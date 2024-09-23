@@ -286,4 +286,12 @@ public class InventoryServiceClient {
     }
 
 
+    public Flux<SupplyResponseDTO> getSuppliesByInventoryName(String inventoryName) {
+        return webClient.get()
+                .uri("/{inventoryName}/supplies", inventoryName)
+                .retrieve()
+                .bodyToFlux(SupplyResponseDTO.class);
+    }
+
+
 }

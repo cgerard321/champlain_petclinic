@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -169,6 +170,16 @@ public class InventoryControllerV2 {
         return supplyInventoryService.addSupplyToInventoryByInventoryName(inventoryName, supplyRequestDTO)
                 .map(inventoryResponseDTO -> ResponseEntity.status(HttpStatus.CREATED).body(inventoryResponseDTO))
                 .onErrorResume(e -> Mono.just(ResponseEntity.notFound().build()));
+    }
+
+    @GetMapping("/{inventoryName}/supplies")
+    public Mono<ResponseEntity<List<SupplyResponseDTO>>> getSuppliesByInventoryName(@PathVariable String inventoryName) {
+        return supplyInventoryService.getSuppliesByInventoryName(inventoryName)
+                .collectList()
+                .map(supplies -> supplies.isEmpty()
+                        ? ResponseEntity.notFound().build()
+                        : ResponseEntity.ok(supplies)
+                );
     }
 
 }

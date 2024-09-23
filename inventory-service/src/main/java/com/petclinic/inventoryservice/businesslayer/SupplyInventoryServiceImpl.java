@@ -461,6 +461,13 @@ public class SupplyInventoryServiceImpl implements SupplyInventoryService {
                 );
     }
 
+    @Override
+    public Flux<SupplyResponseDTO> getSuppliesByInventoryName(String inventoryName) {
+        return inventoryRepository.findByInventoryName(inventoryName)
+                .flatMapMany(inventory -> Flux.fromIterable(inventory.getSupplies()))
+                .map(EntityDTOUtil::toSupplyResponseDTO);
+    }
+
 //    //delete all supplies and delete all inventory
 //    @Override
 //    public Mono<Void> deleteAllSupplyInventory (String inventoryId){

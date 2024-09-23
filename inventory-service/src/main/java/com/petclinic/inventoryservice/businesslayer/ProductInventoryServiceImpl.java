@@ -24,6 +24,8 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static com.petclinic.inventoryservice.utils.EntityDTOUtil.toSupplyEntity;
+
 
 @Service
 @RequiredArgsConstructor
@@ -416,38 +418,22 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
 
     @Override
     public Mono<InventoryResponseDTO> addSupplyToInventoryByInventoryName(String inventoryName, Mono<SupplyRequestDTO> supplyRequestDTOMono) {
-
         return supplyRequestDTOMono
                 .flatMap(supplyRequestDTO ->
                         inventoryRepository.findByInventoryName(inventoryName)
                                 .switchIfEmpty(Mono.error(new InventoryNotFoundException("No inventory found for name: " + inventoryName)))
                                 .flatMap(inventory -> {
-                                    Supply supply = new Supply(
-                                            UUID.randomUUID().toString(),
-                                            inventory.getInventoryId(),
-                                            supplyRequestDTO.getSupplyName(),
-                                            supplyRequestDTO.getSupplyDescription(),
-                                            supplyRequestDTO.getSupplyQuantity(),
-                                            supplyRequestDTO.getSupplyPrice(),
-                                            supplyRequestDTO.getSupplySalePrice(),
-                                            Status.AVAILABLE
-                                    );
+                                    Supply supply = toSupplyEntity(supplyRequestDTO);
+                                    supply.setSupplyId(UUID.randomUUID().toString());
+                                    supply.setInventoryId(inventory.getInventoryId());
 
                                     inventory.addSupply(supply);
                                     return inventoryRepository.save(inventory);
                                 })
                                 .map(updatedInventory -> {
+
                                     List<SupplyResponseDTO> supplyResponseDTOs = updatedInventory.getSupplies().stream()
-                                            .map(supply -> new SupplyResponseDTO(
-                                                    supply.getSupplyId(),
-                                                    supply.getInventoryId(),
-                                                    supply.getSupplyName(),
-                                                    supply.getSupplyDescription(),
-                                                    supply.getSupplyPrice(),
-                                                    supply.getSupplyQuantity(),
-                                                    supply.getSupplySalePrice(),
-                                                    supply.getStatus()
-                                            ))
+                                            .map(EntityDTOUtil::toSupplyResponseDTO)
                                             .collect(Collectors.toList());
 
                                     return new InventoryResponseDTO(
@@ -460,6 +446,7 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                                 })
                 );
     }
+
 
     //delete all products and delete all inventory
     @Override
@@ -498,5 +485,13 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
         return inventoryNameRepository.findAll()
                 .map(EntityDTOUtil::toInventoryNameResponseDTO);
     }
+
+    @Override
+    public Flux<SupplyResponseDTO> getSuppliesByInventoryName(String inventoryName) {
+        return inventoryRepository.findByInventoryName(inventoryName)
+                .flatMapMany(inventory -> Flux.fromIterable(inventory.getSupplies()))
+                .map(EntityDTOUtil::toSupplyResponseDTO);
+    }
+
 }
 

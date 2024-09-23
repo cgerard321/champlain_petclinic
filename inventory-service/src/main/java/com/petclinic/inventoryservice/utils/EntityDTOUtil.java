@@ -40,7 +40,6 @@ public class EntityDTOUtil {
     }
 
     public static SupplyResponseDTO toSupplyResponseDTO(Supply supply) {
-        //should put the logic for the status here
         Status status;
         if (supply.getSupplyQuantity() == 0) {
             status = Status.OUT_OF_STOCK;
@@ -72,10 +71,14 @@ public class EntityDTOUtil {
         return product;
     }
 
-    public static Supply toSupplyEntity(SupplyRequestDTO supplyRequestDTO){
-        Supply supply = new Supply();
-        BeanUtils.copyProperties(supplyRequestDTO, supply);
-        return supply;
+    public static Supply toSupplyEntity(SupplyRequestDTO supplyRequestDTO) {
+        return Supply.builder()
+                .supplyName(supplyRequestDTO.getSupplyName())
+                .supplyDescription(supplyRequestDTO.getSupplyDescription())
+                .supplyQuantity(supplyRequestDTO.getSupplyQuantity())
+                .supplyPrice(supplyRequestDTO.getSupplyPrice())
+                .supplySalePrice(supplyRequestDTO.getSupplySalePrice())
+                .build();
     }
 
     public static InventoryResponseDTO toInventoryResponseDTO(Inventory inventory){

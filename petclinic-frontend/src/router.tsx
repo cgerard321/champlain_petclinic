@@ -25,6 +25,8 @@ import EditInventory from '@/features/inventories/EditInventory.tsx';
 import VisitByVisitId from './features/visits/visits/VisitByVisitId';
 import AddingVisit from './features/visits/models/AddingVisit';
 import ProfilePage from '@/pages/Customer/ProfilePage.tsx';
+import MockPage from '@/pages/Inventory/MockPage.tsx';
+import InventorySupplies from '@/features/inventories/InventorySupplies.tsx';
 
 const router = createBrowserRouter([
   {
@@ -179,6 +181,22 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute roles={['OWNER']}>
             <ProfilePage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.MockPage,
+        element: (
+          <ProtectedRoute>
+            <MockPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.InventorySupplies,
+        element: (
+          <ProtectedRoute>
+            <InventorySupplies />
           </ProtectedRoute>
         ),
       },

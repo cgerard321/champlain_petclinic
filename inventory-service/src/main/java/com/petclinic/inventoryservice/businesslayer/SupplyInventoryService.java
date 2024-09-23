@@ -31,6 +31,6 @@ public interface SupplyInventoryService {
 
     Mono<InventoryResponseDTO> addSupplyToInventoryByInventoryName(String inventoryName, Mono<SupplyRequestDTO> supplyRequestDTOMono);
 
-
+    Flux<SupplyResponseDTO> getSuppliesByInventoryName(String inventoryName);
 
 }

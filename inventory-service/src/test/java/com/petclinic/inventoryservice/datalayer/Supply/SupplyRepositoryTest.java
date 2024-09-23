@@ -1,9 +1,11 @@
 package com.petclinic.inventoryservice.datalayer.Supply;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 @DataMongoTest
@@ -31,6 +33,44 @@ class SupplyRepositoryTest {
         StepVerifier
                 .create(setup2)
                 .expectNextCount(1)
+                .verifyComplete();
+    }
+
+    @Test
+    void testFindSupplyById() {
+        StepVerifier.create(supplyRepository.findById(supply1.getSupplyId()))
+                .expectNextMatches(supply -> supply.getSupplyId().equals(supply1.getSupplyId()))
+                .verifyComplete();
+    }
+
+    @Test
+    void testUpdateSupply() {
+        Mono<Supply> updatedSupply = supplyRepository.findById(supply1.getSupplyId())
+                .map(supply -> {
+                    supply.setSupplyPrice(110.00);
+                    return supply;
+                })
+                .flatMap(supplyRepository::save);
+
+        StepVerifier.create(updatedSupply)
+                .expectNextMatches(supply -> supply.getSupplyPrice() == 110.00)
+                .verifyComplete();
+    }
+
+    @Test
+    void testDeleteSupply() {
+        StepVerifier.create(supplyRepository.delete(supply1))
+                .verifyComplete();
+
+        StepVerifier.create(supplyRepository.findById(supply1.getSupplyId()))
+                .expectComplete()
+                .verify();
+    }
+
+    @Test
+    void testCountSupplies() {
+        StepVerifier.create(supplyRepository.count())
+                .expectNext(2L)
                 .verifyComplete();
     }
 

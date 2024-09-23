@@ -22,6 +22,9 @@ public class Inventory {
     private String inventoryName;
     private String inventoryType;
     private String inventoryDescription;
+
+
+    @Builder.Default
     private List<Supply> supplies = new ArrayList<>();
 
 

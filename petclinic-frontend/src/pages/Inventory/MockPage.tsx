@@ -1,39 +1,12 @@
-// import {useNavigate} from "react-router-dom";
+import { NavBar } from '@/layouts/AppNavBar.tsx';
+import InventoriesListTableV2 from '@/features/inventories/models/InventoriesListTableV2.tsx';
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export default function MockPage() {
-  // const navigate = useNavigate();
-
+export default function Inventories(): JSX.Element {
   return (
-    <></>
-    // <tbody>
-    // {inventoryList.map(inventory => (
-    //     <tr
-    //         key={inventory.inventoryId}
-    //         onClick={() =>
-    //             navigate(/inventory/${inventory.inventoryId}/products)
-    //         }
-    //     >
-    //         <td
-    //             onClick={() =>
-    //                 navigate(/inventory/${inventory.inventoryId}/products)
-    //             }
-    //             style={{
-    //                 cursor: 'pointer',
-    //                 textDecoration: 'underline',
-    //                 color: 'blue',
-    //             }}
-    //         >
-    //             {inventory.inventoryName}
-    //         </td>
-    //         <td>{inventory.inventoryType}</td>
-    //         <td>{inventory.inventoryDescription}</td>
-    //         <td>
-    //         </td>
-    //         <td>
-    //         </td>
-    //     </tr>
-    // ))}
-    // </tbody>
+    <div>
+      <NavBar />
+      <h1>Inventories</h1>
+      <InventoriesListTableV2 />
+    </div>
   );
 }

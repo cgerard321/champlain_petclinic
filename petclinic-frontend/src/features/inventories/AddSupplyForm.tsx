@@ -42,6 +42,7 @@ const AddSupplyForm: React.FC<SupplyFormProps> = ({ onClose, onSubmit }) => {
       supplyPrice: price,
       supplyQuantity: quantity,
       supplySalePrice: salePrice,
+      supplyStatus: 'AVAILABLE',
     };
 
     try {

@@ -1,5 +1,6 @@
 package com.petclinic.inventoryservice.presentationlayer;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.inventoryservice.businesslayer.ProductInventoryService;
 import com.petclinic.inventoryservice.businesslayer.SupplyInventoryService;
 import com.petclinic.inventoryservice.datalayer.Inventory.Inventory;
@@ -18,6 +19,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.reactive.function.BodyInserters;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -27,14 +29,21 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import static com.petclinic.inventoryservice.datalayer.Supply.Status.AVAILABLE;
+import static com.petclinic.inventoryservice.datalayer.Supply.Status.RE_ORDER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.mock.http.server.reactive.MockServerHttpRequest.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebFluxTest(controllers = InventoryController.class)
 class InventoryControllerUnitTest {
+    @Autowired
+    private ObjectMapper objectMapper;
     @Autowired
     WebTestClient webTestClient;
     @MockBean
@@ -129,46 +138,46 @@ class InventoryControllerUnitTest {
 
 
 //    @Test
-//    public void addSupplyToInventoryByName_Positive() {
-//        String inventoryName = "Medical equipment";
+//    public void testAddSupplyToInventoryByName() throws Exception {
+//        String inventoryName = "Sedative Medications";
 //
-//        SupplyRequestDTO requestDTOPositive = new SupplyRequestDTO(
-//                "Anxiety Relief Tablets",
-//                "Tablets for reducing anxiety and stress",
+//        SupplyRequestDTO requestDTO = new SupplyRequestDTO(
+//                "Sedative Medications",
+//                "Medications for relaxation and sleep",
 //                100.0,
-//                150,
-//                115.00
+//                10,
+//                10.0
 //        );
 //
-//        SupplyResponseDTO supplyResponseDTO = new SupplyResponseDTO(
-//                UUID.randomUUID().toString(),
-//                inventory4.getInventoryId(),
-//                "Anxiety Relief Tablets",
-//                "Tablets for reducing anxiety and stress",
-//                100.00,
-//                150,
-//                115.00,
-//                Status.AVAILABLE
-//        );
-//        InventoryResponseDTO responseDTO = new InventoryResponseDTO(
-//                UUID.randomUUID().toString(),
-//                "Medical equipment",
-//                "Equipment",
-//                "Medical equipment for surgery",
-//                List.of(supplyResponseDTO)
-//        );
+//        SupplyResponseDTO supplyResponseDTO = SupplyResponseDTO.builder()
+//                .supplyId("c2e3ebba-d1a7-48d7-9b37-efbea4944874")
+//                .inventoryId("5e2520b1-8c12-48fe-ae79-01552c8588e2")
+//                .supplyName("Sedative Medications")
+//                .supplyDescription("Medications for relaxation and sleep")
+//                .supplyPrice(100.0)
+//                .supplyQuantity(10)
+//                .supplySalePrice(10.0)
+//                .status(AVAILABLE)
+//                .build();
 //
-//        when(supplyInventoryService.addSupplyToInventoryByInventoryName(anyString(), any(Mono.class)))
-//                .thenReturn(Mono.just(responseDTO));
+//        InventoryResponseDTO responseDTO = InventoryResponseDTO.builder()
+//                .inventoryId("5e2520b1-8c12-48fe-ae79-01552c8588e2")
+//                .inventoryName(inventoryName)
+//                .inventoryType("TestInventoryType")
+//                .inventoryDescription("TestInventoryDescription")
+//                .supplies(List.of(supplyResponseDTO))
+//                .build();
+//
+//        when(supplyInventoryService.addSupplyToInventoryByInventoryName(anyString(), any())).thenReturn(Mono.just(responseDTO));
 //
 //        webTestClient.post()
-//                .uri("/inventoriesV2/" + inventoryName + "/supplies")
-//                .body(BodyInserters.fromValue(requestDTOPositive))
+//                .uri("/inventory/" + inventoryName + "/supplies")
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .bodyValue(objectMapper.writeValueAsString(requestDTO))
 //                .exchange()
-//                .expectStatus().isCreated()
-//                .expectBody(InventoryResponseDTO.class)
-//                .isEqualTo(responseDTO);
+//                .expectStatus().isCreated();
 //    }
+
 
     @Test
     public void addSupplyToInventoryByName_Negative() {
@@ -1114,7 +1123,7 @@ class InventoryControllerUnitTest {
                 .productPrice(200.00)
                 .productQuantity(20)
                 .productSalePrice(15.99)
-                .status(Status.AVAILABLE)
+                .status(AVAILABLE)
                 .build();
 
         when(productInventoryService.addProductToInventory(any(), eq(inventoryId)))
@@ -1213,7 +1222,7 @@ class InventoryControllerUnitTest {
                 .productPrice(100.00)
                 .productQuantity(10)
                 .productSalePrice(10.99)
-                .status(Status.RE_ORDER)  // Expected status
+                .status(RE_ORDER)  // Expected status
                 .build();
 
         // Mocking the service method to return the expected response
@@ -1231,7 +1240,7 @@ class InventoryControllerUnitTest {
                 .expectBody(ProductResponseDTO.class)
                 .value(dto -> {
                     assertNotNull(dto);
-                    assertEquals(Status.RE_ORDER, dto.getStatus());  // Assert the status is REORDER
+                    assertEquals(RE_ORDER, dto.getStatus());  // Assert the status is REORDER
                 });
 
         verify(productInventoryService, times(1)).addProductToInventory(any(), eq(inventoryId));
@@ -1258,7 +1267,7 @@ class InventoryControllerUnitTest {
                 .productPrice(200.00)
                 .productQuantity(20)
                 .productSalePrice(15.99)
-                .status(Status.AVAILABLE)
+                .status(AVAILABLE)
                 .build();
 
         when(productInventoryService.updateProductInInventory(any(), eq(inventoryId), eq(productId)))
@@ -1372,7 +1381,7 @@ class InventoryControllerUnitTest {
                 .productPrice(200.00)
                 .productQuantity(15)
                 .productSalePrice(15.99)
-                .status(Status.RE_ORDER)  // Expect the status to be REORDER
+                .status(RE_ORDER)  // Expect the status to be REORDER
                 .build();
 
         // Mocking the service to return the updated product with the REORDER status
@@ -1397,7 +1406,7 @@ class InventoryControllerUnitTest {
                     assertEquals(responseDTO.getProductPrice(), dto.getProductPrice());
                     assertEquals(responseDTO.getProductQuantity(), dto.getProductQuantity());
                     assertEquals(responseDTO.getProductSalePrice(), dto.getProductSalePrice());
-                    assertEquals(Status.RE_ORDER, dto.getStatus());  // Verify the status is REORDER
+                    assertEquals(RE_ORDER, dto.getStatus());  // Verify the status is REORDER
                 });
 
         // Verify that the service method was called exactly once

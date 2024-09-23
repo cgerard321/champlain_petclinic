@@ -131,5 +131,23 @@ public class InventoryControllerV2 {
     }
 
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
+    @GetMapping("/{inventoryName}/supplies")
+    @ApiResponses(value = {
+            @ApiResponse(description = "Get supplies by inventory name", responseCode = "200"),
+            @ApiResponse(description = "Inventory name not found", responseCode = "404")
+    })
+    public Mono<ResponseEntity<Flux<SupplyResponseDTO>>> getSuppliesByInventoryName(@PathVariable String inventoryName) {
+        return inventoryServiceClient.getSuppliesByInventoryName(inventoryName)
+                .collectList()
+                .map(supplyResponseDTOS -> {
+                    if (supplyResponseDTOS.isEmpty()) {
+                        return ResponseEntity.notFound().build();
+                    } else {
+                        return ResponseEntity.ok(Flux.fromIterable(supplyResponseDTOS));
+                    }
+                });
+    }
+
 
 }
