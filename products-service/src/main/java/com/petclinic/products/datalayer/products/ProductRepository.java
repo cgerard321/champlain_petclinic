@@ -18,4 +18,6 @@ public interface ProductRepository extends ReactiveMongoRepository<Product, Stri
 
     @Query("{ 'productSalePrice' : { $lte: ?0 } }")
     Flux<Product> findByProductSalePriceLessThanEqual(Double maxPrice);
+    Flux<Product> findProductsByProductType(String productType);
+
 }

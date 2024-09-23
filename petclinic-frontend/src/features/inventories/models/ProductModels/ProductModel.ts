@@ -4,5 +4,6 @@ export interface ProductModel {
   productDescription: string;
   productSalePrice: number;
   productQuantity: number;
+  productType: string;
   status: 'RE_ORDER' | 'OUT_OF_STOCK' | 'AVAILABLE';
 }

@@ -104,8 +104,21 @@ public class ProductServiceImpl implements ProductService {
                     return productRepository.delete(found)
                             .then(Mono.just(found));
                     }
-      ull          )
+                )
                 .map(EntityModelUtil::toProductResponseModel);
+    }
+    @Override
+    public Flux<ProductResponseModel> getProductsByType(String productType) {
+        return productRepository.findProductsByProductType(productType)
+                .map(product -> {
+                    ProductResponseModel responseModel = new ProductResponseModel();
+                    responseModel.setProductId(product.getProductId());
+                    responseModel.setProductName(product.getProductName());
+                    responseModel.setProductDescription(product.getProductDescription());
+                    responseModel.setProductSalePrice(product.getProductSalePrice());
+                    responseModel.setProductType(product.getProductType());
+                    return responseModel;
+                });
     }
 
 }

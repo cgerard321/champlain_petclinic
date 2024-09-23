@@ -63,5 +63,10 @@ public class ProductController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
+    @GetMapping(value = "/filter/{productType}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Flux<ProductResponseModel> getProductsByType(@PathVariable String productType) {
+        return productService.getProductsByType(productType);
+    }
+
 
 }

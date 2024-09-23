@@ -26,6 +26,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Premium dry food for adult dogs")
                 .productSalePrice(45.99)
                 .averageRating(0.0)
+                .productType("Food")
             .build();
 
         Product product2 = Product.builder()
@@ -34,6 +35,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Clumping cat litter with odor control")
                 .productSalePrice(12.99)
                 .averageRating(0.0)
+                .productType("Accessory")
                 .build();
 
         Product product3 = Product.builder()
@@ -42,6 +44,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Flea and tick prevention for small dogs")
                 .productSalePrice(9.99)
                 .averageRating(0.0)
+                .productType("Medication")
                 .build();
 
         Product product4 = Product.builder()
@@ -50,6 +53,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Spacious cage for small birds like parakeets")
                 .productSalePrice(29.99)
                 .averageRating(0.0)
+                .productType("Accessory")
                 .build();
 
         Product product5 = Product.builder()
@@ -58,6 +62,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Filter system for small to medium-sized aquariums")
                 .productSalePrice(19.99)
                 .averageRating(0.0)
+                .productType("Accessory")
                 .build();
 
         Product product6 = Product.builder()
@@ -66,6 +71,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Lightweight saddle for riding horses")
                 .productSalePrice(199.99)
                 .averageRating(0.0)
+
                 .build();
 
         Product product7 = Product.builder()
