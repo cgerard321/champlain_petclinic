@@ -20,7 +20,7 @@ export default function ProductSearch(): JSX.Element {
     fetchProducts();
   }, []);
 
-  const filterProducts = (): void => {
+  useEffect(() => {
     if (searchQuery === '') {
       setFilteredProducts([]);
     } else {
@@ -29,10 +29,6 @@ export default function ProductSearch(): JSX.Element {
       );
       setFilteredProducts(filtered);
     }
-  };
-
-  useEffect(() => {
-    filterProducts();
   }, [searchQuery, products]);
 
   const handleInputChange = (
