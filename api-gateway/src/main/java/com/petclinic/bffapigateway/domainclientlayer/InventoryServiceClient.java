@@ -292,6 +292,18 @@ public class InventoryServiceClient {
                 .retrieve()
                 .bodyToFlux(SupplyResponseDTO.class);
     }
+  
+  public Flux<ProductResponseDTO> getLowStockProducts(String inventoryId, int stockThreshold) {
+        UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(inventoryServiceUrl + "/{inventoryId}/products/lowstock")
+                .queryParam("threshold", stockThreshold);
 
+        return webClient.get()
+                .uri(uriBuilder.buildAndExpand(inventoryId).toUri())
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError,
+                        resp -> Mono.error(new NotFoundException("No products below threshold in inventory: " + inventoryId)))
+                .bodyToFlux(ProductResponseDTO.class);
+    }
 
 }

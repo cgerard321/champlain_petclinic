@@ -100,7 +100,6 @@ public class VisitsServiceClient {
                 .bodyToMono(VisitResponseDTO.class);
     }
 
-
     public Mono<VisitResponseDTO> addVisit(Mono<VisitRequestDTO> visitRequestDTO){
         return visitRequestDTO.flatMap(visitRequestDTO1 -> {
             if (visitRequestDTO1.getVisitStartDate() != null) {
@@ -162,11 +161,6 @@ public class VisitsServiceClient {
                             }
                         } catch (IOException e) {
                             // Handle parsing error
-                            StringWriter sw = new StringWriter();
-                            e.printStackTrace(new PrintWriter(sw));
-                            String exceptionAsString = sw.toString();
-
-                            System.out.println(exceptionAsString);
                             return Mono.error(new BadRequestException("Bad Request"));
                         }
                     });

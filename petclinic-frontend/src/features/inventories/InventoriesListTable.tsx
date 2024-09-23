@@ -35,6 +35,8 @@ export default function InventoriesListTable(): JSX.Element {
     setShowAddSupplyModal(prev => !prev);
   };
 
+
+
   const {
     inventoryList,
     setInventoryList,
@@ -66,6 +68,7 @@ export default function InventoriesListTable(): JSX.Element {
   const pageBefore = (): void => {
     setCurrentPage(prevPage => Math.max(prevPage - 1, 0));
   };
+
   const pageAfter = (): void => {
     setCurrentPage(prevPage => prevPage + 1);
   };

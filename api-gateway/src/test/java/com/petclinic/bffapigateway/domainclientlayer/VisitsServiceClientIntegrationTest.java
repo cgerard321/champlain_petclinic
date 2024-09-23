@@ -126,7 +126,7 @@ class VisitsServiceClientIntegrationTest {
     void getVisitsForStatus() throws JsonProcessingException{
         VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
                 .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
-                .visitStartDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .description("this is a dummy description")
                 .petId("2")
                 .petName("YourPetNameHere")
@@ -184,7 +184,6 @@ class VisitsServiceClientIntegrationTest {
                 "2",
                 "73b5c112-5703-4fb7-b7bc-ac8186811ae1"
         );
-
 
         // Mock the server response
         VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
