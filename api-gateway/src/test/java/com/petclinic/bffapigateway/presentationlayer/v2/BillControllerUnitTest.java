@@ -106,4 +106,49 @@ private final String baseBillURL = "/api/v2/gateway/bills";
                .getAllBilling();
     }
 
+    @Test
+    public void whenDeleteBill_thenReturnNoContent(){
+        when(billServiceClient.deleteBill("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a"))
+                .thenReturn(Flux.empty().then());
+
+        webTestClient
+                .delete()
+                .uri(baseBillURL + "/e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
+                .exchange()
+                .expectStatus().isNoContent();
+
+        verify(billServiceClient, times(1))
+                .deleteBill("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a");
+    }
+
+    @Test
+    public void whenDeleteUnpaidBill_thenReturnUnprocessableEntity(){
+        when(billServiceClient.deleteBill("e6c7398e-8ac4-4e10-9ee0-03ef33f0361b"))
+                .thenReturn(Flux.defer(() -> Flux.error(new InvalidInputException("Bill is unpaid"))).then());
+
+        webTestClient
+                .delete()
+                .uri(baseBillURL + "/e6c7398e-8ac4-4e10-9ee0-03ef33f0361b")
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.SC_UNPROCESSABLE_ENTITY);
+
+        verify(billServiceClient, times(1))
+                .deleteBill("e6c7398e-8ac4-4e10-9ee0-03ef33f0361b");
+    }
+
+    @Test
+    public void whenDeleteOverdueBill_thenReturnUnprocessableEntity(){
+        when(billServiceClient.deleteBill("e6c7398e-8ac4-4e10-9ee0-03ef33f0361c"))
+                .thenReturn(Flux.defer(() -> Flux.error(new InvalidInputException("Bill is overdue"))).then());
+
+        webTestClient
+                .delete()
+                .uri(baseBillURL + "/e6c7398e-8ac4-4e10-9ee0-03ef33f0361c")
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.SC_UNPROCESSABLE_ENTITY);
+
+        verify(billServiceClient, times(1))
+                .deleteBill("e6c7398e-8ac4-4e10-9ee0-03ef33f0361c");
+    }
+
 }

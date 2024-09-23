@@ -7,6 +7,7 @@ import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -36,11 +37,27 @@ public class BillController {
         return billService.getAllBilling();
     }
 
+<<<<<<< HEAD
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping(value = "/admin/{billId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<BillResponseDTO> getBillById(@PathVariable String billId)
+=======
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping(value = "/{billId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<BillResponseDTO> getBilling(final @PathVariable String billId)
+>>>>>>> f30569ef (Admin can delete bills (redo))
     {
         return billService.getBilling(billId);
     }
 
+<<<<<<< HEAD
+=======
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @DeleteMapping(value = "/{billId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public Mono<Void> deleteBill(@PathVariable String billId) {
+        return billService.deleteBill(billId);
+    }
+>>>>>>> f30569ef (Admin can delete bills (redo))
 }

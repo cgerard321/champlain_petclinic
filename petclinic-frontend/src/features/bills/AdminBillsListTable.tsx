@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { Bill } from '@/features/bills/models/Bill.ts';
 import { getAllBills } from '@/features/bills/api/getAllBills.tsx';
 import { getBillByBillId } from '@/features/bills/api/GetBillByBillId.tsx';
+import { deleteBill } from '@/features/bills/api/deleteBill.tsx';
+import './AdminBillsListTable.css';
 
 export default function AdminBillsListTable(): JSX.Element {
   const [bills, setBills] = useState<Bill[]>([]);
@@ -35,6 +37,39 @@ export default function AdminBillsListTable(): JSX.Element {
     setSearchedBill(null);
     setSearchId('');
     setError(null);
+    getAllBills().then(r => setBills(r));
+    try {
+      const fetchedBills = await getAllBills();
+      setBills(fetchedBills);
+    } catch (error) {
+      console.error('Error fetching bills:', error);
+    }
+  };
+
+  const handleDelete = async (billId: string): Promise<void> => {
+    const confirmDelete = window.confirm(
+      'Are you sure you want to delete this bill?'
+    );
+    if (!confirmDelete) {
+      return;
+    }
+
+    const billToDelete = bills.find(bill => bill.billId === billId);
+    if (!billToDelete) {
+      console.error('Bill not found:', billId);
+      window.alert('Bill not found');
+      return;
+    }
+
+    const response = await deleteBill(billToDelete);
+
+    if (response && (response.status === 200 || response.status === 204)) {
+      setBills(bills.filter(bill => bill.billId !== billId));
+      window.alert(`Bill (${billId}) has been deleted successfully`);
+    } else {
+      console.error('Unexpected response status:', response?.status);
+      window.alert('Cannot delete this bill. It may be unpaid or overdue.');
+    }
   };
 
   useEffect(() => {
@@ -89,8 +124,9 @@ export default function AdminBillsListTable(): JSX.Element {
           </p>
         </div>
       ) : (
-        <div>
+        <div className="container">
           <h3>All Bills:</h3>
+    <div className="container">
           <table className="table table-striped">
             <thead>
               <tr>
@@ -103,6 +139,7 @@ export default function AdminBillsListTable(): JSX.Element {
                 <th>Taxed Amount</th>
                 <th>Status</th>
                 <th>Due Date</th>
+            <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -123,6 +160,25 @@ export default function AdminBillsListTable(): JSX.Element {
                     <td>{bill.taxedAmount}</td>
                     <td>{bill.billStatus}</td>
                     <td>{bill.dueDate}</td>
+                <td>
+                  <button
+                    className="btn btn-danger"
+                    onClick={() => handleDelete(bill.billId)}
+                    title="delete"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="32"
+                      height="32"
+                      fill="currentColor"
+                      className="bi bi-trash"
+                      viewBox="0 0 16 16"
+                    >
+                      <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z" />
+                      <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z" />
+                    </svg>
+                  </button>
+                </td>
                   </tr>
                 ))}
             </tbody>

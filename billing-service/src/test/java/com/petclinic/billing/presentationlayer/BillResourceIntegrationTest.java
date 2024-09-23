@@ -415,4 +415,40 @@ class BillResourceIntegrationTest {
 
         return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(13.37).billStatus(BillStatus.OVERDUE).dueDate(dueDate).build();
     }
+
+    @Test
+    void deleteUnpaidBill() {
+        Bill billEntity = buildUnpaidBill();
+        repo.save(billEntity);
+        Publisher<Void> setup = repo.deleteBillByBillId(billEntity.getBillId());
+
+        StepVerifier.create(setup)
+                .expectNextCount(0)
+                .verifyComplete();
+
+        client.delete()
+                .uri("/bills/" + billEntity.getBillId())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isEqualTo(404)
+                .expectBody();
+    }
+
+    @Test
+    void deleteOverdueBill() {
+        Bill billEntity = buildOverdueBill();
+        repo.save(billEntity);
+        Publisher<Void> setup = repo.deleteBillByBillId(billEntity.getBillId());
+
+        StepVerifier.create(setup)
+                .expectNextCount(0)
+                .verifyComplete();
+
+        client.delete()
+                .uri("/bills/" + billEntity.getBillId())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isEqualTo(404)
+                .expectBody();
+    }
 }
