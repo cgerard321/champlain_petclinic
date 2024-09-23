@@ -8,9 +8,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -211,11 +213,17 @@ public class BillServiceClient {
     }
 
     public Mono<Void> deleteBill(final String billId) {
-        return webClientBuilder.build()
-                .delete()
-                .uri(billServiceUrl + "/{billId}", billId)
-                .retrieve()
-                .bodyToMono(Void.class);
+        return getBilling(billId)
+                .flatMap(bill -> {
+                    if (bill.getBillStatus() == BillStatus.UNPAID || bill.getBillStatus() == BillStatus.OVERDUE) {
+                        return Mono.error(new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Cannot delete a bill that is unpaid or overdue."));
+                    }
+                    return webClientBuilder.build()
+                            .delete()
+                            .uri(billServiceUrl + "/{billId}", billId)
+                            .retrieve()
+                            .bodyToMono(Void.class);
+                });
     }
 
     public Flux<Void> deleteBillsByVetId(final String vetId) {

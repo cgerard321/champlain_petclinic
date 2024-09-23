@@ -501,6 +501,32 @@ public class BillServiceImplTest {
 
     }
 
+    @Test
+    public void test_DeleteBillWithUnpaidStatus() {
+        Bill billEntity = buildUnpaidBill();
+
+        when(repo.findByBillId(anyString())).thenReturn(Mono.just(billEntity));
+
+        Mono<Void> deletedObj = billService.DeleteBill(billEntity.getBillId());
+
+        StepVerifier.create(deletedObj)
+                .expectError()
+                .verify();
+    }
+
+    @Test
+    public void test_DeleteBillWithOverdueStatus() {
+        Bill billEntity = buildOverdueBill();
+
+        when(repo.findByBillId(anyString())).thenReturn(Mono.just(billEntity));
+
+        Mono<Void> deletedObj = billService.DeleteBill(billEntity.getBillId());
+
+        StepVerifier.create(deletedObj)
+                .expectError()
+                .verify();
+    }
+
 
 
 }

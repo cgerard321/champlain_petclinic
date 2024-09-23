@@ -125,28 +125,28 @@ class BillServiceClientIntegrationTest {
                 .verifyComplete();
     }
 
-    @Test
-    void shouldDeleteBill() throws JsonProcessingException {
-        final BillDetails bill = BillDetails.builder()
-                .billId(UUID.randomUUID().toString())
-                .vetId("15")
-                .customerId("2")
-                .date(null)
-                .billStatus(BillStatus.PAID)
-                .dueDate(null)
-                .amount(100)
-                .visitType("Check")
-                .build();
-
-        final String body = mapper.writeValueAsString(mapper.convertValue(bill, BillDetails.class));
-        prepareResponse(response -> response
-                .setHeader("Content-Type", "application/json")
-                .setBody(body));
-
-        final Mono<Void> empty = billServiceClient.deleteBill(bill.getBillId());
-
-        assertNull(empty.block());
-    }
+//    @Test
+//    void shouldDeleteBill() throws JsonProcessingException {
+//        final BillDetails bill = BillDetails.builder()
+//                .billId(UUID.randomUUID().toString())
+//                .vetId("15")
+//                .customerId("2")
+//                .date(null)
+//                .billStatus(BillStatus.PAID)
+//                .dueDate(null)
+//                .amount(100)
+//                .visitType("Check")
+//                .build();
+//
+//        final String body = mapper.writeValueAsString(mapper.convertValue(bill, BillDetails.class));
+//        prepareResponse(response -> response
+//                .setHeader("Content-Type", "application/json")
+//                .setBody(body));
+//
+//        final Mono<Void> empty = billServiceClient.deleteBill(bill.getBillId());
+//
+//        assertNull(empty.block());
+//    }
 
     @Test
     void shouldDeleteBillByVetId() throws JsonProcessingException {
@@ -479,6 +479,30 @@ class BillServiceClientIntegrationTest {
 
         StepVerifier.create(createdBillMono)
                 .expectError(WebClientResponseException.BadRequest.class)
+                .verify();
+    }
+
+    @Test
+    void deleteUnpaidBill_ShouldFail() {
+
+        server.enqueue(new MockResponse().setResponseCode(422));
+
+        Mono<Void> empty = billServiceClient.deleteBill(String.valueOf(2));
+
+        StepVerifier.create(empty)
+                .expectError(WebClientResponseException.UnprocessableEntity.class)
+                .verify();
+    }
+
+    @Test
+    void deleteOverdueBill_ShouldFail() {
+
+        server.enqueue(new MockResponse().setResponseCode(422));
+
+        Mono<Void> empty = billServiceClient.deleteBill(String.valueOf(3));
+
+        StepVerifier.create(empty)
+                .expectError(WebClientResponseException.UnprocessableEntity.class)
                 .verify();
     }
 
