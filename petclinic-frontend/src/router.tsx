@@ -25,12 +25,15 @@ import EditInventory from '@/features/inventories/EditInventory.tsx';
 import CartPage from '@/pages/Carts/Cart.tsx';
 import VisitByVisitId from './features/visits/visits/VisitByVisitId';
 import AddingVisit from './features/visits/models/AddingVisit';
+
 import ProfilePage from '@/pages/Customer/ProfilePage.tsx';
 import AdminBillingPage from '@/pages/Bills/AdminBill.tsx';
 import UserCart from '@/features/carts/components/UserCart.tsx';
 import VetDetails from '@/pages/Vet/VetDetails.tsx';
 import MockPage from '@/pages/Inventory/MockPage.tsx';
 import InventorySupplies from '@/features/inventories/InventorySupplies.tsx';
+
+import EditingVisit from './features/visits/models/EditingVisit';
 
 const router = createBrowserRouter([
   {
@@ -218,6 +221,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute roles={['OWNER']}>
             <ProfilePage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.EditVisit,
+        element: (
+          <ProtectedRoute>
+            <EditingVisit />
           </ProtectedRoute>
         ),
       },

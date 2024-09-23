@@ -101,6 +101,14 @@ export default function VisitListTable(): JSX.Element {
                 >
                   View
                 </button>
+
+                <button
+                  className="btn btn-warning"
+                  onClick={() => navigate(`/visits/${visit.visitId}/edit`)} // Edit button that triggers updateVisit
+                  title="Edit"
+                >
+                  Edit
+                </button>
               </td>
             </tr>
           ))}
