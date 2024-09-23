@@ -63,6 +63,7 @@ export default function VisitListTable(): JSX.Element {
             <th>Vet First Name</th>
             <th>Vet Last Name</th>
             <th>Vet Email</th>
+            <th>Visit End Date</th>
             <th>Status</th>
             <th>Actions</th>
           </tr>
@@ -71,12 +72,13 @@ export default function VisitListTable(): JSX.Element {
           {visits.map(visit => (
             <tr key={visit.visitId}>
               <td>{visit.visitId}</td>
-              <td>{new Date(visit.visitDate).toLocaleString()}</td>
+              <td>{new Date(visit.visitStartDate).toLocaleString()}</td>
               <td>{visit.description}</td>
               <td>{visit.petName}</td>
               <td>{visit.vetFirstName}</td>
               <td>{visit.vetLastName}</td>
               <td>{visit.vetEmail}</td>
+              <td>{new Date(visit.visitEndDate).toLocaleString()}</td>
               <td
                 style={{
                   color:
