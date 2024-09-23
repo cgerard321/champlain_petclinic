@@ -57,10 +57,10 @@ public class VetsServiceClient {
                     HttpStatusCode statusCode = error.statusCode();
                     if(statusCode.equals(NOT_FOUND))
                         return Mono.error(new ExistingVetNotFoundException("Photo for vet "+vetId + " not found", NOT_FOUND));
-                    return Mono.error(new IllegalArgumentException("Something went wrong"));
+                    return Mono.error(new IllegalArgumentException("Something went wrong with the client"));
                 })
                 .onStatus(HttpStatusCode::is5xxServerError,error->
-                        Mono.error(new IllegalArgumentException("Something went wrong"))
+                        Mono.error(new IllegalArgumentException("Something went wrong with the server"))
                 )
                 .bodyToMono(Resource.class);
     }
@@ -73,10 +73,10 @@ public class VetsServiceClient {
                     HttpStatusCode statusCode = error.statusCode();
                     if(statusCode.equals(NOT_FOUND))
                         return Mono.error(new ExistingVetNotFoundException("Photo for vet "+vetId + " not found", NOT_FOUND));
-                    return Mono.error(new IllegalArgumentException("Something went wrong"));
+                    return Mono.error(new IllegalArgumentException("Something went wrong with the client"));
                 })
                 .onStatus(HttpStatusCode::is5xxServerError,error->
-                        Mono.error(new IllegalArgumentException("Something went wrong"))
+                        Mono.error(new IllegalArgumentException("Something went wrong with the server"))
                 )
                 .bodyToMono(PhotoResponseDTO.class);
     }
@@ -89,6 +89,15 @@ public class VetsServiceClient {
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_VALUE)
                 .body(image, Resource.class)
                 .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, error -> {
+                    HttpStatusCode statusCode = error.statusCode();
+                    if (statusCode.equals(NOT_FOUND))
+                        return Mono.error(new NotFoundException("Photo for vet " + vetId + " not found"));
+                    return Mono.error(new IllegalArgumentException("Something went wrong with the client"));
+                })
+                .onStatus(HttpStatusCode::is5xxServerError, error ->
+                        Mono.error(new IllegalArgumentException("Something went wrong with the server"))
+                )
                 .bodyToMono(Resource.class);
     }
 
@@ -104,10 +113,10 @@ public class VetsServiceClient {
                     HttpStatusCode statusCode = error.statusCode();
                     if(statusCode.equals(NOT_FOUND))
                         return Mono.error(new NotFoundException("Photo for vet "+vetId + " not found"));
-                    return Mono.error(new IllegalArgumentException("Something went wrong"));
+                    return Mono.error(new IllegalArgumentException("Something went wrong with the client"));
                 })
                 .onStatus(HttpStatusCode::is5xxServerError,error->
-                        Mono.error(new IllegalArgumentException("Something went wrong"))
+                        Mono.error(new IllegalArgumentException("Something went wrong with the server"))
                 )
                 .bodyToMono(Resource.class);
     }
@@ -122,10 +131,10 @@ public class VetsServiceClient {
                     HttpStatusCode statusCode = error.statusCode();
                     if(statusCode.equals(HttpStatus.NOT_FOUND))
                         return Mono.error(new NotFoundException("vetId not found: "+vetId));
-                    return Mono.error(new IllegalArgumentException("Something went wrong"));
+                    return Mono.error(new IllegalArgumentException("Something went wrong with the client"));
                 })
                 .onStatus(HttpStatusCode::is5xxServerError, error->
-                        Mono.error(new IllegalArgumentException("Something went wrong"))
+                        Mono.error(new IllegalArgumentException("Something went wrong with the server"))
                 )
                 .bodyToMono(BadgeResponseDTO.class);
     }
@@ -142,10 +151,10 @@ public class VetsServiceClient {
                     HttpStatusCode statusCode = error.statusCode();
                     if(statusCode.equals(HttpStatus.NOT_FOUND))
                         return Mono.error(new NotFoundException("vetId not found: "+vetId));
-                    return Mono.error(new IllegalArgumentException("Something went wrong"));
+                    return Mono.error(new IllegalArgumentException("Something went wrong with the client"));
                 })
                 .onStatus(HttpStatusCode::is5xxServerError, error->
-                        Mono.error(new IllegalArgumentException("Something went wrong"))
+                        Mono.error(new IllegalArgumentException("Something went wrong with the server"))
                 )
                 .bodyToFlux(RatingResponseDTO.class);
     }
@@ -161,10 +170,10 @@ public class VetsServiceClient {
                     HttpStatusCode statusCode = error.statusCode();
                     if(statusCode.equals(NOT_FOUND))
                         return Mono.error(new ExistingVetNotFoundException("vetId not found: "+vetId, NOT_FOUND));
-                    return Mono.error(new IllegalArgumentException("Something went wrong"));
+                    return Mono.error(new IllegalArgumentException("Something went wrong with the client"));
                 })
                 .onStatus(HttpStatusCode::is5xxServerError,error->
-                        Mono.error(new IllegalArgumentException("Something went wrong"))
+                        Mono.error(new IllegalArgumentException("Something went wrong with the server"))
                 )
                 .bodyToMono(Integer.class);
     }
@@ -179,10 +188,10 @@ public class VetsServiceClient {
                     HttpStatusCode statusCode = error.statusCode();
                     if(statusCode.equals(NOT_FOUND))
                         return Mono.error(new ExistingVetNotFoundException("vetId not found: "+vetId, NOT_FOUND));
-                    return Mono.error(new IllegalArgumentException("Something went wrong"));
+                    return Mono.error(new IllegalArgumentException("Something went wrong with the client"));
                 })
                 .onStatus(HttpStatusCode::is5xxServerError,error->
-                        Mono.error(new IllegalArgumentException("Something went wrong"))
+                        Mono.error(new IllegalArgumentException("Something went wrong with the server"))
                 )
                 .bodyToMono(String.class);
     }
@@ -200,10 +209,10 @@ public class VetsServiceClient {
                     HttpStatusCode statusCode = error.statusCode();
                     if(statusCode.equals(NOT_FOUND))
                         return Mono.error(new ExistingVetNotFoundException("vetId not found: "+vetId, NOT_FOUND));
-                    return Mono.error(new IllegalArgumentException("Something went wrong"));
+                    return Mono.error(new IllegalArgumentException("Something went wrong with the client"));
                 })
                 .onStatus(HttpStatusCode::is5xxServerError,error->
-                        Mono.error(new IllegalArgumentException("Something went wrong"))
+                        Mono.error(new IllegalArgumentException("Something went wrong with the server"))
                 )
                 .bodyToMono(RatingResponseDTO.class);
     }
@@ -220,10 +229,10 @@ public class VetsServiceClient {
                     HttpStatusCode statusCode = error.statusCode();
                     if (statusCode.equals(HttpStatus.NOT_FOUND))
                         return Mono.error(new NotFoundException("Rating not found for vetId: " + vetId + " and ratingId: " + ratingId));
-                    return Mono.error(new IllegalArgumentException("Something went wrong"));
+                    return Mono.error(new IllegalArgumentException("Something went wrong with the client"));
                 })
                 .onStatus(HttpStatusCode::is5xxServerError, error ->
-                        Mono.error(new IllegalArgumentException("Something went wrong"))
+                        Mono.error(new IllegalArgumentException("Something went wrong with the server"))
                 )
                 .bodyToMono(RatingResponseDTO.class);
     }
@@ -238,10 +247,10 @@ public class VetsServiceClient {
                     HttpStatusCode statusCode = error.statusCode();
                     if (statusCode.equals(HttpStatus.NOT_FOUND))
                         return Mono.error(new NotFoundException("vetId not found "+vetId+" or ratingId not found: " + ratingId));
-                    return Mono.error(new IllegalArgumentException("Something went wrong"));
+                    return Mono.error(new IllegalArgumentException("Something went wrong with the client"));
                 })
                 .onStatus(HttpStatusCode::is5xxServerError, error ->
-                        Mono.error(new IllegalArgumentException("Something went wrong"))
+                        Mono.error(new IllegalArgumentException("Something went wrong with the server"))
                 )
                 .bodyToMono(Void.class);
     }
@@ -252,6 +261,15 @@ public class VetsServiceClient {
                 .get()
                 .uri(vetsServiceUrl + "/topVets" )
                 .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, error->{
+                    HttpStatusCode statusCode = error.statusCode();
+                    if(statusCode.equals(HttpStatus.NOT_FOUND))
+                        return Mono.error(new NotFoundException("No vets found"));
+                    return Mono.error(new IllegalArgumentException("Something went wrong with the client"));
+                })
+                .onStatus(HttpStatusCode::is5xxServerError, error->
+                        Mono.error(new IllegalArgumentException("Something went wrong with the server"))
+                )
                 .bodyToFlux(VetAverageRatingDTO.class);
     }
     public Flux<RatingResponseDTO> getRatingsOfAVetBasedOnDate(String vetId, Map<String,String> queryParams){
@@ -264,6 +282,15 @@ public class VetsServiceClient {
                         .queryParam("year",queryParams.get("year"))
                         .build())
                 .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, error->{
+                    HttpStatusCode statusCode = error.statusCode();
+                    if(statusCode.equals(HttpStatus.NOT_FOUND))
+                        return Mono.error(new NotFoundException("No ratings found for vetId: " + vetId));
+                    return Mono.error(new IllegalArgumentException("Something went wrong with the client"));
+                })
+                .onStatus(HttpStatusCode::is5xxServerError, error ->
+                        Mono.error(new IllegalArgumentException("Something went wrong with the server"))
+                )
                 .bodyToFlux(RatingResponseDTO.class);
     }
 
@@ -277,10 +304,10 @@ public class VetsServiceClient {
                     HttpStatusCode statusCode = error.statusCode();
                     if(statusCode.equals(NOT_FOUND))
                         return Mono.error(new ExistingVetNotFoundException("vetId not found: "+vetId, NOT_FOUND));
-                    return Mono.error(new IllegalArgumentException("Something went wrong"));
+                    return Mono.error(new IllegalArgumentException("Something went wrong with the client"));
                 })
                 .onStatus(HttpStatusCode::is5xxServerError,error->
-                        Mono.error(new IllegalArgumentException("Something went wrong"))
+                        Mono.error(new IllegalArgumentException("Something went wrong with the server"))
                 )
                 .bodyToMono(Double.class);
     }
@@ -292,8 +319,14 @@ public class VetsServiceClient {
                 .get()
                 .uri(vetsServiceUrl)
                 .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, error->{
+                    HttpStatusCode statusCode = error.statusCode();
+                    if(statusCode.equals(NOT_FOUND))
+                        return Mono.error(new ExistingVetNotFoundException("No vets found", NOT_FOUND));
+                    return Mono.error(new IllegalArgumentException("Something went wrong with the client"));
+                })
                 .onStatus(HttpStatusCode::is5xxServerError,error->
-                        Mono.error(new IllegalArgumentException("Something went wrong"))
+                        Mono.error(new IllegalArgumentException("Something went wrong with the server"))
                 )
                 .bodyToFlux(VetResponseDTO.class);
     }
@@ -309,10 +342,10 @@ public class VetsServiceClient {
                     HttpStatusCode statusCode = error.statusCode();
                     if(statusCode.equals(NOT_FOUND))
                         return Mono.error(new ExistingVetNotFoundException("vetId not found: "+vetId, NOT_FOUND));
-                    return Mono.error(new IllegalArgumentException("Something went wrong"));
+                    return Mono.error(new IllegalArgumentException("Something went wrong with the client"));
                 })
                 .onStatus(HttpStatusCode::is5xxServerError,error->
-                        Mono.error(new IllegalArgumentException("Something went wrong"))
+                        Mono.error(new IllegalArgumentException("Something went wrong with the server"))
                 )
                 .bodyToMono(VetResponseDTO.class);
     }
@@ -327,10 +360,10 @@ public class VetsServiceClient {
                     HttpStatusCode statusCode = error.statusCode();
                     if(statusCode.equals(NOT_FOUND))
                         return Mono.error(new ExistingVetNotFoundException("vet with this first name not found: "+firstName, NOT_FOUND));
-                    return Mono.error(new IllegalArgumentException("Something went wrong"));
+                    return Mono.error(new IllegalArgumentException("Something went wrong with the client"));
                 })
                 .onStatus(HttpStatusCode::is5xxServerError,error->
-                        Mono.error(new IllegalArgumentException("Something went wrong"))
+                        Mono.error(new IllegalArgumentException("Something went wrong with the server"))
                 )
                 .bodyToMono(VetResponseDTO.class);
     }
@@ -345,10 +378,10 @@ public class VetsServiceClient {
                     HttpStatusCode statusCode = error.statusCode();
                     if(statusCode.equals(NOT_FOUND))
                         return Mono.error(new ExistingVetNotFoundException("vet with this last name not found: "+lastName, NOT_FOUND));
-                    return Mono.error(new IllegalArgumentException("Something went wrong"));
+                    return Mono.error(new IllegalArgumentException("Something went wrong with the client"));
                 })
                 .onStatus(HttpStatusCode::is5xxServerError,error->
-                        Mono.error(new IllegalArgumentException("Something went wrong"))
+                        Mono.error(new IllegalArgumentException("Something went wrong with the server"))
                 )
                 .bodyToMono(VetResponseDTO.class);
     }
@@ -363,6 +396,15 @@ public class VetsServiceClient {
                 .get()
                 .uri(vetsServiceUrl + "/vetBillId/{vetBillId}", vetBillId)
                 .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, error->{
+                    HttpStatusCode statusCode = error.statusCode();
+                    if(statusCode.equals(NOT_FOUND))
+                        return Mono.error(new ExistingVetNotFoundException("vet with this vetBillId not found: "+vetBillId, NOT_FOUND));
+                    return Mono.error(new IllegalArgumentException("Something went wrong with the client"));
+                })
+                .onStatus(HttpStatusCode::is5xxServerError,error->
+                        Mono.error(new IllegalArgumentException("Something went wrong with the server"))
+                )
                 .bodyToMono(VetResponseDTO.class);
     }
 
@@ -373,8 +415,14 @@ public class VetsServiceClient {
                 .get()
                 .uri(vetsServiceUrl + "/inactive")
                 .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, error->{
+                    HttpStatusCode statusCode = error.statusCode();
+                    if(statusCode.equals(NOT_FOUND))
+                        return Mono.error(new ExistingVetNotFoundException("No inactive vets found", NOT_FOUND));
+                    return Mono.error(new IllegalArgumentException("Something went wrong with the client"));
+                })
                 .onStatus(HttpStatusCode::is5xxServerError,error->
-                        Mono.error(new IllegalArgumentException("Something went wrong"))
+                        Mono.error(new IllegalArgumentException("Something went wrong with the server"))
                 )
                 .bodyToFlux(VetResponseDTO.class);
     }
@@ -386,8 +434,14 @@ public class VetsServiceClient {
                 .get()
                 .uri(vetsServiceUrl + "/active")
                 .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, error->{
+                    HttpStatusCode statusCode = error.statusCode();
+                    if(statusCode.equals(NOT_FOUND))
+                        return Mono.error(new ExistingVetNotFoundException("No active vets found", NOT_FOUND));
+                    return Mono.error(new IllegalArgumentException("Something went wrong with the client"));
+                })
                 .onStatus(HttpStatusCode::is5xxServerError,error->
-                        Mono.error(new IllegalArgumentException("Something went wrong"))
+                        Mono.error(new IllegalArgumentException("Something went wrong with the server"))
                 )
                 .bodyToFlux(VetResponseDTO.class);
     }
@@ -402,6 +456,15 @@ public class VetsServiceClient {
                     .uri(vetsServiceUrl)
                     .body(BodyInserters.fromValue(request))
                     .retrieve()
+                    .onStatus(HttpStatusCode::is4xxClientError, error->{
+                        HttpStatusCode statusCode = error.statusCode();
+                        if(statusCode.equals(NOT_FOUND))
+                            return Mono.error(new ExistingVetNotFoundException("vetId not found: "+vetId, NOT_FOUND));
+                        return Mono.error(new IllegalArgumentException("Something went wrong with the client"));
+                    })
+                    .onStatus(HttpStatusCode::is5xxServerError,error->
+                            Mono.error(new IllegalArgumentException("Something went wrong with the server"))
+                    )
                     .bodyToMono(VetResponseDTO.class);
         });
     }
@@ -416,8 +479,14 @@ public class VetsServiceClient {
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .body(model, VetRequestDTO.class)
                 .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, error->{
+                    HttpStatusCode statusCode = error.statusCode();
+                    if(statusCode.equals(NOT_FOUND))
+                        return Mono.error(new ExistingVetNotFoundException("vetId not found", NOT_FOUND));
+                    return Mono.error(new IllegalArgumentException("Something went wrong with the client"));
+                })
                 .onStatus(HttpStatusCode::is5xxServerError,error->
-                        Mono.error(new IllegalArgumentException("Something went wrong"))
+                        Mono.error(new IllegalArgumentException("Something went wrong with the server"))
                 )
                 .bodyToMono(VetResponseDTO.class);
     }
@@ -433,10 +502,10 @@ public class VetsServiceClient {
                     HttpStatusCode statusCode = error.statusCode();
                     if(statusCode.equals(NOT_FOUND))
                         return Mono.error(new ExistingVetNotFoundException("vetId not found: "+vetId, NOT_FOUND));
-                    return Mono.error(new IllegalArgumentException("Something went wrong"));
+                    return Mono.error(new IllegalArgumentException("Something went wrong with the client"));
                 })
                 .onStatus(HttpStatusCode::is5xxServerError,error->
-                        Mono.error(new IllegalArgumentException("Something went wrong"))
+                        Mono.error(new IllegalArgumentException("Something went wrong with the server"))
                 )
                 .bodyToMono(Void.class);
     }
@@ -454,10 +523,10 @@ public class VetsServiceClient {
                     HttpStatusCode statusCode = error.statusCode();
                     if(statusCode.equals(NOT_FOUND))
                         return Mono.error(new ExistingVetNotFoundException("vetId not found: "+vetId, NOT_FOUND));
-                    return Mono.error(new IllegalArgumentException("Something went wrong"));
+                    return Mono.error(new IllegalArgumentException("Something went wrong with the client"));
                 })
                 .onStatus(HttpStatusCode::is5xxServerError,error->
-                        Mono.error(new IllegalArgumentException("Something went wrong"))
+                        Mono.error(new IllegalArgumentException("Something went wrong with the server"))
                 )
                 .bodyToMono(VetResponseDTO.class);
     }
@@ -471,6 +540,15 @@ public class VetsServiceClient {
                 .get()
                 .uri(vetsServiceUrl + "/" + vetId + "/educations")
                 .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, error->{
+                    HttpStatusCode statusCode = error.statusCode();
+                    if(statusCode.equals(HttpStatus.NOT_FOUND))
+                        return Mono.error(new NotFoundException("Education not found for vetId: " + vetId));
+                    return Mono.error(new IllegalArgumentException("Something went wrong with the client"));
+                })
+                .onStatus(HttpStatusCode::is5xxServerError, error ->
+                        Mono.error(new IllegalArgumentException("Something went wrong with the server"))
+                )
                 .bodyToFlux(EducationResponseDTO.class);
     }
 
@@ -480,6 +558,15 @@ public class VetsServiceClient {
                 .delete()
                 .uri(vetsServiceUrl + "/" + vetId + "/educations" + "/" + educationId)
                 .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, error -> {
+                    HttpStatusCode statusCode = error.statusCode();
+                    if (statusCode.equals(HttpStatus.NOT_FOUND))
+                        return Mono.error(new NotFoundException("vetId not found "+vetId+" or educationId not found: " + educationId));
+                    return Mono.error(new IllegalArgumentException("Something went wrong with the client"));
+                })
+                .onStatus(HttpStatusCode::is5xxServerError, error ->
+                        Mono.error(new IllegalArgumentException("Something went wrong with the server"))
+                )
                 .bodyToMono(Void.class);
     }
     public Mono<EducationResponseDTO> updateEducationByVetIdAndByEducationId(String vetId, String educationId, Mono<EducationRequestDTO> educationRequestDTOMono){
@@ -495,10 +582,10 @@ public class VetsServiceClient {
                             HttpStatusCode statusCode = error.statusCode();
                             if (statusCode.equals(HttpStatus.NOT_FOUND))
                                 return Mono.error(new NotFoundException("Education not found for vetId: " + vetId + " and educationId: " + educationId));
-                            return Mono.error(new IllegalArgumentException("Something went wrong"));
+                            return Mono.error(new IllegalArgumentException("Something went wrong with the client"));
                         })
                         .onStatus(HttpStatusCode::is5xxServerError, error ->
-                                Mono.error(new IllegalArgumentException("Something went wrong"))
+                                Mono.error(new IllegalArgumentException("Something went wrong with the server"))
                         )
                         .bodyToMono(EducationResponseDTO.class);
 
@@ -518,10 +605,10 @@ public class VetsServiceClient {
                     HttpStatusCode statusCode = error.statusCode();
                     if(statusCode.equals(NOT_FOUND))
                         return Mono.error(new ExistingVetNotFoundException("vetId not found: "+ vetId, NOT_FOUND));
-                    return Mono.error(new IllegalArgumentException("Something went wrong"));
+                    return Mono.error(new IllegalArgumentException("Something went wrong with the client"));
                 })
                 .onStatus(HttpStatusCode::is5xxServerError,error->
-                        Mono.error(new IllegalArgumentException("Something went wrong"))
+                        Mono.error(new IllegalArgumentException("Something went wrong with the server"))
                 )
                 .bodyToMono(EducationResponseDTO.class);
     }
