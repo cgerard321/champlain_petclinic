@@ -7,24 +7,22 @@ import com.petclinic.cartsservice.domainclientlayer.ProductResponseModel;
 import com.petclinic.cartsservice.presentationlayer.CartRequestModel;
 import com.petclinic.cartsservice.presentationlayer.CartResponseModel;
 import com.petclinic.cartsservice.utils.exceptions.NotFoundException;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.BeanUtils;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Arrays;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 class CartServiceUnitTest {
@@ -167,6 +165,30 @@ class CartServiceUnitTest {
         StepVerifier.create(cartService.getCartItemCount("cart1"))
                 .expectError(NotFoundException.class) // Expect a NotFoundException
                 .verify();
+    }
+
+    @Test
+    public void whenCreateCart_thenReturnCartResponse() {
+
+        // arrange
+        CartRequestModel cartRequest = new CartRequestModel("123", null);
+        Cart expectedCart = new Cart();
+        expectedCart.setCartId("abc-123-xyz");
+        expectedCart.setCustomerId("123");
+
+        // When
+        when(cartRepository.save(any(Cart.class)))
+                .thenReturn(Mono.just(expectedCart));
+
+        Mono<CartResponseModel> actualResponse = cartService.createNewCart(cartRequest);
+
+        // Assert
+        StepVerifier.create(actualResponse)
+                .expectNextMatches(cart -> cart.getCustomerId().equals("123")
+                        && cart.getCartId().equals("abc-123-xyz"))
+                .verifyComplete();
+
+
     }
 
 
