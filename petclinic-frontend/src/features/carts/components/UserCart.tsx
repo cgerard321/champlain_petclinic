@@ -52,14 +52,16 @@ const UserCart = (): JSX.Element => {
         const initialPrices = products.map(item => item.productSalePrice);
         setFixedPrice(initialPrices);
 
-        const calculatedSubtotal = products.reduce((acc, item) => acc + item.productSalePrice * item.quantity, 0);
+        const calculatedSubtotal = products.reduce(
+          (acc, item) => acc + item.productSalePrice * (item.quantity || 1),
+          0
+        );
         setSubtotal(calculatedSubtotal);
         const tvqValue = calculatedSubtotal * 0.09975; // 9.975%
         const tvcValue = calculatedSubtotal * 0.05; // 5%
         setTvq(tvqValue);
         setTvc(tvcValue);
         setTotal(calculatedSubtotal + tvqValue + tvcValue);
-
       } catch (err: unknown) {
         if (err instanceof Error) {
           console.error('Error fetching cart items:', err.message);
@@ -91,7 +93,10 @@ const UserCart = (): JSX.Element => {
     newItems[index].productSalePrice = fixedPrice[index] * newQuantity;
     setCartItems(newItems);
 
-    const newSubtotal = newItems.reduce((acc, item) => acc + item.productSalePrice * (item.quantity || 1), 0);
+    const newSubtotal = newItems.reduce(
+      (acc, item) => acc + item.productSalePrice * (item.quantity || 1),
+      0
+    );
     setSubtotal(newSubtotal);
     const newTvq = newSubtotal * 0.09975;
     const newTvc = newSubtotal * 0.05;
@@ -106,7 +111,10 @@ const UserCart = (): JSX.Element => {
     );
     setCartItems(newItems);
 
-    const newSubtotal = newItems.reduce((acc, item) => acc + item.productSalePrice * (item.quantity || 1), 0);
+    const newSubtotal = newItems.reduce(
+      (acc, item) => acc + item.productSalePrice * (item.quantity || 1),
+      0
+    );
     setSubtotal(newSubtotal);
     const newTvq = newSubtotal * 0.09975;
     const newTvc = newSubtotal * 0.05;
