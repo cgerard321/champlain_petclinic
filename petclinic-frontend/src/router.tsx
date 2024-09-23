@@ -33,7 +33,6 @@ import VetDetails from '@/pages/Vet/VetDetails.tsx';
 
 import EditingVisit from './features/visits/models/EditingVisit';
 
-
 const router = createBrowserRouter([
   {
     children: [
@@ -200,7 +199,6 @@ const router = createBrowserRouter([
         ),
       },
       {
-
         path: AppRoutePaths.Carts,
         element: (
           <ProtectedRoute roles={['ADMIN']}>
@@ -219,9 +217,9 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.CustomerProfile,
         element: (
-            <ProtectedRoute roles={['OWNER']}>
-              <ProfilePage/>
-            </ProtectedRoute>
+          <ProtectedRoute roles={['OWNER']}>
+            <ProfilePage />
+          </ProtectedRoute>
         ),
       },
 
@@ -230,7 +228,6 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <EditingVisit />
-
           </ProtectedRoute>
         ),
       },
