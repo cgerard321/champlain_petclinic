@@ -14,7 +14,6 @@ import java.util.Date;
 @NoArgsConstructor
 @Builder
 public class VisitResponseDTO {
-//    private String visitId;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime visitStartDate;
