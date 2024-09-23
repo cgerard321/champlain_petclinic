@@ -17,13 +17,6 @@ h1 {
 }
 
 .cart-table {
-<<<<<<< HEAD
-  width: 100%;
-  border-collapse: collapse;
-  margin: 20px 0;
-  font-size: 18px;
-  text-align: left;
-=======
     width: 100%;
     border-collapse: collapse;
     margin: 20px 0;
@@ -33,13 +26,11 @@ h1 {
     border-radius: 10px;
     overflow: hidden;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
->>>>>>> main
 }
 
-.cart-table th,
-.cart-table td {
-  padding: 12px;
-  border-bottom: 1px solid #ddd;
+.cart-table th, .cart-table td {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
 }
 
 .cart-table thead {
@@ -51,21 +42,6 @@ h1 {
 }
 
 .cart-table tbody tr:nth-child(even) {
-<<<<<<< HEAD
-  background-color: #f2f2f2;
-}
-
-.view-button {
-  background-color: green;
-  color: white;
-  border: none;
-  padding: 8px 12px;
-  cursor: pointer;
-}
-
-.view-button:hover {
-  background-color: darkgreen;
-=======
     background-color: #f9f9f9;
 }
 
@@ -104,5 +80,4 @@ h1 {
         padding: 6px 10px;
         font-size: 14px;
     }
->>>>>>> main
 }
