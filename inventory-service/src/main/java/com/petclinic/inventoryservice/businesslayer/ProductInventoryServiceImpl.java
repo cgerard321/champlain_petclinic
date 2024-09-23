@@ -416,7 +416,6 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                 .switchIfEmpty(Mono.error(new NotFoundException("Inventory id:" + inventoryId + "and product:" + productId + "are not found")));
     }
 
-    @Override
     public Mono<InventoryResponseDTO> addSupplyToInventoryByInventoryName(String inventoryName, Mono<SupplyRequestDTO> supplyRequestDTOMono) {
         return supplyRequestDTOMono
                 .flatMap(supplyRequestDTO ->
@@ -446,7 +445,6 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                                 })
                 );
     }
-
 
     //delete all products and delete all inventory
     @Override
@@ -491,6 +489,14 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
         return inventoryRepository.findByInventoryName(inventoryName)
                 .flatMapMany(inventory -> Flux.fromIterable(inventory.getSupplies()))
                 .map(EntityDTOUtil::toSupplyResponseDTO);
+    }
+  
+  @Override
+    public Flux<ProductResponseDTO> getLowStockProducts(String inventoryId, int stockThreshold) {
+        return productRepository
+                .findAllByInventoryIdAndProductQuantityLessThan(inventoryId, stockThreshold)
+                .map(EntityDTOUtil::toProductResponseDTO)
+                .switchIfEmpty(Mono.error(new NotFoundException("No products below threshold in inventory: " + inventoryId)));
     }
 
 }
