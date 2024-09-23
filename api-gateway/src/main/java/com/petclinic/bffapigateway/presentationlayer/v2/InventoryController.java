@@ -151,6 +151,14 @@ public class InventoryController {
                 });
     }
 
-
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER, Roles.VET})
+    @GetMapping("/{inventoryId}/products/search")//, produces= MediaType.TEXT_EVENT_STREAM_VALUE)
+    @ApiResponses(value = {@ApiResponse(useReturnTypeSchema = true, description = "Total number of products available", responseCode = "200")})
+    public ResponseEntity<Flux<ProductResponseDTO>> searchProducts(@PathVariable String inventoryId,
+                                                                   @RequestParam(name = "productName", required = false) String productName,
+                                                                   @RequestParam(name = "productDescription", required = false) String productDescription,
+                                                                   @RequestParam(name = "status", required = false) Status status) {
+        return ResponseEntity.ok().body(inventoryServiceClient.searchProducts(inventoryId, productName, productDescription, status));
+    }
 
 }
