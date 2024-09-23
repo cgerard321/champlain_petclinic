@@ -15,6 +15,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @Slf4j
@@ -43,6 +44,20 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
+    public Flux<CartResponseModel> getAllCarts() {
+        return cartRepository.findAll()
+                .flatMap(cart -> {
+                    List<String> productIds = cart.getProductIds();
+                    return productIds.stream()
+                            .map(productId -> productClient.getProductByProductId(productId).flux()) // fetch products for each cart
+                            .reduce(Flux.empty(), Flux::merge) // merge product streams
+                            .collectList() // collect all products into a list
+                            .map(products -> EntityModelUtil.toCartResponseModel(cart, products)); // map the cart and products to CartResponseModel
+                })
+                .doOnNext(cartResponseModel -> log.debug("Cart: " + cartResponseModel));
+    }
+
+
     public Flux<ProductResponseModel> clearCart(String cartId) {
         return cartRepository.findCartByCartId(cartId)
                 .switchIfEmpty(Mono.error(new NotFoundException("Cart not found: " + cartId)))
@@ -59,6 +74,7 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
+
     public Mono<CartResponseModel> updateCartByCartId(Mono<CartRequestModel> cartRequestModel, String cartId) {
         return cartRepository.findCartByCartId(cartId)
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Cart id was not found: " + cartId))))
@@ -84,4 +100,29 @@ public class CartServiceImpl implements CartService {
                             .map(products -> EntityModelUtil.toCartResponseModel(cart, products));
                 });
     }
+
+    @Override
+    public Mono<Integer> getCartItemCount(String cartId) {
+        return cartRepository.findCartByCartId(cartId)
+                .map(cart -> cart.getProductIds().size())
+                .switchIfEmpty(Mono.error(new NotFoundException("Cart not found: " + cartId)));
+    }
+
+    @Override
+    public Mono<CartResponseModel> createNewCart(CartRequestModel cartRequestModel) {
+
+        Cart cart = new Cart();
+        cart.setCustomerId(cartRequestModel.getCustomerId());
+        cart.setCartId(UUID.randomUUID().toString());
+        Mono<CartResponseModel> cartRequestModelMono = cartRepository.save(cart)
+                .map(savedCart -> {
+                    CartResponseModel cartResponseModel = new CartResponseModel();
+                    cartResponseModel.setCustomerId(savedCart.getCustomerId());
+                    cartResponseModel.setCartId(savedCart.getCartId());
+                    return cartResponseModel;
+                });
+        return cartRequestModelMono;
+    }
+
+
 }

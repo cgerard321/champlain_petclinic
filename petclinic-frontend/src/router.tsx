@@ -22,10 +22,15 @@ import AddReviewForm from './features/visits/Review/AddReviewForm';
 import EditReviewForm from './features/visits/Review/EditReviewForm';
 import Review from './pages/Review/Review';
 import EditInventory from '@/features/inventories/EditInventory.tsx';
+import CartPage from '@/pages/Carts/Cart.tsx';
 import VisitByVisitId from './features/visits/visits/VisitByVisitId';
 import AddingVisit from './features/visits/models/AddingVisit';
 import ProfilePage from '@/pages/Customer/ProfilePage.tsx';
 import AdminBillingPage from '@/pages/Bills/AdminBill.tsx';
+import UserCart from '@/features/carts/components/UserCart.tsx';
+import VetDetails from '@/pages/Vet/VetDetails.tsx';
+import MockPage from '@/pages/Inventory/MockPage.tsx';
+import InventorySupplies from '@/features/inventories/InventorySupplies.tsx';
 
 const router = createBrowserRouter([
   {
@@ -95,6 +100,15 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
+      {
+        path: `${AppRoutePaths.Vet}/:vetId`,
+        element: (
+          <ProtectedRoute>
+            <VetDetails />
+          </ProtectedRoute>
+        ),
+      },
+
       {
         path: AppRoutePaths.CustomerProfileEdit,
         element: (
@@ -184,10 +198,42 @@ const router = createBrowserRouter([
         ),
       },
       {
+        path: AppRoutePaths.Carts,
+        element: (
+          <ProtectedRoute roles={['ADMIN']}>
+            <CartPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: `${AppRoutePaths.Carts}/:cartId`, // Route for viewing a specific cart
+        element: (
+          <ProtectedRoute roles={['ADMIN']}>
+            <UserCart />
+          </ProtectedRoute>
+        ),
+      },
+      {
         path: AppRoutePaths.CustomerProfile,
         element: (
           <ProtectedRoute roles={['OWNER']}>
             <ProfilePage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.MockPage,
+        element: (
+          <ProtectedRoute>
+            <MockPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.InventorySupplies,
+        element: (
+          <ProtectedRoute>
+            <InventorySupplies />
           </ProtectedRoute>
         ),
       },
