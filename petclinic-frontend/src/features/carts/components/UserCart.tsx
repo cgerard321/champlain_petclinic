@@ -20,14 +20,13 @@ const UserCart = (): JSX.Element => {
   useEffect((): void => {
     const fetchCartItems = async (): Promise<void> => {
       try {
-        // Use fetch API instead of axios
         const response = await fetch(
           `http://localhost:8080/api/v2/gateway/carts/${cartId}`,
           {
             headers: {
               Accept: 'application/json',
             },
-            credentials: 'include', // Adjust this depending on your CORS and authentication needs
+            credentials: 'include',
           }
         );
 
@@ -38,11 +37,10 @@ const UserCart = (): JSX.Element => {
         const data: CartResponseDTO = await response.json();
         const products = data.products.map(product => ({
           ...product,
-          quantity: 1, // Set a default quantity if it doesn't exist
+          quantity: 1,
         }));
 
         setCartItems(products);
-
         const initialPrices = products.map(item => item.productSalePrice);
         setFixedPrice(initialPrices);
       } catch (err: unknown) {
@@ -54,7 +52,7 @@ const UserCart = (): JSX.Element => {
           setError('An unexpected error occurred');
         }
       } finally {
-        setLoading(false); // Stop loading once the fetch is done
+        setLoading(false);
       }
     };
 
@@ -84,6 +82,31 @@ const UserCart = (): JSX.Element => {
     setCartItems(newItems);
   };
 
+  const clearCart = async (): Promise<void> => {
+    if (!cartId) {
+      return;
+    }
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/v2/gateway/carts/${cartId}/clear`,
+        {
+          method: 'DELETE',
+          credentials: 'include',
+        }
+      );
+
+      if (response.ok) {
+        setCartItems([]); // Clear the items from the frontend after success
+        alert('Cart has been successfully cleared!');
+      } else {
+        alert('Failed to clear cart');
+      }
+    } catch (error) {
+      console.error('Error clearing cart:', error);
+      alert('Failed to clear cart');
+    }
+  };
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -95,6 +118,7 @@ const UserCart = (): JSX.Element => {
   return (
     <div className="CartItems">
       <h1>User Cart</h1>
+      <button onClick={clearCart}>Clear Cart</button> {/* Clear Cart Button */}
       <hr />
       <div className="CartItems-items">
         {cartItems.length > 0 ? (
