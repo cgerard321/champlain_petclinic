@@ -23,12 +23,22 @@ public class ProductsServiceClient {
                                  @Value("${app.products-service.port}") String productsServicePort) {
         this.webClientBuilder = webClientBuilder;
         productsServiceUrl = "http://" + productsServiceHost + ":" + productsServicePort + "/api/v1/products";
-        //initialize web client
         this.webClient = webClientBuilder
                 .baseUrl(productsServiceUrl)
                 .build();
 
     }
+
+//    public ProductsServiceClient(WebClient.Builder webClientBuilder,
+//                                 @Value("${app.products-service.host}") String productsServiceHost,
+//                                 @Value("${app.products-service.port}") String productsServicePort) {
+//        this.webClientBuilder = webClientBuilder;
+//        productsServiceUrl = "http://" + productsServiceHost + ":" + productsServicePort + "/api/v1/products";
+//        this.webClient = webClientBuilder
+//                .baseUrl(productsServiceUrl)
+//                .build();
+//
+//    }
 
     public Flux<ProductResponseDTO> getAllProducts(Double minPrice, Double maxPrice) {
         return webClient.get()
