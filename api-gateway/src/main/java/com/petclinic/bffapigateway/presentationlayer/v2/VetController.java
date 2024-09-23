@@ -58,12 +58,8 @@ public class VetController {
     }
 
 
-<<<<<<< HEAD
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-=======
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
     //@IsUserSpecific(idToMatch = {"vetId"}, bypassRoles = {Roles.ADMIN})
->>>>>>> 7768b45a (Add the updateVet method inside of the Vet Controller in the API gateway)
     @PutMapping(value = "/{vetId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<VetResponseDTO>> updateVet(
             @RequestBody Mono<VetRequestDTO> vetRequestDTOMono,
@@ -77,7 +73,7 @@ public class VetController {
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
-<<<<<<< HEAD
+
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @DeleteMapping(value = "{vetId}")
     public Mono<ResponseEntity<Void>> deleteVet(@PathVariable String vetId) {
@@ -111,9 +107,4 @@ public class VetController {
 
     }
 
-
-
-
-=======
->>>>>>> 7768b45a (Add the updateVet method inside of the Vet Controller in the API gateway)
 }

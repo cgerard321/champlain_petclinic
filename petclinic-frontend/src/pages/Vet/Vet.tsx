@@ -123,14 +123,7 @@ export default function Vet(): JSX.Element {
   return (
     <div style={{ padding: '20px' }}>
       <NavBar />
-      <h1>Hello dear vets</h1>
-      <VetListTable />
       <div style={{ marginBottom: '20px', textAlign: 'right' }}>
-        <button onClick={() => setFormVisible(prev => !prev)}>
-          {formVisible ? 'Cancel' : 'Add Vet'}
-        </button>
-        {formVisible && <AddVet />}
-
         <input
           type="text"
           value={searchQuery}
@@ -171,10 +164,6 @@ export default function Vet(): JSX.Element {
         )}
       </div>
       <h1>Hello dear vets</h1>
-      <button onClick={() => setFormVisible(prev => !prev)}>
-        {formVisible ? 'Cancel' : 'Add Vet'}
-      </button>
-      {formVisible && <AddVet />}
       <VetListTable />
       <div style={{ marginBottom: '20px', textAlign: 'right' }}>
         <button onClick={() => setFormVisible(prev => !prev)}>
@@ -182,23 +171,6 @@ export default function Vet(): JSX.Element {
         </button>
         {formVisible && <AddVet />}
         <UploadVetPhoto />
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={e => setSearchQuery(e.target.value)}
-          placeholder={`Search by ${searchType}`}
-          style={{ marginRight: '10px' }}
-        />
-        <select
-          value={searchType}
-          onChange={e =>
-            setSearchType(e.target.value as 'firstName' | 'lastName')
-          }
-          style={{ marginRight: '10px' }}
-        >
-          <option value="firstName">First Name</option>
-          <option value="lastName">Last Name</option>
-        </select>
         <button onClick={handleSearch}>Search</button>
       </div>
       {error && <p>{error}</p>}
