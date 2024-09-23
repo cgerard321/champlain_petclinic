@@ -67,7 +67,6 @@ public class VisitControllerUnitTest {
             .vetEmail("john.doe@example.com")
             .vetPhoneNumber("555-1234")
             .status(Status.COMPLETED)
-            .visitEndDate(LocalDate.of(2021, 5, 1).atStartOfDay())
             .build();
 
 
@@ -144,12 +143,11 @@ public class VisitControllerUnitTest {
         verify(visitsServiceClient, times(1)).getAllVisits();
     }
 
-    /*
     @Test
     void whenAddVisit_asAdmin_thenReturnCreatedVisitDTO() {
         // Arrange
         VisitRequestDTO newVisitRequestDTO = VisitRequestDTO.builder()
-                .visitStartDate(LocalDateTime.of(2023, 10, 10, 10, 0))
+                .visitDate(LocalDateTime.of(2023, 10, 10, 10, 0))
                 .description("Routine check-up")
                 .petId("P001")
                 .practitionerId("PR001")
@@ -158,12 +156,11 @@ public class VisitControllerUnitTest {
 
         VisitResponseDTO createdVisitResponseDTO = VisitResponseDTO.builder()
                 .visitId("V001")
-                .visitStartDate(newVisitRequestDTO.getVisitStartDate())
+                .visitDate(newVisitRequestDTO.getVisitDate())
                 .description(newVisitRequestDTO.getDescription())
                 .petId(newVisitRequestDTO.getPetId())
                 .practitionerId(newVisitRequestDTO.getPractitionerId())
                 .status(newVisitRequestDTO.getStatus())
-                .visitEndDate(newVisitRequestDTO.getVisitStartDate())
                 .build();
 
         // Mock the visitsServiceClient to return the expected Mono
@@ -189,7 +186,7 @@ public class VisitControllerUnitTest {
                 .expectNextMatches(visitResponseDTO -> {
                     assertNotNull(visitResponseDTO);
                     assertNotNull(visitResponseDTO.getVisitId());
-                    assertEquals(newVisitRequestDTO.getVisitStartDate(), visitResponseDTO.getVisitStartDate());
+                    assertEquals(newVisitRequestDTO.getVisitDate(), visitResponseDTO.getVisitDate());
                     assertEquals(newVisitRequestDTO.getDescription(), visitResponseDTO.getDescription());
                     assertEquals(newVisitRequestDTO.getPetId(), visitResponseDTO.getPetId());
                     assertEquals(newVisitRequestDTO.getPractitionerId(), visitResponseDTO.getPractitionerId());
@@ -201,8 +198,6 @@ public class VisitControllerUnitTest {
         // Verify that addVisit was called
         verify(visitsServiceClient, times(1)).addVisit(any(Mono.class));
     }
-
-     */
 
     @Test
     void postReview_whenValidRequest_thenReturnCreatedResponse() {

@@ -121,4 +121,28 @@ public class VisitController {
     }
 
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping(value = "/{visitId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<VisitResponseDTO>> getVisitByVisitId(@PathVariable String visitId) {
+        return Mono.just(visitId)
+                .switchIfEmpty(Mono.error(new InvalidInputException("Provided visit ID is invalid: " + visitId)))
+                .flatMap(id -> visitsServiceClient.getVisitByVisitId(id))
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    /*
+        @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @IsUserSpecific(idToMatch = {"reviewId"})
+    @GetMapping(value = "/reviews/{reviewId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<ReviewResponseDTO>> getReviewByReviewId(
+            @PathVariable String reviewId) {
+
+        return Mono.just(reviewId)// Validate the review ID length
+                .switchIfEmpty(Mono.error(new InvalidInputException("Provided review ID is invalid: " + reviewId)))
+                .flatMap(id -> visitsServiceClient.getReviewByReviewId(id)) // Assuming `getReviewByReviewId` method exists in `visitsServiceClient`
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+     */
 }

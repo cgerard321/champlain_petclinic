@@ -135,6 +135,17 @@ class InventoryControllerUnitTest {
             .supplyDescription("Non-steroidal pain relief medication")
             .supplySalePrice(140.00)
             .build();
+  
+      ProductResponseDTO lowStockProduct = ProductResponseDTO.builder()
+            .id("1")
+            .inventoryId("inventoryId_1")
+            .productId("productId_1")
+            .productName("Low Stock Product")
+            .productQuantity(5)
+            .productPrice(100.00)
+            .build();
+
+    List<ProductResponseDTO> lowStockProducts = List.of(lowStockProduct);
 
       ProductResponseDTO lowStockProduct = ProductResponseDTO.builder()
             .id("1")
