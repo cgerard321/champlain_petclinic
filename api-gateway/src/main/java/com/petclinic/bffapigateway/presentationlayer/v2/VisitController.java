@@ -2,6 +2,7 @@ package com.petclinic.bffapigateway.presentationlayer.v2;
 
 import com.petclinic.bffapigateway.domainclientlayer.VisitsServiceClient;
 import com.petclinic.bffapigateway.dtos.Auth.Role;
+import com.petclinic.bffapigateway.dtos.Visits.VisitRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.VisitResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewResponseDTO;
@@ -38,11 +39,19 @@ public class VisitController {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @PostMapping(value = "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<VisitResponseDTO>> addVisit(@RequestBody Mono<VisitRequestDTO> visitResponseDTO) {
+        return visitsServiceClient.addVisit(visitResponseDTO)
+                .map(v -> ResponseEntity.status(HttpStatus.CREATED).body(v))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+        }
+
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping(value = "/reviews")
     public ResponseEntity<Flux<ReviewResponseDTO>> getAllReviews(){
         return ResponseEntity.ok().body(visitsServiceClient.getAllReviews());
     }
-
 
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
@@ -81,12 +90,16 @@ public class VisitController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-
-
-
-
-
-    //add more endpoints here
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @PutMapping(value = "/{visitId}")
+    public Mono<ResponseEntity<VisitResponseDTO>> updateVisitByVisitId(
+            @PathVariable String visitId,
+            @RequestBody Mono<VisitRequestDTO> visitRequestDTO) {
+        return visitRequestDTO
+                .flatMap(request -> visitsServiceClient.updateVisitByVisitId(visitId, Mono.just(request))
+                        .map(updatedVisit -> ResponseEntity.ok(updatedVisit))
+                        .defaultIfEmpty(ResponseEntity.notFound().build())); // Return 404 if not found
+    }
 
 
 }

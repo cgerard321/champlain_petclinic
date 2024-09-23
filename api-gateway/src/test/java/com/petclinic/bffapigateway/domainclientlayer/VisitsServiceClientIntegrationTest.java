@@ -43,6 +43,8 @@ class VisitsServiceClientIntegrationTest {
     private static MockWebServer server;
     private static ObjectMapper objectMapper = new ObjectMapper();
 
+    private static final String VISIT_ID = "visitId4";
+
     private static final String PET_ID = "1";
 
     private static final String STATUS = "UPCOMING";
@@ -179,7 +181,8 @@ class VisitsServiceClientIntegrationTest {
                 "1",
                 "f470653d-05c5-4c45-b7a0-7d70f003d2ac",
                 "testJwtToken",
-                "2"
+                "2",
+                "73b5c112-5703-4fb7-b7bc-ac8186811ae1"
         );
 
         // Mock the server response
@@ -224,7 +227,8 @@ class VisitsServiceClientIntegrationTest {
                 "1",
                 "f470653d-05c5-4c45-b7a0-7d70f003d2ac",
                 "testJwtToken",
-                "2"
+                "2",
+                "73b5c112-5703-4fb7-b7bc-ac8186811ae1"
         );
 
         String errorMessage = "{\"message\":\"A visit with the same time already exists.\"}";
@@ -253,7 +257,8 @@ class VisitsServiceClientIntegrationTest {
                 "1",
                 "f470653d-05c5-4c45-b7a0-7d70f003d2ac",
                 "testJwtToken",
-                "2"
+                "2",
+                "73b5c112-5703-4fb7-b7bc-ac8186811ae1"
         );
 
         String errorMessage = "{\"message\":\"Visit not found.\"}";
@@ -282,7 +287,8 @@ class VisitsServiceClientIntegrationTest {
                 "1",
                 "f470653d-05c5-4c45-b7a0-7d70f003d2ac",
                 "testJwtToken",
-                "2"
+                "2",
+                "73b5c112-5703-4fb7-b7bc-ac8186811ae1"
         );
 
         String errorMessage = "{\"message\":\"Invalid request.\"}";
@@ -311,7 +317,8 @@ class VisitsServiceClientIntegrationTest {
                 "1",
                 "f470653d-05c5-4c45-b7a0-7d70f003d2ac",
                 "testJwtToken",
-                "2"
+                "2",
+                "73b5c112-5703-4fb7-b7bc-ac8186811ae1"
         );
 
         // Mock the server error response with a bad request status and non-JSON body, which should trigger an IOException during parsing
@@ -702,6 +709,47 @@ class VisitsServiceClientIntegrationTest {
                 .verifyComplete();
     }
 
+    //add visit
+    @Test
+    void addVisit_Valid() throws JsonProcessingException {
+        // Arrange
+        VisitRequestDTO visitRequestDTO = new VisitRequestDTO(
+                LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
+                "Routine Check-up",
+                "1", // Pet ID
+                "practitionerId", // Practitioner ID
+                "jwtToken", // JWT Token
+                "ownerId",
+                "73b5c112-5703-4fb7-b7bc-ac8186811ae1"
+        );
+
+        VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
+                .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
+                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .description("Routine Check-up")
+                .petId("1")
+                .practitionerId("practitionerId")
+                .vetFirstName("John")
+                .vetLastName("Doe")
+                .status(Status.UPCOMING)
+                .build();
+
+        // Mock the server response
+        server.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(objectMapper.writeValueAsString(visitResponseDTO)));
+
+        // Act
+        Mono<VisitRequestDTO> requestMono = Mono.just(visitRequestDTO); // Wrap VisitRequestDTO in Mono
+        Mono<VisitResponseDTO> resultMono = visitsServiceClient.addVisit(requestMono); // Call addVisit with Mono
+
+        // Assert
+        StepVerifier.create(resultMono)
+                .expectNextMatches(visitResponse -> visitResponse.getVisitId().equals(visitResponseDTO.getVisitId()))
+                .verifyComplete();
+    }
+
+
 
     @Test
     void createReview() throws JsonProcessingException {
@@ -785,6 +833,62 @@ class VisitsServiceClientIntegrationTest {
                 .expectNext(review1)
                 .expectNext(review2)
                 .verifyComplete();
+    }
+
+    @Test
+    void testUpdateVisitByVisitId() throws Exception {
+        // Arrange
+        VisitRequestDTO requestDTO = new VisitRequestDTO();
+        requestDTO.setVisitDate(LocalDateTime.of(2025, 12, 24, 18, 0)); // Setting a specific date for testing
+        requestDTO.setDescription("Dog Needs Physio-Therapy UPDATE");
+        requestDTO.setPetId("0e4d8481-b611-4e52-baed-af16caa8bf8a");
+        requestDTO.setPractitionerId("69f85d2e-625b-11ee-8c99-0242ac120002");
+        requestDTO.setStatus(Status.UPCOMING);
+
+        VisitResponseDTO responseDTO = new VisitResponseDTO();
+        responseDTO.setVisitId(VISIT_ID);
+        responseDTO.setVisitDate(requestDTO.getVisitDate().minusHours(4));
+        responseDTO.setDescription(requestDTO.getDescription());
+        responseDTO.setPetId(requestDTO.getPetId());
+        responseDTO.setPractitionerId(requestDTO.getPractitionerId());
+        responseDTO.setStatus(requestDTO.getStatus());
+
+        // Simulate HTTP response from the MockWebServer
+        server.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setResponseCode(200)
+                .setBody(objectMapper.writeValueAsString(responseDTO)));
+
+        // Act
+        Mono<VisitResponseDTO> result = visitsServiceClient.updateVisitByVisitId(VISIT_ID, Mono.just(requestDTO));
+
+        // Assert using StepVerifier
+        StepVerifier.create(result)
+                .expectNextMatches(updatedVisit -> {
+                    // Assert each field
+                    assertNotNull(updatedVisit);
+                    assertEquals(VISIT_ID, updatedVisit.getVisitId());
+                    assertEquals(requestDTO.getDescription(), updatedVisit.getDescription());
+                    assertEquals(requestDTO.getVisitDate(), updatedVisit.getVisitDate());
+                    assertEquals(requestDTO.getPetId(), updatedVisit.getPetId());
+                    assertEquals(requestDTO.getPractitionerId(), updatedVisit.getPractitionerId());
+                    assertEquals(requestDTO.getStatus(), updatedVisit.getStatus());
+                    return true;
+                })
+                .verifyComplete();
+    }
+
+
+    @Test
+    void testUpdateVisitByVisitId_BadRequest() {
+        // Arrange
+        VisitRequestDTO requestDTO = new VisitRequestDTO();
+        requestDTO.setVisitDate(null); // Invalid input to trigger BadRequestException
+
+        // Act and Assert
+        StepVerifier.create(visitsServiceClient.updateVisitByVisitId(VISIT_ID, Mono.just(requestDTO)))
+                .expectError(BadRequestException.class)
+                .verify();
     }
 
 }

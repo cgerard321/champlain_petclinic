@@ -13,6 +13,7 @@ import com.petclinic.bffapigateway.exceptions.BadRequestException;
 import com.petclinic.bffapigateway.exceptions.DuplicateTimeException;
 import com.petclinic.bffapigateway.exceptions.InvalidInputsInventoryException;
 import com.petclinic.bffapigateway.utils.Rethrower;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -26,6 +27,7 @@ import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -35,6 +37,7 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
  * Copied from https://github.com/spring-petclinic/spring-petclinic-microservices
  */
 
+@Slf4j
 @Component
 public class VisitsServiceClient {
     private final WebClient webClient;
@@ -95,7 +98,23 @@ public class VisitsServiceClient {
                 .bodyToMono(VisitResponseDTO.class);
     }
 
-
+    public Mono<VisitResponseDTO> addVisit(Mono<VisitRequestDTO> visitRequestDTO){
+        return visitRequestDTO.flatMap(visitRequestDTO1 -> {
+            if (visitRequestDTO1.getVisitDate() != null) {
+                LocalDateTime originalDate = visitRequestDTO1.getVisitDate();
+                LocalDateTime adjustedDate = originalDate.minusHours(4);
+                visitRequestDTO1.setVisitDate(adjustedDate);
+            } else {
+                throw new BadRequestException("Visit date is required");
+            }
+            return webClient
+                    .post()
+                    .uri(reviewUrl)
+                    .body(BodyInserters.fromValue(visitRequestDTO1))
+                    .retrieve()
+                    .bodyToMono(VisitResponseDTO.class);
+        });
+    }
 
     public Mono<VisitResponseDTO> updateStatusForVisitByVisitId(String visitId, String status) {
 
@@ -112,7 +131,6 @@ public class VisitsServiceClient {
             .retrieve()
             .bodyToMono(VisitResponseDTO.class);
     }
-
 
     public Mono<VisitResponseDTO> createVisitForPet(VisitRequestDTO visit) {
         return webClient
@@ -270,6 +288,25 @@ public class VisitsServiceClient {
                 .uri(reviewUrl + "/reviews/" + reviewId)
                 .retrieve()
                 .bodyToMono(ReviewResponseDTO.class);
+    }
+
+    public Mono<VisitResponseDTO> updateVisitByVisitId(String visitId,
+                                                       Mono<VisitRequestDTO> visitRequestDTO){
+        return visitRequestDTO.flatMap(requestDTO -> {
+        if (requestDTO.getVisitDate() != null) {
+            LocalDateTime originalDate = requestDTO.getVisitDate();
+            LocalDateTime adjustedDate = originalDate.minusHours(4);
+            requestDTO.setVisitDate(adjustedDate);
+        } else {
+            throw new BadRequestException("Visit date is required");
+        }
+               return webClient
+                        .put()
+                        .uri(reviewUrl + "/" + visitId)
+                        .body(BodyInserters.fromValue(requestDTO))
+                        .retrieve()
+                        .bodyToMono(VisitResponseDTO.class);
+    });
     }
 
 

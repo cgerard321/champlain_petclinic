@@ -1,4 +1,4 @@
-package com.petclinic.inventoryservice.datalayer.Product;
+package com.petclinic.inventoryservice.datalayer.Supply;
 
 public enum Status {
 

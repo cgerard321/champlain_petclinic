@@ -6,6 +6,7 @@ import { AppRoutePaths } from '@/shared/models/path.routes';
 import '@/features/customers/components/UpdateCustomerForm.css';
 import { OwnerModel } from '@/features/customers/models/OwnerModel.ts';
 import { NavBar } from '@/layouts/AppNavBar.tsx';
+import './AddingCustomer.css';
 
 const AddingCustomer: React.FC = (): JSX.Element => {
   const navigate = useNavigate();
@@ -59,7 +60,7 @@ const AddingCustomer: React.FC = (): JSX.Element => {
   return (
     <div>
       <NavBar />
-      <div className="profile-edit">
+      <div className="add-customer-form">
         <h1>Add Customer</h1>
         <form onSubmit={handleSubmit}>
           <label>First Name: </label>
