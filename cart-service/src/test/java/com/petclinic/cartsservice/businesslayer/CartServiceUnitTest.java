@@ -239,4 +239,47 @@ class CartServiceUnitTest {
         verify(cartRepository, times(1)).save(cart);
         assertTrue(cart.getProductIds().isEmpty());
     }
+
+    @Test
+    public void whenDeleteCartById_withExistingCart_thenCartIsDeleted() {
+        // Arrange
+        String cartId = cart1.getCartId();
+        when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart1));
+        when(cartRepository.delete(cart1)).thenReturn(Mono.empty());
+        when(productClient.getProductByProductId("9a29fff7-564a-4cc9-8fe1-36f6ca9bc223")).thenReturn(Mono.just(product1));
+        when(productClient.getProductByProductId("d819e4f4-25af-4d33-91e9-2c45f0071606")).thenReturn(Mono.just(product2));
+
+        // Act
+        Mono<CartResponseModel> result = cartService.deleteCartByCartId(cartId);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNextMatches(cartResponseModel ->
+                    cartResponseModel.getCartId().equals(cart1.getCartId()))
+
+                .verifyComplete();
+
+        verify(cartRepository, times(1)).findCartByCartId(cartId);
+        verify(cartRepository, times(1)).delete(cart1);
+    }
+
+    @Test
+    public void whenDeleteCartById_withNonExistentCartId_thenThrowNotFoundException() {
+        // Arrange
+        when(cartRepository.findCartByCartId(nonExistentCartId)).thenReturn(Mono.empty());
+
+        // Act
+        Mono<CartResponseModel> result = cartService.deleteCartByCartId(nonExistentCartId);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof NotFoundException
+                        && throwable.getMessage().equals("Cart id was not found: " + nonExistentCartId))
+                .verify();
+
+        verify(cartRepository, times(1)).findCartByCartId(nonExistentCartId);
+        verify(cartRepository, never()).delete(any(Cart.class));
+    }
+
+
 }
