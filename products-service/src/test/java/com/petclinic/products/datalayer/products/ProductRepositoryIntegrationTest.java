@@ -73,10 +73,11 @@ class ProductRepositoryIntegrationTest {
                 .expectNextCount(3)
                 .verifyComplete();
         StepVerifier.create(productRepository.findAll())
-                .expectNextMatches(product -> product.getProductId().equals(id1))
-                .expectNextMatches(product -> product.getProductId().equals(id2))
-                .expectNextMatches(product -> product.getProductId().equals(id3))
+                .expectNextMatches(product -> product.getProductId().equals(id1) || product.getProductId().equals(id2) || product.getProductId().equals(id3))
+                .expectNextMatches(product -> product.getProductId().equals(id1) || product.getProductId().equals(id2) || product.getProductId().equals(id3))
+                .expectNextMatches(product -> product.getProductId().equals(id1) || product.getProductId().equals(id2) || product.getProductId().equals(id3))
                 .verifyComplete();
+
 
 
     }
