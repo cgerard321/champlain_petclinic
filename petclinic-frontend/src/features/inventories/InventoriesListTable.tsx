@@ -30,7 +30,6 @@ export default function InventoriesListTable(): JSX.Element {
     useState<{ [inventoryName: string]: ProductModel[] }>({});
   const [showLowStock, setShowLowStock] = useState(false);
 
-
   const toggleAddSupplyModal = (): void => {
     setShowAddSupplyModal(prev => !prev);
   };
@@ -66,6 +65,7 @@ export default function InventoriesListTable(): JSX.Element {
   const pageBefore = (): void => {
     setCurrentPage(prevPage => Math.max(prevPage - 1, 0));
   };
+
   const pageAfter = (): void => {
     setCurrentPage(prevPage => prevPage + 1);
   };
@@ -395,6 +395,25 @@ export default function InventoriesListTable(): JSX.Element {
         }}
       >
         Delete All Inventories
+      </button>
+      <button
+        className="low-stock-button btn btn-warning mx-1"
+        onClick={async () => {
+          if (inventoryList.length > 0) {
+            setLowStockProductsByInventory({});
+            try {
+              for (const inventory of inventoryList) {
+                await getAllLowStockProducts(inventory);
+              }
+            } catch (error) {
+              console.error('Error fetching low stock products:', error);
+            }
+          } else {
+            console.error('No inventories found');
+          }
+        }}
+      >
+        Add Inventory
       </button>
       <button
         className="low-stock-button btn btn-warning mx-1"
