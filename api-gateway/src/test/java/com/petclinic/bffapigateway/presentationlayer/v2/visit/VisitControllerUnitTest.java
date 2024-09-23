@@ -20,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -52,6 +53,8 @@ public class VisitControllerUnitTest {
 
     private final String BASE_VISIT_URL = "/api/v2/gateway/visits";
     private final String REVIEWS_URL = BASE_VISIT_URL + "/reviews";
+    private final String BASE_VISIT_COMPLETED_URL = "/api/v2/gateway/visits/completed/";
+
 
     //VisitResponseDTO Objects for testing purposes
     private final VisitResponseDTO visitResponseDTO1 = VisitResponseDTO.builder()
@@ -375,9 +378,59 @@ public class VisitControllerUnitTest {
                 // Validate the response
                 .expectStatus().isNotFound();
     }
+    @Test
+    void deleteCompletedVisitByVisitId_whenVisitDeletedSuccessfully_thenReturnNoContent() {
+            // Arrange
+            String visitId = "V001";
+            when(visitsServiceClient.deleteCompletedVisitByVisitId(visitId)).thenReturn(Mono.empty());
+
+            // Act & Assert
+            webTestClient.delete()
+                    .uri(BASE_VISIT_COMPLETED_URL + visitId)
+                    .exchange()
+                    .expectStatus().isNoContent();
+
+            verify(visitsServiceClient, times(1)).deleteCompletedVisitByVisitId(visitId);
+        }
 
 
 
 
+    @Test
+    void deleteCompletedVisitByVisitId_whenInvalidVisitId_thenReturnNotFound() {
+        // Arrange
+        String invalidVisitId = "";
 
+        // Act & Assert
+        webTestClient.delete()
+                .uri(BASE_VISIT_COMPLETED_URL + invalidVisitId)
+                .exchange()
+                .expectStatus().isNotFound();
+
+        verify(visitsServiceClient, times(0)).deleteCompletedVisitByVisitId(invalidVisitId);  // Service should not be called
+    }
+
+//    @Test
+//    void deleteCompletedVisitByVisitId_whenVisitNotCompleted_thenReturnNotFound() {
+//        // Arrange
+//        String visitId = "V002";
+//        VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
+//                .visitId(visitId)
+//                .status(Status.UPCOMING)  // Visit is not completed
+//                .build();
+//
+//        // Mock getVisitByVisitId to return a visit with a status that is not COMPLETED
+//        when(visitsServiceClient.getVisitByVisitId(visitId)).thenReturn(Mono.just(visitResponseDTO));
+//
+//        // Act & Assert
+//        webTestClient.delete()
+//                .uri(BASE_VISIT_COMPLETED_URL + visitId)
+//                .exchange()
+//                .expectStatus().isNotFound();  // Expect 404 Not Found since the visit is not completed
+//
+//        // Verify that deleteCompletedVisitByVisitId is never called since the status is not COMPLETED
+//        verify(visitsServiceClient, times(0)).deleteCompletedVisitByVisitId(visitId);
+//    }
 }
+
+

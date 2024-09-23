@@ -19,6 +19,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
@@ -539,5 +541,40 @@ class VisitControllerUnitTest {
         verify(visitService, times(1)).deleteCompletedVisitByVisitId(visitId);
     }
 
-    
+    @Test
+    public void whenDeleteAllCompletedVisits_return204(){
+        when(visitService.deleteCompletedVisitByVisitId("visitId1")).thenReturn(Mono.empty());
+
+        webTestClient
+                .delete()
+                .uri("/visits/completed/{visitId}","visitId1")
+                .exchange()
+                .expectStatus().isNoContent();
+
+        verify(visitService, times(1)).deleteCompletedVisitByVisitId("visitId1");
+    }
+
+    @Test
+    void deleteCompletedVisitByVisitId_whenVisitNotCompleted_thenReturnNotFound() {
+        // Arrange
+        String visitId = "visitId7";
+
+        VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
+                .visitId(visitId)
+                .status(Status.UPCOMING)  // Not COMPLETED
+                .build();
+
+        when(visitService.getVisitByVisitId(visitId)).thenReturn(Mono.just(visitResponseDTO));
+        when(visitService.deleteCompletedVisitByVisitId(visitId))
+                .thenReturn(Mono.error(new NotFoundException("Cannot Find visit id " + visitId)));
+
+        // Act & Assert
+        webTestClient.delete()
+                .uri("/visits/completed/{visitId}", visitId)
+                .exchange()
+                .expectStatus().isNotFound();  // Expect 404 Not Found
+
+        verify(visitService, times(1)).deleteCompletedVisitByVisitId(visitId);
+        verify(visitService, times(0)).deleteVisit(anyString());  // Ensure delete is not called
+    }
 }
