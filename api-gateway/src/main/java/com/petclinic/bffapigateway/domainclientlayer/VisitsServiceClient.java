@@ -292,14 +292,21 @@ public class VisitsServiceClient {
 
     public Mono<VisitResponseDTO> updateVisitByVisitId(String visitId,
                                                        Mono<VisitRequestDTO> visitRequestDTO){
-        return visitRequestDTO.flatMap(requestDTO ->
-                webClient
+        return visitRequestDTO.flatMap(requestDTO -> {
+        if (requestDTO.getVisitDate() != null) {
+            LocalDateTime originalDate = requestDTO.getVisitDate();
+            LocalDateTime adjustedDate = originalDate.minusHours(4);
+            requestDTO.setVisitDate(adjustedDate);
+        } else {
+            throw new BadRequestException("Visit date is required");
+        }
+               return webClient
                         .put()
                         .uri(reviewUrl + "/" + visitId)
                         .body(BodyInserters.fromValue(requestDTO))
                         .retrieve()
-                        .bodyToMono(VisitResponseDTO.class)
-        );
+                        .bodyToMono(VisitResponseDTO.class);
+    });
     }
 
 

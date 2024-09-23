@@ -1,16 +1,15 @@
-import { AxiosResponse } from 'axios';
 import axiosInstance from '@/shared/api/axiosInstance';
 import { VisitRequestModel } from '@/features/visits/models/VisitRequestModel.ts';
 import { VisitResponseModel } from '@/features/visits/models/VisitResponseModel.ts';
 
 export const updateVisit = async (
+  visitId: string,
   visit: VisitRequestModel
-): Promise<AxiosResponse<void>> => {
-  return await axiosInstance.put<void>('/visits', visit);
+): Promise<void> => {
+  await axiosInstance.put<void>(`/visits/${visitId}`, visit);
 };
 
-// Function to get a review by ID
-export const getUpdate = async (
+export const getVisit = async (
   visitId: string
 ): Promise<VisitResponseModel> => {
   const response = await axiosInstance.get<VisitResponseModel>(
