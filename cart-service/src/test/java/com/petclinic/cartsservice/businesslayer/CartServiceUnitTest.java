@@ -9,23 +9,21 @@ import com.petclinic.cartsservice.presentationlayer.CartResponseModel;
 import com.petclinic.cartsservice.utils.exceptions.NotFoundException;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.beans.BeanUtils;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Arrays;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -39,8 +37,6 @@ class CartServiceUnitTest {
 
     @Mock
     private ProductClient productClient;
-
-
 
     private final ProductResponseModel product1 = ProductResponseModel.builder()
             .productId("9a29fff7-564a-4cc9-8fe1-36f6ca9bc223")
@@ -71,11 +67,11 @@ class CartServiceUnitTest {
             .customerId("1")
             .build();
 
-    //UUID for non-existent cart
+    // UUID for non-existent cart
     private final String nonExistentCartId = "a7d573-bcab-4db3-956f-773324b92a80";
 
     @Test
-    void whenUpdateCartById_thenReturnCartResponseModel(){
+    void whenUpdateCartById_thenReturnCartResponseModel() {
         productIds.add(product3.getProductId());
 
         Cart updatedCart = Cart.builder()
@@ -88,22 +84,14 @@ class CartServiceUnitTest {
         CartRequestModel cartRequestModel = new CartRequestModel();
         BeanUtils.copyProperties(updatedCart, cartRequestModel);
 
-        when(cartRepository.findCartByCartId(cart1.getCartId()))
-                .thenReturn(Mono.just(cart1));
-        when(productClient.getProductByProductId("9a29fff7-564a-4cc9-8fe1-36f6ca9bc223"))
-                .thenReturn(Mono.just(product1));
-        when(productClient.getProductByProductId("d819e4f4-25af-4d33-91e9-2c45f0071606"))
-                .thenReturn(Mono.just(product2));
-        when(productClient.getProductByProductId("132d3c5e-dcaa-4a4f-a35e-b8acc37c51c1"))
-                .thenReturn(Mono.just(product3));
+        when(cartRepository.findCartByCartId(cart1.getCartId())).thenReturn(Mono.just(cart1));
+        when(productClient.getProductByProductId("9a29fff7-564a-4cc9-8fe1-36f6ca9bc223")).thenReturn(Mono.just(product1));
+        when(productClient.getProductByProductId("d819e4f4-25af-4d33-91e9-2c45f0071606")).thenReturn(Mono.just(product2));
+        when(productClient.getProductByProductId("132d3c5e-dcaa-4a4f-a35e-b8acc37c51c1")).thenReturn(Mono.just(product3));
+        when(cartRepository.save(any(Cart.class))).thenReturn(Mono.just(updatedCart));
 
-        when(cartRepository.save(any(Cart.class)))
-                .thenReturn(Mono.just(updatedCart));
-
-        Mono<CartResponseModel> result = cartService
-                .updateCartByCartId(Mono.just(cartRequestModel), cart1.getCartId());
-        StepVerifier
-                .create(result)
+        Mono<CartResponseModel> result = cartService.updateCartByCartId(Mono.just(cartRequestModel), cart1.getCartId());
+        StepVerifier.create(result)
                 .assertNext(cartResponseModel -> {
                     assertNotNull(cartResponseModel);
                     assertNotNull(cartResponseModel.getCartId());
@@ -117,7 +105,7 @@ class CartServiceUnitTest {
     }
 
     @Test
-    void whenUpdateCartById_withNonExistentCartId_thenThrowNotFoundException(){
+    void whenUpdateCartById_withNonExistentCartId_thenThrowNotFoundException() {
         when(cartRepository.findCartByCartId(nonExistentCartId)).thenReturn(Mono.empty());
         Cart updatedCart = Cart.builder()
                 .id(cart1.getId())
@@ -129,26 +117,21 @@ class CartServiceUnitTest {
         CartRequestModel cartRequestModel = new CartRequestModel();
         BeanUtils.copyProperties(updatedCart, cartRequestModel);
 
-
         Mono<CartResponseModel> result = cartService.updateCartByCartId(Mono.just(cartRequestModel), nonExistentCartId);
-        StepVerifier
-                .create(result)
+        StepVerifier.create(result)
                 .expectErrorMatches(throwable -> throwable instanceof NotFoundException
-                    && throwable.getMessage().equals("Cart id was not found: " + nonExistentCartId))
+                        && throwable.getMessage().equals("Cart id was not found: " + nonExistentCartId))
                 .verify();
     }
 
     @Test
     public void whenGetCartById_thenReturnCartResponseModel() {
-        //arrange
         when(cartRepository.findCartByCartId(cart1.getCartId())).thenReturn(Mono.just(cart1));
         when(productClient.getProductByProductId("9a29fff7-564a-4cc9-8fe1-36f6ca9bc223")).thenReturn(Mono.just(product1));
         when(productClient.getProductByProductId("d819e4f4-25af-4d33-91e9-2c45f0071606")).thenReturn(Mono.just(product2));
 
-        //act
         Mono<CartResponseModel> result = cartService.getCartByCartId(cart1.getCartId());
 
-        //assert
         StepVerifier.create(result)
                 .expectNextMatches(cartResponseModel -> cartResponseModel.getCartId().equals(cart1.getCartId()))
                 .verifyComplete();
@@ -156,18 +139,82 @@ class CartServiceUnitTest {
 
     @Test
     public void whenGetCartByCartId_withNonExistentCartId_thenThrowNotFoundException() {
-        //arrange
         when(cartRepository.findCartByCartId(nonExistentCartId)).thenReturn(Mono.empty());
 
-        //act
         Mono<CartResponseModel> result = cartService.getCartByCartId(nonExistentCartId);
 
-        //assert
         StepVerifier.create(result)
                 .expectErrorMatches(throwable -> throwable instanceof NotFoundException
                         && throwable.getMessage().equals("Cart id was not found: " + nonExistentCartId))
                 .verify();
     }
+    @Test
+    public void getCartItemCount_Success() {
+        Cart cart = new Cart();
+        cart.setProductIds(Arrays.asList("prod1", "prod2", "prod3"));
+
+        when(cartRepository.findCartByCartId("cart1")).thenReturn(Mono.just(cart));
+
+        StepVerifier.create(cartService.getCartItemCount("cart1"))
+                .expectNext(3) // Expect 3 items in the cart
+                .verifyComplete();
+    }
+
+    @Test
+    public void getCartItemCount_CartNotFound() {
+        when(cartRepository.findCartByCartId("cart1")).thenReturn(Mono.empty());
+
+        StepVerifier.create(cartService.getCartItemCount("cart1"))
+                .expectError(NotFoundException.class) // Expect a NotFoundException
+                .verify();
+    }
 
 
+    @Test
+    public void clearCart_Success() {
+        Cart mockCart = new Cart("1", "cart1", Arrays.asList("prod1", "prod2"), "customer1");
+
+        when(cartRepository.findCartByCartId("cart1")).thenReturn(Mono.just(mockCart));
+
+        ProductResponseModel product1 = new ProductResponseModel("prod1", "Product1", "Desc1", 100.0);
+        ProductResponseModel product2 = new ProductResponseModel("prod2", "Product2", "Desc2", 200.0);
+
+        when(productClient.getProductByProductId("prod1")).thenReturn(Mono.just(product1));
+        when(productClient.getProductByProductId("prod2")).thenReturn(Mono.just(product2));
+
+        when(cartRepository.save(any(Cart.class))).thenReturn(Mono.just(mockCart));
+
+        StepVerifier.create(cartService.clearCart("cart1"))
+                .expectNext(product1)
+                .expectNext(product2)
+                .verifyComplete();
+
+        verify(cartRepository, times(1)).save(mockCart);
+        assertTrue(mockCart.getProductIds().isEmpty());
+    }
+
+    @Test
+    public void clearCart_ReturnsProducts() {
+        Cart cart = Cart.builder()
+                .cartId("cartId1")
+                .productIds(List.of("prod1", "prod2"))
+                .customerId("customerId1")
+                .build();
+
+        ProductResponseModel product1 = new ProductResponseModel("prod1", "Product1", "Description1", 100.0);
+        ProductResponseModel product2 = new ProductResponseModel("prod2", "Product2", "Description2", 200.0);
+
+        when(cartRepository.findCartByCartId("cartId1")).thenReturn(Mono.just(cart));
+        when(cartRepository.save(any(Cart.class))).thenReturn(Mono.just(cart));
+        when(productClient.getProductByProductId("prod1")).thenReturn(Mono.just(product1));
+        when(productClient.getProductByProductId("prod2")).thenReturn(Mono.just(product2));
+
+        StepVerifier.create(cartService.clearCart("cartId1"))
+                .expectNext(product1)
+                .expectNext(product2)
+                .verifyComplete();
+
+        verify(cartRepository, times(1)).save(cart);
+        assertTrue(cart.getProductIds().isEmpty());
+    }
 }

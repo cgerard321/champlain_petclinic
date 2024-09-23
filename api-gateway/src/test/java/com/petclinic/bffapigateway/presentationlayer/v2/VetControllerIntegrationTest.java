@@ -52,6 +52,7 @@ class VetControllerIntegrationTest {
         mockServerConfigVetService = new MockServerConfigVetService();
         mockServerConfigVetService.registerAddVetEndpoint();
         mockServerConfigVetService.registerGetVetsEndpoint();
+        mockServerConfigVetService.registerDeleteVetEndpoint();
         mockServerConfigVetService.registerGetVetsEndpoint_withNoVets();
 
         mockServerConfigAuthService = new MockServerConfigAuthService();
@@ -116,7 +117,7 @@ class VetControllerIntegrationTest {
     void whenAddVet_asAdmin_thenReturnCreatedVetResponseDTO() {
 
         Mono<VetResponseDTO> result = webTestClient.post()
-                .uri(VET_ENDPOINT)
+                .uri("/api/v2/gateway/vets")
                 .cookie("Bearer", jwtTokenForValidAdmin)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Mono.just(newVetRequestDTO), VetRequestDTO.class)
@@ -187,9 +188,19 @@ class VetControllerIntegrationTest {
                 .exchange()
                 .expectStatus().isNotFound();
     }
+    @Test
+    void whenDeleteVet_asAdmin_thenReturnNoContent() {
+        String vetId = UUID.randomUUID().toString();
 
+        mockServerConfigVetService.registerDeleteVetEndpoint();
 
-
-
+        webTestClient.delete()
+                .uri(VET_ENDPOINT + "/" + vetId)
+                .cookie("Bearer", jwtTokenForValidAdmin)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNoContent()
+                .expectBody().isEmpty();
+    }
 
 }

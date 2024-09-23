@@ -114,7 +114,7 @@ public class VetServiceImpl implements VetService {
                 .map(EntityDtoUtil::vetEntityToResponseDTO);
     }
 
-    @Transactional
+
     @Override
     public Mono<VetResponseDTO> getVetByFirstName(String firstName) {
         return vetRepository.findVetByFirstName(firstName)
@@ -129,6 +129,7 @@ public class VetServiceImpl implements VetService {
                 .map(EntityDtoUtil::vetEntityToResponseDTO);
     }
 
+    @Transactional
     @Override
     public Mono<Void> deleteVetByVetId(String vetId) {
         return vetRepository.findVetByVetId(vetId)
