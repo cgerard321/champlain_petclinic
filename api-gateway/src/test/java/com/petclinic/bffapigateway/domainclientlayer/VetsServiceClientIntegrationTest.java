@@ -116,10 +116,10 @@ class VetsServiceClientIntegrationTest {
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setResponseCode(400)
-                .setBody("Something went wrong"));
+                .setBody("Something went wrong with the client"));
 
         final RatingResponseDTO rating = vetsServiceClient.getRatingsByVetId("deb1950c-3c56-45dc-874b-89e352695eb7").onErrorResume(throwable -> {
-            if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
+            if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong with the client")) {
                 return Mono.empty();
             } else {
                 return Mono.error(throwable);
@@ -134,10 +134,10 @@ class VetsServiceClientIntegrationTest {
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setResponseCode(500)
-                .setBody("Something went wrong"));
+                .setBody("Something went wrong with the server"));
 
         final RatingResponseDTO rating = vetsServiceClient.getRatingsByVetId("deb1950c-3c56-45dc-874b-89e352695eb7").onErrorResume(throwable -> {
-            if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
+            if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong with the server")) {
                 return Mono.empty();
             } else {
                 return Mono.error(throwable);
@@ -223,10 +223,10 @@ class VetsServiceClientIntegrationTest {
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setResponseCode(400)
-                .setBody("Something went wrong"));
+                .setBody("Something went wrong with the client"));
 
         final Integer ratingNumber = vetsServiceClient.getNumberOfRatingsByVetId("deb1950c-3c56-45dc-874b-89e352695eb7").onErrorResume(throwable -> {
-            if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
+            if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong with the client")) {
                 return Mono.empty();
             } else {
                 return Mono.error(throwable);
@@ -241,10 +241,10 @@ class VetsServiceClientIntegrationTest {
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setResponseCode(500)
-                .setBody("Something went wrong"));
+                .setBody("Something went wrong with the server"));
 
         final Integer ratingNumber = vetsServiceClient.getNumberOfRatingsByVetId("deb1950c-3c56-45dc-874b-89e352695eb7").onErrorResume(throwable -> {
-            if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
+            if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong with the server")) {
                 return Mono.empty();
             } else {
                 return Mono.error(throwable);
@@ -303,12 +303,12 @@ class VetsServiceClientIntegrationTest {
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setResponseCode(400)
-                .setBody("Something went wrong"));
+                .setBody("Something went wrong with the client"));
 
         final Double averageRating =
                 vetsServiceClient.getAverageRatingByVetId(vetResponseDTO.getVetId())
                         .onErrorResume(throwable -> {
-                            if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
+                            if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong with the client")) {
                                 return Mono.empty();
                             } else {
                                 return Mono.error(throwable);
@@ -323,12 +323,12 @@ class VetsServiceClientIntegrationTest {
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setResponseCode(500)
-                .setBody("Something went wrong"));
+                .setBody("Something went wrong with the server"));
 
         final Double averageRating =
                 vetsServiceClient.getAverageRatingByVetId(vetResponseDTO.getVetId())
                         .onErrorResume(throwable -> {
-                            if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
+                            if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong with the server")) {
                                 return Mono.empty();
                             } else {
                                 return Mono.error(throwable);
@@ -375,12 +375,12 @@ class VetsServiceClientIntegrationTest {
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setResponseCode(400)
-                .setBody("Something went wrong"));
+                .setBody("Something went wrong with the client"));
 
         final String ratingPercentages =
                 vetsServiceClient.getPercentageOfRatingsByVetId("deb1950c-3c56-45dc-874b-89e352695eb7")
                         .onErrorResume(throwable -> {
-                            if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
+                            if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong with the client")) {
                                 return Mono.empty();
                             } else {
                                 return Mono.error(throwable);
@@ -396,12 +396,12 @@ class VetsServiceClientIntegrationTest {
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setResponseCode(500)
-                .setBody("Something went wrong"));
+                .setBody("Something went wrong with the server"));
 
         final String ratingPercentages =
                 vetsServiceClient.getPercentageOfRatingsByVetId("deb1950c-3c56-45dc-874b-89e352695eb7")
                         .onErrorResume(throwable -> {
-                            if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
+                            if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong with the server")) {
                                 return Mono.empty();
                             } else {
                                 return Mono.error(throwable);
@@ -460,11 +460,11 @@ class VetsServiceClientIntegrationTest {
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setResponseCode(400)
-                .setBody("Something went wrong"));
+                .setBody("Something went wrong with the client"));
 
         final Void empty = vetsServiceClient.deleteRating(validVetId, validRatingId)
                 .onErrorResume(throwable -> {
-                    if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
+                    if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong with the client")) {
                         return Mono.empty();
                     } else {
                         return Mono.error(throwable);
@@ -483,11 +483,11 @@ class VetsServiceClientIntegrationTest {
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setResponseCode(500)
-                .setBody("Something went wrong"));
+                .setBody("Something went wrong with the server"));
 
         final Void empty = vetsServiceClient.deleteRating(validVetId, validRatingId)
                 .onErrorResume(throwable -> {
-                    if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
+                    if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong with the server")) {
                         return Mono.empty();
                     } else {
                         return Mono.error(throwable);
@@ -630,11 +630,11 @@ class VetsServiceClientIntegrationTest {
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setResponseCode(400)
-                .setBody("Something went wrong"));
+                .setBody("Something went wrong with the client"));
 
         final RatingResponseDTO rating = vetsServiceClient.addRatingToVet(validVetId, Mono.just(ratingRequestDTO))
                 .onErrorResume(throwable -> {
-                    if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
+                    if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong with the client")) {
                         return Mono.empty();
                     } else {
                         return Mono.error(throwable);
@@ -660,11 +660,11 @@ class VetsServiceClientIntegrationTest {
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setResponseCode(500)
-                .setBody("Something went wrong"));
+                .setBody("Something went wrong with the server"));
 
         final RatingResponseDTO rating = vetsServiceClient.addRatingToVet(validVetId, Mono.just(ratingRequestDTO))
                 .onErrorResume(throwable -> {
-                    if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
+                    if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong with the server")) {
                         return Mono.empty();
                     } else {
                         return Mono.error(throwable);
@@ -816,12 +816,12 @@ class VetsServiceClientIntegrationTest {
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setResponseCode(400)
-                .setBody("Something went wrong"));
+                .setBody("Something went wrong with the client"));
 
         final RatingResponseDTO ratingResponseDTO =
                 vetsServiceClient.updateRatingByVetIdAndByRatingId("deb1950c-3c56-45dc-874b-89e352695eb7","123456", Mono.just(updatedRating))
                         .onErrorResume(throwable -> {
-                            if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
+                            if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong with the client")) {
                                 return Mono.empty();
                             } else {
                                 return Mono.error(throwable);
@@ -844,12 +844,12 @@ class VetsServiceClientIntegrationTest {
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setResponseCode(500)
-                .setBody("Something went wrong"));
+                .setBody("Something went wrong with the server"));
 
         final RatingResponseDTO ratingResponseDTO =
                 vetsServiceClient.updateRatingByVetIdAndByRatingId("deb1950c-3c56-45dc-874b-89e352695eb7","123456", Mono.just(updatedRating))
                         .onErrorResume(throwable -> {
-                            if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
+                            if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong with the server")) {
                                 return Mono.empty();
                             } else {
                                 return Mono.error(throwable);
@@ -926,11 +926,11 @@ class VetsServiceClientIntegrationTest {
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setResponseCode(400)
-                .setBody("Something went wrong"));
+                .setBody("Something went wrong with the client"));
 
         final PhotoResponseDTO photoResponseDTO = vetsServiceClient.getDefaultPhotoByVetId("cf25e779-548b-4788-aefa-6d58621c2feb")
                 .onErrorResume(throwable->{
-                    if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
+                    if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong with the client")) {
                         return Mono.empty();
                     } else {
                         return Mono.error(throwable);
@@ -945,11 +945,11 @@ class VetsServiceClientIntegrationTest {
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setResponseCode(500)
-                .setBody("Something went wrong"));
+                .setBody("Something went wrong with the server"));
 
         final PhotoResponseDTO photoResponseDTO = vetsServiceClient.getDefaultPhotoByVetId("cf25e779-548b-4788-aefa-6d58621c2feb")
                 .onErrorResume(throwable->{
-                    if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
+                    if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong with the server")) {
                         return Mono.empty();
                     } else {
                         return Mono.error(throwable);
@@ -1020,11 +1020,11 @@ class VetsServiceClientIntegrationTest {
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setResponseCode(400)
-                .setBody("Something went wrong"));
+                .setBody("Something went wrong with the client"));
 
         final Resource photo = vetsServiceClient.updatePhotoOfVet("deb1950c-3c56-45dc-874b-89e352695eb7", "image/jpeg", photoResource)
                         .onErrorResume(throwable -> {
-                            if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
+                            if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong with the client")) {
                                 return Mono.empty();
                             } else {
                                 return Mono.error(throwable);
@@ -1043,11 +1043,11 @@ class VetsServiceClientIntegrationTest {
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setResponseCode(500)
-                .setBody("Something went wrong"));
+                .setBody("Something went wrong with the server"));
 
         final Resource photo = vetsServiceClient.updatePhotoOfVet("deb1950c-3c56-45dc-874b-89e352695eb7", "image/jpeg", photoResource)
                         .onErrorResume(throwable -> {
-                            if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
+                            if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong with the server")) {
                                 return Mono.empty();
                             } else {
                                 return Mono.error(throwable);
@@ -1113,11 +1113,11 @@ class VetsServiceClientIntegrationTest {
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setResponseCode(400)
-                .setBody("Something went wrong"));
+                .setBody("Something went wrong with the client"));
 
         final BadgeResponseDTO badgeResponseDTO = vetsServiceClient.getBadgeByVetId("cf25e779-548b-4788-aefa-6d58621c2feb")
                 .onErrorResume(throwable->{
-                    if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
+                    if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong with the client")) {
                         return Mono.empty();
                     } else {
                         return Mono.error(throwable);
@@ -1133,11 +1133,11 @@ class VetsServiceClientIntegrationTest {
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setResponseCode(500)
-                .setBody("Something went wrong"));
+                .setBody("Something went wrong with the server"));
 
         final BadgeResponseDTO badgeResponseDTO = vetsServiceClient.getBadgeByVetId("cf25e779-548b-4788-aefa-6d58621c2feb")
                 .onErrorResume(throwable->{
-                    if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
+                    if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong with the server")) {
                         return Mono.empty();
                     } else {
                         return Mono.error(throwable);
@@ -1182,11 +1182,11 @@ class VetsServiceClientIntegrationTest {
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setResponseCode(500)
-                .setBody("Something went wrong"));
+                .setBody("Something went wrong with the server"));
 
         final VetResponseDTO vet = vetsServiceClient.getVets()
                 .onErrorResume(throwable -> {
-                    if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
+                    if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong with the server")) {
                         return Mono.empty();
                     } else {
                         return Mono.error(throwable);
@@ -1231,11 +1231,11 @@ class VetsServiceClientIntegrationTest {
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setResponseCode(500)
-                .setBody("Something went wrong"));
+                .setBody("Something went wrong with the server"));
 
         final VetResponseDTO vet = vetsServiceClient.getActiveVets()
                 .onErrorResume(throwable -> {
-                    if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
+                    if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong with the server")) {
                         return Mono.empty();
                     } else {
                         return Mono.error(throwable);
@@ -1280,11 +1280,11 @@ class VetsServiceClientIntegrationTest {
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setResponseCode(500)
-                .setBody("Something went wrong"));
+                .setBody("Something went wrong with the server"));
 
         final VetResponseDTO vet = vetsServiceClient.getInactiveVets()
                 .onErrorResume(throwable -> {
-                    if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
+                    if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong with the server")) {
                         return Mono.empty();
                     } else {
                         return Mono.error(throwable);
@@ -1351,11 +1351,11 @@ class VetsServiceClientIntegrationTest {
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setResponseCode(400)
-                .setBody("Something went wrong"));
+                .setBody("Something went wrong with the client"));
 
         final VetResponseDTO vet = vetsServiceClient.getVetByVetId("deb1950c-3c56-45dc-874b-89e352695eb7")
                 .onErrorResume(throwable -> {
-                    if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
+                    if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong with the client")) {
                         return Mono.empty();
                     } else {
                         return Mono.error(throwable);
@@ -1371,11 +1371,11 @@ class VetsServiceClientIntegrationTest {
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setResponseCode(500)
-                .setBody("Something went wrong"));
+                .setBody("Something went wrong with the server"));
 
         final VetResponseDTO vet = vetsServiceClient.getVetByVetId("deb1950c-3c56-45dc-874b-89e352695eb7")
                 .onErrorResume(throwable -> {
-                    if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
+                    if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong with the server")) {
                         return Mono.empty();
                     } else {
                         return Mono.error(throwable);
@@ -1414,11 +1414,11 @@ class VetsServiceClientIntegrationTest {
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setResponseCode(500)
-                .setBody("Something went wrong"));
+                .setBody("Something went wrong with the server"));
 
         final VetResponseDTO vet = vetsServiceClient.createVet(Mono.just(vetRequestDTO))
                 .onErrorResume(throwable -> {
-                    if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
+                    if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong with the server")) {
                         return Mono.empty();
                     } else {
                         return Mono.error(throwable);
@@ -1479,11 +1479,11 @@ class VetsServiceClientIntegrationTest {
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setResponseCode(400)
-                .setBody("Something went wrong"));
+                .setBody("Something went wrong with the client"));
 
         final VetResponseDTO vet = vetsServiceClient.updateVet("deb1950c-3c56-45dc-874b-89e352695eb7", Mono.just(vetRequestDTO))
                 .onErrorResume(throwable -> {
-                    if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
+                    if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong with the client")) {
                         return Mono.empty();
                     } else {
                         return Mono.error(throwable);
@@ -1499,11 +1499,11 @@ class VetsServiceClientIntegrationTest {
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setResponseCode(500)
-                .setBody("Something went wrong"));
+                .setBody("Something went wrong with the server"));
 
         final VetResponseDTO vet = vetsServiceClient.updateVet("deb1950c-3c56-45dc-874b-89e352695eb7", Mono.just(vetRequestDTO))
                 .onErrorResume(throwable -> {
-                    if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
+                    if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong with the server")) {
                         return Mono.empty();
                     } else {
                         return Mono.error(throwable);
@@ -1561,11 +1561,11 @@ class VetsServiceClientIntegrationTest {
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setResponseCode(400)
-                .setBody("Something went wrong"));
+                .setBody("Something went wrong with the client"));
 
         final Void empty = vetsServiceClient.deleteVet(vetResponseDTO.getVetId())
                 .onErrorResume(throwable -> {
-                    if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
+                    if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong with the client")) {
                         return Mono.empty();
                     } else {
                         return Mono.error(throwable);
@@ -1581,11 +1581,11 @@ class VetsServiceClientIntegrationTest {
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setResponseCode(500)
-                .setBody("Something went wrong"));
+                .setBody("Something went wrong with the server"));
 
         final Void empty = vetsServiceClient.deleteVet(vetResponseDTO.getVetId())
                 .onErrorResume(throwable -> {
-                    if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
+                    if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong with the server")) {
                         return Mono.empty();
                     } else {
                         return Mono.error(throwable);
@@ -1701,11 +1701,11 @@ class VetsServiceClientIntegrationTest {
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setResponseCode(400)
-                .setBody("Something went wrong"));
+                .setBody("Something went wrong with the client"));
 
         final EducationResponseDTO educationResponseDTO = vetsServiceClient.addEducationToAVet(validVetId, Mono.just(newEducation))
                 .onErrorResume(throwable -> {
-                    if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
+                    if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong with the client")) {
                         return Mono.empty();
                     } else {
                         return Mono.error(throwable);
@@ -1732,11 +1732,11 @@ class VetsServiceClientIntegrationTest {
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setResponseCode(500)
-                .setBody("Something went wrong"));
+                .setBody("Something went wrong with the server"));
 
         final EducationResponseDTO educationResponseDTO = vetsServiceClient.addEducationToAVet(validVetId, Mono.just(newEducation))
                 .onErrorResume(throwable -> {
-                    if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
+                    if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong with the server")) {
                         return Mono.empty();
                     } else {
                         return Mono.error(throwable);
@@ -1832,11 +1832,11 @@ class VetsServiceClientIntegrationTest {
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setResponseCode(400)
-                .setBody("Something went wrong"));
+                .setBody("Something went wrong with the client"));
 
         final EducationResponseDTO educationResponseDTO = vetsServiceClient.updateEducationByVetIdAndByEducationId(validVetId, validEducationId, Mono.just(updatedEducation))
                 .onErrorResume(throwable -> {
-                    if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
+                    if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong with the client")) {
                         return Mono.empty();
                     } else {
                         return Mono.error(throwable);
@@ -1864,11 +1864,11 @@ class VetsServiceClientIntegrationTest {
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setResponseCode(500)
-                .setBody("Something went wrong"));
+                .setBody("Something went wrong with the server"));
 
         final EducationResponseDTO educationResponseDTO = vetsServiceClient.updateEducationByVetIdAndByEducationId(validVetId, validEducationId, Mono.just(updatedEducation))
                 .onErrorResume(throwable -> {
-                    if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
+                    if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong with the server")) {
                         return Mono.empty();
                     } else {
                         return Mono.error(throwable);

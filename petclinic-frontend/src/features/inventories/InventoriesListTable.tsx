@@ -9,6 +9,7 @@ import './InventoriesListTable.css';
 import deleteInventory from '@/features/inventories/api/deleteInventory.ts';
 import AddInventoryType from '@/features/inventories/AddInventoryType.tsx';
 import { ProductModel } from '@/features/inventories/models/ProductModels/ProductModel.ts';
+import AddSupplyForm from '@/features/inventories/AddSupplyForm.tsx';
 
 //TODO: create add inventory form component and change the component being shown on the inventories page on the onClick event of the add inventory button
 export default function InventoriesListTable(): JSX.Element {
@@ -23,10 +24,15 @@ export default function InventoriesListTable(): JSX.Element {
   const [inventoryDescription, setInventoryDescription] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [showAddTypeForm, setShowAddTypeForm] = useState(false); // Add state to control the form visibility
+  const [showAddSupplyModal, setShowAddSupplyModal] = useState(false);
   const navigate = useNavigate();
   const [lowStockProductsByInventory, setLowStockProductsByInventory] =
     useState<{ [inventoryName: string]: ProductModel[] }>({});
   const [showLowStock, setShowLowStock] = useState(false);
+
+  const toggleAddSupplyModal = (): void => {
+    setShowAddSupplyModal(prev => !prev);
+  };
 
   const {
     inventoryList,
@@ -59,7 +65,6 @@ export default function InventoriesListTable(): JSX.Element {
   const pageBefore = (): void => {
     setCurrentPage(prevPage => Math.max(prevPage - 1, 0));
   };
-
   const pageAfter = (): void => {
     setCurrentPage(prevPage => prevPage + 1);
   };
@@ -125,6 +130,10 @@ export default function InventoriesListTable(): JSX.Element {
 
   const refreshInventoryTypes = async (): Promise<void> => {
     await fetchAllInventoryTypes();
+  };
+
+  const handleAddSupplySubmit = (): void => {
+    setShowAddSupplyModal(false);
   };
 
   const handleInventorySelection = (
@@ -469,6 +478,15 @@ export default function InventoriesListTable(): JSX.Element {
             </button>
           </div>
         </>
+      )}
+      <button className="btn btn-primary" onClick={toggleAddSupplyModal}>
+        Add Supply
+      </button>
+      {showAddSupplyModal && (
+        <AddSupplyForm
+          onClose={toggleAddSupplyModal}
+          onSubmit={handleAddSupplySubmit}
+        />
       )}
     </div>
   );

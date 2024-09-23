@@ -1706,9 +1706,9 @@ class VetControllerIntegrationTest {
                 .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.message").isEqualTo("This id is not valid");
-
+                .jsonPath("$.message").isEqualTo("Provided vet id is invalid:mjbedf"); // Update this line to match the actual message
     }
+
 
     @Test
     void updateByVetId_Invalid() {

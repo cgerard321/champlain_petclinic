@@ -1,13 +1,16 @@
 package com.petclinic.inventoryservice.businesslayer;
 
+import com.petclinic.inventoryservice.datalayer.Inventory.InventoryNameRepository;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryRepository;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryTypeRepository;
 import com.petclinic.inventoryservice.datalayer.Product.Product;
 import com.petclinic.inventoryservice.datalayer.Product.ProductRepository;
-import com.petclinic.inventoryservice.datalayer.Product.Status;
+import com.petclinic.inventoryservice.datalayer.Supply.Status;
+import com.petclinic.inventoryservice.datalayer.Supply.Supply;
 import com.petclinic.inventoryservice.presentationlayer.*;
 import com.petclinic.inventoryservice.utils.EntityDTOUtil;
 import com.petclinic.inventoryservice.utils.exceptions.InvalidInputException;
+import com.petclinic.inventoryservice.utils.exceptions.InventoryNotFoundException;
 import com.petclinic.inventoryservice.utils.exceptions.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,9 +19,12 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
+import java.util.UUID;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
-import org.springframework.data.domain.Pageable;
+import static com.petclinic.inventoryservice.utils.EntityDTOUtil.toSupplyEntity;
 
 
 @Service
@@ -28,6 +34,7 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
     private final InventoryRepository inventoryRepository;
     private final ProductRepository productRepository;
     private final InventoryTypeRepository inventoryTypeRepository;
+    private final InventoryNameRepository inventoryNameRepository;
 
     @Override
     public Mono<ProductResponseDTO> addProductToInventory(Mono<ProductRequestDTO> productRequestDTOMono, String inventoryId) {
@@ -409,12 +416,34 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                 .switchIfEmpty(Mono.error(new NotFoundException("Inventory id:" + inventoryId + "and product:" + productId + "are not found")));
     }
 
-    @Override
-    public Flux<ProductResponseDTO> getLowStockProducts(String inventoryId, int stockThreshold) {
-        return productRepository
-                .findAllByInventoryIdAndProductQuantityLessThan(inventoryId, stockThreshold)
-                .map(EntityDTOUtil::toProductResponseDTO)
-                .switchIfEmpty(Mono.error(new NotFoundException("No products below threshold in inventory: " + inventoryId)));
+    public Mono<InventoryResponseDTO> addSupplyToInventoryByInventoryName(String inventoryName, Mono<SupplyRequestDTO> supplyRequestDTOMono) {
+        return supplyRequestDTOMono
+                .flatMap(supplyRequestDTO ->
+                        inventoryRepository.findByInventoryName(inventoryName)
+                                .switchIfEmpty(Mono.error(new InventoryNotFoundException("No inventory found for name: " + inventoryName)))
+                                .flatMap(inventory -> {
+                                    Supply supply = toSupplyEntity(supplyRequestDTO);
+                                    supply.setSupplyId(UUID.randomUUID().toString());
+                                    supply.setInventoryId(inventory.getInventoryId());
+
+                                    inventory.addSupply(supply);
+                                    return inventoryRepository.save(inventory);
+                                })
+                                .map(updatedInventory -> {
+
+                                    List<SupplyResponseDTO> supplyResponseDTOs = updatedInventory.getSupplies().stream()
+                                            .map(EntityDTOUtil::toSupplyResponseDTO)
+                                            .collect(Collectors.toList());
+
+                                    return new InventoryResponseDTO(
+                                            updatedInventory.getInventoryId(),
+                                            updatedInventory.getInventoryName(),
+                                            updatedInventory.getInventoryType(),
+                                            updatedInventory.getInventoryDescription(),
+                                            supplyResponseDTOs
+                                    );
+                                })
+                );
     }
 
     //delete all products and delete all inventory
@@ -449,6 +478,26 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                 .map(EntityDTOUtil::toInventoryTypeResponseDTO);
     }
 
+    @Override
+    public Flux<InventoryNameResponseDTO> getAllInventoryNames() {
+        return inventoryNameRepository.findAll()
+                .map(EntityDTOUtil::toInventoryNameResponseDTO);
+    }
+
+    @Override
+    public Flux<SupplyResponseDTO> getSuppliesByInventoryName(String inventoryName) {
+        return inventoryRepository.findByInventoryName(inventoryName)
+                .flatMapMany(inventory -> Flux.fromIterable(inventory.getSupplies()))
+                .map(EntityDTOUtil::toSupplyResponseDTO);
+    }
+  
+  @Override
+    public Flux<ProductResponseDTO> getLowStockProducts(String inventoryId, int stockThreshold) {
+        return productRepository
+                .findAllByInventoryIdAndProductQuantityLessThan(inventoryId, stockThreshold)
+                .map(EntityDTOUtil::toProductResponseDTO)
+                .switchIfEmpty(Mono.error(new NotFoundException("No products below threshold in inventory: " + inventoryId)));
+    }
 
 }
 
