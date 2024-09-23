@@ -99,8 +99,11 @@ public class VetServiceImpl implements VetService {
     public Mono<VetResponseDTO> getVetByVetId(String vetId) {
         return vetRepository.findVetByVetId(vetId)
                 .switchIfEmpty(Mono.error(new NotFoundException("No vet with this vetId was found: " + vetId)))
-                .map(EntityDtoUtil::vetEntityToResponseDTO);
+                .doOnNext(i -> log.debug("The vet entity is: " + i.toString()))
+                .map(EntityDtoUtil::vetEntityToResponseDTO)
+                .log();
     }
+
 
     @Override
     public Flux<VetResponseDTO> getVetByIsActive(boolean isActive) {
@@ -114,7 +117,7 @@ public class VetServiceImpl implements VetService {
                 .map(EntityDtoUtil::vetEntityToResponseDTO);
     }
 
-    @Transactional
+
     @Override
     public Mono<VetResponseDTO> getVetByFirstName(String firstName) {
         return vetRepository.findVetByFirstName(firstName)
@@ -129,6 +132,7 @@ public class VetServiceImpl implements VetService {
                 .map(EntityDtoUtil::vetEntityToResponseDTO);
     }
 
+    @Transactional
     @Override
     public Mono<Void> deleteVetByVetId(String vetId) {
         return vetRepository.findVetByVetId(vetId)

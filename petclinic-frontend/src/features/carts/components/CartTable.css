@@ -1,0 +1,28 @@
+.cart-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 18px;
+    text-align: left;
+}
+
+.cart-table th, .cart-table td {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+}
+
+.cart-table tbody tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+.view-button {
+    background-color: green;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+.view-button:hover {
+    background-color: darkgreen;
+}
