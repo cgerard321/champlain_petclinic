@@ -11,6 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @RestController
 @RequiredArgsConstructor
@@ -33,6 +34,13 @@ public class BillController {
     public Flux<BillResponseDTO> getAllBills()
     {
         return billService.getAllBilling();
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping(value = "/admin/{billId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<BillResponseDTO> getBillById(@PathVariable String billId)
+    {
+        return billService.getBilling(billId);
     }
 
 }
