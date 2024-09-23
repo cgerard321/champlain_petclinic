@@ -44,8 +44,6 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-
-
     public Flux<CartResponseModel> getAllCarts() {
         return cartRepository.findAll()
                 .flatMap(cart -> {

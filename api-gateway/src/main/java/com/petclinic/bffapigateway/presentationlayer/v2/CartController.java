@@ -47,4 +47,12 @@ public class CartController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
+    @DeleteMapping("/{cartId}/clear")
+    public Mono<ResponseEntity<String>> clearCart(@PathVariable String cartId) {
+        return cartServiceClient.clearCart(cartId)
+                .thenReturn(ResponseEntity.ok("Cart successfully cleared"))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
 }
+
+
