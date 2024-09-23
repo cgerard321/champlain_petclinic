@@ -30,6 +30,9 @@ app:
   emailing-service:
     host: localhost
     port: 5115
+  cart-service:
+    host: localhost
+    port: 7008
 
 logging:
   level:
@@ -77,6 +80,9 @@ app:
     host: emailing-service
     port: 5115
 
+  cart-service:
+    host: cart-service
+    port: 8080
 
 logging:
   level:

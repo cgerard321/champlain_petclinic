@@ -69,8 +69,13 @@ export function NavBar(): JSX.Element {
                     )}
                   </NavDropdown>
                 )}
-                {!IsInventoryManager() && (
+                {!IsAdmin() && (
                   <Nav.Link as={Link} to={AppRoutePaths.CustomerBills}>
+                    Bills
+                  </Nav.Link>
+                )}
+                {IsAdmin() && (
+                  <Nav.Link as={Link} to={AppRoutePaths.AdminBills}>
                     Bills
                   </Nav.Link>
                 )}
@@ -94,6 +99,12 @@ export function NavBar(): JSX.Element {
                     Products
                   </Nav.Link>
                 }
+
+                {IsAdmin() && (
+                  <Nav.Link as={Link} to={AppRoutePaths.Carts}>
+                    Carts
+                  </Nav.Link>
+                )}
               </>
             )}
           </Nav>
