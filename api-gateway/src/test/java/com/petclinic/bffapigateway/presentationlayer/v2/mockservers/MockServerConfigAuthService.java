@@ -23,12 +23,14 @@ public class MockServerConfigAuthService {
 
     public static final String jwtTokenForValidVet = "valid-test-token-for-valid-vet";
 
+    public static final String jwtTokenForInvalidVetId = "valid-test-token-for-invalid-vet-id";
+
 
     public MockServerConfigAuthService() {
         this.clientAndServer = ClientAndServer.startClientAndServer(AUTH_SERVICE_SERVER_PORT);
     }
 
-    public void registerValidateTokenForVetEndpoint(){
+    public void registerValidateTokenForVetEndpoint() {
         mockServerClient_AuthService
                 .when(
                         request()
@@ -41,8 +43,9 @@ public class MockServerConfigAuthService {
                                 .withStatusCode(200)
                                 .withBody(json("{\"token\":\"valid-test-token\",\"userId\":\"cb6701ef-22cf-465c-be59-b1ef71cd4f2e\",\"roles\":[\"VET\"]}"))
                 );
-    }
 
+
+    }
     public void registerValidateTokenForOwnerEndpoint() {
         mockServerClient_AuthService
                 .when(
