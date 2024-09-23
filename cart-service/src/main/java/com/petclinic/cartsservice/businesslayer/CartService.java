@@ -15,6 +15,7 @@ public interface CartService {
     Mono<Integer> getCartItemCount(String cartId);
     // Combining both features: clearCart and updateCartByCartId
     Flux<ProductResponseModel> clearCart(String cartId);  // From feat/CART-CPC-1144_clear_cart_feature
+    Mono<CartResponseModel> deleteCartByCartId(String cartId);
 
 
 }
