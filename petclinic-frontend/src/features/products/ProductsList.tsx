@@ -6,6 +6,7 @@ import Product from './components/Product';
 import AddProduct from './components/AddProduct';
 import { addProduct } from '@/features/products/api/addProduct';
 import { useUser } from '@/context/UserContext';
+import './components/Sidebar.css';
 
 export default function ProductList(): JSX.Element {
   const [productList, setProductList] = useState<ProductModel[]>([]);
@@ -128,7 +129,7 @@ export default function ProductList(): JSX.Element {
               Min Price:
               <input
                   type="number"
-                  value={minPrice ?? ''}
+                  value={minPrice ?? typeof 'number'}
                   onChange={e =>
                       setMinPrice(
                           e.target.value ? parseFloat(e.target.value) : undefined
@@ -142,7 +143,7 @@ export default function ProductList(): JSX.Element {
               Max Price:
               <input
                   type="number"
-                  value={maxPrice ?? ''}
+                  value={maxPrice ?? typeof 'number'}
                   onChange={e =>
                       setMaxPrice(
                           e.target.value ? parseFloat(e.target.value) : undefined
