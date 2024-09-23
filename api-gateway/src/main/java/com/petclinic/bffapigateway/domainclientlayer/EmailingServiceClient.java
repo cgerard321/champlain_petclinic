@@ -39,14 +39,17 @@ public class EmailingServiceClient {
     public Mono<String> addHtmlTemplate(String templateName, String htmlContent) {
         return webClientBuilder.build().post()
                 .uri(emailingServiceUrl + "/templates/add/" + templateName)
-                .bodyValue(htmlContent) // Send HTML content in the body
+                .contentType(MediaType.TEXT_HTML)  // Set Content-Type header to text/html
+                .bodyValue(htmlContent)
                 .retrieve()
                 .bodyToMono(String.class)
                 .switchIfEmpty(Mono.error(new RuntimeException("No response from service")));
     }
+
     public Mono<String> sendEmail(DirectEmailModelRequestDTO directEmailModelRequestDTO) {
         return webClientBuilder.build().post()
                 .uri(emailingServiceUrl + "/send")
+                .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(directEmailModelRequestDTO) // Send HTML content in the body
                 .retrieve()
                 .bodyToMono(String.class)

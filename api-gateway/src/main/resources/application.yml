@@ -75,7 +75,7 @@ app:
     port: 8080
   emailing-service:
     host: emailing-service
-    port: 8080
+    port: 5115
 
 
 logging:

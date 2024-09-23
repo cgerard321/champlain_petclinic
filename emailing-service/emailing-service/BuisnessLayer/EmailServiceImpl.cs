@@ -10,7 +10,7 @@ namespace emailing_service.BuisnessLayer;
 
 public class EmailServiceImpl : IEmailService
 {
-    private IDatabaseHelper _databaseHelper;
+    private IDatabaseHelper _databaseHelper = new DatabaseHelper();
     
     
     

@@ -4,6 +4,7 @@ package com.petclinic.bffapigateway.presentationlayer.v2;
 import com.petclinic.bffapigateway.domainclientlayer.BillServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.EmailingServiceClient;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
+import com.petclinic.bffapigateway.dtos.Emailing.DirectEmailModelRequestDTO;
 import com.petclinic.bffapigateway.dtos.Emailing.EmailModelResponseDTO;
 import com.petclinic.bffapigateway.utils.Security.Annotations.IsUserSpecific;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
@@ -27,20 +28,29 @@ public class EmailingController {
     private final EmailingServiceClient emailingService;
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @GetMapping(value = "", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(value = "", produces= MediaType.APPLICATION_JSON_VALUE)
     public Flux<EmailModelResponseDTO> getAllEmails() {
         return emailingService.getAllEmails();
     }
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @PostMapping(value = "/template/{templateName}", produces= MediaType.TEXT_HTML_VALUE)
+
+    @PostMapping(
+        value = "/template/{templateName}",
+        consumes= MediaType.TEXT_HTML_VALUE,
+        produces= MediaType.APPLICATION_JSON_VALUE
+    )
     public Mono<String> sendTemplate(@PathVariable String templateName, @RequestBody String body) {
         return emailingService.addHtmlTemplate(templateName, body);
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @PostMapping(value = "/send", produces= MediaType.TEXT_HTML_VALUE)
-    public Mono<String> sendEmail(@PathVariable String templateName, @RequestBody String body) {
-        return emailingService.addHtmlTemplate(templateName, body);
+    @PostMapping(
+        value = "/send",
+        produces = MediaType.APPLICATION_JSON_VALUE,
+        consumes= MediaType.APPLICATION_JSON_VALUE
+    )
+    public Mono<String> sendEmail(@RequestBody DirectEmailModelRequestDTO body) {
+        return emailingService.sendEmail(body);
     }
 
 
