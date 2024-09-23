@@ -8,10 +8,6 @@ interface CartResponseDTO {
   cartId: string;
   customerId: string;
   products: ProductModel[];
-  subtotal: string;
-  tvq: string;
-  tvc: string;
-  total: string;
 }
 
 const UserCart = (): JSX.Element => {
@@ -20,10 +16,6 @@ const UserCart = (): JSX.Element => {
   const [fixedPrice, setFixedPrice] = useState<number[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true); // Loading state
-  const [subtotal, setSubtotal] = useState<number>(0);
-  const [tvq, setTvq] = useState<number>(0);
-  const [tvc, setTvc] = useState<number>(0);
-  const [total, setTotal] = useState<number>(0);
 
   useEffect((): void => {
     const fetchCartItems = async (): Promise<void> => {
@@ -51,17 +43,6 @@ const UserCart = (): JSX.Element => {
         setCartItems(products);
         const initialPrices = products.map(item => item.productSalePrice);
         setFixedPrice(initialPrices);
-
-        const calculatedSubtotal = products.reduce(
-          (acc, item) => acc + item.productSalePrice * (item.quantity || 1),
-          0
-        );
-        setSubtotal(calculatedSubtotal);
-        const tvqValue = calculatedSubtotal * 0.09975; // 9.975%
-        const tvcValue = calculatedSubtotal * 0.05; // 5%
-        setTvq(tvqValue);
-        setTvc(tvcValue);
-        setTotal(calculatedSubtotal + tvqValue + tvcValue);
       } catch (err: unknown) {
         if (err instanceof Error) {
           console.error('Error fetching cart items:', err.message);
@@ -92,17 +73,6 @@ const UserCart = (): JSX.Element => {
     newItems[index].quantity = newQuantity;
     newItems[index].productSalePrice = fixedPrice[index] * newQuantity;
     setCartItems(newItems);
-
-    const newSubtotal = newItems.reduce(
-      (acc, item) => acc + item.productSalePrice * (item.quantity || 1),
-      0
-    );
-    setSubtotal(newSubtotal);
-    const newTvq = newSubtotal * 0.09975;
-    const newTvc = newSubtotal * 0.05;
-    setTvq(newTvq);
-    setTvc(newTvc);
-    setTotal(newSubtotal + newTvq + newTvc);
   };
 
   const deleteItem = (indexToDelete: number): void => {
@@ -110,17 +80,6 @@ const UserCart = (): JSX.Element => {
       (_item, index) => index !== indexToDelete
     );
     setCartItems(newItems);
-
-    const newSubtotal = newItems.reduce(
-      (acc, item) => acc + item.productSalePrice * (item.quantity || 1),
-      0
-    );
-    setSubtotal(newSubtotal);
-    const newTvq = newSubtotal * 0.09975;
-    const newTvc = newSubtotal * 0.05;
-    setTvq(newTvq);
-    setTvc(newTvc);
-    setTotal(newSubtotal + newTvq + newTvc);
   };
 
   const clearCart = async (): Promise<void> => {
@@ -138,10 +97,6 @@ const UserCart = (): JSX.Element => {
 
       if (response.ok) {
         setCartItems([]); // Clear the items from the frontend after success
-        setSubtotal(0);
-        setTvq(0);
-        setTvc(0);
-        setTotal(0);
         alert('Cart has been successfully cleared!');
       } else {
         alert('Failed to clear cart');
@@ -179,12 +134,6 @@ const UserCart = (): JSX.Element => {
         ) : (
           <p>No products in the cart.</p>
         )}
-      </div>
-      <div className="CartSummary">
-        <p>Subtotal: ${subtotal.toFixed(2)}</p>
-        <p>TVQ (9.975%): ${tvq.toFixed(2)}</p>
-        <p>TVC (5%): ${tvc.toFixed(2)}</p>
-        <p>Total: ${total.toFixed(2)}</p>
       </div>
     </div>
   );
