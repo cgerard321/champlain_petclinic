@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
-import { Bill } from '@/features/bills/models/Bill.ts';
-import { useUser } from '@/context/UserContext';
+import {useEffect, useState} from 'react';
+import {Bill} from '@/features/bills/models/Bill.ts';
+import {useUser} from '@/context/UserContext';
 
 export default function CustomerBillsHistory(): JSX.Element {
-    const { user } = useUser();
+    const {user} = useUser();
     const [bills, setBills] = useState<Bill[]>([]);
     const [filteredBills, setFilteredBills] = useState<Bill[]>([]); // Filtered bills to display
     const [error, setError] = useState<string | null>(null);
@@ -35,11 +35,11 @@ export default function CustomerBillsHistory(): JSX.Element {
                 const billsArray: Bill[] = [];
 
                 while (!done) {
-                    const { value, done: streamDone } = (await reader?.read()) || {};
+                    const {value, done: streamDone} = (await reader?.read()) || {};
                     done = streamDone || true;
 
                     if (value) {
-                        const chunk = decoder.decode(value, { stream: true });
+                        const chunk = decoder.decode(value, {stream: true});
 
                         const formattedChunks = chunk.trim().split(/\n\n/);
 
@@ -73,7 +73,9 @@ export default function CustomerBillsHistory(): JSX.Element {
             setFilteredBills(bills); // Show all bills if "All" is selected
         } else {
             setFilteredBills(
-                bills.filter(bill => bill.billStatus.toLowerCase() === selectedStatus.toLowerCase())
+                bills.filter(
+                    bill => bill.billStatus.toLowerCase() === selectedStatus.toLowerCase()
+                )
             );
         }
     }, [selectedStatus, bills]);

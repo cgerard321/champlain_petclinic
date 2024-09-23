@@ -15,7 +15,6 @@ app:
     host: localhost
     port: 8888
 
-
 logging:
   level:
     root: INFO
@@ -57,7 +56,6 @@ spring:
       username: root
       password: password
       authentication-database: admin
-
 ---
 spring:
   config:

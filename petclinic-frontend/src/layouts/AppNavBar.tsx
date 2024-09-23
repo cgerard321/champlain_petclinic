@@ -149,4 +149,3 @@ export function NavBar(): JSX.Element {
     </Navbar>
   );
 }
-

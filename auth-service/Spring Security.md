@@ -38,7 +38,7 @@ This that Beans will be created here that Spring might read.
 
 This configures spring security with the beans in this class.
 
-#Official "Add this annotation to an @Configuration class to have the Spring Security configuration defined in any `WebSecurityConfigurer` or more likely by exposing a `SecurityFilterChain` bean." 
+#Official "Add this annotation to an @Configuration class to have the Spring Security configuration defined in any `WebSecurityConfigurer` or more likely by exposing a `SecurityFilterChain` bean."
 
 In other words, you tell spring that this configuration class is for spring security.
 
@@ -238,14 +238,14 @@ Example :
 - /book/20
 - /book/20/author
 
-So, all this urls match text with pattern "/**".
+So, all this urls match text with pattern "/\*\*".
 
 Permitted urls for "**Post**":
 
 - /book
 - /magazine
 
-Urls above match with "/*""
+Urls above match with "/\*""
 
 ### Logout
 
@@ -780,50 +780,73 @@ public void sendEmail(String recipientEmail, String link) throws MessagingExcept
 
 ```html
 <html xmlns:th="<http://www.w3.org/1999/xhtml>">
-<head>
-    <link rel="stylesheet" href="<https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css>" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <head>
+    <link
+      rel="stylesheet"
+      href="<https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css>"
+      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+      crossorigin="anonymous"
+    />
 
     <title>Reset Password</title>
-</head>
-<div>
+  </head>
+  <div>
     <h2 class="text-center">Forgot Password</h2>
-</div>
+  </div>
 
-<div class="text-center" th:if="${error != null}">
+  <div class="text-center" th:if="${error != null}">
     <p class="text-danger">[[${error}]]</p>
-</div>
-<div class="text-center" th:if="${message != null}">
+  </div>
+  <div class="text-center" th:if="${message != null}">
     <p class="text-warning">[[${message}]]</p>
-</div>
-<form th:action="@{/api/v1/users/forgot_password}" method="post" style="max-width: 420px; margin: 0 auto;">
+  </div>
+  <form
+    th:action="@{/api/v1/users/forgot_password}"
+    method="post"
+    style="max-width: 420px; margin: 0 auto;"
+  >
     <div class="border border-secondary rounded p-3">
-        <div>            <p>We will be sending a reset password link to your email.</p>
-        </div>        <div>            <p>                <input type="email" name="email" class="form-control" placeholder="Enter your e-mail" required autofocus/>
-            </p>            <p class="text-center">
-                <input type="submit" value="Send" class="btn btn-primary" />
-            </p>        </div>    </div></form>
+      <div><p>We will be sending a reset password link to your email.</p></div>
+      <div>
+        <p>
+          <input
+            type="email"
+            name="email"
+            class="form-control"
+            placeholder="Enter your e-mail"
+            required
+            autofocus
+          />
+        </p>
+        <p class="text-center">
+          <input type="submit" value="Send" class="btn btn-primary" />
+        </p>
+      </div>
+    </div>
+  </form>
 </html>
-
 ```
 
 ### message.html
 
 ```html
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="<https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css>" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <head>
+    <meta charset="UTF-8" />
+    <link
+      rel="stylesheet"
+      href="<https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css>"
+      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+      crossorigin="anonymous"
+    />
 
     <title>Menard Comics</title>
-</head>
-<body>
-<h1 class="text-center">
-    [[${message}]]
-</h1>
-</body>
+  </head>
+  <body>
+    <h1 class="text-center">[[${message}]]</h1>
+  </body>
 </html>
-
 ```
 
 ### reset_password_form.html
@@ -889,9 +912,9 @@ public void sendEmail(String recipientEmail, String link) throws MessagingExcept
 
 # [Example](https://github.com/DylanBrass/mc_website_backend) of security IN API-Gateway
 
-- *We need to make it work in a different microservice
+- \*We need to make it work in a different microservice
 
-#Note ***Below are the steps I believe might work to accomplish this goal
+#Note \*\*\*Below are the steps I believe might work to accomplish this goal
 
 Create a filter in `api-gateway` that makes a request to the `auth-service`. Make an endpoint for validation in `auth-service`.
 
@@ -921,7 +944,7 @@ Create a filter in `api-gateway` that makes a request to the `auth-service`. Mak
 
 ```
 
-- *The `authValidationService` makes a call to the `auth-service` microservice. This is the code I think might work to do it :
+- \*The `authValidationService` makes a call to the `auth-service` microservice. This is the code I think might work to do it :
 
 ## Make call to auth-service
 
@@ -953,7 +976,7 @@ public class AuthValidationService {
 
 ### The filter in auth-service
 
-- *There is already one, but I think it can be better
+- \*There is already one, but I think it can be better
 
 This code is called when a request is done to the auth-service, this verifies the token.
 
@@ -1337,7 +1360,7 @@ public class SecurityConfig  {
 
 To see what the code commented out refer to my config file.
 
-This requires an update to spring boot 3.*
+This requires an update to spring boot 3.\*
 So this :
 
 ```
@@ -1385,11 +1408,10 @@ The logout is done though the front end only, the backend should handle it as we
 
 ```jsx
 function purgeUser() {
-        localStorage.removeItem("token")
-        localStorage.removeItem("username")
-        localStorage.removeItem("email")
-        }
-
+  localStorage.removeItem("token");
+  localStorage.removeItem("username");
+  localStorage.removeItem("email");
+}
 ```
 
 ### Returning token

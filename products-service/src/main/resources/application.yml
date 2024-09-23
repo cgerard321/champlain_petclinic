@@ -34,7 +34,6 @@ de:
         version: 4.4.0
 
 ---
-
 spring:
   config:
     activate:

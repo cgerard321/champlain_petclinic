@@ -9,141 +9,140 @@ name: Java CI with Gradle
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   api_gateway_test:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up JDK 17
-      uses: actions/setup-java@v4
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-    - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@v3
-    - name: Make gradlew executable
-      run: chmod +x ./gradlew
-      working-directory: ./api-gateway
-    - name: Build with Gradle Wrapper
-      run: ./gradlew clean build
-      working-directory: ./api-gateway
+      - uses: actions/checkout@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: "17"
+          distribution: "temurin"
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+        working-directory: ./api-gateway
+      - name: Build with Gradle Wrapper
+        run: ./gradlew clean build
+        working-directory: ./api-gateway
 
   visits_service_test:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout sources
-      uses: actions/checkout@v4
-    - name: Setup Java
-      uses: actions/setup-java@v4
-      with:
-        distribution: 'temurin'
-        java-version: 17
-    - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@v3
-    - name: Make gradlew executable
-      run: chmod +x ./gradlew
-      working-directory: ./visits-service-new
-    - name: Build with Gradle
-      run: ./gradlew clean build
-      working-directory: ./visits-service-new
+      - name: Checkout sources
+        uses: actions/checkout@v4
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: 17
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+        working-directory: ./visits-service-new
+      - name: Build with Gradle
+        run: ./gradlew clean build
+        working-directory: ./visits-service-new
 
   vet_service_test:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout sources
-      uses: actions/checkout@v4
-    - name: Setup Java
-      uses: actions/setup-java@v4
-      with:
-        distribution: 'temurin'
-        java-version: 17
-    - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@v3
-    - name: Change directory # Built diffrently here because i had weird version issues executing the build the way that the other microservices did it
-      run: cd vet-service
-    - name: Build with Gradle
-      run: ./gradlew clean build
-
+      - name: Checkout sources
+        uses: actions/checkout@v4
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: 17
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+      - name: Change directory # Built diffrently here because i had weird version issues executing the build the way that the other microservices did it
+        run: cd vet-service
+      - name: Build with Gradle
+        run: ./gradlew clean build
 
   customers_service_reactive_test:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout sources
-      uses: actions/checkout@v4
-    - name: Setup Java
-      uses: actions/setup-java@v4
-      with:
-        distribution: 'temurin'
-        java-version: 17
-    - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@v3
-    - name: Make gradlew executable
-      run: chmod +x ./gradlew
-      working-directory: ./customers-service-reactive
-    - name: Build with Gradle
-      run: ./gradlew clean build
-      working-directory: ./customers-service-reactive
+      - name: Checkout sources
+        uses: actions/checkout@v4
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: 17
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+        working-directory: ./customers-service-reactive
+      - name: Build with Gradle
+        run: ./gradlew clean build
+        working-directory: ./customers-service-reactive
 
   billing_service_test:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout sources
-      uses: actions/checkout@v4
-    - name: Setup Java
-      uses: actions/setup-java@v4
-      with:
-        distribution: 'temurin'
-        java-version: 17
-    - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@v3
-    - name: Make gradlew executable
-      run: chmod +x ./gradlew
-      working-directory: ./billing-service
-    - name: Build with Gradle
-      run: ./gradlew clean build
-      working-directory: ./billing-service
+      - name: Checkout sources
+        uses: actions/checkout@v4
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: 17
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+        working-directory: ./billing-service
+      - name: Build with Gradle
+        run: ./gradlew clean build
+        working-directory: ./billing-service
 
   auth_service_test:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout sources
-      uses: actions/checkout@v4
-    - name: Setup Java
-      uses: actions/setup-java@v4
-      with:
-        distribution: 'temurin'
-        java-version: 17
-    - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@v3
-    - name: Make gradlew executable
-      run: chmod +x ./gradlew
-      working-directory: ./auth-service
-    - name: Build with Gradle
-      run: ./gradlew clean build
-      working-directory: ./auth-service
+      - name: Checkout sources
+        uses: actions/checkout@v4
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: 17
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+        working-directory: ./auth-service
+      - name: Build with Gradle
+        run: ./gradlew clean build
+        working-directory: ./auth-service
 
   inventory_service_test:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout sources
-      uses: actions/checkout@v4
-    - name: Setup Java
-      uses: actions/setup-java@v4
-      with:
-        distribution: 'temurin'
-        java-version: 17
-    - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@v3
-    - name: Make gradlew executable
-      run: chmod +x ./gradlew
-      working-directory: ./inventory-service
-    - name: Build with Gradle
-      run: ./gradlew clean build
-      working-directory: ./inventory-service
+      - name: Checkout sources
+        uses: actions/checkout@v4
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: 17
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+        working-directory: ./inventory-service
+      - name: Build with Gradle
+        run: ./gradlew clean build
+        working-directory: ./inventory-service
 
   products_service_test:
     runs-on: ubuntu-latest
@@ -153,7 +152,7 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
+          distribution: "temurin"
           java-version: 17
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
@@ -163,7 +162,6 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew clean build
         working-directory: ./products-service
-
 
   cart_service_test:
     runs-on: ubuntu-latest
@@ -173,7 +171,7 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
+          distribution: "temurin"
           java-version: 17
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
@@ -184,22 +182,20 @@ jobs:
         run: ./gradlew clean build
         working-directory: ./cart-service
 
-    
   dependency-submission:
-
     runs-on: ubuntu-latest
     permissions:
       contents: write
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up JDK 17
-      uses: actions/setup-java@v4
-      with:
-        java-version: '17'
-        distribution: 'temurin'
+      - uses: actions/checkout@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: "17"
+          distribution: "temurin"
 
-    # Generates and submits a dependency graph, enabling Dependabot Alerts for all project dependencies.
-    # See: https://github.com/gradle/actions/blob/main/dependency-submission/README.md
-    - name: Generate and submit dependency graph
-      uses: gradle/actions/setup-gradle@v3
+      # Generates and submits a dependency graph, enabling Dependabot Alerts for all project dependencies.
+      # See: https://github.com/gradle/actions/blob/main/dependency-submission/README.md
+      - name: Generate and submit dependency graph
+        uses: gradle/actions/setup-gradle@v3

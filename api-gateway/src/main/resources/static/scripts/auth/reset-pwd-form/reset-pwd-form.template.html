@@ -1,30 +1,52 @@
-
-
 <div style="display: flex; justify-content: center">
   <h2 class="text-center">Reset Your Password</h2>
 </div>
-<br/>
+<br />
 
 <div style="display: flex; justify-content: center">
-  <form ng-submit="$ctrl.resetPwdForm()" style="max-width: 25em;justify-content: center">
-    
-    <div class="alert alert-danger alert-dismissible text-center" role="alert" ng-repeat="error in errorMessages">
-      <a class="close" data-dismiss="alert" aria-label="close" ng-click="clearErrorMessages()">&times;</a>
+  <form
+    ng-submit="$ctrl.resetPwdForm()"
+    style="max-width: 25em; justify-content: center"
+  >
+    <div
+      class="alert alert-danger alert-dismissible text-center"
+      role="alert"
+      ng-repeat="error in errorMessages"
+    >
+      <a
+        class="close"
+        data-dismiss="alert"
+        aria-label="close"
+        ng-click="clearErrorMessages()"
+        >&times;</a
+      >
       <strong>Error:</strong> {{ error }}
     </div>
 
     <div class="group-form">
       <label for="pwd">New Password</label>
-      <input id="pwd" type="password" class="form-control" ng-model="resetPwdForm.password" name="password" required/>
-      <i id="eye" onclick="viewPwd()" style="margin-left: 180px; margin-top: -700px; cursor: pointer" class="bi bi-eye-slash"></i>
+      <input
+        id="pwd"
+        type="password"
+        class="form-control"
+        ng-model="resetPwdForm.password"
+        name="password"
+        required
+      />
+      <i
+        id="eye"
+        onclick="viewPwd()"
+        style="margin-left: 180px; margin-top: -700px; cursor: pointer"
+        class="bi bi-eye-slash"
+      ></i>
       <div id="password-strength" class="password-strength"></div>
       <script>
         function viewPwd() {
-          const x = document.getElementById("pwd")
-          if (x.getAttribute("type") === "password"){
-            x.setAttribute("type", "text")
+          const x = document.getElementById("pwd");
+          if (x.getAttribute("type") === "password") {
+            x.setAttribute("type", "text");
           } else {
-            x.setAttribute("type", "password")
+            x.setAttribute("type", "password");
           }
         }
       </script>
@@ -32,11 +54,12 @@
     </div>
 
     <div class="group-form d-flex justify-content-center">
-      <button id="button" class="btn btn-default" type="submit">Reset Password</button>
+      <button id="button" class="btn btn-default" type="submit">
+        Reset Password
+      </button>
     </div>
   </form>
 </div>
-
 
 <script>
   const passwordInput = document.getElementById("pwd");
@@ -54,8 +77,8 @@
   }
 
   function calculatePasswordStrength(password) {
-
-    const pattern = /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=*!()_.<>,{}])(?=\S+$).{8,}$/;
+    const pattern =
+      /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=*!()_.<>,{}])(?=\S+$).{8,}$/;
 
     if (pattern.test(password)) {
       return 3;
@@ -81,7 +104,6 @@
 </script>
 
 <style>
-
   label {
     font-weight: bold;
   }

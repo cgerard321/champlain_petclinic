@@ -3,7 +3,7 @@
   color: #f1f1f1;
 }
 .table-filter {
-  background-color: #34302D;
+  background-color: #34302d;
   padding: 9px 12px;
 }
 .xd-container {
@@ -33,7 +33,7 @@
 }
 .splash {
   background: #6db33f;
-  color: #34302D;
+  color: #34302d;
   display: none;
 }
 .error-page {
@@ -78,7 +78,7 @@ table td.action-column {
   color: #f1f1f1;
 }
 .status-help-content-table td {
-  color: #34302D;
+  color: #34302d;
 }
 .myspinner {
   animation-name: spinner;
@@ -108,7 +108,8 @@ table td.action-column {
   }
 }
 
-a.newBtn:hover, button#newBtn:hover{
+a.newBtn:hover,
+button#newBtn:hover {
   text-decoration-color: blue;
   text-decoration: underline;
 }
@@ -139,27 +140,32 @@ p.pet {
   margin-bottom: 0px;
 }
 
-#owner, #petForm>div>label, #ownerForm>div>label {
+#owner,
+#petForm > div > label,
+#ownerForm > div > label {
   color: black;
   font-weight: bold;
 }
 
-#petForm, #ownerForm {
+#petForm,
+#ownerForm {
   text-align: center;
   background-color: white;
   margin: auto;
   font-size: large;
 }
 
-div.pet, div.owner {
+div.pet,
+div.owner {
   margin: auto;
 }
 
-div.pet:not(.marg), div.owner:not(.marg){
+div.pet:not(.marg),
+div.owner:not(.marg) {
   background-color: rgba(0, 0, 0, 0.05);
 }
 
-#owner.table>tbody>tr>td {
+#owner.table > tbody > tr > td {
   border-style: none;
   font-weight: normal;
 }
