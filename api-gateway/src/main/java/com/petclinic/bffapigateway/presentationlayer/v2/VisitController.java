@@ -91,9 +91,15 @@ public class VisitController {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @PutMapping(value = "/{visitId}") public ResponseEntity<Mono<VisitResponseDTO>> updateVisitByVisitId(@PathVariable String visitId,
-            @RequestBody Mono<VisitRequestDTO> visitRequestDTO){
-            return ResponseEntity.ok().body(visitsServiceClient.updateVisitByVisitId(visitId, visitRequestDTO));
-}
+    @PutMapping(value = "/{visitId}")
+    public Mono<ResponseEntity<VisitResponseDTO>> updateVisitByVisitId(
+            @PathVariable String visitId,
+            @RequestBody Mono<VisitRequestDTO> visitRequestDTO) {
+        return visitRequestDTO
+                .flatMap(request -> visitsServiceClient.updateVisitByVisitId(visitId, Mono.just(request))
+                        .map(updatedVisit -> ResponseEntity.ok(updatedVisit))
+                        .defaultIfEmpty(ResponseEntity.notFound().build())); // Return 404 if not found
+    }
+
 
 }
