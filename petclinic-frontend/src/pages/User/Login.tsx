@@ -9,6 +9,10 @@ import doctorAndDoggy from '@/assets/Login/doctor-and-doggy.jpg';
 import doggyAndKitty from '@/assets/Login/doggy-and-kitty.jpg';
 import kitty from '@/assets/Login/kitty.jpg';
 import sadDoggy from '@/assets/Login/sad-doggy.jpg';
+import husky from '@/assets/Login/husky.jpg';
+import parrot from '@/assets/Login/parrot.jpg';
+import greyCat from '@/assets/Login/grey-cat.jpg';
+import toucan from '@/assets/Login/toucan.jpg';
 import './Login.css';
 import Slideshow from './Slideshow';
 import { Alert } from 'react-bootstrap';
@@ -19,6 +23,10 @@ const images = [
   doggyAndKitty,
   kitty,
   sadDoggy,
+  husky,
+  parrot,
+  greyCat,
+  toucan,
 ];
 
 export default function Login(): JSX.Element {
