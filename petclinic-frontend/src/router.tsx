@@ -30,6 +30,8 @@ import ProfilePage from '@/pages/Customer/ProfilePage.tsx';
 import AdminBillingPage from '@/pages/Bills/AdminBill.tsx';
 import UserCart from '@/features/carts/components/UserCart.tsx';
 import VetDetails from '@/pages/Vet/VetDetails.tsx';
+import MockPage from '@/pages/Inventory/MockPage.tsx';
+import InventorySupplies from '@/features/inventories/InventorySupplies.tsx';
 
 import EditingVisit from './features/visits/models/EditingVisit';
 
@@ -222,7 +224,6 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
-
       {
         path: AppRoutePaths.EditVisit,
         element: (
@@ -231,12 +232,19 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
-
       {
-        path: AppRoutePaths.EditVisit,
+        path: AppRoutePaths.MockPage,
         element: (
           <ProtectedRoute>
-            <EditingVisit />
+            <MockPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.InventorySupplies,
+        element: (
+          <ProtectedRoute>
+            <InventorySupplies />
           </ProtectedRoute>
         ),
       },
