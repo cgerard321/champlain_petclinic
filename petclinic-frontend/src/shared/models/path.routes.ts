@@ -8,6 +8,7 @@ export enum AppRoutePaths {
   Inventories = '/inventories',
   Vet = '/vets',
   InventoryProducts = '/inventory/:inventoryId/products',
+  InventorySupplies = '/inventories/:inventoryName/supplies',
 
   AdminBills = '/bills/admin',
   CustomerBills = '/bills/customer',
@@ -24,10 +25,13 @@ export enum AppRoutePaths {
   Forbidden = '/forbidden',
   Products = '/products',
   Visits = '/visits',
-
   Carts = '/carts',
   UserCart = '/carts/:cartId',
   AddVisit = '/visits/add',
 
   CustomerProfile = '/customer/profile',
+  MockPage = '/mockpage',
+  VetDetails = '/vets/{vetId}',
+
+  EditVisit = '/visits/:visitId/edit',
 }

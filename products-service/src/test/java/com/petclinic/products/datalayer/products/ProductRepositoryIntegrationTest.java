@@ -43,6 +43,56 @@ class ProductRepositoryIntegrationTest {
                 .verifyComplete();
     }
 
+    @Test
+    void whenGetAllProducts_thenReturnAllProducts() {
+        String id1 = UUID.randomUUID().toString();
+        String id2 = UUID.randomUUID().toString();
+        String id3 = UUID.randomUUID().toString();
+        Product product1 = Product.builder()
+                .productId(id1)
+                .productName("Testing Product 1")
+                .productDescription("This is a testing product 1")
+                .productSalePrice(10.00)
+                .averageRating(5.00)
+                .build();
+        Product product2 = Product.builder()
+                .productId(id2)
+                .productName("Testing Product 2")
+                .productDescription("This is a testing product 2")
+                .productSalePrice(20.00)
+                .averageRating(6.00)
+                .build();
+        Product product3 = Product.builder()
+                .productId(id3)
+                .productName("Testing Product 3")
+                .productDescription("Testing product 3")
+                .productSalePrice(30.00)
+                .averageRating(7.00)
+                .build();
+        StepVerifier.create(productRepository.saveAll(Flux.just(product1,product2,product3)))
+                .expectNextCount(3)
+                .verifyComplete();
+        StepVerifier.create(productRepository.findAll())
+                .expectNextMatches(product -> product.getProductId().equals(id1) || product.getProductId().equals(id2) || product.getProductId().equals(id3))
+                .expectNextMatches(product -> product.getProductId().equals(id1) || product.getProductId().equals(id2) || product.getProductId().equals(id3))
+                .expectNextMatches(product -> product.getProductId().equals(id1) || product.getProductId().equals(id2) || product.getProductId().equals(id3))
+                .verifyComplete();
+
+
+
+    }
+    @Test
+    void whenNoProductsExist_thenReturnEmpty() {
+
+        StepVerifier.create(productRepository.deleteAll())
+                .verifyComplete();
+
+
+        StepVerifier.create(productRepository.findAll())
+                .expectNextCount(0)
+                .verifyComplete();
+    }
+
 
     @Test
     void whenFoundProduct_thenReturnProduct(){

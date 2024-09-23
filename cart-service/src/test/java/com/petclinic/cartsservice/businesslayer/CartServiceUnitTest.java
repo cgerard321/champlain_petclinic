@@ -7,11 +7,11 @@ import com.petclinic.cartsservice.domainclientlayer.ProductResponseModel;
 import com.petclinic.cartsservice.presentationlayer.CartRequestModel;
 import com.petclinic.cartsservice.presentationlayer.CartResponseModel;
 import com.petclinic.cartsservice.utils.exceptions.NotFoundException;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.BeanUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -20,11 +20,10 @@ import reactor.test.StepVerifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Arrays;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 class CartServiceUnitTest {
@@ -169,6 +168,30 @@ class CartServiceUnitTest {
                 .verify();
     }
 
+    @Test
+    public void whenCreateCart_thenReturnCartResponse() {
+
+        // arrange
+        CartRequestModel cartRequest = new CartRequestModel("123", null);
+        Cart expectedCart = new Cart();
+        expectedCart.setCartId("abc-123-xyz");
+        expectedCart.setCustomerId("123");
+
+        // When
+        when(cartRepository.save(any(Cart.class)))
+                .thenReturn(Mono.just(expectedCart));
+
+        Mono<CartResponseModel> actualResponse = cartService.createNewCart(cartRequest);
+
+        // Assert
+        StepVerifier.create(actualResponse)
+                .expectNextMatches(cart -> cart.getCustomerId().equals("123")
+                        && cart.getCartId().equals("abc-123-xyz"))
+                .verifyComplete();
+
+
+    }
+
 
     @Test
     public void clearCart_Success() {
@@ -217,4 +240,95 @@ class CartServiceUnitTest {
         verify(cartRepository, times(1)).save(cart);
         assertTrue(cart.getProductIds().isEmpty());
     }
+
+    @Test
+    void getAllCarts_ReturnsCartResponseModelWithProducts() {
+        //mocking cart retrieval
+        when(cartRepository.findAll()).thenReturn(Flux.just(cart1));
+
+        //mocking product retrieval
+        when(productClient.getProductByProductId(product1.getProductId())).thenReturn(Mono.just(product1));
+        when(productClient.getProductByProductId(product2.getProductId())).thenReturn(Mono.just(product2));
+
+        //run the test
+        StepVerifier.create(cartService.getAllCarts())
+                .expectNextMatches(cartResponseModel ->
+                        cartResponseModel.getCustomerId().equals("1") &&
+                                cartResponseModel.getProducts().size() == 2 && //2 products in the cart
+                                cartResponseModel.getProducts().get(0).getProductName().equals("Web Services") &&
+                                cartResponseModel.getProducts().get(1).getProductName().equals("Shakespeare's Greatest Works")
+                )
+                .verifyComplete();
+
+        // Verify interactions
+        verify(cartRepository, times(1)).findAll();
+        verify(productClient, times(1)).getProductByProductId(product1.getProductId());
+        verify(productClient, times(1)).getProductByProductId(product2.getProductId());
+    }
+
+    @Test
+    void getAllCarts_ReturnsCartWithoutProducts() {
+        //mocking cart retrieval with an empty product list
+        Cart cartWithNoProducts = Cart.builder()
+                .cartId("123")
+                .customerId("2")
+                .productIds(new ArrayList<>()) //no product IDs
+                .build();
+
+        when(cartRepository.findAll()).thenReturn(Flux.just(cartWithNoProducts));
+
+        // Run the test
+        StepVerifier.create(cartService.getAllCarts())
+                .expectNextMatches(cartResponseModel ->
+                        cartResponseModel.getCustomerId().equals("2") &&
+                                cartResponseModel.getProducts().isEmpty() //no products in the cart
+                )
+                .verifyComplete();
+
+        // Verify interactions
+        verify(cartRepository, times(1)).findAll();
+        verifyNoInteractions(productClient); //no products, so productClient shouldn't be called
+    }
+
+    @Test
+    void getAllCarts_ReturnsMultipleCartsWithProducts() {
+        Cart cart2 = Cart.builder()
+                .cartId("456")
+                .customerId("3")
+                .productIds(List.of(product3.getProductId())) //another cart with 1 product
+                .build();
+
+        when(cartRepository.findAll()).thenReturn(Flux.just(cart1, cart2));
+        when(productClient.getProductByProductId(product1.getProductId())).thenReturn(Mono.just(product1));
+        when(productClient.getProductByProductId(product2.getProductId())).thenReturn(Mono.just(product2));
+        when(productClient.getProductByProductId(product3.getProductId())).thenReturn(Mono.just(product3));
+
+        //run the test
+        StepVerifier.create(cartService.getAllCarts())
+                .expectNextMatches(cartResponseModel -> cartResponseModel.getCustomerId().equals("1"))
+                .expectNextMatches(cartResponseModel -> cartResponseModel.getCustomerId().equals("3"))
+                .verifyComplete();
+
+        //verify interactions
+        verify(cartRepository, times(1)).findAll();
+        verify(productClient, times(1)).getProductByProductId(product1.getProductId());
+        verify(productClient, times(1)).getProductByProductId(product2.getProductId());
+        verify(productClient, times(1)).getProductByProductId(product3.getProductId());
+    }
+
+    @Test
+    void getAllCarts_ReturnsEmptyListWhenNoCarts() {
+        //mocking empty cart retrieval
+        when(cartRepository.findAll()).thenReturn(Flux.empty());
+
+        //run the test
+        StepVerifier.create(cartService.getAllCarts())
+                .expectNextCount(0) //no carts should be returned
+                .verifyComplete();
+
+        //verify interactions
+        verify(cartRepository, times(1)).findAll();
+        verifyNoInteractions(productClient); //no carts, so productClient shouldn't be called
+    }
+
 }

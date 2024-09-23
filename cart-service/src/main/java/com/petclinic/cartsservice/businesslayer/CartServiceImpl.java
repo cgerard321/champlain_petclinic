@@ -15,6 +15,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @Slf4j
@@ -43,8 +44,6 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-
-
     public Flux<CartResponseModel> getAllCarts() {
         return cartRepository.findAll()
                 .flatMap(cart -> {
@@ -108,5 +107,22 @@ public class CartServiceImpl implements CartService {
                 .map(cart -> cart.getProductIds().size())
                 .switchIfEmpty(Mono.error(new NotFoundException("Cart not found: " + cartId)));
     }
+
+    @Override
+    public Mono<CartResponseModel> createNewCart(CartRequestModel cartRequestModel) {
+
+        Cart cart = new Cart();
+        cart.setCustomerId(cartRequestModel.getCustomerId());
+        cart.setCartId(UUID.randomUUID().toString());
+        Mono<CartResponseModel> cartRequestModelMono = cartRepository.save(cart)
+                .map(savedCart -> {
+                    CartResponseModel cartResponseModel = new CartResponseModel();
+                    cartResponseModel.setCustomerId(savedCart.getCustomerId());
+                    cartResponseModel.setCartId(savedCart.getCartId());
+                    return cartResponseModel;
+                });
+        return cartRequestModelMono;
+    }
+
 
 }

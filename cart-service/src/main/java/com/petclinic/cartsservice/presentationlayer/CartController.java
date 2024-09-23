@@ -2,24 +2,13 @@ package com.petclinic.cartsservice.presentationlayer;
 
 import com.petclinic.cartsservice.businesslayer.CartService;
 import com.petclinic.cartsservice.domainclientlayer.ProductResponseModel;
-import com.petclinic.cartsservice.presentationlayer.CartRequestModel;
 import com.petclinic.cartsservice.utils.exceptions.InvalidInputException;
 import com.petclinic.cartsservice.utils.exceptions.NotFoundException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import reactor.core.publisher.Flux;
-
 import org.springframework.web.bind.annotation.*;
-
-
-
 import reactor.core.publisher.Flux;
-
 import reactor.core.publisher.Mono;
 
 import java.util.Collections;
@@ -44,8 +33,6 @@ public class CartController {
                 .map(ResponseEntity::ok);
     }
 
-
-
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public Flux<CartResponseModel> getAllCarts() {
         return cartService.getAllCarts();
@@ -67,6 +54,14 @@ public class CartController {
                 .flatMap(id -> cartService.updateCartByCartId(cartRequestModel, id))
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<CartResponseModel>> addCart(@RequestBody CartRequestModel cartRequestModel) {
+        return cartService.createNewCart(cartRequestModel)
+                .map(c-> ResponseEntity.status(HttpStatus.CREATED).body(c))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+
 
     }
 
