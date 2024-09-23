@@ -21,13 +21,13 @@ const UserCart = (): JSX.Element => {
     const fetchCartItems = async (): Promise<void> => {
       try {
         const response = await fetch(
-            `http://localhost:8080/api/v2/gateway/carts/${cartId}`,
-            {
-              headers: {
-                Accept: 'application/json',
-              },
-              credentials: 'include',
-            }
+          `http://localhost:8080/api/v2/gateway/carts/${cartId}`,
+          {
+            headers: {
+              Accept: 'application/json',
+            },
+            credentials: 'include',
+          }
         );
 
         if (!response.ok) {
@@ -65,8 +65,8 @@ const UserCart = (): JSX.Element => {
   }, [cartId]);
 
   const changeItemQuantity = (
-      event: React.ChangeEvent<HTMLInputElement>,
-      index: number
+    event: React.ChangeEvent<HTMLInputElement>,
+    index: number
   ): void => {
     const newItems = [...cartItems];
     const newQuantity = +event.target.value;
@@ -77,7 +77,7 @@ const UserCart = (): JSX.Element => {
 
   const deleteItem = (indexToDelete: number): void => {
     const newItems = cartItems.filter(
-        (_item, index) => index !== indexToDelete
+      (_item, index) => index !== indexToDelete
     );
     setCartItems(newItems);
   };
@@ -88,11 +88,11 @@ const UserCart = (): JSX.Element => {
     }
     try {
       const response = await fetch(
-          `http://localhost:8080/api/v2/gateway/carts/${cartId}/clear`,
-          {
-            method: 'DELETE',
-            credentials: 'include',
-          }
+        `http://localhost:8080/api/v2/gateway/carts/${cartId}/clear`,
+        {
+          method: 'DELETE',
+          credentials: 'include',
+        }
       );
 
       if (response.ok) {
@@ -116,26 +116,26 @@ const UserCart = (): JSX.Element => {
   }
 
   return (
-      <div className="CartItems">
-        <h1>User Cart</h1>
-        <button onClick={clearCart}>Clear Cart</button> {/* Clear Cart Button */}
-        <hr />
-        <div className="CartItems-items">
-          {cartItems.length > 0 ? (
-              cartItems.map((item, index) => (
-                  <CartItem
-                      key={item.productId}
-                      item={item}
-                      index={index}
-                      changeItemQuantity={changeItemQuantity}
-                      deleteItem={deleteItem}
-                  />
-              ))
-          ) : (
-              <p>No products in the cart.</p>
-          )}
-        </div>
+    <div className="CartItems">
+      <h1>User Cart</h1>
+      <button onClick={clearCart}>Clear Cart</button> {/* Clear Cart Button */}
+      <hr />
+      <div className="CartItems-items">
+        {cartItems.length > 0 ? (
+          cartItems.map((item, index) => (
+            <CartItem
+              key={item.productId}
+              item={item}
+              index={index}
+              changeItemQuantity={changeItemQuantity}
+              deleteItem={deleteItem}
+            />
+          ))
+        ) : (
+          <p>No products in the cart.</p>
+        )}
       </div>
+    </div>
   );
 };
 
