@@ -22,8 +22,8 @@ public class EmailingServiceClient {
     private final WebClient.Builder webClientBuilder;
     private final String emailingServiceUrl;
     public EmailingServiceClient(WebClient.Builder webClientBuilder,
-                                @Value("${app.emailing-service.host}") String emailingServiceHost,
-                                @Value("${app.emailing-service.port}") String emailingServicePort) {
+                                 @Value("${app.emailing-service.host}") String emailingServiceHost,
+                                 @Value("${app.emailing-service.port}") String emailingServicePort) {
         this.webClientBuilder = webClientBuilder;
         emailingServiceUrl = "http://" + emailingServiceHost + ":" + emailingServicePort + "/email";
     }
@@ -55,9 +55,5 @@ public class EmailingServiceClient {
                     return Mono.just((HttpStatus) response.statusCode());
                 });
     }
-
-
-
-
 
 }

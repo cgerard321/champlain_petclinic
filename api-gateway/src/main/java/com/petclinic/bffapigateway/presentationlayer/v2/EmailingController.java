@@ -35,9 +35,9 @@ public class EmailingController {
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @PostMapping(
-        value = "/template/{templateName}",
-        consumes= MediaType.TEXT_HTML_VALUE,
-        produces= MediaType.APPLICATION_JSON_VALUE
+            value = "/template/{templateName}",
+            consumes= MediaType.TEXT_HTML_VALUE,
+            produces= MediaType.APPLICATION_JSON_VALUE
     )
     public Mono<String> sendTemplate(@PathVariable String templateName, @RequestBody String body) {
         return emailingService.addHtmlTemplate(templateName, body);
@@ -72,5 +72,5 @@ public class EmailingController {
                 .switchIfEmpty(Mono.error(new RuntimeException("No response from service")));
     }
     * */
-    
+
 }
