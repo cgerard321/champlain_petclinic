@@ -12,7 +12,6 @@ import com.petclinic.bffapigateway.utils.Rethrower;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.petclinic.bffapigateway.dtos.Inventory.*;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -23,7 +22,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 
-import java.nio.channels.FileChannel;
 import java.util.Optional;
 
 import static org.springframework.http.HttpStatus.*;
@@ -32,7 +30,7 @@ import static org.springframework.http.HttpStatus.*;
 @Component
 public class InventoryServiceClient {
     private final WebClient webClient;
-    private String inventoryServiceUrl;
+    private final String inventoryServiceUrl;
     @Autowired
     private Rethrower rethrower;
 
