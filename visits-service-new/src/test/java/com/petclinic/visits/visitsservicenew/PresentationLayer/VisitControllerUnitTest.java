@@ -579,5 +579,8 @@ class VisitControllerUnitTest {
         verify(visitService, times(1)).deleteCompletedVisitByVisitId(visitId);
         verify(visitService, times(0)).deleteVisit(anyString());  // Ensure delete is not called
     }
+<<<<<<< HEAD
 
+=======
+>>>>>>> 57e8b46e (fix merge errors backend)
 }
