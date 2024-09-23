@@ -39,13 +39,21 @@ public class CartServiceImpl implements CartService {
                             .stream().map(productId -> productClient.getProductByProductId(productId).flux())
                             .reduce(Flux.empty(), Flux::merge)
                             .collectList()
-                            .map(products -> EntityModelUtil.toCartResponseModel(cart, products));
+                            .map(products -> {
+                                // Calculate subtotal, tvq, tvc, and total
+                                double subtotal = products.stream()
+                                        .mapToDouble(product -> product.getProductSalePrice() * (product.getQuantity() != null ? product.getQuantity() : 1))
+                                        .sum();
+                                double tvq = subtotal * 0.09975; // 9.975%
+                                double tvc = subtotal * 0.05; // 5%
+                                double total = subtotal + tvq + tvc;
+
+                                return EntityModelUtil.toCartResponseModel(cart, products, subtotal, tvq, tvc, total);
+                            });
                 });
     }
 
     @Override
-
-
     public Flux<CartResponseModel> getAllCarts() {
         return cartRepository.findAll()
                 .flatMap(cart -> {
@@ -125,6 +133,7 @@ public class CartServiceImpl implements CartService {
                 });
         return cartRequestModelMono;
     }
+
 
 
 }

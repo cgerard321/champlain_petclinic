@@ -16,7 +16,6 @@ public interface ProductInventoryService {
     Mono<Void> deleteProductInInventory(String inventoryId, String productId);
     Flux<ProductResponseDTO> getProductsInInventoryByInventoryIdAndProductsField(String inventoryId, String productName, Double productPrice, Integer productQuantity, Double productSalePrice);
     Flux<ProductResponseDTO> getProductsInInventoryByInventoryIdAndProductsFieldsPagination(String inventoryId, String productName, Double productPrice, Integer productQuantity, Pageable pageable);
-   // Flux<InventoryResponseDTO> getAllInventory();
 
     Mono<Void> deleteInventoryByInventoryId(String inventoryId);
 
@@ -26,8 +25,15 @@ public interface ProductInventoryService {
 
     Flux<InventoryResponseDTO> searchInventories(Pageable page, String inventoryName, String inventoryType, String inventoryDescription);
     Flux<InventoryTypeResponseDTO> getAllInventoryTypes();
+    Flux<InventoryNameResponseDTO> getAllInventoryNames();
 
     Mono<ProductResponseDTO> getProductByProductIdInInventory(String inventoryId, String productId);
 
+    Mono<InventoryResponseDTO> addSupplyToInventoryByInventoryName(String inventoryName, Mono<SupplyRequestDTO> supplyRequestDTOMono);
 
-}
+    Flux<SupplyResponseDTO> getSuppliesByInventoryName(String inventoryName);
+  
+    Flux<ProductResponseDTO> getLowStockProducts(String inventoryId, int stockThreshold);
+
+
+    }

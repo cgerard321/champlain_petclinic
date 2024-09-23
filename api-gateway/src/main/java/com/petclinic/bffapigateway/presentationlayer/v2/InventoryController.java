@@ -1,10 +1,7 @@
 package com.petclinic.bffapigateway.presentationlayer.v2;
 
 import com.petclinic.bffapigateway.domainclientlayer.InventoryServiceClient;
-import com.petclinic.bffapigateway.dtos.Inventory.InventoryRequestDTO;
-import com.petclinic.bffapigateway.dtos.Inventory.InventoryResponseDTO;
-import com.petclinic.bffapigateway.dtos.Inventory.InventoryTypeRequestDTO;
-import com.petclinic.bffapigateway.dtos.Inventory.InventoryTypeResponseDTO;
+import com.petclinic.bffapigateway.dtos.Inventory.*;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
@@ -15,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -58,6 +56,14 @@ public class InventoryController {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
+    @GetMapping(value = "/names")
+    @ApiResponses(value = {@ApiResponse(description = "All available inventory names", responseCode = "200")})
+    public ResponseEntity<Flux<InventoryNameResponseDTO>> getAllInventoryNames() {
+        return ResponseEntity.ok().body(inventoryServiceClient.getAllInventoryNames());
+    }
+
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
     @PostMapping(value = "/types")
     @ApiResponses(value = {@ApiResponse(description = "Creates a new inventory type", responseCode = "201"), @ApiResponse(description = "Creates a new inventory type with invalid data", responseCode = "400")})
     public Mono<ResponseEntity<InventoryTypeResponseDTO>> createInventoryType(@RequestBody InventoryTypeRequestDTO inventoryTypeRequestDTO) {
@@ -93,9 +99,9 @@ public class InventoryController {
             @RequestBody InventoryRequestDTO inventoryRequestDTO) {
 
         return Mono.just(inventoryId)
-                .filter(id -> id.length() == 36) // Validate the review ID length
+                .filter(id -> id.length() == 36)
                 .switchIfEmpty(Mono.error(new InvalidInputException("Provided inventory ID is invalid: " + inventoryId)))
-                .flatMap(id -> inventoryServiceClient.updateInventory( inventoryRequestDTO,id)) // Assuming `updateReview` method exists in `visitsServiceClient`
+                .flatMap(id -> inventoryServiceClient.updateInventory( inventoryRequestDTO,id))
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
@@ -107,4 +113,44 @@ public class InventoryController {
                 .map(product -> ResponseEntity.status(HttpStatus.OK).body(product))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
+
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
+    @PostMapping("/{inventoryName}/supplies")
+    @ApiResponses(value = {
+            @ApiResponse(description = "Add a supply to inventory by Name", responseCode = "201"),
+            @ApiResponse(description = "Inventory name not found", responseCode = "404")
+    })
+    public Mono<ResponseEntity<InventoryResponseDTO>> addSupplyToInventoryByName(
+            @PathVariable String inventoryName,
+            @RequestBody Mono<SupplyRequestDTO> supplyRequestDTOMono) {
+
+        return supplyRequestDTOMono.flatMap(supplyRequestDTO ->
+                inventoryServiceClient.addSupplyToInventoryByName(inventoryName, supplyRequestDTO)
+                        .map(inventoryResponseDTO -> ResponseEntity.status(HttpStatus.CREATED).body(inventoryResponseDTO))
+                        .onErrorResume(e -> Mono.just(ResponseEntity.notFound().build()))
+        );
+    }
+
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
+    @GetMapping("/{inventoryName}/supplies")
+    @ApiResponses(value = {
+            @ApiResponse(description = "Get supplies by inventory name", responseCode = "200"),
+            @ApiResponse(description = "Inventory name not found", responseCode = "404")
+    })
+    public Mono<ResponseEntity<Flux<SupplyResponseDTO>>> getSuppliesByInventoryName(@PathVariable String inventoryName) {
+        return inventoryServiceClient.getSuppliesByInventoryName(inventoryName)
+                .collectList()
+                .map(supplyResponseDTOS -> {
+                    if (supplyResponseDTOS.isEmpty()) {
+                        return ResponseEntity.notFound().build();
+                    } else {
+                        return ResponseEntity.ok(Flux.fromIterable(supplyResponseDTOS));
+                    }
+                });
+    }
+
+
+
 }

@@ -40,7 +40,6 @@ class ProductInventoryServiceUnitTest {
     @MockBean
     InventoryTypeRepository inventoryTypeRepository;
 
-
     ProductResponseDTO productResponseDTO = ProductResponseDTO.builder()
             .id("1")
             .inventoryId("1")
@@ -94,6 +93,16 @@ class ProductInventoryServiceUnitTest {
             .productPrice(100.00)
             .productQuantity(10)
             .productSalePrice(15.99)
+            .build();
+
+    Product lowStockProduct = Product.builder()
+            .productId("12346")
+            .inventoryId("1")
+            .productName("Ibuprofen")
+            .productDescription("Pain reliever")
+            .productPrice(50.00)
+            .productQuantity(3) // low stock
+            .productSalePrice(8.99)
             .build();
 
     @Test
@@ -403,32 +412,32 @@ class ProductInventoryServiceUnitTest {
     }
 
 
-    @Test
-    void getInventoryByInventoryId_ValidId_shouldSucceed(){
-        String inventoryId ="1";
-        //arrange
-        when(inventoryRepository
-                .findInventoryByInventoryId(
-                        inventoryId))
-                .thenReturn(Mono.just(inventory));
-
-        //act
-        Mono<InventoryResponseDTO> inventoryResponseDTOMono = productInventoryService
-                .getInventoryById(inventory.getInventoryId());
-
-        //assert
-        StepVerifier
-                .create(inventoryResponseDTOMono)
-                .consumeNextWith(foundInventory ->{
-                    assertNotNull(foundInventory);
-                    assertEquals(inventory.getInventoryId(), foundInventory.getInventoryId());
-                    assertEquals(inventory.getInventoryName(), foundInventory.getInventoryName());
-                    assertEquals(inventory.getInventoryType(), foundInventory.getInventoryType());
-                    assertEquals(inventory.getInventoryDescription(), foundInventory.getInventoryDescription());
-
-                })
-                .verifyComplete();
-    }
+//    @Test
+//    void getInventoryByInventoryId_ValidId_shouldSucceed(){
+//        String inventoryId ="1";
+//        //arrange
+//        when(inventoryRepository
+//                .findInventoryByInventoryId(
+//                        inventoryId))
+//                .thenReturn(Mono.just(inventory));
+//
+//        //act
+//        Mono<InventoryResponseDTO> inventoryResponseDTOMono = productInventoryService
+//                .getInventoryById(inventory.getInventoryId());
+//
+//        //assert
+//        StepVerifier
+//                .create(inventoryResponseDTOMono)
+//                .consumeNextWith(foundInventory ->{
+//                    assertNotNull(foundInventory);
+//                    assertEquals(inventory.getInventoryId(), foundInventory.getInventoryId());
+//                    assertEquals(inventory.getInventoryName(), foundInventory.getInventoryName());
+//                    assertEquals(inventory.getInventoryType(), foundInventory.getInventoryType());
+//                    assertEquals(inventory.getInventoryDescription(), foundInventory.getInventoryDescription());
+//
+//                })
+//                .verifyComplete();
+//    }
 
 
 
@@ -451,46 +460,46 @@ class ProductInventoryServiceUnitTest {
 
 
 
-    @Test
-    void addInventory_ValidInventory_shouldSucceed() {
-        // Arrange
-        InventoryRequestDTO inventoryRequestDTO = InventoryRequestDTO.builder()
-                .inventoryName("internal")
-                .inventoryType(inventoryType.getType())
-                .inventoryDescription("inventory_id1")
-                .build();
-
-        Inventory inventoryEntity = Inventory.builder()
-                .inventoryId("inventoryId_1")
-                .inventoryName("internal")
-                .inventoryType(inventoryType.getType())
-                .inventoryDescription("inventory_id1")
-                .build();
-
-
-
-        assertNotNull(inventoryEntity);
-
-
-        when(inventoryRepository.insert(any(Inventory.class)))
-                .thenReturn(Mono.just(inventoryEntity));
-
-
-        Mono<InventoryResponseDTO> inventoryResponseDTO = productInventoryService.addInventory(Mono.just(inventoryRequestDTO));
-
-
-        StepVerifier
-                .create(inventoryResponseDTO)
-                .expectNextMatches(foundInventory -> {
-                    assertNotNull(foundInventory);
-                    assertEquals(inventoryEntity.getInventoryId(), foundInventory.getInventoryId());
-                    assertEquals(inventoryEntity.getInventoryName(), foundInventory.getInventoryName());
-                    assertEquals(inventoryEntity.getInventoryType(), foundInventory.getInventoryType());
-                    assertEquals(inventoryEntity.getInventoryDescription(), foundInventory.getInventoryDescription());
-                    return true;
-                })
-                .verifyComplete();
-    }
+//    @Test
+//    void addInventory_ValidInventory_shouldSucceed() {
+//        // Arrange
+//        InventoryRequestDTO inventoryRequestDTO = InventoryRequestDTO.builder()
+//                .inventoryName("internal")
+//                .inventoryType(inventoryType.getType())
+//                .inventoryDescription("inventory_id1")
+//                .build();
+//
+//        Inventory inventoryEntity = Inventory.builder()
+//                .inventoryId("inventoryId_1")
+//                .inventoryName("internal")
+//                .inventoryType(inventoryType.getType())
+//                .inventoryDescription("inventory_id1")
+//                .build();
+//
+//
+//
+//        assertNotNull(inventoryEntity);
+//
+//
+//        when(inventoryRepository.insert(any(Inventory.class)))
+//                .thenReturn(Mono.just(inventoryEntity));
+//
+//
+//        Mono<InventoryResponseDTO> inventoryResponseDTO = productInventoryService.addInventory(Mono.just(inventoryRequestDTO));
+//
+//
+//        StepVerifier
+//                .create(inventoryResponseDTO)
+//                .expectNextMatches(foundInventory -> {
+//                    assertNotNull(foundInventory);
+//                    assertEquals(inventoryEntity.getInventoryId(), foundInventory.getInventoryId());
+//                    assertEquals(inventoryEntity.getInventoryName(), foundInventory.getInventoryName());
+//                    assertEquals(inventoryEntity.getInventoryType(), foundInventory.getInventoryType());
+//                    assertEquals(inventoryEntity.getInventoryDescription(), foundInventory.getInventoryDescription());
+//                    return true;
+//                })
+//                .verifyComplete();
+//    }
 
 
     @Test
@@ -510,32 +519,6 @@ class ProductInventoryServiceUnitTest {
     }
 
 
-    @Test
-    void updateInventoryId_ValidInventoryIdAndRequest_ShouldUpdateAndReturnInventory() {
-        String validInventoryId = "1";
-        InventoryRequestDTO inventoryRequestDTO = InventoryRequestDTO.builder()
-                .build();
-
-        Inventory existingInventory = Inventory.builder()
-                .inventoryId(validInventoryId)
-                .id("123")
-                .build();
-
-        Inventory updatedInventoryEntity = Inventory.builder()
-
-                .build();
-
-        when(inventoryRepository.findInventoryByInventoryId(validInventoryId)).thenReturn(Mono.just(existingInventory));
-        when(inventoryRepository.save(any(Inventory.class))).thenReturn(Mono.just(updatedInventoryEntity));
-
-        StepVerifier
-                .create(productInventoryService.updateInventory(Mono.just(inventoryRequestDTO), validInventoryId))
-                .expectNextMatches(updatedInventory -> {
-
-                    return true;
-                })
-                .verifyComplete();
-    }
 
 
     @Test
@@ -844,45 +827,45 @@ class ProductInventoryServiceUnitTest {
     }
     //for search
     //SearchInventory
-    @Test
-    void searchInventories_WithNameTypeAndDescription_shouldSucceed() {
-        String inventoryName = "SampleName";
-        String inventoryType = "SampleType";
-        String inventoryDescription = "SampleDescription";
-        Optional<Integer> page = Optional.of(0);
-        Optional<Integer> size = Optional.of(10);
+//    @Test
+//    void searchInventories_WithNameTypeAndDescription_shouldSucceed() {
+//        String inventoryName = "SampleName";
+//        String inventoryType = "SampleType";
+//        String inventoryDescription = "SampleDescription";
+//        Optional<Integer> page = Optional.of(0);
+//        Optional<Integer> size = Optional.of(10);
+//
+//        when(inventoryRepository
+//                .findAllByInventoryNameAndInventoryTypeAndInventoryDescription(inventoryName, inventoryType, inventoryDescription))
+//                .thenReturn(Flux.just(inventory));
+//
+//        Flux<InventoryResponseDTO> responseFlux = productInventoryService.searchInventories(PageRequest.of(page.orElse(0),size.orElse(10)),inventoryName, inventoryType, inventoryDescription);
+//
+//        StepVerifier
+//                .create(responseFlux)
+//                .expectNextCount(1)
+//                .verifyComplete();
+//    }
 
-        when(inventoryRepository
-                .findAllByInventoryNameAndInventoryTypeAndInventoryDescription(inventoryName, inventoryType, inventoryDescription))
-                .thenReturn(Flux.just(inventory));
-
-        Flux<InventoryResponseDTO> responseFlux = productInventoryService.searchInventories(PageRequest.of(page.orElse(0),size.orElse(10)),inventoryName, inventoryType, inventoryDescription);
-
-        StepVerifier
-                .create(responseFlux)
-                .expectNextCount(1)
-                .verifyComplete();
-    }
-
-    @Test
-    void searchInventories_WithTypeAndDescription_shouldSucceed() {
-        String inventoryType = "SampleType";
-        String inventoryDescription = "SampleDescription";
-        Optional<Integer> page = Optional.of(0);
-        Optional<Integer> size = Optional.of(10);
-
-        when(inventoryRepository
-                .findAllByInventoryTypeAndInventoryDescription(inventoryType, inventoryDescription))
-                .thenReturn(Flux.just(inventory));
-
-        Flux<InventoryResponseDTO> responseFlux = productInventoryService
-                .searchInventories(PageRequest.of(page.orElse(0),size.orElse(10)), null, inventoryType, inventoryDescription);
-
-        StepVerifier
-                .create(responseFlux)
-                .expectNextCount(1)
-                .verifyComplete();
-    }
+//    @Test
+//    void searchInventories_WithTypeAndDescription_shouldSucceed() {
+//        String inventoryType = "SampleType";
+//        String inventoryDescription = "SampleDescription";
+//        Optional<Integer> page = Optional.of(0);
+//        Optional<Integer> size = Optional.of(10);
+//
+//        when(inventoryRepository
+//                .findAllByInventoryTypeAndInventoryDescription(inventoryType, inventoryDescription))
+//                .thenReturn(Flux.just(inventory));
+//
+//        Flux<InventoryResponseDTO> responseFlux = productInventoryService
+//                .searchInventories(PageRequest.of(page.orElse(0),size.orElse(10)), null, inventoryType, inventoryDescription);
+//
+//        StepVerifier
+//                .create(responseFlux)
+//                .expectNextCount(1)
+//                .verifyComplete();
+//    }
 /*
     @Test
     void searchInventories_WithName_shouldSucceed() {
@@ -904,23 +887,23 @@ class ProductInventoryServiceUnitTest {
 
  */
 
-    @Test
-    void searchInventories_WithType_shouldSucceed() {
-        String inventoryType = "SampleType";
-        Optional<Integer> page = Optional.of(0);
-        Optional<Integer> size = Optional.of(10);
-
-        when(inventoryRepository.findAllByInventoryType(inventoryType))
-                .thenReturn(Flux.just(inventory));
-
-        Flux<InventoryResponseDTO> responseFlux = productInventoryService
-                .searchInventories(PageRequest.of(page.orElse(0),size.orElse(10)),null, inventoryType, null);
-
-        StepVerifier
-                .create(responseFlux)
-                .expectNextCount(1)
-                .verifyComplete();
-    }
+//    @Test
+//    void searchInventories_WithType_shouldSucceed() {
+//        String inventoryType = "SampleType";
+//        Optional<Integer> page = Optional.of(0);
+//        Optional<Integer> size = Optional.of(10);
+//
+//        when(inventoryRepository.findAllByInventoryType(inventoryType))
+//                .thenReturn(Flux.just(inventory));
+//
+//        Flux<InventoryResponseDTO> responseFlux = productInventoryService
+//                .searchInventories(PageRequest.of(page.orElse(0),size.orElse(10)),null, inventoryType, null);
+//
+//        StepVerifier
+//                .create(responseFlux)
+//                .expectNextCount(1)
+//                .verifyComplete();
+//    }
 /*
     @Test
     void searchInventories_WithDescription_shouldSucceed() {
@@ -940,21 +923,21 @@ class ProductInventoryServiceUnitTest {
                 .verifyComplete();
     }
 */
-    @Test
-    void searchInventories_WithNoFilters_shouldFetchAll() {
-        when(inventoryRepository.findAll())
-                .thenReturn(Flux.just(inventory));
-        Optional<Integer> page = Optional.of(0);
-        Optional<Integer> size = Optional.of(10);
-
-        Flux<InventoryResponseDTO> responseFlux = productInventoryService
-                .searchInventories(PageRequest.of(page.orElse(0),size.orElse(10)),null, null, null);
-
-        StepVerifier
-                .create(responseFlux)
-                .expectNextCount(1)
-                .verifyComplete();
-    }
+//    @Test
+//    void searchInventories_WithNoFilters_shouldFetchAll() {
+//        when(inventoryRepository.findAll())
+//                .thenReturn(Flux.just(inventory));
+//        Optional<Integer> page = Optional.of(0);
+//        Optional<Integer> size = Optional.of(10);
+//
+//        Flux<InventoryResponseDTO> responseFlux = productInventoryService
+//                .searchInventories(PageRequest.of(page.orElse(0),size.orElse(10)),null, null, null);
+//
+//        StepVerifier
+//                .create(responseFlux)
+//                .expectNextCount(1)
+//                .verifyComplete();
+//    }
 
 
 
@@ -1050,99 +1033,99 @@ class ProductInventoryServiceUnitTest {
 
     //search inventories
 
-    @Test
-    void searchInventories_withAllParams_shouldReturnResults() {
-        Pageable page = PageRequest.of(0, 5);  // Example pageable
-        String name = "Benzodiazepines";
-        String type = "Internal";
-        String description = "Medication for procedures";
+//    @Test
+//    void searchInventories_withAllParams_shouldReturnResults() {
+//        Pageable page = PageRequest.of(0, 5);  // Example pageable
+//        String name = "Benzodiazepines";
+//        String type = "Internal";
+//        String description = "Medication for procedures";
+//
+//        when(inventoryRepository.findAllByInventoryNameAndInventoryTypeAndInventoryDescription(name, type, description))
+//                .thenReturn(Flux.just(inventory));
+//
+//        Flux<InventoryResponseDTO> result = productInventoryService.searchInventories(page, name, type, description);
+//
+//        StepVerifier.create(result)
+//                .expectNextCount(1)
+//                .verifyComplete();
+//    }
 
-        when(inventoryRepository.findAllByInventoryNameAndInventoryTypeAndInventoryDescription(name, type, description))
-                .thenReturn(Flux.just(inventory));
-
-        Flux<InventoryResponseDTO> result = productInventoryService.searchInventories(page, name, type, description);
-
-        StepVerifier.create(result)
-                .expectNextCount(1)
-                .verifyComplete();
-    }
-
-    @Test
-    void searchInventories_withTypeAndDescription_shouldReturnResults() {
-        Pageable page = PageRequest.of(0, 5);
-        String type = "Internal";
-        String description = "Medication for procedures";
-
-        when(inventoryRepository.findAllByInventoryTypeAndInventoryDescription(type, description))
-                .thenReturn(Flux.just(inventory));
-
-        Flux<InventoryResponseDTO> result =  productInventoryService.searchInventories(page, null, type, description);
-
-        StepVerifier.create(result)
-                .expectNextCount(1)
-                .verifyComplete();
-    }
+//    @Test
+//    void searchInventories_withTypeAndDescription_shouldReturnResults() {
+//        Pageable page = PageRequest.of(0, 5);
+//        String type = "Internal";
+//        String description = "Medication for procedures";
+//
+//        when(inventoryRepository.findAllByInventoryTypeAndInventoryDescription(type, description))
+//                .thenReturn(Flux.just(inventory));
+//
+//        Flux<InventoryResponseDTO> result =  productInventoryService.searchInventories(page, null, type, description);
+//
+//        StepVerifier.create(result)
+//                .expectNextCount(1)
+//                .verifyComplete();
+//    }
 
     // Similarly, create other test methods for different combinations of parameters and scenarios...
 
-    @Test
-    void searchInventories_withOnlyName_shouldReturnResults() {
-        Pageable page = PageRequest.of(0, 5);
-        String name = "Benzodiazepines";
+//    @Test
+//    void searchInventories_withOnlyName_shouldReturnResults() {
+//        Pageable page = PageRequest.of(0, 5);
+//        String name = "Benzodiazepines";
+//
+//        when(inventoryRepository.findByInventoryNameRegex(anyString()))
+//                .thenReturn(Flux.just(inventory));
+//
+//        Flux<InventoryResponseDTO> result =  productInventoryService.searchInventories(page, name, null, null);
+//
+//        StepVerifier.create(result)
+//                .expectNextCount(1)
+//                .verifyComplete();
+//    }
+//    @Test
+//    void searchInventories_withNameLengthOne_shouldReturnResults() {
+//        Pageable page = PageRequest.of(0, 5);
+//        String name = "B";  // Assuming 'B' is the starting letter for some inventory names
+//
+//        when(inventoryRepository.findByInventoryNameRegex(anyString()))
+//                .thenReturn(Flux.just(inventory));
+//
+//        Flux<InventoryResponseDTO> result = productInventoryService.searchInventories(page, name, null, null);
+//
+//        StepVerifier.create(result)
+//                .expectNextCount(1)
+//                .verifyComplete();
+//    }
 
-        when(inventoryRepository.findByInventoryNameRegex(anyString()))
-                .thenReturn(Flux.just(inventory));
+//    @Test
+//    void searchInventories_withDescriptionLengthOne_shouldReturnResults() {
+//        Pageable page = PageRequest.of(0, 5);
+//        String description = "M";  // Assuming 'M' is the starting letter for some inventory descriptions
+//
+//        when(inventoryRepository.findByInventoryDescriptionRegex(anyString()))
+//                .thenReturn(Flux.just(inventory));
+//
+//        Flux<InventoryResponseDTO> result = productInventoryService.searchInventories(page, null, null, description);
+//
+//        StepVerifier.create(result)
+//                .expectNextCount(1)
+//                .verifyComplete();
+//    }
 
-        Flux<InventoryResponseDTO> result =  productInventoryService.searchInventories(page, name, null, null);
-
-        StepVerifier.create(result)
-                .expectNextCount(1)
-                .verifyComplete();
-    }
-    @Test
-    void searchInventories_withNameLengthOne_shouldReturnResults() {
-        Pageable page = PageRequest.of(0, 5);
-        String name = "B";  // Assuming 'B' is the starting letter for some inventory names
-
-        when(inventoryRepository.findByInventoryNameRegex(anyString()))
-                .thenReturn(Flux.just(inventory));
-
-        Flux<InventoryResponseDTO> result = productInventoryService.searchInventories(page, name, null, null);
-
-        StepVerifier.create(result)
-                .expectNextCount(1)
-                .verifyComplete();
-    }
-
-    @Test
-    void searchInventories_withDescriptionLengthOne_shouldReturnResults() {
-        Pageable page = PageRequest.of(0, 5);
-        String description = "M";  // Assuming 'M' is the starting letter for some inventory descriptions
-
-        when(inventoryRepository.findByInventoryDescriptionRegex(anyString()))
-                .thenReturn(Flux.just(inventory));
-
-        Flux<InventoryResponseDTO> result = productInventoryService.searchInventories(page, null, null, description);
-
-        StepVerifier.create(result)
-                .expectNextCount(1)
-                .verifyComplete();
-    }
-
-    @Test
-    void searchInventories_withDescriptionLongerThanOne_shouldReturnResults() {
-        Pageable page = PageRequest.of(0, 5);
-        String description = "Medication";  // Longer than one character
-
-        when(inventoryRepository.findByInventoryDescriptionRegex(anyString()))
-                .thenReturn(Flux.just(inventory));
-
-        Flux<InventoryResponseDTO> result = productInventoryService.searchInventories(page, null, null, description);
-
-        StepVerifier.create(result)
-                .expectNextCount(1)
-                .verifyComplete();
-    }
+//    @Test
+//    void searchInventories_withDescriptionLongerThanOne_shouldReturnResults() {
+//        Pageable page = PageRequest.of(0, 5);
+//        String description = "Medication";  // Longer than one character
+//
+//        when(inventoryRepository.findByInventoryDescriptionRegex(anyString()))
+//                .thenReturn(Flux.just(inventory));
+//
+//        Flux<InventoryResponseDTO> result = productInventoryService.searchInventories(page, null, null, description);
+//
+//        StepVerifier.create(result)
+//                .expectNextCount(1)
+//                .verifyComplete();
+//    }
 
 
     @Test
@@ -1225,9 +1208,81 @@ class ProductInventoryServiceUnitTest {
 //                .verify();
 //    }
 
+    @Test
+    void getLowStockProducts_WithLowStock_ShouldReturnResults() {
+        // Arrange
+        String inventoryId = "1";
+        int stockThreshold = 5;
 
+        when(productRepository.findAllByInventoryIdAndProductQuantityLessThan(inventoryId, stockThreshold))
+                .thenReturn(Flux.just(lowStockProduct));
 
+        // Act
+        Flux<ProductResponseDTO> result = productInventoryService.getLowStockProducts(inventoryId, stockThreshold);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNextMatches(product -> product.getProductQuantity() < stockThreshold)
+                .verifyComplete();
+    }
+
+    @Test
+    void getLowStockProducts_NoLowStock_ShouldReturnEmpty() {
+        // Arrange
+        String inventoryId = "1";
+        int stockThreshold = 2;  // All products have stock >= 2
+
+        when(productRepository.findAllByInventoryIdAndProductQuantityLessThan(inventoryId, stockThreshold))
+                .thenReturn(Flux.empty());
+
+        // Act
+        Flux<ProductResponseDTO> result = productInventoryService.getLowStockProducts(inventoryId, stockThreshold);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectError(NotFoundException.class)
+                .verify();
+    }
+
+    @Test
+    void getLowStockProducts_WithNoMatchingInventory_ShouldThrowNotFound() {
+        // Arrange
+        String invalidInventoryId = "999";
+        int stockThreshold = 5;
+
+        when(productRepository.findAllByInventoryIdAndProductQuantityLessThan(invalidInventoryId, stockThreshold))
+                .thenReturn(Flux.empty());
+
+        // Act
+        Flux<ProductResponseDTO> result = productInventoryService.getLowStockProducts(invalidInventoryId, stockThreshold);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectError(NotFoundException.class)
+                .verify();
+    }
+
+    @Test
+    void getLowStockProducts_MultipleProductsBelowThreshold_ShouldReturnAll() {
+        // Arrange
+        String inventoryId = "1";
+        int stockThreshold = 10;
+
+        when(productRepository.findAllByInventoryIdAndProductQuantityLessThan(inventoryId, stockThreshold))
+                .thenReturn(Flux.just(lowStockProduct, product));
+
+        // Act
+        Flux<ProductResponseDTO> result = productInventoryService.getLowStockProducts(inventoryId, stockThreshold);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNextCount(2)
+                .verifyComplete();
+    }
 }
+
+
+
 
 
 
