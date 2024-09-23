@@ -490,7 +490,7 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                 .flatMapMany(inventory -> Flux.fromIterable(inventory.getSupplies()))
                 .map(EntityDTOUtil::toSupplyResponseDTO);
     }
-  
+
   @Override
     public Flux<ProductResponseDTO> getLowStockProducts(String inventoryId, int stockThreshold) {
         return productRepository
