@@ -33,6 +33,7 @@ export default function AddProduct({
       (form.elements.namedItem('productQuantity') as HTMLInputElement).value,
       10
     );
+    const requestCount = 0;
     const averageRating = 0;
     const status = 'AVAILABLE';
 
@@ -42,6 +43,7 @@ export default function AddProduct({
       productSalePrice,
       averageRating,
       productQuantity,
+      requestCount,
       status,
     };
 

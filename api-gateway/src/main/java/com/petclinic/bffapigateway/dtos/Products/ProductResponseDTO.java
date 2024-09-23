@@ -16,4 +16,5 @@ public class ProductResponseDTO {
     private String productDescription;
     private Double productSalePrice;
     private Double averageRating;
+    private Integer requestCount;
 }
