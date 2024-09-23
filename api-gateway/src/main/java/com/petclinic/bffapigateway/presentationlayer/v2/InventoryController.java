@@ -99,9 +99,9 @@ public class InventoryController {
             @RequestBody InventoryRequestDTO inventoryRequestDTO) {
 
         return Mono.just(inventoryId)
-                .filter(id -> id.length() == 36) // Validate the review ID length
+                .filter(id -> id.length() == 36)
                 .switchIfEmpty(Mono.error(new InvalidInputException("Provided inventory ID is invalid: " + inventoryId)))
-                .flatMap(id -> inventoryServiceClient.updateInventory( inventoryRequestDTO,id)) // Assuming `updateReview` method exists in `visitsServiceClient`
+                .flatMap(id -> inventoryServiceClient.updateInventory( inventoryRequestDTO,id))
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
