@@ -79,6 +79,29 @@ class ProductsServiceClientIntegrationTest {
     }
 
     @Test
+    void getAllProducts_WithPriceFiltering_ThenReturnFilteredProductList() {
+
+        mockWebServer.enqueue(new MockResponse()
+                .setBody("data:{\"productId\":\"4affcab7-3ab1-4917-a114-2b6301aa5565\",\"productName\":\"Rabbit Hutch\",\"productDescription\":\"Outdoor wooden hutch for rabbits\",\"productSalePrice\":79.99,\"averageRating\":0.0}\n\n" +
+                        "data:{\"productId\":\"baee7cd2-b67a-449f-b262-91f45dde8a6d\",\"productName\":\"Flea Collar\",\"productDescription\":\"Flea and tick prevention for small dogs\",\"productSalePrice\":9.99,\"averageRating\":0.0}\n\n"
+                ).setHeader("Content-Type", "text/event-stream")
+        );
+
+        // Define the minimum and maximum price for filtering
+        Double minPrice = 5.00;
+        Double maxPrice = 80.00;
+
+        // Call the method with price filters
+        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(minPrice, maxPrice);
+
+        // Verify the results using StepVerifier
+        StepVerifier.create(productsFlux)
+                .expectNextMatches(product -> product.getProductId().equals("4affcab7-3ab1-4917-a114-2b6301aa5565") && product.getProductSalePrice() >= minPrice && product.getProductSalePrice() <= maxPrice)
+                .expectNextMatches(product -> product.getProductId().equals("baee7cd2-b67a-449f-b262-91f45dde8a6d") && product.getProductSalePrice() >= minPrice && product.getProductSalePrice() <= maxPrice)
+                .verifyComplete();
+    }
+
+    @Test
     void whenAddProduct_thenReturnProduct() throws JsonProcessingException {
         ProductResponseDTO productResponseDTO = new ProductResponseDTO(
                 "productId",
