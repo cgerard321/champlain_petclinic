@@ -1,7 +1,7 @@
 import { Status } from '@/features/visits/models/Status.ts';
 
 export interface VisitResponseModel {
-  visitDate: string;
+  visitStartDate: string;
   description: string;
   petId: string;
   petName: string;
@@ -13,4 +13,5 @@ export interface VisitResponseModel {
   vetPhoneNumber: string;
   status: Status;
   visitId: string;
+  visitEndDate: string;
 }

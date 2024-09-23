@@ -490,6 +490,14 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                 .flatMapMany(inventory -> Flux.fromIterable(inventory.getSupplies()))
                 .map(EntityDTOUtil::toSupplyResponseDTO);
     }
+  
+  @Override
+    public Flux<ProductResponseDTO> getLowStockProducts(String inventoryId, int stockThreshold) {
+        return productRepository
+                .findAllByInventoryIdAndProductQuantityLessThan(inventoryId, stockThreshold)
+                .map(EntityDTOUtil::toProductResponseDTO)
+                .switchIfEmpty(Mono.error(new NotFoundException("No products below threshold in inventory: " + inventoryId)));
+    }
 
   @Override
     public Flux<ProductResponseDTO> getLowStockProducts(String inventoryId, int stockThreshold) {
