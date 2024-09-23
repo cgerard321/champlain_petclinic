@@ -9,7 +9,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -122,5 +125,42 @@ public class CartServiceClientTest {
         consumer.accept(response);
         this.mockWebServer.enqueue(response);
     }
+
+    @Test
+    void testDeleteCartByCartId_Success() {
+        // Arrange the server response for delete cart action
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(200)
+        );
+
+        // Act: Call the deleteCartByCartId method with a valid cartId
+        String cartIdToDelete = "98f7b33a-d62a-420a-a84a-05a27c85fc91";
+        Mono<CartResponseDTO> deleteCartResponse = mockCartServiceClient.deleteCartByCartId(cartIdToDelete);
+
+        // Assert: Verify that the action completed successfully
+        StepVerifier.create(deleteCartResponse)
+                .verifyComplete(); // Verify that no errors occurred
+    }
+
+    @Test
+    void testDeleteCartByCartId_NotFound() {
+        // Arrange the server response to simulate a "Not Found" error
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(404)
+        );
+
+        // Act: Call the deleteCartByCartId method with a non-existent cartId
+        String nonExistentCartId = "invalid-cart-id";
+        Mono<CartResponseDTO> deleteCartResponse = mockCartServiceClient.deleteCartByCartId(nonExistentCartId);
+
+        // Assert: Verify that an error is signaled
+        StepVerifier.create(deleteCartResponse)
+                .expectError() // Expect a 404 Not Found error
+                .verify();
+    }
+
+
 
 }
