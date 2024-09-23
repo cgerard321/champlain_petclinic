@@ -50,6 +50,7 @@ dependencies {
             'io.projectreactor:reactor-test'
 
     testImplementation group: 'org.mock-server', name: 'mockserver-netty', version: '5.15.0'
+    testImplementation "org.wiremock:wiremock:3.9.1"
 }
 
 jacoco {
