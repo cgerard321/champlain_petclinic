@@ -199,7 +199,6 @@ const router = createBrowserRouter([
         ),
       },
       {
-
         path: AppRoutePaths.Carts,
         element: (
           <ProtectedRoute roles={['ADMIN']}>
@@ -218,9 +217,9 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.CustomerProfile,
         element: (
-            <ProtectedRoute roles={['OWNER']}>
-              <ProfilePage/>
-            </ProtectedRoute>
+          <ProtectedRoute roles={['OWNER']}>
+            <ProfilePage />
+          </ProtectedRoute>
         ),
       },
 
@@ -229,7 +228,6 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <EditingVisit />
-
           </ProtectedRoute>
         ),
       },
