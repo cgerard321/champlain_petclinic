@@ -6,6 +6,7 @@ using emailing_service.Models.EmailType;
 using emailing_service.Utils;
 using emailing_service.Utils.Exception;
 using Microsoft.AspNetCore.Mvc;
+using MySqlConnector;
 
 namespace emailing_service.Controllers;
 
@@ -32,7 +33,16 @@ public class EmailController : Controller
     [HttpGet("get")]
     public IActionResult GetAllEmails()
     {
-        List<EmailModel> emails = _emailService.GetAllEmails(); // Replace `_emailService` with your service
+        List<EmailModel> emails;
+        try
+        {
+            emails = _emailService.GetAllEmails();
+        }
+        catch (MissingDatabaseException e)
+        {
+            return StatusCode(503, "Database failure! Make sure you are running MySql Server.");
+        }
+         // Replace `_emailService` with your service
         return Ok(emails); // This returns the list as JSON
     }
     
@@ -45,8 +55,13 @@ public class EmailController : Controller
         {
             using (StreamReader reader = new StreamReader(Request.Body))
             {
+                string? templateContent = await reader.ReadToEndAsync();
+                if (String.IsNullOrWhiteSpace(templateContent))
+                {
+                    return NoContent();
+                }
 
-                var result = _emailService.ReceiveHtml(templateName, await reader.ReadToEndAsync());
+                var result = _emailService.ReceiveHtml(templateName, templateContent);
             }
         }
         catch (CreatedAlreadyExistingTemplate e)
@@ -83,11 +98,11 @@ public class EmailController : Controller
             Console.WriteLine(e);
             return NotFound(new { message = e.Message });
         }
-        catch (NullReferenceException e)
+        /*catch (NullReferenceException e)
         {
             Console.WriteLine(e);
             return NotFound(new { message = e.Message });
-        }
+        }*/
         catch (EmailStringContainsPlaceholder e)
         {
             Console.WriteLine(e);

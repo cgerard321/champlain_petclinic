@@ -7,4 +7,9 @@ public class EmailModel
     public string Subject { get; set; }
     public string Body { get; set; }
     public string EmailStatus { get; set; }
+    
+    public override string ToString()
+    {
+        return $"Id: {Id}, Email: {Email}, Subject: {Subject}, Body: {Body}, EmailStatus: {EmailStatus}";
+    }
 }

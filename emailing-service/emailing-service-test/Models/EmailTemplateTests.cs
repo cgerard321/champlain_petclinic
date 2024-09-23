@@ -57,5 +57,41 @@ public class EmailTemplateTests
             Assert.That(ex.Message, Contains.Substring("body"));
         }
 
+        [Test]
+        public void BuildEmail_ThrowsTemplateRequiredFieldNotSet_WhenFooterIsEmpty()
+        {
+        // Arrange
+            var template = new EmailTemplate("TestTemplate", "Footer: %%EMAIL_FOOTER%%");
+
+            // Act & Assert
+            var ex = Assert.Throws<TemplateRequiredFieldNotSet>(() => template.BuildEmail("Header", "Body", ""));
+            Assert.That(ex.Message, Contains.Substring("footer"));
+        }
+
+
+
+        [Test]
+        public void BuildEmail_ThrowsTemplateRequiredFieldNotSet_WhenCorrespondentNameIsEmpty()
+        {
+        // Arrange
+        var template = new EmailTemplate("TestTemplate", "Name: %%EMAIL_NAME%%");
+
+        // Act & Assert
+        var ex = Assert.Throws<TemplateRequiredFieldNotSet>(() => template.BuildEmail("Header", "Body", "Footer", ""));
+        Assert.That(ex.Message, Contains.Substring("correspondentName"));
+        }
+        
+        [Test]
+        public void BuildEmail_ThrowsTemplateRequiredFieldNotSet_WhenSenderIsEmpty()
+        {
+        // Arrange
+        var template = new EmailTemplate("TestTemplate", "Sender: %%EMAIL_SENDER%%");
+
+        // Act & Assert
+        var ex = Assert.Throws<TemplateRequiredFieldNotSet>(() => template.BuildEmail("Header", "Body", "Footer", "Name", ""));
+        Assert.That(ex.Message, Contains.Substring("sender"));
+        }
+
+
         // Add more tests for footer, correspondentName, and sender as needed
     }

@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.VisualStudio.TestPlatform.TestHost;
+using MySqlConnector;
 using Newtonsoft.Json;
 using NUnit.Framework;
 
@@ -40,6 +41,11 @@ public class EmailControllerTests
             "PetClinic"
         );
     }
+    [SetUp]
+    public void Setup()
+    {
+        EmailUtils.EmailTemplates.Clear();
+    }
     [Test]
     public async Task TestEndpoint_ReturnsOkResult()
     {
@@ -55,7 +61,6 @@ public class EmailControllerTests
     [TestCase("Template3")]
     public async Task ReceiveHtml_TemplateNameIsValid_ReturnsOkResult(string name)
     {
-
         // Act
         var request = new HttpRequestMessage(HttpMethod.Post, $"email/templates/add/{name}")
         {
@@ -73,7 +78,6 @@ public class EmailControllerTests
     [TestCase(" ")]
     public async Task ReceiveHtml_TemplateNameIsNullOrWhiteSpace_ReturnsBadRequest(string? templateName)
     {
-        EmailUtils.EmailTemplates.Clear();
         var json = JsonConvert.SerializeObject(directEmailModel);
         // Act
         var request = new HttpRequestMessage(HttpMethod.Post, $"email/templates/add/{templateName}")
@@ -84,6 +88,39 @@ public class EmailControllerTests
 
         //NotFound because you can't send a Null or whitspace as a parameter to an api call
         Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
+    }
+    
+    [Test]
+    [TestCase("Default")]
+    [TestCase("Example2")]
+    [TestCase("ItCanHaveAnyNameReally...")]
+    public async Task ReceiveHtml_TemplateNameAlreadyExist_ReturnsBadRequest(string? templateName)
+    {
+        
+        EmailUtils.EmailTemplates.Add(new EmailTemplate(templateName,"<html><body>%%EMAIL_HEADERS%% %%EMAIL_BODY%% %%EMAIL_FOOTER%% %%EMAIL_NAME%% %%EMAIL_SENDER%%</body></html>"));
+        // Act
+        var request = new HttpRequestMessage(HttpMethod.Post, $"email/templates/add/{templateName}")
+        {
+            Content = new StringContent(pathOfDefaultHtml, Encoding.UTF8, "text/html")
+        };
+        var response = await _httpClient.SendAsync(request);
+
+        //NotFound because you can't send a Null or whitspace as a parameter to an api call
+        Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+    [Test]
+    [TestCase("")]
+    public async Task ReceiveHtml_TemplateBodyIsEmpty_ReturnNoContent(string? template)
+    {
+        // Act
+        var request = new HttpRequestMessage(HttpMethod.Post, $"email/templates/add/Example")
+        {
+            Content = new StringContent(template, Encoding.UTF8, "text/html")
+        };
+        var response = await _httpClient.SendAsync(request);
+
+        // Assert
+        Assert.AreEqual(HttpStatusCode.NoContent, response.StatusCode);
     }
     [Test]
     public async Task SendEmail_EmailModelIsValid_ReturnsOkResult()
@@ -386,6 +423,17 @@ public class EmailControllerTests
         // Assert
         Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
     }
+    [Test]
+    public async Task GetAllEmails_SqlFailure_ReturnStatusCode503()
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, "email/get");
+        var response = await _httpClient.SendAsync(request);
+
+        Console.WriteLine(response.Content.ReadAsStringAsync().Result);
+        // Act
+        // Assert
+        Assert.AreEqual(HttpStatusCode.ServiceUnavailable, response.StatusCode);
+    }
     
     /*public static IEnumerable<DirectEmailModel> FieldContainsPlaceHolder()
     {
@@ -399,7 +447,6 @@ public class EmailControllerTests
             "Felix",
             "PetClinic"
         );
-        
         yield return new DirectEmailModel(
             "example@test.com",
             "This is a test email",
@@ -410,6 +457,9 @@ public class EmailControllerTests
             "John",
             "CompanyXYZ"
         );
+        
+        
+        
         yield return new DirectEmailModel(
             "example@test.com",
             "This is a test email",
@@ -458,6 +508,81 @@ public class EmailControllerTests
         // Assert
         Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
     }*/
+    public static IEnumerable<DirectEmailModel> TemplateRequiredFieldNotSet()
+    {
+        /*yield return new DirectEmailModel(
+            "example@test.com",
+            "This is a test email",
+            "Default",
+            "",
+            "This is the emailbody",
+            "this is the email footer",
+            "Felix",
+            "PetClinic"
+        );*/
+        yield return new DirectEmailModel(
+            "example@test.com",
+            "This is a test email",
+            "Default",
+            "Test email header",
+            null,
+            "Test email footer",
+            "John",
+            "CompanyXYZ"
+        );
+        
+        yield return new DirectEmailModel(
+            "example@test.com",
+            "This is a test email",
+            "Default",
+            "Test email header",
+            "Test email body",
+            "",
+            "John",
+            "CompanyXYZ"
+        );
+        yield return new DirectEmailModel(
+            "example@test.com",
+            "This is a test email",
+            "Default",
+            "This is the emailHeader",
+            "This is the emailbody",
+            "this is the email footer",
+            "",
+            "PetClinic"
+        );
+
+        yield return new DirectEmailModel(
+            "example@test.com",
+            "Another test email",
+            "Default",
+            "Test email header",
+            "Test email body",
+            "Test email footer",
+            "John",
+            null
+        );
+    }
+    [Test, TestCaseSource(nameof(TemplateRequiredFieldNotSet))]
+    public async Task SendEmail_RequestFieldNeededIsNotSet_ReturnsBadRequest(DirectEmailModel emailModelParam)
+    {
+        EmailUtils.EmailTemplates.Add(new EmailTemplate("Default","<html><body>%%EMAIL_HEADERS%% %%EMAIL_BODY%% %%EMAIL_FOOTER%% %%EMAIL_NAME%% %%EMAIL_SENDER%%</body></html>"));
+        // Arrange
+        var json = JsonConvert.SerializeObject(emailModelParam);
+
+        var request = new HttpRequestMessage(HttpMethod.Post, "email/send")
+        {
+            Content = new StringContent(json, Encoding.UTF8, "application/json")
+        };
+        var response = await _httpClient.SendAsync(request);
+        // Act
+        // Assert
+        Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+    
+    
+    
+    
     [TearDown]
     public void AllTimeTearDown()
     {

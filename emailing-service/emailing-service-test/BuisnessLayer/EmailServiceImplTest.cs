@@ -21,12 +21,12 @@ using System.IO;
 using System.Text;
 
 [TestFixture]
-public class EmailControllerTests
+public class EmailServiceImplTest
 {
     private IEmailService _controller;
     private readonly string pathOfDefaultHtml;
     private readonly DirectEmailModel directEmailModel;
-    public EmailControllerTests()
+    public EmailServiceImplTest()
     {
         EmailUtils.sendEmail = false;
         pathOfDefaultHtml = "<html><body>%%EMAIL_HEADERS%% %%EMAIL_BODY%% %%EMAIL_FOOTER%% %%EMAIL_NAME%% %%EMAIL_SENDER%%</body></html>";
@@ -53,7 +53,7 @@ public class EmailControllerTests
             "mockemail@gmail.com",
             "MockPetClinic"
         );
-        _controller = new EmailServiceImpl();
+        _controller = new emailing_service.BuisnessLayer.EmailServiceImpl();
         _controller.SetDatabaseHelper(new TestDbContext());
         
     }
@@ -70,6 +70,16 @@ public class EmailControllerTests
         var result = _controller.GetAllEmails();
         Assert.That(result, Is.Not.Null);
         Assert.IsAssignableFrom<List<EmailModel>>(result);
+    }
+    
+    [Test]
+    public async Task GetAll_AbscentDatabase_ThrowMissingDatabaseException()
+    {
+        IEmailService service = new emailing_service.BuisnessLayer.EmailServiceImpl();
+        Assert.Throws<MissingDatabaseException>(() => {
+            service.GetAllEmails();
+        });
+        
     }
     
     [Test]

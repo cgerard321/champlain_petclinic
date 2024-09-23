@@ -76,7 +76,8 @@ DatabaseHelper._connectionString = connectionString;
 builder.Services.AddTransient<IDatabaseHelper, DatabaseHelper>();
 IDatabaseHelper dbHelper = new DatabaseHelper();
 Console.WriteLine("we reached the tablecreation");
-
+//May there be an error here check later!
+dbHelper.CreateTableAsync(50);
 builder.Services.AddScoped<IEmailService, EmailServiceImpl>();
 
 

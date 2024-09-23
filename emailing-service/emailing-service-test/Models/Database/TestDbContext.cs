@@ -21,6 +21,11 @@ public class TestDbContext : IDatabaseHelper
         return Task.CompletedTask;
     }
 
+    public Task CreateTableAsync(int ticks)
+    {
+        return Task.FromResult(_emails);
+    }
+
     public Task AddEmailAsync(string email, string subject, string body, string emailStatus)
     {
         var newEmail = new EmailModel

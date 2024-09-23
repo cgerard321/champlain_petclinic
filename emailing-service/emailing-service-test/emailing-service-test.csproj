@@ -32,7 +32,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="TestResults\" />
+      <Folder Include="coveragereport\" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\emailing-service\emailing-service.csproj" />

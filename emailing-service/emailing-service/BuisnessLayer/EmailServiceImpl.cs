@@ -20,7 +20,17 @@ public class EmailServiceImpl : IEmailService
     }
     public List<EmailModel> GetAllEmails()
     {
-        return _databaseHelper.GetAllEmailsAsync().Result;
+        try
+        {
+            return _databaseHelper.GetAllEmailsAsync().Result;
+        }
+        //We have no choice but to receive as Aggregate Exception since it is an async service, and it uses a possibly offline database.
+        //What's more, mysql is closed during testing
+        catch (AggregateException e)
+        {
+            Console.WriteLine(e);
+            throw new MissingDatabaseException();
+        }
     }
 
     public OperationResult ReceiveHtml(string? templateName, string? htmlBody)
@@ -86,16 +96,12 @@ public class EmailServiceImpl : IEmailService
                 sender
             );
         }
-        catch (NullReferenceException e)
+        /*catch (NullReferenceException e)
         {
             Console.WriteLine(e);
             throw;
-        }
-        catch (EmailStringContainsPlaceholder e)
-        {
-            Console.WriteLine(e);
-            throw;
-        }
+        }*/
+        
         catch (TemplateRequiredFieldNotSet e)
         {
             Console.WriteLine(e);
