@@ -5,13 +5,12 @@ import { InventoryType } from '@/features/inventories/models/InventoryType.ts';
 import useSearchInventories from '@/features/inventories/hooks/useSearchInventories.ts';
 import { getAllInventoryTypes } from '@/features/inventories/api/getAllInventoryTypes.ts';
 import deleteAllInventories from '@/features/inventories/api/deleteAllInventories.ts';
-import './InventoriesListTable.css';
 import deleteInventory from '@/features/inventories/api/deleteInventory.ts';
 import AddInventoryType from '@/features/inventories/AddInventoryType.tsx';
 import AddSupplyForm from '@/features/inventories/AddSupplyForm.tsx';
 
 //TODO: create add inventory form component and change the component being shown on the inventories page on the onClick event of the add inventory button
-export default function InventoriesListTable(): JSX.Element {
+export default function InventoriesListTableV2(): JSX.Element {
   const [selectedInventories, setSelectedInventories] = useState<Inventory[]>(
     []
   );
@@ -253,7 +252,7 @@ export default function InventoriesListTable(): JSX.Element {
               {/* <td>{inventory.inventoryId}</td> */}
               <td
                 onClick={() =>
-                  navigate(`/inventory/${inventory.inventoryId}/products`)
+                  navigate(`/inventories/${inventory.inventoryName}/supplies`)
                 }
                 style={{
                   cursor: 'pointer',
