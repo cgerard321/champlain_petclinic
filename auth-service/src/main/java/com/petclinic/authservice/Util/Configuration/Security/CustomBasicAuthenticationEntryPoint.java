@@ -1,5 +1,7 @@
 package com.petclinic.authservice.Util.Configuration.Security;
 
+import static java.rmi.server.LogStream.log;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -11,7 +13,6 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import static java.rmi.server.LogStream.log;
 
 @Component
 public class CustomBasicAuthenticationEntryPoint extends BasicAuthenticationEntryPoint {
