@@ -1,5 +1,6 @@
 import axiosInstance from '@/shared/api/axiosInstance.ts';
-import { ProductModel } from '@/features/inventories/models/ProductModels/ProductModel.ts';
+import { ProductModel } from '@/features/products/models/ProductModels/ProductModel';
+
 
 export async function getProductsByType(
   productType: string
