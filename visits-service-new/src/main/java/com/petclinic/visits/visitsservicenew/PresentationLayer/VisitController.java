@@ -192,6 +192,12 @@ public class VisitController {
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
+    @DeleteMapping(value = "/completed/{visitId}")
+    public Mono<ResponseEntity<Void>> deleteCompletedVisitByVisitId(@PathVariable String visitId){
+        return visitService.deleteCompletedVisitByVisitId(visitId)
+                .then(Mono.just(new ResponseEntity<Void>(HttpStatus.NO_CONTENT)));
+    }
+
 //    @GetMapping("/pets/{petId}")
 //    public Mono<PetResponseDTO> getPetByIdTest(@PathVariable int petId){
 //       return visitService.testingGetPetDTO(petId);

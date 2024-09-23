@@ -20,6 +20,7 @@ public interface VisitService {
     Mono<VisitResponseDTO> updateStatusForVisitByVisitId(String visitId, String status);
     Mono<Void> deleteVisit(String visitId);
     Mono<Void> deleteAllCancelledVisits();
+    Mono<Void>deleteCompletedVisitByVisitId(String visitId);
 
 //    Mono<VetDTO> testingGetVetDTO(String vetId);
 //    Mono<PetResponseDTO> testingGetPetDTO(int petId);

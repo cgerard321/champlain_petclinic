@@ -49,16 +49,16 @@ public class VisitController {
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping(value = "/reviews")
-    public ResponseEntity<Flux<ReviewResponseDTO>> getAllReviews(){
+    public ResponseEntity<Flux<ReviewResponseDTO>> getAllReviews() {
         return ResponseEntity.ok().body(visitsServiceClient.getAllReviews());
     }
 
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @PostMapping(value = "/reviews", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<ReviewResponseDTO>> PostReview(@RequestBody Mono<ReviewRequestDTO> reviewRequestDTOMono){
+    public Mono<ResponseEntity<ReviewResponseDTO>> PostReview(@RequestBody Mono<ReviewRequestDTO> reviewRequestDTOMono) {
         return visitsServiceClient.createReview(reviewRequestDTOMono)
-                .map(c->ResponseEntity.status(HttpStatus.CREATED).body(c))
+                .map(c -> ResponseEntity.status(HttpStatus.CREATED).body(c))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
@@ -91,6 +91,7 @@ public class VisitController {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+<<<<<<< HEAD
     @PutMapping(value = "/{visitId}")
     public Mono<ResponseEntity<VisitResponseDTO>> updateVisitByVisitId(
             @PathVariable String visitId,
@@ -102,4 +103,14 @@ public class VisitController {
     }
 
 
+=======
+    @IsUserSpecific(idToMatch = {"visitId"})
+    @DeleteMapping(value = "/completed/{visitId}")
+    public Mono<ResponseEntity<Void>> deleteCompletedVisitByVisitId(@PathVariable String visitId) {
+        return visitsServiceClient.deleteCompletedVisitByVisitId(visitId)
+                .then(Mono.just(new ResponseEntity<Void>(HttpStatus.NO_CONTENT)))
+                .switchIfEmpty(Mono.just(new ResponseEntity<>(HttpStatus.NOT_FOUND)));
+    }
+
+>>>>>>> 1bee8faa (Implemented delete visit when the status is set to complete)
 }
