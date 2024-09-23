@@ -15,12 +15,15 @@ export default function CartListTable(): JSX.Element {
   useEffect(() => {
     const fetchCarts = async (): Promise<void> => {
       try {
-        const response = await fetch(`http://localhost:8080/api/v2/gateway/carts`, {
-          headers: {
-            Accept: 'application/json',
-          },
-          credentials: 'include',
-        });
+        const response = await fetch(
+          `http://localhost:8080/api/v2/gateway/carts`,
+          {
+            headers: {
+              Accept: 'application/json',
+            },
+            credentials: 'include',
+          }
+        );
 
         if (!response.ok) {
           throw new Error(`Error: ${response.status} ${response.statusText}`);
@@ -39,55 +42,55 @@ export default function CartListTable(): JSX.Element {
     fetchCarts();
   }, []);
 
-  const handleDelete = (cartId: string) => {
-    if (window.confirm('Are you sure you want to delete this cart?')) {
-      // TODO: Implement cart deletion logic
-      console.log(`Deleting cart with ID: ${cartId}`);
-    }
-  };
+  // const handleDelete = (cartId: string) => {
+  //   if (window.confirm('Are you sure you want to delete this cart?')) {
+  //     // TODO: Implement cart deletion logic
+  //     console.log(`Deleting cart with ID: ${cartId}`);
+  //   }
+  // };
 
   return (
-      <div className="cart-list-container">
-        <h1>User Carts</h1>
-
-        {loading && <div className="loading">Loading carts...</div>}
-        {error && <div className="error">{error}</div>}
-
-        {!loading && carts.length === 0 && <div className="no-carts">No carts available.</div>}
-
-        {!loading && carts.length > 0 && (
-            <table className="cart-table">
-              <thead>
-              <tr>
-                <th>Cart ID</th>
-                <th>Customer ID</th>
-                <th>View Cart</th>
-                <th>Delete Cart</th>
+    <div className="cart-list-container">
+      <h1>User Carts</h1>
+      {loading && <div className="loading">Loading carts...</div>}
+      {error && <div className="error">{error}</div>}
+      {!loading && carts.length === 0 && (
+        <div className="no-carts">No carts available.</div>
+      )}
+      {!loading && carts.length > 0 && (
+        <table className="cart-table">
+          <thead>
+            <tr>
+              <th>Cart ID</th>
+              <th>Customer ID</th>
+              <th>View Cart</th>
+              <th>Delete Cart</th>
+            </tr>
+          </thead>
+          <tbody>
+            {carts.map(cart => (
+              <tr key={cart.cartId}>
+                <td>{cart.cartId}</td>
+                <td>{cart.customerId}</td>
+                <td>
+                  <Link to={`/carts/${cart.cartId}`} className="view-button">
+                    View Cart
+                  </Link>
+                </td>
+                {/* <td>
+                  <button
+                    className="delete-button"
+                    onClick={() => handleDelete(cart.cartId)}
+                  >
+                    Delete
+                  </button>
+                </td> */}
               </tr>
-              </thead>
-              <tbody>
-              {carts.map(cart => (
-                  <tr key={cart.cartId}>
-                    <td>{cart.cartId}</td>
-                    <td>{cart.customerId}</td>
-                    <td>
-                      <Link to={`/carts/${cart.cartId}`} className="view-button">
-                        View Cart
-                      </Link>
-                    </td>
-                    <td>
-                      <button
-                          className="delete-button"
-                          onClick={() => handleDelete(cart.cartId)}
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-              ))}
-              </tbody>
-            </table>
-        )}
-      </div>
+            ))}
+          </tbody>
+        </table>
+      )}
+      ?{' '}
+    </div>
   );
 }
