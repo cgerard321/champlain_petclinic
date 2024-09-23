@@ -4,7 +4,6 @@ import { getAllBills } from '@/features/bills/api/getAllBills.tsx';
 import './AdminBillsListTable.css';
 import { getBillByBillId } from '@/features/bills/api/GetBillByBillId.tsx';
 import { deleteBill } from '@/features/bills/api/deleteBill.tsx';
-import './AdminBillsListTable.css';
 
 export default function AdminBillsListTable(): JSX.Element {
   const [bills, setBills] = useState<Bill[]>([]);
@@ -15,6 +14,12 @@ export default function AdminBillsListTable(): JSX.Element {
   const fetchBills = async (): Promise<void> => {
     const allBills = await getAllBills();
     setBills(allBills);
+    try {
+      const fetchedBills = await getAllBills();
+      setBills(fetchedBills);
+    } catch (error) {
+      console.error('Error fetching bills:', error);
+    }
   };
 
   const handleSearch = async (): Promise<void> => {
@@ -39,12 +44,6 @@ export default function AdminBillsListTable(): JSX.Element {
     setSearchId('');
     setError(null);
     getAllBills().then(r => setBills(r));
-    try {
-      const fetchedBills = await getAllBills();
-      setBills(fetchedBills);
-    } catch (error) {
-      console.error('Error fetching bills:', error);
-    }
   };
 
   const handleDelete = async (billId: string): Promise<void> => {
