@@ -10,15 +10,13 @@ import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @WebFluxTest(controllers = CartController.class)
 class CartControllerUnitTest {
@@ -152,21 +150,13 @@ class CartControllerUnitTest {
     }
 
     @Test
-    public void whenGetAllCarts_thenReturnListOfCartResponseModels() {
-        // arrange
-        List<String> productIds1 = List.of("9a29fff7-564a-4cc9-8fe1-36f6ca9bc223");
-        List<String> productIds2 = List.of("bb12fff7-679a-2ss9-8fe1-19d6aa3af321");
+    public void whenDeleteCartByIdWithExistingId_thenReturnCartResponseModel(){
+        List<String> productIds = List.of("9a29fff7-564a-4cc9-8fe1-36f6ca9bc223");
 
-        Cart cart1 = Cart.builder()
+        Cart cart = Cart.builder()
                 .cartId("98f7b33a-d62a-420a-a84a-05a27c85fc91")
-                .productIds(productIds1)
+                .productIds(productIds)
                 .customerId("1")
-                .build();
-
-        Cart cart2 = Cart.builder()
-                .cartId("56e7b33a-d62a-420a-a84a-05a27c85fc34")
-                .productIds(productIds2)
-                .customerId("2")
                 .build();
 
         ProductResponseModel product1 = ProductResponseModel.builder()
@@ -176,81 +166,45 @@ class CartControllerUnitTest {
                 .productSalePrice(100.00)
                 .build();
 
-        ProductResponseModel product2 = ProductResponseModel.builder()
-                .productId("bb12fff7-679a-2ss9-8fe1-19d6aa3af321")
-                .productName("Cloud Computing")
-                .productDescription("Learn the basics of cloud computing")
-                .productSalePrice(150.00)
+        List<ProductResponseModel> products = List.of(product1);
+
+        CartResponseModel cartResponseModel = CartResponseModel.builder()
+                .cartId(cart.getCartId())
+                .customerId("1")
+                .products(products)
                 .build();
+        when(cartService.deleteCartByCartId(cart.getCartId()))
+                .thenReturn(Mono.just(cartResponseModel));
 
-        List<ProductResponseModel> products1 = List.of(product1);
-        List<ProductResponseModel> products2 = List.of(product2);
-
-        CartResponseModel cartResponseModel1 = CartResponseModel.builder()
-                .cartId(cart1.getCartId())
-                .customerId(cart1.getCustomerId())
-                .products(products1)
-                .build();
-
-        CartResponseModel cartResponseModel2 = CartResponseModel.builder()
-                .cartId(cart2.getCartId())
-                .customerId(cart2.getCustomerId())
-                .products(products2)
-                .build();
-
-        List<CartResponseModel> cartResponseModels = List.of(cartResponseModel1, cartResponseModel2);
-
-        when(cartService.getAllCarts()).thenReturn(Flux.fromIterable(cartResponseModels));
-
-        // act & assert
         webTestClient
-                .get()
-                .uri("/api/v1/carts")
+                .delete()
+                .uri("/api/v1/carts/" + cart.getCartId())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBodyList(CartResponseModel.class)
-                .value(result -> {
-                    assertEquals(2, result.size());
-                    assertEquals(cart1.getCartId(), result.get(0).getCartId());
-                    assertEquals(cart2.getCartId(), result.get(1).getCartId());
-                    assertEquals(cart1.getCustomerId(), result.get(0).getCustomerId());
-                    assertEquals(cart2.getCustomerId(), result.get(1).getCustomerId());
-                    assertEquals(cart1.getProductIds(), result.get(0).getProducts().stream().map(ProductResponseModel::getProductId).toList());
-                    assertEquals(cart2.getProductIds(), result.get(1).getProducts().stream().map(ProductResponseModel::getProductId).toList());
-                });
+                .expectBody(CartResponseModel.class)
+                .isEqualTo(cartResponseModel);
+
+        verify(cartService, times(1)).deleteCartByCartId(cartResponseModel.getCartId());
     }
 
     @Test
-    public void whenGetAllCarts_andNoCartsExist_thenReturnEmptyList() {
-        // arrange
-        when(cartService.getAllCarts()).thenReturn(Flux.empty());
+    public void whenDeleteCartByIdWithInvalidId_ThenReturnEmptyMono(){
+        String cartId = "98f7b33a-d62a-420a-a84a-05a27c85fc";
 
-        // act & assert
+        when(cartService.deleteCartByCartId(cartId))
+                .thenReturn(Mono.empty());
+
         webTestClient
-                .get()
-                .uri("/api/v1/carts")
-                .accept(MediaType.APPLICATION_JSON)
+                .delete()
+                .uri("/api/v1/carts/" + cartId)
+                .accept()
                 .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBodyList(CartResponseModel.class)
-                .value(result -> assertTrue(result.isEmpty()));  // Verifies that the list is empty
+                .expectStatus().isEqualTo(422);
+
+        verify(cartService, times(0)).deleteCartByCartId(cartId);
     }
 
-    @Test
-    public void whenGetAllCarts_andServiceFails_thenReturnServerError() {
-        // arrange
-        when(cartService.getAllCarts()).thenReturn(Flux.error(new RuntimeException("Internal Server Error")));
-
-        // act & assert
-        webTestClient
-                .get()
-                .uri("/api/v1/carts")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().is5xxServerError();  // Verifies that a 500 error is returned
-    }
 
 }
