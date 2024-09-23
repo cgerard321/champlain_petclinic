@@ -52,5 +52,15 @@ public class CartServiceClient {
                 .bodyToMono(CartResponseDTO.class);
     }
 
+    public CartResponseDTO createCart(CartRequestDTO cartRequestDTO) {
+        return webClientBuilder.build()
+                .post()
+                .uri(CartServiceUrl)
+                .bodyValue(cartRequestDTO)
+                .retrieve()
+                .bodyToMono(CartResponseDTO.class)
+                .block();
+    }
+
 }
 
