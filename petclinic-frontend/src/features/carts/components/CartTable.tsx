@@ -42,16 +42,17 @@ export default function CartListTable(): JSX.Element {
     fetchCarts();
   }, []);
 
-
-
   async function getAllCarts() {
     try {
-      const response = await fetch(`http://localhost:8080/api/v2/gateway/carts`, {
-        headers: {
-          Accept: 'application/json',
-        },
-        credentials: 'include',
-      });
+      const response = await fetch(
+        `http://localhost:8080/api/v2/gateway/carts`,
+        {
+          headers: {
+            Accept: 'application/json',
+          },
+          credentials: 'include',
+        }
+      );
 
       const carts = await response.json();
       setCarts(carts);
@@ -64,9 +65,8 @@ export default function CartListTable(): JSX.Element {
     }
   }
 
-
   const handleDelete = async (cartId: string) => {
-    if (window.confirm('Are you sure you want to delete this cart?')){
+    if (window.confirm('Are you sure you want to delete this cart?')) {
       try {
         await fetch(`http://localhost:8080/api/v2/gateway/carts/${cartId}`, {
           method: 'DELETE',
@@ -75,15 +75,14 @@ export default function CartListTable(): JSX.Element {
           },
           credentials: 'include',
         });
-        console.log('Cart Deleted Successfully')
 
         const updatedCarts = await getAllCarts();
-        setCarts(updatedCarts);
+        setCarts(updatedCarts)
       } catch (err){
         console.error('Error deleting cart', err);
       }
     }
-  }
+  };
 
   return (
     <div className="cart-list-container">
@@ -113,14 +112,16 @@ export default function CartListTable(): JSX.Element {
                     View Cart
                   </Link>
                 </td>
-                { <td>
-                  <button
-                    className="delete-button"
-                    onClick={() => handleDelete(cart.cartId)}
-                  >
-                    Delete
-                  </button>
-                </td> }
+                {
+                  <td>
+                    <button
+                      className="delete-button"
+                      onClick={() => handleDelete(cart.cartId)}
+                    >
+                      Delete
+                    </button>
+                  </td>
+                }
               </tr>
             ))}
           </tbody>
