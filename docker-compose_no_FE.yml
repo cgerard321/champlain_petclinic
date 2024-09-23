@@ -210,6 +210,19 @@ services:
     environment:
       - PMA_ARBITRARY=1
 
+  phpmyadmin-emailing-service:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin-emailing-service
+    restart: always
+    ports:
+      - "5019:80"
+    environment:
+      - PMA_HOST=emailing-service-mysql-db
+      - MYSQL_ROOT_PASSWORD=Your_password123
+    depends_on:
+      - emailing-service
+      - emailing-service-mysql-db
+
   # vet mongo container
   mongo:
     image: mongo

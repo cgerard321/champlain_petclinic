@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Template</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        .email-container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .email-header {
+            background-image: url('https://image.pbs.org/bento3-prod/_clipboard/pbreen/f991056c16_1221sm_Vegas-PBS-Veterinary-Assistant_1920x1080.jpg');
+            background-size: cover;
+            background-position: center;
+            color: #ffffff;
+            padding: 40px 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .email-header h1 {
+            margin: 0;
+            font-size: 28px;
+            background: rgba(0, 0, 0, 0.5); /* Optional: Adds a dark overlay behind text */
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 5px;
+        }
+
+        .email-body {
+            padding: 20px;
+            color: #333333;
+        }
+
+        .email-body p {
+            margin: 10px 0;
+        }
+
+        .email-footer {
+            background-color: #f4f4f4;
+            color: #777777;
+            text-align: center;
+            padding: 15px;
+            font-size: 12px;
+            border-top: 1px solid #dddddd;
+        }
+
+        .email-footer a {
+            color: #4CAF50;
+            text-decoration: none;
+        }
+
+        .email-button {
+            display: inline-block;
+            background-color: #4CAF50;
+            color: #ffffff;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+<div class="email-container">
+    <div class="email-header">
+        <h1>%%EMAIL_HEADER%%</h1>
+    </div>
+    <div class="email-body">
+        <p>Dear %%EMAIL_NAME%%,</p>
+        <p>%%EMAIL_BODY%%</p>
+        <p>Regards,<br>%%EMAIL_SENDER%%</p>
+        <a href="%%CALL_TO_ACTION_URL%%" class="email-button">%%CALL_TO_ACTION_TEXT%%</a>
+    </div>
+    <div class="email-footer">
+        <p>%%EMAIL_FOOTER%%</p>
+        <a href="%%PRIVACY_POLICY_URL%%">Privacy Policy</a>
+    </div>
+</div>
+</body>
+
+</html>

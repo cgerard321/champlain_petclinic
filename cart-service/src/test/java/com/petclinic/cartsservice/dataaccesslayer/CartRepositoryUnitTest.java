@@ -105,6 +105,35 @@ class CartRepositoryUnitTest {
 
     }
 
+    @Test
+    void deleteCartByCartId_withExistingId_thenReturnSuccess() {
+        StepVerifier.create(cartRepository.save(cart1))
+                        .consumeNextWith(insertedCart -> {
+                            assertNotNull(insertedCart);
+                            assertEquals(cart1.getCartId(), insertedCart.getCartId());
+                        })
+                                .verifyComplete();
+
+        StepVerifier
+                .create(cartRepository.delete(cart1))
+                .expectNextCount(0)
+                .verifyComplete();
+    }
+
+    @Test
+    void deleteCartByCartId_withNonExistentId_thenReturnEmpty() {
+        StepVerifier.create(cartRepository.deleteById(nonExistentCartId))
+                .verifyComplete();
+
+        StepVerifier.create(cartRepository.findCartByCartId(nonExistentCartId))
+                .expectNextCount(0)
+                .verifyComplete();
+    }
+
+
+
+
+
 //    @Test
 //    void findCartByCartId_withExistingId_thenReturnCart() {
 //        StepVerifier
