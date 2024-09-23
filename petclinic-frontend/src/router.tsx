@@ -35,6 +35,8 @@ import MockPage from '@/pages/Inventory/MockPage.tsx';
 import InventorySupplies from '@/features/inventories/InventorySupplies.tsx';
 
 import EditingVisit from './features/visits/models/EditingVisit';
+import MockPage from '@/pages/Inventory/MockPage.tsx';
+import InventorySupplies from '@/features/inventories/InventorySupplies.tsx';
 
 const router = createBrowserRouter([
   {

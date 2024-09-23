@@ -14,7 +14,7 @@ export default function Inventories(): JSX.Element {
   return (
     <div>
       <NavBar />
-      <h1>Inventories</h1>
+      <h1>InventoriesGG</h1>
       <InventoriesListTable />
       <button onClick={handleButtonClick}>Go to MockPage</button>
     </div>
