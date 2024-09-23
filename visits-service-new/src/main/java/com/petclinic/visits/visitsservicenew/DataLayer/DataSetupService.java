@@ -25,8 +25,15 @@ public class DataSetupService implements CommandLineRunner {
      * This is an event function ran at the start to populate visitRepo. Sort of like a main
      * @throws Exception
      */
+    /**
+     * This is an event function ran at the start to populate visitRepo. Sort of like a main
+     * @throws Exception
+     */
     @Override
     public void run(String... args) throws Exception {
+       setupVisits();
+       setupReviews();
+
        setupVisits();
        setupReviews();
 
@@ -38,7 +45,7 @@ public class DataSetupService implements CommandLineRunner {
         Flux.just(review1)
                 .flatMap(reviewRepository::insert)
                 .subscribe();
-    }
+        }
 
     private void setupVisits(){
         Visit visit1 = buildVisit("visitId1", "2022-11-24 13:00", "this is a dummy description", "ecb109cd-57ea-4b85-b51e-99751fd1c349", "69f852ca-625b-11ee-8c99-0242ac120002", Status.COMPLETED, LocalDateTime.parse("2022-11-24 13:00", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")).plusHours(1));
@@ -80,4 +87,3 @@ public class DataSetupService implements CommandLineRunner {
                 .build();
     }
 }
-//VLAD
