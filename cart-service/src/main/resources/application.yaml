@@ -52,3 +52,19 @@ spring:
       authentication-database: admin
 
 server.port: 8080
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: local
+
+  data:
+    mongodb:
+      host: localhost
+      port: 27022
+      database: carts
+      username: root
+      password: password
+      authentication-database: admin
