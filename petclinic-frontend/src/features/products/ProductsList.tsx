@@ -106,104 +106,104 @@ export default function ProductList(): JSX.Element {
   };
 
   return (
-      <div className="product-list-container">
-        {isSidebarOpen && (
-            <div className="overlay" onClick={handleOverlayClick}></div>
-        )}
+    <div className="product-list-container">
+      {isSidebarOpen && (
+        <div className="overlay" onClick={handleOverlayClick}></div>
+      )}
 
-        <div
-            className={`sidebar ${isSidebarOpen ? 'open' : ''}`}
-            id="sidebar"
-            aria-hidden={!isSidebarOpen}
+      <div
+        className={`sidebar ${isSidebarOpen ? 'open' : ''}`}
+        id="sidebar"
+        aria-hidden={!isSidebarOpen}
+      >
+        <button
+          className="close-button"
+          onClick={toggleSidebar}
+          aria-label="Close Filters"
         >
-          <button
-              className="close-button"
-              onClick={toggleSidebar}
-              aria-label="Close Filters"
-          >
-            &times;
+          &times;
+        </button>
+        <div className="filter-container">
+          <h2>Filters</h2>
+          <label>
+            Min Price:
+            <input
+              type="number"
+              value={minPrice ?? typeof 'number'}
+              onChange={e =>
+                setMinPrice(
+                  e.target.value ? parseFloat(e.target.value) : undefined
+                )
+              }
+              min="0"
+              placeholder="e.g., 10"
+            />
+          </label>
+          <label>
+            Max Price:
+            <input
+              type="number"
+              value={maxPrice ?? typeof 'number'}
+              onChange={e =>
+                setMaxPrice(
+                  e.target.value ? parseFloat(e.target.value) : undefined
+                )
+              }
+              min="0"
+              placeholder="e.g., 100"
+            />
+          </label>
+          <button className="apply-filter-button" onClick={fetchProducts}>
+            Apply Filter
           </button>
-          <div className="filter-container">
-            <h2>Filters</h2>
-            <label>
-              Min Price:
-              <input
-                  type="number"
-                  value={minPrice ?? typeof 'number'}
-                  onChange={e =>
-                      setMinPrice(
-                          e.target.value ? parseFloat(e.target.value) : undefined
-                      )
-                  }
-                  min="0"
-                  placeholder="e.g., 10"
-              />
-            </label>
-            <label>
-              Max Price:
-              <input
-                  type="number"
-                  value={maxPrice ?? typeof 'number'}
-                  onChange={e =>
-                      setMaxPrice(
-                          e.target.value ? parseFloat(e.target.value) : undefined
-                      )
-                  }
-                  min="0"
-                  placeholder="e.g., 100"
-              />
-            </label>
-            <button className="apply-filter-button" onClick={fetchProducts}>
-              Apply Filter
-            </button>
-            <button className="clear-filter-button" onClick={clearFilters}>
-              Clear Filters
-            </button>
-          </div>
+          <button className="clear-filter-button" onClick={clearFilters}>
+            Clear Filters
+          </button>
         </div>
+      </div>
 
-        {!isSidebarOpen && (
-            <button
-                className="toggle-sidebar-button"
-                onClick={toggleSidebar}
-                aria-expanded={isSidebarOpen}
-                aria-controls="sidebar"
-            >
-              &#9776; Filters
-            </button>
-        )}
+      {!isSidebarOpen && (
+        <button
+          className="toggle-sidebar-button"
+          onClick={toggleSidebar}
+          aria-expanded={isSidebarOpen}
+          aria-controls="sidebar"
+        >
+          &#9776; Filters
+        </button>
+      )}
 
-        {isRightRole && <AddProduct addProduct={handleAddProduct} />}
-        <div className="main-content">
+      {isRightRole && <AddProduct addProduct={handleAddProduct} />}
+      <div className="main-content">
+        <div className="grid">
+          {isLoading ? (
+            <p>Loading products...</p>
+          ) : productList.length > 0 ? (
+            productList.map((product: ProductModel) => (
+              <div
+                key={product.productId}
+                onClick={() => handleProductClick(product)}
+              >
+                <Product key={product.productId} product={product} />
+              </div>
+            ))
+          ) : (
+            <p>No products found.</p>
+          )}
+        </div>
+        <div>
+          <h2>Recently Clicked Products</h2>
           <div className="grid">
-            {isLoading ? (
-                <p>Loading products...</p>
-            ) : productList.length > 0 ? (
-                productList.map((product: ProductModel) => (
-                    <div
-                        key={product.productId}
-                        onClick={() => handleProductClick(product)}
-                    >
-                      <Product key={product.productId} product={product} />
-                    </div>
-                ))
-            ) : (
-                <p>No products found.</p>
-            )}
-          </div>
-          <div>
-            <h2>Recently Clicked Products</h2>
-            <div className="grid">
-              {recentlyClickedProducts.map(product => (
-                  <div className="card" key={product.productId}>
-                    <h2>{product.productName}</h2>
-                    <p>{product.productDescription}</p>
-                    <p>Price: ${product.productSalePrice.toFixed(2)}</p>
-                  </div>
-              ))}
-            </div>
+            {recentlyClickedProducts.map(product => (
+              <div className="card" key={product.productId}>
+                <h2>{product.productName}</h2>
+                <p>{product.productDescription}</p>
+                <p>Price: ${product.productSalePrice.toFixed(2)}</p>
+              </div>
+            ))}
           </div>
         </div>
       </div>
+    </div>
   );
 }
