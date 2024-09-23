@@ -1,14 +1,17 @@
 package com.petclinic.inventoryservice.utils;
 
 import com.petclinic.inventoryservice.datalayer.Inventory.Inventory;
+import com.petclinic.inventoryservice.datalayer.Inventory.InventoryName;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryType;
 import com.petclinic.inventoryservice.datalayer.Product.Product;
-import com.petclinic.inventoryservice.datalayer.Product.Status;
+import com.petclinic.inventoryservice.datalayer.Supply.Status;
+import com.petclinic.inventoryservice.datalayer.Supply.Supply;
 import com.petclinic.inventoryservice.presentationlayer.*;
 import org.springframework.beans.BeanUtils;
 
-import java.util.Random;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class EntityDTOUtil {
 
@@ -35,6 +38,28 @@ public class EntityDTOUtil {
                 .status(status)
                 .build();
     }
+
+    public static SupplyResponseDTO toSupplyResponseDTO(Supply supply) {
+        Status status;
+        if (supply.getSupplyQuantity() == 0) {
+            status = Status.OUT_OF_STOCK;
+        } else if (supply.getSupplyQuantity() < 20) {
+            status = Status.RE_ORDER;
+        } else {
+            status = Status.AVAILABLE;
+        }
+
+        return SupplyResponseDTO.builder()
+                .supplyId(supply.getSupplyId())
+                .inventoryId(supply.getInventoryId())
+                .supplyName(supply.getSupplyName())
+                .supplyDescription(supply.getSupplyDescription())
+                .supplyPrice(supply.getSupplyPrice())
+                .supplyQuantity(supply.getSupplyQuantity())
+                .supplySalePrice(supply.getSupplySalePrice())
+                .status(status)
+                .build();
+    }
 //    public static ProductResponseDTO toProductResponseDTO(Product product){
 //        ProductResponseDTO productResponseDTO = new ProductResponseDTO();
 //        BeanUtils.copyProperties(product, productResponseDTO);
@@ -45,11 +70,36 @@ public class EntityDTOUtil {
         BeanUtils.copyProperties(productRequestDTO, product);
         return product;
     }
+
+    public static Supply toSupplyEntity(SupplyRequestDTO supplyRequestDTO) {
+        return Supply.builder()
+                .supplyName(supplyRequestDTO.getSupplyName())
+                .supplyDescription(supplyRequestDTO.getSupplyDescription())
+                .supplyQuantity(supplyRequestDTO.getSupplyQuantity())
+                .supplyPrice(supplyRequestDTO.getSupplyPrice())
+                .supplySalePrice(supplyRequestDTO.getSupplySalePrice())
+                .build();
+    }
+
     public static InventoryResponseDTO toInventoryResponseDTO(Inventory inventory){
         InventoryResponseDTO inventoryResponseDTO = new InventoryResponseDTO();
         BeanUtils.copyProperties(inventory, inventoryResponseDTO);
+        List<SupplyResponseDTO> supplyResponseDTOs = inventory.getSupplies().stream()
+                .map(supply -> new SupplyResponseDTO(
+                        supply.getSupplyId(),
+                        supply.getInventoryId(),
+                        supply.getSupplyName(),
+                        supply.getSupplyDescription(),
+                        supply.getSupplyPrice(),
+                        supply.getSupplyQuantity(),
+                        supply.getSupplySalePrice(),
+                        supply.getStatus()
+                ))
+                .collect(Collectors.toList());
+        inventoryResponseDTO.setSupplies(supplyResponseDTOs);
         return inventoryResponseDTO;
     }
+
     public static Inventory toInventoryEntity(InventoryRequestDTO inventoryResponseDTO){
         Inventory inventory = new Inventory();
         BeanUtils.copyProperties(inventoryResponseDTO, inventory);
@@ -60,10 +110,23 @@ public class EntityDTOUtil {
         BeanUtils.copyProperties(inventoryTypeRequestDTO, inventoryType);
         return inventoryType;
     }
+
+    public static InventoryName toInventoryNameEntity(InventoryNameRequestDTO inventoryNameRequestDTO){
+        InventoryName inventoryName = new InventoryName();
+        BeanUtils.copyProperties(inventoryNameRequestDTO, inventoryName);
+        return inventoryName;
+    }
+
     public static InventoryTypeResponseDTO toInventoryTypeResponseDTO(InventoryType inventoryType){
         InventoryTypeResponseDTO inventoryTypeResponseDTO = new InventoryTypeResponseDTO();
         BeanUtils.copyProperties(inventoryType, inventoryTypeResponseDTO);
         return inventoryTypeResponseDTO;
+    }
+
+    public static InventoryNameResponseDTO toInventoryNameResponseDTO(InventoryName inventoryName){
+        InventoryNameResponseDTO inventoryNameResponseDTO = new InventoryNameResponseDTO();
+        BeanUtils.copyProperties(inventoryName, inventoryNameResponseDTO);
+        return inventoryNameResponseDTO;
     }
 
     public static String generateUUID(){
