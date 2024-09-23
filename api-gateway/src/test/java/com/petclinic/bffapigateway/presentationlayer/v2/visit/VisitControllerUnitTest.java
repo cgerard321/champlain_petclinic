@@ -304,7 +304,7 @@ public class VisitControllerUnitTest {
         String visitId = "visitId4";
 
         VisitRequestDTO newVisitRequestDTO = VisitRequestDTO.builder()
-                .visitDate(LocalDateTime.of(2023, 10, 10, 10, 0))
+                .visitStartDate(LocalDateTime.of(2023, 10, 10, 10, 0))
                 .description("Routine check-up")
                 .petId("0e4d8481-b611-4e52-baed-af16caa8bf8a")
                 .practitionerId("69f85d2e-625b-11ee-8c99-0242ac120002")
@@ -313,7 +313,7 @@ public class VisitControllerUnitTest {
 
         VisitResponseDTO updatedVisitResponseDTO = VisitResponseDTO.builder()
                 .visitId(visitId)
-                .visitDate(newVisitRequestDTO.getVisitDate())
+                .visitStartDate(newVisitRequestDTO.getVisitStartDate())
                 .description(newVisitRequestDTO.getDescription())
                 .petId(newVisitRequestDTO.getPetId())
                 .practitionerId(newVisitRequestDTO.getPractitionerId())
@@ -341,7 +341,7 @@ public class VisitControllerUnitTest {
                 .expectNextMatches(visitResponseDTO -> {
                     assertNotNull(visitResponseDTO);
                     assertNotNull(visitResponseDTO.getVisitId());
-                    assertEquals(newVisitRequestDTO.getVisitDate(), visitResponseDTO.getVisitDate());
+                    assertEquals(newVisitRequestDTO.getVisitStartDate(), visitResponseDTO.getVisitStartDate());
                     assertEquals(newVisitRequestDTO.getDescription(), visitResponseDTO.getDescription());
                     assertEquals(newVisitRequestDTO.getPetId(), visitResponseDTO.getPetId());
                     assertEquals(newVisitRequestDTO.getPractitionerId(), visitResponseDTO.getPractitionerId());
@@ -360,7 +360,7 @@ public class VisitControllerUnitTest {
         String nonExistentVisitId = "invalidVisitId";
 
         VisitRequestDTO visitUpdateRequest = VisitRequestDTO.builder()
-                .visitDate(LocalDateTime.parse("2022-01-15T10:30"))
+                .visitStartDate(LocalDateTime.parse("2022-01-15T10:30"))
                 .description("Updated description for a non-existent visit.")
                 .petId("1")
                 .practitionerId("2")
