@@ -42,12 +42,48 @@ export default function CartListTable(): JSX.Element {
     fetchCarts();
   }, []);
 
-  // const handleDelete = (cartId: string) => {
-  //   if (window.confirm('Are you sure you want to delete this cart?')) {
-  //     // TODO: Implement cart deletion logic
-  //     console.log(`Deleting cart with ID: ${cartId}`);
-  //   }
-  // };
+
+
+  async function getAllCarts() {
+    try {
+      const response = await fetch(`http://localhost:8080/api/v2/gateway/carts`, {
+        headers: {
+          Accept: 'application/json',
+        },
+        credentials: 'include',
+      });
+
+      const carts = await response.json();
+      setCarts(carts);
+      setLoading(false);
+
+      return carts;
+    } catch (error) {
+      console.error('Error fetching carts:', error);
+      throw error;
+    }
+  }
+
+
+  const handleDelete = async (cartId: string) => {
+    if (window.confirm('Are you sure you want to delete this cart?')){
+      try {
+        await fetch(`http://localhost:8080/api/v2/gateway/carts/${cartId}`, {
+          method: 'DELETE',
+          headers: {
+            Accept: 'application/json',
+          },
+          credentials: 'include',
+        });
+        console.log('Cart Deleted Successfully')
+
+        const updatedCarts = await getAllCarts();
+        setCarts(updatedCarts);
+      } catch (err){
+        console.error('Error deleting cart', err);
+      }
+    }
+  }
 
   return (
     <div className="cart-list-container">
@@ -77,14 +113,14 @@ export default function CartListTable(): JSX.Element {
                     View Cart
                   </Link>
                 </td>
-                {/* <td>
+                { <td>
                   <button
                     className="delete-button"
                     onClick={() => handleDelete(cart.cartId)}
                   >
                     Delete
                   </button>
-                </td> */}
+                </td> }
               </tr>
             ))}
           </tbody>
