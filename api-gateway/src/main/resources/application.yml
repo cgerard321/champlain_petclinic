@@ -79,7 +79,6 @@ app:
   emailing-service:
     host: emailing-service
     port: 5115
-
   cart-service:
     host: cart-service
     port: 8080

@@ -1,7 +1,7 @@
 import { NavBar } from '@/layouts/AppNavBar.tsx';
 import EmailingListTable from '@/features/Emailing/EmailingListTable.tsx';
 
-export default function Inventories(): JSX.Element {
+export default function EmailingPage(): JSX.Element {
   return (
     <div>
       <NavBar />

@@ -32,8 +32,9 @@ public class EmailingController {
     public Flux<EmailModelResponseDTO> getAllEmails() {
         return emailingService.getAllEmails();
     }
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
 
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @PostMapping(
         value = "/template/{templateName}",
         consumes= MediaType.TEXT_HTML_VALUE,

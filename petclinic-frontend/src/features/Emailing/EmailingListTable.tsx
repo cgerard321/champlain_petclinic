@@ -1,78 +1,80 @@
-import { FC, useEffect, useState } from 'react';
-import './EmailingListTable.css';
-// Example interface for EmailModelResponseDTO
-interface EmailModelResponseDTO {
-  id: number;
-  email: string;
-  subject: string;
-  body: string; // HTML body
-  emailStatus: string;
-}
+import { useState, useEffect } from 'react';
+import { EmailModelResponseDTO } from '@/features/Emailing/Model/EmailResponse.ts';
+import { getAllEmails } from '@/features/Emailing/Api/GetAllEmails.tsx';
 
-const EmailingListTable: FC = () => {
+export default function EmailListTable(): JSX.Element {
   const [emails, setEmails] = useState<EmailModelResponseDTO[]>([]);
-  const [selectedBody, setSelectedBody] = useState<string | null>(null);
+  const [selectedEmailBody, setSelectedEmailBody] = useState<string | null>(
+    null
+  );
 
-  // Placeholder fetch function to get data from an endpoint
+  const fetchEmails = async (): Promise<void> => {
+    try {
+      const data = await getAllEmails();
+      setEmails(data);
+    } catch (error) {
+      console.error('Error fetching emails:', error);
+      setEmails([]); // Default to an empty array on error
+    }
+  };
+
   useEffect(() => {
-    const fetchEmails = async (): Promise<void> => {
-      try {
-        const response = await fetch(
-          'http://localhost:8080/api/v2/gateway/emailing'
-        );
-        const data: EmailModelResponseDTO[] = await response.json();
-        setEmails(data);
-      } catch (error) {
-        console.error('Failed to fetch emails:', error);
-      }
-    };
-
-    fetchEmails();
+    fetchEmails(); // Call the async function to fetch emails
   }, []);
-  const handleShowBody = (body: string): void => {
-    setSelectedBody(body);
+
+  const openPopup = (htmlBody: string): void => {
+    setSelectedEmailBody(htmlBody);
   };
-  const handleClosePopup = (): void => {
-    setSelectedBody(null);
+
+  const closePopup = (): void => {
+    setSelectedEmailBody(null);
   };
+
+  const renderTable = (emails: EmailModelResponseDTO[]): JSX.Element => (
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Email</th>
+          <th>Subject</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {emails.map(email => (
+          <tr key={email.id}>
+            <td>{email.id}</td>
+            <td>{email.email}</td>
+            <td>{email.subject}</td>
+            <td>{email.emailStatus}</td>
+            <td>
+              <button
+                className="btn btn-dark"
+                onClick={() => openPopup(email.body)}
+              >
+                Show Body
+              </button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+
   return (
     <div>
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Email</th>
-            <th>Subject</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {emails.map(email => (
-            <tr key={email.id}>
-              <td>{email.id}</td>
-              <td>{email.email}</td>
-              <td>{email.subject}</td>
-              <td>{email.emailStatus}</td>
-              <td>
-                <button onClick={() => handleShowBody(email.body)}>Show</button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      {/* Popup for displaying the HTML body */}
-      {selectedBody && (
+      {renderTable(emails)}
+      {selectedEmailBody && (
         <div className="popup">
           <div className="popup-content">
-            <button onClick={handleClosePopup}>Close</button>
-            <div dangerouslySetInnerHTML={{ __html: selectedBody }} />
+            <button className="close-btn" onClick={closePopup}>
+              Close
+            </button>
+            <div dangerouslySetInnerHTML={{ __html: selectedEmailBody }} />
           </div>
         </div>
       )}
     </div>
   );
-};
-
-export default EmailingListTable;
+}
