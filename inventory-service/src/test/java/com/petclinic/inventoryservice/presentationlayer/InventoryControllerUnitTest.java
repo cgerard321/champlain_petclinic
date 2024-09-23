@@ -135,6 +135,17 @@ class InventoryControllerUnitTest {
             .supplyDescription("Non-steroidal pain relief medication")
             .supplySalePrice(140.00)
             .build();
+  
+      ProductResponseDTO lowStockProduct = ProductResponseDTO.builder()
+            .id("1")
+            .inventoryId("inventoryId_1")
+            .productId("productId_1")
+            .productName("Low Stock Product")
+            .productQuantity(5)
+            .productPrice(100.00)
+            .build();
+
+    List<ProductResponseDTO> lowStockProducts = List.of(lowStockProduct);
 
 
 //    @Test
@@ -1414,26 +1425,100 @@ class InventoryControllerUnitTest {
                 .updateProductInInventory(any(), eq(inventoryId), eq(productId));
 
 
-
     }
 
+    @Test
+    void getLowStockProducts_WithDefaultThreshold_ShouldReturnLowStockProducts() {
+        // Arrange
+        String inventoryId = "inventoryId_1";
+        int defaultThreshold = 16;
 
+        when(productInventoryService.getLowStockProducts(inventoryId, defaultThreshold))
+                .thenReturn(Flux.fromIterable(lowStockProducts));
 
+        // Act & Assert
+        webTestClient.get()
+                .uri("/inventory/{inventoryId}/products/lowstock", inventoryId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBodyList(ProductResponseDTO.class)
+                .value(products -> {
+                    assertNotNull(products);
+                    assertEquals(1, products.size());
+                    assertEquals(lowStockProduct.getProductName(), products.get(0).getProductName());
+                    assertEquals(lowStockProduct.getProductQuantity(), products.get(0).getProductQuantity());
+                });
 
+        verify(productInventoryService, times(1)).getLowStockProducts(inventoryId, defaultThreshold);
+    }
 
+    @Test
+    void getLowStockProducts_WithCustomThreshold_ShouldReturnLowStockProducts() {
+        // Arrange
+        String inventoryId = "inventoryId_1";
+        int customThreshold = 10;
 
+        when(productInventoryService.getLowStockProducts(inventoryId, customThreshold))
+                .thenReturn(Flux.fromIterable(lowStockProducts));
 
+        // Act & Assert
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder.path("/inventory/{inventoryId}/products/lowstock")
+                        .queryParam("threshold", String.valueOf(customThreshold))
+                        .build(inventoryId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBodyList(ProductResponseDTO.class)
+                .value(products -> {
+                    assertNotNull(products);
+                    assertEquals(1, products.size());
+                    assertEquals(lowStockProduct.getProductName(), products.get(0).getProductName());
+                    assertEquals(lowStockProduct.getProductQuantity(), products.get(0).getProductQuantity());
+                });
+
+        verify(productInventoryService, times(1)).getLowStockProducts(inventoryId, customThreshold);
+    }
+
+//    @Test
+//    void getLowStockProducts_WithInvalidInventoryId_ShouldReturnNotFound() {
+//        // Arrange
+//        String invalidInventoryId = "nonExistentInventory";
+//        int threshold = 16;
+//
+//        when(productInventoryService.getLowStockProducts(invalidInventoryId, threshold))
+//                .thenReturn(Flux.empty());
+//
+//        // Act & Assert
+//        webTestClient.get()
+//                .uri("/inventory/{inventoryId}/products/lowstock", invalidInventoryId)
+//                .accept(MediaType.APPLICATION_JSON)
+//                .exchange()
+//                .expectStatus().isNotFound();
+//
+//        verify(productInventoryService, times(1)).getLowStockProducts(invalidInventoryId, threshold);
+//    }
+
+//    @Test
+//    void getLowStockProducts_WithEmptyResult_ShouldReturnNoContent() {
+//        // Arrange
+//        String inventoryId = "inventoryId_2";
+//        int threshold = 16;
+//
+//        when(productInventoryService.getLowStockProducts(inventoryId, threshold))
+//                .thenReturn(Flux.empty());
+//
+//        // Act & Assert
+//        webTestClient.get()
+//                .uri("/inventory/{inventoryId}/products/lowstock", inventoryId)
+//                .accept(MediaType.APPLICATION_JSON)
+//                .exchange()
+//                .expectStatus().isNoContent();
+//
+//        verify(productInventoryService, times(1)).getLowStockProducts(inventoryId, threshold);
+//    }
 
 }
-
-
-
-
-
-
-
-
-
-
-
-

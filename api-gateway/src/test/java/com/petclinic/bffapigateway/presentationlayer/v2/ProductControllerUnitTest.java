@@ -17,8 +17,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 @RunWith(SpringRunner.class)
@@ -151,6 +150,34 @@ class ProductControllerUnitTest {
                 .expectStatus().isNoContent();
 
         verify(productsServiceClient, times(1)).deleteProduct("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a");
+    }
+
+    @Test
+    void whenGetAllProductsWithNegativeMinPrice_thenReturnBadRequest() {
+        webTestClient.get()
+                .uri("/api/v2/gateway/products?minPrice=-10")
+                .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody(String.class)
+                .value(response -> {
+                    assertNotNull(response);
+                    assertTrue(response.contains("Price values cannot be negative"));
+                });
+    }
+
+    @Test
+    void whenGetAllProductsWithMinPriceGreaterThanMaxPrice_thenReturnBadRequest() {
+        webTestClient.get()
+                .uri("/api/v2/gateway/products?minPrice=50&maxPrice=30")
+                .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody(String.class)
+                .value(response -> {
+                    assertNotNull(response);
+                    assertTrue(response.contains("minPrice cannot be greater than maxPrice"));
+                });
     }
 
 }
