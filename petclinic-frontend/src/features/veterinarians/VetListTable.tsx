@@ -1,13 +1,22 @@
 import { useEffect, useState } from 'react';
+<<<<<<< HEAD
 import { VetRequestModel } from '@/features/veterinarians/models/VetRequestModel.ts';
 import { useNavigate } from 'react-router-dom';
 import './VetListTable.css';
 import DeleteVet from '@/pages/Vet/DeleteVet.tsx';
+=======
+import { VetRequestModel } from '@/features/veterinarians/models/VetRequestModel';
+import UpdateVet from '@/pages/Vet/UpdateVet';
+>>>>>>> 68988608 (Added the front end for the PUT request and added my tests for that method for the api gateway.)
 
 export default function VetListTable(): JSX.Element {
   const [vets, setVets] = useState<VetRequestModel[]>([]);
   const [error, setError] = useState<string | null>(null);
+<<<<<<< HEAD
   const navigate = useNavigate(); // Use navigate to programmatically navigate
+=======
+  const [selectedVet, setSelectedVet] = useState<VetRequestModel | null>(null);
+>>>>>>> 68988608 (Added the front end for the PUT request and added my tests for that method for the api gateway.)
 
   useEffect(() => {
     const fetchVets = async (): Promise<void> => {
@@ -52,6 +61,7 @@ export default function VetListTable(): JSX.Element {
       {error ? (
         <p>{error}</p>
       ) : (
+<<<<<<< HEAD
         <table className="table table-striped">
           <thead>
             <tr>
@@ -79,10 +89,45 @@ export default function VetListTable(): JSX.Element {
                     onVetDeleted={event => handleVetDelete(event, vet.vetId)}
                   />
                 </td>
+=======
+        <>
+          <table className="table table-striped">
+            <thead>
+              <tr>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Specialties</th>
+                <th>Actions</th>
+>>>>>>> 68988608 (Added the front end for the PUT request and added my tests for that method for the api gateway.)
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {vets.map(vet => (
+                <tr key={vet.vetId}>
+                  <td>{vet.firstName}</td>
+                  <td>{vet.lastName}</td>
+                  <td>
+                    {vet.specialties
+                      .map(specialty => specialty.name)
+                      .join(', ')}
+                  </td>
+                  <td>
+                    <button
+                      className="btn btn-primary"
+                      onClick={() => setSelectedVet(vet)}
+                    >
+                      Update
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          {selectedVet && (
+            <UpdateVet vet={selectedVet} onClose={() => setSelectedVet(null)} />
+          )}
+        </>
       )}
     </div>
   );

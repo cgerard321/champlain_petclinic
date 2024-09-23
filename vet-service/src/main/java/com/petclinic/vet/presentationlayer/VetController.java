@@ -214,7 +214,7 @@ public class VetController {
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
-    
+
 
     @PutMapping("{vetId}")
     public Mono<ResponseEntity<VetResponseDTO>> updateVetByVetId(@PathVariable String vetId, @RequestBody Mono<VetRequestDTO> vetRequestDTOMono) {
