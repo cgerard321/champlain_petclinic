@@ -1,18 +1,12 @@
-
 package com.petclinic.bffapigateway.domainclientlayer;
 
-import com.petclinic.bffapigateway.dtos.Inventory.InventoryResponseDTO;
-import com.petclinic.bffapigateway.dtos.Inventory.InventoryRequestDTO;
-import com.petclinic.bffapigateway.dtos.Inventory.ProductRequestDTO;
-import com.petclinic.bffapigateway.dtos.Inventory.ProductResponseDTO;
+import com.petclinic.bffapigateway.dtos.Inventory.*;
 import com.petclinic.bffapigateway.exceptions.InvalidInputsInventoryException;
 import com.petclinic.bffapigateway.exceptions.InventoryNotFoundException;
 import com.petclinic.bffapigateway.exceptions.ProductListNotFoundException;
 import com.petclinic.bffapigateway.utils.Rethrower;
 import org.springframework.beans.factory.annotation.Autowired;
-import com.petclinic.bffapigateway.dtos.Inventory.*;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -22,26 +16,24 @@ import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-
-import java.nio.channels.FileChannel;
 import java.util.Optional;
 
-import static org.springframework.http.HttpStatus.*;
-
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @Component
-public class InventoryServiceClient {
+public class InventoryServiceClientV2 {
     private final WebClient webClient;
     private String inventoryServiceUrl;
     @Autowired
     private Rethrower rethrower;
 
-    public InventoryServiceClient(
+    public InventoryServiceClientV2(
             @Value("${app.inventory-service.host}") String inventoryServiceHost,
             @Value("${app.inventory-service.port}") String inventoryServicePort
     ) {
 
-        inventoryServiceUrl = "http://" + inventoryServiceHost + ":" + inventoryServicePort + "/inventory";
+        inventoryServiceUrl = "http://" + inventoryServiceHost + ":" + inventoryServicePort + "/inventoryV2";
         this.webClient = WebClient.builder()
                 .baseUrl(inventoryServiceUrl)
                 .build();

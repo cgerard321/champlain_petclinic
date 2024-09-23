@@ -5,14 +5,12 @@ import com.petclinic.bffapigateway.dtos.Inventory.*;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
-import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -24,10 +22,10 @@ import java.util.Optional;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping("/api/v2/gateway/inventories")
+@RequestMapping("/api/v2/gateway/inventoriesV2")
 @Validated
 @CrossOrigin(origins = "http://localhost:3000, http://localhost:80")
-public class InventoryController {
+public class InventoryControllerV2 {
     private final InventoryServiceClient inventoryServiceClient;
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER, Roles.VET})
@@ -99,9 +97,9 @@ public class InventoryController {
             @RequestBody InventoryRequestDTO inventoryRequestDTO) {
 
         return Mono.just(inventoryId)
-                .filter(id -> id.length() == 36)
+                .filter(id -> id.length() == 36) // Validate the review ID length
                 .switchIfEmpty(Mono.error(new InvalidInputException("Provided inventory ID is invalid: " + inventoryId)))
-                .flatMap(id -> inventoryServiceClient.updateInventory( inventoryRequestDTO,id))
+                .flatMap(id -> inventoryServiceClient.updateInventory( inventoryRequestDTO,id)) // Assuming `updateReview` method exists in `visitsServiceClient`
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
@@ -110,7 +108,7 @@ public class InventoryController {
     @GetMapping(value = "{inventoryId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<InventoryResponseDTO>> getInventoryById(@PathVariable String inventoryId) {
         return inventoryServiceClient.getInventoryById(inventoryId)
-                .map(product -> ResponseEntity.status(HttpStatus.OK).body(product))
+                .map(supply -> ResponseEntity.status(HttpStatus.OK).body(supply))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
@@ -150,7 +148,6 @@ public class InventoryController {
                     }
                 });
     }
-
 
 
 }
