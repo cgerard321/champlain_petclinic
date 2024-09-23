@@ -3,7 +3,6 @@ package com.petclinic.bffapigateway.domainclientlayer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.dtos.Cart.CartRequestDTO;
 import com.petclinic.bffapigateway.dtos.Cart.CartResponseDTO;
-import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterEach;
@@ -12,6 +11,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
+
 
 import java.io.IOException;
 import java.util.List;
@@ -27,8 +29,7 @@ public class CartServiceClientTest {
     MockWebServer mockWebServer;
 
     @BeforeEach
-    void setUp(){
-
+    void setUp() {
         mockWebServer = new MockWebServer();
         mockCartServiceClient = new CartServiceClient(
                 WebClient.builder(),
@@ -43,8 +44,7 @@ public class CartServiceClientTest {
     }
 
     @Test
-    void testCreateCart(){
-
+    void testCreateCart() {
         String body = """
                   {
                     "cartId":"98f7b33a-d62a-420a-a84a-05a27c85fc91"
@@ -59,8 +59,23 @@ public class CartServiceClientTest {
                 .setBody(body));
 
         final CartResponseDTO cartResponseDTO = mockCartServiceClient.createCart(cartRequestDTO);
-        assertEquals(cartResponseDTO.getCartId(),"98f7b33a-d62a-420a-a84a-05a27c85fc91");
+        assertEquals(cartResponseDTO.getCartId(), "98f7b33a-d62a-420a-a84a-05a27c85fc91");
+    }
 
+    @Test
+    void testClearCart_Success() {
+        // Arrange the server response for clear cart action
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(200)
+        );
+
+        // Act: Call the clearCart method
+        Mono<Void> clearCartResponse = mockCartServiceClient.clearCart("98f7b33a-d62a-420a-a84a-05a27c85fc91");
+
+        // Assert: Verify that the action completed successfully
+        StepVerifier.create(clearCartResponse)
+                .verifyComplete(); // Verify that no errors occurred
     }
 
     @Test
@@ -107,6 +122,5 @@ public class CartServiceClientTest {
         consumer.accept(response);
         this.mockWebServer.enqueue(response);
     }
-
 
 }
