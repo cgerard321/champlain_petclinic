@@ -159,11 +159,11 @@ public Flux<InventoryResponseDTO> searchInventories(
     return productInventoryService.getAllInventoryTypes();
     }
 
+
     @GetMapping("/name")
     public Flux<InventoryNameResponseDTO> getAllInventoryNames(){
         return productInventoryService.getAllInventoryNames();
     }
-
 
 
     @PostMapping("/{inventoryName}/supplies")
@@ -185,6 +185,11 @@ public Flux<InventoryResponseDTO> searchInventories(
                         : ResponseEntity.ok(supplies)
                 );
     }
+  
+    @GetMapping("/{inventoryId}/products/lowstock")
+    public Flux<ProductResponseDTO> getLowStockProducts(@PathVariable String inventoryId, @RequestParam Optional<Integer> threshold) {
+        int stockThreshold = threshold.orElse(16);
+        return productInventoryService.getLowStockProducts(inventoryId, stockThreshold);
 
 }
-
+}
