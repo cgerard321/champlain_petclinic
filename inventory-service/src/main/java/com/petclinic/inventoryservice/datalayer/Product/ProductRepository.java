@@ -23,4 +23,5 @@ public interface ProductRepository extends ReactiveMongoRepository<Product, Stri
    //Regex
     Flux<Product> findAllProductsByInventoryIdAndProductNameRegex(String inventoryId, String regex);
 
+    Flux<Product> findAllByInventoryIdAndProductQuantityLessThan(String inventoryId, int productQuantity);
 }

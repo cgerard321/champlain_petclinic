@@ -409,6 +409,14 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                 .switchIfEmpty(Mono.error(new NotFoundException("Inventory id:" + inventoryId + "and product:" + productId + "are not found")));
     }
 
+    @Override
+    public Flux<ProductResponseDTO> getLowStockProducts(String inventoryId, int stockThreshold) {
+        return productRepository
+                .findAllByInventoryIdAndProductQuantityLessThan(inventoryId, stockThreshold)
+                .map(EntityDTOUtil::toProductResponseDTO)
+                .switchIfEmpty(Mono.error(new NotFoundException("No products below threshold in inventory: " + inventoryId)));
+    }
+
     //delete all products and delete all inventory
     @Override
     public Mono<Void> deleteAllProductInventory (String inventoryId){
@@ -440,5 +448,7 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
         return inventoryTypeRepository.findAll()
                 .map(EntityDTOUtil::toInventoryTypeResponseDTO);
     }
+
+
 }
 

@@ -96,6 +96,16 @@ class ProductInventoryServiceUnitTest {
             .productSalePrice(15.99)
             .build();
 
+    Product lowStockProduct = Product.builder()
+            .productId("12346")
+            .inventoryId("1")
+            .productName("Ibuprofen")
+            .productDescription("Pain reliever")
+            .productPrice(50.00)
+            .productQuantity(3) // low stock
+            .productSalePrice(8.99)
+            .build();
+
     @Test
     void getProductsInInventoryByInventoryIdAndProductFieldPagination_ShouldSucceed(){
         Pageable pageable = PageRequest.of(0, 2);
@@ -1225,9 +1235,81 @@ class ProductInventoryServiceUnitTest {
 //                .verify();
 //    }
 
+    @Test
+    void getLowStockProducts_WithLowStock_ShouldReturnResults() {
+        // Arrange
+        String inventoryId = "1";
+        int stockThreshold = 5;
 
+        when(productRepository.findAllByInventoryIdAndProductQuantityLessThan(inventoryId, stockThreshold))
+                .thenReturn(Flux.just(lowStockProduct));
 
+        // Act
+        Flux<ProductResponseDTO> result = productInventoryService.getLowStockProducts(inventoryId, stockThreshold);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNextMatches(product -> product.getProductQuantity() < stockThreshold)
+                .verifyComplete();
+    }
+
+    @Test
+    void getLowStockProducts_NoLowStock_ShouldReturnEmpty() {
+        // Arrange
+        String inventoryId = "1";
+        int stockThreshold = 2;  // All products have stock >= 2
+
+        when(productRepository.findAllByInventoryIdAndProductQuantityLessThan(inventoryId, stockThreshold))
+                .thenReturn(Flux.empty());
+
+        // Act
+        Flux<ProductResponseDTO> result = productInventoryService.getLowStockProducts(inventoryId, stockThreshold);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectError(NotFoundException.class)
+                .verify();
+    }
+
+    @Test
+    void getLowStockProducts_WithNoMatchingInventory_ShouldThrowNotFound() {
+        // Arrange
+        String invalidInventoryId = "999";
+        int stockThreshold = 5;
+
+        when(productRepository.findAllByInventoryIdAndProductQuantityLessThan(invalidInventoryId, stockThreshold))
+                .thenReturn(Flux.empty());
+
+        // Act
+        Flux<ProductResponseDTO> result = productInventoryService.getLowStockProducts(invalidInventoryId, stockThreshold);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectError(NotFoundException.class)
+                .verify();
+    }
+
+    @Test
+    void getLowStockProducts_MultipleProductsBelowThreshold_ShouldReturnAll() {
+        // Arrange
+        String inventoryId = "1";
+        int stockThreshold = 10;
+
+        when(productRepository.findAllByInventoryIdAndProductQuantityLessThan(inventoryId, stockThreshold))
+                .thenReturn(Flux.just(lowStockProduct, product));
+
+        // Act
+        Flux<ProductResponseDTO> result = productInventoryService.getLowStockProducts(inventoryId, stockThreshold);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNextCount(2)
+                .verifyComplete();
+    }
 }
+
+
+
 
 
 
