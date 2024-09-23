@@ -34,6 +34,10 @@ export default function InventoriesListTable(): JSX.Element {
     setShowAddSupplyModal(prev => !prev);
   };
 
+  const toggleAddSupplyModal = (): void => {
+    setShowAddSupplyModal(prev => !prev);
+  };
+
   const {
     inventoryList,
     setInventoryList,
@@ -394,12 +398,6 @@ export default function InventoriesListTable(): JSX.Element {
         }}
       >
         Delete All Inventories
-      </button>
-      <button
-        className="add-inventory-button btn btn-success"
-        onClick={() => {}}
-      >
-        Add Inventory
       </button>
       <button
         className="low-stock-button btn btn-warning mx-1"

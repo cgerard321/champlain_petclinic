@@ -292,7 +292,7 @@ public class InventoryServiceClient {
                 .retrieve()
                 .bodyToFlux(SupplyResponseDTO.class);
     }
-  
+
   public Flux<ProductResponseDTO> getLowStockProducts(String inventoryId, int stockThreshold) {
         UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(inventoryServiceUrl + "/{inventoryId}/products/lowstock")
                 .queryParam("threshold", stockThreshold);

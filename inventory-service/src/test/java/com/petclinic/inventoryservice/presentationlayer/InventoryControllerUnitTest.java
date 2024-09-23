@@ -135,7 +135,7 @@ class InventoryControllerUnitTest {
             .supplyDescription("Non-steroidal pain relief medication")
             .supplySalePrice(140.00)
             .build();
-  
+
       ProductResponseDTO lowStockProduct = ProductResponseDTO.builder()
             .id("1")
             .inventoryId("inventoryId_1")
