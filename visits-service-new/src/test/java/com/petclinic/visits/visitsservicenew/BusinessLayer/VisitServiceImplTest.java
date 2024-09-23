@@ -580,7 +580,7 @@ class VisitServiceImplTest {
         //arrange
         String visitId = "73b5c112-5703-4fb7-b7bc-ac8186811ae1";
 
-        Mockito.when(visitRepo.existsByVisitId(visitId)).thenReturn(Mono.just(true));
+        Mockito.when(visitRepo.findByVisitId(visitId)).thenReturn(Mono.just(visit1));
         Mockito.when(visitRepo.deleteByVisitId(visitId)).thenReturn(Mono.empty());
 
         //act
@@ -600,7 +600,8 @@ class VisitServiceImplTest {
         String visitId = UUID.randomUUID().toString();
 
         // Mock the existsByVisitId method to return false, indicating that the visit does not exist
-        Mockito.when(visitRepo.existsByVisitId(visitId)).thenReturn(Mono.just(false));
+//        Mockito.when(visitRepo.existsByVisitId(visitId)).thenReturn(Mono.just(false));
+        Mockito.when(visitRepo.findByVisitId(visitId)).thenReturn(Mono.empty());
 
         // Act
         Mono<Void> result = visitService.deleteVisit(visitId);

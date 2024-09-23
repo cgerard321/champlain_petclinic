@@ -1,6 +1,6 @@
 package com.petclinic.inventoryservice.presentationlayer;
 
-import com.petclinic.inventoryservice.datalayer.Product.Status;
+import com.petclinic.inventoryservice.datalayer.Supply.Status;
 import lombok.*;
 
 @Data

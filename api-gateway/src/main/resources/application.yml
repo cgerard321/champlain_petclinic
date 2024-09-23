@@ -27,6 +27,12 @@ app:
   products-service:
     host: localhost
     port: 7007
+  cart-service:
+    host: localhost
+    port: 7008
+  emailing-service:
+    host: localhost
+    port: 5115
 
 logging:
   level:
@@ -70,6 +76,12 @@ app:
   products-service:
     host: products-service
     port: 8080
+  cart-service:
+    host: cart-service
+    port: 8080
+  emailing-service:
+    host: emailing-service
+    port: 5115
 
 logging:
   level:

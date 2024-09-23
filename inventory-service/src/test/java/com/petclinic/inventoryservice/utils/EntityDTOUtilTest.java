@@ -1,7 +1,7 @@
 package com.petclinic.inventoryservice.utils;
 
 import com.petclinic.inventoryservice.datalayer.Product.Product;
-import com.petclinic.inventoryservice.datalayer.Product.Status;
+import com.petclinic.inventoryservice.datalayer.Supply.Status;
 import com.petclinic.inventoryservice.presentationlayer.ProductResponseDTO;
 import org.junit.jupiter.api.Test;
 

@@ -1,0 +1,60 @@
+.CartItem {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+.CartItem-info {
+  flex: 3;
+}
+
+.info-title h2 {
+  margin: 0;
+  font-size: 1.2em;
+}
+
+.info-description {
+  color: #666;
+}
+
+.info-rating {
+  margin-top: 5px;
+}
+
+.item-actions {
+  display: flex;
+  align-items: center;
+}
+
+.item-quantity input {
+  width: 50px;
+  padding: 5px;
+  margin-right: 10px;
+}
+
+.item-delete {
+  color: #f44336; /* Red for delete */
+}
+
+.item-actions-divider {
+  margin: 0 10px;
+}
+
+.CartItem-price {
+  flex: 1;
+  text-align: right;
+}
+
+.delete-button {
+  background-color: #f44336; /* Red button for delete */
+  color: white;
+  padding: 5px 10px;
+  border: none;
+  cursor: pointer;
+}
+
+.delete-button:hover {
+  background-color: #d32f2f;
+}

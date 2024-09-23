@@ -13,7 +13,9 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @Slf4j
@@ -37,11 +39,68 @@ public class CartServiceImpl implements CartService {
                             .stream().map(productId -> productClient.getProductByProductId(productId).flux())
                             .reduce(Flux.empty(), Flux::merge)
                             .collectList()
+                            .map(products -> {
+                                // Calculate subtotal, tvq, tvc, and total
+                                double subtotal = products.stream()
+                                        .mapToDouble(product -> product.getProductSalePrice() * (product.getQuantity() != null ? product.getQuantity() : 1))
+                                        .sum();
+                                double tvq = subtotal * 0.09975; // 9.975%
+                                double tvc = subtotal * 0.05; // 5%
+                                double total = subtotal + tvq + tvc;
+
+                                return EntityModelUtil.toCartResponseModel(cart, products, subtotal, tvq, tvc, total);
+                            });
+                });
+    }
+
+    @Override
+    public Flux<CartResponseModel> getAllCarts() {
+        return cartRepository.findAll()
+                .flatMap(cart -> {
+                    List<String> productIds = cart.getProductIds();
+                    return productIds.stream()
+                            .map(productId -> productClient.getProductByProductId(productId).flux()) // fetch products for each cart
+                            .reduce(Flux.empty(), Flux::merge) // merge product streams
+                            .collectList() // collect all products into a list
+                            .map(products -> EntityModelUtil.toCartResponseModel(cart, products)); // map the cart and products to CartResponseModel
+                })
+                .doOnNext(cartResponseModel -> log.debug("Cart: " + cartResponseModel));
+    }
+
+
+    public Flux<ProductResponseModel> clearCart(String cartId) {
+        return cartRepository.findCartByCartId(cartId)
+                .switchIfEmpty(Mono.error(new NotFoundException("Cart not found: " + cartId)))
+                .flatMapMany(cart -> {
+                    // Retrieve products based on productIds and clear the cart simultaneously
+                    Flux<ProductResponseModel> productsFlux = Flux.fromIterable(cart.getProductIds())
+                            .flatMap(productClient::getProductByProductId);
+
+                    // Clear cart and save it
+                    cart.setProductIds(Collections.emptyList());
+                    return cartRepository.save(cart)
+                            .thenMany(productsFlux);  // Ensure cart is saved before returning the products
+                });
+    }
+
+    @Override
+    public Mono<CartResponseModel> deleteCartByCartId(String cartId) {
+        return cartRepository.findCartByCartId(cartId)
+                .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Cart id was not found: " + cartId))))
+                .flatMap(found -> cartRepository.delete(found)
+                    .then(Mono.just(found)))
+                .flatMap(cart -> {
+                    List<String> productIds = cart.getProductIds();
+                    return productIds
+                            .stream().map(productId -> productClient.getProductByProductId(productId).flux())
+                            .reduce(Flux.empty(), Flux::merge)
+                            .collectList()
                             .map(products -> EntityModelUtil.toCartResponseModel(cart, products));
                 });
     }
 
     @Override
+
     public Mono<CartResponseModel> updateCartByCartId(Mono<CartRequestModel> cartRequestModel, String cartId) {
         return cartRepository.findCartByCartId(cartId)
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Cart id was not found: " + cartId))))
@@ -66,10 +125,30 @@ public class CartServiceImpl implements CartService {
                             .collectList()
                             .map(products -> EntityModelUtil.toCartResponseModel(cart, products));
                 });
-
-
     }
 
+    @Override
+    public Mono<Integer> getCartItemCount(String cartId) {
+        return cartRepository.findCartByCartId(cartId)
+                .map(cart -> cart.getProductIds().size())
+                .switchIfEmpty(Mono.error(new NotFoundException("Cart not found: " + cartId)));
+    }
+
+    @Override
+    public Mono<CartResponseModel> createNewCart(CartRequestModel cartRequestModel) {
+
+        Cart cart = new Cart();
+        cart.setCustomerId(cartRequestModel.getCustomerId());
+        cart.setCartId(UUID.randomUUID().toString());
+        Mono<CartResponseModel> cartRequestModelMono = cartRepository.save(cart)
+                .map(savedCart -> {
+                    CartResponseModel cartResponseModel = new CartResponseModel();
+                    cartResponseModel.setCustomerId(savedCart.getCustomerId());
+                    cartResponseModel.setCartId(savedCart.getCartId());
+                    return cartResponseModel;
+                });
+        return cartRequestModelMono;
+    }
 
 
 

@@ -33,6 +33,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StreamUtils;
+import org.springframework.web.bind.annotation.RequestMapping;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -99,8 +100,11 @@ public class VetServiceImpl implements VetService {
     public Mono<VetResponseDTO> getVetByVetId(String vetId) {
         return vetRepository.findVetByVetId(vetId)
                 .switchIfEmpty(Mono.error(new NotFoundException("No vet with this vetId was found: " + vetId)))
-                .map(EntityDtoUtil::vetEntityToResponseDTO);
+                .doOnNext(i -> log.debug("The vet entity is: " + i.toString()))
+                .map(EntityDtoUtil::vetEntityToResponseDTO)
+                .log();
     }
+
 
     @Override
     public Flux<VetResponseDTO> getVetByIsActive(boolean isActive) {
