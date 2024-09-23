@@ -28,6 +28,8 @@ import AddingVisit from './features/visits/models/AddingVisit';
 import ProfilePage from '@/pages/Customer/ProfilePage.tsx';
 import AdminBillingPage from '@/pages/Bills/AdminBill.tsx';
 import UserCart from "@/features/carts/components/UserCart.tsx";
+import VetDetails from '@/pages/Vet/VetDetails.tsx';
+
 
 const router = createBrowserRouter([
   {
@@ -97,6 +99,15 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
+      {
+        path: `${AppRoutePaths.Vet}/:vetId`,
+        element: (
+          <ProtectedRoute>
+            <VetDetails />
+          </ProtectedRoute>
+        ),
+      },
+
       {
         path: AppRoutePaths.CustomerProfileEdit,
         element: (
