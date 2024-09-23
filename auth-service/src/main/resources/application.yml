@@ -10,7 +10,9 @@ logging:
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
 
-
+cart-service:
+  host: localhost
+  port: 7008
 mailer-service:
   host: localhost
   port: 8888
@@ -80,6 +82,10 @@ spring:
 
 mailer-service:
   host: mailer-service
+  port: 8080
+
+cart-service:
+  host: cart-service
   port: 8080
 
 logging:
