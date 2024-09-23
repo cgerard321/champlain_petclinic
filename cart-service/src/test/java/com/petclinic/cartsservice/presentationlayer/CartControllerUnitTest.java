@@ -150,14 +150,47 @@ class CartControllerUnitTest {
     }
 
     @Test
-    public void whenDeleteCartByIdWithExistingId_thenReturnCartResponseModel(){
-        List<String> productIds = List.of("9a29fff7-564a-4cc9-8fe1-36f6ca9bc223");
+    public void whenDeleteCartByIdWithExistingId_thenReturnCartResponseModel() {
+    List<String> productIds = List.of("9a29fff7-564a-4cc9-8fe1-36f6ca9bc223");
 
-        Cart cart = Cart.builder()
-                .cartId("98f7b33a-d62a-420a-a84a-05a27c85fc91")
-                .productIds(productIds)
-                .customerId("1")
-                .build();
+    Cart cart = Cart.builder()
+            .cartId("98f7b33a-d62a-420a-a84a-05a27c85fc91")
+            .productIds(productIds)
+            .customerId("1")
+            .build();
+
+    ProductResponseModel product1 = ProductResponseModel.builder()
+            .productId("9a29fff7-564a-4cc9-8fe1-36f6ca9bc223")
+            .productName("Web Services")
+            .productDescription("Learn how to create web services")
+            .productSalePrice(100.00)
+            .build();
+
+    List<ProductResponseModel> products = List.of(product1);
+
+    CartResponseModel cartResponseModel = CartResponseModel.builder()
+            .cartId(cart.getCartId())
+            .customerId("1")
+            .products(products)
+            .build();
+    when(cartService.deleteCartByCartId(cart.getCartId()))
+            .thenReturn(Mono.just(cartResponseModel));
+
+        webTestClient
+                .delete()
+                .uri("/api/v1/carts/" + cart.getCartId())
+            .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(CartResponseModel.class)
+                .isEqualTo(cartResponseModel);
+
+    verify(cartService, times(1)).deleteCartByCartId(cartResponseModel.getCartId());
+
+    }
+
+
 
     public void whenGetAllCarts_thenReturnListOfCartResponseModels() {
         // arrange
@@ -183,19 +216,8 @@ class CartControllerUnitTest {
                 .productSalePrice(100.00)
                 .build();
 
-        List<ProductResponseModel> products = List.of(product1);
 
-        CartResponseModel cartResponseModel = CartResponseModel.builder()
-                .cartId(cart.getCartId())
-                .customerId("1")
-                .products(products)
-                .build();
-        when(cartService.deleteCartByCartId(cart.getCartId()))
-                .thenReturn(Mono.just(cartResponseModel));
 
-        webTestClient
-                .delete()
-                .uri("/api/v1/carts/" + cart.getCartId())
         ProductResponseModel product2 = ProductResponseModel.builder()
                 .productId("bb12fff7-679a-2ss9-8fe1-19d6aa3af321")
                 .productName("Cloud Computing")
@@ -230,10 +252,17 @@ class CartControllerUnitTest {
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody(CartResponseModel.class)
-                .isEqualTo(cartResponseModel);
+                .expectBodyList(CartResponseModel.class)
+                .value(result -> {
+                    assertEquals(2, result.size());
+                    assertEquals(cart1.getCartId(), result.get(0).getCartId());
+                    assertEquals(cart2.getCartId(), result.get(1).getCartId());
+                    assertEquals(cart1.getCustomerId(), result.get(0).getCustomerId());
+                    assertEquals(cart2.getCustomerId(), result.get(1).getCustomerId());
+                    assertEquals(cart1.getProductIds(), result.get(0).getProducts().stream().map(ProductResponseModel::getProductId).toList());
+                    assertEquals(cart2.getProductIds(), result.get(1).getProducts().stream().map(ProductResponseModel::getProductId).toList());
+                });
 
-        verify(cartService, times(1)).deleteCartByCartId(cartResponseModel.getCartId());
     }
 
     @Test
@@ -253,17 +282,6 @@ class CartControllerUnitTest {
         verify(cartService, times(0)).deleteCartByCartId(cartId);
     }
 
-                .expectBodyList(CartResponseModel.class)
-                .value(result -> {
-                    assertEquals(2, result.size());
-                    assertEquals(cart1.getCartId(), result.get(0).getCartId());
-                    assertEquals(cart2.getCartId(), result.get(1).getCartId());
-                    assertEquals(cart1.getCustomerId(), result.get(0).getCustomerId());
-                    assertEquals(cart2.getCustomerId(), result.get(1).getCustomerId());
-                    assertEquals(cart1.getProductIds(), result.get(0).getProducts().stream().map(ProductResponseModel::getProductId).toList());
-                    assertEquals(cart2.getProductIds(), result.get(1).getProducts().stream().map(ProductResponseModel::getProductId).toList());
-                });
-    }
 
     @Test
     public void whenGetAllCarts_andNoCartsExist_thenReturnEmptyList() {
