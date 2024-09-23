@@ -50,7 +50,40 @@ export default function VisitListTable(): JSX.Element {
     visit => visit.status === 'COMPLETED'
   );
 
-  const renderTable = (title: string, visits: Visit[]): JSX.Element => (
+  const handleDelete = async (visitId: string): Promise<void> => {
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete visit with ID: ${visitId}?`
+    );
+    if (confirmDelete) {
+      try {
+        const response = await fetch(
+          `http://localhost:8080/api/v2/gateway/visits/completed/${visitId}`,
+          {
+            method: 'DELETE',
+            credentials: 'include',
+          }
+        );
+        if (response.ok) {
+          setVisitsList(prev =>
+            prev.filter(visit => visit.visitId !== visitId)
+          );
+          alert('Visit deleted successfully!');
+        } else {
+          console.error('Failed to delete the visit.');
+          alert('Failed to delete the visit.');
+        }
+      } catch (error) {
+        console.error('Error deleting visit:', error);
+        alert('Error deleting visit.');
+      }
+    }
+  };
+
+  const renderTable = (
+    title: string,
+    visits: Visit[],
+    allowDelete: boolean = false
+  ): JSX.Element => (
     <div className="visit-table-section">
       <h2>{title}</h2>
       <table>
@@ -99,7 +132,6 @@ export default function VisitListTable(): JSX.Element {
                 >
                   View
                 </button>
-
                 <button
                   className="btn btn-warning"
                   onClick={() => navigate(`/visits/${visit.visitId}/edit`)} // Edit button that triggers updateVisit
@@ -107,6 +139,15 @@ export default function VisitListTable(): JSX.Element {
                 >
                   Edit
                 </button>
+                {allowDelete && (
+                  <button
+                    className="btn btn-danger"
+                    onClick={() => handleDelete(visit.visitId)}
+                    title="Delete"
+                  >
+                    Delete
+                  </button>
+                )}
               </td>
             </tr>
           ))}
@@ -141,9 +182,9 @@ export default function VisitListTable(): JSX.Element {
         </button>
       </div>
 
-      {renderTable('Confirmed Visits', confirmedVisits)}
-      {renderTable('Upcoming Visits', upcomingVisits)}
-      {renderTable('Completed Visits', completedVisits)}
+      {renderTable('Confirmed Visits', confirmedVisits, false)}
+      {renderTable('Upcoming Visits', upcomingVisits, false)}
+      {renderTable('Completed Visits', completedVisits, true)}
     </div>
   );
 }

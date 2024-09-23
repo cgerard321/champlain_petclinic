@@ -510,4 +510,34 @@ class VisitControllerUnitTest {
 
     }
 
+    @Test
+    public void whenDeleteCompletedVisitsWithValidId_return204(){
+        String visitId = UUID.randomUUID().toString();
+        when(visitService.deleteCompletedVisitByVisitId(visitId)).thenReturn(Mono.empty());
+
+        webTestClient
+                .delete()
+                .uri("/visits/completed/{visitId}",visitId)
+                .exchange()
+                .expectStatus().isNoContent();
+
+        verify(visitService, times(1)).deleteCompletedVisitByVisitId(visitId);
+    }
+    @Test
+    public void whenDeleteCompleteVisitsWithInvalidId_return404(){
+        String visitId = UUID.randomUUID().toString();
+        when(visitService.deleteCompletedVisitByVisitId(visitId)).thenReturn(Mono.error(new NotFoundException("No visit was found with visitId: " + visitId)));
+
+        webTestClient
+                .delete()
+                .uri("/visits/completed/{visitId}",visitId)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.message", "No visit was found with visitId: " + visitId);
+
+        verify(visitService, times(1)).deleteCompletedVisitByVisitId(visitId);
+    }
+
+    
 }
