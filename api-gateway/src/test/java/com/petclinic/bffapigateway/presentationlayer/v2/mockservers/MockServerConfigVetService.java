@@ -151,7 +151,114 @@ public class MockServerConfigVetService {
                 );
     }
 
-    public void stopMockServer() {
+
+    public void registerUpdateVetEndpoint() {
+        mockServerClient_VetService
+                .when(
+                        request()
+                                .withMethod("PUT")
+                                .withPath("/vets/c02cbf82-625b-11ee-8c99-0242ac120002")
+                                .withBody(json("{"
+                                        + "\"vetId\":\"c02cbf82-625b-11ee-8c99-0242ac120002\","
+                                        + "\"vetBillId\":\"bill001\","
+                                        + "\"firstName\":\"John\","
+                                        + "\"lastName\":\"Doe\","
+                                        + "\"email\":\"john.doe@example.com\","
+                                        + "\"phoneNumber\":\"1234567890\","
+                                        + "\"resume\":\"Specialist in dermatology\","
+                                        + "\"workday\":["
+                                        + "\"Wednesday\""
+                                        + "],"
+                                        + "\"workHoursJson\":\"08:00-16:00\","
+                                        + "\"active\":true,"
+                                        + "\"specialties\":["
+                                        + "{"
+                                        + "\"specialtyId\":\"dermatology\","
+                                        + "\"name\":\"Dermatology\""
+                                        + "}"
+                                        + "]"
+                                        + "}"))
+                )
+                .respond(
+                        response()
+                                .withStatusCode(200)
+                                .withBody(json("{"
+                                        + "\"vetId\":\"c02cbf82-625b-11ee-8c99-0242ac120002\","
+                                        + "\"vetBillId\":\"bill001\","
+                                        + "\"firstName\":\"John\","
+                                        + "\"lastName\":\"Doe\","
+                                        + "\"email\":\"john.doe@example.com\","
+                                        + "\"phoneNumber\":\"1234567890\","
+                                        + "\"resume\":\"Specialist in dermatology\","
+                                        + "\"workday\":["
+                                        + "\"Wednesday\""
+                                        + "],"
+                                        + "\"workHoursJson\":\"08:00-16:00\","
+                                        + "\"active\":true,"
+                                        + "\"specialties\":["
+                                        + "{"
+                                        + "\"specialtyId\":\"dermatology\","
+                                        + "\"name\":\"Dermatology\""
+                                        + "}"
+                                        + "]"
+                                        + "}"))
+                );
+    }
+
+    public void registerUpdateVetEndpoint_withInvalidId() {
+        mockServerClient_VetService
+                .when(
+                        request()
+                                .withMethod("PUT")
+                                .withPath("/vets/c02cbf82-625b-11ee-8c99-0242ac120002") // The vetId to update
+                                .withBody(json("{"
+                                        + "\"vetId\":\"invalid-vet-id\","
+                                        + "\"vetBillId\":\"bill001\","
+                                        + "\"firstName\":\"John\","
+                                        + "\"lastName\":\"Doe\","
+                                        + "\"email\":\"john.doe@example.com\","
+                                        + "\"phoneNumber\":\"1234567890\","
+                                        + "\"resume\":\"Specialist in dermatology\","
+                                        + "\"workday\":["
+                                        + "\"Wednesday\""
+                                        + "],"
+                                        + "\"workHoursJson\":\"08:00-16:00\","
+                                        + "\"active\":true,"
+                                        + "\"specialties\":["
+                                        + "{"
+                                        + "\"specialtyId\":\"dermatology\","
+                                        + "\"name\":\"Dermatology\""
+                                        + "}"
+                                        + "]"
+                                        + "}"))
+                )
+                .respond(
+                        response()
+                                .withStatusCode(200)
+                                .withBody(json("{"
+                                        + "\"vetId\":\"invalid-vet-id\","
+                                        + "\"vetBillId\":\"bill001\","
+                                        + "\"firstName\":\"John\","
+                                        + "\"lastName\":\"Doe\","
+                                        + "\"email\":\"john.doe@example.com\","
+                                        + "\"phoneNumber\":\"1234567890\","
+                                        + "\"resume\":\"Specialist in dermatology\","
+                                        + "\"workday\":["
+                                        + "\"Wednesday\""
+                                        + "],"
+                                        + "\"workHoursJson\":\"08:00-16:00\","
+                                        + "\"active\":true,"
+                                        + "\"specialties\":["
+                                        + "{"
+                                        + "\"specialtyId\":\"dermatology\","
+                                        + "\"name\":\"Dermatology\""
+                                        + "}"
+                                        + "]"
+                                        + "}"))
+                );
+    }
+
+public void stopMockServer() {
         if(clientAndServer != null)
             this.clientAndServer.stop();
     }
