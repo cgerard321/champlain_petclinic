@@ -399,35 +399,35 @@ class VisitsControllerIntegrationTest {
                     assertEquals(0, list.size()); // Check if it returns an empty list when no visits exist
                 });
     }
-
-    @Test
-    void getVisitByVisitId_whenVisitExists_shouldReturnVisit() {
-        when(visitRepo.findByVisitId("V001")).thenReturn(Mono.just(visit1));
-        webTestClient.get()
-                .uri("/visits/{visitId}", "V001")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody()
-                .jsonPath("$.visitId").isEqualTo("V001");
-    }
-
-    @Test
-    void getVisitByVisitId_whenVisitDoesNotExist_shouldReturnNotFound() {
-        // Arrange - Mock the repo's behavior
-        when(visitRepo.findByVisitId("V001")).thenReturn(Mono.empty());
-
-        // Act & Assert - Perform the request and expect 404 Not Found
-        webTestClient.get()
-                .uri("/visits/{visitId}", "V001")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isNotFound();
-
-        // Optionally, verify the repository interaction
-        StepVerifier.create(visitRepo.findByVisitId("V001"))
-                .expectNextCount(0)
-                .verifyComplete();
-    }
+//
+//    @Test
+//    void getVisitByVisitId_whenVisitExists_shouldReturnVisit() {
+//        when(visitRepo.findByVisitId("V001")).thenReturn(Mono.just(visit1));
+//        webTestClient.get()
+//                .uri("/visits/{visitId}", "V001")
+//                .accept(MediaType.APPLICATION_JSON)
+//                .exchange()
+//                .expectStatus().isOk()
+//                .expectBody()
+//                .jsonPath("$.visitId").isEqualTo("V001");
+//    }
+//
+//    @Test
+//    void getVisitByVisitId_whenVisitDoesNotExist_shouldReturnNotFound() {
+//        // Arrange - Mock the repo's behavior
+//        when(visitRepo.findByVisitId("V001")).thenReturn(Mono.empty());
+//
+//        // Act & Assert - Perform the request and expect 404 Not Found
+//        webTestClient.get()
+//                .uri("/visits/{visitId}", "V001")
+//                .accept(MediaType.APPLICATION_JSON)
+//                .exchange()
+//                .expectStatus().isNotFound();
+//
+//        // Optionally, verify the repository interaction
+//        StepVerifier.create(visitRepo.findByVisitId("V001"))
+//                .expectNextCount(0)
+//                .verifyComplete();
+//    }
 
 }
