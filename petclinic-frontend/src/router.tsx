@@ -27,6 +27,8 @@ import VisitByVisitId from './features/visits/visits/VisitByVisitId';
 import AddingVisit from './features/visits/models/AddingVisit';
 import ProfilePage from '@/pages/Customer/ProfilePage.tsx';
 import AdminBillingPage from '@/pages/Bills/AdminBill.tsx';
+import UserCart from '@/features/carts/components/UserCart.tsx';
+import VetDetails from '@/pages/Vet/VetDetails.tsx';
 
 const router = createBrowserRouter([
   {
@@ -96,6 +98,15 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
+      {
+        path: `${AppRoutePaths.Vet}/:vetId`,
+        element: (
+          <ProtectedRoute>
+            <VetDetails />
+          </ProtectedRoute>
+        ),
+      },
+
       {
         path: AppRoutePaths.CustomerProfileEdit,
         element: (
@@ -189,6 +200,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute roles={['ADMIN']}>
             <CartPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: `${AppRoutePaths.Carts}/:cartId`, // Route for viewing a specific cart
+        element: (
+          <ProtectedRoute roles={['ADMIN']}>
+            <UserCart />
           </ProtectedRoute>
         ),
       },
