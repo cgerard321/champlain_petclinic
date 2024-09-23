@@ -2304,7 +2304,7 @@ class ApiGatewayControllerTest {
         String ownerId = "5fe81e29-1f1d-4f9d-b249-8d3e0cc0b7dd";
         String petId = "9";
         VisitRequestDTO visit = VisitRequestDTO.builder()
-                .visitDate(LocalDateTime.parse("2021-12-12T14:00:00"))
+                .visitStartDate(LocalDateTime.parse("2021-12-12T14:00:00"))
                 .description("Charle's Richard cat has a paw infection.")
                 .petId(petId)
                 .practitionerId("1")
@@ -2661,7 +2661,7 @@ class ApiGatewayControllerTest {
     void getVisitsByStatus_Valid() {
         VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
                 .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
-                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .visitStartDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .description("this is a dummy description")
                 .petId("2")
                 .petName("YourPetNameHere")

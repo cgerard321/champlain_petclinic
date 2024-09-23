@@ -37,7 +37,7 @@ export default function VisitDetails(): JSX.Element {
         </div>
         <div className="visit-field">
           <span className="visit-label">Visit Date:</span>
-          <span className="visit-value">{visit.visitDate}</span>
+          <span className="visit-value">{visit.visitStartDate}</span>
         </div>
         <div className="visit-field">
           <span className="visit-label">Description:</span>
@@ -76,6 +76,10 @@ export default function VisitDetails(): JSX.Element {
           >
             {visit.status}
           </span>
+        </div>
+        <div className="visit-field">
+          <span className="visit-label">Visit End Date:</span>
+          <span className="visit-value">{visit.visitEndDate}</span>
         </div>
       </div>
       <button
