@@ -3,6 +3,7 @@ package com.petclinic.bffapigateway.domainclientlayer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.dtos.Products.ProductRequestDTO;
+
 import com.petclinic.bffapigateway.dtos.Products.ProductResponseDTO;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -108,7 +109,8 @@ class ProductsServiceClientIntegrationTest {
                 "Product 1",
                 "desc",
                 10.00,
-                0.00
+                0.00,
+                0
         );
 
         mockWebServer.enqueue(new MockResponse()
@@ -131,7 +133,8 @@ class ProductsServiceClientIntegrationTest {
                 "Product 1",
                 "desc",
                 10.00,
-                0.00
+                0.00,
+                0
         );
 
         mockWebServer.enqueue(new MockResponse()
@@ -154,7 +157,8 @@ class ProductsServiceClientIntegrationTest {
                 "Product 1",
                 "desc",
                 10.00,
-                0.00
+                0.00,
+                0
         );
 
         mockWebServer.enqueue(new MockResponse()
