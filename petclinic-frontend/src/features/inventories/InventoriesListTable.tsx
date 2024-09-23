@@ -8,6 +8,8 @@ import deleteAllInventories from '@/features/inventories/api/deleteAllInventorie
 import './InventoriesListTable.css';
 import deleteInventory from '@/features/inventories/api/deleteInventory.ts';
 import AddInventoryType from '@/features/inventories/AddInventoryType.tsx';
+import { ProductModel } from '@/features/inventories/models/ProductModels/ProductModel.ts';
+import AddSupplyForm from '@/features/inventories/AddSupplyForm.tsx';
 
 //TODO: create add inventory form component and change the component being shown on the inventories page on the onClick event of the add inventory button
 export default function InventoriesListTable(): JSX.Element {
@@ -22,7 +24,15 @@ export default function InventoriesListTable(): JSX.Element {
   const [inventoryDescription, setInventoryDescription] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [showAddTypeForm, setShowAddTypeForm] = useState(false); // Add state to control the form visibility
+  const [showAddSupplyModal, setShowAddSupplyModal] = useState(false);
   const navigate = useNavigate();
+  const [lowStockProductsByInventory, setLowStockProductsByInventory] =
+    useState<{ [inventoryName: string]: ProductModel[] }>({});
+  const [showLowStock, setShowLowStock] = useState(false);
+
+  const toggleAddSupplyModal = (): void => {
+    setShowAddSupplyModal(prev => !prev);
+  };
 
   const {
     inventoryList,
@@ -55,7 +65,6 @@ export default function InventoriesListTable(): JSX.Element {
   const pageBefore = (): void => {
     setCurrentPage(prevPage => Math.max(prevPage - 1, 0));
   };
-
   const pageAfter = (): void => {
     setCurrentPage(prevPage => prevPage + 1);
   };
@@ -79,6 +88,41 @@ export default function InventoriesListTable(): JSX.Element {
     }
   };
 
+  const getAllLowStockProducts = async (
+    inventory: Inventory
+  ): Promise<void> => {
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/gateway/inventory/${inventory.inventoryId}/products/lowstock`,
+        {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            Accept: 'application/json',
+          },
+        }
+      );
+
+      if (response.status === 404) {
+        // eslint-disable-next-line no-console
+        console.log(
+          `No products below threshold in inventory: ${inventory.inventoryName}`
+        );
+      }
+
+      const data = await response.json();
+      if (data && data.length > 0) {
+        setLowStockProductsByInventory(prevState => ({
+          ...prevState,
+          [inventory.inventoryName]: data, //Group products by inventory name
+        }));
+        setShowLowStock(true);
+      }
+    } catch (error) {
+      console.error('Error fetching low stock products:', error);
+    }
+  };
+
   const fetchAllInventoryTypes = async (): Promise<void> => {
     const data = await getAllInventoryTypes();
     setInventoryTypeList(data);
@@ -86,6 +130,10 @@ export default function InventoriesListTable(): JSX.Element {
 
   const refreshInventoryTypes = async (): Promise<void> => {
     await fetchAllInventoryTypes();
+  };
+
+  const handleAddSupplySubmit = (): void => {
+    setShowAddSupplyModal(false);
   };
 
   const handleInventorySelection = (
@@ -354,6 +402,47 @@ export default function InventoriesListTable(): JSX.Element {
         Add Inventory
       </button>
       <button
+        className="low-stock-button btn btn-warning mx-1"
+        onClick={async () => {
+          if (inventoryList.length > 0) {
+            setLowStockProductsByInventory({});
+            try {
+              for (const inventory of inventoryList) {
+                await getAllLowStockProducts(inventory);
+              }
+            } catch (error) {
+              console.error('Error fetching low stock products:', error);
+            }
+          } else {
+            console.error('No inventories found');
+          }
+        }}
+      >
+        Check Low Stock for All Inventories
+      </button>
+
+      {showLowStock && Object.keys(lowStockProductsByInventory).length > 0 && (
+        <div>
+          <h3>Low Stock Products</h3>
+          {Object.entries(lowStockProductsByInventory).map(
+            ([inventoryName, products]) => (
+              <div key={inventoryName}>
+                <h4>Inventory: {inventoryName}</h4>
+                <ul>
+                  {products.map(product => (
+                    <li key={product.productId}>
+                      {product.productName}: {product.productQuantity} units
+                      left
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )
+          )}
+        </div>
+      )}
+
+      <button
         className="add-inventorytype-button btn btn-primary"
         onClick={() => setShowAddTypeForm(true)} // Show the form when clicked
       >
@@ -389,6 +478,15 @@ export default function InventoriesListTable(): JSX.Element {
             </button>
           </div>
         </>
+      )}
+      <button className="btn btn-primary" onClick={toggleAddSupplyModal}>
+        Add Supply
+      </button>
+      {showAddSupplyModal && (
+        <AddSupplyForm
+          onClose={toggleAddSupplyModal}
+          onSubmit={handleAddSupplySubmit}
+        />
       )}
     </div>
   );
