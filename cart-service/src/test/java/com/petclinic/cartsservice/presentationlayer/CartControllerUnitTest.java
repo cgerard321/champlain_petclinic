@@ -16,7 +16,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @WebFluxTest(controllers = CartController.class)
 class CartControllerUnitTest {
@@ -145,6 +145,63 @@ class CartControllerUnitTest {
         webTestClient.get().uri("/api/v1/carts/cart1/count")
                 .exchange()
                 .expectStatus().isNotFound();
+    }
+
+    @Test
+    public void whenDeleteCartByIdWithExistingId_thenReturnCartResponseModel(){
+        List<String> productIds = List.of("9a29fff7-564a-4cc9-8fe1-36f6ca9bc223");
+
+        Cart cart = Cart.builder()
+                .cartId("98f7b33a-d62a-420a-a84a-05a27c85fc91")
+                .productIds(productIds)
+                .customerId("1")
+                .build();
+
+        ProductResponseModel product1 = ProductResponseModel.builder()
+                .productId("9a29fff7-564a-4cc9-8fe1-36f6ca9bc223")
+                .productName("Web Services")
+                .productDescription("Learn how to create web services")
+                .productSalePrice(100.00)
+                .build();
+
+        List<ProductResponseModel> products = List.of(product1);
+
+        CartResponseModel cartResponseModel = CartResponseModel.builder()
+                .cartId(cart.getCartId())
+                .customerId("1")
+                .products(products)
+                .build();
+        when(cartService.deleteCartByCartId(cart.getCartId()))
+                .thenReturn(Mono.just(cartResponseModel));
+
+        webTestClient
+                .delete()
+                .uri("/api/v1/carts/" + cart.getCartId())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(CartResponseModel.class)
+                .isEqualTo(cartResponseModel);
+
+        verify(cartService, times(1)).deleteCartByCartId(cartResponseModel.getCartId());
+    }
+
+    @Test
+    public void whenDeleteCartByIdWithInvalidId_ThenReturnEmptyMono(){
+        String cartId = "98f7b33a-d62a-420a-a84a-05a27c85fc";
+
+        when(cartService.deleteCartByCartId(cartId))
+                .thenReturn(Mono.empty());
+
+        webTestClient
+                .delete()
+                .uri("/api/v1/carts/" + cartId)
+                .accept()
+                .exchange()
+                .expectStatus().isEqualTo(422);
+
+        verify(cartService, times(0)).deleteCartByCartId(cartId);
     }
 
 
