@@ -1,4 +1,5 @@
 package com.petclinic.visits.visitsservicenew.PresentationLayer;
+
 import com.petclinic.visits.visitsservicenew.DataLayer.Status;
 import com.petclinic.visits.visitsservicenew.DataLayer.Visit;
 import com.petclinic.visits.visitsservicenew.DataLayer.VisitRepo;
@@ -13,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -61,7 +63,7 @@ class VisitsControllerIntegrationTest {
 
     private final String STATUS = "CONFIRMED";
 
-    Set<SpecialtyDTO> set= new HashSet<>();
+    Set<SpecialtyDTO> set = new HashSet<>();
     Set<Workday> workdaySet = new HashSet<>();
 
     VetDTO vet = VetDTO.builder()
@@ -78,7 +80,7 @@ class VisitsControllerIntegrationTest {
             .specialties(set)
             .build();
 
-    Date currentDate =new Date();
+    Date currentDate = new Date();
     PetResponseDTO petResponseDTO = PetResponseDTO.builder()
             .petTypeId(uuidPet)
             .name("Billy")
@@ -87,13 +89,13 @@ class VisitsControllerIntegrationTest {
             .ownerId(uuidOwner)
             .build();
 
-    Visit visit1 = buildVisit(uuidVisit1,"this is a dummy description",vet.getVetId());
-    Visit visit2 = buildVisit(uuidVisit2,"this is a dummy description",vet.getVetId());
+    Visit visit1 = buildVisit(uuidVisit1, "this is a dummy description", vet.getVetId());
+    Visit visit2 = buildVisit(uuidVisit2, "this is a dummy description", vet.getVetId());
 
     Visit cancelledVisit1 = buildCancelledVisit(uuidCancelledVisit1, "this is a dummy description", vet.getVetId());
     Visit cancelledVisit2 = buildCancelledVisit(uuidCancelledVisit2, "this is a dummy description", vet.getVetId());
 
-    private final VisitResponseDTO visitResponseDTO = buildVisitResponseDto(visit1.getVisitId(),vet.getVetId());
+    private final VisitResponseDTO visitResponseDTO = buildVisitResponseDto(visit1.getVisitId(), vet.getVetId());
     private final VisitRequestDTO visitRequestDTO = buildVisitRequestDto(vet.getVetId());
 
     private final String PRAC_ID = visitResponseDTO.getPractitionerId();
@@ -104,7 +106,7 @@ class VisitsControllerIntegrationTest {
 
 
     @BeforeEach
-    void dbSetUp(){
+    void dbSetUp() {
         Publisher<Visit> visitPublisher = visitRepo.deleteAll()
                 .thenMany(visitRepo.save(visit1)
                         .thenMany(visitRepo.save(visit2)
@@ -115,7 +117,7 @@ class VisitsControllerIntegrationTest {
     }
 
     @Test
-    void getAllVisits(){
+    void getAllVisits() {
         when(entityDtoUtil.toVisitResponseDTO(any())).thenReturn(Mono.just(visitResponseDTO));
         webTestClient
                 .get()
@@ -125,14 +127,15 @@ class VisitsControllerIntegrationTest {
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE + ";charset=UTF-8")
                 .expectBodyList(VisitResponseDTO.class)
-                .value((list)-> assertEquals(list.size(), dbSize));
+                .value((list) -> assertEquals(list.size(), dbSize));
     }
+
     @Test
-    void getVisitByVisitId(){
+    void getVisitByVisitId() {
         when(entityDtoUtil.toVisitResponseDTO(any())).thenReturn(Mono.just(visitResponseDTO));
         webTestClient
                 .get()
-                .uri("/visits/"+visit1.getVisitId())
+                .uri("/visits/" + visit1.getVisitId())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -145,23 +148,24 @@ class VisitsControllerIntegrationTest {
                 .jsonPath("$.visitDate").isEqualTo("2024-11-25 13:45")
                 .jsonPath("$.status").isEqualTo("UPCOMING");
     }
+
     @Test
-    void getVisitByPractitionerId(){
+    void getVisitByPractitionerId() {
 
         when(vetsClient.getVetByVetId(anyString())).thenReturn(Mono.just(vet));
         when(entityDtoUtil.toVisitResponseDTO(any())).thenReturn(Mono.just(visitResponseDTO));
 
         webTestClient
                 .get()
-                .uri("/visits/practitioner/"+vet.getVetId())
+                .uri("/visits/practitioner/" + vet.getVetId())
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE + ";charset=UTF-8")
                 .expectBodyList(VisitResponseDTO.class)
-                .value((list)->{
+                .value((list) -> {
                     assertNotNull(list);
-                    assertEquals(list.size(),4);
+                    assertEquals(list.size(), 4);
                     assertEquals(list.get(0).getVisitId(), visit1.getVisitId());
                     assertEquals(list.get(0).getPractitionerId(), visit1.getPractitionerId());
                     assertEquals(list.get(0).getPetId(), visit1.getPetId());
@@ -172,18 +176,18 @@ class VisitsControllerIntegrationTest {
     }
 
     @Test
-    void getVisitsForPet(){
+    void getVisitsForPet() {
         when(petsClient.getPetById(anyString())).thenReturn(Mono.just(petResponseDTO));
         when(entityDtoUtil.toVisitResponseDTO(any())).thenReturn(Mono.just(visitResponseDTO));
         webTestClient
                 .get()
-                .uri("/visits/pets/"+visit1.getPetId())
+                .uri("/visits/pets/" + visit1.getPetId())
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE + ";charset=UTF-8")
                 .expectBodyList(VisitResponseDTO.class)
-                .value((list)->{
+                .value((list) -> {
                     assertNotNull(list);
                     assertEquals(dbSize, list.size());
                     assertEquals(list.get(0).getVisitId(), visit1.getVisitId());
@@ -196,7 +200,7 @@ class VisitsControllerIntegrationTest {
     }
 
     @Test
-    void getVisitsForStatus(){
+    void getVisitsForStatus() {
         when(entityDtoUtil.toVisitResponseDTO(any())).thenReturn(Mono.just(visitResponseDTO));
         visit1.setStatus(Status.CONFIRMED);
 
@@ -204,13 +208,13 @@ class VisitsControllerIntegrationTest {
 
         webTestClient
                 .get()
-                .uri("/visits/status/"+STATUS)
+                .uri("/visits/status/" + STATUS)
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE + ";charset=UTF-8")
                 .expectBodyList(VisitResponseDTO.class)
-                .value((list)->{
+                .value((list) -> {
                     assertNotNull(list);
                     assertEquals(1, list.size());
                     assertEquals(list.get(0).getVisitId(), visit1.getVisitId());
@@ -256,10 +260,8 @@ class VisitsControllerIntegrationTest {
 //    }
 
 
-
-
     @Test
-    void updateVisit(){
+    void updateVisit() {
         when(entityDtoUtil.toVisitEntity(any(VisitRequestDTO.class))).thenReturn(visit1);
         when(entityDtoUtil.toVisitResponseDTO(any())).thenReturn(Mono.just(visitResponseDTO));
         when(petsClient.getPetById(anyString())).thenReturn(Mono.just(petResponseDTO));
@@ -268,7 +270,7 @@ class VisitsControllerIntegrationTest {
 
         webTestClient
                 .put()
-                .uri("/visits/"+visit1.getVisitId())
+                .uri("/visits/" + visit1.getVisitId())
                 .body(Mono.just(visitResponseDTO), VisitResponseDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -284,7 +286,7 @@ class VisitsControllerIntegrationTest {
     }
 
     @Test
-    void updateStatusForVisitByVisitId(){
+    void updateStatusForVisitByVisitId() {
         when(entityDtoUtil.toVisitEntity(any(VisitRequestDTO.class))).thenReturn(visit1);
         when(entityDtoUtil.toVisitResponseDTO(any())).thenReturn(Mono.just(visitResponseDTO));
         when(petsClient.getPetById(anyString())).thenReturn(Mono.just(petResponseDTO));
@@ -293,7 +295,7 @@ class VisitsControllerIntegrationTest {
         String status = "CANCELLED";
         webTestClient
                 .put()
-                .uri("/visits/"+VISIT_ID+"/status/"+status)
+                .uri("/visits/" + VISIT_ID + "/status/" + status)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -306,10 +308,10 @@ class VisitsControllerIntegrationTest {
     }
 
     @Test
-    void deleteVisit(){
+    void deleteVisit() {
         webTestClient
                 .delete()
-                .uri("/visits/"+visit1.getVisitId())
+                .uri("/visits/" + visit1.getVisitId())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNoContent();
@@ -333,7 +335,7 @@ class VisitsControllerIntegrationTest {
     }
 
 
-    private Visit buildVisit(String uuid,String description, String vetId){
+    private Visit buildVisit(String uuid, String description, String vetId) {
         return Visit.builder()
                 .visitId(uuid)
 
@@ -345,7 +347,7 @@ class VisitsControllerIntegrationTest {
                 .build();
     }
 
-    private Visit buildCancelledVisit(String uuid,String description, String vetId){
+    private Visit buildCancelledVisit(String uuid, String description, String vetId) {
         return Visit.builder()
                 .visitId(uuid)
 
@@ -357,7 +359,7 @@ class VisitsControllerIntegrationTest {
                 .build();
     }
 
-    private VisitResponseDTO buildVisitResponseDto(String visitId,String vetId){
+    private VisitResponseDTO buildVisitResponseDto(String visitId, String vetId) {
         return VisitResponseDTO.builder()
                 .visitId(visitId)
                 .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
@@ -367,7 +369,8 @@ class VisitsControllerIntegrationTest {
                 .status(Status.UPCOMING)
                 .build();
     }
-    private VisitRequestDTO buildVisitRequestDto(String vetId){
+
+    private VisitRequestDTO buildVisitRequestDto(String vetId) {
         return VisitRequestDTO.builder()
                 .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .description("this is a dummy description")
@@ -376,4 +379,55 @@ class VisitsControllerIntegrationTest {
                 .status(Status.UPCOMING)
                 .build();
     }
+
+    @Test
+    void getAllVisits_whenNoVisitsExist_shouldReturnEmptyList() {
+        // Simulating no visits in the repo by clearing it before the test
+        visitRepo.deleteAll().block();
+
+        // Act & Assert
+        webTestClient
+                .get()
+                .uri("/visits")
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE + ";charset=UTF-8")
+                .expectBodyList(VisitResponseDTO.class)
+                .value(list -> {
+                    assertNotNull(list);
+                    assertEquals(0, list.size()); // Check if it returns an empty list when no visits exist
+                });
+    }
+
+    @Test
+    void getVisitByVisitId_whenVisitExists_shouldReturnVisit() {
+        when(visitRepo.findByVisitId("V001")).thenReturn(Mono.just(visit1));
+        webTestClient.get()
+                .uri("/visits/{visitId}", "V001")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.visitId").isEqualTo("V001");
+    }
+
+    @Test
+    void getVisitByVisitId_whenVisitDoesNotExist_shouldReturnNotFound() {
+        // Arrange - Mock the repo's behavior
+        when(visitRepo.findByVisitId("V001")).thenReturn(Mono.empty());
+
+        // Act & Assert - Perform the request and expect 404 Not Found
+        webTestClient.get()
+                .uri("/visits/{visitId}", "V001")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound();
+
+        // Optionally, verify the repository interaction
+        StepVerifier.create(visitRepo.findByVisitId("V001"))
+                .expectNextCount(0)
+                .verifyComplete();
+    }
+
 }

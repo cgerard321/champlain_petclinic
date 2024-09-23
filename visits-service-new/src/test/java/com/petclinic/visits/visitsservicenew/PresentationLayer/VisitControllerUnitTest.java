@@ -4,6 +4,7 @@ package com.petclinic.visits.visitsservicenew.PresentationLayer;
 import com.petclinic.visits.visitsservicenew.BusinessLayer.Review.ReviewService;
 import com.petclinic.visits.visitsservicenew.BusinessLayer.VisitService;
 import com.petclinic.visits.visitsservicenew.DataLayer.Status;
+import com.petclinic.visits.visitsservicenew.DataLayer.Visit;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.SpecialtyDTO;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.VetDTO;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.Workday;
@@ -24,6 +25,7 @@ import reactor.test.StepVerifier;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import static org.mockito.ArgumentMatchers.any;
@@ -577,4 +579,6 @@ class VisitControllerUnitTest {
         verify(visitService, times(1)).deleteCompletedVisitByVisitId(visitId);
         verify(visitService, times(0)).deleteVisit(anyString());  // Ensure delete is not called
     }
+
+
 }
