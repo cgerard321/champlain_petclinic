@@ -147,7 +147,7 @@ public class VisitControllerUnitTest {
     void whenAddVisit_asAdmin_thenReturnCreatedVisitDTO() {
         // Arrange
         VisitRequestDTO newVisitRequestDTO = VisitRequestDTO.builder()
-                .visitDate(LocalDateTime.of(2023, 10, 10, 10, 0))
+                .visitStartDate(LocalDateTime.of(2023, 10, 10, 10, 0))
                 .description("Routine check-up")
                 .petId("P001")
                 .practitionerId("PR001")
@@ -156,7 +156,7 @@ public class VisitControllerUnitTest {
 
         VisitResponseDTO createdVisitResponseDTO = VisitResponseDTO.builder()
                 .visitId("V001")
-                .visitDate(newVisitRequestDTO.getVisitDate())
+                .visitStartDate(newVisitRequestDTO.getVisitStartDate())
                 .description(newVisitRequestDTO.getDescription())
                 .petId(newVisitRequestDTO.getPetId())
                 .practitionerId(newVisitRequestDTO.getPractitionerId())
@@ -186,7 +186,7 @@ public class VisitControllerUnitTest {
                 .expectNextMatches(visitResponseDTO -> {
                     assertNotNull(visitResponseDTO);
                     assertNotNull(visitResponseDTO.getVisitId());
-                    assertEquals(newVisitRequestDTO.getVisitDate(), visitResponseDTO.getVisitDate());
+                    assertEquals(newVisitRequestDTO.getVisitStartDate(), visitResponseDTO.getVisitStartDate());
                     assertEquals(newVisitRequestDTO.getDescription(), visitResponseDTO.getDescription());
                     assertEquals(newVisitRequestDTO.getPetId(), visitResponseDTO.getPetId());
                     assertEquals(newVisitRequestDTO.getPractitionerId(), visitResponseDTO.getPractitionerId());
