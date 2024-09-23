@@ -290,7 +290,6 @@ class VetControllerIntegrationTest {
                 .expectBody().isEmpty();
     }
 
-
     @Test
     void whenUpdateVet_asAdmin_with_ValidVetId_thenReturnUpdatedVetResponseDTO() {
 
