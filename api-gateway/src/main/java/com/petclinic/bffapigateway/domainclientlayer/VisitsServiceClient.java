@@ -301,10 +301,10 @@ public class VisitsServiceClient {
     public Mono<VisitResponseDTO> updateVisitByVisitId(String visitId,
                                                        Mono<VisitRequestDTO> visitRequestDTO){
         return visitRequestDTO.flatMap(requestDTO -> {
-        if (requestDTO.getVisitDate() != null) {
-            LocalDateTime originalDate = requestDTO.getVisitDate();
+        if (requestDTO.getVisitStartDate() != null) {
+            LocalDateTime originalDate = requestDTO.getVisitStartDate();
             LocalDateTime adjustedDate = originalDate.minusHours(4);
-            requestDTO.setVisitDate(adjustedDate);
+            requestDTO.setVisitStartDate(adjustedDate);
         } else {
             throw new BadRequestException("Visit date is required");
         }
