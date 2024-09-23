@@ -70,5 +70,13 @@ public class CartServiceClient {
                 .block();
     }
 
+    public Mono<Void> clearCart(String cartId) {
+        return webClientBuilder.build()
+                .delete()
+                .uri(CartServiceUrl + "/" + cartId + "/clear")
+                .retrieve()
+                .bodyToMono(Void.class);
+    }
 }
+
 

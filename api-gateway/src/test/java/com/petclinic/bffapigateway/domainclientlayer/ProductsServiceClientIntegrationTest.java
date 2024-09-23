@@ -14,6 +14,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -44,6 +45,60 @@ class ProductsServiceClientIntegrationTest {
     @AfterAll
     static void tearDown() throws IOException {
         mockWebServer.shutdown();
+    }
+    @Test
+    void getAllProducts_ThenReturnProductList() {
+
+        mockWebServer.enqueue(new MockResponse()
+                .setBody("data:{\"productId\":\"4affcab7-3ab1-4917-a114-2b6301aa5565\",\"productName\":\"Rabbit Hutch\",\"productDescription\":\"Outdoor wooden hutch for rabbits\",\"productSalePrice\":79.99,\"averageRating\":0.0}\n\n" +
+                        "data:{\"productId\":\"baee7cd2-b67a-449f-b262-91f45dde8a6d\",\"productName\":\"Flea Collar\",\"productDescription\":\"Flea and tick prevention for small dogs\",\"productSalePrice\":9.99,\"averageRating\":0.0}\n\n"
+                ).setHeader("Content-Type", "text/event-stream")
+        );
+
+
+        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(null,null);
+
+        StepVerifier.create(productsFlux)
+                .expectNextMatches(product -> product.getProductId().equals("4affcab7-3ab1-4917-a114-2b6301aa5565") && product.getProductName().equals("Rabbit Hutch"))
+                .expectNextMatches(product -> product.getProductId().equals("baee7cd2-b67a-449f-b262-91f45dde8a6d") && product.getProductName().equals("Flea Collar"))
+                .verifyComplete();
+    }
+    @Test
+    void getAllProducts_ThenReturnEmptyResponse() {
+
+        mockWebServer.enqueue(new MockResponse()
+                .setBody("")
+                .setHeader("Content-Type", "text/event-stream")
+        );
+
+        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(null,null);
+
+        StepVerifier.create(productsFlux)
+                .expectNextCount(0)
+                .verifyComplete();
+    }
+
+    @Test
+    void getAllProducts_WithPriceFiltering_ThenReturnFilteredProductList() {
+
+        mockWebServer.enqueue(new MockResponse()
+                .setBody("data:{\"productId\":\"4affcab7-3ab1-4917-a114-2b6301aa5565\",\"productName\":\"Rabbit Hutch\",\"productDescription\":\"Outdoor wooden hutch for rabbits\",\"productSalePrice\":79.99,\"averageRating\":0.0}\n\n" +
+                        "data:{\"productId\":\"baee7cd2-b67a-449f-b262-91f45dde8a6d\",\"productName\":\"Flea Collar\",\"productDescription\":\"Flea and tick prevention for small dogs\",\"productSalePrice\":9.99,\"averageRating\":0.0}\n\n"
+                ).setHeader("Content-Type", "text/event-stream")
+        );
+
+        // Define the minimum and maximum price for filtering
+        Double minPrice = 5.00;
+        Double maxPrice = 80.00;
+
+        // Call the method with price filters
+        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(minPrice, maxPrice);
+
+        // Verify the results using StepVerifier
+        StepVerifier.create(productsFlux)
+                .expectNextMatches(product -> product.getProductId().equals("4affcab7-3ab1-4917-a114-2b6301aa5565") && product.getProductSalePrice() >= minPrice && product.getProductSalePrice() <= maxPrice)
+                .expectNextMatches(product -> product.getProductId().equals("baee7cd2-b67a-449f-b262-91f45dde8a6d") && product.getProductSalePrice() >= minPrice && product.getProductSalePrice() <= maxPrice)
+                .verifyComplete();
     }
 
     @Test

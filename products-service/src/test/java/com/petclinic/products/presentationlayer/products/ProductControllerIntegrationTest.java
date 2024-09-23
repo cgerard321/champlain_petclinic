@@ -83,6 +83,45 @@ class ProductControllerIntegrationTest {
                 .expectNextCount(2)
                 .verifyComplete();
     }
+    @Test
+    public void whenGetAllProducts_thenReturnAllProducts() {
+        StepVerifier.create(productRepository.findAll())
+                .expectNextCount(2)
+                .verifyComplete();
+
+        webTestClient.get()
+                .uri("/api/v1/products")
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().valueEquals("Content-Type", "text/event-stream;charset=UTF-8")
+                .expectBodyList(ProductResponseModel.class)
+                .value(productResponseModel -> {
+                    assertNotNull(productResponseModel);
+                    assertEquals(2, productResponseModel.size());
+                });
+
+    }
+
+    @Test
+    public void whenNoProductsExist_thenReturnEmptyList() {
+
+        StepVerifier.create(productRepository.deleteAll())
+                .verifyComplete();
+
+
+        webTestClient.get()
+                .uri("/api/v1/products")
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().valueEquals("Content-Type", "text/event-stream;charset=UTF-8")
+                .expectBodyList(ProductResponseModel.class)
+                .value(productResponseModel -> {
+                    assertNotNull(productResponseModel);
+                    assertEquals(0, productResponseModel.size());
+                });
+    }
 
     @Test
     public void whenAddProduct_thenReturnProduct() {
@@ -255,6 +294,78 @@ class ProductControllerIntegrationTest {
                 .create(productRepository.findAll())
                 .expectNextCount(2)
                 .verifyComplete();
+    }
+
+    @Test
+    public void whenGetAllProductsWithMinPrice_thenReturnFilteredProducts() {
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder.path("/api/v1/products")
+                        .queryParam("minPrice", 60.00)
+                        .build())
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().valueEquals("Content-Type", "text/event-stream;charset=UTF-8")
+                .expectBodyList(ProductResponseModel.class)
+                .value(productResponseModel -> {
+                    assertNotNull(productResponseModel);
+                    assertEquals(1, productResponseModel.size());
+                    assertEquals(product1.getProductId(), productResponseModel.get(0).getProductId());
+                });
+    }
+
+    @Test
+    public void whenGetAllProductsWithMaxPrice_thenReturnFilteredProducts() {
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder.path("/api/v1/products")
+                        .queryParam("maxPrice", 60.00)
+                        .build())
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().valueEquals("Content-Type", "text/event-stream;charset=UTF-8")
+                .expectBodyList(ProductResponseModel.class)
+                .value(productResponseModel -> {
+                    assertNotNull(productResponseModel);
+                    assertEquals(1, productResponseModel.size());
+                    assertEquals(product2.getProductId(), productResponseModel.get(0).getProductId());
+                });
+    }
+
+    @Test
+    public void whenGetAllProductsWithMinAndMaxPrice_thenReturnFilteredProducts() {
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder.path("/api/v1/products")
+                        .queryParam("minPrice", 40.00)
+                        .queryParam("maxPrice", 60.00)
+                        .build())
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().valueEquals("Content-Type", "text/event-stream;charset=UTF-8")
+                .expectBodyList(ProductResponseModel.class)
+                .value(productResponseModel -> {
+                    assertNotNull(productResponseModel);
+                    assertEquals(1, productResponseModel.size());
+                    assertEquals(product2.getProductId(), productResponseModel.get(0).getProductId());
+                });
+    }
+
+    @Test
+    public void whenGetAllProductsWithNoMatchingPrice_thenReturnEmptyList() {
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder.path("/api/v1/products")
+                        .queryParam("minPrice", 200.00)
+                        .build())
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().valueEquals("Content-Type", "text/event-stream;charset=UTF-8")
+                .expectBodyList(ProductResponseModel.class)
+                .value(productResponseModel -> {
+                    assertNotNull(productResponseModel);
+                    assertEquals(0, productResponseModel.size());
+                });
     }
 
 }

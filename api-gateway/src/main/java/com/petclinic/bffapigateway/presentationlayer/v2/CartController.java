@@ -47,6 +47,7 @@ public class CartController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
+
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @DeleteMapping(value = "/{cartId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<CartResponseDTO>> deleteCartByCartId(@PathVariable String cartId){
@@ -55,4 +56,14 @@ public class CartController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
+
+    @DeleteMapping("/{cartId}/clear")
+    public Mono<ResponseEntity<String>> clearCart(@PathVariable String cartId) {
+        return cartServiceClient.clearCart(cartId)
+                .thenReturn(ResponseEntity.ok("Cart successfully cleared"))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
 }
+
+
