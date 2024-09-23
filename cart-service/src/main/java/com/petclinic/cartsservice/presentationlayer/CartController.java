@@ -73,4 +73,15 @@ public class CartController {
                 .map(count -> ResponseEntity.ok(Collections.singletonMap("itemCount", count)))
                 .switchIfEmpty(Mono.error(new NotFoundException("Cart not found for ID: " + cartId)));
     }
+
+    @DeleteMapping("/{cartId}")
+    public Mono<ResponseEntity<CartResponseModel>> deleteCartByCartId(@PathVariable String cartId){
+        return Mono.just(cartId)
+                .filter(id -> id.length() == 36)
+                .switchIfEmpty(Mono.error(new InvalidInputException("Provided cart id is invalid: " + cartId)))
+                .flatMap(cartService::deleteCartByCartId)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+
+    }
 }
