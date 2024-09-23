@@ -840,7 +840,7 @@ class VisitsServiceClientIntegrationTest {
     void testUpdateVisitByVisitId() throws Exception {
         // Arrange
         VisitRequestDTO requestDTO = new VisitRequestDTO();
-        requestDTO.setVisitDate(LocalDateTime.of(2025, 12, 24, 18, 0)); // Setting a specific date for testing
+        requestDTO.setVisitStartDate(LocalDateTime.of(2025, 12, 24, 18, 0)); // Setting a specific date for testing
         requestDTO.setDescription("Dog Needs Physio-Therapy UPDATE");
         requestDTO.setPetId("0e4d8481-b611-4e52-baed-af16caa8bf8a");
         requestDTO.setPractitionerId("69f85d2e-625b-11ee-8c99-0242ac120002");
@@ -848,7 +848,7 @@ class VisitsServiceClientIntegrationTest {
 
         VisitResponseDTO responseDTO = new VisitResponseDTO();
         responseDTO.setVisitId(VISIT_ID);
-        responseDTO.setVisitDate(requestDTO.getVisitDate().minusHours(4));
+        responseDTO.setVisitStartDate(requestDTO.getVisitStartDate().minusHours(4));
         responseDTO.setDescription(requestDTO.getDescription());
         responseDTO.setPetId(requestDTO.getPetId());
         responseDTO.setPractitionerId(requestDTO.getPractitionerId());
@@ -870,7 +870,7 @@ class VisitsServiceClientIntegrationTest {
                     assertNotNull(updatedVisit);
                     assertEquals(VISIT_ID, updatedVisit.getVisitId());
                     assertEquals(requestDTO.getDescription(), updatedVisit.getDescription());
-                    assertEquals(requestDTO.getVisitDate(), updatedVisit.getVisitDate());
+                    assertEquals(requestDTO.getVisitStartDate(), updatedVisit.getVisitStartDate());
                     assertEquals(requestDTO.getPetId(), updatedVisit.getPetId());
                     assertEquals(requestDTO.getPractitionerId(), updatedVisit.getPractitionerId());
                     assertEquals(requestDTO.getStatus(), updatedVisit.getStatus());
@@ -884,7 +884,7 @@ class VisitsServiceClientIntegrationTest {
     void testUpdateVisitByVisitId_BadRequest() {
         // Arrange
         VisitRequestDTO requestDTO = new VisitRequestDTO();
-        requestDTO.setVisitDate(null); // Invalid input to trigger BadRequestException
+        requestDTO.setVisitStartDate(null); // Invalid input to trigger BadRequestException
 
         // Act and Assert
         StepVerifier.create(visitsServiceClient.updateVisitByVisitId(VISIT_ID, Mono.just(requestDTO)))

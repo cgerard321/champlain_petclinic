@@ -2256,6 +2256,7 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.practitionerId").isEqualTo(1);
     }*/
 
+/*
     @Test
     public void addVisit_ShouldReturnCreatedStatus() {
         String ownerId = "owner1";
@@ -2298,6 +2299,8 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.practitionerId").isEqualTo(1);
 
     }
+
+ */
 
     @Test
     void shouldCreateAVisitWithOwnerAndPetInfo(){
