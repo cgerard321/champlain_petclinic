@@ -101,7 +101,7 @@ public class ProductServiceImpl implements ProductService {
                     return productRepository.delete(found)
                             .then(Mono.just(found));
                     }
-                )
+      ull          )
                 .map(EntityModelUtil::toProductResponseModel);
     }
 
