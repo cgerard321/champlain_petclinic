@@ -6,6 +6,7 @@ import com.petclinic.inventoryservice.datalayer.Inventory.InventoryType;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryTypeRepository;
 import com.petclinic.inventoryservice.datalayer.Product.Product;
 import com.petclinic.inventoryservice.datalayer.Product.ProductRepository;
+import com.petclinic.inventoryservice.datalayer.Product.Status;
 import com.petclinic.inventoryservice.utils.exceptions.InvalidInputException;
 import com.petclinic.inventoryservice.utils.exceptions.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -109,6 +110,7 @@ class InventoryControllerIntegrationTest {
                 .productPrice(100.00)
                 .productQuantity(10)
                 .productSalePrice(15.99)
+                .status(Status.RE_ORDER)
                 .build());
         StepVerifier
                 .create(productPublisher1)
@@ -1025,6 +1027,167 @@ class InventoryControllerIntegrationTest {
                 });
     }
 
+    @Test
+    public void searchProductsByInventoryIdAndProductNameAndProductDescriptionAndStatus_shouldSucceed() {
+        String inventoryId = "inventoryId_3";
+        String productName = "Benzodiazepines";
+        String productDescription = "Sedative Medication";
+        Status status = Status.RE_ORDER;
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder.path("/inventory/{inventoryId}/products")
+                        .queryParam("productName", productName)
+                        .queryParam("productDescription", productDescription)
+                        .queryParam("status", status)
+                        .build(inventoryId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(ProductResponseDTO.class)
+                .consumeWith(response -> {
+                    List<ProductResponseDTO> products = response.getResponseBody();
+                    assertNotNull(products);
+                    assertTrue(products.size() > 0);
+                    assertEquals(productName, products.get(0).getProductName());
+                    assertEquals(productDescription, products.get(0).getProductDescription());
+                    assertEquals(status, products.get(0).getStatus());
+                });
+    }
+
+    @Test
+    public void searchProductsByInventoryIdAndProductNameAndProductDescription_shouldSucceed() {
+        String inventoryId = "inventoryId_3";
+        String productName = "Benzodiazepines";
+        String productDescription = "Sedative Medication";
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder.path("/inventory/{inventoryId}/products")
+                        .queryParam("productName", productName)
+                        .queryParam("productDescription", productDescription)
+                        .build(inventoryId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(ProductResponseDTO.class)
+                .consumeWith(response -> {
+                    List<ProductResponseDTO> products = response.getResponseBody();
+                    assertNotNull(products);
+                    assertTrue(products.size() > 0);
+                    assertEquals(productName, products.get(0).getProductName());
+                    assertEquals(productDescription, products.get(0).getProductDescription());
+                });
+    }
+
+    @Test
+    public void searchProductsByInventoryIdAndProductNameAndStatus_shouldSucceed() {
+        String inventoryId = "inventoryId_3";
+        String productName = "Benzodiazepines";
+        Status status = Status.RE_ORDER;
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder.path("/inventory/{inventoryId}/products")
+                        .queryParam("productName", productName)
+                        .queryParam("status", status)
+                        .build(inventoryId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(ProductResponseDTO.class)
+                .consumeWith(response -> {
+                    List<ProductResponseDTO> products = response.getResponseBody();
+                    assertNotNull(products);
+                    assertTrue(products.size() > 0);
+                    assertEquals(productName, products.get(0).getProductName());
+                    assertEquals(status, products.get(0).getStatus());
+                });
+    }
+
+    @Test
+    public void searchProductsByInventoryIdAndProductDescriptionAndStatus_shouldSucceed() {
+        String inventoryId = "inventoryId_3";
+        String productDescription = "Sedative Medication";
+        Status status = Status.RE_ORDER;
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder.path("/inventory/{inventoryId}/products")
+                        .queryParam("productDescription", productDescription)
+                        .queryParam("status", status)
+                        .build(inventoryId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(ProductResponseDTO.class)
+                .consumeWith(response -> {
+                    List<ProductResponseDTO> products = response.getResponseBody();
+                    assertNotNull(products);
+                    assertTrue(products.size() > 0);
+                    assertEquals(productDescription, products.get(0).getProductDescription());
+                    assertEquals(status, products.get(0).getStatus());
+                });
+    }
+
+    @Test
+    public void searchProductsByInventoryIdAndProductName_shouldSucceed() {
+        String inventoryId = "inventoryId_3";
+        String productName = "Benzodiazepines";
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder.path("/inventory/{inventoryId}/products")
+                        .queryParam("productName", productName)
+                        .build(inventoryId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(ProductResponseDTO.class)
+                .consumeWith(response -> {
+                    List<ProductResponseDTO> products = response.getResponseBody();
+                    assertNotNull(products);
+                    assertTrue(products.size() > 0);
+                    assertEquals(productName, products.get(0).getProductName());
+                });
+    }
+
+    @Test
+    public void searchProductsByInventoryIdAndProductDescription_shouldSucceed() {
+        String inventoryId = "inventoryId_3";
+        String productDescription = "Sedative Medication";
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder.path("/inventory/{inventoryId}/products")
+                        .queryParam("productDescription", productDescription)
+                        .build(inventoryId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(ProductResponseDTO.class)
+                .consumeWith(response -> {
+                    List<ProductResponseDTO> products = response.getResponseBody();
+                    assertNotNull(products);
+                    assertTrue(products.size() > 0);
+                    assertEquals(productDescription, products.get(0).getProductDescription());
+                });
+    }
+
+    @Test
+    public void searchProductsByInventoryIdAndStatus_shouldSucceed() {
+        String inventoryId = "inventoryId_3";
+        Status status = Status.RE_ORDER;
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder.path("/inventory/{inventoryId}/products")
+                        .queryParam("status", status)
+                        .build(inventoryId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(ProductResponseDTO.class)
+                .consumeWith(response -> {
+                    List<ProductResponseDTO> products = response.getResponseBody();
+                    assertNotNull(products);
+                    assertTrue(products.size() > 0);
+                    assertEquals(status, products.get(0).getStatus());
+                });
+    }
 
     /*
     @Test

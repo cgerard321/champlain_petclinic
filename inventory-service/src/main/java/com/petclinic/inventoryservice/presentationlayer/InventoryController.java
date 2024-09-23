@@ -155,9 +155,9 @@ public class InventoryController {
     return productInventoryService.getAllInventoryTypes();
     }
 
-    @GetMapping()
+    @GetMapping("/{inventoryId}/products/search")
     public Flux<ProductResponseDTO> searchProducts(
-            @RequestParam(name = "inventoryId", required = false) String inventoryId,
+            @PathVariable String inventoryId,
             @RequestParam(name = "productName", required = false) String productName,
             @RequestParam(name = "productDescription", required = false) String productDescription,
             @RequestParam(name = "status", required = false) Status status) {

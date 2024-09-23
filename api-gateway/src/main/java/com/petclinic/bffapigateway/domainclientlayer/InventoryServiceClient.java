@@ -264,4 +264,21 @@ public class InventoryServiceClient {
                 .bodyToMono(Void.class);
     }
 
+    public Flux<ProductResponseDTO> searchProducts (
+            final String productName,
+            final String productDescription,
+            final Status status
+    ) {
+        UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(inventoryServiceUrl + "/products/search")
+                .queryParamIfPresent("productName", Optional.ofNullable(productName))
+                .queryParamIfPresent("productDescription", Optional.ofNullable(productDescription))
+                .queryParamIfPresent("status", Optional.ofNullable(status));
+
+        return webClient.get()
+                .uri(uriBuilder.buildAndExpand().toUri())
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToFlux(ProductResponseDTO.class);
+    }
+
 }

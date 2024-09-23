@@ -1,14 +1,10 @@
 package com.petclinic.bffapigateway.presentationlayer.v2;
 
 import com.petclinic.bffapigateway.domainclientlayer.InventoryServiceClient;
-import com.petclinic.bffapigateway.dtos.Inventory.InventoryRequestDTO;
-import com.petclinic.bffapigateway.dtos.Inventory.InventoryResponseDTO;
-import com.petclinic.bffapigateway.dtos.Inventory.InventoryTypeRequestDTO;
-import com.petclinic.bffapigateway.dtos.Inventory.InventoryTypeResponseDTO;
+import com.petclinic.bffapigateway.dtos.Inventory.*;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
-import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
@@ -106,5 +102,16 @@ public class InventoryController {
         return inventoryServiceClient.getInventoryById(inventoryId)
                 .map(product -> ResponseEntity.status(HttpStatus.OK).body(product))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER, Roles.VET})
+    @GetMapping(value = "/{inventoryId}/products/search")
+    @ApiResponses(value = {@ApiResponse(useReturnTypeSchema = true, description = "Total number of items available", responseCode = "200")})
+    public ResponseEntity<Flux<ProductResponseDTO>> searchProducts(@PathVariable String inventoryId,
+                                                                   @RequestParam(required = false) String productName,
+                                                                   @RequestParam(required = false) String productDescription,
+                                                                   @RequestParam(required = false) Status status) {
+
+        return ResponseEntity.ok().body(inventoryServiceClient.searchProducts(productName, productDescription, status));
     }
 }
