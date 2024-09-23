@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "OlSPNQHj5EDOh4xH8T5+Fwg3WANg+7KGaEVQo++RC4s=",
+  "Source": "emailing-service",
+  "BasePath": "_content/emailing-service",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}

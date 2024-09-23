@@ -2,18 +2,15 @@ package com.petclinic.cartsservice.dataaccesslayer;
 
 import com.petclinic.cartsservice.domainclientlayer.ProductResponseModel;
 import com.petclinic.cartsservice.presentationlayer.CartRequestModel;
-import com.petclinic.cartsservice.presentationlayer.CartResponseModel;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.test.context.ActiveProfiles;
-import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -25,9 +22,6 @@ class CartRepositoryUnitTest {
     private CartRepository cartRepository;
 
     private final String nonExistentCartId = "06a7d573-bcab-4db3-956f-773324b92a80";
-
-
-
 
     private final ProductResponseModel product1 = ProductResponseModel.builder()
             .productId("9a29fff7-564a-4cc9-8fe1-36f6ca9bc223")
@@ -111,6 +105,35 @@ class CartRepositoryUnitTest {
 
     }
 
+    @Test
+    void deleteCartByCartId_withExistingId_thenReturnSuccess() {
+        StepVerifier.create(cartRepository.save(cart1))
+                        .consumeNextWith(insertedCart -> {
+                            assertNotNull(insertedCart);
+                            assertEquals(cart1.getCartId(), insertedCart.getCartId());
+                        })
+                                .verifyComplete();
+
+        StepVerifier
+                .create(cartRepository.delete(cart1))
+                .expectNextCount(0)
+                .verifyComplete();
+    }
+
+    @Test
+    void deleteCartByCartId_withNonExistentId_thenReturnEmpty() {
+        StepVerifier.create(cartRepository.deleteById(nonExistentCartId))
+                .verifyComplete();
+
+        StepVerifier.create(cartRepository.findCartByCartId(nonExistentCartId))
+                .expectNextCount(0)
+                .verifyComplete();
+    }
+
+
+
+
+
 //    @Test
 //    void findCartByCartId_withExistingId_thenReturnCart() {
 //        StepVerifier
@@ -141,5 +164,16 @@ class CartRepositoryUnitTest {
                 .verifyComplete();
     }
 
+    @Test
+    void saveNewCart_WhenValidInput_ThenSuccess(){
+        Cart cartToSave = new Cart();
+        cartToSave.setCustomerId("123");
+        cartToSave.setCartId("abc-123-xyz");
+        StepVerifier.create(cartRepository.save(cartToSave))
+                .expectNextMatches(cart1 -> cart1.getCustomerId().equals("123")
+                        && cart1.getCartId().equals("abc-123-xyz"))
+                .verifyComplete();
+        ;
+    }
 
 }

@@ -17,9 +17,9 @@ import reactor.core.publisher.Mono;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping("api/v2/gateway/products")
+@RequestMapping("/api/v2/gateway/products")
 @Validated
-@CrossOrigin(origins = "http://localhost:3000, http://localhost:80")
+@CrossOrigin(origins = "http://localhost:3000, http://localhost:80",  methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PATCH, RequestMethod.PUT, RequestMethod.DELETE})
 public class ProductController {
 
     private final ProductsServiceClient productsServiceClient;
@@ -47,6 +47,13 @@ public class ProductController {
                 .map(product -> ResponseEntity.status(HttpStatus.OK).body(product))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @PatchMapping(value = "{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<Void>> incrementRequestCount(@PathVariable String productId) {
+        return productsServiceClient.requestCount(productId).then(Mono.just(ResponseEntity.noContent().build()));
+    }
+
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
     @PostMapping(value = "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)

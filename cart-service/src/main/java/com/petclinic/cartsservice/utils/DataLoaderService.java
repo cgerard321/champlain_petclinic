@@ -20,16 +20,27 @@ public class DataLoaderService implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
 
-        List<String> productIds = List.of("9a29fff7-564a-4cc9-8fe1-36f6ca9bc223", "d819e4f4-25af-4d33-91e9-2c45f0071606");
+        List<String> productIds = List.of("1501f30e-1db1-44b2-a555-bca6f64450e4", "baee7cd2-b67a-449f-b262-91f45dde8a6d");
 
         Cart cart1 = Cart.builder()
                 .cartId("98f7b33a-d62a-420a-a84a-05a27c85fc91")
                 .productIds(productIds)
-                .customerId("1")
+                .customerId("f470653d-05c5-4c45-b7a0-7d70f003d2ac")
+                .build();
+
+        Cart cart2 = Cart.builder()
+                .cartId("34f7b33a-d62a-420a-a84a-05a27c85fc91")
+                .productIds(productIds)
+                .customerId("c6a0fb9d-fc6f-4c21-95fc-4f5e7311d0e2")
                 .build();
 
 
         Flux.just(cart1)
+                .flatMap(s -> cartRepository.insert(Mono.just(s))
+                        .log(s.toString()))
+                .subscribe();
+
+        Flux.just(cart2)
                 .flatMap(s -> cartRepository.insert(Mono.just(s))
                         .log(s.toString()))
                 .subscribe();

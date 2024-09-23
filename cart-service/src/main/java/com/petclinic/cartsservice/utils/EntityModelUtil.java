@@ -19,6 +19,23 @@ public class EntityModelUtil {
         return cartResponseModel;
     }
 
+    // Overloaded method for getCartByCartId
+    public static CartResponseModel toCartResponseModel(
+            Cart cart,
+            List<ProductResponseModel> products,
+            double subtotal,
+            double tvq,
+            double tvc,
+            double total) {
+
+        CartResponseModel cartResponseModel = toCartResponseModel(cart, products);
+        cartResponseModel.setSubtotal(subtotal);
+        cartResponseModel.setTvq(tvq);
+        cartResponseModel.setTvc(tvc);
+        cartResponseModel.setTotal(total);
+        return cartResponseModel;
+    }
+
     public static Cart toCartEntity(CartRequestModel cartRequestModel) {
         return Cart.builder()
                 .cartId(generateUUIDString())
