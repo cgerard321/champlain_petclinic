@@ -58,8 +58,6 @@ class VetControllerIntegrationTest {
         mockServerConfigVetService.registerGetVetsEndpoint_withNoVets();
         mockServerConfigVetService.registerUpdateVetEndpoint();
         //mockServerConfigVetService.registerUpdateVetEndpoint_withInvalidId();
-
-
         mockServerConfigAuthService = new MockServerConfigAuthService();
         mockServerConfigAuthService.registerValidateTokenForAdminEndpoint();
         mockServerConfigAuthService.registerValidateTokenForVetEndpoint();
@@ -291,7 +289,6 @@ class VetControllerIntegrationTest {
                 .expectStatus().isNoContent()
                 .expectBody().isEmpty();
     }
-
 
     @Test
     void whenUpdateVet_asAdmin_with_ValidVetId_thenReturnUpdatedVetResponseDTO() {
