@@ -1998,41 +1998,34 @@ class ApiGatewayControllerTest {
     }
 
     @Test
-    public void getBillById(){
+    void shouldGetBillById() {
+        // Arrange
+        String billId = UUID.randomUUID().toString();
+        BillResponseDTO bill = new BillResponseDTO();
+        bill.setBillId(billId);
+        bill.setCustomerId("1");
+        bill.setAmount(499);
+        bill.setVisitType("Test");
 
-        //int expectedLength = 1;
+        when(billServiceClient.getBilling(billId))
+                .thenReturn(Mono.just(bill));
 
-        BillResponseDTO entity = new BillResponseDTO();
-
-        entity.setBillId("9");
-
-        entity.setAmount(599);
-
-        entity.setCustomerId("2");
-
-        entity.setVisitType("Consultation");
-
-        when(billServiceClient.getBilling("9"))
-                .thenReturn(Mono.just(entity));
-
+        // Act & Assert
         client.get()
-                //check the URI
-                .uri("/api/gateway/bills/9")
+                .uri("/api/gateway/bills/{billId}", billId)
+                .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.billId").isEqualTo("9")
-                .jsonPath("$.customerId").isEqualTo(entity.getCustomerId())
-                .jsonPath("$.visitType").isEqualTo(entity.getVisitType())
-                .jsonPath("$.amount").isEqualTo(entity.getAmount());
+                .jsonPath("$.billId").isEqualTo(billId)
+                .jsonPath("$.customerId").isEqualTo(bill.getCustomerId())
+                .jsonPath("$.visitType").isEqualTo(bill.getVisitType())
+                .jsonPath("$.amount").isEqualTo(bill.getAmount());
 
-
-
-
-        assertEquals(entity.getBillId(), "9");
-
-
+        Mockito.verify(billServiceClient, times(1)).getBilling(billId);
     }
+
 
     @Test
     public void getBillsByOwnerId(){
