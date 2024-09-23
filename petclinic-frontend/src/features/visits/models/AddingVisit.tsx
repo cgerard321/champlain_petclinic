@@ -10,21 +10,23 @@ interface ApiError {
   message: string;
 }
 type VisitType = {
-  visitDate: Date;
+  visitStartDate: Date;
   description: string;
   petId: string;
   practitionerId: string;
   // ownerId: string;
   status: Status;
+  visitEndDate: Date;
 };
 
 const AddingVisit: React.FC = (): JSX.Element => {
   const [visit, setVisit] = useState<VisitType>({
-    visitDate: new Date(),
+    visitStartDate: new Date(),
     description: '',
     petId: '',
     practitionerId: '',
     status: 'UPCOMING' as Status,
+    visitEndDate: new Date(),
   });
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -37,7 +39,7 @@ const AddingVisit: React.FC = (): JSX.Element => {
 
   const formatDate = (date: Date): string => {
     const pad = (n: number): string => n.toString().padStart(2, '0');
-    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
   };
 
   const handleChange = (
@@ -46,14 +48,14 @@ const AddingVisit: React.FC = (): JSX.Element => {
     const { name, value } = e.target;
     setVisit(prevVisit => ({
       ...prevVisit,
-      [name]: name === 'visitDate' ? new Date(value) : value, // Convert string to Date object for visitDate
+      [name]: name === 'visitStartDate' ? new Date(value) : value, // Convert string to Date object for visitDate
     }));
   };
 
   const validate = (): boolean => {
     const newErrors: { [key: string]: string } = {};
     if (!visit.petId) newErrors.petId = 'Pet ID is required';
-    if (!visit.visitDate) newErrors.visitDate = 'Visit date is required';
+    if (!visit.visitStartDate) newErrors.visitDate = 'Visit date is required';
     if (!visit.description) newErrors.description = 'Description is required';
     if (!visit.practitionerId)
       newErrors.practitionerId = 'Practitioner ID is required';
@@ -74,7 +76,10 @@ const AddingVisit: React.FC = (): JSX.Element => {
 
     const formattedVisit: VisitRequestModel = {
       ...visit,
-      visitDate: visit.visitDate.toISOString().slice(0, 16).replace('T', ' '),
+      visitStartDate: visit.visitStartDate
+        .toISOString()
+        .slice(0, 16)
+        .replace('T', ' '),
     };
 
     try {
@@ -84,11 +89,12 @@ const AddingVisit: React.FC = (): JSX.Element => {
       setTimeout(() => setShowNotification(false), 3000);
       navigate('/visits');
       setVisit({
-        visitDate: new Date(),
+        visitStartDate: new Date(),
         description: '',
         petId: '',
         practitionerId: '',
         status: 'UPCOMING' as Status,
+        visitEndDate: new Date(),
       });
     } catch (error) {
       const apiError = error as ApiError;
@@ -114,12 +120,14 @@ const AddingVisit: React.FC = (): JSX.Element => {
         <label>Visit Date: </label>
         <input
           type="datetime-local"
-          name="visitDate"
-          value={formatDate(visit.visitDate)}
+          name="visitStartDate"
+          value={formatDate(visit.visitStartDate)}
           onChange={handleChange}
           required
         />
-        {errors.visitDate && <span className="error">{errors.visitDate}</span>}
+        {errors.visitStartDate && (
+          <span className="error">{errors.visitStartDate}</span>
+        )}
         <br />
         <label>Description: </label>
         <input

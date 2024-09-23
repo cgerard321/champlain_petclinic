@@ -1,6 +1,6 @@
 export interface Visit {
   visitId: string;
-  visitDate: string;
+  visitStartDate: string;
   description: string;
   petName: string;
   vetFirstName: string;
@@ -8,4 +8,5 @@ export interface Visit {
   vetEmail: string;
   vetPhone: string;
   status: string;
+  visitEndDate: string;
 }
