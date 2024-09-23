@@ -18,4 +18,8 @@ public class CartResponseModel {
     private String cartId;
     private String customerId;
     private List<ProductResponseModel> products;
+    private double subtotal;
+    private double tvq;
+    private double tvc;
+    private double total;
 }
