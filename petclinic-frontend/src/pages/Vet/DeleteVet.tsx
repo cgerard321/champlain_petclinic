@@ -14,11 +14,10 @@ const DeleteVet: React.FC<DeleteVetProps> = ({ vetId, onVetDeleted }) => {
   };
 
   return (
-      <button onClick={handleDelete} className="btn btn-danger">
-        Delete
-      </button>
+    <button onClick={handleDelete} className="btn btn-danger">
+      Delete
+    </button>
   );
 };
 
 export default DeleteVet;
-
