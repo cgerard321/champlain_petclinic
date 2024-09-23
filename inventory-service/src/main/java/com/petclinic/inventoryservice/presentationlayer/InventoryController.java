@@ -192,4 +192,4 @@ public Flux<InventoryResponseDTO> searchInventories(
         return productInventoryService.getLowStockProducts(inventoryId, stockThreshold);
 
 }
-
+}
