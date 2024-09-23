@@ -24,8 +24,6 @@ import Review from './pages/Review/Review';
 import EditInventory from '@/features/inventories/EditInventory.tsx';
 import VisitByVisitId from './features/visits/visits/VisitByVisitId';
 import AddingVisit from './features/visits/models/AddingVisit';
-import ProfilePage from '@/pages/Customer/ProfilePage.tsx';
-import AdminBillingPage from '@/pages/Bills/AdminBill.tsx';
 
 const router = createBrowserRouter([
   {
@@ -120,14 +118,6 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: AppRoutePaths.AdminBills,
-        element: (
-          <ProtectedRoute roles={['ADMIN']}>
-            <AdminBillingPage />
-          </ProtectedRoute>
-        ),
-      },
-      {
         path: AppRoutePaths.AllCustomers,
         element: (
           <ProtectedRoute roles={['ADMIN', 'VET']}>
@@ -180,14 +170,6 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <AddingVisit />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: AppRoutePaths.CustomerProfile,
-        element: (
-          <ProtectedRoute roles={['OWNER']}>
-            <ProfilePage />
           </ProtectedRoute>
         ),
       },
