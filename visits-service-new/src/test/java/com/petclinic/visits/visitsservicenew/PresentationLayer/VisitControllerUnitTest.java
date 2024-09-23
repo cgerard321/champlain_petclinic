@@ -579,4 +579,22 @@ class VisitControllerUnitTest {
         verify(visitService, times(1)).deleteCompletedVisitByVisitId(visitId);
         verify(visitService, times(0)).deleteVisit(anyString());  // Ensure delete is not called
     }
+
+    //for Improve fault tolerance tests:
+    @Test
+    void deleteVisitById_visitExists_shouldSucceed() {
+        // Arrange
+        String visitId = "73b5c112-5703-4fb7-b7bc-ac8186811ae1";
+
+        // Mocking the repo responses
+        Mockito.when(visitService.getVisitByVisitId(visitId)).thenReturn(Mono.just(visitResponseDTO));
+        Mockito.when(visitService.deleteCompletedVisitByVisitId((visitId))).thenReturn(Mono.empty());
+
+        // Act
+        Mono<Void> result = visitService.deleteVisit(visitId);
+
+        // Assert
+        StepVerifier.create(result)
+                .verifyComplete();  // Asserts that the result completes without errors
+    }
 }
