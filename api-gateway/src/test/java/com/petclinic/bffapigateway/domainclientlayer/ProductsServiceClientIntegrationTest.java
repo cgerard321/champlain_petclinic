@@ -47,7 +47,7 @@ class ProductsServiceClientIntegrationTest {
         mockWebServer.shutdown();
     }
     @Test
-    void getAllProducts_ShouldReturnProductListStream() {
+    void getAllProducts_ThenReturnProductList() {
 
         mockWebServer.enqueue(new MockResponse()
                 .setBody("data:{\"productId\":\"4affcab7-3ab1-4917-a114-2b6301aa5565\",\"productName\":\"Rabbit Hutch\",\"productDescription\":\"Outdoor wooden hutch for rabbits\",\"productSalePrice\":79.99,\"averageRating\":0.0}\n\n" +
@@ -64,7 +64,7 @@ class ProductsServiceClientIntegrationTest {
                 .verifyComplete();
     }
     @Test
-    void getAllProducts_ShouldHandleEmptyResponse() {
+    void getAllProducts_ThenReturnEmptyResponse() {
 
         mockWebServer.enqueue(new MockResponse()
                 .setBody("")
