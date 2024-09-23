@@ -9,7 +9,6 @@ import {
 import axiosInstance from '@/shared/api/axiosInstance.ts';
 import { AppRoutePaths } from '@/shared/models/path.routes.ts';
 import { useState } from 'react';
-// eslint-disable-next-line import/no-unresolved
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Navbar, Nav, NavDropdown, Container } from 'react-bootstrap';
 import './AppNavBar.css';
