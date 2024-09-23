@@ -2,6 +2,7 @@ package com.petclinic.products.presentationlayer.products;
 
 import com.petclinic.products.datalayer.products.Product;
 import com.petclinic.products.datalayer.products.ProductRepository;
+import com.petclinic.products.utils.exceptions.NotFoundException;
 import org.junit.jupiter.api.*;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,9 @@ class ProductControllerIntegrationTest {
     @Autowired
     private ProductRepository productRepository;
 
+    private final String NON_EXISTENT_PRODUCT_ID = UUID.randomUUID().toString();
+    private final String INVALID_PRODUCT_ID = "INVALID_PRODUCT_ID";
+
     private Product product1 = Product.builder()
             .productId(UUID.randomUUID().toString())
             .productName("Product 1")
@@ -58,6 +62,13 @@ class ProductControllerIntegrationTest {
             .productName("Product 3")
             .productDescription("Product 3 Description")
             .productSalePrice(0.00)
+            .averageRating(0.0)
+            .build();
+
+    private ProductRequestModel productRequestModel2 = ProductRequestModel.builder()
+            .productName("Product 4")
+            .productDescription("Product 4 Description")
+            .productSalePrice(25.00)
             .averageRating(0.0)
             .build();
 
@@ -113,7 +124,7 @@ class ProductControllerIntegrationTest {
     }
 
     @Test
-    public void whenAddProduct_thenAddProductResponseModel() {
+    public void whenAddProduct_thenReturnProduct() {
         webTestClient
                 .post()
                 .uri("/api/v1/products")
@@ -125,6 +136,7 @@ class ProductControllerIntegrationTest {
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody(ProductResponseModel.class)
                 .value(productResponseModel -> {
+                    assertNotNull(productResponseModel);
                     assertNotNull(productResponseModel.getProductId());
                     assertEquals(productRequestModel.getProductName(), productResponseModel.getProductName());
                     assertEquals(productRequestModel.getProductDescription(), productResponseModel.getProductDescription());
@@ -133,8 +145,8 @@ class ProductControllerIntegrationTest {
                 });
 
         StepVerifier
-                .create(productRepository.count())
-                .expectNextCount(1)
+                .create(productRepository.findAll())
+                .expectNextCount(3)
                 .verifyComplete();
     }
 
@@ -153,8 +165,134 @@ class ProductControllerIntegrationTest {
                 .jsonPath("$.message").isEqualTo("Product sale price must be greater than 0");
 
         StepVerifier
-                .create(productRepository.count())
+                .create(productRepository.findAll())
+                .expectNextCount(2)
+                .verifyComplete();
+    }
+
+    @Test
+    public void whenUpdateProduct_thenReturnUpdatedProduct() {
+        webTestClient
+                .put()
+                .uri("/api/v1/products/" +  product1.getProductId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Mono.just(productRequestModel), ProductRequestModel.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(ProductResponseModel.class)
+                .value(productResponseModel -> {
+                    assertEquals(product1.getProductId(), productResponseModel.getProductId());
+                    assertEquals(productRequestModel.getProductName(), productResponseModel.getProductName());
+                    assertEquals(productRequestModel.getProductDescription(), productResponseModel.getProductDescription());
+                    assertEquals(productRequestModel.getProductSalePrice(), productResponseModel.getProductSalePrice());
+                    assertEquals(productRequestModel.getAverageRating(), productResponseModel.getAverageRating());
+                });
+
+        StepVerifier
+                .create(productRepository.findAll())
+                .expectNextCount(2)
+                .verifyComplete();
+    }
+
+    @Test
+    public void whenUpdateProductWithNonExistentProductId_thenThrowNotFoundException() {
+        webTestClient
+                .put()
+                .uri("/api/v1/products/" + NON_EXISTENT_PRODUCT_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Mono.just(productRequestModel2), ProductRequestModel.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Product id was not found: " + NON_EXISTENT_PRODUCT_ID);
+
+        StepVerifier
+                .create(productRepository.findAll())
+                .expectNext(product1)
+                .expectNext(product2);
+    }
+
+    @Test
+    public void whenUpdateWithInvalidProductId_thenThrowInvalidInputException() {
+        webTestClient
+                .put()
+                .uri("/api/v1/products/" + INVALID_PRODUCT_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Mono.just(productRequestModel2), ProductRequestModel.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().is4xxClientError()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Provided product id is invalid: " + "INVALID_PRODUCT_ID");
+
+        StepVerifier
+                .create(productRepository.findAll())
+                .expectNextCount(2)
+                .verifyComplete();
+    }
+
+    @Test
+    public void whenDeleteProduct_thenDeleteProduct() {
+        webTestClient
+                .delete()
+                .uri("/api/v1/products/" + product1.getProductId())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(ProductResponseModel.class)
+                .value(productResponseModel -> {
+                    assertEquals(product1.getProductId(), productResponseModel.getProductId());
+                    assertEquals(product1.getProductName(), productResponseModel.getProductName());
+                    assertEquals(product1.getProductDescription(), productResponseModel.getProductDescription());
+                    assertEquals(product1.getProductSalePrice(), productResponseModel.getProductSalePrice());
+                    assertEquals(product1.getAverageRating(), productResponseModel.getAverageRating());
+                });
+
+        StepVerifier
+                .create(productRepository.findAll())
                 .expectNextCount(1)
+                .verifyComplete();
+    }
+
+    @Test
+    public void whenDeleteProductWithNonExistentProductId_thenThrowNotFoundException() {
+        webTestClient
+                .delete()
+                .uri("/api/v1/products/" + NON_EXISTENT_PRODUCT_ID)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Product id was not found: " + NON_EXISTENT_PRODUCT_ID);
+
+        StepVerifier
+                .create(productRepository.findAll())
+                .expectNextCount(2)
+                .verifyComplete();
+    }
+
+    @Test
+    public void whenDeleteWithInvalidProductId_thenThrowInvalidInputException() {
+        webTestClient
+                .delete()
+                .uri("/api/v1/products/" + INVALID_PRODUCT_ID)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().is4xxClientError()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Provided product id is invalid: " + INVALID_PRODUCT_ID);
+
+        StepVerifier
+                .create(productRepository.findAll())
+                .expectNextCount(2)
                 .verifyComplete();
     }
 
