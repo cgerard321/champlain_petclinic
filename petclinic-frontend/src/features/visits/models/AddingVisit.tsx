@@ -16,7 +16,7 @@ type VisitType = {
   practitionerId: string;
   // ownerId: string;
   status: Status;
-  visitEndDate: Date;
+  //visitEndDate: Date;
 };
 
 const AddingVisit: React.FC = (): JSX.Element => {
@@ -26,7 +26,7 @@ const AddingVisit: React.FC = (): JSX.Element => {
     petId: '',
     practitionerId: '',
     status: 'UPCOMING' as Status,
-    visitEndDate: new Date(),
+    //visitEndDate: new Date(),
   });
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -94,7 +94,7 @@ const AddingVisit: React.FC = (): JSX.Element => {
         petId: '',
         practitionerId: '',
         status: 'UPCOMING' as Status,
-        visitEndDate: new Date(),
+        //visitEndDate: new Date(),
       });
     } catch (error) {
       const apiError = error as ApiError;
