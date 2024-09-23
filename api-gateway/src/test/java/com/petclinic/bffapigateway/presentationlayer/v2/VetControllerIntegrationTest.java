@@ -271,8 +271,7 @@ class VetControllerIntegrationTest {
                     assertTrue(responseBody.contains("vetId not found: ac9adeb8-625b-11ee-8c99-0242ac12000200000"));
                 });
     }
-
-
+    @Test
     void whenDeleteVet_asAdmin_thenReturnNoContent() {
         String vetId = UUID.randomUUID().toString();
 
@@ -286,5 +285,6 @@ class VetControllerIntegrationTest {
                 .expectStatus().isNoContent()
                 .expectBody().isEmpty();
     }
+
 
 }

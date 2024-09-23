@@ -41,6 +41,7 @@ export default function VetListTable(): JSX.Element {
     navigate(`/vets/${vetId}`);
   };
 
+  // Function to handle vet deletion
   const handleVetDelete = (event: React.MouseEvent, vetId: string): void => {
     event.stopPropagation();
     setVets(prevVets => prevVets.filter(vet => vet.vetId !== vetId));
