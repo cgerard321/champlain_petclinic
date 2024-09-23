@@ -171,28 +171,8 @@ export default function Vet(): JSX.Element {
         </button>
         {formVisible && <AddVet />}
         <UploadVetPhoto />
-        <button onClick={handleSearch}>Search</button>
       </div>
       {error && <p>{error}</p>}
-      <div>
-        {result ? (
-          <div>
-            <p>Vet ID: {result.vetId}</p>
-            <p>Vet Bill ID: {result.vetBillId}</p>
-            <p>First Name: {result.firstName}</p>
-            <p>Last Name: {result.lastName}</p>
-            <p>Email: {result.email}</p>
-            <p>Phone: {result.phoneNumber}</p>
-            <p>Resume: {result.resume}</p>
-            <p>Active: {result.active ? 'Yes' : 'No'}</p>
-            <p>Specialties: {renderSpecialties(result.specialties)}</p>
-            <p>Workdays: {renderWorkdays(result.workday)}</p>
-            <p>Work Hours: {parseWorkHours(result.workHoursJson)}</p>
-          </div>
-        ) : (
-          <p>No results found.</p>
-        )}
-      </div>
     </div>
   );
 }
