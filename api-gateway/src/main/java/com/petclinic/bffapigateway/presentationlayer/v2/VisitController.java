@@ -91,7 +91,6 @@ public class VisitController {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-<<<<<<< HEAD
     @PutMapping(value = "/{visitId}")
     public Mono<ResponseEntity<VisitResponseDTO>> updateVisitByVisitId(
             @PathVariable String visitId,
@@ -103,7 +102,6 @@ public class VisitController {
     }
 
 
-=======
     @IsUserSpecific(idToMatch = {"visitId"})
     @DeleteMapping(value = "/completed/{visitId}")
     public Mono<ResponseEntity<Void>> deleteCompletedVisitByVisitId(@PathVariable String visitId) {
@@ -111,6 +109,4 @@ public class VisitController {
                 .then(Mono.just(new ResponseEntity<Void>(HttpStatus.NO_CONTENT)))
                 .switchIfEmpty(Mono.just(new ResponseEntity<>(HttpStatus.NOT_FOUND)));
     }
-
->>>>>>> 1bee8faa (Implemented delete visit when the status is set to complete)
 }
