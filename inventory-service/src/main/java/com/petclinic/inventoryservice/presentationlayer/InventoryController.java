@@ -198,10 +198,9 @@ public Flux<InventoryResponseDTO> searchInventories(
     public Flux<ProductResponseDTO> searchProducts(
             @PathVariable String inventoryId,
             @RequestParam(name = "productName", required = false) String productName,
-            @RequestParam(name = "productDescription", required = false) String productDescription,
-            @RequestParam(name = "status", required = false) Status status) {
+            @RequestParam(name = "productDescription", required = false) String productDescription) {
 
-        return productInventoryService.searchProducts(inventoryId, productName, productDescription, status);
+        return productInventoryService.searchProducts(inventoryId, productName, productDescription);
     }
 
 }

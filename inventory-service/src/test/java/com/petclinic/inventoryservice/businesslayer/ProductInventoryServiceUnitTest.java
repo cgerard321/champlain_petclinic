@@ -1299,12 +1299,11 @@ class ProductInventoryServiceUnitTest {
         String inventoryId = "1";
         String name = "Benzodiazepines";
         String description = "Medication for procedures";
-        Status status = Status.AVAILABLE;
 
-        when(productRepository.findAllProductsByInventoryIdAndProductNameAndProductDescriptionAndStatus(inventoryId, name, description, status))
+        when(productRepository.findAllProductsByInventoryIdAndProductNameAndProductDescription(inventoryId, name, description))
                 .thenReturn(Flux.just(availableProduct));
 
-        Flux<ProductResponseDTO> result = productInventoryService.searchProducts(inventoryId, name, description, status);
+        Flux<ProductResponseDTO> result = productInventoryService.searchProducts(inventoryId, name, description);
 
         StepVerifier.create(result)
                 .expectNextCount(1)
@@ -1316,12 +1315,11 @@ class ProductInventoryServiceUnitTest {
         String inventoryId = "1";
         String name = "InvalidName";
         String description = "InvalidDescription";
-        Status status = Status.OUT_OF_STOCK;
 
-        when(productRepository.findAllProductsByInventoryIdAndProductNameAndProductDescriptionAndStatus(inventoryId, name, description, status))
+        when(productRepository.findAllProductsByInventoryIdAndProductNameAndProductDescription(inventoryId, name, description))
                 .thenReturn(Flux.empty());
 
-        Flux<ProductResponseDTO> result = productInventoryService.searchProducts(inventoryId, name, description, status);
+        Flux<ProductResponseDTO> result = productInventoryService.searchProducts(inventoryId, name, description);
 
         StepVerifier.create(result)
                 .expectError(NotFoundException.class)
@@ -1337,7 +1335,7 @@ class ProductInventoryServiceUnitTest {
         when(productRepository.findAllProductsByInventoryIdAndProductNameAndProductDescription(inventoryId, name, description))
                 .thenReturn(Flux.just(product));
 
-        Flux<ProductResponseDTO> result = productInventoryService.searchProducts(inventoryId, name, description, null);
+        Flux<ProductResponseDTO> result = productInventoryService.searchProducts(inventoryId, name, description);
 
         StepVerifier.create(result)
                 .expectNextCount(1)
@@ -1353,7 +1351,7 @@ class ProductInventoryServiceUnitTest {
         when(productRepository.findAllProductsByInventoryIdAndProductNameAndProductDescription(inventoryId, name, description))
                 .thenReturn(Flux.empty());
 
-        Flux<ProductResponseDTO> result = productInventoryService.searchProducts(inventoryId, name, description, null);
+        Flux<ProductResponseDTO> result = productInventoryService.searchProducts(inventoryId, name, description);
 
         StepVerifier.create(result)
                 .expectError(NotFoundException.class)
@@ -1364,12 +1362,11 @@ class ProductInventoryServiceUnitTest {
     void searchProducts_withNameAndStatus_shouldReturnResults() {
         String inventoryId = "1";
         String name = "Benzodiazepines";
-        Status status = Status.AVAILABLE;
 
-        when(productRepository.findAllProductsByInventoryIdAndProductNameAndStatus(inventoryId, name, status))
+        when(productRepository.findAllProductsByInventoryIdAndProductName(inventoryId, name))
                 .thenReturn(Flux.just(availableProduct));
 
-        Flux<ProductResponseDTO> result = productInventoryService.searchProducts(inventoryId, name, null, status);
+        Flux<ProductResponseDTO> result = productInventoryService.searchProducts(inventoryId, name, null);
 
         StepVerifier.create(result)
                 .expectNextCount(1)
@@ -1380,12 +1377,11 @@ class ProductInventoryServiceUnitTest {
     void searchProducts_withNameAndStatus_noResult_shouldThrowNotFoundException() {
         String inventoryId = "1";
         String name = "InvalidName";
-        Status status = Status.AVAILABLE;
 
-        when(productRepository.findAllProductsByInventoryIdAndProductNameAndStatus(inventoryId, name, status))
+        when(productRepository.findAllProductsByInventoryIdAndProductName(inventoryId, name))
                 .thenReturn(Flux.empty());
 
-        Flux<ProductResponseDTO> result = productInventoryService.searchProducts(inventoryId, name, null, status);
+        Flux<ProductResponseDTO> result = productInventoryService.searchProducts(inventoryId, name, null);
 
         StepVerifier.create(result)
                 .expectError(NotFoundException.class)
@@ -1396,12 +1392,11 @@ class ProductInventoryServiceUnitTest {
     void searchProducts_withDescriptionAndStatus_shouldReturnResults() {
         String inventoryId = "1";
         String description = "Medication for procedures";
-        Status status = Status.AVAILABLE;
 
-        when(productRepository.findAllProductsByInventoryIdAndProductDescriptionAndStatus(inventoryId, description, status))
+        when(productRepository.findAllProductsByInventoryIdAndProductDescription(inventoryId, description))
                 .thenReturn(Flux.just(availableProduct));
 
-        Flux<ProductResponseDTO> result = productInventoryService.searchProducts(inventoryId, null, description, status);
+        Flux<ProductResponseDTO> result = productInventoryService.searchProducts(inventoryId, null, description);
 
         StepVerifier.create(result)
                 .expectNextCount(1)
@@ -1412,12 +1407,11 @@ class ProductInventoryServiceUnitTest {
     void searchProducts_withDescriptionAndStatus_noResult_shouldThrowNotFoundException() {
         String inventoryId = "1";
         String description = "InvalidDescription";
-        Status status = Status.AVAILABLE;
 
-        when(productRepository.findAllProductsByInventoryIdAndProductDescriptionAndStatus(inventoryId, description, status))
+        when(productRepository.findAllProductsByInventoryIdAndProductDescription(inventoryId, description))
                 .thenReturn(Flux.empty());
 
-        Flux<ProductResponseDTO> result = productInventoryService.searchProducts(inventoryId, null, description, status);
+        Flux<ProductResponseDTO> result = productInventoryService.searchProducts(inventoryId, null, description);
 
         StepVerifier.create(result)
                 .expectError(NotFoundException.class)
@@ -1432,7 +1426,7 @@ class ProductInventoryServiceUnitTest {
         when(productRepository.findAllProductsByInventoryIdAndProductName(inventoryId, name))
                 .thenReturn(Flux.just(product));
 
-        Flux<ProductResponseDTO> result = productInventoryService.searchProducts(inventoryId, name, null, null);
+        Flux<ProductResponseDTO> result = productInventoryService.searchProducts(inventoryId, name, null);
 
         StepVerifier.create(result)
                 .expectNextCount(1)
@@ -1447,7 +1441,7 @@ class ProductInventoryServiceUnitTest {
         when(productRepository.findAllProductsByInventoryIdAndProductName(inventoryId, name))
                 .thenReturn(Flux.empty());
 
-        Flux<ProductResponseDTO> result = productInventoryService.searchProducts(inventoryId, name, null, null);
+        Flux<ProductResponseDTO> result = productInventoryService.searchProducts(inventoryId, name, null);
 
         StepVerifier.create(result)
                 .expectError(NotFoundException.class)
@@ -1462,7 +1456,7 @@ class ProductInventoryServiceUnitTest {
         when(productRepository.findAllProductsByInventoryIdAndProductDescription(inventoryId, description))
                 .thenReturn(Flux.just(product));
 
-        Flux<ProductResponseDTO> result = productInventoryService.searchProducts(inventoryId, null, description, null);
+        Flux<ProductResponseDTO> result = productInventoryService.searchProducts(inventoryId, null, description);
 
         StepVerifier.create(result)
                 .expectNextCount(1)
@@ -1477,37 +1471,7 @@ class ProductInventoryServiceUnitTest {
         when(productRepository.findAllProductsByInventoryIdAndProductDescription(inventoryId, description))
                 .thenReturn(Flux.empty());
 
-        Flux<ProductResponseDTO> result = productInventoryService.searchProducts(inventoryId, null, description, null);
-
-        StepVerifier.create(result)
-                .expectError(NotFoundException.class)
-                .verify();
-    }
-
-    @Test
-    void searchProducts_withStatus_shouldReturnResults() {
-        String inventoryId = "1";
-        Status status = Status.AVAILABLE;
-
-        when(productRepository.findAllProductsByInventoryIdAndStatus(inventoryId, status))
-                .thenReturn(Flux.just(availableProduct));
-
-        Flux<ProductResponseDTO> result = productInventoryService.searchProducts(inventoryId, null, null, status);
-
-        StepVerifier.create(result)
-                .expectNextCount(1)
-                .verifyComplete();
-    }
-
-    @Test
-    void searchProducts_withStatus_noResult_shouldThrowNotFoundException() {
-        String inventoryId = "1";
-        Status status = Status.RE_ORDER;
-
-        when(productRepository.findAllProductsByInventoryIdAndStatus(inventoryId, status))
-                .thenReturn(Flux.empty());
-
-        Flux<ProductResponseDTO> result = productInventoryService.searchProducts(inventoryId, null, null, status);
+        Flux<ProductResponseDTO> result = productInventoryService.searchProducts(inventoryId, null, description);
 
         StepVerifier.create(result)
                 .expectError(NotFoundException.class)
@@ -1521,7 +1485,7 @@ class ProductInventoryServiceUnitTest {
         when(productRepository.findAllProductsByInventoryId(inventoryId))
                 .thenReturn(Flux.just(availableProduct));
 
-        Flux<ProductResponseDTO> result = productInventoryService.searchProducts(inventoryId, null, null, null);
+        Flux<ProductResponseDTO> result = productInventoryService.searchProducts(inventoryId, null, null);
 
         StepVerifier
                 .create(result)
@@ -1536,7 +1500,7 @@ class ProductInventoryServiceUnitTest {
         when(productRepository.findAllProductsByInventoryId(inventoryId))
                 .thenReturn(Flux.empty());
 
-        Flux<ProductResponseDTO> result = productInventoryService.searchProducts(inventoryId, null, null, null);
+        Flux<ProductResponseDTO> result = productInventoryService.searchProducts(inventoryId, null, null);
 
         StepVerifier.create(result)
                 .expectError(NotFoundException.class)

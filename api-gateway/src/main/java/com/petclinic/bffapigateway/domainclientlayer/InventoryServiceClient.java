@@ -307,13 +307,11 @@ public class InventoryServiceClient {
     public Flux<ProductResponseDTO> searchProducts(
             final String inventoryId,
             final String productName,
-            final String productDescription,
-            final Status status
+            final String productDescription
     ) {
         UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(inventoryServiceUrl + "/{inventoryId}/products/search")
                 .queryParamIfPresent("productName", Optional.ofNullable(productName))
-                .queryParamIfPresent("productDescription", Optional.ofNullable(productDescription))
-                .queryParamIfPresent("status", Optional.ofNullable(status));
+                .queryParamIfPresent("productDescription", Optional.ofNullable(productDescription));
 
         return webClient.get()
                 .uri(uriBuilder.buildAndExpand(inventoryId).toUri())

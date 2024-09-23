@@ -500,37 +500,13 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
     }
 
     @Override
-    public Flux<ProductResponseDTO>searchProducts(String inventoryId, String productName, String productDescription, Status status) {
-        if (productName != null && productDescription != null && status != null){
-            return productRepository
-                    .findAllProductsByInventoryIdAndProductNameAndProductDescriptionAndStatus(inventoryId, productName, productDescription, status)
-                    .map(EntityDTOUtil::toProductResponseDTO)
-                    .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with InventoryId: " + inventoryId +
-                            "\nOr ProductName: " + productName + "\nOr ProductDescription: " + productDescription + "\nOr Status: " + status)));
-        }
-
+    public Flux<ProductResponseDTO>searchProducts(String inventoryId, String productName, String productDescription) {
         if (productName != null && productDescription != null){
             return productRepository
                     .findAllProductsByInventoryIdAndProductNameAndProductDescription(inventoryId, productName, productDescription)
                     .map(EntityDTOUtil::toProductResponseDTO)
                     .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with InventoryId: " + inventoryId +
                             "\nOr ProductName: " + productName + "\nOr ProductDescription: " + productDescription)));
-        }
-
-        if (productName != null && status != null){
-            return productRepository
-                    .findAllProductsByInventoryIdAndProductNameAndStatus(inventoryId, productName, status)
-                    .map(EntityDTOUtil::toProductResponseDTO)
-                    .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with InventoryId: " + inventoryId +
-                            "\nOr ProductName: " + productName + "\nOr Status: " + status)));
-        }
-
-        if (productDescription != null && status != null){
-            return productRepository
-                    .findAllProductsByInventoryIdAndProductDescriptionAndStatus(inventoryId, productDescription, status)
-                    .map(EntityDTOUtil::toProductResponseDTO)
-                    .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with InventoryId: " + inventoryId +
-                            "\nOr ProductDescription: " + productDescription + "\nOr Status: " + status)));
         }
 
         if (productName != null){
@@ -541,20 +517,12 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                             "\nOr ProductName: " + productName)));
         }
 
-        if (productDescription != null) {
+        if (productDescription != null){
             return productRepository
                     .findAllProductsByInventoryIdAndProductDescription(inventoryId, productDescription)
                     .map(EntityDTOUtil::toProductResponseDTO)
                     .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with InventoryId: " + inventoryId +
                             "\nOr ProductDescription: " + productDescription)));
-        }
-
-        if (status != null){
-            return productRepository
-                    .findAllProductsByInventoryIdAndStatus(inventoryId, status)
-                    .map(EntityDTOUtil::toProductResponseDTO)
-                    .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with InventoryId: " + inventoryId +
-                            "\nOr Status: " + status)));
         }
 
         if (inventoryId != null) {
