@@ -1,16 +1,15 @@
 package com.petclinic.bffapigateway.presentationlayer.v2;
 
 
-import com.petclinic.bffapigateway.domainclientlayer.BillServiceClient;
+
 import com.petclinic.bffapigateway.domainclientlayer.EmailingServiceClient;
-import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
 import com.petclinic.bffapigateway.dtos.Emailing.DirectEmailModelRequestDTO;
 import com.petclinic.bffapigateway.dtos.Emailing.EmailModelResponseDTO;
-import com.petclinic.bffapigateway.utils.Security.Annotations.IsUserSpecific;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -46,13 +45,21 @@ public class EmailingController {
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @PostMapping(
-        value = "/send",
-        produces = MediaType.APPLICATION_JSON_VALUE,
-        consumes= MediaType.APPLICATION_JSON_VALUE
+            value = "/send",
+            consumes = MediaType.APPLICATION_JSON_VALUE
     )
-    public Mono<String> sendEmail(@RequestBody DirectEmailModelRequestDTO body) {
-        return emailingService.sendEmail(body);
+    public Mono<HttpStatus> sendEmail(@RequestBody DirectEmailModelRequestDTO body) {
+        return emailingService.sendEmail(body)
+                .map(status -> {
+                    // Here, you can handle the status code returned from the emailing service
+                    return status; // This returns the HTTP status code
+                })
+                .onErrorResume(e -> {
+                    // Handle any exceptions that may occur
+                    return Mono.just(HttpStatus.INTERNAL_SERVER_ERROR); // or another appropriate status
+                });
     }
+
 
 
     /*
