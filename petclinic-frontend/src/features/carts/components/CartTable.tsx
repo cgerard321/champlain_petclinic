@@ -42,7 +42,7 @@ export default function CartListTable(): JSX.Element {
     fetchCarts();
   }, []);
 
-  async function getAllCarts() {
+  const getAllCarts = async (): Promise<CartModel[]> => {
     try {
       const response = await fetch(
         `http://localhost:8080/api/v2/gateway/carts`,
@@ -54,7 +54,7 @@ export default function CartListTable(): JSX.Element {
         }
       );
 
-      const carts = await response.json();
+      const carts: CartModel[] = await response.json();
       setCarts(carts);
       setLoading(false);
 
@@ -63,9 +63,9 @@ export default function CartListTable(): JSX.Element {
       console.error('Error fetching carts:', error);
       throw error;
     }
-  }
+  };
 
-  const handleDelete = async (cartId: string) => {
+  const handleDelete = async (cartId: string): Promise<void> => {
     if (window.confirm('Are you sure you want to delete this cart?')) {
       try {
         await fetch(`http://localhost:8080/api/v2/gateway/carts/${cartId}`, {
@@ -77,8 +77,8 @@ export default function CartListTable(): JSX.Element {
         });
 
         const updatedCarts = await getAllCarts();
-        setCarts(updatedCarts)
-      } catch (err){
+        setCarts(updatedCarts);
+      } catch (err) {
         console.error('Error deleting cart', err);
       }
     }
@@ -127,7 +127,6 @@ export default function CartListTable(): JSX.Element {
           </tbody>
         </table>
       )}
-      ?{' '}
     </div>
   );
 }
