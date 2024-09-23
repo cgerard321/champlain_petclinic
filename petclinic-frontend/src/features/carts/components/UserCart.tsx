@@ -45,9 +45,14 @@ const UserCart = (): JSX.Element => {
 
         const initialPrices = products.map(item => item.productSalePrice);
         setFixedPrice(initialPrices);
-      } catch (err: any) {
-        console.error('Error fetching cart items:', err);
-        setError('Failed to fetch cart items');
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          console.error('Error fetching cart items:', err.message);
+          setError('Failed to fetch cart items');
+        } else {
+          console.error('Unexpected error', err);
+          setError('An unexpected error occurred');
+        }
       } finally {
         setLoading(false); // Stop loading once the fetch is done
       }
