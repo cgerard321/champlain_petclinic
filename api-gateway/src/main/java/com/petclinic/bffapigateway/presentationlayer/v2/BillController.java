@@ -37,27 +37,30 @@ public class BillController {
         return billService.getAllBilling();
     }
 
-<<<<<<< HEAD
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @GetMapping(value = "/admin/{billId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<BillResponseDTO> getBillById(@PathVariable String billId)
-=======
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping(value = "/{billId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<BillResponseDTO> getBilling(final @PathVariable String billId)
->>>>>>> f30569ef (Admin can delete bills (redo))
     {
         return billService.getBilling(billId);
     }
 
-<<<<<<< HEAD
-=======
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @DeleteMapping(value = "/{billId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public Mono<Void> deleteBill(@PathVariable String billId) {
         return billService.deleteBill(billId);
     }
->>>>>>> f30569ef (Admin can delete bills (redo))
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping(value = "/admin/{billId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<BillResponseDTO> getBillById(@PathVariable String billId)
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping(value = "/{billId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<BillResponseDTO> getBilling(final @PathVariable String billId)
+    {
+        return billService.getBilling(billId);
+    }
+
+
 }
