@@ -5,6 +5,7 @@ import com.petclinic.inventoryservice.datalayer.Inventory.InventoryType;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryTypeRepository;
 import com.petclinic.inventoryservice.datalayer.Product.Product;
 import com.petclinic.inventoryservice.datalayer.Product.ProductRepository;
+import com.petclinic.inventoryservice.datalayer.Supply.Status;
 import com.petclinic.inventoryservice.presentationlayer.*;
 import com.petclinic.inventoryservice.utils.exceptions.InvalidInputException;
 import com.petclinic.inventoryservice.utils.exceptions.NotFoundException;
@@ -75,6 +76,19 @@ class ProductInventoryServiceUnitTest {
             .productPrice(200.00)
             .productQuantity(50)
             .build();
+
+    Product availableProduct = Product.builder()
+            .productId("12345")
+            .inventoryId("1")
+            .productName("Benzodiazepines")
+            .productDescription("Medication for procedures")
+            .productPrice(100.00)
+            .productQuantity(10)
+            .productSalePrice(15.99)
+            .status(Status.AVAILABLE)
+            .build();
+
+
     InventoryType inventoryType = InventoryType.builder()
             .id("1")
             .typeId("81445f86-5329-4df6-badc-8f230ee07e75")
@@ -1279,6 +1293,256 @@ class ProductInventoryServiceUnitTest {
                 .expectNextCount(2)
                 .verifyComplete();
     }
+
+    @Test
+    void searchProducts_withAllParams_shouldReturnResults() {
+        String inventoryId = "1";
+        String name = "Benzodiazepines";
+        String description = "Medication for procedures";
+        Status status = Status.AVAILABLE;
+
+        when(productRepository.findAllProductsByInventoryIdAndProductNameAndProductDescriptionAndStatus(inventoryId, name, description, status))
+                .thenReturn(Flux.just(availableProduct));
+
+        Flux<ProductResponseDTO> result = productInventoryService.searchProducts(inventoryId, name, description, status);
+
+        StepVerifier.create(result)
+                .expectNextCount(1)
+                .verifyComplete();
+    }
+
+    @Test
+    void searchProducts_withAllParams_noResults_shouldThrowNotFoundException() {
+        String inventoryId = "1";
+        String name = "InvalidName";
+        String description = "InvalidDescription";
+        Status status = Status.OUT_OF_STOCK;
+
+        when(productRepository.findAllProductsByInventoryIdAndProductNameAndProductDescriptionAndStatus(inventoryId, name, description, status))
+                .thenReturn(Flux.empty());
+
+        Flux<ProductResponseDTO> result = productInventoryService.searchProducts(inventoryId, name, description, status);
+
+        StepVerifier.create(result)
+                .expectError(NotFoundException.class)
+                .verify();
+    }
+
+    @Test
+    void searchProducts_withNameAndDescription_shouldReturnResults() {
+        String inventoryId = "1";
+        String name = "Benzodiazepines";
+        String description = "Medication for procedures";
+
+        when(productRepository.findAllProductsByInventoryIdAndProductNameAndProductDescription(inventoryId, name, description))
+                .thenReturn(Flux.just(product));
+
+        Flux<ProductResponseDTO> result = productInventoryService.searchProducts(inventoryId, name, description, null);
+
+        StepVerifier.create(result)
+                .expectNextCount(1)
+                .verifyComplete();
+    }
+
+    @Test
+    void searchProducts_withNameAndDescription_noResult_shouldThrowNotFoundException() {
+        String inventoryId = "1";
+        String name = "InvalidName";
+        String description = "InvalidDescription";
+
+        when(productRepository.findAllProductsByInventoryIdAndProductNameAndProductDescription(inventoryId, name, description))
+                .thenReturn(Flux.empty());
+
+        Flux<ProductResponseDTO> result = productInventoryService.searchProducts(inventoryId, name, description, null);
+
+        StepVerifier.create(result)
+                .expectError(NotFoundException.class)
+                .verify();
+    }
+
+    @Test
+    void searchProducts_withNameAndStatus_shouldReturnResults() {
+        String inventoryId = "1";
+        String name = "Benzodiazepines";
+        Status status = Status.AVAILABLE;
+
+        when(productRepository.findAllProductsByInventoryIdAndProductNameAndStatus(inventoryId, name, status))
+                .thenReturn(Flux.just(availableProduct));
+
+        Flux<ProductResponseDTO> result = productInventoryService.searchProducts(inventoryId, name, null, status);
+
+        StepVerifier.create(result)
+                .expectNextCount(1)
+                .verifyComplete();
+    }
+
+    @Test
+    void searchProducts_withNameAndStatus_noResult_shouldThrowNotFoundException() {
+        String inventoryId = "1";
+        String name = "InvalidName";
+        Status status = Status.AVAILABLE;
+
+        when(productRepository.findAllProductsByInventoryIdAndProductNameAndStatus(inventoryId, name, status))
+                .thenReturn(Flux.empty());
+
+        Flux<ProductResponseDTO> result = productInventoryService.searchProducts(inventoryId, name, null, status);
+
+        StepVerifier.create(result)
+                .expectError(NotFoundException.class)
+                .verify();
+    }
+
+    @Test
+    void searchProducts_withDescriptionAndStatus_shouldReturnResults() {
+        String inventoryId = "1";
+        String description = "Medication for procedures";
+        Status status = Status.AVAILABLE;
+
+        when(productRepository.findAllProductsByInventoryIdAndProductDescriptionAndStatus(inventoryId, description, status))
+                .thenReturn(Flux.just(availableProduct));
+
+        Flux<ProductResponseDTO> result = productInventoryService.searchProducts(inventoryId, null, description, status);
+
+        StepVerifier.create(result)
+                .expectNextCount(1)
+                .verifyComplete();
+    }
+
+    @Test
+    void searchProducts_withDescriptionAndStatus_noResult_shouldThrowNotFoundException() {
+        String inventoryId = "1";
+        String description = "InvalidDescription";
+        Status status = Status.AVAILABLE;
+
+        when(productRepository.findAllProductsByInventoryIdAndProductDescriptionAndStatus(inventoryId, description, status))
+                .thenReturn(Flux.empty());
+
+        Flux<ProductResponseDTO> result = productInventoryService.searchProducts(inventoryId, null, description, status);
+
+        StepVerifier.create(result)
+                .expectError(NotFoundException.class)
+                .verify();
+    }
+
+    @Test
+    void searchProducts_withName_shouldReturnResults() {
+        String inventoryId = "1";
+        String name = "Benzodiazepines";
+
+        when(productRepository.findAllProductsByInventoryIdAndProductName(inventoryId, name))
+                .thenReturn(Flux.just(product));
+
+        Flux<ProductResponseDTO> result = productInventoryService.searchProducts(inventoryId, name, null, null);
+
+        StepVerifier.create(result)
+                .expectNextCount(1)
+                .verifyComplete();
+    }
+
+    @Test
+    void searchProducts_withName_noResult_shouldThrowNotFoundException() {
+        String inventoryId = "1";
+        String name = "InvalidName";
+
+        when(productRepository.findAllProductsByInventoryIdAndProductName(inventoryId, name))
+                .thenReturn(Flux.empty());
+
+        Flux<ProductResponseDTO> result = productInventoryService.searchProducts(inventoryId, name, null, null);
+
+        StepVerifier.create(result)
+                .expectError(NotFoundException.class)
+                .verify();
+    }
+
+    @Test
+    void searchProducts_withDescription_shouldReturnResults() {
+        String inventoryId = "1";
+        String description = "Medication for procedures";
+
+        when(productRepository.findAllProductsByInventoryIdAndProductDescription(inventoryId, description))
+                .thenReturn(Flux.just(product));
+
+        Flux<ProductResponseDTO> result = productInventoryService.searchProducts(inventoryId, null, description, null);
+
+        StepVerifier.create(result)
+                .expectNextCount(1)
+                .verifyComplete();
+    }
+
+    @Test
+    void searchProducts_withDescription_noResult_shouldThrowNotFoundException() {
+        String inventoryId = "1";
+        String description = "InvalidDescription";
+
+        when(productRepository.findAllProductsByInventoryIdAndProductDescription(inventoryId, description))
+                .thenReturn(Flux.empty());
+
+        Flux<ProductResponseDTO> result = productInventoryService.searchProducts(inventoryId, null, description, null);
+
+        StepVerifier.create(result)
+                .expectError(NotFoundException.class)
+                .verify();
+    }
+
+    @Test
+    void searchProducts_withStatus_shouldReturnResults() {
+        String inventoryId = "1";
+        Status status = Status.AVAILABLE;
+
+        when(productRepository.findAllProductsByInventoryIdAndStatus(inventoryId, status))
+                .thenReturn(Flux.just(availableProduct));
+
+        Flux<ProductResponseDTO> result = productInventoryService.searchProducts(inventoryId, null, null, status);
+
+        StepVerifier.create(result)
+                .expectNextCount(1)
+                .verifyComplete();
+    }
+
+    @Test
+    void searchProducts_withStatus_noResult_shouldThrowNotFoundException() {
+        String inventoryId = "1";
+        Status status = Status.RE_ORDER;
+
+        when(productRepository.findAllProductsByInventoryIdAndStatus(inventoryId, status))
+                .thenReturn(Flux.empty());
+
+        Flux<ProductResponseDTO> result = productInventoryService.searchProducts(inventoryId, null, null, status);
+
+        StepVerifier.create(result)
+                .expectError(NotFoundException.class)
+                .verify();
+    }
+
+    @Test
+    void searchProducts_withNoParams_shouldReturnResults() {
+        String inventoryId = "1";
+
+        when(productRepository.findAllProductsByInventoryId(inventoryId))
+                .thenReturn(Flux.just(availableProduct));
+
+        Flux<ProductResponseDTO> result = productInventoryService.searchProducts(inventoryId, null, null, null);
+
+        StepVerifier
+                .create(result)
+                .expectNextCount(1)
+                .verifyComplete();
+    }
+
+    @Test
+    void searchProducts_withNotExistingInventoryId_shouldThrowNotFound() {
+        String inventoryId = "NonExistingInventoryId";
+
+        when(productRepository.findAllProductsByInventoryId(inventoryId))
+                .thenReturn(Flux.empty());
+
+        Flux<ProductResponseDTO> result = productInventoryService.searchProducts(inventoryId, null, null, null);
+
+        StepVerifier.create(result)
+                .expectError(NotFoundException.class)
+                .verify();
+    }
+
 }
 
 

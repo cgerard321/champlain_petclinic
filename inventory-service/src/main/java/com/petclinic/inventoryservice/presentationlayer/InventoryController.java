@@ -3,6 +3,7 @@ package com.petclinic.inventoryservice.presentationlayer;
 import com.petclinic.inventoryservice.businesslayer.ProductInventoryService;
 import com.petclinic.inventoryservice.businesslayer.SupplyInventoryService;
 import com.petclinic.inventoryservice.businesslayer.SupplyInventoryServiceImpl;
+import com.petclinic.inventoryservice.datalayer.Supply.Status;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -191,5 +192,16 @@ public Flux<InventoryResponseDTO> searchInventories(
         int stockThreshold = threshold.orElse(16);
         return productInventoryService.getLowStockProducts(inventoryId, stockThreshold);
 
-}
+    }
+
+    @GetMapping("/{inventoryId}/products/search")
+    public Flux<ProductResponseDTO> searchProducts(
+            @PathVariable String inventoryId,
+            @RequestParam(name = "productName", required = false) String productName,
+            @RequestParam(name = "productDescription", required = false) String productDescription,
+            @RequestParam(name = "status", required = false) Status status) {
+
+        return productInventoryService.searchProducts(inventoryId, productName, productDescription, status);
+    }
+
 }
