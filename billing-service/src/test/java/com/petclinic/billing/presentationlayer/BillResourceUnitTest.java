@@ -216,6 +216,36 @@ class BillResourceUnitTest {
     }
 
     @Test
+    void deleteUnpaidBill() {
+
+        when(billService.DeleteBill(anyString())).thenReturn(Mono.empty());
+
+        client.delete()
+                .uri("/bills/" + unpaidResponseDTO.getBillId())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNoContent()
+                .expectBody();
+
+        Mockito.verify(billService, times(1)).DeleteBill(unpaidResponseDTO.getBillId());
+    }
+
+    @Test
+    void deleteOverdueBill() {
+
+        when(billService.DeleteBill(anyString())).thenReturn(Mono.empty());
+
+        client.delete()
+                .uri("/bills/" + overdueResponseDTO.getBillId())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNoContent()
+                .expectBody();
+
+        Mockito.verify(billService, times(1)).DeleteBill(overdueResponseDTO.getBillId());
+    }
+
+    @Test
     void deleteBillByVetId() {
 
         when(billService.DeleteBillsByVetId(anyString())).thenReturn(Flux.empty());

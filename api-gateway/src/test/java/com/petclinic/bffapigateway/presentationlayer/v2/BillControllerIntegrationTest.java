@@ -34,10 +34,12 @@ public class BillControllerIntegrationTest {
     private MockServerConfigAuthService mockServerConfigAuthService;
 
 
+
     @BeforeAll
     public void startMockServer() {
         mockServerConfigBillService = new MockServerConfigBillService();
         mockServerConfigBillService.registerGetAllBillsEndpoint();
+        mockServerConfigBillService.registerDeleteBillEndpoint();
 
         mockServerConfigAuthService = new MockServerConfigAuthService();
         mockServerConfigAuthService.registerValidateTokenForAdminEndpoint();
@@ -60,7 +62,7 @@ public class BillControllerIntegrationTest {
             .date(LocalDate.parse("2024-10-11"))
             .amount(100.0)
             .taxedAmount(0.0)
-            .billStatus(BillStatus.UNPAID)
+            .billStatus(BillStatus.PAID)
             .dueDate(LocalDate.parse("2024-10-13"))
             .build();
 
@@ -73,6 +75,18 @@ public class BillControllerIntegrationTest {
             .amount(120.0)
             .taxedAmount(10.0)
             .billStatus(BillStatus.UNPAID)
+            .dueDate(LocalDate.parse("2024-10-13"))
+            .build();
+
+    private BillResponseDTO billresponse3 = BillResponseDTO.builder()
+            .billId("e6c7398e-8ac4-4e10-9ee0-03ef33f0361c")
+            .customerId("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
+            .visitType("general")
+            .vetId("2")
+            .date(LocalDate.parse("2024-10-11"))
+            .amount(120.0)
+            .taxedAmount(10.0)
+            .billStatus(BillStatus.OVERDUE)
             .dueDate(LocalDate.parse("2024-10-13"))
             .build();
 
@@ -96,6 +110,37 @@ public class BillControllerIntegrationTest {
                 .expectNextCount(2)
                 .verifyComplete();
     }
+
+
+
+    @Test
+    void whenDeleteBill_asAdmin_thenReturnNoContent() {
+
+        Flux<BillResponseDTO> result = webTestClient
+                .delete()
+                .uri("/api/v2/gateway/bills/e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
+                .cookie("Bearer", jwtTokenForValidAdmin)
+                .exchange()
+                .expectStatus().isNotFound()
+                .returnResult(BillResponseDTO.class)
+                .getResponseBody();
+
+        StepVerifier
+                .create(result)
+                .expectNextCount(0);
+    }
+
+    @Test
+    void whenDeleteUnpaidBill_asAdmin_thenReturnUnprocessableEntity() {
+        webTestClient
+                .delete()
+                .uri("/api/v2/gateway/bills/e6c7398e-8ac4-4e10-9ee0-03ef33f0361b")
+                .cookie("Bearer", jwtTokenForValidAdmin)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+
 }
 
 
