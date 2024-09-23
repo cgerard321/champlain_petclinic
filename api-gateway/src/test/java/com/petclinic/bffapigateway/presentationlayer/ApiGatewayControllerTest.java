@@ -67,6 +67,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+import static com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigAuthService.jwtTokenForValidAdmin;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -3912,5 +3913,10 @@ private VetAverageRatingDTO buildVetAverageRatingDTO(){
                 .endDate("2014")
                 .build();
     }
+
+
+
+
+
 
 }

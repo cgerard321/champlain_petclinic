@@ -14,12 +14,13 @@ export default function ProductList(): JSX.Element {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { user } = useUser();
   const [isRightRole, setIsRightRole] = useState<boolean>(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
   const [recentlyClickedProducts, setRecentlyClickedProducts] = useState<
     ProductModel[]
   >([]);
 
-  const fetchProducts = async (): Promise<void> => {
-    // Validate inputs
+  function FilterByPriceErrorHandling(): void {
+    // Validate inputs for filter by price
     if (
       minPrice !== undefined &&
       maxPrice !== undefined &&
@@ -28,14 +29,10 @@ export default function ProductList(): JSX.Element {
       alert('Min Price cannot be greater than Max Price');
       return;
     }
-    if (
-      (minPrice !== undefined && minPrice < 0) ||
-      (maxPrice !== undefined && maxPrice < 0)
-    ) {
-      alert('Price values cannot be negative');
-      return;
-    }
+  }
 
+  const fetchProducts = async (): Promise<void> => {
+    FilterByPriceErrorHandling();
     setIsLoading(true);
     try {
       const list = await getAllProducts(minPrice, maxPrice);
@@ -73,6 +70,20 @@ export default function ProductList(): JSX.Element {
     }
   };
 
+  const toggleSidebar = (): void => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
+  // Handler to close sidebar when clicking outside
+  const handleOverlayClick = (): void => {
+    setIsSidebarOpen(false);
+  };
+
+  const clearFilters = (): void => {
+    setMinPrice(undefined);
+    setMaxPrice(undefined);
+  };
+
   const handleProductClick = (product: ProductModel): void => {
     setRecentlyClickedProducts(listOfProducts => {
       const updatedProducts = [];
@@ -94,64 +105,104 @@ export default function ProductList(): JSX.Element {
   };
 
   return (
-    <div>
-      <div className="filter-container">
-        <label>
-          Min Price:
-          <input
-            type="number"
-            value={minPrice ?? typeof 'number'}
-            onChange={e =>
-              setMinPrice(
-                e.target.value ? parseFloat(e.target.value) : undefined
-              )
-            }
-          />
-        </label>
-        <label>
-          Max Price:
-          <input
-            type="number"
-            value={maxPrice ?? typeof 'number'}
-            onChange={e =>
-              setMaxPrice(
-                e.target.value ? parseFloat(e.target.value) : undefined
-              )
-            }
-          />
-        </label>
-        <button onClick={fetchProducts}>Apply Filter</button>
-      </div>
-
-      {isRightRole && <AddProduct addProduct={handleAddProduct} />}
-      <div className="grid">
-        {isLoading ? (
-          <p>Loading products...</p>
-        ) : productList.length > 0 ? (
-          productList.map((product: ProductModel) => (
-            <div
-              key={product.productId}
-              onClick={() => handleProductClick(product)}
-            >
-              <Product key={product.productId} product={product} />
-            </div>
-          ))
-        ) : (
-          <p>No products found.</p>
+      <div className="product-list-container">
+        {isSidebarOpen && (
+            <div className="overlay" onClick={handleOverlayClick}></div>
         )}
-      </div>
-      <div>
-        <h2>Recently Clicked Products</h2>
-        <div className="grid">
-          {recentlyClickedProducts.map(product => (
-            <div className="card" key={product.productId}>
-              <h2>{product.productName}</h2>
-              <p>{product.productDescription}</p>
-              <p>Price: ${product.productSalePrice.toFixed(2)}</p>
+
+        <div
+            className={`sidebar ${isSidebarOpen ? 'open' : ''}`}
+            id="sidebar"
+            aria-hidden={!isSidebarOpen}
+        >
+          <button
+              className="close-button"
+              onClick={toggleSidebar}
+              aria-label="Close Filters"
+          >
+            &times;
+          </button>
+          <div className="filter-container">
+            <h2>Filters</h2>
+            <label>
+              Min Price:
+              <input
+                  type="number"
+                  value={minPrice ?? ''}
+                  onChange={e =>
+                      setMinPrice(
+                          e.target.value ? parseFloat(e.target.value) : undefined
+                      )
+                  }
+                  min="0"
+                  placeholder="e.g., 10"
+              />
+            </label>
+            <label>
+              Max Price:
+              <input
+                  type="number"
+                  value={maxPrice ?? ''}
+                  onChange={e =>
+                      setMaxPrice(
+                          e.target.value ? parseFloat(e.target.value) : undefined
+                      )
+                  }
+                  min="0"
+                  placeholder="e.g., 100"
+              />
+            </label>
+            <button className="apply-filter-button" onClick={fetchProducts}>
+              Apply Filter
+            </button>
+            <button className="clear-filter-button" onClick={clearFilters}>
+              Clear Filters
+            </button>
+          </div>
+        </div>
+
+        {!isSidebarOpen && (
+            <button
+                className="toggle-sidebar-button"
+                onClick={toggleSidebar}
+                aria-expanded={isSidebarOpen}
+                aria-controls="sidebar"
+            >
+              &#9776; Filters
+            </button>
+        )}
+
+        {isRightRole && <AddProduct addProduct={handleAddProduct} />}
+        <div className="main-content">
+          <div className="grid">
+            {isLoading ? (
+                <p>Loading products...</p>
+            ) : productList.length > 0 ? (
+                productList.map((product: ProductModel) => (
+                    <div
+                        key={product.productId}
+                        onClick={() => handleProductClick(product)}
+                    >
+                      <Product key={product.productId} product={product} />
+                    </div>
+                ))
+            ) : (
+                <p>No products found.</p>
+            )}
+          </div>
+          <div>
+            <h2>Recently Clicked Products</h2>
+            <div className="grid">
+              {recentlyClickedProducts.map(product => (
+                  <div className="card" key={product.productId}>
+                    <h2>{product.productName}</h2>
+                    <p>{product.productDescription}</p>
+                    <p>Price: ${product.productSalePrice.toFixed(2)}</p>
+                  </div>
+              ))}
             </div>
-          ))}
+          </div>
         </div>
       </div>
-    </div>
   );
 }
