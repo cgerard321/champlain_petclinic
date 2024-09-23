@@ -17,8 +17,10 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
 @SpringBootTest
 @AutoConfigureWebTestClient
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-class RatingControllerIntegrationTest {
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+// Do NOT rename, letter W is always ran last, if ran before: causes issues with port binding with the other MockServers
+// As much as I hate this "solution", it's better than another hacky solution like holding the thread for X amount of time.
+class WireMockRatingControllerIntegrationTest {
 
     @Autowired
     private WebTestClient webTestClient;
