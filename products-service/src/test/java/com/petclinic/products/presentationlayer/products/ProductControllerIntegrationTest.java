@@ -85,7 +85,7 @@ class ProductControllerIntegrationTest {
     }
 
     @Test
-    public void whenAddProduct_thenAddProductResponseModel() {
+    public void whenAddProduct_thenReturnProduct() {
         webTestClient
                 .post()
                 .uri("/api/v1/products")
@@ -132,7 +132,7 @@ class ProductControllerIntegrationTest {
     }
 
     @Test
-    public void whenUpdateProduct_thenUpdateProductResponseModel() {
+    public void whenUpdateProduct_thenReturnUpdatedProduct() {
         webTestClient
                 .put()
                 .uri("/api/v1/products/" +  product1.getProductId())
@@ -173,8 +173,8 @@ class ProductControllerIntegrationTest {
 
         StepVerifier
                 .create(productRepository.findAll())
-                .expectNextCount(2)
-                .verifyComplete();
+                .expectNext(product1)
+                .expectNext(product2);
     }
 
     @Test
@@ -189,16 +189,16 @@ class ProductControllerIntegrationTest {
                 .expectStatus().is4xxClientError()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.message").isEqualTo("Provided product id is invalid: " + INVALID_PRODUCT_ID);
+                .jsonPath("$.message").isEqualTo("Provided product id is invalid: " + "INVALID_PRODUCT_ID");
 
         StepVerifier
-                .create(Mono.just(productRequestModel2))
-                .expectNext(productRequestModel2)
+                .create(productRepository.findAll())
+                .expectNextCount(2)
                 .verifyComplete();
     }
 
     @Test
-    public void whenDeleteProduct_thenDeleteProductResponseModel() {
+    public void whenDeleteProduct_thenDeleteProduct() {
         webTestClient
                 .delete()
                 .uri("/api/v1/products/" + product1.getProductId())
