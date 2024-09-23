@@ -13,6 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.BeanUtils;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -239,4 +240,136 @@ class CartServiceUnitTest {
         verify(cartRepository, times(1)).save(cart);
         assertTrue(cart.getProductIds().isEmpty());
     }
+
+    @Test
+
+    public void whenDeleteCartById_withExistingCart_thenCartIsDeleted() {
+        // Arrange
+        String cartId = cart1.getCartId();
+        when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart1));
+        when(cartRepository.delete(cart1)).thenReturn(Mono.empty());
+        when(productClient.getProductByProductId("9a29fff7-564a-4cc9-8fe1-36f6ca9bc223")).thenReturn(Mono.just(product1));
+        when(productClient.getProductByProductId("d819e4f4-25af-4d33-91e9-2c45f0071606")).thenReturn(Mono.just(product2));
+
+        // Act
+        Mono<CartResponseModel> result = cartService.deleteCartByCartId(cartId);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNextMatches(cartResponseModel ->
+                    cartResponseModel.getCartId().equals(cart1.getCartId()))
+
+                .verifyComplete();
+
+        verify(cartRepository, times(1)).findCartByCartId(cartId);
+        verify(cartRepository, times(1)).delete(cart1);
+    }
+
+    @Test
+    public void whenDeleteCartById_withNonExistentCartId_thenThrowNotFoundException() {
+        // Arrange
+        when(cartRepository.findCartByCartId(nonExistentCartId)).thenReturn(Mono.empty());
+
+        // Act
+        Mono<CartResponseModel> result = cartService.deleteCartByCartId(nonExistentCartId);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof NotFoundException
+                        && throwable.getMessage().equals("Cart id was not found: " + nonExistentCartId))
+                .verify();
+
+        verify(cartRepository, times(1)).findCartByCartId(nonExistentCartId);
+        verify(cartRepository, never()).delete(any(Cart.class));
+    }
+
+    void getAllCarts_ReturnsCartResponseModelWithProducts() {
+        //mocking cart retrieval
+        when(cartRepository.findAll()).thenReturn(Flux.just(cart1));
+
+        //mocking product retrieval
+        when(productClient.getProductByProductId(product1.getProductId())).thenReturn(Mono.just(product1));
+        when(productClient.getProductByProductId(product2.getProductId())).thenReturn(Mono.just(product2));
+
+        //run the test
+        StepVerifier.create(cartService.getAllCarts())
+                .expectNextMatches(cartResponseModel ->
+                        cartResponseModel.getCustomerId().equals("1") &&
+                                cartResponseModel.getProducts().size() == 2 && //2 products in the cart
+                                cartResponseModel.getProducts().get(0).getProductName().equals("Web Services") &&
+                                cartResponseModel.getProducts().get(1).getProductName().equals("Shakespeare's Greatest Works")
+                )
+                .verifyComplete();
+
+        // Verify interactions
+        verify(cartRepository, times(1)).findAll();
+        verify(productClient, times(1)).getProductByProductId(product1.getProductId());
+        verify(productClient, times(1)).getProductByProductId(product2.getProductId());
+    }
+
+    @Test
+    void getAllCarts_ReturnsCartWithoutProducts() {
+        //mocking cart retrieval with an empty product list
+        Cart cartWithNoProducts = Cart.builder()
+                .cartId("123")
+                .customerId("2")
+                .productIds(new ArrayList<>()) //no product IDs
+                .build();
+
+        when(cartRepository.findAll()).thenReturn(Flux.just(cartWithNoProducts));
+
+        // Run the test
+        StepVerifier.create(cartService.getAllCarts())
+                .expectNextMatches(cartResponseModel ->
+                        cartResponseModel.getCustomerId().equals("2") &&
+                                cartResponseModel.getProducts().isEmpty() //no products in the cart
+                )
+                .verifyComplete();
+
+        // Verify interactions
+        verify(cartRepository, times(1)).findAll();
+        verifyNoInteractions(productClient); //no products, so productClient shouldn't be called
+    }
+
+    @Test
+    void getAllCarts_ReturnsMultipleCartsWithProducts() {
+        Cart cart2 = Cart.builder()
+                .cartId("456")
+                .customerId("3")
+                .productIds(List.of(product3.getProductId())) //another cart with 1 product
+                .build();
+
+        when(cartRepository.findAll()).thenReturn(Flux.just(cart1, cart2));
+        when(productClient.getProductByProductId(product1.getProductId())).thenReturn(Mono.just(product1));
+        when(productClient.getProductByProductId(product2.getProductId())).thenReturn(Mono.just(product2));
+        when(productClient.getProductByProductId(product3.getProductId())).thenReturn(Mono.just(product3));
+
+        //run the test
+        StepVerifier.create(cartService.getAllCarts())
+                .expectNextMatches(cartResponseModel -> cartResponseModel.getCustomerId().equals("1"))
+                .expectNextMatches(cartResponseModel -> cartResponseModel.getCustomerId().equals("3"))
+                .verifyComplete();
+
+        //verify interactions
+        verify(cartRepository, times(1)).findAll();
+        verify(productClient, times(1)).getProductByProductId(product1.getProductId());
+        verify(productClient, times(1)).getProductByProductId(product2.getProductId());
+        verify(productClient, times(1)).getProductByProductId(product3.getProductId());
+    }
+
+    @Test
+    void getAllCarts_ReturnsEmptyListWhenNoCarts() {
+        //mocking empty cart retrieval
+        when(cartRepository.findAll()).thenReturn(Flux.empty());
+
+        //run the test
+        StepVerifier.create(cartService.getAllCarts())
+                .expectNextCount(0) //no carts should be returned
+                .verifyComplete();
+
+        //verify interactions
+        verify(cartRepository, times(1)).findAll();
+        verifyNoInteractions(productClient); //no carts, so productClient shouldn't be called
+    }
+
 }

@@ -33,8 +33,6 @@ public class CartController {
                 .map(ResponseEntity::ok);
     }
 
-
-
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public Flux<CartResponseModel> getAllCarts() {
         return cartService.getAllCarts();
@@ -72,5 +70,16 @@ public class CartController {
         return cartService.getCartItemCount(cartId)
                 .map(count -> ResponseEntity.ok(Collections.singletonMap("itemCount", count)))
                 .switchIfEmpty(Mono.error(new NotFoundException("Cart not found for ID: " + cartId)));
+    }
+
+    @DeleteMapping("/{cartId}")
+    public Mono<ResponseEntity<CartResponseModel>> deleteCartByCartId(@PathVariable String cartId){
+        return Mono.just(cartId)
+                .filter(id -> id.length() == 36)
+                .switchIfEmpty(Mono.error(new InvalidInputException("Provided cart id is invalid: " + cartId)))
+                .flatMap(cartService::deleteCartByCartId)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+
     }
 }

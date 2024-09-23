@@ -52,5 +52,31 @@ public class CartServiceClient {
                 .bodyToMono(CartResponseDTO.class);
     }
 
+    public Mono<CartResponseDTO> deleteCartByCartId(String CardId){
+        return webClientBuilder.build()
+                .delete()
+                .uri(CartServiceUrl + "/" + CardId)
+                .retrieve()
+                .bodyToMono(CartResponseDTO.class);
+    }
+
+    public CartResponseDTO createCart(CartRequestDTO cartRequestDTO) {
+        return webClientBuilder.build()
+                .post()
+                .uri(CartServiceUrl)
+                .bodyValue(cartRequestDTO)
+                .retrieve()
+                .bodyToMono(CartResponseDTO.class)
+                .block();
+    }
+
+    public Mono<Void> clearCart(String cartId) {
+        return webClientBuilder.build()
+                .delete()
+                .uri(CartServiceUrl + "/" + cartId + "/clear")
+                .retrieve()
+                .bodyToMono(Void.class);
+    }
 }
+
 

@@ -2,21 +2,18 @@ package com.petclinic.products.utils;
 
 import com.petclinic.products.datalayer.products.Product;
 import com.petclinic.products.datalayer.products.ProductRepository;
-import com.petclinic.products.datalayer.ratings.RatingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
 @Service
+@Profile("!test")
 public class DataLoaderService implements CommandLineRunner {
 
     @Autowired
     ProductRepository productRepository;
-
-    @Autowired
-    RatingRepository ratingRepository;
 
     @Override
     public void run(String... args) throws Exception {
@@ -87,6 +84,6 @@ public class DataLoaderService implements CommandLineRunner {
         Flux.just(product1, product2, product3, product4, product5, product6, product7, product8)
                 .flatMap(s -> productRepository.insert(Mono.just(s))
                         .log(s.toString()))
-                .subscribe();  //if you don't subscribe, nothing happens
+                .subscribe();
     }
 }

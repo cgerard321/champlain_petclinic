@@ -240,6 +240,22 @@ class ProductRepositoryTest {
                 .verifyComplete();
     }
 
+    @Test
+    public void shouldFindNoProductsWhenNoneAreBelowThreshold() {
+        // Act & Assert
+        StepVerifier
+                .create(productRepository.findAllByInventoryIdAndProductQuantityLessThan("inventoryId_1", 3))  // No product with stock less than 3
+                .verifyComplete();  // Expect no results
+    }
+
+    @Test
+    public void shouldReturnEmptyWhenInventoryDoesNotExist() {
+        // Act & Assert
+        StepVerifier
+                .create(productRepository.findAllByInventoryIdAndProductQuantityLessThan("nonExistingInventoryId", 50))
+                .verifyComplete();
+    }
+
 
     private Product buildProduct(String inventoryId, String productId, String productName, String productDescription, Double productPrice, Integer productQuantity, Double productSalePrice) {
         return Product.builder()
