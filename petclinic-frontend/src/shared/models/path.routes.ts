@@ -31,4 +31,5 @@ export enum AppRoutePaths {
   VetDetails = '/vets/{vetId}',
 
   EditVisit = '/visits/:visitId/edit',
+
 }
