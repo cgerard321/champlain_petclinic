@@ -1059,6 +1059,12 @@ public class BFFApiGatewayController {
         return inventoryServiceClient.deleteInventoryByInventoryId(inventoryId);
     }
 
+    @GetMapping(value="inventory/{inventoryId}/products/lowstock")
+    public Flux<ProductResponseDTO>getLowStockProducts(@PathVariable String inventoryId, @RequestParam Optional<Integer> threshold){
+        int stockThreshold = threshold.orElse(16);
+        return inventoryServiceClient.getLowStockProducts(inventoryId, stockThreshold);
+    }
+
     @SecuredEndpoint(allowedRoles = {Roles.ALL})
     @GetMapping(value = "owners/petTypes")//, produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<PetTypeResponseDTO> getAllPetTypes() {
