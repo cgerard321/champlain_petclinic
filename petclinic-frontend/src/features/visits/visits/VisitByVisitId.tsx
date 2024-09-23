@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 // Assuming this function gets the visit by visitId
 import { Visit } from '../models/Visit';
 import { getVisitByVisitId } from '../Review/Api/getVisitByVisitId';
@@ -8,6 +8,7 @@ import './VisitDetails.css';
 export default function VisitDetails(): JSX.Element {
   const { visitId } = useParams<{ visitId: string }>(); // Extract visitId from URL parameters
   const [visit, setVisit] = useState<Visit | null>(null); // State for the visit
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (visitId) {
@@ -77,6 +78,13 @@ export default function VisitDetails(): JSX.Element {
           </span>
         </div>
       </div>
+      <button
+        className="btn btn-warning"
+        onClick={() => navigate('/visits')}
+        title="Let a review"
+      >
+        Return to visits
+      </button>
     </div>
   );
 }
