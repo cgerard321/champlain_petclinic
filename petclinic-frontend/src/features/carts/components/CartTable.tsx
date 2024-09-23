@@ -42,12 +42,12 @@ export default function CartListTable(): JSX.Element {
     fetchCarts();
   }, []);
 
-  // const handleDelete = (cartId: string) => {
-  //   if (window.confirm('Are you sure you want to delete this cart?')) {
-  //     // TODO: Implement cart deletion logic
-  //     console.log(`Deleting cart with ID: ${cartId}`);
-  //   }
-  // };
+  const handleDelete = (cartId: string) => {
+    if (window.confirm('Are you sure you want to delete this cart?')) {
+      // TODO: Implement cart deletion logic
+      console.log(`Deleting cart with ID: ${cartId}`);
+    }
+  };
 
   return (
     <div className="cart-list-container">
@@ -77,14 +77,14 @@ export default function CartListTable(): JSX.Element {
                     View Cart
                   </Link>
                 </td>
-                {/* <td>
+                <td>
                   <button
                     className="delete-button"
                     onClick={() => handleDelete(cart.cartId)}
                   >
                     Delete
                   </button>
-                </td> */}
+                </td>
               </tr>
             ))}
           </tbody>
