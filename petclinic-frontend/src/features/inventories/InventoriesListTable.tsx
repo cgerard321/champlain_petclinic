@@ -34,8 +34,6 @@ export default function InventoriesListTable(): JSX.Element {
     setShowAddSupplyModal(prev => !prev);
   };
 
-
-
   const {
     inventoryList,
     setInventoryList,
@@ -397,6 +395,25 @@ export default function InventoriesListTable(): JSX.Element {
         }}
       >
         Delete All Inventories
+      </button>
+      <button
+        className="low-stock-button btn btn-warning mx-1"
+        onClick={async () => {
+          if (inventoryList.length > 0) {
+            setLowStockProductsByInventory({});
+            try {
+              for (const inventory of inventoryList) {
+                await getAllLowStockProducts(inventory);
+              }
+            } catch (error) {
+              console.error('Error fetching low stock products:', error);
+            }
+          } else {
+            console.error('No inventories found');
+          }
+        }}
+      >
+        Add Inventory
       </button>
       <button
         className="low-stock-button btn btn-warning mx-1"

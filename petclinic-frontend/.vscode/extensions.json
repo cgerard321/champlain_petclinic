@@ -1,9 +1,0 @@
-{
-    "recommendations": [
-        "esbenp.prettier-vscode",
-        "dbaeumer.vscode-eslint",
-        "rafapaulin.try-material-icon-theme",
-        "github.copilot-chat",
-        "github.copilot"
-    ]
-}
