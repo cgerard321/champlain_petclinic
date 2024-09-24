@@ -34,6 +34,8 @@ import MockPage from '@/pages/Inventory/MockPage.tsx';
 import InventorySupplies from '@/features/inventories/InventorySupplies.tsx';
 
 import EditingVisit from './features/visits/models/EditingVisit';
+import UpdateCustomer from "@/pages/Customer/UpdateCustomer.tsx";
+import CustomerDetails from "@/pages/Customer/CustomerDetails.tsx";
 
 const router = createBrowserRouter([
   {
@@ -150,6 +152,22 @@ const router = createBrowserRouter([
           <ProtectedRoute roles={['ADMIN', 'VET']}>
             <AllOwners />
           </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.UpdateCustomer,
+        element: (
+            <ProtectedRoute roles={['ADMIN', 'VET']}>
+              <UpdateCustomer />
+            </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.CustomerDetails,
+        element: (
+            <ProtectedRoute roles={['ADMIN', 'VET']}>
+              <CustomerDetails />
+            </ProtectedRoute>
         ),
       },
       {
