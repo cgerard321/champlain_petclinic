@@ -1,0 +1,38 @@
+@startuml
+
+package "api-gateway" {
+
+    class JwtTokenFilter implements WebFilter
+
+    class RoleFilter implements WebFilter
+
+    class IsUserFilter implements WebFilter
+
+    class BFFApiGatewayController
+
+}
+
+
+
+package "auth-service" {
+
+}
+
+
+JwtTokenFilter --> "auth-service" : POST /users/validate-token
+
+"auth-service" -[dashed]-> JwtTokenFilter : TokenResponseDTO
+
+JwtTokenFilter --> RoleFilter
+
+RoleFilter --> IsUserFilter
+
+note top of "api-gateway"
+ Any of the filters can reject
+ a request based on the conditions set in the annotations above
+ the handled method
+end note
+IsUserFilter --> BFFApiGatewayController
+
+
+@enduml
