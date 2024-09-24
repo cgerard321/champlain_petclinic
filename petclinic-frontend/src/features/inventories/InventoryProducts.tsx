@@ -1,10 +1,11 @@
 import {useEffect, useState} from "react";
-import {useParams} from "react-router-dom";
+//import {useParams} from "react-router-dom";
 import {ProductModel} from "@/features/inventories/models/ProductModels/ProductModel.ts";
 import useSearchProducts from "@/features/inventories/hooks/useSearchProducts.ts";
 export default function InventoryProducts(): JSX.Element {
 
-    const { inventoryId } = useParams<{ inventoryId: string }>();
+    //const { inventoryId } = useParams<{ inventoryId: string }>();
+  const inventoryId = '4040d18a-d098-4f60-9c57-6093fa747bb8';
 
   const [productName, setProductName] = useState('');
   const [productDescription, setProductDescription] = useState('');

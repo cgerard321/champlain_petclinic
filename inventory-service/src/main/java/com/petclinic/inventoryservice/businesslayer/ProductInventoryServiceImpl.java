@@ -525,15 +525,8 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                             "\nOr ProductDescription: " + productDescription)));
         }
 
-        if (inventoryId != null) {
-            return productRepository
-                    .findAllProductsByInventoryId(inventoryId)
-                    .map(EntityDTOUtil::toProductResponseDTO)
-                    .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with InventoryId: " + inventoryId)));
-        }
-
         return productRepository
-                .findAll()
+                .findAllProductsByInventoryId(inventoryId)
                 .map(EntityDTOUtil::toProductResponseDTO)
                 .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with InventoryId: " + inventoryId)));
 
