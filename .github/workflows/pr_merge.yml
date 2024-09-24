@@ -21,6 +21,6 @@ jobs:
           after: 00:00
           before: 00:00
           base-branches: "(default)"
-          prohibited-days-dates: "2024-10-07, 2024-10-21"
+          prohibited-days-dates: "2024-09-24, 2024-10-07, 2024-10-21"
       - run: echo pr-blocked=${{ steps.block.outputs.pr-blocked }}
         if: github.event_name == 'pull_request'
