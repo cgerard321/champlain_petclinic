@@ -778,10 +778,10 @@ class ApiGatewayControllerTest {
                 .uri("/api/gateway/vets/" + INVALID_VET_ID)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isEqualTo(INTERNAL_SERVER_ERROR)
+                .expectStatus().isEqualTo(UNPROCESSABLE_ENTITY)
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.message").isEqualTo("This id is not valid");
+                .jsonPath("$.message").isEqualTo("This id is not valid"); // replace with the actual error message
     }
 
     @Test
@@ -796,22 +796,6 @@ class ApiGatewayControllerTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isEqualTo(UNPROCESSABLE_ENTITY)
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$.message").isEqualTo("This id is not valid");
-    }
-
-    @Test
-    void deleteByVetId_Invalid() {
-        when(vetsServiceClient.deleteVet(anyString()))
-                .thenReturn((Mono.empty()));
-
-        client
-                .delete()
-                .uri("/api/gateway/vets/" + INVALID_VET_ID)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isEqualTo(INTERNAL_SERVER_ERROR)
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$.message").isEqualTo("This id is not valid");

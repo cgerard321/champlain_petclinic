@@ -79,7 +79,8 @@ const EditingVisit: React.FC = (): JSX.Element => {
   const validate = (): boolean => {
     const newErrors: { [key: string]: string } = {};
     if (!visit.petId) newErrors.petId = 'Pet ID is required';
-    if (!visit.visitStartDate) newErrors.visitStartDate = 'Visit date is required';
+    if (!visit.visitStartDate)
+      newErrors.visitStartDate = 'Visit date is required';
     if (!visit.description) newErrors.description = 'Description is required';
     if (!visit.practitionerId)
       newErrors.practitionerId = 'Practitioner ID is required';
@@ -144,7 +145,9 @@ const EditingVisit: React.FC = (): JSX.Element => {
           onChange={handleChange}
           required
         />
-        {errors.visitStartDate && <span className="error">{errors.visitStartDate}</span>}
+        {errors.visitStartDate && (
+          <span className="error">{errors.visitStartDate}</span>
+        )}
         <br />
         <label>Description: </label>
         <input
