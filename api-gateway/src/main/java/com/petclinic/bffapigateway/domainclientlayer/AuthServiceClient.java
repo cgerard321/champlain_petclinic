@@ -101,61 +101,61 @@ public class AuthServiceClient {
     /*
     This shit is beyond cursed, but I do not care. This works, I only spent 6 HOURS OF MY LIFE.
      */
-    public Mono<OwnerResponseDTO> createUser (Mono<Register> model) {
+    public Mono<OwnerResponseDTO> createUser(Mono<Register> model) {
 
         String uuid = UUID.randomUUID().toString();
 
-        return model.flatMap(register ->{
-                register.setUserId(uuid);
-                return webClientBuilder.build().post()
-                        .uri(authServiceUrl + "/users")
-                        .body(Mono.just(register), Register.class)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .retrieve()
-                        .onStatus(HttpStatusCode::is4xxClientError,
-                                n -> rethrower.rethrow(n,
-                                        x -> new GenericHttpException(x.get("message").toString(), BAD_REQUEST))
-                        )
-                        .bodyToMono(UserPasswordLessDTO.class)
-                        .flatMap(userDetails -> {
-                            OwnerRequestDTO ownerRequestDTO = OwnerRequestDTO.builder()
-                                    .firstName(register.getOwner().getFirstName())
-                                    .lastName(register.getOwner().getLastName())
-                                    .address(register.getOwner().getAddress())
-                                    .city(register.getOwner().getCity())
-                                    .telephone(register.getOwner().getTelephone())
-                                    .ownerId(uuid)
-                                    .build();
-                            return customersServiceClient.createOwner(ownerRequestDTO);
-                        }
-                        );
-        }
+        return model.flatMap(register -> {
+                    register.setUserId(uuid);
+                    return webClientBuilder.build().post()
+                            .uri(authServiceUrl + "/users")
+                            .body(Mono.just(register), Register.class)
+                            .accept(MediaType.APPLICATION_JSON)
+                            .retrieve()
+                            .onStatus(HttpStatusCode::is4xxClientError,
+                                    n -> rethrower.rethrow(n,
+                                            x -> new GenericHttpException(x.get("message").toString(), BAD_REQUEST))
+                            )
+                            .bodyToMono(UserPasswordLessDTO.class)
+                            .flatMap(userDetails -> {
+                                        OwnerRequestDTO ownerRequestDTO = OwnerRequestDTO.builder()
+                                                .firstName(register.getOwner().getFirstName())
+                                                .lastName(register.getOwner().getLastName())
+                                                .address(register.getOwner().getAddress())
+                                                .city(register.getOwner().getCity())
+                                                .telephone(register.getOwner().getTelephone())
+                                                .ownerId(uuid)
+                                                .build();
+                                        return customersServiceClient.createOwner(ownerRequestDTO);
+                                    }
+                            );
+                }
         ).doOnError(throwable -> {
             log.error("Error creating user: " + throwable.getMessage());
             customersServiceClient.deleteOwner(uuid);
         });
 
-        }
+    }
 
-        public Mono<UserPasswordLessDTO> createInventoryMangerUser(Mono<RegisterInventoryManager> registerInventoryManagerMono){
-            String uuid = UUID.randomUUID().toString();
-            return registerInventoryManagerMono.flatMap(registerInventoryManager -> {
-                registerInventoryManager.setUserId(uuid);
-                return webClientBuilder.build().post()
-                        .uri(authServiceUrl + "/users")
-                        .body(Mono.just(registerInventoryManager), RegisterInventoryManager.class)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .retrieve()
-                        .onStatus(HttpStatusCode::is4xxClientError,
-                                n -> rethrower.rethrow(n,
-                                        x -> new GenericHttpException(x.get("message").toString(), BAD_REQUEST))
-                        )
-                        .bodyToMono(UserPasswordLessDTO.class);
-            });
-        }
+    public Mono<UserPasswordLessDTO> createInventoryMangerUser(Mono<RegisterInventoryManager> registerInventoryManagerMono) {
+        String uuid = UUID.randomUUID().toString();
+        return registerInventoryManagerMono.flatMap(registerInventoryManager -> {
+            registerInventoryManager.setUserId(uuid);
+            return webClientBuilder.build().post()
+                    .uri(authServiceUrl + "/users")
+                    .body(Mono.just(registerInventoryManager), RegisterInventoryManager.class)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::is4xxClientError,
+                            n -> rethrower.rethrow(n,
+                                    x -> new GenericHttpException(x.get("message").toString(), BAD_REQUEST))
+                    )
+                    .bodyToMono(UserPasswordLessDTO.class);
+        });
+    }
 
 
-    public Mono<VetResponseDTO> createVetUser(Mono<RegisterVet> model){
+    public Mono<VetResponseDTO> createVetUser(Mono<RegisterVet> model) {
 
         String uuid = UUID.randomUUID().toString();
 
@@ -168,7 +168,7 @@ public class AuthServiceClient {
                     .retrieve()
                     .onStatus(HttpStatusCode::is4xxClientError,
                             n -> rethrower.rethrow(n,
-                                    x -> new GenericHttpException(x.get("message").toString(),(HttpStatus) n.statusCode()))
+                                    x -> new GenericHttpException(x.get("message").toString(), (HttpStatus) n.statusCode()))
                     )
                     .bodyToMono(UserPasswordLessDTO.class)
                     .flatMap(userDetails -> {
@@ -185,7 +185,7 @@ public class AuthServiceClient {
                                         .lastName(registerVet.getVet().getLastName())
                                         .vetId(uuid)
                                         .build();
-                        return vetsServiceClient.createVet((Mono.just(vetDTO)));
+                                return vetsServiceClient.createVet((Mono.just(vetDTO)));
                             }
                     );
         }).doOnError(throwable -> {
@@ -195,7 +195,7 @@ public class AuthServiceClient {
     }
 
 
-//    public Mono<UserDetails> updateUser (final long userId, final Register model) {
+    //    public Mono<UserDetails> updateUser (final long userId, final Register model) {
 //        return webClientBuilder.build().put()
 //                .uri(authServiceUrl + "/users/{userId}", userId)
 //                .body(just(model), Register.class)
@@ -218,7 +218,7 @@ public class AuthServiceClient {
                         HttpStatusCode::is4xxClientError,
                         n -> rethrower.rethrow(
                                 n,
-                                x -> new GenericHttpException(x.get("message").toString(),(HttpStatus) n.statusCode()))
+                                x -> new GenericHttpException(x.get("message").toString(), (HttpStatus) n.statusCode()))
                 )
                 //grabbing the response entity and modifying the headers a little before returning it
                 .toEntity(UserDetails.class)
@@ -231,11 +231,11 @@ public class AuthServiceClient {
                 });
     }
 
-    public  Mono<ResponseEntity<UserPasswordLessDTO>> login(final Mono<Login> login) throws Exception {
+    public Mono<ResponseEntity<UserPasswordLessDTO>> login(final Mono<Login> login) throws Exception {
         try {
             return webClientBuilder.build()
                     .post()
-                    .uri(authServiceUrl+"/users/login")
+                    .uri(authServiceUrl + "/users/login")
                     .body(login, Login.class)
                     .retrieve()
                     .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> clientResponse.bodyToMono(HttpErrorInfo.class)
@@ -250,17 +250,21 @@ public class AuthServiceClient {
     public Mono<ResponseEntity<Void>> logout(ServerHttpRequest request, ServerHttpResponse response) {
         log.info("Entered AuthServiceClient logout method");
         List<HttpCookie> cookies = request.getCookies().get("Bearer");
+
+        // Make sure to delete the cookie even if it is empty
+        ResponseCookie cookie = ResponseCookie.from("Bearer", "")
+                .maxAge(Duration.ZERO)
+                .path("/")
+                .build();
+
+        response.addCookie(cookie);
+
+        // If the cookie is not empty, return a 204 No Content response
         if (cookies != null && !cookies.isEmpty()) {
-            ResponseCookie cookie = ResponseCookie.from("Bearer", "")
-                    .httpOnly(true)
-                    .secure(true)
-                    .path("/api/gateway")
-                    .domain("localhost")
-                    .maxAge(Duration.ofSeconds(0))
-                    .sameSite("Lax").build();
-            response.addCookie(cookie);
             log.info("Logout Success: Account session ended");
             return Mono.just(ResponseEntity.noContent().build());
+
+            // If the cookie is empty, return a 401 Unauthorized response
         } else {
             log.warn("Logout Error: Problem removing account cookies, Session may have expired, redirecting to login page");
             return Mono.just(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
@@ -272,7 +276,7 @@ public class AuthServiceClient {
 
 
         try {
-            String url = authServiceUrl+"/users/forgot_password";
+            String url = authServiceUrl + "/users/forgot_password";
 
             return webClientBuilder.build()
                     .post()
@@ -292,17 +296,16 @@ public class AuthServiceClient {
 
 
         try {
-            String url = authServiceUrl+"/users/reset_password";
+            String url = authServiceUrl + "/users/reset_password";
 
             return webClientBuilder.build()
-                            .post().uri(url)
-                            .body(pwdChange, UserPasswordAndTokenRequestModel.class)
+                    .post().uri(url)
+                    .body(pwdChange, UserPasswordAndTokenRequestModel.class)
                     .retrieve()
                     .onStatus(HttpStatusCode::is4xxClientError, n -> rethrower.rethrow(n,
                             x -> new GenericHttpException(x.get("message").toString(), (HttpStatus) n.statusCode())))
                     .onStatus(HttpStatusCode::is5xxServerError, clientResponse -> Mono.error(new InvalidInputException("Unexpected error")))
                     .toEntity(Void.class);
-
 
 
         } catch (HttpClientErrorException ex) {
