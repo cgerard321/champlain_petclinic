@@ -778,7 +778,7 @@ class ApiGatewayControllerTest {
                 .uri("/api/gateway/vets/" + INVALID_VET_ID)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isEqualTo(INTERNAL_SERVER_ERROR)
+                .expectStatus().isEqualTo(UNPROCESSABLE_ENTITY)
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$.message").isEqualTo("This id is not valid"); // replace with the actual error message
@@ -795,7 +795,7 @@ class ApiGatewayControllerTest {
                 .body(Mono.just(vetRequestDTO), VetRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isEqualTo(INTERNAL_SERVER_ERROR)
+                .expectStatus().isEqualTo(UNPROCESSABLE_ENTITY)
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$.message").isEqualTo("This id is not valid");
@@ -811,7 +811,7 @@ class ApiGatewayControllerTest {
                 .uri("/api/gateway/vets/" + INVALID_VET_ID)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isEqualTo(INTERNAL_SERVER_ERROR)
+                .expectStatus().isEqualTo(UNPROCESSABLE_ENTITY)
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$.message").isEqualTo("This id is not valid");
@@ -2282,7 +2282,7 @@ class ApiGatewayControllerTest {
                 .description("Charle's Richard cat has a paw infection.")
                 .practitionerId("1")
                 .status(Status.UPCOMING)
-                .visitEndDate(LocalDateTime.parse("2021-12-12T14:30:00"))
+                .visitEndDate(LocalDateTime.parse("2021-12-12T15:00:00"))
                 .build();
 
         when(visitsServiceClient.createVisitForPet(any(VisitRequestDTO.class)))
@@ -2299,10 +2299,11 @@ class ApiGatewayControllerTest {
                 .expectBody()
                 .jsonPath("$.visitId").isEqualTo(visitResponseDTO.getVisitId())
                 .jsonPath("$.petId").isEqualTo("1")
-                .jsonPath("$.visitDate").isEqualTo("2021-12-12 14:00")
+                .jsonPath("$.visitStartDate").isEqualTo("2021-12-12 14:00")
                 .jsonPath("$.description").isEqualTo("Charle's Richard cat has a paw infection.")
                 .jsonPath("$.status").isEqualTo("UPCOMING")
-                .jsonPath("$.practitionerId").isEqualTo(1);
+                .jsonPath("$.practitionerId").isEqualTo(1)
+                .jsonPath("$.visitEndDate").isEqualTo("2021-12-12 15:00");
 
     }
 
