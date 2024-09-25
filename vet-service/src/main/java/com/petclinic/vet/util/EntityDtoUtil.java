@@ -78,20 +78,31 @@ public class EntityDtoUtil {
         return UUID.randomUUID().toString();
     }
 
+    public static String encodeToBase64(byte[] data) {
+        return Base64.getEncoder().encodeToString(data);
+    }
+
+
     public static Photo toPhotoEntity(String vetId, String photoName, Resource resource) {
         Photo photo = new Photo();
         photo.setFilename(photoName);
-        //StreamUtils.copyToByteArray(resource.getInputStream())
+
         try {
-            photo.setData(resource.getInputStream().readAllBytes());
-        } catch (IOException io){
-            throw new InvalidInputException("Picture does not exist" + io.getMessage());
+            byte[] data = resource.getInputStream().readAllBytes();
+            String base64Data = encodeToBase64(data);  //convert the byte array to a Base64-encoded string
+            photo.setImgBase64(base64Data);  //store the Base64 encoded image
+        } catch (IOException io) {
+            throw new InvalidInputException("Picture does not exist: " + io.getMessage());
         }
+
         photo.setVetId(vetId);
         photo.setImgType("image/" + getPhotoType(photoName));
 
         return photo;
     }
+
+
+
 
     public static String getPhotoType(String photoName){
         String type = photoName.split("\\.")[1];
@@ -172,13 +183,16 @@ public class EntityDtoUtil {
         photoResponseDTO.setVetId(photo.getVetId());
         photoResponseDTO.setFilename(photo.getFilename());
         photoResponseDTO.setImgType(photo.getImgType());
+        //use the Base64 encoded string for the image
         if(photo.getFilename().equals("vet_default.jpg"))
-            photoResponseDTO.setResourceBase64(Base64.getEncoder().encodeToString(photo.getData()));
+            photoResponseDTO.setResourceBase64(photo.getImgBase64());
         else {
-            photoResponseDTO.setResource(photo.getData());
+            photoResponseDTO.setResourceBase64(photo.getImgBase64());
         }
         return photoResponseDTO;
     }
+
+
 
     public static DataSource createDataSource() {
         // url specifies address of database along with username and password

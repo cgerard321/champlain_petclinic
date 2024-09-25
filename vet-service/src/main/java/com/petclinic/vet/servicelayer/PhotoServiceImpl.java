@@ -37,9 +37,8 @@ public class PhotoServiceImpl implements PhotoService {
         return photoRepository.findByVetId(vetId)
                 .switchIfEmpty(Mono.error(new NotFoundException("Photo for vet " + vetId + " does not exist.")))
                 .map(img -> {
-                    ByteArrayResource resource = new ByteArrayResource(img.getData());
-
-
+                    byte[] decodedImg = decodeFromBase64(img.getImgBase64());  //decode the Base64 data back to byte[]
+                    ByteArrayResource resource = new ByteArrayResource(decodedImg);
                     return resource;
                 });
     }
@@ -56,17 +55,15 @@ public class PhotoServiceImpl implements PhotoService {
     @Override
     public Mono<Resource> insertPhotoOfVet(String vetId, String photoName, Mono<Resource> photo) {
         return photo
-                .map(p -> EntityDtoUtil.toPhotoEntity(vetId, photoName, p))
+                .map(p -> EntityDtoUtil.toPhotoEntity(vetId, photoName, p))  //convert to Photo entity
                 .flatMap(photoRepository::save)
                 .map(img -> {
-                    // Create a Resource from the photo's InputStream
-                    ByteArrayResource resource = new ByteArrayResource(img.getData());
-                    //log.debug("Picture byte array in vet-service toServiceImpl" + resource);
-
-
+                    byte[] decodedImg = decodeFromBase64(img.getImgBase64());  //decode Base64 to byte[]
+                    ByteArrayResource resource = new ByteArrayResource(decodedImg);
                     return resource;
                 });
     }
+
 
 
     @Override
@@ -81,24 +78,16 @@ public class PhotoServiceImpl implements PhotoService {
                         .flatMap(updatedPhoto -> {
                             return photoRepository.save(updatedPhoto)
                                     .map(savedPhoto -> {
-                                        ByteArrayResource savedResource = new ByteArrayResource(savedPhoto.getData());
+                                        byte[] decodedImg = decodeFromBase64(savedPhoto.getImgBase64());  //decode Base64 to byte[]
+                                        ByteArrayResource savedResource = new ByteArrayResource(decodedImg);
                                         return savedResource;
                                     });
                         }));
     }
- /*   @Override
-    public Mono<Resource> insertPhotoOfVet(String vetId, String photoName, MultipartFile photo) {
-        return Mono.fromCallable(() -> {
-                    Photo photoEntity = new Photo();
-                    photoEntity.setVetId(vetId);
-                    photoEntity.setFilename(photoName);
-                    photoEntity.setImgType(photo.getContentType());
-                    photoEntity.setData(photo.getBytes());
-                    return photoEntity;
-                })
-                .flatMap(photoRepository::save)
-                .map(savedPhoto -> new ByteArrayResource(savedPhoto.getData()));
+
+    //helper method to decode Base64 string to byte[]
+    private byte[] decodeFromBase64(String base64Data) {
+        return java.util.Base64.getDecoder().decode(base64Data);
     }
-*/
 
 }

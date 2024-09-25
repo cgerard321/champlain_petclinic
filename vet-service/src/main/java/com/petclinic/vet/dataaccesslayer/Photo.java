@@ -1,9 +1,6 @@
 package com.petclinic.vet.dataaccesslayer;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
@@ -13,6 +10,7 @@ import org.springframework.data.relational.core.mapping.Table;
 @Builder
 @AllArgsConstructor
 @Table("images")
+@Setter
 public class Photo {
     @Id
     private Integer id;
@@ -23,6 +21,6 @@ public class Photo {
     @Column("img_type")
     private String imgType;
     //@Lob
-    @Column("img_data")
-    private byte[] data;
+    @Column("img_base64")
+    private String imgBase64;
 }

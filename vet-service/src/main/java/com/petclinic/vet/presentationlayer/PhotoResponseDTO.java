@@ -14,5 +14,5 @@ public class PhotoResponseDTO {
     private String filename;
     private String imgType;
     private String resourceBase64;
-    private byte[] resource;
+    private String imgBase64;
 }

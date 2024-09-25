@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS images(
     vet_id varchar(36) unique,
     filename varchar(255),
     img_type varchar(10),
-    img_data bytea,
+    img_base64 varchar(255),
     PRIMARY KEY (id)
 );
 
@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS badges (
     vet_id varchar(255),
     badge_title varchar(255),
     badge_date varchar(255),
-    img_data bytea,
+    img_base64 varchar(255),
     PRIMARY KEY (id),
     UNIQUE (vet_id)
 );
