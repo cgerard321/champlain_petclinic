@@ -6,4 +6,5 @@ export interface ProductModel {
   productQuantity: number;
   productType: string;
   status: 'RE_ORDER' | 'OUT_OF_STOCK' | 'AVAILABLE';
+  requestCount: number;
 }
