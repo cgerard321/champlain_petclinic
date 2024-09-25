@@ -30,12 +30,9 @@ export default function InventoriesListTable(): JSX.Element {
     useState<{ [inventoryName: string]: ProductModel[] }>({});
   const [showLowStock, setShowLowStock] = useState(false);
 
-
   const toggleAddSupplyModal = (): void => {
     setShowAddSupplyModal(prev => !prev);
   };
-
-
 
   const {
     inventoryList,
