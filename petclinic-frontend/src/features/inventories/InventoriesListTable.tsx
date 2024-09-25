@@ -407,8 +407,8 @@ export default function InventoriesListTable(): JSX.Element {
 
       {showAddInventoryForm && (
         <AddInventory
-          show={showAddInventoryForm}
-          handleClose={() => setShowAddInventoryForm(false)}
+          showAddInventoryForm={showAddInventoryForm}
+          handleInventoryClose={() => setShowAddInventoryForm(false)}
           refreshInventoryTypes={refreshInventoryTypes}
         />
       )}

@@ -6,14 +6,14 @@ import { InventoryType } from '@/features/inventories/models/InventoryType.ts';
 import './AddInventoryForm.css';
 
 interface AddInventoryProps {
-  show: boolean;
-  handleClose: () => void;
+  showAddInventoryForm: boolean;
+  handleInventoryClose: () => void;
   refreshInventoryTypes: () => void;
 }
 
 const AddInventoryForm: React.FC<AddInventoryProps> = ({
-  show,
-  handleClose,
+  showAddInventoryForm,
+  handleInventoryClose,
   refreshInventoryTypes,
 }: AddInventoryProps): React.ReactElement | null => {
   const [inventoryName, setInventoryName] = useState<string>('');
@@ -52,20 +52,20 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
     };
 
     try {
-      await addInventory(newInventory as Omit<Inventory, 'typeId'>);
+      await addInventory(newInventory as Omit<Inventory, 'inventoryId'>);
       alert('Inventory added successfully!');
       setInventoryName('');
       setInventoryType('');
       setInventoryDescription('');
       refreshInventoryTypes(); // Call the function to refresh inventory types
-      handleClose(); // Close the form after adding the inventory
+      handleInventoryClose(); // Close the form after adding the inventory
     } catch (error) {
       console.error('Error adding inventory:', error);
     }
   };
 
   // Conditionally render the form based on the show prop
-  if (!show) return null; // Do not render if show is false
+  if (!showAddInventoryForm) return null; // Do not render if show is false
 
   return (
     <div className="overlay">
@@ -112,7 +112,7 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
           </div>
 
           <button type="submit">Add Inventory</button>
-          <button type="button" className="cancel" onClick={handleClose}>
+          <button type="button" className="cancel" onClick={handleInventoryClose}>
             Cancel
           </button>
         </form>

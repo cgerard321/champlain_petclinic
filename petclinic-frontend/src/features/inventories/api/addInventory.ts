@@ -1,16 +1,14 @@
-import { Inventory } from '@/features/inventories/models/Inventory.ts';
+import { Inventory } from '@/features/inventories/models/Inventory';
 import axiosInstance from '@/shared/api/axiosInstance';
 
 export default async function addInventory(
-  inventoryType: Omit<Inventory, 'typeId'>
+  inventoryData: Omit<Inventory, 'inventoryId'> // Renamed to avoid confusion
 ): Promise<void> {
   try {
-    await axiosInstance.post<void>(
-      axiosInstance.defaults.baseURL + 'inventories',
-      inventoryType
-    );
+    // Append the appropriate endpoint for adding an inventory
+    await axiosInstance.post<void>('/inventories', inventoryData);
   } catch (error) {
-    console.error('Error adding inventory type:', error);
-    throw error; // Re-throw the error after logging
+    console.error('Error adding inventory:', error);
+    throw error;
   }
 }
