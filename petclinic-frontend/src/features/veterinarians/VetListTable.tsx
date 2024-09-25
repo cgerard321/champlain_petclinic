@@ -3,11 +3,13 @@ import { VetRequestModel } from '@/features/veterinarians/models/VetRequestModel
 import { useNavigate } from 'react-router-dom';
 import './VetListTable.css';
 import DeleteVet from '@/pages/Vet/DeleteVet.tsx';
+import UpdateVet from '@/pages/Vet/UpdateVet';
 
 export default function VetListTable(): JSX.Element {
   const [vets, setVets] = useState<VetRequestModel[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const navigate = useNavigate(); // Use navigate to programmatically navigate
+  const navigate = useNavigate();
+  const [selectedVet, setSelectedVet] = useState<VetRequestModel | null>(null);
 
   useEffect(() => {
     const fetchVets = async (): Promise<void> => {
@@ -41,7 +43,6 @@ export default function VetListTable(): JSX.Element {
     navigate(`/vets/${vetId}`);
   };
 
-  // Function to handle vet deletion
   const handleVetDelete = (event: React.MouseEvent, vetId: string): void => {
     event.stopPropagation();
     setVets(prevVets => prevVets.filter(vet => vet.vetId !== vetId));
@@ -58,7 +59,7 @@ export default function VetListTable(): JSX.Element {
               <th>First Name</th>
               <th>Last Name</th>
               <th>Specialties</th>
-              <th></th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -78,11 +79,24 @@ export default function VetListTable(): JSX.Element {
                     vetId={vet.vetId}
                     onVetDeleted={event => handleVetDelete(event, vet.vetId)}
                   />
+                  <button
+                    className="btn btn-primary"
+                    onClick={event => {
+                      event.stopPropagation();
+                      setSelectedVet(vet);
+                    }}
+                  >
+                    Update
+                  </button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
+      )}
+
+      {selectedVet && (
+        <UpdateVet vet={selectedVet} onClose={() => setSelectedVet(null)} />
       )}
     </div>
   );

@@ -1,31 +1,33 @@
 .cart-list-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
 }
 
 h1 {
-    text-align: center;
-    color: #333;
+  text-align: center;
+  color: #333;
 }
 
-.loading, .error, .no-carts {
-    text-align: center;
-    font-size: 18px;
-    color: #ff6b6b;
-    margin-top: 20px;
+.loading,
+.error,
+.no-carts {
+  text-align: center;
+  font-size: 18px;
+  color: #ff6b6b;
+  margin-top: 20px;
 }
 
 .cart-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 20px 0;
-    font-size: 18px;
-    text-align: left;
-    background-color: white;
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  font-size: 18px;
+  text-align: left;
+  background-color: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 
@@ -36,66 +38,52 @@ h1 {
 }
 
 .cart-table thead {
-    background-color: #f4f4f4;
+  background-color: #f4f4f4;
 }
 
 .cart-table tbody tr:hover {
-    background-color: #f1f1f1;
+  background-color: #f1f1f1;
 }
 
 .cart-table tbody tr:nth-child(even) {
-<<<<<<< HEAD
-  background-color: #f2f2f2;
+  background-color: #f9f9f9;
 }
 
-.view-button {
-  background-color: green;
-  color: white;
-  border: none;
+.view-button,
+.delete-button {
   padding: 8px 12px;
+  border: none;
+  border-radius: 5px;
   cursor: pointer;
-}
-
-.view-button:hover {
-  background-color: darkgreen;
-=======
-    background-color: #f9f9f9;
-}
-
-.view-button, .delete-button {
-    padding: 8px 12px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
+  font-size: 16px;
 }
 
 .view-button {
-    background-color: #28a745;
-    color: white;
+  background-color: #28a745;
+  color: white;
 }
 
 .view-button:hover {
-    background-color: #218838;
+  background-color: #218838;
 }
 
 .delete-button {
-    background-color: #dc3545;
-    color: white;
+  background-color: #dc3545;
+  color: white;
 }
 
 .delete-button:hover {
-    background-color: #c82333;
+  background-color: #c82333;
 }
 
 @media screen and (max-width: 768px) {
-    .cart-table {
-        font-size: 16px;
-    }
+  .cart-table {
+    font-size: 16px;
+  }
 
-    .view-button, .delete-button {
-        padding: 6px 10px;
-        font-size: 14px;
-    }
->>>>>>> origin/main
+  .view-button,
+  .delete-button {
+    padding: 6px 10px;
+    font-size: 14px;
+  }
 }

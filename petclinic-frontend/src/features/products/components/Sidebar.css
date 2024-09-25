@@ -19,11 +19,11 @@
 .sidebar {
   position: fixed;
   top: 0;
-  right: -350px; 
+  right: -350px;
   width: 350px;
   height: 100%;
   background-color: #fff;
-  box-shadow: -2px 0 5px rgba(0,0,0,0.3);
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.3);
   padding: 20px;
   z-index: 999;
   transition: right 0.3s ease;
@@ -67,7 +67,7 @@
 
 .apply-filter-button {
   padding: 10px;
-  background-color: #3e8e41; 
+  background-color: #3e8e41;
   color: #fff;
   border: none;
   border-radius: 4px;
@@ -77,14 +77,14 @@
 }
 
 .apply-filter-button:hover {
-  background-color: #45a049; 
+  background-color: #45a049;
 }
 
 .toggle-sidebar-button {
   position: fixed;
-  top: 100px; 
+  top: 100px;
   right: 20px;
-  background-color: #3e8e41; 
+  background-color: #3e8e41;
   color: #fff;
   border: none;
   padding: 12px 16px;
@@ -96,12 +96,12 @@
 }
 
 .toggle-sidebar-button:hover {
-  background-color: #45a049; 
+  background-color: #45a049;
 }
 
 .clear-filter-button {
   padding: 10px;
-  background-color: #f44336; 
+  background-color: #f44336;
   color: #fff;
   border: none;
   border-radius: 4px;
