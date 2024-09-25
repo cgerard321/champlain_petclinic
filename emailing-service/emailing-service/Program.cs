@@ -66,8 +66,17 @@ catch (DirectoryNotFoundException e)
 }
 
 // Configure database connection string
-var connectionString = Env.GetString("EMAILING_SQL_DEFAULT_CONNECTION_STRING") ?? throw new ArgumentNullException("EMAILING_SQL_DEFAULT_CONNECTION_STRING");//builder.Configuration.GetConnectionString("DefaultConnection");
-DatabaseHelper._connectionString = connectionString;
+try
+{
+    var connectionString = Env.GetString("EMAILING_SQL_DEFAULT_CONNECTION_STRING") ?? throw new ArgumentNullException("EMAILING_SQL_DEFAULT_CONNECTION_STRING");//builder.Configuration.GetConnectionString("DefaultConnection");
+    DatabaseHelper._connectionString = connectionString;
+}
+catch (System.ArgumentNullException e)
+{
+    Console.WriteLine("Database String was null meaning it was run outside of Docker context. Please supplly a connection String to the DatabaseHelp._connectionString");
+}
+
+
 builder.Services.AddTransient<IDatabaseHelper, DatabaseHelper>();
 IDatabaseHelper dbHelper = new DatabaseHelper();
 dbHelper.CreateTableAsync(50);
