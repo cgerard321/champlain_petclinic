@@ -7,6 +7,7 @@ import { getAllInventoryTypes } from '@/features/inventories/api/getAllInventory
 import deleteAllInventories from '@/features/inventories/api/deleteAllInventories.ts';
 import './InventoriesListTable.css';
 import deleteInventory from '@/features/inventories/api/deleteInventory.ts';
+import AddInventory from '@/features/inventories/AddInventoryForm.tsx';
 import AddInventoryType from '@/features/inventories/AddInventoryType.tsx';
 import { ProductModel } from '@/features/inventories/models/ProductModels/ProductModel.ts';
 import AddSupplyForm from '@/features/inventories/AddSupplyForm.tsx';
@@ -23,7 +24,8 @@ export default function InventoriesListTable(): JSX.Element {
   );
   const [inventoryDescription, setInventoryDescription] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [showAddTypeForm, setShowAddTypeForm] = useState(false); // Add state to control the form visibility
+  const [showAddInventoryForm, setShowAddInventoryForm] = useState(false);
+  const [showAddTypeForm, setShowAddTypeForm] = useState(false);
   const [showAddSupplyModal, setShowAddSupplyModal] = useState(false);
   const navigate = useNavigate();
   const [lowStockProductsByInventory, setLowStockProductsByInventory] =
@@ -395,12 +397,22 @@ export default function InventoriesListTable(): JSX.Element {
       >
         Delete All Inventories
       </button>
+
       <button
         className="add-inventory-button btn btn-success"
-        onClick={() => {}}
+        onClick={() => setShowAddInventoryForm(true)} 
       >
         Add Inventory
       </button>
+
+      {showAddInventoryForm && (
+        <AddInventory
+          show={showAddInventoryForm}
+          handleClose={() => setShowAddInventoryForm(false)}
+          refreshInventoryTypes={refreshInventoryTypes}
+        />
+      )}
+
       <button
         className="low-stock-button btn btn-warning mx-1"
         onClick={async () => {

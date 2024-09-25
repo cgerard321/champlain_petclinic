@@ -151,6 +151,15 @@ public class InventoryController {
                 });
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
+    @PostMapping(value = "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<InventoryResponseDTO>> addInventory(@RequestBody InventoryRequestDTO inventoryRequestDTO) {
+        return inventoryServiceClient.addInventory(inventoryRequestDTO)
+                .map(inventory -> ResponseEntity.status(HttpStatus.CREATED).body(inventory))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
+
 
 
 }
