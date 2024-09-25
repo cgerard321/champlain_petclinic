@@ -22,11 +22,9 @@ import javax.print.attribute.standard.Media;
 @Slf4j
 public class RatingController {
     private final RatingService ratingService;
-    private final ProductService productService;
 
-    public RatingController(RatingService ratingService, ProductService productService) {
+    public RatingController(RatingService ratingService) {
         this.ratingService = ratingService;
-        this.productService = productService;
     }
 
     private void validateId(String id, String name){

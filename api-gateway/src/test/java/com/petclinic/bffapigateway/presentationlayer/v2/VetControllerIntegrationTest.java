@@ -6,6 +6,7 @@ import com.petclinic.bffapigateway.dtos.Vets.SpecialtyDTO;
 import com.petclinic.bffapigateway.dtos.Vets.VetRequestDTO;
 import com.petclinic.bffapigateway.dtos.Vets.VetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Vets.Workday;
+import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigAuthService;
 import com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigCustomersService;
 import com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigVetService;
@@ -55,7 +56,8 @@ class VetControllerIntegrationTest {
         mockServerConfigVetService.registerGetVetsEndpoint();
         mockServerConfigVetService.registerDeleteVetEndpoint();
         mockServerConfigVetService.registerGetVetsEndpoint_withNoVets();
-
+        mockServerConfigVetService.registerUpdateVetEndpoint();
+        //mockServerConfigVetService.registerUpdateVetEndpoint_withInvalidId();
         mockServerConfigAuthService = new MockServerConfigAuthService();
         mockServerConfigAuthService.registerValidateTokenForAdminEndpoint();
         mockServerConfigAuthService.registerValidateTokenForVetEndpoint();
@@ -89,6 +91,7 @@ class VetControllerIntegrationTest {
             .specialties(Set.of(SpecialtyDTO.builder().specialtyId("dermatology").name("Dermatology").build()))
             .photoDefault(false)
             .build();
+
     //#endregion
 
     @Test
@@ -271,6 +274,7 @@ class VetControllerIntegrationTest {
                     assertTrue(responseBody.contains("vetId not found: ac9adeb8-625b-11ee-8c99-0242ac12000200000"));
                 });
     }
+
     @Test
     void whenDeleteVet_asAdmin_thenReturnNoContent() {
         String vetId = UUID.randomUUID().toString();
@@ -286,5 +290,101 @@ class VetControllerIntegrationTest {
                 .expectBody().isEmpty();
     }
 
+    @Test
+    void whenUpdateVet_asAdmin_with_ValidVetId_thenReturnUpdatedVetResponseDTO() {
 
+        VetRequestDTO updatedRequestDTO = VetRequestDTO.builder()
+                .vetId("c02cbf82-625b-11ee-8c99-0242ac120002")
+                .vetBillId("bill001")
+                .firstName("John")
+                .lastName("Doe")
+                .email("john.doe@example.com")
+                .phoneNumber("1234567890")
+                .resume("Specialist in dermatology")
+                .workday(workdaySet)
+                .workHoursJson("08:00-16:00")
+                .active(true)
+                .specialties(Set.of(SpecialtyDTO.builder().specialtyId("dermatology").name("Dermatology").build()))
+                .photoDefault(false)
+                .build();
+
+
+        Mono<VetResponseDTO> result = webTestClient.put()
+                .uri("/api/v2/gateway/vets/{vetId}", updatedRequestDTO.getVetId())
+                .cookie("Bearer", jwtTokenForValidAdmin)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Mono.just(updatedRequestDTO), VetRequestDTO.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk() // change to is Ok after testing for errors
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .returnResult(VetResponseDTO.class)
+                .getResponseBody()
+                .single();
+
+        StepVerifier
+                .create(result)
+                .expectNextMatches(vetResponseDTO -> {
+                    assertNotNull(vetResponseDTO);
+                    assertEquals(updatedRequestDTO.getVetId(), vetResponseDTO.getVetId());
+                    assertEquals(updatedRequestDTO.getVetBillId(), vetResponseDTO.getVetBillId());
+                    assertEquals(updatedRequestDTO.getFirstName(), vetResponseDTO.getFirstName());
+                    assertEquals(updatedRequestDTO.getLastName(), vetResponseDTO.getLastName());
+                    assertEquals(updatedRequestDTO.getEmail(), vetResponseDTO.getEmail());
+                    assertEquals(updatedRequestDTO.getPhoneNumber(), vetResponseDTO.getPhoneNumber());
+                    assertEquals(updatedRequestDTO.getResume(), vetResponseDTO.getResume());
+                    assertEquals(updatedRequestDTO.getWorkday(), vetResponseDTO.getWorkday());
+                    assertEquals(updatedRequestDTO.getWorkHoursJson(), vetResponseDTO.getWorkHoursJson());
+                    assertEquals(updatedRequestDTO.isActive(), vetResponseDTO.isActive());
+                    assertEquals(updatedRequestDTO.getSpecialties(), vetResponseDTO.getSpecialties());
+                    return true;
+                })
+                .verifyComplete();
+    }
+
+    /*@Test
+    void whenUpdateVet_asAdmin_with_InvalidVetId_thenInvalidInput() {
+
+        VetRequestDTO updatedRequestDTO = VetRequestDTO.builder()
+                .vetId("invalid-vet-id")
+                .vetBillId("bill001")
+                .firstName("John")
+                .lastName("Doe")
+                .email("john.doe@example.com")
+                .phoneNumber("1234567890")
+                .resume("Specialist in dermatology")
+                .workday(workdaySet)
+                .workHoursJson("08:00-16:00")
+                .active(true)
+                .specialties(Set.of(SpecialtyDTO.builder().specialtyId("dermatology").name("Dermatology").build()))
+                .photoDefault(false)
+                .build();
+
+
+
+        Mono<InvalidInputException> result = webTestClient.put()
+                .uri("/api/v2/gateway/vets/{vetId}", updatedRequestDTO.getVetId())
+                .cookie("Bearer", jwtTokenForValidAdmin)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Mono.just(updatedRequestDTO), VetRequestDTO.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isEqualTo(422) // change to is Ok after testing for errors
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .returnResult(InvalidInputException.class)
+                .getResponseBody()
+                .single();
+
+        StepVerifier
+                .create(result)
+                .expectNextMatches(responseError ->{
+
+                    assertNotNull(responseError);
+                    assertEquals("Vet Id provided is invalid: " + updatedRequestDTO.getVetId()
+                            , responseError.getMessage());
+                    return true;
+                })
+                .verifyComplete();
+    }
+*/
 }

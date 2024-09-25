@@ -6,4 +6,5 @@ export interface ProductModel {
   averageRating: number;
   productQuantity: number;
   status: 'RE_ORDER' | 'OUT_OF_STOCK' | 'AVAILABLE';
+  requestCount: number;
 }

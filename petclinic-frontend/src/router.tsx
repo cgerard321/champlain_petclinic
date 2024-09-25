@@ -25,11 +25,11 @@ import EditInventory from '@/features/inventories/EditInventory.tsx';
 import CartPage from '@/pages/Carts/Cart.tsx';
 import VisitByVisitId from './features/visits/visits/VisitByVisitId';
 import AddingVisit from './features/visits/models/AddingVisit';
-
 import ProfilePage from '@/pages/Customer/ProfilePage.tsx';
 import AdminBillingPage from '@/pages/Bills/AdminBill.tsx';
 import UserCart from '@/features/carts/components/UserCart.tsx';
 import VetDetails from '@/pages/Vet/VetDetails.tsx';
+import EmailingPage from '@/pages/Emailing/EmailingPage.tsx';
 import MockPage from '@/pages/Inventory/MockPage.tsx';
 import InventorySupplies from '@/features/inventories/InventorySupplies.tsx';
 
@@ -205,6 +205,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute roles={['ADMIN']}>
             <CartPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.Emailing,
+        element: (
+          <ProtectedRoute roles={['ADMIN']}>
+            <EmailingPage />
           </ProtectedRoute>
         ),
       },
