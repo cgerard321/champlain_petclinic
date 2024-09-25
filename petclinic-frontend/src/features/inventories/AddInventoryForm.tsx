@@ -112,7 +112,11 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
           </div>
 
           <button type="submit">Add Inventory</button>
-          <button type="button" className="cancel" onClick={handleInventoryClose}>
+          <button
+            type="button"
+            className="cancel"
+            onClick={handleInventoryClose}
+          >
             Cancel
           </button>
         </form>
