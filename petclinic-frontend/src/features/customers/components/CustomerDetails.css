@@ -1,42 +1,42 @@
 .customer-details-card {
-    background-color: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    padding: 30px;
-    margin: 40px auto;
-    max-width: 600px;
-    text-align: left;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  padding: 30px;
+  margin: 40px auto;
+  max-width: 600px;
+  text-align: left;
 }
 
 .customer-details-card h2 {
-    margin-bottom: 20px;
-    color: #333;
-    font-size: 1.5em;
+  margin-bottom: 20px;
+  color: #333;
+  font-size: 1.5em;
 }
 
 .customer-details-card p {
-    margin: 12px 0;
-    color: #555;
-    font-size: 1.1em;
+  margin: 12px 0;
+  color: #555;
+  font-size: 1.1em;
 }
 
 .customer-details-buttons {
-    display: flex;
-    justify-content: flex-start;
-    margin-top: 30px;
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 30px;
 }
 
 .customer-details-button {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    padding: 10px 16px;
-    font-size: 0.9em;
-    cursor: pointer;
-    transition: background-color 0.3s;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 16px;
+  font-size: 0.9em;
+  cursor: pointer;
+  transition: background-color 0.3s;
 }
 
 .customer-details-button:hover {
-    background-color: #0056b3;
+  background-color: #0056b3;
 }

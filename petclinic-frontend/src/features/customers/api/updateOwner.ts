@@ -13,7 +13,5 @@ export const updateOwner = async (
 export const getOwner = async (
   userId: string
 ): Promise<AxiosResponse<OwnerResponseModel>> => {
-  return await axiosInstance.get<OwnerResponseModel>(
-    `owners/${userId}`
-  );
+  return await axiosInstance.get<OwnerResponseModel>(`owners/${userId}`);
 };

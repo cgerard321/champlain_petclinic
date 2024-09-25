@@ -4,7 +4,7 @@ import { Bill } from '@/features/bills/models/Bill';
 import './AllOwners.css';
 import { NavBar } from '@/layouts/AppNavBar.tsx';
 import axios from 'axios';
-import {Link} from "react-router-dom";
+import { Link } from 'react-router-dom';
 
 const AllOwners: React.FC = (): JSX.Element => {
   interface FilterModel {
@@ -367,7 +367,9 @@ const AllOwners: React.FC = (): JSX.Element => {
             {filteredOwners.map(owner => (
               <tr key={owner.ownerId}>
                 <td>
-                  <Link to={`/customers/${owner.ownerId}`}>{owner.ownerId}</Link>
+                  <Link to={`/customers/${owner.ownerId}`}>
+                    {owner.ownerId}
+                  </Link>
                 </td>
                 <td>{owner.firstName}</td>
                 <td>{owner.lastName}</td>

@@ -3,12 +3,12 @@ import AdminUpdateCustomerForm from '@/features/customers/components/AdminUpdate
 import { NavBar } from '@/layouts/AppNavBar.tsx';
 
 const UpdateCustomerPage: FC = (): JSX.Element => {
-    return (
-        <div>
-            <NavBar/>
-            <AdminUpdateCustomerForm/>
-        </div>
-    );
+  return (
+    <div>
+      <NavBar />
+      <AdminUpdateCustomerForm />
+    </div>
+  );
 };
 
 export default UpdateCustomerPage;
