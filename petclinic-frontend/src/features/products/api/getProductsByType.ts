@@ -8,4 +8,5 @@ export async function getProductsByType(
   return res.data;
 
 
+
 }

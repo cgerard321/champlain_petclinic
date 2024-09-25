@@ -1,15 +1,13 @@
 package com.petclinic.products.datalayer.products;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection = "products")
 @Data
 @Builder
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Product {
@@ -23,5 +21,6 @@ public class Product {
     private Double averageRating;
     private String productType;
     private Integer requestCount;
+    private String productType;
 }
 

@@ -112,8 +112,6 @@ class ProductsServiceClientIntegrationTest {
                 0.00,
                 "type",
                 0
-
-
         );
 
         mockWebServer.enqueue(new MockResponse()

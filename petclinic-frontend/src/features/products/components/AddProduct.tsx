@@ -46,7 +46,7 @@ export default function AddProduct({
       productQuantity,
       requestCount,
       status,
-      productType, // Include productType here
+      productType: '',
     };
 
     try {

@@ -18,5 +18,5 @@ public class ProductResponseDTO {
     private Double averageRating;
     private String productType;
     private Integer requestCount;
-    private String productType;
+
 }
