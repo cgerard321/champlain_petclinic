@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - bug/VIST-CPC-1267_Missing/Incorrect_docker_compose_and_CI_Configuration_For_Emailing_Service # For TESTING
   pull_request:
     branches:
       - main

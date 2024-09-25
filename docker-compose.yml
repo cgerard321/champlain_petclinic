@@ -105,8 +105,8 @@ services:
     build:
       context: ./emailing-service
       dockerfile: emailing-service/Dockerfile
-    ports:
-      - "5000:5115" # Used for testing without gateway
+  #  ports:
+  #    - "5000:5115" # Used for testing without gateway
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - EMAILING_SQL_DEFAULT_CONNECTION_STRING=emailing-service-mysql-db;Port=3306;Database=MyAppDb;User=root;Password=Your_password123;
