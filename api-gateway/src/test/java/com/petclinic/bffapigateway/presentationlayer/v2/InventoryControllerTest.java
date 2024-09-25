@@ -331,4 +331,58 @@ public class InventoryControllerTest {
                 .updateInventory(eq(updateRequest), eq(validInventoryId));
     }
 
+    @Test
+    void addInventory_withValidInventoryRequest_shouldReturnCreatedInventory() {
+        // Arrange
+        InventoryRequestDTO inventoryRequest = InventoryRequestDTO.builder()
+                .inventoryName("invt1")
+                .inventoryType("Internal")
+                .inventoryDescription("invtone")
+                .build();
+        InventoryResponseDTO createdInventory = buildInventoryDTO();
+
+        when(inventoryServiceClient.addInventory(eq(inventoryRequest)))
+                .thenReturn(Mono.just(createdInventory));
+
+        // Act
+        client.post()
+                .uri(baseInventoryURL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(inventoryRequest)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody(InventoryResponseDTO.class)
+                .isEqualTo(createdInventory);
+
+        // Assert
+        verify(inventoryServiceClient, times(1))
+                .addInventory(eq(inventoryRequest));
+    }
+
+    @Test
+    void addInventory_withInvalidInventoryRequest_shouldReturnBadRequest() {
+        // Arrange
+        InventoryRequestDTO invalidInventoryRequest = InventoryRequestDTO.builder()
+                .inventoryName("invt1")
+                .inventoryType("Internal")
+                .inventoryDescription("invtone")
+                .build();
+
+        when(inventoryServiceClient.addInventory(eq(invalidInventoryRequest)))
+                .thenReturn(Mono.empty());
+
+        // Act
+        client.post()
+                .uri(baseInventoryURL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(invalidInventoryRequest)
+                .exchange()
+                .expectStatus().isBadRequest();
+
+        // Assert
+        verify(inventoryServiceClient, times(1))
+                .addInventory(eq(invalidInventoryRequest));
+    }
+
+
 }

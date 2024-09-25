@@ -47,7 +47,6 @@ public class InventoryServiceClient {
                 .build();
     }
 
-
     public Mono<InventoryResponseDTO> getInventoryById(final String inventoryId) {
         return webClient.get()
                 .uri(inventoryServiceUrl + "/{inventoryId}", inventoryId)
