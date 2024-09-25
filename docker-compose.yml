@@ -109,7 +109,7 @@ services:
   #    - "5000:5115" # Used for testing without gateway
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Server=emailing-service-mysql-db;Database=MyAppDb;User=root;Password=Your_password123;
+      - ConnectionStrings__DefaultConnection=Server=emailing-service-mysql-db;Port=3306;Database=MyAppDb;User=root;Password=Your_password123;
     depends_on:
       - emailing-service-mysql-db
       - api-gateway
