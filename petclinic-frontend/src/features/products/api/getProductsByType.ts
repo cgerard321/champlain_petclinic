@@ -6,4 +6,6 @@ export async function getProductsByType(
 ): Promise<ProductModel[]> {
   const res = await axiosInstance.get(`/products/filter/${productType}`);
   return res.data;
+
+
 }

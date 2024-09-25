@@ -18,4 +18,5 @@ public class ProductResponseModel {
     private Double averageRating;
     private String productType;
     private Integer requestCount;
+    private String productType;
 }

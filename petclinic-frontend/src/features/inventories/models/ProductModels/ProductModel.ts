@@ -3,6 +3,7 @@ export interface ProductModel {
   productName: string;
   productDescription: string;
   productSalePrice: number;
+  averageRating: number;
   productQuantity: number;
   productType: string;
   status: 'RE_ORDER' | 'OUT_OF_STOCK' | 'AVAILABLE';
