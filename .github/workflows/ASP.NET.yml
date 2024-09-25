@@ -44,7 +44,7 @@ jobs:
 
       # Run the tests
       - name: Test
-        run: dotnet test ./emailing-service/emailing-service-test/emailing-service-test.csproj --no-build --verbosity normal
+        run: dotnet test ./emailing-service/emailing-service-test/emailing-service-test.csproj --verbosity normal
 
       # Publish the results (optional)
       - name: Publish Test Results
