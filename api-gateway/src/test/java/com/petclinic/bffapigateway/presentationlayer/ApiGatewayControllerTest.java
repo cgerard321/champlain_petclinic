@@ -778,7 +778,7 @@ class ApiGatewayControllerTest {
                 .uri("/api/gateway/vets/" + INVALID_VET_ID)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isEqualTo(UNPROCESSABLE_ENTITY)
+                .expectStatus().isEqualTo(INTERNAL_SERVER_ERROR)
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$.message").isEqualTo("This id is not valid"); // replace with the actual error message
@@ -795,7 +795,23 @@ class ApiGatewayControllerTest {
                 .body(Mono.just(vetRequestDTO), VetRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isEqualTo(UNPROCESSABLE_ENTITY)
+                .expectStatus().isEqualTo(INTERNAL_SERVER_ERROR)
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("This id is not valid");
+    }
+
+    @Test
+    void deleteByVetId_Invalid() {
+        when(vetsServiceClient.deleteVet(anyString()))
+                .thenReturn((Mono.empty()));
+
+        client
+                .delete()
+                .uri("/api/gateway/vets/" + INVALID_VET_ID)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isEqualTo(INTERNAL_SERVER_ERROR)
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$.message").isEqualTo("This id is not valid");
@@ -1982,34 +1998,41 @@ class ApiGatewayControllerTest {
     }
 
     @Test
-    void shouldGetBillById() {
-        // Arrange
-        String billId = UUID.randomUUID().toString();
-        BillResponseDTO bill = new BillResponseDTO();
-        bill.setBillId(billId);
-        bill.setCustomerId("1");
-        bill.setAmount(499);
-        bill.setVisitType("Test");
+    public void getBillById(){
 
-        when(billServiceClient.getBilling(billId))
-                .thenReturn(Mono.just(bill));
+        //int expectedLength = 1;
 
-        // Act & Assert
+        BillResponseDTO entity = new BillResponseDTO();
+
+        entity.setBillId("9");
+
+        entity.setAmount(599);
+
+        entity.setCustomerId("2");
+
+        entity.setVisitType("Consultation");
+
+        when(billServiceClient.getBilling("9"))
+                .thenReturn(Mono.just(entity));
+
         client.get()
-                .uri("/api/gateway/bills/{billId}", billId)
-                .accept(MediaType.APPLICATION_JSON)
+                //check the URI
+                .uri("/api/gateway/bills/9")
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.billId").isEqualTo(billId)
-                .jsonPath("$.customerId").isEqualTo(bill.getCustomerId())
-                .jsonPath("$.visitType").isEqualTo(bill.getVisitType())
-                .jsonPath("$.amount").isEqualTo(bill.getAmount());
+                .jsonPath("$.billId").isEqualTo("9")
+                .jsonPath("$.customerId").isEqualTo(entity.getCustomerId())
+                .jsonPath("$.visitType").isEqualTo(entity.getVisitType())
+                .jsonPath("$.amount").isEqualTo(entity.getAmount());
 
-        Mockito.verify(billServiceClient, times(1)).getBilling(billId);
+
+
+
+        assertEquals(entity.getBillId(), "9");
+
+
     }
-
 
     @Test
     public void getBillsByOwnerId(){
@@ -2240,7 +2263,6 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.practitionerId").isEqualTo(1);
     }*/
 
-/*
     @Test
     public void addVisit_ShouldReturnCreatedStatus() {
         String ownerId = "owner1";

@@ -416,6 +416,25 @@ export default function InventoriesListTable(): JSX.Element {
           }
         }}
       >
+        Add Inventory
+      </button>
+      <button
+        className="low-stock-button btn btn-warning mx-1"
+        onClick={async () => {
+          if (inventoryList.length > 0) {
+            setLowStockProductsByInventory({});
+            try {
+              for (const inventory of inventoryList) {
+                await getAllLowStockProducts(inventory);
+              }
+            } catch (error) {
+              console.error('Error fetching low stock products:', error);
+            }
+          } else {
+            console.error('No inventories found');
+          }
+        }}
+      >
         Check Low Stock for All Inventories
       </button>
 
