@@ -3,6 +3,8 @@ package com.petclinic.visits.visitsservicenew.BusinessLayer;
 import com.petclinic.visits.visitsservicenew.DataLayer.Status;
 import com.petclinic.visits.visitsservicenew.DataLayer.Visit;
 import com.petclinic.visits.visitsservicenew.DataLayer.VisitRepo;
+import com.petclinic.visits.visitsservicenew.DomainClientLayer.Auth.UserDetails;
+import com.petclinic.visits.visitsservicenew.DomainClientLayer.Mailing.Mail;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.Mailing.MailService;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.*;
 import com.petclinic.visits.visitsservicenew.Exceptions.BadRequestException;
@@ -659,6 +661,8 @@ class VisitServiceImplTest {
         Mockito.verify(visitRepo, Mockito.times(1)).findAllByStatus("CANCELLED");
         Mockito.verify(visitRepo, Mockito.times(1)).deleteAll(cancelledVisits);
     }
+
+
 
 
     private Visit buildVisit (String description){

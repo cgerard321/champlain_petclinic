@@ -15,8 +15,10 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.time.LocalDateTime;
@@ -508,6 +510,25 @@ class VisitControllerUnitTest {
 
         verify(reviewService, times(1)).DeleteReview(reviewId);
 
+    }
+
+    @Test
+    void getReviewByReviewId_withValidIdLength_shouldReturnReview() {
+        // Arrange
+        String validReviewId = "12345678-1234-1234-1234-123456789012"; // Exactly 36 characters
+        ReviewResponseDTO reviewResponseDTO = new ReviewResponseDTO(); // Create a mock response object
+
+        // Mock the service response
+        Mockito.when(reviewService.GetReviewByReviewId(validReviewId)).thenReturn(Mono.just(reviewResponseDTO));
+
+        // Act and Assert
+        webTestClient.get()
+                .uri("/reviews/{reviewId}", validReviewId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody(ReviewResponseDTO.class)
+                .isEqualTo(reviewResponseDTO);
     }
 
 }

@@ -129,6 +129,7 @@ class ReviewServiceUnitTest {
     public void whenUpdateReview_thenReturnUpdatedReviewResponseDTO() {
         // Arrange
         String existingReviewId = review1.getReviewId();
+
         Review updatedReview = Review.builder()
                 .id(review1.getId())
                 .reviewId(existingReviewId)
@@ -163,6 +164,38 @@ class ReviewServiceUnitTest {
                     return true;
                 })
                 .verifyComplete();
+    }
+
+    @Test
+    public void whenUpdateReviewWithNonExistentId_thenThrowNotFoundException() {
+        // Arrange
+        String nonExistentReviewId = UUID.randomUUID().toString();
+        Review updatedReview = Review.builder()
+                .id(UUID.randomUUID().toString())
+                .reviewId(nonExistentReviewId)
+                .rating(3) // Updated rating
+                .reviewerName("John Smith") // Updated reviewer name
+                .review("Good service") // Updated review text
+                .dateSubmitted(LocalDateTime.now())
+                .build();
+
+        ReviewRequestDTO updatedReviewRequestDTO = new ReviewRequestDTO();
+        updatedReviewRequestDTO.setRating(updatedReview.getRating());
+        updatedReviewRequestDTO.setReviewerName(updatedReview.getReviewerName());
+        updatedReviewRequestDTO.setReview(updatedReview.getReview());
+        updatedReviewRequestDTO.setDateSubmitted(updatedReview.getDateSubmitted());
+
+        when(reviewRepository.findReviewByReviewId(nonExistentReviewId)).thenReturn(Mono.empty());
+
+        // Act
+        Mono<ReviewResponseDTO> result = reviewService.UpdateReview(Mono.just(updatedReviewRequestDTO), nonExistentReviewId);
+
+        // Assert
+        StepVerifier
+                .create(result)
+                .expectErrorMatches(throwable -> throwable instanceof NotFoundException &&
+                        throwable.getMessage().equals("review id is not found: " + nonExistentReviewId))
+                .verify();
     }
 
  /*   @Test
@@ -204,6 +237,22 @@ class ReviewServiceUnitTest {
                 .verifyComplete();
     }
 
+    @Test
+    public void whenDeleteReviewWithNonExistentId_thenThrowNotFoundException() {
+        // Arrange
+        String nonExistentReviewId = UUID.randomUUID().toString();
+        when(reviewRepository.findReviewByReviewId(nonExistentReviewId)).thenReturn(Mono.empty());
+
+        // Act
+        Mono<ReviewResponseDTO> result = reviewService.DeleteReview(nonExistentReviewId);
+
+        // Assert
+        StepVerifier
+                .create(result)
+                .expectErrorMatches(throwable -> throwable instanceof NotFoundException &&
+                        throwable.getMessage().equals("review id is not found: " + nonExistentReviewId))
+                .verify();
+    }
 
   /*  @Test
     public void whenReviewIdDoesNotExistOnDelete_thenReturnNotFound() {
