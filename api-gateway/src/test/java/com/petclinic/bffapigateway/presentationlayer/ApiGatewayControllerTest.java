@@ -2306,7 +2306,7 @@ class ApiGatewayControllerTest {
 
     }
 
- */
+
 
     @Test
     void shouldCreateAVisitWithOwnerAndPetInfo(){
