@@ -11,11 +11,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add environment variable loading
 
-Env.Load(Directory.GetCurrentDirectory()+"mailer.env");
-
-// Log the current directory (for debugging)
-// Log the current directory (for debugging)
-Console.WriteLine($"Path of docker is : {Directory.GetCurrentDirectory()}");
+Env.Load(Directory.GetCurrentDirectory()+"mailer.env"); //LoadEnv file
+Env.Load(); // Load the Docker.env
 
 // Load SMTP settings from environment variables
 try
@@ -37,7 +34,6 @@ try
         smtpEmail,
         smtpDisplayName
     );
-    Console.WriteLine($"SMTP server is : {EmailUtils.emailConnectionString.ToString()}");
 }
 catch (Exception ex)
 {
@@ -70,13 +66,10 @@ catch (DirectoryNotFoundException e)
 }
 
 // Configure database connection string
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-Console.WriteLine(connectionString);
+var connectionString = Env.GetString("EMAILING_SQL_DEFAULT_CONNECTION_STRING") ?? throw new ArgumentNullException("EMAILING_SQL_DEFAULT_CONNECTION_STRING");//builder.Configuration.GetConnectionString("DefaultConnection");
 DatabaseHelper._connectionString = connectionString;
 builder.Services.AddTransient<IDatabaseHelper, DatabaseHelper>();
 IDatabaseHelper dbHelper = new DatabaseHelper();
-Console.WriteLine("we reached the tablecreation");
-//May there be an error here check later!
 dbHelper.CreateTableAsync(50);
 builder.Services.AddScoped<IEmailService, EmailServiceImpl>();
 

@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "K+I0asKz24Y=",
+  "dgSpecHash": "3CWrfsmnPdk=",
   "success": true,
-  "projectFilePath": "C:\\Users\\Admin\\Desktop\\PetClinic\\champlain_petclinic\\emailing-service\\emailing-service\\emailing-service.csproj",
+  "projectFilePath": "C:\\Users\\Admin\\Desktop\\Sprint2\\champlain_petclinic\\emailing-service\\emailing-service\\emailing-service.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Admin\\.nuget\\packages\\dotnetenv\\3.1.1\\dotnetenv.3.1.1.nupkg.sha512",
     "C:\\Users\\Admin\\.nuget\\packages\\microsoft.extensions.apidescription.server\\6.0.5\\microsoft.extensions.apidescription.server.6.0.5.nupkg.sha512",
