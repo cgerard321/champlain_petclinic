@@ -47,6 +47,7 @@ export default function ProductList(): JSX.Element {
         setProductList(list);
       } else {
         const filteredList = await getProductsByType(filterType);
+        // @ts-ignore
         setProductList(filteredList);
       }
     } catch (err) {
