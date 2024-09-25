@@ -400,7 +400,7 @@ export default function InventoriesListTable(): JSX.Element {
 
       <button
         className="add-inventory-button btn btn-success"
-        onClick={() => setShowAddInventoryForm(true)} 
+        onClick={() => setShowAddInventoryForm(true)}
       >
         Add Inventory
       </button>
