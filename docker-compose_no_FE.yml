@@ -411,3 +411,30 @@ services:
     depends_on:
       - mongo-products
       - products-service
+
+  emailing-service:
+    image: emailing-service
+    container_name: emailing-service-container
+    build:
+      context: ./emailing-service
+      dockerfile: emailing-service/Dockerfile
+    #  ports:
+    #    - "5000:5115" # Used for testing without gateway
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=emailing-service-mysql-db;Database=MyAppDb;User=root;Password=Your_password123;
+    depends_on:
+      - emailing-service-mysql-db
+      - api-gateway
+    env_file:
+      - mailer.env
+  emailing-service-mysql-db:
+    image: mysql:8.0
+    container_name: emailing-service-mysql-db
+    platform: linux/arm64/v8
+    environment:
+      - MYSQL_ROOT_PASSWORD=Your_password123
+      - MYSQL_DATABASE=MyAppDb
+      - SPRING_PROFILES_ACTIVE=docker
+    ports:
+      - "3306:3306"
