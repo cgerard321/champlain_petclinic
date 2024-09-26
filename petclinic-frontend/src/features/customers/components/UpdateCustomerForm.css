@@ -64,3 +64,79 @@
   box-shadow: 0 0 5px rgba(40, 167, 69, 0.5);
   outline: none;
 }
+
+.admin-update-customer-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.admin-update-customer-modal {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  max-width: 400px;
+  width: 100%;
+}
+
+.admin-update-customer-modal h2 {
+  margin-bottom: 10px;
+  font-size: 24px;
+}
+
+.admin-update-customer-modal p {
+  margin-bottom: 20px;
+  font-size: 18px;
+}
+
+.admin-update-customer-modal button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 10px 30px;
+  font-size: 16px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.admin-update-customer-modal button:hover {
+  background-color: #45a049;
+}
+
+#back-button {
+  display: inline-block;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #ffffff;
+  background-color: #007bff;
+  text-decoration: none;
+  border-radius: 5px;
+  transition:
+    background-color 0.3s ease,
+    transform 0.2s ease;
+  white-space: nowrap;
+  position: fixed;
+  left: 15px;
+  bottom: 15px;
+  z-index: 1000;
+}
+
+#back-button:hover {
+  background-color: #0056b3;
+  color: #ffffff;
+}
+
+#back-button:active {
+  background-color: #004085;
+  transform: scale(0.98);
+}

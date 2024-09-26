@@ -5,6 +5,22 @@ import { OwnerRequestModel } from '../models/OwnerRequestModel';
 import { OwnerResponseModel } from '../models/OwnerResponseModel';
 import './UpdateCustomerForm.css';
 
+const provincesOfCanada = [
+  'Alberta',
+  'British Columbia',
+  'Manitoba',
+  'New Brunswick',
+  'Newfoundland and Labrador',
+  'Nova Scotia',
+  'Ontario',
+  'Prince Edward Island',
+  'Quebec',
+  'Saskatchewan',
+  'Northwest Territories',
+  'Nunavut',
+  'Yukon',
+];
+
 const AdminUpdateCustomerForm: FC = () => {
   const { ownerId } = useParams<{ ownerId: string }>();
   const navigate = useNavigate();
@@ -18,6 +34,7 @@ const AdminUpdateCustomerForm: FC = () => {
   });
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchOwnerData = async (): Promise<void> => {
@@ -40,7 +57,9 @@ const AdminUpdateCustomerForm: FC = () => {
     );
   }, [ownerId]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ): void => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
@@ -49,12 +68,20 @@ const AdminUpdateCustomerForm: FC = () => {
 
   const validate = (): boolean => {
     const newErrors: { [key: string]: string } = {};
+
     if (!formData.firstName) newErrors.firstName = 'First name is required';
     if (!formData.lastName) newErrors.lastName = 'Last name is required';
     if (!formData.address) newErrors.address = 'Address is required';
     if (!formData.city) newErrors.city = 'City is required';
     if (!formData.province) newErrors.province = 'Province is required';
-    if (!formData.telephone) newErrors.telephone = 'Telephone is required';
+
+    const telephoneRegex = /^[0-9]+$/;
+    if (!formData.telephone) {
+      newErrors.telephone = 'Telephone is required';
+    } else if (!telephoneRegex.test(formData.telephone)) {
+      newErrors.telephone = 'Telephone must contain only digits';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -71,10 +98,19 @@ const AdminUpdateCustomerForm: FC = () => {
         return;
       }
       await updateOwner(ownerId, formData);
-      navigate(`/customers/${ownerId}`);
+      setIsModalOpen(true);
     } catch (error) {
       console.error('Error updating owner:', error);
     }
+  };
+
+  const closeModal = (): void => {
+    setIsModalOpen(false);
+    navigate(`/customers/${ownerId}`);
+  };
+
+  const handleBack = (): void => {
+    navigate(`/customers/${ownerId}`);
   };
 
   return (
@@ -118,12 +154,18 @@ const AdminUpdateCustomerForm: FC = () => {
         {errors.city && <span className="error">{errors.city}</span>}
         <br />
         <label>Province: </label>
-        <input
-          type="text"
+        <select
           name="province"
           value={formData.province}
           onChange={handleChange}
-        />
+        >
+          <option value="">Select Province</option>
+          {provincesOfCanada.map(province => (
+            <option key={province} value={province}>
+              {province}
+            </option>
+          ))}
+        </select>
         {errors.province && <span className="error">{errors.province}</span>}
         <br />
         <label>Telephone: </label>
@@ -137,6 +179,20 @@ const AdminUpdateCustomerForm: FC = () => {
         <br />
         <button type="submit">Update</button>
       </form>
+
+      <button id="back-button" onClick={handleBack}>
+        Back
+      </button>
+
+      {isModalOpen && (
+        <div className="admin-update-customer-modal-overlay">
+          <div className="admin-update-customer-modal">
+            <h2>Success!</h2>
+            <p>Customer has been successfully updated.</p>
+            <button onClick={closeModal}>Close</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
