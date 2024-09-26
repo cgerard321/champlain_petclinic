@@ -8,4 +8,5 @@ export interface Visit {
   vetEmail: string;
   vetPhone: string;
   status: string;
+  visitEndDate: string;
 }
