@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import './VetListTable.css';
 import DeleteVet from '@/pages/Vet/DeleteVet.tsx';
 import UpdateVet from '@/pages/Vet/UpdateVet';
+import { deleteVet } from '@/features/veterinarians/api/deleteVet';
 
 export default function VetListTable(): JSX.Element {
   const [vets, setVets] = useState<VetRequestModel[]>([]);
@@ -43,9 +44,18 @@ export default function VetListTable(): JSX.Element {
     navigate(`/vets/${vetId}`);
   };
 
-  const handleVetDelete = (event: React.MouseEvent, vetId: string): void => {
+  const handleVetDelete = async (
+    event: React.MouseEvent,
+    vetId: string
+  ): Promise<void> => {
     event.stopPropagation();
-    setVets(prevVets => prevVets.filter(vet => vet.vetId !== vetId));
+    try {
+      await deleteVet(vetId);
+      setVets(prevVets => prevVets.filter(vet => vet.vetId !== vetId));
+    } catch (err) {
+      console.error('Error deleting vet:', err);
+      setError('Failed to delete vet');
+    }
   };
 
   return (
