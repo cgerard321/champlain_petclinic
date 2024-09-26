@@ -81,7 +81,7 @@ class CartControllerUnitTest {
     void whenGetCartByCartId_withNonExistingCartId_thenReturnNotFound() {
         // Arrange
         when(cartService.getCartByCartId(NOT_FOUND_CART_ID))
-                .thenReturn(Mono.error(new NotFoundException("Enrollment id not found: " + NOT_FOUND_CART_ID)));
+                .thenReturn(Mono.error(new NotFoundException("Cart id was not found: " + NOT_FOUND_CART_ID)));
 
         // Act & Assert
         webTestClient

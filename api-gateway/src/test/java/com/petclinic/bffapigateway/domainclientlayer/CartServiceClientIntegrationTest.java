@@ -1,6 +1,5 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.dtos.Cart.CartRequestDTO;
 import com.petclinic.bffapigateway.dtos.Cart.CartResponseDTO;
 import okhttp3.mockwebserver.MockResponse;
@@ -21,7 +20,7 @@ import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class CartServiceClientTest {
+public class CartServiceClientIntegrationTest {
 
     @MockBean
     CartServiceClient mockCartServiceClient;
@@ -115,6 +114,24 @@ public class CartServiceClientTest {
 
         List<CartResponseDTO> carts = result.collectList().block(); // Collect the results into a list
         assertEquals(0, carts.size()); // Assert that the list is empty
+    }
+
+    @Test
+    void testGetCartById() {
+        String responseBody = """
+                {
+                    "cartId": "cart1",
+                    "customerId": "customer1"
+                }
+                """;
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody(responseBody));
+
+        Mono<CartResponseDTO> cart = mockCartServiceClient.getCartByCartId("cart1");
+        assertEquals("cart1", cart.block().getCartId());
+        assertEquals("customer1", cart.block().getCustomerId());
     }
 
     private void prepareResponse(Consumer<MockResponse> consumer) {
