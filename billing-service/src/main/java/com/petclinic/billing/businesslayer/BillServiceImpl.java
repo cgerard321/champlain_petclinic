@@ -98,11 +98,11 @@ public class BillServiceImpl implements BillService{
     public Mono<BillResponseDTO> CreateBill(Mono<BillRequestDTO> billRequestDTO) {
 
             return billRequestDTO
-//                    .map(RequestContextAdd::new)
-//                    .flatMap(this::vetRequestResponse)
-//                    .flatMap(this::ownerRequestResponse)
-//                    .map(EntityDtoUtil::toBillEntityRC)
-                    .map(EntityDtoUtil::toBillEntity)
+                  .map(RequestContextAdd::new)
+                  .flatMap(this::vetRequestResponse)
+                    .flatMap(this::ownerRequestResponse)
+                    .map(EntityDtoUtil::toBillEntityRC)
+                    //.map(EntityDtoUtil::toBillEntity)
                     .doOnNext(e -> e.setBillId(EntityDtoUtil.generateUUIDString()))
                     .flatMap(billRepository::insert)
                     .map(EntityDtoUtil::toBillResponseDto);
@@ -166,16 +166,16 @@ public class BillServiceImpl implements BillService{
 
     }
 
-//    private Mono<RequestContextAdd> vetRequestResponse(RequestContextAdd rc) {
-//        return
-//                this.vetClient.getVetByVetId(rc.getBillRequestDTO().getVetId())
-//                        .doOnNext(rc::setVetDTO)
-//                        .thenReturn(rc);
-//    }
-//    private Mono<RequestContextAdd> ownerRequestResponse(RequestContextAdd rc) {
-//        return
-//                this.ownerClient.getOwnerByOwnerId(rc.getBillRequestDTO().getCustomerId())
-//                        .doOnNext(rc::setOwnerResponseDTO)
-//                        .thenReturn(rc);
-//    }
+    private Mono<RequestContextAdd> vetRequestResponse(RequestContextAdd rc) {
+        return
+                this.vetClient.getVetByVetId(rc.getBillRequestDTO().getVetId())
+                        .doOnNext(rc::setVetDTO)
+                        .thenReturn(rc);
+    }
+    private Mono<RequestContextAdd> ownerRequestResponse(RequestContextAdd rc) {
+        return
+                this.ownerClient.getOwnerByOwnerId(rc.getBillRequestDTO().getCustomerId())
+                        .doOnNext(rc::setOwnerResponseDTO)
+                        .thenReturn(rc);
+    }
 }
