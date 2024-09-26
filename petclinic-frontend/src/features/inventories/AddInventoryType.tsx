@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { InventoryType } from '@/features/inventories/models/InventoryType.ts';
 import addInventoryType from '@/features/inventories/api/addInventoryType.ts';
-import './AddInventoryType.css'; // Import CSS for styling
+import './AddInventoryType.css';
 
 interface AddInventoryTypeProps {
   show: boolean;
   handleClose: () => void;
-  refreshInventoryTypes: () => void; // Ensure this prop is used
+  refreshInventoryTypes: () => void;
 }
 
 export default function AddInventoryType({
