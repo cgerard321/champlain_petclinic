@@ -36,8 +36,8 @@ export default function ProductList(): JSX.Element {
     setIsLoading(true);
     try {
       if (filterType.trim() === '') {
-      const list = await getAllProducts(minPrice, maxPrice);
-      setProductList(list);
+        const list = await getAllProducts(minPrice, maxPrice);
+        setProductList(list);
       } else {
         const filteredList = await getProductsByType(filterType);
 
@@ -113,38 +113,38 @@ export default function ProductList(): JSX.Element {
           <label>
             Min Price:
             <input
-                type="number"
-                value={minPrice ?? typeof 'number'}
-                onChange={e =>
-                    setMinPrice(
-                        e.target.value ? parseFloat(e.target.value) : undefined
-                    )
-                }
-                min="0"
-                placeholder="e.g., 10"
+              type="number"
+              value={minPrice ?? typeof 'number'}
+              onChange={e =>
+                setMinPrice(
+                  e.target.value ? parseFloat(e.target.value) : undefined
+                )
+              }
+              min="0"
+              placeholder="e.g., 10"
             />
           </label>
           <label>
             Max Price:
             <input
-                type="number"
-                value={maxPrice ?? typeof 'number'}
-                onChange={e =>
-                    setMaxPrice(
-                        e.target.value ? parseFloat(e.target.value) : undefined
-                    )
-                }
-                min="0"
-                placeholder="e.g., 100"
+              type="number"
+              value={maxPrice ?? typeof 'number'}
+              onChange={e =>
+                setMaxPrice(
+                  e.target.value ? parseFloat(e.target.value) : undefined
+                )
+              }
+              min="0"
+              placeholder="e.g., 100"
             />
           </label>
           <label>
             Product Type:
             <input
-                type="text"
-                placeholder="Enter product type"
-                value={filterType}
-                onChange={e => setFilterType(e.target.value)}
+              type="text"
+              placeholder="Enter product type"
+              value={filterType}
+              onChange={e => setFilterType(e.target.value)}
             />
           </label>
           <button className="apply-filter-button" onClick={fetchProducts}>
@@ -157,14 +157,14 @@ export default function ProductList(): JSX.Element {
       </div>
 
       {!isSidebarOpen && (
-          <button
-              className="toggle-sidebar-button"
-              onClick={toggleSidebar}
-              aria-expanded={isSidebarOpen}
-              aria-controls="sidebar"
-          >
-            &#9776; Filters
-          </button>
+        <button
+          className="toggle-sidebar-button"
+          onClick={toggleSidebar}
+          aria-expanded={isSidebarOpen}
+          aria-controls="sidebar"
+        >
+          &#9776; Filters
+        </button>
       )}
 
       {isRightRole && <AddProduct addProduct={handleAddProduct} />}

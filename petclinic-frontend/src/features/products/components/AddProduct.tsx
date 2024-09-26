@@ -112,12 +112,12 @@ export default function AddProduct({
             <Form.Group className="mb-3" controlId="formGridType">
               <Form.Label>Type</Form.Label>
               <Form.Control
-                  type="text"
-                  name="productType"
-                  placeholder="Product Type"
-                  value={productType}
-                  onChange={e => setProductType(e.target.value)} /////////////////
-                  required
+                type="text"
+                name="productType"
+                placeholder="Product Type"
+                value={productType}
+                onChange={e => setProductType(e.target.value)} /////////////////
+                required
               />
             </Form.Group>
           </Form>
