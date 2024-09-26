@@ -195,11 +195,7 @@ export default function ProductList(): JSX.Element {
           <h2>Recently Clicked Products</h2>
           <div className="grid">
             {recentlyClickedProducts.map(product => (
-              <div className="card" key={product.productId}>
-                <h2>{product.productName}</h2>
-                <p>{product.productDescription}</p>
-                <p>Price: ${product.productSalePrice.toFixed(2)}</p>
-              </div>
+              <Product key={product.productId} product={product} />
             ))}
           </div>
         </div>
