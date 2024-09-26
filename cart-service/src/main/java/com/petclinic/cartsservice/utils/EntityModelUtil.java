@@ -2,6 +2,7 @@ package com.petclinic.cartsservice.utils;
 
 
 import com.petclinic.cartsservice.dataaccesslayer.Cart;
+import com.petclinic.cartsservice.dataaccesslayer.cartproduct.CartProduct;
 import com.petclinic.cartsservice.domainclientlayer.ProductResponseModel;
 import com.petclinic.cartsservice.presentationlayer.CartRequestModel;
 import com.petclinic.cartsservice.presentationlayer.CartResponseModel;
@@ -12,10 +13,9 @@ import java.util.UUID;
 
 public class EntityModelUtil {
 
-    public static CartResponseModel toCartResponseModel(Cart cart, List<ProductResponseModel> products) {
+    public static CartResponseModel toCartResponseModel(Cart cart) {
         CartResponseModel cartResponseModel = new CartResponseModel();
         BeanUtils.copyProperties(cart, cartResponseModel);
-        cartResponseModel.setProducts(products);
         return cartResponseModel;
     }
 
