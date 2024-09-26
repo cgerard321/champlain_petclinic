@@ -260,7 +260,7 @@ public class VetController {
 
 
     //Photo
-    @GetMapping("{vetId}/photos")
+    @GetMapping("{vetId}/photo")
     public Mono<ResponseEntity<Resource>> getPhotoByVetId(@PathVariable String vetId) {
         return photoService.getPhotoByVetId(vetId)
                 .map(r -> ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, MediaType.IMAGE_JPEG_VALUE).body(r))
@@ -274,7 +274,7 @@ public class VetController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    @PostMapping("{vetId}/photos/{photoName}")
+    @PostMapping("{vetId}/photo/{photoName}")
     public Mono<ResponseEntity<Resource>> addPhoto(
             @PathVariable String vetId,
             @PathVariable String photoName,
@@ -285,7 +285,7 @@ public class VetController {
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
-    @PutMapping("{vetId}/photos/{photoName}")
+    @PutMapping("{vetId}/photo/{photoName}")
     public Mono<ResponseEntity<Resource>> updatePhotoByVetId(
             @PathVariable String vetId,
             @PathVariable String photoName,

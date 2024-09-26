@@ -51,7 +51,7 @@ public class VetsServiceClient {
     public Mono<PhotoResponseDTO> getPhotoByVetId(String vetId){
         return webClientBuilder.build()
                 .get()
-                .uri(vetsServiceUrl + "/" + vetId + "/photos")
+                .uri(vetsServiceUrl + "/" + vetId + "/photo")
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, error -> {
                     HttpStatusCode statusCode = error.statusCode();
@@ -86,7 +86,7 @@ public class VetsServiceClient {
         return webClientBuilder
                 .build()
                 .post()
-                .uri(vetsServiceUrl + "/" + vetId + "/photos/" + photoName)
+                .uri(vetsServiceUrl + "/" + vetId + "/photo/" + photoName)
                 .contentType(MediaType.MULTIPART_FORM_DATA)
                 .body(photoResource, Resource.class)
                 .retrieve()
@@ -108,7 +108,7 @@ public class VetsServiceClient {
         return webClientBuilder
                 .build()
                 .put()
-                .uri(vetsServiceUrl + "/" + vetId + "/photos")
+                .uri(vetsServiceUrl + "/" + vetId + "/photo")
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE) // JSON data
                 .body(photoRequestDTO, PhotoRequestDTO.class) // Send DTO as JSON
                 .retrieve()

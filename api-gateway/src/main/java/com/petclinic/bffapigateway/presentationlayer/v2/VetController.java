@@ -82,21 +82,21 @@ public class VetController {
                 .then(Mono.just(ResponseEntity.noContent().<Void>build()))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
-    @PostMapping(value = "{vetId}/photos/{photoName}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public Mono<ResponseEntity<PhotoResponseDTO>> addPhoto(
-            @PathVariable String vetId,
-            @PathVariable String photoName,
-            @RequestParam("image") MultipartFile image) throws IOException {
-
-        Mono<Resource> resourceMono = Mono.just(new ByteArrayResource(image.getBytes()));
-
-        return vetsServiceClient.addPhotoToVet(vetId, photoName, resourceMono)
-                .map(r -> ResponseEntity.status(HttpStatus.CREATED).body(r))
-                .defaultIfEmpty(ResponseEntity.badRequest().build());
-    }
+//    @PostMapping(value = "{vetId}/photo/{photoName}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+//    public Mono<ResponseEntity<PhotoResponseDTO>> addPhoto(
+//            @PathVariable String vetId,
+//            @PathVariable String photoName,
+//            @RequestParam("image") MultipartFile image) throws IOException {
+//
+//        Mono<Resource> resourceMono = Mono.just(new ByteArrayResource(image.getBytes()));
+//
+//        return vetsServiceClient.addPhotoToVet(vetId, photoName, resourceMono)
+//                .map(r -> ResponseEntity.status(HttpStatus.CREATED).body(r))
+//                .defaultIfEmpty(ResponseEntity.badRequest().build());
+//    }
 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
-    @GetMapping(value = "{vetId}/photos", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "{vetId}/photo", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<PhotoResponseDTO>> getPhotoByVetId(@PathVariable String vetId) {
         return vetsServiceClient.getPhotoByVetId(vetId)
                 .map(photo -> ResponseEntity.status(HttpStatus.OK).body(photo))

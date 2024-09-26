@@ -435,7 +435,7 @@ public class BFFApiGatewayController {
         }
 
         @SecuredEndpoint(allowedRoles = {Roles.ADMIN}) // Assuming only admin can add photos
-        @PostMapping(value = "vets/{vetId}/photos/{photoName}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+        @PostMapping(value = "vets/{vetId}/photo/{photoName}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
         public Mono<ResponseEntity<PhotoResponseDTO>> addPhoto(
                 @PathVariable String vetId,
                 @PathVariable String photoName,
