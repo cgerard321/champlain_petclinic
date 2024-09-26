@@ -167,7 +167,8 @@ class ProductRepositoryTest {
         // Check that there are no products in the repository anymore
         StepVerifier
                 .create(productRepository.findAll())
-                .expectNextCount(0);
+                .expectNextCount(0)
+                .verifyComplete();
 
     }
 
