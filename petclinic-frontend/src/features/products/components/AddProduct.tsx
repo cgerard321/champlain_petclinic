@@ -10,6 +10,7 @@ export default function AddProduct({
   addProduct,
 }: AddProductProps): JSX.Element {
   const [show, setShow] = useState(false);
+  const [productType, setProductType] = useState('');
 
   const handleClose = (): void => setShow(false);
   const handleShow = (): void => setShow(true);
@@ -45,6 +46,7 @@ export default function AddProduct({
       productQuantity,
       requestCount,
       status,
+      productType,
     };
 
     try {
@@ -105,6 +107,17 @@ export default function AddProduct({
                 name="productQuantity"
                 placeholder="Product Quantity"
                 required
+              />
+            </Form.Group>
+            <Form.Group className="mb-3" controlId="formGridType">
+              <Form.Label>Type</Form.Label>
+              <Form.Control
+                  type="text"
+                  name="productType"
+                  placeholder="Product Type"
+                  value={productType}
+                  onChange={e => setProductType(e.target.value)} /////////////////
+                  required
               />
             </Form.Group>
           </Form>
