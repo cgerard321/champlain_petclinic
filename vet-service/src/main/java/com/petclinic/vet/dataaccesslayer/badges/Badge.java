@@ -20,6 +20,6 @@ public class Badge {
     private BadgeTitle badgeTitle;
     @Column("badge_date")
     private String badgeDate;
-    @Column("img_data")
-    private byte[] data;
+    @Column("img_base64")
+    private String imgBase64;
 }

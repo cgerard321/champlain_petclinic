@@ -40,6 +40,7 @@ import reactor.core.publisher.Mono;
 import javax.sql.DataSource;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.Base64;
 
 @Slf4j
 @Service
@@ -153,14 +154,16 @@ public class VetServiceImpl implements VetService {
     }
 
 
-    private byte[] loadImage(String imagePath) {
+    private String loadImage(String imagePath) {
         try {
             ClassPathResource cpr = new ClassPathResource(imagePath);
-            return StreamUtils.copyToByteArray(cpr.getInputStream());
+            byte[] imageData = StreamUtils.copyToByteArray(cpr.getInputStream());
+            return Base64.getEncoder().encodeToString(imageData);
         } catch (IOException io) {
             throw new InvalidInputException("Picture does not exist: " + io.getMessage());
         }
     }
+
 
     private Mono<VetRequestDTO> validateVetRequestDTO(VetRequestDTO requestDTO) {
         if(requestDTO.getFirstName().length()>30||requestDTO.getFirstName().length()<2)
@@ -180,29 +183,37 @@ public class VetServiceImpl implements VetService {
 
     private Mono<VetRequestDTO> handleDefaultPhoto(VetRequestDTO vet) {
         if (vet.isPhotoDefault()) {
+            String base64Image = loadImage("images/vet_default.jpg");
+
             Photo photo = Photo.builder()
                     .vetId(vet.getVetId())
                     .filename("vet_default.jpg")
                     .imgType("image/jpeg")
-                    .data(loadImage("images/vet_default.jpg"))
+                    .imgBase64(base64Image)
                     .build();
+
             return photoRepository.save(photo)
                     .thenReturn(vet);
         }
         return Mono.just(vet);
     }
 
+
+
     private Mono<Vet> assignBadgeAndSaveBadgeAndVet(Vet vetEntity) {
+        String base64ImageData = loadImage("images/empty_food_bowl.png");
+
         Badge assignedBadge = Badge.builder()
                 .vetId(vetEntity.getVetId())
                 .badgeTitle(BadgeTitle.VALUED)
                 .badgeDate(String.valueOf(LocalDate.now().getYear()))
-                .data(loadImage("images/empty_food_bowl.png"))
+                .imgBase64(base64ImageData)
                 .build();
 
         return badgeRepository.save(assignedBadge)
                 .zipWith(vetRepository.save(vetEntity))
                 .map(tuple -> tuple.getT2());
     }
+
 
 }

@@ -25,19 +25,16 @@ import com.petclinic.vet.servicelayer.ratings.RatingResponseDTO;
 import com.petclinic.vet.servicelayer.ratings.RatingService;
 import com.petclinic.vet.util.EntityDtoUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 
-import java.io.IOException;
 import java.util.Map;
 
 
@@ -262,53 +259,43 @@ public class VetController {
     }
 
 
-
-
-
-
     //Photo
-    @GetMapping("{vetId}/photo")
-    public Mono<ResponseEntity<Resource>> getPhotoByVetId(@PathVariable String vetId){
+    @GetMapping("{vetId}/photos")
+    public Mono<ResponseEntity<Resource>> getPhotoByVetId(@PathVariable String vetId) {
         return photoService.getPhotoByVetId(vetId)
                 .map(r -> ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, MediaType.IMAGE_JPEG_VALUE).body(r))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
+
     @GetMapping("{vetId}/default-photo")
-    public Mono<ResponseEntity<PhotoResponseDTO>> getDefaultPhotoByVetId(@PathVariable String vetId){
+    public Mono<ResponseEntity<PhotoResponseDTO>> getDefaultPhotoByVetId(@PathVariable String vetId) {
         return photoService.getDefaultPhotoByVetId(vetId)
                 .map(r -> ResponseEntity.ok().body(r))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-
-  /*  @PostMapping("{vetId}/photos/{photoName}")
+    @PostMapping("{vetId}/photos/{photoName}")
     public Mono<ResponseEntity<Resource>> addPhoto(
             @PathVariable String vetId,
             @PathVariable String photoName,
-            @RequestParam("file") MultipartFile file) throws IOException {
+            @RequestBody Mono<Resource> photo) {
 
-
-        // Convert MultipartFile to Resource
-        Mono<Resource> photoResource = Mono.just(new ByteArrayResource(file.getBytes()));
-
-
-        return photoService.insertPhotoOfVet(vetId, photoName, photoResource)
+        return photoService.insertPhotoOfVet(vetId, photoName, photo)
                 .map(p -> ResponseEntity.status(HttpStatus.CREATED).body(p))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
-*/
-
-
-
-
-
 
     @PutMapping("{vetId}/photos/{photoName}")
-    public Mono<ResponseEntity<Resource>> updatePhotoByVetId(@PathVariable String vetId, @PathVariable String photoName, @RequestBody Mono<Resource> photo){
+    public Mono<ResponseEntity<Resource>> updatePhotoByVetId(
+            @PathVariable String vetId,
+            @PathVariable String photoName,
+            @RequestBody Mono<Resource> photo) {
+
         return photoService.updatePhotoByVetId(vetId, photoName, photo)
-                .map(p -> ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, MediaType.IMAGE_JPEG_VALUE).body(p))
+                .map(p -> ResponseEntity.ok().body(p))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
+
 
 
     //Badge

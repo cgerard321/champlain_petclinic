@@ -5,6 +5,7 @@ import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VetsServiceClient;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
+import com.petclinic.bffapigateway.dtos.Vets.PhotoResponseDTO;
 import com.petclinic.bffapigateway.dtos.Vets.VetRequestDTO;
 import com.petclinic.bffapigateway.dtos.Vets.VetResponseDTO;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
@@ -81,21 +82,25 @@ public class VetController {
                 .then(Mono.just(ResponseEntity.noContent().<Void>build()))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @PostMapping(value = "{vetId}/photos/{photoName}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public Mono<ResponseEntity<Resource>> addPhoto(
+    public Mono<ResponseEntity<PhotoResponseDTO>> addPhoto(
             @PathVariable String vetId,
             @PathVariable String photoName,
             @RequestParam("image") MultipartFile image) throws IOException {
 
-
-        // Convert MultipartFile to Resource
         Mono<Resource> resourceMono = Mono.just(new ByteArrayResource(image.getBytes()));
-
 
         return vetsServiceClient.addPhotoToVet(vetId, photoName, resourceMono)
                 .map(r -> ResponseEntity.status(HttpStatus.CREATED).body(r))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
+    @GetMapping(value = "{vetId}/photos", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<PhotoResponseDTO>> getPhotoByVetId(@PathVariable String vetId) {
+        return vetsServiceClient.getPhotoByVetId(vetId)
+                .map(photo -> ResponseEntity.status(HttpStatus.OK).body(photo))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})

@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StreamUtils;
 import reactor.core.publisher.Flux;
 
+import java.io.IOException;
 import java.util.*;
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -329,104 +330,127 @@ public class DataSetupService implements CommandLineRunner {
         ClassPathResource cpr1=new ClassPathResource("images/empty_food_bowl.png");
         ClassPathResource cpr2=new ClassPathResource("images/half-full_food_bowl.png");
         ClassPathResource cpr3=new ClassPathResource("images/full_food_bowl.png");
+        ClassPathResource cpr4=new ClassPathResource("images/jamesCarter.png");
 
         //default photo
         String defaultPhotoName = "vet_default.jpg";
-        String defaultPhotoType = "image/jpeg";
+        String jamesCarterPhoto = "jamesCarter.png";
+        String jpgPhotoType = "image/jpg";
+        String pngPhotoType = "image/png";
+
 
         ClassPathResource defaultPhoto = new ClassPathResource("images/" + defaultPhotoName);
 
+        String base64DefaultPhoto = Base64.getEncoder().encodeToString(StreamUtils.copyToByteArray(defaultPhoto.getInputStream()));
+        String base64PhotoJames = Base64.getEncoder().encodeToString(StreamUtils.copyToByteArray(cpr4.getInputStream())); // James Carter's photo
+
         Photo photo1 = Photo.builder()
                 .vetId(v1.getVetId())
-                .filename(defaultPhotoName)
-                .imgType(defaultPhotoType)
-                .data(StreamUtils.copyToByteArray(defaultPhoto.getInputStream()))
+                .filename(jamesCarterPhoto)
+                .imgType(pngPhotoType)
+                .imgBase64(base64PhotoJames)
                 .build();
 
         Photo photo2 = Photo.builder()
                 .vetId(v2.getVetId())
                 .filename(defaultPhotoName)
-                .imgType(defaultPhotoType)
-                .data(StreamUtils.copyToByteArray(defaultPhoto.getInputStream()))
+                .imgType(jpgPhotoType)
+                .imgBase64(base64DefaultPhoto)
                 .build();
 
         Photo photo3 = Photo.builder()
                 .vetId(v3.getVetId())
                 .filename(defaultPhotoName)
-                .imgType(defaultPhotoType)
-                .data(StreamUtils.copyToByteArray(defaultPhoto.getInputStream()))
+                .imgType(jpgPhotoType)
+                .imgBase64(base64DefaultPhoto)
                 .build();
 
         Photo photo4 = Photo.builder()
                 .vetId(v4.getVetId())
                 .filename(defaultPhotoName)
-                .imgType(defaultPhotoType)
-                .data(StreamUtils.copyToByteArray(defaultPhoto.getInputStream()))
+                .imgType(jpgPhotoType)
+                .imgBase64(base64DefaultPhoto)
                 .build();
 
         Photo photo5 = Photo.builder()
                 .vetId(v5.getVetId())
                 .filename(defaultPhotoName)
-                .imgType(defaultPhotoType)
-                .data(StreamUtils.copyToByteArray(defaultPhoto.getInputStream()))
+                .imgType(jpgPhotoType)
+                .imgBase64(base64DefaultPhoto)
                 .build();
 
         Photo photo6 = Photo.builder()
                 .vetId(v6.getVetId())
                 .filename(defaultPhotoName)
-                .imgType(defaultPhotoType)
-                .data(StreamUtils.copyToByteArray(defaultPhoto.getInputStream()))
+                .imgType(jpgPhotoType)
+                .imgBase64(base64DefaultPhoto)
                 .build();
 
         Photo photo7 = Photo.builder()
                 .vetId(v7.getVetId())
                 .filename(defaultPhotoName)
-                .imgType(defaultPhotoType)
-                .data(StreamUtils.copyToByteArray(defaultPhoto.getInputStream()))
+                .imgType(jpgPhotoType)
+                .imgBase64(base64DefaultPhoto)
                 .build();
+
+        Flux.just(photo1, photo2, photo3, photo4, photo5, photo6, photo7)
+                .flatMap(photoRepository::save)
+                .log()
+                .subscribe();
+
+
+        String badgeData;
+
+        try {
+            byte[] imageBytes = StreamUtils.copyToByteArray(cpr3.getInputStream());
+            badgeData = Base64.getEncoder().encodeToString(imageBytes); // Encode to Base64
+        } catch (IOException e) {
+            e.printStackTrace();
+            badgeData = "";
+        }
 
 
         Badge b1 = Badge.builder()
                 .vetId(v1.getVetId())
                 .badgeTitle(BadgeTitle.HIGHLY_RESPECTED)
                 .badgeDate("2020")
-                .data(StreamUtils.copyToByteArray(cpr3.getInputStream()))
+                .imgBase64(badgeData)
                 .build();
         Badge b2 = Badge.builder()
                 .vetId(v2.getVetId())
                 .badgeTitle(BadgeTitle.HIGHLY_RESPECTED)
                 .badgeDate("2022")
-                .data(StreamUtils.copyToByteArray(cpr3.getInputStream()))
+                .imgBase64(badgeData)
                 .build();
         Badge b3 = Badge.builder()
                 .vetId(v3.getVetId())
                 .badgeTitle(BadgeTitle.MUCH_APPRECIATED)
                 .badgeDate("2023")
-                .data(StreamUtils.copyToByteArray(cpr2.getInputStream()))
+                .imgBase64(badgeData)
                 .build();
         Badge b4 = Badge.builder()
                 .vetId(v4.getVetId())
                 .badgeTitle(BadgeTitle.VALUED)
                 .badgeDate("2010")
-                .data(StreamUtils.copyToByteArray(cpr1.getInputStream()))
+                .imgBase64(badgeData)
                 .build();
         Badge b5 = Badge.builder()
                 .vetId(v5.getVetId())
                 .badgeTitle(BadgeTitle.VALUED)
                 .badgeDate("2013")
-                .data(StreamUtils.copyToByteArray(cpr1.getInputStream()))
+                .imgBase64(badgeData)
                 .build();
         Badge b6 = Badge.builder()
                 .vetId(v6.getVetId())
                 .badgeTitle(BadgeTitle.VALUED)
                 .badgeDate("2016")
-                .data(StreamUtils.copyToByteArray(cpr1.getInputStream()))
+                .imgBase64(badgeData)
                 .build();
         Badge b7 = Badge.builder()
                 .vetId(v7.getVetId())
                 .badgeTitle(BadgeTitle.VALUED)
                 .badgeDate("2018")
-                .data(StreamUtils.copyToByteArray(cpr1.getInputStream()))
+                .imgBase64(badgeData)
                 .build();
 
         // Use method defined to create datasource
@@ -449,8 +473,11 @@ public class DataSetupService implements CommandLineRunner {
                 insertStmt.setString(2, badge.getBadgeTitle().name());
                 insertStmt.setString(3, badge.getBadgeDate());
 
-                // Assuming badge.getData() returns image data as byte array
-                insertStmt.setBytes(4, badge.getData());
+                // Convert Base64 string to byte array
+                byte[] imageBytes = Base64.getDecoder().decode(badge.getImgBase64());
+
+                // Set the byte array in the prepared statement
+                insertStmt.setBytes(4, imageBytes);
 
                 // Run insert query for each badge
                 int insertedRows = insertStmt.executeUpdate();
@@ -458,6 +485,7 @@ public class DataSetupService implements CommandLineRunner {
                 // Print out number of inserted rows for each badge
                 System.out.printf("Inserted %d badge(s)%n", insertedRows);
             }
+
 
             // Close PreparedStatement after use
             insertStmt.close();
@@ -467,8 +495,8 @@ public class DataSetupService implements CommandLineRunner {
             e.printStackTrace();
         }
 
-        try(
-                // get connection from datasource
+        try (
+                // Get connection from datasource
                 Connection conn = dataSource.getConnection();
 
                 // Prepare INSERT statement
@@ -476,21 +504,17 @@ public class DataSetupService implements CommandLineRunner {
                         "INSERT INTO images (vet_id, filename, img_type, img_data) " +
                                 "VALUES (?, ?, ?, ?)")
         ) {
+            // Insert photo1 for vet1
+            insertStmt.setString(1, photo1.getVetId());  // vet1's ID
+            insertStmt.setString(2, photo1.getFilename());  // e.g., vet_default.jpg
+            insertStmt.setString(3, photo1.getImgType());  // e.g., image/png or image/jpg
+            byte[] imgData = Base64.getDecoder().decode(photo1.getImgBase64());  // Decode the Base64 image data
+            insertStmt.setBytes(4, imgData);  // Set the binary image data
 
-            Photo[] photos = {photo1,photo2,photo3,photo4,photo5,photo6, photo7};
-
-            for (Photo photo : photos) {
-                insertStmt.setString(1, photo.getVetId());
-                insertStmt.setString(2, photo.getFilename());
-                insertStmt.setString(3, photo.getImgType());
-                insertStmt.setBytes(4, photo.getData());
-
-                int insertedRows = insertStmt.executeUpdate();
-                System.out.printf("Inserted %d defaultPhoto(s)%n", insertedRows);
-            }
-
-            insertStmt.close();
+            int insertedRows = insertStmt.executeUpdate();  // Execute the insert query
+            System.out.printf("Inserted %d photo(s) for vet1%n", insertedRows);
         }
+
         catch (SQLException e) {
             // Handle any SQL exceptions
             e.printStackTrace();

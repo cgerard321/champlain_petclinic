@@ -16,5 +16,5 @@ public class BadgeResponseDTO {
     private String vetId;
     private String badgeDate;
     private BadgeTitle badgeTitle;
-    private String resourceBase64;
+    private String imgBase64;
 }

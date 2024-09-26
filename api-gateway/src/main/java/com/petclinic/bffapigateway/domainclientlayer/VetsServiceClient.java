@@ -48,22 +48,23 @@ public class VetsServiceClient {
     }
 
     //Photo
-    public Mono<Resource> getPhotoByVetId(String vetId){
+    public Mono<PhotoResponseDTO> getPhotoByVetId(String vetId){
         return webClientBuilder.build()
                 .get()
-                .uri(vetsServiceUrl + "/" + vetId + "/photo")
+                .uri(vetsServiceUrl + "/" + vetId + "/photos")
                 .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError, error->{
+                .onStatus(HttpStatusCode::is4xxClientError, error -> {
                     HttpStatusCode statusCode = error.statusCode();
-                    if(statusCode.equals(NOT_FOUND))
-                        return Mono.error(new ExistingVetNotFoundException("Photo for vet "+vetId + " not found", NOT_FOUND));
+                    if (statusCode.equals(NOT_FOUND))
+                        return Mono.error(new ExistingVetNotFoundException("Photo for vet " + vetId + " not found", NOT_FOUND));
                     return Mono.error(new IllegalArgumentException("Something went wrong with the client"));
                 })
-                .onStatus(HttpStatusCode::is5xxServerError,error->
+                .onStatus(HttpStatusCode::is5xxServerError, error ->
                         Mono.error(new IllegalArgumentException("Something went wrong with the server"))
                 )
-                .bodyToMono(Resource.class);
+                .bodyToMono(PhotoResponseDTO.class);  // Return the PhotoResponseDTO with the Base64 string
     }
+
     public Mono<PhotoResponseDTO> getDefaultPhotoByVetId(String vetId){
         return webClientBuilder.build()
                 .get()
@@ -81,13 +82,13 @@ public class VetsServiceClient {
                 .bodyToMono(PhotoResponseDTO.class);
     }
 
-    public Mono<Resource> addPhotoToVet(String vetId, String photoName, Mono<Resource> image) {
+    public Mono<PhotoResponseDTO> addPhotoToVet(String vetId, String photoName, Mono<Resource> photoResource) {
         return webClientBuilder
                 .build()
                 .post()
                 .uri(vetsServiceUrl + "/" + vetId + "/photos/" + photoName)
-                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_VALUE)
-                .body(image, Resource.class)
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+                .body(photoResource, Resource.class)
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, error -> {
                     HttpStatusCode statusCode = error.statusCode();
@@ -98,28 +99,31 @@ public class VetsServiceClient {
                 .onStatus(HttpStatusCode::is5xxServerError, error ->
                         Mono.error(new IllegalArgumentException("Something went wrong with the server"))
                 )
-                .bodyToMono(Resource.class);
+                .bodyToMono(PhotoResponseDTO.class);
     }
 
-    public Mono<Resource> updatePhotoOfVet(String vetId, String photoName, Mono<Resource> image){
+
+
+    public Mono<PhotoResponseDTO> updatePhotoOfVet(String vetId, Mono<PhotoRequestDTO> photoRequestDTO) {
         return webClientBuilder
                 .build()
                 .put()
-                .uri(vetsServiceUrl+"/"+vetId+"/photos/"+photoName)
-                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_VALUE)
-                .body(image, Resource.class)
+                .uri(vetsServiceUrl + "/" + vetId + "/photos")
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE) // JSON data
+                .body(photoRequestDTO, PhotoRequestDTO.class) // Send DTO as JSON
                 .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError, error->{
+                .onStatus(HttpStatusCode::is4xxClientError, error -> {
                     HttpStatusCode statusCode = error.statusCode();
-                    if(statusCode.equals(NOT_FOUND))
-                        return Mono.error(new NotFoundException("Photo for vet "+vetId + " not found"));
+                    if (statusCode.equals(NOT_FOUND))
+                        return Mono.error(new NotFoundException("Photo for vet " + vetId + " not found"));
                     return Mono.error(new IllegalArgumentException("Something went wrong with the client"));
                 })
-                .onStatus(HttpStatusCode::is5xxServerError,error->
+                .onStatus(HttpStatusCode::is5xxServerError, error ->
                         Mono.error(new IllegalArgumentException("Something went wrong with the server"))
                 )
-                .bodyToMono(Resource.class);
+                .bodyToMono(PhotoResponseDTO.class); // Assuming you get the PhotoResponseDTO in return
     }
+
 
     //Badge
     public Mono<BadgeResponseDTO> getBadgeByVetId(String vetId){

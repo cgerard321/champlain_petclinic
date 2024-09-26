@@ -2,14 +2,12 @@ package com.petclinic.vet.presentationlayer;
 
 import lombok.*;
 
-import org.springframework.core.io.Resource;
-
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PhotoResponseDTO {
+public class PhotoRequestDTO {
     private String vetId;
     private String filename;
     private String imgType;

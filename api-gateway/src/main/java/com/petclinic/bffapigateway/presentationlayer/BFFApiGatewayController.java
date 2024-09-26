@@ -5,14 +5,12 @@ import com.petclinic.bffapigateway.domainclientlayer.*;
 import com.petclinic.bffapigateway.dtos.Auth.*;
 import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
-import com.petclinic.bffapigateway.dtos.Bills.BillStatus;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.*;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.*;
 import com.petclinic.bffapigateway.dtos.Vets.*;
 import com.petclinic.bffapigateway.dtos.Visits.VisitRequestDTO;
-import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewResponseDTO;
 import com.petclinic.bffapigateway.utils.Security.Annotations.IsUserSpecific;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
@@ -23,7 +21,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import nonapi.io.github.classgraph.json.Id;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -33,9 +30,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.time.LocalDate;
 import java.util.Map;
-import java.awt.print.Pageable;
 import java.util.Optional;
 
 /**
@@ -421,34 +416,49 @@ public class BFFApiGatewayController {
      **/
 
     //Photo
-    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
-    @GetMapping("vets/{vetId}/photo")
-    public Mono<ResponseEntity<Resource>> getPhotoByVetId(@PathVariable String vetId) {
-        return vetsServiceClient.getPhotoByVetId(vetId)
-                .map(r -> ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, MediaType.IMAGE_JPEG_VALUE).body(r))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
-    }
-    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
-    @GetMapping("vets/{vetId}/default-photo")
-    public Mono<ResponseEntity<PhotoResponseDTO>> getDefaultPhotoByVetId(@PathVariable String vetId) {
-        return vetsServiceClient.getDefaultPhotoByVetId(vetId)
-                .map(r -> ResponseEntity.ok().body(r))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
-    }
+        @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
+        @GetMapping("vets/{vetId}/photo")
+        public Mono<ResponseEntity<PhotoResponseDTO>> getPhotoByVetId(@PathVariable String vetId) {
+            return vetsServiceClient.getPhotoByVetId(vetId)
+                    .map(r -> ResponseEntity.ok()
+                            .header(HttpHeaders.CONTENT_TYPE, MediaType.IMAGE_JPEG_VALUE)
+                            .body(r))
+                    .defaultIfEmpty(ResponseEntity.notFound().build());
+        }
 
-    @PostMapping(value = "vets/{vetId}/photos/{photoName}")
-    public Mono<ResponseEntity<Resource>> addPhoto(@PathVariable String vetId, @PathVariable String photoName, @RequestBody Mono<Resource> image) {
-        return vetsServiceClient.addPhotoToVet(vetId, photoName, image)
-                .map(r -> ResponseEntity.status(HttpStatus.CREATED).body(r))
-                .defaultIfEmpty(ResponseEntity.badRequest().build());
-    }
+        @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
+        @GetMapping("vets/{vetId}/default-photo")
+        public Mono<ResponseEntity<PhotoResponseDTO>> getDefaultPhotoByVetId(@PathVariable String vetId) {
+            return vetsServiceClient.getDefaultPhotoByVetId(vetId)
+                    .map(r -> ResponseEntity.ok().body(r))
+                    .defaultIfEmpty(ResponseEntity.notFound().build());
+        }
 
-    @PutMapping(value = "vets/{vetId}/photos/{photoName}")
-    public Mono<ResponseEntity<Resource>> updatePhotoByVetId(@PathVariable String vetId, @PathVariable String photoName, @RequestBody Mono<Resource> image) {
-        return vetsServiceClient.updatePhotoOfVet(vetId, photoName, image)
-                .map(p -> ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, MediaType.IMAGE_JPEG_VALUE).body(p))
-                .defaultIfEmpty(ResponseEntity.badRequest().build());
-    }
+        @SecuredEndpoint(allowedRoles = {Roles.ADMIN}) // Assuming only admin can add photos
+        @PostMapping(value = "vets/{vetId}/photos/{photoName}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+        public Mono<ResponseEntity<PhotoResponseDTO>> addPhoto(
+                @PathVariable String vetId,
+                @PathVariable String photoName,
+                @RequestPart("image") Mono<Resource> image) { // Changed to @RequestPart for multipart
+            return vetsServiceClient.addPhotoToVet(vetId, photoName, image)
+                    .map(r -> ResponseEntity.status(HttpStatus.CREATED).body(r))
+                    .defaultIfEmpty(ResponseEntity.badRequest().build());
+        }
+
+        /*@SecuredEndpoint(allowedRoles = {Roles.ADMIN}) // Assuming only admin can update photos
+        @PutMapping(value = "vets/{vetId}/photos/{photoName}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+        public Mono<ResponseEntity<PhotoResponseDTO>> updatePhotoByVetId(
+                @PathVariable String vetId,
+                @PathVariable String photoName,
+                @RequestPart("image") Mono<Resource> image) { // Changed to @RequestPart for multipart
+            return vetsServiceClient.updatePhotoOfVet(vetId, photoName, image)
+                    .map(p -> ResponseEntity.ok()
+                            .header(HttpHeaders.CONTENT_TYPE, MediaType.IMAGE_JPEG_VALUE)
+                            .body(p))
+                    .defaultIfEmpty(ResponseEntity.badRequest().build());
+        }
+    }*/
+
 
     //Badge
     @GetMapping("vets/{vetId}/badge")
@@ -1106,10 +1116,4 @@ public class BFFApiGatewayController {
         );
     }
 
-
-
-
-
-
-
-}
+    }

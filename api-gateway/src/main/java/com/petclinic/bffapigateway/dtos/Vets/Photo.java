@@ -14,5 +14,5 @@ public class Photo {
     private String vetId;
     private String filename;
     private String imgType;
-    private byte[] data;
+    private String imgBase64;
 }

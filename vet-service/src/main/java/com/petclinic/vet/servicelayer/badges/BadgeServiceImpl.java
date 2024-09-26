@@ -15,6 +15,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Base64;
 
 @Service
 @RequiredArgsConstructor
@@ -42,21 +44,21 @@ public class BadgeServiceImpl implements BadgeService{
                             if (avgRating <= 2.0) {
                                 return loadBadgeImage("images/empty_food_bowl.png")
                                         .map(imageData -> {
-                                            badge.setData(imageData);
+                                            badge.setImgBase64(Base64.getEncoder().encodeToString(imageData)); // Encode to Base64
                                             badge.setBadgeTitle(BadgeTitle.VALUED);
                                             return badge;
                                         });
                             } else if (avgRating <= 4.0) {
                                 return loadBadgeImage("images/half-full_food_bowl.png")
                                         .map(imageData -> {
-                                            badge.setData(imageData);
+                                            badge.setImgBase64(Base64.getEncoder().encodeToString(imageData)); // Encode to Base64
                                             badge.setBadgeTitle(BadgeTitle.MUCH_APPRECIATED);
                                             return badge;
                                         });
                             } else {
                                 return loadBadgeImage("images/full_food_bowl.png")
                                         .map(imageData -> {
-                                            badge.setData(imageData);
+                                            badge.setImgBase64(Base64.getEncoder().encodeToString(imageData)); // Encode to Base64
                                             badge.setBadgeTitle(BadgeTitle.HIGHLY_RESPECTED);
                                             return badge;
                                         });

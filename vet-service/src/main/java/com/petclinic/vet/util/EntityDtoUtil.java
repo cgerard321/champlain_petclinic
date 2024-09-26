@@ -104,10 +104,15 @@ public class EntityDtoUtil {
 
 
 
-    public static String getPhotoType(String photoName){
-        String type = photoName.split("\\.")[1];
-        if(type.equals("jpg"))
+    public static String getPhotoType(String photoName) {
+        String[] parts = photoName.split("\\.");
+        if (parts.length < 2) {
+            throw new InvalidInputException("Photo name must contain an extension: " + photoName);
+        }
+        String type = parts[1];
+        if (type.equals("jpg")) {
             type = "jpeg";
+        }
         return type;
     }
 
@@ -169,28 +174,34 @@ public class EntityDtoUtil {
         return specialties;
     }
 
-    public static BadgeResponseDTO toBadgeResponseDTO(Badge badge){
-        BadgeResponseDTO badgeResponseDTO=new BadgeResponseDTO();
+    public static BadgeResponseDTO toBadgeResponseDTO(Badge badge) {
+        BadgeResponseDTO badgeResponseDTO = new BadgeResponseDTO();
         badgeResponseDTO.setBadgeDate(badge.getBadgeDate());
         badgeResponseDTO.setBadgeTitle(badge.getBadgeTitle());
         badgeResponseDTO.setVetId(badge.getVetId());
-        badgeResponseDTO.setResourceBase64(Base64.getEncoder().encodeToString(badge.getData()));
+
+        badgeResponseDTO.setImgBase64(badge.getImgBase64());
         return badgeResponseDTO;
     }
 
-    public static PhotoResponseDTO toPhotoResponseDTO(Photo photo){
-        PhotoResponseDTO photoResponseDTO = new PhotoResponseDTO();
-        photoResponseDTO.setVetId(photo.getVetId());
-        photoResponseDTO.setFilename(photo.getFilename());
-        photoResponseDTO.setImgType(photo.getImgType());
-        //use the Base64 encoded string for the image
-        if(photo.getFilename().equals("vet_default.jpg"))
-            photoResponseDTO.setResourceBase64(photo.getImgBase64());
-        else {
-            photoResponseDTO.setResourceBase64(photo.getImgBase64());
+
+    public static PhotoResponseDTO toPhotoResponseDTO(Photo photo) {
+        // Validate the photo object
+        if (photo == null) {
+            throw new IllegalArgumentException("Photo cannot be null");
         }
+
+        // Create and populate the PhotoResponseDTO
+        PhotoResponseDTO photoResponseDTO = PhotoResponseDTO.builder()
+                .vetId(photo.getVetId())
+                .filename(photo.getFilename())
+                .imgType(photo.getImgType())
+                .imgBase64(photo.getImgBase64())
+                .build();
+
         return photoResponseDTO;
     }
+
 
 
 
