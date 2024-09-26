@@ -28,6 +28,18 @@ const InventoryProducts: React.FC = () => {
       setLoading(false);
     }
   };
+  // Delete product by productId
+  const deleteProduct = async (productId: string): Promise<void> => {
+    try {
+      await axios.delete(
+        `http://localhost:8080/api/gateway/inventory/${inventoryId}/products/${productId}`
+      );
+      // Filter out the deleted product from the state
+      setProducts(products.filter(product => product.productId !== productId));
+    } catch (err) {
+      setError('Failed to delete product.');
+    }
+  };
 
   // useEffect with dependency
   useEffect(() => {
@@ -58,6 +70,7 @@ const InventoryProducts: React.FC = () => {
               <th>Price</th>
               <th>Quantity</th>
               <th>Status</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -81,6 +94,14 @@ const InventoryProducts: React.FC = () => {
                   }}
                 >
                   {product.status.replace('_', ' ')}
+                </td>
+                <td>
+                  <button
+                    className="btn btn-danger"
+                    onClick={() => deleteProduct(product.productId)}
+                  >
+                    Delete
+                  </button>
                 </td>
               </tr>
             ))}
