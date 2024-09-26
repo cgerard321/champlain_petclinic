@@ -44,36 +44,40 @@ public class CartController {
                 .map(ResponseEntity::ok);
     }
 
-
-
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public Flux<CartResponseModel> getAllCarts() {
-        return cartService.getAllCarts();
+    public Flux<ResponseEntity<CartResponseModel>> getAllCarts() {
+        return cartService.getAllCarts()
+                .map(ResponseEntity::ok);
     }
 
-    // Adding the clearCart method from feat/CART-CPC-1144_clear_cart_feature
     @DeleteMapping("/{cartId}/clear")
-    public Flux<ProductResponseModel> clearCart(@PathVariable String cartId) {
-        return cartService.clearCart(cartId)
-                .switchIfEmpty(Mono.error(new NotFoundException("Cart not found")));
+    public Flux<ResponseEntity<CartResponseModel>> clearCart(@PathVariable String cartId) {
+        return Flux.just(cartId)
+                .filter(id -> id.length() == 36) // validate the cart id
+                .switchIfEmpty(Mono.error(new InvalidInputException("Provided cart id is invalid: " + cartId)))
+                .flatMap(cartService::clearCart)
+                .map(ResponseEntity::ok);
     }
 
     // Adding the updateCartByCartId method from main
-    @PutMapping(value = "/{cartId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<CartResponseModel>> updateCartByCartId(@RequestBody Mono<CartRequestModel> cartRequestModel, @PathVariable String cartId) {
-        return Mono.just(cartId)
-                .filter(id -> id.length() == 36)
-                .switchIfEmpty(Mono.error(new InvalidInputException("Provided cart id is invalid: " + cartId)))
-                .flatMap(id -> cartService.updateCartByCartId(cartRequestModel, id))
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.badRequest().build());
-
-    }
+//    @PutMapping(value = "/{cartId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+//    public Mono<ResponseEntity<CartResponseModel>> updateCartByCartId(@RequestBody Mono<CartRequestModel> cartRequestModel, @PathVariable String cartId) {
+//        return Mono.just(cartId)
+//                .filter(id -> id.length() == 36)
+//                .switchIfEmpty(Mono.error(new InvalidInputException("Provided cart id is invalid: " + cartId)))
+//                .flatMap(id -> cartService.updateCartByCartId(cartRequestModel, id))
+//                .map(ResponseEntity::ok)
+//                .defaultIfEmpty(ResponseEntity.badRequest().build());
+//
+//    }
+    //we are going to subdivide this method into multiple methods
 
     @GetMapping("/{cartId}/count")
     public Mono<ResponseEntity<Map<String, Integer>>> getCartItemCount(@PathVariable String cartId) {
-        return cartService.getCartItemCount(cartId)
-                .map(count -> ResponseEntity.ok(Collections.singletonMap("itemCount", count)))
-                .switchIfEmpty(Mono.error(new NotFoundException("Cart not found for ID: " + cartId)));
+        return Mono.just(cartId)
+                .filter(id -> id.length() == 36) // validate the cart id
+                .switchIfEmpty(Mono.error(new InvalidInputException("Provided cart id is invalid: " + cartId)))
+                .flatMap(cartService::getCartItemCount)
+                .map(count -> ResponseEntity.ok(Collections.singletonMap("itemCount", count)));
     }
 }

@@ -38,13 +38,13 @@ public class CartController {
         return cartServiceClient.getAllCarts();
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @PutMapping(value = "/{cartId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<CartResponseDTO>> updateCartById(@RequestBody Mono<CartRequestDTO> cartRequestDTO,
-                                                                @PathVariable String cartId){
-        return cartServiceClient.updateCartByCartId(cartRequestDTO, cartId)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build());
-    }
+//    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+//    @PutMapping(value = "/{cartId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+//    public Mono<ResponseEntity<CartResponseDTO>> updateCartById(@RequestBody Mono<CartRequestDTO> cartRequestDTO,
+//                                                                @PathVariable String cartId){
+//        return cartServiceClient.updateCartByCartId(cartRequestDTO, cartId)
+//                .map(ResponseEntity::ok)
+//                .defaultIfEmpty(ResponseEntity.notFound().build());
+//    }
 
 }

@@ -12,6 +12,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Map;
+
 @Component
 @Slf4j
 public class CartServiceClient {
@@ -42,15 +44,24 @@ public class CartServiceClient {
                 .bodyToMono(CartResponseDTO.class);
     }
 
-    public Mono<CartResponseDTO> updateCartByCartId(Mono<CartRequestDTO> cartRequestDTOMono, String CartId){
+    public Mono<CartResponseDTO> clearCartByCartId(final String CartId) {
         return webClientBuilder.build()
-                .put()
-                .uri(CartServiceUrl + "/" + CartId)
-                .body(Mono.just(cartRequestDTOMono), CartRequestDTO.class)
-                .accept(MediaType.APPLICATION_JSON)
+                .delete()
+                .uri(CartServiceUrl + "/" + CartId + "/clear")
                 .retrieve()
                 .bodyToMono(CartResponseDTO.class);
     }
+
+
+//    public Mono<CartResponseDTO> updateCartByCartId(Mono<CartRequestDTO> cartRequestDTOMono, String CartId){
+//        return webClientBuilder.build()
+//                .put()
+//                .uri(CartServiceUrl + "/" + CartId)
+//                .body(Mono.just(cartRequestDTOMono), CartRequestDTO.class)
+//                .accept(MediaType.APPLICATION_JSON)
+//                .retrieve()
+//                .bodyToMono(CartResponseDTO.class);
+//    }
 
 }
 
