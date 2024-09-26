@@ -156,7 +156,6 @@ public class EmailServiceImplTest
         Assert.That(result, Is.TypeOf<OperationResult>());
         OperationResult operationResult = result;
         Assert.That(operationResult.IsSuccess, Is.True);
-        
     }
     /*
      We now do this in the endpoint

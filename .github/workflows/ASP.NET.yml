@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - bug/VIST-CPC-1267_Missing/Incorrect_docker_compose_and_CI_Configuration_For_Emailing_Service
+      # - bug/VIST-CPC-1267_Missing/Incorrect_docker_compose_and_CI_Configuration_For_Emailing_Service
   pull_request:
     branches:
       - main
@@ -20,7 +20,7 @@ jobs:
           MYSQL_ROOT_PASSWORD: Your_password123
           MYSQL_DATABASE: MyAppDb
         ports:
-          - 3306:3306
+          - 3308:3306
         options: --health-cmd="mysqladmin ping --silent" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:

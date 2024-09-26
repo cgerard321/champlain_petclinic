@@ -3,8 +3,6 @@ using emailing_service.Models.Database;
 using emailing_service.Models.EmailType;
 using emailing_service.Utils;
 using emailing_service.Utils.Exception;
-using Microsoft.AspNetCore.Http.HttpResults;
-using MySqlConnector;
 
 namespace emailing_service.BuisnessLayer;
 
@@ -55,7 +53,7 @@ public class EmailServiceImpl : IEmailService
     {
         Console.WriteLine("Received Email Call Function!");
         DirectEmailModel directEmailModel = model;
-        Console.WriteLine("Found the model!" + directEmailModel.ToString());
+        Console.WriteLine("Found the model!" + directEmailModel);
         
         
         if (String.IsNullOrWhiteSpace(directEmailModel.EmailToSendTo))
@@ -64,7 +62,7 @@ public class EmailServiceImpl : IEmailService
             throw new BadEmailModel("Email To Send To Not Valid");
         if(String.IsNullOrWhiteSpace(directEmailModel.EmailTitle))
             throw new BadEmailModel("Email Title is null or whitespace");
-        if (directEmailModel.TemplateName == null)
+        if (String.IsNullOrWhiteSpace(directEmailModel.TemplateName))
             directEmailModel.TemplateName = "Default";
         EmailTemplate? emailTemplate = EmailUtils.EmailTemplates.FirstOrDefault(e => e.Name == directEmailModel.TemplateName);
         if (emailTemplate == null)
@@ -78,15 +76,15 @@ public class EmailServiceImpl : IEmailService
             string footer = "";
             string correspondentName = "";
             string sender = "";
-            if (directEmailModel.Header != null)
+            if (!String.IsNullOrWhiteSpace(directEmailModel.Header))
                 header = directEmailModel.Header;
-            if (directEmailModel.Body != null)
+            if (!String.IsNullOrWhiteSpace(directEmailModel.Body))
                 body = directEmailModel.Body;
-            if (directEmailModel.Footer != null)
+            if (!String.IsNullOrWhiteSpace(directEmailModel.Footer))
                 footer = directEmailModel.Footer;
-            if (directEmailModel.CorrespondantName != null)
+            if (!String.IsNullOrWhiteSpace(directEmailModel.CorrespondantName))
                 correspondentName = directEmailModel.CorrespondantName;
-            if (directEmailModel.SenderName != null)
+            if (!String.IsNullOrWhiteSpace(directEmailModel.SenderName))
                 sender = directEmailModel.SenderName;
             builtEmail = emailTemplate.BuildEmail(
                 header,
@@ -124,8 +122,7 @@ public class EmailServiceImpl : IEmailService
                         directEmailModel.EmailToSendTo,
                         directEmailModel.EmailTitle,
                         builtEmail,
-                        EmailUtils.smtpClient,
-                        true
+                        EmailUtils.smtpClient
                     );
                     
                     if (sendEmailResult.Status == "Sent")

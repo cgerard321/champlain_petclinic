@@ -58,7 +58,7 @@ public class DatabaseHelper : IDatabaseHelper
             command.Parameters.AddWithValue("@emailStatus", emailStatus);
             await command.ExecuteNonQueryAsync();
         }
-        catch (MySqlException ex)
+        catch (MySqlException)
         {
             throw new MissingDatabaseException("Could not find or create the database.");
         }
@@ -90,7 +90,7 @@ public class DatabaseHelper : IDatabaseHelper
             }
             return emails;
         }
-        catch (MySqlException e)
+        catch (MySqlException)
         {
             throw new MissingDatabaseException("Could not find the database");
         }
