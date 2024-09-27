@@ -2,20 +2,22 @@ import * as React from 'react';
 import { FormEvent, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppRoutePaths } from '@/shared/models/path.routes';
-import { OwnerModel } from '@/features/customers/models/OwnerModel.ts';
-import { UserIdLessRoleLessDTO } from '@/shared/models/UserIdLessRoleLessDTO';
+import { OwnerRequestModel } from '@/shared/models/OwnerRequestModel';
+import { Register } from '@/shared/models/RegisterModel';
 import { NavBar } from '@/layouts/AppNavBar.tsx';
 import axios from 'axios';
 import './SignUp.css';
 
 const SignUp: React.FC = (): JSX.Element => {
-  //This is the character limit for all fields but the email (Since a valid email can go up to 320 characters)
+  // Character limit for all fields but email
   const characterLimit = 60;
   const [errorMessage, setErrorMessage] = useState<
     Partial<Record<string, string>>
   >({});
   const navigate = useNavigate();
-  const [owner, setOwner] = useState<OwnerModel>({
+
+  // Owner state based on OwnerRequestModel
+  const [owner, setOwner] = useState<OwnerRequestModel>({
     ownerId: '',
     firstName: '',
     lastName: '',
@@ -23,15 +25,16 @@ const SignUp: React.FC = (): JSX.Element => {
     city: '',
     province: '',
     telephone: '',
-    pets: [],
   });
 
-  const [userData, setUserData] = useState<UserIdLessRoleLessDTO>({
+  // User data state based on Register model
+  const [userData, setUserData] = useState<Register>({
     userId: '',
+    email: '',
     username: '',
     password: '',
-    email: '',
     defaultRole: '',
+    owner,
   });
 
   const validatePassword = (password: string): string | undefined => {
@@ -48,7 +51,7 @@ const SignUp: React.FC = (): JSX.Element => {
   const validateEmail = (email: string): string | undefined => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!email) return 'Email is required.';
-    if (email.length > 320) return 'Password cannot exceed 320 characters.';
+    if (email.length > 320) return 'Email cannot exceed 320 characters.';
     if (!emailRegex.test(email)) {
       return 'Invalid email format.';
     }
@@ -78,7 +81,6 @@ const SignUp: React.FC = (): JSX.Element => {
     email: 'Email',
   };
 
-  //To instantly notify the user when they are inputing the fields
   const validateField = (name: string, value: string): string | undefined => {
     const label = fieldLabels[name] || name;
 
@@ -119,12 +121,12 @@ const SignUp: React.FC = (): JSX.Element => {
     setErrorMessage({});
     let hasErrors = false;
 
-    // Validate all fields when submitting (Since they all have individual validation)
+    // Validate all fields
     const errors: Partial<Record<string, string>> = {};
     Object.keys(owner).forEach(key => {
       const error = validateField(
         key,
-        owner[key as keyof OwnerModel] as string
+        owner[key as keyof OwnerRequestModel] as string
       );
       if (error) {
         errors[key] = error;
@@ -135,7 +137,7 @@ const SignUp: React.FC = (): JSX.Element => {
     Object.keys(userData).forEach(key => {
       const error = validateField(
         key,
-        userData[key as keyof UserIdLessRoleLessDTO] as string
+        userData[key as keyof Register] as string
       );
       if (error) {
         errors[key] = error;
@@ -149,14 +151,20 @@ const SignUp: React.FC = (): JSX.Element => {
       return;
     }
 
-    // Submission (Currently using old endpoint)
+    // Prepare data to send to backend
+    const requestData = {
+      ...userData,
+      owner,
+    };
+
+    // Submission
     try {
-      const response = await axios.post<UserIdLessRoleLessDTO>(
+      const response = await axios.post<Register>(
         'http://localhost:8080/api/gateway/users',
-        userData
+        requestData
       );
 
-      if (response.data.userId !== '') {
+      if (response.data.userId) {
         navigate(AppRoutePaths.Home);
       }
     } catch (error) {
@@ -169,13 +177,11 @@ const SignUp: React.FC = (): JSX.Element => {
             'Invalid input. Please check the fields and try again.';
           setErrorMessage({ general: errorMessageString });
         } else {
-          // For error statuses or unknown errors
           setErrorMessage({
             general: 'Something went wrong, please try again later.',
           });
         }
       } else {
-        // For Non-Axios errors
         setErrorMessage({
           general: 'An unexpected error occurred. Please try again.',
         });
