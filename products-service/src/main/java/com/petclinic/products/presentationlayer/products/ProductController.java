@@ -26,6 +26,10 @@ public class ProductController {
             @RequestParam(required = false) Double maxPrice) {
         return productService.getAllProducts(minPrice, maxPrice);
     }
+    @GetMapping(value="/reviews",produces = MediaType.APPLICATION_JSON_VALUE)
+    public Flux<ProductResponseModel> getAllProductsByReview(){
+        return productService.getAllProductsByReview();
+    }
 
     @GetMapping(value = "/{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<ProductResponseModel>> getProductByProductId(@PathVariable String productId) {

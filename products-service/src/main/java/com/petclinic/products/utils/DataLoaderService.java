@@ -23,7 +23,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Premium dry food for adult dogs")
                 .productSalePrice(45.99)
                 .requestCount(0)
-                .averageRating(0.0)
+                .averageRating(1.0)
             .build();
 
         Product product2 = Product.builder()
@@ -32,7 +32,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Clumping cat litter with odor control")
                 .productSalePrice(12.99)
                 .requestCount(0)
-                .averageRating(0.0)
+                .averageRating(5.0)
                 .build();
 
         Product product3 = Product.builder()
@@ -41,7 +41,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Flea and tick prevention for small dogs")
                 .productSalePrice(9.99)
                 .requestCount(0)
-                .averageRating(0.0)
+                .averageRating(2.0)
                 .build();
 
         Product product4 = Product.builder()
@@ -50,7 +50,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Spacious cage for small birds like parakeets")
                 .productSalePrice(29.99)
                 .requestCount(0)
-                .averageRating(0.0)
+                .averageRating(1.0)
                 .build();
 
         Product product5 = Product.builder()
@@ -59,7 +59,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Filter system for small to medium-sized aquariums")
                 .productSalePrice(19.99)
                 .requestCount(0)
-                .averageRating(0.0)
+                .averageRating(5.0)
                 .build();
 
         Product product6 = Product.builder()
@@ -68,7 +68,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Lightweight saddle for riding horses")
                 .productSalePrice(199.99)
                 .requestCount(0)
-                .averageRating(0.0)
+                .averageRating(4.0)
                 .build();
 
         Product product7 = Product.builder()
@@ -77,7 +77,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Outdoor wooden hutch for rabbits")
                 .productSalePrice(79.99)
                 .requestCount(0)
-                .averageRating(0.0)
+                .averageRating(3.0)
                 .build();
 
         Product product8 = Product.builder()
@@ -86,7 +86,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Submersible heater for tropical fish tanks")
                 .productSalePrice(14.99)
                 .requestCount(0)
-                .averageRating(0.0)
+                .averageRating(1.0)
                 .build();
 
         Flux.just(product1, product2, product3, product4, product5, product6, product7, product8)

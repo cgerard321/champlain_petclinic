@@ -39,6 +39,12 @@ public class ProductController {
         }
         return productsServiceClient.getAllProducts(minPrice, maxPrice);
     }
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
+    @GetMapping(value = "",produces = MediaType.APPLICATION_JSON_VALUE)
+    public Flux<ProductResponseDTO>getAllProductsByReview(){
+        return productsServiceClient.getAllProductsByReview();
+
+    }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping(value = "{productId}", produces = MediaType.APPLICATION_JSON_VALUE)

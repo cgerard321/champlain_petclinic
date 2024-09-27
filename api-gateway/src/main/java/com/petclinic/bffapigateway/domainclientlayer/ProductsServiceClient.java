@@ -54,6 +54,13 @@ public class ProductsServiceClient {
                 .retrieve()
                 .bodyToFlux(ProductResponseDTO.class);
     }
+    public Flux<ProductResponseDTO>getAllProductsByReview(){
+        return webClient.get()
+                .uri("/reviews")
+                .retrieve()
+                .bodyToFlux(ProductResponseDTO.class);
+
+    }
 
     public Mono<ProductResponseDTO> getProductByProductId(final String productId) {
         return webClientBuilder.build()

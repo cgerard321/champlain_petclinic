@@ -13,4 +13,5 @@ public interface ProductService {
     Mono<ProductResponseModel> updateProductByProductId(String productId, Mono<ProductRequestModel> productRequestModel);
     Mono<ProductResponseModel> deleteProductByProductId(String productId);
     Mono<Void> requestCount(String productId);
+    Flux<ProductResponseModel> getAllProductsByReview();
 }

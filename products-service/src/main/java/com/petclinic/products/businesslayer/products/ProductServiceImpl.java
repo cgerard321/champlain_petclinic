@@ -69,6 +69,14 @@ public class ProductServiceImpl implements ProductService {
                 .map(EntityModelUtil::toProductResponseModel);
     }
 
+    public Flux<ProductResponseModel>getAllProductsByReview(){
+        return productRepository.findProductsByHighRating()
+                .flatMap(this::getAverageRating)
+                .map(EntityModelUtil::toProductResponseModel);
+
+
+    }
+
     @Override
     public Mono<ProductResponseModel> getProductByProductId(String productId) {
         return productRepository.findProductByProductId(productId)
