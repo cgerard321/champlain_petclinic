@@ -35,6 +35,7 @@ class ProductServiceUnitTest {
             .productDescription("Premium dry food for adult dogs")
             .productSalePrice(45.99)
             .averageRating(0.0)
+            .productType("Food")
             .build();
 
     Product product2 = Product.builder()
@@ -43,6 +44,7 @@ class ProductServiceUnitTest {
             .productDescription("Clumping cat litter with odor control")
             .productSalePrice(12.99)
             .averageRating(0.0)
+            .productType("Accessory")
             .build();
 
 
@@ -88,6 +90,31 @@ class ProductServiceUnitTest {
                 .thenReturn(Flux.empty());
 
         Flux<ProductResponseModel> result = productService.getAllProducts(null,null);
+
+        StepVerifier.create(result)
+                .expectNextCount(0)
+                .verifyComplete();
+    }
+    @Test
+    public void whenGetProductsByType_thenReturnFilteredProducts() {
+        when(productRepository.findProductsByProductType("Food"))
+                .thenReturn(Flux.just(product1));
+
+        Flux<ProductResponseModel> result = productService.getProductsByType("Food");
+
+        StepVerifier.create(result)
+                .expectNextMatches(product ->
+                        product.getProductId().equals(product1.getProductId()) &&
+                                product.getProductType().equals("Food"))
+                .verifyComplete();
+    }
+
+    @Test
+    public void whenNoProductsOfTypeFound_thenReturnEmptyFlux() {
+        when(productRepository.findProductsByProductType("Toys"))
+                .thenReturn(Flux.empty());
+
+        Flux<ProductResponseModel> result = productService.getProductsByType("Toys");
 
         StepVerifier.create(result)
                 .expectNextCount(0)
