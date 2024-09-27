@@ -56,6 +56,7 @@ public class EntityDtoUtil {
                             .vetEmail(vetResponseDTO.getEmail())
                             .vetPhoneNumber(vetResponseDTO.getPhoneNumber())
                             .status(visit.getStatus())
+                            .visitEndDate(visit.getVisitDate().plusHours(1))
                             .build());
                 });
     }
