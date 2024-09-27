@@ -73,9 +73,9 @@ catch (DirectoryNotFoundException e)
 String connectionString;
 try
 {
-    connectionString = builder.Configuration["DEFAULT_CONNECTION"] ?? throw new ArgumentNullException("DEFAULT_CONNECTION");
+    connectionString = builder.Configuration["DEFAULT_CONNECTION"];
 }
-catch (Exception)
+catch (ArgumentNullException)
 {
     //We just make sure the DB string is valid for testing!
     Console.WriteLine("We did not find the string connection, as such, we will use a placeholder one!");
