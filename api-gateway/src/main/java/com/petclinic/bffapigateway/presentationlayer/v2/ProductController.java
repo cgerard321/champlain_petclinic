@@ -85,4 +85,8 @@ public class ProductController {
                 .then(Mono.just(ResponseEntity.noContent().<Void>build()))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
+    @GetMapping(value = "/filter/{productType}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Flux<ProductResponseDTO> getProductsByType(@PathVariable String productType) {
+        return productsServiceClient.getProductsByType(productType);
+    }
 }

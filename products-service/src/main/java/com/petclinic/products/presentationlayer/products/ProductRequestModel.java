@@ -15,4 +15,5 @@ public class ProductRequestModel {
     private String productDescription;
     private Double productSalePrice;
     private Double averageRating;
+    private String productType;
 }

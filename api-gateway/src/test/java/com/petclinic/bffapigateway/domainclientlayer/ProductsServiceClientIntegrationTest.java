@@ -110,7 +110,8 @@ class ProductsServiceClientIntegrationTest {
                 "desc",
                 10.00,
                 0.00,
-                0
+                0,
+                "type"
         );
 
         mockWebServer.enqueue(new MockResponse()
@@ -134,7 +135,8 @@ class ProductsServiceClientIntegrationTest {
                 "desc",
                 10.00,
                 0.00,
-                0
+                0,
+                "type"
         );
 
         mockWebServer.enqueue(new MockResponse()
@@ -158,7 +160,8 @@ class ProductsServiceClientIntegrationTest {
                 "desc",
                 10.00,
                 0.00,
-                0
+                0,
+                "type"
         );
 
         mockWebServer.enqueue(new MockResponse()
