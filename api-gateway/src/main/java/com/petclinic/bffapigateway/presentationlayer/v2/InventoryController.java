@@ -160,5 +160,14 @@ public class InventoryController {
     }
 
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
+    @GetMapping(value = "/{inventoryId}/products/search", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Flux<ResponseEntity<ProductResponseDTO>> searchProducts(@PathVariable String inventoryId,
+                                                   @RequestParam(required = false) String productName,
+                                                   @RequestParam(required = false) String productDescription) {
+        return inventoryServiceClient.searchProducts(inventoryId, productName, productDescription)
+                .map(product -> ResponseEntity.status(HttpStatus.OK).body(product))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
 
 }
