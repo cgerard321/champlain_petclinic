@@ -1,5 +1,5 @@
 using emailing_service.Models;
-using NUnit.Framework;
+
 
 namespace emailing_service_test.Models;
 
@@ -34,7 +34,7 @@ public class OperationResultTests
         var operationResult = new OperationResult { Message = "Test message" };
 
         // Assert
-        Assert.AreEqual("Test message", operationResult.Message);
+        Assert.That(operationResult.Message, Is.EqualTo("Test message"));
     }
 
     [Test]
@@ -45,6 +45,6 @@ public class OperationResultTests
 
         // Assert
         Assert.IsTrue(operationResult.IsSuccess);
-        Assert.AreEqual("Test message", operationResult.Message);
+        Assert.That(operationResult.Message, Is.EqualTo("Test message"));
     }
 }

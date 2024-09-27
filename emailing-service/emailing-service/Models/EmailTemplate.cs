@@ -38,7 +38,6 @@ public class EmailTemplate
         string sender = ""
         )
     {
-        
         string emailContent = HtmlFormat;
         if (_doesHaveHeader)
         {

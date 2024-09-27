@@ -1,16 +1,13 @@
-using System.Net;
 using System.Net.Mail;
-using System.Threading.Tasks;
 using emailing_service.Models.SMTP;
-using Moq;
-using NUnit.Framework;
+
 
 namespace emailing_service_test.Models.SMTP;
 [TestFixture]
 public class SmtpClientWrapperTest
 {
     [Test]
-    public async Task SendMailAsync_ValidMailMessage_NoConnectionExceptionThrown()
+    public Task SendMailAsync_ValidMailMessage_NoConnectionExceptionThrown()
     {
         // Arrange
         var smtpClient = new SmtpClient
@@ -27,5 +24,6 @@ public class SmtpClientWrapperTest
         // Act and Assert
         //WE ARE EXCEPTING AN EXCEPTION BECAUSE WE HAVE NO SMTP SERVER LSITENING
         Assert.ThrowsAsync<SmtpException>(() => smtpClientWrapper.SendMailAsync(mailMessage));
+        return Task.CompletedTask;
     }
 }

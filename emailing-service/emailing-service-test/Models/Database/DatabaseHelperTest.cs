@@ -1,23 +1,21 @@
-using System.Threading.Tasks;
 using emailing_service.Models.Database;
 using emailing_service.Utils.Exception;
-using MySqlConnector;
-using NUnit.Framework;
 
-namespace emailing_service_test;
+namespace emailing_service_test.Models.Database;
 [TestFixture]
 public class DatabaseHelperTest
 {
     [Test]
-    public async Task CreateTableAsync_ThrowsException_WhenDatabaseDoesNotExist()
+    public Task CreateTableAsync_ThrowsException_WhenDatabaseDoesNotExist()
     {
         // Arrange
         IDatabaseHelper databaseHelperTest = new DatabaseHelper();
         // Act and Assert
         Assert.ThrowsAsync<MissingDatabaseException>(() =>databaseHelperTest.CreateTableAsync(1));
+        return Task.CompletedTask;
     }
     [Test]
-    public async Task AddEmailAsync_ThrowsException_WhenDatabaseDoesNotExist()
+    public Task AddEmailAsync_ThrowsException_WhenDatabaseDoesNotExist()
     {
         // Arrange
         IDatabaseHelper databaseHelperTest = new DatabaseHelper();
@@ -28,6 +26,7 @@ public class DatabaseHelperTest
                 "body",
                 "status"
             ));
+        return Task.CompletedTask;
     }
     
 }

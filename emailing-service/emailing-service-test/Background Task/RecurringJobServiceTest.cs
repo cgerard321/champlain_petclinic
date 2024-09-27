@@ -1,16 +1,8 @@
 using emailing_service.BackgroundTask;
-
-
-
-using Moq;
 using Microsoft.Extensions.Logging;
-using NUnit.Framework;
-using System;
-using System.Reflection;
-using System.Threading;
-using System.Threading.Tasks;
+using Moq;
 
-namespace emailingservice_test.Background_Task{
+namespace emailing_service_test.Background_Task{
     [TestFixture]
     public class RecurringJobServiceTests
     {
@@ -33,7 +25,8 @@ namespace emailingservice_test.Background_Task{
             // Arrange
             var stoppingToken = new CancellationTokenSource().Token;
             var now = DateTime.Now;
-            var expectedDelay = _service.GetType()
+            //var expectedDelay =
+            _service.GetType()
                 .GetMethod("CalculateInitialDelay", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
                 ?.Invoke(_service, new object[] { now });
 
@@ -44,9 +37,13 @@ namespace emailingservice_test.Background_Task{
             _mockLogger.Verify(logger => logger.Log(
                 It.Is<LogLevel>(logLevel => logLevel == LogLevel.Information),
                 It.IsAny<EventId>(),
+                #pragma warning disable CS8602 // Dereference of a possibly null reference.
                 It.Is<It.IsAnyType>((state, t) => state.ToString().Contains("Recurring job started in")),
+                #pragma warning restore CS8602 // Dereference of a possibly null reference.
                 It.IsAny<Exception>(),
+                #pragma warning disable CS8620 // Argument cannot be used for parameter due to differences in the nullability of reference types.
                 It.Is<Func<It.IsAnyType, Exception, string>>((state, ex) => true)),
+                #pragma warning restore CS8620 // Argument cannot be used for parameter due to differences in the nullability of reference types.
                 Times.Once);
         }
 
@@ -63,7 +60,7 @@ namespace emailingservice_test.Background_Task{
                 ?.Invoke(_service, new object[] { now });
 
             // Assert
-            Assert.AreEqual(expectedDelay, result);
+            Assert.That(result, Is.EqualTo(expectedDelay));
         }
 
         [Test]
@@ -72,15 +69,19 @@ namespace emailingservice_test.Background_Task{
             // Act
             _service.GetType()
                 .GetMethod("DoWork", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-                ?.Invoke(_service, new object[] { null });
+                ?.Invoke(_service, new object?[] { null });
 
             // Assert
             _mockLogger.Verify(logger => logger.Log(
                 It.Is<LogLevel>(logLevel => logLevel == LogLevel.Information),
                 It.IsAny<EventId>(),
+                #pragma warning disable CS8602 // Dereference of a possibly null reference.
                 It.Is<It.IsAnyType>((state, t) => state.ToString().Contains("Recurring task executed")),
+                #pragma warning restore CS8602 // Dereference of a possibly null reference.
                 It.IsAny<Exception>(),
+                #pragma warning disable CS8620 // Argument cannot be used for parameter due to differences in the nullability of reference types.
                 It.Is<Func<It.IsAnyType, Exception, string>>((state, ex) => true)),
+                #pragma warning restore CS8620 // Argument cannot be used for parameter due to differences in the nullability of reference types.
                 Times.Once);
         }
         [Test]
@@ -96,7 +97,7 @@ namespace emailingservice_test.Background_Task{
                 ?.Invoke(_service, new object[] { now });
 
             // Assert
-            Assert.AreEqual(expectedDelay, result);
+            Assert.That(result, Is.EqualTo(expectedDelay));
         }
         [Test]
         public void CalculateInitialDelay_WhenAtExactInterval_ReturnsZeroDelay()
@@ -111,7 +112,7 @@ namespace emailingservice_test.Background_Task{
                 ?.Invoke(_service, new object[] { now });
 
             // Assert
-            Assert.AreEqual(expectedDelay, result);
+            Assert.That(result, Is.EqualTo(expectedDelay));
         }
 
 
