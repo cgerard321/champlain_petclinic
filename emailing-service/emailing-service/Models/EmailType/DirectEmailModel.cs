@@ -4,6 +4,7 @@ public class DirectEmailModel
 {
     public DirectEmailModel()
     {
+        
     }
 
     public DirectEmailModel(string emailToSendTo, string emailTitle, string templateName, string header, string body, string footer, string correspondantName, string senderName)
