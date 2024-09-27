@@ -1,4 +1,4 @@
-export interface UserIDLessRoleLessDTO {
+export interface UserIdLessRoleLessDTO {
   userId: string;
   username: string;
   password: string;

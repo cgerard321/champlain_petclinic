@@ -1,4 +1,4 @@
-.add-customer-form {
+.signup-user-form {
   max-width: 600px;
   margin: 50px auto;
   padding: 20px;
@@ -8,25 +8,25 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.add-customer-form h1 {
+.signup-user-form h1 {
   text-align: center;
   margin-bottom: 20px;
   color: #333;
   font-family: 'Arial', sans-serif;
 }
 
-.add-customer-form form {
+.signup-user-form form {
   display: flex;
   flex-direction: column;
 }
 
-.add-customer-form label {
+.signup-user-form label {
   margin-bottom: 15px;
   font-family: 'Arial', sans-serif;
   color: #555;
 }
 
-.add-customer-form input {
+.signup-user-form input {
   padding: 10px;
   margin-top: 5px;
   border: 1px solid #ccc;
@@ -35,7 +35,7 @@
   font-size: 16px;
 }
 
-.add-customer-form button {
+.submit-button {
   padding: 12px;
   background-color: #28a745;
   color: white;
@@ -48,8 +48,8 @@
   transition: background-color 0.3s ease;
 }
 
-.add-customer-form button:hover {
-  background-color: #218838;
+.submit-button:hover {
+  background-color: #218838; /* Darker green on hover */
 }
 
 .error {
@@ -59,7 +59,7 @@
   font-family: 'Arial', sans-serif;
 }
 
-.add-customer-form input:focus {
+.signup-user-form input:focus {
   border-color: #28a745;
   box-shadow: 0 0 5px rgba(40, 167, 69, 0.5);
   outline: none;
