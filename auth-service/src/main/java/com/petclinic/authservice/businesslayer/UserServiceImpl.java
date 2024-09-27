@@ -14,8 +14,10 @@ import com.petclinic.authservice.datalayer.roles.RoleRepo;
 import com.petclinic.authservice.datamapperlayer.UserMapper;
 import com.petclinic.authservice.domainclientlayer.Mail.Mail;
 import com.petclinic.authservice.domainclientlayer.Mail.MailService;
+import com.petclinic.authservice.domainclientlayer.NewEmailingService.DirectEmailModelRequestDTO;
 import com.petclinic.authservice.domainclientlayer.cart.CartRequest;
 import com.petclinic.authservice.domainclientlayer.cart.CartResponse;
+import com.petclinic.authservice.domainclientlayer.NewEmailingService.EmailingServiceClient;
 import com.petclinic.authservice.domainclientlayer.cart.CartService;
 import com.petclinic.authservice.presentationlayer.User.*;
 import com.petclinic.authservice.security.JwtTokenUtil;
@@ -25,6 +27,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -33,7 +36,7 @@ import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.server.resource.InvalidBearerTokenException;
 import org.springframework.stereotype.Service;
-
+import reactor.core.publisher.Mono;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.*;
@@ -55,6 +58,7 @@ public class UserServiceImpl implements UserService {
     private final JwtTokenUtil jwtService;
     private final AuthenticationManager authenticationManager;
     private final CartService cartService;
+    private final EmailingServiceClient emailingServiceClient;
     private final String salt = BCrypt.gensalt(10);
 
 
@@ -107,13 +111,15 @@ public class UserServiceImpl implements UserService {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
 
             log.info("Sending email to {}...", userIDLessDTO.getEmail());
-            log.info(mailService.sendMail(generateVerificationMail(user)));
+            //Using new email service
+            //log.info(mailService.sendMail(generateVerificationMail(user)));
+            generateVerificationMailWithNewEmailingService(user);
             log.info("Email sent to {}", userIDLessDTO.getEmail());
 
-            User savedUser = userRepo.save(user);
-            CartResponse cartResponse = cartService.createCart(new CartRequest(savedUser.getUserIdentifier().getUserId()));
+            //User savedUser = userRepo.save(user);
+            //CartResponse cartResponse = cartService.createCart(new CartRequest(savedUser.getUserIdentifier().getUserId()));
 
-            return savedUser;
+            return userRepo.save(user);
     }
 
 //    @Override
@@ -122,6 +128,41 @@ public class UserServiceImpl implements UserService {
 //        log.info("deleteUser: trying to delete entity with userId: {}", userId);
 //        userRepo.findById(userId).ifPresent(userRepo::delete);
 //    }
+
+    @Override
+    public void generateVerificationMailWithNewEmailingService(User user) {
+        final String base64Token = Base64.getEncoder()
+                .withoutPadding()
+                .encodeToString(jwtService.generateToken(user).getBytes(StandardCharsets.UTF_8));
+
+        // Remove dangling . in case of empty sub
+        String niceSub = gatewaySubdomain.length() > 0 ? gatewaySubdomain + "." : "";
+
+        String formatedLink = format("<a class=\"email-button\" href=\"%s://%s%s/verification/%s\">Verify Email</a>", gatewayProtocol, niceSub, gatewayOrigin, base64Token);
+
+        log.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@" + user.getEmail());
+
+//        DirectEmailModelRequestDTO directEmailModelRequestDTO = new DirectEmailModelRequestDTO(
+//                user.getEmail(), "Verification Email", "Default", "Thank you for Signing Up with us - Verify your email address",
+//                "We have received a request to create an account for Pet Clinic from this email.\n\n" +
+//                        "We have received a request to create an account for Pet Clinic from this email." +
+//                        "Click on the following link to verify your identity: " + formatedLink + "\n" +
+//                        "If you do not wish to create an account, please disregard this email.",
+//                "Thank you for choosing Pet Clinic.", user.getUsername(), "ChamplainPetClinic");
+
+                DirectEmailModelRequestDTO directEmailModelRequestDTO = new DirectEmailModelRequestDTO(
+                user.getEmail(), "Verification Email", "Default", "Thank you",
+                "Body",
+                "Footer.", user.getUsername(), "ChamplainPetClinic");
+
+        HttpStatus result = emailingServiceClient.sendEmail(directEmailModelRequestDTO).block();
+
+        if (result != null && result.equals(HttpStatus.OK)) {
+            log.info("Email sent to {}", user.getEmail());
+        } else {
+            throw new EmailSendingException("Failed to send email to " + user.getEmail());
+        }
+    }
 
     @Override
     public Mail generateVerificationMail(User user) {
