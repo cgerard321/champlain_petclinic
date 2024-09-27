@@ -24,6 +24,8 @@ export function NavBar(): JSX.Element {
       .then(() => {
         navigate(AppRoutePaths.Login);
         localStorage.removeItem('user');
+        //Reload the login page to remove all previous user data
+        window.location.reload();
       });
   };
 

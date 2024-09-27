@@ -9,14 +9,13 @@ import axios from 'axios';
 import './SignUp.css';
 
 const SignUp: React.FC = (): JSX.Element => {
-  // Character limit for all fields but email
+  // Character limit for all fields but email (Since a valid email can go up to 320 characters)
   const characterLimit = 60;
   const [errorMessage, setErrorMessage] = useState<
     Partial<Record<string, string>>
   >({});
   const navigate = useNavigate();
-
-  // Owner state based on OwnerRequestModel
+  //Models needed to communicate with the backend
   const [owner, setOwner] = useState<OwnerRequestModel>({
     ownerId: '',
     firstName: '',
@@ -27,7 +26,6 @@ const SignUp: React.FC = (): JSX.Element => {
     telephone: '',
   });
 
-  // User data state based on Register model
   const [userData, setUserData] = useState<Register>({
     userId: '',
     email: '',
@@ -37,6 +35,7 @@ const SignUp: React.FC = (): JSX.Element => {
     owner,
   });
 
+  //Made difference functions for password and email since they require more checks
   const validatePassword = (password: string): string | undefined => {
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
     if (!password) return 'Password is required.';
@@ -58,6 +57,7 @@ const SignUp: React.FC = (): JSX.Element => {
     return undefined;
   };
 
+  //Since every field has a limit and needs to be checked indepedently, I made this function to quickly check any length and if it is valid or not
   const checkLength = (
     field: string,
     value: string,
@@ -69,6 +69,7 @@ const SignUp: React.FC = (): JSX.Element => {
     return undefined;
   };
 
+  //Just to make validation look better for users
   const fieldLabels: Record<string, string> = {
     firstName: 'First Name',
     lastName: 'Last Name',
@@ -81,6 +82,7 @@ const SignUp: React.FC = (): JSX.Element => {
     email: 'Email',
   };
 
+  //Check individually to give more reactive feedback to the user
   const validateField = (name: string, value: string): string | undefined => {
     const label = fieldLabels[name] || name;
 
@@ -121,7 +123,7 @@ const SignUp: React.FC = (): JSX.Element => {
     setErrorMessage({});
     let hasErrors = false;
 
-    // Validate all fields
+    // Validates all fields before submitting form
     const errors: Partial<Record<string, string>> = {};
     Object.keys(owner).forEach(key => {
       const error = validateField(
@@ -151,13 +153,13 @@ const SignUp: React.FC = (): JSX.Element => {
       return;
     }
 
-    // Prepare data to send to backend
+    // Preparing the data to send to the backend
     const requestData = {
       ...userData,
       owner,
     };
 
-    // Submission
+    // Submission function
     try {
       const response = await axios.post<Register>(
         'http://localhost:8080/api/gateway/users',
