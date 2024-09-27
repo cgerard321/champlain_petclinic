@@ -12,7 +12,7 @@ interface ApiError {
 }
 
 type VisitType = {
-  visitDate: Date;
+  visitStartDate: Date;
   description: string;
   petId: string;
   practitionerId: string;
@@ -28,7 +28,7 @@ const formatDate = (date: Date): string => {
 const EditingVisit: React.FC = (): JSX.Element => {
   const { visitId } = useParams<{ visitId: string }>();
   const [visit, setVisit] = useState<VisitType>({
-    visitDate: new Date(),
+    visitStartDate: new Date(),
     description: '',
     petId: '',
     practitionerId: '',
@@ -52,7 +52,7 @@ const EditingVisit: React.FC = (): JSX.Element => {
             practitionerId: response.practitionerId,
             description: response.description,
             petId: response.petId,
-            visitDate: new Date(response.visitDate),
+            visitStartDate: new Date(response.visitDate),
             status: response.status,
           });
         } catch (error) {
@@ -72,14 +72,15 @@ const EditingVisit: React.FC = (): JSX.Element => {
     const { name, value } = e.target;
     setVisit(prevVisit => ({
       ...prevVisit,
-      [name]: name === 'visitDate' ? new Date(value) : value, // Convert string to Date object for visitDate
+      [name]: name === 'visitStartDate' ? new Date(value) : value, // Convert string to Date object for visitDate
     }));
   };
 
   const validate = (): boolean => {
     const newErrors: { [key: string]: string } = {};
     if (!visit.petId) newErrors.petId = 'Pet ID is required';
-    if (!visit.visitDate) newErrors.visitDate = 'Visit date is required';
+    if (!visit.visitStartDate)
+      newErrors.visitStartDate = 'Visit date is required';
     if (!visit.description) newErrors.description = 'Description is required';
     if (!visit.practitionerId)
       newErrors.practitionerId = 'Practitioner ID is required';
@@ -100,7 +101,10 @@ const EditingVisit: React.FC = (): JSX.Element => {
 
     const formattedVisit: VisitRequestModel = {
       ...visit,
-      visitDate: visit.visitDate.toISOString().slice(0, 16).replace('T', ' '),
+      visitDate: visit.visitStartDate
+        .toISOString()
+        .slice(0, 16)
+        .replace('T', ' '),
     };
 
     try {
@@ -136,12 +140,14 @@ const EditingVisit: React.FC = (): JSX.Element => {
         <label>Visit Date: </label>
         <input
           type="datetime-local"
-          name="visitDate"
-          value={formatDate(visit.visitDate)}
+          name="visitStartDate"
+          value={formatDate(visit.visitStartDate)}
           onChange={handleChange}
           required
         />
-        {errors.visitDate && <span className="error">{errors.visitDate}</span>}
+        {errors.visitStartDate && (
+          <span className="error">{errors.visitStartDate}</span>
+        )}
         <br />
         <label>Description: </label>
         <input
