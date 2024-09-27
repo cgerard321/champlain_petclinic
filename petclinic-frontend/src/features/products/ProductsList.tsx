@@ -48,6 +48,10 @@ export default function ProductList(): JSX.Element {
 
   useEffect(() => {
     fetchProducts();
+    const savedProducts = localStorage.getItem('recentlyClickedProducts');
+    if (savedProducts) {
+      return setRecentlyClickedProducts(JSON.parse(savedProducts));
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -87,19 +91,19 @@ export default function ProductList(): JSX.Element {
 
   const handleProductClick = (product: ProductModel): void => {
     setRecentlyClickedProducts(listOfProducts => {
-      const updatedProducts = [];
 
-      for (const p of listOfProducts) {
-        if (p.productId !== product.productId) {
-          updatedProducts.push(p);
-        }
-      }
+      const updatedProducts = listOfProducts.filter(p => p.productId !== product.productId);
 
-      updatedProducts.push(product);
+
+      updatedProducts.unshift(product);
 
       if (updatedProducts.length > 5) {
-        updatedProducts.shift();
+        updatedProducts.pop();
       }
+      localStorage.setItem(
+        'recentlyClickedProducts',
+        JSON.stringify(updatedProducts)
+      );
 
       return updatedProducts;
     });
