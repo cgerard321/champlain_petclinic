@@ -13,4 +13,5 @@ export interface VisitResponseModel {
   vetPhoneNumber: string;
   status: Status;
   visitId: string;
+  visitEndDate: string;
 }
