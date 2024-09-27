@@ -140,7 +140,7 @@ export function NavBar(): JSX.Element {
               </NavDropdown>
             ) : (
               <>
-                <Nav.Link as={Link} to={AppRoutePaths.Home}>
+                <Nav.Link as={Link} to={AppRoutePaths.SignUp}>
                   Signup
                 </Nav.Link>
                 <Nav.Link as={Link} to={AppRoutePaths.Login}>
