@@ -460,6 +460,7 @@ services:
   emailing-service-mysql-db:
     image: mysql:8.0
     container_name: emailing-service-mysql-db
+    platform: linux/arm64/v8
     environment:
       - MYSQL_ROOT_PASSWORD=Your_password123
       - MYSQL_DATABASE=MyAppDb

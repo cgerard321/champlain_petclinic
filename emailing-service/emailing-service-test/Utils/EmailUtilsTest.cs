@@ -1,10 +1,9 @@
 using System.Net.Mail;
-using System.Threading.Tasks;
+
 using emailing_service.Models;
 using emailing_service.Models.SMTP;
 using emailing_service.Utils;
 using Moq;
-using NUnit.Framework;
 
 namespace emailing_service_test.Utils;
 [TestFixture]
@@ -38,15 +37,17 @@ public class EmailUtilsTest
             "mockemail@gmail.com",
             "MockPetClinic"
         );
-        Assert.DoesNotThrow(() => EmailUtils.SetUpEmailUtils());
+        Assert.DoesNotThrow(EmailUtils.SetUpEmailUtils);
     }
     [Test]
     public void SetUpEmailUtilsTest_UnModifiedEmailConnectionString_ReturnNullReferenceException()
     {
-        EmailUtils.emailConnectionString   = null;
-        Assert.ThrowsAsync<System.NullReferenceException>(async () =>
-            EmailUtils.SetUpEmailUtils()
-        );
+        EmailUtils.emailConnectionString   = null!;
+        Assert.ThrowsAsync<NullReferenceException>(() =>
+        {
+            EmailUtils.SetUpEmailUtils();
+            return Task.CompletedTask;
+        });
     }
     
     
@@ -85,13 +86,11 @@ public class EmailUtilsTest
     [TestCase("    ")]
     public void CheckIfEmailIsValid_ShouldReturnFalse_WhenNullOrEmpty(string? email)
     {
-        bool result = EmailUtils.CheckIfEmailIsValid(email);
+        bool result = EmailUtils.CheckIfEmailIsValid(email!); //Suppressing
         Assert.That(result, Is.False);
     }
 
     
-    
-
     [Test]
     public async Task SendEmailAsync_ValidEmail_SendsEmail()
     {
@@ -123,7 +122,7 @@ public class EmailUtilsTest
         var isBodyHtml = true;
 
         // Act & Assert
-        Assert.ThrowsAsync<System.FormatException>(async () =>
+        Assert.ThrowsAsync<FormatException>(async () =>
             await EmailUtils.SendEmailAsync(invalidEmail, subject, body, _smtpClientMock.Object, isBodyHtml)
         );
     }

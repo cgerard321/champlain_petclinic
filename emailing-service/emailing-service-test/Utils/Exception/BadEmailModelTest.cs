@@ -1,6 +1,5 @@
-using System;
 using emailing_service.Utils.Exception;
-using NUnit.Framework;
+
 
 namespace emailing_service_test.Utils.Exception;
 [TestFixture]
@@ -27,7 +26,7 @@ public class BadEmailModelTest
         var exception = new BadEmailModel(expectedMessage);
 
         // Assert
-        Assert.AreEqual(expectedMessage, exception.Message);
+        Assert.That(exception.Message, Is.EqualTo(expectedMessage));
     }
 
     [Test]
@@ -41,7 +40,7 @@ public class BadEmailModelTest
         var exception = new BadEmailModel(expectedMessage, innerException);
 
         // Assert
-        Assert.AreEqual(expectedMessage, exception.Message);
-        Assert.AreEqual(innerException, exception.InnerException);
+        Assert.That(exception.Message, Is.EqualTo(expectedMessage));
+        Assert.That(exception.InnerException, Is.EqualTo(innerException));
     }
 }

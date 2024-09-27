@@ -1,7 +1,6 @@
 using emailing_service.Models.Database;
-using NUnit.Framework;
 
-namespace emailing_service_test;
+namespace emailing_service_test.Models.Database;
 
 public class EmailModelTests
 {
@@ -26,11 +25,11 @@ public class EmailModelTests
         };
 
         // Assert
-        Assert.AreEqual(id, emailModel.Id);
-        Assert.AreEqual(email, emailModel.Email);
-        Assert.AreEqual(subject, emailModel.Subject);
-        Assert.AreEqual(body, emailModel.Body);
-        Assert.AreEqual(emailStatus, emailModel.EmailStatus);
+        Assert.That(emailModel.Id, Is.EqualTo(id));
+        Assert.That(emailModel.Email, Is.EqualTo(email));
+        Assert.That(emailModel.Subject, Is.EqualTo(subject));
+        Assert.That(emailModel.Body, Is.EqualTo(body));
+        Assert.That(emailModel.EmailStatus, Is.EqualTo(emailStatus));
     }
 
     [Test]
@@ -50,6 +49,6 @@ public class EmailModelTests
         string toString = emailModel.ToString();
 
         // Assert
-        Assert.AreEqual($"Id: 1, Email: test@example.com, Subject: Test Subject, Body: Test Body, EmailStatus: Test Status", toString);
+        Assert.That(toString, Is.EqualTo($"Id: 1, Email: test@example.com, Subject: Test Subject, Body: Test Body, EmailStatus: Test Status"));
     }
 }
