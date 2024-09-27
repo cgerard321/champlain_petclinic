@@ -1,14 +1,10 @@
-using System.Diagnostics.CodeAnalysis;
 using emailing_service.BuisnessLayer;
-using emailing_service.Models;
 using emailing_service.Models.Database;
 using emailing_service.Models.EmailType;
-using emailing_service.Utils;
 using emailing_service.Utils.Exception;
 using Microsoft.AspNetCore.Mvc;
-using MySqlConnector;
 
-namespace emailing_service.Controllers;
+namespace emailing_service.PresentationLayer;
 
 //THIS MEANS THAT THE ROUTE STARTS WITH     VVV
 //                                    api/controller
@@ -38,7 +34,7 @@ public class EmailController : Controller
         {
             emails = _emailService.GetAllEmails();
         }
-        catch (MissingDatabaseException e)
+        catch (MissingDatabaseException)
         {
             return StatusCode(503, "Database failure! Make sure you are running MySql Server.");
         }
@@ -60,8 +56,7 @@ public class EmailController : Controller
                 {
                     return NoContent();
                 }
-
-                var result = _emailService.ReceiveHtml(templateName, templateContent);
+                _emailService.ReceiveHtml(templateName, templateContent);
             }
         }
         catch (CreatedAlreadyExistingTemplate e)
@@ -86,7 +81,7 @@ public class EmailController : Controller
         }
         try
         {
-            var result = _emailService.SendEmail(emailModel);
+            _emailService.SendEmail(emailModel);
         }
         catch (BadEmailModel e)
         {

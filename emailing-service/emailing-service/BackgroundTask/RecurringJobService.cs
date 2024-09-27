@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 public class RecurringJobService : BackgroundService
 {
     private readonly ILogger<RecurringJobService> _logger;
-    private Timer _timer;
+    private Timer _timer = null!;
     /// <summary>
     /// Simple logger constructor
     /// </summary>
@@ -70,7 +70,7 @@ public class RecurringJobService : BackgroundService
     /// The task that gets called every half hour
     /// </summary>
     /// <param name="state">Unused parameter</param>
-    private void DoWork(object state)
+    private void DoWork(object? state)
     {
         _logger.LogInformation("Recurring task executed at: {time}", DateTime.Now);
         
@@ -83,7 +83,7 @@ public class RecurringJobService : BackgroundService
     /// <returns></returns>
     public override Task StopAsync(CancellationToken cancellationToken)
     {
-        _timer?.Change(Timeout.Infinite, 0);
+        _timer.Change(Timeout.Infinite, 0);
         return base.StopAsync(cancellationToken);
     }
 }

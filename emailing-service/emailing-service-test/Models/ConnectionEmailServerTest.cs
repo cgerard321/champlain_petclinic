@@ -1,6 +1,4 @@
 using emailing_service.Models;
-using NUnit.Framework;
-
 namespace emailing_service_test.Models;
 [TestFixture]
 public class ConnectionEmailServerTest
