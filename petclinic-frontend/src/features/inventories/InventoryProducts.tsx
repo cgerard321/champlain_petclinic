@@ -27,7 +27,7 @@ const InventoryProducts: React.FC = () => {
       setError(null);
       try {
         const response = await axios.get<ProductModel[]>(
-            `http://localhost:8080/api/gateway/inventory/${inventoryId}/products`
+          `http://localhost:8080/api/gateway/inventory/${inventoryId}/products`
         );
         setProducts(response.data);
         setProductList(response.data); // Set productList as well
