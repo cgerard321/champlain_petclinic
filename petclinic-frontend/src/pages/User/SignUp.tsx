@@ -33,6 +33,9 @@ const SignUp: React.FC = (): JSX.Element => {
     owner,
   });
 
+  // New state for password visibility
+  const [showPassword, setShowPassword] = useState(false);
+
   const validatePassword = (password: string): string | undefined => {
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
     if (!password) return 'Password is required.';
@@ -300,11 +303,19 @@ const SignUp: React.FC = (): JSX.Element => {
               <label>Password: </label>
               <div className="password-container">
                 <input
-                  type="password"
+                  type={showPassword ? 'text' : 'password'} // Toggle between text and password type
                   name="password"
                   value={userData.password}
                   onChange={handleChange}
+                  className="password-input" // Additional class for styling
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(prev => !prev)} // Toggle visibility state
+                  className="toggle-password-visibility"
+                >
+                  {showPassword ? 'Hide' : 'Show'}
+                </button>
               </div>
               {errorMessage.password && (
                 <span className="error">{errorMessage.password}</span>
