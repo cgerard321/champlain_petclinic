@@ -52,6 +52,14 @@ const SignUp: React.FC = (): JSX.Element => {
     return undefined;
   };
 
+  const validatePhoneNumber = (phone: string): string | undefined => {
+    const phoneRegex = /^[0-9]{10}$/;
+    if (!phone) return 'Telephone number is required.';
+    if (!phoneRegex.test(phone))
+      return 'Invalid phone number format. Please enter a 10-digit number.';
+    return undefined;
+  };
+
   const checkLength = (
     field: string,
     value: string,
@@ -82,10 +90,11 @@ const SignUp: React.FC = (): JSX.Element => {
       case 'address':
       case 'city':
       case 'province':
-      case 'telephone':
       case 'username':
         if (!value) return `${label} is required.`;
         return checkLength(label, value, characterLimit);
+      case 'telephone':
+        return validatePhoneNumber(value);
       case 'password':
         return validatePassword(value);
       case 'email':
