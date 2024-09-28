@@ -1,4 +1,4 @@
-export interface OwnerRequestDTO {
+export interface OwnerRequestModel {
   ownerId: string;
   firstName: string;
   lastName: string;
