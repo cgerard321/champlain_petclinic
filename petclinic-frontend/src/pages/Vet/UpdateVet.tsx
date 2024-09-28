@@ -128,21 +128,6 @@ export default function UpdateVet({
           </Form.Group>
 
           <Form.Group className="mb-3">
-            <Form.Label>Specialties</Form.Label>
-            <Form.Control
-              as="select"
-              multiple
-              name="specialties"
-              value={formData.specialties.map(s => s.specialtyId)}
-              onChange={handleSpecialtiesChange}
-            >
-              <option value="1">Surgery</option>
-              <option value="2">Dentistry</option>
-              <option value="3">Dermatology</option>
-            </Form.Control>
-          </Form.Group>
-
-          <Form.Group className="mb-3">
             <Form.Label>Email</Form.Label>
             <Form.Control
               type="email"
@@ -185,7 +170,22 @@ export default function UpdateVet({
           </Form.Group>
 
           <Form.Group className="mb-3">
-            <Form.Label>Work Hours JSON</Form.Label>
+            <Form.Label>Specialties</Form.Label>
+            <Form.Control
+              as="select"
+              multiple
+              name="specialties"
+              value={formData.specialties.map(s => s.specialtyId)}
+              onChange={handleSpecialtiesChange}
+            >
+              <option value="1">Surgery</option>
+              <option value="2">Dentistry</option>
+              <option value="3">Dermatology</option>
+            </Form.Control>
+          </Form.Group>
+
+          <Form.Group className="mb-3">
+            <Form.Label>Work Hours</Form.Label>
             <Form.Control
               type="text"
               name="workHoursJson"
@@ -205,16 +205,6 @@ export default function UpdateVet({
           </Form.Group>
 
           <Form.Group className="mb-3">
-            <Form.Check
-              type="checkbox"
-              label="Photo Default"
-              name="photoDefault"
-              checked={formData.photoDefault}
-              onChange={handleCheckboxChange}
-            />
-          </Form.Group>
-
-          <Form.Group className="mb-3">
             <Form.Label>Work Days</Form.Label>
             {Object.values(Workday).map(day => (
               <Form.Check
@@ -227,6 +217,16 @@ export default function UpdateVet({
                 onChange={handleWorkdayChange}
               />
             ))}
+          </Form.Group>
+
+          <Form.Group className="mb-3">
+            <Form.Check
+              type="checkbox"
+              label="Photo Default"
+              name="photoDefault"
+              checked={formData.photoDefault}
+              onChange={handleCheckboxChange}
+            />
           </Form.Group>
         </Form>
       </Modal.Body>

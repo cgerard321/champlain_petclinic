@@ -39,6 +39,7 @@ const AddVet: React.FC = (): JSX.Element => {
       if (response.status === 201) {
         handleClose();
         navigate(AppRoutePaths.Vet);
+        window.location.reload();
       } else {
         console.error('Failed to add vet');
       }
@@ -140,36 +141,6 @@ const AddVet: React.FC = (): JSX.Element => {
             </Form.Group>
 
             <Form.Group className="mb-3">
-              <Form.Label>Specialties</Form.Label>
-              <Form.Control
-                as="select"
-                multiple
-                name="specialties"
-                value={vet.specialties.map(s => s.specialtyId)}
-                onChange={handleSpecialtiesChange}
-              >
-                <option value="1">Surgery</option>
-                <option value="2">Dentistry</option>
-                <option value="3">Dermatology</option>
-              </Form.Control>
-            </Form.Group>
-
-            <Form.Group className="mb-3">
-              <Form.Label>Work Days</Form.Label>
-              {Object.values(Workday).map(day => (
-                <Form.Check
-                  key={day}
-                  type="checkbox"
-                  label={day}
-                  name="workday"
-                  value={day}
-                  checked={vet.workday.includes(day)}
-                  onChange={handleWorkdayChange}
-                />
-              ))}
-            </Form.Group>
-
-            <Form.Group className="mb-3">
               <Form.Label>Last Name</Form.Label>
               <Form.Control
                 type="text"
@@ -226,7 +197,22 @@ const AddVet: React.FC = (): JSX.Element => {
             </Form.Group>
 
             <Form.Group className="mb-3">
-              <Form.Label>Work Hours JSON</Form.Label>
+              <Form.Label>Specialties</Form.Label>
+              <Form.Control
+                as="select"
+                multiple
+                name="specialties"
+                value={vet.specialties.map(s => s.specialtyId)}
+                onChange={handleSpecialtiesChange}
+              >
+                <option value="1">Surgery</option>
+                <option value="2">Dentistry</option>
+                <option value="3">Dermatology</option>
+              </Form.Control>
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Work Hours</Form.Label>
               <Form.Control
                 type="text"
                 name="workHoursJson"
@@ -243,6 +229,21 @@ const AddVet: React.FC = (): JSX.Element => {
                 checked={vet.active}
                 onChange={handleCheckboxChange}
               />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Work Days</Form.Label>
+              {Object.values(Workday).map(day => (
+                <Form.Check
+                  key={day}
+                  type="checkbox"
+                  label={day}
+                  name="workday"
+                  value={day}
+                  checked={vet.workday.includes(day)}
+                  onChange={handleWorkdayChange}
+                />
+              ))}
             </Form.Group>
 
             <Form.Group className="mb-3">
