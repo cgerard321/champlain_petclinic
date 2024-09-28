@@ -29,6 +29,7 @@ const InventoryProducts: React.FC = () => {
           `http://localhost:8080/api/gateway/inventory/${inventoryId}/products`
       );
       setProducts(response.data);
+      setProductList(response.data); // Set productList as well
       setFilteredProducts(response.data); // Initialize filtered products with all products
     } catch (err) {
       setError('Failed to fetch products.');
@@ -59,29 +60,34 @@ const InventoryProducts: React.FC = () => {
     }
   }, [inventoryId]);
 
-  // Handle filtering
-  const handleFilter = () => {
+  const handleFilter = async () => {
+    // Apply status filtering on the frontend first
     let filtered = products;
 
     if (productStatus) {
       filtered = filtered.filter(product => product.status === productStatus);
     }
 
-    setProductList(filtered); // Update productList with filtered products by status
-
-    if (!productName && !productDescription) {
-      setFilteredProducts(filtered);
-    } else if (productName && !productDescription) {
-      getProductList(inventoryId!, productName);
-    } else if (!productName && productDescription) {
-      getProductList(inventoryId!, undefined, productDescription);
-    } else {
-      getProductList(inventoryId!, productName, productDescription);
+    // Call the backend only if name or description is provided
+    if (productName || productDescription) {
+      await getProductList(inventoryId!, productName || undefined, productDescription || undefined);
     }
-    filtered = productList; // Combine both filtered products from frontend and backend
 
-    setFilteredProducts(filtered);
+    // Set filteredProducts when productList changes (after the backend call)
+    // Trigger a state change here in case productList is updated asynchronously
+    setFilteredProducts(filtered); // Apply status filter immediately
   };
+
+// UseEffect to monitor changes in productList and apply filtering
+  useEffect(() => {
+    // Apply frontend status filtering on the updated productList from the backend
+    if (productList) {
+      setFilteredProducts(productList.filter(product =>
+          (!productStatus || product.status === productStatus)
+      ));
+    }
+  }, [productList, productStatus]); // Trigger this effect when productList or productStatus changes
+
 
   // Render loading, error, and product table
   if (loading) return <p>Loading supplies...</p>;
