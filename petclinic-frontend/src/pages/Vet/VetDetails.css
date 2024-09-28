@@ -12,12 +12,28 @@
   margin-bottom: 20px;
   color: #333;
 }
-.vet-photo {
-  width: 150px;  /* Adjust the width as needed */
-  height: auto;  /* Maintain aspect ratio */
-  border-radius: 15px;  /* Adjust the rounding of the corners */
-  object-fit: cover;  /* Ensures the image covers the container without stretching */
+.vet-photo-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 40px; /* Increased margin for more spacing */
+  padding-bottom: 20px;
 }
+
+.vet-photo {
+  width: 300px; /* Increased width */
+  height: 300px; /* Increased height */
+  border-radius: 15px;
+  object-fit: cover;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* Slightly larger shadow */
+  transition: transform 0.3s ease;
+}
+
+.vet-photo:hover {
+  transform: scale(1.08); /* Slightly larger scaling on hover */
+}
+
+
 
 .vet-info,
 .contact-info,

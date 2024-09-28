@@ -48,7 +48,7 @@ export default function VetDetails(): JSX.Element {
           {
             method: 'GET',
             headers: {
-              Accept: 'image/*', // Expecting an image response
+              Accept: 'image/*',
             },
           }
         );
@@ -57,18 +57,18 @@ export default function VetDetails(): JSX.Element {
           throw new Error(`Error: ${response.statusText}`);
         }
 
-        const blob = await response.blob(); // Get the response as a blob
-        const imageUrl = URL.createObjectURL(blob); // Create a URL for the image blob
-        setPhoto(imageUrl); // Set the photo state
+        const blob = await response.blob();
+        const imageUrl = URL.createObjectURL(blob);
+        setPhoto(imageUrl);
       } catch (error) {
         setError('Failed to fetch vet photo');
       }
     };
 
-    // Fetch both vet details and photo
+    //fetch both vet details and photo
     fetchVetDetails().then(() => {
       fetchVetPhoto();
-      setLoading(false); // Set loading to false after both fetches
+      setLoading(false);
     });
   }, [vetId]);
 
