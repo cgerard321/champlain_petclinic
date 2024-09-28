@@ -77,6 +77,10 @@ export default function VisitDetails(): JSX.Element {
             {visit.status}
           </span>
         </div>
+        <div className="visit-field">
+          <span className="visit-label">Visit End Date:</span>
+          <span className="visit-value">{visit.visitEndDate}</span>
+        </div>
       </div>
       <button
         className="btn btn-warning"

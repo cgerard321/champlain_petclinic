@@ -31,4 +31,7 @@ public class Visit {
 
     private Status status;
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
+    LocalDateTime visitEndDate;
+
 }

@@ -29,4 +29,6 @@ public class VisitResponseDTO {
     private String vetEmail;
     private String vetPhoneNumber;
     private Status status;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
+    private LocalDateTime visitEndDate;
 }
