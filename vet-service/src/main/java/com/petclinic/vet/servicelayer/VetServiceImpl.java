@@ -205,4 +205,16 @@ public class VetServiceImpl implements VetService {
                 .map(tuple -> tuple.getT2());
     }
 
+    @Override
+    public Flux<VetResponseDTO> findByFirstNameOrLastName(String name) {
+        return vetRepository.findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(name, name)
+                .map(EntityDtoUtil::vetEntityToResponseDTO);
+    }
+    @Override
+    public Flux<VetResponseDTO> findByFirstNameAndLastName(String firstName, String lastName) {
+        return vetRepository.findByFirstNameContainingIgnoreCaseAndLastNameContainingIgnoreCase(firstName, lastName)
+                .map(EntityDtoUtil::vetEntityToResponseDTO);
+    }
+
+
 }

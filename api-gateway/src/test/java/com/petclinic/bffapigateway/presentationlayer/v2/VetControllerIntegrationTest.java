@@ -173,31 +173,6 @@ class VetControllerIntegrationTest {
     }
 
 
-    @Test
-    void whenGetVetByFirstName_notExists_thenReturnNotFound() {
-        String firstName = "Unknown";
-
-        mockServerConfigVetService.registerGetVetByFirstNameEndpointNotFound(firstName);
-
-        webTestClient.get()
-                .uri("/api/v2/gateway/vets/firstName/{firstName}", firstName)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isNotFound();
-    }
-
-    @Test
-    void whenGetVetByLastName_notExists_thenReturnNotFound() {
-        String lastName = "Unknown";
-
-        mockServerConfigVetService.registerGetVetByLastNameEndpointNotFound(lastName);
-
-        webTestClient.get()
-                .uri("/api/v2/gateway/vets/lastName/{lastName}", lastName)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isNotFound();
-    }
 
     @Test
     public void getVetById_ValidId_ReturnsVet() {
@@ -362,6 +337,7 @@ class VetControllerIntegrationTest {
                 .isEqualTo(photoData);
     }
 
+
     @Test
     public void whenGetPhotoByVetId_withNotFoundVetId_thenReturn404() {
         String notFoundVetId = ("jj2cbf82-625b-11ee-8c99-0242ac120002");
@@ -374,6 +350,74 @@ class VetControllerIntegrationTest {
                 .accept(MediaType.ALL)
                 .exchange()
                 .expectStatus().isNotFound();
+    }
+
+    @Test
+    void whenSearchVetsByName_withValidName_thenReturnVetDetails() {
+
+        String searchTerm = "John";
+        VetResponseDTO expectedVetResponse = VetResponseDTO.builder()
+                .vetId("vet-id-001")
+                .vetBillId("bill001")
+                .firstName("John")
+                .lastName("Doe")
+                .email("john.doe@example.com")
+                .phoneNumber("1234567890")
+                .resume("Experienced vet")
+                .workday(Set.of(Workday.Wednesday))
+                .workHoursJson("{\"Wednesday\":[\"Hour_8_9\",\"Hour_9_10\"]}")
+                .active(true)
+                .specialties(Set.of(new SpecialtyDTO("dermatology", "Dermatology")))
+                .build();
+
+        mockServerConfigVetService.registerSearchVetsEndpoint(searchTerm, expectedVetResponse);
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/api/gateway/vets/search")
+                        .queryParam("name", searchTerm)
+                        .build())
+                .cookie("Bearer", BEARER_TOKEN)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(VetResponseDTO.class)
+                .hasSize(1)
+                .consumeWith(response -> {
+                    var vetList = response.getResponseBody();
+                    assertNotNull(vetList);
+                    assertEquals(1, vetList.size());
+                    VetResponseDTO vetResponse = vetList.get(0);
+                    assertEquals(expectedVetResponse.getFirstName(), vetResponse.getFirstName());
+                    assertEquals(expectedVetResponse.getLastName(), vetResponse.getLastName());
+                    assertEquals(expectedVetResponse.getEmail(), vetResponse.getEmail());
+                    assertEquals(expectedVetResponse.getPhoneNumber(), vetResponse.getPhoneNumber());
+                    assertEquals(expectedVetResponse.getResume(), vetResponse.getResume());
+                    assertEquals(expectedVetResponse.getWorkday(), vetResponse.getWorkday());
+                    assertEquals(expectedVetResponse.getWorkHoursJson(), vetResponse.getWorkHoursJson());
+                    assertEquals(expectedVetResponse.isActive(), vetResponse.isActive());
+                    assertEquals(expectedVetResponse.getSpecialties(), vetResponse.getSpecialties());
+                });
+    }
+
+    @Test
+    void whenSearchVetsByName_withInvalidName_thenReturnEmptyList() {
+
+        String searchTerm = "InvalidName";
+
+        mockServerConfigVetService.registerSearchVetsEndpointWithEmptyResponse(searchTerm);
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/api/gateway/vets/search")
+                        .queryParam("name", searchTerm)
+                        .build())
+                .cookie("Bearer", BEARER_TOKEN)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(VetResponseDTO.class)
+                .hasSize(0);
     }
 
 

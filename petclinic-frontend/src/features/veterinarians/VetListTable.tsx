@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { VetRequestModel } from '@/features/veterinarians/models/VetRequestModel.ts';
 import { useNavigate } from 'react-router-dom';
 import './VetListTable.css';
@@ -6,39 +6,17 @@ import DeleteVet from '@/pages/Vet/DeleteVet.tsx';
 import { deleteVet } from '@/features/veterinarians/api/deleteVet';
 import UpdateVet from '@/pages/Vet/UpdateVet';
 
-export default function VetListTable(): JSX.Element {
-  const [vets, setVets] = useState<VetRequestModel[]>([]);
-  const [error, setError] = useState<string | null>(null);
+interface VetListTableProps {
+  vets: VetRequestModel[];
+  onDeleteVet: (updatedVets: VetRequestModel[]) => void;
+}
+
+export default function VetListTable({
+  vets,
+  onDeleteVet,
+}: VetListTableProps): JSX.Element {
   const navigate = useNavigate();
   const [selectedVet, setSelectedVet] = useState<VetRequestModel | null>(null);
-
-  useEffect(() => {
-    const fetchVets = async (): Promise<void> => {
-      try {
-        const response = await fetch(
-          `http://localhost:8080/api/v2/gateway/vets`,
-          {
-            headers: {
-              Accept: 'application/json',
-            },
-            credentials: 'include',
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error(`Error: ${response.status} ${response.statusText}`);
-        }
-
-        const data = await response.json();
-        setVets(data);
-      } catch (err) {
-        console.error('Error fetching vets:', err);
-        setError('Failed to fetch vets');
-      }
-    };
-
-    fetchVets();
-  }, []);
 
   const handleRowClick = (vetId: string): void => {
     navigate(`/vets/${vetId}`);
@@ -50,18 +28,30 @@ export default function VetListTable(): JSX.Element {
   ): Promise<void> => {
     event.stopPropagation();
     try {
-      await deleteVet(vetId);
-      setVets(prevVets => prevVets.filter(vet => vet.vetId !== vetId));
-    } catch (err) {
-      console.error('Error deleting vet:', err);
-      setError('Failed to delete vet');
+
+      await fetch(`http://localhost:8080/api/gateway/vets/${vetId}`, {
+        method: 'DELETE',
+      });
+
+
+      onDeleteVet(vets.filter(vet => vet.vetId !== vetId));
+    } catch (error) {
+      console.error('Failed to delete vet:', error);
+
+      try {
+        await deleteVet(vetId);
+        onDeleteVet(vets.filter(vet => vet.vetId !== vetId));
+      } catch (err) {
+        console.error('Error deleting vet with deleteVet function:', err);
+
+      }
     }
   };
 
   return (
     <div>
-      {error ? (
-        <p>{error}</p>
+      {vets.length === 0 ? (
+        <p>No vets found.</p>
       ) : (
         <table className="table table-striped">
           <thead>

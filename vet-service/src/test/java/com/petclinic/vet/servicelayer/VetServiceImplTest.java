@@ -290,4 +290,59 @@ class VetServiceImplTest {
                 .active(true)
                 .build();
     }
+
+    @Test
+    void findByFirstNameOrLastName_ShouldReturnVets_WhenNameMatches() {
+        Vet vet = buildVet();
+        when(vetRepository.findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase("Pauline", "Pauline"))
+                .thenReturn(Flux.just(vet));
+
+        StepVerifier.create(vetService.findByFirstNameOrLastName("Pauline"))
+                .expectNextMatches(vetDTO -> vetDTO.getFirstName().equals("Pauline"))
+                .verifyComplete();
+
+        verify(vetRepository, times(1))
+                .findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase("Pauline", "Pauline");
+    }
+
+    @Test
+    void findByFirstNameOrLastName_ShouldReturnEmpty_WhenNameDoesNotMatch() {
+        when(vetRepository.findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase("NonExistent", "NonExistent"))
+                .thenReturn(Flux.empty());
+
+        StepVerifier.create(vetService.findByFirstNameOrLastName("NonExistent"))
+                .expectNextCount(0)
+                .verifyComplete();
+
+        verify(vetRepository, times(1))
+                .findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase("NonExistent", "NonExistent");
+    }
+
+    @Test
+    void findByFirstNameAndLastName_ShouldReturnVets_WhenFirstAndLastNameMatch() {
+        Vet vet = buildVet();
+        when(vetRepository.findByFirstNameContainingIgnoreCaseAndLastNameContainingIgnoreCase("Pauline", "LeBlanc"))
+                .thenReturn(Flux.just(vet));
+
+        StepVerifier.create(vetService.findByFirstNameAndLastName("Pauline", "LeBlanc"))
+                .expectNextMatches(vetDTO -> vetDTO.getFirstName().equals("Pauline") && vetDTO.getLastName().equals("LeBlanc"))
+                .verifyComplete();
+
+        verify(vetRepository, times(1))
+                .findByFirstNameContainingIgnoreCaseAndLastNameContainingIgnoreCase("Pauline", "LeBlanc");
+    }
+
+    @Test
+    void findByFirstNameAndLastName_ShouldReturnEmpty_WhenFirstAndLastNameDoNotMatch() {
+        when(vetRepository.findByFirstNameContainingIgnoreCaseAndLastNameContainingIgnoreCase("NonExistent", "Name"))
+                .thenReturn(Flux.empty());
+
+        StepVerifier.create(vetService.findByFirstNameAndLastName("NonExistent", "Name"))
+                .expectNextCount(0)
+                .verifyComplete();
+
+        verify(vetRepository, times(1))
+                .findByFirstNameContainingIgnoreCaseAndLastNameContainingIgnoreCase("NonExistent", "Name");
+    }
+
 }

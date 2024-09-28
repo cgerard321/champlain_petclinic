@@ -9,6 +9,7 @@ import org.mockserver.client.MockServerClient;
 import org.mockserver.integration.ClientAndServer;
 import org.springframework.http.MediaType;
 
+import java.util.Collections;
 import java.util.Set;
 
 import static org.mockserver.model.HttpRequest.request;
@@ -263,59 +264,7 @@ public void stopMockServer() {
         if(clientAndServer != null)
             this.clientAndServer.stop();
     }
-    public void registerGetVetByFirstNameEndpoint(String firstName, VetResponseDTO responseDTO) throws JsonProcessingException {
-        mockServerClient_VetService
-                .when(
-                        request()
-                                .withMethod("GET")
-                                .withPath("/vets/firstName/" + firstName)
-                )
-                .respond(
-                        response()
-                                .withStatusCode(200)
-                                .withBody(json(new ObjectMapper().writeValueAsString(responseDTO)))
-                );
-    }
 
-    public void registerGetVetByFirstNameEndpointNotFound(String firstName) {
-        mockServerClient_VetService
-                .when(
-                        request()
-                                .withMethod("GET")
-                                .withPath("/vets/firstName/" + firstName)
-                )
-                .respond(
-                        response()
-                                .withStatusCode(404)
-                );
-    }
-
-    public void registerGetVetByLastNameEndpoint(String lastName, VetResponseDTO responseDTO) throws JsonProcessingException {
-        mockServerClient_VetService
-                .when(
-                        request()
-                                .withMethod("GET")
-                                .withPath("/vets/lastName/" + lastName)
-                )
-                .respond(
-                        response()
-                                .withStatusCode(200)
-                                .withBody(json(new ObjectMapper().writeValueAsString(responseDTO)))
-                );
-    }
-
-    public void registerGetVetByLastNameEndpointNotFound(String lastName) {
-        mockServerClient_VetService
-                .when(
-                        request()
-                                .withMethod("GET")
-                                .withPath("/vets/lastName/" + lastName)
-                )
-                .respond(
-                        response()
-                                .withStatusCode(404)
-                );
-    }
 
     public void registerGetVetByIdEndpoint() {
         mockServerClient_VetService
@@ -404,5 +353,36 @@ public void stopMockServer() {
                 );
     }
 
+    public void registerSearchVetsEndpoint(String searchTerm, VetResponseDTO expectedResponse) {
+        mockServerClient_VetService
+                .when(
+                        request()
+                                .withMethod("GET")
+                                .withPath("/vets/search")
+                                .withQueryStringParameter("name", searchTerm)
+                )
+                .respond(
+                        response()
+                                .withStatusCode(200)
+                                .withHeader("Content-Type", "application/json")
+                                .withBody(json(Collections.singletonList(expectedResponse)))
+                );
+    }
+
+    public void registerSearchVetsEndpointWithEmptyResponse(String searchTerm) {
+        mockServerClient_VetService
+                .when(
+                        request()
+                                .withMethod("GET")
+                                .withPath("/vets/search")
+                                .withQueryStringParameter("name", searchTerm)
+                )
+                .respond(
+                        response()
+                                .withStatusCode(200)
+                                .withHeader("Content-Type", "application/json")
+                                .withBody("[]")
+                );
+    }
 
 }

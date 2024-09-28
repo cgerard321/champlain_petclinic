@@ -1940,5 +1940,80 @@ class VetsServiceClientIntegrationTest {
                 .build();
     }
 
+    @Test
+    void getVetsBySearchTerm_ValidSearchTerm() throws JsonProcessingException {
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody("[\n" +
+                        "    {\n" +
+                        "        \"vetId\": \"cf25e779-548b-4788-aefa-6d58621c2feb\",\n" +
+                        "        \"vetBillId\": \"d9d3a7ac-6817-4c13-9a09-c09da74fb65f\",\n" +
+                        "        \"firstName\": \"Pauline\",\n" +
+                        "        \"lastName\": \"LeBlanc\",\n" +
+                        "        \"email\": \"skjfhf@gmail.com\",\n" +
+                        "        \"phoneNumber\": \"947-238-2847\",\n" +
+                        "        \"resume\": \"Just became a vet\",\n" +
+                        "        \"workHoursJson\": \"{\\n            \\\"Monday\\\": [\\\"Hour_8_9\\\",\\\"Hour_9_10\\\",\\\"Hour_10_11\\\",\\\"Hour_11_12\\\",\\\"Hour_12_13\\\",\\\"Hour_13_14\\\",\\\"Hour_14_15\\\",\\\"Hour_15_16\\\"],\\n            \\\"Wednesday\\\": [\\\"Hour_12_13\\\",\\\"Hour_13_14\\\",\\\"Hour_14_15\\\",\\\"Hour_15_16\\\",\\\"Hour_16_17\\\",\\\"Hour_17_18\\\",\\\"Hour_18_19\\\",\\\"Hour_19_20\\\"],\\n            \\\"Thursday\\\": [\\\"Hour_10_11\\\",\\\"Hour_11_12\\\",\\\"Hour_12_13\\\",\\\"Hour_13_14\\\",\\\"Hour_14_15\\\",\\\"Hour_15_16\\\",\\\"Hour_16_17\\\",\\\"Hour_17_18\\\"]\\n        }\",\n" +
+                        "        \"active\": true\n" +
+                        "    }\n" +
+                        "]"));
+
+        final VetResponseDTO vet = vetsServiceClient.getVetsBySearchTerm("Pauline").blockFirst();
+
+        assertNotNull(vet);
+        assertEquals("cf25e779-548b-4788-aefa-6d58621c2feb", vet.getVetId());
+        assertEquals("d9d3a7ac-6817-4c13-9a09-c09da74fb65f", vet.getVetBillId());
+        assertEquals("Pauline", vet.getFirstName());
+        assertEquals("LeBlanc", vet.getLastName());
+        assertEquals("skjfhf@gmail.com", vet.getEmail());
+        assertEquals("947-238-2847", vet.getPhoneNumber());
+        assertEquals("Just became a vet", vet.getResume());
+        assertEquals("{\n            \"Monday\": [\"Hour_8_9\",\"Hour_9_10\",\"Hour_10_11\",\"Hour_11_12\",\"Hour_12_13\",\"Hour_13_14\",\"Hour_14_15\",\"Hour_15_16\"],\n            \"Wednesday\": [\"Hour_12_13\",\"Hour_13_14\",\"Hour_14_15\",\"Hour_15_16\",\"Hour_16_17\",\"Hour_17_18\",\"Hour_18_19\",\"Hour_19_20\"],\n            \"Thursday\": [\"Hour_10_11\",\"Hour_11_12\",\"Hour_12_13\",\"Hour_13_14\",\"Hour_14_15\",\"Hour_15_16\",\"Hour_16_17\",\"Hour_17_18\"]\n        }", vet.getWorkHoursJson());
+    }
+
+    @Test
+    void getVetsBySearchTerm_InvalidSearchTerm() throws JsonProcessingException {
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody("[]"));
+
+        final List<VetResponseDTO> vets = vetsServiceClient.getVetsBySearchTerm("InvalidName").collectList().block();
+
+        assertNotNull(vets);
+        assertTrue(vets.isEmpty());
+    }
+
+    @Test
+    void getVetsBySearchTerm_ClientError() throws JsonProcessingException {
+
+        prepareResponse(response -> response
+                .setResponseCode(400)
+                .setHeader("Content-Type", "application/json")
+                .setBody("{\"message\": \"Client error during search\"}"));
+
+        StepVerifier.create(vetsServiceClient.getVetsBySearchTerm("InvalidName"))
+                .expectErrorMatches(throwable -> throwable instanceof RuntimeException &&
+                        throwable.getMessage().equals("Client error during search"))
+                .verify();
+    }
+
+
+    @Test
+    void getVetsBySearchTerm_ServerError() throws JsonProcessingException {
+
+        prepareResponse(response -> response
+                .setResponseCode(500)
+                .setHeader("Content-Type", "application/json")
+                .setBody("{\"message\": \"Server error during search\"}"));
+
+        StepVerifier.create(vetsServiceClient.getVetsBySearchTerm("ServerError"))
+                .expectErrorMatches(throwable -> throwable instanceof RuntimeException &&
+                        throwable.getMessage().equals("Server error during search"))
+                .verify();
+    }
+
+
 }
 

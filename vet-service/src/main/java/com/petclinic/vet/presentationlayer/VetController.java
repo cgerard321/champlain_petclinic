@@ -318,4 +318,16 @@ public class VetController {
                 .map(r->ResponseEntity.status(HttpStatus.OK).body(r))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
+
+    @GetMapping("/search")
+    public Flux<VetResponseDTO> getVetsBySearchTerm(@RequestParam String name) {
+
+        String[] names = name.split(" ");
+        if (names.length > 1) {
+            return vetService.findByFirstNameAndLastName(names[0], names[1]);
+        } else {
+            return vetService.findByFirstNameOrLastName(name);
+        }
+    }
+
 }

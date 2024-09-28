@@ -1037,73 +1037,7 @@ class VetControllerUnitTest {
                 .rateDescription("This is a bad vet")
                 .build();
     }
-    @Test
-    void getVetByFirstName_ShouldSucceed() {
-        when(vetService.getVetByFirstName("Pauline")).thenReturn(Mono.just(vetResponseDTO));
 
-        client
-                .get()
-                .uri("/vets/firstName/Pauline")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isEqualTo(HttpStatus.OK)
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$.firstName").isEqualTo(vetResponseDTO.getFirstName());
-
-
-        Mockito.verify(vetService, times(1)).getVetByFirstName("Pauline");
-    }
-
-    @Test
-    void getVetByFirstName_NotFound() {
-        when(vetService.getVetByFirstName("Nonexistent")).thenReturn(Mono.empty());
-
-        client
-                .get()
-                .uri("/vets/firstName/Nonexistent")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isNotFound();
-
-        Mockito.verify(vetService, times(1)).getVetByFirstName("Nonexistent");
-    }
-
-
-
-
-
-    @Test
-    void getVetByLastName_ShouldSucceed() {
-        when(vetService.getVetByLastName("LeBlanc")).thenReturn(Mono.just(vetResponseDTO2));
-
-        client
-                .get()
-                .uri("/vets/lastName/LeBlanc")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$.firstName").isEqualTo(vetResponseDTO2.getFirstName())
-                .jsonPath("$.lastName").isEqualTo(vetResponseDTO2.getLastName());
-
-        Mockito.verify(vetService, times(1)).getVetByLastName("LeBlanc");
-    }
-
-    @Test
-    void getVetByLastName_NotFound() {
-        when(vetService.getVetByLastName("Nonexistent")).thenReturn(Mono.empty());
-
-        client
-                .get()
-                .uri("/vets/lastName/Nonexistent")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isNotFound();
-
-        Mockito.verify(vetService, times(1)).getVetByLastName("Nonexistent");
-    }
  /*   @Test
     void addPhoto_ShouldReturnBadRequest_WhenRequestIsMalformed() throws IOException {
         // Create MultiValueMap for multipart/form-data body
@@ -1138,6 +1072,56 @@ class VetControllerUnitTest {
     }
 
 */
+
+    @Test
+    void getVetsBySearchTerm_ShouldReturnVets_WhenFirstNameAndLastNameMatch() {
+
+        String fullName = "Pauline LeBlanc";
+        when(vetService.findByFirstNameAndLastName("Pauline", "LeBlanc"))
+                .thenReturn(Flux.just(vetResponseDTO));
+
+        client
+                .get()
+                .uri("/vets/search?name=" + fullName)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$[0].vetId").isEqualTo(vetResponseDTO.getVetId())
+                .jsonPath("$[0].vetBillId").isEqualTo(vetResponseDTO.getVetBillId())
+                .jsonPath("$[0].firstName").isEqualTo(vetResponseDTO.getFirstName())
+                .jsonPath("$[0].lastName").isEqualTo(vetResponseDTO.getLastName())
+                .jsonPath("$[0].email").isEqualTo(vetResponseDTO.getEmail())
+                .jsonPath("$[0].phoneNumber").isEqualTo(vetResponseDTO.getPhoneNumber())
+                .jsonPath("$[0].resume").isEqualTo(vetResponseDTO.getResume())
+                .jsonPath("$[0].workHoursJson").isEqualTo(vetResponseDTO.getWorkHoursJson());
+
+
+        Mockito.verify(vetService, times(1)).findByFirstNameAndLastName("Pauline", "LeBlanc");
+    }
+
+
+    @Test
+    void getVetsBySearchTerm_ShouldReturnEmpty_WhenNoNameMatches() {
+
+        when(vetService.findByFirstNameOrLastName("Nonexistent"))
+                .thenReturn(Flux.empty());
+
+        client
+                .get()
+                .uri("/vets/search?name=Nonexistent")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$").isArray()
+                .jsonPath("$.length()").isEqualTo(0);
+
+        Mockito.verify(vetService, times(1)).findByFirstNameOrLastName("Nonexistent");
+    }
+
 
 
 
