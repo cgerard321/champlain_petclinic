@@ -12,6 +12,12 @@
   margin-bottom: 20px;
   color: #333;
 }
+.vet-photo {
+  width: 150px;  /* Adjust the width as needed */
+  height: auto;  /* Maintain aspect ratio */
+  border-radius: 15px;  /* Adjust the rounding of the corners */
+  object-fit: cover;  /* Ensures the image covers the container without stretching */
+}
 
 .vet-info,
 .contact-info,

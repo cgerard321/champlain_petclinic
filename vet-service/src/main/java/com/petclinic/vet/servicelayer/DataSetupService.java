@@ -333,14 +333,19 @@ public class DataSetupService implements CommandLineRunner {
         //default photo
         String defaultPhotoName = "vet_default.jpg";
         String defaultPhotoType = "image/jpeg";
+        
+        //vet photo
+        String jamesCarterPhotoName = "james_carter.jpg";
 
         ClassPathResource defaultPhoto = new ClassPathResource("images/" + defaultPhotoName);
+        ClassPathResource jamesCarterPhoto = new ClassPathResource("images/" + jamesCarterPhotoName);
+
 
         Photo photo1 = Photo.builder()
                 .vetId(v1.getVetId())
                 .filename(defaultPhotoName)
                 .imgType(defaultPhotoType)
-                .data(StreamUtils.copyToByteArray(defaultPhoto.getInputStream()))
+                .data(StreamUtils.copyToByteArray(jamesCarterPhoto.getInputStream()))
                 .build();
 
         Photo photo2 = Photo.builder()
