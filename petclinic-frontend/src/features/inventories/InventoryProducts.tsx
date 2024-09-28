@@ -42,8 +42,7 @@ const InventoryProducts: React.FC = () => {
     if (inventoryId) {
       fetchProducts().catch(err => console.error(err));
     }
-  }, [inventoryId]);
-
+  }, [inventoryId, setProductList]); // Add 'setProductList' to the dependency array
 
   // Delete product by productId
   const deleteProduct = async (productId: string): Promise<void> => {
