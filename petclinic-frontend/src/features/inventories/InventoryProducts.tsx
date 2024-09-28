@@ -60,9 +60,9 @@ const InventoryProducts: React.FC = () => {
     if (inventoryId) {
       fetchProducts().catch(err => console.error(err));
     }
-  }, [inventoryId]);
+  }, [inventoryId, fetchProducts]);
 
-  const handleFilter = async () => {
+  const handleFilter = async (): Promise<void> => {
     // Apply status filtering on the frontend first
     let filtered = products;
 
