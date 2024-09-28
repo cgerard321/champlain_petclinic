@@ -5,7 +5,9 @@ import { useUser } from '@/context/UserContext';
 export default function BillsListTable(): JSX.Element {
   const { user } = useUser();
   const [bills, setBills] = useState<Bill[]>([]);
+  const [filteredBills, setFilteredBills] = useState<Bill[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [selectedStatus, setSelectedStatus] = useState<string>('all'); // Default filter status
 
   useEffect(() => {
     if (!user.userId) return;
@@ -13,13 +15,13 @@ export default function BillsListTable(): JSX.Element {
     const fetchBills = async (): Promise<void> => {
       try {
         const response = await fetch(
-          `http://localhost:8080/api/v2/gateway/bills/customer/${user.userId}`,
-          {
-            headers: {
-              Accept: 'text/event-stream',
-            },
-            credentials: 'include',
-          }
+            `http://localhost:8080/api/v2/gateway/bills/customer/${user.userId}`,
+            {
+              headers: {
+                Accept: 'text/event-stream',
+              },
+              credentials: 'include',
+            }
         );
 
         if (!response.ok) {
@@ -65,46 +67,78 @@ export default function BillsListTable(): JSX.Element {
     fetchBills();
   }, [user.userId]);
 
+  // Filtering bills by selected status
+  useEffect(() => {
+    if (selectedStatus === 'all') {
+      setFilteredBills(bills);
+    } else {
+      setFilteredBills(
+          bills.filter(
+              bill => bill.billStatus.toLowerCase() === selectedStatus.toLowerCase()
+          )
+      );
+    }
+  }, [selectedStatus, bills]);
+
   return (
-    <div>
-      {error ? (
-        <p>{error}</p>
-      ) : (
-        <table className="table table-striped">
-          <thead>
-            <tr>
-              <th>Bill ID</th>
-              <th>Owner Name</th>
-              <th>Visit Type</th>
-              <th>Vet Name</th>
-              <th>Date</th>
-              <th>Amount</th>
-              <th>Taxed Amount</th>
-              <th>Status</th>
-              <th>Due Date</th>
-            </tr>
-          </thead>
-          <tbody>
-            {bills.map(bill => (
-              <tr key={bill.billId}>
-                <td>{bill.billId}</td>
-                <td>
-                  {bill.ownerFirstName} {bill.ownerLastName}
-                </td>
-                <td>{bill.visitType}</td>
-                <td>
-                  {bill.vetFirstName} {bill.vetLastName}
-                </td>
-                <td>{bill.date}</td>
-                <td>{bill.amount}</td>
-                <td>{bill.taxedAmount}</td>
-                <td>{bill.billStatus}</td>
-                <td>{bill.dueDate}</td>
+      <div>
+        <h2>Bills</h2>
+
+        {/* Dropdown to filter bills by status */}
+        <div>
+          <label htmlFor="statusFilter">Filter by Status:</label>
+          <select
+              id="statusFilter"
+              value={selectedStatus}
+              onChange={e => setSelectedStatus(e.target.value)}
+              style={{ width: '150px' }}
+          >
+            <option value="all">All</option>
+            <option value="overdue">Overdue</option>
+            <option value="paid">Paid</option>
+            <option value="unpaid">Unpaid</option>
+          </select>
+        </div>
+
+        {error ? (
+            <p>{error}</p>
+        ) : (
+            <table className="table table-striped">
+              <thead>
+              <tr>
+                <th>Bill ID</th>
+                <th>Owner Name</th>
+                <th>Visit Type</th>
+                <th>Vet Name</th>
+                <th>Date</th>
+                <th>Amount</th>
+                <th>Taxed Amount</th>
+                <th>Status</th>
+                <th>Due Date</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-    </div>
+              </thead>
+              <tbody>
+              {filteredBills.map(bill => (
+                  <tr key={bill.billId}>
+                    <td>{bill.billId}</td>
+                    <td>
+                      {bill.ownerFirstName} {bill.ownerLastName}
+                    </td>
+                    <td>{bill.visitType}</td>
+                    <td>
+                      {bill.vetFirstName} {bill.vetLastName}
+                    </td>
+                    <td>{bill.date}</td>
+                    <td>{bill.amount}</td>
+                    <td>{bill.taxedAmount}</td>
+                    <td>{bill.billStatus}</td>
+                    <td>{bill.dueDate}</td>
+                  </tr>
+              ))}
+              </tbody>
+            </table>
+        )}
+      </div>
   );
 }
+
