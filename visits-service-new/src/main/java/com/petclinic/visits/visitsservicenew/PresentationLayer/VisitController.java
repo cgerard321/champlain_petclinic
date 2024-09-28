@@ -196,7 +196,7 @@ public class VisitController {
     public Mono<ResponseEntity<Void>> deleteCompletedVisitByVisitId(@PathVariable String visitId){
         return visitService.deleteCompletedVisitByVisitId(visitId)
                 .then(Mono.just(new ResponseEntity<Void>(HttpStatus.NO_CONTENT)))
-                .onErrorResume(NotFoundException.class, e -> Mono.just(new ResponseEntity<>(HttpStatus.NOT_FOUND))); // Return 404 if NotFoundException is thrown
+                .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));// Return 404 if NotFoundException is thrown
     }
 //    @GetMapping("/pets/{petId}")
 //    public Mono<PetResponseDTO> getPetByIdTest(@PathVariable int petId){

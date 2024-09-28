@@ -108,7 +108,7 @@ public class VisitController {
     public Mono<ResponseEntity<Void>> deleteCompletedVisitByVisitId(@PathVariable String visitId) {
         return visitsServiceClient.deleteCompletedVisitByVisitId(visitId)
                 .then(Mono.just(new ResponseEntity<Void>(HttpStatus.NO_CONTENT)))
-                .switchIfEmpty(Mono.just(new ResponseEntity<>(HttpStatus.NOT_FOUND)));
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     //customer visits
