@@ -21,22 +21,29 @@ const InventoryProducts: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   // Fetch products from the backend
-  const fetchProducts = async (): Promise<void> => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await axios.get<ProductModel[]>(
-        `http://localhost:8080/api/gateway/inventory/${inventoryId}/products`
-      );
-      setProducts(response.data);
-      setProductList(response.data); // Set productList as well
-      setFilteredProducts(response.data); // Initialize filtered products with all products
-    } catch (err) {
-      setError('Failed to fetch products.');
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    const fetchProducts = async (): Promise<void> => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await axios.get<ProductModel[]>(
+            `http://localhost:8080/api/gateway/inventory/${inventoryId}/products`
+        );
+        setProducts(response.data);
+        setProductList(response.data); // Set productList as well
+        setFilteredProducts(response.data); // Initialize filtered products with all products
+      } catch (err) {
+        setError('Failed to fetch products.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (inventoryId) {
+      fetchProducts().catch(err => console.error(err));
     }
-  };
+  }, [inventoryId]);
+
 
   // Delete product by productId
   const deleteProduct = async (productId: string): Promise<void> => {
@@ -54,13 +61,6 @@ const InventoryProducts: React.FC = () => {
       setError('Failed to delete product.');
     }
   };
-
-  // useEffect with dependency
-  useEffect(() => {
-    if (inventoryId) {
-      fetchProducts().catch(err => console.error(err));
-    }
-  }, [inventoryId, fetchProducts]);
 
   const handleFilter = async (): Promise<void> => {
     // Apply status filtering on the frontend first
