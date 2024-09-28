@@ -44,7 +44,10 @@ export default function VetListTable(): JSX.Element {
     navigate(`/vets/${vetId}`);
   };
 
-  const handleVetDelete = async (event: React.MouseEvent, vetId: string): Promise<void> => {
+  const handleVetDelete = async (
+    event: React.MouseEvent,
+    vetId: string
+  ): Promise<void> => {
     event.stopPropagation();
     try {
       await deleteVet(vetId);
@@ -93,8 +96,8 @@ export default function VetListTable(): JSX.Element {
                   </button>
 
                   <DeleteVet
-                      vetId={vet.vetId}
-                      onVetDeleted={event => handleVetDelete(event, vet.vetId)}
+                    vetId={vet.vetId}
+                    onVetDeleted={event => handleVetDelete(event, vet.vetId)}
                   />
                 </td>
               </tr>
