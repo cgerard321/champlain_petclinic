@@ -5,6 +5,7 @@ import com.petclinic.visits.visitsservicenew.DataLayer.Visit;
 import com.petclinic.visits.visitsservicenew.DataLayer.VisitRepo;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.*;
 import com.petclinic.visits.visitsservicenew.Utils.EntityDtoUtil;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,6 +15,7 @@ import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWeb
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -52,16 +54,15 @@ class VisitsControllerIntegrationTest {
 
     String uuidVisit1 = UUID.randomUUID().toString();
     String uuidVisit2 = UUID.randomUUID().toString();
-
     String uuidCancelledVisit1 = UUID.randomUUID().toString();
     String uuidCancelledVisit2 = UUID.randomUUID().toString();
-
     String uuidVet = UUID.randomUUID().toString();
     String uuidPet = UUID.randomUUID().toString();
     String uuidPhoto = UUID.randomUUID().toString();
     String uuidOwner = UUID.randomUUID().toString();
 
     private final String STATUS = "CONFIRMED";
+    private final int dbSize = 4;
 
     Set<SpecialtyDTO> set = new HashSet<>();
     Set<Workday> workdaySet = new HashSet<>();
@@ -91,19 +92,11 @@ class VisitsControllerIntegrationTest {
 
     Visit visit1 = buildVisit(uuidVisit1, "this is a dummy description", vet.getVetId());
     Visit visit2 = buildVisit(uuidVisit2, "this is a dummy description", vet.getVetId());
-
     Visit cancelledVisit1 = buildCancelledVisit(uuidCancelledVisit1, "this is a dummy description", vet.getVetId());
     Visit cancelledVisit2 = buildCancelledVisit(uuidCancelledVisit2, "this is a dummy description", vet.getVetId());
 
     private final VisitResponseDTO visitResponseDTO = buildVisitResponseDto(visit1.getVisitId(), vet.getVetId());
     private final VisitRequestDTO visitRequestDTO = buildVisitRequestDto(vet.getVetId());
-
-    private final String PRAC_ID = visitResponseDTO.getPractitionerId();
-    private final String PET_ID = visitResponseDTO.getPetId();
-    private final String VISIT_ID = visitResponseDTO.getVisitId();
-    private final int dbSize = 4;
-    //private final LocalDateTime visitDate = visitResponseDTO.getVisitDate().withSecond(0);
-
 
     @BeforeEach
     void dbSetUp() {
@@ -114,6 +107,49 @@ class VisitsControllerIntegrationTest {
                                         .thenMany(visitRepo.save(cancelledVisit2)))));
 
         StepVerifier.create(visitPublisher).expectNextCount(1).verifyComplete();
+    }
+
+    private Visit buildVisit(String uuid, String description, String vetId) {
+        return Visit.builder()
+                .visitId(uuid)
+                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .description(description)
+                .petId("2")
+                .practitionerId(vetId)
+                .status(Status.UPCOMING)
+                .build();
+    }
+
+    private Visit buildCancelledVisit(String uuid, String description, String vetId) {
+        return Visit.builder()
+                .visitId(uuid)
+                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .description(description)
+                .petId("2")
+                .practitionerId(vetId)
+                .status(Status.CANCELLED)
+                .build();
+    }
+
+    private VisitResponseDTO buildVisitResponseDto(String visitId, String vetId) {
+        return VisitResponseDTO.builder()
+                .visitId(visitId)
+                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .description("this is a dummy description")
+                .petId("2")
+                .practitionerId(vetId)
+                .status(Status.UPCOMING)
+                .build();
+    }
+
+    private VisitRequestDTO buildVisitRequestDto(String vetId) {
+        return VisitRequestDTO.builder()
+                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .description("this is a dummy description")
+                .petId("2")
+                .practitionerId(vetId)
+                .status(Status.UPCOMING)
+                .build();
     }
 
     @Test
@@ -151,7 +187,6 @@ class VisitsControllerIntegrationTest {
 
     @Test
     void getVisitByPractitionerId() {
-
         when(vetsClient.getVetByVetId(anyString())).thenReturn(Mono.just(vet));
         when(entityDtoUtil.toVisitResponseDTO(any())).thenReturn(Mono.just(visitResponseDTO));
 
@@ -165,7 +200,7 @@ class VisitsControllerIntegrationTest {
                 .expectBodyList(VisitResponseDTO.class)
                 .value((list) -> {
                     assertNotNull(list);
-                    assertEquals(list.size(), 4);
+                    assertEquals(list.size(), dbSize);
                     assertEquals(list.get(0).getVisitId(), visit1.getVisitId());
                     assertEquals(list.get(0).getPractitionerId(), visit1.getPractitionerId());
                     assertEquals(list.get(0).getPetId(), visit1.getPetId());
@@ -226,47 +261,12 @@ class VisitsControllerIntegrationTest {
                 });
     }
 
-
-//    @Test
-//    void addVisit() {
-//        // Mock the behavior of petsClient and vetsClient
-//        String petId = "yourPetId";
-//        String vetId = "yourVetId";
-//
-//        when(petsClient.getPetById(petId)).thenReturn(Mono.just(petResponseDTO));
-//        when(vetsClient.getVetByVetId(vetId)).thenReturn(Mono.just(vet));
-//        when(entityDtoUtil.toVisitEntity(any())).thenReturn(visit1);
-//        when(entityDtoUtil.generateVisitIdString()).thenReturn("yourVisitId");
-//        when(entityDtoUtil.toVisitResponseDTO(any())).thenReturn(Mono.just(visitResponseDTO));
-//
-//        // Create a sample VisitRequestDTO
-//        VisitRequestDTO visitRequestDTO = buildVisitRequestDto(vetId);
-//
-//        webTestClient
-//                .post()
-//                .uri("/visits")
-//                .body(Mono.just(visitResponseDTO), VisitResponseDTO.class)
-//                .accept(MediaType.APPLICATION_JSON)
-//                .exchange()
-//                .expectStatus().isOk()
-//                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-//                .expectBody()
-//                .jsonPath("$.visitId").isEqualTo(visit1.getVisitId())
-//                .jsonPath("$.practitionerId").isEqualTo(visit1.getPractitionerId())
-//                .jsonPath("$.petId").isEqualTo(visit1.getPetId())
-//                .jsonPath("$.description").isEqualTo(visit1.getDescription())
-//                .jsonPath("$.visitDate").isEqualTo("2024-11-25 13:45")
-//                .jsonPath("$.status").isEqualTo("UPCOMING");
-//    }
-
-
     @Test
     void updateVisit() {
         when(entityDtoUtil.toVisitEntity(any(VisitRequestDTO.class))).thenReturn(visit1);
         when(entityDtoUtil.toVisitResponseDTO(any())).thenReturn(Mono.just(visitResponseDTO));
         when(petsClient.getPetById(anyString())).thenReturn(Mono.just(petResponseDTO));
         when(vetsClient.getVetByVetId(anyString())).thenReturn(Mono.just(vet));
-
 
         webTestClient
                 .put()
@@ -295,7 +295,7 @@ class VisitsControllerIntegrationTest {
         String status = "CANCELLED";
         webTestClient
                 .put()
-                .uri("/visits/" + VISIT_ID + "/status/" + status)
+                .uri("/visits/" + visit1.getVisitId() + "/status/" + status)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -319,7 +319,6 @@ class VisitsControllerIntegrationTest {
 
     @Test
     void deleteAllCanceledVisits() {
-
         webTestClient
                 .delete()
                 .uri("/visits/cancelled")
@@ -334,65 +333,37 @@ class VisitsControllerIntegrationTest {
                 .verifyComplete();
     }
 
-
-    private Visit buildVisit(String uuid, String description, String vetId) {
-        return Visit.builder()
-                .visitId(uuid)
-
-                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
-                .description(description)
-                .petId("2")
-                .practitionerId(vetId)
-                .status(Status.UPCOMING)
-                .build();
-    }
-
-    private Visit buildCancelledVisit(String uuid, String description, String vetId) {
-        return Visit.builder()
-                .visitId(uuid)
-
-                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
-                .description(description)
-                .petId("2")
-                .practitionerId(vetId)
-                .status(Status.CANCELLED)
-                .build();
-    }
-
-    private VisitResponseDTO buildVisitResponseDto(String visitId, String vetId) {
-        return VisitResponseDTO.builder()
-                .visitId(visitId)
-                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
-                .description("this is a dummy description")
-                .petId("2")
-                .practitionerId(vetId)
-                .status(Status.UPCOMING)
-                .build();
-    }
-
-    private VisitRequestDTO buildVisitRequestDto(String vetId) {
-        return VisitRequestDTO.builder()
-                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
-                .description("this is a dummy description")
-                .petId("2")
-                .practitionerId(vetId)
-                .status(Status.UPCOMING)
-                .build();
-    }
-
     @Test
     void deleteCompletedVisitByValidVisitId_Return_NoContent() {
-        // Use the ID from the setup
-        String valid_VisitId = "visitId3";
+        // Arrange: Create and save a COMPLETED visit
+        String validVisitId = "visitId3";
+        Visit completedVisit = Visit.builder()
+                .visitId(validVisitId)
+                .visitDate(LocalDateTime.now())
+                .description("Completed visit for deletion test")
+                .petId("3")
+                .practitionerId(vet.getVetId())
+                .status(Status.COMPLETED)
+                .build();
 
+        visitRepo.save(completedVisit).block();
+
+        // Verify the visit exists and has a status of COMPLETED
+        StepVerifier
+                .create(visitRepo.findByVisitId(validVisitId))
+                .expectNextMatches(visit -> visit.getStatus().equals(Status.COMPLETED))
+                .verifyComplete();
+
+        // Act: Delete the completed visit
         webTestClient
                 .delete()
-                .uri("/visits/completed/" + valid_VisitId)
+                .uri("/visits/completed/" + validVisitId)
                 .exchange()
                 .expectStatus().isNoContent();
 
+        // Assert: Verify the visit is deleted
         StepVerifier
-                .create(visitRepo.findByVisitId(valid_VisitId))
+                .create(visitRepo.findByVisitId(validVisitId))
                 .expectNextCount(0)
                 .verifyComplete();
     }
@@ -405,10 +376,41 @@ class VisitsControllerIntegrationTest {
                 .uri("/visits/completed/" + visitId)
                 .exchange()
                 .expectStatus().isNotFound();
+
         StepVerifier
                 .create(visitRepo.findByVisitId(visitId))
                 .expectNextCount(0) //confirms that visit does not exist in the database
                 .verifyComplete();
     }
 
+    @Test
+    void deleteCompletedVisitByValidVisitId_Where_StatusIsNotCompleted_Return_NotFound() {
+        String validId = "ValidId";
+        Visit CancelledVisit = Visit.builder()
+                .visitId(validId)
+                .visitDate(LocalDateTime.now())
+                .description("Completed visit for deletion test")
+                .petId("3")
+                .practitionerId(vet.getVetId())
+                .status(Status.CANCELLED)
+                .build();
+
+        visitRepo.save(CancelledVisit).block();
+
+        StepVerifier
+                .create(visitRepo.findByVisitId(validId))
+                .expectNextMatches(visit -> visit.getStatus() == Status.CANCELLED)
+                .verifyComplete();
+
+        webTestClient
+                .delete()
+                .uri("/visits/completed/" + CancelledVisit.getVisitId())
+                .exchange()
+                .expectStatus().isNotFound();
+
+        StepVerifier
+                .create(visitRepo.findByVisitId(visit1.getVisitId()))
+                .expectNextCount(1)
+                .verifyComplete();
+    }
 }
