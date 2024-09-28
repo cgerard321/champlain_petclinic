@@ -4,6 +4,7 @@ package com.petclinic.products.businesslayer;
 import com.petclinic.products.businesslayer.products.ProductServiceImpl;
 import com.petclinic.products.datalayer.products.Product;
 import com.petclinic.products.datalayer.products.ProductRepository;
+import com.petclinic.products.presentationlayer.products.ProductResponseModel;
 import com.petclinic.products.utils.exceptions.NotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -120,4 +121,63 @@ class ProductServiceImplUnitTest {
         verify(productRepository).findProductByProductId(productId);
         verify(productRepository, never()).save(any(Product.class));
     }
+    @Test
+    void testGetProductsByType_ValidType() {
+        // Arrange
+        String productType = "Food";
+        Product product1 = Product.builder()
+                .productId("1")
+                .productName("Dog Food")
+                .productDescription("Premium dog food")
+                .productSalePrice(50.0)
+                .productType(productType)
+                .build();
+
+        Product product2 = Product.builder()
+                .productId("2")
+                .productName("Cat Food")
+                .productDescription("Premium cat food")
+                .productSalePrice(30.0)
+                .productType(productType)
+                .build();
+
+        when(productRepository.findProductsByProductType(productType)).thenReturn(Flux.just(product1, product2));
+
+        // Act
+        Flux<ProductResponseModel> result = productService.getProductsByType(productType);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNextMatches(responseModel ->
+                        responseModel.getProductId().equals("1") &&
+                                responseModel.getProductName().equals("Dog Food") &&
+                                responseModel.getProductType().equals(productType)
+                )
+                .expectNextMatches(responseModel ->
+                        responseModel.getProductId().equals("2") &&
+                                responseModel.getProductName().equals("Cat Food") &&
+                                responseModel.getProductType().equals(productType)
+                )
+                .verifyComplete();
+
+        verify(productRepository).findProductsByProductType(productType);
+    }
+
+    @Test
+    void testGetProductsByType_InvalidType() {
+        // Arrange
+        String productType = "NonExistentType";
+
+        when(productRepository.findProductsByProductType(productType)).thenReturn(Flux.empty());
+
+        // Act
+        Flux<ProductResponseModel> result = productService.getProductsByType(productType);
+
+        // Assert
+        StepVerifier.create(result)
+                .verifyComplete();
+
+        verify(productRepository).findProductsByProductType(productType);
+    }
 }
+

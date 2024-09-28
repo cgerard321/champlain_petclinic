@@ -98,4 +98,11 @@ public class ProductsServiceClient {
                 .bodyToMono(Void.class);
 
     }
+    public Flux<ProductResponseDTO> getProductsByType(final String type){
+        return webClientBuilder.build()
+                .get()
+                .uri(productsServiceUrl + "/filter/"  + type)
+                .retrieve()
+                .bodyToFlux(ProductResponseDTO.class);
+    }
 }

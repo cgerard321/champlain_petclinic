@@ -292,7 +292,7 @@ public class InventoryServiceClient {
                 .bodyToFlux(SupplyResponseDTO.class);
     }
   
-  public Flux<ProductResponseDTO> getLowStockProducts(String inventoryId, int stockThreshold) {
+    public Flux<ProductResponseDTO> getLowStockProducts(String inventoryId, int stockThreshold) {
         UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(inventoryServiceUrl + "/{inventoryId}/products/lowstock")
                 .queryParam("threshold", stockThreshold);
 
@@ -302,6 +302,24 @@ public class InventoryServiceClient {
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError,
                         resp -> Mono.error(new NotFoundException("No products below threshold in inventory: " + inventoryId)))
+                .bodyToFlux(ProductResponseDTO.class);
+    }
+
+    public Flux<ProductResponseDTO> searchProducts(
+            final String inventoryId,
+            final String productName,
+            final String productDescription
+    ) {
+        UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(inventoryServiceUrl + "/{inventoryId}/products/search")
+                .queryParamIfPresent("productName", Optional.ofNullable(productName))
+                .queryParamIfPresent("productDescription", Optional.ofNullable(productDescription));
+
+        return webClient.get()
+                .uri(uriBuilder.buildAndExpand(inventoryId).toUri())
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError,
+                        resp -> Mono.error(new NotFoundException("No products found in inventory: " + inventoryId)))
                 .bodyToFlux(ProductResponseDTO.class);
     }
 
