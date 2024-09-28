@@ -7,9 +7,9 @@ package com.petclinic.authservice.Util.Exceptions;
  * Date: 2021-10-16
  * Ticket: feat(AUTH-CPC-460)
  */
-public class EmailSendingException extends RuntimeException {
+public class EmailSendingFailedException extends RuntimeException {
 
-    public EmailSendingException(String message) {
+    public EmailSendingFailedException(String message) {
         super(message);
     }
 }

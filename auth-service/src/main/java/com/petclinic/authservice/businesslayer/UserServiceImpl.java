@@ -15,8 +15,6 @@ import com.petclinic.authservice.datamapperlayer.UserMapper;
 import com.petclinic.authservice.domainclientlayer.Mail.Mail;
 import com.petclinic.authservice.domainclientlayer.Mail.MailService;
 import com.petclinic.authservice.domainclientlayer.NewEmailingService.DirectEmailModelRequestDTO;
-import com.petclinic.authservice.domainclientlayer.cart.CartRequest;
-import com.petclinic.authservice.domainclientlayer.cart.CartResponse;
 import com.petclinic.authservice.domainclientlayer.NewEmailingService.EmailingServiceClient;
 import com.petclinic.authservice.domainclientlayer.cart.CartService;
 import com.petclinic.authservice.presentationlayer.User.*;
@@ -36,7 +34,7 @@ import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.server.resource.InvalidBearerTokenException;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Mono;
+
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.*;
@@ -160,7 +158,7 @@ public class UserServiceImpl implements UserService {
         if (result != null && result.equals(HttpStatus.OK)) {
             log.info("Email sent to {}", user.getEmail());
         } else {
-            throw new EmailSendingException("Failed to send email to " + user.getEmail());
+            throw new EmailSendingFailedException("Failed to send email to " + user.getEmail());
         }
     }
 

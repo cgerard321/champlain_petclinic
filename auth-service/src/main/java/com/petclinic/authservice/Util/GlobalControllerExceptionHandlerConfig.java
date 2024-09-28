@@ -96,9 +96,9 @@ public class GlobalControllerExceptionHandlerConfig {
         return new HTTPErrorMessage(BAD_REQUEST.value(), ex.getMessage());
     }
 
-    @ExceptionHandler(value = EmailSendingException.class)
+    @ExceptionHandler(value = EmailSendingFailedException.class)
     @ResponseStatus(value = UNPROCESSABLE_ENTITY)
-    public HTTPErrorMessage emailSendingException(EmailSendingException ex) {
+    public HTTPErrorMessage emailSendingException(EmailSendingFailedException ex) {
 
         return new HTTPErrorMessage(UNPROCESSABLE_ENTITY.value(), ex.getMessage());
     }
