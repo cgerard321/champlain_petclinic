@@ -26,23 +26,6 @@ public class EmailingServiceClient {
         emailingServiceUrl = "http://" + emailingServiceHost + ":" + emailingServicePort + "/email";
     }
 
-    public Flux<EmailModelResponseDTO> getAllEmails(){
-        return webClientBuilder.build().get()
-                .uri(emailingServiceUrl + "/get")
-                .retrieve()
-                .bodyToFlux(EmailModelResponseDTO.class);
-    }
-
-    public Mono<String> addHtmlTemplate(String templateName, String htmlContent) {
-        return webClientBuilder.build().post()
-                .uri(emailingServiceUrl + "/templates/add/" + templateName)
-                .contentType(MediaType.TEXT_HTML)  // Set Content-Type header to text/html
-                .bodyValue(htmlContent)
-                .retrieve()
-                .bodyToMono(String.class)
-                .switchIfEmpty(Mono.error(new RuntimeException("No response from service")));
-    }
-
     public Mono<HttpStatus> sendEmail(DirectEmailModelRequestDTO directEmailModelRequestDTO) {
         return webClientBuilder.build().post()
                 .uri(emailingServiceUrl + "/send")
