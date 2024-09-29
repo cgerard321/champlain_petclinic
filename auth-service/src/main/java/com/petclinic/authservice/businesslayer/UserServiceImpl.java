@@ -109,11 +109,11 @@ public class UserServiceImpl implements UserService {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
 
             log.info("Sending email to {}...", userIDLessDTO.getEmail());
-            ////////////////////////////// NEW INFO -> Reverted back to using old emailing service as it works fine and there was bugs in the new emailing service
-            //    //Using new email service
-            log.info(mailService.sendMail(generateVerificationMail(user)));
-            //      generateVerificationMailWithNewEmailingService(user);
-            /////////////////////////////
+
+            //Commented out the old emailing service and replaced it with the new emailing service
+            //log.info(mailService.sendMail(generateVerificationMail(user)));  //Old
+            generateVerificationMailWithNewEmailingService(user);              //New
+
             log.info("Email sent to {}", userIDLessDTO.getEmail());
 
             //////////////////////////////////////// BROKEN CODE -> Cart decided to add a code the create a cart and DIDN'T TEST IT! Turns out it breaks everything when trying to sign up :)
@@ -143,18 +143,13 @@ public class UserServiceImpl implements UserService {
 
         String formatedLink = format("<a class=\"email-button\" href=\"%s://%s%s/verification/%s\">Verify Email</a>", gatewayProtocol, niceSub, gatewayOrigin, base64Token);
 
-//        DirectEmailModelRequestDTO directEmailModelRequestDTO = new DirectEmailModelRequestDTO(
-//                user.getEmail(), "Verification Email", "Default", "Thank you for Signing Up with us - Verify your email address",
-//                "We have received a request to create an account for Pet Clinic from this email.\n\n" +
-//                        "We have received a request to create an account for Pet Clinic from this email." +
-//                        "Click on the following link to verify your identity: " + formatedLink + "\n" +
-//                        "If you do not wish to create an account, please disregard this email.",
-//                "Thank you for choosing Pet Clinic.", user.getUsername(), "ChamplainPetClinic");
-
-                DirectEmailModelRequestDTO directEmailModelRequestDTO = new DirectEmailModelRequestDTO(
-                user.getEmail(), "Verification Email", "Default", "Thank you",
-                "Body",
-                "Footer.", user.getUsername(), "ChamplainPetClinic");
+        DirectEmailModelRequestDTO directEmailModelRequestDTO = new DirectEmailModelRequestDTO(
+                user.getEmail(), "Verification Email", "Default", "Pet clinic - Verification Email",
+                "Thank you for Signing Up with us.\n" +
+                        "We have received a request to create an account for Pet Clinic from this email.\n\n" +
+                        "Click on the following button to verify your identity: " + formatedLink + "\n\n\n" +
+                        "If you do not wish to create an account, please disregard this email.",
+                "Thank you for choosing Pet Clinic.", user.getUsername(), "ChamplainPetClinic");
 
         HttpStatus result = emailingServiceClient.sendEmail(directEmailModelRequestDTO).block();
 
