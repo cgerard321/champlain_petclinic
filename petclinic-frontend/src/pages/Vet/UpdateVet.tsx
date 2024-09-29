@@ -3,6 +3,8 @@ import { VetRequestModel } from '@/features/veterinarians/models/VetRequestModel
 import { updateVet } from '@/features/veterinarians/api/updateVet';
 import { Button, Modal, Form } from 'react-bootstrap';
 import { Workday } from '@/features/veterinarians/models/Workday';
+import { useNavigate } from 'react-router-dom';
+import { AppRoutePaths } from '@/shared/models/path.routes';
 
 interface UpdateVetProps {
   vet: VetRequestModel;
@@ -45,6 +47,21 @@ export default function UpdateVet({
     }
   };
 
+  const handleSpecialtiesChange = (e: ChangeEvent<unknown>): void => {
+    const selectElement = e.target as HTMLSelectElement;
+    const selectedOptions = Array.from(selectElement.selectedOptions);
+
+    const selectedSpecialties = selectedOptions.map(option => ({
+      specialtyId: option.value,
+      name: option.textContent || '',
+    }));
+
+    setFormData(prevVet => ({
+      ...prevVet,
+      specialties: selectedSpecialties,
+    }));
+  };
+
   const validate = (): boolean => {
     const newErrors: { [key: string]: string } = {};
     if (!formData.firstName) newErrors.firstName = 'First name is required';
@@ -57,6 +74,8 @@ export default function UpdateVet({
     return Object.keys(newErrors).length === 0;
   };
 
+  const navigate = useNavigate();
+
   const handleSubmit = async (e: FormEvent): Promise<void> => {
     e.preventDefault();
     if (!validate()) return;
@@ -65,6 +84,9 @@ export default function UpdateVet({
       await updateVet(vet.vetId, formData);
       alert('Vet updated successfully!');
       onClose();
+
+      navigate(AppRoutePaths.Vet);
+      window.location.reload();
     } catch (error) {
       console.error('Error updating vet:', error);
     }
@@ -148,7 +170,22 @@ export default function UpdateVet({
           </Form.Group>
 
           <Form.Group className="mb-3">
-            <Form.Label>Work Hours JSON</Form.Label>
+            <Form.Label>Specialties</Form.Label>
+            <Form.Control
+              as="select"
+              multiple
+              name="specialties"
+              value={formData.specialties.map(s => s.specialtyId)}
+              onChange={handleSpecialtiesChange}
+            >
+              <option value="1">Surgery</option>
+              <option value="2">Dentistry</option>
+              <option value="3">Dermatology</option>
+            </Form.Control>
+          </Form.Group>
+
+          <Form.Group className="mb-3">
+            <Form.Label>Work Hours</Form.Label>
             <Form.Control
               type="text"
               name="workHoursJson"
@@ -168,16 +205,6 @@ export default function UpdateVet({
           </Form.Group>
 
           <Form.Group className="mb-3">
-            <Form.Check
-              type="checkbox"
-              label="Photo Default"
-              name="photoDefault"
-              checked={formData.photoDefault}
-              onChange={handleCheckboxChange}
-            />
-          </Form.Group>
-
-          <Form.Group className="mb-3">
             <Form.Label>Work Days</Form.Label>
             {Object.values(Workday).map(day => (
               <Form.Check
@@ -190,6 +217,16 @@ export default function UpdateVet({
                 onChange={handleWorkdayChange}
               />
             ))}
+          </Form.Group>
+
+          <Form.Group className="mb-3">
+            <Form.Check
+              type="checkbox"
+              label="Photo Default"
+              name="photoDefault"
+              checked={formData.photoDefault}
+              onChange={handleCheckboxChange}
+            />
           </Form.Group>
         </Form>
       </Modal.Body>
