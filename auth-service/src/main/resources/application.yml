@@ -23,6 +23,7 @@ default-admin:
   username: admin
   password: admin
 
+#This was changed to the new endpoint using the new V2 functions, if you want to access the previous
 gateway:
   origin: localhost:8080/api/v2/gateway
   protocol: http

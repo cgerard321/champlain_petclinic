@@ -33,7 +33,6 @@ public class UserController {
 
     private final AuthServiceClient authServiceClient;
 
-    //STRINGTOFINDNEWMETHODSTODOTESTINON-GEIFUSEFUISEB
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @GetMapping("/verification/{token}")
     public Mono<ResponseEntity<UserDetails>> verifyUserUsingV2Endpoint(@PathVariable final String token) {
@@ -48,7 +47,6 @@ public class UserController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    //STRINGTOFINDNEWMETHODSTODOTESTINON-GEIFUSEFUISEB
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @PostMapping(value = "/users",
             consumes = "application/json",

@@ -138,7 +138,6 @@ public class AuthServiceClient {
 
     }
 
-    //STRINGTOFINDNEWMETHODSTODOTESTINON-GEIFUSEFUISEB
     public Mono<OwnerResponseDTO> createUserUsingV2Endpoint(Mono<Register> model) {
 
         String uuid = UUID.randomUUID().toString();
@@ -271,7 +270,6 @@ public class AuthServiceClient {
                 });
     }
 
-    //STRINGTOFINDNEWMETHODSTODOTESTINON-GEIFUSEFUISEB
     public Mono<ResponseEntity<UserDetails>> verifyUserUsingV2Endpoint(final String token) {
 
         return webClientBuilder.build()
