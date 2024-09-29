@@ -129,8 +129,6 @@ export default function VetDetails(): JSX.Element {
               </p>
             </section>
 
-
-
             <section className="work-info">
               <h2>Work Information</h2>
               <p>
