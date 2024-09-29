@@ -35,5 +35,6 @@ public interface ProductInventoryService {
   
     Flux<ProductResponseDTO> getLowStockProducts(String inventoryId, int stockThreshold);
 
+    Flux<ProductResponseDTO> searchProducts(String inventoryId, String productName, String productDescription);
 
     }
