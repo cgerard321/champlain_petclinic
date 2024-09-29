@@ -44,6 +44,22 @@ public class BillServiceImpl implements BillService{
                 .map(EntityDtoUtil::toBillResponseDto);
     }
 
+    // Fetch a specific bill for a customer
+    @Override
+    public Mono<BillResponseDTO> GetBillByCustomerIdAndBillId(String customerId, String billId) {
+        return billRepository.findByBillId(billId)
+                .filter(bill -> bill.getCustomerId().equals(customerId))
+                .map(EntityDtoUtil::toBillResponseDto);
+    }
+
+    // Fetch filtered bills by status for a customer
+    @Override
+    public Flux<BillResponseDTO> GetBillsByCustomerIdAndStatus(String customerId, BillStatus status) {
+        return billRepository.findByCustomerIdAndBillStatus(customerId, status)
+                .map(EntityDtoUtil::toBillResponseDto);
+    }
+
+
     @Override
     public Flux<BillResponseDTO> getAllBillsByPage(Pageable pageable, String billId, String customerId,
                                                    String ownerFirstName, String ownerLastName, String visitType,

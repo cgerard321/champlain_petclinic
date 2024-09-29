@@ -47,6 +47,11 @@ public interface BillService {
     Mono<Void> DeleteBill(@RequestParam(value = "billId", required = true) String billId);
 
     Flux<BillResponseDTO> GetBillsByCustomerId(@RequestParam(value = "customerId", required = true) String customerId);
+    // Fetch a specific bill for a customer
+    Mono<BillResponseDTO> GetBillByCustomerIdAndBillId(String customerId, String billId);
+    // Fetch filtered bills by status
+    Flux<BillResponseDTO> GetBillsByCustomerIdAndStatus(String customerId, BillStatus status);
+
     Flux<BillResponseDTO> GetBillsByVetId(@RequestParam(value = "vetId", required = true) String vetId);
 
     Flux<Void> DeleteBillsByVetId(@RequestParam(value="vetId", required = true) String vetId);
@@ -55,5 +60,7 @@ public interface BillService {
     Mono<BillResponseDTO> updateBill(String billId, Mono<BillRequestDTO> billRequestDTO);
 
     Mono<Void> DeleteAllBills();
+
+
 
 }
