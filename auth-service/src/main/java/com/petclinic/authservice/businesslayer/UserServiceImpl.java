@@ -109,9 +109,9 @@ public class UserServiceImpl implements UserService {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
 
             log.info("Sending email to {}...", userIDLessDTO.getEmail());
-            //Using new email service
-            //log.info(mailService.sendMail(generateVerificationMail(user)));
-            generateVerificationMailWithNewEmailingService(user);
+            //    //Using new email service
+            log.info(mailService.sendMail(generateVerificationMail(user)));
+            //      generateVerificationMailWithNewEmailingService(user);
             log.info("Email sent to {}", userIDLessDTO.getEmail());
 
             //User savedUser = userRepo.save(user);
@@ -137,8 +137,6 @@ public class UserServiceImpl implements UserService {
         String niceSub = gatewaySubdomain.length() > 0 ? gatewaySubdomain + "." : "";
 
         String formatedLink = format("<a class=\"email-button\" href=\"%s://%s%s/verification/%s\">Verify Email</a>", gatewayProtocol, niceSub, gatewayOrigin, base64Token);
-
-        log.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@" + user.getEmail());
 
 //        DirectEmailModelRequestDTO directEmailModelRequestDTO = new DirectEmailModelRequestDTO(
 //                user.getEmail(), "Verification Email", "Default", "Thank you for Signing Up with us - Verify your email address",

@@ -303,15 +303,15 @@ const SignUp: React.FC = (): JSX.Element => {
               <label>Password: </label>
               <div className="password-container">
                 <input
-                  type={showPassword ? 'text' : 'password'} // Toggle between text and password type
+                  type={showPassword ? 'text' : 'password'}
                   name="password"
                   value={userData.password}
                   onChange={handleChange}
-                  className="password-input" // Additional class for styling
+                  className="password-input"
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPassword(prev => !prev)} // Toggle visibility state
+                  onClick={() => setShowPassword(prev => !prev)}
                   className="toggle-password-visibility"
                 >
                   {showPassword ? 'Hide' : 'Show'}

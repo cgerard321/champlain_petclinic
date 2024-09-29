@@ -24,7 +24,7 @@ default-admin:
   password: admin
 
 gateway:
-  origin: localhost:8080/api/gateway
+  origin: localhost:8080/api/v2/gateway
   protocol: http
   subdomain:
 
