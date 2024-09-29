@@ -54,8 +54,6 @@ public class EmailServiceImpl : IEmailService
         Console.WriteLine("Received Email Call Function!");
         DirectEmailModel directEmailModel = model;
         Console.WriteLine("Found the model!" + directEmailModel);
-
-
         
         if (String.IsNullOrWhiteSpace(directEmailModel.EmailToSendTo))
             throw new BadEmailModel("Email To Send To is null or whitespace. EMAIL IS REQUIRED");
