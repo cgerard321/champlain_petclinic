@@ -105,7 +105,7 @@ export default function VetDetails(): JSX.Element {
         <h1>Vet Information</h1>
 
         {photo && (
-          <section className="vet-photo">
+          <section className="vet-photo-container">
             <img src={photo} alt="Vet" className="vet-photo" />
           </section>
         )}

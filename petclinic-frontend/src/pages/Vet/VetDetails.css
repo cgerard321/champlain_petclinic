@@ -16,8 +16,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: 40px;
-  padding-bottom: 60px;
+  margin-bottom: 20px;
+  padding-bottom: 20px;
 }
 
 .vet-photo {
@@ -30,9 +30,8 @@
 }
 
 .vet-photo:hover {
-  transform: scale(1.08); 
+  transform: scale(1.08);
 }
-
 
 
 .vet-info,
