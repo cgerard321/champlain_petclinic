@@ -2,6 +2,12 @@ import { useEffect, useState } from 'react';
 import { Bill } from '@/features/bills/models/Bill.ts';
 import { getAllBills } from '@/features/bills/api/getAllBills.tsx';
 import { getBillByBillId } from '@/features/bills/api/GetBillByBillId.tsx';
+import { getAllOwners } from '../customers/api/getAllOwners';
+import { getAllVets } from '../veterinarians/api/getAllVets';
+import { BillRequestModel } from './models/BillRequestModel';
+import { addBill } from './api/addBill';
+import { OwnerResponseModel } from '../customers/models/OwnerResponseModel';
+import { VetResponseModel } from '../veterinarians/models/VetResponseModel';
 
 export default function AdminBillsListTable(): JSX.Element {
   const [bills, setBills] = useState<Bill[]>([]);
@@ -9,9 +15,40 @@ export default function AdminBillsListTable(): JSX.Element {
   const [searchedBill, setSearchedBill] = useState<Bill | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const [showCreateForm, setCreateForm] = useState<boolean>(false);
+  const [newBill, setNewBill] = useState<BillRequestModel>({
+    customerId: '',
+    vetId: '',
+    visitType: '',
+    date: '',
+    amount: 0,
+    billStatus: '',
+    dueDate: '',
+  });
+  const [owners, setOwners] = useState<OwnerResponseModel[]>([]);
+  const [vets, setVets] = useState<VetResponseModel[]>([]);
+
   const fetchBills = async (): Promise<void> => {
     const allBills = await getAllBills();
     setBills(allBills);
+  };
+
+  const fetchOwnersAndVets = async (): Promise<void> => {
+    const ownersList = await getAllOwners();
+    const vetsList = await getAllVets();
+    setOwners(ownersList);
+    setVets(vetsList);
+  };
+
+  const handleCreateBill = async (): Promise<void> => {
+    try {
+      await addBill(newBill);
+      setCreateForm(false);
+      fetchBills();
+    } catch (err) {
+      console.error('Error creating bill:', err);
+      setError('Failed to create bill. Please try again.');
+    }
   };
 
   const handleSearch = async (): Promise<void> => {
@@ -39,6 +76,7 @@ export default function AdminBillsListTable(): JSX.Element {
 
   useEffect(() => {
     fetchBills();
+    fetchOwnersAndVets();
   }, []);
 
   return (
@@ -127,6 +165,112 @@ export default function AdminBillsListTable(): JSX.Element {
                 ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* Create Bill Form */}
+      <button onClick={() => setCreateForm(!showCreateForm)}>
+        {showCreateForm ? 'Cancel' : 'Create New Bill'}
+      </button>
+
+      {showCreateForm && (
+        <div>
+          <h3>Create New Bill</h3>
+          <form
+            onSubmit={e => {
+              e.preventDefault();
+              handleCreateBill();
+            }}
+          >
+            <div>
+              <label>Customer</label>
+              <select
+                value={newBill.customerId}
+                onChange={e =>
+                  setNewBill({ ...newBill, customerId: e.target.value })
+                }
+              >
+                <option value="">Select Customer</option>
+                {owners.map(owner => (
+                  <option key={owner.ownerId} value={owner.ownerId}>
+                    {owner.firstName} {owner.lastName}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label>Vet</label>
+              <select
+                value={newBill.vetId}
+                onChange={e =>
+                  setNewBill({ ...newBill, vetId: e.target.value })
+                }
+              >
+                <option value="">Select Vet</option>
+                {vets.map(vet => (
+                  <option key={vet.vetId} value={vet.vetId}>
+                    {vet.firstName} {vet.lastName}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label>Visit Type</label>
+              <input
+                type="text"
+                value={newBill.visitType}
+                onChange={e =>
+                  setNewBill({ ...newBill, visitType: e.target.value })
+                }
+              />
+            </div>
+
+            <div>
+              <label>Date</label>
+              <input
+                type="date"
+                value={newBill.date}
+                onChange={e => setNewBill({ ...newBill, date: e.target.value })}
+              />
+            </div>
+
+            <div>
+              <label>Amount</label>
+              <input
+                type="number"
+                value={newBill.amount}
+                onChange={e =>
+                  setNewBill({ ...newBill, amount: parseFloat(e.target.value) })
+                }
+              />
+            </div>
+
+            <div>
+              <label>Status</label>
+              <input
+                type="text"
+                value={newBill.billStatus}
+                onChange={e =>
+                  setNewBill({ ...newBill, billStatus: e.target.value })
+                }
+              />
+            </div>
+
+            <div>
+              <label>Due Date</label>
+              <input
+                type="date"
+                value={newBill.dueDate}
+                onChange={e =>
+                  setNewBill({ ...newBill, dueDate: e.target.value })
+                }
+              />
+            </div>
+
+            <button type="submit">Create Bill</button>
+          </form>
         </div>
       )}
     </div>
