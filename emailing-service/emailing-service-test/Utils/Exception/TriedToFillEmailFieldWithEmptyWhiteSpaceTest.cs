@@ -1,6 +1,6 @@
-using System;
+
 using emailing_service.Utils.Exception;
-using NUnit.Framework;
+
 
 namespace emailing_service_test.Utils.Exception;
 
@@ -30,7 +30,7 @@ public class TriedToFillEmailFieldWithEmptyWhiteSpaceTests
         var exception = new TriedToFillEmailFieldWithEmptyWhiteSpace(expectedMessage, expectedFieldName);
 
         // Assert
-        Assert.AreEqual(expectedFormattedMessage, exception.Message);
+        Assert.That(exception.Message, Is.EqualTo(expectedFormattedMessage));
     }
 
     [Test]
@@ -44,7 +44,7 @@ public class TriedToFillEmailFieldWithEmptyWhiteSpaceTests
         var exception = new TriedToFillEmailFieldWithEmptyWhiteSpace(expectedMessage, innerException);
 
         // Assert
-        Assert.AreEqual(expectedMessage, exception.Message);
-        Assert.AreEqual(innerException, exception.InnerException);
+        Assert.That(exception.Message, Is.EqualTo(expectedMessage));
+        Assert.That(exception.InnerException, Is.EqualTo(innerException));
     }
 }

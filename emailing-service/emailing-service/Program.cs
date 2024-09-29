@@ -28,7 +28,7 @@ try
     var smtpEmail = Env.GetString("SMTP_EMAIL") ?? throw new ArgumentNullException("SMTP_EMAIL");
     var smtpDisplayName = Env.GetString("SMTP_DISPLAY_NAME") ?? throw new ArgumentNullException("SMTP_DISPLAY_NAME");
 
-    
+
     EmailUtils.emailConnectionString = new ConnectionEmailServer(
         smtpServer,
         smtpPort,
@@ -37,7 +37,6 @@ try
         smtpEmail,
         smtpDisplayName
     );
-    Console.WriteLine($"SMTP server is : {EmailUtils.emailConnectionString.ToString()}");
 }
 catch (Exception ex)
 {
@@ -69,16 +68,26 @@ catch (DirectoryNotFoundException e)
     Console.WriteLine("Could not load HTML file. This means that we do not have the default template loaded. IGNORE THIS IF IN TEST");
 }
 
+
 // Configure database connection string
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-Console.WriteLine(connectionString);
+String connectionString;
+try
+{
+    connectionString = builder.Configuration["DEFAULT_CONNECTION"];
+}
+catch (ArgumentNullException)
+{
+    //We just make sure the DB string is valid for testing!
+    Console.WriteLine("We did not find the string connection, as such, we will use a placeholder one!");
+    connectionString = "Server=emailing-service-mysql-db;Port=3308;Database=MyDatabaseExample;User=root;Password=Example;";
+}
 DatabaseHelper._connectionString = connectionString;
 builder.Services.AddTransient<IDatabaseHelper, DatabaseHelper>();
 IDatabaseHelper dbHelper = new DatabaseHelper();
 Console.WriteLine("we reached the tablecreation");
 //May there be an error here check later!
 dbHelper.CreateTableAsync(50);
-builder.Services.AddScoped<IEmailService, EmailServiceImpl>();
+//builder.Services.AddScoped<IEmailService, EmailServiceImpl>();
 
 
 

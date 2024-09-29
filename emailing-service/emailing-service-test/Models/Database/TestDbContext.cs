@@ -1,11 +1,6 @@
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using emailing_service.Models.Database;
-using emailing_service.Utils;
-using Microsoft.EntityFrameworkCore;
 
-namespace emailing_service_test;
+namespace emailing_service_test.Models.Database;
 
 public class TestDbContext : IDatabaseHelper
 {

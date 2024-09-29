@@ -1,49 +1,30 @@
-using System.Collections.Generic;
-using System.Net.Http;
+using emailing_service_test.Models.Database;
 using emailing_service.BuisnessLayer;
-using emailing_service.Controllers;
 using emailing_service.Models;
 using emailing_service.Models.Database;
 using emailing_service.Models.EmailType;
 using emailing_service.Utils;
 using emailing_service.Utils.Exception;
-using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace emailing_service_test.BuisnessLayer;
 
 using NUnit.Framework;
-using Moq;
-using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
-using System.IO;
-using System.Text;
+
 
 [TestFixture]
 public class EmailServiceImplTest
 {
     private IEmailService _controller;
-    private readonly string pathOfDefaultHtml;
-    private readonly DirectEmailModel directEmailModel;
+    private readonly string _pathOfDefaultHtml;
     public EmailServiceImplTest()
     {
         EmailUtils.sendEmail = false;
-        pathOfDefaultHtml = "<html><body>%%EMAIL_HEADERS%% %%EMAIL_BODY%% %%EMAIL_FOOTER%% %%EMAIL_NAME%% %%EMAIL_SENDER%%</body></html>";
-        directEmailModel = new DirectEmailModel(
-            "xilef992@gmail.com",
-            "This is a test email",
-            "Default",
-            "This is the emailHeader",
-            "This is the emailbody",
-            "this is the email footer",
-            "Felix",
-            "PetClinic"
-        );
+        _pathOfDefaultHtml = "<html><body>%%EMAIL_HEADERS%% %%EMAIL_BODY%% %%EMAIL_FOOTER%% %%EMAIL_NAME%% %%EMAIL_SENDER%%</body></html>";
     }
     
     [OneTimeSetUp]
-    public async Task SetUp()
+    public Task SetUp()
     {
         EmailUtils.emailConnectionString  = new ConnectionEmailServer(
             "Mock",
@@ -53,9 +34,9 @@ public class EmailServiceImplTest
             "mockemail@gmail.com",
             "MockPetClinic"
         );
-        _controller = new emailing_service.BuisnessLayer.EmailServiceImpl();
+        _controller = new EmailServiceImpl();
         _controller.SetDatabaseHelper(new TestDbContext());
-        
+        return Task.CompletedTask;
     }
     /*[Test]
     public async Task TestEndpoint_Returns_OkObjectResult()
@@ -65,33 +46,35 @@ public class EmailServiceImplTest
     }*/
 
     [Test]
-    public async Task GetAll_ReturnAllMessages_ReturnAllEmails()
+    public Task GetAll_ReturnAllMessages_ReturnAllEmails()
     {
         var result = _controller.GetAllEmails();
         Assert.That(result, Is.Not.Null);
         Assert.IsAssignableFrom<List<EmailModel>>(result);
+        return Task.CompletedTask;
     }
     
     [Test]
-    public async Task GetAll_AbscentDatabase_ThrowMissingDatabaseException()
+    public Task GetAll_AbscentDatabase_ThrowMissingDatabaseException()
     {
-        IEmailService service = new emailing_service.BuisnessLayer.EmailServiceImpl();
+        IEmailService service = new EmailServiceImpl();
         Assert.Throws<MissingDatabaseException>(() => {
             service.GetAllEmails();
         });
-        
+        return Task.CompletedTask;
     }
     
     [Test]
     [TestCase("T")]
     [TestCase("Template2")]
     [TestCase("ndawindawiuhduiaw")]
-    public async Task ReceiveHtml_Returns_OperationResult(string templateName)
+    public Task ReceiveHtml_Returns_OperationResult(string templateName)
     {
-        var result = _controller.ReceiveHtml(templateName, pathOfDefaultHtml);
+        var result = _controller.ReceiveHtml(templateName, _pathOfDefaultHtml);
         Assert.That(result, Is.TypeOf<OperationResult>());
-        OperationResult operationResult = (OperationResult)result;
+        OperationResult operationResult = result;
         Assert.That(operationResult.IsSuccess, Is.True);
+        return Task.CompletedTask;
     }
     [Test]
     [TestCase("")]
@@ -100,7 +83,7 @@ public class EmailServiceImplTest
     {
         // Act & Assert
         var ex = Assert.Throws<TemplateFormatException>(() =>
-            _controller.ReceiveHtml(templateName, pathOfDefaultHtml));
+            _controller.ReceiveHtml(templateName!, _pathOfDefaultHtml));
     
         Assert.That(ex.Message, Does.Contain("Template Name is required"));
     }
@@ -112,25 +95,25 @@ public class EmailServiceImplTest
     {
         // Act & Assert
         var ex = Assert.Throws<TemplateFormatException>(() =>
-            _controller.ReceiveHtml("templateName", templateBody));
+            _controller.ReceiveHtml("templateName", templateBody!));
     
         Assert.That(ex.Message, Does.Contain("HTML content was missing"));
     }
     [Test]
     [TestCase("FirstExample1")]
     [TestCase("Example1")]
-    public void ReceiveHtml_AlreadyExistingTemplate_ThrowsTemplateFormatException(string? templateName)
+    public void ReceiveHtml_AlreadyExistingTemplate_ThrowsTemplateFormatException(string templateName)
     {
         //Create our first template
-        var result = _controller.ReceiveHtml(templateName, pathOfDefaultHtml);
+        var result = _controller.ReceiveHtml(templateName, _pathOfDefaultHtml);
         Assert.That(result, Is.TypeOf<OperationResult>());
-        OperationResult operationResult = (OperationResult)result;
+        OperationResult operationResult = result;
         Assert.That(operationResult.IsSuccess, Is.True);
 
         
         // Act & Assert
         var ex = Assert.Throws<TemplateFormatException>(() =>
-            _controller.ReceiveHtml(templateName, pathOfDefaultHtml));
+            _controller.ReceiveHtml(templateName, _pathOfDefaultHtml));
     
         Assert.That(ex.Message, Does.Contain($"Template [{templateName}] already exists."));
     }
@@ -142,7 +125,7 @@ public class EmailServiceImplTest
             "This is a test email",
             "Default",
             "This is the emailHeader",
-            "This is the emailbody",
+            "This is the email body",
             "this is the email footer",
             "Felix",
             "PetClinic"
@@ -151,7 +134,7 @@ public class EmailServiceImplTest
         yield return new DirectEmailModel(
             "example2@test.com",
             "Another test email",
-            null,
+            null!,
             "Test email header",
             "Test email body",
             "Test email footer",
@@ -160,20 +143,19 @@ public class EmailServiceImplTest
         );
     }
     [Test, TestCaseSource(nameof(ValidEmailModels))]
-    public void SendEmail_ValidEmail_SendsEmail(DirectEmailModel? testModel)
+    public void SendEmail_ValidEmail_SendsEmail(DirectEmailModel testModel)
     {
         EmailUtils.EmailTemplates.Clear();
-        var templateCreateResult = _controller.ReceiveHtml("Default", pathOfDefaultHtml);
+        var templateCreateResult = _controller.ReceiveHtml("Default", _pathOfDefaultHtml);
         Assert.That(templateCreateResult, Is.TypeOf<OperationResult>());
-        OperationResult operationResultForTemplateCreate = (OperationResult)templateCreateResult;
+        OperationResult operationResultForTemplateCreate = templateCreateResult;
         Assert.That(operationResultForTemplateCreate.IsSuccess, Is.True);
         
         
         var result = _controller.SendEmail(testModel);
         Assert.That(result, Is.TypeOf<OperationResult>());
-        OperationResult operationResult = (OperationResult)result;
+        OperationResult operationResult = result;
         Assert.That(operationResult.IsSuccess, Is.True);
-        
     }
     /*
      We now do this in the endpoint
@@ -190,7 +172,7 @@ public class EmailServiceImplTest
     public static IEnumerable<DirectEmailModel> NullOrWhiteSpaceEmailModels()
     {
         yield return new DirectEmailModel(
-            null,
+            null!,
             "This is a test email",
             "Default",
             "This is the emailHeader",
@@ -222,7 +204,7 @@ public class EmailServiceImplTest
         );
     }
     [Test, TestCaseSource(nameof(NullOrWhiteSpaceEmailModels))]
-    public void SendEmail_NullOrWhitespaceEmailToSendTo_BadEmailModel(DirectEmailModel? testModel)
+    public void SendEmail_NullOrWhitespaceEmailToSendTo_BadEmailModel(DirectEmailModel testModel)
     {
         var ex = Assert.Throws<BadEmailModel>(() =>
             _controller.SendEmail(testModel));
@@ -293,7 +275,7 @@ public class EmailServiceImplTest
         );
     }
     [Test, TestCaseSource(nameof(InvalidEmailEmailModels))]
-    public void SendEmail_InvalidEmail_BadEmailModel(DirectEmailModel? testModel)
+    public void SendEmail_InvalidEmail_BadEmailModel(DirectEmailModel testModel)
     {
         var ex = Assert.Throws<BadEmailModel>(() =>
             _controller.SendEmail(testModel));
@@ -304,7 +286,7 @@ public class EmailServiceImplTest
     {
         yield return new DirectEmailModel(
             "felix@gmail.com",
-            null,
+            null!,
             "Default",
             "This is the emailHeader",
             "This is the emailbody",
@@ -334,7 +316,7 @@ public class EmailServiceImplTest
         );
     }
     [Test, TestCaseSource(nameof(NullOrWhitespaceTitleEmailModels))]
-    public void SendEmail_NullOrWhitespaceTitle_BadEmailModel(DirectEmailModel? testModel)
+    public void SendEmail_NullOrWhitespaceTitle_BadEmailModel(DirectEmailModel testModel)
     {
         var ex = Assert.Throws<BadEmailModel>(() =>
             _controller.SendEmail(testModel));
@@ -375,7 +357,7 @@ public class EmailServiceImplTest
         );
     }
     [Test, TestCaseSource(nameof(NonExistingTemplateEmailModels))]
-    public void SendEmail_NonExistingTemplate_TriedToFindNonExistingTemplate(DirectEmailModel? testModel)
+    public void SendEmail_NonExistingTemplate_TriedToFindNonExistingTemplate(DirectEmailModel testModel)
     {
         var ex = Assert.Throws<TriedToFindNonExistingTemplate>(() =>
             _controller.SendEmail(testModel));

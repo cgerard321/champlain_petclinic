@@ -191,5 +191,12 @@ public Flux<InventoryResponseDTO> searchInventories(
         int stockThreshold = threshold.orElse(16);
         return productInventoryService.getLowStockProducts(inventoryId, stockThreshold);
 
-}
+    }
+
+    @GetMapping("/{inventoryId}/products/search")
+    public Flux<ProductResponseDTO> searchProducts(@PathVariable String inventoryId,
+                                                   @RequestParam(required = false) String productName,
+                                                   @RequestParam(required = false) String productDescription) {
+        return productInventoryService.searchProducts(inventoryId, productName, productDescription);
+    }
 }

@@ -7010,11 +7010,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Admin\\Desktop\\PetClinic\\champlain_petclinic\\emailing-service\\emailing-service-test\\emailing-service-test.csproj",
+      "projectUniqueName": "C:\\Users\\Admin\\Desktop\\Sprint2\\Try3\\champlain_petclinic\\emailing-service\\emailing-service-test\\emailing-service-test.csproj",
       "projectName": "emailing-service-test",
-      "projectPath": "C:\\Users\\Admin\\Desktop\\PetClinic\\champlain_petclinic\\emailing-service\\emailing-service-test\\emailing-service-test.csproj",
+      "projectPath": "C:\\Users\\Admin\\Desktop\\Sprint2\\Try3\\champlain_petclinic\\emailing-service\\emailing-service-test\\emailing-service-test.csproj",
       "packagesPath": "C:\\Users\\Admin\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Admin\\Desktop\\PetClinic\\champlain_petclinic\\emailing-service\\emailing-service-test\\obj\\",
+      "outputPath": "C:\\Users\\Admin\\Desktop\\Sprint2\\Try3\\champlain_petclinic\\emailing-service\\emailing-service-test\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\Admin\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -7029,8 +7029,8 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "projectReferences": {
-            "C:\\Users\\Admin\\Desktop\\PetClinic\\champlain_petclinic\\emailing-service\\emailing-service\\emailing-service.csproj": {
-              "projectPath": "C:\\Users\\Admin\\Desktop\\PetClinic\\champlain_petclinic\\emailing-service\\emailing-service\\emailing-service.csproj"
+            "C:\\Users\\Admin\\Desktop\\Sprint2\\Try3\\champlain_petclinic\\emailing-service\\emailing-service\\emailing-service.csproj": {
+              "projectPath": "C:\\Users\\Admin\\Desktop\\Sprint2\\Try3\\champlain_petclinic\\emailing-service\\emailing-service\\emailing-service.csproj"
             }
           }
         }
