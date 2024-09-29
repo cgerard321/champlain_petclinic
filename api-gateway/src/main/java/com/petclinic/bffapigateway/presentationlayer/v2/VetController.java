@@ -16,10 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -81,22 +78,31 @@ public class VetController {
                 .then(Mono.just(ResponseEntity.noContent().<Void>build()))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @PostMapping(value = "{vetId}/photos/{photoName}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public Mono<ResponseEntity<Resource>> addPhoto(
-            @PathVariable String vetId,
-            @PathVariable String photoName,
-            @RequestParam("image") MultipartFile image) throws IOException {
 
-
-        // Convert MultipartFile to Resource
-        Mono<Resource> resourceMono = Mono.just(new ByteArrayResource(image.getBytes()));
-
-
-        return vetsServiceClient.addPhotoToVet(vetId, photoName, resourceMono)
-                .map(r -> ResponseEntity.status(HttpStatus.CREATED).body(r))
-                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
+    @GetMapping("{vetId}/photo")
+    public Mono<ResponseEntity<Resource>> getPhotoByVetId(@PathVariable String vetId) {
+        return vetsServiceClient.getPhotoByVetId(vetId)
+                .map(r -> ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, MediaType.IMAGE_JPEG_VALUE).body(r))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
+
+//    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+//    @PostMapping(value = "{vetId}/photos/{photoName}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+//    public Mono<ResponseEntity<Resource>> addPhoto(
+//            @PathVariable String vetId,
+//            @PathVariable String photoName,
+//            @RequestParam("image") MultipartFile image) throws IOException {
+//
+//
+//        // Convert MultipartFile to Resource
+//        Mono<Resource> resourceMono = Mono.just(new ByteArrayResource(image.getBytes()));
+//
+//
+//        return vetsServiceClient.addPhotoToVet(vetId, photoName, resourceMono)
+//                .map(r -> ResponseEntity.status(HttpStatus.CREATED).body(r))
+//                .defaultIfEmpty(ResponseEntity.badRequest().build());
+//    }
 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @GetMapping(value = "{vetId}", produces = MediaType.APPLICATION_JSON_VALUE)
