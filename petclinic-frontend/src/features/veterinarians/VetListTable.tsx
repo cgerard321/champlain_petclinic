@@ -27,24 +27,12 @@ export default function VetListTable({
     vetId: string
   ): Promise<void> => {
     event.stopPropagation();
+
     try {
-
-      await fetch(`http://localhost:8080/api/gateway/vets/${vetId}`, {
-        method: 'DELETE',
-      });
-
-
+      await deleteVet(vetId);
       onDeleteVet(vets.filter(vet => vet.vetId !== vetId));
-    } catch (error) {
-      console.error('Failed to delete vet:', error);
-
-      try {
-        await deleteVet(vetId);
-        onDeleteVet(vets.filter(vet => vet.vetId !== vetId));
-      } catch (err) {
-        console.error('Error deleting vet with deleteVet function:', err);
-
-      }
+    } catch (err) {
+      console.error('Error deleting vet:', err);
     }
   };
 
