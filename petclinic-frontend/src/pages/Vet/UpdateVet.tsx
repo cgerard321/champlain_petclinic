@@ -47,7 +47,9 @@ export default function UpdateVet({
     }
   };
 
-  const handleSpecialtiesChange = (e: ChangeEvent<unknown>): void => {
+  const handleSpecialtiesChange = (
+    e: React.ChangeEvent<HTMLSelectElement>
+  ): void => {
     const selectElement = e.target as HTMLSelectElement;
     const selectedOptions = Array.from(selectElement.selectedOptions);
 
@@ -171,7 +173,7 @@ export default function UpdateVet({
 
           <Form.Group className="mb-3">
             <Form.Label>Specialties</Form.Label>
-            <Form.Control
+            <Form.Select
               as="select"
               multiple
               name="specialties"
@@ -181,7 +183,7 @@ export default function UpdateVet({
               <option value="1">Surgery</option>
               <option value="2">Dentistry</option>
               <option value="3">Dermatology</option>
-            </Form.Control>
+            </Form.Select>
           </Form.Group>
 
           <Form.Group className="mb-3">
