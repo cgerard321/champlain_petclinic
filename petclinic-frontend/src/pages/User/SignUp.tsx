@@ -206,7 +206,8 @@ const SignUp: React.FC = (): JSX.Element => {
               Please check your inbox and follow the instructions in the email
               to complete your registration.
             </p>
-            <p>If you don’t see it, please check your spam folder.</p>
+            <p>Make sure to check the spam folder!</p>
+            <p>No emails received? Please contact us at (xxx)-xxxx-xxxx</p>
           </div>
         ) : (
           <>
