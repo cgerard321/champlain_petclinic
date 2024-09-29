@@ -31,19 +31,16 @@ import java.io.IOException;
 public class PhotoServiceImpl implements PhotoService {
     private final PhotoRepository photoRepository;
 
-
     @Override
     public Mono<Resource> getPhotoByVetId(String vetId) {
         return photoRepository.findByVetId(vetId)
+                .doOnSubscribe(subscription -> log.debug("Fetching photo for vetId: {}", vetId))
                 .switchIfEmpty(Mono.error(new NotFoundException("Photo for vet " + vetId + " does not exist.")))
-                .map(img -> {
-                    ByteArrayResource resource = new ByteArrayResource(img.getData());
-
-
-                    return resource;
-                });
+                .map(this::createResourceFromPhoto)
+                .cast(Resource.class) // Explicit cast to Resource
+                .doOnSuccess(resource -> log.info("Successfully fetched photo for vetId: {}", vetId))
+                .doOnError(error -> log.error("Error fetching photo for vetId: {}", vetId, error));
     }
-
 
     @Override
     public Mono<PhotoResponseDTO> getDefaultPhotoByVetId(String vetId) {
@@ -86,19 +83,9 @@ public class PhotoServiceImpl implements PhotoService {
                                     });
                         }));
     }
- /*   @Override
-    public Mono<Resource> insertPhotoOfVet(String vetId, String photoName, MultipartFile photo) {
-        return Mono.fromCallable(() -> {
-                    Photo photoEntity = new Photo();
-                    photoEntity.setVetId(vetId);
-                    photoEntity.setFilename(photoName);
-                    photoEntity.setImgType(photo.getContentType());
-                    photoEntity.setData(photo.getBytes());
-                    return photoEntity;
-                })
-                .flatMap(photoRepository::save)
-                .map(savedPhoto -> new ByteArrayResource(savedPhoto.getData()));
+
+    private ByteArrayResource createResourceFromPhoto(Photo img) {
+        return new ByteArrayResource(img.getData());
     }
-*/
 
 }
