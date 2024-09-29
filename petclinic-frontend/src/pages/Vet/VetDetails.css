@@ -16,21 +16,21 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: 40px; /* Increased margin for more spacing */
-  padding-bottom: 20px;
+  margin-bottom: 40px;
+  padding-bottom: 60px;
 }
 
 .vet-photo {
-  width: 300px; /* Increased width */
-  height: 300px; /* Increased height */
+  width: 300px;
+  height: 300px;
   border-radius: 15px;
   object-fit: cover;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* Slightly larger shadow */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   transition: transform 0.3s ease;
 }
 
 .vet-photo:hover {
-  transform: scale(1.08); /* Slightly larger scaling on hover */
+  transform: scale(1.08); 
 }
 
 

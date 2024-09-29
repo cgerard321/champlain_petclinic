@@ -28,7 +28,7 @@ export default function VetDetails(): JSX.Element {
     const fetchVetDetails = async (): Promise<void> => {
       try {
         const response = await fetch(
-          `http://localhost:8080/api/gateway/vets/${vetId}`
+          `http://localhost:8080/api/v2/gateway/vets/${vetId}`
         );
 
         if (!response.ok) {
@@ -44,7 +44,7 @@ export default function VetDetails(): JSX.Element {
     const fetchVetPhoto = async (): Promise<void> => {
       try {
         const response = await fetch(
-          `http://localhost:8080/api/gateway/vets/${vetId}/photo`,
+          `http://localhost:8080/api/v2/gateway/vets/${vetId}/photo`,
           {
             method: 'GET',
             headers: {
