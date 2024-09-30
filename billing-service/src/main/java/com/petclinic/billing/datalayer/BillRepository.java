@@ -19,6 +19,9 @@ public interface BillRepository extends ReactiveMongoRepository<Bill, String> {
     @Transactional(readOnly = true)
     Flux<Bill> findByCustomerId(String customerId);
 
+    // New method to find bills by customer ID and status
+    Flux<Bill> findByCustomerIdAndBillStatus(String customerId, BillStatus status);
+
     @Transactional(readOnly = true)
     Flux<Bill> findByVetId(String vetId);
 

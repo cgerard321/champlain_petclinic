@@ -56,6 +56,23 @@ public class BillServicePersistenceTests {
 
     }
 
+    @Test
+    void shouldFindBillByCustomerId_shouldSucceed() {
+        Bill bill = buildBill();
+
+        Publisher<Bill> setup = repo.deleteAll().thenMany(repo.save(bill));
+        Publisher<Bill> find = repo.findByCustomerId(bill.getCustomerId());
+
+        StepVerifier
+                .create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        StepVerifier
+                .create(find)
+                .expectNextMatches(foundBill -> foundBill.getCustomerId().equals(bill.getCustomerId()))
+                .verifyComplete();
+    }
 
     @Test
     void shouldFindBillByCustomerId(){
