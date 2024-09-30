@@ -24,9 +24,5 @@ public interface VetService {
     Mono<Void> deleteVetByVetId(String vetId);
     Flux<VetResponseDTO> getVetByIsActive(boolean isActive);
     Mono<VetResponseDTO> getVetByVetBillId(String vetBillId);
-    Mono<VetResponseDTO> getVetByFirstName(String firstName);
-    Mono<VetResponseDTO> getVetByLastName(String lastName);
-    Flux<VetResponseDTO> findByFirstNameOrLastName(String name);
-    Flux<VetResponseDTO> findByFirstNameAndLastName(String firstName, String lastName);
 
 }

@@ -164,28 +164,7 @@ public class VetController {
                 .map(ResponseEntity::ok);
     }
 
-
-
-    @GetMapping("/firstName/{firstName}")
-    public Mono<ResponseEntity<VetResponseDTO>> getVetByFirstName(@PathVariable String firstName) {
-        return vetService.getVetByFirstName(firstName)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build());
-    }
-
-
-    @GetMapping("/lastName/{lastName}")
-    public Mono<ResponseEntity<VetResponseDTO>> getVetByLastName(@PathVariable String lastName) {
-        return vetService.getVetByLastName(lastName)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build());
-    }
-
-
-
-
     //bills
-
 
     @GetMapping("/vetBillId/{vetBillId}")
     public Mono<ResponseEntity<VetResponseDTO>> getVetByBillId(@PathVariable String vetBillId) {
@@ -319,15 +298,5 @@ public class VetController {
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
-    @GetMapping("/search")
-    public Flux<VetResponseDTO> getVetsBySearchTerm(@RequestParam String name) {
-
-        String[] names = name.split(" ");
-        if (names.length > 1) {
-            return vetService.findByFirstNameAndLastName(names[0], names[1]);
-        } else {
-            return vetService.findByFirstNameOrLastName(name);
-        }
-    }
 
 }

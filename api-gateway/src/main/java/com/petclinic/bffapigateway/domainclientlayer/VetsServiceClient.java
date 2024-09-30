@@ -574,17 +574,5 @@ public class VetsServiceClient {
                 .bodyToMono(EducationResponseDTO.class);
     }
 
-    public Flux<VetResponseDTO> getVetsBySearchTerm(String searchTerm) {
-        return webClientBuilder
-                .build()
-                .get()
-                .uri(vetsServiceUrl + "/search?name={name}", searchTerm)
-                .retrieve()
-                .onStatus(httpStatus -> httpStatus.is4xxClientError(),
-                        response -> Mono.error(new RuntimeException("Client error during search")))
-                .onStatus(httpStatus -> httpStatus.is5xxServerError(),
-                        response -> Mono.error(new RuntimeException("Server error during search")))
-                .bodyToFlux(VetResponseDTO.class);
-    }
 
 }

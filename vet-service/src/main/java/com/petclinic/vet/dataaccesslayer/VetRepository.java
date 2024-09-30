@@ -26,12 +26,8 @@ public interface VetRepository extends ReactiveMongoRepository<Vet, String> {
 
     Mono<Vet> findVetByVetBillId(String vetBillId);
 
-   Mono<Vet> findVetByFirstName(String firstName);
-   Mono<Vet> findVetByLastName(String lastName);
 
-    Flux<Vet> findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(String firstName, String lastName);
 
-    Flux<Vet> findByFirstNameContainingIgnoreCaseAndLastNameContainingIgnoreCase(String firstName, String lastName);
 
 
 }

@@ -118,21 +118,6 @@ public class VetServiceImpl implements VetService {
                 .map(EntityDtoUtil::vetEntityToResponseDTO);
     }
 
-
-    @Override
-    public Mono<VetResponseDTO> getVetByFirstName(String firstName) {
-        return vetRepository.findVetByFirstName(firstName)
-                .switchIfEmpty(Mono.error(new NotFoundException("No vet with this first name was found: " + firstName)))
-                .map(EntityDtoUtil::vetEntityToResponseDTO);
-    }
-
-    @Override
-    public Mono<VetResponseDTO> getVetByLastName(String lastName) {
-        return vetRepository.findVetByLastName(lastName)
-                .switchIfEmpty(Mono.error(new NotFoundException("No vet with this last name was found: " + lastName)))
-                .map(EntityDtoUtil::vetEntityToResponseDTO);
-    }
-
     @Transactional
     @Override
     public Mono<Void> deleteVetByVetId(String vetId) {
@@ -203,17 +188,6 @@ public class VetServiceImpl implements VetService {
         return badgeRepository.save(assignedBadge)
                 .zipWith(vetRepository.save(vetEntity))
                 .map(tuple -> tuple.getT2());
-    }
-
-    @Override
-    public Flux<VetResponseDTO> findByFirstNameOrLastName(String name) {
-        return vetRepository.findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(name, name)
-                .map(EntityDtoUtil::vetEntityToResponseDTO);
-    }
-    @Override
-    public Flux<VetResponseDTO> findByFirstNameAndLastName(String firstName, String lastName) {
-        return vetRepository.findByFirstNameContainingIgnoreCaseAndLastNameContainingIgnoreCase(firstName, lastName)
-                .map(EntityDtoUtil::vetEntityToResponseDTO);
     }
 
 

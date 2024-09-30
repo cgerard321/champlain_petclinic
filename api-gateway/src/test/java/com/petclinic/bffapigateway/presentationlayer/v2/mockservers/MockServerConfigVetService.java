@@ -352,37 +352,4 @@ public void stopMockServer() {
                                 .withStatusCode(404)
                 );
     }
-
-    public void registerSearchVetsEndpoint(String searchTerm, VetResponseDTO expectedResponse) {
-        mockServerClient_VetService
-                .when(
-                        request()
-                                .withMethod("GET")
-                                .withPath("/vets/search")
-                                .withQueryStringParameter("name", searchTerm)
-                )
-                .respond(
-                        response()
-                                .withStatusCode(200)
-                                .withHeader("Content-Type", "application/json")
-                                .withBody(json(Collections.singletonList(expectedResponse)))
-                );
-    }
-
-    public void registerSearchVetsEndpointWithEmptyResponse(String searchTerm) {
-        mockServerClient_VetService
-                .when(
-                        request()
-                                .withMethod("GET")
-                                .withPath("/vets/search")
-                                .withQueryStringParameter("name", searchTerm)
-                )
-                .respond(
-                        response()
-                                .withStatusCode(200)
-                                .withHeader("Content-Type", "application/json")
-                                .withBody("[]")
-                );
-    }
-
 }

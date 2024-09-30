@@ -1101,10 +1101,4 @@ public class BFFApiGatewayController {
         );
     }
 
-    @GetMapping("/vets/search")
-    public Flux<VetResponseDTO> searchVetsByName(@RequestParam String name) {
-        log.info("Searching vets with name: {}", name);
-        return vetsServiceClient.getVetsBySearchTerm(name);
-    }
-
 }
