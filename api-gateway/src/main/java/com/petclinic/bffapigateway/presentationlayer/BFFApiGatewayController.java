@@ -572,20 +572,7 @@ public class BFFApiGatewayController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
-            @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
-    @GetMapping("/vets/firstName/{firstName}")
-    public Mono<ResponseEntity<VetResponseDTO>> getVetByFirstName(@PathVariable String firstName) {
-        return vetsServiceClient.getVetByFirstName(firstName)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build());
-    }
-    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
-    @GetMapping("/vets/lastName/{lastName}")
-    public Mono<ResponseEntity<VetResponseDTO>> getVetByLastName(@PathVariable String lastName) {
-        return vetsServiceClient.getVetByLastName(lastName)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build());
-    }
+
     @IsUserSpecific(idToMatch = {"vetId"})
     @GetMapping("/vets/vetBillId/{vetId}")
     public Mono<ResponseEntity<VetResponseDTO>> getVetByBillId(@PathVariable String vetBillId) {
@@ -1065,6 +1052,14 @@ public class BFFApiGatewayController {
         return inventoryServiceClient.getLowStockProducts(inventoryId, stockThreshold);
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER,Roles.VET})
+    @GetMapping(value = "inventory/{inventoryId}/products/search")//, produces= MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<ProductResponseDTO> searchProducts(@PathVariable String inventoryId,
+                                                   @RequestParam(required = false) String productName,
+                                                   @RequestParam(required = false) String productDescription) {
+        return inventoryServiceClient.searchProducts(inventoryId, productName, productDescription);
+    }
+
     @SecuredEndpoint(allowedRoles = {Roles.ALL})
     @GetMapping(value = "owners/petTypes")//, produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<PetTypeResponseDTO> getAllPetTypes() {
@@ -1105,11 +1100,5 @@ public class BFFApiGatewayController {
                         .defaultIfEmpty(ResponseEntity.notFound().build())
         );
     }
-
-
-
-
-
-
 
 }

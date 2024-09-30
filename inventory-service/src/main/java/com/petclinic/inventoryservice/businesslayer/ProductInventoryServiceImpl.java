@@ -499,5 +499,38 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                 .switchIfEmpty(Mono.error(new NotFoundException("No products below threshold in inventory: " + inventoryId)));
     }
 
+    @Override
+    public Flux<ProductResponseDTO>searchProducts(String inventoryId, String productName, String productDescription) {
+        if (productName != null && productDescription != null){
+            return productRepository
+                    .findAllProductsByInventoryIdAndProductNameAndProductDescription(inventoryId, productName, productDescription)
+                    .map(EntityDTOUtil::toProductResponseDTO)
+                    .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with InventoryId: " + inventoryId +
+                            "\nOr ProductName: " + productName + "\nOr ProductDescription: " + productDescription)));
+        }
+
+        if (productName != null){
+            return productRepository
+                    .findAllProductsByInventoryIdAndProductName(inventoryId, productName)
+                    .map(EntityDTOUtil::toProductResponseDTO)
+                    .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with InventoryId: " + inventoryId +
+                            "\nOr ProductName: " + productName)));
+        }
+
+        if (productDescription != null){
+            return productRepository
+                    .findAllProductsByInventoryIdAndProductDescription(inventoryId, productDescription)
+                    .map(EntityDTOUtil::toProductResponseDTO)
+                    .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with InventoryId: " + inventoryId +
+                            "\nOr ProductDescription: " + productDescription)));
+        }
+
+        return productRepository
+                .findAllProductsByInventoryId(inventoryId)
+                .map(EntityDTOUtil::toProductResponseDTO)
+                .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with InventoryId: " + inventoryId)));
+
+    }
+
 }
 

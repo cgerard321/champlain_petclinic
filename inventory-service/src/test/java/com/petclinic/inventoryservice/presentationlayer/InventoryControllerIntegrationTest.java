@@ -1098,4 +1098,66 @@ class InventoryControllerIntegrationTest {
     }
 
  */
+    @Test
+    public void searchProductsByInventoryIdProductNameAndProductDescription_shouldSucceed() {
+        String inventoryId = "1";
+        String productName = "Benzodiazepines";
+        String productDescription = "Sedative Medication";
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder.path("/inventory/{inventoryId}/products/search")
+                        .queryParam("productName", productName)
+                        .queryParam("productDescription", productDescription)
+                        .build(inventoryId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(ProductResponseDTO.class)
+                .consumeWith(response -> {
+                    List<ProductResponseDTO> products = response.getResponseBody();
+                    assertNotNull(products);
+                    assertTrue(products.size() > 0);
+                    assertEquals(productName, products.get(0).getProductName());
+                    assertEquals(productDescription, products.get(0).getProductDescription());
+                });
+    }
+
+    @Test
+    public void searchProductsByInventoryIdAndProductName_shouldSucceed() {
+        String inventoryId = "1";
+        String productName = "Benzodiazepines";
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder.path("/inventory/{inventoryId}/products/search")
+                        .queryParam("productName", productName)
+                        .build(inventoryId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(ProductResponseDTO.class)
+                .consumeWith(response -> {
+                    List<ProductResponseDTO> products = response.getResponseBody();
+                    assertNotNull(products);
+                    assertTrue(products.size() > 0);
+                    assertEquals(productName, products.get(0).getProductName());
+                });
+    }
+
+    @Test
+    public void searchProductsByInventoryId_shouldSucceed() {
+        String inventoryId = "1";
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder.path("/inventory/{inventoryId}/products/search")
+                        .build(inventoryId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(ProductResponseDTO.class)
+                .consumeWith(response -> {
+                    List<ProductResponseDTO> products = response.getResponseBody();
+                    assertNotNull(products);
+                    assertTrue(products.size() > 0);
+                });
+    }
 }
