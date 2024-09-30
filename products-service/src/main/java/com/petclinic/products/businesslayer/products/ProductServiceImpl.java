@@ -1,5 +1,9 @@
 package com.petclinic.products.businesslayer.products;
 
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+
+
 import com.petclinic.products.datalayer.products.Product;
 import com.petclinic.products.datalayer.ratings.Rating;
 import com.petclinic.products.datalayer.ratings.RatingRepository;
@@ -11,6 +15,7 @@ import com.petclinic.products.utils.exceptions.InvalidAmountException;
 import com.petclinic.products.utils.exceptions.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -18,8 +23,9 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public class ProductServiceImpl implements ProductService {
 
-    private final RatingRepository ratingRepository;
     private final ProductRepository productRepository;
+
+    private final RatingRepository ratingRepository;
 
     public ProductServiceImpl(ProductRepository productRepository, RatingRepository ratingRepository) {
         this.productRepository = productRepository;
@@ -106,6 +112,41 @@ public class ProductServiceImpl implements ProductService {
                     }
                 )
                 .map(EntityModelUtil::toProductResponseModel);
+    }
+
+
+    @Override
+    public Mono<Void> requestCount(String productId) {
+        return productRepository.findProductByProductId(productId)
+                .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Product id was not found: " + productId))))
+                .flatMap(product -> {
+                    product.setRequestCount(product.getRequestCount() + 1);
+                    return productRepository.save(product).then(); // Save and complete
+                });
+    }
+
+
+    @Scheduled(cron = "0 0 0 */30 * *")  // Runs every 30 days at midnight
+    public Mono<Void> resetRequestCounts() {
+        return productRepository.findAll()
+                .flatMap(product -> {
+                    product.setRequestCount(0);
+                    return productRepository.save(product);
+                })
+                .then();
+    }
+    @Override
+    public Flux<ProductResponseModel> getProductsByType(String productType) {
+        return productRepository.findProductsByProductType(productType)
+                .map(product -> {
+                    ProductResponseModel responseModel = new ProductResponseModel();
+                    responseModel.setProductId(product.getProductId());
+                    responseModel.setProductName(product.getProductName());
+                    responseModel.setProductDescription(product.getProductDescription());
+                    responseModel.setProductSalePrice(product.getProductSalePrice());
+                    responseModel.setProductType(product.getProductType());
+                    return responseModel;
+                });
     }
 
 }

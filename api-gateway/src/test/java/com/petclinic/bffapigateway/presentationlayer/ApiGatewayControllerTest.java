@@ -67,6 +67,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+import static com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigAuthService.jwtTokenForValidAdmin;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -1997,41 +1998,34 @@ class ApiGatewayControllerTest {
     }
 
     @Test
-    public void getBillById(){
+    void shouldGetBillById() {
+        // Arrange
+        String billId = UUID.randomUUID().toString();
+        BillResponseDTO bill = new BillResponseDTO();
+        bill.setBillId(billId);
+        bill.setCustomerId("1");
+        bill.setAmount(499);
+        bill.setVisitType("Test");
 
-        //int expectedLength = 1;
+        when(billServiceClient.getBilling(billId))
+                .thenReturn(Mono.just(bill));
 
-        BillResponseDTO entity = new BillResponseDTO();
-
-        entity.setBillId("9");
-
-        entity.setAmount(599);
-
-        entity.setCustomerId("2");
-
-        entity.setVisitType("Consultation");
-
-        when(billServiceClient.getBilling("9"))
-                .thenReturn(Mono.just(entity));
-
+        // Act & Assert
         client.get()
-                //check the URI
-                .uri("/api/gateway/bills/9")
+                .uri("/api/gateway/bills/{billId}", billId)
+                .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.billId").isEqualTo("9")
-                .jsonPath("$.customerId").isEqualTo(entity.getCustomerId())
-                .jsonPath("$.visitType").isEqualTo(entity.getVisitType())
-                .jsonPath("$.amount").isEqualTo(entity.getAmount());
+                .jsonPath("$.billId").isEqualTo(billId)
+                .jsonPath("$.customerId").isEqualTo(bill.getCustomerId())
+                .jsonPath("$.visitType").isEqualTo(bill.getVisitType())
+                .jsonPath("$.amount").isEqualTo(bill.getAmount());
 
-
-
-
-        assertEquals(entity.getBillId(), "9");
-
-
+        Mockito.verify(billServiceClient, times(1)).getBilling(billId);
     }
+
 
     @Test
     public void getBillsByOwnerId(){
@@ -2281,6 +2275,7 @@ class ApiGatewayControllerTest {
                 .description("Charle's Richard cat has a paw infection.")
                 .practitionerId("1")
                 .status(Status.UPCOMING)
+                .visitEndDate(LocalDateTime.parse("2021-12-12T15:00:00"))
                 .build();
 
         when(visitsServiceClient.createVisitForPet(any(VisitRequestDTO.class)))
@@ -2300,7 +2295,9 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.visitDate").isEqualTo("2021-12-12 14:00")
                 .jsonPath("$.description").isEqualTo("Charle's Richard cat has a paw infection.")
                 .jsonPath("$.status").isEqualTo("UPCOMING")
-                .jsonPath("$.practitionerId").isEqualTo(1);
+                .jsonPath("$.practitionerId").isEqualTo(1)
+                .jsonPath("$.visitEndDate").isEqualTo("2021-12-12 15:00");
+
 
     }
 
@@ -2323,6 +2320,7 @@ class ApiGatewayControllerTest {
                 .description("Charle's Richard cat has a paw infection.")
                 .practitionerId("1")
                 .status(Status.UPCOMING)
+                .visitEndDate(LocalDateTime.parse("2021-12-12T15:00:00"))
                 .build();
 
         when(visitsServiceClient.createVisitForPet(visit))
@@ -2341,7 +2339,8 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.visitDate").isEqualTo("2021-12-12 14:00")
                 .jsonPath("$.description").isEqualTo("Charle's Richard cat has a paw infection.")
                 .jsonPath("$.status").isEqualTo("UPCOMING")
-                .jsonPath("$.practitionerId").isEqualTo("1");
+                .jsonPath("$.practitionerId").isEqualTo("1")
+                .jsonPath("$.visitEndDate").isEqualTo("2021-12-12 15:00");
     }
 
 
@@ -2431,6 +2430,7 @@ class ApiGatewayControllerTest {
                 .practitionerId("2")
                 .petId("2")
                 .status(Status.CANCELLED)
+                .visitEndDate(LocalDateTime.parse("2022-11-25T14:45:00"))
                 .build();
         String visitId = visit.getVisitId();
         when(visitsServiceClient.updateStatusForVisitByVisitId(anyString(), anyString()))
@@ -2446,7 +2446,8 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.petId").isEqualTo(visit.getPetId())
                 .jsonPath("$.description").isEqualTo(visit.getDescription())
                 .jsonPath("$.visitDate").isEqualTo("2022-11-25 13:45")
-                .jsonPath("$.status").isEqualTo("CANCELLED");
+                .jsonPath("$.status").isEqualTo("CANCELLED")
+                .jsonPath("$.visitEndDate").isEqualTo("2022-11-25 14:45");
 
         Mockito.verify(visitsServiceClient, times(1))
                 .updateStatusForVisitByVisitId(anyString(), anyString());
@@ -2466,6 +2467,7 @@ class ApiGatewayControllerTest {
                 .vetEmail("vet@email.com")
                 .vetPhoneNumber("123-456-7890")
                 .status(Status.UPCOMING)
+                .visitEndDate(LocalDateTime.parse("2024-11-25 14:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .build();
         VisitResponseDTO visitResponseDTO2 = VisitResponseDTO.builder()
                 .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
@@ -2480,6 +2482,7 @@ class ApiGatewayControllerTest {
                 .vetEmail("vet@email.com")
                 .vetPhoneNumber("123-456-7890")
                 .status(Status.UPCOMING)
+                .visitEndDate(LocalDateTime.parse("2024-11-25 14:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .build();
         when(visitsServiceClient.getAllVisits()).thenReturn(Flux.just(visitResponseDTO,visitResponseDTO2));
 
@@ -2541,6 +2544,7 @@ class ApiGatewayControllerTest {
                 .vetEmail("vet@email.com")
                 .vetPhoneNumber("123-456-7890")
                 .status(Status.UPCOMING)
+                .visitEndDate(LocalDateTime.parse("2024-11-25 14:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .build();
 
         when(visitsServiceClient.getVisitsForPet(visit.getPetId()))
@@ -2562,6 +2566,7 @@ class ApiGatewayControllerTest {
                     assertEquals(list.get(0).getDescription(),visit.getDescription());
                     assertEquals(list.get(0).getStatus(),visit.getStatus());
                     assertEquals(list.get(0).getPractitionerId(),visit.getPractitionerId());
+                    assertEquals(list.get(0).getVisitEndDate(),visit.getVisitEndDate());
                 });
     }
 /*
@@ -2638,6 +2643,7 @@ class ApiGatewayControllerTest {
                 .vetEmail("vet@email.com")
                 .vetPhoneNumber("123-456-7890")
                 .status(Status.UPCOMING)
+                .visitEndDate(LocalDateTime.parse("2024-11-25 14:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .build();
         when(visitsServiceClient.getVisitByVisitId(anyString())).thenReturn(Mono.just(visitResponseDTO));
 
@@ -2650,7 +2656,9 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.petId").isEqualTo(visitResponseDTO.getPetId())
                 .jsonPath("$.visitDate").isEqualTo("2024-11-25 13:45")
                 .jsonPath("$.description").isEqualTo(visitResponseDTO.getDescription())
-                .jsonPath("$.practitionerId").isEqualTo(visitResponseDTO.getPractitionerId());
+                .jsonPath("$.practitionerId").isEqualTo(visitResponseDTO.getPractitionerId())
+                .jsonPath("$.status").isEqualTo(visitResponseDTO.getStatus().toString())
+                .jsonPath("$.visitEndDate").isEqualTo("2024-11-25 14:45");
     }
     @Test
     void getVisitsByStatus_Valid() {
@@ -2667,6 +2675,7 @@ class ApiGatewayControllerTest {
                 .vetEmail("vet@email.com")
                 .vetPhoneNumber("123-456-7890")
                 .status(Status.UPCOMING)
+                .visitEndDate(LocalDateTime.parse("2024-11-25 14:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .build();
 
         when(visitsServiceClient.getVisitsForStatus(visitResponseDTO.getStatus().toString())).thenReturn(Flux.just(visitResponseDTO));
@@ -2685,6 +2694,8 @@ class ApiGatewayControllerTest {
                     Assertions.assertEquals(visitResponseDTO.getVisitDate(), responseBody.getVisitDate());
                     Assertions.assertEquals(visitResponseDTO.getDescription(), responseBody.getDescription());
                     Assertions.assertEquals(visitResponseDTO.getPractitionerId(), responseBody.getPractitionerId());
+                    Assertions.assertEquals(visitResponseDTO.getStatus(), responseBody.getStatus());
+                    Assertions.assertEquals(visitResponseDTO.getVisitEndDate(), responseBody.getVisitEndDate());
                 });
     }
 
@@ -2703,6 +2714,7 @@ class ApiGatewayControllerTest {
                 .vetEmail("vet@email.com")
                 .vetPhoneNumber("123-456-7890")
                 .status(Status.UPCOMING)
+                .visitEndDate(LocalDateTime.parse("2024-11-25 14:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .build();
 
         when(visitsServiceClient.getVisitByPractitionerId(visitResponseDTO.getPractitionerId())).thenReturn(Flux.just(visitResponseDTO));
@@ -2721,6 +2733,8 @@ class ApiGatewayControllerTest {
                     Assertions.assertEquals(visitResponseDTO.getVisitDate(), responseBody.getVisitDate());
                     Assertions.assertEquals(visitResponseDTO.getDescription(), responseBody.getDescription());
                     Assertions.assertEquals(visitResponseDTO.getPractitionerId(), responseBody.getPractitionerId());
+                    Assertions.assertEquals(visitResponseDTO.getStatus(), responseBody.getStatus());
+                    Assertions.assertEquals(visitResponseDTO.getVisitEndDate(), responseBody.getVisitEndDate());
                 });
     }
 
@@ -3018,6 +3032,7 @@ class ApiGatewayControllerTest {
                 .expectStatus().isFound()
                 .expectHeader().valueEquals("Location", "http://localhost:8080/#!/login");
     }
+
 
 //    @Test
 //    @DisplayName("Given invalid JWT, expect 400")
@@ -3912,5 +3927,10 @@ private VetAverageRatingDTO buildVetAverageRatingDTO(){
                 .endDate("2014")
                 .build();
     }
+
+
+
+
+
 
 }

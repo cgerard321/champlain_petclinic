@@ -12,6 +12,7 @@ package com.petclinic.vet.presentationlayer;
  */
 
 
+import com.petclinic.vet.exceptions.InvalidInputException;
 import com.petclinic.vet.exceptions.NotFoundException;
 import com.petclinic.vet.servicelayer.*;
 import com.petclinic.vet.servicelayer.badges.BadgeResponseDTO;
@@ -154,12 +155,15 @@ public class VetController {
     }
 
 
-    @GetMapping("{vetId}")
+    @GetMapping(value = "/{vetId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<VetResponseDTO>> getVetByVetId(@PathVariable String vetId) {
-        return vetService.getVetByVetId(EntityDtoUtil.verifyId(vetId))
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+        return Mono.just(vetId)
+                .filter(id -> id.length() == 36)
+                .switchIfEmpty(Mono.error(new InvalidInputException("Provided vet id is invalid:" + vetId)))
+                .flatMap(vetService::getVetByVetId)
+                .map(ResponseEntity::ok);
     }
+
 
 
     @GetMapping("/firstName/{firstName}")
@@ -211,9 +215,10 @@ public class VetController {
     }
 
 
+
     @PutMapping("{vetId}")
     public Mono<ResponseEntity<VetResponseDTO>> updateVetByVetId(@PathVariable String vetId, @RequestBody Mono<VetRequestDTO> vetRequestDTOMono) {
-        return vetService.updateVet(EntityDtoUtil.verifyId(vetId), vetRequestDTOMono)
+    return vetService.updateVet(EntityDtoUtil.verifyId(vetId), vetRequestDTOMono)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }

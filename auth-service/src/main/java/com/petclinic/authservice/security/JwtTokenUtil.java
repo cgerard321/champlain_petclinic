@@ -40,6 +40,7 @@ public class JwtTokenUtil implements Serializable {
 
 
         } catch (Exception e) {
+            //SHOULD ADD THAT IT THROWS AN EXCEPTION, NOT JUST SETS IT NULL
             username = null;
         }
         return username;
@@ -64,6 +65,8 @@ public class JwtTokenUtil implements Serializable {
                     .setSigningKey(Keys.hmacShaKeyFor(securityConst.getSECRET().getBytes()))
                     .build().parseClaimsJws(token).getBody();
         } catch (Exception e) {
+            log.info(e.getMessage());
+            //SHOULD ADD THAT IT THROWS AN EXCEPTION, NOT JUST SETS IT NULL
             claims = null;
         }
         return claims;

@@ -1,33 +1,37 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { AppRoutePaths } from './shared/models/path.routes';
 import Login from '@/pages/User/Login';
+import SignUp from '@/pages/User/SignUp';
+import Home from '@/pages/Home/Home.tsx';
+import ProfilePage from '@/pages/Customer/ProfilePage.tsx';
+import ProfileEdit from '@/pages/Customer/ProfileEdit.tsx';
+import Products from '@/pages/Product/Products.tsx';
 import Inventories from '@/pages/Inventory/Inventories.tsx';
 import InventoryProducts from '@/features/inventories/InventoryProducts.tsx';
 import Vet from '@/pages/Vet/Vet.tsx';
-import { ProtectedRoute } from '@/shared/components/ProtectedRouteProps.tsx';
-import Home from '@/pages/Home/Home.tsx';
-import ProfileEdit from '@/pages/Customer/ProfileEdit.tsx';
-import Products from '@/pages/Product/Products.tsx';
-import AddingCustomer from '@/pages/Customer/AddingCustomer.tsx';
-import CustomerBillingPage from '@/pages/Bills/CostumerBills.tsx';
-import AllOwners from '@/pages/Customer/AllOwners.tsx';
-import PageNotFound from '@/pages/Error/PageNotFound.tsx';
-import Forbidden from '@/pages/Error/Forbidden.tsx';
-import Unauthorized from '@/pages/Error/Unauthorized.tsx';
-import InternalServerError from '@/pages/Error/InternalServerError.tsx';
-import RequestTimeout from '@/pages/Error/RequestTimeout.tsx';
-import ServiceUnavailable from '@/pages/Error/ServiceUnavailable.tsx';
+import VetDetails from '@/pages/Vet/VetDetails.tsx';
 import Visits from './pages/Visit/Visit';
 import AddReviewForm from './features/visits/Review/AddReviewForm';
 import EditReviewForm from './features/visits/Review/EditReviewForm';
 import Review from './pages/Review/Review';
-import EditInventory from '@/features/inventories/EditInventory.tsx';
 import CartPage from '@/pages/Carts/Cart.tsx';
-import VisitByVisitId from './features/visits/visits/VisitByVisitId';
-import AddingVisit from './features/visits/models/AddingVisit';
-import ProfilePage from '@/pages/Customer/ProfilePage.tsx';
-import AdminBillingPage from '@/pages/Bills/AdminBill.tsx';
 import UserCart from '@/features/carts/components/UserCart.tsx';
+import AddingCustomer from '@/pages/Customer/AddingCustomer.tsx';
+import AllOwners from '@/pages/Customer/AllOwners.tsx';
+import CustomerBillingPage from '@/pages/Bills/CostumerBills.tsx';
+import AdminBillingPage from '@/pages/Bills/AdminBill.tsx';
+import EditingVisit from './features/visits/models/EditingVisit';
+import AddingVisit from './features/visits/models/AddingVisit';
+import InternalServerError from '@/pages/Error/InternalServerError.tsx';
+import RequestTimeout from '@/pages/Error/RequestTimeout.tsx';
+import ServiceUnavailable from '@/pages/Error/ServiceUnavailable.tsx';
+import Forbidden from '@/pages/Error/Forbidden.tsx';
+import Unauthorized from '@/pages/Error/Unauthorized.tsx';
+import PageNotFound from '@/pages/Error/PageNotFound.tsx';
+import EmailingPage from '@/pages/Emailing/EmailingPage.tsx';
+import MockPage from '@/pages/Inventory/MockPage.tsx';
+import InventorySupplies from '@/features/inventories/InventorySupplies.tsx';
+import EditInventory from '@/features/inventories/EditInventory.tsx';
 
 const router = createBrowserRouter([
   {
@@ -98,6 +102,15 @@ const router = createBrowserRouter([
         ),
       },
       {
+        path: `${AppRoutePaths.Vet}/:vetId`,
+        element: (
+          <ProtectedRoute>
+            <VetDetails />
+          </ProtectedRoute>
+        ),
+      },
+
+      {
         path: AppRoutePaths.CustomerProfileEdit,
         element: (
           <ProtectedRoute roles={['OWNER']}>
@@ -134,6 +147,22 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute roles={['ADMIN', 'VET']}>
             <AllOwners />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.UpdateCustomer,
+        element: (
+          <ProtectedRoute roles={['ADMIN', 'VET']}>
+            <UpdateCustomerPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.CustomerDetails,
+        element: (
+          <ProtectedRoute roles={['ADMIN', 'VET']}>
+            <CustomerDetailsPage />
           </ProtectedRoute>
         ),
       },
@@ -202,10 +231,50 @@ const router = createBrowserRouter([
         ),
       },
       {
+        path: AppRoutePaths.Emailing,
+        element: (
+          <ProtectedRoute roles={['ADMIN']}>
+            <EmailingPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: `${AppRoutePaths.Carts}/:cartId`, // Route for viewing a specific cart
+        element: (
+          <ProtectedRoute roles={['ADMIN']}>
+            <UserCart />
+          </ProtectedRoute>
+        ),
+      },
+      {
         path: AppRoutePaths.CustomerProfile,
         element: (
           <ProtectedRoute roles={['OWNER']}>
             <ProfilePage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.EditVisit,
+        element: (
+          <ProtectedRoute>
+            <EditingVisit />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.MockPage,
+        element: (
+          <ProtectedRoute>
+            <MockPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.InventorySupplies,
+        element: (
+          <ProtectedRoute>
+            <InventorySupplies />
           </ProtectedRoute>
         ),
       },
@@ -220,6 +289,7 @@ const router = createBrowserRouter([
     element: <Home />,
   },
   { path: AppRoutePaths.Login, element: <Login /> },
+  { path: AppRoutePaths.SignUp, element: <SignUp /> },
   {
     path: '*',
     element: <PageNotFound />,

@@ -1,0 +1,13 @@
+@emailing_service_HostAddress = http://localhost:5000
+
+GET {{emailing_service_HostAddress}}/email/test/
+Accept: application/json
+###
+@templateName = variable value
+POST {{emailing_service_HostAddress}}/email/templates/add/{{templateName}}
+Accept: text/html
+###
+POST {{emailing_service_HostAddress}}/email/send
+Accept: application/json
+
+

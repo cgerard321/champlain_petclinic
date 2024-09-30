@@ -572,7 +572,7 @@ public class BFFApiGatewayController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
-    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
+            @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @GetMapping("/vets/firstName/{firstName}")
     public Mono<ResponseEntity<VetResponseDTO>> getVetByFirstName(@PathVariable String firstName) {
         return vetsServiceClient.getVetByFirstName(firstName)
@@ -1057,6 +1057,20 @@ public class BFFApiGatewayController {
     @DeleteMapping(value = "inventory/{inventoryId}")
     public Mono<Void> deleteInventoryByInventoryId(@PathVariable String inventoryId) {
         return inventoryServiceClient.deleteInventoryByInventoryId(inventoryId);
+    }
+
+    @GetMapping(value="inventory/{inventoryId}/products/lowstock")
+    public Flux<ProductResponseDTO>getLowStockProducts(@PathVariable String inventoryId, @RequestParam Optional<Integer> threshold){
+        int stockThreshold = threshold.orElse(16);
+        return inventoryServiceClient.getLowStockProducts(inventoryId, stockThreshold);
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER,Roles.VET})
+    @GetMapping(value = "inventory/{inventoryId}/products/search")//, produces= MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<ProductResponseDTO> searchProducts(@PathVariable String inventoryId,
+                                                   @RequestParam(required = false) String productName,
+                                                   @RequestParam(required = false) String productDescription) {
+        return inventoryServiceClient.searchProducts(inventoryId, productName, productDescription);
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ALL})

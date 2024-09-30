@@ -10,6 +10,9 @@ public interface ProductRepository extends ReactiveMongoRepository<Product, Stri
 
     Mono<Product> findProductByProductId(String productId);
 
+
+
+
     @Query("{ 'productSalePrice' : { $gte: ?0, $lte: ?1 } }")
     Flux<Product> findByProductSalePriceBetween(Double minPrice, Double maxPrice);
 
@@ -18,4 +21,5 @@ public interface ProductRepository extends ReactiveMongoRepository<Product, Stri
 
     @Query("{ 'productSalePrice' : { $lte: ?0 } }")
     Flux<Product> findByProductSalePriceLessThanEqual(Double maxPrice);
+    Flux<Product> findProductsByProductType(String productType);
 }

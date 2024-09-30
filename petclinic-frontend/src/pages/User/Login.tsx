@@ -80,6 +80,11 @@ export default function Login(): JSX.Element {
             Login
           </button>
         </form>
+        <div className="signup-button-container">
+          <Link to={AppRoutePaths.SignUp} className="signup-button">
+            Sign Up
+          </Link>
+        </div>
       </div>
       <Slideshow images={images} interval={7000} />
     </div>

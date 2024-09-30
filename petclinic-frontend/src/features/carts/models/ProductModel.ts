@@ -4,5 +4,5 @@ export interface ProductModel {
   productDescription: string;
   productSalePrice: number;
   averageRating?: number;
-  quantity: number;
+  quantity?: number;
 }

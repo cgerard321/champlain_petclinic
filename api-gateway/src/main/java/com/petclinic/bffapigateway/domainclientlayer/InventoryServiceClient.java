@@ -22,6 +22,8 @@ import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+
+import java.nio.channels.FileChannel;
 import java.util.Optional;
 
 import static org.springframework.http.HttpStatus.*;
@@ -44,7 +46,6 @@ public class InventoryServiceClient {
                 .baseUrl(inventoryServiceUrl)
                 .build();
     }
-
 
     public Mono<InventoryResponseDTO> getInventoryById(final String inventoryId) {
         return webClient.get()
@@ -255,6 +256,16 @@ public class InventoryServiceClient {
                 .bodyToFlux(InventoryTypeResponseDTO.class);
     }
 
+    public Flux<InventoryNameResponseDTO> getAllInventoryNames(){
+        return webClient.get()
+                .uri(inventoryServiceUrl + "/name")
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToFlux(InventoryNameResponseDTO.class);
+    }
+
+
+
     public Mono<Void> deleteInventoryByInventoryId(String inventoryId){
         return webClient.delete()
                 .uri(inventoryServiceUrl + "/{inventoryId}", inventoryId)
@@ -262,6 +273,54 @@ public class InventoryServiceClient {
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, resp -> rethrower.rethrow(resp, ex -> new NotFoundException(ex.get("message").toString())))
                 .bodyToMono(Void.class);
+    }
+
+
+    public Mono<InventoryResponseDTO> addSupplyToInventoryByName(String inventoryName, SupplyRequestDTO supplyRequestDTO) {
+        return webClient.post()
+                .uri(inventoryServiceUrl + "/{inventoryName}/supplies", inventoryName)
+                .body(Mono.just(supplyRequestDTO), SupplyRequestDTO.class)
+                .retrieve()
+                .bodyToMono(InventoryResponseDTO.class);
+    }
+
+
+    public Flux<SupplyResponseDTO> getSuppliesByInventoryName(String inventoryName) {
+        return webClient.get()
+                .uri("/{inventoryName}/supplies", inventoryName)
+                .retrieve()
+                .bodyToFlux(SupplyResponseDTO.class);
+    }
+  
+    public Flux<ProductResponseDTO> getLowStockProducts(String inventoryId, int stockThreshold) {
+        UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(inventoryServiceUrl + "/{inventoryId}/products/lowstock")
+                .queryParam("threshold", stockThreshold);
+
+        return webClient.get()
+                .uri(uriBuilder.buildAndExpand(inventoryId).toUri())
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError,
+                        resp -> Mono.error(new NotFoundException("No products below threshold in inventory: " + inventoryId)))
+                .bodyToFlux(ProductResponseDTO.class);
+    }
+
+    public Flux<ProductResponseDTO> searchProducts(
+            final String inventoryId,
+            final String productName,
+            final String productDescription
+    ) {
+        UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(inventoryServiceUrl + "/{inventoryId}/products/search")
+                .queryParamIfPresent("productName", Optional.ofNullable(productName))
+                .queryParamIfPresent("productDescription", Optional.ofNullable(productDescription));
+
+        return webClient.get()
+                .uri(uriBuilder.buildAndExpand(inventoryId).toUri())
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError,
+                        resp -> Mono.error(new NotFoundException("No products found in inventory: " + inventoryId)))
+                .bodyToFlux(ProductResponseDTO.class);
     }
 
 }

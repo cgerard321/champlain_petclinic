@@ -334,55 +334,73 @@ public class DataSetupService implements CommandLineRunner {
         String defaultPhotoName = "vet_default.jpg";
         String defaultPhotoType = "image/jpeg";
 
+        //vet photo
+        String jamesCarterPhotoName = "james_carter.jpg";
+        String helenLearyPhotoName = "helen_leary.jpg";
+        String henryStevensPhotoName = "henry_stevens.jpg";
+        String johnDoePhotoName = "johnn_doe.jpg";
+        String lindaDouglassPhotoName = "linda_douglass.jpg";
+        String rafaelOrtegaPhotoName = "rafael_o.jpg";
+        String sharonJenkinsPhotoName = "sharon_jenkins.jpg";
+
         ClassPathResource defaultPhoto = new ClassPathResource("images/" + defaultPhotoName);
+        ClassPathResource jamesCarterPhoto = new ClassPathResource("images/" + jamesCarterPhotoName);
+        ClassPathResource helenLearyPhoto = new ClassPathResource("images/" + helenLearyPhotoName);
+        ClassPathResource henryStevensPhoto = new ClassPathResource("images/" + henryStevensPhotoName);
+        ClassPathResource johnDoePhoto = new ClassPathResource("images/" + johnDoePhotoName);
+        ClassPathResource lindaDouglassPhoto = new ClassPathResource("images/" + lindaDouglassPhotoName);
+        ClassPathResource rafaelOrtegaPhoto = new ClassPathResource("images/" + rafaelOrtegaPhotoName);
+        ClassPathResource sharonJenkinsPhoto = new ClassPathResource("images/" + sharonJenkinsPhotoName);
+
+
 
         Photo photo1 = Photo.builder()
                 .vetId(v1.getVetId())
                 .filename(defaultPhotoName)
                 .imgType(defaultPhotoType)
-                .data(StreamUtils.copyToByteArray(defaultPhoto.getInputStream()))
+                .data(StreamUtils.copyToByteArray(jamesCarterPhoto.getInputStream()))
                 .build();
 
         Photo photo2 = Photo.builder()
                 .vetId(v2.getVetId())
                 .filename(defaultPhotoName)
                 .imgType(defaultPhotoType)
-                .data(StreamUtils.copyToByteArray(defaultPhoto.getInputStream()))
+                .data(StreamUtils.copyToByteArray(helenLearyPhoto.getInputStream()))
                 .build();
 
         Photo photo3 = Photo.builder()
                 .vetId(v3.getVetId())
                 .filename(defaultPhotoName)
                 .imgType(defaultPhotoType)
-                .data(StreamUtils.copyToByteArray(defaultPhoto.getInputStream()))
+                .data(StreamUtils.copyToByteArray(lindaDouglassPhoto.getInputStream()))
                 .build();
 
         Photo photo4 = Photo.builder()
                 .vetId(v4.getVetId())
                 .filename(defaultPhotoName)
                 .imgType(defaultPhotoType)
-                .data(StreamUtils.copyToByteArray(defaultPhoto.getInputStream()))
+                .data(StreamUtils.copyToByteArray(rafaelOrtegaPhoto.getInputStream()))
                 .build();
 
         Photo photo5 = Photo.builder()
                 .vetId(v5.getVetId())
                 .filename(defaultPhotoName)
                 .imgType(defaultPhotoType)
-                .data(StreamUtils.copyToByteArray(defaultPhoto.getInputStream()))
+                .data(StreamUtils.copyToByteArray(henryStevensPhoto.getInputStream()))
                 .build();
 
         Photo photo6 = Photo.builder()
                 .vetId(v6.getVetId())
                 .filename(defaultPhotoName)
                 .imgType(defaultPhotoType)
-                .data(StreamUtils.copyToByteArray(defaultPhoto.getInputStream()))
+                .data(StreamUtils.copyToByteArray(sharonJenkinsPhoto.getInputStream()))
                 .build();
 
         Photo photo7 = Photo.builder()
                 .vetId(v7.getVetId())
                 .filename(defaultPhotoName)
                 .imgType(defaultPhotoType)
-                .data(StreamUtils.copyToByteArray(defaultPhoto.getInputStream()))
+                .data(StreamUtils.copyToByteArray(johnDoePhoto.getInputStream()))
                 .build();
 
 

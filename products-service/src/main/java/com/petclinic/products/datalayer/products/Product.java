@@ -21,4 +21,7 @@ public class Product {
     private String productDescription;
     private Double productSalePrice;
     private Double averageRating;
+    private Integer requestCount;
+    private String productType;
 }
+

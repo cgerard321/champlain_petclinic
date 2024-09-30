@@ -2,9 +2,14 @@ package com.petclinic.bffapigateway.presentationlayer.v2.mockservers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.petclinic.bffapigateway.dtos.Vets.SpecialtyDTO;
 import com.petclinic.bffapigateway.dtos.Vets.VetResponseDTO;
+import com.petclinic.bffapigateway.dtos.Vets.Workday;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.integration.ClientAndServer;
+import org.springframework.http.MediaType;
+
+import java.util.Set;
 
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
@@ -20,7 +25,9 @@ public class MockServerConfigVetService {
 
     public MockServerConfigVetService() {
         this.clientAndServer = ClientAndServer.startClientAndServer(VET_SERVICE_SERVER_PORT);
+
     }
+
 
     public void registerGetVetsEndpoint() {
         mockServerClient_VetService
@@ -145,7 +152,114 @@ public class MockServerConfigVetService {
                 );
     }
 
-    public void stopMockServer() {
+
+    public void registerUpdateVetEndpoint() {
+        mockServerClient_VetService
+                .when(
+                        request()
+                                .withMethod("PUT")
+                                .withPath("/vets/c02cbf82-625b-11ee-8c99-0242ac120002")
+                                .withBody(json("{"
+                                        + "\"vetId\":\"c02cbf82-625b-11ee-8c99-0242ac120002\","
+                                        + "\"vetBillId\":\"bill001\","
+                                        + "\"firstName\":\"John\","
+                                        + "\"lastName\":\"Doe\","
+                                        + "\"email\":\"john.doe@example.com\","
+                                        + "\"phoneNumber\":\"1234567890\","
+                                        + "\"resume\":\"Specialist in dermatology\","
+                                        + "\"workday\":["
+                                        + "\"Wednesday\""
+                                        + "],"
+                                        + "\"workHoursJson\":\"08:00-16:00\","
+                                        + "\"active\":true,"
+                                        + "\"specialties\":["
+                                        + "{"
+                                        + "\"specialtyId\":\"dermatology\","
+                                        + "\"name\":\"Dermatology\""
+                                        + "}"
+                                        + "]"
+                                        + "}"))
+                )
+                .respond(
+                        response()
+                                .withStatusCode(200)
+                                .withBody(json("{"
+                                        + "\"vetId\":\"c02cbf82-625b-11ee-8c99-0242ac120002\","
+                                        + "\"vetBillId\":\"bill001\","
+                                        + "\"firstName\":\"John\","
+                                        + "\"lastName\":\"Doe\","
+                                        + "\"email\":\"john.doe@example.com\","
+                                        + "\"phoneNumber\":\"1234567890\","
+                                        + "\"resume\":\"Specialist in dermatology\","
+                                        + "\"workday\":["
+                                        + "\"Wednesday\""
+                                        + "],"
+                                        + "\"workHoursJson\":\"08:00-16:00\","
+                                        + "\"active\":true,"
+                                        + "\"specialties\":["
+                                        + "{"
+                                        + "\"specialtyId\":\"dermatology\","
+                                        + "\"name\":\"Dermatology\""
+                                        + "}"
+                                        + "]"
+                                        + "}"))
+                );
+    }
+
+    public void registerUpdateVetEndpoint_withInvalidId() {
+        mockServerClient_VetService
+                .when(
+                        request()
+                                .withMethod("PUT")
+                                .withPath("/vets/c02cbf82-625b-11ee-8c99-0242ac120002") // The vetId to update
+                                .withBody(json("{"
+                                        + "\"vetId\":\"invalid-vet-id\","
+                                        + "\"vetBillId\":\"bill001\","
+                                        + "\"firstName\":\"John\","
+                                        + "\"lastName\":\"Doe\","
+                                        + "\"email\":\"john.doe@example.com\","
+                                        + "\"phoneNumber\":\"1234567890\","
+                                        + "\"resume\":\"Specialist in dermatology\","
+                                        + "\"workday\":["
+                                        + "\"Wednesday\""
+                                        + "],"
+                                        + "\"workHoursJson\":\"08:00-16:00\","
+                                        + "\"active\":true,"
+                                        + "\"specialties\":["
+                                        + "{"
+                                        + "\"specialtyId\":\"dermatology\","
+                                        + "\"name\":\"Dermatology\""
+                                        + "}"
+                                        + "]"
+                                        + "}"))
+                )
+                .respond(
+                        response()
+                                .withStatusCode(200)
+                                .withBody(json("{"
+                                        + "\"vetId\":\"invalid-vet-id\","
+                                        + "\"vetBillId\":\"bill001\","
+                                        + "\"firstName\":\"John\","
+                                        + "\"lastName\":\"Doe\","
+                                        + "\"email\":\"john.doe@example.com\","
+                                        + "\"phoneNumber\":\"1234567890\","
+                                        + "\"resume\":\"Specialist in dermatology\","
+                                        + "\"workday\":["
+                                        + "\"Wednesday\""
+                                        + "],"
+                                        + "\"workHoursJson\":\"08:00-16:00\","
+                                        + "\"active\":true,"
+                                        + "\"specialties\":["
+                                        + "{"
+                                        + "\"specialtyId\":\"dermatology\","
+                                        + "\"name\":\"Dermatology\""
+                                        + "}"
+                                        + "]"
+                                        + "}"))
+                );
+    }
+
+public void stopMockServer() {
         if(clientAndServer != null)
             this.clientAndServer.stop();
     }
@@ -202,5 +316,93 @@ public class MockServerConfigVetService {
                                 .withStatusCode(404)
                 );
     }
+
+    public void registerGetVetByIdEndpoint() {
+        mockServerClient_VetService
+                .when(
+                        request()
+                                .withMethod("GET")
+                                .withPath("/vets/ac9adeb8-625b-11ee-8c99-0242ac120002")
+                )
+                .respond(
+                        response()
+                                .withStatusCode(200)
+                                .withBody(json(new VetResponseDTO(
+                                        "ac9adeb8-625b-11ee-8c99-0242ac120002",
+                                        "5",
+                                        "Henry",
+                                        "Stevens",
+                                        "stevenshenry@email.com",
+                                        "(514)-634-8276 #2389",
+                                        "Practicing since 1 years",
+                                        Set.of(Workday.Wednesday, Workday.Tuesday, Workday.Thursday, Workday.Monday),
+                                        "{\"Thursday\":[\"Hour_8_9\",\"Hour_9_10\",\"Hour_10_11\",\"Hour_11_12\"],"
+                                                + "\"Monday\":[\"Hour_8_9\",\"Hour_9_10\",\"Hour_10_11\",\"Hour_11_12\",\"Hour_12_13\",\"Hour_13_14\",\"Hour_14_15\",\"Hour_15_16\"],"
+                                                + "\"Wednesday\":[\"Hour_10_11\",\"Hour_11_12\",\"Hour_12_13\",\"Hour_13_14\",\"Hour_14_15\",\"Hour_15_16\",\"Hour_16_17\",\"Hour_17_18\"],"
+                                                + "\"Tuesday\":[\"Hour_12_13\",\"Hour_13_14\",\"Hour_14_15\",\"Hour_15_16\",\"Hour_16_17\",\"Hour_17_18\",\"Hour_18_19\",\"Hour_19_20\"]}",
+                                        false,
+                                        Set.of(
+                                                new SpecialtyDTO("surgery", "surgery"),
+                                                new SpecialtyDTO("radiology", "radiology")
+                                        )
+                                ))));
+    }
+
+    public void registerGetVetByInvalidIdEndpoint() {
+        mockServerClient_VetService
+                .when(
+                        request()
+                                .withMethod("GET")
+                                .withPath("/vets/ac9adeb8-625b-11ee-8c99-0242ac12000200000")
+                )
+                .respond(
+                        response()
+                                .withStatusCode(404)
+                                .withBody("{\"statusCode\":404,\"message\":\"vetId not found: invalid-id\",\"timestamp\":\"" + java.time.Instant.now() + "\"}")
+                );
+    }
+
+
+    public void registerDeleteVetEndpoint() {
+        mockServerClient_VetService
+                .when(
+                        request()
+                                .withMethod("DELETE")
+                                .withPath("/vets/[a-f0-9\\-]+")
+                )
+                .respond(
+                        response()
+                                .withStatusCode(204)
+                );
+    }
+
+    public void registerGetPhotoByVetIdEndpoint(String vetId, byte[] photoData) {
+        mockServerClient_VetService
+                .when(
+                        request()
+                                .withMethod("GET")
+                                .withPath("/vets/" + vetId + "/photo")
+                )
+                .respond(
+                        response()
+                                .withStatusCode(200)
+                                .withHeader("Content-Type", MediaType.IMAGE_JPEG_VALUE)
+                                .withBody(photoData)
+                );
+    }
+
+    public void registerGetPhotoByVetIdEndpointNotFound(String vetId) {
+        mockServerClient_VetService
+                .when(
+                        request()
+                                .withMethod("GET")
+                                .withPath("/vets/" + vetId + "/photo")
+                )
+                .respond(
+                        response()
+                                .withStatusCode(404)
+                );
+    }
+
 
 }

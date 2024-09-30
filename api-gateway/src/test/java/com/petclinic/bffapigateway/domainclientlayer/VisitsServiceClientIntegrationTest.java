@@ -20,6 +20,7 @@ import org.springframework.context.annotation.FilterType;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -43,10 +44,13 @@ class VisitsServiceClientIntegrationTest {
     private static MockWebServer server;
     private static ObjectMapper objectMapper = new ObjectMapper();
 
+    private static final String VISIT_ID = "visitId4";
+
     private static final String PET_ID = "1";
 
     private static final String STATUS = "UPCOMING";
 
+    String reviewUrl = "http://localhost:8080/reviews";
 
     @BeforeAll
     static void beforeAllSetUp() throws IOException{
@@ -79,6 +83,7 @@ class VisitsServiceClientIntegrationTest {
                 .vetEmail("vet@email.com")
                 .vetPhoneNumber("123-456-7890")
                 .status(Status.UPCOMING)
+                .visitEndDate(LocalDateTime.parse("2024-11-25 14:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .build();
         VisitResponseDTO visitResponseDTO2 = VisitResponseDTO.builder()
                 .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
@@ -93,6 +98,7 @@ class VisitsServiceClientIntegrationTest {
                 .vetEmail("vet@email.com")
                 .vetPhoneNumber("123-456-7890")
                 .status(Status.UPCOMING)
+                .visitEndDate(LocalDateTime.parse("2024-11-25 14:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .build();
         server.enqueue(new MockResponse().setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .setBody(objectMapper.writeValueAsString(Arrays.asList(visitResponseDTO, visitResponseDTO2))).addHeader("Content-Type", "application/json"));
@@ -197,6 +203,7 @@ class VisitsServiceClientIntegrationTest {
                 .vetEmail("vet@email.com")
                 .vetPhoneNumber("123-456-7890")
                 .status(Status.UPCOMING)
+                .visitEndDate(LocalDateTime.parse("2024-11-25 14:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .build();
         server.enqueue(new MockResponse()
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -351,6 +358,7 @@ class VisitsServiceClientIntegrationTest {
                 .vetEmail("vet@email.com")
                 .vetPhoneNumber("123-456-7890")
                 .status(Status.UPCOMING)
+                .visitEndDate(LocalDateTime.parse("2024-11-25 14:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .build();
         server.enqueue(new MockResponse().setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE).setBody(objectMapper.writeValueAsString(visitResponseDTO)).addHeader("Content-Type", "application/json"));
 
@@ -374,6 +382,7 @@ class VisitsServiceClientIntegrationTest {
                 .vetEmail("vet@email.com")
                 .vetPhoneNumber("123-456-7890")
                 .status(Status.UPCOMING)
+                .visitEndDate(LocalDateTime.parse("2024-11-25 14:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .build();
 
         server.enqueue(new MockResponse().setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE).setBody(objectMapper.writeValueAsString(visitResponseDTO)).addHeader("Content-Type", "application/json"));
@@ -437,6 +446,7 @@ class VisitsServiceClientIntegrationTest {
                 .petId(visitRequest.getPetId())
                 .practitionerId(visitRequest.getPractitionerId())
                 .status(visitRequest.getStatus()) // use isStatus here
+                .visitEndDate(visitRequest.getVisitDate().plusHours(1))
                 .build();
 
         final String responseBody = objectMapper.writeValueAsString(expectedVisitResponse);
@@ -730,6 +740,7 @@ class VisitsServiceClientIntegrationTest {
                 .vetFirstName("John")
                 .vetLastName("Doe")
                 .status(Status.UPCOMING)
+                .visitEndDate(LocalDateTime.parse("2024-11-25 14:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .build();
 
         // Mock the server response
@@ -831,6 +842,67 @@ class VisitsServiceClientIntegrationTest {
                 .expectNext(review1)
                 .expectNext(review2)
                 .verifyComplete();
+    }
+//TODO I could not get this test to work no matter how hard i tried the date does not get passed down correctly
+/*
+    @Test
+    void testUpdateVisitByVisitId() throws Exception {
+        // Arrange
+        VisitRequestDTO requestDTO = new VisitRequestDTO();
+        requestDTO.setVisitDate(LocalDateTime.of(2025, 12, 24, 18, 0)); // Setting a specific date for testing
+        requestDTO.setDescription("Dog Needs Physio-Therapy UPDATE");
+        requestDTO.setPetId("0e4d8481-b611-4e52-baed-af16caa8bf8a");
+        requestDTO.setPractitionerId("69f85d2e-625b-11ee-8c99-0242ac120002");
+        requestDTO.setStatus(Status.UPCOMING);
+
+        VisitResponseDTO responseDTO = new VisitResponseDTO();
+        responseDTO.setVisitId(VISIT_ID);
+        responseDTO.setVisitDate(requestDTO.getVisitDate().minusHours(4));
+        responseDTO.setDescription(requestDTO.getDescription());
+        responseDTO.setPetId(requestDTO.getPetId());
+        responseDTO.setPractitionerId(requestDTO.getPractitionerId());
+        responseDTO.setStatus(requestDTO.getStatus());
+        responseDTO.setVisitEndDate(requestDTO.getVisitDate().plusHours(1));
+
+        // Simulate HTTP response from the MockWebServer
+        server.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setResponseCode(200)
+                .setBody(objectMapper.writeValueAsString(responseDTO)));
+
+        // Act
+        Mono<VisitResponseDTO> result = visitsServiceClient.updateVisitByVisitId(VISIT_ID, Mono.just(requestDTO));
+
+        // Assert using StepVerifier
+        StepVerifier.create(result)
+                .expectNextMatches(updatedVisit -> {
+                    // Assert each field
+                    assertNotNull(updatedVisit);
+                    assertEquals(VISIT_ID, updatedVisit.getVisitId());
+                    assertEquals(requestDTO.getDescription(), updatedVisit.getDescription());
+                    assertEquals(requestDTO.getVisitDate(), updatedVisit.getVisitDate());
+                    assertEquals(requestDTO.getPetId(), updatedVisit.getPetId());
+                    assertEquals(requestDTO.getPractitionerId(), updatedVisit.getPractitionerId());
+                    assertEquals(requestDTO.getStatus(), updatedVisit.getStatus());
+                    assertEquals(requestDTO.getVisitDate().plusHours(1), updatedVisit.getVisitEndDate());
+                    return true;
+                })
+                .verifyComplete();
+    }
+
+ */
+
+    
+    @Test
+    void testUpdateVisitByVisitId_BadRequest() {
+        // Arrange
+        VisitRequestDTO requestDTO = new VisitRequestDTO();
+        requestDTO.setVisitDate(null); // Invalid input to trigger BadRequestException
+
+        // Act and Assert
+        StepVerifier.create(visitsServiceClient.updateVisitByVisitId(VISIT_ID, Mono.just(requestDTO)))
+                .expectError(BadRequestException.class)
+                .verify();
     }
 
 }

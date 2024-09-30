@@ -1,7 +1,13 @@
 package com.petclinic.inventoryservice.presentationlayer;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.inventoryservice.businesslayer.ProductInventoryService;
-import com.petclinic.inventoryservice.datalayer.Product.Status;
+import com.petclinic.inventoryservice.businesslayer.SupplyInventoryService;
+import com.petclinic.inventoryservice.datalayer.Inventory.Inventory;
+import com.petclinic.inventoryservice.datalayer.Inventory.InventoryType;
+import com.petclinic.inventoryservice.datalayer.Supply.Status;
+import com.petclinic.inventoryservice.datalayer.Supply.Supply;
+import com.petclinic.inventoryservice.datalayer.Supply.SupplyRepository;
 import com.petclinic.inventoryservice.utils.exceptions.InvalidInputException;
 import com.petclinic.inventoryservice.utils.exceptions.NotFoundException;
 import org.junit.jupiter.api.Test;
@@ -13,6 +19,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.reactive.function.BodyInserters;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -21,19 +29,27 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import static com.petclinic.inventoryservice.datalayer.Supply.Status.AVAILABLE;
+import static com.petclinic.inventoryservice.datalayer.Supply.Status.RE_ORDER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.mock.http.server.reactive.MockServerHttpRequest.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebFluxTest(controllers = InventoryController.class)
 class InventoryControllerUnitTest {
     @Autowired
+    private ObjectMapper objectMapper;
+    @Autowired
     WebTestClient webTestClient;
     @MockBean
     ProductInventoryService productInventoryService;
-
+    @MockBean
+    SupplyInventoryService supplyInventoryService;
 
     ProductResponseDTO productResponseDTO = ProductResponseDTO.builder()
             .id("1")
@@ -77,6 +93,124 @@ class InventoryControllerUnitTest {
                     .typeId(UUID.randomUUID().toString())
                     .build()
     );
+
+    InventoryType inventoryType4 = InventoryType.builder()
+            .typeId(UUID.randomUUID().toString())
+            .type("Medications")
+            .build();
+
+    Inventory inventory4 = Inventory.builder()
+            .inventoryId(UUID.randomUUID().toString())
+            .inventoryName("Medications")
+            .inventoryType(inventoryType4.getType())
+            .inventoryDescription("Antibiotics for pet infections")
+            .build();
+
+    Supply supply1 = Supply.builder()
+            .supplyName("Sedative Medications")
+            .supplyId(UUID.randomUUID().toString())
+            .supplyPrice(100.00)
+            .inventoryId("dummy-inventory-id")
+            .supplyQuantity(10)
+            .supplyDescription("Medications for relaxation and sleep")
+            .supplySalePrice(10.00)
+            .build();
+
+    Supply Supply2 = Supply.builder()
+            .supplyName("Anxiety Relief Tablets")
+            .supplyId(UUID.randomUUID().toString())
+            .supplyPrice(150.00)
+            .inventoryId(inventory4.getInventoryId())
+            .supplyQuantity(10)
+            .supplyDescription("Tablets for reducing anxiety and stress")
+            .supplySalePrice(10.00)
+            .build();
+
+    Supply Supply3 = Supply.builder()
+            .supplyName("Pain Relief Medication")
+            .supplyId(UUID.randomUUID().toString())
+            .supplyPrice(130.00)
+            .inventoryId(inventory4.getInventoryId()) // Medications
+            .supplyQuantity(12)
+            .supplyDescription("Non-steroidal pain relief medication")
+            .supplySalePrice(140.00)
+            .build();
+  
+      ProductResponseDTO lowStockProduct = ProductResponseDTO.builder()
+            .id("1")
+            .inventoryId("inventoryId_1")
+            .productId("productId_1")
+            .productName("Low Stock Product")
+            .productQuantity(5)
+            .productPrice(100.00)
+            .build();
+
+    List<ProductResponseDTO> lowStockProducts = List.of(lowStockProduct);
+
+
+//    @Test
+//    public void testAddSupplyToInventoryByName() throws Exception {
+//        String inventoryName = "Sedative Medications";
+//
+//        SupplyRequestDTO requestDTO = new SupplyRequestDTO(
+//                "Sedative Medications",
+//                "Medications for relaxation and sleep",
+//                100.0,
+//                10,
+//                10.0
+//        );
+//
+//        SupplyResponseDTO supplyResponseDTO = SupplyResponseDTO.builder()
+//                .supplyId("c2e3ebba-d1a7-48d7-9b37-efbea4944874")
+//                .inventoryId("5e2520b1-8c12-48fe-ae79-01552c8588e2")
+//                .supplyName("Sedative Medications")
+//                .supplyDescription("Medications for relaxation and sleep")
+//                .supplyPrice(100.0)
+//                .supplyQuantity(10)
+//                .supplySalePrice(10.0)
+//                .status(AVAILABLE)
+//                .build();
+//
+//        InventoryResponseDTO responseDTO = InventoryResponseDTO.builder()
+//                .inventoryId("5e2520b1-8c12-48fe-ae79-01552c8588e2")
+//                .inventoryName(inventoryName)
+//                .inventoryType("TestInventoryType")
+//                .inventoryDescription("TestInventoryDescription")
+//                .supplies(List.of(supplyResponseDTO))
+//                .build();
+//
+//        when(supplyInventoryService.addSupplyToInventoryByInventoryName(anyString(), any())).thenReturn(Mono.just(responseDTO));
+//
+//        webTestClient.post()
+//                .uri("/inventory/" + inventoryName + "/supplies")
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .bodyValue(objectMapper.writeValueAsString(requestDTO))
+//                .exchange()
+//                .expectStatus().isCreated();
+//    }
+
+
+    @Test
+    public void addSupplyToInventoryByName_Negative() {
+        String inventoryName = "NonExistingInventory";
+
+        SupplyRequestDTO requestDTONegative = new SupplyRequestDTO(
+                supply1.getSupplyName(),
+                supply1.getSupplyDescription(),
+                supply1.getSupplyPrice(),
+                supply1.getSupplyQuantity(),
+                supply1.getSupplySalePrice()
+        );
+
+        when(supplyInventoryService.addSupplyToInventoryByInventoryName(anyString(), any(Mono.class)))
+                .thenReturn(Mono.error(new RuntimeException("Inventory not found")));
+
+        webTestClient.post()
+                .uri("/inventoriesV2/" + inventoryName + "/supplies")
+                .body(BodyInserters.fromValue(requestDTONegative))
+                .exchange()
+                .expectStatus().isNotFound();
+    }
 
     @Test
     void updateInventory_ValidRequest_ShouldReturnOk() {
@@ -1000,7 +1134,7 @@ class InventoryControllerUnitTest {
                 .productPrice(200.00)
                 .productQuantity(20)
                 .productSalePrice(15.99)
-                .status(Status.AVAILABLE)
+                .status(AVAILABLE)
                 .build();
 
         when(productInventoryService.addProductToInventory(any(), eq(inventoryId)))
@@ -1099,7 +1233,7 @@ class InventoryControllerUnitTest {
                 .productPrice(100.00)
                 .productQuantity(10)
                 .productSalePrice(10.99)
-                .status(Status.RE_ORDER)  // Expected status
+                .status(RE_ORDER)  // Expected status
                 .build();
 
         // Mocking the service method to return the expected response
@@ -1117,7 +1251,7 @@ class InventoryControllerUnitTest {
                 .expectBody(ProductResponseDTO.class)
                 .value(dto -> {
                     assertNotNull(dto);
-                    assertEquals(Status.RE_ORDER, dto.getStatus());  // Assert the status is REORDER
+                    assertEquals(RE_ORDER, dto.getStatus());  // Assert the status is REORDER
                 });
 
         verify(productInventoryService, times(1)).addProductToInventory(any(), eq(inventoryId));
@@ -1144,7 +1278,7 @@ class InventoryControllerUnitTest {
                 .productPrice(200.00)
                 .productQuantity(20)
                 .productSalePrice(15.99)
-                .status(Status.AVAILABLE)
+                .status(AVAILABLE)
                 .build();
 
         when(productInventoryService.updateProductInInventory(any(), eq(inventoryId), eq(productId)))
@@ -1258,7 +1392,7 @@ class InventoryControllerUnitTest {
                 .productPrice(200.00)
                 .productQuantity(15)
                 .productSalePrice(15.99)
-                .status(Status.RE_ORDER)  // Expect the status to be REORDER
+                .status(RE_ORDER)  // Expect the status to be REORDER
                 .build();
 
         // Mocking the service to return the updated product with the REORDER status
@@ -1283,7 +1417,7 @@ class InventoryControllerUnitTest {
                     assertEquals(responseDTO.getProductPrice(), dto.getProductPrice());
                     assertEquals(responseDTO.getProductQuantity(), dto.getProductQuantity());
                     assertEquals(responseDTO.getProductSalePrice(), dto.getProductSalePrice());
-                    assertEquals(Status.RE_ORDER, dto.getStatus());  // Verify the status is REORDER
+                    assertEquals(RE_ORDER, dto.getStatus());  // Verify the status is REORDER
                 });
 
         // Verify that the service method was called exactly once
@@ -1291,26 +1425,200 @@ class InventoryControllerUnitTest {
                 .updateProductInInventory(any(), eq(inventoryId), eq(productId));
 
 
-
     }
 
+    @Test
+    void getLowStockProducts_WithDefaultThreshold_ShouldReturnLowStockProducts() {
+        // Arrange
+        String inventoryId = "inventoryId_1";
+        int defaultThreshold = 16;
 
+        when(productInventoryService.getLowStockProducts(inventoryId, defaultThreshold))
+                .thenReturn(Flux.fromIterable(lowStockProducts));
 
+        // Act & Assert
+        webTestClient.get()
+                .uri("/inventory/{inventoryId}/products/lowstock", inventoryId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBodyList(ProductResponseDTO.class)
+                .value(products -> {
+                    assertNotNull(products);
+                    assertEquals(1, products.size());
+                    assertEquals(lowStockProduct.getProductName(), products.get(0).getProductName());
+                    assertEquals(lowStockProduct.getProductQuantity(), products.get(0).getProductQuantity());
+                });
 
+        verify(productInventoryService, times(1)).getLowStockProducts(inventoryId, defaultThreshold);
+    }
 
+    @Test
+    void getLowStockProducts_WithCustomThreshold_ShouldReturnLowStockProducts() {
+        // Arrange
+        String inventoryId = "inventoryId_1";
+        int customThreshold = 10;
 
+        when(productInventoryService.getLowStockProducts(inventoryId, customThreshold))
+                .thenReturn(Flux.fromIterable(lowStockProducts));
 
+        // Act & Assert
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder.path("/inventory/{inventoryId}/products/lowstock")
+                        .queryParam("threshold", String.valueOf(customThreshold))
+                        .build(inventoryId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBodyList(ProductResponseDTO.class)
+                .value(products -> {
+                    assertNotNull(products);
+                    assertEquals(1, products.size());
+                    assertEquals(lowStockProduct.getProductName(), products.get(0).getProductName());
+                    assertEquals(lowStockProduct.getProductQuantity(), products.get(0).getProductQuantity());
+                });
+
+        verify(productInventoryService, times(1)).getLowStockProducts(inventoryId, customThreshold);
+    }
+
+    @Test
+    void searchProductsByInventoryIdAndProductNameAndProductDescription_withValidFields_shouldSucceed() {
+        String inventoryId = "1";
+        String productName = "B";
+        String productDescription = "Sedative";
+
+        when(productInventoryService.searchProducts(inventoryId, productName, productDescription))
+                .thenReturn(Flux.fromIterable(productResponseDTOS));
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/inventory/{inventoryId}/products/search")
+                        .queryParam("productName", productName)
+                        .queryParam("productDescription", productDescription)
+                        .build(inventoryId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(ProductResponseDTO.class)
+                .value(products -> {
+                    assertNotNull(products);
+                    assertEquals(2, products.size());
+                });
+        verify(productInventoryService, times(1))
+                .searchProducts(inventoryId, productName, productDescription);
+    }
+
+    @Test
+    void searchProductsByInventoryIdAndProductName_withValidFields_shouldSucceed() {
+        String inventoryId = "1";
+        String productName = "B";
+
+        when(productInventoryService.searchProducts(inventoryId, productName, null))
+                .thenReturn(Flux.fromIterable(productResponseDTOS));
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/inventory/{inventoryId}/products/search")
+                        .queryParam("productName", productName)
+                        .build(inventoryId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(ProductResponseDTO.class)
+                .value(products -> {
+                    assertNotNull(products);
+                    assertEquals(2, products.size());
+                });
+        verify(productInventoryService, times(1))
+                .searchProducts(inventoryId, productName, null);
+    }
+
+    @Test
+    void searchProductsByInventoryIdAndProductDescription_withValidFields_shouldSucceed() {
+        String inventoryId = "1";
+        String productDescription = "Sedative";
+
+        when(productInventoryService.searchProducts(inventoryId, null, productDescription))
+                .thenReturn(Flux.fromIterable(productResponseDTOS));
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/inventory/{inventoryId}/products/search")
+                        .queryParam("productDescription", productDescription)
+                        .build(inventoryId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(ProductResponseDTO.class)
+                .value(products -> {
+                    assertNotNull(products);
+                    assertEquals(2, products.size());
+                });
+        verify(productInventoryService, times(1))
+                .searchProducts(inventoryId, null, productDescription);
+    }
+
+    @Test
+    void searchProductsByInventoryId_withValidFields_shouldSucceed() {
+        String inventoryId = "1";
+
+        when(productInventoryService.searchProducts(inventoryId, null, null))
+                .thenReturn(Flux.fromIterable(productResponseDTOS));
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/inventory/{inventoryId}/products/search")
+                        .build(inventoryId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(ProductResponseDTO.class)
+                .value(products -> {
+                    assertNotNull(products);
+                    assertEquals(2, products.size());
+                });
+        verify(productInventoryService, times(1))
+                .searchProducts(inventoryId, null, null);
+    }
+
+//    @Test
+//    void getLowStockProducts_WithInvalidInventoryId_ShouldReturnNotFound() {
+//        // Arrange
+//        String invalidInventoryId = "nonExistentInventory";
+//        int threshold = 16;
+//
+//        when(productInventoryService.getLowStockProducts(invalidInventoryId, threshold))
+//                .thenReturn(Flux.empty());
+//
+//        // Act & Assert
+//        webTestClient.get()
+//                .uri("/inventory/{inventoryId}/products/lowstock", invalidInventoryId)
+//                .accept(MediaType.APPLICATION_JSON)
+//                .exchange()
+//                .expectStatus().isNotFound();
+//
+//        verify(productInventoryService, times(1)).getLowStockProducts(invalidInventoryId, threshold);
+//    }
+
+//    @Test
+//    void getLowStockProducts_WithEmptyResult_ShouldReturnNoContent() {
+//        // Arrange
+//        String inventoryId = "inventoryId_2";
+//        int threshold = 16;
+//
+//        when(productInventoryService.getLowStockProducts(inventoryId, threshold))
+//                .thenReturn(Flux.empty());
+//
+//        // Act & Assert
+//        webTestClient.get()
+//                .uri("/inventory/{inventoryId}/products/lowstock", inventoryId)
+//                .accept(MediaType.APPLICATION_JSON)
+//                .exchange()
+//                .expectStatus().isNoContent();
+//
+//        verify(productInventoryService, times(1)).getLowStockProducts(inventoryId, threshold);
+//    }
 
 }
-
-
-
-
-
-
-
-
-
-
-
-

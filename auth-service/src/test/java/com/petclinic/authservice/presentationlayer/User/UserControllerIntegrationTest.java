@@ -3,6 +3,7 @@ package com.petclinic.authservice.presentationlayer.User;
 import com.petclinic.authservice.Util.Exceptions.HTTPErrorMessage;
 import com.petclinic.authservice.datalayer.roles.Role;
 import com.petclinic.authservice.domainclientlayer.Mail.MailService;
+import com.petclinic.authservice.domainclientlayer.cart.CartService;
 import com.petclinic.authservice.security.JwtTokenUtil;
 import com.petclinic.authservice.datalayer.user.*;
 import org.aspectj.lang.annotation.Before;
@@ -53,6 +54,9 @@ class UserControllerIntegrationTest {
 
     @MockBean
     private MailService mailService;
+
+    @MockBean
+    CartService cartService;
 
     private final String VALID_USER_ID = "7c0d42c2-0c2d-41ce-bd9c-6ca67478956f";
 
@@ -332,6 +336,10 @@ class UserControllerIntegrationTest {
 
     }
 
+    ////////////////////////////////////////////
+    // Removing the following tests as it is testing a function that is no longer in use (The old emailing service)
+    ////////////////////////////////////////////
+    /*
     @Test
     void createUser_ShouldSucceed() {
         UserIDLessRoleLessDTO userDTO = UserIDLessRoleLessDTO.builder()
@@ -410,7 +418,8 @@ class UserControllerIntegrationTest {
 
         userRepo.delete(userRepo.findByEmail(userDTO.getEmail()).get());
     }
-
+     */
+    ////////////////////////////////////////////
 
 
     @Test

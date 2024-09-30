@@ -1,22 +1,5 @@
-.cart-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 20px 0;
-    font-size: 18px;
-    text-align: left;
-}
-
-.cart-table th, .cart-table td {
-    padding: 12px;
-    border-bottom: 1px solid #ddd;
-}
-
-.cart-table tbody tr:nth-child(even) {
-    background-color: #f2f2f2;
-}
-
 .view-button {
-    background-color: rgb(128, 0, 0);
+    background-color: rgb(128, 0, 0); 
     color: white;
     border: none;
     padding: 8px 12px;
@@ -24,6 +7,26 @@
 }
 
 .view-button:hover {
-    background-color: rgb(2, 57, 12);
+    background-color: rgb(2, 57, 12); 
 }
 
+.delete-button {
+    background-color: #dc3545;
+    color: white;
+}
+
+.delete-button:hover {
+    background-color: #c82333; 
+}
+
+@media screen and (max-width: 768px) {
+    .cart-table {
+        font-size: 16px;
+    }
+
+    .view-button,
+    .delete-button {
+        padding: 6px 10px;
+        font-size: 14px;
+    }
+}

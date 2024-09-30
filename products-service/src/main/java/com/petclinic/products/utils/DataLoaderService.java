@@ -2,21 +2,18 @@ package com.petclinic.products.utils;
 
 import com.petclinic.products.datalayer.products.Product;
 import com.petclinic.products.datalayer.products.ProductRepository;
-import com.petclinic.products.datalayer.ratings.RatingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
 @Service
+@Profile("!test")
 public class DataLoaderService implements CommandLineRunner {
 
     @Autowired
     ProductRepository productRepository;
-
-    @Autowired
-    RatingRepository ratingRepository;
 
     @Override
     public void run(String... args) throws Exception {
@@ -25,7 +22,9 @@ public class DataLoaderService implements CommandLineRunner {
                 .productName("Dog Food")
                 .productDescription("Premium dry food for adult dogs")
                 .productSalePrice(45.99)
+                .requestCount(0)
                 .averageRating(0.0)
+                .productType("Food")
             .build();
 
         Product product2 = Product.builder()
@@ -33,7 +32,9 @@ public class DataLoaderService implements CommandLineRunner {
                 .productName("Cat Litter")
                 .productDescription("Clumping cat litter with odor control")
                 .productSalePrice(12.99)
+                .requestCount(0)
                 .averageRating(0.0)
+                .productType("Accessory")
                 .build();
 
         Product product3 = Product.builder()
@@ -41,7 +42,9 @@ public class DataLoaderService implements CommandLineRunner {
                 .productName("Flea Collar")
                 .productDescription("Flea and tick prevention for small dogs")
                 .productSalePrice(9.99)
+                .requestCount(0)
                 .averageRating(0.0)
+                .productType("Medication")
                 .build();
 
         Product product4 = Product.builder()
@@ -49,7 +52,9 @@ public class DataLoaderService implements CommandLineRunner {
                 .productName("Bird Cage")
                 .productDescription("Spacious cage for small birds like parakeets")
                 .productSalePrice(29.99)
+                .requestCount(0)
                 .averageRating(0.0)
+                .productType("Accessory")
                 .build();
 
         Product product5 = Product.builder()
@@ -57,7 +62,9 @@ public class DataLoaderService implements CommandLineRunner {
                 .productName("Aquarium Filter")
                 .productDescription("Filter system for small to medium-sized aquariums")
                 .productSalePrice(19.99)
+                .requestCount(0)
                 .averageRating(0.0)
+                .productType("Accessory")
                 .build();
 
         Product product6 = Product.builder()
@@ -65,7 +72,9 @@ public class DataLoaderService implements CommandLineRunner {
                 .productName("Horse Saddle")
                 .productDescription("Lightweight saddle for riding horses")
                 .productSalePrice(199.99)
+                .requestCount(0)
                 .averageRating(0.0)
+                .productType("Equipment")
                 .build();
 
         Product product7 = Product.builder()
@@ -73,7 +82,9 @@ public class DataLoaderService implements CommandLineRunner {
                 .productName("Rabbit Hutch")
                 .productDescription("Outdoor wooden hutch for rabbits")
                 .productSalePrice(79.99)
+                .requestCount(0)
                 .averageRating(0.0)
+                .productType("Accessory")
                 .build();
 
         Product product8 = Product.builder()
@@ -81,12 +92,14 @@ public class DataLoaderService implements CommandLineRunner {
                 .productName("Fish Tank Heater")
                 .productDescription("Submersible heater for tropical fish tanks")
                 .productSalePrice(14.99)
+                .requestCount(0)
                 .averageRating(0.0)
+                .productType("Accessory")
                 .build();
 
         Flux.just(product1, product2, product3, product4, product5, product6, product7, product8)
                 .flatMap(s -> productRepository.insert(Mono.just(s))
                         .log(s.toString()))
-                .subscribe();  //if you don't subscribe, nothing happens
+                .subscribe();
     }
 }

@@ -24,6 +24,8 @@ export function NavBar(): JSX.Element {
       .then(() => {
         navigate(AppRoutePaths.Login);
         localStorage.removeItem('user');
+        //Reload the login page to remove all previous user data
+        window.location.reload();
       });
   };
 
@@ -88,11 +90,17 @@ export function NavBar(): JSX.Element {
                     Inventories
                   </Nav.Link>
                 )}
+                {IsAdmin() && (
+                  <Nav.Link as={Link} to={AppRoutePaths.Emailing}>
+                    Emails
+                  </Nav.Link>
+                )}
                 {
                   <Nav.Link as={Link} to={AppRoutePaths.Products}>
-                    Products
+                    Shop
                   </Nav.Link>
                 }
+
                 {IsAdmin() && (
                   <Nav.Link as={Link} to={AppRoutePaths.Carts}>
                     Carts
@@ -134,7 +142,7 @@ export function NavBar(): JSX.Element {
               </NavDropdown>
             ) : (
               <>
-                <Nav.Link as={Link} to={AppRoutePaths.Home}>
+                <Nav.Link as={Link} to={AppRoutePaths.SignUp}>
                   Signup
                 </Nav.Link>
                 <Nav.Link as={Link} to={AppRoutePaths.Login}>

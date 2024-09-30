@@ -63,6 +63,7 @@ export default function VisitListTable(): JSX.Element {
             <th>Vet First Name</th>
             <th>Vet Last Name</th>
             <th>Vet Email</th>
+            <th>Visit End Date</th>
             <th>Status</th>
             <th>Actions</th>
           </tr>
@@ -77,6 +78,7 @@ export default function VisitListTable(): JSX.Element {
               <td>{visit.vetFirstName}</td>
               <td>{visit.vetLastName}</td>
               <td>{visit.vetEmail}</td>
+              <td>{new Date(visit.visitEndDate).toLocaleString()}</td>
               <td
                 style={{
                   color:
@@ -98,6 +100,14 @@ export default function VisitListTable(): JSX.Element {
                   title="View"
                 >
                   View
+                </button>
+
+                <button
+                  className="btn btn-warning"
+                  onClick={() => navigate(`/visits/${visit.visitId}/edit`)} // Edit button that triggers updateVisit
+                  title="Edit"
+                >
+                  Edit
                 </button>
               </td>
             </tr>

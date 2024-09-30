@@ -44,24 +44,42 @@ public class CartServiceClient {
                 .bodyToMono(CartResponseDTO.class);
     }
 
-    public Mono<CartResponseDTO> clearCartByCartId(final String CartId) {
+    public Mono<CartResponseDTO> updateCartByCartId(Mono<CartRequestDTO> cartRequestDTOMono, String CartId) {
         return webClientBuilder.build()
-                .delete()
-                .uri(CartServiceUrl + "/" + CartId + "/clear")
+                .put()
+                .uri(CartServiceUrl + "/" + CartId)
+                .body(Mono.just(cartRequestDTOMono), CartRequestDTO.class)
+                .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .bodyToMono(CartResponseDTO.class);
     }
 
+    public Mono<CartResponseDTO> deleteCartByCartId(String CardId) {
+        return webClientBuilder.build()
+                .delete()
+                .uri(CartServiceUrl + "/" + CardId)
+                .retrieve()
+                .bodyToMono(CartResponseDTO.class);
+    }
 
-//    public Mono<CartResponseDTO> updateCartByCartId(Mono<CartRequestDTO> cartRequestDTOMono, String CartId){
-//        return webClientBuilder.build()
-//                .put()
-//                .uri(CartServiceUrl + "/" + CartId)
-//                .body(Mono.just(cartRequestDTOMono), CartRequestDTO.class)
-//                .accept(MediaType.APPLICATION_JSON)
-//                .retrieve()
-//                .bodyToMono(CartResponseDTO.class);
-//    }
+    public CartResponseDTO createCart(CartRequestDTO cartRequestDTO) {
+        return webClientBuilder.build()
+                .post()
+                .uri(CartServiceUrl)
+                .bodyValue(cartRequestDTO)
+                .retrieve()
+                .bodyToMono(CartResponseDTO.class)
+                .block();
+    }
+
+    public Mono<Void> clearCart(String cartId) {
+        return webClientBuilder.build()
+                .delete()
+                .uri(CartServiceUrl + "/" + cartId + "/clear")
+                .retrieve()
+                .bodyToMono(Void.class);
+    }
 
 }
+
 
