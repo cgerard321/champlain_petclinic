@@ -73,6 +73,11 @@ export function NavBar(): JSX.Element {
                     Bills
                   </Nav.Link>
                 )}
+                {!IsAdmin() && (
+                  <Nav.Link as={Link} to={AppRoutePaths.CustomerVisits}>
+                    Visits
+                  </Nav.Link>
+                )}
                 {IsAdmin() && (
                   <Nav.Link as={Link} to={AppRoutePaths.AdminBills}>
                     Bills
