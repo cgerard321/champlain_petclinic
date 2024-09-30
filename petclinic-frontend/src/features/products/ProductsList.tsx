@@ -201,7 +201,12 @@ export default function ProductList(): JSX.Element {
             <p>Loading products...</p>
           ) : productList.length > 0 ? (
             productList.map((product: ProductModel) => (
-              <Product key={product.productId} product={product} />
+              <div
+                key={product.productId}
+                onClick={() => handleProductClick(product)}
+              >
+                <Product key={product.productId} product={product} />
+              </div>
             ))
           ) : (
             <p>No products found.</p>
