@@ -40,7 +40,7 @@ public class ProductsServiceClient {
 //
 //    }
 
-    public Flux<ProductResponseDTO> getAllProducts(Double minPrice, Double maxPrice) {
+    public Flux<ProductResponseDTO> getAllProducts(Double minPrice, Double maxPrice,String sort) {
         return webClient.get()
                 .uri(uriBuilder -> {
                     if (minPrice != null) {
@@ -49,17 +49,13 @@ public class ProductsServiceClient {
                     if (maxPrice != null) {
                         uriBuilder.queryParam("maxPrice", maxPrice);
                     }
+                    if (sort != null) {
+                        uriBuilder.queryParam("sort", sort);
+                    }
                     return uriBuilder.build();
                 })
                 .retrieve()
                 .bodyToFlux(ProductResponseDTO.class);
-    }
-    public Flux<ProductResponseDTO>getAllProductsByReview(){
-        return webClient.get()
-                .uri("/reviews")
-                .retrieve()
-                .bodyToFlux(ProductResponseDTO.class);
-
     }
 
     public Mono<ProductResponseDTO> getProductByProductId(final String productId) {

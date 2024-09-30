@@ -28,7 +28,8 @@ public class ProductController {
     @GetMapping(value = "", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ProductResponseDTO> getAllProducts(
             @RequestParam(required = false) Double minPrice,
-            @RequestParam(required = false) Double maxPrice) {
+            @RequestParam(required = false) Double maxPrice,
+            @RequestParam(required = false) String sort) {
         // Validate negative prices
         if ((minPrice != null && minPrice < 0) || (maxPrice != null && maxPrice < 0)) {
             throw new IllegalArgumentException("Price values cannot be negative");
@@ -37,13 +38,7 @@ public class ProductController {
         if (minPrice != null && maxPrice != null && minPrice > maxPrice) {
             return Flux.error(new IllegalArgumentException("minPrice cannot be greater than maxPrice"));
         }
-        return productsServiceClient.getAllProducts(minPrice, maxPrice);
-    }
-    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
-    @GetMapping(value = "",produces = MediaType.APPLICATION_JSON_VALUE)
-    public Flux<ProductResponseDTO>getAllProductsByReview(){
-        return productsServiceClient.getAllProductsByReview();
-
+        return productsServiceClient.getAllProducts(minPrice, maxPrice,sort);
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})

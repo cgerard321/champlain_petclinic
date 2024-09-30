@@ -14,7 +14,6 @@ import com.petclinic.products.presentationlayer.products.ProductResponseModel;
 import com.petclinic.products.utils.exceptions.InvalidAmountException;
 import com.petclinic.products.utils.exceptions.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -51,7 +50,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Flux<ProductResponseModel> getAllProducts(Double minPrice, Double maxPrice) {
+    public Flux<ProductResponseModel> getAllProducts(Double minPrice, Double maxPrice, String sort) {
         Flux<Product> products;
 
         if (minPrice != null && maxPrice != null) {
@@ -66,16 +65,18 @@ public class ProductServiceImpl implements ProductService {
 
         return products
                 .flatMap(this::getAverageRating)
+                .collectList()
+                .flatMapMany(productList -> {
+                    if ("asc".equals(sort)) {
+                        productList.sort((p1, p2) -> Double.compare(p1.getAverageRating(), p2.getAverageRating()));
+                    } else if ("desc".equals(sort)) {
+                        productList.sort((p1, p2) -> Double.compare(p2.getAverageRating(), p1.getAverageRating()));
+                    }
+                    return Flux.fromIterable(productList);
+                })
                 .map(EntityModelUtil::toProductResponseModel);
     }
 
-    public Flux<ProductResponseModel>getAllProductsByReview(){
-        return productRepository.findProductsByHighRating()
-                .flatMap(this::getAverageRating)
-                .map(EntityModelUtil::toProductResponseModel);
-
-
-    }
 
     @Override
     public Mono<ProductResponseModel> getProductByProductId(String productId) {

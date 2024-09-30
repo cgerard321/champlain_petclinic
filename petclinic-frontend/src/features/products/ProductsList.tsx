@@ -18,6 +18,7 @@ export default function ProductList(): JSX.Element {
   const [isRightRole, setIsRightRole] = useState<boolean>(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
   const [filterType, setFilterType] = useState<string>('');
+  const [ratingSort, setRatingSort]=useState<string>('');
 
   function FilterByPriceErrorHandling(): void {
     // Validate inputs for filter by price
@@ -36,7 +37,7 @@ export default function ProductList(): JSX.Element {
     setIsLoading(true);
     try {
       if (filterType.trim() === '') {
-        const list = await getAllProducts(minPrice, maxPrice);
+        const list = await getAllProducts(minPrice, maxPrice,ratingSort);
         setProductList(list);
       } else {
         const filteredList = await getProductsByType(filterType);
@@ -85,9 +86,13 @@ export default function ProductList(): JSX.Element {
     setIsSidebarOpen(false);
   };
 
-  const clearFilters = (): void => {
+  const clearFilters = async (): Promise<void> => {
     setMinPrice(undefined);
     setMaxPrice(undefined);
+    setFilterType("");
+    setRatingSort('');
+    const list = await getAllProducts(minPrice, maxPrice,'');
+    setProductList(list);
   };
 
   return (
@@ -147,6 +152,13 @@ export default function ProductList(): JSX.Element {
               onChange={e => setFilterType(e.target.value)}
             />
           </label>
+          <select name="rating"
+                  value={ratingSort}
+                  onChange={e => setRatingSort(e.target.value)}>
+            <option value="default">Sort by Rating</option>
+            <option value="asc" >Low to High</option>
+            <option value="desc">High to Low</option>
+          </select>
           <button className="apply-filter-button" onClick={fetchProducts}>
             Apply Filter
           </button>

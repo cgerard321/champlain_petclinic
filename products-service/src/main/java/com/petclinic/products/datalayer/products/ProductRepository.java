@@ -23,7 +23,5 @@ public interface ProductRepository extends ReactiveMongoRepository<Product, Stri
     Flux<Product> findByProductSalePriceLessThanEqual(Double maxPrice);
     Flux<Product> findProductsByProductType(String productType);
 
-    @Query("SELECT * FROM Products ORDER BY averageRating DESC")
-    Flux<Product> findProductsByHighRating();
 
 }

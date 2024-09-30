@@ -42,7 +42,7 @@ public class ProductControllerUnitTest {
                 .productSalePrice(9.99)
                 .averageRating(0.0)
                 .build();
-        when(productService.getAllProducts(null,null)).thenReturn(Flux.just(productResponseModel1, productResponseModel2));
+        when(productService.getAllProducts(null,null,null)).thenReturn(Flux.just(productResponseModel1, productResponseModel2));
 
         webClient.get().uri("/api/v1/products")
                 .accept(MediaType.TEXT_EVENT_STREAM)
@@ -51,12 +51,12 @@ public class ProductControllerUnitTest {
                 .expectHeader().valueEquals("Content-Type", "text/event-stream;charset=UTF-8")
                 .expectBodyList(ProductResponseModel.class);
 
-        verify(productService).getAllProducts(null,null);
+        verify(productService).getAllProducts(null,null,null);
     }
     @Test
     public void whenNoProductsExist_thenReturnEmptyList() {
 
-        when(productService.getAllProducts(null,null)).thenReturn(Flux.empty());
+        when(productService.getAllProducts(null,null,null)).thenReturn(Flux.empty());
 
         webClient.get().uri("/api/v1/products")
                 .accept(MediaType.TEXT_EVENT_STREAM)
@@ -69,7 +69,7 @@ public class ProductControllerUnitTest {
                     assertEquals(0, productResponseModel.size());
                 });
 
-        verify(productService).getAllProducts(null,null);
+        verify(productService).getAllProducts(null,null,null);
     }
 
     @Test

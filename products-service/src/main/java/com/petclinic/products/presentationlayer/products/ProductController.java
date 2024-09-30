@@ -23,12 +23,9 @@ public class ProductController {
     @GetMapping(value = "", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ProductResponseModel> getAllProducts(
             @RequestParam(required = false) Double minPrice,
-            @RequestParam(required = false) Double maxPrice) {
-        return productService.getAllProducts(minPrice, maxPrice);
-    }
-    @GetMapping(value="/reviews",produces = MediaType.APPLICATION_JSON_VALUE)
-    public Flux<ProductResponseModel> getAllProductsByReview(){
-        return productService.getAllProductsByReview();
+            @RequestParam(required = false) Double maxPrice,
+            @RequestParam(required = false) String sort) {
+        return productService.getAllProducts(minPrice, maxPrice,sort);
     }
 
     @GetMapping(value = "/{productId}", produces = MediaType.APPLICATION_JSON_VALUE)

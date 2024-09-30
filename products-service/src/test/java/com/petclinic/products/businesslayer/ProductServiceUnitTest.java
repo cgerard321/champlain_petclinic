@@ -70,7 +70,7 @@ class ProductServiceUnitTest {
                 .thenReturn(Flux.just(rating2));
 
 
-        Flux<ProductResponseModel> result = productService.getAllProducts(null,null);
+        Flux<ProductResponseModel> result = productService.getAllProducts(null,null,null);
 
 
         StepVerifier.create(result)
@@ -89,7 +89,7 @@ class ProductServiceUnitTest {
         when(productRepository.findAll())
                 .thenReturn(Flux.empty());
 
-        Flux<ProductResponseModel> result = productService.getAllProducts(null,null);
+        Flux<ProductResponseModel> result = productService.getAllProducts(null,null,null);
 
         StepVerifier.create(result)
                 .expectNextCount(0)
