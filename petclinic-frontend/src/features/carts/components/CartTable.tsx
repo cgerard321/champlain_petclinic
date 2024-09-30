@@ -1,16 +1,18 @@
 import { useEffect, useState } from 'react';
-//import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import './CartTable.css';
+import { ProductModel } from '../models/ProductModel';
 
 interface CartModel {
   cartId: string;
   customerId: string;
+  products: Array<ProductModel>;
 }
 
 export default function CartListTable(): JSX.Element {
   const [carts, setCarts] = useState<CartModel[]>([]);
   const [error, setError] = useState<string | null>(null);
-  //const navigate = useNavigate();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCarts = async (): Promise<void> => {
@@ -58,7 +60,12 @@ export default function CartListTable(): JSX.Element {
               <td>{cart.cartId}</td>
               <td>{cart.customerId}</td>
               <td>
-                <button className="view-button">View</button>
+                <button
+                  className="view-button"
+                  onClick={() => navigate(`/cart/${cart.cartId}`)}
+                >
+                  View
+                </button>
               </td>
               <td>
                 <button

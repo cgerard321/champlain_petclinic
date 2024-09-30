@@ -4,6 +4,7 @@ import axios from 'axios';
 import CartItem from './CartItem.tsx';
 import { ProductModel } from '../models/ProductModel';
 import './UserCart.css';
+import { NavBar } from '@/layouts/AppNavBar';
 
 const UserCart = (): JSX.Element => {
   const { cartId } = useParams<{ cartId: string }>();
@@ -15,6 +16,8 @@ const UserCart = (): JSX.Element => {
     const fetchCartItems = async (): Promise<void> => {
       try {
         const response = await axios.get(`/api/v2/gateway/carts/${cartId}`);
+        console.error('response: ', response);
+        console.error('data', response.data);
         const products = response.data.products; // Assuming 'products' is the field containing cart items
         setCartItems(products);
 
@@ -56,6 +59,7 @@ const UserCart = (): JSX.Element => {
 
   return (
     <div className="CartItems">
+      <NavBar />
       <h1>User Cart</h1>
       <hr />
       <div className="CartItems-items">

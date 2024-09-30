@@ -5,6 +5,7 @@ import com.petclinic.cartsservice.domainclientlayer.ProductResponseModel;
 import com.petclinic.cartsservice.presentationlayer.CartRequestModel;
 import com.petclinic.cartsservice.utils.exceptions.InvalidInputException;
 import com.petclinic.cartsservice.utils.exceptions.NotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
@@ -27,6 +28,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/carts")
+@Slf4j
 public class CartController {
 
     private final CartService cartService;
@@ -45,18 +47,17 @@ public class CartController {
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public Flux<ResponseEntity<CartResponseModel>> getAllCarts() {
+    public Flux<CartResponseModel> getAllCarts() {
         return cartService.getAllCarts()
-                .map(ResponseEntity::ok);
+                .doOnNext(e -> log.debug("cart-service controller is returning cart data: " + e.toString()));
     }
 
     @DeleteMapping("/{cartId}/clear")
-    public Flux<ResponseEntity<CartResponseModel>> clearCart(@PathVariable String cartId) {
+    public Flux<CartResponseModel> clearCart(@PathVariable String cartId) {
         return Flux.just(cartId)
                 .filter(id -> id.length() == 36) // validate the cart id
                 .switchIfEmpty(Mono.error(new InvalidInputException("Provided cart id is invalid: " + cartId)))
-                .flatMap(cartService::clearCart)
-                .map(ResponseEntity::ok);
+                .flatMap(cartService::clearCart);
     }
 
     // Adding the updateCartByCartId method from main

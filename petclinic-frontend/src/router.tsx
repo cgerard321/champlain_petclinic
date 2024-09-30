@@ -27,6 +27,7 @@ import VisitByVisitId from './features/visits/visits/VisitByVisitId';
 import AddingVisit from './features/visits/models/AddingVisit';
 import ProfilePage from '@/pages/Customer/ProfilePage.tsx';
 import AdminBillingPage from '@/pages/Bills/AdminBill.tsx';
+import UserCart from '@/features/carts/components/UserCart.tsx';
 
 const router = createBrowserRouter([
   {
@@ -181,6 +182,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <AddingVisit />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: `${AppRoutePaths.Carts}/:cartId`,
+        element: (
+          <ProtectedRoute roles={['ADMIN', 'OWNER']}>
+            <UserCart />
           </ProtectedRoute>
         ),
       },
