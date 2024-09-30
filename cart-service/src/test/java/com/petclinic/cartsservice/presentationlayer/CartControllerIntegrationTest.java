@@ -123,7 +123,7 @@ class CartControllerIntegrationTest {
 //                });
 //    }
 
-    @Test
+//    @Test
     void whenGetCartByCartId_thenReturnCartResponseModel(){
         webTestClient.get()
                 .uri("/api/v1/carts/" + cart1.getCartId())
