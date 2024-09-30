@@ -93,6 +93,11 @@ export default function AdminBillsListTable(): JSX.Element {
         {searchedBill && <button onClick={handleGoBack}>Go Back</button>}
       </div>
 
+      {/* Create Bill Form */}
+      <button onClick={() => setCreateForm(!showCreateForm)}>
+        {showCreateForm ? 'Cancel' : 'Create New Bill'}
+      </button>
+
       {searchedBill ? (
         <div>
           <h3>Searched Bill Details:</h3>
@@ -167,11 +172,6 @@ export default function AdminBillsListTable(): JSX.Element {
           </table>
         </div>
       )}
-
-      {/* Create Bill Form */}
-      <button onClick={() => setCreateForm(!showCreateForm)}>
-        {showCreateForm ? 'Cancel' : 'Create New Bill'}
-      </button>
 
       {showCreateForm && (
         <div>
