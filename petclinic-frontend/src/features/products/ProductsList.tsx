@@ -7,6 +7,7 @@ import AddProduct from './components/AddProduct';
 import { addProduct } from '@/features/products/api/addProduct';
 import { useUser } from '@/context/UserContext';
 import './components/Sidebar.css';
+import { getProductsByType } from '@/features/products/api/getProductsByType.ts';
 
 export default function ProductList(): JSX.Element {
   const [productList, setProductList] = useState<ProductModel[]>([]);
@@ -16,6 +17,7 @@ export default function ProductList(): JSX.Element {
   const { user } = useUser();
   const [isRightRole, setIsRightRole] = useState<boolean>(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
+  const [filterType, setFilterType] = useState<string>('');
   const [recentlyClickedProducts, setRecentlyClickedProducts] = useState<
     ProductModel[]
   >([]);
@@ -36,8 +38,14 @@ export default function ProductList(): JSX.Element {
     FilterByPriceErrorHandling();
     setIsLoading(true);
     try {
-      const list = await getAllProducts(minPrice, maxPrice);
-      setProductList(list);
+      if (filterType.trim() === '') {
+        const list = await getAllProducts(minPrice, maxPrice);
+        setProductList(list);
+      } else {
+        const filteredList = await getProductsByType(filterType);
+
+        setProductList(filteredList);
+      }
     } catch (err) {
       console.error('Error fetching products:', err);
       setProductList([]);
@@ -157,6 +165,15 @@ export default function ProductList(): JSX.Element {
               placeholder="e.g., 100"
             />
           </label>
+          <label>
+            Product Type:
+            <input
+              type="text"
+              placeholder="Enter product type"
+              value={filterType}
+              onChange={e => setFilterType(e.target.value)}
+            />
+          </label>
           <button className="apply-filter-button" onClick={fetchProducts}>
             Apply Filter
           </button>
@@ -184,12 +201,7 @@ export default function ProductList(): JSX.Element {
             <p>Loading products...</p>
           ) : productList.length > 0 ? (
             productList.map((product: ProductModel) => (
-              <div
-                key={product.productId}
-                onClick={() => handleProductClick(product)}
-              >
-                <Product key={product.productId} product={product} />
-              </div>
+              <Product key={product.productId} product={product} />
             ))
           ) : (
             <p>No products found.</p>

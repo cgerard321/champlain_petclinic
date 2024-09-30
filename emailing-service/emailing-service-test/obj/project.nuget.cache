@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "VyZt6L0IiW8=",
+  "dgSpecHash": "Op/iwsXJ2wI=",
   "success": true,
-  "projectFilePath": "C:\\Users\\Admin\\Desktop\\PetClinic\\champlain_petclinic\\emailing-service\\emailing-service-test\\emailing-service-test.csproj",
+  "projectFilePath": "C:\\Users\\Admin\\Desktop\\Sprint2\\Try3\\champlain_petclinic\\emailing-service\\emailing-service-test\\emailing-service-test.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Admin\\.nuget\\packages\\castle.core\\5.1.1\\castle.core.5.1.1.nupkg.sha512",
     "C:\\Users\\Admin\\.nuget\\packages\\coverlet.collector\\6.0.0\\coverlet.collector.6.0.0.nupkg.sha512",

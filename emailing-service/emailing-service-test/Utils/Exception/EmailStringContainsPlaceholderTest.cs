@@ -1,6 +1,6 @@
-using System;
+
 using emailing_service.Utils.Exception;
-using NUnit.Framework;
+
 
 namespace emailing_service_test.Utils.Exception;
 
@@ -30,7 +30,7 @@ public class EmailStringContainsPlaceholderTests
         var exception = new EmailStringContainsPlaceholder(expectedField, expectedPlaceholder);
 
         // Assert
-        Assert.AreEqual(expectedMessage, exception.Message);
+        Assert.That(exception.Message, Is.EqualTo(expectedMessage));
     }
 
     [Test]
@@ -44,7 +44,7 @@ public class EmailStringContainsPlaceholderTests
         var exception = new EmailStringContainsPlaceholder(expectedMessage, innerException);
 
         // Assert
-        Assert.AreEqual(expectedMessage, exception.Message);
-        Assert.AreEqual(innerException, exception.InnerException);
+        Assert.That(exception.Message, Is.EqualTo(expectedMessage));
+        Assert.That(exception.InnerException, Is.EqualTo(innerException));
     }
 }

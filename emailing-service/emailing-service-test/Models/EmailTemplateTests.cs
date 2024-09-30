@@ -1,6 +1,6 @@
 using emailing_service.Models;
 using emailing_service.Utils.Exception;
-using NUnit.Framework;
+
 
 namespace emailing_service_test.Models;
 [TestFixture]
@@ -64,7 +64,7 @@ public class EmailTemplateTests
             var template = new EmailTemplate("TestTemplate", "Footer: %%EMAIL_FOOTER%%");
 
             // Act & Assert
-            var ex = Assert.Throws<TemplateRequiredFieldNotSet>(() => template.BuildEmail("Header", "Body", ""));
+            var ex = Assert.Throws<TemplateRequiredFieldNotSet>(() => template.BuildEmail("Header", "Body"));
             Assert.That(ex.Message, Contains.Substring("footer"));
         }
 
@@ -77,7 +77,7 @@ public class EmailTemplateTests
         var template = new EmailTemplate("TestTemplate", "Name: %%EMAIL_NAME%%");
 
         // Act & Assert
-        var ex = Assert.Throws<TemplateRequiredFieldNotSet>(() => template.BuildEmail("Header", "Body", "Footer", ""));
+        var ex = Assert.Throws<TemplateRequiredFieldNotSet>(() => template.BuildEmail("Header", "Body", "Footer"));
         Assert.That(ex.Message, Contains.Substring("correspondentName"));
         }
         
@@ -88,7 +88,7 @@ public class EmailTemplateTests
         var template = new EmailTemplate("TestTemplate", "Sender: %%EMAIL_SENDER%%");
 
         // Act & Assert
-        var ex = Assert.Throws<TemplateRequiredFieldNotSet>(() => template.BuildEmail("Header", "Body", "Footer", "Name", ""));
+        var ex = Assert.Throws<TemplateRequiredFieldNotSet>(() => template.BuildEmail("Header", "Body", "Footer", "Name"));
         Assert.That(ex.Message, Contains.Substring("sender"));
         }
 

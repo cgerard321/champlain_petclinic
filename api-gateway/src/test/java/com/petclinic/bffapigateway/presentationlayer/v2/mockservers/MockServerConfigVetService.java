@@ -7,6 +7,7 @@ import com.petclinic.bffapigateway.dtos.Vets.VetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Vets.Workday;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.integration.ClientAndServer;
+import org.springframework.http.MediaType;
 
 import java.util.Set;
 
@@ -374,5 +375,34 @@ public void stopMockServer() {
                                 .withStatusCode(204)
                 );
     }
+
+    public void registerGetPhotoByVetIdEndpoint(String vetId, byte[] photoData) {
+        mockServerClient_VetService
+                .when(
+                        request()
+                                .withMethod("GET")
+                                .withPath("/vets/" + vetId + "/photo")
+                )
+                .respond(
+                        response()
+                                .withStatusCode(200)
+                                .withHeader("Content-Type", MediaType.IMAGE_JPEG_VALUE)
+                                .withBody(photoData)
+                );
+    }
+
+    public void registerGetPhotoByVetIdEndpointNotFound(String vetId) {
+        mockServerClient_VetService
+                .when(
+                        request()
+                                .withMethod("GET")
+                                .withPath("/vets/" + vetId + "/photo")
+                )
+                .respond(
+                        response()
+                                .withStatusCode(404)
+                );
+    }
+
 
 }

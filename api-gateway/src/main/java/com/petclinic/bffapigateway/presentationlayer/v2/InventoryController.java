@@ -151,6 +151,35 @@ public class InventoryController {
                 });
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
+    @PostMapping(value = "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<InventoryResponseDTO>> addInventory(@RequestBody InventoryRequestDTO inventoryRequestDTO) {
+        return inventoryServiceClient.addInventory(inventoryRequestDTO)
+                .map(inventory -> ResponseEntity.status(HttpStatus.CREATED).body(inventory))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
+    @GetMapping(value = "/{inventoryId}/products/search", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<Flux<ProductResponseDTO>>> searchProducts(
+            @PathVariable String inventoryId,
+            @RequestParam(required = false) String productName,
+            @RequestParam(required = false) String productDescription) {
+
+        Flux<ProductResponseDTO> products = inventoryServiceClient
+                .searchProducts(inventoryId, productName, productDescription);
+
+        return products
+                .hasElements() // Check if any elements are present in the flux
+                .flatMap(hasElements -> {
+                    if (hasElements) {
+                        return Mono.just(ResponseEntity.ok(products));
+                    } else {
+                        return Mono.just(ResponseEntity.notFound().build());
+                    }
+                });
+    }
+
 
 
 }

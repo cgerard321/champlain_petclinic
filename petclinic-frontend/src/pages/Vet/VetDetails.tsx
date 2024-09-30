@@ -20,6 +20,7 @@ interface VetResponseType {
 export default function VetDetails(): JSX.Element {
   const { vetId } = useParams<{ vetId: string }>();
   const [vet, setVet] = useState<VetResponseType | null>(null);
+  const [photo, setPhoto] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -27,7 +28,7 @@ export default function VetDetails(): JSX.Element {
     const fetchVetDetails = async (): Promise<void> => {
       try {
         const response = await fetch(
-          `http://localhost:8080/api/gateway/vets/${vetId}`
+          `http://localhost:8080/api/v2/gateway/vets/${vetId}`
         );
 
         if (!response.ok) {
@@ -35,14 +36,40 @@ export default function VetDetails(): JSX.Element {
         }
         const data: VetResponseType = await response.json();
         setVet(data);
-        setLoading(false);
       } catch (error) {
         setError('Failed to fetch vet details');
-        setLoading(false);
       }
     };
 
-    fetchVetDetails();
+    const fetchVetPhoto = async (): Promise<void> => {
+      try {
+        const response = await fetch(
+          `http://localhost:8080/api/v2/gateway/vets/${vetId}/photo`,
+          {
+            method: 'GET',
+            headers: {
+              Accept: 'image/*',
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`Error: ${response.statusText}`);
+        }
+
+        const blob = await response.blob();
+        const imageUrl = URL.createObjectURL(blob);
+        setPhoto(imageUrl);
+      } catch (error) {
+        setError('Failed to fetch vet photo');
+      }
+    };
+
+    //fetch both vet details and photo
+    fetchVetDetails().then(() => {
+      fetchVetPhoto();
+      setLoading(false);
+    });
   }, [vetId]);
 
   const renderWorkHours = (workHoursJson: string): JSX.Element => {
@@ -76,6 +103,13 @@ export default function VetDetails(): JSX.Element {
       <NavBar />
       <div className="vet-details-container">
         <h1>Vet Information</h1>
+
+        {photo && (
+          <section className="vet-photo-container">
+            <img src={photo} alt="Vet" className="vet-photo" />
+          </section>
+        )}
+
         {vet && (
           <>
             <section className="vet-info">

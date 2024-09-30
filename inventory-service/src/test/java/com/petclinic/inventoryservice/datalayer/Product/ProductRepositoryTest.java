@@ -167,7 +167,8 @@ class ProductRepositoryTest {
         // Check that there are no products in the repository anymore
         StepVerifier
                 .create(productRepository.findAll())
-                .expectNextCount(0);
+                .expectNextCount(0)
+                .verifyComplete();
 
     }
 
@@ -256,6 +257,44 @@ class ProductRepositoryTest {
                 .verifyComplete();
     }
 
+    @Test
+    public void shouldFindProductsByInventoryIdAndProductNameAndProductDescription() {
+        // Arrange
+        Product product = buildProduct("inventoryId_1", "productId_1", "name", "description", 100.00, 10, 15.99);
+        productRepository.save(product).block();
+
+        // Act & Assert
+        StepVerifier
+                .create(productRepository.findAllProductsByInventoryIdAndProductNameAndProductDescription("inventoryId_1", "name", "description"))
+                .expectNextMatches(result -> result.getProductId().equals("productId_1"))
+                .verifyComplete();
+    }
+
+    @Test
+    public void shouldFindProductsByInventoryIdAndProductDescription() {
+        // Arrange
+        Product product = buildProduct("inventoryId_1", "productId_1", "name", "description", 100.00, 10, 15.99);
+        productRepository.save(product).block();
+
+        // Act & Assert
+        StepVerifier
+                .create(productRepository.findAllProductsByInventoryIdAndProductDescription("inventoryId_1", "description"))
+                .expectNextMatches(result -> result.getProductId().equals("productId_1"))
+                .verifyComplete();
+    }
+
+    @Test
+    public void shouldFindProductsByInventoryIdAndProductName() {
+        // Arrange
+        Product product = buildProduct("inventoryId_1", "productId_1", "name", "description", 100.00, 10, 15.99);
+        productRepository.save(product).block();
+
+        // Act & Assert
+        StepVerifier
+                .create(productRepository.findAllProductsByInventoryIdAndProductName("inventoryId_1", "name"))
+                .expectNextMatches(result -> result.getProductId().equals("productId_1"))
+                .verifyComplete();
+    }
 
     private Product buildProduct(String inventoryId, String productId, String productName, String productDescription, Double productPrice, Integer productQuantity, Double productSalePrice) {
         return Product.builder()

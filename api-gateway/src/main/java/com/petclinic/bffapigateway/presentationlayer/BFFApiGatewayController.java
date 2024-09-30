@@ -1065,6 +1065,14 @@ public class BFFApiGatewayController {
         return inventoryServiceClient.getLowStockProducts(inventoryId, stockThreshold);
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER,Roles.VET})
+    @GetMapping(value = "inventory/{inventoryId}/products/search")//, produces= MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<ProductResponseDTO> searchProducts(@PathVariable String inventoryId,
+                                                   @RequestParam(required = false) String productName,
+                                                   @RequestParam(required = false) String productDescription) {
+        return inventoryServiceClient.searchProducts(inventoryId, productName, productDescription);
+    }
+
     @SecuredEndpoint(allowedRoles = {Roles.ALL})
     @GetMapping(value = "owners/petTypes")//, produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<PetTypeResponseDTO> getAllPetTypes() {

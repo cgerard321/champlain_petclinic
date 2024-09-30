@@ -1,6 +1,6 @@
-using System;
+
 using emailing_service.Utils.Exception;
-using NUnit.Framework;
+
 
 namespace emailing_service_test.Utils.Exception;
 
@@ -28,7 +28,7 @@ public class TriedToFindNonExistingTemplateTests
         var exception = new TriedToFindNonExistingTemplate(expectedMessage);
 
         // Assert
-        Assert.AreEqual(expectedMessage, exception.Message);
+        Assert.That(exception.Message, Is.EqualTo(expectedMessage));
     }
 
     [Test]
@@ -42,7 +42,7 @@ public class TriedToFindNonExistingTemplateTests
         var exception = new TriedToFindNonExistingTemplate(expectedMessage, innerException);
 
         // Assert
-        Assert.AreEqual(expectedMessage, exception.Message);
-        Assert.AreEqual(innerException, exception.InnerException);
+        Assert.That(exception.Message, Is.EqualTo(expectedMessage));
+        Assert.That(exception.InnerException, Is.EqualTo(innerException));
     }
 }
