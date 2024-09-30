@@ -11,6 +11,7 @@ import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
@@ -128,7 +129,7 @@ class CartControllerUnitTest {
         // Act & Assert
         webTestClient
                 .get()
-                .uri("/api/v2/carts")
+                .uri("/api/v1/carts")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -222,22 +223,11 @@ class CartControllerUnitTest {
 
 //    @Test
     public void whenDeleteCartByIdWithExistingId_thenReturnCartResponseModel(){
-        List<String> productIds = List.of("9a29fff7-564a-4cc9-8fe1-36f6ca9bc223");
-
         Cart cart = Cart.builder()
                 .cartId("98f7b33a-d62a-420a-a84a-05a27c85fc91")
-                .productIds(productIds)
+                .products(products)
                 .customerId("1")
                 .build();
-
-        ProductResponseModel product1 = ProductResponseModel.builder()
-                .productId("9a29fff7-564a-4cc9-8fe1-36f6ca9bc223")
-                .productName("Web Services")
-                .productDescription("Learn how to create web services")
-                .productSalePrice(100.00)
-                .build();
-
-        List<ProductResponseModel> products = List.of(product1);
 
         CartResponseModel cartResponseModel = CartResponseModel.builder()
                 .cartId(cart.getCartId())

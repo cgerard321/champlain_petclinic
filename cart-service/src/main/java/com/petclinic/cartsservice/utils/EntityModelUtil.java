@@ -13,28 +13,26 @@ import java.util.UUID;
 
 public class EntityModelUtil {
 
-    public static CartResponseModel toCartResponseModel(Cart cart) {
-        CartResponseModel cartResponseModel = new CartResponseModel();
-        BeanUtils.copyProperties(cart, cartResponseModel);
-        return cartResponseModel;
-    }
 
     // Overloaded method for getCartByCartId
-    public static CartResponseModel toCartResponseModel(
-            Cart cart,
-            List<ProductResponseModel> products,
-            double subtotal,
-            double tvq,
-            double tvc,
-            double total) {
+    public static CartResponseModel toCartResponseModel(Cart cart, List<CartProduct> products) {
+        double subtotal = 0;
+        for (CartProduct product : products) {
+            subtotal += product.getProductSalePrice() * product.getQuantityInCart();
+        }
+        double tvq = subtotal * 0.09975; // Example tax rate for Quebec
+        double tvc = subtotal * 0.05; // Example tax rate for Canada
+        double total = subtotal + tvq + tvc;
 
-        CartResponseModel cartResponseModel = toCartResponseModel(cart, products);
+        CartResponseModel cartResponseModel = new CartResponseModel();
+        BeanUtils.copyProperties(cart, cartResponseModel);
         cartResponseModel.setSubtotal(subtotal);
         cartResponseModel.setTvq(tvq);
         cartResponseModel.setTvc(tvc);
         cartResponseModel.setTotal(total);
         return cartResponseModel;
     }
+
 
     public static Cart toCartEntity(CartRequestModel cartRequestModel) {
         return Cart.builder()

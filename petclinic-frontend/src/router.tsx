@@ -32,6 +32,10 @@ import EmailingPage from '@/pages/Emailing/EmailingPage.tsx';
 import MockPage from '@/pages/Inventory/MockPage.tsx';
 import InventorySupplies from '@/features/inventories/InventorySupplies.tsx';
 import EditInventory from '@/features/inventories/EditInventory.tsx';
+import { ProtectedRoute } from './shared/components/ProtectedRouteProps';
+import CustomerDetailsPage from '@/pages/Customer/CustomerDetailsPage.tsx';
+import UpdateCustomerPage from '@/pages/Customer/UpdateCustomerPage.tsx';
+import VisitDetails from './features/visits/visits/VisitByVisitId';
 
 const router = createBrowserRouter([
   {
@@ -48,7 +52,7 @@ const router = createBrowserRouter([
         path: AppRoutePaths.GetVisitByVistId,
         element: (
           <ProtectedRoute>
-            <VisitByVisitId />
+            <VisitDetails />
           </ProtectedRoute>
         ),
       },

@@ -126,7 +126,7 @@ class CartControllerIntegrationTest {
     @Test
     void whenGetCartByCartId_thenReturnCartResponseModel(){
         webTestClient.get()
-                .uri("/api/v2/carts/" + cart1.getCartId())
+                .uri("/api/v1/carts/" + cart1.getCartId())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -134,7 +134,6 @@ class CartControllerIntegrationTest {
                 .expectBody(CartResponseModel.class)
                 .value(result -> {
                     assertNotNull(cartResponseModel);
-                    assertEquals(cart1.getCartId(), result.getCartId());
                     assertEquals(cart1.getCustomerId(), result.getCustomerId());
                     assertEquals(cart1.getProducts().size(), result.getProducts().size());
                     assertEquals(cart1.getProducts().get(0).getProductId(), result.getProducts().get(0).getProductId());

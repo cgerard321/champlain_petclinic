@@ -51,7 +51,7 @@ class EntityModelUtilTest {
         List<CartProduct> products = new ArrayList<>(Arrays.asList(product1, product2));
 
         // Act
-        CartResponseModel cartResponseModel = EntityModelUtil.toCartResponseModel(cart);
+        CartResponseModel cartResponseModel = EntityModelUtil.toCartResponseModel(cart, products);
 
         // Assert
         assertEquals("cart-123", cartResponseModel.getCartId());

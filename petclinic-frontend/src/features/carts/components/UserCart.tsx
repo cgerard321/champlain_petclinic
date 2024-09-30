@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import { useParams } from 'react-router-dom';
+import { useState, useEffect, useCallback } from 'react';
+import { useParams, useNavigate } from 'react-router-dom'; // Import useNavigate
 import CartItem from './CartItem';
 import { ProductModel } from '../models/ProductModel';
 import './UserCart.css';
@@ -7,18 +7,18 @@ import { NavBar } from '@/layouts/AppNavBar';
 
 const UserCart = (): JSX.Element => {
   const { cartId } = useParams<{ cartId: string }>();
+  const navigate = useNavigate(); // Initialize useNavigate
   const [cartItems, setCartItems] = useState<ProductModel[]>([]);
-  const [fixedPrice, setFixedPrice] = useState<number[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
-  const subtotal = useMemo(() => {
-    return cartItems.reduce((acc, item) => acc + item.productSalePrice * (item.quantity || 1), 0);
-  }, [cartItems]);
-
-  const tvq = useMemo(() => subtotal * 0.09975, [subtotal]);
-  const tvc = useMemo(() => subtotal * 0.05, [subtotal]);
-  const total = useMemo(() => subtotal + tvq + tvc, [subtotal, tvq, tvc]);
+  const subtotal = cartItems.reduce(
+    (acc, item) => acc + item.productSalePrice * (item.quantity || 1),
+    0
+  );
+  const tvq = subtotal * 0.09975; // Quebec tax rate
+  const tvc = subtotal * 0.05; // Canadian tax rate
+  const total = subtotal + tvq + tvc;
 
   useEffect(() => {
     const fetchCartItems = async (): Promise<void> => {
@@ -29,22 +29,28 @@ const UserCart = (): JSX.Element => {
       }
 
       try {
-        const response = await fetch(`http://localhost:8080/api/v2/gateway/carts/${cartId}`, {
-          headers: { Accept: 'application/json' },
-          credentials: 'include',
-        });
+        const response = await fetch(
+          `http://localhost:8080/api/v2/gateway/carts/${cartId}`,
+          {
+            headers: { Accept: 'application/json' },
+            credentials: 'include',
+          }
+        );
 
         if (!response.ok) {
           throw new Error(`Error: ${response.status} ${response.statusText}`);
         }
 
         const data = await response.json();
-        const products = data.products.map(product => ({ ...product, quantity: 1 }));
+        const products = data.products.map((product: ProductModel) => ({
+          ...product,
+          quantity: 1, // Default quantity to 1
+        }));
 
         setCartItems(products);
-        setFixedPrice(products.map(item => item.productSalePrice));
       } catch (err: unknown) {
         if (err instanceof Error) {
+          console.error(err.message); // Log the actual error
           setError('Failed to fetch cart items');
         } else {
           setError('An unexpected error occurred');
@@ -57,29 +63,40 @@ const UserCart = (): JSX.Element => {
     fetchCartItems();
   }, [cartId]);
 
-  const changeItemQuantity = useCallback((event: React.ChangeEvent<HTMLInputElement>, index: number): void => {
-    const newItems = [...cartItems];
-    const newQuantity = +event.target.value;
-    newItems[index].quantity = newQuantity;
-
-    setCartItems(newItems);
-  }, [cartItems]);
+  const changeItemQuantity = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>, index: number): void => {
+      const newQuantity = Math.max(1, +event.target.value); // Ensure quantity is at least 1
+      setCartItems(prevItems => {
+        const newItems = [...prevItems];
+        newItems[index].quantity = newQuantity;
+        return newItems;
+      });
+    },
+    []
+  );
 
   const deleteItem = useCallback((indexToDelete: number): void => {
-    const newItems = cartItems.filter((_, index) => index !== indexToDelete);
-    setCartItems(newItems);
-  }, [cartItems]);
+    setCartItems(prevItems =>
+      prevItems.filter((_, index) => index !== indexToDelete)
+    );
+  }, []);
 
   const clearCart = async (): Promise<void> => {
-    if (!cartId || !window.confirm('Are you sure you want to clear the cart?')) {
+    if (
+      !cartId ||
+      !window.confirm('Are you sure you want to clear the cart?')
+    ) {
       return;
     }
 
     try {
-      const response = await fetch(`http://localhost:8080/api/v2/gateway/carts/${cartId}/clear`, {
-        method: 'DELETE',
-        credentials: 'include',
-      });
+      const response = await fetch(
+        `http://localhost:8080/api/v2/gateway/carts/${cartId}/clear`,
+        {
+          method: 'DELETE',
+          credentials: 'include',
+        }
+      );
 
       if (response.ok) {
         setCartItems([]);
@@ -106,6 +123,7 @@ const UserCart = (): JSX.Element => {
       <NavBar />
       <h1>User Cart</h1>
       <button onClick={clearCart}>Clear Cart</button>
+      <button onClick={() => navigate(-1)}>Go Back</button>
       <hr />
       <div className="CartItems-items">
         {cartItems.length > 0 ? (

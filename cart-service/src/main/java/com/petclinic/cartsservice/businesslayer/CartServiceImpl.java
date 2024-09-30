@@ -28,38 +28,24 @@ public class CartServiceImpl implements CartService {
         this.cartRepository = cartRepository;
         this.productClient = productClient;
     }
+    @Override
+    public Flux<CartResponseModel> getAllCarts() {
+        return cartRepository.findAll()
+                .map(cart -> {
+                    List<CartProduct> products = cart.getProducts();
+                    return EntityModelUtil.toCartResponseModel(cart, products);
+                });
+    }
 
     @Override
     public Mono<CartResponseModel> getCartByCartId(String cartId) {
         return cartRepository.findCartByCartId(cartId)
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Cart id was not found: " + cartId))))
                 .doOnNext(e -> log.debug("The cart response entity is: " + e.toString()))
-                .map(EntityModelUtil::toCartResponseModel);
                 .flatMap(cart -> {
-                    List<String> productIds = cart.getProductIds();
-                    return productIds
-                            .stream().map(productId -> productClient.getProductByProductId(productId).flux())
-                            .reduce(Flux.empty(), Flux::merge)
-                            .collectList()
-                            .map(products -> {
-                                // Calculate subtotal, tvq, tvc, and total
-                                double subtotal = products.stream()
-                                        .mapToDouble(product -> product.getProductSalePrice() * (product.getQuantity() != null ? product.getQuantity() : 1))
-                                        .sum();
-                                double tvq = subtotal * 0.09975; // 9.975%
-                                double tvc = subtotal * 0.05; // 5%
-                                double total = subtotal + tvq + tvc;
-
-                                return EntityModelUtil.toCartResponseModel(cart, products, subtotal, tvq, tvc, total);
-                            });
+                    List<CartProduct> products = cart.getProducts();
+                    return Mono.just(EntityModelUtil.toCartResponseModel(cart, products));
                 });
-    }
-
-    @Override
-    public Flux<CartResponseModel> getAllCarts() {
-        return cartRepository.findAll()
-                .map(EntityModelUtil::toCartResponseModel)
-                .doOnNext(e -> log.debug("The cart response entity is: " + e.toString()));
     }
 
 
@@ -67,12 +53,11 @@ public class CartServiceImpl implements CartService {
         return cartRepository.findCartByCartId(cartId)
                 .switchIfEmpty(Mono.error(new NotFoundException("Cart not found: " + cartId)))
                 .flatMapMany(cart -> {
-                    // Retrieve products based on productIds and clear the cart simultaneously
-                    Flux<CartProduct> productsFlux = Flux.fromIterable(cart.getProducts());
-                    // Clear cart and save it
+                    List<CartProduct> products = cart.getProducts();
                     cart.setProducts(Collections.emptyList());
                     return cartRepository.save(cart)
-                            .map(EntityModelUtil::toCartResponseModel);  // Ensure cart is saved before returning the cart
+                            .thenMany(Flux.fromIterable(products))
+                            .map(product -> EntityModelUtil.toCartResponseModel(cart, List.of(product)));
                 });
     }
 
@@ -106,21 +91,16 @@ public class CartServiceImpl implements CartService {
 //instead lets create a removeProductFromCart, UpdateQuantityOfProductInCart, and AddProductInCart methods
 
 
-//     @Override
-//     public Mono<CartResponseModel> deleteCartByCartId(String cartId) {
-//         return cartRepository.findCartByCartId(cartId)
-//                 .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Cart id was not found: " + cartId))))
-//                 .flatMap(found -> cartRepository.delete(found)
-//                     .then(Mono.just(found)))
-//                 .flatMap(cart -> {
-//                     List<String> productIds = cart.getProductIds();
-//                     return productIds
-//                             .stream().map(productId -> productClient.getProductByProductId(productId).flux())
-//                             .reduce(Flux.empty(), Flux::merge)
-//                             .collectList()
-//                             .map(products -> EntityModelUtil.toCartResponseModel(cart, products));
-//                 });
-//     }
+     @Override
+     public Mono<CartResponseModel> deleteCartByCartId(String cartId) {
+         return cartRepository.findCartByCartId(cartId)
+                 .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Cart id was not found: " + cartId))))
+                 .flatMap(found -> {
+                     List<CartProduct> products = found.getProducts();
+                     return cartRepository.delete(found)
+                             .then(Mono.just(EntityModelUtil.toCartResponseModel(found, products)));
+                 });
+     }
 
 
 
