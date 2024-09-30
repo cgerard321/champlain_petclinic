@@ -1,6 +1,7 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { AppRoutePaths } from './shared/models/path.routes';
 import Login from '@/pages/User/Login';
+import SignUp from '@/pages/User/SignUp';
 import Inventories from '@/pages/Inventory/Inventories.tsx';
 import InventoryProducts from '@/features/inventories/InventoryProducts.tsx';
 import Vet from '@/pages/Vet/Vet.tsx';
@@ -293,6 +294,7 @@ const router = createBrowserRouter([
     element: <Home />,
   },
   { path: AppRoutePaths.Login, element: <Login /> },
+  { path: AppRoutePaths.SignUp, element: <SignUp /> },
   {
     path: '*',
     element: <PageNotFound />,
