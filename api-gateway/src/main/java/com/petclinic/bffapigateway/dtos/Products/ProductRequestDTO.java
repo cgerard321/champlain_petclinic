@@ -16,4 +16,5 @@ public class ProductRequestDTO {
     private Double productSalePrice;
     private Double averageRating;
     private String productType;
+    private Integer productQuantity;
 }

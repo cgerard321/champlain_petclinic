@@ -105,4 +105,23 @@ public class ProductsServiceClient {
                 .retrieve()
                 .bodyToFlux(ProductResponseDTO.class);
     }
+    public Mono<Void> decreaseProductQuantity(final String productId) {
+        return webClientBuilder.build()
+                .patch()
+                .uri(productsServiceUrl + "/" + productId)
+                .retrieve()
+                .bodyToMono(Void.class);
+
+    }
+    public Mono<Void> changeProductQuantity(final String productId, Integer productQuantity) {
+        return webClientBuilder.build()
+                .patch()
+                .uri(productsServiceUrl + "/" + productId + "/quantity")
+                .retrieve()
+                .bodyToMono(Void.class);
+
+    }
+
+
+
 }

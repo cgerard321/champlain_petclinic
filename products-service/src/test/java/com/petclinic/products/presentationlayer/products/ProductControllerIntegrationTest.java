@@ -41,6 +41,7 @@ class ProductControllerIntegrationTest {
             .productDescription("Product 1 Description")
             .productSalePrice(100.00)
             .averageRating(0.0)
+            .productQuantity(2)
             .build();
 
     private Product product2 = Product.builder()
@@ -49,6 +50,7 @@ class ProductControllerIntegrationTest {
             .productDescription("Product 2 Description")
             .productSalePrice(50.00)
             .averageRating(0.0)
+            .productQuantity(2)
             .build();
 
     private ProductRequestModel productRequestModel = ProductRequestModel.builder()
@@ -56,6 +58,7 @@ class ProductControllerIntegrationTest {
             .productDescription("Product 3 Description")
             .productSalePrice(25.00)
             .averageRating(0.0)
+            .productQuantity(2)
             .build();
 
     private ProductRequestModel productRequestModelWithInavlidSalePrice = ProductRequestModel.builder()
@@ -63,6 +66,8 @@ class ProductControllerIntegrationTest {
             .productDescription("Product 3 Description")
             .productSalePrice(0.00)
             .averageRating(0.0)
+            .productQuantity(2)
+
             .build();
 
     private ProductRequestModel productRequestModel2 = ProductRequestModel.builder()
@@ -70,6 +75,7 @@ class ProductControllerIntegrationTest {
             .productDescription("Product 4 Description")
             .productSalePrice(25.00)
             .averageRating(0.0)
+            .productQuantity(2)
             .build();
 
     @BeforeEach

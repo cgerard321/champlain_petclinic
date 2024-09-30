@@ -11,6 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -82,5 +83,24 @@ public class ProductController {
     @GetMapping(value = "/filter/{productType}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Flux<ProductResponseDTO> getProductsByType(@PathVariable String productType) {
         return productsServiceClient.getProductsByType(productType);
+    }
+
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @PatchMapping(value = "{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<Void>> decreaseProductQuantity(@PathVariable String productId) {
+        return productsServiceClient.decreaseProductQuantity(productId).then(Mono.just(ResponseEntity.noContent().build()));
+    }
+
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @PatchMapping(value = "{productId}/quantity", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<Object>> changeProductQuantity( /////Object might not work
+            @PathVariable String productId,
+            @RequestBody Mono<ProductRequestDTO> productRequestModel) {
+        return productRequestModel
+                .flatMap(request -> productsServiceClient.changeProductQuantity(productId, request.getProductQuantity()))
+                .then(Mono.just(ResponseEntity.noContent().build()))
+                .onErrorResume(NotFoundException.class, e -> Mono.just(ResponseEntity.notFound().build()));
     }
 }
