@@ -181,6 +181,72 @@ class ProductServiceImplUnitTest {
     }
 
 
+    @Test
+    public void testDecreaseProductCount() {
+        String productId = "testProductId";
+        Product product = new Product();
+        product.setProductId(productId);
+        product.setRequestCount(10);
+        product.setProductQuantity(20);
+
+        when(productRepository.findProductByProductId(productId)).thenReturn(Mono.just(product));
+        when(productRepository.save(any(Product.class))).thenReturn(Mono.just(product));
+
+        StepVerifier.create(productService.DecreaseProductCount(productId))
+                .verifyComplete();
+
+        verify(productRepository).findProductByProductId(productId);
+        verify(productRepository).save(any(Product.class));
+    }
+
+    @Test
+    public void testDecreaseProductCount_NotFound() {
+        String productId = "nonExistentProductId";
+
+        when(productRepository.findProductByProductId(productId)).thenReturn(Mono.empty());
+
+        StepVerifier.create(productService.DecreaseProductCount(productId))
+                .expectError(NotFoundException.class)
+                .verify();
+
+        verify(productRepository).findProductByProductId(productId);
+        verify(productRepository, never()).save(any(Product.class));
+    }
+
+    @Test
+    public void testChangeProductQuantity() {
+        String productId = "testProductId";
+        Integer quantityChange = 5;
+        Product product = new Product();
+        product.setProductId(productId);
+        product.setProductQuantity(10);
+
+        when(productRepository.findProductByProductId(productId)).thenReturn(Mono.just(product));
+        when(productRepository.save(any(Product.class))).thenReturn(Mono.just(product));
+
+        StepVerifier.create(productService.changeProductQuantity(productId, quantityChange))
+                .verifyComplete();
+
+        verify(productRepository).findProductByProductId(productId);
+        verify(productRepository).save(any(Product.class));
+    }
+
+    @Test
+    public void testChangeProductQuantity_NotFound() {
+        String productId = "nonExistentProductId";
+        Integer quantityChange = 5;
+
+        when(productRepository.findProductByProductId(productId)).thenReturn(Mono.empty());
+
+        StepVerifier.create(productService.changeProductQuantity(productId, quantityChange))
+                .expectError(NotFoundException.class)
+                .verify();
+
+        verify(productRepository).findProductByProductId(productId);
+        verify(productRepository, never()).save(any(Product.class));
+    }
+
+
 
 }
 
