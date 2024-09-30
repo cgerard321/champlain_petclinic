@@ -36,6 +36,8 @@ import { ProtectedRoute } from './shared/components/ProtectedRouteProps';
 import CustomerDetailsPage from '@/pages/Customer/CustomerDetailsPage.tsx';
 import UpdateCustomerPage from '@/pages/Customer/UpdateCustomerPage.tsx';
 import VisitDetails from './features/visits/visits/VisitByVisitId';
+import CustomerVisits from '@/pages/Visit/CustomerVisits.tsx';
+
 
 const router = createBrowserRouter([
   {
@@ -279,6 +281,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <InventorySupplies />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.CustomerVisits,
+        element: (
+          <ProtectedRoute>
+            <CustomerVisits />
           </ProtectedRoute>
         ),
       },
