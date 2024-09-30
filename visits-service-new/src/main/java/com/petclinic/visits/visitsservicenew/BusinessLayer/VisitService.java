@@ -2,6 +2,7 @@ package com.petclinic.visits.visitsservicenew.BusinessLayer;
 
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitResponseDTO;
+import org.springframework.web.bind.annotation.RequestParam;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -20,7 +21,6 @@ public interface VisitService {
     Mono<VisitResponseDTO> updateStatusForVisitByVisitId(String visitId, String status);
     Mono<Void> deleteVisit(String visitId);
     Mono<Void> deleteAllCancelledVisits();
-
 //    Mono<VetDTO> testingGetVetDTO(String vetId);
 //    Mono<PetResponseDTO> testingGetPetDTO(int petId);
 
