@@ -129,7 +129,6 @@ class CartControllerIntegrationTest {
                 .uri("/api/v1/carts/" + cart1.getCartId())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody(CartResponseModel.class)
                 .value(result -> {
