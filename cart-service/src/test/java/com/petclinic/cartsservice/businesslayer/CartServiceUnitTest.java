@@ -7,6 +7,7 @@ import com.petclinic.cartsservice.domainclientlayer.ProductClient;
 import com.petclinic.cartsservice.domainclientlayer.ProductResponseModel;
 import com.petclinic.cartsservice.presentationlayer.CartRequestModel;
 import com.petclinic.cartsservice.presentationlayer.CartResponseModel;
+import com.petclinic.cartsservice.utils.EntityModelUtil;
 import com.petclinic.cartsservice.utils.exceptions.NotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -131,39 +132,39 @@ class CartServiceUnitTest {
 //                .verify();
 //    }
 
-//     @Test
-//     public void whenGetCartById_thenReturnCartResponseModel() {
-//         when(cartRepository.findCartByCartId(cart1.getCartId())).thenReturn(Mono.just(cart1));
+     @Test
+     public void whenGetCartById_thenReturnCartResponseModel() {
+         when(cartRepository.findCartByCartId(cart1.getCartId())).thenReturn(Mono.just(cart1));
 
-//         Mono<CartResponseModel> result = cartService.getCartByCartId(cart1.getCartId());
+         Mono<CartResponseModel> result = cartService.getCartByCartId(cart1.getCartId());
 
-//         StepVerifier.create(result)
-//                 .expectNextMatches(cartResponseModel -> cartResponseModel.getCartId().equals(cart1.getCartId()))
-//                 .verifyComplete();
-//     }
+         StepVerifier.create(result)
+                 .expectNextMatches(cartResponseModel -> cartResponseModel.getCartId().equals(cart1.getCartId()))
+                 .verifyComplete();
+     }
 
-//     @Test
-//     public void whenGetCartByCartId_withNonExistentCartId_thenThrowNotFoundException() {
-//         when(cartRepository.findCartByCartId(nonExistentCartId)).thenReturn(Mono.empty());
+     @Test
+     public void whenGetCartByCartId_withNonExistentCartId_thenThrowNotFoundException() {
+         when(cartRepository.findCartByCartId(nonExistentCartId)).thenReturn(Mono.empty());
 
-//         Mono<CartResponseModel> result = cartService.getCartByCartId(nonExistentCartId);
+         Mono<CartResponseModel> result = cartService.getCartByCartId(nonExistentCartId);
 
-//         StepVerifier.create(result)
-//                 .expectErrorMatches(throwable -> throwable instanceof NotFoundException
-//                         && throwable.getMessage().equals("Cart id was not found: " + nonExistentCartId))
-//                 .verify();
-//     }
+         StepVerifier.create(result)
+                 .expectErrorMatches(throwable -> throwable instanceof NotFoundException
+                         && throwable.getMessage().equals("Cart id was not found: " + nonExistentCartId))
+                 .verify();
+     }
 
-//     @Test
-//     public void whenGetAllCarts_thenReturnCartResponseModel() {
-//         when(cartRepository.findAll()).thenReturn(Flux.just(cart1));
+     @Test
+     public void whenGetAllCarts_thenReturnCartResponseModel() {
+         when(cartRepository.findAll()).thenReturn(Flux.just(cart1));
 
-//         Flux<CartResponseModel> result = cartService.getAllCarts();
+         Flux<CartResponseModel> result = cartService.getAllCarts();
 
-//         StepVerifier.create(result)
-//                 .expectNextMatches(cartResponseModel -> cartResponseModel.getCartId().equals(cart1.getCartId()))
-//                 .verifyComplete();
-//     }
+         StepVerifier.create(result)
+                 .expectNextMatches(cartResponseModel -> cartResponseModel.getCartId().equals(cart1.getCartId()))
+                 .verifyComplete();
+     }
 
 
 //    @Test
@@ -214,7 +215,11 @@ class CartServiceUnitTest {
 
 //    @Test
 //    public void clearCart_Success() {
-//        Cart mockCart = new Cart("1", "cart1", Arrays.asList("prod1", "prod2"), "customer1");
+//        Cart mockCart = Cart.builder()
+//                .cartId("cart1")
+//                .products(products)
+//                .customerId("customerId1")
+//                .build();
 //
 //        when(cartRepository.findCartByCartId("cart1")).thenReturn(Mono.just(mockCart));
 //
@@ -232,7 +237,7 @@ class CartServiceUnitTest {
 //                .verifyComplete();
 //
 //        verify(cartRepository, times(1)).save(mockCart);
-//        assertTrue(mockCart.getProductIds().isEmpty());
+//        assertTrue(mockCart.getProducts().isEmpty());
 //    }
 
 
@@ -305,93 +310,84 @@ class CartServiceUnitTest {
 //         verify(cartRepository, never()).delete(any(Cart.class));
 //     }
 
-//     void getAllCarts_ReturnsCartResponseModelWithProducts() {
-//         //mocking cart retrieval
-//         when(cartRepository.findAll()).thenReturn(Flux.just(cart1));
+    @Test
+     void getAllCarts_ReturnsCartResponseModelWithProducts() {
+         //mocking cart retrieval
+         when(cartRepository.findAll()).thenReturn(Flux.just(cart1));
 
-//         //mocking product retrieval
-//         when(productClient.getProductByProductId(product1.getProductId())).thenReturn(Mono.just(product1));
-//         when(productClient.getProductByProductId(product2.getProductId())).thenReturn(Mono.just(product2));
 
-//         //run the test
-//         StepVerifier.create(cartService.getAllCarts())
-//                 .expectNextMatches(cartResponseModel ->
-//                         cartResponseModel.getCustomerId().equals("1") &&
-//                                 cartResponseModel.getProducts().size() == 2 && //2 products in the cart
-//                                 cartResponseModel.getProducts().get(0).getProductName().equals("Web Services") &&
-//                                 cartResponseModel.getProducts().get(1).getProductName().equals("Shakespeare's Greatest Works")
-//                 )
-//                 .verifyComplete();
+         //run the test
+         StepVerifier.create(cartService.getAllCarts())
+                 .expectNextMatches(cartResponseModel ->
+                         cartResponseModel.getCustomerId().equals("1") &&
+                                 cartResponseModel.getProducts().size() == 2 &&
+                                 cartResponseModel.getProducts().get(0).getProductName().equals("Product1") &&
+                                 cartResponseModel.getProducts().get(1).getProductName().equals("Product2")
+                 )
+                 .verifyComplete();
 
-//         // Verify interactions
-//         verify(cartRepository, times(1)).findAll();
-//         verify(productClient, times(1)).getProductByProductId(product1.getProductId());
-//         verify(productClient, times(1)).getProductByProductId(product2.getProductId());
-//     }
+         // Verify interactions
+         verify(cartRepository, times(1)).findAll();
+     }
 
-//     @Test
-//     void getAllCarts_ReturnsCartWithoutProducts() {
-//         //mocking cart retrieval with an empty product list
-//         Cart cartWithNoProducts = Cart.builder()
-//                 .cartId("123")
-//                 .customerId("2")
-//                 .productIds(new ArrayList<>()) //no product IDs
-//                 .build();
+     @Test
+     void getAllCarts_ReturnsCartWithoutProducts() {
+         //mocking cart retrieval with an empty product list
+         Cart cartWithNoProducts = Cart.builder()
+                 .cartId("123")
+                 .customerId("2")
+                 .products(new ArrayList<>())
+                 .build();
 
-//         when(cartRepository.findAll()).thenReturn(Flux.just(cartWithNoProducts));
+         when(cartRepository.findAll()).thenReturn(Flux.just(cartWithNoProducts));
 
-//         // Run the test
-//         StepVerifier.create(cartService.getAllCarts())
-//                 .expectNextMatches(cartResponseModel ->
-//                         cartResponseModel.getCustomerId().equals("2") &&
-//                                 cartResponseModel.getProducts().isEmpty() //no products in the cart
-//                 )
-//                 .verifyComplete();
+         // Run the test
+         StepVerifier.create(cartService.getAllCarts())
+                 .expectNextMatches(cartResponseModel ->
+                         cartResponseModel.getCustomerId().equals("2") &&
+                                 cartResponseModel.getProducts().isEmpty() //no products in the cart
+                 )
+                 .verifyComplete();
 
-//         // Verify interactions
-//         verify(cartRepository, times(1)).findAll();
-//         verifyNoInteractions(productClient); //no products, so productClient shouldn't be called
-//     }
+         // Verify interactions
+         verify(cartRepository, times(1)).findAll();
+         verifyNoInteractions(productClient); //no products, so productClient shouldn't be called
+     }
 
-//     @Test
-//     void getAllCarts_ReturnsMultipleCartsWithProducts() {
-//         Cart cart2 = Cart.builder()
-//                 .cartId("456")
-//                 .customerId("3")
-//                 .productIds(List.of(product3.getProductId())) //another cart with 1 product
-//                 .build();
+     @Test
+     void getAllCarts_ReturnsMultipleCartsWithProducts() {
+        when(cartRepository.findAll()).thenReturn(Flux.just(cart1));
 
-//         when(cartRepository.findAll()).thenReturn(Flux.just(cart1, cart2));
-//         when(productClient.getProductByProductId(product1.getProductId())).thenReturn(Mono.just(product1));
-//         when(productClient.getProductByProductId(product2.getProductId())).thenReturn(Mono.just(product2));
-//         when(productClient.getProductByProductId(product3.getProductId())).thenReturn(Mono.just(product3));
+        //mocking product retrieval
 
-//         //run the test
-//         StepVerifier.create(cartService.getAllCarts())
-//                 .expectNextMatches(cartResponseModel -> cartResponseModel.getCustomerId().equals("1"))
-//                 .expectNextMatches(cartResponseModel -> cartResponseModel.getCustomerId().equals("3"))
-//                 .verifyComplete();
+        //run the test
+        StepVerifier.create(cartService.getAllCarts())
+                .expectNextMatches(cartResponseModel ->
+                        cartResponseModel.getCustomerId().equals("1") &&
+                                cartResponseModel.getProducts().size() == 2 && //2 products in the cart
+                                cartResponseModel.getProducts().get(0).getProductName().equals("Product1") &&
+                                cartResponseModel.getProducts().get(1).getProductName().equals("Product2")
+                )
+                .verifyComplete();
 
-//         //verify interactions
-//         verify(cartRepository, times(1)).findAll();
-//         verify(productClient, times(1)).getProductByProductId(product1.getProductId());
-//         verify(productClient, times(1)).getProductByProductId(product2.getProductId());
-//         verify(productClient, times(1)).getProductByProductId(product3.getProductId());
-//     }
+         // Verify interactions
+         verify(cartRepository, times(1)).findAll();
+         verifyNoInteractions(productClient); //no products, so productClient shouldn't be called
+     }
 
-//     @Test
-//     void getAllCarts_ReturnsEmptyListWhenNoCarts() {
-//         //mocking empty cart retrieval
-//         when(cartRepository.findAll()).thenReturn(Flux.empty());
+     @Test
+     void getAllCarts_ReturnsEmptyListWhenNoCarts() {
+         //mocking empty cart retrieval
+         when(cartRepository.findAll()).thenReturn(Flux.empty());
 
-//         //run the test
-//         StepVerifier.create(cartService.getAllCarts())
-//                 .expectNextCount(0) //no carts should be returned
-//                 .verifyComplete();
+         //run the test
+         StepVerifier.create(cartService.getAllCarts())
+                 .expectNextCount(0) //no carts should be returned
+                 .verifyComplete();
 
-//         //verify interactions
-//         verify(cartRepository, times(1)).findAll();
-//         verifyNoInteractions(productClient); //no carts, so productClient shouldn't be called
-//     }
+         //verify interactions
+         verify(cartRepository, times(1)).findAll();
+         verifyNoInteractions(productClient); //no carts, so productClient shouldn't be called
+     }
 
 }

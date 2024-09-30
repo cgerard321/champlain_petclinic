@@ -41,6 +41,21 @@ public class EntityModelUtil {
                 .build();
     }
 
+    public static CartProduct toCartProductEntity(ProductResponseModel productResponseModel, CartRequestModel cartRequestModel) {
+        return CartProduct.builder()
+                .productId(productResponseModel.getProductId())
+                .productId(productResponseModel.getProductId())
+                .productName(productResponseModel.getProductName())
+                .productSalePrice(productResponseModel.getProductSalePrice())
+                .build();
+    }
+
+    public static ProductResponseModel toProductResponseModel(CartProduct cartProduct) {
+        ProductResponseModel productResponseModel = new ProductResponseModel();
+        BeanUtils.copyProperties(cartProduct, productResponseModel);
+        return productResponseModel;
+    }
+
     public static String generateUUIDString() {
         return UUID.randomUUID().toString();
     }
