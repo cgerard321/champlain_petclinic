@@ -108,20 +108,20 @@ class CartControllerIntegrationTest {
     }
 
 //    @Test
-    void whenUpdateByCartId_thenReturnCartResponseModel(){
-        webTestClient.put()
-                .uri("/api/v2/carts/" + cart1.getCartId())
-                .accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(cartRequestModel)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody(CartResponseModel.class)
-                .value(updated -> {
-                    assertEquals(cartRequestModel.getCustomerId(), updated.getCustomerId());
-                });
-    }
+//    void whenUpdateByCartId_thenReturnCartResponseModel(){
+//        webTestClient.put()
+//                .uri("/api/v2/carts/" + cart1.getCartId())
+//                .accept(MediaType.APPLICATION_JSON)
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .bodyValue(cartRequestModel)
+//                .exchange()
+//                .expectStatus().isOk()
+//                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+//                .expectBody(CartResponseModel.class)
+//                .value(updated -> {
+//                    assertEquals(cartRequestModel.getCustomerId(), updated.getCustomerId());
+//                });
+//    }
 
     @Test
     void whenGetCartByCartId_thenReturnCartResponseModel(){
