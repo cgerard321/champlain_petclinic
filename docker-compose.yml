@@ -460,4 +460,4 @@ services:
       - MYSQL_DATABASE=MyAppDb
       - SPRING_PROFILES_ACTIVE=docker
     ports:
-      - "3308:3306"
+      - "3306:3306"
