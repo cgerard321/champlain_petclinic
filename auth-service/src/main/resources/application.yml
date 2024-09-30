@@ -20,7 +20,6 @@ default-admin:
   username: admin
   password: admin
 
-
 gateway:
   origin: localhost:8080/api/gateway
   protocol: http

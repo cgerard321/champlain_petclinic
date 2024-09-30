@@ -3,12 +3,15 @@
 Champlain Final Project 1 420-N52-LA Pet Clinic repo
 
 ## Source
+
 This project is based on the spring petclinic microservices (https://github.com/spring-petclinic/spring-petclinic-microservices) implementation.
-However, only the customers, visits, vets, and api-gateway services have been retained. In addition, the 
+However, only the customers, visits, vets, and api-gateway services have been retained. In addition, the
 Docker setup has been changed.
 
-## Requirements for a user story to be considered DONE 
+## Requirements for a user story to be considered DONE
+
 For a User Story to be considered as DONE, all the following need to be met:
+
 <ol>
 <li>A pull request has been made, reviewed and merged into Main.</li>
 <li>Any pull request that affects other teams' implementations needs to be reviewed by at least 1 member of each affected team.</li>
@@ -18,21 +21,19 @@ For a User Story to be considered as DONE, all the following need to be met:
 <li>All the user acceptance criteria for the story are met.</li>
 </ol>
 
-
-
-
-
-
 ## Running the project
+
 Once you have cloned the repo (see the setup instructions below), you need to do the following:
 
 ### mailer.env
-In the project's top-level folder, you will need to create a file called mailer.env. It will contain SMTP_PASS property set to the hashed password of the mailing service you will be using. 
-My students: I'll provide this to you. 
 
+In the project's top-level folder, you will need to create a file called mailer.env. It will contain SMTP_PASS property set to the hashed password of the mailing service you will be using.
+My students: I'll provide this to you.
 
 ### Docker Profile (for running with docker-compose with ALL SERVICES)
+
 Must be used prior to issuing a PR and in Sprint Reviews.
+
 ```
 docker-compose build
 docker-compose up -d
@@ -44,7 +45,9 @@ docker-compose up --build
 ```
 
 ### Docker Profile (for running with docker-compose with all services but NO FRONTEND)
-This can be used during development to avoid having to rebuild everything whenever you make a change to the frontend. 
+
+This can be used during development to avoid having to rebuild everything whenever you make a change to the frontend.
+
 ```
 docker-compose -f docker-compose_no_FE.yml build
 docker-compose -f docker-compose_no_FE.yml up -d
@@ -54,32 +57,44 @@ or
 
 docker-compose -f docker-compose_no_FE.yml up --build
 ```
+
 ### Bring up Frontend
+
 React frontend:
+
 ```
 localhost:3000/
 ```
+
 Until it is fixed, to login on React frontend, use need to enter the following URI:
+
 ```
 localhost:3000/users/login
 ```
+
 Angular frontend:
+
 ```
 localhost:8080/
 ```
+
 In terminal:
 
 Check database contents (did the script run)
+
 ```
 winpty docker-compose exec mysql3 mysql -uuser -p customers-db -e "select * from owners"
 winpty docker-compose exec mysql3 mysql -uuser -p customers-db -e "select * from pets"
 winpty docker-compose exec mysql3 mysql -uuser -p customers-db -e "select * from types"
 ```
+
 When all docker containers are up, test with curl:
+
 ```
 curl localhost:8080/api/gateway/customer/owners | jq
 curl localhost:8080/api/gateway/vet/vets | jq
 ```
+
 ## Structure
 
 - Please following standard naming convention as stated in the 'story workflow' section, and don't forget to label your pull requests
@@ -95,10 +110,10 @@ curl localhost:8080/api/gateway/vet/vets | jq
 
 - Branches will be named according to the following convention: type/TEAMTAG-JiraID_Description
   I like to break it down into 4 'folders' or types:
-    - feat/
-    - bug/
-    - doc/
-    - conf/
+  - feat/
+  - bug/
+  - doc/
+  - conf/
 - After the slash, add your TEAMTAG
 - After the TEAMTAG, add a slash and then the JIRA id (it will be something like CPC-4).
 - The full branch name would look like this `feat/TEAMA-CPC-4_Add_Test_Scenario_New_Pet` and would be created and navigated to by executing the following command:
@@ -147,10 +162,13 @@ git clone https://github.com/cgerard321/champlain_petclinic
 ```
 cd champlain_petclinic/
 ```
+
 To see that the remote origin has been correctly set up, type:
+
 ```
 git remote add upstream https://github.com/cgerard321/champlain_petclinic.git
 ```
+
 - If we type `git remote -v` we should see 4 different connections, push and fetch for our upstream and for our origin
 - Now that you have setup your clone, move on to the 'story workflow section'
 
@@ -159,10 +177,13 @@ git remote add upstream https://github.com/cgerard321/champlain_petclinic.git
 - So you've setup your clone of the repo and started your first story. Now what?
 - We will first navigate to our project in the file explorer, right-click, and select 'git bash here'
 - In the current command line, you should see in parentheses, the branch you are currently on. We want to start this 'new story process' from our origin's main branch.
+
 ```
 Christine@DESKTOP-2VF5PQD MINGW64 /e/champlain_petclinic (main)
 ```
+
 - If it says main, great. Skip this next line. If not, type:
+
 ```
 git checkout main
 ```
@@ -283,7 +304,6 @@ git push -force-with-lease
 
 ![image](https://github.com/cgerard321/champlain_petclinic/assets/57333167/a0110160-7072-4ea7-952b-1d63b5df2947)
 
-
 - At this point, if you go back to your pull request, you should be able to automatically merge the branch.
 
 ## Useful Git Commands
@@ -387,14 +407,18 @@ git stash pop
 ```
 
 ---
+
 ## SSH Keys
+
 Note: This section is if you are using **SSH keys to clone your repo** and have already generated your GitHub SSH keys and ran your keygen in your terminal (console of your computer)
 
-A common problem you face when setting the SSH key on the Mac is that when you restart your computer the ssh key makes you authenticate with your passphrase. 
+A common problem you face when setting the SSH key on the Mac is that when you restart your computer the ssh key makes you authenticate with your passphrase.
 To set the password and not make it ask for your passphrase everytime you run a command needing permissions. Run the command:
+
 ```
 ssh-add
 ```
+
 and enter your passphrase when prompted (Note: if you are not using the default filename, you'll need to specify your key filename `ssh-add ~/.ssh/myprivatekeyname)`. The system will print Identity Added if successful.
 
 ---

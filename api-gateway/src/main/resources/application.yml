@@ -39,13 +39,11 @@ logging:
     root: INFO
     com.petclinic: DEBUG
 
-
 ---
 spring:
   config:
     activate:
       on-profile: docker
-
 
 server.port: 8080
 
@@ -87,4 +85,3 @@ logging:
   level:
     root: INFO
     com.petclinic: DEBUG
-

@@ -18,7 +18,6 @@ spring:
     activate:
       on-profile: test
 
-
   data:
     mongodb:
       username: root
@@ -36,7 +35,6 @@ de:
         version: 5.0.5
 
 ---
-
 spring:
   config:
     activate:
@@ -54,7 +52,6 @@ spring:
 server.port: 8080
 
 ---
-
 spring:
   config:
     activate:

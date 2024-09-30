@@ -35,10 +35,19 @@ import InventorySupplies from '@/features/inventories/InventorySupplies.tsx';
 import EditingVisit from './features/visits/models/EditingVisit';
 import UpdateCustomerPage from '@/pages/Customer/UpdateCustomerPage.tsx';
 import CustomerDetailsPage from '@/pages/Customer/CustomerDetailsPage.tsx';
+import EditInventoryProducts from '@/features/inventories/EditInventoryProducts.tsx';
 
 const router = createBrowserRouter([
   {
     children: [
+      {
+        path: AppRoutePaths.EditInventoryProducts,
+        element: (
+          <ProtectedRoute>
+            <EditInventoryProducts />
+          </ProtectedRoute>
+        ),
+      },
       {
         path: AppRoutePaths.EditInventory,
         element: (

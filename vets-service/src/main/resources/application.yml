@@ -48,8 +48,6 @@ spring:
 
 spring.datasource.hikari.initializationFailTimeout: 60000
 
-
-
 ---
 spring.profiles: docker
 
@@ -60,7 +58,6 @@ spring:
     username: user
     password: pwd
     initialization-mode: always
-
 
   # recommend setting this to "none" for production environments
 
