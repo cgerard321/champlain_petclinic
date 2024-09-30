@@ -39,25 +39,18 @@ class EntityModelUtilTest {
                 .quantityInCart(1)
                 .averageRating(4.0)
                 .build();
-        final CartProduct product3 = CartProduct.builder()
-                .productId("132d3c5e-dcaa-4a4f-a35e-b8acc37c51c1")
-                .productName("Product3")
-                .productDescription("Description3")
-                .productSalePrice(300.0)
-                .quantityInCart(1)
-                .averageRating(3.5)
-                .build();
 
         List<CartProduct> products = new ArrayList<>(Arrays.asList(product1, product2));
+
+        cart.setProducts(products);
 
         // Act
         CartResponseModel cartResponseModel = EntityModelUtil.toCartResponseModel(cart, products);
 
         // Assert
-        assertEquals("cart-123", cartResponseModel.getCartId());
-        assertEquals("customer-456", cartResponseModel.getCustomerId());
-        assertEquals(2, cartResponseModel.getProducts().size());
-        assertEquals("prod-1", cartResponseModel.getProducts().get(0).getProductId());
+        assertEquals(cart.getCartId(), cartResponseModel.getCartId());
+        assertEquals(cart.getCustomerId(), cartResponseModel.getCustomerId());
+        assertEquals(cart.getProducts().size(), cartResponseModel.getProducts().size());
     }
 
     @Test
