@@ -72,7 +72,7 @@ public class ProductController {
     public Flux<ProductResponseModel> getProductsByType(@PathVariable String productType) {
         return productService.getProductsByType(productType);
     }
-    @PatchMapping(value = "/{productId}")
+    @PatchMapping(value = "/{productId}/decrease")
     public Mono<ResponseEntity<Void>> decreaseProductQuantity(@PathVariable String productId) {
         return productService.DecreaseProductCount(productId).then(Mono.just(ResponseEntity.noContent().build()));
     }
