@@ -99,15 +99,16 @@ export default function ProductList(): JSX.Element {
 
   const handleProductClick = (product: ProductModel): void => {
     setRecentlyClickedProducts(listOfProducts => {
-
-      const updatedProducts = listOfProducts.filter(p => p.productId !== product.productId);
-
+      const updatedProducts = listOfProducts.filter(
+        p => p.productId !== product.productId
+      );
 
       updatedProducts.unshift(product);
 
       if (updatedProducts.length > 5) {
         updatedProducts.pop();
       }
+
       localStorage.setItem(
         'recentlyClickedProducts',
         JSON.stringify(updatedProducts)
