@@ -62,7 +62,12 @@ export default function CartListTable(): JSX.Element {
               <td>
                 <button
                   className="view-button"
-                  onClick={() => navigate(`/cart/${cart.cartId}`)}
+                  onClick={() => {
+                    console.error(
+                      `View button clicked for cart ID: ${cart.cartId}`
+                    );
+                    navigate(`/cart/${cart.cartId}`);
+                  }}
                 >
                   View
                 </button>

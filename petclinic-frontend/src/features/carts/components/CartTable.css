@@ -24,5 +24,10 @@
 }
 
 .view-button:hover {
-    background-color: darkgreen;
+    background-color: rgb(100, 0, 0);
 }
+
+body {
+    background-color: red;
+}
+
