@@ -100,7 +100,7 @@ export default function ProductList(): JSX.Element {
   const handleProductClick = (product: ProductModel): void => {
     setRecentlyClickedProducts(listOfProducts => {
       const updatedProducts = listOfProducts.filter(
-        p => p.productId !== product.productId
+        currentProduct => currentProduct.productId !== product.productId
       );
 
       updatedProducts.unshift(product);
