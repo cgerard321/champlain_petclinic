@@ -41,7 +41,6 @@ class ProductInventoryServiceUnitTest {
     InventoryTypeRepository inventoryTypeRepository;
 
     ProductResponseDTO productResponseDTO = ProductResponseDTO.builder()
-            .id("1")
             .inventoryId("1")
             .productId(UUID.randomUUID().toString())
             .productName("Benzodiazepines")
@@ -86,6 +85,8 @@ class ProductInventoryServiceUnitTest {
             .inventoryId("1")
             .inventoryType(inventoryType.getType())
             .inventoryDescription("Medication for procedures")
+            .inventoryImage("https://www.fda.gov/files/iStock-157317886.jpg")
+            .inventoryBackupImage("https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14")
             .build();
     ProductRequestDTO productRequestDTO = ProductRequestDTO.builder()
             .productName("Benzodiazepines")
@@ -565,7 +566,6 @@ class ProductInventoryServiceUnitTest {
                 .build();
 
         Product existingProduct = Product.builder()
-                .id("1")
                 .inventoryId(inventoryId)
                 .productId(productId)
                 .productName("Original Product Name")
@@ -575,7 +575,6 @@ class ProductInventoryServiceUnitTest {
                 .build();
 
         Product updatedProduct = Product.builder()
-                .id("1")
                 .inventoryId(inventoryId)
                 .productId(productId)
                 .productName("Updated Product Name")

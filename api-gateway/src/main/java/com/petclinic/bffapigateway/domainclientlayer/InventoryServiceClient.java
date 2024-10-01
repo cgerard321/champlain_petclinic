@@ -276,20 +276,20 @@ public class InventoryServiceClient {
     }
 
 
-    public Mono<InventoryResponseDTO> addSupplyToInventoryByName(String inventoryName, SupplyRequestDTO supplyRequestDTO) {
+    public Mono<InventoryResponseDTO> addProductToInventoryByName(String inventoryName, ProductRequestDTO productRequestDTO) {
         return webClient.post()
-                .uri(inventoryServiceUrl + "/{inventoryName}/supplies", inventoryName)
-                .body(Mono.just(supplyRequestDTO), SupplyRequestDTO.class)
+                .uri(inventoryServiceUrl + "/{inventoryName}/products", inventoryName)
+                .body(Mono.just(productRequestDTO), ProductRequestDTO.class)
                 .retrieve()
                 .bodyToMono(InventoryResponseDTO.class);
     }
 
 
-    public Flux<SupplyResponseDTO> getSuppliesByInventoryName(String inventoryName) {
+    public Flux<ProductResponseDTO> getProductsByInventoryName(String inventoryName) {
         return webClient.get()
-                .uri("/{inventoryName}/supplies", inventoryName)
+                .uri("/{inventoryName}/products", inventoryName)
                 .retrieve()
-                .bodyToFlux(SupplyResponseDTO.class);
+                .bodyToFlux(ProductResponseDTO.class);
     }
   
     public Flux<ProductResponseDTO> getLowStockProducts(String inventoryId, int stockThreshold) {

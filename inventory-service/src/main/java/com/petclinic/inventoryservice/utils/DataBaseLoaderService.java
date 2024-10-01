@@ -3,8 +3,6 @@ package com.petclinic.inventoryservice.utils;
 import com.petclinic.inventoryservice.datalayer.Inventory.*;
 import com.petclinic.inventoryservice.datalayer.Product.Product;
 import com.petclinic.inventoryservice.datalayer.Product.ProductRepository;
-import com.petclinic.inventoryservice.datalayer.Supply.Supply;
-import com.petclinic.inventoryservice.datalayer.Supply.SupplyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
@@ -18,8 +16,6 @@ public class DataBaseLoaderService  implements CommandLineRunner {
     InventoryRepository inventoryRepository;
     @Autowired
     ProductRepository productRepository;
-    @Autowired
-    SupplyRepository supplyRepository;
     @Autowired
     InventoryTypeRepository inventoryTypeRepository;
     @Autowired
@@ -98,6 +94,8 @@ public class DataBaseLoaderService  implements CommandLineRunner {
                 .inventoryName("Medical equipment")
                 .inventoryType(inventoryType1.getType())
                 .inventoryDescription("Medical equipment for surgery")
+                .inventoryImage("https://alliedusa.net/wp-content/uploads/2022/06/Tips-for-Choosing-Medical-Equipment-For-Your-Practice.jpg")
+                .inventoryBackupImage("https://northsidemedicalsupply.com/wp-content/uploads/2022/12/Medical-Supply-or-Equipment.jpg")
                 .build();
 
         Inventory inventory2 = Inventory.builder()
@@ -105,6 +103,8 @@ public class DataBaseLoaderService  implements CommandLineRunner {
                 .inventoryName("First-Aid")
                 .inventoryType(inventoryType2.getType())
                 .inventoryDescription("First-aid supplies for pet emergencies")
+                .inventoryImage("https://www.lakesidemedical.ca/app/uploads/featuredimage-The-Importance-of-Having-a-First-Aid-Kit-in-Your-Home-or-Place-of-Business.jpg")
+                .inventoryBackupImage("https://insights.ibx.com/wp-content/uploads/2019/06/first-aid-kit-screenshot.png")
                 .build();
 
         Inventory inventory3 = Inventory.builder()
@@ -112,6 +112,8 @@ public class DataBaseLoaderService  implements CommandLineRunner {
                 .inventoryName("Vaccines")
                 .inventoryType(inventoryType3.getType())
                 .inventoryDescription("Supplies for disease prevention")
+                .inventoryImage("https://www.fda.gov/files/iStock-157317886.jpg")
+                .inventoryBackupImage("https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14")
                 .build();
 
         Inventory inventory4 = Inventory.builder()
@@ -119,6 +121,8 @@ public class DataBaseLoaderService  implements CommandLineRunner {
                 .inventoryName("Medications")
                 .inventoryType(inventoryType4.getType())
                 .inventoryDescription("Antibiotics for pet infections")
+                .inventoryImage("https://logrx.com/wp-content/uploads/2024/01/colorful-pills-tablets-background.jpg")
+                .inventoryBackupImage("https://firstaidforlife.org.uk/wp-content/uploads/2018/03/poisoning-pill-bottle.jpg")
                 .build();
 
         Inventory inventory5 = Inventory.builder()
@@ -126,6 +130,8 @@ public class DataBaseLoaderService  implements CommandLineRunner {
                 .inventoryName("Pet Carriers")
                 .inventoryType(inventoryType1.getType())
                 .inventoryDescription("Carriers for transporting pets")
+                .inventoryImage("https://i5.walmartimages.ca/images/Enlarge/034/128/6000203034128.jpg?odnHeight=2000&odnWidth=2000&odnBg=FFFFFF")
+                .inventoryBackupImage("https://assets.wfcdn.com/im/60682166/compr-r85/1267/126767614/Gainey+Large+Pet+Carrier.jpg")
                 .build();
 
         Inventory inventory6 = Inventory.builder()
@@ -133,6 +139,8 @@ public class DataBaseLoaderService  implements CommandLineRunner {
                 .inventoryName("Diagnostic Kits")
                 .inventoryType(inventoryType1.getType()) // Assuming medical supplies use the same type
                 .inventoryDescription("Kits for diagnosing various pet illnesses and conditions")
+                .inventoryImage("https://cdn.labmanager.com/assets/articleNo/22063/aImg/40819/rt-pcr-covid-19-diagnostic-kit-concept-l.jpg")
+                .inventoryBackupImage("https://image.made-in-china.com/226f3j00UnelmKsMKwuy/Vet-Animal-Pet-Veterinary-Antigen-Rapid-Test-Kit-for-Dog-Cat.webp")
                 .build();
 
         Inventory inventory7 = Inventory.builder()
@@ -140,6 +148,8 @@ public class DataBaseLoaderService  implements CommandLineRunner {
                 .inventoryName("Surgical Instruments")
                 .inventoryType(inventoryType1.getType())
                 .inventoryDescription("Tools for performing surgical procedures on pets")
+                .inventoryImage("https://www.amerisurgicalinstruments.com/cdn/shop/articles/3_63803250-d4a1-4a10-8c23-39c34b9fd8cf.jpg?v=1680040619")
+                .inventoryBackupImage("https://censis.com/hubfs/Imported_Blog_Media/Surgical-Instruments-with-Marks-1.jpg")
                 .build();
 
         Inventory inventory8 = Inventory.builder()
@@ -147,6 +157,8 @@ public class DataBaseLoaderService  implements CommandLineRunner {
                 .inventoryName("Anesthesia Supplies")
                 .inventoryType(inventoryType1.getType())
                 .inventoryDescription("Supplies for administering anesthesia during surgeries")
+                .inventoryImage("https://s3.amazonaws.com/cdn-origin-etr.akc.org/wp-content/uploads/2017/03/22110255/Labrador-Retriever-laying-on-an-operating-table.jpg")
+                .inventoryBackupImage("https://www.cardinalhealth.com/content/dam/corp/products/professional-products/category-grid-asset/category-featured/CategoryFeatured---AC604P.jpg")
                 .build();
 
         Inventory inventory9 = Inventory.builder()
@@ -154,6 +166,8 @@ public class DataBaseLoaderService  implements CommandLineRunner {
                 .inventoryName("Wound Care Supplies")
                 .inventoryType(inventoryType1.getType())
                 .inventoryDescription("Supplies for treating and dressing wounds")
+                .inventoryImage("https://silverliningshc.ca/wp-content/uploads/2022/09/WoundCare.jpg")
+                .inventoryBackupImage("https://www.allegromedical.com/media/wysiwyg/ALG_Wound-Care-Supplies.jpg")
                 .build();
 
         Inventory inventory10 = Inventory.builder()
@@ -161,6 +175,8 @@ public class DataBaseLoaderService  implements CommandLineRunner {
                 .inventoryName("Infectious Disease Test Kits")
                 .inventoryType(inventoryType5.getType())
                 .inventoryDescription("Kits for testing infectious diseases in pets")
+                .inventoryImage("https://img.medicalexpo.com/images_me/photo-mg/306028-17870793.webp")
+                .inventoryBackupImage("https://image.made-in-china.com/202f0j00eqLkbtRgJfcC/Ich-AG-The-Infectious-Canine-Hepatitis-Antigen-Rapid-Test-Kit.jpg")
                 .build();
 
 
@@ -483,378 +499,59 @@ public class DataBaseLoaderService  implements CommandLineRunner {
                 .productSalePrice(60.00)
                 .build();
 
-        //MEDICATIONS
-        Supply Supply1 = Supply.builder()
-                .supplyName("Sedative Medications")
-                .supplyId(UUID.randomUUID().toString())
-                .supplyPrice(100.00)
-                .inventoryId(inventory4.getInventoryId()) // Medications
-                .supplyQuantity(10)
-                .supplyDescription("Medications for relaxation and sleep")
-                .supplySalePrice(10.00)
-                .build();
-
-        Supply Supply2 = Supply.builder()
-                .supplyName("Anxiety Relief Tablets")
-                .supplyId(UUID.randomUUID().toString())
-                .supplyPrice(150.00)
-                .inventoryId(inventory4.getInventoryId()) // Medications
-                .supplyQuantity(10)
-                .supplyDescription("Tablets for reducing anxiety and stress")
-                .supplySalePrice(10.00)
-                .build();
-
-        Supply Supply3 = Supply.builder()
-                .supplyName("Pain Relief Medication")
-                .supplyId(UUID.randomUUID().toString())
-                .supplyPrice(130.00)
-                .inventoryId(inventory4.getInventoryId()) // Medications
-                .supplyQuantity(12)
-                .supplyDescription("Non-steroidal pain relief medication")
-                .supplySalePrice(140.00)
-                .build();
-
-        Supply Supply4 = Supply.builder()
-                .supplyName("Adhesive Bandages")
-                .supplyId(UUID.randomUUID().toString())
-                .supplyPrice(15.00)
-                .inventoryId(inventory2.getInventoryId()) // Bandages
-                .supplyQuantity(25)
-                .supplyDescription("Adhesive bandages for wound care")
-                .supplySalePrice(75.00)
-                .build();
-
-        Supply Supply5 = Supply.builder()
-                .supplyName("Non-Woven Gauze Pads")
-                .supplyId(UUID.randomUUID().toString())
-                .supplyPrice(10.00)
-                .inventoryId(inventory2.getInventoryId()) // Bandages
-                .supplyQuantity(30)
-                .supplyDescription("Absorbent gauze pads for wound care")
-                .supplySalePrice(20.00)
-                .build();
-
-        Supply Supply6 = Supply.builder()
-                .supplyName("Wound Cleaning Solution")
-                .supplyId(UUID.randomUUID().toString())
-                .supplyPrice(5.00)
-                .inventoryId(inventory2.getInventoryId()) // Bandages
-                .supplyQuantity(40)
-                .supplyDescription("Antiseptic solution for cleaning wounds")
-                .supplySalePrice(10.00)
-                .build();
-
-        Supply Supply7 = Supply.builder()
-                .supplyName("Diagnostic MRI Machine")
-                .supplyId(UUID.randomUUID().toString())
-                .supplyPrice(100000.00)
-                .inventoryId(inventory1.getInventoryId()) // Equipment
-                .supplyQuantity(1)
-                .supplyDescription("Advanced imaging machine for diagnostics")
-                .supplySalePrice(110000.00)
-                .build();
-
-        Supply Supply8 = Supply.builder()
-                .supplyName("Canine Rabies Vaccine")
-                .supplyId(UUID.randomUUID().toString())
-                .supplyPrice(50.00)
-                .inventoryId(inventory3.getInventoryId()) // Injections
-                .supplyQuantity(20)
-                .supplyDescription("Vaccine for rabies prevention in dogs")
-                .supplySalePrice(55.00)
-                .build();
-
-// Equipment
-        Supply Supply9 = Supply.builder()
-                .supplyName("Flexible Endoscope")
-                .supplyId(UUID.randomUUID().toString())
-                .supplyPrice(20000.00)
-                .inventoryId(inventory1.getInventoryId()) // Medical equipment
-                .supplyQuantity(1)
-                .supplyDescription("Flexible endoscope for internal examinations")
-                .supplySalePrice(22000.00)
-                .build();
-
-        Supply Supply10 = Supply.builder()
-                .supplyName("Portable Ultrasound System")
-                .supplyId(UUID.randomUUID().toString())
-                .supplyPrice(30000.00)
-                .inventoryId(inventory1.getInventoryId()) // Medical equipment
-                .supplyQuantity(1)
-                .supplyDescription("Portable ultrasound system for diagnostics")
-                .supplySalePrice(32000.00)
-                .build();
-
-// Bandages
-        Supply Supply11 = Supply.builder()
-                .supplyName("Compression Bandage")
-                .supplyId(UUID.randomUUID().toString())
-                .supplyPrice(8.00)
-                .inventoryId(inventory2.getInventoryId()) // Bandages
-                .supplyQuantity(50)
-                .supplyDescription("Compression bandage for support")
-                .supplySalePrice(15.00)
-                .build();
-
-        // Bandages
-        Supply Supply12 = Supply.builder()
-                .supplyName("Antiseptic Wipes")
-                .supplyId(UUID.randomUUID().toString())
-                .supplyPrice(12.00)
-                .inventoryId(inventory2.getInventoryId()) // Bandages
-                .supplyQuantity(60)
-                .supplyDescription("Antiseptic wipes for cleaning wounds")
-                .supplySalePrice(25.00)
-                .build();
-
-// Injections
-        Supply Supply13 = Supply.builder()
-                .supplyName("Insulin Syringes")
-                .supplyId(UUID.randomUUID().toString())
-                .supplyPrice(50.00)
-                .inventoryId(inventory3.getInventoryId()) // Injections
-                .supplyQuantity(100)
-                .supplyDescription("Syringes for administering insulin")
-                .supplySalePrice(55.00)
-                .build();
-
-        Supply Supply14 = Supply.builder()
-                .supplyName("IV Catheters")
-                .supplyId(UUID.randomUUID().toString())
-                .supplyPrice(30.00)
-                .inventoryId(inventory3.getInventoryId()) // Injections
-                .supplyQuantity(50)
-                .supplyDescription("Intravenous catheters for fluid administration")
-                .supplySalePrice(35.00)
-                .build();
-
-// Medications
-        Supply Supply15 = Supply.builder()
-                .supplyName("Antihistamines")
-                .supplyId(UUID.randomUUID().toString())
-                .supplyPrice(80.00)
-                .inventoryId(inventory4.getInventoryId()) // Medications
-                .supplyQuantity(20)
-                .supplyDescription("Antihistamines for allergic reactions")
-                .supplySalePrice(90.00)
-                .build();
-
-        Supply Supply16 = Supply.builder()
-                .supplyName("Antibiotic Ointment")
-                .supplyId(UUID.randomUUID().toString())
-                .supplyPrice(25.00)
-                .inventoryId(inventory4.getInventoryId()) // Medications
-                .supplyQuantity(25)
-                .supplyDescription("Topical antibiotic ointment for wound care")
-                .supplySalePrice(30.00)
-                .build();
-
-// Diagnostic Kits
-        Supply Supply17 = Supply.builder()
-                .supplyName("Blood Glucose Test Kits")
-                .supplyId(UUID.randomUUID().toString())
-                .supplyPrice(70.00)
-                .inventoryId(inventory6.getInventoryId()) // Diagnostic Kits
-                .supplyQuantity(30)
-                .supplyDescription("Test kits for measuring blood glucose levels")
-                .supplySalePrice(75.00)
-                .build();
-
-        Supply Supply18 = Supply.builder()
-                .supplyName("Urinalysis Test Kits")
-                .supplyId(UUID.randomUUID().toString())
-                .supplyPrice(60.00)
-                .inventoryId(inventory6.getInventoryId()) // Diagnostic Kits
-                .supplyQuantity(30)
-                .supplyDescription("Test kits for analyzing urine samples")
-                .supplySalePrice(65.00)
-                .build();
-
-// Wound Care Supplies
-        Supply Supply19 = Supply.builder()
-                .supplyName("Hydrogel Dressing")
-                .supplyId(UUID.randomUUID().toString())
-                .supplyPrice(20.00)
-                .inventoryId(inventory9.getInventoryId()) // Wound Care Supplies
-                .supplyQuantity(40)
-                .supplyDescription("Hydrogel dressing for moist wound healing")
-                .supplySalePrice(25.00)
-                .build();
-
-        Supply Supply20 = Supply.builder()
-                .supplyName("Sutures Kit")
-                .supplyId(UUID.randomUUID().toString())
-                .supplyPrice(120.00)
-                .inventoryId(inventory9.getInventoryId()) // Wound Care Supplies
-                .supplyQuantity(15)
-                .supplyDescription("Kit containing sutures for wound closure")
-                .supplySalePrice(130.00)
-                .build();
-
-// Anesthesia Supplies
-        Supply Supply21 = Supply.builder()
-                .supplyName("Anesthesia Machines")
-                .supplyId(UUID.randomUUID().toString())
-                .supplyPrice(5000.00)
-                .inventoryId(inventory8.getInventoryId()) // Anesthesia Supplies
-                .supplyQuantity(2)
-                .supplyDescription("Machines for administering anesthesia")
-                .supplySalePrice(5500.00)
-                .build();
-
-        Supply Supply22 = Supply.builder()
-                .supplyName("Anesthetic Masks")
-                .supplyId(UUID.randomUUID().toString())
-                .supplyPrice(200.00)
-                .inventoryId(inventory8.getInventoryId()) // Anesthesia Supplies
-                .supplyQuantity(20)
-                .supplyDescription("Masks for delivering anesthesia")
-                .supplySalePrice(220.00)
-                .build();
-
-        Supply Supply23 = Supply.builder()
-                .supplyName("Surgical Scissors")
-                .supplyId(UUID.randomUUID().toString())
-                .supplyPrice(150.00)
-                .inventoryId(inventory7.getInventoryId()) // Surgical Instruments
-                .supplyQuantity(10)
-                .supplyDescription("Scissors for cutting tissues during surgery")
-                .supplySalePrice(160.00)
-                .build();
-
-        Supply Supply24 = Supply.builder()
-                .supplyName("Hemostats")
-                .supplyId(UUID.randomUUID().toString())
-                .supplyPrice(120.00)
-                .inventoryId(inventory7.getInventoryId()) // Surgical Instruments
-                .supplyQuantity(15)
-                .supplyDescription("Clamps for controlling bleeding during surgery")
-                .supplySalePrice(130.00)
-                .build();
-
-        Supply Supply25 = Supply.builder()
-                .supplyName("Needle Holders")
-                .supplyId(UUID.randomUUID().toString())
-                .supplyPrice(180.00)
-                .inventoryId(inventory7.getInventoryId()) // Surgical Instruments
-                .supplyQuantity(10)
-                .supplyDescription("Hold needles securely during suturing")
-                .supplySalePrice(190.00)
-                .build();
-
-        Supply Supply26 = Supply.builder()
-                .supplyName("Pet Carrier Accessories")
-                .supplyId(UUID.randomUUID().toString())
-                .supplyPrice(25.00)
-                .inventoryId(inventory5.getInventoryId()) // Pet Carriers
-                .supplyQuantity(50)
-                .supplyDescription("Accessories like water bowls and food trays for pet carriers")
-                .supplySalePrice(30.00)
-                .build();
-
-        Supply Supply27 = Supply.builder()
-                .supplyName("Carrier Cleaning Supplies")
-                .supplyId(UUID.randomUUID().toString())
-                .supplyPrice(10.00)
-                .inventoryId(inventory5.getInventoryId()) // Pet Carriers
-                .supplyQuantity(60)
-                .supplyDescription("Cleaning sprays and wipes for pet carriers")
-                .supplySalePrice(15.00)
-                .build();
-
-        Supply Supply28 = Supply.builder()
-                .supplyName("Comfort Pads")
-                .supplyId(UUID.randomUUID().toString())
-                .supplyPrice(20.00)
-                .inventoryId(inventory5.getInventoryId()) // Pet Carriers
-                .supplyQuantity(40)
-                .supplyDescription("Comfortable pads for lining pet carriers")
-                .supplySalePrice(25.00)
-                .build();
-
-        Supply Supply29 = Supply.builder()
-                .supplyName("Parvovirus Test Kits")
-                .supplyId(UUID.randomUUID().toString())
-                .supplyPrice(50.00)
-                .inventoryId(inventory10.getInventoryId()) // Infectious Disease Test Kits
-                .supplyQuantity(30)
-                .supplyDescription("Test kits for detecting canine parvovirus")
-                .supplySalePrice(55.00)
-                .build();
-
-        Supply Supply30 = Supply.builder()
-                .supplyName("Feline Leukemia Test Kits")
-                .supplyId(UUID.randomUUID().toString())
-                .supplyPrice(60.00)
-                .inventoryId(inventory10.getInventoryId()) // Infectious Disease Test Kits
-                .supplyQuantity(25)
-                .supplyDescription("Test kits for detecting feline leukemia virus")
-                .supplySalePrice(65.00)
-                .build();
-
-        Supply Supply31 = Supply.builder()
-                .supplyName("Heartworm Test Kits")
-                .supplyId(UUID.randomUUID().toString())
-                .supplyPrice(55.00)
-                .inventoryId(inventory10.getInventoryId()) // Infectious Disease Test Kits
-                .supplyQuantity(20)
-                .supplyDescription("Test kits for detecting heartworm infection")
-                .supplySalePrice(60.00)
-                .build();
-
 
         //Inventory1 ---------------------------------------------------
-        inventory1.addSupply(Supply9);
-        inventory1.addSupply(Supply10);
+        inventory1.addProduct(supply9);
+        inventory1.addProduct(supply10);
         //--------------------------------------------------------------
 
         //Inventory2 ---------------------------------------------------
-        inventory2.addSupply(Supply4);
-        inventory2.addSupply(Supply5);
-        inventory2.addSupply(Supply6);
+        inventory2.addProduct(supply4);
+        inventory2.addProduct(supply5);
+        inventory2.addProduct(supply6);
         //--------------------------------------------------------------
 
         //Inventory3 ---------------------------------------------------
-        inventory3.addSupply(Supply8);
+        inventory3.addProduct(supply8);
         //--------------------------------------------------------------
 
         //Inventory4 ---------------------------------------------------
-        inventory4.addSupply(Supply1);
-        inventory4.addSupply(Supply2);
-        inventory4.addSupply(Supply3);
+        inventory4.addProduct(supply1);
+        inventory4.addProduct(supply2);
+        inventory4.addProduct(supply3);
         //--------------------------------------------------------------
 
         //Inventory5 ---------------------------------------------------
-        inventory5.addSupply(Supply26);
-        inventory5.addSupply(Supply27);
-        inventory5.addSupply(Supply28);
+        inventory5.addProduct(supply26);
+        inventory5.addProduct(supply27);
+        inventory5.addProduct(supply28);
         //--------------------------------------------------------------
 
         //Inventory6 ---------------------------------------------------
-        inventory6.addSupply(Supply17);
-        inventory6.addSupply(Supply18);
+        inventory6.addProduct(supply17);
+        inventory6.addProduct(supply18);
         //--------------------------------------------------------------
 
         //Inventory7 ---------------------------------------------------
-        inventory7.addSupply(Supply23);
-        inventory7.addSupply(Supply24);
-        inventory7.addSupply(Supply25);
+        inventory7.addProduct(supply23);
+        inventory7.addProduct(supply24);
+        inventory7.addProduct(supply25);
         //--------------------------------------------------------------
 
         //Inventory8 ---------------------------------------------------
-        inventory8.addSupply(Supply21);
-        inventory8.addSupply(Supply22);
+        inventory8.addProduct(supply21);
+        inventory8.addProduct(supply22);
         //--------------------------------------------------------------
 
         //Inventory9 ---------------------------------------------------
-        inventory9.addSupply(Supply19);
-        inventory9.addSupply(Supply20);
+        inventory9.addProduct(supply19);
+        inventory9.addProduct(supply20);
         //--------------------------------------------------------------
 
         //Inventory10 ---------------------------------------------------
-        inventory10.addSupply(Supply29);
-        inventory10.addSupply(Supply30);
-        inventory10.addSupply(Supply31);
+        inventory10.addProduct(supply29);
+        inventory10.addProduct(supply30);
+        inventory10.addProduct(supply31);
         //--------------------------------------------------------------
 
 
@@ -867,13 +564,6 @@ public class DataBaseLoaderService  implements CommandLineRunner {
                 .log()
                 .subscribe();
 
-        Flux.just(Supply1, Supply2, Supply3, Supply4, Supply5, Supply6, Supply7, Supply8, Supply9,
-                        Supply10, Supply11, Supply12, Supply13, Supply14, Supply15,
-                        Supply16, Supply17, Supply18, Supply19, Supply20, Supply21, Supply22,
-                        Supply23, Supply24, Supply25, Supply26, Supply27, Supply28, Supply29, Supply30, Supply31)
-                .flatMap(supplyRepository::insert)
-                .log()
-                .subscribe();
 
         Flux.just(inventory1, inventory2, inventory3, inventory4, inventory5,
                         inventory6, inventory7, inventory8, inventory9, inventory10)

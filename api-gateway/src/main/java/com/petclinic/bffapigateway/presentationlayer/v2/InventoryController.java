@@ -116,17 +116,17 @@ public class InventoryController {
 
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
-    @PostMapping("/{inventoryName}/supplies")
+    @PostMapping("/{inventoryName}/products")
     @ApiResponses(value = {
-            @ApiResponse(description = "Add a supply to inventory by Name", responseCode = "201"),
+            @ApiResponse(description = "Add a product to inventory by Name", responseCode = "201"),
             @ApiResponse(description = "Inventory name not found", responseCode = "404")
     })
-    public Mono<ResponseEntity<InventoryResponseDTO>> addSupplyToInventoryByName(
+    public Mono<ResponseEntity<InventoryResponseDTO>> addProductToInventoryByName(
             @PathVariable String inventoryName,
-            @RequestBody Mono<SupplyRequestDTO> supplyRequestDTOMono) {
+            @RequestBody Mono<ProductRequestDTO> productRequestDTOMono) {
 
-        return supplyRequestDTOMono.flatMap(supplyRequestDTO ->
-                inventoryServiceClient.addSupplyToInventoryByName(inventoryName, supplyRequestDTO)
+        return productRequestDTOMono.flatMap(productRequestDTO ->
+                inventoryServiceClient.addProductToInventoryByName(inventoryName, productRequestDTO)
                         .map(inventoryResponseDTO -> ResponseEntity.status(HttpStatus.CREATED).body(inventoryResponseDTO))
                         .onErrorResume(e -> Mono.just(ResponseEntity.notFound().build()))
         );
@@ -134,19 +134,19 @@ public class InventoryController {
 
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
-    @GetMapping("/{inventoryName}/supplies")
+    @GetMapping("/{inventoryName}/products")
     @ApiResponses(value = {
-            @ApiResponse(description = "Get supplies by inventory name", responseCode = "200"),
+            @ApiResponse(description = "Get products by inventory name", responseCode = "200"),
             @ApiResponse(description = "Inventory name not found", responseCode = "404")
     })
-    public Mono<ResponseEntity<Flux<SupplyResponseDTO>>> getSuppliesByInventoryName(@PathVariable String inventoryName) {
-        return inventoryServiceClient.getSuppliesByInventoryName(inventoryName)
+    public Mono<ResponseEntity<Flux<ProductResponseDTO>>> getProductsByInventoryName(@PathVariable String inventoryName) {
+        return inventoryServiceClient.getProductsByInventoryName(inventoryName)
                 .collectList()
-                .map(supplyResponseDTOS -> {
-                    if (supplyResponseDTOS.isEmpty()) {
+                .map(productResponseDTOS -> {
+                    if (productResponseDTOS.isEmpty()) {
                         return ResponseEntity.notFound().build();
                     } else {
-                        return ResponseEntity.ok(Flux.fromIterable(supplyResponseDTOS));
+                        return ResponseEntity.ok(Flux.fromIterable(productResponseDTOS));
                     }
                 });
     }

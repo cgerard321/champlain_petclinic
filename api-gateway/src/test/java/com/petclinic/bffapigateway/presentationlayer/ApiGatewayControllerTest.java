@@ -3140,12 +3140,21 @@ private InventoryResponseDTO buildInventoryDTO(){
                 .inventoryName("invt1")
                 .inventoryType("Internal")
                 .inventoryDescription("invtone")
+                .inventoryImage("https://www.fda.gov/files/iStock-157317886.jpg")
+                .inventoryBackupImage("https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14")
                 .build();
 }
     @Test
     void addInventory_withValidValue_shouldSucceed() {
 
-        InventoryRequestDTO requestDTO = new InventoryRequestDTO("internal", "Internal", "invt1");
+        //InventoryRequestDTO requestDTO = new InventoryRequestDTO("internal", "Internal", "invt1");
+        InventoryRequestDTO requestDTO = new InventoryRequestDTO();
+        requestDTO.setInventoryName("invt1");
+        requestDTO.setInventoryType("Internal");
+        requestDTO.setInventoryDescription("newDescription");
+        requestDTO.setInventoryImage("https://www.fda.gov/files/iStock-157317886.jpg");
+        requestDTO.setInventoryBackupImage("https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14");
+
 
         InventoryResponseDTO inventoryResponseDTO = buildInventoryDTO();
 
@@ -3174,13 +3183,22 @@ private InventoryResponseDTO buildInventoryDTO(){
 
     @Test
     void updateInventory_withValidValue_shouldSucceed() {
-        InventoryRequestDTO requestDTO = new InventoryRequestDTO("internal", "Internal", "newDescription");
+        //InventoryRequestDTO requestDTO = new InventoryRequestDTO("internal", "Internal", "newDescription");
+        InventoryRequestDTO requestDTO = new InventoryRequestDTO();
+        requestDTO.setInventoryName("invt1");
+        requestDTO.setInventoryType("Internal");
+        requestDTO.setInventoryDescription("newDescription");
+        requestDTO.setInventoryImage("https://www.fda.gov/files/iStock-157317886.jpg");
+        requestDTO.setInventoryBackupImage("https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14");
+
 
         InventoryResponseDTO expectedResponse = InventoryResponseDTO.builder()
                 .inventoryId("1")
                 .inventoryName("newName")
                 .inventoryType("Internal")
                 .inventoryDescription("newDescription")
+                .inventoryImage("https://www.fda.gov/files/iStock-157317886.jpg")
+                .inventoryBackupImage("https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14")
                 .build();
 
         when(inventoryServiceClient.updateInventory(any(), eq(buildInventoryDTO().getInventoryId())))
@@ -3242,6 +3260,8 @@ private InventoryResponseDTO buildInventoryDTO(){
                 .inventoryName("Pet food")
                 .inventoryType("Internal")
                 .inventoryDescription("pet")
+                .inventoryImage("https://www.fda.gov/files/iStock-157317886.jpg")
+                .inventoryBackupImage("https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14")
                 .build();
 
         when(inventoryServiceClient.getInventoryById(validInventoryId))

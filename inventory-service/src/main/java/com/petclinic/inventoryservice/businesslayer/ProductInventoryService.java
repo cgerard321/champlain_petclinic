@@ -29,9 +29,9 @@ public interface ProductInventoryService {
 
     Mono<ProductResponseDTO> getProductByProductIdInInventory(String inventoryId, String productId);
 
-    Mono<InventoryResponseDTO> addSupplyToInventoryByInventoryName(String inventoryName, Mono<SupplyRequestDTO> supplyRequestDTOMono);
+    Mono<InventoryResponseDTO> addProductToInventoryByInventoryName(String inventoryName, Mono<ProductRequestDTO> productRequestDTOMono);
 
-    Flux<SupplyResponseDTO> getSuppliesByInventoryName(String inventoryName);
+    Flux<ProductResponseDTO> getProductsByInventoryName(String inventoryName);
   
     Flux<ProductResponseDTO> getLowStockProducts(String inventoryId, int stockThreshold);
 

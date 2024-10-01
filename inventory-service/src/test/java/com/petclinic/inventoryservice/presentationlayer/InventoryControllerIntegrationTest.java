@@ -45,6 +45,17 @@ class InventoryControllerIntegrationTest {
 
     private final Long DB_SIZE = 2L;
 
+    Product product1 = buildProduct("productId1", "inventoryId_3" , "drug" , "drug", 18.00, 30.00, 3);
+    Product product2 = buildProduct("productId2", "inventoryId_3" , "drug" , "drug", 18.00, 30.00, 3);
+
+    Product product3 = buildProduct("productId3", "inventoryId_4" , "drug" , "drug", 18.00, 30.00, 3);
+    Product product4 = buildProduct("productId4", "inventoryId_4" , "drug" , "drug", 18.00, 30.00, 3);
+
+
+    List<Product> products = List.of(product1, product2);
+
+    List<Product> products2 = List.of(product3, product4);
+
     InventoryType inventoryType1 = InventoryType.builder()
             .id("1")
             .typeId("d37a9df1-430b-40b8-be55-38730efa52a7")
@@ -58,11 +69,29 @@ class InventoryControllerIntegrationTest {
 
 
 
-    Inventory inventory1 = buildInventory("inventoryId_3", "internal", inventoryType1.getType(),"inventoryDescription_3");
+    Inventory inventory1 = buildInventory(
+            "inventoryId_3",
+            "internal",
+            inventoryType1.getType(),
+            "inventoryDescription_3",
+            "https://www.fda.gov/files/iStock-157317886.jpg",
+            "https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14",
+            products
+    );
 
-    Inventory inventory2 = buildInventory("inventoryId_4", "sales", inventoryType2.getType() ,"inventoryDescription_4");
 
-    Product product1 = buildProduct("productId1", "inventoryId_3" , "drug" , "drug", 18.00, 30.00, 3);
+
+    Inventory inventory2 = buildInventory(
+            "inventoryId_4",
+            "sales",
+            inventoryType2.getType() ,
+            "inventoryDescription_4",
+            "https://www.fda.gov/files/iStock-157317886.jpg",
+            "https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14",
+            products2
+
+    );
+
 
     @BeforeEach
     public void dbSetup() {
@@ -613,12 +642,15 @@ class InventoryControllerIntegrationTest {
                 .exchange()
                 .expectStatus().isNotFound();
     }
-    private Inventory buildInventory(String inventoryId, String name, String inventoryType, String inventoryDescription) {
+    private Inventory buildInventory(String inventoryId, String name, String inventoryType, String inventoryDescription, String inventoryImage, String inventoryBackupImage, List<Product> products) {
         return Inventory.builder()
                 .inventoryId(inventoryId)
                 .inventoryName(name)
                 .inventoryType(inventoryType)
                 .inventoryDescription(inventoryDescription)
+                .inventoryImage(inventoryImage)
+                .inventoryBackupImage(inventoryBackupImage)
+                .products(products)
                 .build();
     }
 
