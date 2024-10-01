@@ -67,7 +67,7 @@ function Product({ product }: { product: ProductModel }): JSX.Element {
 
   const handleProductClickForProductQuantity = async (productId: string): Promise<void> => {
     try {
-      const product = await changeProductQuantity(productId, quantity); // Pass the quantity from useState
+      const product = await getProductByProductId(productId)
       setSelectedProductForQuantity(product); // Set the product details after change
     } catch (error) {
       console.error('Failed to fetch product details:', error);
