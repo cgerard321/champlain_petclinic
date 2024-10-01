@@ -9,7 +9,7 @@ interface ApiError {
   message: string;
 }
 
-const EditReviewForm: React.FC = (): JSX.Element => {
+const EditInventory: React.FC = (): JSX.Element => {
   const { inventoryId } = useParams<{ inventoryId: string }>();
   const [inventory, setInventory] = useState<InventoryRequestModel>({
     inventoryName: '',
@@ -45,7 +45,7 @@ const EditReviewForm: React.FC = (): JSX.Element => {
     };
 
     fetchInventoryData().catch(error =>
-      console.error('Error in fetchReviewData:', error)
+      console.error('Error in fetchInventoryData:', error)
     );
   }, [inventoryId]);
 
@@ -91,7 +91,7 @@ const EditReviewForm: React.FC = (): JSX.Element => {
       }
     } catch (error) {
       const apiError = error as ApiError;
-      setErrorMessage(`Error updating review: ${apiError.message}`);
+      setErrorMessage(`Error updating inventory: ${apiError.message}`);
     } finally {
       setLoading(false);
     }
@@ -199,4 +199,4 @@ const EditReviewForm: React.FC = (): JSX.Element => {
     </div>
   );
 };
-export default EditReviewForm;
+export default EditInventory;
