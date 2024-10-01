@@ -7,6 +7,8 @@ import com.petclinic.bffapigateway.dtos.Cart.CartResponseDTO;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -20,6 +22,7 @@ import reactor.core.publisher.Mono;
 @RequestMapping("api/v2/gateway/carts")
 @Validated
 @CrossOrigin(origins = "http://localhost:3000, http://localhost:80")
+@Slf4j
 public class CartController {
 
     private final CartServiceClient cartServiceClient;
@@ -28,24 +31,25 @@ public class CartController {
     @GetMapping("/{cartId}")
     public Mono<ResponseEntity<CartResponseDTO>> getCartById(@PathVariable String cartId) {
         return cartServiceClient.getCartByCartId(cartId)
-                .map(ResponseEntity::ok)
+                .map(cart -> ResponseEntity.status(HttpStatus.OK).body(cart))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping
     public Flux<CartResponseDTO> getAllCarts() {
-        return cartServiceClient.getAllCarts();
+        return cartServiceClient.getAllCarts()
+                .doOnNext(cart -> log.debug("The cart response from the API gateway is: " + cart.toString()));
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @PutMapping(value = "/{cartId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<CartResponseDTO>> updateCartById(@RequestBody Mono<CartRequestDTO> cartRequestDTO,
-                                                                @PathVariable String cartId){
-        return cartServiceClient.updateCartByCartId(cartRequestDTO, cartId)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build());
-    }
+//    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+//    @PutMapping(value = "/{cartId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+//    public Mono<ResponseEntity<CartResponseDTO>> updateCartById(@RequestBody Mono<CartRequestDTO> cartRequestDTO,
+//                                                                @PathVariable String cartId){
+//        return cartServiceClient.updateCartByCartId(cartRequestDTO, cartId)
+//                .map(ResponseEntity::ok)
+//                .defaultIfEmpty(ResponseEntity.notFound().build());
+//    }
 
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
