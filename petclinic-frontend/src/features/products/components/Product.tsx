@@ -1,4 +1,4 @@
-import React, { JSX, useEffect, useState } from 'react';
+import { JSX, useEffect, useState } from 'react';
 import { ProductModel } from '@/features/products/models/ProductModels/ProductModel';
 import { getUserRating } from '../api/getUserRating';
 import StarRating from './StarRating';
@@ -8,11 +8,18 @@ import { deleteUserRating } from '../api/deleteUserRating';
 import { getProductByProductId } from '@/features/products/api/getProductByProductId.tsx';
 import { changeProductQuantity } from '../api/changeProductQuantity';
 
-function Product({ product }: { product: ProductModel }): JSX.Element {
+export default function Product({
+  product,
+}: {
+  product: ProductModel;
+}): JSX.Element {
   const [currentUserRating, setUserRating] = useState<number>(0);
   const [currentProduct, setCurrentProduct] = useState<ProductModel>(product);
-  const [selectedProduct, setSelectedProduct] = useState<ProductModel | null>(null);
-  const [selectedProductForQuantity, setSelectedProductForQuantity] = useState<ProductModel | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<ProductModel | null>(
+    null
+  );
+  const [selectedProductForQuantity, setSelectedProductForQuantity] =
+    useState<ProductModel | null>(null);
   const [quantity, setQuantity] = useState<number>(0);
 
   useEffect(() => {
@@ -61,7 +68,9 @@ function Product({ product }: { product: ProductModel }): JSX.Element {
     }
   };
 
-  const handleProductClickForProductQuantity = async (productId: string): Promise<void> => {
+  const handleProductClickForProductQuantity = async (
+    productId: string
+  ): Promise<void> => {
     try {
       const product = await getProductByProductId(productId);
       setSelectedProductForQuantity(product);
@@ -75,8 +84,13 @@ function Product({ product }: { product: ProductModel }): JSX.Element {
     e.preventDefault();
     if (selectedProductForQuantity) {
       try {
-        await changeProductQuantity(selectedProductForQuantity.productId, quantity);
-        const updatedProduct = await getProductByProductId(selectedProductForQuantity.productId);
+        await changeProductQuantity(
+          selectedProductForQuantity.productId,
+          quantity
+        );
+        const updatedProduct = await getProductByProductId(
+          selectedProductForQuantity.productId
+        );
         setCurrentProduct(updatedProduct);
         setSelectedProductForQuantity(null); // Close the quantity update form
       } catch (error) {
@@ -112,7 +126,7 @@ function Product({ product }: { product: ProductModel }): JSX.Element {
             <input
               type="number"
               value={quantity}
-              onChange={(e) => setQuantity(parseInt(e.target.value))}
+              onChange={e => setQuantity(parseInt(e.target.value))}
               placeholder="Enter new quantity"
             />
           </label>
@@ -125,12 +139,11 @@ function Product({ product }: { product: ProductModel }): JSX.Element {
 
   return (
     <div
-    className={`card ${product.productQuantity < 10 ? 'low-quantity' : ''}`}
-    key={product.productId}
-  >
-     
-      <span 
-        onClick={() => handleProductClickForProductQuantity(product.productId)} 
+      className={`card ${product.productQuantity < 10 ? 'low-quantity' : ''}`}
+      key={product.productId}
+    >
+      <span
+        onClick={() => handleProductClickForProductQuantity(product.productId)}
         style={{ cursor: 'pointer', color: 'blue', fontWeight: 'bold' }}
       >
         +
@@ -145,7 +158,7 @@ function Product({ product }: { product: ProductModel }): JSX.Element {
       >
         {currentProduct.productName}
       </h2>
-      
+
       <p>{currentProduct.productDescription}</p>
       <p>Price: ${currentProduct.productSalePrice.toFixed(2)}</p>
       <p>Rating: {currentProduct.averageRating}</p>
@@ -157,5 +170,3 @@ function Product({ product }: { product: ProductModel }): JSX.Element {
     </div>
   );
 }
-
-export default Product;

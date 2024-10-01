@@ -48,19 +48,19 @@
 }
 
 .low-quantity {
-    border-top: 5px solid red; /* Adds a red bar at the top */
-    position: relative; /* Make sure the container is positioned for pseudo-elements */
+  border-top: 5px solid red;
+  position: relative;
 }
 
 .low-quantity::after {
-    content: "Low Stock";
-    color: orange;
-    font-weight: bold;
-    font-size: 8px;
-    position: absolute;
-    top: 10px; /* Adjust as needed */
-    right: 5px; /* Adjust as needed */
-    background: white; /* Optional background to make text stand out */
+  content: 'Low Stock';
+  color: orange;
+  font-weight: bold;
+  font-size: 8px;
+  position: absolute;
+  top: 10px;
+  right: 5px;
+  background: white;
 
-    border-radius: 3px;
+  border-radius: 3px;
 }
