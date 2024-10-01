@@ -180,6 +180,39 @@ public class InventoryController {
                 });
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
+    @GetMapping(value = "/{inventoryId}/products/{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get a product by its ID in an inventory")
+    @ApiResponses(value = {
+            @ApiResponse(description = "Product found", responseCode = "200"),
+            @ApiResponse(description = "Product not found", responseCode = "404")
+    })
+    public Mono<ResponseEntity<ProductResponseDTO>> getProductByProductIdInInventory(
+            @PathVariable String inventoryId,
+            @PathVariable String productId) {
+
+        return inventoryServiceClient.getProductByProductIdInInventory(inventoryId, productId)
+                .map(productResponseDTO -> ResponseEntity.ok(productResponseDTO))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
+    @PutMapping(value = "/{inventoryId}/products/{productId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Update a product in an inventory")
+    @ApiResponses(value = {
+            @ApiResponse(description = "Product updated successfully", responseCode = "200"),
+            @ApiResponse(description = "Invalid inputs or product not found", responseCode = "400")
+    })
+    public Mono<ResponseEntity<ProductResponseDTO>> updateProductInInventory(
+            @RequestBody ProductRequestDTO productRequestDTO,
+            @PathVariable String inventoryId,
+            @PathVariable String productId) {
+
+        return inventoryServiceClient.updateProductInInventory(productRequestDTO, inventoryId, productId)
+                .map(productResponseDTO -> ResponseEntity.ok(productResponseDTO))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
 
 
 }
