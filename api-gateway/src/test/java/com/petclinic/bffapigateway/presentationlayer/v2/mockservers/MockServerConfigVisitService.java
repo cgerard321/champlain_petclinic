@@ -42,7 +42,9 @@ public class MockServerConfigVisitService {
                 )
                 .respond(
                         response()
-                                .withStatusCode(204));
+                                .withStatusCode(204)
+                                .withBody(json(""))
+                );
     }
 
     public void registerDeleteCompletedVisit_ByInvalidIdEndpoint() {
@@ -55,7 +57,10 @@ public class MockServerConfigVisitService {
                 )
                 .respond(
                         response()
-                                .withStatusCode(404));
+                                .withStatusCode(404)
+                                .withBody(json(""))
+
+                );
     }
 
 

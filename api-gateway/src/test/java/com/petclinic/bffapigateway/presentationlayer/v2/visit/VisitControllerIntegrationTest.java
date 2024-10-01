@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.junit.jupiter.api.*;
@@ -21,12 +22,15 @@ import java.time.LocalDateTime;
 import java.util.Date;
 
 import static com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigAuthService.jwtTokenForValidAdmin;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
-
-@SpringBootTest
+// Disables MongoDB for testing as mock servers handle all data interactions.
+@SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"spring.data.mongodb.port=0"})
 @ActiveProfiles("test")
 @AutoConfigureWebTestClient
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+//@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+
 public class VisitControllerIntegrationTest {
     @Autowired
     private WebTestClient webTestClient;
@@ -65,10 +69,6 @@ public class VisitControllerIntegrationTest {
             .visitEndDate(LocalDateTime.of(2023, 10, 2, 15, 0))
             .build();
 
-//    @BeforeEach
-//    void setupDB() {
-//
-//    }
 
     @BeforeAll
     void startService() {
@@ -84,8 +84,18 @@ public class VisitControllerIntegrationTest {
     @AfterAll
     void stopService() {
         mockServerConfigVisitService.stopServer();
+        mockServerConfigAuthService.stopMockServer();
+
     }
 
+    //    @BeforeEach
+//    void setUp(){
+//        mockServerConfigVisitService.registerGetAllVisitsEndpoint();
+//        mockServerConfigVisitService.registerDeleteCompletedVisitsByIdEndpoint();
+//        mockServerConfigVisitService.registerDeleteCompletedVisit_ByInvalidIdEndpoint();
+//        mockServerConfigAuthService.registerValidateTokenForAdminEndpoint();
+//
+//    }
     @Test
     void whenGetAllVisits_asAdmin_thenReturnAllVisits() {
         Flux<VisitResponseDTO> result = webTestClient.get()
@@ -115,6 +125,7 @@ public class VisitControllerIntegrationTest {
                 .expectStatus().isNoContent()
                 .expectBody().isEmpty();
     }
+
     @Test
     void whenDeleteCompletedVisit_ByInvalidId_asAdmin_thenReturnNotFound() {
         String visitId = "InvalidId";
