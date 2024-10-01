@@ -6,6 +6,7 @@ import com.petclinic.bffapigateway.dtos.Visits.VisitRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.VisitResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewResponseDTO;
+import com.petclinic.bffapigateway.presentationlayer.BFFApiGatewayController;
 import com.petclinic.bffapigateway.presentationlayer.v2.VisitController;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -49,6 +50,9 @@ public class VisitControllerUnitTest {
 
     @MockBean
     private VisitsServiceClient visitsServiceClient;
+
+    @MockBean
+    private BFFApiGatewayController bffApiGatewayController;
 
     private final String BASE_VISIT_URL = "/api/v2/gateway/visits";
     private final String REVIEWS_URL = BASE_VISIT_URL + "/reviews";
@@ -376,8 +380,44 @@ public class VisitControllerUnitTest {
                 .expectStatus().isNotFound();
     }
 
+    @Test
+    void getVisitsByOwnerId_whenOwnerExists_thenReturnFluxVisitResponseDTO() {
+        // Arrange
+        String ownerId = "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a";
+        when(bffApiGatewayController.getVisitsByOwnerId(ownerId))
+                .thenReturn(Flux.just(visitResponseDTO1));
 
+        // Act
+        webTestClient.get()
+                .uri(BASE_VISIT_URL + "/owners/{ownerId}", ownerId)
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(VisitResponseDTO.class)
+                .hasSize(1);
 
+        // Assert
+        verify(bffApiGatewayController, times(1)).getVisitsByOwnerId(ownerId);
+    }
 
+    @Test
+    void getVisitsByOwnerId_whenOwnerDoesNotExist_thenReturnEmptyFlux() {
+        // Arrange
+        String ownerId = "e6c7398e-8ac4-4e10-9ee0-03ef33f03610";
+        when(bffApiGatewayController.getVisitsByOwnerId(ownerId))
+                .thenReturn(Flux.empty());
+
+        // Act
+        webTestClient.get()
+                .uri(BASE_VISIT_URL + "/owners/{ownerId}", ownerId)
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(VisitResponseDTO.class)
+                .hasSize(0);
+
+        // Assert
+        verify(bffApiGatewayController, times(1)).getVisitsByOwnerId(ownerId);
+    }
 
 }
