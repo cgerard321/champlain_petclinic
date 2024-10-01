@@ -84,18 +84,16 @@ const ProfilePage = (): JSX.Element => {
              <strong>Telephone:</strong> {owner.telephone}
            </p>
          </div>
-
-         {/* Pets Info */}
-         <div className="pets-info">
+         <div className="pets-section">
            <h3>Owner's Pets</h3>
            {owner.pets && owner.pets.length > 0 ? (
             <ul>
               {owner.pets.map((pet: PetResponseModel) => (
                <li key={pet.petId}>
-                 <strong>Name:</strong> {pet.name},
-                 <strong>Type:</strong> {petTypeMapping[pet.petTypeId] || 'Unknown'},
-                 <strong>Weight:</strong> {pet.weight}kg,
-                 <strong>Age:</strong> {calculateAge(pet.birthDate)}
+                 <strong>Name: </strong> {pet.name},
+                 <strong>Type: </strong> {petTypeMapping[pet.petTypeId] || 'Unknown'},
+                 <strong>Weight: </strong> {pet.weight}kg,
+                 <strong>Age: </strong> {calculateAge(pet.birthDate)}
                </li>
               ))}
             </ul>
@@ -103,7 +101,6 @@ const ProfilePage = (): JSX.Element => {
             <p>No pets found.</p>
            )}
          </div>
-
          <button className="updateButton" onClick={handleUpdateClick}>
            Update Profile
          </button>
