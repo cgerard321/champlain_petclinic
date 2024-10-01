@@ -40,9 +40,47 @@ export default function AdminBillsListTable(): JSX.Element {
     setVets(vetsList);
   };
 
+  const validateForm = (): boolean => {
+    if (
+      !newBill.customerId ||
+      !newBill.vetId ||
+      !newBill.visitType ||
+      !newBill.date ||
+      newBill.amount <= 0 ||
+      !newBill.billStatus ||
+      !newBill.dueDate
+    ) {
+      setError(
+        'All fields are required and the amount must be greater than zero.'
+      );
+      return false;
+    }
+
+    const billDate = new Date(newBill.date);
+    const dueDate = new Date(newBill.dueDate);
+
+    if (billDate > dueDate) {
+      setError('The bill date cannot be after the due date.');
+      return false;
+    }
+
+    setError(null);
+    return true;
+  };
+
   const handleCreateBill = async (): Promise<void> => {
+    const isValid = validateForm();
+    if (!isValid) {
+      return;
+    }
+
+    const formattedBill = {
+      ...newBill,
+      billStatus: newBill.billStatus.toUpperCase(),
+    };
+
     try {
-      await addBill(newBill);
+      await addBill(formattedBill);
       setCreateForm(false);
       fetchBills();
     } catch (err) {
@@ -98,84 +136,10 @@ export default function AdminBillsListTable(): JSX.Element {
         {showCreateForm ? 'Cancel' : 'Create New Bill'}
       </button>
 
-      {searchedBill ? (
-        <div>
-          <h3>Searched Bill Details:</h3>
-          <p>
-            <strong>Bill ID:</strong> {searchedBill.billId}
-          </p>
-          <p>
-            <strong>Owner Name:</strong> {searchedBill.ownerFirstName}{' '}
-            {searchedBill.ownerLastName}
-          </p>
-          <p>
-            <strong>Visit Type:</strong> {searchedBill.visitType}
-          </p>
-          <p>
-            <strong>Vet Name:</strong> {searchedBill.vetFirstName}{' '}
-            {searchedBill.vetLastName}
-          </p>
-          <p>
-            <strong>Date:</strong> {searchedBill.date}
-          </p>
-          <p>
-            <strong>Amount:</strong> {searchedBill.amount}
-          </p>
-          <p>
-            <strong>Taxed Amount:</strong> {searchedBill.taxedAmount}
-          </p>
-          <p>
-            <strong>Status:</strong> {searchedBill.billStatus}
-          </p>
-          <p>
-            <strong>Due Date:</strong> {searchedBill.dueDate}
-          </p>
-        </div>
-      ) : (
-        <div>
-          <h3>All Bills:</h3>
-          <table className="table table-striped">
-            <thead>
-              <tr>
-                <th>Bill ID</th>
-                <th>Owner Name</th>
-                <th>Visit Type</th>
-                <th>Vet Name</th>
-                <th>Date</th>
-                <th>Amount</th>
-                <th>Taxed Amount</th>
-                <th>Status</th>
-                <th>Due Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              {bills
-                .filter(data => data != null)
-                .map((bill: Bill) => (
-                  <tr key={bill.billId}>
-                    <td>{bill.billId}</td>
-                    <td>
-                      {bill.ownerFirstName} {bill.ownerLastName}
-                    </td>
-                    <td>{bill.visitType}</td>
-                    <td>
-                      {bill.vetFirstName} {bill.vetLastName}
-                    </td>
-                    <td>{bill.date}</td>
-                    <td>{bill.amount}</td>
-                    <td>{bill.taxedAmount}</td>
-                    <td>{bill.billStatus}</td>
-                    <td>{bill.dueDate}</td>
-                  </tr>
-                ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
       {showCreateForm && (
         <div>
           <h3>Create New Bill</h3>
+          {error && <p style={{ color: 'red' }}>{error}</p>}
           <form
             onSubmit={e => {
               e.preventDefault();
@@ -251,7 +215,7 @@ export default function AdminBillsListTable(): JSX.Element {
               <label>Status</label>
               <input
                 type="text"
-                value={newBill.billStatus}
+                value={newBill.billStatus.toUpperCase()}
                 onChange={e =>
                   setNewBill({ ...newBill, billStatus: e.target.value })
                 }
@@ -271,6 +235,81 @@ export default function AdminBillsListTable(): JSX.Element {
 
             <button type="submit">Create Bill</button>
           </form>
+        </div>
+      )}
+
+      {searchedBill ? (
+        <div>
+          <h3>Searched Bill Details:</h3>
+          <p>
+            <strong>Bill ID:</strong> {searchedBill.billId}
+          </p>
+          <p>
+            <strong>Owner Name:</strong> {searchedBill.ownerFirstName}{' '}
+            {searchedBill.ownerLastName}
+          </p>
+          <p>
+            <strong>Visit Type:</strong> {searchedBill.visitType}
+          </p>
+          <p>
+            <strong>Vet Name:</strong> {searchedBill.vetFirstName}{' '}
+            {searchedBill.vetLastName}
+          </p>
+          <p>
+            <strong>Date:</strong> {searchedBill.date}
+          </p>
+          <p>
+            <strong>Amount:</strong> {searchedBill.amount}
+          </p>
+          <p>
+            <strong>Taxed Amount:</strong> {searchedBill.taxedAmount}
+          </p>
+          <p>
+            <strong>Status:</strong> {searchedBill.billStatus}
+          </p>
+          <p>
+            <strong>Due Date:</strong> {searchedBill.dueDate}
+          </p>
+        </div>
+      ) : (
+        <div>
+          <h3>All Bills:</h3>
+          <table className="table table-striped">
+            <thead>
+              <tr>
+                <th>Bill ID</th>
+                <th>Owner Name</th>
+                <th>Visit Type</th>
+                <th>Vet Name</th>
+                <th>Date</th>
+                <th>Amount</th>
+                <th>Taxed Amount</th>
+                <th>Status</th>
+                <th>Due Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {bills
+                .filter(data => data != null)
+                .map((bill: Bill) => (
+                  <tr key={bill.billId}>
+                    <td>{bill.billId}</td>
+                    <td>
+                      {bill.ownerFirstName} {bill.ownerLastName}
+                    </td>
+                    <td>{bill.visitType}</td>
+                    <td>
+                      {bill.vetFirstName} {bill.vetLastName}
+                    </td>
+                    <td>{bill.date}</td>
+                    <td>{bill.amount}</td>
+                    <td>{bill.taxedAmount}</td>
+                    <td>{bill.billStatus}</td>
+                    <td>{bill.dueDate}</td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
         </div>
       )}
     </div>
