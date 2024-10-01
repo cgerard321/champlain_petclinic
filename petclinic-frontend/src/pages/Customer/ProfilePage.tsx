@@ -85,7 +85,7 @@ const ProfilePage = (): JSX.Element => {
             </p>
           </div>
           <div className="pets-section">
-            <h3>Owner's Pets</h3>
+            <h3>Owner&apos;s Pets</h3>
             {owner.pets && owner.pets.length > 0 ? (
               <ul>
                 {owner.pets.map((pet: PetResponseModel) => (
