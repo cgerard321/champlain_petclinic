@@ -308,9 +308,5 @@ public class VisitsServiceClient {
                         .bodyToMono(VisitResponseDTO.class);
     });
     }
-
-
-
-
 }
 

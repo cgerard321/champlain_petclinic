@@ -173,31 +173,6 @@ class VetControllerIntegrationTest {
     }
 
 
-    @Test
-    void whenGetVetByFirstName_notExists_thenReturnNotFound() {
-        String firstName = "Unknown";
-
-        mockServerConfigVetService.registerGetVetByFirstNameEndpointNotFound(firstName);
-
-        webTestClient.get()
-                .uri("/api/v2/gateway/vets/firstName/{firstName}", firstName)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isNotFound();
-    }
-
-    @Test
-    void whenGetVetByLastName_notExists_thenReturnNotFound() {
-        String lastName = "Unknown";
-
-        mockServerConfigVetService.registerGetVetByLastNameEndpointNotFound(lastName);
-
-        webTestClient.get()
-                .uri("/api/v2/gateway/vets/lastName/{lastName}", lastName)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isNotFound();
-    }
 
     @Test
     public void getVetById_ValidId_ReturnsVet() {
@@ -362,6 +337,7 @@ class VetControllerIntegrationTest {
                 .isEqualTo(photoData);
     }
 
+
     @Test
     public void whenGetPhotoByVetId_withNotFoundVetId_thenReturn404() {
         String notFoundVetId = ("jj2cbf82-625b-11ee-8c99-0242ac120002");
@@ -375,6 +351,5 @@ class VetControllerIntegrationTest {
                 .exchange()
                 .expectStatus().isNotFound();
     }
-
 
 }

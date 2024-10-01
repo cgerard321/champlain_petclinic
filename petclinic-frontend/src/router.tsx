@@ -36,6 +36,7 @@ import InventorySupplies from '@/features/inventories/InventorySupplies.tsx';
 import EditingVisit from './features/visits/models/EditingVisit';
 import UpdateCustomerPage from '@/pages/Customer/UpdateCustomerPage.tsx';
 import CustomerDetailsPage from '@/pages/Customer/CustomerDetailsPage.tsx';
+import CustomerVisits from '@/pages/Visit/CustomerVisits.tsx';
 
 const router = createBrowserRouter([
   {
@@ -271,6 +272,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <InventorySupplies />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.CustomerVisits,
+        element: (
+          <ProtectedRoute>
+            <CustomerVisits />
           </ProtectedRoute>
         ),
       },
