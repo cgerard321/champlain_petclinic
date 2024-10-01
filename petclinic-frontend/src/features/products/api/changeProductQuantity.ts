@@ -6,7 +6,7 @@ export async function changeProductQuantity(productId: string, newQuantity: numb
     await axiosInstance.patch(`/products/${productId}/quantity`, {
       productQuantity: newQuantity,
     });
-    // The response is empty, so we don't return anything
+    
   } catch (err) {
     console.error(`Error updating quantity for product ${productId}:`, err);
     throw err;

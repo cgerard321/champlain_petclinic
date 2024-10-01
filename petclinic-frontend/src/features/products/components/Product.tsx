@@ -76,7 +76,6 @@ function Product({ product }: { product: ProductModel }): JSX.Element {
     if (selectedProductForQuantity) {
       try {
         await changeProductQuantity(selectedProductForQuantity.productId, quantity);
-        // After successful update, fetch the updated product
         const updatedProduct = await getProductByProductId(selectedProductForQuantity.productId);
         setCurrentProduct(updatedProduct);
         setSelectedProductForQuantity(null); // Close the quantity update form
@@ -125,7 +124,11 @@ function Product({ product }: { product: ProductModel }): JSX.Element {
   }
 
   return (
-    <div className="card" key={product.productId}>
+    <div
+    className={`card ${product.productQuantity < 10 ? 'low-quantity' : ''}`}
+    key={product.productId}
+  >
+     
       <span 
         onClick={() => handleProductClickForProductQuantity(product.productId)} 
         style={{ cursor: 'pointer', color: 'blue', fontWeight: 'bold' }}
@@ -142,6 +145,7 @@ function Product({ product }: { product: ProductModel }): JSX.Element {
       >
         {currentProduct.productName}
       </h2>
+      
       <p>{currentProduct.productDescription}</p>
       <p>Price: ${currentProduct.productSalePrice.toFixed(2)}</p>
       <p>Rating: {currentProduct.averageRating}</p>

@@ -56,11 +56,11 @@
     content: "Low Stock";
     color: orange;
     font-weight: bold;
-    font-size: 14px;
+    font-size: 8px;
     position: absolute;
     top: 10px; /* Adjust as needed */
-    right: 10px; /* Adjust as needed */
+    right: 5px; /* Adjust as needed */
     background: white; /* Optional background to make text stand out */
-    padding: 5px;
+
     border-radius: 3px;
 }
