@@ -57,56 +57,56 @@ const ProfilePage = (): JSX.Element => {
   }
 
   return (
-   <div>
-     <NavBar />
-     <div className="profile-page container-profile">
-       <div className="profile-card shadow-lg p-5 mb-5 bg-white rounded">
-         <h1>
-           {owner.firstName} {owner.lastName}&apos;s Profile
-         </h1>
-         <div className="profile-info">
-           <p>
-             <strong>First Name:</strong> {owner.firstName}
-           </p>
-           <p>
-             <strong>Last Name:</strong> {owner.lastName}
-           </p>
-           <p>
-             <strong>Address:</strong> {owner.address}
-           </p>
-           <p>
-             <strong>City:</strong> {owner.city}
-           </p>
-           <p>
-             <strong>Province:</strong> {owner.province}
-           </p>
-           <p>
-             <strong>Telephone:</strong> {owner.telephone}
-           </p>
-         </div>
-         <div className="pets-section">
-           <h3>Owner's Pets</h3>
-           {owner.pets && owner.pets.length > 0 ? (
-            <ul>
-              {owner.pets.map((pet: PetResponseModel) => (
-               <li key={pet.petId}>
-                 <strong>Name: </strong> {pet.name},
-                 <strong>Type: </strong> {petTypeMapping[pet.petTypeId] || 'Unknown'},
-                 <strong>Weight: </strong> {pet.weight}kg,
-                 <strong>Age: </strong> {calculateAge(pet.birthDate)}
-               </li>
-              ))}
-            </ul>
-           ) : (
-            <p>No pets found.</p>
-           )}
-         </div>
-         <button className="updateButton" onClick={handleUpdateClick}>
-           Update Profile
-         </button>
-       </div>
-     </div>
-   </div>
+    <div>
+      <NavBar />
+      <div className="profile-page container-profile">
+        <div className="profile-card shadow-lg p-5 mb-5 bg-white rounded">
+          <h1>
+            {owner.firstName} {owner.lastName}&apos;s Profile
+          </h1>
+          <div className="profile-info">
+            <p>
+              <strong>First Name:</strong> {owner.firstName}
+            </p>
+            <p>
+              <strong>Last Name:</strong> {owner.lastName}
+            </p>
+            <p>
+              <strong>Address:</strong> {owner.address}
+            </p>
+            <p>
+              <strong>City:</strong> {owner.city}
+            </p>
+            <p>
+              <strong>Province:</strong> {owner.province}
+            </p>
+            <p>
+              <strong>Telephone:</strong> {owner.telephone}
+            </p>
+          </div>
+          <div className="pets-section">
+            <h3>Owner's Pets</h3>
+            {owner.pets && owner.pets.length > 0 ? (
+              <ul>
+                {owner.pets.map((pet: PetResponseModel) => (
+                  <li key={pet.petId}>
+                    <strong>Name: </strong> {pet.name},<strong>Type: </strong>{' '}
+                    {petTypeMapping[pet.petTypeId] || 'Unknown'},
+                    <strong>Weight: </strong> {pet.weight}kg,
+                    <strong>Age: </strong> {calculateAge(pet.birthDate)}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>No pets found.</p>
+            )}
+          </div>
+          <button className="updateButton" onClick={handleUpdateClick}>
+            Update Profile
+          </button>
+        </div>
+      </div>
+    </div>
   );
 };
 
