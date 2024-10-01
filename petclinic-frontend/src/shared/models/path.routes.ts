@@ -15,6 +15,7 @@ export enum AppRoutePaths {
   InventoryProducts = '/inventory/:inventoryId/products',
   InventorySupplies = '/inventories/:inventoryName/supplies',
   AdminBills = '/bills/admin',
+  UpdateBill = '/bills/admin/:billId',
   CustomerBills = '/bills/customer',
   PageNotFound = '/page-not-found',
   Unauthorized = '/unauthorized',

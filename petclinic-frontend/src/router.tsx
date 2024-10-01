@@ -15,6 +15,7 @@ import AddReviewForm from './features/visits/Review/AddReviewForm';
 import EditReviewForm from './features/visits/Review/EditReviewForm';
 import Review from './pages/Review/Review';
 import CartPage from '@/pages/Carts/Cart.tsx';
+import UpdateBillPage from "@/pages/Bills/UpdateBill.tsx";
 import UserCart from '@/features/carts/components/UserCart.tsx';
 import AddingCustomer from '@/pages/Customer/AddingCustomer.tsx';
 import AllOwners from '@/pages/Customer/AllOwners.tsx';
@@ -194,6 +195,14 @@ const router = createBrowserRouter([
           <ProtectedRoute roles={['ADMIN']}>
             <AdminBillingPage />
           </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.UpdateBill,
+        element: (
+            <ProtectedRoute roles={['ADMIN']}>
+              <UpdateBillPage />
+            </ProtectedRoute>
         ),
       },
       {

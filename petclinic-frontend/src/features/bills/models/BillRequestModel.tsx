@@ -7,3 +7,4 @@ export interface BillRequestModel {
   billStatus: string;
   dueDate: string;
 }
+
