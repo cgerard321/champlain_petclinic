@@ -38,7 +38,6 @@ import UpdateCustomerPage from '@/pages/Customer/UpdateCustomerPage.tsx';
 import VisitDetails from './features/visits/visits/VisitByVisitId';
 import CustomerVisits from '@/pages/Visit/CustomerVisits.tsx';
 
-
 const router = createBrowserRouter([
   {
     children: [
