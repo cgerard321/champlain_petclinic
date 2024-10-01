@@ -20,4 +20,5 @@ public interface CartService {
     Mono<Integer> getCartItemCount(String cartId);
     // Combining both features: clearCart and updateCartByCartId
     Mono<CartResponseModel> deleteCartByCartId(String cartId);
+    Mono<CartResponseModel> removeProductFromCart(String cartId, String productId);
 }

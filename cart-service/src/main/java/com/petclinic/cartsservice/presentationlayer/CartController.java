@@ -90,4 +90,14 @@ public class CartController {
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
 
     }
+
+    @DeleteMapping("/{cartId}/{productId}")
+    public Mono<ResponseEntity<CartResponseModel>> removeProductFromCart(@PathVariable String cartId, @PathVariable String productId){
+        return Mono.just(cartId)
+                .filter(id -> id.length() == 36)
+                .switchIfEmpty(Mono.error(new InvalidInputException("Provided cart id is invalid: " + cartId)))
+                .flatMap(validId -> cartService.removeProductFromCart(validId, productId))
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
 }
