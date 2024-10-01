@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { ProductModel } from './models/ProductModels/ProductModel';
 import './InventoriesListTable.css';
@@ -19,6 +19,7 @@ const InventoryProducts: React.FC = () => {
   const [filteredProducts, setFilteredProducts] = useState<ProductModel[]>([]); // State for filtered products
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   // Fetch products from the backend
   useEffect(() => {
@@ -154,7 +155,7 @@ const InventoryProducts: React.FC = () => {
               <th>Price</th>
               <th>Quantity</th>
               <th>Status</th>
-              <th>Actions</th>
+              <th colSpan={2}>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -178,6 +179,17 @@ const InventoryProducts: React.FC = () => {
                   }}
                 >
                   {product.status.replace('_', ' ')}
+                </td>
+                <td>
+                  <button
+                    onClick={e => {
+                      e.stopPropagation();
+                      navigate(`${product.productId}/edit`);
+                    }}
+                    className="btn btn-warning"
+                  >
+                    Edit
+                  </button>
                 </td>
                 <td>
                   <button
