@@ -4,6 +4,7 @@ package com.petclinic.visits.visitsservicenew.PresentationLayer;
 import com.petclinic.visits.visitsservicenew.BusinessLayer.Review.ReviewService;
 import com.petclinic.visits.visitsservicenew.BusinessLayer.VisitService;
 import com.petclinic.visits.visitsservicenew.Exceptions.InvalidInputException;
+import com.petclinic.visits.visitsservicenew.Exceptions.NotFoundException;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.Review.ReviewRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.Review.ReviewResponseDTO;
 import lombok.RequiredArgsConstructor;
@@ -191,7 +192,12 @@ public class VisitController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
-
+    @DeleteMapping(value = "/completed/{visitId}")
+    public Mono<ResponseEntity<Void>> deleteCompletedVisitByVisitId(@PathVariable String visitId){
+        return visitService.deleteCompletedVisitByVisitId(visitId)
+                .then(Mono.just(new ResponseEntity<Void>(HttpStatus.NO_CONTENT)))
+                .onErrorResume(NotFoundException.class, e -> Mono.just(new ResponseEntity<>(HttpStatus.NOT_FOUND))); // Return 404 if NotFoundException is thrown
+    }
 //    @GetMapping("/pets/{petId}")
 //    public Mono<PetResponseDTO> getPetByIdTest(@PathVariable int petId){
 //       return visitService.testingGetPetDTO(petId);
