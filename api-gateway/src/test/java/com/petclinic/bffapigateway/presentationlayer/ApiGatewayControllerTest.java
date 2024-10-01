@@ -3033,6 +3033,7 @@ class ApiGatewayControllerTest {
                 .expectHeader().valueEquals("Location", "http://localhost:8080/#!/login");
     }
 
+
 //    @Test
 //    @DisplayName("Given invalid JWT, expect 400")
 //    void verify_user_bad_token() {

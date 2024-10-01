@@ -1,5 +1,5 @@
+import React, { JSX, useEffect, useState } from 'react';
 import { ProductModel } from '@/features/products/models/ProductModels/ProductModel';
-import { JSX, useEffect, useState } from 'react';
 import { getUserRating } from '../api/getUserRating';
 import StarRating from './StarRating';
 import { updateUserRating } from '../api/updateUserRating';
@@ -11,12 +11,8 @@ import { changeProductQuantity } from '../api/changeProductQuantity';
 function Product({ product }: { product: ProductModel }): JSX.Element {
   const [currentUserRating, setUserRating] = useState<number>(0);
   const [currentProduct, setCurrentProduct] = useState<ProductModel>(product);
-  const [selectedProduct, setSelectedProduct] = useState<ProductModel | null>(
-    null
-  );
-  const [selectedProductForQuantity, setSelectedProductForQuantity] = useState<ProductModel | null>(
-    null
-  );
+  const [selectedProduct, setSelectedProduct] = useState<ProductModel | null>(null);
+  const [selectedProductForQuantity, setSelectedProductForQuantity] = useState<ProductModel | null>(null);
   const [quantity, setQuantity] = useState<number>(0);
 
   useEffect(() => {
@@ -67,22 +63,32 @@ function Product({ product }: { product: ProductModel }): JSX.Element {
 
   const handleProductClickForProductQuantity = async (productId: string): Promise<void> => {
     try {
-      const product = await getProductByProductId(productId)
-      setSelectedProductForQuantity(product); // Set the product details after change
+      const product = await getProductByProductId(productId);
+      setSelectedProductForQuantity(product);
+      setQuantity(product.productQuantity); // Set initial quantity to current product quantity
     } catch (error) {
       console.error('Failed to fetch product details:', error);
     }
   };
 
-  const handleFormSubmit = (e: React.FormEvent) => {
-    e.preventDefault(); // Prevent the form from reloading the page
+  const handleQuantitySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (selectedProductForQuantity) {
-      handleProductClickForProductQuantity(selectedProductForQuantity.productId); // Trigger the API call
+      try {
+        await changeProductQuantity(selectedProductForQuantity.productId, quantity);
+        // After successful update, fetch the updated product
+        const updatedProduct = await getProductByProductId(selectedProductForQuantity.productId);
+        setCurrentProduct(updatedProduct);
+        setSelectedProductForQuantity(null); // Close the quantity update form
+      } catch (error) {
+        console.error('Failed to update product quantity:', error);
+      }
     }
   };
 
   const handleBackToList = (): void => {
     setSelectedProduct(null);
+    setSelectedProductForQuantity(null);
   };
 
   if (selectedProduct) {
@@ -101,9 +107,7 @@ function Product({ product }: { product: ProductModel }): JSX.Element {
       <div>
         <h1>Change Product Quantity</h1>
         <h2>{selectedProductForQuantity.productName}</h2>
-
-        {/* Form to submit the new quantity */}
-        <form onSubmit={handleFormSubmit}>
+        <form onSubmit={handleQuantitySubmit}>
           <label>
             Quantity:
             <input
@@ -115,22 +119,19 @@ function Product({ product }: { product: ProductModel }): JSX.Element {
           </label>
           <button type="submit">Update Quantity</button>
         </form>
-
         <button onClick={handleBackToList}>Back to Products</button>
       </div>
     );
   }
 
-  
-
   return (
     <div className="card" key={product.productId}>
-       <span 
-  onClick={() => handleProductClickForProductQuantity(product.productId)} 
-  style={{ cursor: 'pointer', color: 'blue', fontWeight: 'bold' }}
->
-  +
-</span>
+      <span 
+        onClick={() => handleProductClickForProductQuantity(product.productId)} 
+        style={{ cursor: 'pointer', color: 'blue', fontWeight: 'bold' }}
+      >
+        +
+      </span>
       <h2
         onClick={() => handleProductClick(product.productId)}
         style={{
@@ -139,30 +140,16 @@ function Product({ product }: { product: ProductModel }): JSX.Element {
           textDecoration: 'underline',
         }}
       >
-        
-        {/* <div
-                className={`card ${currentProduct.productQuantity < 10 ? 'low-quantity' : ''}`}
-                key={currentProduct.productId}
-                style={{ height: '10px' }}
-              ></div> */}
         {currentProduct.productName}
       </h2>
       <p>{currentProduct.productDescription}</p>
       <p>Price: ${currentProduct.productSalePrice.toFixed(2)}</p>
       <p>Rating: {currentProduct.averageRating}</p>
       <p>Your Rating:</p>
-      
       <StarRating
         currentRating={currentUserRating}
-        updateRating={updateRating}/>
-        {/* {currentProduct.productQuantity === 0 ? (
-          <p className="out-of-stock">Out of Stock</p>
-        ) : currentProduct.productQuantity < 10 ? (
-          <p className="low-stock">Low Stock</p>
-        ) : null} */}
-
-      
-     
+        updateRating={updateRating}
+      />
     </div>
   );
 }
