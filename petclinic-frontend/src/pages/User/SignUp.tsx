@@ -158,7 +158,7 @@ const SignUp: React.FC = (): JSX.Element => {
 
     try {
       const response = await axios.post<Register>(
-        'http://localhost:8080/api/gateway/users',
+        'http://localhost:8080/api/v2/gateway/users',
         requestData
       );
 
