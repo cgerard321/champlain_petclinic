@@ -49,7 +49,7 @@ public class ProductController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @SecuredEndpoint(allowedRoles = {Roles.ALL})
     @PatchMapping(value = "{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<Void>> incrementRequestCount(@PathVariable String productId) {
         return productsServiceClient.requestCount(productId).then(Mono.just(ResponseEntity.noContent().build()));
@@ -86,21 +86,28 @@ public class ProductController {
     }
 
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @PatchMapping(value = "{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @SecuredEndpoint(allowedRoles = {Roles.ALL})
+    @PatchMapping(value = "{productId}/decrease", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<Void>> decreaseProductQuantity(@PathVariable String productId) {
         return productsServiceClient.decreaseProductQuantity(productId).then(Mono.just(ResponseEntity.noContent().build()));
     }
 
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @PatchMapping(value = "{productId}/quantity", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<Object>> changeProductQuantity( /////Object might not work
+    @PatchMapping(value = "{productId}/quantity", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<Object>> changeProductQuantity(
             @PathVariable String productId,
-            @RequestBody Mono<ProductRequestDTO> productRequestModel) {
-        return productRequestModel
+            @RequestBody Mono<ProductQuantityRequest> productQuantityRequest) {
+
+        return productQuantityRequest
                 .flatMap(request -> productsServiceClient.changeProductQuantity(productId, request.getProductQuantity()))
                 .then(Mono.just(ResponseEntity.noContent().build()))
-                .onErrorResume(NotFoundException.class, e -> Mono.just(ResponseEntity.notFound().build()));
+                .onErrorResume(NotFoundException.class, e -> Mono.just(ResponseEntity.notFound().build()))
+                .onErrorResume(Exception.class, e -> {
+                    // Log the error
+                    log.error("Error changing product quantity", e);
+                    return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
+                });
     }
+
 }

@@ -1,5 +1,6 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
+import com.petclinic.bffapigateway.dtos.Products.ProductQuantityRequest;
 import com.petclinic.bffapigateway.dtos.Products.ProductRequestDTO;
 import com.petclinic.bffapigateway.dtos.Products.ProductResponseDTO;
 import lombok.extern.slf4j.Slf4j;
@@ -9,6 +10,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.Collections;
 
 @Component
 @Slf4j
@@ -117,10 +120,11 @@ public class ProductsServiceClient {
         return webClientBuilder.build()
                 .patch()
                 .uri(productsServiceUrl + "/" + productId + "/quantity")
+                .bodyValue(new ProductQuantityRequest(productQuantity))
                 .retrieve()
                 .bodyToMono(Void.class);
-
     }
+
 
 
 

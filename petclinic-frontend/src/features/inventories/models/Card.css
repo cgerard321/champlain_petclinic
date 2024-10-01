@@ -45,3 +45,21 @@
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
 }
 
+.low-quantity {
+    border-top: 5px solid red; /* Adds a red bar at the top */
+    position: relative; /* Make sure the container is positioned for pseudo-elements */
+}
+
+.low-quantity::after {
+    content: "Low Stock";
+    color: orange;
+    font-weight: bold;
+    font-size: 14px;
+    position: absolute;
+    top: 10px; /* Adjust as needed */
+    right: 10px; /* Adjust as needed */
+    background: white; /* Optional background to make text stand out */
+    padding: 5px;
+    border-radius: 3px;
+}
+

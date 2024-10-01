@@ -25,4 +25,6 @@ export async function getAllProducts(
       }
     })
     .filter((data?: JSON) => data !== null);
+
+    
 }
