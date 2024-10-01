@@ -2,6 +2,7 @@ import { NavBar } from '@/layouts/AppNavBar.tsx';
 import InventoriesListTable from '@/features/inventories/InventoriesListTable.tsx';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import { AppRoutePaths } from '@/shared/models/path.routes'; // Import your route paths
+import './Inventories.css';
 
 export default function Inventories(): JSX.Element {
   const navigate = useNavigate(); // Get the navigate function
@@ -14,7 +15,7 @@ export default function Inventories(): JSX.Element {
   return (
     <div>
       <NavBar />
-      <h1>Inventories</h1>
+      <h1 id="page-title">Inventories</h1>
       <InventoriesListTable />
       <button onClick={handleButtonClick}>Go to MockPage</button>
     </div>

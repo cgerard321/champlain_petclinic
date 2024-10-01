@@ -1,6 +1,6 @@
 package com.petclinic.inventoryservice.datalayer.Inventory;
 
-import com.petclinic.inventoryservice.datalayer.Supply.Supply;
+import com.petclinic.inventoryservice.datalayer.Product.Product;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -22,16 +22,22 @@ public class Inventory {
     private String inventoryName;
     private String inventoryType;
     private String inventoryDescription;
+    private String inventoryImage;
+    private String inventoryBackupImage;
 
 
     @Builder.Default
-    private List<Supply> supplies = new ArrayList<>();
+    private List<Product> products = new ArrayList<>();
 
 
-    public void addSupply(Supply supply) {
-        if (this.supplies == null) {
-            this.supplies = new ArrayList<>();
+    public void addProduct(Product product) {
+        if (this.products == null) {
+            this.products = new ArrayList<>();
         }
-        this.supplies.add(supply);
+        this.products.add(product);
+    }
+
+    public void setProducts(List<Product> products) {
+        this.products = products;
     }
 }

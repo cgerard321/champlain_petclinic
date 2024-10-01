@@ -53,6 +53,8 @@ public class InventoryControllerTest {
                 .inventoryName("invt1")
                 .inventoryType("Internal")
                 .inventoryDescription("invtone")
+                .inventoryImage("https://www.fda.gov/files/iStock-157317886.jpg")
+                .inventoryBackupImage("https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14")
                 .build();
     }
     private List<InventoryTypeResponseDTO> buildInventoryTypeResponseDTOList(){
@@ -279,12 +281,16 @@ public class InventoryControllerTest {
                 .inventoryName("updatedName")
                 .inventoryType("updatedType")
                 .inventoryDescription("updatedDescription")
+                .inventoryImage("https://www.fda.gov/files/iStock-157317886.jpg")
+                .inventoryBackupImage("https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14")
                 .build();
         InventoryResponseDTO updatedInventory = InventoryResponseDTO.builder()
                 .inventoryId(inventoryId)
                 .inventoryName("updatedName")
                 .inventoryType("updatedType")
                 .inventoryDescription("updatedDescription")
+                .inventoryImage("https://www.fda.gov/files/iStock-157317886.jpg")
+                .inventoryBackupImage("https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14")
                 .build();
 
         when(inventoryServiceClient.updateInventory(eq(updateRequest), eq(inventoryId)))
@@ -313,6 +319,8 @@ public class InventoryControllerTest {
                 .inventoryName("updatedName")
                 .inventoryType("updatedType")
                 .inventoryDescription("updatedDescription")
+                .inventoryImage("https://www.fda.gov/files/iStock-157317886.jpg")
+                .inventoryBackupImage("https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14")
                 .build();
 
         when(inventoryServiceClient.updateInventory(eq(updateRequest), eq(validInventoryId)))
@@ -338,6 +346,8 @@ public class InventoryControllerTest {
                 .inventoryName("invt1")
                 .inventoryType("Internal")
                 .inventoryDescription("invtone")
+                .inventoryImage("https://www.fda.gov/files/iStock-157317886.jpg")
+                .inventoryBackupImage("https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14")
                 .build();
         InventoryResponseDTO createdInventory = buildInventoryDTO();
 
@@ -366,6 +376,8 @@ public class InventoryControllerTest {
                 .inventoryName("invt1")
                 .inventoryType("Internal")
                 .inventoryDescription("invtone")
+                .inventoryImage("https://www.fda.gov/files/iStock-157317886.jpg")
+                .inventoryBackupImage("https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14")
                 .build();
 
         when(inventoryServiceClient.addInventory(eq(invalidInventoryRequest)))
