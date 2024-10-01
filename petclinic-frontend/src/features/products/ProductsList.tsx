@@ -8,6 +8,8 @@ import { addProduct } from '@/features/products/api/addProduct';
 import { useUser } from '@/context/UserContext';
 import './components/Sidebar.css';
 import { getProductsByType } from '@/features/products/api/getProductsByType.ts';
+import AddImage from './components/AddImage';
+import { addImage } from './api/addImage';
 
 export default function ProductList(): JSX.Element {
   const [productList, setProductList] = useState<ProductModel[]>([]);
@@ -90,8 +92,18 @@ export default function ProductList(): JSX.Element {
     setMaxPrice(undefined);
   };
 
+  const handleAddImage = async (formData: FormData): Promise<void> => {
+    try {
+      await addImage(formData);
+      await fetchProducts();
+    } catch (error) {
+      console.error('Error adding image:', error);
+    }
+  };
+
   return (
     <div className="product-list-container">
+      <AddImage addImage={handleAddImage} />
       {isSidebarOpen && (
         <div className="overlay" onClick={handleOverlayClick}></div>
       )}

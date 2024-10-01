@@ -1,13 +1,15 @@
 package com.petclinic.products.utils;
 
+import com.petclinic.products.datalayer.products.Image;
 import com.petclinic.products.datalayer.products.Product;
 import com.petclinic.products.datalayer.ratings.Rating;
+import com.petclinic.products.presentationlayer.images.ImageRequestModel;
+import com.petclinic.products.presentationlayer.images.ImageResponseModel;
 import com.petclinic.products.presentationlayer.products.ProductRequestModel;
 import com.petclinic.products.presentationlayer.products.ProductResponseModel;
 import com.petclinic.products.presentationlayer.ratings.RatingRequestModel;
 import com.petclinic.products.presentationlayer.ratings.RatingResponseModel;
 import org.springframework.beans.BeanUtils;
-import reactor.core.publisher.Mono;
 
 import java.util.UUID;
 
@@ -41,6 +43,21 @@ public class EntityModelUtil {
                 .productId(productId)
                 .customerId(customerId)
                 .rating(requestModel.getRating())
+                .build();
+    }
+
+    public static ImageResponseModel toImageResponseModel(Image image) {
+        ImageResponseModel imageResponseModel = new ImageResponseModel();
+        BeanUtils.copyProperties(image, imageResponseModel);
+        return imageResponseModel;
+    }
+
+    public static Image toImageEntity(ImageRequestModel imageRequestModel){
+        return Image.builder()
+                .imageId(generateUUIDString())
+                .imageName(imageRequestModel.getImageName())
+                .imageType(imageRequestModel.getImageType())
+                .imageData(imageRequestModel.getImageData())
                 .build();
     }
 

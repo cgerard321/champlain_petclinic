@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
 @Service
 @Profile("!test")
 public class DataLoaderService implements CommandLineRunner {
@@ -25,7 +26,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .requestCount(0)
                 .averageRating(0.0)
                 .productType("Food")
-            .build();
+                .build();
 
         Product product2 = Product.builder()
                 .productId("98f7b33a-d62a-420a-a84a-05a27c85fc91")

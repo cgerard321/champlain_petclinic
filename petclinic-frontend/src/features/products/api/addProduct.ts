@@ -9,8 +9,6 @@ export async function addProduct(
       responseType: 'json',
     });
 
-    // eslint-disable-next-line no-console
-    console.log(response.data);
     return response.data;
   } catch (error) {
     console.error('Error adding product:', error);
