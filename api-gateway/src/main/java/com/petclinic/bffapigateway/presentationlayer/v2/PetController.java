@@ -1,10 +1,9 @@
 package com.petclinic.bffapigateway.presentationlayer.v2;
 
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
+import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetRequestDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
-import com.petclinic.bffapigateway.exceptions.InvalidInputException;
-import com.petclinic.bffapigateway.utils.Security.Annotations.IsUserSpecific;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +15,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @Slf4j
@@ -23,29 +24,21 @@ import reactor.core.publisher.Mono;
 @Validated
 @CrossOrigin(origins = "http://localhost:3000, http://localhost:80")
 public class PetController {
+
     private final CustomersServiceClient customersServiceClient;
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
-    @IsUserSpecific(idToMatch = {"petId"}, bypassRoles = {Roles.ADMIN})
-    @PutMapping(value = "/{petId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<PetResponseDTO>> updatePet(
-            @PathVariable String petId,
-            @RequestBody Mono<PetRequestDTO> petRequestDTO) {
+    @PutMapping(value = "/owner/{ownerId}/pets", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @SecuredEndpoint(allowedRoles = {Roles.VET, Roles.ADMIN})
+    public Mono<ResponseEntity<List<PetResponseDTO>>> updateOwnerPets(
+            @PathVariable("ownerId") String ownerId,
+            @RequestBody List<PetRequestDTO> petRequestDTOs) {
 
-        return Mono.just(petId)
-                .filter(id -> id.length() == 36) // Validate the petId length
-                .switchIfEmpty(Mono.error(new InvalidInputException("Provided pet id is invalid: " + petId)))
-                .flatMap(id -> customersServiceClient.updatePet(id, petRequestDTO))
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.badRequest().build());
+        return customersServiceClient.updateOwnerPets(ownerId, petRequestDTOs)
+                .map(updatedPets -> ResponseEntity.ok().body(updatedPets))
+                .onErrorResume(e -> {
+                    log.error("Error updating pets for owner: {}", ownerId, e);
+                    return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
+                });
     }
-
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET})
-    @GetMapping(value = "/{petId}")
-    public Mono<ResponseEntity<PetResponseDTO>> getPetByPetId(@PathVariable String petId){
-        return customersServiceClient.getPetByPetId(petId).map(s -> ResponseEntity.status(HttpStatus.OK).body(s))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
-    }
-
 }
 

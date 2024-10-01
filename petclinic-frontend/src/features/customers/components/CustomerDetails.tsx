@@ -126,8 +126,8 @@ const CustomerDetails: FC = () => {
     return Math.abs(ageDate.getUTCFullYear() - 1970);
   };
 
-  const handleEditPetClick = (petId: string): void => {
-    navigate(`/pets/${petId}/edit`);
+  const handleEditPetClick = (ownerId: string): void => {
+    navigate(`/owners/${ownerId}/pets/edit`);
   };
 
   return (

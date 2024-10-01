@@ -1,163 +1,118 @@
-import * as React from 'react';
-import { FormEvent, useEffect, useState } from 'react';
-import { updatePet, getPet } from '../api/updatePet';
-import { PetResponseModel } from '../models/PetResponseModel';
-import { PetRequestModel } from '../models/PetRequestModel';
+import React, { useState, useEffect, FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { getOwnerPets, updateOwnerPets } from '../api/updatePet';
+import { PetRequestModel } from '../models/PetRequestModel';
 import './UpdatePetForm.css';
 
-const UpdatePetForm: React.FC = (): JSX.Element => {
+const UpdateOwnerPetsForm: React.FC = (): JSX.Element => {
   const navigate = useNavigate();
-  const { petId } = useParams<{ petId: string }>();
-  const [pet, setPet] = useState<PetResponseModel | null>(null);
+  const { ownerId } = useParams<{ ownerId: string }>();
+  const [pets, setPets] = useState<PetRequestModel[]>([]);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  const [successMessage, setSuccessMessage] = useState<string>('');
-  const [notFound, setNotFound] = useState<boolean>(false);
 
-  // Fetch pet data on component mount
   useEffect(() => {
-    const fetchPetData = async (): Promise<void> => {
-      if (petId) {
+    const fetchPetsData = async (): Promise<void> => {
+      if (ownerId) {
         try {
-          const response = await getPet(petId);
-          const petData: PetResponseModel = response.data;
-          setPet({
-            ...petData,
-            birthDate: new Date(petData.birthDate),
-          });
-        } catch (err) {
-          const error = err as { response?: { status: number } };
-          if (error.response && error.response.status === 404) {
-            setNotFound(true);
-          } else {
-            console.error('Error fetching pet data:', error);
-          }
+          const response = await getOwnerPets(ownerId);
+          setPets(response.data);
+        } catch (error) {
+          console.error('Error fetching pets data:', error);
         }
       }
     };
+    fetchPetsData();
+  }, [ownerId]);
 
-    fetchPetData().catch(error =>
-      console.error('Error in fetchPetData:', error)
-    );
-  }, [petId]);
-
-  // Handle form field changes
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
-    if (pet) {
-      const { name, type, value, checked } = e.target;
-      setPet({ ...pet, [name]: type === 'checkbox' ? checked : value });
-    }
+  const handleChange = (index: number, e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
+    const { name, value } = e.target;
+    const updatedPets = [...pets];
+    updatedPets[index] = { ...updatedPets[index], [name]: value };
+    setPets(updatedPets);
   };
 
-  // Form validation
   const validate = (): boolean => {
     const newErrors: { [key: string]: string } = {};
-    if (!pet?.name) newErrors.name = 'Name is required';
-    if (!pet?.weight) newErrors.weight = 'Weight is required';
-    if (!pet?.petTypeId) newErrors.petTypeId = 'Pet Type is required';
+    pets.forEach((pet, index) => {
+      if (!pet.name) newErrors[`name${index}`] = 'Name is required';
+      if (!pet.weight) newErrors[`weight${index}`] = 'Weight is required';
+    });
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  // Handle form submission
   const handleSubmit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();
-    if (!validate() || !pet) return;
-
-    const petRequestData: PetRequestModel = {
-      name: pet.name,
-      birthDate: pet.birthDate, // Ensure date is in correct format
-      petTypeId: pet.petTypeId,
-      isActive: pet.isActive ? 'true' : 'false', // Convert boolean to string
-      weight: pet.weight,
-    };
+    if (!validate()) return;
 
     try {
-      const response = await updatePet(petId!, petRequestData);
-      if (response.status === 200) {
-        setSuccessMessage('Pet updated successfully!');
-        navigate(`/customers/${pet.ownerId}`);
-      } else {
-        console.error('Error updating pet');
-      }
+      await updateOwnerPets(ownerId!, pets);
+      navigate(`/owners/${ownerId}`);
     } catch (error) {
-      console.error('Error updating pet:', error);
+      console.error('Error updating pets:', error);
     }
   };
-
-  // Handle cancel button click
-  const handleCancel = (): void => {
-    if (pet) {
-      navigate(`/customers/${pet.ownerId}`);
-    }
-  };
-
-  if (notFound) {
-    return <p>Pet not found. Please check the pet ID and try again.</p>;
-  }
-
-  if (!pet) {
-    return <p>Loading...</p>;
-  }
 
   return (
-    <div className="update-pet-form">
-      <h1>Edit Pet: {pet.petId}</h1>
-      <form onSubmit={handleSubmit}>
-        <label>Name: </label>
-        <input
-          type="text"
-          name="name"
-          value={pet.name}
-          onChange={handleChange}
-        />
-        {errors.name && <span className="error">{errors.name}</span>}
-        <br />
+    <form onSubmit={handleSubmit}>
+      {pets.map((pet, index) => (
+        <div key={pet.petId}>
+          <h3>Edit Pet {index + 1}: {pet.name}</h3>
 
-        <label>Birth Date: </label>
-        <input
-          type="date"
-          name="birthDate"
-          value={pet.birthDate.toISOString().split('T')[0]}
-          onChange={handleChange}
-        />
-        <br />
+          <label>Name:</label>
+          <input
+            type="text"
+            name="name"
+            value={pet.name}
+            onChange={e => handleChange(index, e)}
+          />
+          {errors[`name${index}`] && <span className="error">{errors[`name${index}`]}</span>}
 
-        <label>Pet Type: </label>
-        <input
-          type="text"
-          name="petTypeId"
-          value={pet.petTypeId}
-          onChange={handleChange}
-        />
-        {errors.petTypeId && <span className="error">{errors.petTypeId}</span>}
-        <br />
+          <label>Birth Date:</label>
+          <input
+            type="date"
+            name="birthDate"
+            value={new Date(pet.birthDate).toISOString().split('T')[0]} // Pre-fill birth date
+            onChange={e => handleChange(index, e)}
+          />
 
-        <label>Is Active: </label>
-        <input
-          type="checkbox"
-          name="isActive"
-          checked={pet.isActive === 'true'} // Assuming pet.isActive is a string
-          onChange={handleChange}
-        />
-        <br />
+          <label>Pet Type:</label>
+          <select
+            name="petTypeId"
+            value={pet.petTypeId}
+            onChange={e => handleChange(index, e)}
+          >
+            <option value="1">Cat</option>
+            <option value="2">Dog</option>
+            <option value="3">Lizard</option>
+            <option value="4">Snake</option>
+            <option value="5">Bird</option>
+            <option value="6">Hamster</option>
+          </select>
 
-        <label>Weight (kg): </label>
-        <input
-          type="text"
-          name="weight"
-          value={pet.weight}
-          onChange={handleChange}
-        />
-        {errors.weight && <span className="error">{errors.weight}</span>}
-        <br />
+          <label>Active Status:</label>
+          <select
+            name="isActive"
+            value={pet.isActive}
+            onChange={e => handleChange(index, e)}
+          >
+            <option value="true">Active</option>
+            <option value="false">Inactive</option>
+          </select>
 
-        <button type="submit">Update Pet</button>
-        <button type="button" onClick={handleCancel}>Cancel</button>
-      </form>
-      {successMessage && <p className="success">{successMessage}</p>}
-    </div>
+          <label>Weight:</label>
+          <input
+            type="text"
+            name="weight"
+            value={pet.weight}
+            onChange={e => handleChange(index, e)}
+          />
+          {errors[`weight${index}`] && <span className="error">{errors[`weight${index}`]}</span>}
+        </div>
+      ))}
+      <button type="submit">Update Pets</button>
+    </form>
   );
 };
 
-export default UpdatePetForm;
+export default UpdateOwnerPetsForm;

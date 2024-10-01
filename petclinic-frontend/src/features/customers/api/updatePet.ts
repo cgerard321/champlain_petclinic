@@ -1,17 +1,14 @@
-import { AxiosResponse } from 'axios';
-import axiosInstance from '@/shared/api/axiosInstance';
-import { PetResponseModel } from '../models/PetResponseModel.ts';
-import {PetRequestModel} from "@/features/customers/models/PetRequestModel.ts";
+import { PetRequestModel } from "@/features/customers/models/PetRequestModel";
+import axiosInstance from "@/shared/api/axiosInstance";
 
-export const updatePet = async (
-  petId: string,
-  pet: PetRequestModel
-): Promise<AxiosResponse<void>> => {
-  return await axiosInstance.put<void>(`http://localhost:8080/api/v2/gateway/pet/${petId}`, pet);
+
+export const getOwnerPets = async (ownerId: string): Promise<{ data: PetRequestModel[] }> => {
+  const response = await axiosInstance.get(`http://localhost:8080/api/v2/gateway/owners/${ownerId}/pets`, { withCredentials: true });
+  return response;
 };
 
-export const getPet = async (
-  petId: string
-): Promise<AxiosResponse<PetResponseModel>> => {
-  return await axiosInstance.get<PetResponseModel>(`http://localhost:8080/api/v2/gateway/pet/${petId}`);
+// Function to update the pets for an owner
+export const updateOwnerPets = async (ownerId: string, pets: PetRequestModel[]): Promise<void> => {
+  // Update the URL to match the backend endpoint
+  await axiosInstance.put(`http://localhost:8080/api/v2/gateway/pet/owner/${ownerId}/pets`, pets, {withCredentials: true});
 };
