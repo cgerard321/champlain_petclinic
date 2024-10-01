@@ -3366,7 +3366,6 @@ void deleteAllInventory_shouldSucceed() {
     @Test
     void getProductsInInventoryByInventoryIdAndProductFieldPagination(){
         ProductResponseDTO expectedResponse = ProductResponseDTO.builder()
-                .id("sampleId")
                 .productId("1234")
                 .inventoryId("1")
                 .productName("testName")
@@ -3388,7 +3387,6 @@ void deleteAllInventory_shouldSucceed() {
                 .expectBodyList(ProductResponseDTO.class)
                 .value((list)-> {
                     assertEquals(1,list.size());
-                    assertEquals(list.get(0).getId(),expectedResponse.getId());
                     assertEquals(list.get(0).getProductId(),expectedResponse.getProductId());
                     assertEquals(list.get(0).getInventoryId(),expectedResponse.getInventoryId());
                     assertEquals(list.get(0).getProductName(),expectedResponse.getProductName());
@@ -3401,7 +3399,6 @@ void deleteAllInventory_shouldSucceed() {
     @Test
     void getTotalNumberOfProductsWithRequestParams(){
         ProductResponseDTO expectedResponse = ProductResponseDTO.builder()
-                .id("sampleId")
                 .productId("1234")
                 .inventoryId("1")
                 .productName("testName")
@@ -3429,7 +3426,6 @@ void deleteAllInventory_shouldSucceed() {
 
         // Define the expected response
         ProductResponseDTO expectedResponse = ProductResponseDTO.builder()
-                .id("sampleId")
                 .productId("sampleProductId")
                 .inventoryId("sampleInventoryId")
                 .productName(requestDTO.getProductName())
@@ -3487,7 +3483,6 @@ void deleteAllInventory_shouldSucceed() {
 
         // Define the expected response
         ProductResponseDTO expectedResponse = ProductResponseDTO.builder()
-                .id("sampleId")
                 .productId("sampleProductId")
                 .inventoryId("sampleInventoryId")
                 .productName(requestDTO.getProductName())
@@ -3531,7 +3526,6 @@ void deleteAllInventory_shouldSucceed() {
 
         // Define the expected response
         ProductResponseDTO expectedResponse = ProductResponseDTO.builder()
-                .id("sampleId")
                 .productId("sampleProductId")
                 .inventoryId("sampleInventoryId")
                 .productName(requestDTO.getProductName())
@@ -3569,7 +3563,6 @@ void deleteAllInventory_shouldSucceed() {
 
     private ProductResponseDTO buildProductDTO(){
         return ProductResponseDTO.builder()
-                .id("1")
                 .inventoryId("1")
                 .productId(UUID.randomUUID().toString())
                 .productName("Benzodiazepines")
