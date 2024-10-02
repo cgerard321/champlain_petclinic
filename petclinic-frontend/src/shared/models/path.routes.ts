@@ -2,6 +2,7 @@ export enum AppRoutePaths {
   Default = '/',
   EditInventory = 'inventories/inventory/:inventoryId/edit',
   EditInventoryProducts = 'inventory/:inventoryId/products/:productId/edit',
+  AddSupplyToInventory = 'inventory/:inventoryId/products/add',
   Review = '/reviews',
   UpdateReview = '/updateReview/:reviewId/edit',
   GetVisitByVistId = 'visits/:visitId',
