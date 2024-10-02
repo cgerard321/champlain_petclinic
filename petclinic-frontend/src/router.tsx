@@ -39,7 +39,7 @@ import VisitDetails from './features/visits/visits/VisitByVisitId';
 import CustomerVisits from '@/pages/Visit/CustomerVisits.tsx';
 import EditInventoryProducts from '@/features/inventories/EditInventoryProducts.tsx';
 import AddSupplyToInventory from './features/inventories/AddSupplyToInventory';
-import ProductDetails from "@/features/products/api/ProductDetails.tsx";
+import ProductDetails from '@/features/products/api/ProductDetails.tsx';
 
 const router = createBrowserRouter([
   {
@@ -313,12 +313,11 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.ProductDetails,
         element: (
-            <ProtectedRoute>
-              <ProductDetails />
-            </ProtectedRoute>
+          <ProtectedRoute>
+            <ProductDetails />
+          </ProtectedRoute>
         ),
       },
-
     ],
   },
   {

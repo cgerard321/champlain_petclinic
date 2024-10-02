@@ -16,14 +16,13 @@ function Product({ product }: { product: ProductModel }): JSX.Element {
     null
   );
 
-    const navigate = useNavigate(); // Get the navigate function
-    const handleButtonClick = () => {
-        // Navigate to ProductDetails and pass the product data
-        navigate(AppRoutePaths.ProductDetails, { state: { product } });
-    };
+  const navigate = useNavigate(); // Get the navigate function
+  const handleButtonClick = (): void => {
+    // Navigate to ProductDetails and pass the product data
+    navigate(AppRoutePaths.ProductDetails, { state: { product } });
+  };
 
-
-    useEffect(() => {
+  useEffect(() => {
     fetchRating();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -87,7 +86,7 @@ function Product({ product }: { product: ProductModel }): JSX.Element {
   return (
     <div className="card" key={product.productId}>
       <h2
-          onClick = {handleButtonClick}
+        onClick={handleButtonClick}
         style={{
           cursor: 'pointer',
           color: 'blue',
