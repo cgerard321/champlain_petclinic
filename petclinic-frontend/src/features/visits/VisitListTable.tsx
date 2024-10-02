@@ -3,9 +3,16 @@ import { Visit } from './models/Visit';
 import './VisitListTable.css';
 import { useNavigate } from 'react-router-dom';
 import { AppRoutePaths } from '@/shared/models/path.routes.ts';
+import { getAllEmergency } from './Emergency/Api/getAllEmergency';
+import { EmergencyResponseDTO } from './Emergency/Model/EmergencyResponseDTO';
+import { deleteEmergency } from './Emergency/Api/deleteEmergency';
+import './Emergency.css';
 
 export default function VisitListTable(): JSX.Element {
   const [visitsList, setVisitsList] = useState<Visit[]>([]);
+  const [emergencyList, setEmergencyList] = useState<EmergencyResponseDTO[]>(
+    []
+  );
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -40,6 +47,37 @@ export default function VisitListTable(): JSX.Element {
     };
   }, []);
 
+  useEffect(() => {
+    // Fetch emergency visits
+    async function fetchEmergencies(): Promise<void> {
+      try {
+        const emergencies = await getAllEmergency();
+        setEmergencyList(emergencies); // Set emergency data to state
+      } catch (error) {
+        console.error('Error fetching emergencies:', error);
+      }
+    }
+    fetchEmergencies();
+  }, []);
+
+  const handleDeleteEmergency = async (
+    visitEmergencyId: string
+  ): Promise<void> => {
+    try {
+      await deleteEmergency(visitEmergencyId);
+      setEmergencyList(prevEmergencies =>
+        prevEmergencies.filter(
+          emergency => emergency.visitEmergencyId !== visitEmergencyId
+        )
+      );
+    } catch (error) {
+      console.error(
+        `Error deleting emergency with ID ${visitEmergencyId}:`,
+        error
+      );
+    }
+  };
+
   const confirmedVisits = visitsList.filter(
     visit => visit.status === 'CONFIRMED'
   );
@@ -48,6 +86,61 @@ export default function VisitListTable(): JSX.Element {
   );
   const completedVisits = visitsList.filter(
     visit => visit.status === 'COMPLETED'
+  );
+
+  // Render table for emergencies
+  const renderEmergencyTable = (
+    title: string,
+    emergencies: EmergencyResponseDTO[]
+  ): JSX.Element => (
+    <div className="visit-table-section-red">
+      <h2>{title}</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Visit Emergency Id</th>
+            <th>Visit Date</th>
+            <th>Description</th>
+            <th>Pet Name</th>
+            <th>Urgency Level</th>
+            <th>Emergency Type</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {emergencies.map(emergency => (
+            <tr key={emergency.visitEmergencyId}>
+              <td>{emergency.visitEmergencyId}</td>
+              <td>{new Date(emergency.visitDate).toLocaleString()}</td>
+              <td>{emergency.description}</td>
+              <td>{emergency.petName}</td>
+              <td>{emergency.urgencyLevel}</td>
+              <td>{emergency.emergencyType}</td>
+              <td>
+                <button
+                  className="btn btn-warning"
+                  onClick={() => {
+                    navigate(`/visits/emergency/${emergency.visitEmergencyId}`);
+                  }}
+                  title="Edit"
+                >
+                  Edit
+                </button>
+                <button
+                  className="btn btn-danger"
+                  onClick={async () => {
+                    await handleDeleteEmergency(emergency.visitEmergencyId);
+                  }}
+                  title="Delete"
+                >
+                  Delete
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 
   const renderTable = (title: string, visits: Visit[]): JSX.Element => (
@@ -101,10 +194,9 @@ export default function VisitListTable(): JSX.Element {
                 >
                   View
                 </button>
-
                 <button
                   className="btn btn-warning"
-                  onClick={() => navigate(`/visits/${visit.visitId}/edit`)} // Edit button that triggers updateVisit
+                  onClick={() => navigate(`/visits/${visit.visitId}/edit`)}
                   title="Edit"
                 >
                   Edit
@@ -135,6 +227,13 @@ export default function VisitListTable(): JSX.Element {
           View Reviews
         </button>
         <button
+          className="btn btn-dark"
+          onClick={() => navigate('/visits/emergency')}
+          title="Create emergency visit"
+        >
+          Create Emergency visit
+        </button>
+        <button
           className="btn btn-warning"
           onClick={() => navigate(AppRoutePaths.AddVisit)}
           title="Make a Visit"
@@ -142,6 +241,9 @@ export default function VisitListTable(): JSX.Element {
           Make a Visit
         </button>
       </div>
+
+      {/* Emergency Table below buttons, but above visit tables */}
+      {renderEmergencyTable('Emergency Visits', emergencyList)}
 
       {renderTable('Confirmed Visits', confirmedVisits)}
       {renderTable('Upcoming Visits', upcomingVisits)}

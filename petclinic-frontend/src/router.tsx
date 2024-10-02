@@ -35,6 +35,9 @@ import InventorySupplies from '@/features/inventories/InventorySupplies.tsx';
 import EditingVisit from './features/visits/models/EditingVisit';
 import UpdateCustomerPage from '@/pages/Customer/UpdateCustomerPage.tsx';
 import CustomerDetailsPage from '@/pages/Customer/CustomerDetailsPage.tsx';
+import AddEmergencyForm from './features/visits/Emergency/AddEmergencyForm';
+import EmergencyList from './features/visits/Emergency/EmergencyList';
+import EditEmergency from './features/visits/Emergency/EditEmergency';
 
 const router = createBrowserRouter([
   {
@@ -52,6 +55,32 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <VisitByVisitId />
+          </ProtectedRoute>
+        ),
+      },
+
+      {
+        path: AppRoutePaths.Emergency,
+        element: (
+          <ProtectedRoute>
+            <AddEmergencyForm />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.EditEmergency,
+        element: (
+          <ProtectedRoute>
+            <EditEmergency />
+          </ProtectedRoute>
+        ),
+      },
+
+      {
+        path: AppRoutePaths.EmergencyList,
+        element: (
+          <ProtectedRoute>
+            <EmergencyList />
           </ProtectedRoute>
         ),
       },
