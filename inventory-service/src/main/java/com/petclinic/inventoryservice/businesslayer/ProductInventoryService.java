@@ -7,7 +7,7 @@ import reactor.core.publisher.Mono;
 
 
 public interface ProductInventoryService {
-    Mono<ProductResponseDTO> addProductToInventory(Mono<ProductRequestDTO> productRequestDTOMono, String inventoryId);
+//    Mono<ProductResponseDTO> addProductToInventory(Mono<ProductRequestDTO> productRequestDTOMono, String inventoryId);
     Mono<InventoryResponseDTO> addInventory(Mono<InventoryRequestDTO> inventoryRequestDTO);
     Mono<InventoryResponseDTO> updateInventory(Mono<InventoryRequestDTO> inventoryRequestDTO, String inventoryId);
 
@@ -37,4 +37,5 @@ public interface ProductInventoryService {
 
     Flux<ProductResponseDTO> searchProducts(String inventoryId, String productName, String productDescription);
 
+    Mono<ProductResponseDTO> addSupplyToInventory(Mono<ProductRequestDTO> productRequestDTOMono, String inventoryId);
     }

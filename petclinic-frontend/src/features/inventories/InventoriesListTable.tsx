@@ -67,10 +67,14 @@ export default function InventoriesListTable(): JSX.Element {
   };
 
   const pageBefore = (): void => {
-    setCurrentPage(prevPage => Math.max(prevPage - 1, 0));
+    if (currentPage > 0) {
+      setCurrentPage(prevPage => prevPage - 1);
+    }
   };
   const pageAfter = (): void => {
-    setCurrentPage(prevPage => prevPage + 1);
+    if (inventoryList.length > 0) {
+      setCurrentPage(prevPage => prevPage + 1);
+    }
   };
 
   const deleteInventoryHandler = (inventoryToDelete: Inventory): void => {
@@ -345,27 +349,38 @@ export default function InventoriesListTable(): JSX.Element {
           ))}
         </tbody>
       </table>
-      <div className="text-center">
-        <table className="mx-auto">
-          <tbody>
-            <tr>
-              <td>
-                <button className="btn btn-success btn-sm" onClick={pageBefore}>
-                  &lt;
-                </button>
-              </td>
-              <td>
-                <span>{realPage}</span>
-              </td>
-              <td>
-                <button className="btn btn-success btn-sm" onClick={pageAfter}>
-                  &gt;
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <div className="d-flex justify-content-center">
+        <div className="text-center">
+          <table>
+            <tbody>
+              <tr>
+                <td>
+                  <button
+                    className="btn btn-success btn-sm"
+                    onClick={pageBefore}
+                  >
+                    &lt;
+                  </button>
+                </td>
+                <td>
+                  <span className="mx-2">{realPage}</span>{' '}
+                  {/* Added margin for space */}
+                </td>
+                <td>
+                  <button
+                    className="btn btn-success btn-sm"
+                    onClick={pageAfter}
+                    disabled={inventoryList.length === 0}
+                  >
+                    &gt;
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
+
       <div id="loadingObject" style={{ display: 'none' }}>
         Loading...
       </div>

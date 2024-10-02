@@ -28,7 +28,9 @@
   border-radius: 8px;
   background-color: #f8f9fa;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s, box-shadow 0.3s;
+  transition:
+    transform 0.3s,
+    box-shadow 0.3s;
 }
 
 .section:hover {
@@ -42,7 +44,8 @@
   font-size: 1.5em;
 }
 
-.section p, .section ul {
+.section p,
+.section ul {
   color: #555;
   font-size: 1.1em;
 }
@@ -61,7 +64,9 @@
   padding: 12px 20px;
   font-size: 1.1em;
   cursor: pointer;
-  transition: background-color 0.3s, transform 0.3s;
+  transition:
+    background-color 0.3s,
+    transform 0.3s;
   margin-right: 20px;
 }
 
@@ -77,4 +82,3 @@
 .delete-button:hover {
   background-color: #c82333;
 }
-

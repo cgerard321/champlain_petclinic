@@ -102,6 +102,14 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
 
+  cart-service:
+    build: cart-service
+    hostname: cart
+    depends_on:
+      - mongo-carts
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+
   #    visits:
   #        build: visits-service
   #        hostname: visits
@@ -411,6 +419,30 @@ services:
     depends_on:
       - mongo-products
       - products-service
+
+  mongo-carts:
+    image: mongo
+    container_name: mongo-carts
+    restart: always
+    ports:
+      - 27022:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password
+
+  mongo-express-carts:
+    image: mongo-express
+    restart: always
+    environment:
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=root
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=password
+      - ME_CONFIG_MONGODB_SERVER=mongo-products
+      - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
+    ports:
+      - 8087:8081
+    depends_on:
+      - mongo-carts
+      - cart-service
 
   emailing-service:
     image: emailing-service
