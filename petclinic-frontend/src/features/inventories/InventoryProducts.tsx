@@ -206,6 +206,12 @@ const InventoryProducts: React.FC = () => {
       ) : (
         <p>No supplies found for this inventory.</p>
       )}
+      <button
+        className="btn btn-add"
+        onClick={() => navigate(`/inventory/${inventoryId}/products/add`)}
+      >
+        Add
+      </button>
     </div>
   );
 };

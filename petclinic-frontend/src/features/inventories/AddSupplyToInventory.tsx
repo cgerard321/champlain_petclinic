@@ -1,21 +1,15 @@
 import * as React from 'react';
-import { FormEvent, useEffect, useState } from 'react';
+import { FormEvent, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import {
-  getProductByProductIdInInventory,
-  updateProductInInventory,
-} from '@/features/inventories/api/EditInventoryProducts.ts';
+import { addSupplyToInventory } from '@/features/inventories/api/AddSupplyToInventory.ts';
 import { ProductRequestModel } from '@/features/inventories/models/InventoryModels/ProductRequestModel';
 
 interface ApiError {
   message: string;
 }
 
-const EditInventoryProducts: React.FC = (): JSX.Element => {
-  const { inventoryId, productId } = useParams<{
-    inventoryId: string;
-    productId: string;
-  }>(); // Get params from URL
+const AddSupplyToInventory: React.FC = (): JSX.Element => {
+  const { inventoryId } = useParams<{ inventoryId: string }>(); // Get params from URL
   const [product, setProduct] = useState<ProductRequestModel>({
     productName: '',
     productDescription: '',
@@ -30,25 +24,6 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
   const [showNotification, setShowNotification] = useState<boolean>(false);
 
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const fetchProduct = async (): Promise<void> => {
-      if (inventoryId && productId) {
-        try {
-          const response = await getProductByProductIdInInventory(
-            inventoryId,
-            productId
-          );
-          setProduct(response);
-        } catch (error) {
-          console.error(`Error fetching product with ID ${productId}:`, error);
-        }
-      }
-    };
-    fetchProduct().catch(error =>
-      console.error('Error in fetchProduct:', error)
-    );
-  }, [inventoryId, productId]);
 
   const validate = (): boolean => {
     const newError: { [key: string]: string } = {};
@@ -83,9 +58,9 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
     setShowNotification(false);
 
     try {
-      if (inventoryId && productId) {
-        await updateProductInInventory(inventoryId, productId, product);
-        setSuccessMessage('Product updated successfully');
+      if (inventoryId) {
+        await addSupplyToInventory(inventoryId, product);
+        setSuccessMessage('Supply added successfully');
         setShowNotification(true);
         setTimeout(() => {
           navigate(`/inventory/${inventoryId}/products`);
@@ -93,7 +68,7 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
       }
     } catch (error) {
       const apiError = error as ApiError;
-      setErrorMessage(`Error updating product: ${apiError.message}`);
+      setErrorMessage(`Error adding supply: ${apiError.message}`);
     } finally {
       setLoading(false);
     }
@@ -112,7 +87,7 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
 
   return (
     <div>
-      <h1>Edit Product</h1>
+      <h1>Add Supply</h1>
       {error && <p style={{ color: 'red' }}>{error.message}</p>}
 
       <form onSubmit={handleSubmit}>
@@ -171,7 +146,7 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
           />
         </div>
 
-        <button type="submit">Update Product</button>
+        <button type="submit">Add Supply</button>
       </form>
       <div>
         {loading && <p>Loading...</p>}
@@ -188,4 +163,4 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
   );
 };
 
-export default EditInventoryProducts;
+export default AddSupplyToInventory;
