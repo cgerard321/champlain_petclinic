@@ -40,6 +40,7 @@ import CustomerVisits from '@/pages/Visit/CustomerVisits.tsx';
 import EditInventoryProducts from '@/features/inventories/EditInventoryProducts.tsx';
 import AddSupplyToInventory from './features/inventories/AddSupplyToInventory';
 import ProductDetails from '@/features/products/api/ProductDetails.tsx';
+import UpdateOwnerPetPage from '@/pages/Customer/UpdateOwnerPetPage.tsx';
 
 const router = createBrowserRouter([
   {
@@ -283,6 +284,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <EditingVisit />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.UpdatePet,
+        element: (
+          <ProtectedRoute roles={['ADMIN', 'VET']}>
+            <UpdateOwnerPetPage />
           </ProtectedRoute>
         ),
       },

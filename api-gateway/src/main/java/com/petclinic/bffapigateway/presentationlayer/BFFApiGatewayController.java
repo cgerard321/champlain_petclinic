@@ -277,6 +277,7 @@ public class BFFApiGatewayController {
         return customersServiceClient.getPetTypes();
     }
 
+    /*
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET})
     @PutMapping("pets/{petId}")
     public Mono<ResponseEntity<PetResponseDTO>> updatePet(@RequestBody PetResponseDTO pet, @PathVariable String petId){
@@ -284,7 +285,7 @@ public class BFFApiGatewayController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-
+*/
 
         /* Visits Methods */
 
