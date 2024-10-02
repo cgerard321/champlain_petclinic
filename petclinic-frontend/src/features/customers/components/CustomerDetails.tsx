@@ -126,6 +126,10 @@ const CustomerDetails: FC = () => {
     return Math.abs(ageDate.getUTCFullYear() - 1970);
   };
 
+  const handleEditPetClick = (petId: string): void => {
+    navigate(`/pets/${petId}/edit`);
+  };
+
   return (
     <div className="customer-details-card">
       <h2>
@@ -170,12 +174,21 @@ const CustomerDetails: FC = () => {
             <ul>
               {owner.pets.map(pet => (
                 <li key={pet.petId}>
+                  <strong>Pet ID: </strong>
+                  {pet.petId},{' '}
                   <strong>Name: </strong>
                   {pet.name}, <strong>Type: </strong>
                   {petTypeMapping[pet.petTypeId] || 'Unknown'},{' '}
                   <strong>Weight: </strong>
                   {pet.weight}kg,<strong> Age: </strong>
                   {calculateAge(pet.birthDate)}
+                  <button
+                    className="edit-pet-button"
+                    onClick={() => handleEditPetClick(pet.petId)}
+                    style={{ marginLeft: '10px' }}
+                  >
+                    Edit Pet
+                  </button>
                 </li>
               ))}
             </ul>

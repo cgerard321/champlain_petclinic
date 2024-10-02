@@ -1,5 +1,5 @@
-import { createBrowserRouter, Navigate } from 'react-router-dom';
-import { AppRoutePaths } from './shared/models/path.routes';
+import {createBrowserRouter, Navigate} from 'react-router-dom';
+import {AppRoutePaths} from './shared/models/path.routes';
 import Login from '@/pages/User/Login';
 import SignUp from '@/pages/User/SignUp';
 import Home from '@/pages/Home/Home.tsx';
@@ -39,6 +39,7 @@ import VisitDetails from './features/visits/visits/VisitByVisitId';
 import CustomerVisits from '@/pages/Visit/CustomerVisits.tsx';
 import EditInventoryProducts from '@/features/inventories/EditInventoryProducts.tsx';
 import AddSupplyToInventory from './features/inventories/AddSupplyToInventory';
+import UpdateOwnerPetPage from "@/pages/Customer/UpdateOwnerPetPage.tsx";
 
 const router = createBrowserRouter([
   {
@@ -284,6 +285,15 @@ const router = createBrowserRouter([
             <EditingVisit />
           </ProtectedRoute>
         ),
+      },
+      {
+        path: AppRoutePaths.UpdatePet,
+        element: (
+          <ProtectedRoute roles={['ADMIN', 'VET']}>
+            <UpdateOwnerPetPage />
+          </ProtectedRoute>
+
+        )
       },
       {
         path: AppRoutePaths.MockPage,

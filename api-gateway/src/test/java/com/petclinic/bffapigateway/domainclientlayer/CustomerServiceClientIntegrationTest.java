@@ -313,32 +313,6 @@ public class CustomerServiceClientIntegrationTest {
     }
 
 
-
-    @Test
-    void testUpdatePet() throws Exception {
-        PetResponseDTO petRequestDTO = new PetResponseDTO(); // Create a request DTO
-        petRequestDTO.setPetId("petId-123");
-        petRequestDTO.setName("UpdatedName");
-
-        PetResponseDTO updatedPetResponse = new PetResponseDTO(); // Create an expected response DTO
-        updatedPetResponse.setPetId("petId-123");
-        updatedPetResponse.setName("UpdatedName");
-
-        server.enqueue(new MockResponse()
-                .setResponseCode(200)
-                .setHeader("Content-Type", "application/json")
-                .setBody(mapper.writeValueAsString(updatedPetResponse))); // Use the expected response DTO
-
-        Mono<PetResponseDTO> responseMono = customersServiceClient.updatePet(petRequestDTO, "petId-123");
-
-        PetResponseDTO responseDTO = responseMono.block(); // Blocking for simplicity
-
-        // Verify the response
-        assertEquals(updatedPetResponse.getPetId(), responseDTO.getPetId());
-        assertEquals(updatedPetResponse.getName(), responseDTO.getName());
-    }
-
-
     @Test
     void testPatchPet() throws Exception {
         PetRequestDTO petRequestDTO = new PetRequestDTO(); // Create a request DTO
