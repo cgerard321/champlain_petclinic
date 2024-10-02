@@ -84,6 +84,13 @@ public class InventoryController {
         }
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER})
+    @DeleteMapping(value = "{inventoryId}/products/{productId}")
+    public Mono<ResponseEntity<Void>> deleteProductInInventory(@PathVariable String inventoryId, @PathVariable String productId){
+        return inventoryServiceClient.deleteProductInInventory(inventoryId, productId).then(Mono.just(ResponseEntity.noContent().<Void>build()))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
     @DeleteMapping(value = "")
     @ApiResponses(value = {@ApiResponse(useReturnTypeSchema = true, description = "Deletes all inventories", responseCode = "204")})
@@ -116,7 +123,7 @@ public class InventoryController {
 
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
-    @PostMapping("/{inventoryName}/products")
+    @PostMapping("/{inventoryName}/products/by-name")
     @ApiResponses(value = {
             @ApiResponse(description = "Add a product to inventory by Name", responseCode = "201"),
             @ApiResponse(description = "Inventory name not found", responseCode = "404")
@@ -134,7 +141,7 @@ public class InventoryController {
 
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
-    @GetMapping("/{inventoryName}/products")
+    @GetMapping("/{inventoryName}/products/by-name")
     @ApiResponses(value = {
             @ApiResponse(description = "Get products by inventory name", responseCode = "200"),
             @ApiResponse(description = "Inventory name not found", responseCode = "404")
@@ -196,6 +203,18 @@ public class InventoryController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER,Roles.VET})
+    @GetMapping(value = "inventory/{inventoryId}/products")//, produces= MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<ProductResponseDTO> getProductsInInventoryByInventoryIdAndFields(@PathVariable String inventoryId,
+                                                                                 @RequestParam(required = false) String productName,
+                                                                                 @RequestParam(required = false) Double productPrice,
+                                                                                 @RequestParam(required = false) Integer productQuantity,
+                                                                                 @RequestParam(required = false) Double productSalePrice){
+        return inventoryServiceClient.getProductsInInventoryByInventoryIdAndProductsField(inventoryId, productName, productPrice, productQuantity, productSalePrice);
+    }
+
+
+
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
     @PutMapping(value = "/{inventoryId}/products/{productId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -231,7 +250,7 @@ public class InventoryController {
                 .map(quantity -> ResponseEntity.ok(quantity))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
 
-    }   
-    
+    }
+
 
 }

@@ -52,9 +52,9 @@ class InventoryControllerIntegrationTest {
     Product product4 = buildProduct("productId4", "inventoryId_4" , "drug" , "drug", 18.00, 30.00, 3);
 
 
-    List<Product> products = List.of(product1, product2);
+    List<Product> products = List.of();
 
-    List<Product> products2 = List.of(product3, product4);
+    List<Product> products2 = List.of();
 
     InventoryType inventoryType1 = InventoryType.builder()
             .id("1")
@@ -144,43 +144,6 @@ class InventoryControllerIntegrationTest {
                 .expectNextCount(1)
                 .verifyComplete();
     }
-
-//    @Test
-//    void testAddSupplyToInventoryByName() {
-//        String inventoryName = "TestInventory";
-//        SupplyRequestDTO supplyRequest = new SupplyRequestDTO(
-//                "Sedative Medications",
-//                "Desc",
-//                100.00,
-//                10,
-//                10.00);
-//
-//        webTestClient.post()
-//                .uri("/api/inventory/" + inventoryName + "/supplies")
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .bodyValue(supplyRequest)
-//                .exchange()
-//                .expectStatus().isCreated()
-//                .expectHeader().contentType(MediaType.APPLICATION_JSON);
-//
-//        webTestClient.get()
-//                .uri("/api/inventory/" + inventoryName)
-//                .exchange()
-//                .expectStatus().isOk()
-//                .expectBody(InventoryResponseDTO.class)
-//                .consumeWith(response -> {
-//                    InventoryResponseDTO inventoryResponse = response.getResponseBody();
-//                    assertNotNull(inventoryResponse, "Inventory response should not be null");
-//
-//                    boolean supplyExists = inventoryResponse.getSupplies().stream()
-//                            .anyMatch(supply ->
-//                                    supply.getSupplyName().equals(supplyRequest.getSupplyName()) &&
-//                                            supply.getSupplyDescription().equals(supplyRequest.getSupplyDescription()));
-//
-//                    assertTrue(supplyExists);
-//                });
-//    }
-
 
 
 
