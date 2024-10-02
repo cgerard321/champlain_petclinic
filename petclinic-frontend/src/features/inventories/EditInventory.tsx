@@ -1,11 +1,14 @@
 import * as React from 'react';
 import { FormEvent, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getInventory, updateInventory } from '@/features/inventories/api/EditInventory.ts';
+import {
+  getInventory,
+  updateInventory,
+} from '@/features/inventories/api/EditInventory.ts';
 import { InventoryResponseModel } from '@/features/inventories/models/InventoryModels/InventoryResponseModel.ts';
 import { InventoryRequestModel } from '@/features/inventories/models/InventoryModels/InventoryRequestModel.ts';
-import {InventoryType} from "@/features/inventories/models/InventoryType.ts";
-import {getAllInventoryTypes} from "@/features/inventories/api/getAllInventoryTypes.ts";
+import { InventoryType } from '@/features/inventories/models/InventoryType.ts';
+import { getAllInventoryTypes } from '@/features/inventories/api/getAllInventoryTypes.ts';
 
 interface ApiError {
   message: string;
@@ -61,10 +64,7 @@ const EditInventory: React.FC = (): JSX.Element => {
     };
 
     fetchInventoryTypes();
-
   }, [inventoryId]);
-
-
 
   const validate = (): boolean => {
     const newError: { [key: string]: string } = {};
@@ -151,28 +151,28 @@ const EditInventory: React.FC = (): JSX.Element => {
               <div className="form-group">
                 <label>Inventory Type</label>
                 <select
-                    name="inventoryType"
-                    className="form-control"
-                    value={inventory.inventoryType}
-                    onChange={e =>
-                        setInventory({
-                          ...inventory,
-                          inventoryType: e.target.value,
-                        })
-                    }
-                    required
+                  name="inventoryType"
+                  className="form-control"
+                  value={inventory.inventoryType}
+                  onChange={e =>
+                    setInventory({
+                      ...inventory,
+                      inventoryType: e.target.value,
+                    })
+                  }
+                  required
                 >
                   <option value="" disabled>
                     Select inventory type
                   </option>
                   {inventoryTypes.map(type => (
-                      <option key={type.typeId} value={type.type}>
-                        {type.type}
-                      </option>
+                    <option key={type.typeId} value={type.type}>
+                      {type.type}
+                    </option>
                   ))}
                 </select>
                 {error.inventoryType && (
-                    <span className="error">{error.inventoryType}</span>
+                  <span className="error">{error.inventoryType}</span>
                 )}
               </div>
             </div>
