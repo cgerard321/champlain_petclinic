@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
     import com.petclinic.bffapigateway.dtos.Inventory.InventoryRequestDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.InventoryResponseDTO;
+import com.petclinic.bffapigateway.dtos.Visits.Emergency.EmergencyRequestDTO;
+import com.petclinic.bffapigateway.dtos.Visits.Emergency.EmergencyResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.Status;
 import com.petclinic.bffapigateway.dtos.Visits.VisitRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.VisitResponseDTO;
@@ -313,6 +315,57 @@ public class VisitsServiceClient {
                         .retrieve()
                         .bodyToMono(VisitResponseDTO.class);
     });
+    }
+
+
+    //Emergency
+    public Flux<EmergencyResponseDTO> getAllEmergency(){
+        return webClient
+                .get()
+                .uri(reviewUrl + "/emergency")
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToFlux(EmergencyResponseDTO.class);
+    }
+
+    public Mono<EmergencyResponseDTO> createEmergency(Mono<EmergencyRequestDTO> model) {
+        String emergencyId= UUID.randomUUID().toString();
+        return model.flatMap(emergencyRequestDTO -> {
+            return webClient
+                    .post()
+                    .uri(reviewUrl + "/emergency")
+                    .body(BodyInserters.fromValue(emergencyRequestDTO))
+                    .retrieve()
+                    .bodyToMono(EmergencyResponseDTO.class);
+        });
+
+    }
+
+    public Mono<EmergencyResponseDTO> updateEmergency(String emergencyId, Mono<EmergencyRequestDTO> emergencyRequestDTOMono) {
+        return emergencyRequestDTOMono.flatMap(requestDTO ->
+                webClient
+                        .put()
+                        .uri(reviewUrl + "/emergency/" + emergencyId)
+                        .body(BodyInserters.fromValue(requestDTO))
+                        .retrieve()
+                        .bodyToMono(EmergencyResponseDTO.class)
+        );
+    }
+
+    public Mono<EmergencyResponseDTO> getEmergencyByEmergencyId(String emergencyId) {
+        return webClient
+                .get()
+                .uri(reviewUrl + "/emergency/" + emergencyId)
+                .retrieve()
+                .bodyToMono(EmergencyResponseDTO.class);
+    }
+
+    public Mono<EmergencyResponseDTO> deleteEmergency(String emergencyId){
+        return webClient
+                .delete()
+                .uri(reviewUrl + "/emergency/" + emergencyId)
+                .retrieve()
+                .bodyToMono(EmergencyResponseDTO.class);
     }
 }
 

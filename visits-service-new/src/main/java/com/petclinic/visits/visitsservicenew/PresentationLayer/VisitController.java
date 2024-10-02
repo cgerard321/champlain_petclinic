@@ -1,10 +1,14 @@
 package com.petclinic.visits.visitsservicenew.PresentationLayer;
 
 
+import com.petclinic.visits.visitsservicenew.BusinessLayer.Emergency.EmergencyService;
 import com.petclinic.visits.visitsservicenew.BusinessLayer.Review.ReviewService;
 import com.petclinic.visits.visitsservicenew.BusinessLayer.VisitService;
 import com.petclinic.visits.visitsservicenew.Exceptions.InvalidInputException;
 import com.petclinic.visits.visitsservicenew.Exceptions.NotFoundException;
+import com.petclinic.visits.visitsservicenew.PresentationLayer.Emergency.EmergencyRequestDTO;
+import com.petclinic.visits.visitsservicenew.PresentationLayer.Emergency.EmergencyResponseDTO;
+
 import com.petclinic.visits.visitsservicenew.PresentationLayer.Review.ReviewRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.Review.ReviewResponseDTO;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +32,7 @@ public class VisitController {
      */
     private final VisitService visitService;
     private final ReviewService reviewService;
+    private final EmergencyService emergencyService;
 
     /**
      * Simple Get all Visits
@@ -192,12 +197,59 @@ public class VisitController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
+
     @DeleteMapping(value = "/completed/{visitId}")
     public Mono<ResponseEntity<Void>> deleteCompletedVisitByVisitId(@PathVariable String visitId){
         return visitService.deleteCompletedVisitByVisitId(visitId)
                 .then(Mono.just(new ResponseEntity<Void>(HttpStatus.NO_CONTENT)))
                 .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));// Return 404 if NotFoundException is thrown
     }
+
+
+    //Emergency
+
+    @GetMapping(value = "/emergency")
+    public Flux<EmergencyResponseDTO> getAllEmergency(){
+        return emergencyService.GetAllEmergencies();
+    }
+
+    @GetMapping(value="/emergency/{emergencyId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<EmergencyResponseDTO>> getEmergencyByEmergencyId(@PathVariable String emergencyId){
+        return Mono.just(emergencyId)
+                //.filter(id -> id.length() == 36)
+                //.switchIfEmpty(Mono.error(new InvalidInputException("the provided emergency id is invalid: " + emergencyId)))
+                .flatMap(emergencyService::GetEmergencyByEmergencyId)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
+    @PostMapping(value = "/emergency")
+    public Mono<ResponseEntity<EmergencyResponseDTO>> PostEmergency(@RequestBody Mono<EmergencyRequestDTO> emergencyRequestDTOMono){
+        return emergencyService.AddEmergency(emergencyRequestDTOMono)
+                .map(c->ResponseEntity.status(HttpStatus.CREATED).body(c))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
+    @PutMapping(value="/emergency/{emergencyId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<EmergencyResponseDTO>> UpdateEmergency(@RequestBody Mono<EmergencyRequestDTO> emergencyRequestDTOMono, @PathVariable String emergencyId){
+        return Mono.just(emergencyId)
+                //.filter(id -> id.length() == 36)
+                //.switchIfEmpty(Mono.error(new InvalidInputException("the provided emergency id is invalid: " + emergencyId)))
+                .flatMap(id-> emergencyService.UpdateEmergency(emergencyRequestDTOMono,emergencyId))
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
+    @DeleteMapping(value="/emergency/{emergencyId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<EmergencyResponseDTO>> DeteleEmergency(@PathVariable String emergencyId) {
+        return Mono.just(emergencyId)
+               // .filter(id -> id.length() == 36)
+               // .switchIfEmpty(Mono.error(new InvalidInputException("the provided emergency id is invalid: " + emergencyId)))
+                .flatMap(emergencyService::DeleteEmergency)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
 //    @GetMapping("/pets/{petId}")
 //    public Mono<PetResponseDTO> getPetByIdTest(@PathVariable int petId){
 //       return visitService.testingGetPetDTO(petId);
