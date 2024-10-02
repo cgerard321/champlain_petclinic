@@ -290,4 +290,5 @@ class VetServiceImplTest {
                 .active(true)
                 .build();
     }
+
 }
