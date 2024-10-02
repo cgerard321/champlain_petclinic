@@ -162,16 +162,12 @@ public class CustomersServiceClient {
     }
 
     public Mono<OwnerResponseDTO> addOwner(Mono<OwnerRequestDTO> model) {
-        String ownerId = UUID.randomUUID().toString();
-        return model.flatMap(requestDTO -> {
-            requestDTO.setOwnerId(ownerId);
-            return webClientBuilder.build()
-                    .post()
-                    .uri(customersServiceUrl + "/owners")
-                    .body(BodyInserters.fromValue(requestDTO))
-                    .retrieve()
-                    .bodyToMono(OwnerResponseDTO.class);
-        });
+        return model.flatMap(requestDTO -> webClientBuilder.build()
+                .post()
+                .uri(customersServiceUrl + "/owners")
+                .body(BodyInserters.fromValue(requestDTO))
+                .retrieve()
+                .bodyToMono(OwnerResponseDTO.class));
     }
 
     public Flux<PetType> getPetTypes() {
