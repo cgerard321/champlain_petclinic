@@ -45,8 +45,12 @@ public class RatingServiceImpl implements RatingService{
     @Override
     public Mono<RatingResponseModel> addRatingForProduct(String productId, String customerId, Mono<RatingRequestModel> requestModel) {
             return requestModel
+                    .filter(req -> req.getRating() != null)
+                    .switchIfEmpty(Mono.error(new InvalidInputException("Rating must be provided")))
                     .filter(req -> req.getRating() > 0 && req.getRating() <= 5)
                     .switchIfEmpty(Mono.error(new InvalidInputException("Rating must be between 1 and 5")))
+                    .filter(req -> req.getReview() == null || req.getReview().length() < 2000)
+                    .switchIfEmpty(Mono.error(new InvalidInputException("Review must be less than 2000 characters")))
                     .flatMap(req ->
                             productRepository.findProductByProductId(productId)
                             .switchIfEmpty(Mono.error(new NotFoundException("Product id not found: " + productId)))
@@ -68,8 +72,12 @@ public class RatingServiceImpl implements RatingService{
     @Override
     public Mono<RatingResponseModel> updateRatingForProduct(String productId, String customerId, Mono<RatingRequestModel> requestModel) {
         return requestModel
+                .filter(req -> req.getRating() != null)
+                .switchIfEmpty(Mono.error(new InvalidInputException("Rating must be provided")))
                 .filter(req -> req.getRating() > 0 && req.getRating() <= 5)
                 .switchIfEmpty(Mono.error(new InvalidInputException("Rating must be between 1 and 5")))
+                .filter(req -> req.getReview() == null || req.getReview().length() < 2000)
+                .switchIfEmpty(Mono.error(new InvalidInputException("Review must be less than 2000 characters")))
                 .flatMap(req ->
                         productRepository.findProductByProductId(productId)
                                 .switchIfEmpty(Mono.error(new NotFoundException("Product id not found: " + productId)))

@@ -47,6 +47,7 @@ public class EntityModelUtil {
                 .productId(productId)
                 .customerId(customerId)
                 .rating(requestModel.getRating())
+                .review(requestModel.getReview() != null ? requestModel.getReview() : "")
                 .build();
     }
 

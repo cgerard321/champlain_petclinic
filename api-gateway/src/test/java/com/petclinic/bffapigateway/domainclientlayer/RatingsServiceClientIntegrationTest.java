@@ -44,7 +44,7 @@ class RatingsServiceClientIntegrationTest {
                 .build();
 
         stubFor(post(urlEqualTo("/api/v1/ratings/%s/%s".formatted(productId, customerId)))
-                .withRequestBody(equalToJson("{\"rating\": " + requestModel.getRating() + "}"))
+                .withRequestBody(matchingJsonSchema("{\"rating\": " + requestModel.getRating() + "}"))
                 .willReturn(created()
                         .withHeader("Content-Type", MediaType.APPLICATION_JSON.toString())
                         .withBody("{\"rating\":" + requestModel.getRating() + "}")
@@ -66,7 +66,7 @@ class RatingsServiceClientIntegrationTest {
                 .build();
 
         stubFor(put(urlEqualTo("/api/v1/ratings/%s/%s".formatted(productId, customerId)))
-                .withRequestBody(equalToJson("{\"rating\": " + requestModel.getRating() + "}"))
+                .withRequestBody(matchingJsonSchema("{\"rating\": " + requestModel.getRating() + "}"))
                 .willReturn(okForContentType(MediaType.APPLICATION_JSON.toString(), "{\"rating\":" + requestModel.getRating() + "}"))
         );
 

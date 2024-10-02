@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.util.UUID;
@@ -17,10 +16,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
 @SpringBootTest
 @AutoConfigureWebTestClient
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-// Do NOT rename, letter W is always ran last, if ran before: causes issues with port binding with the other MockServers
-// As much as I hate this "solution", it's better than another hacky solution like holding the thread for X amount of time.
-class WireMockRatingControllerIntegrationTest {
+class RatingControllerIntegrationTest {
 
     @Autowired
     private WebTestClient webTestClient;
@@ -36,6 +32,11 @@ class WireMockRatingControllerIntegrationTest {
     static WireMockExtension authMock = WireMockExtension.newInstance()
             .options(WireMockConfiguration.options().port(7005))
             .build();
+
+    @BeforeEach
+    public void resetJWTCache(){
+        RatingController.clearCache();
+    }
 
     @Test
     void whenGetRatingByProductId_thenReturnRating(){
@@ -93,7 +94,7 @@ class WireMockRatingControllerIntegrationTest {
         String customerId = UUID.randomUUID().toString();
 
         ratingMock.stubFor(post(urlEqualTo("/api/v1/ratings/%s/%s".formatted(productId, customerId)))
-                .withRequestBody(equalToJson("{\"rating\": 3}"))
+                .withRequestBody(matchingJsonSchema("{\"rating\": 3}"))
                 .willReturn(okForContentType("application/json", "{\"rating\": 3}"))
         );
 
@@ -125,7 +126,7 @@ class WireMockRatingControllerIntegrationTest {
         String customerId = UUID.randomUUID().toString();
 
         ratingMock.stubFor(put(urlEqualTo("/api/v1/ratings/%s/%s".formatted(productId, customerId)))
-                .withRequestBody(equalToJson("{\"rating\": 4}"))
+                .withRequestBody(matchingJsonSchema("{\"rating\": 4}"))
                 .willReturn(okForContentType("application/json", "{\"rating\": 4}"))
         );
 

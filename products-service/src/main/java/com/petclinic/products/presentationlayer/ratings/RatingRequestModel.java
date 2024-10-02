@@ -11,4 +11,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class RatingRequestModel {
     Byte rating;
+    String review;
 }

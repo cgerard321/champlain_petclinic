@@ -11,6 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -50,7 +51,7 @@ public class RatingController {
     }
 
     // Ghetto User Cache
-    private HashMap<String, UserCache> jwtUserCache = new HashMap<>();
+    private static HashMap<String, UserCache> jwtUserCache = new HashMap<>();
 
     // Caches JWT to a UserID so we don't have to call Auth all the time
     private Mono<String> getFromJWTUserId(String jwt){
@@ -67,10 +68,14 @@ public class RatingController {
     // Goes through HashMap and cleans if was not used within 5 minutes.
     private void cleanCache(){
         jwtUserCache.entrySet().iterator().forEachRemaining(entry -> {
-            if(System.currentTimeMillis() - entry.getValue().lastUsed > 300000){
+            if(System.currentTimeMillis() - entry.getValue().getLastUsed() > 300000){
                 jwtUserCache.remove(entry.getKey());
             }
         });
+    }
+
+    public static void clearCache(){
+        jwtUserCache.clear();
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ALL})

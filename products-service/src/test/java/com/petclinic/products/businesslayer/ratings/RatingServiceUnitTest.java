@@ -40,12 +40,14 @@ class RatingServiceUnitTest {
             .productId(productId)
             .customerId(UUID.randomUUID().toString())
             .rating((byte) 5)
+            .review("Good stuff!")
             .build();
 
     Rating rating2 = Rating.builder()
             .productId(productId)
             .customerId(UUID.randomUUID().toString())
             .rating((byte) 3)
+            .review("It's alright..")
             .build();
 
     @Test
@@ -65,24 +67,27 @@ class RatingServiceUnitTest {
         StepVerifier.create(ratingService.getAllRatingsForProductId(productId))
                 .expectNextMatches(response -> {
                     assertNotNull(response.getRating());
+                    assertNotNull(response.getReview());
                     return true;
                 })
                 .expectNextMatches(response -> {
                     assertNotNull(response.getRating());
+                    assertNotNull(response.getReview());
                     return true;
                 })
                 .verifyComplete();
     }
 
     @Test
-    void whenGetAllRatingsForNotFoundProduct_thenReturnRatings(){
+    void whenGetAllRatingsForNotFoundProduct_thenReturnNotFound(){
         when(productRepository.findProductByProductId(productId))
                 .thenReturn(Mono.empty());
         when(ratingRepository.findRatingsByProductId(rating1.getProductId()))
                 .thenReturn(Flux.empty());
 
         StepVerifier.create(ratingService.getAllRatingsForProductId(productId))
-                .expectError(NotFoundException.class);
+                .expectError(NotFoundException.class)
+                .verify();
     }
 
     @Test
@@ -102,6 +107,7 @@ class RatingServiceUnitTest {
         StepVerifier.create(ratingService.getRatingForProductIdWithCustomerId(rating1.getProductId(), rating1.getCustomerId()))
                 .expectNextMatches(response -> {
                     assertNotNull(response.getRating());
+                    assertNotNull(response.getReview());
                     return true;
                 })
                 .verifyComplete();
@@ -138,6 +144,7 @@ class RatingServiceUnitTest {
 
         RatingRequestModel requestModel = RatingRequestModel.builder()
                 .rating(rating1.getRating())
+                .review(rating1.getReview())
                 .build();
 
         when(productRepository.findProductByProductId(productId))
@@ -150,7 +157,9 @@ class RatingServiceUnitTest {
         StepVerifier.create(ratingService.addRatingForProduct(productId, rating1.getCustomerId(), Mono.just(requestModel)))
                 .expectNextMatches(response -> {
                     assertNotNull(response.getRating());
+                    assertNotNull(response.getReview());
                     assertEquals(requestModel.getRating(), response.getRating());
+                    assertEquals(requestModel.getReview(), response.getReview());
                     return true;
                 })
                 .verifyComplete();
@@ -160,6 +169,7 @@ class RatingServiceUnitTest {
     void whenAddRatingForNotFoundProduct_thenReturnNotFound(){
         RatingRequestModel requestModel = RatingRequestModel.builder()
                 .rating(rating1.getRating())
+                .review(rating1.getReview())
                 .build();
 
         when(productRepository.findProductByProductId(productId))
@@ -219,6 +229,7 @@ class RatingServiceUnitTest {
 
         RatingRequestModel requestModel = RatingRequestModel.builder()
                 .rating(rating1.getRating())
+                .review(rating1.getReview())
                 .build();
 
         when(productRepository.findProductByProductId(productId))
@@ -231,6 +242,7 @@ class RatingServiceUnitTest {
         StepVerifier.create(ratingService.updateRatingForProduct(productId, rating1.getCustomerId(), Mono.just(requestModel)))
                 .expectNextMatches(response -> {
                     assertNotNull(response.getRating());
+                    assertNotNull(response.getReview());
                     assertEquals(requestModel.getRating(), response.getRating());
                     return true;
                 })

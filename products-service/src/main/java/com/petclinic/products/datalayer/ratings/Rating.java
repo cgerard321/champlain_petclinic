@@ -22,4 +22,6 @@ public class Rating {
     private String customerId;
 
     private Byte rating;
+
+    private String review;
 }
