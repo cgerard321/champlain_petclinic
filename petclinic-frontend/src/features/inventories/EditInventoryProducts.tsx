@@ -4,7 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import {
   getProductByProductIdInInventory,
   updateProductInInventory,
-} from '@/shared/api/EditInventoryProducts';
+} from '@/features/inventories/api/EditInventoryProducts.ts';
 import { ProductRequestModel } from '@/features/inventories/models/InventoryModels/ProductRequestModel';
 
 interface ApiError {
