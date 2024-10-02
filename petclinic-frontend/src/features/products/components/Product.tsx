@@ -5,7 +5,9 @@ import StarRating from './StarRating';
 import { updateUserRating } from '../api/updateUserRating';
 import { getProduct } from '../api/getProduct';
 import { deleteUserRating } from '../api/deleteUserRating';
-import { getProductByProductId } from '@/features/products/api/getProductByProductId.tsx';
+// import { getProductByProductId } from '@/features/products/api/getProductByProductId.tsx';
+import { useNavigate } from 'react-router-dom';
+import { AppRoutePaths } from '@/shared/models/path.routes';
 
 function Product({ product }: { product: ProductModel }): JSX.Element {
   const [currentUserRating, setUserRating] = useState<number>(0);
@@ -14,7 +16,14 @@ function Product({ product }: { product: ProductModel }): JSX.Element {
     null
   );
 
-  useEffect(() => {
+    const navigate = useNavigate(); // Get the navigate function
+    const handleButtonClick = () => {
+        // Navigate to ProductDetails and pass the product data
+        navigate(AppRoutePaths.ProductDetails, { state: { product } });
+    };
+
+
+    useEffect(() => {
     fetchRating();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -51,14 +60,14 @@ function Product({ product }: { product: ProductModel }): JSX.Element {
     }
   };
 
-  const handleProductClick = async (productId: string): Promise<void> => {
-    try {
-      const product = await getProductByProductId(productId);
-      setSelectedProduct(product);
-    } catch (error) {
-      console.error('Failed to fetch product details:', error);
-    }
-  };
+  // const handleProductClick = async (productId: string): Promise<void> => {
+  //   try {
+  //     const product = await getProductByProductId(productId);
+  //     setSelectedProduct(product);
+  //   } catch (error) {
+  //     console.error('Failed to fetch product details:', error);
+  //   }
+  // };
 
   const handleBackToList = (): void => {
     setSelectedProduct(null);
@@ -78,7 +87,7 @@ function Product({ product }: { product: ProductModel }): JSX.Element {
   return (
     <div className="card" key={product.productId}>
       <h2
-        onClick={() => handleProductClick(product.productId)}
+          onClick = {handleButtonClick}
         style={{
           cursor: 'pointer',
           color: 'blue',
