@@ -120,31 +120,18 @@ public class MockServerConfigCustomersService {
                 );
     }
 
-    public void registerGetPetByIdEndpoint() {
+
+    public void registerUpdatePetEndpoint() {
         mockServerClient_CustomersService
                 .when(
                         request()
-                                .withMethod("GET")
-                                .withPath("/pet/123")
+                                .withMethod("PUT")
+                                .withPath("/api/v2/gateway/pet/123")
+                                .withBody(json("{\"petId\":\"123\",\"name\":\"Buddy\",\"birthDate\":\"2020-01-01\",\"petTypeId\":\"1\",\"isActive\":\"true\",\"weight\":\"10\"}"))
                 )
                 .respond(
                         response()
                                 .withStatusCode(200)
-                                .withBody(json("{\"petId\":\"123\",\"name\":\"Buddy\",\"birthDate\":\"2020-01-01\",\"petTypeId\":\"1\",\"isActive\":\"true\",\"weight\":\"10\"}"))
-                );
-    }
-
-    public void registerAddPetEndpoint() {
-        mockServerClient_CustomersService
-                .when(
-                        request()
-                                .withMethod("POST")
-                                .withPath("/api/v2/gateway/pet/123")
-                                .withBody(json("{\"name\":\"Buddy\",\"birthDate\":\"2020-01-01\",\"petTypeId\":\"1\",\"isActive\":\"true\",\"weight\":\"10\"}"))
-                )
-                .respond(
-                        response()
-                                .withStatusCode(201)
                                 .withBody(json("{\"petId\":\"123\",\"name\":\"Buddy\",\"birthDate\":\"2020-01-01\",\"petTypeId\":\"1\",\"isActive\":\"true\",\"weight\":\"10\"}"))
                 );
     }

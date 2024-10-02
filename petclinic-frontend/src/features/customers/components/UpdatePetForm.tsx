@@ -70,9 +70,9 @@ const UpdatePetForm: React.FC = (): JSX.Element => {
     if (!validate() || !pet) return;
     const petRequestData: PetRequestModel = {
       name: pet.name,
-      birthDate: pet.birthDate, // Ensure date is in correct format
+      birthDate: pet.birthDate,
       petTypeId: pet.petTypeId,
-      isActive: pet.isActive, // Already converted as string
+      isActive: pet.isActive,
       weight: pet.weight,
     };
 

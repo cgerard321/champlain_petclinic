@@ -439,6 +439,7 @@ public class CustomerServiceClientIntegrationTest {
         assertEquals("/pet/" + petId, request.getPath());
         assertEquals("PUT", request.getMethod());
     }
+        
     /*@Test
     void getOwnerPhoto() throws JsonProcessingException {
 
