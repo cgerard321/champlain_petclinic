@@ -163,7 +163,7 @@ public Flux<InventoryResponseDTO> searchInventories(
     }
 
 
-    @PostMapping("/{inventoryName}/products")
+    @PostMapping("/{inventoryName}/products/by-name")
     public Mono<ResponseEntity<InventoryResponseDTO>> addProductToInventoryByName(
             @PathVariable String inventoryName,
             @RequestBody Mono<ProductRequestDTO> productRequestDTO) {
@@ -173,7 +173,7 @@ public Flux<InventoryResponseDTO> searchInventories(
     }
 
 
-    @GetMapping("/{inventoryName}/products")
+    @GetMapping("/{inventoryName}/products/by-name")
     public Mono<ResponseEntity<List<ProductResponseDTO>>> getProductsByInventoryName(@PathVariable String inventoryName) {
         return productInventoryService.getProductsByInventoryName(inventoryName)
                 .collectList()

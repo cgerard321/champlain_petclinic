@@ -7,7 +7,7 @@ import { getAllInventoryTypes } from '@/features/inventories/api/getAllInventory
 import deleteAllInventories from '@/features/inventories/api/deleteAllInventories.ts';
 import deleteInventory from '@/features/inventories/api/deleteInventory.ts';
 import AddInventoryType from '@/features/inventories/AddInventoryType.tsx';
-import AddSupplyForm from '@/features/inventories/AddSupplyForm.tsx';
+import AddSupplyForm from '@/features/inventories/AddProductForm.tsx';
 import './Card.css';
 import DefaultInventoryImage from '@/assets/Inventory/DefaultInventoryImage.jpg';
 

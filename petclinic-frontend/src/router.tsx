@@ -31,7 +31,7 @@ import UserCart from '@/features/carts/components/UserCart.tsx';
 import VetDetails from '@/pages/Vet/VetDetails.tsx';
 import EmailingPage from '@/pages/Emailing/EmailingPage.tsx';
 import MockPage from '@/pages/Inventory/MockPage.tsx';
-import InventorySupplies from '@/features/inventories/InventorySupplies.tsx';
+// import InventorySupplies from '@/features/inventories/InventorySupplies.tsx';
 import EditingVisit from './features/visits/models/EditingVisit';
 import UpdateCustomerPage from '@/pages/Customer/UpdateCustomerPage.tsx';
 import CustomerDetailsPage from '@/pages/Customer/CustomerDetailsPage.tsx';
@@ -265,14 +265,14 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
-      {
-        path: AppRoutePaths.InventorySupplies,
-        element: (
-          <ProtectedRoute>
-            <InventorySupplies />
-          </ProtectedRoute>
-        ),
-      },
+      // {
+      //   path: AppRoutePaths.InventorySupplies,
+      //   element: (
+      //     <ProtectedRoute>
+      //       <InventorySupplies />
+      //     </ProtectedRoute>
+      //   ),
+      // },
     ],
   },
   {

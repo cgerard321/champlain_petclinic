@@ -8,7 +8,6 @@ import useSearchProducts from '@/features/inventories/hooks/useSearchProducts.ts
 
 const InventoryProducts: React.FC = () => {
   const { inventoryId } = useParams<{ inventoryId: string }>();
-
   const { productList, setProductList, getProductList } = useSearchProducts();
 
   // Declare state
@@ -27,7 +26,7 @@ const InventoryProducts: React.FC = () => {
       setError(null);
       try {
         const response = await axios.get<ProductModel[]>(
-          `http://localhost:8080/api/gateway/inventory/${inventoryId}/products`
+          `http://localhost:8080/api/v2/gateway/inventories/${inventoryId}/products/search`
         );
         setProducts(response.data);
         setProductList(response.data); // Set productList as well
@@ -48,7 +47,7 @@ const InventoryProducts: React.FC = () => {
   const deleteProduct = async (productId: string): Promise<void> => {
     try {
       await axios.delete(
-        `http://localhost:8080/api/gateway/inventory/${inventoryId}/products/${productId}`
+        `http://localhost:8080/api/v2/gateway/inventories/${inventoryId}/products/${productId}`
       );
       // Filter out the deleted product from both lists
       const updatedProducts = products.filter(
@@ -159,8 +158,8 @@ const InventoryProducts: React.FC = () => {
           </thead>
           <tbody>
             {filteredProducts.map((product: ProductModel) => (
-              <tr key={product.productId}>
-                <td>{product.productId}</td>
+              <tr key={product.productName}>
+                <td>{product.productName}</td>
                 <td>{product.productName}</td>
                 <td>{product.productDescription}</td>
                 <td>${product.productSalePrice}</td>

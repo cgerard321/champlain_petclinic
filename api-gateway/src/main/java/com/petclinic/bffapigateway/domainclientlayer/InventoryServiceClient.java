@@ -108,9 +108,6 @@ public class InventoryServiceClient {
     }
 
 
-
-
-
     public Mono<ProductResponseDTO> updateProductInInventory(ProductRequestDTO model, String inventoryId, String productId){
 
 
@@ -278,7 +275,7 @@ public class InventoryServiceClient {
 
     public Mono<InventoryResponseDTO> addProductToInventoryByName(String inventoryName, ProductRequestDTO productRequestDTO) {
         return webClient.post()
-                .uri(inventoryServiceUrl + "/{inventoryName}/products", inventoryName)
+                .uri(inventoryServiceUrl + "/{inventoryName}/products/by-name", inventoryName)
                 .body(Mono.just(productRequestDTO), ProductRequestDTO.class)
                 .retrieve()
                 .bodyToMono(InventoryResponseDTO.class);
@@ -287,7 +284,7 @@ public class InventoryServiceClient {
 
     public Flux<ProductResponseDTO> getProductsByInventoryName(String inventoryName) {
         return webClient.get()
-                .uri("/{inventoryName}/products", inventoryName)
+                .uri("/{inventoryName}/products/by-name", inventoryName)
                 .retrieve()
                 .bodyToFlux(ProductResponseDTO.class);
     }

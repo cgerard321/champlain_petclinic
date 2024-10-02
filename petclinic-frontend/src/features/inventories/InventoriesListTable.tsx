@@ -10,7 +10,7 @@ import deleteInventory from '@/features/inventories/api/deleteInventory.ts';
 import AddInventory from '@/features/inventories/AddInventoryForm.tsx';
 import AddInventoryType from '@/features/inventories/AddInventoryType.tsx';
 import { ProductModel } from '@/features/inventories/models/ProductModels/ProductModel.ts';
-import AddSupplyForm from '@/features/inventories/AddSupplyForm.tsx';
+import AddProductForm from '@/features/inventories/AddProductForm.tsx';
 import './models/Card.css';
 import DefaultInventoryImage from '@/assets/Inventory/DefaultInventoryImage.jpg';
 
@@ -28,14 +28,14 @@ export default function InventoriesListTable(): JSX.Element {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [showAddInventoryForm, setShowAddInventoryForm] = useState(false);
   const [showAddTypeForm, setShowAddTypeForm] = useState(false);
-  const [showAddSupplyModal, setShowAddSupplyModal] = useState(false);
+  const [showAddProductModal, setShowAddProductModal] = useState(false);
   const navigate = useNavigate();
   const [lowStockProductsByInventory, setLowStockProductsByInventory] =
     useState<{ [inventoryName: string]: ProductModel[] }>({});
   const [showLowStock, setShowLowStock] = useState(false);
 
-  const toggleAddSupplyModal = (): void => {
-    setShowAddSupplyModal(prev => !prev);
+  const toggleAddProductModal = (): void => {
+    setShowAddProductModal(prev => !prev);
   };
 
   const {
@@ -136,8 +136,8 @@ export default function InventoriesListTable(): JSX.Element {
     await fetchAllInventoryTypes();
   };
 
-  const handleAddSupplySubmit = (): void => {
-    setShowAddSupplyModal(false);
+  const handleAddProductSubmit = (): void => {
+    setShowAddProductModal(false);
   };
 
   const handleInventorySelection = (
@@ -493,20 +493,20 @@ export default function InventoriesListTable(): JSX.Element {
           </div>
         </>
       )}
-      <button className="btn btn-primary" onClick={toggleAddSupplyModal}>
-        Add Supply
+      <button className="btn btn-primary" onClick={toggleAddProductModal}>
+        Add Product
       </button>
-      {showAddSupplyModal && (
-        <AddSupplyForm
-          onClose={toggleAddSupplyModal}
-          onSubmit={handleAddSupplySubmit}
+      {showAddProductModal && (
+        <AddProductForm
+          onClose={toggleAddProductModal}
+          onSubmit={handleAddProductSubmit}
         />
       )}
       <div className="card-container-custom">
         {inventoryList.map(inventory => (
           <div
             className="card"
-            key={inventory.inventoryId}
+            key={inventory.inventoryName}
             onClick={() =>
               navigate(`/inventory/${inventory.inventoryId}/products`)
             }

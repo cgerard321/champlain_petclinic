@@ -501,6 +501,7 @@ public class DataBaseLoaderService  implements CommandLineRunner {
 
 
         //Inventory1 ---------------------------------------------------
+        inventory1.addProduct(supply7);
         inventory1.addProduct(supply9);
         inventory1.addProduct(supply10);
         //--------------------------------------------------------------
@@ -509,16 +510,22 @@ public class DataBaseLoaderService  implements CommandLineRunner {
         inventory2.addProduct(supply4);
         inventory2.addProduct(supply5);
         inventory2.addProduct(supply6);
+        inventory2.addProduct(supply11);
+        inventory2.addProduct(supply12);
         //--------------------------------------------------------------
 
         //Inventory3 ---------------------------------------------------
         inventory3.addProduct(supply8);
+        inventory3.addProduct(supply13);
+        inventory3.addProduct(supply14);
         //--------------------------------------------------------------
 
         //Inventory4 ---------------------------------------------------
         inventory4.addProduct(supply1);
         inventory4.addProduct(supply2);
         inventory4.addProduct(supply3);
+        inventory4.addProduct(supply15);
+        inventory4.addProduct(supply16);
         //--------------------------------------------------------------
 
         //Inventory5 ---------------------------------------------------
