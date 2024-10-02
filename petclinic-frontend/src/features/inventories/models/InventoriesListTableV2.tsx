@@ -8,7 +8,7 @@ import deleteAllInventories from '@/features/inventories/api/deleteAllInventorie
 import deleteInventory from '@/features/inventories/api/deleteInventory.ts';
 import AddInventoryType from '@/features/inventories/AddInventoryType.tsx';
 import AddSupplyForm from '@/features/inventories/AddProductForm.tsx';
-import './Card.css';
+import './CardInventoryTeam.css';
 import DefaultInventoryImage from '@/assets/Inventory/DefaultInventoryImage.jpg';
 
 //TODO: create add inventory form component and change the component being shown on the inventories page on the onClick event of the add inventory button
