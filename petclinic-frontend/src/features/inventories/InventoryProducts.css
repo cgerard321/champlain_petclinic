@@ -105,6 +105,10 @@ select:focus {
   background-color: #dc3545;
 }
 
+.btn-add{
+  background-color: green;
+}
+
 .btn-danger:hover {
   background-color: #c82333;
 }

@@ -213,6 +213,16 @@ public class InventoryController {
                 .map(productResponseDTO -> ResponseEntity.ok(productResponseDTO))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
+    @PostMapping("/{inventoryId}/products")
+    public Mono<ResponseEntity<ProductResponseDTO>> addSupplyToInventory(
+            @RequestBody ProductRequestDTO productRequestDTO,
+            @PathVariable String inventoryId) {
+        return inventoryServiceClient.addSupplyToInventory(productRequestDTO, inventoryId)
+                .map(productResponseDTO -> ResponseEntity.status(HttpStatus.CREATED).body(productResponseDTO))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
 
 
 }

@@ -103,6 +103,13 @@ public class VisitController {
                         .map(updatedVisit -> ResponseEntity.ok(updatedVisit))
                         .defaultIfEmpty(ResponseEntity.notFound().build())); // Return 404 if not found
     }
+    @IsUserSpecific(idToMatch = {"visitId"})
+    @DeleteMapping(value = "/completed/{visitId}")
+    public Mono<ResponseEntity<Void>> deleteCompletedVisitByVisitId(@PathVariable String visitId) {
+        return visitsServiceClient.deleteCompletedVisitByVisitId(visitId)
+                .then(Mono.just(new ResponseEntity<Void>(HttpStatus.NO_CONTENT)))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
 
     //customer visits
     @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN})
