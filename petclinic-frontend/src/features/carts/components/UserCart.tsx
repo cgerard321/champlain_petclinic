@@ -1,16 +1,35 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useParams, useNavigate } from 'react-router-dom';
 import CartItem from './CartItem';
 import { ProductModel } from '../models/ProductModel';
 import './UserCart.css';
 import { NavBar } from '@/layouts/AppNavBar';
 
+interface InvoiceItem {
+  productId: string;
+  productName: string;
+  productSalePrice: number;
+  quantity: number;
+}
+
+interface Invoice {
+  invoiceId: string;
+  cartId: string;
+  items: InvoiceItem[];
+  subtotal: number;
+  tax: number;
+  total: number;
+  issueDate: string;
+}
+
 const UserCart = (): JSX.Element => {
   const { cartId } = useParams<{ cartId: string }>();
-  const navigate = useNavigate(); // Initialize useNavigate
+  const navigate = useNavigate();
   const [cartItems, setCartItems] = useState<ProductModel[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [checkoutMessage, setCheckoutMessage] = useState<string | null>(null);
+  const [invoice, setInvoice] = useState<Invoice | null>(null);
 
   const subtotal = cartItems.reduce(
     (acc, item) => acc + item.productSalePrice * (item.quantity || 1),
@@ -50,7 +69,7 @@ const UserCart = (): JSX.Element => {
         setCartItems(products);
       } catch (err: unknown) {
         if (err instanceof Error) {
-          console.error(err.message); // Log the actual error
+          console.error(err.message);
           setError('Failed to fetch cart items');
         } else {
           setError('An unexpected error occurred');
@@ -65,7 +84,7 @@ const UserCart = (): JSX.Element => {
 
   const changeItemQuantity = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>, index: number): void => {
-      const newQuantity = Math.max(1, +event.target.value); // Ensure quantity is at least 1
+      const newQuantity = Math.max(1, +event.target.value);
       setCartItems(prevItems => {
         const newItems = [...prevItems];
         newItems[index].quantity = newQuantity;
@@ -110,6 +129,54 @@ const UserCart = (): JSX.Element => {
     }
   };
 
+  const handleCheckout = async (): Promise<void> => {
+    if (!cartId) {
+      setCheckoutMessage('Invalid cart ID');
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/v2/gateway/carts/${cartId}/checkout`,
+        {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (response.ok) {
+        // Generate the invoice
+        const newInvoice: Invoice = {
+          invoiceId: 'INV-' + new Date().getTime(), // Generate a simple invoice ID
+          cartId,
+          items: cartItems.map(item => ({
+            productId: item.productId,
+            productName: item.productName,
+            productSalePrice: item.productSalePrice,
+            quantity: item.quantity || 1,
+          })),
+          subtotal,
+          tax: tvq + tvc,
+          total,
+          issueDate: new Date().toISOString(), // Current date
+        };
+
+        setInvoice(newInvoice); // Set the new invoice state
+        setCheckoutMessage('Checkout successful!'); // Notify the user
+        // console.log('Checkout response:', newInvoice); // Remove or comment out console logs
+        setCartItems([]); // Clear cart after checkout
+      } else {
+        setCheckoutMessage('Checkout failed.');
+      }
+    } catch (error) {
+      console.error('Error during checkout:', error);
+      setCheckoutMessage('Checkout failed.');
+    }
+  };
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -145,7 +212,30 @@ const UserCart = (): JSX.Element => {
         <p>TVQ (9.975%): ${tvq.toFixed(2)}</p>
         <p>TVC (5%): ${tvc.toFixed(2)}</p>
         <p>Total: ${total.toFixed(2)}</p>
+        <button onClick={handleCheckout}>Checkout</button>
+        {checkoutMessage && <p>{checkoutMessage}</p>}
       </div>
+
+      {invoice && ( // Render the invoice if available
+        <div className="Invoice">
+          <h2>Invoice Details</h2>
+          <p>Invoice ID: {invoice.invoiceId}</p>
+          <p>Cart ID: {invoice.cartId}</p>
+          <p>Subtotal: ${invoice.subtotal.toFixed(2)}</p>
+          <p>Tax: ${invoice.tax.toFixed(2)}</p>
+          <p>Total: ${invoice.total.toFixed(2)}</p>
+          <p>Issue Date: {new Date(invoice.issueDate).toLocaleString()}</p>
+          <h3>Items:</h3>
+          <ul>
+            {invoice.items.map((item: InvoiceItem, index: number) => (
+              <li key={index}>
+                {item.productName} - Quantity: {item.quantity} - Price: $
+                {item.productSalePrice.toFixed(2)}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 };
