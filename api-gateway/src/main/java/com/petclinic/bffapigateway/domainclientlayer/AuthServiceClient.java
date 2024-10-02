@@ -123,6 +123,7 @@ public class AuthServiceClient {
                                                 .lastName(register.getOwner().getLastName())
                                                 .address(register.getOwner().getAddress())
                                                 .city(register.getOwner().getCity())
+                                                .province(register.getOwner().getProvince())
                                                 .telephone(register.getOwner().getTelephone())
                                                 .ownerId(uuid)
                                                 .build();
@@ -133,6 +134,44 @@ public class AuthServiceClient {
         ).doOnError(throwable -> {
             log.error("Error creating user: " + throwable.getMessage());
             customersServiceClient.deleteOwner(uuid);
+        });
+
+    }
+
+    public Mono<OwnerResponseDTO> createUserUsingV2Endpoint(Mono<Register> model) {
+
+        String uuid = UUID.randomUUID().toString();
+
+        return model.flatMap(register -> {
+                    register.setUserId(uuid);
+                    return webClientBuilder.build().post()
+                            .uri(authServiceUrl + "/users")
+                            .body(Mono.just(register), Register.class)
+                            .accept(MediaType.APPLICATION_JSON)
+                            .retrieve()
+                            .onStatus(HttpStatusCode::is4xxClientError,
+                                    n -> rethrower.rethrow(n,
+                                            x -> new GenericHttpException(x.get("message").toString(), BAD_REQUEST))
+                            )
+                            .bodyToMono(UserPasswordLessDTO.class)
+                            .flatMap(userDetails -> {
+                                Mono<OwnerRequestDTO> ownerRequestDTO = Mono.just(OwnerRequestDTO.builder()
+                                        .firstName(register.getOwner().getFirstName())
+                                        .lastName(register.getOwner().getLastName())
+                                        .address(register.getOwner().getAddress())
+                                        .city(register.getOwner().getCity())
+                                        .province(register.getOwner().getProvince())
+                                        .telephone(register.getOwner().getTelephone())
+                                        .ownerId(uuid)
+                                        .build());
+
+                                return customersServiceClient.addOwner(ownerRequestDTO);
+                                    }
+                            );
+                }
+        ).doOnError(throwable -> {
+            log.error("Error creating user: " + throwable.getMessage());
+            customersServiceClient.deleteOwnerV2(uuid);
         });
 
     }
@@ -225,6 +264,29 @@ public class AuthServiceClient {
                 .map(responseEntity -> {
                     HttpHeaders headers = new HttpHeaders();
                     headers.add("Location", "http://localhost:8080/#!/login");
+                    return ResponseEntity.status(HttpStatus.FOUND)
+                            .headers(headers)
+                            .body(responseEntity.getBody());
+                });
+    }
+
+    public Mono<ResponseEntity<UserDetails>> verifyUserUsingV2Endpoint(final String token) {
+
+        return webClientBuilder.build()
+                .get()
+                .uri(authServiceUrl + "/users/verification/{token}", token)
+                .retrieve()
+                .onStatus(
+                        HttpStatusCode::is4xxClientError,
+                        n -> rethrower.rethrow(
+                                n,
+                                x -> new GenericHttpException(x.get("message").toString(), (HttpStatus) n.statusCode()))
+                )
+                //grabbing the response entity and modifying the headers a little before returning it
+                .toEntity(UserDetails.class)
+                .map(responseEntity -> {
+                    HttpHeaders headers = new HttpHeaders();
+                    headers.add("Location", "http://localhost:3000/users/login");
                     return ResponseEntity.status(HttpStatus.FOUND)
                             .headers(headers)
                             .body(responseEntity.getBody());

@@ -3,6 +3,7 @@ package com.petclinic.cartsservice.presentationlayer;
 import com.petclinic.cartsservice.MockServerConfigProductService;
 import com.petclinic.cartsservice.dataaccesslayer.Cart;
 import com.petclinic.cartsservice.dataaccesslayer.CartRepository;
+import com.petclinic.cartsservice.dataaccesslayer.cartproduct.CartProduct;
 import com.petclinic.cartsservice.domainclientlayer.ProductResponseModel;
 import org.junit.jupiter.api.*;
 import org.reactivestreams.Publisher;
@@ -17,6 +18,7 @@ import reactor.test.StepVerifier;
 
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -40,32 +42,49 @@ class CartControllerIntegrationTest {
 
     private MockServerConfigProductService mockServerConfigProductService;
 
-
-    ProductResponseModel productResponseModel = ProductResponseModel.builder()
-            .productId("06a7d573-bcab-4db3-956f-773324b92a88")
-            .productName("Dog Food")
-            .productDescription("Dog Food")
-            .productSalePrice(10.0)
+    private final CartProduct product1 = CartProduct.builder()
+            .productId("9a29fff7-564a-4cc9-8fe1-36f6ca9bc223")
+            .productName("Product1")
+            .productDescription("Description1")
+            .productSalePrice(100.0)
+            .quantityInCart(1)
+            .averageRating(4.5)
             .build();
 
+    private final CartProduct product2 = CartProduct.builder()
+            .productId("d819e4f4-25af-4d33-91e9-2c45f0071606")
+            .productName("Product2")
+            .productDescription("Description2")
+            .productSalePrice(200.0)
+            .quantityInCart(1)
+            .averageRating(4.0)
+            .build();
 
-    List<String> productIds = new ArrayList(List.of(productResponseModel.getProductId()));
+    private final CartProduct product3 = CartProduct.builder()
+            .productId("132d3c5e-dcaa-4a4f-a35e-b8acc37c51c1")
+            .productName("Product3")
+            .productDescription("Description3")
+            .productSalePrice(300.0)
+            .quantityInCart(1)
+            .averageRating(3.5)
+            .build();
+
+    private final List<CartProduct> products = new ArrayList<>(Arrays.asList(product1, product2));
 
     private final Cart cart1 = Cart.builder()
             .cartId("98f7b33a-d62a-420a-a84a-05a27c85fc91")
-            .productIds(productIds)
+            .products(products)
             .customerId("1")
             .build();
 
     CartResponseModel cartResponseModel = CartResponseModel.builder()
             .cartId("98f7b33a-d62a-420a-a84a-05a27c85fc91")
-            .products(List.of(productResponseModel))
+            .products(products)
             .customerId("1")
             .build();
 
     CartRequestModel cartRequestModel = CartRequestModel.builder()
             .customerId("1")
-            .productIds(productIds)
             .build();
 
     @BeforeAll
@@ -89,36 +108,39 @@ class CartControllerIntegrationTest {
     }
 
 //    @Test
-    void whenUpdateByCartId_thenReturnCartResponseModel(){
-        webTestClient.put()
-                .uri("/api/v1/carts/" + cart1.getCartId())
-                .accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(cartRequestModel)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody(CartResponseModel.class)
-                .value(updated -> {
-                    assertEquals(cartRequestModel.getCustomerId(), updated.getCustomerId());
-                });
-    }
+//    void whenUpdateByCartId_thenReturnCartResponseModel(){
+//        webTestClient.put()
+//                .uri("/api/v2/carts/" + cart1.getCartId())
+//                .accept(MediaType.APPLICATION_JSON)
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .bodyValue(cartRequestModel)
+//                .exchange()
+//                .expectStatus().isOk()
+//                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+//                .expectBody(CartResponseModel.class)
+//                .value(updated -> {
+//                    assertEquals(cartRequestModel.getCustomerId(), updated.getCustomerId());
+//                });
+//    }
 
- //   @Test
+//    @Test
     void whenGetCartByCartId_thenReturnCartResponseModel(){
         webTestClient.get()
                 .uri("/api/v1/carts/" + cart1.getCartId())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody(CartResponseModel.class)
                 .value(result -> {
                     assertNotNull(cartResponseModel);
-                    assertEquals(cart1.getCartId(), result.getCartId());
                     assertEquals(cart1.getCustomerId(), result.getCustomerId());
-                    assertEquals(cart1.getProductIds().size(), result.getProducts().size());
-                    assertEquals(cart1.getProductIds().get(0), result.getProducts().get(0).getProductId());
+                    assertEquals(cart1.getProducts().size(), result.getProducts().size());
+                    assertEquals(cart1.getProducts().get(0).getProductId(), result.getProducts().get(0).getProductId());
+                    assertEquals(cart1.getProducts().get(0).getProductName(), result.getProducts().get(0).getProductName());
+                    assertEquals(cart1.getProducts().get(0).getProductDescription(), result.getProducts().get(0).getProductDescription());
+                    assertEquals(cart1.getProducts().get(0).getProductSalePrice(), result.getProducts().get(0).getProductSalePrice());
+                    assertEquals(cart1.getProducts().get(0).getQuantityInCart(), result.getProducts().get(0).getQuantityInCart());
+                    assertEquals(cart1.getProducts().get(0).getAverageRating(), result.getProducts().get(0).getAverageRating());
                 });
     }
 

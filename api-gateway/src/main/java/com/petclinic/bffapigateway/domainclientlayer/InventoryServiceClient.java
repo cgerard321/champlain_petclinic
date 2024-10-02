@@ -322,5 +322,17 @@ public class InventoryServiceClient {
                         resp -> Mono.error(new NotFoundException("No products found in inventory: " + inventoryId)))
                 .bodyToFlux(ProductResponseDTO.class);
     }
+    public Mono<ProductResponseDTO> addSupplyToInventory(final ProductRequestDTO model, final String inventoryId){
+
+        return webClient.post()
+                .uri(inventoryServiceUrl + "/{inventoryId}/products", inventoryId)
+                .body(Mono.just(model),ProductRequestDTO.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError,
+                        resp -> rethrower.rethrow(resp, ex -> new InvalidInputsInventoryException(ex.get("message").toString(), BAD_REQUEST)))
+                .bodyToMono(ProductResponseDTO.class);
+    }
 
 }
+

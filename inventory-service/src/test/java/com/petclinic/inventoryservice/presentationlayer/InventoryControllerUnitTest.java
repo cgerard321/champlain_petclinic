@@ -761,7 +761,7 @@ class InventoryControllerUnitTest {
     }
 
     @Test
-    void addProductToInventory_ShouldCallServiceAddProduct() {
+    void addSupplyToInventory_ShouldCallServiceAddProduct() {
         // Arrange
         String inventoryId = "123";
         ProductRequestDTO requestDTO = ProductRequestDTO.builder()
@@ -781,7 +781,7 @@ class InventoryControllerUnitTest {
                 .productSalePrice(15.99)
                 .build();
 
-        when(productInventoryService.addProductToInventory(any(), eq(inventoryId)))
+        when(productInventoryService.addSupplyToInventory(any(), eq(inventoryId)))
                 .thenReturn(Mono.just(responseDTO));
 
         // Act and Assert
@@ -804,11 +804,11 @@ class InventoryControllerUnitTest {
                 });
 
         verify(productInventoryService, times(1))
-                .addProductToInventory(any(), eq(inventoryId));
+                .addSupplyToInventory(any(), eq(inventoryId));
     }
 
     @Test
-    void addProductToInventory_InvalidInput_ShouldReturnBadRequest() {
+    void addSupplyToInventory_InvalidInput_ShouldReturnBadRequest() {
         // Arrange
         String inventoryId = "123";
         ProductRequestDTO requestDTO = ProductRequestDTO.builder()
@@ -819,7 +819,7 @@ class InventoryControllerUnitTest {
                 .productSalePrice(15.99)
                 .build();
 
-        when(productInventoryService.addProductToInventory(any(), eq(inventoryId)))
+        when(productInventoryService.addSupplyToInventory(any(), eq(inventoryId)))
                 .thenReturn(Mono.error(new InvalidInputException("Invalid input")));
 
         // Act and Assert
@@ -834,7 +834,7 @@ class InventoryControllerUnitTest {
                 .jsonPath("$.message", "Invalid input");
 
         verify(productInventoryService, times(1))
-                .addProductToInventory(any(), eq(inventoryId));
+                .addSupplyToInventory(any(), eq(inventoryId));
     }
 
     @Test
@@ -1069,7 +1069,7 @@ class InventoryControllerUnitTest {
     }
 
     @Test
-    public void addProductToInventory_StatusAssignedCorrectly() {
+    public void addSupplyToInventory_StatusAssignedCorrectly() {
         // Arrange
         String inventoryId = "1";
         ProductRequestDTO requestDTO = ProductRequestDTO.builder()
@@ -1090,7 +1090,7 @@ class InventoryControllerUnitTest {
                 .status(AVAILABLE)
                 .build();
 
-        when(productInventoryService.addProductToInventory(any(), eq(inventoryId)))
+        when(productInventoryService.addSupplyToInventory(any(), eq(inventoryId)))
                 .thenReturn(Mono.just(responseDTO));
 
         // Act and Assert
@@ -1114,11 +1114,11 @@ class InventoryControllerUnitTest {
                 });
 
         verify(productInventoryService, times(1))
-                .addProductToInventory(any(), eq(inventoryId));
+                .addSupplyToInventory(any(), eq(inventoryId));
     }
 
     @Test
-    public void addProductToInventory_StatusAssignedShouldBeOut_Of_Stock() {
+    public void addSupplyToInventory_StatusAssignedShouldBeOut_Of_Stock() {
         // Arrange
         String inventoryId = "123";
 
@@ -1142,7 +1142,7 @@ class InventoryControllerUnitTest {
                 .build();
 
         // Mocking the service method to return the expected response
-        when(productInventoryService.addProductToInventory(any(), eq(inventoryId)))
+        when(productInventoryService.addSupplyToInventory(any(), eq(inventoryId)))
                 .thenReturn(Mono.just(responseDTO));
 
         // Act and Assert
@@ -1159,11 +1159,11 @@ class InventoryControllerUnitTest {
                     assertEquals(Status.OUT_OF_STOCK, dto.getStatus());  // Assert the status is OUT_OF_STOCK
                 });
 
-        verify(productInventoryService, times(1)).addProductToInventory(any(), eq(inventoryId));
+        verify(productInventoryService, times(1)).addSupplyToInventory(any(), eq(inventoryId));
     }
 
     @Test
-    public void addProductToInventory_StatusAssignedShouldBeRe_Order() {
+    public void addSupplyToInventory_StatusAssignedShouldBeRe_Order(){
         // Arrange
         String inventoryId = "123";
 
@@ -1187,8 +1187,8 @@ class InventoryControllerUnitTest {
                 .build();
 
         // Mocking the service method to return the expected response
-        when(productInventoryService.addProductToInventory(any(), eq(inventoryId)))
-                .thenReturn(Mono.just(responseDTO));
+        when(productInventoryService.addSupplyToInventory(any(), eq(inventoryId))
+        ).thenReturn(Mono.just(responseDTO));
 
         // Act and Assert
         webTestClient
@@ -1204,8 +1204,54 @@ class InventoryControllerUnitTest {
                     assertEquals(RE_ORDER, dto.getStatus());  // Assert the status is REORDER
                 });
 
-        verify(productInventoryService, times(1)).addProductToInventory(any(), eq(inventoryId));
+        verify(productInventoryService, times(1)).addSupplyToInventory(any(), eq(inventoryId));
     }
+
+//    @Test
+//    public void addProductToInventory_StatusAssignedShouldBeRe_Order() {
+//        // Arrange
+//        String inventoryId = "123";
+//
+//        // Product with quantity less than 20 should result in REORDER status
+//        ProductRequestDTO requestDTO = ProductRequestDTO.builder()
+//                .productName("New Product")
+//                .productDescription("New Description")
+//                .productPrice(100.00)
+//                .productQuantity(10)  // Quantity < 20, so the status should be REORDER
+//                .productSalePrice(10.99)
+//                .build();
+//
+//        ProductResponseDTO responseDTO = ProductResponseDTO.builder()
+//                .id("456")
+//                .inventoryId(inventoryId)
+//                .productName("New Product")
+//                .productDescription("New Description")
+//                .productPrice(100.00)
+//                .productQuantity(10)
+//                .productSalePrice(10.99)
+//                .status(RE_ORDER)  // Expected status
+//                .build();
+//
+//        // Mocking the service method to return the expected response
+//        when(productInventoryService.addProductToInventory(any(), eq(inventoryId)))
+//                .thenReturn(Mono.just(responseDTO));
+//
+//        // Act and Assert
+//        webTestClient
+//                .post()
+//                .uri("/inventory/{inventoryId}/products", inventoryId)
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .bodyValue(requestDTO)
+//                .exchange()
+//                .expectStatus().isCreated()
+//                .expectBody(ProductResponseDTO.class)
+//                .value(dto -> {
+//                    assertNotNull(dto);
+//                    assertEquals(RE_ORDER, dto.getStatus());  // Assert the status is REORDER
+//                });
+//
+//        verify(productInventoryService, times(1)).addProductToInventory(any(), eq(inventoryId));
+//    }
 
     @Test
     public void updateProductInInventory_StatusAssignedCorrectly() {
