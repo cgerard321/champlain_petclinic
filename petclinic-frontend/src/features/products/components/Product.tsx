@@ -59,14 +59,6 @@ function Product({ product }: { product: ProductModel }): JSX.Element {
     }
   };
 
-  // const handleProductClick = async (productId: string): Promise<void> => {
-  //   try {
-  //     const product = await getProductByProductId(productId);
-  //     setSelectedProduct(product);
-  //   } catch (error) {
-  //     console.error('Failed to fetch product details:', error);
-  //   }
-  // };
 
   const handleBackToList = (): void => {
     setSelectedProduct(null);
