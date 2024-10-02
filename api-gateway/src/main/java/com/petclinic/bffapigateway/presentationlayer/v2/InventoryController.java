@@ -229,18 +229,8 @@ public class InventoryController {
         return inventoryServiceClient.addSupplyToInventory(productRequestDTO, inventoryId)
                 .map(productResponseDTO -> ResponseEntity.status(HttpStatus.CREATED).body(productResponseDTO))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
-      
-      @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER,Roles.VET})
-    @GetMapping(value = "inventory/{inventoryId}/products")//, produces= MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ProductResponseDTO> getProductsInInventoryByInventoryIdAndFields(@PathVariable String inventoryId,
-                                                                                 @RequestParam(required = false) String productName,
-                                                                                 @RequestParam(required = false) Double productPrice,
-                                                                                 @RequestParam(required = false) Integer productQuantity,
-                                                                                 @RequestParam(required = false) Double productSalePrice){
-        return inventoryServiceClient.getProductsInInventoryByInventoryIdAndProductsField(inventoryId, productName, productPrice, productQuantity, productSalePrice);
+
+
 
     }
-
-
-
 }
