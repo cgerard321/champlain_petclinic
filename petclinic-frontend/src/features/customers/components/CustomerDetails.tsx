@@ -184,7 +184,7 @@ const CustomerDetails: FC = () => {
               {pets.map(pet => (
                 <li key={pet.petId}>
                   <strong>Pet ID: </strong>
-                  {pet.petId},{' '}
+                  {pet.petId}
                   <strong>Name: </strong>
                   {pet.name}, <strong>Type: </strong>
                   {petTypeMapping[pet.petTypeId] || 'Unknown'},{' '}

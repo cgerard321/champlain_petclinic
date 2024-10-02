@@ -1,4 +1,3 @@
-
 export interface PetRequestModel {
   name: string;
   birthDate: Date;

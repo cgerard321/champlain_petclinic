@@ -10,5 +10,4 @@ const UpdateOwnerPetPage: FC = (): JSX.Element => {
     </div>
   );
 };
-
 export default UpdateOwnerPetPage;

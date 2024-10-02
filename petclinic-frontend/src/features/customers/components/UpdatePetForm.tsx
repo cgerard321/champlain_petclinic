@@ -61,14 +61,14 @@ const UpdatePetForm: React.FC = (): JSX.Element => {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-
   // Handle form submission
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
+
+  const handleSubmit = async (
+    event: FormEvent<HTMLFormElement>
+  ): Promise<void> => {
     event.preventDefault();
     if (!validate() || !pet) return;
-
     const petRequestData: PetRequestModel = {
-
       name: pet.name,
       birthDate: pet.birthDate, // Ensure date is in correct format
       petTypeId: pet.petTypeId,
@@ -118,15 +118,6 @@ const UpdatePetForm: React.FC = (): JSX.Element => {
         {errors.name && <span className="error">{errors.name}</span>}
         <br />
 
-        <label>Birth Date: </label>
-        <input
-          type="date"
-          name="birthDate"
-          value={pet.birthDate.toISOString().split('T')[0]}
-          onChange={handleChange}
-        />
-        <br />
-
         <label>Pet Type: </label>
         <input
           type="text"
@@ -141,7 +132,7 @@ const UpdatePetForm: React.FC = (): JSX.Element => {
         <input
           type="checkbox"
           name="isActive"
-          checked={pet.isActive === 'true'} // Handle string conversion to checkbox
+          checked={pet.isActive === 'true'}
           onChange={handleChange}
         />
         <br />
@@ -155,9 +146,11 @@ const UpdatePetForm: React.FC = (): JSX.Element => {
         />
         {errors.weight && <span className="error">{errors.weight}</span>}
         <br />
-
         <button type="submit">Update Pet</button>
-        <button type="button" onClick={handleCancel}>Cancel</button>
+        <button type="button" onClick={handleCancel}>
+          {' '}
+          Cancel{' '}
+        </button>
       </form>
       {successMessage && <p className="success">{successMessage}</p>}
     </div>
