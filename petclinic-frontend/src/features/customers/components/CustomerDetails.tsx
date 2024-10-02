@@ -2,6 +2,7 @@ import { FC, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { OwnerResponseModel } from '@/features/customers/models/OwnerResponseModel';
+import { PetResponseModel } from '@/features/customers/models/PetResponseModel'; // Import the PetResponseModel
 import { Bill } from '@/features/bills/models/Bill';
 import './CustomerDetails.css';
 
@@ -10,6 +11,7 @@ const CustomerDetails: FC = () => {
   const navigate = useNavigate();
 
   const [owner, setOwner] = useState<OwnerResponseModel | null>(null);
+  const [pets, setPets] = useState<PetResponseModel[]>([]); // State for pets
   const [bills, setBills] = useState<Bill[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -22,6 +24,13 @@ const CustomerDetails: FC = () => {
           { withCredentials: true }
         );
         setOwner(ownerResponse.data);
+
+        // Fetch pets by owner ID
+        const petsResponse = await axios.get(
+          `http://localhost:8080/api/v2/gateway/pet/owner/${ownerId}/pets`,
+          { withCredentials: true }
+        );
+        setPets(petsResponse.data); // Set the pets state
 
         const billsResponse = await axios.get(
           `http://localhost:8080/api/v2/gateway/bills/customer/${ownerId}`,
@@ -126,8 +135,8 @@ const CustomerDetails: FC = () => {
     return Math.abs(ageDate.getUTCFullYear() - 1970);
   };
 
-  const handleEditPetClick = (ownerId: string): void => {
-    navigate(`/owners/${ownerId}/pets/edit`);
+  const handleEditPetClick = (petId: string): void => {
+    navigate(`/pets/${petId}/edit`);
   };
 
   return (
@@ -170,9 +179,9 @@ const CustomerDetails: FC = () => {
         {/* Owner Pets */}
         <div className="section owner-pets">
           <h3>Owner Pets</h3>
-          {owner.pets && owner.pets.length > 0 ? (
+          {pets && pets.length > 0 ? (
             <ul>
-              {owner.pets.map(pet => (
+              {pets.map(pet => (
                 <li key={pet.petId}>
                   <strong>Pet ID: </strong>
                   {pet.petId},{' '}

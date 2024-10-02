@@ -1,9 +1,11 @@
 package com.petclinic.bffapigateway.presentationlayer.v2;
 
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
-import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
+import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetRequestDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
+import com.petclinic.bffapigateway.exceptions.InvalidInputException;
+import com.petclinic.bffapigateway.utils.Security.Annotations.IsUserSpecific;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
 import lombok.RequiredArgsConstructor;
@@ -13,9 +15,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.List;
+import static reactor.core.publisher.Mono.just;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,21 +27,41 @@ import java.util.List;
 @Validated
 @CrossOrigin(origins = "http://localhost:3000, http://localhost:80")
 public class PetController {
-
     private final CustomersServiceClient customersServiceClient;
 
-    @PutMapping(value = "/owner/{ownerId}/pets", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @SecuredEndpoint(allowedRoles = {Roles.VET, Roles.ADMIN})
-    public Mono<ResponseEntity<List<PetResponseDTO>>> updateOwnerPets(
-            @PathVariable("ownerId") String ownerId,
-            @RequestBody List<PetRequestDTO> petRequestDTOs) {
-
-        return customersServiceClient.updateOwnerPets(ownerId, petRequestDTOs)
-                .map(updatedPets -> ResponseEntity.ok().body(updatedPets))
-                .onErrorResume(e -> {
-                    log.error("Error updating pets for owner: {}", ownerId, e);
-                    return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
-                });
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
+    @PutMapping(value = "/{petId}")
+    public Mono<ResponseEntity<PetResponseDTO>> updatePet(@RequestBody Mono<PetRequestDTO> petRequestDTO, @PathVariable String petId) {
+        return petRequestDTO
+                .flatMap(requestDTO -> {
+                    requestDTO.setPetId(petId); // Ensure petId is set
+                    return customersServiceClient.updatePet(just(requestDTO), petId)
+                            .flatMap(petResponse -> customersServiceClient.getOwner(petResponse.getOwnerId())
+                                    .flatMap(owner -> {
+                                        owner.getPets().removeIf(pet -> pet.getPetId().equals(petId));
+                                        owner.getPets().add(petResponse);
+                                        return customersServiceClient.updateOwner(owner.getOwnerId(), just(OwnerRequestDTO.builder().build())) // Pass the ownerId and owner to updateOwner
+                                                .thenReturn(petResponse);
+                                    })
+                            );
+                })
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
-}
 
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
+    @GetMapping(value = "/{petId}")
+    public Mono<ResponseEntity<PetResponseDTO>> getPetByPetId(@PathVariable String petId) {
+        return customersServiceClient.getPetByPetId(petId)
+                .map(s -> ResponseEntity.status(HttpStatus.OK).body(s))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
+    @GetMapping("/owner/{ownerId}/pets")
+    public Flux<PetResponseDTO> getPetsByOwnerId(@PathVariable String ownerId) {
+        return customersServiceClient.getPetsByOwnerId(ownerId);
+    }
+
+}

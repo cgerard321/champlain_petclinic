@@ -6,9 +6,9 @@ import com.petclinic.bffapigateway.dtos.Pets.*;
 import com.petclinic.bffapigateway.dtos.Vets.PhotoDetails;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -16,7 +16,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 
-import java.util.List;
 import java.util.Objects;
 
 import java.util.Optional;
@@ -214,20 +213,21 @@ public class CustomersServiceClient {
                 .retrieve().bodyToMono(PetResponseDTO.class);
     }
 
-    public Mono<List<PetResponseDTO>> updateOwnerPets(String ownerId, List<PetRequestDTO> petRequestDTOs) {
-        return webClientBuilder.build().put()
-                .uri(customersServiceUrl + "/owners/{ownerId}/pets", ownerId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(BodyInserters.fromValue(petRequestDTOs))
-                .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<List<PetResponseDTO>>() {});
+
+    public Mono<PetResponseDTO> updatePet(Mono<PetRequestDTO> petRequestDTO, String petId) {
+        return petRequestDTO.flatMap(requestDTO -> {
+            requestDTO.setPetId(petId);
+            return webClientBuilder.build().put()
+                    .uri(customersServiceUrl + "/pet/" + petId)
+                    .body(BodyInserters.fromValue(requestDTO))
+                    .retrieve()
+                    .bodyToMono(PetResponseDTO.class);
+        });
     }
-
-
     public Mono<PetResponseDTO> patchPet(PetRequestDTO model, String petId) {
         return webClientBuilder.build().patch()
                 .uri(customersServiceUrl + "/pet/{petId}", petId)
-                .body(BodyInserters.fromValue(model))
+                .body(just(model), PetRequestDTO.class)
                 .retrieve()
                 .bodyToMono(PetResponseDTO.class);
     }
