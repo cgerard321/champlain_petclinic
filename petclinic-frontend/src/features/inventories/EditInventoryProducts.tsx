@@ -36,8 +36,8 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
       if (inventoryId && productId) {
         try {
           const response = await getProductByProductIdInInventory(
-            inventoryId,
-            productId
+              inventoryId,
+              productId
           );
           setProduct(response);
         } catch (error) {
@@ -46,7 +46,7 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
       }
     };
     fetchProduct().catch(error =>
-      console.error('Error in fetchProduct:', error)
+        console.error('Error in fetchProduct:', error)
     );
   }, [inventoryId, productId]);
 
@@ -72,7 +72,7 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
   };
 
   const handleSubmit = async (
-    event: FormEvent<HTMLFormElement>
+      event: FormEvent<HTMLFormElement>
   ): Promise<void> => {
     event.preventDefault();
     if (!validate()) return;
@@ -104,87 +104,128 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
     setProduct({
       ...product,
       [e.target.name]:
-        e.target.type === 'number'
-          ? parseFloat(e.target.value)
-          : e.target.value,
+          e.target.type === 'number'
+              ? parseFloat(e.target.value)
+              : e.target.value,
     });
   };
 
   return (
-    <div>
-      <h1>Edit Product</h1>
-      {error && <p style={{ color: 'red' }}>{error.message}</p>}
+      <div
+          className="card d-flex justify-content-center align-items-center"
+          style={{
+            width: '500px',
+            height: '700px',
+            backgroundColor: 'lightgray',
+            margin: '0 auto',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+          }}
+      >
+        <h2>Edit Product</h2>
 
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Product Name</label>
-          <input
-            type="text"
-            name="productName"
-            value={product.productName}
-            onChange={handleChange}
-            required
-          />
-        </div>
+        <br></br>
 
-        <div>
-          <label>Product Description</label>
-          <input
-            type="text"
-            name="productDescription"
-            value={product.productDescription}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <div>
-          <label>Product Price</label>
-          <input
-            type="number"
-            name="productPrice"
-            value={product.productPrice}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <div>
-          <label>Product Quantity</label>
-          <input
-            type="number"
-            name="productQuantity"
-            value={product.productQuantity}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <div>
-          <label>Product Sale Price</label>
-          <input
-            type="number"
-            name="productSalePrice"
-            value={product.productSalePrice}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <button type="submit">Update Product</button>
-      </form>
-      <div>
-        {loading && <p>Loading...</p>}
-        {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
-        {showNotification ? (
-          <div className="notification">
-            {successMessage && (
-              <p style={{ color: 'white' }}>{successMessage}</p>
-            )}
+        <form onSubmit={handleSubmit}>
+          <h6>Name</h6>
+          <div className="input-group mb-3">
+            <input
+                className="form-control"
+                type="text"
+                name="productName"
+                value={product.productName}
+                onChange={handleChange}
+                required
+            />
           </div>
-        ) : null}
+
+          <br></br>
+
+          <h6>Description</h6>
+          <div className="input-group mb-3">
+            <input
+                className="form-control"
+                type="text"
+                name="productDescription"
+                value={product.productDescription}
+                onChange={handleChange}
+                required
+            />
+          </div>
+
+          <br></br>
+
+          <h6>Price</h6>
+          <div className="input-group mb-3">
+            <span className="input-group-text">$</span>
+            <input
+                className="form-control"
+                aria-label="Amount (to the nearest dollar)"
+                type="number"
+                name="productPrice"
+                value={product.productPrice}
+                onChange={handleChange}
+                required
+            />
+            <span className="input-group-text">.00</span>
+          </div>
+
+          <br></br>
+
+          <h6>Quantity</h6>
+          <div className="input-group mb-3">
+            <input
+                className="form-control"
+                type="number"
+                name="productQuantity"
+                value={product.productQuantity}
+                onChange={handleChange}
+                required
+            />
+          </div>
+
+          <br></br>
+
+          <h6>Sale Price</h6>
+          <div className="input-group mb-3">
+            <span className="input-group-text">$</span>
+            <input
+                className="form-control"
+                aria-label="Amount (to the nearest dollar)"
+                type="number"
+                name="productSalePrice"
+                value={product.productSalePrice}
+                onChange={handleChange}
+                required
+            />
+            <span className="input-group-text">.00</span>
+          </div>
+
+          <button
+              type="submit"
+              style={{
+                width: '100px',
+                backgroundColor: '#333',
+                color: 'white',
+              }}
+          >
+            Update
+          </button>
+        </form>
+        <div>
+          {loading && <p>Loading...</p>}
+          {error && <p style={{ color: 'red' }}>{error.message}</p>}
+          {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+          {showNotification ? (
+              <div className="notification">
+                {successMessage && (
+                    <p style={{ color: 'white' }}>{successMessage}</p>
+                )}
+              </div>
+          ) : null}
+        </div>
       </div>
-    </div>
   );
 };
 
