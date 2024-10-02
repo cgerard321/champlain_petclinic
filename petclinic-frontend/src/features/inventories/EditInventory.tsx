@@ -1,9 +1,11 @@
 import * as React from 'react';
 import { FormEvent, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getInventory, updateInventory } from '@/shared/api/EditInventory.ts';
+import { getInventory, updateInventory } from '@/features/inventories/api/EditInventory.ts';
 import { InventoryResponseModel } from '@/features/inventories/models/InventoryModels/InventoryResponseModel.ts';
 import { InventoryRequestModel } from '@/features/inventories/models/InventoryModels/InventoryRequestModel.ts';
+import {InventoryType} from "@/features/inventories/models/InventoryType.ts";
+import {getAllInventoryTypes} from "@/features/inventories/api/getAllInventoryTypes.ts";
 
 interface ApiError {
   message: string;
@@ -16,6 +18,7 @@ const EditInventory: React.FC = (): JSX.Element => {
     inventoryType: '',
     inventoryDescription: '',
   });
+  const [inventoryTypes, setInventoryTypes] = useState<InventoryType[]>([]);
   const [error, setError] = useState<{ [key: string]: string }>({});
   const [successMessage, setSuccessMessage] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string>('');
@@ -47,7 +50,21 @@ const EditInventory: React.FC = (): JSX.Element => {
     fetchInventoryData().catch(error =>
       console.error('Error in fetchInventoryData:', error)
     );
+
+    const fetchInventoryTypes = async () => {
+      try {
+        const types = await getAllInventoryTypes();
+        setInventoryTypes(types); // Set the fetched types in state
+      } catch (error) {
+        console.error('Error fetching inventory types:', error);
+      }
+    };
+
+    fetchInventoryTypes();
+
   }, [inventoryId]);
+
+
 
   const validate = (): boolean => {
     const newError: { [key: string]: string } = {};
@@ -134,27 +151,28 @@ const EditInventory: React.FC = (): JSX.Element => {
               <div className="form-group">
                 <label>Inventory Type</label>
                 <select
-                  name="inventoryType"
-                  className="form-control"
-                  value={inventory.inventoryType}
-                  onChange={e =>
-                    setInventory({
-                      ...inventory,
-                      inventoryType: e.target.value,
-                    })
-                  }
-                  required
+                    name="inventoryType"
+                    className="form-control"
+                    value={inventory.inventoryType}
+                    onChange={e =>
+                        setInventory({
+                          ...inventory,
+                          inventoryType: e.target.value,
+                        })
+                    }
+                    required
                 >
                   <option value="" disabled>
                     Select inventory type
                   </option>
-                  <option value="Equipment">Equipment</option>
-                  <option value="Injections">Injections</option>
-                  <option value="Medications">Medications</option>
-                  <option value="Bandages">Bandages</option>
+                  {inventoryTypes.map(type => (
+                      <option key={type.typeId} value={type.type}>
+                        {type.type}
+                      </option>
+                  ))}
                 </select>
                 {error.inventoryType && (
-                  <span className="error">{error.inventoryType}</span>
+                    <span className="error">{error.inventoryType}</span>
                 )}
               </div>
             </div>
