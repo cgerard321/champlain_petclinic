@@ -54,7 +54,7 @@ const EditInventory: React.FC = (): JSX.Element => {
       console.error('Error in fetchInventoryData:', error)
     );
 
-    const fetchInventoryTypes = async () => {
+    const fetchInventoryTypes = async ():Promise<void> => {
       try {
         const types = await getAllInventoryTypes();
         setInventoryTypes(types); // Set the fetched types in state
