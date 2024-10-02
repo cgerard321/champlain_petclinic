@@ -83,17 +83,18 @@ export default function ProductDetails(): JSX.Element {
                     </>
                 );
             default:
-                return <>Description not available</>; 
+                return <>Description not available</>;
         }
     };
 
 
     return (
         <>
-            <NavBar />
+            <NavBar/>
             <h1>{product.productName}</h1>
             <p>{renderProductDescription(product.productName)}</p>
             <p>Price: ${product.productSalePrice.toFixed(2)}</p>
+            <p>Rating: {product.averageRating} / 5</p>
         </>
     );
 }
