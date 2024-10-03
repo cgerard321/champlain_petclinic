@@ -42,4 +42,5 @@ export enum AppRoutePaths {
   SignUp = '/users/signup',
   CustomerVisits = '/customer/visits',
   UpdatePet = '/pets/:petId/edit',
+  ProductDetails = '/productDetails',
 }

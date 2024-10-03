@@ -43,6 +43,8 @@ import EmergencyList from './features/visits/Emergency/EmergencyList';
 import EditEmergency from './features/visits/Emergency/EditEmergency';
 import EditInventoryProducts from './features/inventories/EditInventoryProducts';
 import AddSupplyToInventory from './features/inventories/AddSupplyToInventory';
+import ProductDetails from '@/features/products/api/ProductDetails.tsx';
+
 
 const router = createBrowserRouter([
   {
@@ -344,6 +346,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <CustomerVisits />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.ProductDetails,
+        element: (
+          <ProtectedRoute>
+            <ProductDetails />
           </ProtectedRoute>
         ),
       },
