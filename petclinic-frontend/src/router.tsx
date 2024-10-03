@@ -38,18 +38,12 @@ import UpdateCustomerPage from '@/pages/Customer/UpdateCustomerPage.tsx';
 import VisitDetails from './features/visits/visits/VisitByVisitId';
 import CustomerVisits from '@/pages/Visit/CustomerVisits.tsx';
 import UpdateOwnerPetPage from '@/pages/Customer/UpdateOwnerPetPage.tsx';
-import AddEmergencyForm from './features/visits/Emergency/AddEmergencyForm';
-import EmergencyList from './features/visits/Emergency/EmergencyList';
-import EditEmergency from './features/visits/Emergency/EditEmergency';
 import EditInventoryProducts from './features/inventories/EditInventoryProducts';
 import AddSupplyToInventory from './features/inventories/AddSupplyToInventory';
-import ProductDetails from '@/features/products/api/ProductDetails.tsx';
 import AddEmergencyForm from './features/visits/Emergency/AddEmergencyForm';
-import EmergencyList from './features/visits/Emergency/EmergencyList';
 import EditEmergency from './features/visits/Emergency/EditEmergency';
-import EditInventoryProducts from './features/inventories/EditInventoryProducts';
-import AddSupplyToInventory from './features/inventories/AddSupplyToInventory';
-
+import EmergencyList from './features/visits/Emergency/EmergencyList';
+import ProductDetails from './features/products/api/ProductDetails';
 
 const router = createBrowserRouter([
   {
