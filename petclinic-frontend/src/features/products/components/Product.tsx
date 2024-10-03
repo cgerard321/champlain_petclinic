@@ -58,7 +58,6 @@ function Product({ product }: { product: ProductModel }): JSX.Element {
     }
   };
 
-
   const handleBackToList = (): void => {
     setSelectedProduct(null);
   };
