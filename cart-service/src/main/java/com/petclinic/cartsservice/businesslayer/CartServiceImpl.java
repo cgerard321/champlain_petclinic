@@ -106,12 +106,12 @@ public class CartServiceImpl implements CartService {
     public Mono<CartResponseModel> checkoutCart(String cartId) {
         return cartRepository.findCartByCartId(cartId)
                 .flatMap(cart -> {
-                    // Calculate subtotal
+
                     double subtotal = cart.getProducts().stream()
                             .mapToDouble(product -> product.getProductSalePrice() * product.getQuantityInCart())
                             .sum();
 
-                    // Calculate taxes (example: 9.975% TVQ and 5% TVC)
+
                     double tvq = subtotal * 0.09975;
                     double tvc = subtotal * 0.05;
                     double total = subtotal + tvq + tvc;
@@ -122,9 +122,7 @@ public class CartServiceImpl implements CartService {
                     cart.setTvc(tvc);
                     cart.setTotal(total);
 
-                    // Simulate payment processing here (or call an actual payment service)
 
-                    // Save the updated cart (optional, if you want to persist checkout results)
                     return cartRepository.save(cart)
                             .map(savedCart -> {
                                 // Create a response model to send back to the client
