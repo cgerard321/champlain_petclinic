@@ -1,5 +1,6 @@
 package com.petclinic.bffapigateway.dtos.Pets;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,6 +17,7 @@ public class PetRequestDTO {
     private String ownerId;
     private String petId;
     private String name;
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private Date birthDate;
     private String petTypeId;
     //private String photoId;
