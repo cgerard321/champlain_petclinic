@@ -5,7 +5,6 @@ import StarRating from './StarRating';
 import { updateUserRating } from '../api/updateUserRating';
 import { getProduct } from '../api/getProduct';
 import { deleteUserRating } from '../api/deleteUserRating';
-// import { getProductByProductId } from '@/features/products/api/getProductByProductId.tsx';
 import { useNavigate } from 'react-router-dom';
 import { AppRoutePaths } from '@/shared/models/path.routes';
 
@@ -16,9 +15,9 @@ function Product({ product }: { product: ProductModel }): JSX.Element {
     null
   );
 
-  const navigate = useNavigate(); // Get the navigate function
-  const handleButtonClick = (): void => {
-    // Navigate to ProductDetails and pass the product data
+  const navigate = useNavigate();
+
+  const handleProductTitleClick = (): void => {
     navigate(AppRoutePaths.ProductDetails, { state: { product } });
   };
 
@@ -48,7 +47,7 @@ function Product({ product }: { product: ProductModel }): JSX.Element {
   };
 
   const updateRating = async (newRating: number): Promise<void> => {
-    if (newRating == 0) return deleteRating();
+    if (newRating === 0) return deleteRating();
     try {
       const resUpdate = await updateUserRating(product.productId, newRating);
       setUserRating(resUpdate);
@@ -78,7 +77,7 @@ function Product({ product }: { product: ProductModel }): JSX.Element {
   return (
     <div className="card" key={product.productId}>
       <h2
-        onClick={handleButtonClick}
+        onClick={handleProductTitleClick}
         style={{
           cursor: 'pointer',
           color: 'blue',
