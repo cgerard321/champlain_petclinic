@@ -5,6 +5,16 @@ import { ProductModel } from '../models/ProductModel';
 import './UserCart.css';
 import { NavBar } from '@/layouts/AppNavBar';
 
+interface ProductAPIResponse {
+  productId: number;
+  productName: string;
+  productDescription: string;
+  productSalePrice: number;
+  averageRating: number;
+  quantityInCart: number;
+  productQuantity: number;
+}
+
 const UserCart = (): JSX.Element => {
   const { cartId } = useParams<{ cartId: string }>();
   const navigate = useNavigate();
@@ -45,15 +55,23 @@ const UserCart = (): JSX.Element => {
         }
 
         const data = await response.json();
-        const products = data.products.map((product: any) => ({
-          productId: product.productId,
-          productName: product.productName,
-          productDescription: product.productDescription,
-          productSalePrice: product.productSalePrice,
-          averageRating: product.averageRating,
-          quantity: product.quantityInCart,
-          productQuantity: product.productQuantity,
-        }));
+
+        // Ensure that data.products exists and is an array
+        if (!Array.isArray(data.products)) {
+          throw new Error('Invalid data format: products should be an array');
+        }
+
+        const products: ProductModel[] = data.products.map(
+          (product: ProductAPIResponse) => ({
+            productId: product.productId,
+            productName: product.productName,
+            productDescription: product.productDescription,
+            productSalePrice: product.productSalePrice,
+            averageRating: product.averageRating,
+            quantity: product.quantityInCart,
+            productQuantity: product.productQuantity,
+          })
+        );
 
         setCartItems(products);
       } catch (err: unknown) {
@@ -76,7 +94,7 @@ const UserCart = (): JSX.Element => {
       event: React.ChangeEvent<HTMLInputElement>,
       index: number
     ): Promise<void> => {
-      const newQuantity = Math.max(1, +event.target.value); // Ensure quantity is at least 1
+      const newQuantity = Math.max(1, Number(event.target.value)); // Ensure quantity is at least 1
       const item = cartItems[index];
 
       if (newQuantity > item.productQuantity) {
@@ -89,7 +107,8 @@ const UserCart = (): JSX.Element => {
       } else {
         // Clear error message
         setErrorMessages(prevErrors => {
-          const { [index]: _, ...rest } = prevErrors;
+          const { ...rest } = prevErrors;
+          delete rest[index];
           return rest;
         });
       }
@@ -195,7 +214,7 @@ const UserCart = (): JSX.Element => {
               index={index}
               changeItemQuantity={changeItemQuantity}
               deleteItem={deleteItem}
-              error-message={errorMessages[index]}
+              errorMessage={errorMessages[index]}
             />
           ))
         ) : (
