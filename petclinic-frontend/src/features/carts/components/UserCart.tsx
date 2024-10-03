@@ -13,7 +13,7 @@ interface ProductAPIResponse {
   averageRating: number;
   quantityInCart: number;
   productQuantity: number;
-
+}
 interface InvoiceItem {
   productId: string;
   productName: string;
@@ -168,13 +168,6 @@ const UserCart = (): JSX.Element => {
           [index]: 'Failed to update quantity',
         }));
       }
-    (event: React.ChangeEvent<HTMLInputElement>, index: number): void => {
-      const newQuantity = Math.max(1, +event.target.value);
-      setCartItems(prevItems => {
-        const newItems = [...prevItems];
-        newItems[index].quantity = newQuantity;
-        return newItems;
-      });
     },
     [cartItems, cartId]
   );
