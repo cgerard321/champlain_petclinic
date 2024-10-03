@@ -6,6 +6,7 @@ import com.petclinic.visits.visitsservicenew.BusinessLayer.Review.ReviewService;
 import com.petclinic.visits.visitsservicenew.BusinessLayer.VisitService;
 import com.petclinic.visits.visitsservicenew.DataLayer.Emergency.UrgencyLevel;
 import com.petclinic.visits.visitsservicenew.DataLayer.Status;
+import com.petclinic.visits.visitsservicenew.DataLayer.Visit;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.SpecialtyDTO;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.VetDTO;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.Workday;
@@ -101,8 +102,11 @@ class VisitControllerUnitTest {
 
     //private final LocalDateTime visitDate = visitResponseDTO.getVisitDate().withSecond(0);
     @Test
-    void getAllVisits() {
-        when(visitService.getAllVisits()).thenReturn(Flux.just(visitResponseDTO, visitResponseDTO));
+    void getAllVisits(){
+        Visit visit1 = new Visit(); // replace with your actual Visit object
+
+
+        when(visitService.getAllVisits(visit1.getDescription())).thenReturn(Flux.just(visitResponseDTO, visitResponseDTO));
 
         webTestClient.get()
                 .uri("/visits")
@@ -112,7 +116,7 @@ class VisitControllerUnitTest {
                 .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM + ";charset=UTF-8")
                 .returnResult(VisitResponseDTO.class);
 
-        verify(visitService, times(1)).getAllVisits();
+        verify(visitService, times(1)).getAllVisits(visit1.getDescription());
     }
 
     @Test

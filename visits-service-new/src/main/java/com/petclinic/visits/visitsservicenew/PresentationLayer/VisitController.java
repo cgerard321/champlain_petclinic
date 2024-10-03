@@ -39,9 +39,10 @@ public class VisitController {
      *
      * @return All visits
      */
-    @GetMapping(value = "", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<VisitResponseDTO> getAllVisits() {
-        return visitService.getAllVisits();
+    @GetMapping(value="", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<VisitResponseDTO> getAllVisits(@RequestParam(required = false) String description){
+
+        return visitService.getAllVisits(description);
     }
 
     /**

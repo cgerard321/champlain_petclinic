@@ -10,8 +10,7 @@ import reactor.core.publisher.Mono;
  * Simple interface for all the request controller. Implemented in VisitServiceImpl
  */
 public interface VisitService {
-    Flux<VisitResponseDTO> getAllVisits();
-
+    Flux<VisitResponseDTO> getAllVisits(String description);
     Flux<VisitResponseDTO> getVisitsForPet(String petId);
 
     Flux<VisitResponseDTO> getVisitsForStatus(String statusString);

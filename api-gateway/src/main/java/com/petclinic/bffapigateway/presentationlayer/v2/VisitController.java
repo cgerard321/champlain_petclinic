@@ -39,8 +39,8 @@ public class VisitController {
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping(value = "", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public ResponseEntity<Flux<VisitResponseDTO>> getAllVisits() {
-        return ResponseEntity.ok().body(visitsServiceClient.getAllVisits());
+    public ResponseEntity<Flux<VisitResponseDTO>> getAllVisits(@RequestParam(required = false) String description){
+        return ResponseEntity.ok().body(visitsServiceClient.getAllVisits(description));
     }
     @SecuredEndpoint(allowedRoles = {Roles.ALL})
     @GetMapping(value = "/{visitId}", produces = MediaType.APPLICATION_JSON_VALUE)
