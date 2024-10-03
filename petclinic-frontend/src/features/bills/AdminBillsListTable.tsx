@@ -10,8 +10,10 @@ import { VetResponseModel } from '../veterinarians/models/VetResponseModel';
 import { deleteBill } from '@/features/bills/api/deleteBill.tsx';
 import useGetAllBillsPaginated from '@/features/bills/hooks/useGetAllBillsPaginated.ts';
 import './AdminBillsListTable.css';
+import {useNavigate} from "react-router-dom";
 
 export default function AdminBillsListTable(): JSX.Element {
+  const navigate = useNavigate();
   const [searchId, setSearchId] = useState<string>('');
   const [searchedBill, setSearchedBill] = useState<Bill | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -138,6 +140,9 @@ export default function AdminBillsListTable(): JSX.Element {
       window.alert('Cannot delete this bill. It may be unpaid or overdue.');
     }
   };
+  const handleEditClick = (): void => {
+    navigate(`/bills/admin/${searchId}/edit`)
+  }
 
   const handleGoBack = (): void => {
     setSearchedBill(null);
@@ -287,7 +292,7 @@ export default function AdminBillsListTable(): JSX.Element {
           <p>
             <strong>Bill ID:</strong> {searchedBill.billId}
           </p>
-          <p>
+          <p> d
             <strong>Owner Name:</strong> {searchedBill.ownerFirstName}{' '}
             {searchedBill.ownerLastName}
           </p>
@@ -313,6 +318,9 @@ export default function AdminBillsListTable(): JSX.Element {
           <p>
             <strong>Due Date:</strong> {searchedBill.dueDate}
           </p>
+          <button  onClick={handleEditClick}>
+            Edit Bill
+          </button>
         </div>
       ) : (
         <div className="container">
@@ -382,3 +390,5 @@ export default function AdminBillsListTable(): JSX.Element {
     </div>
   );
 }
+
+

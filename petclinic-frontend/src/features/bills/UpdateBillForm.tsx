@@ -4,19 +4,20 @@ import {BillRequestModel} from "@/features/bills/models/BillRequestModel.tsx";
 import {getBill, updateBill} from "@/features/bills/api/updateBill.tsx";
 import {Bill} from "@/features/bills/models/Bill.ts";
 import {AppRoutePaths} from "@/shared/models/path.routes.ts";
+import './UpdateBillForm.css'
+import {getAllOwners} from "@/features/customers/api/getAllOwners.tsx";
+import {getAllVets} from "@/features/veterinarians/api/getAllVets.tsx";
+import {OwnerResponseModel} from "@/features/customers/models/OwnerResponseModel.ts";
+import {VetResponseModel} from "@/features/veterinarians/models/VetResponseModel.ts";
 
 
 const UpdateBillForm: React.FC = (): JSX.Element => {
     const { billId } = useParams<{billId: string}>();
     const navigate = useNavigate();
-    const [bill, setBill] = useState<BillRequestModel>({
+    const [formData, setFormData] = useState<BillRequestModel>({
         customerId: '',
-        ownerFirstName: '',
-        ownerLastName: '',
         visitType: '',
         vetId: '',
-        vetFirstName: '',
-        vetLastName: '',
         date: '',
         amount: 0.0,
         taxedAmount: 0.0,
@@ -24,6 +25,19 @@ const UpdateBillForm: React.FC = (): JSX.Element => {
         dueDate: ''
     });
     const [errors, setErrors] = useState<{ [key: string]: string }>({})
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [owners, setOwners] = useState<OwnerResponseModel[]>([]);
+    const [vets, setVets] = useState<VetResponseModel[]>([]);
+
+
+
+    const fetchOwnersAndVets = async (): Promise<void> => {
+        const ownersList = await getAllOwners();
+        const vetsList = await getAllVets();
+        setOwners(ownersList);
+        setVets(vetsList);
+    };
+
 
     useEffect(() => {
         const fetchBillData = async(): Promise<void> => {
@@ -31,22 +45,9 @@ const UpdateBillForm: React.FC = (): JSX.Element => {
                 try {
                     const response = await getBill(billId);
                     const billData: Bill = response.data;
-                    setBill({
-                        customerId: billData.customerId,
-                        ownerFirstName: billData.ownerFirstName,
-                        ownerLastName: billData.ownerLastName,
-                        visitType: billData.visitType,
-                        vetId: billData.vetId,
-                        vetFirstName: billData.vetFirstName,
-                        vetLastName: billData.vetLastName,
-                        date: billData.date,
-                        amount: billData.amount,
-                        taxedAmount: billData.taxedAmount,
-                        billStatus: billData.billStatus,
-                        dueDate: billData.dueDate
-                    });
+                    setFormData(billData);
                 } catch (error) {
-                    console.error('Error fetching owner data: ', error);
+                    console.error('Error fetching bill data: ', error);
                 }
             }
             if (billId) {
@@ -55,30 +56,39 @@ const UpdateBillForm: React.FC = (): JSX.Element => {
         }
     }, [billId]);
 
+
+    useEffect(() => {
+        fetchOwnersAndVets()
+    }, []);
+
+
+
+
     const handleChange = (
-        e: React.ChangeEvent<HTMLInputElement>
+        e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
     ): void => {
-        const {name, value} = e.target;
-        setBill({...bill, [name]: value});
+        setFormData(({
+            ...formData,
+            [e.target.name]: e.target.value,
+        }))
     }
 
     const validate = (): boolean => {
         const newErrors: { [key: string]: string } = {};
-        if(!bill.customerId) newErrors.customerId = 'Customer ID is required';
-        if(!bill.ownerFirstName) newErrors.ownerFirstName = 'Owner first name is required';
-        if(!bill.ownerLastName) newErrors.ownerLastName = 'Owner last name is required';
-        if(!bill.visitType) newErrors.visitType = 'Visit type is required';
-        if(!bill.vetId) newErrors.vetId = 'Vet ID is required';
-        if(!bill.vetFirstName) newErrors.vetFirstName = 'Vet first name is required';
-        if(!bill.vetLastName) newErrors.vetLastName = 'Vet last name is required';
-        if(!bill.date) newErrors.date = 'Date is required';
-        if(!bill.amount) newErrors.amount = 'Amount is required';
-        if(!bill.taxedAmount) newErrors.taxedAmount = 'Taxed amount is required';
-        if(!bill.billStatus) newErrors.billStatus = 'Bill status is required';
-        if(!bill.dueDate) newErrors.dueDate = 'Due date is required';
+        if(!formData.customerId) newErrors.customerId = 'Customer ID is required';
+        if(!formData.visitType) newErrors.visitType = 'Visit type is required';
+        if(!formData.vetId) newErrors.vetId = 'Vet ID is required';
+        if(!formData.date) newErrors.date = 'Date is required';
+        if(!formData.amount) newErrors.amount = 'Amount is required';
+        if(!formData.taxedAmount) newErrors.taxedAmount = 'Taxed amount is required';
+        if(!formData.billStatus) newErrors.billStatus = 'Bill status is required';
+        if(!formData.dueDate) newErrors.dueDate = 'Due date is required';
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
+
+
+
 
     const handleSubmit = async (
         event: FormEvent<HTMLFormElement>
@@ -88,7 +98,8 @@ const UpdateBillForm: React.FC = (): JSX.Element => {
 
         try {
             if(billId) {
-                const response = await updateBill(billId, bill)
+                const response = await updateBill(billId, formData)
+                setIsModalOpen(true)
                 if (response.status === 200) {
                     navigate(AppRoutePaths.AdminBills);
                 }
@@ -98,66 +109,106 @@ const UpdateBillForm: React.FC = (): JSX.Element => {
         }
     };
 
+    const closeModal = (): void => {
+        setIsModalOpen(false)
+        navigate(`/bills/admin}`)
+    }
+
     return (
-        <div className="update-customer-form">
-            <h1>Edit Profile</h1>
+        <div>
             <form onSubmit={handleSubmit}>
-                <label>First Name: </label>
+
+                <label>Customer: </label>
+                <select
+                    value={formData.customerId}
+                    onChange={e =>
+                        setFormData({ ...formData, customerId: e.target.value })
+                    }
+                >
+                    <option value="">Select Customer</option>
+                    {owners.map(owner => (
+                        <option key={owner.ownerId} value={owner.ownerId}>
+                            {owner.firstName} {owner.lastName}
+                        </option>
+                    ))}
+                </select>
+                {errors.customerId && <span className="error">{errors.customerId}</span>}
+                <label>Visit Type: </label>
                 <input
                     type="text"
-                    name="firstName"
-                    value={bill.ownerFirstName}
+                    name="visitType"
+                    value={formData.visitType}
                     onChange={handleChange}
                 />
-                {errors.ownerFirstName && <span className="error">{errors.firstName}</span>}
-                <br />
-                <label>Last Name: </label>
+                {errors.visitType && <span className="error">{errors.visitType}</span>}
+                <label>Vet ID: </label>
+                <select
+                    value={formData.vetId}
+                    onChange={e =>
+                    setFormData({ ...formData, vetId: e.target.value })
+                }>
+                <option value="">Select Vet</option>
+                    {vets.map(vet => (
+                        <option key={vet.vetId} value={vet.vetId}>
+                            {vet.firstName} {vet.lastName}
+                        </option>
+                    ))}
+                </select>
+                {errors.vetId && <span className="error">{errors.vetId}</span>}
+                <label>Date: </label>
                 <input
                     type="text"
-                    name="lastName"
-                    value={bill.ownerLastName}
+                    name="date"
+                    value={formData.date}
                     onChange={handleChange}
                 />
-                {errors.lastName && <span className="error">{errors.lastName}</span>}
-                <br />
-                <label>Address: </label>
+                {errors.date && <span className="error">{errors.date}</span>}
+                <label>Amount: </label>
                 <input
                     type="text"
-                    name="address"
-                    value={bill.visitType}
+                    name="amount"
+                    value={formData.amount}
                     onChange={handleChange}
                 />
-                {errors.address && <span className="error">{errors.address}</span>}
-                <br />
-                <label>City: </label>
+                {errors.amount && <span className="error">{errors.amount}</span>}
+                <label>Taxed Amount: </label>
                 <input
                     type="text"
-                    name="city"
-                    value={bill.vetFirstName}
+                    name="taxedAmount"
+                    value={formData.taxedAmount}
                     onChange={handleChange}
                 />
-                {errors.city && <span className="error">{errors.city}</span>}
-                <br />
-                <label>Province: </label>
+                {errors.taxedAmount && <span className="error">{errors.taxedAmount}</span>}
+                <label>Bill Status: </label>
+                <select
+                    value={formData.billStatus}
+                    onChange={e =>
+                        setFormData({ ...formData, vetId: e.target.value })
+                    }>
+                    <option> PAID </option>
+                    <option> UNPAID </option>
+                    <option> OVERDUE </option>
+                </select>
+                {errors.billStatus && <span className="error">{errors.billStatus}</span>}
+                <label>Due Date: </label>
                 <input
                     type="text"
-                    name="province"
-                    value={bill.vetLastName}
+                    name="dueDate"
+                    value={formData.dueDate}
                     onChange={handleChange}
                 />
-                {errors.province && <span className="error">{errors.province}</span>}
-                <br />
-                <label>Telephone: </label>
-                <input
-                    type="text"
-                    name="telephone"
-                    value={bill.dueDate}
-                    onChange={handleChange}
-                />
-                {errors.telephone && <span className="error">{errors.telephone}</span>}
-                <br />
+                {errors.dueDate && <span className="error">{errors.dueDate}</span>}
+
                 <button type="submit">Update</button>
             </form>
+
+            {isModalOpen && (
+                <div className="admin-update-bill-modal">
+                        <h2>Success!</h2>
+                        <p>Bill has been successfully updated.</p>
+                        <button onClick={closeModal}>Close</button>
+                </div>
+            )}
         </div>
     );
 };
