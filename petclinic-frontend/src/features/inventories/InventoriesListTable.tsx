@@ -31,6 +31,9 @@ export default function InventoriesListTable(): JSX.Element {
   const [lowStockProductsByInventory, setLowStockProductsByInventory] =
     useState<{ [inventoryName: string]: ProductModel[] }>({});
   const [showLowStock, setShowLowStock] = useState(false);
+  const [productQuantities, setProductQuantities] = useState<{
+    [key: string]: number;
+  }>({});
 
   const toggleAddSupplyModal = (): void => {
     setShowAddSupplyModal(prev => !prev);
@@ -91,6 +94,39 @@ export default function InventoriesListTable(): JSX.Element {
         return;
       }
       setShowConfirmDialog(true);
+    }
+  };
+
+  useEffect(() => {
+    if (inventoryList.length > 0) {
+      inventoryList.forEach(inventory => {
+        fetchProductQuantity(inventory.inventoryId);
+      });
+    }
+  }, [inventoryList]);
+
+  const fetchProductQuantity = async (inventoryId: string): Promise<void> => {
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/v2/gateway/inventories/${inventoryId}/productquantity`,
+        {
+          method: 'GET',
+          credentials: 'include', // <-- Add this line to include cookies or credentials
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+
+      if (response.ok) {
+        const quantity = await response.json();
+        setProductQuantities(prevQuantities => ({
+          ...prevQuantities,
+          [inventoryId]: quantity,
+        }));
+      } else {
+        console.error('Failed to fetch product quantity:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error fetching product quantity:', error);
     }
   };
 
@@ -181,6 +217,7 @@ export default function InventoriesListTable(): JSX.Element {
             <td>Name</td>
             <td>Type</td>
             <td>Description</td>
+            <td>Quantity of Products</td>
             <td></td>
             <td></td>
           </tr>
@@ -295,7 +332,6 @@ export default function InventoriesListTable(): JSX.Element {
                   onChange={e => handleInventorySelection(e, inventory)}
                 />
               </td>
-              {/* <td>{inventory.inventoryId}</td> */}
               <td
                 onClick={() =>
                   navigate(`/inventory/${inventory.inventoryId}/products`)
@@ -310,6 +346,11 @@ export default function InventoriesListTable(): JSX.Element {
               </td>
               <td>{inventory.inventoryType}</td>
               <td>{inventory.inventoryDescription}</td>
+              <td>
+                {productQuantities[inventory.inventoryId] !== undefined
+                  ? productQuantities[inventory.inventoryId]
+                  : 'Loading...'}{' '}
+              </td>
               <td>
                 <button
                   onClick={e => {

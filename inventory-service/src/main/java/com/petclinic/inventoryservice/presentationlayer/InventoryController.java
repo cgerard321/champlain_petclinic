@@ -205,6 +205,11 @@ public Flux<InventoryResponseDTO> searchInventories(
                 .map(productResponseDTO -> ResponseEntity.status(HttpStatus.CREATED).body(productResponseDTO))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
+
+    @GetMapping("/{inventoryId}/productquantity")
+    public Mono<Integer> getQuantityOfProductsInInventory (@PathVariable String inventoryId) {
+        return productInventoryService.getQuantityOfProductsInInventory(inventoryId);
+    }
 }
 
 
