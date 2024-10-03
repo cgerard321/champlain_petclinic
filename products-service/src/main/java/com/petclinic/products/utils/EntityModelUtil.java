@@ -10,6 +10,9 @@ import com.petclinic.products.presentationlayer.products.ProductResponseModel;
 import com.petclinic.products.presentationlayer.ratings.RatingRequestModel;
 import com.petclinic.products.presentationlayer.ratings.RatingResponseModel;
 import org.springframework.beans.BeanUtils;
+import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.http.codec.multipart.FilePart;
+import reactor.core.publisher.Mono;
 
 import java.util.UUID;
 
@@ -64,5 +67,16 @@ public class EntityModelUtil {
 
     public static String generateUUIDString() {
         return UUID.randomUUID().toString();
+    }
+
+    public static Mono<ImageRequestModel> handleAddImage(String imageName, String imageType, FilePart imageData) {
+        return DataBufferUtils.join(imageData.content())
+                .map(dataBuffer -> {
+                    byte[] imageDataBytes = new byte[dataBuffer.readableByteCount()];
+                    dataBuffer.read(imageDataBytes);
+                    DataBufferUtils.release(dataBuffer);
+
+                    return new ImageRequestModel(imageName, imageType, imageDataBytes);
+                });
     }
 }

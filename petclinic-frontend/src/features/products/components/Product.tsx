@@ -6,6 +6,8 @@ import { updateUserRating } from '../api/updateUserRating';
 import { getProduct } from '../api/getProduct';
 import { deleteUserRating } from '../api/deleteUserRating';
 import { getProductByProductId } from '@/features/products/api/getProductByProductId.tsx';
+import ImageContainer from './ImageContainer';
+import './Product.css';
 
 function Product({ product }: { product: ProductModel }): JSX.Element {
   const [currentUserRating, setUserRating] = useState<number>(0);
@@ -85,6 +87,7 @@ function Product({ product }: { product: ProductModel }): JSX.Element {
           textDecoration: 'underline',
         }}
       >
+        <ImageContainer imageId={product.imageId} />
         {currentProduct.productName}
       </h2>
       <p>{currentProduct.productDescription}</p>

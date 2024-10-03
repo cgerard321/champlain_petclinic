@@ -1,0 +1,10 @@
+.card {
+    text-align: center;
+  }
+  
+  .card img {
+    width: 100%;
+    border-radius: 4px;
+    margin-bottom: 12px;
+  }
+  

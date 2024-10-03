@@ -11,7 +11,6 @@ export async function addImage(formData: FormData): Promise<ImageModel> {
     });
     return response.data as ImageModel;
   } catch (error) {
-    console.error('Error uploading image:', error);
     throw new Error('Error uploading image');
   }
 }

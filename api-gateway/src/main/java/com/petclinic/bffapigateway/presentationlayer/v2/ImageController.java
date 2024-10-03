@@ -30,9 +30,8 @@ public class ImageController {
                 .map(ResponseEntity::ok);
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ALL})
-    @PostMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-//            produces = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
+    @PostMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<ImageResponseDTO>> addImage(@RequestPart("imageName") String imageName,
                                                            @RequestPart("imageType") String imageType,
                                                            @RequestPart("imageData") FilePart imageData) {

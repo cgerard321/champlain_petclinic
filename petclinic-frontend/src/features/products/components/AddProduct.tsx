@@ -39,10 +39,14 @@ export default function AddProduct({
 
       try {
         createdImage = await addImage(formData);
-        // handleClose();
       } catch (error) {
         console.error('Error adding image:', error);
       }
+    }
+
+    if (!createdImage) {
+      console.error('Failed creating image');
+      return;
     }
 
     const imageId = createdImage.imageId;
@@ -76,8 +80,6 @@ export default function AddProduct({
       status,
       productType,
     };
-    // eslint-disable-next-line no-console
-    console.log(newProduct.imageId);
 
     try {
       await addProduct(newProduct);
