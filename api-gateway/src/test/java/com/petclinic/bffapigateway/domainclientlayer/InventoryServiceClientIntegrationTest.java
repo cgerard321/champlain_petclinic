@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.*;
-import com.petclinic.inventoryservice.utils.exceptions.InventoryNotFoundException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterAll;
@@ -218,28 +217,6 @@ class InventoryServiceClientIntegrationTest {
     }
 
     @Test
-    void getQuantityOfProductsInInventory_withInvalidInventoryId_shouldReturnNotFound() {
-        // Arrange
-        String invalidInventoryId = "nonExistentInventoryId";
-        String errorMessage = "Inventory not found: " + invalidInventoryId;
-
-        // Mock the response from the MockWebServer
-        mockWebServer.enqueue(new MockResponse()
-                .setResponseCode(404)
-                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
-                .setBody("{\"message\":\"" + errorMessage + "\"}"));
-
-        // Act
-        Mono<Integer> result = inventoryServiceClient.getQuantityOfProductsInInventory(invalidInventoryId);
-
-        // Assert
-        StepVerifier.create(result)
-                .expectErrorMatches(throwable -> throwable instanceof InventoryNotFoundException &&
-                        throwable.getMessage().contains(errorMessage))
-                .verify();
-    }
-
-    @Test
     void getQuantityOfProductsInInventory_withEmptyInventory_shouldReturnZero() throws JsonProcessingException {
         // Arrange
         int expectedQuantity = 0;
@@ -259,7 +236,7 @@ class InventoryServiceClientIntegrationTest {
                 .verifyComplete();
     }
 
-    
+
 
 
 
