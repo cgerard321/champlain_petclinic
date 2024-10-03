@@ -390,4 +390,38 @@ class CartServiceUnitTest {
          verifyNoInteractions(productClient); //no carts, so productClient shouldn't be called
      }
 
+    @Test
+    void whenCheckoutCart_thenReturnUpdatedCartWithPaymentProcessed() {
+        // Given
+        String cartId = "98f7b33a-d62a-420a-a84a-05a27c85fc91";
+        Cart cart = new Cart();
+        cart.setCartId(cartId);
+        cart.setCustomerId("customer1");
+
+        CartProduct product = new CartProduct();
+        product.setProductId("product1");
+        product.setProductSalePrice(100.0);
+        product.setQuantityInCart(3); // 3 items at $100 each
+
+        cart.setProducts(List.of(product));
+
+        when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart));
+        when(cartRepository.save(any(Cart.class))).thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
+
+        // When
+        Mono<CartResponseModel> result = cartService.checkoutCart(cartId);
+
+        // Then
+        StepVerifier.create(result)
+                .assertNext(cartResponseModel -> {
+                    assertEquals(cartId, cartResponseModel.getCartId());
+                    assertEquals(300.0, cartResponseModel.getSubtotal()); // 3 * 100.0
+                    assertEquals(29.925, cartResponseModel.getTvq());      // 9.975% tax
+                    assertEquals(15.0, cartResponseModel.getTvc());        // 5% tax
+                    assertEquals(344.925, cartResponseModel.getTotal());   // subtotal + taxes
+                    assertEquals("Payment Processed", cartResponseModel.getPaymentStatus());
+                })
+                .verifyComplete();
+    }
+
 }
