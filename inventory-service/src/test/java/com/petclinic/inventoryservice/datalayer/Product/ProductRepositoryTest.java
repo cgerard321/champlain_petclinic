@@ -307,6 +307,4 @@ class ProductRepositoryTest {
                 .productSalePrice(productSalePrice)
                 .build();
     }
-
-
 }

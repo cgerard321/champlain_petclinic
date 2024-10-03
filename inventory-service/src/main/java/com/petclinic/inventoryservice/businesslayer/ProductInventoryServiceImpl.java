@@ -554,6 +554,15 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                 .switchIfEmpty(Mono.error(new InvalidInputException("Unable to save supply to the inventory, an error occurred.")));
 
     }
+
+    @Override
+    public Mono<Integer> getQuantityOfProductsInInventory(String inventoryId) {
+        return inventoryRepository.findInventoryByInventoryId(inventoryId)
+                .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with id: " + inventoryId)))
+                .flatMap(inventory ->
+                        productRepository.countByInventoryId(inventoryId)
+                );
+    }
 }
 
 
