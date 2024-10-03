@@ -99,9 +99,11 @@ public class CartServiceClient {
                 .bodyToMono(CartResponseDTO.class);
     }
 
-
-
-
+    public Mono<CartResponseDTO> checkoutCart(final String cartId) {
+        return webClientBuilder.build()
+                .post()
+                .uri(CartServiceUrl + "/" + cartId + "/checkout")
+                .retrieve()
+                .bodyToMono(CartResponseDTO.class);
+    }
 }
-
-

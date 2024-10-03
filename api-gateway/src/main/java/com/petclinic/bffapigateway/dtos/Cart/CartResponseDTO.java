@@ -20,5 +20,6 @@ public class CartResponseDTO {
     private double tvq;
     private double tvc;
     private double total;
-    private String message;
+    private String message;  
+    private String paymentStatus;  
 }

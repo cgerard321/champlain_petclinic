@@ -2,6 +2,7 @@ package com.petclinic.bffapigateway.presentationlayer.v2;
 
 import com.petclinic.bffapigateway.config.GlobalExceptionHandler;
 import com.petclinic.bffapigateway.domainclientlayer.BillServiceClient;
+import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillStatus;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
@@ -17,6 +18,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
 
@@ -63,6 +65,16 @@ private final String baseBillURL = "/api/v2/gateway/bills";
             .dueDate(LocalDate.parse("2024-10-13"))
             .build();
 
+    private BillRequestDTO billRequestDTO = BillRequestDTO.builder()
+            .customerId("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
+            .visitType("general")
+            .vetId("3")
+            .date(LocalDate.parse("2024-10-11"))
+            .amount(100.0)
+            .billStatus(BillStatus.UNPAID)
+            .dueDate(LocalDate.parse("2024-10-13"))
+            .build();
+
 
    @Test
     public void whenGetAllBillsByCustomerId_ThenReturnCustomerBills() {
@@ -104,6 +116,18 @@ private final String baseBillURL = "/api/v2/gateway/bills";
 
        verify(billServiceClient, times(1))
                .getAllBilling();
+    }
+
+    @Test
+    public void AddBill_thenReturnBill(){
+        when(billServiceClient.createBill(billRequestDTO)).thenReturn(Mono.just(billresponse));
+        webTestClient.post()
+                .uri(baseBillURL + "/admin")
+                .bodyValue(billRequestDTO)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody(BillResponseDTO.class)
+                .isEqualTo(billresponse);
     }
 
 }

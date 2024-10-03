@@ -123,7 +123,7 @@ class CartControllerIntegrationTest {
 //                });
 //    }
 
-//    @Test
+  /*@Test
     void whenGetCartByCartId_thenReturnCartResponseModel(){
         webTestClient.get()
                 .uri("/api/v1/carts/" + cart1.getCartId())
@@ -143,5 +143,9 @@ class CartControllerIntegrationTest {
                     assertEquals(cart1.getProducts().get(0).getAverageRating(), result.getProducts().get(0).getAverageRating());
                 });
     }
+*/
+
+
+
 
 }

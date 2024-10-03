@@ -24,4 +24,5 @@ public class CartResponseModel {
     private double tvc;
     private double total;
     private String message;
+    private String paymentStatus;
 }

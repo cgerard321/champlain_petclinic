@@ -25,4 +25,9 @@ public class Cart {
     private List<CartProduct> products;
     private String cartId;
     private String customerId;
+    //added those
+    private double subtotal;
+    private double tvq;
+    private double tvc;
+    private double total;
 }

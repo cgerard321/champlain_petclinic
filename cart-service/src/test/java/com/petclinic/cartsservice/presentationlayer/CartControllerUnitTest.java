@@ -287,6 +287,25 @@ class CartControllerUnitTest {
                 .uri("/api/v1/carts/" + cartId + "/products")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(requestModel)
+    public void whenAddCheckoutCart_thenReturnCartResponseModel(){
+        Cart cart = Cart.builder()
+                .cartId("98f7b33a-d62a-420a-a84a-05a27c85fc91")
+                .products(products)
+                .customerId("1")
+                .build();
+
+        CartResponseModel cartResponseModel = CartResponseModel.builder()
+                .cartId(cart.getCartId())
+                .customerId("1")
+                .products(products)
+                .build();
+        when(cartService.checkoutCart(cart.getCartId()))
+                .thenReturn(Mono.just(cartResponseModel));
+
+        webTestClient
+                .post()
+                .uri("/api/v1/carts/" + cart.getCartId() + "/checkout")
+                .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
@@ -394,6 +413,12 @@ class CartControllerUnitTest {
     }
 
 
+
+
+                .isEqualTo(cartResponseModel);
+
+        verify(cartService, times(1)).checkoutCart(cartResponseModel.getCartId());
+    }
 
 
 }

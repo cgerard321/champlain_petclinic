@@ -122,6 +122,10 @@ public class CartController {
                 });
     }
 
-
-
+    @PostMapping("/{cartId}/checkout")
+    public Mono<ResponseEntity<CartResponseModel>> checkoutCart(@PathVariable String cartId) {
+        return cartService.checkoutCart(cartId)
+                .map(cart -> new ResponseEntity<>(cart, HttpStatus.OK))
+                .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
 }

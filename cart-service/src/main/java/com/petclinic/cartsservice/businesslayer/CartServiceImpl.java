@@ -105,6 +105,41 @@ public class CartServiceImpl implements CartService {
                  });
      }
 
+    @Override
+    public Mono<CartResponseModel> checkoutCart(String cartId) {
+        return cartRepository.findCartByCartId(cartId)
+                .flatMap(cart -> {
+
+                    double subtotal = cart.getProducts().stream()
+                            .mapToDouble(product -> product.getProductSalePrice() * product.getQuantityInCart())
+                            .sum();
+
+
+                    double tvq = subtotal * 0.09975;
+                    double tvc = subtotal * 0.05;
+                    double total = subtotal + tvq + tvc;
+
+                    // Update the cart model
+                    cart.setSubtotal(subtotal);
+                    cart.setTvq(tvq);
+                    cart.setTvc(tvc);
+                    cart.setTotal(total);
+
+
+                    return cartRepository.save(cart)
+                            .map(savedCart -> {
+                                // Create a response model to send back to the client
+                                CartResponseModel responseModel = new CartResponseModel();
+                                responseModel.setCartId(savedCart.getCartId());
+                                responseModel.setSubtotal(subtotal);
+                                responseModel.setTvq(tvq);
+                                responseModel.setTvc(tvc);
+                                responseModel.setTotal(total);
+                                responseModel.setPaymentStatus("Payment Processed");  // Simulated payment status
+                                return responseModel;
+                            });
+                });
+    }
 
 
     @Override
