@@ -167,4 +167,51 @@ public class VisitController {
 
 
 
+    //Emergency
+
+    @GetMapping(value = "/emergency")
+    public Flux<EmergencyResponseDTO> getAllEmergency(){
+        return visitsServiceClient.getAllEmergency();
+    }
+
+    @GetMapping(value="/emergency/{emergencyId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<EmergencyResponseDTO>> getEmergencyByEmergencyId(@PathVariable String emergencyId){
+        return Mono.just(emergencyId)
+                //.filter(id -> id.length() == 36)
+                //.switchIfEmpty(Mono.error(new InvalidInputException("the provided emergency id is invalid: " + emergencyId)))
+                .flatMap(visitsServiceClient::getEmergencyByEmergencyId)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
+    @PostMapping(value = "/emergency")
+    public Mono<ResponseEntity<EmergencyResponseDTO>> PostEmergency(@RequestBody Mono<EmergencyRequestDTO> emergencyRequestDTOMono){
+        return visitsServiceClient.createEmergency(emergencyRequestDTOMono)
+                .map(c->ResponseEntity.status(HttpStatus.CREATED).body(c))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
+    @PutMapping(value="/emergency/{emergencyId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<EmergencyResponseDTO>> UpdateEmergency(@RequestBody Mono<EmergencyRequestDTO> emergencyRequestDTOMono, @PathVariable String emergencyId){
+        return Mono.just(emergencyId)
+              //  .filter(id -> id.length() == 36)
+               // .switchIfEmpty(Mono.error(new InvalidInputException("the provided emergency id is invalid: " + emergencyId)))
+                .flatMap(id-> visitsServiceClient.updateEmergency(emergencyId,emergencyRequestDTOMono))
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
+    @DeleteMapping(value="/emergency/{emergencyId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<EmergencyResponseDTO>> DeteleEmergency(@PathVariable String emergencyId) {
+        return Mono.just(emergencyId)
+              //  .filter(id -> id.length() == 36)
+             //   .switchIfEmpty(Mono.error(new InvalidInputException("the provided emergency id is invalid: " + emergencyId)))
+                .flatMap(visitsServiceClient::deleteEmergency)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
+
+
+
 }
