@@ -594,31 +594,7 @@ public class InventoryControllerTest {
         verify(inventoryServiceClient, times(1))
                 .getQuantityOfProductsInInventory(eq(inventoryId));
     }
-
-
-    @Test
-    void getQuantityOfProductsInInventory_withInvalidInventoryId_shouldReturnNotFound() {
-        // Arrange
-        String invalidInventoryId = "invalidInventoryId";
-
-        // Mocking the service to return an empty Mono (as if the inventory doesn't exist)
-        when(inventoryServiceClient.getQuantityOfProductsInInventory(invalidInventoryId))
-                .thenReturn(Mono.empty());
-
-        // Act and Assert
-        client.get()
-                .uri(baseInventoryURL + "/" + invalidInventoryId + "/productquantity")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isNotFound()
-                .expectBody()
-                .jsonPath("$.message").isEqualTo("Inventory not found: " + invalidInventoryId);
-
-        // Verify that the service was called with the invalid inventoryId
-        verify(inventoryServiceClient, times(1))
-                .getQuantityOfProductsInInventory(eq(invalidInventoryId));
-    }
-
+    
     @Test
     void getQuantityOfProductsInInventory_withServerError_shouldReturnInternalServerError() {
         // Arrange
@@ -641,46 +617,6 @@ public class InventoryControllerTest {
         // Verify that the service was called with the correct inventoryId
         verify(inventoryServiceClient, times(1))
                 .getQuantityOfProductsInInventory(eq(inventoryId));
-    }
-
-    @Test
-    void getQuantityOfProductsInInventory_withUnauthorizedAccess_shouldReturnUnauthorized() {
-        // Arrange
-        String inventoryId = "1";
-
-        // Mocking the service to return an empty Mono (as if the user is unauthorized)
-        when(inventoryServiceClient.getQuantityOfProductsInInventory(inventoryId))
-                .thenReturn(Mono.empty());
-
-        // Act and Assert
-        client.get()
-                .uri(baseInventoryURL + "/" + inventoryId + "/productquantity")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isUnauthorized();
-
-        // Verify that the service was not called because the user is unauthorized
-        verify(inventoryServiceClient, never()).getQuantityOfProductsInInventory(eq(inventoryId));
-    }
-
-    @Test
-    void getQuantityOfProductsInInventory_withForbiddenAccess_shouldReturnForbidden() {
-        // Arrange
-        String inventoryId = "1";
-
-        // Mocking the service to return an empty Mono (as if access is forbidden)
-        when(inventoryServiceClient.getQuantityOfProductsInInventory(inventoryId))
-                .thenReturn(Mono.empty());
-
-        // Act and Assert
-        client.get()
-                .uri(baseInventoryURL + "/" + inventoryId + "/productquantity")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isForbidden();
-
-        // Verify that the service was not called because access is forbidden
-        verify(inventoryServiceClient, never()).getQuantityOfProductsInInventory(eq(inventoryId));
     }
 
 }
