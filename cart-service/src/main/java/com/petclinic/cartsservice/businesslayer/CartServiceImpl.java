@@ -173,31 +173,40 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public Mono<CartResponseModel> addProductToCart(String cartId, String productId, int quantity) {
+        // Fetch the latest cart and product information
         return cartRepository.findCartByCartId(cartId)
                 .switchIfEmpty(Mono.error(new NotFoundException("Cart not found: " + cartId)))
                 .flatMap(cart -> productClient.getProductByProductId(productId)
                         .flatMap(product -> {
+                            // Validate if the requested quantity is greater than zero
                             if (quantity <= 0) {
                                 return Mono.error(new InvalidInputException("Quantity must be greater than zero."));
                             }
+                            // Check if the available stock is sufficient
                             if (product.getProductQuantity() < quantity) {
-                                return Mono.error(new OutOfStockException("You cannot add more than " + product.getProductQuantity() + " items. Only " + product.getProductQuantity() + " items left in stock."));
+                                return Mono.error(new OutOfStockException("You cannot add more than "
+                                        + product.getProductQuantity() + " items. Only "
+                                        + product.getProductQuantity() + " items left in stock."));
                             }
 
-                            // Check if product already exists in cart
+                            // Check if the product already exists in the cart
                             Optional<CartProduct> existingProductOpt = cart.getProducts().stream()
                                     .filter(p -> p.getProductId().equals(productId))
                                     .findFirst();
 
                             if (existingProductOpt.isPresent()) {
+                                // If product is already in the cart, update the quantity
                                 CartProduct existingProduct = existingProductOpt.get();
                                 int newQuantity = existingProduct.getQuantityInCart() + quantity;
                                 if (newQuantity > product.getProductQuantity()) {
-                                    return Mono.error(new OutOfStockException("You cannot add more than " + product.getProductQuantity() + " items. Only " + product.getProductQuantity() + " items left in stock."));
+                                    return Mono.error(new OutOfStockException("You cannot add more than "
+                                            + product.getProductQuantity() + " items. Only "
+                                            + product.getProductQuantity() + " items left in stock."));
                                 }
                                 existingProduct.setQuantityInCart(newQuantity);
-                                existingProduct.setProductQuantity(product.getProductQuantity());
+                                existingProduct.setProductQuantity(product.getProductQuantity()); // Update stock information
                             } else {
+                                // If product is not in the cart, create a new entry
                                 CartProduct cartProduct = CartProduct.builder()
                                         .productId(product.getProductId())
                                         .productName(product.getProductName())
@@ -205,16 +214,18 @@ public class CartServiceImpl implements CartService {
                                         .productSalePrice(product.getProductSalePrice())
                                         .averageRating(product.getAverageRating())
                                         .quantityInCart(quantity)
-                                        .productQuantity(product.getProductQuantity())
+                                        .productQuantity(product.getProductQuantity()) // Set stock information
                                         .build();
                                 cart.getProducts().add(cartProduct);
                             }
 
+                            // Save the updated cart
                             return cartRepository.save(cart)
                                     .map(savedCart -> EntityModelUtil.toCartResponseModel(savedCart, savedCart.getProducts()));
                         })
                 );
     }
+
 
     @Override
     public Mono<CartResponseModel> updateProductQuantityInCart(String cartId, String productId, int quantity) {
