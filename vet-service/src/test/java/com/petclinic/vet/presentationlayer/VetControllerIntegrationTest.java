@@ -1881,4 +1881,55 @@ class VetControllerIntegrationTest {
                 .data(StreamUtils.copyToByteArray(cpr.getInputStream()))
                 .build();
     }
+
+    SpecialtyDTO specialtyDTO = SpecialtyDTO.builder()
+            .specialtyId("specialty123")
+            .name("Cardiology")
+            .build();
+
+    SpecialtyDTO invalidSpecialtyDTO = SpecialtyDTO.builder()
+            .specialtyId(null) // Invalid specialty ID
+            .name(null)        // Invalid specialty name
+            .build();
+
+    @Test
+    void addSpecialtyToVet_WithValidVetId_ShouldSucceed() {
+        Vet vet = buildVet("1234");
+
+        Publisher<Vet> setup = vetRepository.deleteAll().thenMany(vetRepository.save(vet));
+        StepVerifier.create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        client.post()
+                .uri("/vets/" + vet.getVetId() + "/specialties")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(specialtyDTO)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(VetResponseDTO.class)
+                .value(responseDTO -> {
+                    assertNotNull(responseDTO);
+                    assertEquals(1, responseDTO.getSpecialties().size());
+                    assertEquals("Cardiology",specialtyDTO.getName());
+                });
+    }
+
+    @Test
+    void addSpecialtyToVet_WithInvalidVetId_ShouldReturnNotFound() {
+        String invalidVetId = "invalid-vet-id";
+
+        client.post()
+                .uri("/vets/" + invalidVetId + "/specialties")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(specialtyDTO)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Vet not found with id: " + invalidVetId);
+    }
+
+
 }
