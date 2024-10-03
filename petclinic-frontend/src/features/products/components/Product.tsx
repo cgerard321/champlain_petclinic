@@ -15,11 +15,11 @@ function Product({ product }: { product: ProductModel }): JSX.Element {
     null
   );
 
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
-    const handleProductTitleClick = (): void => {
-        navigate(AppRoutePaths.ProductDetails, { state: { product } });
-    };
+  const handleProductTitleClick = (): void => {
+    navigate(AppRoutePaths.ProductDetails, { state: { product } });
+  };
 
   useEffect(() => {
     fetchRating();
@@ -76,7 +76,7 @@ function Product({ product }: { product: ProductModel }): JSX.Element {
   return (
     <div className="card" key={product.productId}>
       <h2
-          onClick={handleProductTitleClick}
+        onClick={handleProductTitleClick}
         style={{
           cursor: 'pointer',
           color: 'blue',
