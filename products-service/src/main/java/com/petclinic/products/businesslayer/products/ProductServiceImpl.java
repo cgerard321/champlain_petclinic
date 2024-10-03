@@ -167,7 +167,11 @@ public class ProductServiceImpl implements ProductService {
         return productRepository.findProductByProductId(productId)
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Product id was not found: " + productId))))
                 .flatMap(product -> {
-                    product.setProductQuantity(product.getProductQuantity() + productQuantity);
+                    if (productQuantity > product.getProductQuantity()) {
+                        product.setProductQuantity(product.getProductQuantity() + productQuantity);
+                    }else {
+                        product.setProductQuantity(product.getProductQuantity() - productQuantity);
+                    }
                     return productRepository.save(product).then();
                 });
     }

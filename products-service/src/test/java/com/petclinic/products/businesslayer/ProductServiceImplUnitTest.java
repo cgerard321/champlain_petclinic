@@ -214,9 +214,9 @@ class ProductServiceImplUnitTest {
     }
 
     @Test
-    public void testChangeProductQuantity() {
-        String productId = "testProductId";
-        Integer quantityChange = 5;
+    public void testChangeProductQuantity_Increase() {
+        String productId = "06a7d573-bcab-4db3-956f-773324b92a80";
+        Integer newQuantity = 15;
         Product product = new Product();
         product.setProductId(productId);
         product.setProductQuantity(10);
@@ -224,16 +224,38 @@ class ProductServiceImplUnitTest {
         when(productRepository.findProductByProductId(productId)).thenReturn(Mono.just(product));
         when(productRepository.save(any(Product.class))).thenReturn(Mono.just(product));
 
-        StepVerifier.create(productService.changeProductQuantity(productId, quantityChange))
+        StepVerifier.create(productService.changeProductQuantity(productId, newQuantity))
                 .verifyComplete();
 
         verify(productRepository).findProductByProductId(productId);
-        verify(productRepository).save(any(Product.class));
+        verify(productRepository).save(argThat(savedProduct ->
+                savedProduct.getProductQuantity() == 25 // 10 + 15
+        ));
+    }
+
+    @Test
+    public void testChangeProductQuantity_Decrease() {
+        String productId = "06a7d573-bcab-4db3-956f-773324b92a80";
+        Integer newQuantity = 5;
+        Product product = new Product();
+        product.setProductId(productId);
+        product.setProductQuantity(10);
+
+        when(productRepository.findProductByProductId(productId)).thenReturn(Mono.just(product));
+        when(productRepository.save(any(Product.class))).thenReturn(Mono.just(product));
+
+        StepVerifier.create(productService.changeProductQuantity(productId, newQuantity))
+                .verifyComplete();
+
+        verify(productRepository).findProductByProductId(productId);
+        verify(productRepository).save(argThat(savedProduct ->
+                savedProduct.getProductQuantity() == 5 // 10 - 5
+        ));
     }
 
     @Test
     public void testChangeProductQuantity_NotFound() {
-        String productId = "nonExistentProductId";
+        String productId = "06a7d573-bcab-4db3-956f-773324b92a81";
         Integer quantityChange = 5;
 
         when(productRepository.findProductByProductId(productId)).thenReturn(Mono.empty());

@@ -80,7 +80,7 @@ export default function Product({
     }
   };
 
-  const handleQuantitySubmit = async (e: React.FormEvent) => {
+  const handleQuantitySubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     if (selectedProductForQuantity) {
       try {
