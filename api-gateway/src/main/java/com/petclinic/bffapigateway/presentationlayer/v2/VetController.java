@@ -5,6 +5,7 @@ import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VetsServiceClient;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
+import com.petclinic.bffapigateway.dtos.Vets.SpecialtyDTO;
 import com.petclinic.bffapigateway.dtos.Vets.VetRequestDTO;
 import com.petclinic.bffapigateway.dtos.Vets.VetResponseDTO;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
@@ -25,6 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 
 import java.io.IOException;
+import java.util.List;
 
 
 @RestController
@@ -112,5 +114,14 @@ public class VetController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
 
     }
+    //specialty
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET})
+    @PostMapping(value = "{vetId}/specialties")
+    public Mono<VetResponseDTO> addSpecialtiesByVetId(
+            @PathVariable String vetId,
+            @RequestBody Mono<SpecialtyDTO> specialties) {
+        return vetsServiceClient.addSpecialtiesByVetId(vetId, specialties);
+    }
+
 
 }
