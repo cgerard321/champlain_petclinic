@@ -334,5 +334,14 @@ public class InventoryServiceClient {
                 .bodyToMono(ProductResponseDTO.class);
     }
 
+    public Mono<Integer> getQuantityOfProductsInInventory(final String inventoryId) {
+        return webClient.get()
+                .uri(inventoryServiceUrl + "/{inventoryId}/productquantity", inventoryId)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError,
+                        resp -> rethrower.rethrow(resp, ex -> new InventoryNotFoundException(ex.get("message").toString(), NOT_FOUND)))
+                .bodyToMono(Integer.class);
+    }
 }
 

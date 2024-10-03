@@ -1498,6 +1498,53 @@ class ProductInventoryServiceUnitTest {
                 .expectError(NotFoundException.class)
                 .verify();
     }
+
+    @Test
+    void getQuantityOfProductsInInventory_InventoryFound_ShouldReturnQuantity() {
+        // Arrange
+        String inventoryId = "1";
+        Inventory inventory = Inventory.builder()
+                .inventoryId(inventoryId)
+                .build();
+
+        when(inventoryRepository.findInventoryByInventoryId(inventoryId))
+                .thenReturn(Mono.just(inventory));
+        when(productRepository.countByInventoryId(inventoryId))
+                .thenReturn(Mono.just(5));
+
+        // Act
+        Mono<Integer> result = productInventoryService.getQuantityOfProductsInInventory(inventoryId);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNext(5)
+                .verifyComplete();
+
+        verify(inventoryRepository, times(1)).findInventoryByInventoryId(inventoryId);
+        verify(productRepository, times(1)).countByInventoryId(inventoryId);
+    }
+
+    @Test
+    void getQuantityOfProductsInInventory_InventoryNotFound_ShouldThrowNotFoundException() {
+        // Arrange
+        String inventoryId = "invalid";
+
+        when(inventoryRepository.findInventoryByInventoryId(inventoryId))
+                .thenReturn(Mono.empty());
+
+        // Act
+        Mono<Integer> result = productInventoryService.getQuantityOfProductsInInventory(inventoryId);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof NotFoundException &&
+                        throwable.getMessage().equals("Inventory not found with id: " + inventoryId))
+                .verify();
+
+        verify(inventoryRepository, times(1)).findInventoryByInventoryId(inventoryId);
+        verify(productRepository, never()).countByInventoryId(anyString());
+    }
+
 }
 
 
