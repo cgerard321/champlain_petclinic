@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 public class ProductResponseDTO {
 
     private String productId;
+    private String imageId;
     private String productName;
     private String productDescription;
     private Double productSalePrice;

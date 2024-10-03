@@ -17,6 +17,7 @@ public class Image {
     @Id
     private String id;
     private String imageId;
+    private String productId;
     private String imageName;
     private String imageType;
     private byte[] imageData;

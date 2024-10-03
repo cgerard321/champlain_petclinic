@@ -24,6 +24,7 @@ public class EntityModelUtil {
     public static Product toProductEntity(ProductRequestModel productRequestModel) {
         return Product.builder()
                 .productId(generateUUIDString())
+                .imageId(productRequestModel.getImageId())
                 .productName(productRequestModel.getProductName())
                 .productDescription(productRequestModel.getProductDescription())
                 .productSalePrice(productRequestModel.getProductSalePrice())

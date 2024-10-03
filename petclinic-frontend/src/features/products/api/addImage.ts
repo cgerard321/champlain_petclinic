@@ -1,6 +1,7 @@
 import axiosInstance from '@/shared/api/axiosInstance.ts';
+import { ImageModel } from '../models/ProductModels/ImageModel';
 
-export async function addImage(formData: FormData): Promise<void> {
+export async function addImage(formData: FormData): Promise<ImageModel> {
   try {
     const response = await axiosInstance.post('/images', formData, {
       headers: {
@@ -8,9 +9,9 @@ export async function addImage(formData: FormData): Promise<void> {
       },
       responseType: 'json',
     });
-    return response.data;
+    return response.data as ImageModel;
   } catch (error) {
-    console.error('Error adding image:', error);
-    throw error;
+    console.error('Error uploading image:', error);
+    throw new Error('Error uploading image');
   }
 }

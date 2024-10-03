@@ -8,8 +8,9 @@ import { addProduct } from '@/features/products/api/addProduct';
 import { useUser } from '@/context/UserContext';
 import './components/Sidebar.css';
 import { getProductsByType } from '@/features/products/api/getProductsByType.ts';
-import AddImage from './components/AddImage';
+// import AddImage from './components/AddImage';
 import { addImage } from './api/addImage';
+import { ImageModel } from './models/ProductModels/ImageModel';
 
 export default function ProductList(): JSX.Element {
   const [productList, setProductList] = useState<ProductModel[]>([]);
@@ -67,14 +68,26 @@ export default function ProductList(): JSX.Element {
     setIsRightRole(hasRightRole);
   }, [user]);
 
-  const handleAddProduct = async (
-    product: Omit<ProductModel, 'productId'>
-  ): Promise<void> => {
+  const handleAddImage = async (formData: FormData): Promise<ImageModel> => {
     try {
-      await addProduct(product);
+      const createdImage = await addImage(formData);
       await fetchProducts();
+      return createdImage;
     } catch (error) {
-      console.error('Error adding product:', error);
+      console.error('Error adding image:', error);
+      throw error;
+    }
+  };
+
+  const handleAddProduct = async (
+    product: ProductModel
+  ): Promise<ProductModel> => {
+    try {
+      const savedProduct = await addProduct(product);
+      await fetchProducts();
+      return savedProduct;
+    } catch (error) {
+      throw error;
     }
   };
 
@@ -92,18 +105,8 @@ export default function ProductList(): JSX.Element {
     setMaxPrice(undefined);
   };
 
-  const handleAddImage = async (formData: FormData): Promise<void> => {
-    try {
-      await addImage(formData);
-      await fetchProducts();
-    } catch (error) {
-      console.error('Error adding image:', error);
-    }
-  };
-
   return (
     <div className="product-list-container">
-      <AddImage addImage={handleAddImage} />
       {isSidebarOpen && (
         <div className="overlay" onClick={handleOverlayClick}></div>
       )}
@@ -179,7 +182,9 @@ export default function ProductList(): JSX.Element {
         </button>
       )}
 
-      {isRightRole && <AddProduct addProduct={handleAddProduct} />}
+      {isRightRole && (
+        <AddProduct addProduct={handleAddProduct} addImage={handleAddImage} />
+      )}
       <div className="main-content">
         <div className="grid">
           {isLoading ? (
