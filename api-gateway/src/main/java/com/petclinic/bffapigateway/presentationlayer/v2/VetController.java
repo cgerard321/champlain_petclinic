@@ -115,7 +115,7 @@ public class VetController {
 
     }
     //specialty
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET})
     @PostMapping(value = "{vetId}/specialties")
     public Mono<VetResponseDTO> addSpecialtiesByVetId(
             @PathVariable String vetId,
