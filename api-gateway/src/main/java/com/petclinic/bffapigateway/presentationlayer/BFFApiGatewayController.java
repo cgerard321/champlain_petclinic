@@ -277,6 +277,7 @@ public class BFFApiGatewayController {
         return customersServiceClient.getPetTypes();
     }
 
+    /*
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET})
     @PutMapping("pets/{petId}")
     public Mono<ResponseEntity<PetResponseDTO>> updatePet(@RequestBody PetResponseDTO pet, @PathVariable String petId){
@@ -284,7 +285,7 @@ public class BFFApiGatewayController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-
+*/
 
         /* Visits Methods */
 
@@ -572,20 +573,7 @@ public class BFFApiGatewayController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
-            @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
-    @GetMapping("/vets/firstName/{firstName}")
-    public Mono<ResponseEntity<VetResponseDTO>> getVetByFirstName(@PathVariable String firstName) {
-        return vetsServiceClient.getVetByFirstName(firstName)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build());
-    }
-    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
-    @GetMapping("/vets/lastName/{lastName}")
-    public Mono<ResponseEntity<VetResponseDTO>> getVetByLastName(@PathVariable String lastName) {
-        return vetsServiceClient.getVetByLastName(lastName)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build());
-    }
+
     @IsUserSpecific(idToMatch = {"vetId"})
     @GetMapping("/vets/vetBillId/{vetId}")
     public Mono<ResponseEntity<VetResponseDTO>> getVetByBillId(@PathVariable String vetBillId) {
@@ -1113,11 +1101,5 @@ public class BFFApiGatewayController {
                         .defaultIfEmpty(ResponseEntity.notFound().build())
         );
     }
-
-
-
-
-
-
 
 }

@@ -7,6 +7,7 @@ import com.petclinic.bffapigateway.dtos.Visits.VisitResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewResponseDTO;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
+import com.petclinic.bffapigateway.presentationlayer.BFFApiGatewayController;
 import com.petclinic.bffapigateway.utils.Security.Annotations.IsUserSpecific;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
@@ -31,6 +32,8 @@ import reactor.core.publisher.Mono;
 public class VisitController {
 
     private final VisitsServiceClient visitsServiceClient;
+
+    private final BFFApiGatewayController bffApiGatewayController;
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping(value = "", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
@@ -100,6 +103,19 @@ public class VisitController {
                         .map(updatedVisit -> ResponseEntity.ok(updatedVisit))
                         .defaultIfEmpty(ResponseEntity.notFound().build())); // Return 404 if not found
     }
+    @IsUserSpecific(idToMatch = {"visitId"})
+    @DeleteMapping(value = "/completed/{visitId}")
+    public Mono<ResponseEntity<Void>> deleteCompletedVisitByVisitId(@PathVariable String visitId) {
+        return visitsServiceClient.deleteCompletedVisitByVisitId(visitId)
+                .then(Mono.just(new ResponseEntity<Void>(HttpStatus.NO_CONTENT)))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
 
+    //customer visits
+    @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN})
+    @GetMapping(value = "/owners/{ownerId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<VisitResponseDTO> getVisitsByOwnerId(final @PathVariable String ownerId) {
+        return bffApiGatewayController.getVisitsByOwnerId(ownerId);
+    }
 
 }

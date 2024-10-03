@@ -21,6 +21,9 @@ export default function ProductList(): JSX.Element {
   const [isRightRole, setIsRightRole] = useState<boolean>(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
   const [filterType, setFilterType] = useState<string>('');
+  const [recentlyClickedProducts, setRecentlyClickedProducts] = useState<
+    ProductModel[]
+  >([]);
 
   function FilterByPriceErrorHandling(): void {
     // Validate inputs for filter by price
@@ -56,6 +59,10 @@ export default function ProductList(): JSX.Element {
 
   useEffect(() => {
     fetchProducts();
+    const savedProducts = localStorage.getItem('recentlyClickedProducts');
+    if (savedProducts) {
+      return setRecentlyClickedProducts(JSON.parse(savedProducts));
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -103,6 +110,27 @@ export default function ProductList(): JSX.Element {
   const clearFilters = (): void => {
     setMinPrice(undefined);
     setMaxPrice(undefined);
+  };
+
+  const handleProductClick = (product: ProductModel): void => {
+    setRecentlyClickedProducts(listOfProducts => {
+      const updatedProducts = listOfProducts.filter(
+        currentProduct => currentProduct.productId !== product.productId
+      );
+
+      updatedProducts.unshift(product);
+
+      if (updatedProducts.length > 5) {
+        updatedProducts.pop();
+      }
+
+      localStorage.setItem(
+        'recentlyClickedProducts',
+        JSON.stringify(updatedProducts)
+      );
+
+      return updatedProducts;
+    });
   };
 
   return (
@@ -191,11 +219,24 @@ export default function ProductList(): JSX.Element {
             <p>Loading products...</p>
           ) : productList.length > 0 ? (
             productList.map((product: ProductModel) => (
-              <Product key={product.productId} product={product} />
+              <div
+                key={product.productId}
+                onClick={() => handleProductClick(product)}
+              >
+                <Product key={product.productId} product={product} />
+              </div>
             ))
           ) : (
             <p>No products found.</p>
           )}
+        </div>
+        <div>
+          <h2>Recently Clicked Products</h2>
+          <div className="grid">
+            {recentlyClickedProducts.map(product => (
+              <Product key={product.productId} product={product} />
+            ))}
+          </div>
         </div>
       </div>
     </div>

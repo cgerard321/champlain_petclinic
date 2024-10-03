@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { ProductModel } from './models/ProductModels/ProductModel';
 import './InventoriesListTable.css';
@@ -19,6 +19,7 @@ const InventoryProducts: React.FC = () => {
   const [filteredProducts, setFilteredProducts] = useState<ProductModel[]>([]); // State for filtered products
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   // Fetch products from the backend
   useEffect(() => {
@@ -105,6 +106,13 @@ const InventoryProducts: React.FC = () => {
         Supplies in Inventory: <span>{inventoryId}</span>
       </h2>
 
+      <button
+        className="btn btn-secondary"
+        onClick={() => navigate('/inventories')}
+      >
+        Back
+      </button>
+
       <div className="products-filtering">
         <div className="filter-by-name">
           <label htmlFor="product-name">Filter by Name:</label>
@@ -154,7 +162,7 @@ const InventoryProducts: React.FC = () => {
               <th>Price</th>
               <th>Quantity</th>
               <th>Status</th>
-              <th>Actions</th>
+              <th colSpan={2}>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -181,6 +189,17 @@ const InventoryProducts: React.FC = () => {
                 </td>
                 <td>
                   <button
+                    onClick={e => {
+                      e.stopPropagation();
+                      navigate(`${product.productId}/edit`);
+                    }}
+                    className="btn btn-warning"
+                  >
+                    Edit
+                  </button>
+                </td>
+                <td>
+                  <button
                     className="btn btn-danger"
                     onClick={() => deleteProduct(product.productId)}
                   >
@@ -194,6 +213,12 @@ const InventoryProducts: React.FC = () => {
       ) : (
         <p>No supplies found for this inventory.</p>
       )}
+      <button
+        className="btn btn-add"
+        onClick={() => navigate(`/inventory/${inventoryId}/products/add`)}
+      >
+        Add
+      </button>
     </div>
   );
 };

@@ -36,35 +36,35 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
     private final InventoryTypeRepository inventoryTypeRepository;
     private final InventoryNameRepository inventoryNameRepository;
 
-    @Override
-    public Mono<ProductResponseDTO> addProductToInventory(Mono<ProductRequestDTO> productRequestDTOMono, String inventoryId) {
-        return productRequestDTOMono
-                .publishOn(Schedulers.boundedElastic())
-                .flatMap(requestDTO -> inventoryRepository.findInventoryByInventoryId(inventoryId)
-                        .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with id: " + inventoryId)))
-                        .flatMap(inventory -> {
-                            if (requestDTO.getProductName() == null || requestDTO.getProductPrice() == null || requestDTO.getProductQuantity() == null || requestDTO.getProductSalePrice() == null) {
-                                return Mono.error(new InvalidInputException("Product must have an inventory id, product name, product price, and product quantity."));
-                            } else if (requestDTO.getProductPrice() < 0 || requestDTO.getProductQuantity() < 0 || requestDTO.getProductSalePrice() < 0) {
-                                return Mono.error(new InvalidInputException("Product price and quantity must be greater than 0."));
-                            } else {
-                                Product product = EntityDTOUtil.toProductEntity(requestDTO);
-                                product.setInventoryId(inventoryId);
-                                product.setProductId(EntityDTOUtil.generateUUID());
-                                // Set Status based on the product quantity
-//                                if (product.getProductQuantity() == 0) {
-//                                    product.setStatus(Status.OUT_OF_STOCK);
-//                                } else if (product.getProductQuantity() < 20) {
-//                                    product.setStatus(Status.RE_ORDER);
-//                                } else {
-//                                    product.setStatus(Status.AVAILABLE);
-//                                }
-                                return productRepository.save(product)
-                                        .map(EntityDTOUtil::toProductResponseDTO);
-                            }
-                        }))
-                .switchIfEmpty(Mono.error(new InvalidInputException("Unable to save product to the repository, an error occurred.")));
-    }
+//    @Override
+//    public Mono<ProductResponseDTO> addProductToInventory(Mono<ProductRequestDTO> productRequestDTOMono, String inventoryId) {
+//        return productRequestDTOMono
+//                .publishOn(Schedulers.boundedElastic())
+//                .flatMap(requestDTO -> inventoryRepository.findInventoryByInventoryId(inventoryId)
+//                        .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with id: " + inventoryId)))
+//                        .flatMap(inventory -> {
+//                            if (requestDTO.getProductName() == null || requestDTO.getProductPrice() == null || requestDTO.getProductQuantity() == null || requestDTO.getProductSalePrice() == null) {
+//                                return Mono.error(new InvalidInputException("Product must have an inventory id, product name, product price, and product quantity."));
+//                            } else if (requestDTO.getProductPrice() < 0 || requestDTO.getProductQuantity() < 0 || requestDTO.getProductSalePrice() < 0) {
+//                                return Mono.error(new InvalidInputException("Product price and quantity must be greater than 0."));
+//                            } else {
+//                                Product product = EntityDTOUtil.toProductEntity(requestDTO);
+//                                product.setInventoryId(inventoryId);
+//                                product.setProductId(EntityDTOUtil.generateUUID());
+//                                // Set Status based on the product quantity
+////                                if (product.getProductQuantity() == 0) {
+////                                    product.setStatus(Status.OUT_OF_STOCK);
+////                                } else if (product.getProductQuantity() < 20) {
+////                                    product.setStatus(Status.RE_ORDER);
+////                                } else {
+////                                    product.setStatus(Status.AVAILABLE);
+////                                }
+//                                return productRepository.save(product)
+//                                        .map(EntityDTOUtil::toProductResponseDTO);
+//                            }
+//                        }))
+//                .switchIfEmpty(Mono.error(new InvalidInputException("Unable to save product to the repository, an error occurred.")));
+//    }
 
     @Override
 
@@ -531,6 +531,31 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                 .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with InventoryId: " + inventoryId)));
 
     }
+    @Override
+    public Mono<ProductResponseDTO> addSupplyToInventory(Mono<ProductRequestDTO> productRequestDTOMono, String inventoryId)
+    {
+        return productRequestDTOMono
+                .publishOn(Schedulers.boundedElastic())
+                .flatMap(requestDTO -> inventoryRepository.findInventoryByInventoryId(inventoryId)
+                        .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with id: " + inventoryId)))
+                        .flatMap(inventory -> {
+                            if (requestDTO.getProductName() == null || requestDTO.getProductPrice() == null || requestDTO.getProductQuantity() == null || requestDTO.getProductSalePrice() == null) {
+                                return Mono.error(new InvalidInputException("Product must have an inventory id, product name, product price, and product quantity."));
+                            } else if (requestDTO.getProductPrice() < 0 || requestDTO.getProductQuantity() < 0 || requestDTO.getProductSalePrice() < 0) {
+                                return Mono.error(new InvalidInputException("Product price and quantity must be greater than 0."));
+                            } else {
+                                Product product = EntityDTOUtil.toProductEntity(requestDTO);
+                                product.setInventoryId(inventoryId);
+                                product.setProductId(EntityDTOUtil.generateUUID());
+                                return productRepository.save(product)
+                                        .map(EntityDTOUtil::toProductResponseDTO);
+                            }
+                        }))
+                .switchIfEmpty(Mono.error(new InvalidInputException("Unable to save supply to the inventory, an error occurred.")));
 
+    }
 }
+
+
+
 

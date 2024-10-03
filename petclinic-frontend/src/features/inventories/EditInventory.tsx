@@ -1,21 +1,27 @@
 import * as React from 'react';
 import { FormEvent, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getInventory, updateInventory } from '@/shared/api/EditInventory.ts';
+import {
+  getInventory,
+  updateInventory,
+} from '@/features/inventories/api/EditInventory.ts';
 import { InventoryResponseModel } from '@/features/inventories/models/InventoryModels/InventoryResponseModel.ts';
 import { InventoryRequestModel } from '@/features/inventories/models/InventoryModels/InventoryRequestModel.ts';
+import { InventoryType } from '@/features/inventories/models/InventoryType.ts';
+import { getAllInventoryTypes } from '@/features/inventories/api/getAllInventoryTypes.ts';
 
 interface ApiError {
   message: string;
 }
 
-const EditReviewForm: React.FC = (): JSX.Element => {
+const EditInventory: React.FC = (): JSX.Element => {
   const { inventoryId } = useParams<{ inventoryId: string }>();
   const [inventory, setInventory] = useState<InventoryRequestModel>({
     inventoryName: '',
     inventoryType: '',
     inventoryDescription: '',
   });
+  const [inventoryTypes, setInventoryTypes] = useState<InventoryType[]>([]);
   const [error, setError] = useState<{ [key: string]: string }>({});
   const [successMessage, setSuccessMessage] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string>('');
@@ -45,8 +51,19 @@ const EditReviewForm: React.FC = (): JSX.Element => {
     };
 
     fetchInventoryData().catch(error =>
-      console.error('Error in fetchReviewData:', error)
+      console.error('Error in fetchInventoryData:', error)
     );
+
+    const fetchInventoryTypes = async (): Promise<void> => {
+      try {
+        const types = await getAllInventoryTypes();
+        setInventoryTypes(types); // Set the fetched types in state
+      } catch (error) {
+        console.error('Error fetching inventory types:', error);
+      }
+    };
+
+    fetchInventoryTypes();
   }, [inventoryId]);
 
   const validate = (): boolean => {
@@ -91,7 +108,7 @@ const EditReviewForm: React.FC = (): JSX.Element => {
       }
     } catch (error) {
       const apiError = error as ApiError;
-      setErrorMessage(`Error updating review: ${apiError.message}`);
+      setErrorMessage(`Error updating inventory: ${apiError.message}`);
     } finally {
       setLoading(false);
     }
@@ -148,10 +165,11 @@ const EditReviewForm: React.FC = (): JSX.Element => {
                   <option value="" disabled>
                     Select inventory type
                   </option>
-                  <option value="Equipment">Equipment</option>
-                  <option value="Injections">Injections</option>
-                  <option value="Medications">Medications</option>
-                  <option value="Bandages">Bandages</option>
+                  {inventoryTypes.map(type => (
+                    <option key={type.typeId} value={type.type}>
+                      {type.type}
+                    </option>
+                  ))}
                 </select>
                 {error.inventoryType && (
                   <span className="error">{error.inventoryType}</span>
@@ -199,4 +217,4 @@ const EditReviewForm: React.FC = (): JSX.Element => {
     </div>
   );
 };
-export default EditReviewForm;
+export default EditInventory;

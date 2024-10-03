@@ -180,7 +180,13 @@ public class VisitsServiceClient {
                 .retrieve()
                 .bodyToMono(Void.class);
     }
-
+    public Mono<Void> deleteCompletedVisitByVisitId(String visitId){
+        return webClient
+                .delete()
+                .uri("/completed/{visitId}", visitId)
+                .retrieve()
+                .bodyToMono(Void.class);
+    }
     /*
     public Flux<VisitDetails> getPreviousVisitsForPet(final String petId) {
         return webClient
@@ -308,9 +314,5 @@ public class VisitsServiceClient {
                         .bodyToMono(VisitResponseDTO.class);
     });
     }
-
-
-
-
 }
 
