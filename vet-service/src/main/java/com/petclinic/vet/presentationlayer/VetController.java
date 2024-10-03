@@ -38,6 +38,7 @@ import reactor.core.publisher.Mono;
 
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 
@@ -297,6 +298,17 @@ public class VetController {
                 .map(r->ResponseEntity.status(HttpStatus.OK).body(r))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
+
+    //specialty
+    @PostMapping("{vetId}/specialties")
+    public Mono<VetResponseDTO> addSpecialtiesByVetId(
+            @PathVariable String vetId,
+            @RequestBody Mono<SpecialtyDTO> specialties) {
+
+        return vetService.addSpecialtiesByVetId(vetId, specialties);
+    }
+
+
 
 
 }

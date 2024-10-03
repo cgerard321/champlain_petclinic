@@ -19,6 +19,7 @@ import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -573,6 +574,30 @@ public class VetsServiceClient {
                 )
                 .bodyToMono(EducationResponseDTO.class);
     }
+    //specialties
+    public Mono<VetResponseDTO> addSpecialtiesByVetId(String vetId, Mono<SpecialtyDTO> specialties) {
+        return webClientBuilder
+                .build()
+                .post()  // POST for adding new resources
+                .uri(vetsServiceUrl + "/" + vetId + "/specialties")  // Ensure you're pointing to the correct POST endpoint
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .body(BodyInserters.fromPublisher(specialties, SpecialtyDTO.class))  // Use fromPublisher to handle the Mono
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, error -> {
+                    HttpStatusCode statusCode = error.statusCode();
+                    if (statusCode.equals(HttpStatus.NOT_FOUND)) {
+                        return Mono.error(new ExistingVetNotFoundException("Vet not found: " + vetId, HttpStatus.NOT_FOUND));
+                    }
+                    return Mono.error(new IllegalArgumentException("Something went wrong with the client"));
+                })
+                .onStatus(HttpStatusCode::is5xxServerError, error ->
+                        Mono.error(new IllegalArgumentException("Something went wrong with the server"))
+                )
+                .bodyToMono(VetResponseDTO.class);
+    }
+
+
+
 
 
 }
