@@ -5,12 +5,11 @@ import com.petclinic.visits.visitsservicenew.BusinessLayer.Emergency.EmergencySe
 import com.petclinic.visits.visitsservicenew.BusinessLayer.Review.ReviewService;
 import com.petclinic.visits.visitsservicenew.BusinessLayer.VisitService;
 import com.petclinic.visits.visitsservicenew.Exceptions.InvalidInputException;
-<<<<<<< HEAD
+
 import com.petclinic.visits.visitsservicenew.Exceptions.NotFoundException;
-=======
+
 import com.petclinic.visits.visitsservicenew.PresentationLayer.Emergency.EmergencyRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.Emergency.EmergencyResponseDTO;
->>>>>>> b69e7972 (feat/VIST-CPC-1118_Add-Emergency_Appointment_Feature)
 import com.petclinic.visits.visitsservicenew.PresentationLayer.Review.ReviewRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.Review.ReviewResponseDTO;
 import lombok.RequiredArgsConstructor;

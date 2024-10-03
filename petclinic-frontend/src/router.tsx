@@ -41,9 +41,8 @@ import UpdateOwnerPetPage from '@/pages/Customer/UpdateOwnerPetPage.tsx';
 import AddEmergencyForm from './features/visits/Emergency/AddEmergencyForm';
 import EmergencyList from './features/visits/Emergency/EmergencyList';
 import EditEmergency from './features/visits/Emergency/EditEmergency';
-import AddSupplyToInventory from "@/features/inventories/AddSupplyToInventory.tsx";
-import EditInventoryProducts from "@/features/inventories/EditInventoryProducts.tsx";
-
+import EditInventoryProducts from './features/inventories/EditInventoryProducts';
+import AddSupplyToInventory from './features/inventories/AddSupplyToInventory';
 
 const router = createBrowserRouter([
   {
