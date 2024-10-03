@@ -6,6 +6,7 @@ create table if not exists users (
          username VARCHAR(2048) NOT NULL UNIQUE,
          password VARCHAR(2048) NOT NULL,
          verified BOOL,
+        disabled BOOL DEFAULT FALSE,
          PRIMARY KEY(id)
 );
 

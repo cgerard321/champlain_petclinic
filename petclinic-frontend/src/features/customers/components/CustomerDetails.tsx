@@ -10,6 +10,7 @@ const CustomerDetails: FC = () => {
   const { ownerId } = useParams<{ ownerId: string }>();
   const navigate = useNavigate();
 
+  const [isDisabled, setIsDisabled] = useState<boolean>(false); // Track account status (disabled/enabled)
   const [owner, setOwner] = useState<OwnerResponseModel | null>(null);
   const [pets, setPets] = useState<PetResponseModel[]>([]); // State for pets
   const [bills, setBills] = useState<Bill[]>([]);
@@ -24,7 +25,7 @@ const CustomerDetails: FC = () => {
           { withCredentials: true }
         );
         setOwner(ownerResponse.data);
-
+        setIsDisabled(ownerResponse.data.disabled);
         // Fetch pets by owner ID
         const petsResponse = await axios.get(
           `http://localhost:8080/api/v2/gateway/pets/owner/${ownerId}/pets`,
@@ -135,6 +136,40 @@ const CustomerDetails: FC = () => {
     return Math.abs(ageDate.getUTCFullYear() - 1970);
   };
 
+  const handleDisableEnable = async (): Promise<void> => {
+    const confirmAction = window.confirm(
+        `Are you sure you want to ${isDisabled ? 'enable' : 'disable'} this user's account?`
+    );
+
+    if (confirmAction) {
+      try {
+        if (isDisabled) {
+          // Call enable API
+          await axios.patch(
+              `http://localhost:8080/api/v2/gateway/users/${ownerId}/enable`,
+              {},
+              { withCredentials: true }
+          );
+          alert('User account enabled successfully.');
+        } else {
+          // Call disable API
+          await axios.patch(
+              `http://localhost:8080/api/v2/gateway/users/${ownerId}/disable`,
+              {},
+              { withCredentials: true }
+          );
+          alert('User account disabled successfully.');
+        }
+        setIsDisabled(!isDisabled); // Toggle isDisabled state
+      } catch (error) {
+        console.error('Error updating user account status:', error);
+        alert('Error updating user account status. Please try again.');
+      }
+    }
+  };
+
+
+
   const handleEditPetClick = (petId: string): void => {
     navigate(`/pets/${petId}/edit`);
   };
@@ -240,6 +275,14 @@ const CustomerDetails: FC = () => {
           style={{ backgroundColor: 'red', color: 'white' }}
         >
           Delete Owner
+        </button>
+        <button
+            className="btn btn-warning"
+            onClick={handleDisableEnable}
+            title={isDisabled ? 'Enable' : 'Disable'}
+            style={{ backgroundColor: isDisabled ? 'green' : 'orange', color: 'white' }}
+        >
+          {isDisabled ? 'Enable Account' : 'Disable Account'}
         </button>
       </div>
     </div>

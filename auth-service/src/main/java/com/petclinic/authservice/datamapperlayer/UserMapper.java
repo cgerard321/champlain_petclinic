@@ -61,6 +61,7 @@ public interface UserMapper {
 
     @Mappings({
             @Mapping(target = "userId",expression = "java(model.getUserIdentifier().getUserId())"),
+            @Mapping(target = "disabled", source = "model.disabled")  // Map the disabled field
     })
     UserDetails modelToDetails(User model);
 
