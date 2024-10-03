@@ -42,7 +42,7 @@ public class VetController {
 
 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
-    @GetMapping()
+    @GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<VetResponseDTO> getVets(){
         return vetsServiceClient.getVets();
     }
