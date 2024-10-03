@@ -16,4 +16,5 @@ public class CartProduct {
     private Double productSalePrice;
     private Double averageRating;
     private Integer quantityInCart;
+    private Integer productQuantity;
 }

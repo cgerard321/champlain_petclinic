@@ -1,9 +1,11 @@
 package com.petclinic.cartsservice.presentationlayer;
 
 import com.petclinic.cartsservice.businesslayer.CartService;
-import com.petclinic.cartsservice.domainclientlayer.ProductResponseModel;
+import com.petclinic.cartsservice.domainclientlayer.AddProductRequestModel;
+import com.petclinic.cartsservice.domainclientlayer.UpdateProductQuantityRequestModel;
 import com.petclinic.cartsservice.utils.exceptions.InvalidInputException;
 import com.petclinic.cartsservice.utils.exceptions.NotFoundException;
+import com.petclinic.cartsservice.utils.exceptions.OutOfStockException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -90,4 +92,36 @@ public class CartController {
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
 
     }
+    @PostMapping("/{cartId}/products")
+    public Mono<ResponseEntity<CartResponseModel>> addProductToCart(@PathVariable String cartId, @RequestBody AddProductRequestModel requestModel) {
+        return cartService.addProductToCart(cartId, requestModel.getProductId(), requestModel.getQuantity())
+                .map(ResponseEntity::ok)
+                .onErrorResume(e -> {
+                    if (e instanceof OutOfStockException || e instanceof InvalidInputException) {
+                        CartResponseModel errorResponse = new CartResponseModel();
+                        errorResponse.setMessage(e.getMessage());
+                        return Mono.just(ResponseEntity.badRequest().body(errorResponse));
+                    } else {
+                        return Mono.error(e);
+                    }
+                });
+    }
+
+    @PutMapping("/{cartId}/products/{productId}")
+    public Mono<ResponseEntity<CartResponseModel>> updateProductQuantityInCart(@PathVariable String cartId, @PathVariable String productId, @RequestBody UpdateProductQuantityRequestModel requestModel) {
+        return cartService.updateProductQuantityInCart(cartId, productId, requestModel.getQuantity())
+                .map(ResponseEntity::ok)
+                .onErrorResume(e -> {
+                    if (e instanceof OutOfStockException || e instanceof InvalidInputException || e instanceof NotFoundException) {
+                        CartResponseModel errorResponse = new CartResponseModel();
+                        errorResponse.setMessage(e.getMessage());
+                        return Mono.just(ResponseEntity.badRequest().body(errorResponse));
+                    } else {
+                        return Mono.error(e);
+                    }
+                });
+    }
+
+
+
 }

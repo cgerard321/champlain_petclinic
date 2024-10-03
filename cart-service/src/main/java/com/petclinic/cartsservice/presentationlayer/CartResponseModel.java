@@ -23,4 +23,5 @@ public class CartResponseModel {
     private double tvq;
     private double tvc;
     private double total;
+    private String message;
 }
