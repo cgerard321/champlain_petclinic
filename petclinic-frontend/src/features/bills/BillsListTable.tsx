@@ -5,7 +5,9 @@ import { useUser } from '@/context/UserContext';
 export default function BillsListTable(): JSX.Element {
   const { user } = useUser();
   const [bills, setBills] = useState<Bill[]>([]);
+  const [filteredBills, setFilteredBills] = useState<Bill[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [selectedStatus, setSelectedStatus] = useState<string>('all'); // Default filter status
 
   useEffect(() => {
     if (!user.userId) return;
@@ -65,8 +67,39 @@ export default function BillsListTable(): JSX.Element {
     fetchBills();
   }, [user.userId]);
 
+  // Filtering bills by selected status
+  useEffect(() => {
+    if (selectedStatus === 'all') {
+      setFilteredBills(bills);
+    } else {
+      setFilteredBills(
+        bills.filter(
+          bill => bill.billStatus.toLowerCase() === selectedStatus.toLowerCase()
+        )
+      );
+    }
+  }, [selectedStatus, bills]);
+
   return (
     <div>
+      <h2>Bills</h2>
+
+      {/* Dropdown to filter bills by status */}
+      <div>
+        <label htmlFor="statusFilter">Filter by Status:</label>
+        <select
+          id="statusFilter"
+          value={selectedStatus}
+          onChange={e => setSelectedStatus(e.target.value)}
+          style={{ width: '150px' }}
+        >
+          <option value="all">All</option>
+          <option value="overdue">Overdue</option>
+          <option value="paid">Paid</option>
+          <option value="unpaid">Unpaid</option>
+        </select>
+      </div>
+
       {error ? (
         <p>{error}</p>
       ) : (
@@ -85,7 +118,7 @@ export default function BillsListTable(): JSX.Element {
             </tr>
           </thead>
           <tbody>
-            {bills.map(bill => (
+            {filteredBills.map(bill => (
               <tr key={bill.billId}>
                 <td>{bill.billId}</td>
                 <td>
