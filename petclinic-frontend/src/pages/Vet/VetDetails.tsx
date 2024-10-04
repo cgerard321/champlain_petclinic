@@ -22,11 +22,13 @@ export default function VetDetails(): JSX.Element {
   const { vetId } = useParams<{ vetId: string }>();
   const [vet, setVet] = useState<VetResponseType | null>(null);
   const [photo, setPhoto] = useState<string | null>(null);
+  const [albumPhotos, setAlbumPhotos] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [isFormOpen, setIsFormOpen] = useState(false); // To handle form visibility
   const [specialtyId, setSpecialtyId] = useState('');
   const [specialtyName, setSpecialtyName] = useState('');
+  const [enlargedPhoto, setEnlargedPhoto] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchVetDetails = async (): Promise<void> => {
@@ -44,6 +46,38 @@ export default function VetDetails(): JSX.Element {
         setError('Failed to fetch vet details');
       }
     };
+
+    const fetchAlbumPhotos = async (): Promise<void> => {
+      try {
+        const response = await fetch(
+            `http://localhost:8080/api/v2/gateway/vets/${vetId}/albums`,
+            {
+              method: 'GET',
+              headers: {
+                Accept: 'application/json',
+              },
+            }
+        );
+
+        if (!response.ok) {
+          throw new Error(`Error: ${response.statusText}`);
+        }
+
+        const photos: Uint8Array[] = await response.json(); // Expect byte arrays (Uint8Array)
+
+        // Convert each byte array to a Blob and create object URLs
+        const imageUrls = photos.map((photoBytes: Uint8Array) => {
+          const blob = new Blob([photoBytes], { type: 'image/jpeg' }); // Assuming JPEG format, adjust MIME type if necessary
+          return URL.createObjectURL(blob);
+        });
+
+        setAlbumPhotos(imageUrls); // Set the image URLs in state
+      } catch (error) {
+        setError('Failed to fetch album photos');
+      }
+    };
+
+
 
     const fetchVetPhoto = async (): Promise<void> => {
       try {
@@ -72,6 +106,7 @@ export default function VetDetails(): JSX.Element {
     //fetch both vet details and photo
     fetchVetDetails().then(() => {
       fetchVetPhoto();
+      fetchAlbumPhotos();
       setLoading(false);
     });
   }, [vetId]);
@@ -97,6 +132,14 @@ export default function VetDetails(): JSX.Element {
       console.error('Error parsing work hours:', error);
       return <p>Invalid work hours data</p>;
     }
+  };
+
+  const openPhotoModal = (photoUrl: string) => {
+    setEnlargedPhoto(photoUrl);
+  };
+
+  const closePhotoModal = () => {
+    setEnlargedPhoto(null);
   };
 
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -247,9 +290,39 @@ export default function VetDetails(): JSX.Element {
                 </div>
               )}
             </section>
+
+            <section className="album-photos">
+              <h2>Album Photos</h2>
+              {albumPhotos.length > 0 ? (
+                  <div className="album-photo-grid">
+                    {albumPhotos.map((photoUrl, index) => (
+                        <div
+                            key={index}
+                            className="album-photo-card"
+                            onClick={() => openPhotoModal(photoUrl)}
+                        >
+                          <img
+                              src={photoUrl}
+                              alt={`Album Photo ${index + 1}`}
+                              className="album-photo-thumbnail"
+                          />
+                        </div>
+                    ))}
+                  </div>
+              ) : (
+                  <p>No album photos available</p>
+              )}
+            </section>
           </>
         )}
       </div>
+
+      {/* Modal for enlarged photo */}
+      {enlargedPhoto && (
+          <div className="photo-modal" onClick={closePhotoModal}>
+            <img src={enlargedPhoto} alt="Enlarged Vet Album Photo" />
+          </div>
+      )}
     </div>
   );
 }

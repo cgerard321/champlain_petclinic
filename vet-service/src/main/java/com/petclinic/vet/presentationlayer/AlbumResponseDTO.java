@@ -12,6 +12,5 @@ import java.util.List;
 @AllArgsConstructor
 public class AlbumResponseDTO {
     private String vetId;
-    private String title;
     private List<PhotoResponseDTO> photos;
 }

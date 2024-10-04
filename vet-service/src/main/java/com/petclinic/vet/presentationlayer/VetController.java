@@ -12,6 +12,7 @@ package com.petclinic.vet.presentationlayer;
  */
 
 
+import com.petclinic.vet.dataaccesslayer.Album;
 import com.petclinic.vet.dataaccesslayer.AlbumRepository;
 import com.petclinic.vet.exceptions.InvalidInputException;
 import com.petclinic.vet.exceptions.NotFoundException;
@@ -312,9 +313,9 @@ public class VetController {
         return vetService.addSpecialtiesByVetId(vetId, specialties);
     }
 
-    @GetMapping("{vetId}/photos")
-    public Flux<Resource> getAllPhotosByVetId(@PathVariable String vetId) {
-        return albumService.getAllPhotosByVetId(vetId)
+    @GetMapping("{vetId}/albums")
+    public Flux<Album> getAllAlbumsByVetId(@PathVariable String vetId) {
+        return albumService.getAllAlbumsByVetId(vetId)
                 .doOnError(error -> log.error("Error fetching photos for vet {}", vetId, error));
     }
 

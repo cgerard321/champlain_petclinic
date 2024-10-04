@@ -5,6 +5,7 @@ import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VetsServiceClient;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
+import com.petclinic.bffapigateway.dtos.Vets.Album;
 import com.petclinic.bffapigateway.dtos.Vets.SpecialtyDTO;
 import com.petclinic.bffapigateway.dtos.Vets.VetRequestDTO;
 import com.petclinic.bffapigateway.dtos.Vets.VetResponseDTO;
@@ -124,8 +125,8 @@ public class VetController {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
-    @GetMapping(value = "{vetId}/photos", produces = MediaType.IMAGE_JPEG_VALUE)
-    public Flux<Resource> getAllAlbumsByVetId(@PathVariable String vetId) {
+    @GetMapping(value = "{vetId}/albums", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Flux<Album> getAllAlbumsByVetId(@PathVariable String vetId) {
         return vetsServiceClient.getAllAlbumsByVetId(vetId)
                 .doOnError(error -> log.error("Error fetching photos for vet {}", vetId, error));
     }

@@ -22,9 +22,13 @@ public class Album {
 
     @Column("vet_id")
     private String vetId;
+    @Column("filename")
+    private String filename;
+    @Column("img_type")
+    private String imgType;
+    //@Lob
+    @Column("img_data")
+    private byte[] data;
 
-    @Column("title")
-    private String title;
-
-    private List<Photo> photos;
+    //private List<Photo> photos;
 }

@@ -1,5 +1,6 @@
 package com.petclinic.vet.servicelayer;
 
+import com.petclinic.vet.dataaccesslayer.Album;
 import com.petclinic.vet.dataaccesslayer.AlbumRepository;
 import com.petclinic.vet.dataaccesslayer.Photo;
 import com.petclinic.vet.exceptions.NotFoundException;
@@ -18,21 +19,12 @@ public class AlbumServiceImpl implements AlbumService{
     private final AlbumRepository albumRepository;
 
     @Override
-    public Flux<Resource> getAllPhotosByVetId(String vetId) {
+    public Flux<Album> getAllAlbumsByVetId(String vetId) {
         return albumRepository.findAllByVetId(vetId)  // Fetch all albums by vetId
-                .doOnSubscribe(subscription -> log.debug("Fetching all photos for vetId: {}", vetId))
-                .switchIfEmpty(Flux.error(new NotFoundException("No photos found for vet " + vetId)))
-                // Flatten the list of photos from each album
-                .flatMap(album -> Flux.fromIterable(album.getPhotos()))
-                // Convert each Photo to Resource
-                .map(this::createResourceFromPhoto)
-                .cast(Resource.class)  // Explicit cast to Resource
-                .doOnComplete(() -> log.info("Successfully fetched all photos for vetId: {}", vetId))
-                .doOnError(error -> log.error("Error fetching photos for vetId: {}", vetId, error));
-    }
-
-    private ByteArrayResource createResourceFromPhoto(Photo photo) {
-        return new ByteArrayResource(photo.getData());
+                .doOnSubscribe(subscription -> log.debug("Fetching all albums for vetId: {}", vetId))
+                .switchIfEmpty(Flux.error(new NotFoundException("No albums found for vet " + vetId)))
+                .doOnComplete(() -> log.info("Successfully fetched all albums for vetId: {}", vetId))
+                .doOnError(error -> log.error("Error fetching albums for vetId: {}", vetId, error));
     }
 
 }
