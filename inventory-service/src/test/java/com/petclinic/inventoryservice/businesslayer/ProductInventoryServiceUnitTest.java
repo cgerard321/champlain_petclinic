@@ -19,7 +19,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
@@ -40,16 +39,17 @@ class ProductInventoryServiceUnitTest {
     @MockBean
     InventoryTypeRepository inventoryTypeRepository;
 
-    ProductResponseDTO productResponseDTO = ProductResponseDTO.builder()
-            .inventoryId("1")
-            .productId(UUID.randomUUID().toString())
-            .productName("Benzodiazepines")
-            .productDescription("Sedative Medication")
-            .productPrice(100.00)
-            .productQuantity(10)
-            .productSalePrice(15.99)
-            .build();
+//    ProductResponseDTO productResponseDTO = ProductResponseDTO.builder()
+//            .inventoryId("1")
+//            .productId(UUID.randomUUID().toString())
+//            .productName("Benzodiazepines")
+//            .productDescription("Sedative Medication")
+//            .productPrice(100.00)
+//            .productQuantity(10)
+//            .productSalePrice(15.99)
+//            .build();
     Product product = Product.builder()
+            .id(UUID.randomUUID().toString())
             .productId("12345")
             .inventoryId("1")
             .productName("Benzodiazepines")
@@ -59,6 +59,7 @@ class ProductInventoryServiceUnitTest {
             .productSalePrice(15.99)
             .build();
     Product product1 = Product.builder()
+            .id(UUID.randomUUID().toString())
             .productId("123456")
             .inventoryId("1")
             .productName("Antibenzo")
@@ -67,6 +68,7 @@ class ProductInventoryServiceUnitTest {
             .productQuantity(100)
             .build();
     Product product2 = Product.builder()
+            .id(UUID.randomUUID().toString())
             .productId("1234567")
             .inventoryId("1")
             .productName("ibuprofen")
@@ -566,6 +568,7 @@ class ProductInventoryServiceUnitTest {
                 .build();
 
         Product existingProduct = Product.builder()
+                .id(UUID.randomUUID().toString())
                 .inventoryId(inventoryId)
                 .productId(productId)
                 .productName("Original Product Name")
@@ -575,6 +578,7 @@ class ProductInventoryServiceUnitTest {
                 .build();
 
         Product updatedProduct = Product.builder()
+                .id(UUID.randomUUID().toString())
                 .inventoryId(inventoryId)
                 .productId(productId)
                 .productName("Updated Product Name")
@@ -691,20 +695,20 @@ class ProductInventoryServiceUnitTest {
         // You can also assert the exception message here if needed
     }
 
-    public void deleteProduct_InvalidInventoryId_ShouldNotFound(){
-        //arrange
-        String invalidInventoryId = "invalid";
-        when(inventoryRepository.existsByInventoryId(invalidInventoryId)).thenReturn(Mono.just(false));
-        when(productRepository.existsByProductId(product.getProductId())).thenReturn(Mono.just(true));
-
-        //act
-        Mono<Void> setup = productInventoryService.deleteProductInInventory(invalidInventoryId, product.getProductId());
-        //assert
-        StepVerifier
-                .create(setup)
-                .expectError(NotFoundException.class) // Expect a NotFoundException
-                .verify();
-    }
+//    public void deleteProduct_InvalidInventoryId_ShouldNotFound(){
+//        //arrange
+//        String invalidInventoryId = "invalid";
+//        when(inventoryRepository.existsByInventoryId(invalidInventoryId)).thenReturn(Mono.just(false));
+//        when(productRepository.existsByProductId(product.getProductId())).thenReturn(Mono.just(true));
+//
+//        //act
+//        Mono<Void> setup = productInventoryService.deleteProductInInventory(invalidInventoryId, product.getProductId());
+//        //assert
+//        StepVerifier
+//                .create(setup)
+//                .expectError(NotFoundException.class) // Expect a NotFoundException
+//                .verify();
+//    }
     //delete
     @Test
     void deleteAllProductInventory_ValidInventoryId_ShouldDeleteAllProducts() {

@@ -48,7 +48,6 @@ public class EntityDTOUtil {
         return product;
     }
 
-
     public static InventoryResponseDTO toInventoryResponseDTO(Inventory inventory){
         InventoryResponseDTO inventoryResponseDTO = new InventoryResponseDTO();
         BeanUtils.copyProperties(inventory, inventoryResponseDTO);
@@ -73,17 +72,18 @@ public class EntityDTOUtil {
         BeanUtils.copyProperties(inventoryResponseDTO, inventory);
         return inventory;
     }
+
     public static InventoryType toInventoryTypeEntity(InventoryTypeRequestDTO inventoryTypeRequestDTO){
         InventoryType inventoryType = new InventoryType();
         BeanUtils.copyProperties(inventoryTypeRequestDTO, inventoryType);
         return inventoryType;
     }
 
-    public static InventoryName toInventoryNameEntity(InventoryNameRequestDTO inventoryNameRequestDTO){
-        InventoryName inventoryName = new InventoryName();
-        BeanUtils.copyProperties(inventoryNameRequestDTO, inventoryName);
-        return inventoryName;
-    }
+//    public static InventoryName toInventoryNameEntity(InventoryNameRequestDTO inventoryNameRequestDTO){
+//        InventoryName inventoryName = new InventoryName();
+//        BeanUtils.copyProperties(inventoryNameRequestDTO, inventoryName);
+//        return inventoryName;
+//    }
 
     public static InventoryTypeResponseDTO toInventoryTypeResponseDTO(InventoryType inventoryType){
         InventoryTypeResponseDTO inventoryTypeResponseDTO = new InventoryTypeResponseDTO();

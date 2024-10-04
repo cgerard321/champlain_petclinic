@@ -10,6 +10,7 @@ import org.springframework.data.annotation.Id;
 @EqualsAndHashCode
 public class Product {
     @Id
+    private String id;
     private String productId;
     private String inventoryId;
     private String productName;
