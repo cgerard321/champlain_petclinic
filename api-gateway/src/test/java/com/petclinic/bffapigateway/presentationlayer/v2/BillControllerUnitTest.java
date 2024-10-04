@@ -169,4 +169,18 @@ private final String baseBillURL = "/api/v2/gateway/bills";
 
 
 
+    public void whenUpdateBill_thenReturnUpdatedBill() {
+       when(billServiceClient.updateBill("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a",Mono.just(billRequestDTO)))
+               .thenReturn(Mono.just(billresponse));
+
+       webTestClient.put()
+               .uri(baseBillURL + "/admin" + "/e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
+               .bodyValue(billRequestDTO)
+               .exchange()
+               .expectStatus().isOk()
+               .expectBody(BillResponseDTO.class)
+               .isEqualTo(billresponse);
+
+       verify(billServiceClient, times(1)).updateBill("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a", Mono.just(billRequestDTO));
+    }
 }
