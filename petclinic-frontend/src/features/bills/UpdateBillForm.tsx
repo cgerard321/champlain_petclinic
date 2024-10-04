@@ -3,7 +3,6 @@ import React, {FormEvent, useEffect, useState} from "react";
 import {BillRequestModel} from "@/features/bills/models/BillRequestModel.tsx";
 import {getBill, updateBill} from "@/features/bills/api/updateBill.tsx";
 import {Bill} from "@/features/bills/models/Bill.ts";
-import {AppRoutePaths} from "@/shared/models/path.routes.ts";
 import './UpdateBillForm.css'
 import {getAllOwners} from "@/features/customers/api/getAllOwners.tsx";
 import {getAllVets} from "@/features/veterinarians/api/getAllVets.tsx";
@@ -20,7 +19,6 @@ const UpdateBillForm: React.FC = (): JSX.Element => {
         vetId: '',
         date: '',
         amount: 0.0,
-        taxedAmount: 0.0,
         billStatus: '',
         dueDate: ''
     });
@@ -41,18 +39,20 @@ const UpdateBillForm: React.FC = (): JSX.Element => {
 
     useEffect(() => {
         const fetchBillData = async(): Promise<void> => {
-            if(billId) {
+            if(!billId) {
+                console.error('Bill ID does not exist');
+                return;
+            }
                 try {
                     const response = await getBill(billId);
                     const billData: Bill = response.data;
                     setFormData(billData);
                 } catch (error) {
-                    console.error('Error fetching bill data: ', error);
+                    console.error('Error fetching bill data', error);
                 }
-            }
-            if (billId) {
-                fetchBillData();
-            }
+            fetchBillData().catch(error =>
+                console.error('Error fetching bill data', error)
+            )
         }
     }, [billId]);
 
@@ -80,7 +80,6 @@ const UpdateBillForm: React.FC = (): JSX.Element => {
         if(!formData.vetId) newErrors.vetId = 'Vet ID is required';
         if(!formData.date) newErrors.date = 'Date is required';
         if(!formData.amount) newErrors.amount = 'Amount is required';
-        if(!formData.taxedAmount) newErrors.taxedAmount = 'Taxed amount is required';
         if(!formData.billStatus) newErrors.billStatus = 'Bill status is required';
         if(!formData.dueDate) newErrors.dueDate = 'Due date is required';
         setErrors(newErrors);
@@ -97,13 +96,12 @@ const UpdateBillForm: React.FC = (): JSX.Element => {
         if(!validate()) return;
 
         try {
-            if(billId) {
-                const response = await updateBill(billId, formData)
-                setIsModalOpen(true)
-                if (response.status === 200) {
-                    navigate(AppRoutePaths.AdminBills);
-                }
+            if(!billId) {
+                console.error('Invalid bill ID')
+                return;
             }
+            await updateBill(billId, formData)
+            setIsModalOpen(true)
         } catch(error) {
             console.error('Error: ', error)
         }
@@ -111,11 +109,11 @@ const UpdateBillForm: React.FC = (): JSX.Element => {
 
     const closeModal = (): void => {
         setIsModalOpen(false)
-        navigate(`/bills/admin}`)
+        navigate(`/bills/admin`)
     }
 
     return (
-        <div>
+        <div className="update-bill-form">
             <form onSubmit={handleSubmit}>
 
                 <label>Customer: </label>
@@ -125,7 +123,7 @@ const UpdateBillForm: React.FC = (): JSX.Element => {
                         setFormData({ ...formData, customerId: e.target.value })
                     }
                 >
-                    <option value="">Select Customer</option>
+                    <option value=''>Select Customer</option>
                     {owners.map(owner => (
                         <option key={owner.ownerId} value={owner.ownerId}>
                             {owner.firstName} {owner.lastName}
@@ -157,10 +155,11 @@ const UpdateBillForm: React.FC = (): JSX.Element => {
                 {errors.vetId && <span className="error">{errors.vetId}</span>}
                 <label>Date: </label>
                 <input
-                    type="text"
-                    name="date"
+                    type="date"
                     value={formData.date}
-                    onChange={handleChange}
+                    onChange={e =>
+                        setFormData({ ...formData, date: e.target.value })
+                    }
                 />
                 {errors.date && <span className="error">{errors.date}</span>}
                 <label>Amount: </label>
@@ -171,42 +170,39 @@ const UpdateBillForm: React.FC = (): JSX.Element => {
                     onChange={handleChange}
                 />
                 {errors.amount && <span className="error">{errors.amount}</span>}
-                <label>Taxed Amount: </label>
-                <input
-                    type="text"
-                    name="taxedAmount"
-                    value={formData.taxedAmount}
-                    onChange={handleChange}
-                />
-                {errors.taxedAmount && <span className="error">{errors.taxedAmount}</span>}
                 <label>Bill Status: </label>
                 <select
                     value={formData.billStatus}
                     onChange={e =>
-                        setFormData({ ...formData, vetId: e.target.value })
-                    }>
-                    <option> PAID </option>
-                    <option> UNPAID </option>
-                    <option> OVERDUE </option>
+                        setFormData({ ...formData, billStatus: e.target.value })
+                }>
+                    <option value=""> Select a Bill Status </option>
+                    <option value="PAID"> PAID </option>
+                    <option value="UNPAID"> UNPAID </option>
+                    <option value="OVERDUE"> OVERDUE </option>
                 </select>
                 {errors.billStatus && <span className="error">{errors.billStatus}</span>}
                 <label>Due Date: </label>
                 <input
-                    type="text"
-                    name="dueDate"
+                    type="date"
                     value={formData.dueDate}
-                    onChange={handleChange}
+                    onChange={e =>
+                        setFormData({ ...formData, dueDate: e.target.value })
+                    }
                 />
                 {errors.dueDate && <span className="error">{errors.dueDate}</span>}
-
-                <button type="submit">Update</button>
+                <div className="update-button">
+                    <button type="submit">Update</button>
+                </div>
             </form>
 
             {isModalOpen && (
-                <div className="admin-update-bill-modal">
+                <div className="admin-update-bill-modal-overlay">
+                    <div className="admin-update-bill-modal">
                         <h2>Success!</h2>
                         <p>Bill has been successfully updated.</p>
                         <button onClick={closeModal}>Close</button>
+                    </div>
                 </div>
             )}
         </div>
