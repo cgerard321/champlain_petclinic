@@ -2,17 +2,11 @@ import { ProductModel } from '@/features/products/models/ProductModels/ProductMo
 import { NavBar } from '@/layouts/AppNavBar.tsx';
 import { JSX } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useUser } from '@/context/UserContext';
-import { Role } from '@/models/Role';
 
 export default function ProductDetails(): JSX.Element {
   const location = useLocation();
   const navigate = useNavigate();
   const { product } = location.state as { product: ProductModel };
-  const { user } = useUser();
-
-  const isAdmin = user?.roles?.some(role => role.name === 'ADMIN');
-
   const navigateToEditProduct = (): void => {
     navigate(`/products/edit/${product.productId}`, { state: { product } });
   };
@@ -125,7 +119,7 @@ export default function ProductDetails(): JSX.Element {
       <p>Price: ${product.productSalePrice.toFixed(2)}</p>
       <p>Rating: {product.averageRating} / 5</p>
 
-      {isAdmin && <button onClick={navigateToEditProduct}>Edit Product</button>}
+      <button onClick={navigateToEditProduct}>Edit Product</button>
     </>
   );
 }

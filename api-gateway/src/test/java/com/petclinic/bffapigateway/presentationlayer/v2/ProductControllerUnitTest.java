@@ -141,6 +141,49 @@ class ProductControllerUnitTest {
     }
 
     @Test
+    public void whenUpdateNonExistentProduct_thenReturnNotFound() {
+        String nonExistentProductId = "non-existent-id";
+
+        when(productsServiceClient.updateProduct(nonExistentProductId, productRequest1))
+                .thenReturn(Mono.empty());
+
+        webTestClient.put()
+                .uri(baseInventoryURL + "/" + nonExistentProductId)
+                .bodyValue(productRequest1)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .consumeWith(response -> {
+                    assertTrue(response.getResponseBody() == null || response.getResponseBody().length == 0);
+                });
+
+        verify(productsServiceClient, times(1)).updateProduct(nonExistentProductId, productRequest1);
+    }
+
+    @Test
+    public void whenUpdateProductServiceThrowsException_thenReturnInternalServerError() {
+        String productId = "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a";
+
+        when(productsServiceClient.updateProduct(productId, productRequest1))
+                .thenReturn(Mono.error(new RuntimeException("Service layer exception")));
+
+        webTestClient.put()
+                .uri(baseInventoryURL + "/" + productId)
+                .bodyValue(productRequest1)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().is5xxServerError()
+                .expectBody()
+                .consumeWith(response -> {
+                    String responseBody = new String(response.getResponseBody());
+                    assertTrue(responseBody.contains("Internal Server Error"));
+                });
+
+        verify(productsServiceClient, times(1)).updateProduct(productId, productRequest1);
+    }
+
+    @Test
     public void whenDeleteProduct_thenReturnNothing() {
         when(productsServiceClient.deleteProduct("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")).thenReturn(Mono.empty());
 

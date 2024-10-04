@@ -1,25 +1,17 @@
 import { ProductModel } from '@/features/products/models/ProductModels/ProductModel';
-import { useState, useEffect, JSX } from 'react';
+import { useState, JSX } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useUser } from '@/context/UserContext';
 import { updateProduct } from '../api/updateProduct';
+import './EditProduct.css';
 
 export default function EditProduct(): JSX.Element {
-  const { user } = useUser();
   const navigate = useNavigate();
   const location = useLocation();
   const { product } = location.state as { product: ProductModel };
 
   const [productData, setProductData] = useState<ProductModel>(product);
 
-  useEffect(() => {
-    const isAdmin = user?.roles?.some(role => role.name === 'ADMIN');
-    if (!isAdmin) {
-      navigate('/unauthorized');
-    }
-  }, [user, navigate]);
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     setProductData({ ...productData, [e.target.name]: e.target.value });
   };
 
@@ -27,9 +19,10 @@ export default function EditProduct(): JSX.Element {
     e.preventDefault();
     try {
       await updateProduct(productData.productId, productData);
-      navigate(`/products/${productData.productId}`, {
+      navigate(`/products`, {
         state: { product: productData },
       });
+      alert('Product updated successfully!');
     } catch (error) {
       console.error('Error updating product:', error);
       alert('Failed to update the product. Please try again.');
@@ -37,48 +30,70 @@ export default function EditProduct(): JSX.Element {
   };
 
   return (
-    <div>
-      <h2>Edit Product</h2>
-      <form onSubmit={handleSubmit}>
-        <label>
-          Product Name:
+    <div className="edit-product-container">
+      <h2 className="form-title">Edit Product</h2>
+      <form className="edit-product-form" onSubmit={handleSubmit}>
+        <div className="form-group">
+          <label htmlFor="productName" className="form-label">
+            Product Name:
+          </label>
           <input
+            id="productName"
             name="productName"
+            className="form-input"
             value={productData.productName}
             onChange={handleInputChange}
             required
           />
-        </label>
-        <label>
-          Product Description:
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="productDescription" className="form-label">
+            Product Description:
+          </label>
           <input
+            id="productDescription"
             name="productDescription"
+            className="form-input"
             value={productData.productDescription}
             onChange={handleInputChange}
             required
           />
-        </label>
-        <label>
-          Product Sale Price:
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="productSalePrice" className="form-label">
+            Product Sale Price:
+          </label>
           <input
+            id="productSalePrice"
             name="productSalePrice"
             type="number"
             step="0.01"
+            className="form-input"
             value={productData.productSalePrice}
             onChange={handleInputChange}
             required
           />
-        </label>
-        <label>
-          Product Type:
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="productType" className="form-label">
+            Product Type:
+          </label>
           <input
+            id="productType"
             name="productType"
+            className="form-input"
             value={productData.productType}
             onChange={handleInputChange}
             required
           />
-        </label>
-        <button type="submit">Update Product</button>
+        </div>
+
+        <button type="submit" className="submit-button">
+          Update Product
+        </button>
       </form>
     </div>
   );
