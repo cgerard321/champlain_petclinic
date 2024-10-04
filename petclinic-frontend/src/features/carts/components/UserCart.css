@@ -120,3 +120,63 @@
   font-weight: bold;
   color: #333;
 }
+
+/* Container for Cart Icon and Badge */
+.cart-icon-container {
+  position: relative;
+  display: inline-block;
+  margin-left: 20px;
+}
+
+/* Shopping Cart Icon */
+.cart-icon {
+  font-size: 2em;
+  color: #333;
+}
+
+/* Badge for Item Count */
+.cart-badge {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background-color: #ff4d4f; /* Vibrant red for visibility */
+  color: white;
+  border-radius: 50%;
+  padding: 4px 7px;
+  font-size: 0.8em;
+  font-weight: bold;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive Design */
+@media screen and (max-width: 768px) {
+  .UserCart {
+    padding: 10px;
+  }
+
+  .cart-header {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .cart-icon-container {
+    margin-left: 0;
+    margin-top: 10px;
+  }
+
+  .cart-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .cart-actions button,
+  .CartSummary button {
+    width: 100%;
+    font-size: 0.9em;
+    padding: 8px 16px;
+  }
+
+  .CartSummary {
+    text-align: center;
+  }
+}
