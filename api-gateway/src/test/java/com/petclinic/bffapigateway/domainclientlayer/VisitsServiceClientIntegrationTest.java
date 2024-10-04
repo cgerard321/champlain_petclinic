@@ -3,6 +3,9 @@ package com.petclinic.bffapigateway.domainclientlayer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.dtos.Visits.*;
+import com.petclinic.bffapigateway.dtos.Visits.Emergency.EmergencyRequestDTO;
+import com.petclinic.bffapigateway.dtos.Visits.Emergency.EmergencyResponseDTO;
+import com.petclinic.bffapigateway.dtos.Visits.Emergency.UrgencyLevel;
 import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewResponseDTO;
 import com.petclinic.bffapigateway.exceptions.BadRequestException;
@@ -904,5 +907,141 @@ class VisitsServiceClientIntegrationTest {
                 .expectError(BadRequestException.class)
                 .verify();
     }
+
+
+
+    //Emergency
+    private static final String EMERGENCY_ID = UUID.randomUUID().toString();
+
+    @Test
+    void createEmergency() throws JsonProcessingException {
+        EmergencyRequestDTO emergencyRequest = EmergencyRequestDTO.builder()
+                .urgencyLevel(UrgencyLevel.HIGH)
+                .description("Emergency case")
+                .visitDate(LocalDateTime.now())
+                .emergencyType("Medical")
+                .petName("Buddy")
+                .build();
+
+        EmergencyResponseDTO emergencyResponse = EmergencyResponseDTO.builder()
+                .visitEmergencyId(EMERGENCY_ID)
+                .urgencyLevel(UrgencyLevel.HIGH)
+                .description("Emergency case")
+                .visitDate(LocalDateTime.now())
+                .emergencyType("Medical")
+                .petName("Buddy")
+                .build();
+
+        server.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(objectMapper.writeValueAsString(emergencyResponse)));
+
+        Mono<EmergencyResponseDTO> emergencyMono = visitsServiceClient.createEmergency(Mono.just(emergencyRequest));
+        StepVerifier.create(emergencyMono)
+                .expectNextMatches(emergency -> emergency.getVisitEmergencyId().equals(EMERGENCY_ID) && emergency.getUrgencyLevel().equals(UrgencyLevel.HIGH))
+                .verifyComplete();
+    }
+
+    @Test
+    void updateEmergency() throws JsonProcessingException {
+        EmergencyRequestDTO updatedEmergencyRequest = EmergencyRequestDTO.builder()
+                .urgencyLevel(UrgencyLevel.HIGH)
+                .description("Updated Emergency case")
+                .visitDate(LocalDateTime.now())
+                .emergencyType("Medical")
+                .petName("Buddy")
+                .build();
+
+        EmergencyResponseDTO updatedEmergencyResponse = EmergencyResponseDTO.builder()
+                .visitEmergencyId(EMERGENCY_ID)
+                .urgencyLevel(UrgencyLevel.HIGH)
+                .description("Updated Emergency case")
+                .visitDate(LocalDateTime.now())
+                .emergencyType("Medical")
+                .petName("Buddy")
+                .build();
+
+        server.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(objectMapper.writeValueAsString(updatedEmergencyResponse)));
+
+        Mono<EmergencyResponseDTO> emergencyMono = visitsServiceClient.updateEmergency(EMERGENCY_ID, Mono.just(updatedEmergencyRequest));
+        StepVerifier.create(emergencyMono)
+                .expectNextMatches(emergency -> emergency.getVisitEmergencyId().equals(EMERGENCY_ID) && emergency.getUrgencyLevel().equals(UrgencyLevel.HIGH))
+                .verifyComplete();
+    }
+
+    @Test
+    void getAllEmergencies() throws JsonProcessingException {
+        EmergencyResponseDTO emergency1 = EmergencyResponseDTO.builder()
+                .visitEmergencyId(EMERGENCY_ID)
+                .urgencyLevel(UrgencyLevel.HIGH)
+                .description("First Emergency case")
+                .visitDate(LocalDateTime.now())
+                .emergencyType("Medical")
+                .petName("Buddy")
+                .build();
+
+        EmergencyResponseDTO emergency2 = EmergencyResponseDTO.builder()
+                .visitEmergencyId(EMERGENCY_ID)
+                .urgencyLevel(UrgencyLevel.HIGH)
+                .description("Second Emergency case")
+                .visitDate(LocalDateTime.now())
+                .emergencyType("Medical")
+                .petName("Charlie")
+                .build();
+
+        server.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(objectMapper.writeValueAsString(new EmergencyResponseDTO[]{emergency1, emergency2})));
+
+        StepVerifier.create(visitsServiceClient.getAllEmergency())
+                .expectNext(emergency1)
+                .expectNext(emergency2)
+                .verifyComplete();
+    }
+
+    @Test
+    void getEmergencyByEmergencyId() throws JsonProcessingException {
+        EmergencyResponseDTO emergencyResponse = EmergencyResponseDTO.builder()
+                .visitEmergencyId(EMERGENCY_ID)
+                .urgencyLevel(UrgencyLevel.HIGH)
+                .description("Specific Emergency case")
+                .visitDate(LocalDateTime.now())
+                .emergencyType("Medical")
+                .petName("Buddy")
+                .build();
+
+        server.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(objectMapper.writeValueAsString(emergencyResponse)));
+
+        Mono<EmergencyResponseDTO> emergencyMono = visitsServiceClient.getEmergencyByEmergencyId(EMERGENCY_ID);
+        StepVerifier.create(emergencyMono)
+                .expectNextMatches(emergency -> emergency.getVisitEmergencyId().equals(EMERGENCY_ID) && emergency.getUrgencyLevel().equals(UrgencyLevel.HIGH))
+                .verifyComplete();
+    }
+
+    @Test
+    void deleteEmergency() throws JsonProcessingException {
+        EmergencyResponseDTO emergencyResponse = EmergencyResponseDTO.builder()
+                .visitEmergencyId(EMERGENCY_ID)
+                .urgencyLevel(UrgencyLevel.HIGH)
+                .description("Emergency to delete")
+                .visitDate(LocalDateTime.now())
+                .emergencyType("Medical")
+                .petName("Buddy")
+                .build();
+
+        server.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(objectMapper.writeValueAsString(emergencyResponse)));
+
+        Mono<EmergencyResponseDTO> emergencyMono = visitsServiceClient.deleteEmergency(EMERGENCY_ID);
+        StepVerifier.create(emergencyMono)
+                .expectNextMatches(emergency -> emergency.getVisitEmergencyId().equals(EMERGENCY_ID))
+                .verifyComplete();
+    }
+
 
 }

@@ -36,10 +36,13 @@ import CustomerDetailsPage from '@/pages/Customer/CustomerDetailsPage.tsx';
 import UpdateCustomerPage from '@/pages/Customer/UpdateCustomerPage.tsx';
 import VisitDetails from './features/visits/visits/VisitByVisitId';
 import CustomerVisits from '@/pages/Visit/CustomerVisits.tsx';
-import EditInventoryProducts from '@/features/inventories/EditInventoryProducts.tsx';
-import AddSupplyToInventory from './features/inventories/AddSupplyToInventory';
 import UpdateOwnerPetPage from '@/pages/Customer/UpdateOwnerPetPage.tsx';
-import ProductDetails from '@/features/products/api/ProductDetails.tsx';
+import EditInventoryProducts from './features/inventories/EditInventoryProducts';
+import AddSupplyToInventory from './features/inventories/AddSupplyToInventory';
+import AddEmergencyForm from './features/visits/Emergency/AddEmergencyForm';
+import EditEmergency from './features/visits/Emergency/EditEmergency';
+import EmergencyList from './features/visits/Emergency/EmergencyList';
+import ProductDetails from './features/products/api/ProductDetails';
 
 const router = createBrowserRouter([
   {
@@ -73,6 +76,32 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <VisitDetails />
+          </ProtectedRoute>
+        ),
+      },
+
+      {
+        path: AppRoutePaths.Emergency,
+        element: (
+          <ProtectedRoute>
+            <AddEmergencyForm />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.EditEmergency,
+        element: (
+          <ProtectedRoute>
+            <EditEmergency />
+          </ProtectedRoute>
+        ),
+      },
+
+      {
+        path: AppRoutePaths.EmergencyList,
+        element: (
+          <ProtectedRoute>
+            <EmergencyList />
           </ProtectedRoute>
         ),
       },
