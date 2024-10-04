@@ -9,6 +9,7 @@ interface CartItemProps {
     index: number
   ) => void;
   deleteItem: (indexToDelete: number) => void;
+  errorMessage?: string;
 }
 
 const formatPrice = (price: number): string => {
@@ -21,6 +22,8 @@ const CartItem = ({
   changeItemQuantity,
   deleteItem,
 }: CartItemProps): JSX.Element => {
+  const remainingStock = item.productQuantity - (item.quantity ?? 0);
+
   return (
     <div className="CartItem">
       <h4>{item.productName}</h4>
@@ -30,11 +33,19 @@ const CartItem = ({
         <input
           type="number"
           min="1"
-          value={item.quantity || 1}
+          max={item.productQuantity}
+          value={item.quantity ?? 0}
           onChange={e => changeItemQuantity(e, index)}
         />
         <button onClick={() => deleteItem(index)}>Remove</button>
       </div>
+      {remainingStock <= 5 && remainingStock > 0 ? (
+        <div className="stock-message">
+          Only {remainingStock} items left in stock.
+        </div>
+      ) : remainingStock === 0 ? (
+        <div className="stock-message out-of-stock">Out of stock</div>
+      ) : null}
     </div>
   );
 };
