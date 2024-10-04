@@ -76,14 +76,6 @@
   text-align: center;
 }
 
-.delete-pet-button {
-  background-color: #dc3545 !important;
-}
-
-.delete-pet-button:hover {
-  background-color: #c82333 !important;
-}
-
 .cancel-form-button {
   background-color: #007BFF !important;
 }

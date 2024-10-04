@@ -3,6 +3,7 @@ import { FormEvent, useState } from 'react';
 import { addPet } from '../api/addPet';
 import { PetRequestModel } from '../models/PetRequestModel';
 import { useNavigate, useParams } from 'react-router-dom';
+import './AddPetForm.css';
 
 const petTypeOptions: { [key: string]: string } = {
   '1': 'Cat',
