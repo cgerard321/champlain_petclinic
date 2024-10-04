@@ -23,7 +23,7 @@ import static reactor.core.publisher.Mono.just;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping("/api/v2/gateway/pet")
+@RequestMapping("/api/v2/gateway/pets")
 @Validated
 @CrossOrigin(origins = "http://localhost:3000, http://localhost:80")
 public class PetController {
@@ -75,6 +75,17 @@ public class PetController {
     @GetMapping("/owner/{ownerId}/pets")
     public Flux<PetResponseDTO> getPetsByOwnerId(@PathVariable String ownerId) {
         return customersServiceClient.getPetsByOwnerId(ownerId);
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
+    @DeleteMapping(value = "/{petId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<PetResponseDTO>> deletePet(@PathVariable String petId) {
+        return Mono.just(petId)
+                .filter(id -> id.length() == 36)
+                .switchIfEmpty(Mono.error(new InvalidInputException("Provided pet id is invalid: " + petId)))
+                .flatMap(customersServiceClient::deletePetByPetIdV2)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
 }

@@ -34,6 +34,11 @@ public class PetController {
         return petService.deletePetByPetId(petId);
     }
 
+    @DeleteMapping("/{petId}/v2")
+    public Mono<PetResponseDTO> deletePetByPetIdV2(@PathVariable String petId) {
+        return petService.deletePetByPetIdV2(petId);
+    }
+
     @PostMapping
     public Mono<PetResponseDTO> insertPet(@RequestBody Mono<Pet> petMono) {
         return petService.insertPet(petMono).map(EntityDTOUtil::toPetResponseDTO);
