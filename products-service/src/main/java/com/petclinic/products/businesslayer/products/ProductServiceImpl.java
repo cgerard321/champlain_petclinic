@@ -50,7 +50,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Flux<ProductResponseModel> getAllProducts(Double minPrice, Double maxPrice, String sort) {
+    public Flux<ProductResponseModel> getAllProducts(Double minPrice, Double maxPrice,Double minRating, Double maxRating, String sort) {
         Flux<Product> products;
 
         if (minPrice != null && maxPrice != null) {
@@ -65,6 +65,12 @@ public class ProductServiceImpl implements ProductService {
 
         return products
                 .flatMap(this::getAverageRating)
+                .filter(product -> {
+                    double avgRating = product.getAverageRating();
+                    boolean meetsMinRating = (minRating == null || avgRating >= minRating);
+                    boolean meetsMaxRating = (maxRating == null || avgRating <= maxRating);
+                    return meetsMinRating && meetsMaxRating;
+                })
                 .collectList()
                 .flatMapMany(productList -> {
                     if ("asc".equals(sort)) {

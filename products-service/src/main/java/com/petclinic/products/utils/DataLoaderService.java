@@ -33,7 +33,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Clumping cat litter with odor control")
                 .productSalePrice(12.99)
                 .requestCount(0)
-                .averageRating(5.6)
+                .averageRating(4.8)
                 .productType("Accessory")
                 .build();
 
@@ -63,7 +63,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Filter system for small to medium-sized aquariums")
                 .productSalePrice(19.99)
                 .requestCount(0)
-                .averageRating(5.1)
+                .averageRating(4.9)
                 .productType("Accessory")
                 .build();
 

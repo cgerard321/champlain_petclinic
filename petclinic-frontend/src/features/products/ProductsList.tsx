@@ -8,6 +8,7 @@ import { addProduct } from '@/features/products/api/addProduct';
 import { useUser } from '@/context/UserContext';
 import './components/Sidebar.css';
 import { getProductsByType } from '@/features/products/api/getProductsByType.ts';
+import StarRating from "@/features/products/components/StarRating.tsx";
 
 export default function ProductList(): JSX.Element {
   const [productList, setProductList] = useState<ProductModel[]>([]);
@@ -19,6 +20,8 @@ export default function ProductList(): JSX.Element {
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
   const [filterType, setFilterType] = useState<string>('');
   const [ratingSort, setRatingSort]=useState<string>('');
+  const [minStars, setMinStars] = useState<number>(0);
+  const [maxStars, setMaxStars] = useState<number>(5);
 
   function FilterByPriceErrorHandling(): void {
     // Validate inputs for filter by price
@@ -37,7 +40,7 @@ export default function ProductList(): JSX.Element {
     setIsLoading(true);
     try {
       if (filterType.trim() === '') {
-        const list = await getAllProducts(minPrice, maxPrice,ratingSort);
+        const list = await getAllProducts(minPrice, maxPrice,minStars,maxStars, ratingSort);
         setProductList(list);
       } else {
         const filteredList = await getProductsByType(filterType);
@@ -91,7 +94,9 @@ export default function ProductList(): JSX.Element {
     setMaxPrice(undefined);
     setFilterType("");
     setRatingSort('');
-    const list = await getAllProducts(minPrice, maxPrice,'');
+    setMaxStars(5);
+    setMinStars(0);
+    const list = await getAllProducts(minPrice, maxPrice,minStars,maxStars);
     setProductList(list);
   };
 
@@ -152,6 +157,17 @@ export default function ProductList(): JSX.Element {
               onChange={e => setFilterType(e.target.value)}
             />
           </label>
+          <div className="star-rating-container">
+            <h3>Filter by Star Rating</h3>
+            <div className="star-row">
+              <label>Min Stars:</label>
+              <StarRating currentRating={minStars} updateRating={setMinStars} />
+            </div>
+            <div className="star-row">
+              <label>Max Stars:</label>
+              <StarRating currentRating={maxStars} updateRating={setMaxStars} />
+            </div>
+          </div>
           <select name="rating"
                   value={ratingSort}
                   onChange={e => setRatingSort(e.target.value)}>

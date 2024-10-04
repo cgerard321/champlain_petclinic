@@ -73,7 +73,7 @@ class ProductControllerUnitTest {
     @Test
     void getAllProducts_whenProductsExist_thenReturnFluxProductResponseDTO() {
 
-        when(productsServiceClient.getAllProducts(null, null,null))
+        when(productsServiceClient.getAllProducts(null, null,null,null,null))
                 .thenReturn(Flux.just(productResponseDTO1,productResponseDTO2));
 
         webTestClient.get()
@@ -88,13 +88,13 @@ class ProductControllerUnitTest {
                     assertEquals(productResponseDTO1.getProductId(), productResponseDTOS.get(0).getProductId());
                     assertEquals(productResponseDTO2.getProductId(), productResponseDTOS.get(1).getProductId());
                 });
-        verify(productsServiceClient, times(1)).getAllProducts(null, null,null);
+        verify(productsServiceClient, times(1)).getAllProducts(null, null,null,null,null);
     }
 
     @Test
     void getAllProducts_whenNoProductsExist_thenReturnEmptyFlux() {
 
-        when(productsServiceClient.getAllProducts(null, null,null))
+        when(productsServiceClient.getAllProducts(null, null,null,null,null))
                 .thenReturn(Flux.empty());
 
         webTestClient.get()
@@ -107,7 +107,7 @@ class ProductControllerUnitTest {
                     assertNotNull(productResponseDTOS);
                     assertEquals(0, productResponseDTOS.size());
                 });
-        verify(productsServiceClient, times(1)).getAllProducts(null, null,null);
+        verify(productsServiceClient, times(1)).getAllProducts(null, null,null,null,null);
     }
 
     @Test

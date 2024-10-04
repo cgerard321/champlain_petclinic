@@ -57,7 +57,7 @@ class ProductsServiceClientIntegrationTest {
         );
 
 
-        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(null,null);
+        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(null,null,null,null,null);
 
         StepVerifier.create(productsFlux)
                 .expectNextMatches(product -> product.getProductId().equals("4affcab7-3ab1-4917-a114-2b6301aa5565") && product.getProductName().equals("Rabbit Hutch"))
@@ -72,7 +72,7 @@ class ProductsServiceClientIntegrationTest {
                 .setHeader("Content-Type", "text/event-stream")
         );
 
-        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(null,null);
+        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(null,null,null,null,null);
 
         StepVerifier.create(productsFlux)
                 .expectNextCount(0)
@@ -93,9 +93,10 @@ class ProductsServiceClientIntegrationTest {
         Double maxPrice = 80.00;
 
         // Call the method with price filters
-        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(minPrice, maxPrice);
+        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(minPrice, maxPrice,null,null,null);
 
-        // Verify the results using StepVerifier
+
+            // Verify the results using StepVerifier
         StepVerifier.create(productsFlux)
                 .expectNextMatches(product -> product.getProductId().equals("4affcab7-3ab1-4917-a114-2b6301aa5565") && product.getProductSalePrice() >= minPrice && product.getProductSalePrice() <= maxPrice)
                 .expectNextMatches(product -> product.getProductId().equals("baee7cd2-b67a-449f-b262-91f45dde8a6d") && product.getProductSalePrice() >= minPrice && product.getProductSalePrice() <= maxPrice)
