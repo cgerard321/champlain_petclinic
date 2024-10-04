@@ -159,23 +159,23 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public Mono<CartResponseModel> assignCartToCustomer(String customerId, List<CartProduct> products) {
-        // Check if the customer already has a cart
+        //check if the customer already has a cart
         return cartRepository.findCartByCustomerId(customerId)
-                .defaultIfEmpty(new Cart())  // If no cart is found, create a new one
+                .defaultIfEmpty(new Cart())
                 .flatMap(cart -> {
-                    // Set the customerId if it's a new cart
+                    //set the customerId if it's a new cart
                     if (cart.getCustomerId() == null) {
                         cart.setCustomerId(customerId);
                         cart.setCartId(UUID.randomUUID().toString()); // Generate a new cart ID
                     }
 
-                    // Add or update products in the cart
+                    //add or update products in the cart
                     List<CartProduct> updatedProducts = cart.getProducts() != null ? cart.getProducts() : new ArrayList<>();
 
                     for (CartProduct newProduct : products) {
                         boolean productExists = false;
 
-                        // Update quantity if product already exists in the cart
+                        //update quantity if product already exists in the cart
                         for (CartProduct existingProduct : updatedProducts) {
                             if (existingProduct.getProductId().equals(newProduct.getProductId())) {
                                 existingProduct.setQuantityInCart(existingProduct.getQuantityInCart() + newProduct.getQuantityInCart());
@@ -184,7 +184,7 @@ public class CartServiceImpl implements CartService {
                             }
                         }
 
-                        // If the product is not in the cart, add it
+                        //if the product is not in the cart, add it
                         if (!productExists) {
                             updatedProducts.add(newProduct);
                         }
@@ -192,7 +192,7 @@ public class CartServiceImpl implements CartService {
 
                     cart.setProducts(updatedProducts);
 
-                    // Save the cart to the repository
+                    //save the cart to the repository
                     return cartRepository.save(cart)
                             .map(savedCart -> EntityModelUtil.toCartResponseModel(savedCart, savedCart.getProducts()));
                 });

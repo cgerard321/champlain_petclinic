@@ -6,7 +6,7 @@ import {
   IsVet,
   useUser,
 } from '@/context/UserContext';
-import { fetchCartIdByCustomerId } from '@/features/carts/api/getCart.ts';
+import { fetchCartIdByCustomerId } from '../features/carts/api/getCart.ts';
 import axiosInstance from '@/shared/api/axiosInstance.ts';
 import { AppRoutePaths } from '@/shared/models/path.routes.ts';
 import {useEffect, useState} from 'react';
@@ -35,7 +35,7 @@ export function NavBar(): JSX.Element {
     setNavbarOpen(prevNavbarOpen => !prevNavbarOpen);
   };
 
-  /* fyi this sucks and shouldn't be here
+  /* fyi this sucks and shouldn't be in the nav bar
   fetching the cart id for correct routing. this will (hopefully) be implemented more efficiently in the third sprint */
   useEffect(() => {
     const fetchCartId = async () => {
