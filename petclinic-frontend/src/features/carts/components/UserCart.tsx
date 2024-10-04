@@ -191,11 +191,38 @@ const UserCart = (): JSX.Element => {
     [cartItems, cartId]
   );
 
-  const deleteItem = useCallback((indexToDelete: number): void => {
-    setCartItems(prevItems => {
-      return prevItems.filter((_, index) => index !== indexToDelete);
-    });
-  }, []);
+  const deleteItem = useCallback(
+    async (productId: string, indexToDelete: number): Promise<void> => {
+      if (!cartId) {
+        console.error('Cart ID is missing');
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `http://localhost:8080/api/v2/gateway/carts/${cartId}/${productId}`,
+          {
+            method: 'DELETE',
+            headers: {
+              Accept: 'application/json',
+            },
+            credentials: 'include',
+          }
+        );
+        if (!response.ok) {
+          throw new Error('Failed to delete item from the cart');
+        }
+
+        setCartItems(prevItems =>
+          prevItems.filter((_, index) => index !== indexToDelete)
+        );
+      } catch (error) {
+        console.error('Error deleting item: ', error);
+        alert('Failed to delete item');
+      }
+    },
+    [cartId]
+  );
 
   const clearCart = async (): Promise<void> => {
     if (!cartId) {

@@ -9,6 +9,7 @@ build_property.EnforceExtendedAnalyzerRules =
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = emailing_service
 build_property.RootNamespace = emailing_service
+<<<<<<< HEAD
 build_property.ProjectDir = C:\Users\Admin\Desktop\PetCLINIC secondSprint\champlain_petclinic\emailing-service\emailing-service\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
@@ -16,4 +17,11 @@ build_property.RazorLangVersion = 8.0
 build_property.SupportLocalizedComponentNames = 
 build_property.GenerateRazorMetadataSourceChecksumAttributes = 
 build_property.MSBuildProjectDirectory = C:\Users\Admin\Desktop\PetCLINIC secondSprint\champlain_petclinic\emailing-service\emailing-service
+=======
+build_property.ProjectDir = /Users/seto/champlain_petclinic/emailing-service/emailing-service/
+build_property.RazorLangVersion = 7.0
+build_property.SupportLocalizedComponentNames = 
+build_property.GenerateRazorMetadataSourceChecksumAttributes = 
+build_property.MSBuildProjectDirectory = /Users/seto/champlain_petclinic/emailing-service/emailing-service
+>>>>>>> f389e9e0 (implemented remove product from cart front-end)
 build_property._RazorSourceGeneratorDebug = 
