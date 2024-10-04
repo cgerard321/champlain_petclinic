@@ -42,7 +42,7 @@ import AddSupplyToInventory from './features/inventories/AddSupplyToInventory';
 import AddEmergencyForm from './features/visits/Emergency/AddEmergencyForm';
 import EditEmergency from './features/visits/Emergency/EditEmergency';
 import EmergencyList from './features/visits/Emergency/EmergencyList';
-import ProductDetails from './features/products/api/ProductDetails';
+import ProductDetails from '@/features/products/api/ProductDetails.tsx';
 import EditProduct from '@/features/products/components/EditProduct';
 
 const router = createBrowserRouter([
