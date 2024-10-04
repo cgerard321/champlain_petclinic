@@ -3,7 +3,6 @@ import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
 import com.petclinic.bffapigateway.dtos.Pets.PetRequestDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
-import com.petclinic.bffapigateway.presentationlayer.v2.PetController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -19,11 +18,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
-class PetControllerTest {
+class PetControllerIntegrationTest {
 
     @InjectMocks
     private PetController petController;
@@ -126,4 +124,60 @@ class PetControllerTest {
                 .expectNextMatches(pet -> pet.getPetId().equals("pet123"))
                 .verifyComplete();
     }
+
+    @Test
+    void whenAddPet_WithValidRequest_thenReturnCreatedPetResponseDTO() {
+        PetRequestDTO newPetRequestDTO = PetRequestDTO.builder()
+                .name("Buddy")
+                .petTypeId("Dog")
+                .ownerId("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
+                .birthDate(new Date())
+                .build();
+
+        PetResponseDTO newPetResponseDTO = PetResponseDTO.builder()
+                .petId("pet123")
+                .name("Buddy")
+                .petTypeId("Dog")
+                .ownerId("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
+                .birthDate(new Date())
+                .build();
+
+        when(customersServiceClient.addPet(any(Mono.class))).thenReturn(Mono.just(newPetResponseDTO));
+        when(customersServiceClient.getOwner(anyString())).thenReturn(Mono.just(ownerResponseDTO));
+        when(customersServiceClient.updateOwner(anyString(), any(Mono.class))).thenReturn(Mono.empty());
+
+        Mono<ResponseEntity<PetResponseDTO>> result = petController.addPet(Mono.just(newPetRequestDTO));
+
+        StepVerifier.create(result)
+                .expectNextMatches(response -> response.getStatusCode() == HttpStatus.OK && response.getBody().getPetId().equals("pet123"))
+                .verifyComplete();
+    }
+
+    @Test
+    void whenAddPet_WithEmptyRequest_thenReturnBadRequest() {
+        Mono<ResponseEntity<PetResponseDTO>> result = petController.addPet(Mono.empty());
+
+        StepVerifier.create(result)
+                .expectNextMatches(response -> response.getStatusCode() == HttpStatus.BAD_REQUEST)
+                .verifyComplete();
+    }
+
+    @Test
+    void whenAddPet_WithInvalidOwner_thenReturnBadRequest() {
+        PetRequestDTO newPetRequestDTO = PetRequestDTO.builder()
+                .name("Buddy")
+                .petTypeId("Dog")
+                .ownerId("invalidOwnerId")
+                .birthDate(new Date())
+                .build();
+
+        when(customersServiceClient.addPet(any(Mono.class))).thenReturn(Mono.empty());
+
+        Mono<ResponseEntity<PetResponseDTO>> result = petController.addPet(Mono.just(newPetRequestDTO));
+
+        StepVerifier.create(result)
+                .expectNextMatches(response -> response.getStatusCode() == HttpStatus.BAD_REQUEST)
+                .verifyComplete();
+    }
+
 }
