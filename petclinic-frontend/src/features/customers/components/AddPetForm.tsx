@@ -27,24 +27,7 @@ const AddPetForm: React.FC = (): JSX.Element => {
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [successMessage, setSuccessMessage] = useState<string>('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-
-  // const handleChange = (
-  //   e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  // ): void => {
-  //   const { name, type, value } = e.target;
-  //   if (type === 'checkbox') {
-  //     const checked = (e.target as HTMLInputElement).checked;
-  //     setPet({
-  //       ...pet,
-  //       [name]: checked ? 'true' : 'false',
-  //     });
-  //   } else {
-  //     setPet({
-  //       ...pet,
-  //       [name]: value,
-  //     });
-  //   }
-  // };
+  
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ): void => {
