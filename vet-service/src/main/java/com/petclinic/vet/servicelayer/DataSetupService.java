@@ -1,7 +1,6 @@
 package com.petclinic.vet.servicelayer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.vet.dataaccesslayer.*;
 import com.petclinic.vet.dataaccesslayer.badges.Badge;
@@ -15,7 +14,6 @@ import com.petclinic.vet.dataaccesslayer.ratings.RatingRepository;
 import com.petclinic.vet.exceptions.InvalidInputException;
 import com.petclinic.vet.util.EntityDtoUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.postgresql.ds.PGSimpleDataSource;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
@@ -42,13 +40,15 @@ public class DataSetupService implements CommandLineRunner {
     private final EducationRepository educationRepository;
     private final BadgeRepository badgeRepository;
     private final PhotoRepository photoRepository;
+    private final AlbumRepository albumRepository;
 
-    public DataSetupService(VetRepository vetRepository, RatingRepository ratingRepository, EducationRepository educationRepository, BadgeRepository badgeRepository, PhotoRepository photoRepository){
+    public DataSetupService(VetRepository vetRepository, RatingRepository ratingRepository, EducationRepository educationRepository, BadgeRepository badgeRepository, PhotoRepository photoRepository, AlbumRepository albumRepository){
         this.vetRepository = vetRepository;
         this.ratingRepository = ratingRepository;
         this.educationRepository = educationRepository;
         this.badgeRepository=badgeRepository;
         this.photoRepository = photoRepository;
+        this.albumRepository = albumRepository;
     }
 
     @Override
@@ -343,6 +343,18 @@ public class DataSetupService implements CommandLineRunner {
         String rafaelOrtegaPhotoName = "rafael_o.jpg";
         String sharonJenkinsPhotoName = "sharon_jenkins.jpg";
 
+        String JohnPhoto1= "john_photo1.jpg";
+        String JohnPhoto2= "john_photo2.jpg";
+        String JohnPhoto3= "john_photo3.jpg";
+        String JohnPhoto4= "john_photo4.jpg";
+        String JohnPhoto5= "john_photo5.jpg";
+        String HelenPhoto1= "helen_photo1.jpg";
+        String HelenPhoto2= "helen_photo2.jpg";
+        String HelenPhoto3= "helen_photo3.jpg";
+        String HelenPhoto4= "helen_photo4.jpg";
+        String HelenPhoto5= "helen_photo5.jpg";
+
+
         ClassPathResource defaultPhoto = new ClassPathResource("images/" + defaultPhotoName);
         ClassPathResource jamesCarterPhoto = new ClassPathResource("images/" + jamesCarterPhotoName);
         ClassPathResource helenLearyPhoto = new ClassPathResource("images/" + helenLearyPhotoName);
@@ -351,7 +363,16 @@ public class DataSetupService implements CommandLineRunner {
         ClassPathResource lindaDouglassPhoto = new ClassPathResource("images/" + lindaDouglassPhotoName);
         ClassPathResource rafaelOrtegaPhoto = new ClassPathResource("images/" + rafaelOrtegaPhotoName);
         ClassPathResource sharonJenkinsPhoto = new ClassPathResource("images/" + sharonJenkinsPhotoName);
-
+        ClassPathResource John1 = new ClassPathResource("album/" + JohnPhoto1);
+        ClassPathResource John2 = new ClassPathResource("album/" + JohnPhoto2);
+        ClassPathResource John3 = new ClassPathResource("album/" + JohnPhoto3);
+        ClassPathResource John4 = new ClassPathResource("album/" + JohnPhoto4);
+        ClassPathResource John5 = new ClassPathResource("album/" + JohnPhoto5);
+        ClassPathResource Helen1 = new ClassPathResource("album/" + HelenPhoto1);
+        ClassPathResource Helen2 = new ClassPathResource("album/" + HelenPhoto2);
+        ClassPathResource Helen3 = new ClassPathResource("album/" + HelenPhoto3);
+        ClassPathResource Helen4 = new ClassPathResource("album/" + HelenPhoto4);
+        ClassPathResource Helen5 = new ClassPathResource("album/" + HelenPhoto5);
 
 
         Photo photo1 = Photo.builder()
@@ -402,6 +423,82 @@ public class DataSetupService implements CommandLineRunner {
                 .imgType(defaultPhotoType)
                 .data(StreamUtils.copyToByteArray(johnDoePhoto.getInputStream()))
                 .build();
+
+        Album album1 = Album.builder()
+                .vetId(v7.getVetId())
+                .filename("john_photo1.jpg")  // Filename of the album's cover image or default image
+                .imgType("image/jpeg")
+                .data(StreamUtils.copyToByteArray(John1.getInputStream()))  // Album cover image data
+                .build();
+
+        Album album2 = Album.builder()
+                .vetId(v7.getVetId())
+                .filename("john_photo2.jpg")  // Filename of the album's cover image or default image
+                .imgType("image/jpeg")
+                .data(StreamUtils.copyToByteArray(John2.getInputStream()))  // Album cover image data
+                .build();
+
+        Album album3 = Album.builder()
+                .vetId(v7.getVetId())
+                .filename("john_photo3.jpg")  // Filename of the album's cover image or default image
+                .imgType("image/jpeg")
+                .data(StreamUtils.copyToByteArray(John3.getInputStream()))  // Album cover image data
+                .build();
+
+        Album album4 = Album.builder()
+                .vetId(v7.getVetId())
+                .filename("john_photo4.jpg")  // Filename of the album's cover image or default image
+                .imgType("image/jpeg")
+                .data(StreamUtils.copyToByteArray(John4.getInputStream()))  // Album cover image data
+                .build();
+
+        Album album5 = Album.builder()
+                .vetId(v7.getVetId())
+                .filename("john_photo5.jpg")  // Filename of the album's cover image or default image
+                .imgType("image/jpeg")
+                .data(StreamUtils.copyToByteArray(John5.getInputStream()))  // Album cover image data
+                .build();
+
+        Album album6 = Album.builder()
+                .vetId(v2.getVetId())
+                .filename("helen_photo1.jpg")  // Filename of the album's cover image or default image
+                .imgType("image/jpeg")
+                .data(StreamUtils.copyToByteArray(Helen1.getInputStream()))  // Album cover image data
+                .build();
+
+        Album album7 = Album.builder()
+                .vetId(v2.getVetId())
+                .filename("helen_photo2.jpg")  // Filename of the album's cover image or default image
+                .imgType("image/jpeg")
+                .data(StreamUtils.copyToByteArray(Helen2.getInputStream()))  // Album cover image data
+                .build();
+
+        Album album8 = Album.builder()
+                .vetId(v2.getVetId())
+                .filename("helen_photo3.jpg")  // Filename of the album's cover image or default image
+                .imgType("image/jpeg")
+                .data(StreamUtils.copyToByteArray(Helen3.getInputStream()))  // Album cover image data
+                .build();
+
+        Album album9 = Album.builder()
+                .vetId(v2.getVetId())
+                .filename("helen_photo4.jpg")  // Filename of the album's cover image or default image
+                .imgType("image/jpeg")
+                .data(StreamUtils.copyToByteArray(Helen4.getInputStream()))  // Album cover image data
+                .build();
+
+        Album album10 = Album.builder()
+                .vetId(v2.getVetId())
+                .filename("helen_photo5.jpg")  // Filename of the album's cover image or default image
+                .imgType("image/jpeg")
+                .data(StreamUtils.copyToByteArray(Helen5.getInputStream()))  // Album cover image data
+                .build();
+
+
+        Flux.just(album1,album2,album3,album4,album5,album6,album7,album8,album9,album10)
+                .flatMap(albumRepository::save)
+                .log()
+                .subscribe();
 
 
         Badge b1 = Badge.builder()

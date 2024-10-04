@@ -60,22 +60,28 @@ export default function VetDetails(): JSX.Element {
         );
 
         if (!response.ok) {
-          throw new Error(`Error: ${response.statusText}`);
+          if (response.status === 404) {
+            setAlbumPhotos([]); // No albums found
+          } else {
+            throw new Error(`Error: ${response.statusText}`);
+          }
+        } else {
+          const photos = await response.json();
+          console.log('Album Photos:', photos); // Log the album photos
+
+          const imageUrls = photos.map((photo: { data: string, imgType: string }) => {
+            // Construct the full data URL for the image
+            return `data:${photo.imgType};base64,${photo.data}`;
+          });
+
+          setAlbumPhotos(imageUrls); // Set the image URLs in the state
         }
-
-        const photos: Uint8Array[] = await response.json(); // Expect byte arrays (Uint8Array)
-
-        // Convert each byte array to a Blob and create object URLs
-        const imageUrls = photos.map((photoBytes: Uint8Array) => {
-          const blob = new Blob([photoBytes], { type: 'image/jpeg' }); // Assuming JPEG format, adjust MIME type if necessary
-          return URL.createObjectURL(blob);
-        });
-
-        setAlbumPhotos(imageUrls); // Set the image URLs in state
       } catch (error) {
         setError('Failed to fetch album photos');
       }
     };
+
+
 
 
 

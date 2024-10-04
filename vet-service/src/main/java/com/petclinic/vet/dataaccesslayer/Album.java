@@ -14,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @AllArgsConstructor
-@Table("images")
+@Table("albums")
 public class Album {
 
     @Id
@@ -30,5 +30,4 @@ public class Album {
     @Column("img_data")
     private byte[] data;
 
-    //private List<Photo> photos;
 }
