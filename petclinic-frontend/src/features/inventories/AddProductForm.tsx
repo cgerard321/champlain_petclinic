@@ -1,17 +1,17 @@
 import { useEffect, useState } from 'react';
 import { getAllInventoryNames } from '@/features/inventories/api/getAllInventoryNames.ts';
-import { addSupplyToInventoryByName } from '@/features/inventories/api/addSupplyToInventoryByName.ts'; // Import the function
+import { addProductToInventoryByName } from '@/features/inventories/api/addProductToInventoryByName.ts'; // Import the function
 import { InventoryName } from '@/features/inventories/models/InventoryName.ts';
-import { SupplyModel } from '@/features/inventories/models/ProductModels/SupplyModel.ts';
-import './AddSupplyForm.css';
+import './AddProductForm.css';
+import { ProductModelINVT } from '@/features/inventories/models/ProductModels/ProductModelINVT.ts';
 
-interface SupplyFormProps {
+interface ProductFormProps {
   onClose: () => void;
   onSubmit: () => void;
 }
 
 // eslint-disable-next-line react/prop-types
-const AddSupplyForm: React.FC<SupplyFormProps> = ({ onClose, onSubmit }) => {
+const AddProductForm: React.FC<ProductFormProps> = ({ onClose, onSubmit }) => {
   const [inventoryNames, setInventoryNames] = useState<InventoryName[]>([]);
   const [selectedName, setSelectedName] = useState<string>('');
   const [name, setName] = useState('');
@@ -35,18 +35,18 @@ const AddSupplyForm: React.FC<SupplyFormProps> = ({ onClose, onSubmit }) => {
   }, []);
 
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  const handleAddSupplySubmit = async () => {
-    const supply: SupplyModel = {
-      supplyName: name,
-      supplyDescription: description,
-      supplyPrice: price,
-      supplyQuantity: quantity,
-      supplySalePrice: salePrice,
-      supplyStatus: 'AVAILABLE',
+  const handleAddProductSubmit = async () => {
+    const product: ProductModelINVT = {
+      productName: name,
+      productDescription: description,
+      productPrice: price,
+      productQuantity: quantity,
+      productSalePrice: salePrice,
+      productStatus: 'AVAILABLE',
     };
 
     try {
-      await addSupplyToInventoryByName(selectedName, supply);
+      await addProductToInventoryByName(selectedName, product);
       onSubmit();
     } catch (error) {
       console.error('Error adding supply:', error);
@@ -56,7 +56,7 @@ const AddSupplyForm: React.FC<SupplyFormProps> = ({ onClose, onSubmit }) => {
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    handleAddSupplySubmit();
+    handleAddProductSubmit();
     onClose();
   };
 
@@ -70,7 +70,7 @@ const AddSupplyForm: React.FC<SupplyFormProps> = ({ onClose, onSubmit }) => {
       <div className="overlay">
         <div className="form-container">
           <div id="first-row">
-            <h2 style={{ marginTop: '20px' }}>Add Supply To Inventory</h2>
+            <h2 style={{ marginTop: '20px' }}>Add Product To Inventory</h2>
             <button
               className="btn btn-danger"
               onClick={onClose}
@@ -205,4 +205,4 @@ const AddSupplyForm: React.FC<SupplyFormProps> = ({ onClose, onSubmit }) => {
   );
 };
 
-export default AddSupplyForm;
+export default AddProductForm;

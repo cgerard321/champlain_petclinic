@@ -5,8 +5,6 @@ import com.petclinic.inventoryservice.datalayer.Inventory.InventoryRepository;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryTypeRepository;
 import com.petclinic.inventoryservice.datalayer.Product.Product;
 import com.petclinic.inventoryservice.datalayer.Product.ProductRepository;
-import com.petclinic.inventoryservice.datalayer.Supply.Status;
-import com.petclinic.inventoryservice.datalayer.Supply.Supply;
 import com.petclinic.inventoryservice.presentationlayer.*;
 import com.petclinic.inventoryservice.utils.EntityDTOUtil;
 import com.petclinic.inventoryservice.utils.exceptions.InvalidInputException;
@@ -24,7 +22,7 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static com.petclinic.inventoryservice.utils.EntityDTOUtil.toSupplyEntity;
+import static com.petclinic.inventoryservice.utils.EntityDTOUtil.toProductEntity;
 
 
 @Service
@@ -95,6 +93,8 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
 
                     existingInventory.setInventoryType(requestDTO.getInventoryType());
                     existingInventory.setInventoryDescription(requestDTO.getInventoryDescription());
+                    existingInventory.setInventoryImage(requestDTO.getInventoryImage());
+                    existingInventory.setInventoryBackupImage(requestDTO.getInventoryBackupImage());
                     return existingInventory;
 
                 }))
@@ -416,23 +416,24 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                 .switchIfEmpty(Mono.error(new NotFoundException("Inventory id:" + inventoryId + "and product:" + productId + "are not found")));
     }
 
-    public Mono<InventoryResponseDTO> addSupplyToInventoryByInventoryName(String inventoryName, Mono<SupplyRequestDTO> supplyRequestDTOMono) {
-        return supplyRequestDTOMono
-                .flatMap(supplyRequestDTO ->
+    @Override
+    public Mono<InventoryResponseDTO> addProductToInventoryByInventoryName(String inventoryName, Mono<ProductRequestDTO> productRequestDTOMono) {
+        return productRequestDTOMono
+                .flatMap(productRequestDTO ->
                         inventoryRepository.findByInventoryName(inventoryName)
                                 .switchIfEmpty(Mono.error(new InventoryNotFoundException("No inventory found for name: " + inventoryName)))
                                 .flatMap(inventory -> {
-                                    Supply supply = toSupplyEntity(supplyRequestDTO);
-                                    supply.setSupplyId(UUID.randomUUID().toString());
-                                    supply.setInventoryId(inventory.getInventoryId());
+                                    Product product = toProductEntity(productRequestDTO);
+                                    product.setProductId(UUID.randomUUID().toString());
+                                    product.setInventoryId(inventory.getInventoryId());
 
-                                    inventory.addSupply(supply);
+                                    inventory.addProduct(product);
                                     return inventoryRepository.save(inventory);
                                 })
                                 .map(updatedInventory -> {
 
-                                    List<SupplyResponseDTO> supplyResponseDTOs = updatedInventory.getSupplies().stream()
-                                            .map(EntityDTOUtil::toSupplyResponseDTO)
+                                    List<ProductResponseDTO> productResponseDTOs = updatedInventory.getProducts().stream()
+                                            .map(EntityDTOUtil::toProductResponseDTO)
                                             .collect(Collectors.toList());
 
                                     return new InventoryResponseDTO(
@@ -440,7 +441,9 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                                             updatedInventory.getInventoryName(),
                                             updatedInventory.getInventoryType(),
                                             updatedInventory.getInventoryDescription(),
-                                            supplyResponseDTOs
+                                            updatedInventory.getInventoryImage(),
+                                            updatedInventory.getInventoryBackupImage(),
+                                            productResponseDTOs
                                     );
                                 })
                 );
@@ -485,10 +488,10 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
     }
 
     @Override
-    public Flux<SupplyResponseDTO> getSuppliesByInventoryName(String inventoryName) {
+    public Flux<ProductResponseDTO> getProductsByInventoryName(String inventoryName) {
         return inventoryRepository.findByInventoryName(inventoryName)
-                .flatMapMany(inventory -> Flux.fromIterable(inventory.getSupplies()))
-                .map(EntityDTOUtil::toSupplyResponseDTO);
+                .flatMapMany(inventory -> Flux.fromIterable(inventory.getProducts()))
+                .map(EntityDTOUtil::toProductResponseDTO);
     }
   
   @Override

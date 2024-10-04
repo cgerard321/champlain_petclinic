@@ -1,6 +1,6 @@
 package com.petclinic.inventoryservice.presentationlayer;
 
-import com.petclinic.inventoryservice.datalayer.Supply.Status;
+import com.petclinic.inventoryservice.datalayer.Product.Status;
 import lombok.*;
 
 @Data
@@ -9,7 +9,6 @@ import lombok.*;
 @Builder
 @EqualsAndHashCode
 public class ProductResponseDTO {
-    private String id;
     private String productId;
     private String inventoryId;
     private String productName;
