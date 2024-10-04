@@ -295,7 +295,7 @@ const UserCart = (): JSX.Element => {
         <button onClick={() => navigate(-1)}>Go Back</button>
       </div>
       <hr />
-      <div className="UserCart-items">
+      <div className="CartItems-items">
         {cartItems.length > 0 ? (
           cartItems.map((item, index) => (
             <CartItem
