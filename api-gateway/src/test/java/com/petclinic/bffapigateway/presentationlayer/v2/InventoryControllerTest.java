@@ -580,4 +580,55 @@ public class InventoryControllerTest {
                 .updateProductInInventory(invalidProductRequestDTO, inventoryId, productId);
     }
 
+    @Test
+    void getQuantityOfProductsInInventory_withValidInventoryId_shouldReturnProductQuantity() {
+        // Arrange
+        String inventoryId = "1";
+        Integer expectedQuantity = 100;  // Simulating that there are 100 products in the inventory
+
+        // Mocking the service to return the expected quantity
+        when(inventoryServiceClient.getQuantityOfProductsInInventory(inventoryId))
+                .thenReturn(Mono.just(expectedQuantity));
+
+        // Act and Assert
+        client.get()
+                .uri(baseInventoryURL + "/" + inventoryId + "/productquantity")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(Integer.class)
+                .value(quantity -> {
+                    assertNotNull(quantity);
+                    assertEquals(expectedQuantity, quantity);
+                });
+
+        // Verify that the service was called with the correct inventoryId
+        verify(inventoryServiceClient, times(1))
+                .getQuantityOfProductsInInventory(eq(inventoryId));
+    }
+    
+    @Test
+    void getQuantityOfProductsInInventory_withServerError_shouldReturnInternalServerError() {
+        // Arrange
+        String inventoryId = "1";
+        String errorMessage = "Internal Server Error";
+
+        // Mocking the service to throw an error (simulating a 500 error from the server)
+        when(inventoryServiceClient.getQuantityOfProductsInInventory(inventoryId))
+                .thenReturn(Mono.error(new RuntimeException(errorMessage)));
+
+        // Act and Assert
+        client.get()
+                .uri(baseInventoryURL + "/" + inventoryId + "/productquantity")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().is5xxServerError()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Internal Server Error");
+
+        // Verify that the service was called with the correct inventoryId
+        verify(inventoryServiceClient, times(1))
+                .getQuantityOfProductsInInventory(eq(inventoryId));
+    }
+
 }

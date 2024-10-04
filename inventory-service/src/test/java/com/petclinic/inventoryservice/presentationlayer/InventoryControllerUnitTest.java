@@ -1611,4 +1611,31 @@ class InventoryControllerUnitTest {
 //        verify(productInventoryService, times(1)).getLowStockProducts(inventoryId, threshold);
 //    }
 
+    @Test
+    void getQuantityOfProductsInInventory_withValidInventoryId_shouldReturnProductQuantity() {
+        // Arrange
+        String inventoryId = "inventoryId_1";
+        Integer expectedQuantity = 10;
+
+        // Mock the service to return the expected quantity
+        when(productInventoryService.getQuantityOfProductsInInventory(inventoryId))
+                .thenReturn(Mono.just(expectedQuantity));
+
+        // Act and Assert
+        webTestClient.get()
+                .uri("/inventory/{inventoryId}/productquantity", inventoryId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(Integer.class)
+                .value(quantity -> {
+                    assertNotNull(quantity);
+                    assertEquals(expectedQuantity, quantity); // Check if the returned value matches the mocked quantity
+                });
+
+        // Verify that the service was called with the correct inventoryId
+        verify(productInventoryService, times(1)).getQuantityOfProductsInInventory(inventoryId);
+    }
+
 }
