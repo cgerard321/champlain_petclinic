@@ -4,8 +4,7 @@ import com.petclinic.inventoryservice.datalayer.Inventory.Inventory;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryName;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryType;
 import com.petclinic.inventoryservice.datalayer.Product.Product;
-import com.petclinic.inventoryservice.datalayer.Supply.Status;
-import com.petclinic.inventoryservice.datalayer.Supply.Supply;
+import com.petclinic.inventoryservice.datalayer.Product.Status;
 import com.petclinic.inventoryservice.presentationlayer.*;
 import org.springframework.beans.BeanUtils;
 
@@ -27,7 +26,6 @@ public class EntityDTOUtil {
         }
 
         return ProductResponseDTO.builder()
-                .id(product.getId())
                 .productId(product.getProductId())
                 .inventoryId(product.getInventoryId())
                 .productName(product.getProductName())
@@ -39,27 +37,6 @@ public class EntityDTOUtil {
                 .build();
     }
 
-    public static SupplyResponseDTO toSupplyResponseDTO(Supply supply) {
-        Status status;
-        if (supply.getSupplyQuantity() == 0) {
-            status = Status.OUT_OF_STOCK;
-        } else if (supply.getSupplyQuantity() < 20) {
-            status = Status.RE_ORDER;
-        } else {
-            status = Status.AVAILABLE;
-        }
-
-        return SupplyResponseDTO.builder()
-                .supplyId(supply.getSupplyId())
-                .inventoryId(supply.getInventoryId())
-                .supplyName(supply.getSupplyName())
-                .supplyDescription(supply.getSupplyDescription())
-                .supplyPrice(supply.getSupplyPrice())
-                .supplyQuantity(supply.getSupplyQuantity())
-                .supplySalePrice(supply.getSupplySalePrice())
-                .status(status)
-                .build();
-    }
 //    public static ProductResponseDTO toProductResponseDTO(Product product){
 //        ProductResponseDTO productResponseDTO = new ProductResponseDTO();
 //        BeanUtils.copyProperties(product, productResponseDTO);
@@ -71,32 +48,22 @@ public class EntityDTOUtil {
         return product;
     }
 
-    public static Supply toSupplyEntity(SupplyRequestDTO supplyRequestDTO) {
-        return Supply.builder()
-                .supplyName(supplyRequestDTO.getSupplyName())
-                .supplyDescription(supplyRequestDTO.getSupplyDescription())
-                .supplyQuantity(supplyRequestDTO.getSupplyQuantity())
-                .supplyPrice(supplyRequestDTO.getSupplyPrice())
-                .supplySalePrice(supplyRequestDTO.getSupplySalePrice())
-                .build();
-    }
-
     public static InventoryResponseDTO toInventoryResponseDTO(Inventory inventory){
         InventoryResponseDTO inventoryResponseDTO = new InventoryResponseDTO();
         BeanUtils.copyProperties(inventory, inventoryResponseDTO);
-        List<SupplyResponseDTO> supplyResponseDTOs = inventory.getSupplies().stream()
-                .map(supply -> new SupplyResponseDTO(
-                        supply.getSupplyId(),
-                        supply.getInventoryId(),
-                        supply.getSupplyName(),
-                        supply.getSupplyDescription(),
-                        supply.getSupplyPrice(),
-                        supply.getSupplyQuantity(),
-                        supply.getSupplySalePrice(),
-                        supply.getStatus()
+        List<ProductResponseDTO> productResponseDTOs = inventory.getProducts().stream()
+                .map(product -> new ProductResponseDTO(
+                        product.getProductId(),
+                        product.getInventoryId(),
+                        product.getProductName(),
+                        product.getProductDescription(),
+                        product.getProductPrice(),
+                        product.getProductQuantity(),
+                        product.getProductSalePrice(),
+                        product.getStatus()
                 ))
                 .collect(Collectors.toList());
-        inventoryResponseDTO.setSupplies(supplyResponseDTOs);
+        inventoryResponseDTO.setProducts(productResponseDTOs);
         return inventoryResponseDTO;
     }
 
@@ -105,17 +72,18 @@ public class EntityDTOUtil {
         BeanUtils.copyProperties(inventoryResponseDTO, inventory);
         return inventory;
     }
+
     public static InventoryType toInventoryTypeEntity(InventoryTypeRequestDTO inventoryTypeRequestDTO){
         InventoryType inventoryType = new InventoryType();
         BeanUtils.copyProperties(inventoryTypeRequestDTO, inventoryType);
         return inventoryType;
     }
 
-    public static InventoryName toInventoryNameEntity(InventoryNameRequestDTO inventoryNameRequestDTO){
-        InventoryName inventoryName = new InventoryName();
-        BeanUtils.copyProperties(inventoryNameRequestDTO, inventoryName);
-        return inventoryName;
-    }
+//    public static InventoryName toInventoryNameEntity(InventoryNameRequestDTO inventoryNameRequestDTO){
+//        InventoryName inventoryName = new InventoryName();
+//        BeanUtils.copyProperties(inventoryNameRequestDTO, inventoryName);
+//        return inventoryName;
+//    }
 
     public static InventoryTypeResponseDTO toInventoryTypeResponseDTO(InventoryType inventoryType){
         InventoryTypeResponseDTO inventoryTypeResponseDTO = new InventoryTypeResponseDTO();

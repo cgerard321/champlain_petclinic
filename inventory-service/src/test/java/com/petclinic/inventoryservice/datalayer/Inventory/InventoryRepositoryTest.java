@@ -22,7 +22,15 @@ class InventoryRepositoryTest {
     @Test
     public void shouldSaveSingleInventory(){
         //arrange
-        Inventory newInventory = buildInventory("inventoryId_3", "inventoryType_3", "Internal", "inventoryDescription_3");
+        Inventory newInventory = buildInventory(
+                "inventoryId_3",
+                "inventoryType_3",
+                "Internal",
+                "inventoryDescription_3",
+                "https://www.fda.gov/files/iStock-157317886.jpg",
+                "https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14"
+
+        );
         Publisher<Inventory> setup = inventoryRepository.save(newInventory);
         //act and assert
         StepVerifier
@@ -36,7 +44,15 @@ class InventoryRepositoryTest {
     @Test public void findInventoryByInventoryID_shouldFindOne(){
 
 
-        Inventory newInventory = buildInventory("inventoryId_3", "internal", "Internal" ,"inventoryDescription_3");
+        Inventory newInventory = buildInventory(
+                "inventoryId_3",
+                "internal",
+                "Internal" ,
+                "inventoryDescription_3",
+                "https://www.fda.gov/files/iStock-157317886.jpg",
+                "https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14"
+
+        );
 
         StepVerifier
                 .create(inventoryRepository.findInventoryByInventoryId(newInventory.getInventoryId()))
@@ -50,7 +66,15 @@ class InventoryRepositoryTest {
     @Test
     public void shouldDeleteInventory() {
         // Arrange
-        Inventory inventoryToBeDeleted = buildInventory("inventoryId_4", "inventoryType_4", "Internal" ,"inventoryDescription_4");
+        Inventory inventoryToBeDeleted = buildInventory(
+                "inventoryId_4",
+                "inventoryType_4",
+                "Internal" ,
+                "inventoryDescription_4",
+                "https://www.fda.gov/files/iStock-157317886.jpg",
+                "https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14"
+
+        );
         inventoryRepository.save(inventoryToBeDeleted).block();
 
         // Act
@@ -66,13 +90,24 @@ class InventoryRepositoryTest {
     @Test
     public void shouldFindInventoryByNameTypeAndDescription() {
         // Arrange
-        Inventory inventory = buildInventory("inventoryId_1", "SampleName", "Internal", "SampleDescription");
+        Inventory inventory = buildInventory(
+                "inventoryId_1",
+                "SampleName",
+                "Internal",
+                "SampleDescription",
+                "https://www.fda.gov/files/iStock-157317886.jpg",
+                "https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14"
+
+        );
         inventoryRepository.save(inventory).block();
 
         // Act & Assert
         StepVerifier
                 .create(inventoryRepository.findAllByInventoryNameAndInventoryTypeAndInventoryDescription(
-                        "SampleName", "Internal", "SampleDescription"))
+                        "SampleName",
+                        "Internal",
+                        "SampleDescription"
+                ))
                 .expectNextMatches(result -> result.getInventoryId().equals("inventoryId_1"))
                 .verifyComplete();
     }
@@ -80,12 +115,21 @@ class InventoryRepositoryTest {
     @Test
     public void shouldFindInventoryByTypeAndDescription() {
         // Arrange
-        Inventory inventory = buildInventory("inventoryId_2", "OtherName", "Internal", "SampleDescription");
+        Inventory inventory = buildInventory("inventoryId_2",
+                "OtherName",
+                "Internal",
+                "SampleDescription",
+                "https://www.fda.gov/files/iStock-157317886.jpg",
+                "https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14"
+
+        );
         inventoryRepository.save(inventory).block();
 
         // Act & Assert
         StepVerifier
-                .create(inventoryRepository.findAllByInventoryTypeAndInventoryDescription("Internal", "SampleDescription"))
+                .create(inventoryRepository.findAllByInventoryTypeAndInventoryDescription("Internal",
+                        "SampleDescription"
+                ))
                 .expectNextMatches(result -> result.getInventoryId().equals("inventoryId_2"))
                 .verifyComplete();
     }
@@ -93,7 +137,14 @@ class InventoryRepositoryTest {
     @Test
     public void shouldFindInventoryByName() {
         // Arrange
-        Inventory inventory = buildInventory("inventoryId_3", "SampleName", "Internal", "OtherDescription");
+        Inventory inventory = buildInventory("inventoryId_3",
+                "SampleName",
+                "Internal",
+                "OtherDescription",
+                "https://www.fda.gov/files/iStock-157317886.jpg",
+                "https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14"
+
+        );
         inventoryRepository.save(inventory).block();
 
         // Act & Assert
@@ -108,7 +159,15 @@ class InventoryRepositoryTest {
     @Test
     public void shouldFindInventoryByNameRegex() {
         // Arrange
-        Inventory inventory = buildInventory("inventoryId_4", "Benzodiazepines", "Internal", "SomeDescription");
+        Inventory inventory = buildInventory(
+                "inventoryId_4",
+                "Benzodiazepines",
+                "Internal",
+                "SomeDescription",
+                "https://www.fda.gov/files/iStock-157317886.jpg",
+                "https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14"
+
+        );
         inventoryRepository.save(inventory).block();
 
         String regexPattern = "(?i)^B.*";  // Just for this example since we know the name starts with 'B'
@@ -123,7 +182,15 @@ class InventoryRepositoryTest {
     @Test
     public void shouldFindInventoryByDescriptionRegex() {
         // Arrange
-        Inventory inventory = buildInventory("inventoryId_5", "SomeName", "Internal", "Medication");
+        Inventory inventory = buildInventory(
+                "inventoryId_5",
+                "SomeName",
+                "Internal",
+                "Medication",
+                "https://www.fda.gov/files/iStock-157317886.jpg",
+                "https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14"
+
+        );
         inventoryRepository.save(inventory).block();
 
         String regexPattern = "(?i)^M.*";  // Since we know the description starts with 'M'
@@ -135,12 +202,14 @@ class InventoryRepositoryTest {
                 .verifyComplete();
     }
 
-    private Inventory buildInventory(String inventoryId, String inventoryName, String inventoryType, String inventoryDescription) {
+    private Inventory buildInventory(String inventoryId, String inventoryName, String inventoryType, String inventoryDescription, String inventoryImage, String inventoryBackupImage) {
         return Inventory.builder()
                 .inventoryName(inventoryName)
                 .inventoryId(inventoryId)
                 .inventoryType(inventoryType)
                 .inventoryDescription(inventoryDescription)
+                .inventoryImage(inventoryImage)
+                .inventoryBackupImage(inventoryBackupImage)
                 .build();
     }
 
