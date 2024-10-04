@@ -144,9 +144,9 @@ const AddPetForm: React.FC = (): JSX.Element => {
 
       {isAddModalOpen && (
         <div className="pet-add-modal-overlay">
-        <div className="pet-add-modal">
+          <div className="pet-add-modal">
             <h2>Success!</h2>
-              <p>Pet has been successfully added.</p>
+            <p>Pet has been successfully added.</p>
             <button onClick={closeAddModal}>Close</button>
           </div>
         </div>
