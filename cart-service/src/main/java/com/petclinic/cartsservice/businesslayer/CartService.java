@@ -20,12 +20,10 @@ public interface CartService {
    // Mono<CartResponseModel> updateCartByCartId(Mono<CartRequestModel> cartRequestModel, String cartId);
     Mono<CartResponseModel> createNewCart(CartRequestModel cartRequestModel);
     Mono<Integer> getCartItemCount(String cartId);
-    // Combining both features: clearCart and updateCartByCartId
     Mono<CartResponseModel> deleteCartByCartId(String cartId);
+    Mono<CartResponseModel> addProductToCart(String cartId, String productId, int quantity); 
+    Mono<CartResponseModel> updateProductQuantityInCart(String cartId, String productId, int quantity);  
 
-    //feature for the chekout cart
-    Mono<CartResponseModel> checkoutCart(String cartId);
-
-
-
+    Mono<CartResponseModel> checkoutCart(String cartId); 
 }
+
