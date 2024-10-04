@@ -37,4 +37,6 @@ public interface ProductInventoryService {
     Flux<ProductResponseDTO> searchProducts(String inventoryId, String productName, String productDescription);
 
     Mono<ProductResponseDTO> addSupplyToInventory(Mono<ProductRequestDTO> productRequestDTOMono, String inventoryId);
+
+    Mono<Integer> getQuantityOfProductsInInventory(String inventoryId);
     }

@@ -39,7 +39,9 @@ h1 {
   padding: 20px;
   margin: 15px 0;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s, box-shadow 0.3s;
+  transition:
+    transform 0.3s,
+    box-shadow 0.3s;
 }
 
 .section:hover {
@@ -96,7 +98,9 @@ h1 {
   border-radius: 6px;
   font-size: 1.1rem;
   cursor: pointer;
-  transition: background-color 0.3s, transform 0.3s;
+  transition:
+    background-color 0.3s,
+    transform 0.3s;
   margin-top: 30px;
   display: block;
   width: 100%;

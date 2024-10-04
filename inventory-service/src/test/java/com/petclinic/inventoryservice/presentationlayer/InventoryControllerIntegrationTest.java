@@ -1155,4 +1155,42 @@ class InventoryControllerIntegrationTest {
                     assertTrue(products.size() > 0);
                 });
     }
+
+    @Test
+    void getQuantityOfProductsInInventory_withValidInventoryId_shouldReturnProductCount() {
+        // Arrange
+        String inventoryId = "inventoryId_3";  // This inventory has products
+
+        // Act & Assert
+        webTestClient.get()
+                .uri("/inventory/{inventoryId}/productquantity", inventoryId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(Integer.class)
+                .value(count -> {
+                    assertNotNull(count);
+                    assertTrue(count > 0);  // Ensure that the inventory contains products
+                });
+    }
+
+    @Test
+    void getQuantityOfProductsInInventory_withInvalidInventoryId_shouldReturnNotFound() {
+        // Arrange
+        String invalidInventoryId = "invalidInventoryId";  // This inventory ID does not exist
+
+        // Act & Assert
+        webTestClient.get()
+                .uri("/inventory/{inventoryId}/productquantity", invalidInventoryId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Inventory not found with id: " + invalidInventoryId);
+    }
+
+
+
 }

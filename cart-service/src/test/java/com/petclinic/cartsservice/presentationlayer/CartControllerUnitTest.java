@@ -3,8 +3,12 @@ package com.petclinic.cartsservice.presentationlayer;
 import com.petclinic.cartsservice.businesslayer.CartService;
 import com.petclinic.cartsservice.dataaccesslayer.Cart;
 import com.petclinic.cartsservice.dataaccesslayer.cartproduct.CartProduct;
-import com.petclinic.cartsservice.domainclientlayer.ProductResponseModel;
+import com.petclinic.cartsservice.domainclientlayer.AddProductRequestModel;
+
+import com.petclinic.cartsservice.domainclientlayer.UpdateProductQuantityRequestModel;
+import com.petclinic.cartsservice.utils.exceptions.InvalidInputException;
 import com.petclinic.cartsservice.utils.exceptions.NotFoundException;
+import com.petclinic.cartsservice.utils.exceptions.OutOfStockException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
@@ -25,14 +29,14 @@ import static org.mockito.Mockito.*;
 @WebFluxTest(controllers = CartController.class)
 class CartControllerUnitTest {
 
-
     @MockBean
     private CartService cartService;
 
     @Autowired
     private WebTestClient webTestClient;
 
-
+    // Use valid UUIDs for cart IDs
+    private final String VALID_CART_ID = "98f7b33a-d62a-420a-a84a-05a27c85fc91";
     private final String NOT_FOUND_CART_ID = "98f7b33a-d62a-420a-a84a-05a27c85fc92";
 
     private final CartProduct product1 = CartProduct.builder()
@@ -66,9 +70,9 @@ class CartControllerUnitTest {
 
     @Test
     public void whenGetCartByCartId_thenReturnCartResponseModel() {
-        // arrange
-          Cart cart = Cart.builder()
-                .cartId("98f7b33a-d62a-420a-a84a-05a27c85fc91")
+        // Arrange
+        Cart cart = Cart.builder()
+                .cartId(VALID_CART_ID)
                 .products(products)
                 .customerId("1")
                 .build();
@@ -81,7 +85,7 @@ class CartControllerUnitTest {
 
         when(cartService.getCartByCartId(cart.getCartId())).thenReturn(Mono.just(cartResponseModel));
 
-        // act & assert
+        // Act & Assert
         webTestClient
                 .get()
                 .uri("/api/v1/carts/" + cart.getCartId())
@@ -101,13 +105,13 @@ class CartControllerUnitTest {
     void whenGetAllCarts_thenReturnAllCartResponseModels() {
         // Arrange
         Cart cart1 = Cart.builder()
-                .cartId("98f7b33a-d62a-420a-a84a-05a27c85fc91")
+                .cartId(VALID_CART_ID)
                 .products(products)
                 .customerId("1")
                 .build();
 
         Cart cart2 = Cart.builder()
-                .cartId("98f7b33a-d62a-420a-a84a-05a27c85fc92")
+                .cartId(NOT_FOUND_CART_ID)
                 .products(products)
                 .customerId("2")
                 .build();
@@ -163,20 +167,22 @@ class CartControllerUnitTest {
 
     @Test
     void whenGetCartByCartId_withIncorrectCartId_thenThrowIllegalArgumentException() {
-        when(cartService.getCartByCartId("incorrect-cart-id"))
-                .thenReturn(Mono.error(new IllegalArgumentException("Provided cart id is invalid: " + "incorrect-cart-id")));
+        String invalidCartId = "incorrect-cart-id";
+        when(cartService.getCartByCartId(invalidCartId))
+                .thenReturn(Mono.error(new IllegalArgumentException("Provided cart id is invalid: " + invalidCartId)));
 
         // Act & Assert
         webTestClient
                 .get()
-                .uri("/api/v1/carts/" + "incorrect-cart-id")
+                .uri("/api/v1/carts/" + invalidCartId)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isEqualTo(422);    }
+                .expectStatus().isEqualTo(422);
+    }
 
-//    @Test
-
+    @Test
     void whenCreateNewCart_withValidCustomerId_thenReturnCartResponse() {
+        // Arrange
         CartResponseModel expectedCartResponseModel = new CartResponseModel();
         expectedCartResponseModel.setCartId("12345");
         expectedCartResponseModel.setCustomerId("123");
@@ -198,33 +204,44 @@ class CartControllerUnitTest {
                 .bodyValue(json)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isEqualTo(201);
+                .expectStatus().isCreated()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(CartResponseModel.class)
+                .value(response -> {
+                    assertEquals("12345", response.getCartId());
+                    assertEquals("123", response.getCustomerId());
+                });
     }
 
-//    @Test
+    @Test
     public void getCartItemCount_Success() {
-        when(cartService.getCartItemCount("cart1")).thenReturn(Mono.just(3));
+        // Use a valid cart ID
+        when(cartService.getCartItemCount(VALID_CART_ID)).thenReturn(Mono.just(3));
 
-        webTestClient.get().uri("/api/v1/carts/cart1/count")
+        webTestClient.get().uri("/api/v1/carts/" + VALID_CART_ID + "/count")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$.itemCount").isEqualTo(3);
     }
 
- //   @Test
+    @Test
     public void getCartItemCount_CartNotFound() {
-        when(cartService.getCartItemCount("cart1")).thenReturn(Mono.empty());
+        // Arrange
+        when(cartService.getCartItemCount(NOT_FOUND_CART_ID))
+                .thenReturn(Mono.error(new NotFoundException("Cart not found: " + NOT_FOUND_CART_ID)));
 
-        webTestClient.get().uri("/api/v1/carts/cart1/count")
+        // Act & Assert
+        webTestClient.get().uri("/api/v1/carts/" + NOT_FOUND_CART_ID + "/count")
                 .exchange()
                 .expectStatus().isNotFound();
     }
 
-//    @Test
+    @Test
     public void whenDeleteCartByIdWithExistingId_thenReturnCartResponseModel(){
+        // Arrange
         Cart cart = Cart.builder()
-                .cartId("98f7b33a-d62a-420a-a84a-05a27c85fc91")
+                .cartId(VALID_CART_ID)
                 .products(products)
                 .customerId("1")
                 .build();
@@ -252,20 +269,175 @@ class CartControllerUnitTest {
 
     @Test
     public void whenDeleteCartByIdWithInvalidId_ThenReturnEmptyMono(){
-        String cartId = "98f7b33a-d62a-420a-a84a-05a27c85fc";
+        String invalidCartId = "98f7b33a-d62a-420a-a84a-05a27c85fc"; // Invalid UUID
 
-        when(cartService.deleteCartByCartId(cartId))
+        when(cartService.deleteCartByCartId(invalidCartId))
                 .thenReturn(Mono.empty());
 
         webTestClient
                 .delete()
-                .uri("/api/v1/carts/" + cartId)
+                .uri("/api/v1/carts/" + invalidCartId)
                 .accept()
                 .exchange()
                 .expectStatus().isEqualTo(422);
 
-        verify(cartService, times(0)).deleteCartByCartId(cartId);
+        verify(cartService, times(0)).deleteCartByCartId(invalidCartId);
     }
 
+    @Test
+    void whenAddProductToCart_Success() {
+        // Arrange
+        String cartId = VALID_CART_ID;
+        AddProductRequestModel requestModel = new AddProductRequestModel("9a29fff7-564a-4cc9-8fe1-36f6ca9bc223", 2);
+        CartResponseModel expectedResponse = new CartResponseModel();
+        expectedResponse.setCartId(cartId);
+        expectedResponse.setProducts(List.of(product1));
 
+        when(cartService.addProductToCart(anyString(), anyString(), anyInt())).thenReturn(Mono.just(expectedResponse));
+
+        // Act & Assert
+        webTestClient.post()
+                .uri("/api/v1/carts/" + cartId + "/products")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestModel)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(CartResponseModel.class)
+                .value(response -> {
+                    assertEquals(cartId, response.getCartId());
+                    assertEquals(1, response.getProducts().size());
+                    assertEquals(product1.getProductId(), response.getProducts().get(0).getProductId());
+                });
+
+        verify(cartService, times(1)).addProductToCart(anyString(), anyString(), anyInt());
+    }
+
+    @Test
+    void whenAddCheckoutCart_thenReturnCartResponseModel(){
+        // Arrange
+        Cart cart = Cart.builder()
+                .cartId(VALID_CART_ID)
+                .products(products)
+                .customerId("1")
+                .build();
+
+        CartResponseModel cartResponseModel = CartResponseModel.builder()
+                .cartId(cart.getCartId())
+                .customerId("1")
+                .products(products)
+                .build();
+        when(cartService.checkoutCart(cart.getCartId()))
+                .thenReturn(Mono.just(cartResponseModel));
+
+        webTestClient
+                .post()
+                .uri("/api/v1/carts/" + cart.getCartId() + "/checkout")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(CartResponseModel.class)
+                .value(response -> {
+                    assertEquals(cart.getCartId(), response.getCartId());
+                    assertEquals(cart.getCustomerId(), response.getCustomerId());
+                    assertEquals(cart.getProducts().size(), response.getProducts().size());
+                    assertEquals(product1.getProductId(), response.getProducts().get(0).getProductId());
+                });
+
+        verify(cartService, times(1)).checkoutCart(cartResponseModel.getCartId());
+    }
+
+    @Test
+    void whenAddProductToCart_OutOfStock_ThrowsBadRequest() {
+        // Arrange
+        String cartId = VALID_CART_ID;
+        AddProductRequestModel requestModel = new AddProductRequestModel("9a29fff7-564a-4cc9-8fe1-36f6ca9bc223", 20);
+
+        when(cartService.addProductToCart(anyString(), anyString(), anyInt()))
+                .thenReturn(Mono.error(new OutOfStockException("Only 5 items left in stock.")));
+
+        // Act & Assert
+        webTestClient.post()
+                .uri("/api/v1/carts/" + cartId + "/products")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestModel)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Only 5 items left in stock.");
+
+        verify(cartService, times(1)).addProductToCart(anyString(), anyString(), anyInt());
+    }
+
+    @Test
+    void whenAddProductToCart_InvalidQuantity_ThrowsBadRequest() {
+        // Arrange
+        String cartId = VALID_CART_ID;
+        AddProductRequestModel requestModel = new AddProductRequestModel("9a29fff7-564a-4cc9-8fe1-36f6ca9bc223", -1);
+
+        when(cartService.addProductToCart(anyString(), anyString(), anyInt()))
+                .thenReturn(Mono.error(new InvalidInputException("Quantity must be greater than zero.")));
+
+        // Act & Assert
+        webTestClient.post()
+                .uri("/api/v1/carts/" + cartId + "/products")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestModel)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Quantity must be greater than zero.");
+
+        verify(cartService, times(1)).addProductToCart(anyString(), anyString(), anyInt());
+    }
+
+    @Test
+    void whenUpdateProductQuantityInCart_Success() {
+        // Arrange
+        String cartId = VALID_CART_ID;
+        String productId = "9a29fff7-564a-4cc9-8fe1-36f6ca9bc223";
+        UpdateProductQuantityRequestModel requestModel = new UpdateProductQuantityRequestModel(3);
+        CartResponseModel expectedResponse = new CartResponseModel();
+        expectedResponse.setCartId(cartId);
+        expectedResponse.setProducts(List.of(product1));
+
+        when(cartService.updateProductQuantityInCart(anyString(), anyString(), anyInt()))
+                .thenReturn(Mono.just(expectedResponse));
+
+        // Act & Assert
+        webTestClient.put()
+                .uri("/api/v1/carts/" + cartId + "/products/" + productId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestModel)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(CartResponseModel.class)
+                .value(response -> assertEquals(cartId, response.getCartId()));
+
+        verify(cartService, times(1)).updateProductQuantityInCart(anyString(), anyString(), anyInt());
+    }
+
+    @Test
+    void whenUpdateProductQuantityInCart_OutOfStock_ThrowsBadRequest() {
+        // Arrange
+        String cartId = VALID_CART_ID;
+        String productId = "9a29fff7-564a-4cc9-8fe1-36f6ca9bc223";
+        UpdateProductQuantityRequestModel requestModel = new UpdateProductQuantityRequestModel(15);
+
+        when(cartService.updateProductQuantityInCart(anyString(), anyString(), anyInt()))
+                .thenReturn(Mono.error(new OutOfStockException("Only 5 items left in stock.")));
+
+        // Act & Assert
+        webTestClient.put()
+                .uri("/api/v1/carts/" + cartId + "/products/" + productId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestModel)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Only 5 items left in stock.");
+
+        verify(cartService, times(1)).updateProductQuantityInCart(anyString(), anyString(), anyInt());
+    }
 }
