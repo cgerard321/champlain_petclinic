@@ -3,6 +3,7 @@ package com.petclinic.vet.servicelayer;
 
 import com.petclinic.vet.dataaccesslayer.Photo;
 import com.petclinic.vet.dataaccesslayer.PhotoRepository;
+import com.petclinic.vet.dataaccesslayer.VetRepository;
 import com.petclinic.vet.dataaccesslayer.badges.BadgeTitle;
 import com.petclinic.vet.exceptions.InvalidInputException;
 import com.petclinic.vet.exceptions.NotFoundException;
@@ -30,6 +31,7 @@ import java.io.IOException;
 @Slf4j
 public class PhotoServiceImpl implements PhotoService {
     private final PhotoRepository photoRepository;
+    private final VetRepository vetRepository;
 
     @Override
     public Mono<Resource> getPhotoByVetId(String vetId) {
@@ -83,6 +85,35 @@ public class PhotoServiceImpl implements PhotoService {
                                     });
                         }));
     }
+
+    @Override
+    public Mono<Void> deletePhotoByVetId(String vetId) {
+        return photoRepository.deleteByVetId(vetId)
+                .then(insertDefaultPhoto(vetId))
+                .then();
+    }
+
+    private Mono<Void> insertDefaultPhoto(String vetId) {
+        return Mono.defer(() -> {
+            try {
+                ClassPathResource defaultPhoto = new ClassPathResource("images/vet_default.jpg");
+                byte[] data = StreamUtils.copyToByteArray(defaultPhoto.getInputStream());
+
+                Photo defaultPhotoEntity = Photo.builder()
+                        .vetId(vetId)
+                        .filename("vet_default.jpg")
+                        .imgType("image/jpeg")
+                        .data(data)
+                        .build();
+
+                return photoRepository.save(defaultPhotoEntity).then();
+
+            } catch (IOException e) {
+                return Mono.error(new RuntimeException("Failed to load default photo", e));
+            }
+        });
+    }
+
 
     private ByteArrayResource createResourceFromPhoto(Photo img) {
         return new ByteArrayResource(img.getData());
