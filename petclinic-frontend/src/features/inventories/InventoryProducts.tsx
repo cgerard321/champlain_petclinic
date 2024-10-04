@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { ProductModel } from './models/ProductModels/ProductModel';
 import './InventoriesListTable.css';
@@ -8,7 +8,6 @@ import useSearchProducts from '@/features/inventories/hooks/useSearchProducts.ts
 
 const InventoryProducts: React.FC = () => {
   const { inventoryId } = useParams<{ inventoryId: string }>();
-
   const { productList, setProductList, getProductList } = useSearchProducts();
 
   // Declare state
@@ -19,6 +18,7 @@ const InventoryProducts: React.FC = () => {
   const [filteredProducts, setFilteredProducts] = useState<ProductModel[]>([]); // State for filtered products
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   // Fetch products from the backend
   useEffect(() => {
@@ -27,7 +27,7 @@ const InventoryProducts: React.FC = () => {
       setError(null);
       try {
         const response = await axios.get<ProductModel[]>(
-          `http://localhost:8080/api/gateway/inventory/${inventoryId}/products`
+          `http://localhost:8080/api/v2/gateway/inventories/${inventoryId}/products/search`
         );
         setProducts(response.data);
         setProductList(response.data); // Set productList as well
@@ -48,7 +48,7 @@ const InventoryProducts: React.FC = () => {
   const deleteProduct = async (productId: string): Promise<void> => {
     try {
       await axios.delete(
-        `http://localhost:8080/api/gateway/inventory/${inventoryId}/products/${productId}`
+        `http://localhost:8080/api/v2/gateway/inventories/${inventoryId}/products/${productId}`
       );
       // Filter out the deleted product from both lists
       const updatedProducts = products.filter(
@@ -105,6 +105,13 @@ const InventoryProducts: React.FC = () => {
         Supplies in Inventory: <span>{inventoryId}</span>
       </h2>
 
+      <button
+        className="btn btn-secondary"
+        onClick={() => navigate('/inventories')}
+      >
+        Back
+      </button>
+
       <div className="products-filtering">
         <div className="filter-by-name">
           <label htmlFor="product-name">Filter by Name:</label>
@@ -154,13 +161,13 @@ const InventoryProducts: React.FC = () => {
               <th>Price</th>
               <th>Quantity</th>
               <th>Status</th>
-              <th>Actions</th>
+              <th colSpan={2}>Actions</th>
             </tr>
           </thead>
           <tbody>
             {filteredProducts.map((product: ProductModel) => (
-              <tr key={product.productId}>
-                <td>{product.productId}</td>
+              <tr key={product.productName}>
+                <td>{product.productName}</td>
                 <td>{product.productName}</td>
                 <td>{product.productDescription}</td>
                 <td>${product.productSalePrice}</td>
@@ -181,6 +188,17 @@ const InventoryProducts: React.FC = () => {
                 </td>
                 <td>
                   <button
+                    onClick={e => {
+                      e.stopPropagation();
+                      navigate(`${product.productId}/edit`);
+                    }}
+                    className="btn btn-warning"
+                  >
+                    Edit
+                  </button>
+                </td>
+                <td>
+                  <button
                     className="btn btn-danger"
                     onClick={() => deleteProduct(product.productId)}
                   >
@@ -194,6 +212,12 @@ const InventoryProducts: React.FC = () => {
       ) : (
         <p>No supplies found for this inventory.</p>
       )}
+      <button
+        className="btn btn-add"
+        onClick={() => navigate(`/inventory/${inventoryId}/products/add`)}
+      >
+        Add
+      </button>
     </div>
   );
 };

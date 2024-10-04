@@ -15,5 +15,11 @@ import java.util.List;
 public class CartResponseDTO {
     private String cartId;
     private String customerId;
-    private List<ProductResponseDTO> products;
+    private List<CartProductResponseDTO> products;
+    private double subtotal;
+    private double tvq;
+    private double tvc;
+    private double total;
+    private String message;  
+    private String paymentStatus;  
 }

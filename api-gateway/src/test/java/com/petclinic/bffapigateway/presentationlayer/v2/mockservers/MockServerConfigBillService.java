@@ -36,6 +36,22 @@ public class MockServerConfigBillService {
                 );
     }
 
+    public void registerCreateBillEndpoint() {
+        String response = "{\"billId\":\"e6c7398e-8ac4-4e10-9ee0-03ef33f0361b\",\"customerId\":\"e6c7398e-8ac4-4e10-9ee0-03ef33f0361a\",\"visitType\":\"general\",\"vetId\":\"3\",\"date\":\"2024-10-11\",\"amount\":\"100\",\"taxedAmount\":\"0.0\", \"billStatus\":\"UNPAID\", \"dueDate\":\"2024-10-13\"}";
+
+        mockServerClient_BillService
+                .when(
+                    request()
+                            .withMethod("POST")
+                            .withPath("/bills")
+                )
+                .respond(
+                        response()
+                                .withStatusCode(201)
+                                .withBody(json(response))
+                );
+    }
+
     public void stopMockServer() {
         if(clientAndServer != null)
             this.clientAndServer.stop();

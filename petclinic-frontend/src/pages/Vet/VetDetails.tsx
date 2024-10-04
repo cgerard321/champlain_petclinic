@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { NavBar } from '@/layouts/AppNavBar.tsx';
 import './VetDetails.css';
+import axios from 'axios';
 
 interface VetResponseType {
   vetId: string;
@@ -23,6 +24,9 @@ export default function VetDetails(): JSX.Element {
   const [photo, setPhoto] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [isFormOpen, setIsFormOpen] = useState(false); // To handle form visibility
+  const [specialtyId, setSpecialtyId] = useState('');
+  const [specialtyName, setSpecialtyName] = useState('');
 
   useEffect(() => {
     const fetchVetDetails = async (): Promise<void> => {
@@ -92,6 +96,37 @@ export default function VetDetails(): JSX.Element {
     } catch (error) {
       console.error('Error parsing work hours:', error);
       return <p>Invalid work hours data</p>;
+    }
+  };
+
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  const handleAddSpecialty = async () => {
+    const specialtyDTO = {
+      specialtyId,
+      name: specialtyName,
+    };
+
+    try {
+      await axios.post(
+        `http://localhost:8080/api/v2/gateway/vets/${vetId}/specialties`,
+        specialtyDTO
+      );
+      alert('Specialty added successfully!');
+      setIsFormOpen(false); // Close form on success
+      setSpecialtyId(''); // Clear fields
+      setSpecialtyName('');
+
+      // Update the vet data after adding the specialty
+      setVet(prevVet =>
+        prevVet
+          ? {
+              ...prevVet,
+              specialties: [...prevVet.specialties, specialtyDTO], // Update specialties locally
+            }
+          : null
+      );
+    } catch (error) {
+      setError('Failed to add specialty');
     }
   };
 
@@ -165,6 +200,51 @@ export default function VetDetails(): JSX.Element {
                 </ul>
               ) : (
                 <p>No specialties available</p>
+              )}
+
+              {/* Button to open the form */}
+              <button onClick={() => setIsFormOpen(true)}>Add Specialty</button>
+
+              {/* Conditionally render the form */}
+              {isFormOpen && (
+                <div className="specialty-form-popup">
+                  <form
+                    onSubmit={e => {
+                      e.preventDefault();
+                      handleAddSpecialty();
+                    }}
+                  >
+                    <div>
+                      <label htmlFor="specialtyId">Specialty ID:</label>
+                      <input
+                        type="text"
+                        id="specialtyId"
+                        value={specialtyId}
+                        onChange={e => setSpecialtyId(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="specialtyName">Specialty Name:</label>
+                      <input
+                        type="text"
+                        id="specialtyName"
+                        value={specialtyName}
+                        onChange={e => setSpecialtyName(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <button type="submit">Submit</button>
+                      <button
+                        type="button"
+                        onClick={() => setIsFormOpen(false)}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
+                </div>
               )}
             </section>
           </>

@@ -1,7 +1,12 @@
 export enum AppRoutePaths {
   Default = '/',
   EditInventory = 'inventories/inventory/:inventoryId/edit',
+  EditInventoryProducts = 'inventory/:inventoryId/products/:productId/edit',
+  AddSupplyToInventory = 'inventory/:inventoryId/products/add',
   Review = '/reviews',
+  Emergency = '/visits/emergency',
+  EmergencyList = '/visits/emergencyList',
+  EditEmergency = '/visits/emergency/:emergencyId',
   UpdateReview = '/updateReview/:reviewId/edit',
   GetVisitByVistId = 'visits/:visitId',
   Form = '/forms',
@@ -35,4 +40,7 @@ export enum AppRoutePaths {
   CustomerDetails = '/customers/:ownerId',
   UpdateCustomer = '/customers/:ownerId/edit',
   SignUp = '/users/signup',
+  CustomerVisits = '/customer/visits',
+  UpdatePet = '/pets/:petId/edit',
+  ProductDetails = '/productDetails',
 }
