@@ -2,6 +2,7 @@ import { ProductModel } from '@/features/products/models/ProductModels/ProductMo
 import { NavBar } from '@/layouts/AppNavBar.tsx';
 import { JSX } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import './ProductDetails.css';
 
 export default function ProductDetails(): JSX.Element {
   const location = useLocation();
@@ -119,7 +120,9 @@ export default function ProductDetails(): JSX.Element {
       <p>Price: ${product.productSalePrice.toFixed(2)}</p>
       <p>Rating: {product.averageRating} / 5</p>
 
-      <button onClick={navigateToEditProduct}>Edit Product</button>
+      <button className="edit-button" onClick={navigateToEditProduct}>
+        Edit Product
+      </button>
     </>
   );
 }
