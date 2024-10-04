@@ -7,8 +7,9 @@ import { getAllInventoryTypes } from '@/features/inventories/api/getAllInventory
 import deleteAllInventories from '@/features/inventories/api/deleteAllInventories.ts';
 import deleteInventory from '@/features/inventories/api/deleteInventory.ts';
 import AddInventoryType from '@/features/inventories/AddInventoryType.tsx';
-import AddSupplyForm from '@/features/inventories/AddSupplyForm.tsx';
-import './Card.css';
+import AddSupplyForm from '@/features/inventories/AddProductForm.tsx';
+import './CardInventoryTeam.css';
+import DefaultInventoryImage from '@/assets/Inventory/DefaultInventoryImage.jpg';
 
 //TODO: create add inventory form component and change the component being shown on the inventories page on the onClick event of the add inventory button
 export default function InventoriesListTableV2(): JSX.Element {
@@ -422,16 +423,26 @@ export default function InventoriesListTableV2(): JSX.Element {
           >
             <div className="image-container">
               <img
-                src="https://static.wixstatic.com/media/00326d_f83bb643b5a040f9bd6f3927fd9e03d3~mv2.jpg/v1/fill/w_640,h_720,fp_0.42_0.57,q_85,usm_0.66_1.00_0.01,enc_auto/00326d_f83bb643b5a040f9bd6f3927fd9e03d3~mv2.jpg"
+                src={inventory.inventoryImage}
                 alt={inventory.inventoryName}
                 className="card-image"
+                onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+                  const target = e.target as HTMLImageElement;
+                  if (inventory.inventoryBackupImage) {
+                    target.src = inventory.inventoryBackupImage;
+                    target.onerror = () => {
+                      target.onerror = null;
+                      target.src = DefaultInventoryImage;
+                    };
+                  } else {
+                    target.src = DefaultInventoryImage;
+                  }
+                }}
               />
             </div>
-            <h2>Inventory Name: {inventory.inventoryName}</h2>
-            <p>Inventory Description: {inventory.inventoryDescription}</p>
-            <p>
-              <strong>Inventory Type:</strong> {inventory.inventoryType}
-            </p>
+            <h2>{inventory.inventoryName}</h2>
+            <p>Type: {inventory.inventoryType}</p>
+            <p>{inventory.inventoryDescription}</p>
           </div>
         ))}
       </div>

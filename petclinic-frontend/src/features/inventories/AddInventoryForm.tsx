@@ -19,6 +19,8 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
   const [inventoryName, setInventoryName] = useState<string>('');
   const [inventoryType, setInventoryType] = useState<string>('');
   const [inventoryDescription, setInventoryDescription] = useState<string>('');
+  const [inventoryImage, setInventoryImage] = useState<string>('');
+  const [inventoryBackupImage, setInventoryBackupImage] = useState<string>('');
   const [inventoryTypes, setInventoryTypes] = useState<InventoryType[]>([]);
 
   useEffect(() => {
@@ -49,6 +51,8 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
       inventoryName,
       inventoryType: selectedInventoryType.type,
       inventoryDescription,
+      inventoryImage,
+      inventoryBackupImage,
     };
 
     try {
@@ -57,6 +61,7 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
       setInventoryName('');
       setInventoryType('');
       setInventoryDescription('');
+      setInventoryImage('');
       refreshInventoryTypes(); // Call the function to refresh inventory types
       handleInventoryClose(); // Close the form after adding the inventory
     } catch (error) {
@@ -107,6 +112,28 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
               id="inventoryDescription"
               value={inventoryDescription}
               onChange={e => setInventoryDescription(e.target.value)}
+              required
+            />
+          </div>
+
+          <div>
+            <label htmlFor="inventoryImage">Inventory Image:</label>
+            <input
+              type="text"
+              id="inventoryImage"
+              value={inventoryImage}
+              onChange={e => setInventoryImage(e.target.value)}
+              required
+            />
+          </div>
+
+          <div>
+            <label htmlFor="inventoryImage">Inventory Backup Image:</label>
+            <input
+              type="text"
+              id="inventoryBackupImage"
+              value={inventoryBackupImage}
+              onChange={e => setInventoryBackupImage(e.target.value)}
               required
             />
           </div>

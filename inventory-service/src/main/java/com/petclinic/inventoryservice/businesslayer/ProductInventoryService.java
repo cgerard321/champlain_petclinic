@@ -5,7 +5,6 @@ import org.springframework.data.domain.Pageable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-
 public interface ProductInventoryService {
 //    Mono<ProductResponseDTO> addProductToInventory(Mono<ProductRequestDTO> productRequestDTOMono, String inventoryId);
     Mono<InventoryResponseDTO> addInventory(Mono<InventoryRequestDTO> inventoryRequestDTO);
@@ -29,9 +28,9 @@ public interface ProductInventoryService {
 
     Mono<ProductResponseDTO> getProductByProductIdInInventory(String inventoryId, String productId);
 
-    Mono<InventoryResponseDTO> addSupplyToInventoryByInventoryName(String inventoryName, Mono<SupplyRequestDTO> supplyRequestDTOMono);
+    Mono<InventoryResponseDTO> addProductToInventoryByInventoryName(String inventoryName, Mono<ProductRequestDTO> productRequestDTOMono);
 
-    Flux<SupplyResponseDTO> getSuppliesByInventoryName(String inventoryName);
+    Flux<ProductResponseDTO> getProductsByInventoryName(String inventoryName);
   
     Flux<ProductResponseDTO> getLowStockProducts(String inventoryId, int stockThreshold);
 

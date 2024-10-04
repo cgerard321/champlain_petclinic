@@ -11,4 +11,6 @@ public class InventoryRequestDTO {
     private String inventoryName;
     private String inventoryType;
     private String inventoryDescription;
+    private String inventoryImage;
+    private String inventoryBackupImage;
 }
