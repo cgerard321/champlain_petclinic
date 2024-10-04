@@ -74,7 +74,7 @@ function Product({ product }: { product: ProductModel }): JSX.Element {
   }
 
   return (
-    <div className="card" key={product.productId}>
+    <div className="cardProduct" key={product.productId}>
       <h2
         onClick={handleProductTitleClick}
         style={{
