@@ -1,7 +1,7 @@
 package com.petclinic.inventoryservice.utils;
 
 import com.petclinic.inventoryservice.datalayer.Product.Product;
-import com.petclinic.inventoryservice.datalayer.Supply.Status;
+import com.petclinic.inventoryservice.datalayer.Product.Status;
 import com.petclinic.inventoryservice.presentationlayer.ProductResponseDTO;
 import org.junit.jupiter.api.Test;
 
@@ -13,7 +13,6 @@ class EntityDTOUtilTest {
     public void toProductResponseDTO_ShouldReturnOutOfStock_WhenQuantityIsZero() {
         // Arrange
         Product product = new Product();
-        product.setId("1");
         product.setProductId("P1");
         product.setInventoryId("Inv1");
         product.setProductName("Test Product");
@@ -35,7 +34,6 @@ class EntityDTOUtilTest {
     public void toProductResponseDTO_ShouldReturnReOrder_WhenQuantityIsLessThan20() {
         // Arrange
         Product product = new Product();
-        product.setId("2");
         product.setProductId("P2");
         product.setInventoryId("Inv2");
         product.setProductName("Test Product");
@@ -57,7 +55,6 @@ class EntityDTOUtilTest {
     public void toProductResponseDTO_ShouldReturnAvailable_WhenQuantityIs20OrMore() {
         // Arrange
         Product product = new Product();
-        product.setId("3");
         product.setProductId("P3");
         product.setInventoryId("Inv3");
         product.setProductName("Test Product");

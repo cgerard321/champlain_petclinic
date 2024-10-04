@@ -11,10 +11,15 @@ package com.petclinic.vet.servicelayer;
   * Ticket: feat(VVS-CPC-553): add veterinarian
  */
 
+import com.petclinic.vet.dataaccesslayer.Specialty;
 import com.petclinic.vet.presentationlayer.VetRequestDTO;
 import com.petclinic.vet.presentationlayer.VetResponseDTO;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
+import java.util.Set;
+
 public interface VetService {
 
     Flux<VetResponseDTO> getAll();
@@ -24,6 +29,5 @@ public interface VetService {
     Mono<Void> deleteVetByVetId(String vetId);
     Flux<VetResponseDTO> getVetByIsActive(boolean isActive);
     Mono<VetResponseDTO> getVetByVetBillId(String vetBillId);
-    Mono<VetResponseDTO> getVetByFirstName(String firstName);
-    Mono<VetResponseDTO> getVetByLastName(String lastName);
+    Mono<VetResponseDTO> addSpecialtiesByVetId(String vetId, Mono<SpecialtyDTO> specialtyDTO);
 }

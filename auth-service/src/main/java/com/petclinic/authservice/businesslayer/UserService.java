@@ -42,6 +42,8 @@ public interface UserService {
 
     Mail generateVerificationMail(User user);
 
+    void generateVerificationMailWithNewEmailingService(User user);
+
     UserPasswordLessDTO verifyEmailFromToken(String token);
 
     HashMap<String, Object> login(UserIDLessUsernameLessDTO user) throws IncorrectPasswordException;
