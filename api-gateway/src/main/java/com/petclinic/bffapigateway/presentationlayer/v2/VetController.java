@@ -123,5 +123,12 @@ public class VetController {
         return vetsServiceClient.addSpecialtiesByVetId(vetId, specialties);
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
+    @GetMapping(value = "{vetId}/photos", produces = MediaType.IMAGE_JPEG_VALUE)
+    public Flux<Resource> getAllAlbumsByVetId(@PathVariable String vetId) {
+        return vetsServiceClient.getAllAlbumsByVetId(vetId)
+                .doOnError(error -> log.error("Error fetching photos for vet {}", vetId, error));
+    }
+
 
 }
