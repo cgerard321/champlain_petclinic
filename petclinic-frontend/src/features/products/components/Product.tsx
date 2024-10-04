@@ -10,7 +10,6 @@ import { changeProductQuantity } from '../api/changeProductQuantity';
 import { useNavigate } from 'react-router-dom';
 import { AppRoutePaths } from '@/shared/models/path.routes';
 
-
 export default function Product({
   product,
 }: {
@@ -83,7 +82,7 @@ export default function Product({
     try {
       const product = await getProductByProductId(productId);
       setSelectedProductForQuantity(product);
-      setQuantity(product.productQuantity); 
+      setQuantity(product.productQuantity);
     } catch (error) {
       console.error('Failed to fetch product details:', error);
     }
