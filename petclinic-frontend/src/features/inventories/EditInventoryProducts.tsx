@@ -4,7 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import {
   getProductByProductIdInInventory,
   updateProductInInventory,
-} from '@/shared/api/EditInventoryProducts';
+} from '@/features/inventories/api/EditInventoryProducts.ts';
 import { ProductRequestModel } from '@/features/inventories/models/InventoryModels/ProductRequestModel';
 
 interface ApiError {
@@ -111,14 +111,27 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
   };
 
   return (
-    <div>
-      <h1>Edit Product</h1>
-      {error && <p style={{ color: 'red' }}>{error.message}</p>}
+    <div
+      className="card d-flex justify-content-center align-items-center"
+      style={{
+        width: '500px',
+        height: '700px',
+        backgroundColor: 'lightgray',
+        margin: '0 auto',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+      }}
+    >
+      <h2>Edit Product</h2>
+
+      <br></br>
 
       <form onSubmit={handleSubmit}>
-        <div>
-          <label>Product Name</label>
+        <h6>Name</h6>
+        <div className="input-group mb-3">
           <input
+            className="form-control"
             type="text"
             name="productName"
             value={product.productName}
@@ -127,9 +140,12 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
           />
         </div>
 
-        <div>
-          <label>Product Description</label>
+        <br></br>
+
+        <h6>Description</h6>
+        <div className="input-group mb-3">
           <input
+            className="form-control"
             type="text"
             name="productDescription"
             value={product.productDescription}
@@ -138,20 +154,29 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
           />
         </div>
 
-        <div>
-          <label>Product Price</label>
+        <br></br>
+
+        <h6>Price</h6>
+        <div className="input-group mb-3">
+          <span className="input-group-text">$</span>
           <input
+            className="form-control"
+            aria-label="Amount (to the nearest dollar)"
             type="number"
             name="productPrice"
             value={product.productPrice}
             onChange={handleChange}
             required
           />
+          <span className="input-group-text">.00</span>
         </div>
 
-        <div>
-          <label>Product Quantity</label>
+        <br></br>
+
+        <h6>Quantity</h6>
+        <div className="input-group mb-3">
           <input
+            className="form-control"
             type="number"
             name="productQuantity"
             value={product.productQuantity}
@@ -160,21 +185,37 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
           />
         </div>
 
-        <div>
-          <label>Product Sale Price</label>
+        <br></br>
+
+        <h6>Sale Price</h6>
+        <div className="input-group mb-3">
+          <span className="input-group-text">$</span>
           <input
+            className="form-control"
+            aria-label="Amount (to the nearest dollar)"
             type="number"
             name="productSalePrice"
             value={product.productSalePrice}
             onChange={handleChange}
             required
           />
+          <span className="input-group-text">.00</span>
         </div>
 
-        <button type="submit">Update Product</button>
+        <button
+          type="submit"
+          style={{
+            width: '100px',
+            backgroundColor: '#333',
+            color: 'white',
+          }}
+        >
+          Update
+        </button>
       </form>
       <div>
         {loading && <p>Loading...</p>}
+        {error && <p style={{ color: 'red' }}>{error.message}</p>}
         {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
         {showNotification ? (
           <div className="notification">

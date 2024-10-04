@@ -19,11 +19,13 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -34,7 +36,7 @@ class VisitControllerUnitTest {
     private VisitService visitService;
 
     @MockBean
-   private ReviewService reviewService;
+    private ReviewService reviewService;
 
     @Autowired
     private WebTestClient webTestClient;
@@ -46,7 +48,7 @@ class VisitControllerUnitTest {
 //    @MockBean
 //    private PetsClient petsClient;
 
-//    String uuidVisit1 = UUID.randomUUID().toString();
+    //    String uuidVisit1 = UUID.randomUUID().toString();
     String uuidVet = UUID.randomUUID().toString();
 //    String uuidPet = UUID.randomUUID().toString();
 //    String uuidPhoto = UUID.randomUUID().toString();
@@ -55,7 +57,7 @@ class VisitControllerUnitTest {
 //    private final String STATUS = "COMPLETED";
 
 
-    Set<SpecialtyDTO> set= new HashSet<>();
+    Set<SpecialtyDTO> set = new HashSet<>();
     Set<Workday> workdaySet = new HashSet<>();
 
     VetDTO vet = VetDTO.builder()
@@ -88,9 +90,10 @@ class VisitControllerUnitTest {
     private final String Visit_UUID_OK = visitResponseDTO.getVisitId();
     private final String Practitioner_Id_OK = visitResponseDTO.getPractitionerId();
     private final String Pet_Id_OK = visitResponseDTO.getPetId();
+
     //private final LocalDateTime visitDate = visitResponseDTO.getVisitDate().withSecond(0);
     @Test
-    void getAllVisits(){
+    void getAllVisits() {
         when(visitService.getAllVisits()).thenReturn(Flux.just(visitResponseDTO, visitResponseDTO));
 
         webTestClient.get()
@@ -105,7 +108,7 @@ class VisitControllerUnitTest {
     }
 
     @Test
-    void getVisitByVisitId(){
+    void getVisitByVisitId() {
         when(visitService.getVisitByVisitId(anyString())).thenReturn(Mono.just(visitResponseDTO));
 
         webTestClient.get()
@@ -126,7 +129,7 @@ class VisitControllerUnitTest {
     }
 
     @Test
-    void getVisitByPractitionerId(){
+    void getVisitByPractitionerId() {
         when(visitService.getVisitsForPractitioner(anyString())).thenReturn(Flux.just(visitResponseDTO));
 
         webTestClient.get()
@@ -139,10 +142,10 @@ class VisitControllerUnitTest {
 
         Mockito.verify(visitService, times(1)).getVisitsForPractitioner(Practitioner_Id_OK);
     }
-    
+
 
     @Test
-    void getVisitsByPetId(){
+    void getVisitsByPetId() {
         when(visitService.getVisitsForPet(anyString())).thenReturn(Flux.just(visitResponseDTO));
 
         webTestClient.get()
@@ -174,7 +177,7 @@ class VisitControllerUnitTest {
      */
 
     @Test
-    void addVisit(){
+    void addVisit() {
         when(visitService.addVisit(any(Mono.class))).thenReturn(Mono.just(visitResponseDTO));
 
         webTestClient
@@ -191,7 +194,7 @@ class VisitControllerUnitTest {
     }
 
     @Test
-    void updateVisitByVisitId(){
+    void updateVisitByVisitId() {
 
 
         Mono<VisitRequestDTO> monoVisit = Mono.just(visitRequestDTO);
@@ -209,6 +212,7 @@ class VisitControllerUnitTest {
 
         verify(visitService, times(1)).updateVisit(anyString(), any(Mono.class));
     }
+
     /*
     @Test
     void deleteVisit(){
@@ -254,18 +258,18 @@ class VisitControllerUnitTest {
     }
 
     @Test
-    void deleteAllCancelledVisits_shouldSucceed(){
+    void deleteAllCancelledVisits_shouldSucceed() {
         // Arrange
         Mockito.when(visitService.deleteAllCancelledVisits()).thenReturn(Mono.empty());
 
         // Act & Assert
         webTestClient
-               .delete()
-               .uri("/visits/cancelled")
-               .exchange()
-               .expectStatus().isNoContent();
+                .delete()
+                .uri("/visits/cancelled")
+                .exchange()
+                .expectStatus().isNoContent();
 
-       Mockito.verify(visitService, times(1)).deleteAllCancelledVisits();
+        Mockito.verify(visitService, times(1)).deleteAllCancelledVisits();
     }
 
     @Test
@@ -297,7 +301,7 @@ class VisitControllerUnitTest {
     }
 */
 
-    private VisitResponseDTO buildVisitResponseDto(){
+    private VisitResponseDTO buildVisitResponseDto() {
         return VisitResponseDTO.builder()
                 .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
                 .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
@@ -307,7 +311,8 @@ class VisitControllerUnitTest {
                 .status(Status.UPCOMING)
                 .build();
     }
-    private VisitRequestDTO buildVisitRequestDTO(String vetId){
+
+    private VisitRequestDTO buildVisitRequestDTO(String vetId) {
         return VisitRequestDTO.builder()
                 .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .description("this is a dummy description")
@@ -318,13 +323,9 @@ class VisitControllerUnitTest {
     }
 
 
-
-
-
-
     @Test
-    public void whenGetAllReview_returnReviewResponseDTO(){
-        ReviewResponseDTO reviewResponseDTO1= ReviewResponseDTO.builder()
+    public void whenGetAllReview_returnReviewResponseDTO() {
+        ReviewResponseDTO reviewResponseDTO1 = ReviewResponseDTO.builder()
                 .reviewId(UUID.randomUUID().toString())
                 .rating(5)
                 .reviewerName("Zako")
@@ -332,7 +333,7 @@ class VisitControllerUnitTest {
                 .dateSubmitted(LocalDateTime.now())
                 .build();
 
-        ReviewResponseDTO reviewResponseDTO2= ReviewResponseDTO.builder()
+        ReviewResponseDTO reviewResponseDTO2 = ReviewResponseDTO.builder()
                 .reviewId(UUID.randomUUID().toString())
                 .rating(2)
                 .reviewerName("Zako2")
@@ -361,10 +362,10 @@ class VisitControllerUnitTest {
 
 
     @Test
-    public void whenGetReviewById_returnReviewResponseDTO(){
+    public void whenGetReviewById_returnReviewResponseDTO() {
 
-        String reviewId= UUID.randomUUID().toString();
-        ReviewResponseDTO reviewResponseDTO1= ReviewResponseDTO.builder()
+        String reviewId = UUID.randomUUID().toString();
+        ReviewResponseDTO reviewResponseDTO1 = ReviewResponseDTO.builder()
                 .reviewId(reviewId)
                 .rating(5)
                 .reviewerName("Zako")
@@ -372,7 +373,7 @@ class VisitControllerUnitTest {
                 .dateSubmitted(LocalDateTime.now())
                 .build();
 
-        ReviewResponseDTO reviewResponseDTO2= ReviewResponseDTO.builder()
+        ReviewResponseDTO reviewResponseDTO2 = ReviewResponseDTO.builder()
                 .reviewId(UUID.randomUUID().toString())
                 .rating(2)
                 .reviewerName("Zako2")
@@ -399,9 +400,9 @@ class VisitControllerUnitTest {
     }
 
     @Test
-    public void whenAddReview_returnReviewResponseDTO(){
-        String reviewId= UUID.randomUUID().toString();
-        ReviewResponseDTO reviewResponseDTO1= ReviewResponseDTO.builder()
+    public void whenAddReview_returnReviewResponseDTO() {
+        String reviewId = UUID.randomUUID().toString();
+        ReviewResponseDTO reviewResponseDTO1 = ReviewResponseDTO.builder()
                 .reviewId(reviewId)
                 .rating(5)
                 .reviewerName("Zako")
@@ -409,7 +410,7 @@ class VisitControllerUnitTest {
                 .dateSubmitted(LocalDateTime.now())
                 .build();
 
-        ReviewRequestDTO reviewRequestDTO= ReviewRequestDTO.builder()
+        ReviewRequestDTO reviewRequestDTO = ReviewRequestDTO.builder()
                 .rating(2)
                 .reviewerName("Zako2")
                 .review("Very bad")
@@ -436,9 +437,9 @@ class VisitControllerUnitTest {
 
 
     @Test
-    public void whenUpdateReview_returnReviewResponseDTO(){
-        String reviewId= UUID.randomUUID().toString();
-        ReviewResponseDTO reviewResponseDTO1= ReviewResponseDTO.builder()
+    public void whenUpdateReview_returnReviewResponseDTO() {
+        String reviewId = UUID.randomUUID().toString();
+        ReviewResponseDTO reviewResponseDTO1 = ReviewResponseDTO.builder()
                 .reviewId(reviewId)
                 .rating(5)
                 .reviewerName("Zako")
@@ -446,14 +447,14 @@ class VisitControllerUnitTest {
                 .dateSubmitted(LocalDateTime.now())
                 .build();
 
-        ReviewRequestDTO reviewRequestDTO= ReviewRequestDTO.builder()
+        ReviewRequestDTO reviewRequestDTO = ReviewRequestDTO.builder()
                 .rating(2)
                 .reviewerName("Zako2")
                 .review("Very bad")
                 .dateSubmitted(LocalDateTime.now())
                 .build();
 
-        when(reviewService.UpdateReview(any(Mono.class),anyString())).thenReturn(Mono.just(reviewResponseDTO1));
+        when(reviewService.UpdateReview(any(Mono.class), anyString())).thenReturn(Mono.just(reviewResponseDTO1));
         webTestClient
                 .put()
                 .uri("/visits/reviews/" + reviewId)
@@ -473,10 +474,10 @@ class VisitControllerUnitTest {
 
 
     @Test
-    public void whenDeleteReviewById_returnReviewResponseDTO(){
+    public void whenDeleteReviewById_returnReviewResponseDTO() {
 
-        String reviewId= UUID.randomUUID().toString();
-        ReviewResponseDTO reviewResponseDTO1= ReviewResponseDTO.builder()
+        String reviewId = UUID.randomUUID().toString();
+        ReviewResponseDTO reviewResponseDTO1 = ReviewResponseDTO.builder()
                 .reviewId(reviewId)
                 .rating(5)
                 .reviewerName("Zako")
@@ -484,7 +485,7 @@ class VisitControllerUnitTest {
                 .dateSubmitted(LocalDateTime.now())
                 .build();
 
-        ReviewResponseDTO reviewResponseDTO2= ReviewResponseDTO.builder()
+        ReviewResponseDTO reviewResponseDTO2 = ReviewResponseDTO.builder()
                 .reviewId(UUID.randomUUID().toString())
                 .rating(2)
                 .reviewerName("Zako2")
@@ -509,5 +510,41 @@ class VisitControllerUnitTest {
         verify(reviewService, times(1)).DeleteReview(reviewId);
 
     }
+
+    @Test
+    void whenDeleteCompletedVisitByValidVisitId_returnNoContent() {
+        // Arrange
+        String visitId = UUID.randomUUID().toString();
+        when(visitService.deleteCompletedVisitByVisitId(visitId))
+                .thenReturn(Mono.empty());
+
+        // Act & Assert
+        webTestClient
+                .delete()
+                .uri("/visits/completed/{visitId}", visitId)
+                .exchange()
+                .expectStatus().isNoContent();  // Expecting 204 NO CONTENT status.
+
+        verify(visitService, times(1)).deleteCompletedVisitByVisitId(visitId);
+    }
+
+    @Test
+    void whenDeleteCompletedVisitByInvalidVisitId_returnNotFound() {
+        // Arrange
+        String invalidVisitId = "fakeId";
+        when(visitService.deleteCompletedVisitByVisitId(invalidVisitId)).thenReturn(Mono.error(new NotFoundException("No visit was found with visitId: " + invalidVisitId)));
+
+        // Act & Assert
+        webTestClient
+                .delete()
+                .uri("/visits/completed/{visitId}", invalidVisitId)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody();
+        verify(visitService, times(1)).deleteCompletedVisitByVisitId(invalidVisitId);
+    }
+
+
+
 
 }

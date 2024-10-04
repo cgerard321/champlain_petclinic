@@ -218,7 +218,15 @@ public class VisitServiceImpl implements VisitService {
                 )
                 .flatMap(repo::deleteAll);
     }
-
+    @Override
+    public Mono<Void> deleteCompletedVisitByVisitId(String visitId) {
+        return repo.findByVisitId(visitId)
+                .filter(visit -> visit.getStatus() == Status.COMPLETED)
+                .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Cannot Find visit id" + visitId))))
+                .flatMap(visit -> repo.deleteByVisitId(visit.getVisitId()))
+                .doOnSuccess(v -> log.info("Successfully deleted completed visit with id: {}", visitId))
+                .doOnError(e -> log.error("Failed to delete completed visit with id: {}", visitId, e));
+    }
 
 //    @Override
 //    public Mono<VetDTO> testingGetVetDTO(String vetId) {

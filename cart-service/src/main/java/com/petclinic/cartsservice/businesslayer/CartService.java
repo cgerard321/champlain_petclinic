@@ -1,8 +1,10 @@
 package com.petclinic.cartsservice.businesslayer;
 
+import com.petclinic.cartsservice.dataaccesslayer.CartRepository;
 import com.petclinic.cartsservice.domainclientlayer.ProductResponseModel;
 import com.petclinic.cartsservice.presentationlayer.CartRequestModel;
 import com.petclinic.cartsservice.presentationlayer.CartResponseModel;
+import org.springframework.beans.factory.annotation.Autowired;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -20,4 +22,10 @@ public interface CartService {
     Mono<Integer> getCartItemCount(String cartId);
     // Combining both features: clearCart and updateCartByCartId
     Mono<CartResponseModel> deleteCartByCartId(String cartId);
+
+    //feature for the chekout cart
+    Mono<CartResponseModel> checkoutCart(String cartId);
+
+
+
 }

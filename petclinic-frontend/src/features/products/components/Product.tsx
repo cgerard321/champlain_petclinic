@@ -7,6 +7,9 @@ import { getProduct } from '../api/getProduct';
 import { deleteUserRating } from '../api/deleteUserRating';
 import { getProductByProductId } from '@/features/products/api/getProductByProductId.tsx';
 import { changeProductQuantity } from '../api/changeProductQuantity';
+import { useNavigate } from 'react-router-dom';
+import { AppRoutePaths } from '@/shared/models/path.routes';
+
 
 export default function Product({
   product,
@@ -21,6 +24,12 @@ export default function Product({
   const [selectedProductForQuantity, setSelectedProductForQuantity] =
     useState<ProductModel | null>(null);
   const [quantity, setQuantity] = useState<number>(0);
+
+  const navigate = useNavigate();
+
+  const handleProductTitleClick = (): void => {
+    navigate(AppRoutePaths.ProductDetails, { state: { product } });
+  };
 
   useEffect(() => {
     fetchRating();
@@ -59,14 +68,14 @@ export default function Product({
     }
   };
 
-  const handleProductClick = async (productId: string): Promise<void> => {
-    try {
-      const product = await getProductByProductId(productId);
-      setSelectedProduct(product);
-    } catch (error) {
-      console.error('Failed to fetch product details:', error);
-    }
-  };
+  // const handleProductClick = async (productId: string): Promise<void> => {
+  //   try {
+  //     const product = await getProductByProductId(productId);
+  //     setSelectedProduct(product);
+  //   } catch (error) {
+  //     console.error('Failed to fetch product details:', error);
+  //   }
+  // };
 
   const handleProductClickForProductQuantity = async (
     productId: string
@@ -74,7 +83,7 @@ export default function Product({
     try {
       const product = await getProductByProductId(productId);
       setSelectedProductForQuantity(product);
-      setQuantity(product.productQuantity); // Set initial quantity to current product quantity
+      setQuantity(product.productQuantity); 
     } catch (error) {
       console.error('Failed to fetch product details:', error);
     }
@@ -118,7 +127,7 @@ export default function Product({
   if (selectedProductForQuantity) {
     return (
       <div>
-        <h1>Change Product Quantity</h1>
+        <h3>Change Product Quantity</h3>
         <h2>{selectedProductForQuantity.productName}</h2>
         <form onSubmit={handleQuantitySubmit}>
           <label>
@@ -149,7 +158,7 @@ export default function Product({
         +
       </span>
       <h2
-        onClick={() => handleProductClick(product.productId)}
+        onClick={handleProductTitleClick}
         style={{
           cursor: 'pointer',
           color: 'blue',

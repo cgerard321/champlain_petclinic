@@ -23,12 +23,12 @@ public class InventoryController {
     @Autowired
     SupplyInventoryService supplyInventoryService;
 
-    @PostMapping("/{inventoryId}/products")
-    public Mono<ResponseEntity<ProductResponseDTO>> addProductToInventory(@RequestBody Mono<ProductRequestDTO> newProduct, @PathVariable String inventoryId){
-        return productInventoryService.addProductToInventory(newProduct, inventoryId)
-                .map(productResponseDTO -> ResponseEntity.status(HttpStatus.CREATED).body(productResponseDTO))
-                .defaultIfEmpty(ResponseEntity.badRequest().build());
-    }
+//    @PostMapping("/{inventoryId}/products")
+//    public Mono<ResponseEntity<ProductResponseDTO>> addProductToInventory(@RequestBody Mono<ProductRequestDTO> newProduct, @PathVariable String inventoryId){
+//        return productInventoryService.addProductToInventory(newProduct, inventoryId)
+//                .map(productResponseDTO -> ResponseEntity.status(HttpStatus.CREATED).body(productResponseDTO))
+//                .defaultIfEmpty(ResponseEntity.badRequest().build());
+//    }
 
     @DeleteMapping("/{inventoryId}/products/{productId}")
     public Mono<ResponseEntity<Void>> deleteProductToInventory(@PathVariable String inventoryId, @PathVariable String productId){
@@ -199,4 +199,17 @@ public Flux<InventoryResponseDTO> searchInventories(
                                                    @RequestParam(required = false) String productDescription) {
         return productInventoryService.searchProducts(inventoryId, productName, productDescription);
     }
+    @PostMapping("/{inventoryId}/products")
+    public Mono<ResponseEntity<ProductResponseDTO>> addSupplyToInventory(@RequestBody Mono<ProductRequestDTO> newProduct, @PathVariable String inventoryId) {
+        return productInventoryService.addSupplyToInventory(newProduct, inventoryId)
+                .map(productResponseDTO -> ResponseEntity.status(HttpStatus.CREATED).body(productResponseDTO))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
+    @GetMapping("/{inventoryId}/productquantity")
+    public Mono<Integer> getQuantityOfProductsInInventory (@PathVariable String inventoryId) {
+        return productInventoryService.getQuantityOfProductsInInventory(inventoryId);
+    }
 }
+
+

@@ -31,6 +31,9 @@ export default function InventoriesListTable(): JSX.Element {
   const [lowStockProductsByInventory, setLowStockProductsByInventory] =
     useState<{ [inventoryName: string]: ProductModel[] }>({});
   const [showLowStock, setShowLowStock] = useState(false);
+  const [productQuantities, setProductQuantities] = useState<{
+    [key: string]: number;
+  }>({});
 
   const toggleAddSupplyModal = (): void => {
     setShowAddSupplyModal(prev => !prev);
@@ -65,10 +68,14 @@ export default function InventoriesListTable(): JSX.Element {
   };
 
   const pageBefore = (): void => {
-    setCurrentPage(prevPage => Math.max(prevPage - 1, 0));
+    if (currentPage > 0) {
+      setCurrentPage(prevPage => prevPage - 1);
+    }
   };
   const pageAfter = (): void => {
-    setCurrentPage(prevPage => prevPage + 1);
+    if (inventoryList.length > 0) {
+      setCurrentPage(prevPage => prevPage + 1);
+    }
   };
 
   const deleteInventoryHandler = (inventoryToDelete: Inventory): void => {
@@ -87,6 +94,39 @@ export default function InventoriesListTable(): JSX.Element {
         return;
       }
       setShowConfirmDialog(true);
+    }
+  };
+
+  useEffect(() => {
+    if (inventoryList.length > 0) {
+      inventoryList.forEach(inventory => {
+        fetchProductQuantity(inventory.inventoryId);
+      });
+    }
+  }, [inventoryList]);
+
+  const fetchProductQuantity = async (inventoryId: string): Promise<void> => {
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/v2/gateway/inventories/${inventoryId}/productquantity`,
+        {
+          method: 'GET',
+          credentials: 'include', // <-- Add this line to include cookies or credentials
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+
+      if (response.ok) {
+        const quantity = await response.json();
+        setProductQuantities(prevQuantities => ({
+          ...prevQuantities,
+          [inventoryId]: quantity,
+        }));
+      } else {
+        console.error('Failed to fetch product quantity:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error fetching product quantity:', error);
     }
   };
 
@@ -177,6 +217,7 @@ export default function InventoriesListTable(): JSX.Element {
             <td>Name</td>
             <td>Type</td>
             <td>Description</td>
+            <td>Quantity of Products</td>
             <td></td>
             <td></td>
           </tr>
@@ -291,7 +332,6 @@ export default function InventoriesListTable(): JSX.Element {
                   onChange={e => handleInventorySelection(e, inventory)}
                 />
               </td>
-              {/* <td>{inventory.inventoryId}</td> */}
               <td
                 onClick={() =>
                   navigate(`/inventory/${inventory.inventoryId}/products`)
@@ -306,6 +346,11 @@ export default function InventoriesListTable(): JSX.Element {
               </td>
               <td>{inventory.inventoryType}</td>
               <td>{inventory.inventoryDescription}</td>
+              <td>
+                {productQuantities[inventory.inventoryId] !== undefined
+                  ? productQuantities[inventory.inventoryId]
+                  : 'Loading...'}{' '}
+              </td>
               <td>
                 <button
                   onClick={e => {
@@ -343,27 +388,38 @@ export default function InventoriesListTable(): JSX.Element {
           ))}
         </tbody>
       </table>
-      <div className="text-center">
-        <table className="mx-auto">
-          <tbody>
-            <tr>
-              <td>
-                <button className="btn btn-success btn-sm" onClick={pageBefore}>
-                  &lt;
-                </button>
-              </td>
-              <td>
-                <span>{realPage}</span>
-              </td>
-              <td>
-                <button className="btn btn-success btn-sm" onClick={pageAfter}>
-                  &gt;
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <div className="d-flex justify-content-center">
+        <div className="text-center">
+          <table>
+            <tbody>
+              <tr>
+                <td>
+                  <button
+                    className="btn btn-success btn-sm"
+                    onClick={pageBefore}
+                  >
+                    &lt;
+                  </button>
+                </td>
+                <td>
+                  <span className="mx-2">{realPage}</span>{' '}
+                  {/* Added margin for space */}
+                </td>
+                <td>
+                  <button
+                    className="btn btn-success btn-sm"
+                    onClick={pageAfter}
+                    disabled={inventoryList.length === 0}
+                  >
+                    &gt;
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
+
       <div id="loadingObject" style={{ display: 'none' }}>
         Loading...
       </div>
