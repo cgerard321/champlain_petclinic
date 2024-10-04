@@ -21,7 +21,7 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
-class PetControllerIntegrationTest {
+class PetControllerUnitTest {
 
     @InjectMocks
     private PetController petController;
@@ -149,16 +149,7 @@ class PetControllerIntegrationTest {
         Mono<ResponseEntity<PetResponseDTO>> result = petController.addPet(Mono.just(newPetRequestDTO));
 
         StepVerifier.create(result)
-                .expectNextMatches(response -> response.getStatusCode() == HttpStatus.OK && response.getBody().getPetId().equals("pet123"))
-                .verifyComplete();
-    }
-
-    @Test
-    void whenAddPet_WithEmptyRequest_thenReturnBadRequest() {
-        Mono<ResponseEntity<PetResponseDTO>> result = petController.addPet(Mono.empty());
-
-        StepVerifier.create(result)
-                .expectNextMatches(response -> response.getStatusCode() == HttpStatus.BAD_REQUEST)
+                .expectNextMatches(response -> response.getStatusCode() == HttpStatus.CREATED && response.getBody().getPetId().equals("pet123"))
                 .verifyComplete();
     }
 

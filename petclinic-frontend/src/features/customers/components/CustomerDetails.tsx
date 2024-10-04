@@ -204,6 +204,7 @@ const CustomerDetails: FC = () => {
           ) : (
             <p>No pets found.</p>
           )}
+
         </div>
 
         {/* Owner Bills */}
@@ -232,6 +233,12 @@ const CustomerDetails: FC = () => {
         </button>
         <button className="customer-details-button" onClick={handleBackClick}>
           Back to All Owners
+        </button>
+        <button
+          className="add-pet-button"
+          onClick={() => navigate(`/customers/${ownerId}/pets/new`)}
+        >
+          Add New Pet
         </button>
         <button
           className="btn btn-danger"

@@ -63,30 +63,10 @@ public class PetController {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
-    @PostMapping(value = "", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value= "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<PetResponseDTO>> addPet(@RequestBody Mono<PetRequestDTO> petRequestDTO) {
-        return petRequestDTO
-                .flatMap(requestDTO -> customersServiceClient.addPet(just(requestDTO))
-                        .flatMap(petResponse -> customersServiceClient.getOwner(petResponse.getOwnerId())
-                                .flatMap(owner -> {
-                                    owner.getPets().add(petResponse);
-
-                                    OwnerRequestDTO ownerRequestDTO = OwnerRequestDTO.builder()
-                                            .ownerId(owner.getOwnerId())
-                                            .firstName(owner.getFirstName())
-                                            .lastName(owner.getLastName())
-                                            .address(owner.getAddress())
-                                            .city(owner.getCity())
-                                            .province(owner.getProvince())
-                                            .telephone(owner.getTelephone())
-                                            .build();
-
-                                    return customersServiceClient.updateOwner(ownerRequestDTO.getOwnerId(), just(ownerRequestDTO))
-                                            .thenReturn(petResponse);
-                                })
-                        )
-                )
-                .map(ResponseEntity::ok)
+        return customersServiceClient.addPet(petRequestDTO)
+                .map(e -> ResponseEntity.status(HttpStatus.CREATED).body(e))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
