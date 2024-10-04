@@ -27,7 +27,7 @@ const CustomerDetails: FC = () => {
 
         // Fetch pets by owner ID
         const petsResponse = await axios.get(
-          `http://localhost:8080/api/v2/gateway/pet/owner/${ownerId}/pets`,
+          `http://localhost:8080/api/v2/gateway/pets/owner/${ownerId}/pets`,
           { withCredentials: true }
         );
         setPets(petsResponse.data); // Set the pets state
