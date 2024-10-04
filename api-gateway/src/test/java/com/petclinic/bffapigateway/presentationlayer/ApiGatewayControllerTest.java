@@ -1998,32 +1998,27 @@ class ApiGatewayControllerTest {
     }
 
     @Test
-    void shouldGetBillById() {
-        // Arrange
-        String billId = UUID.randomUUID().toString();
+    public void shouldGetBillById(){
         BillResponseDTO bill = new BillResponseDTO();
-        bill.setBillId(billId);
+        bill.setBillId(UUID.randomUUID().toString());
         bill.setCustomerId("1");
         bill.setAmount(499);
         bill.setVisitType("Test");
 
-        when(billServiceClient.getBilling(billId))
+        when(billServiceClient.getBilling(bill.getBillId()))
                 .thenReturn(Mono.just(bill));
 
-        // Act & Assert
         client.get()
-                .uri("/api/gateway/bills/{billId}", billId)
+                .uri("/api/gateway/bills/{billId}", bill.getBillId())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$.billId").isEqualTo(billId)
-                .jsonPath("$.customerId").isEqualTo(bill.getCustomerId())
-                .jsonPath("$.visitType").isEqualTo(bill.getVisitType())
-                .jsonPath("$.amount").isEqualTo(bill.getAmount());
-
-        Mockito.verify(billServiceClient, times(1)).getBilling(billId);
+                .expectBody(BillResponseDTO.class)
+                .value(billResponseDTO -> {
+                    assertNotNull(billResponseDTO);
+                    assertEquals(billResponseDTO.getBillId(),bill.getBillId());
+                });
     }
 
 

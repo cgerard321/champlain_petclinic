@@ -43,4 +43,24 @@ public class BillController {
         return billService.getBilling(billId);
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping(value = "/admin/paid", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<BillResponseDTO> getAllPaidBilling()
+    {
+        return billService.getAllPaidBilling();
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping(value = "/admin/unpaid", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<BillResponseDTO> getAllUnpaidBilling()
+    {
+        return billService.getAllUnpaidBilling();
+    }
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping(value = "/admin/overdue", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<BillResponseDTO> getAllOverdueBilling()
+    {
+        return billService.getAllOverdueBilling();
+    }
+
 }

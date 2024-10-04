@@ -17,6 +17,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
 
@@ -104,6 +105,85 @@ private final String baseBillURL = "/api/v2/gateway/bills";
 
        verify(billServiceClient, times(1))
                .getAllBilling();
+    }
+
+    @Test
+    public void whenGetBillById_thenReturnBill(){
+        when(billServiceClient.getBilling("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a"))
+                .thenReturn(Mono.just(billresponse));
+
+        webTestClient
+                .get()
+                .uri(baseBillURL + "/admin/{billId}", "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(BillResponseDTO.class)
+                .hasSize(1)
+                .contains(billresponse);
+
+        verify(billServiceClient, times(1))
+                .getBilling("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a");
+    }
+
+    @Test
+    public void whenGetAllPaidBills_thenReturnAllPaidBills(){
+        when(billServiceClient.getAllPaidBilling())
+                .thenReturn(Flux.just(billresponse, billresponse2));
+
+        webTestClient
+                .get()
+                .uri(baseBillURL + "/admin/paid")
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().valueEquals("Content-Type", "text/event-stream;charset=UTF-8")
+                .expectBodyList(BillResponseDTO.class)
+                .hasSize(2)
+                .contains(billresponse, billresponse2);
+
+        verify(billServiceClient, times(1))
+                .getAllPaidBilling();
+    }
+
+    @Test
+    public void whenGetAllUnpaidBills_thenReturnAllUnpaidBills(){
+        when(billServiceClient.getAllUnpaidBilling())
+                .thenReturn(Flux.just(billresponse, billresponse2));
+
+        webTestClient
+                .get()
+                .uri(baseBillURL + "/admin/unpaid")
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().valueEquals("Content-Type", "text/event-stream;charset=UTF-8")
+                .expectBodyList(BillResponseDTO.class)
+                .hasSize(2)
+                .contains(billresponse, billresponse2);
+
+        verify(billServiceClient, times(1))
+                .getAllUnpaidBilling();
+    }
+
+    @Test
+    public void whenGetAllOverdueBills_thenReturnAllOverdueBills(){
+        when(billServiceClient.getAllOverdueBilling())
+                .thenReturn(Flux.just(billresponse, billresponse2));
+
+        webTestClient
+                .get()
+                .uri(baseBillURL + "/admin/overdue")
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().valueEquals("Content-Type", "text/event-stream;charset=UTF-8")
+                .expectBodyList(BillResponseDTO.class)
+                .hasSize(2)
+                .contains(billresponse, billresponse2);
+
+        verify(billServiceClient, times(1))
+                .getAllOverdueBilling();
     }
 
 }
