@@ -17,18 +17,17 @@ const petTypeOptions: { [key: string]: string } = {
 const AddPetForm: React.FC = (): JSX.Element => {
   const navigate = useNavigate();
   const { ownerId } = useParams<{ ownerId: string }>();
-    const [pet, setPet] = useState<PetRequestModel>({
-      ownerId: ownerId || '',
-      name: '',
-      birthDate: new Date(),
-      petTypeId: '',
-      isActive: 'true',
-      weight: '',
-    });
+  const [pet, setPet] = useState<PetRequestModel>({
+    ownerId: ownerId || '',
+    name: '',
+    birthDate: new Date(),
+    petTypeId: '',
+    isActive: 'true',
+    weight: '',
+  });
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [successMessage, setSuccessMessage] = useState<string>('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ): void => {
@@ -86,7 +85,6 @@ const AddPetForm: React.FC = (): JSX.Element => {
     setIsAddModalOpen(false);
     navigate(`/customers/${ownerId}`);
   };
-
 
   return (
     <div className="add-pet-form">
@@ -148,13 +146,13 @@ const AddPetForm: React.FC = (): JSX.Element => {
         <div className="pet-add-modal-overlay">
         <div className="pet-add-modal">
             <h2>Success!</h2>
-            <p>Pet has been successfully added.</p>
+              <p>Pet has been successfully added.</p>
             <button onClick={closeAddModal}>Close</button>
           </div>
         </div>
       )}
     </div>
   );
-}
+};
 
 export default AddPetForm;

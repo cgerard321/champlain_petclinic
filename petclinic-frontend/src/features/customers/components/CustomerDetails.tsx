@@ -204,7 +204,6 @@ const CustomerDetails: FC = () => {
           ) : (
             <p>No pets found.</p>
           )}
-
         </div>
 
         {/* Owner Bills */}
