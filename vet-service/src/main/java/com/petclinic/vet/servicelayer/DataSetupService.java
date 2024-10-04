@@ -348,11 +348,42 @@ public class DataSetupService implements CommandLineRunner {
         String JohnPhoto3= "john_photo3.jpg";
         String JohnPhoto4= "john_photo4.jpg";
         String JohnPhoto5= "john_photo5.jpg";
+
         String HelenPhoto1= "helen_photo1.jpg";
         String HelenPhoto2= "helen_photo2.jpg";
         String HelenPhoto3= "helen_photo3.jpg";
         String HelenPhoto4= "helen_photo4.jpg";
         String HelenPhoto5= "helen_photo5.jpg";
+
+        String HenryPhoto1= "henry_photo1.jpg";
+        String HenryPhoto2= "henry_photo2.jpg";
+        String HenryPhoto3= "henry_photo3.jpg";
+        String HenryPhoto4= "henry_photo4.jpg";
+        String HenryPhoto5= "henry_photo5.jpg";
+
+        String JamesPhoto1= "james_photo1.jpg";
+        String JamesPhoto2= "james_photo2.jpg";
+        String JamesPhoto3= "james_photo3.jpg";
+        String JamesPhoto4= "james_photo4.jpg";
+        String JamesPhoto5= "james_photo5.jpg";
+
+        String LindaPhoto1= "linda_photo1.jpg";
+        String LindaPhoto2= "linda_photo2.jpg";
+        String LindaPhoto3= "linda_photo3.jpg";
+        String LindaPhoto4= "linda_photo4.jpg";
+        String LindaPhoto5= "linda_photo5.jpg";
+
+        String RafaelPhoto1= "rafael_photo1.jpg";
+        String RafaelPhoto2= "rafael_photo2.jpg";
+        String RafaelPhoto3= "rafael_photo3.jpg";
+        String RafaelPhoto4= "rafael_photo4.jpg";
+        String RafaelPhoto5= "rafael_photo5.jpg";
+
+        String SharonPhoto1= "sharon_photo1.jpg";
+        String SharonPhoto2= "sharon_photo2.jpg";
+        String SharonPhoto3= "sharon_photo3.jpg";
+        String SharonPhoto4= "sharon_photo4.jpg";
+        String SharonPhoto5= "sharon_photo5.jpg";
 
 
         ClassPathResource defaultPhoto = new ClassPathResource("images/" + defaultPhotoName);
@@ -363,16 +394,48 @@ public class DataSetupService implements CommandLineRunner {
         ClassPathResource lindaDouglassPhoto = new ClassPathResource("images/" + lindaDouglassPhotoName);
         ClassPathResource rafaelOrtegaPhoto = new ClassPathResource("images/" + rafaelOrtegaPhotoName);
         ClassPathResource sharonJenkinsPhoto = new ClassPathResource("images/" + sharonJenkinsPhotoName);
+
         ClassPathResource John1 = new ClassPathResource("album/" + JohnPhoto1);
         ClassPathResource John2 = new ClassPathResource("album/" + JohnPhoto2);
         ClassPathResource John3 = new ClassPathResource("album/" + JohnPhoto3);
         ClassPathResource John4 = new ClassPathResource("album/" + JohnPhoto4);
         ClassPathResource John5 = new ClassPathResource("album/" + JohnPhoto5);
+
         ClassPathResource Helen1 = new ClassPathResource("album/" + HelenPhoto1);
         ClassPathResource Helen2 = new ClassPathResource("album/" + HelenPhoto2);
         ClassPathResource Helen3 = new ClassPathResource("album/" + HelenPhoto3);
         ClassPathResource Helen4 = new ClassPathResource("album/" + HelenPhoto4);
         ClassPathResource Helen5 = new ClassPathResource("album/" + HelenPhoto5);
+
+        ClassPathResource Henry1 = new ClassPathResource("album/" + HenryPhoto1);
+        ClassPathResource Henry2 = new ClassPathResource("album/" + HenryPhoto2);
+        ClassPathResource Henry3 = new ClassPathResource("album/" + HenryPhoto3);
+        ClassPathResource Henry4 = new ClassPathResource("album/" + HenryPhoto4);
+        ClassPathResource Henry5 = new ClassPathResource("album/" + HenryPhoto5);
+
+        ClassPathResource James1 = new ClassPathResource("album/" + JamesPhoto1);
+        ClassPathResource James2 = new ClassPathResource("album/" + JamesPhoto2);
+        ClassPathResource James3 = new ClassPathResource("album/" + JamesPhoto3);
+        ClassPathResource James4 = new ClassPathResource("album/" + JamesPhoto4);
+        ClassPathResource James5 = new ClassPathResource("album/" + JamesPhoto5);
+
+        ClassPathResource Linda1 = new ClassPathResource("album/" + LindaPhoto1);
+        ClassPathResource Linda2 = new ClassPathResource("album/" + LindaPhoto2);
+        ClassPathResource Linda3 = new ClassPathResource("album/" + LindaPhoto3);
+        ClassPathResource Linda4 = new ClassPathResource("album/" + LindaPhoto4);
+        ClassPathResource Linda5 = new ClassPathResource("album/" + LindaPhoto5);
+
+        ClassPathResource Rafael1 = new ClassPathResource("album/" + RafaelPhoto1);
+        ClassPathResource Rafael2 = new ClassPathResource("album/" + RafaelPhoto2);
+        ClassPathResource Rafael3 = new ClassPathResource("album/" + RafaelPhoto3);
+        ClassPathResource Rafael4 = new ClassPathResource("album/" + RafaelPhoto4);
+        ClassPathResource Rafael5 = new ClassPathResource("album/" + RafaelPhoto5);
+
+        ClassPathResource Sharon1 = new ClassPathResource("album/" + SharonPhoto1);
+        ClassPathResource Sharon2 = new ClassPathResource("album/" + SharonPhoto2);
+        ClassPathResource Sharon3 = new ClassPathResource("album/" + SharonPhoto3);
+        ClassPathResource Sharon4 = new ClassPathResource("album/" + SharonPhoto4);
+        ClassPathResource Sharon5 = new ClassPathResource("album/" + SharonPhoto5);
 
 
         Photo photo1 = Photo.builder()
@@ -426,76 +489,250 @@ public class DataSetupService implements CommandLineRunner {
 
         Album album1 = Album.builder()
                 .vetId(v7.getVetId())
-                .filename("john_photo1.jpg")  // Filename of the album's cover image or default image
+                .filename("john_photo1.jpg")
                 .imgType("image/jpeg")
-                .data(StreamUtils.copyToByteArray(John1.getInputStream()))  // Album cover image data
+                .data(StreamUtils.copyToByteArray(John1.getInputStream()))
                 .build();
 
         Album album2 = Album.builder()
                 .vetId(v7.getVetId())
-                .filename("john_photo2.jpg")  // Filename of the album's cover image or default image
+                .filename("john_photo2.jpg")
                 .imgType("image/jpeg")
-                .data(StreamUtils.copyToByteArray(John2.getInputStream()))  // Album cover image data
+                .data(StreamUtils.copyToByteArray(John2.getInputStream()))
                 .build();
 
         Album album3 = Album.builder()
                 .vetId(v7.getVetId())
-                .filename("john_photo3.jpg")  // Filename of the album's cover image or default image
+                .filename("john_photo3.jpg")
                 .imgType("image/jpeg")
-                .data(StreamUtils.copyToByteArray(John3.getInputStream()))  // Album cover image data
+                .data(StreamUtils.copyToByteArray(John3.getInputStream()))
                 .build();
 
         Album album4 = Album.builder()
                 .vetId(v7.getVetId())
-                .filename("john_photo4.jpg")  // Filename of the album's cover image or default image
+                .filename("john_photo4.jpg")
                 .imgType("image/jpeg")
-                .data(StreamUtils.copyToByteArray(John4.getInputStream()))  // Album cover image data
+                .data(StreamUtils.copyToByteArray(John4.getInputStream()))
                 .build();
 
         Album album5 = Album.builder()
                 .vetId(v7.getVetId())
-                .filename("john_photo5.jpg")  // Filename of the album's cover image or default image
+                .filename("john_photo5.jpg")
                 .imgType("image/jpeg")
-                .data(StreamUtils.copyToByteArray(John5.getInputStream()))  // Album cover image data
+                .data(StreamUtils.copyToByteArray(John5.getInputStream()))
                 .build();
 
         Album album6 = Album.builder()
                 .vetId(v2.getVetId())
-                .filename("helen_photo1.jpg")  // Filename of the album's cover image or default image
+                .filename("helen_photo1.jpg")
                 .imgType("image/jpeg")
-                .data(StreamUtils.copyToByteArray(Helen1.getInputStream()))  // Album cover image data
+                .data(StreamUtils.copyToByteArray(Helen1.getInputStream()))
                 .build();
 
         Album album7 = Album.builder()
                 .vetId(v2.getVetId())
-                .filename("helen_photo2.jpg")  // Filename of the album's cover image or default image
+                .filename("helen_photo2.jpg")
                 .imgType("image/jpeg")
-                .data(StreamUtils.copyToByteArray(Helen2.getInputStream()))  // Album cover image data
+                .data(StreamUtils.copyToByteArray(Helen2.getInputStream()))
                 .build();
 
         Album album8 = Album.builder()
                 .vetId(v2.getVetId())
-                .filename("helen_photo3.jpg")  // Filename of the album's cover image or default image
+                .filename("helen_photo3.jpg")
                 .imgType("image/jpeg")
-                .data(StreamUtils.copyToByteArray(Helen3.getInputStream()))  // Album cover image data
+                .data(StreamUtils.copyToByteArray(Helen3.getInputStream()))
                 .build();
 
         Album album9 = Album.builder()
                 .vetId(v2.getVetId())
-                .filename("helen_photo4.jpg")  // Filename of the album's cover image or default image
+                .filename("helen_photo4.jpg")
                 .imgType("image/jpeg")
-                .data(StreamUtils.copyToByteArray(Helen4.getInputStream()))  // Album cover image data
+                .data(StreamUtils.copyToByteArray(Helen4.getInputStream()))
                 .build();
 
         Album album10 = Album.builder()
                 .vetId(v2.getVetId())
-                .filename("helen_photo5.jpg")  // Filename of the album's cover image or default image
+                .filename("helen_photo5.jpg")
                 .imgType("image/jpeg")
-                .data(StreamUtils.copyToByteArray(Helen5.getInputStream()))  // Album cover image data
+                .data(StreamUtils.copyToByteArray(Helen5.getInputStream()))
                 .build();
 
+        Album album11 = Album.builder()
+                .vetId(v5.getVetId())
+                .filename("henry_photo1.jpg")
+                .imgType("image/jpeg")
+                .data(StreamUtils.copyToByteArray(Henry1.getInputStream()))
+                .build();
 
-        Flux.just(album1,album2,album3,album4,album5,album6,album7,album8,album9,album10)
+        Album album12 = Album.builder()
+                .vetId(v5.getVetId())
+                .filename("henry_photo2.jpg")
+                .imgType("image/jpeg")
+                .data(StreamUtils.copyToByteArray(Henry2.getInputStream()))
+                .build();
+
+        Album album13 = Album.builder()
+                .vetId(v5.getVetId())
+                .filename("henry_photo3.jpg")
+                .imgType("image/jpeg")
+                .data(StreamUtils.copyToByteArray(Henry3.getInputStream()))
+                .build();
+
+        Album album14 = Album.builder()
+                .vetId(v5.getVetId())
+                .filename("henry_photo4.jpg")
+                .imgType("image/jpeg")
+                .data(StreamUtils.copyToByteArray(Henry4.getInputStream()))
+                .build();
+
+        Album album15 = Album.builder()
+                .vetId(v5.getVetId())
+                .filename("henry_photo5.jpg")
+                .imgType("image/jpeg")
+                .data(StreamUtils.copyToByteArray(Henry5.getInputStream()))
+                .build();
+
+        Album album16 = Album.builder()
+                .vetId(v1.getVetId())
+                .filename("james_photo1.jpg")
+                .imgType("image/jpeg")
+                .data(StreamUtils.copyToByteArray(James1.getInputStream()))
+                .build();
+
+        Album album17 = Album.builder()
+                .vetId(v1.getVetId())
+                .filename("james_photo2.jpg")
+                .imgType("image/jpeg")
+                .data(StreamUtils.copyToByteArray(James2.getInputStream()))
+                .build();
+
+        Album album18 = Album.builder()
+                .vetId(v1.getVetId())
+                .filename("james_photo3.jpg")
+                .imgType("image/jpeg")
+                .data(StreamUtils.copyToByteArray(James3.getInputStream()))
+                .build();
+
+        Album album19 = Album.builder()
+                .vetId(v1.getVetId())
+                .filename("james_photo4.jpg")
+                .imgType("image/jpeg")
+                .data(StreamUtils.copyToByteArray(James4.getInputStream()))
+                .build();
+
+        Album album20 = Album.builder()
+                .vetId(v1.getVetId())
+                .filename("james_photo5.jpg")
+                .imgType("image/jpeg")
+                .data(StreamUtils.copyToByteArray(James5.getInputStream()))
+                .build();
+
+        Album album21 = Album.builder()
+                .vetId(v3.getVetId())
+                .filename("linda_photo1.jpg")
+                .imgType("image/jpeg")
+                .data(StreamUtils.copyToByteArray(Linda1.getInputStream()))
+                .build();
+
+        Album album22 = Album.builder()
+                .vetId(v3.getVetId())
+                .filename("linda_photo2.jpg")
+                .imgType("image/jpeg")
+                .data(StreamUtils.copyToByteArray(Linda2.getInputStream()))
+                .build();
+
+        Album album23 = Album.builder()
+                .vetId(v3.getVetId())
+                .filename("linda_photo3.jpg")
+                .imgType("image/jpeg")
+                .data(StreamUtils.copyToByteArray(Linda3.getInputStream()))
+                .build();
+
+        Album album24 = Album.builder()
+                .vetId(v3.getVetId())
+                .filename("linda_photo4.jpg")
+                .imgType("image/jpeg")
+                .data(StreamUtils.copyToByteArray(Linda4.getInputStream()))
+                .build();
+
+        Album album25 = Album.builder()
+                .vetId(v3.getVetId())
+                .filename("linda_photo5.jpg")
+                .imgType("image/jpeg")
+                .data(StreamUtils.copyToByteArray(Linda5.getInputStream()))
+                .build();
+
+        Album album26 = Album.builder()
+                .vetId(v4.getVetId())
+                .filename("rafael_photo1.jpg")
+                .imgType("image/jpeg")
+                .data(StreamUtils.copyToByteArray(Rafael1.getInputStream()))
+                .build();
+
+        Album album27 = Album.builder()
+                .vetId(v4.getVetId())
+                .filename("rafael_photo2.jpg")
+                .imgType("image/jpeg")
+                .data(StreamUtils.copyToByteArray(Rafael2.getInputStream()))
+                .build();
+
+        Album album28 = Album.builder()
+                .vetId(v4.getVetId())
+                .filename("rafael_photo3.jpg")
+                .imgType("image/jpeg")
+                .data(StreamUtils.copyToByteArray(Rafael3.getInputStream()))
+                .build();
+
+        Album album29 = Album.builder()
+                .vetId(v4.getVetId())
+                .filename("rafael_photo4.jpg")
+                .imgType("image/jpeg")
+                .data(StreamUtils.copyToByteArray(Rafael4.getInputStream()))
+                .build();
+
+        Album album30 = Album.builder()
+                .vetId(v4.getVetId())
+                .filename("rafael_photo5.jpg")
+                .imgType("image/jpeg")
+                .data(StreamUtils.copyToByteArray(Rafael5.getInputStream()))
+                .build();
+
+        Album album31 = Album.builder()
+                .vetId(v6.getVetId())
+                .filename("sharon_photo1.jpg")
+                .imgType("image/jpeg")
+                .data(StreamUtils.copyToByteArray(Sharon1.getInputStream()))
+                .build();
+
+        Album album32 = Album.builder()
+                .vetId(v6.getVetId())
+                .filename("sharon_photo2.jpg")
+                .imgType("image/jpeg")
+                .data(StreamUtils.copyToByteArray(Sharon2.getInputStream()))
+                .build();
+
+        Album album33 = Album.builder()
+                .vetId(v6.getVetId())
+                .filename("sharon_photo3.jpg")
+                .imgType("image/jpeg")
+                .data(StreamUtils.copyToByteArray(Sharon3.getInputStream()))
+                .build();
+
+        Album album34 = Album.builder()
+                .vetId(v6.getVetId())
+                .filename("sharon_photo4.jpg")
+                .imgType("image/jpeg")
+                .data(StreamUtils.copyToByteArray(Sharon4.getInputStream()))
+                .build();
+
+        Album album35 = Album.builder()
+                .vetId(v6.getVetId())
+                .filename("sharon_photo5.jpg")
+                .imgType("image/jpeg")
+                .data(StreamUtils.copyToByteArray(Sharon5.getInputStream()))
+                .build();
+
+        Flux.just(album1,album2,album3,album4,album5,album6,album7,album8,album9,album10,album11,album12,album13,album14,album15,album16,album17,album18,album19,album20,album21,album22,album23,album24,album25,album26,album27,album28,album29,album30,album31,album32,album33,album34,album35)
                 .flatMap(albumRepository::save)
                 .log()
                 .subscribe();

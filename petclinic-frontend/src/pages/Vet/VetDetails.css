@@ -114,6 +114,14 @@ ul {
 
 .album-photo-thumbnail {
   width: 100%;
-  height: auto;
+  height: 200px;
+  border-radius: 15px;
+  object-fit: cover;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease;
+}
+
+.album-photo-thumbnail:hover {
+  transform: scale(1.08);
 }
 
