@@ -11,6 +11,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Collections;
 import java.util.Map;
 
 @Component
@@ -75,6 +76,14 @@ public class CartServiceClient {
         return webClientBuilder.build()
                 .delete()
                 .uri(CartServiceUrl + "/" + cartId + "/clear")
+                .retrieve()
+                .bodyToMono(Void.class);
+    }
+
+    public Mono<Void> assignCartToUser(String customerId) {
+        return webClientBuilder.build().post()
+                .uri(CartServiceUrl + "/" + customerId + "/assign")
+                .bodyValue(Collections.emptyList())  //Pass an empty list of CartProduct
                 .retrieve()
                 .bodyToMono(Void.class);
     }
