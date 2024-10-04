@@ -13,7 +13,11 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("emailing-service")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
+<<<<<<< HEAD
 [assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0eb86418b37c2ac46c17bc39ea4b0aaa2295f5a2")]
+=======
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+>>>>>>> f389e9e0 (implemented remove product from cart front-end)
 [assembly: System.Reflection.AssemblyProductAttribute("emailing-service")]
 [assembly: System.Reflection.AssemblyTitleAttribute("emailing-service")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
