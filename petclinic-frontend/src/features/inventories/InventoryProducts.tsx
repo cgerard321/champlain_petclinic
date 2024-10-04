@@ -105,6 +105,13 @@ const InventoryProducts: React.FC = () => {
         Supplies in Inventory: <span>{inventoryId}</span>
       </h2>
 
+      <button
+        className="btn btn-secondary"
+        onClick={() => navigate('/inventories')}
+      >
+        Back
+      </button>
+
       <div className="products-filtering">
         <div className="filter-by-name">
           <label htmlFor="product-name">Filter by Name:</label>

@@ -121,6 +121,25 @@ public class MockServerConfigCustomersService {
     }
 
 
+    public void registerUpdatePetEndpoint() {
+        mockServerClient_CustomersService
+                .when(
+                        request()
+                                .withMethod("PUT")
+                                .withPath("/api/v2/gateway/pet/123")
+                                .withBody(json("{\"petId\":\"123\",\"name\":\"Buddy\",\"birthDate\":\"2020-01-01\",\"petTypeId\":\"1\",\"isActive\":\"true\",\"weight\":\"10\"}"))
+                )
+                .respond(
+                        response()
+                                .withStatusCode(200)
+                                .withBody(json("{\"petId\":\"123\",\"name\":\"Buddy\",\"birthDate\":\"2020-01-01\",\"petTypeId\":\"1\",\"isActive\":\"true\",\"weight\":\"10\"}"))
+                );
+    }
+
+
+
+
+
 
     public void stopMockServer() {
         if(clientAndServer != null)

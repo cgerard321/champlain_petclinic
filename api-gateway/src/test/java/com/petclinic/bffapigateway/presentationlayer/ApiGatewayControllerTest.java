@@ -1479,38 +1479,6 @@ class ApiGatewayControllerTest {
     }
 
     @Test
-    void shouldUpdatePet() {
-        OwnerResponseDTO od = new OwnerResponseDTO();
-        od.setOwnerId("ownerId-12345");
-        PetResponseDTO pet = new PetResponseDTO();
-        PetType type = new PetType();
-        type.setName("Dog");
-        pet.setPetId("30-30-30-30");
-        pet.setOwnerId("ownerId-12345");
-        pet.setName("Fluffy");
-        pet.setBirthDate(date);
-        pet.setPetTypeId("5");
-        pet.setIsActive("true");
-
-
-        when(customersServiceClient.updatePet(any(PetResponseDTO.class), any(String.class)))
-                .thenReturn(Mono.just(pet));
-
-        client.put()
-                .uri("/api/gateway/pets/{petId}", od.getOwnerId(), pet.getPetId())
-                .body(fromValue(pet))
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$.petId").isEqualTo(pet.getPetId())
-                .jsonPath("$.name").isEqualTo(pet.getName())
-                .jsonPath("$.petTypeId").isEqualTo(pet.getPetTypeId())
-                .jsonPath("$.isActive").isEqualTo(pet.getIsActive());
-
-    }
-    @Test
     void shouldDeletePet() {
         // Create a pet id that will be used in the test
         String petId = "petId-123";
