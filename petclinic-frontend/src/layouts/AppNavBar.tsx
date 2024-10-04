@@ -9,7 +9,7 @@ import {
 import { fetchCartIdByCustomerId } from '../features/carts/api/getCart.ts';
 import axiosInstance from '@/shared/api/axiosInstance.ts';
 import { AppRoutePaths } from '@/shared/models/path.routes.ts';
-import {useEffect, useState} from 'react';
+import { useEffect, useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Navbar, Nav, NavDropdown, Container } from 'react-bootstrap';
 import './AppNavBar.css';
@@ -38,7 +38,8 @@ export function NavBar(): JSX.Element {
   /* fyi this sucks and shouldn't be in the nav bar
   fetching the cart id for correct routing. this will (hopefully) be implemented more efficiently in the third sprint */
   useEffect(() => {
-    const fetchCartId = async () => {
+    const fetchCartId = async (): Promise<void> => {
+      // Add the explicit return type
       if (user.userId) {
         const id = await fetchCartIdByCustomerId(user.userId);
         setCartId(id);
@@ -47,7 +48,6 @@ export function NavBar(): JSX.Element {
 
     fetchCartId();
   }, [user.userId]);
-
 
   return (
     <Navbar bg="light" expand="lg" className="navbar">
@@ -129,9 +129,12 @@ export function NavBar(): JSX.Element {
                 )}
 
                 {cartId && (
-                    <Nav.Link as={Link} to={AppRoutePaths.UserCart.replace(':cartId', cartId)}>
-                      Cart
-                    </Nav.Link>
+                  <Nav.Link
+                    as={Link}
+                    to={AppRoutePaths.UserCart.replace(':cartId', cartId)}
+                  >
+                    Cart
+                  </Nav.Link>
                 )}
               </>
             )}
