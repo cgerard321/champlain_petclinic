@@ -13,6 +13,7 @@ public interface PhotoService {
     Mono<Resource> insertPhotoOfVet(String vetId, String photoName, Mono<Resource> photo);
     Mono<Resource> updatePhotoByVetId(String vetId, String photoName, Mono<Resource> photo);
    // Mono<Resource> insertPhotoOfVet(String vetId, String photoName, MultipartFile photo);
+    Mono<Void> deletePhotoByVetId(String vetId);
 
 
 }
