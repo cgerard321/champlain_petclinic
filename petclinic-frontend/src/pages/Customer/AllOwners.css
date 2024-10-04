@@ -59,23 +59,6 @@
   }
 }
 
-/* Buttons and hover effects */
-.owners-container button {
-  padding: 10px 20px;
-  background-color: #28a745;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-family: 'Arial', sans-serif;
-  font-size: 14px;
-  transition: background-color 0.3s ease;
-}
-
-.owners-container button:hover {
-  background-color: #218838;
-}
-
 /* Error styling */
 .error {
   color: red;
@@ -90,6 +73,25 @@
   margin: 2px 0;
   border: 1px solid #ccc;
   border-radius: 4px;
-  width: 100%;
   box-sizing: border-box;
+}
+
+.filter-container {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.filter-container input {
+  padding: 5px;
+  font-size: 14px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  width: 190px;
+}
+
+.filter-toggle {
+  padding: 5px 30px;
+  height: 40px;
+  font-size: 14px;
 }
