@@ -29,7 +29,7 @@ const AddPetForm: React.FC = (): JSX.Element => {
   const [successMessage, setSuccessMessage] = useState<string>('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+   e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ): void => {
     const { name, type, value } = e.target;
     if (type === 'checkbox') {
@@ -63,7 +63,7 @@ const AddPetForm: React.FC = (): JSX.Element => {
 
   // Handle form submission
   const handleSubmit = async (
-    event: FormEvent<HTMLFormElement>
+   event: FormEvent<HTMLFormElement>
   ): Promise<void> => {
     event.preventDefault();
     if (!validate() || !ownerId) return;
@@ -87,71 +87,71 @@ const AddPetForm: React.FC = (): JSX.Element => {
   };
 
   return (
-    <div className="add-pet-form">
-      <h1>Add New Pet</h1>
-      <form onSubmit={handleSubmit}>
-        <label>Name: </label>
-        <input
-          type="text"
-          name="name"
-          value={pet.name}
-          onChange={handleChange}
-        />
-        {errors.name && <span className="error">{errors.name}</span>}
-        <br />
+   <div className="add-pet-form">
+     <h1>Add New Pet</h1>
+     <form onSubmit={handleSubmit}>
+       <label>Name: </label>
+       <input
+        type="text"
+        name="name"
+        value={pet.name}
+        onChange={handleChange}
+       />
+       {errors.name && <span className="error">{errors.name}</span>}
+       <br />
 
-        <label>Pet Type: </label>
-        <select name="petTypeId" value={pet.petTypeId} onChange={handleChange}>
-          <option value="">Select a pet type</option>
-          {Object.entries(petTypeOptions).map(([id, name]) => (
-            <option key={id} value={id}>
-              {name}
-            </option>
-          ))}
-        </select>
-        {errors.petTypeId && <span className="error">{errors.petTypeId}</span>}
-        <br />
+       <label>Pet Type: </label>
+       <select name="petTypeId" value={pet.petTypeId} onChange={handleChange}>
+         <option value="">Select a pet type</option>
+         {Object.entries(petTypeOptions).map(([id, name]) => (
+          <option key={id} value={id}>
+            {name}
+          </option>
+         ))}
+       </select>
+       {errors.petTypeId && <span className="error">{errors.petTypeId}</span>}
+       <br />
 
-        <label>Birth Date: </label>
-        <input
-          type="date"
-          name="birthDate"
-          value={pet.birthDate.toISOString().split('T')[0]}
-          onChange={handleChange}
-        />
-        <br />
+       <label>Birth Date: </label>
+       <input
+        type="date"
+        name="birthDate"
+        value={pet.birthDate.toISOString().split('T')[0]}
+        onChange={handleChange}
+       />
+       <br />
 
-        <label>Weight (kg): </label>
-        <input
-          type="text"
-          name="weight"
-          value={pet.weight}
-          onChange={handleChange}
-        />
-        {errors.weight && <span className="error">{errors.weight}</span>}
-        <br />
+       <label>Weight (kg): </label>
+       <input
+        type="text"
+        name="weight"
+        value={pet.weight}
+        onChange={handleChange}
+       />
+       {errors.weight && <span className="error">{errors.weight}</span>}
+       <br />
 
-        <button type="submit">Add Pet</button>
-        <button
-          type="button"
-          onClick={() => navigate(`/customers/${ownerId}`)}
-          className={'cancel-form-button'}
-        >
-          Cancel
-        </button>
-      </form>
-      {successMessage && <p className="success">{successMessage}</p>}
+       <button type="submit">Add Pet</button>
+       <button
+        type="button"
+        onClick={() => navigate(`/customers/${ownerId}`)}
+        className={'cancel-form-button'}
+       >
+         Cancel
+       </button>
+     </form>
+     {successMessage && <p className="success">{successMessage}</p>}
 
-      {isAddModalOpen && (
-        <div className="pet-add-modal-overlay">
-            <div className="pet-add-modal">
-            <h2>Success!</h2>
+     {isAddModalOpen && (
+      <div className="pet-add-modal-overlay">
+        <div className="pet-add-modal">
+          <h2>Success!</h2>
           <p>Pet has been successfully added.</p>
-            <button onClick={closeAddModal}>Close</button>
-          </div>
+          <button onClick={closeAddModal}>Close</button>
         </div>
-      )}
-    </div>
+      </div>
+     )}
+   </div>
   );
 };
 
