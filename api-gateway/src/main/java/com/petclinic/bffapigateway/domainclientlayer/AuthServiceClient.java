@@ -233,6 +233,45 @@ public class AuthServiceClient {
         });
     }
 
+    public Mono<VetResponseDTO> addVetUser(Mono<RegisterVet> model) {
+
+        String uuid = UUID.randomUUID().toString();
+
+        return model.flatMap(registerVet -> {
+            registerVet.setUserId(uuid);
+            return webClientBuilder.build().post()
+                    .uri(authServiceUrl + "/users")
+                    .body(Mono.just(registerVet), RegisterVet.class)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::is4xxClientError,
+                            n -> rethrower.rethrow(n,
+                                    x -> new GenericHttpException(x.get("message").toString(), (HttpStatus) n.statusCode()))
+                    )
+                    .bodyToMono(UserPasswordLessDTO.class)
+                    .flatMap(userDetails -> {
+                                VetRequestDTO vetDTO = VetRequestDTO.builder()
+                                        .specialties(registerVet.getVet().getSpecialties())
+                                        .active(registerVet.getVet().isActive())
+                                        .photoDefault(registerVet.getVet().isPhotoDefault())
+                                        .email(registerVet.getEmail())
+                                        .resume(registerVet.getVet().getResume())
+                                        .workday(registerVet.getVet().getWorkday())
+                                        .phoneNumber(registerVet.getVet().getPhoneNumber())
+                                        .vetBillId(registerVet.getVet().getVetBillId())
+                                        .firstName(registerVet.getVet().getFirstName())
+                                        .lastName(registerVet.getVet().getLastName())
+                                        .vetId(uuid)
+                                        .build();
+                                return vetsServiceClient.addVet((Mono.just(vetDTO)));
+                            }
+                    );
+        }).doOnError(throwable -> {
+            log.error("Error creating user: " + throwable.getMessage());
+            vetsServiceClient.deleteVet(uuid);
+        });
+    }
+
 
     //    public Mono<UserDetails> updateUser (final long userId, final Register model) {
 //        return webClientBuilder.build().put()
