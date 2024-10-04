@@ -1,5 +1,6 @@
 package com.petclinic.cartsservice.businesslayer;
 
+import com.petclinic.cartsservice.dataaccesslayer.Cart;
 import com.petclinic.cartsservice.dataaccesslayer.CartRepository;
 import com.petclinic.cartsservice.dataaccesslayer.cartproduct.CartProduct;
 import com.petclinic.cartsservice.domainclientlayer.ProductResponseModel;
@@ -30,5 +31,7 @@ public interface CartService {
     Mono<CartResponseModel> checkoutCart(String cartId);
 
     public Mono<CartResponseModel> assignCartToCustomer(String customerId, List<CartProduct> products);
+
+    public Mono<CartResponseModel>  findCartByCustomerId(String customerId);
 }
 

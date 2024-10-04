@@ -60,14 +60,18 @@ const UserCart = (): JSX.Element => {
         return;
       }
 
+      console.log('Fetching cart items for cartId:', cartId); // Log the cartId
+
       try {
         const response = await fetch(
-          `http://localhost:8080/api/v2/gateway/carts/${cartId}`,
-          {
-            headers: { Accept: 'application/json' },
-            credentials: 'include',
-          }
+            `http://localhost:8080/api/v2/gateway/carts/${cartId}`,
+            {
+              headers: { Accept: 'application/json' },
+              credentials: 'include',
+            }
         );
+
+        console.log('Response status:', response.status); // Log the response status
 
         if (!response.ok) {
           throw new Error(`Error: ${response.status} ${response.statusText}`);
@@ -81,15 +85,15 @@ const UserCart = (): JSX.Element => {
         }
 
         const products: ProductModel[] = data.products.map(
-          (product: ProductAPIResponse) => ({
-            productId: product.productId,
-            productName: product.productName,
-            productDescription: product.productDescription,
-            productSalePrice: product.productSalePrice,
-            averageRating: product.averageRating,
-            quantity: product.quantityInCart,
-            productQuantity: product.productQuantity,
-          })
+            (product: ProductAPIResponse) => ({
+              productId: product.productId,
+              productName: product.productName,
+              productDescription: product.productDescription,
+              productSalePrice: product.productSalePrice,
+              averageRating: product.averageRating,
+              quantity: product.quantityInCart,
+              productQuantity: product.productQuantity,
+            })
         );
 
         setCartItems(products);

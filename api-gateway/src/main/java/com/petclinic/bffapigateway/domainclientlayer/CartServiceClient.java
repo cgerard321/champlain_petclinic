@@ -115,4 +115,13 @@ public class CartServiceClient {
                 .retrieve()
                 .bodyToMono(CartResponseDTO.class);
     }
+
+    public Mono<CartResponseDTO> getCartByCustomerId(final String customerId) {
+        return webClientBuilder.build()
+                .get()
+                .uri(CartServiceUrl + "/customer/" + customerId)
+                .retrieve()
+                .bodyToMono(CartResponseDTO.class);
+    }
+
 }

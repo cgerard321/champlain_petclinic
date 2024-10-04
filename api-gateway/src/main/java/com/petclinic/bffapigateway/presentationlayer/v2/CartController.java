@@ -30,7 +30,8 @@ public class CartController {
 
     private final CartServiceClient cartServiceClient;
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    //later we will need to check if the user that is logged in isnt getting someone else's carts, but thats for sprint 3
+    //@SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping("/{cartId}")
     public Mono<ResponseEntity<CartResponseDTO>> getCartById(@PathVariable String cartId) {
         return cartServiceClient.getCartByCartId(cartId)
@@ -103,6 +104,14 @@ public class CartController {
                 .map(cart -> new ResponseEntity<>(cart, HttpStatus.OK))
                 .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
+
+    @GetMapping("/customer/{customerId}")
+    public Mono<ResponseEntity<CartResponseDTO>> getCartByCustomerId(@PathVariable String customerId) {
+        return cartServiceClient.getCartByCustomerId(customerId)
+                .map(cart -> ResponseEntity.status(HttpStatus.OK).body(cart))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
 }
 
 

@@ -131,4 +131,14 @@ public class CartController {
                 .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
+    @GetMapping(value = "/customer/{customerId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<CartResponseModel>> getCartByCustomerId(@PathVariable String customerId) {
+        return Mono.just(customerId)
+                .filter(id -> id.length() == 36) // assuming customerId length is 36; adjust based on your system
+                .switchIfEmpty(Mono.error(new InvalidInputException("Provided customer id is invalid: " + customerId)))
+                .flatMap(cartService::findCartByCustomerId)
+                .map(ResponseEntity::ok);
+    }
+
+
 }

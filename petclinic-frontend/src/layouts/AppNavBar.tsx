@@ -6,9 +6,10 @@ import {
   IsVet,
   useUser,
 } from '@/context/UserContext';
+import { fetchCartIdByCustomerId } from '@/features/carts/api/getCart.ts';
 import axiosInstance from '@/shared/api/axiosInstance.ts';
 import { AppRoutePaths } from '@/shared/models/path.routes.ts';
-import { useState } from 'react';
+import {useEffect, useState} from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Navbar, Nav, NavDropdown, Container } from 'react-bootstrap';
 import './AppNavBar.css';
@@ -17,6 +18,7 @@ export function NavBar(): JSX.Element {
   const { user } = useUser();
   const navigate = useNavigate();
   const [navbarOpen, setNavbarOpen] = useState(false);
+  const [cartId, setCartId] = useState<string | null>(null);
 
   const logoutUser = (): void => {
     axiosInstance
@@ -32,6 +34,20 @@ export function NavBar(): JSX.Element {
   const toggleNavbar = (): void => {
     setNavbarOpen(prevNavbarOpen => !prevNavbarOpen);
   };
+
+  /* fyi this sucks and shouldn't be here
+  fetching the cart id for correct routing. this will (hopefully) be implemented more efficiently in the third sprint */
+  useEffect(() => {
+    const fetchCartId = async () => {
+      if (user.userId) {
+        const id = await fetchCartIdByCustomerId(user.userId);
+        setCartId(id);
+      }
+    };
+
+    fetchCartId();
+  }, [user.userId]);
+
 
   return (
     <Navbar bg="light" expand="lg" className="navbar">
@@ -110,6 +126,12 @@ export function NavBar(): JSX.Element {
                   <Nav.Link as={Link} to={AppRoutePaths.Carts}>
                     Carts
                   </Nav.Link>
+                )}
+
+                {cartId && (
+                    <Nav.Link as={Link} to={AppRoutePaths.UserCart.replace(':cartId', cartId)}>
+                      Cart
+                    </Nav.Link>
                 )}
               </>
             )}
