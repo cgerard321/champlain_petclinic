@@ -10,7 +10,7 @@ const CustomerDetails: FC = () => {
   const { ownerId } = useParams<{ ownerId: string }>();
   const navigate = useNavigate();
 
-  const [isDisabled, setIsDisabled] = useState<boolean>(false); // Track account status (disabled/enabled)
+  const [isDisabled, setIsDisabled] = useState<boolean>(false);
   const [owner, setOwner] = useState<OwnerResponseModel | null>(null);
   const [pets, setPets] = useState<PetResponseModel[]>([]); // State for pets
   const [bills, setBills] = useState<Bill[]>([]);
@@ -25,7 +25,13 @@ const CustomerDetails: FC = () => {
           { withCredentials: true }
         );
         setOwner(ownerResponse.data);
-        setIsDisabled(ownerResponse.data.disabled);
+
+        const userResponse = await axios.get(
+            `http://localhost:8080/api/v2/gateway/users/${ownerId}`,
+            { withCredentials: true }
+        );
+        setIsDisabled(userResponse.data.disabled);
+
         // Fetch pets by owner ID
         const petsResponse = await axios.get(
           `http://localhost:8080/api/v2/gateway/pets/owner/${ownerId}/pets`,
@@ -144,7 +150,6 @@ const CustomerDetails: FC = () => {
     if (confirmAction) {
       try {
         if (isDisabled) {
-          // Call enable API
           await axios.patch(
               `http://localhost:8080/api/v2/gateway/users/${ownerId}/enable`,
               {},
@@ -152,7 +157,6 @@ const CustomerDetails: FC = () => {
           );
           alert('User account enabled successfully.');
         } else {
-          // Call disable API
           await axios.patch(
               `http://localhost:8080/api/v2/gateway/users/${ownerId}/disable`,
               {},
@@ -160,7 +164,14 @@ const CustomerDetails: FC = () => {
           );
           alert('User account disabled successfully.');
         }
-        setIsDisabled(!isDisabled); // Toggle isDisabled state
+
+
+        const userResponse = await axios.get(
+            `http://localhost:8080/api/v2/gateway/users/${ownerId}`,
+            { withCredentials: true }
+        );
+
+        setIsDisabled(userResponse.data.disabled);
       } catch (error) {
         console.error('Error updating user account status:', error);
         alert('Error updating user account status. Please try again.');
@@ -277,10 +288,8 @@ const CustomerDetails: FC = () => {
           Delete Owner
         </button>
         <button
-            className="btn btn-warning"
+            className={`btn ${isDisabled ? 'btn-success' : 'btn-warning'}`}
             onClick={handleDisableEnable}
-            title={isDisabled ? 'Enable' : 'Disable'}
-            style={{ backgroundColor: isDisabled ? 'green' : 'orange', color: 'white' }}
         >
           {isDisabled ? 'Enable Account' : 'Disable Account'}
         </button>

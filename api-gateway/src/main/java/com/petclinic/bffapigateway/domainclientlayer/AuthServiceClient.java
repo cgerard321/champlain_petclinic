@@ -411,7 +411,7 @@ public class AuthServiceClient {
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> Mono.error(new GenericHttpException("Error disabling user", HttpStatus.BAD_REQUEST)))
                 .onStatus(HttpStatusCode::is5xxServerError, clientResponse -> Mono.error(new GenericHttpException("Server error", HttpStatus.INTERNAL_SERVER_ERROR)))
-                .bodyToMono(Void.class); // returning Mono<Void>
+                .bodyToMono(Void.class); 
     }
     public Mono<Void> enableUser(String userId, String jwtToken) {
         return webClientBuilder.build()

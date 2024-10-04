@@ -245,8 +245,8 @@ public class UserServiceImpl implements UserService {
     public void disableUser(String userId) {
         User user = userRepo.findUserByUserIdentifier_UserId(userId);
         if (user != null) {
-            user.setDisabled(true);  // Set the user as disabled
-            userRepo.save(user);     // Save the updated user in the repository
+            user.setDisabled(true);
+            userRepo.save(user);
             log.info("User with ID {} has been disabled", userId);
         } else {
             throw new NotFoundException("No user found with userId: " + userId);
@@ -257,8 +257,8 @@ public class UserServiceImpl implements UserService {
     public void enableUser(String userId) {
         User user = userRepo.findUserByUserIdentifier_UserId(userId);
         if (user != null) {
-            user.setDisabled(false);  // Set the user as enabled (not disabled)
-            userRepo.save(user);      // Save the updated user in the repository
+            user.setDisabled(false);
+            userRepo.save(user);
             log.info("User with ID {} has been enabled", userId);
         } else {
             throw new NotFoundException("No user found with userId: " + userId);

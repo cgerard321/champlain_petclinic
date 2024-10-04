@@ -73,7 +73,7 @@ public class User implements UserDetails {
 
     private boolean verified;
 
-    private boolean disabled;
+    private boolean disabled =false;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
