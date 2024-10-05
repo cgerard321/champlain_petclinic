@@ -27,8 +27,8 @@ const CustomerDetails: FC = () => {
         setOwner(ownerResponse.data);
 
         const userResponse = await axios.get(
-            `http://localhost:8080/api/v2/gateway/users/${ownerId}`,
-            { withCredentials: true }
+          `http://localhost:8080/api/v2/gateway/users/${ownerId}`,
+          { withCredentials: true }
         );
         setIsDisabled(userResponse.data.disabled);
 
@@ -144,31 +144,30 @@ const CustomerDetails: FC = () => {
 
   const handleDisableEnable = async (): Promise<void> => {
     const confirmAction = window.confirm(
-        `Are you sure you want to ${isDisabled ? 'enable' : 'disable'} this user's account?`
+      `Are you sure you want to ${isDisabled ? 'enable' : 'disable'} this user's account?`
     );
 
     if (confirmAction) {
       try {
         if (isDisabled) {
           await axios.patch(
-              `http://localhost:8080/api/v2/gateway/users/${ownerId}/enable`,
-              {},
-              { withCredentials: true }
+            `http://localhost:8080/api/v2/gateway/users/${ownerId}/enable`,
+            {},
+            { withCredentials: true }
           );
           alert('User account enabled successfully.');
         } else {
           await axios.patch(
-              `http://localhost:8080/api/v2/gateway/users/${ownerId}/disable`,
-              {},
-              { withCredentials: true }
+            `http://localhost:8080/api/v2/gateway/users/${ownerId}/disable`,
+            {},
+            { withCredentials: true }
           );
           alert('User account disabled successfully.');
         }
 
-
         const userResponse = await axios.get(
-            `http://localhost:8080/api/v2/gateway/users/${ownerId}`,
-            { withCredentials: true }
+          `http://localhost:8080/api/v2/gateway/users/${ownerId}`,
+          { withCredentials: true }
         );
 
         setIsDisabled(userResponse.data.disabled);
@@ -178,8 +177,6 @@ const CustomerDetails: FC = () => {
       }
     }
   };
-
-
 
   const handleEditPetClick = (petId: string): void => {
     navigate(`/pets/${petId}/edit`);
@@ -294,8 +291,8 @@ const CustomerDetails: FC = () => {
           Delete Owner
         </button>
         <button
-            className={`btn ${isDisabled ? 'btn-success' : 'btn-warning'}`}
-            onClick={handleDisableEnable}
+          className={`btn ${isDisabled ? 'btn-success' : 'btn-warning'}`}
+          onClick={handleDisableEnable}
         >
           {isDisabled ? 'Enable Account' : 'Disable Account'}
         </button>

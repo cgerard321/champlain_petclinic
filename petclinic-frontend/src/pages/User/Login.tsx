@@ -42,12 +42,12 @@ export default function Login(): JSX.Element {
           email: formElements.emailInput.value,
           password: formElements.passwordInput.value,
         },
-          {
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            withCredentials: true, // Ensure credentials like cookies are passed
-          }
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          withCredentials: true, // Ensure credentials like cookies are passed
+        }
       );
 
       setUser(response.data);
@@ -59,10 +59,18 @@ export default function Login(): JSX.Element {
         if (error.response?.status === 401) {
           const errorMessage = error.response?.data?.message;
           // Check for the custom unverified account error
-          if (errorMessage === 'Your account is not verified ! A link has been sent to verify the account !') {
+          if (
+            errorMessage ===
+            'Your account is not verified ! A link has been sent to verify the account !'
+          ) {
             setErrorMessage(errorMessage);
-          } else if (errorMessage === 'Your account has been disabled. Please contact support.') {
-            setErrorMessage('Your account has been disabled. Please contact support.');
+          } else if (
+            errorMessage ===
+            'Your account has been disabled. Please contact support.'
+          ) {
+            setErrorMessage(
+              'Your account has been disabled. Please contact support.'
+            );
           } else {
             // Handle invalid credentials
             setErrorMessage('Invalid email or password. Please try again.');
