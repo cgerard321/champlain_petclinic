@@ -94,6 +94,31 @@ public class CartServiceImpl implements CartService {
 
 
 //instead lets create a removeProductFromCart, UpdateQuantityOfProductInCart, and AddProductInCart methods
+    @Override
+    public Mono<CartResponseModel> removeProductFromCart(String cartId, String productId){
+        return cartRepository.findCartByCartId(cartId)
+                .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Cart id was not found:" + cartId))))
+                .flatMap(found -> {
+                    List<CartProduct> products = found.getProducts();
+
+                    Optional<CartProduct> productToRemove = products.stream()
+                            .filter(product -> product.getProductId().equals(productId)).findFirst();
+
+                    if (productToRemove.isPresent()) {
+                        products.remove(productToRemove.get());
+
+                        found.setProducts(products);
+
+                        return cartRepository.save(found)
+                                .map(updatedCart -> {
+                                    return EntityModelUtil.toCartResponseModel(updatedCart, products);
+                                });
+                    } else {
+                        return Mono.error(new NotFoundException("Product id was not found: " + productId));
+                    }
+
+                });
+    }
 
 
      @Override
