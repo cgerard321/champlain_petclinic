@@ -10,7 +10,7 @@ import { VetResponseModel } from '../veterinarians/models/VetResponseModel';
 import { deleteBill } from '@/features/bills/api/deleteBill.tsx';
 import useGetAllBillsPaginated from '@/features/bills/hooks/useGetAllBillsPaginated.ts';
 import './AdminBillsListTable.css';
-import {useNavigate} from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
 
 export default function AdminBillsListTable(): JSX.Element {
   const navigate = useNavigate();
@@ -141,8 +141,8 @@ export default function AdminBillsListTable(): JSX.Element {
     }
   };
   const handleEditClick = (): void => {
-    navigate(`/bills/admin/${searchId}/edit`)
-  }
+    navigate(`/bills/admin/${searchId}/edit`);
+  };
 
   const handleGoBack = (): void => {
     setSearchedBill(null);
@@ -292,8 +292,9 @@ export default function AdminBillsListTable(): JSX.Element {
           <p>
             <strong>Bill ID:</strong> {searchedBill.billId}
           </p>
-          <p> d
-            <strong>Owner Name:</strong> {searchedBill.ownerFirstName}{' '}
+          <p>
+            {' '}
+            d<strong>Owner Name:</strong> {searchedBill.ownerFirstName}{' '}
             {searchedBill.ownerLastName}
           </p>
           <p>
@@ -318,9 +319,7 @@ export default function AdminBillsListTable(): JSX.Element {
           <p>
             <strong>Due Date:</strong> {searchedBill.dueDate}
           </p>
-          <button  onClick={handleEditClick}>
-            Edit Bill
-          </button>
+          <button onClick={handleEditClick}>Edit Bill</button>
         </div>
       ) : (
         <div className="container">
