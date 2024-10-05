@@ -1,6 +1,5 @@
 package com.petclinic.inventoryservice.datalayer.Product;
 
-import com.petclinic.inventoryservice.datalayer.Supply.Status;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 

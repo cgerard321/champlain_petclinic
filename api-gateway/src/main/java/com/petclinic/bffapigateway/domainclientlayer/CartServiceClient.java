@@ -1,7 +1,6 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
-import com.petclinic.bffapigateway.dtos.Cart.CartRequestDTO;
-import com.petclinic.bffapigateway.dtos.Cart.CartResponseDTO;
+import com.petclinic.bffapigateway.dtos.Cart.*;
 import com.petclinic.bffapigateway.dtos.Cart.CartRequestDTO;
 import com.petclinic.bffapigateway.dtos.Cart.CartResponseDTO;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +11,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Collections;
 import java.util.Map;
 
 @Component
@@ -80,6 +80,48 @@ public class CartServiceClient {
                 .bodyToMono(Void.class);
     }
 
+    public Mono<Void> assignCartToUser(String customerId) {
+        return webClientBuilder.build().post()
+                .uri(CartServiceUrl + "/" + customerId + "/assign")
+                .bodyValue(Collections.emptyList())  //Pass an empty list of CartProduct
+                .retrieve()
+                .bodyToMono(Void.class);
+    }
+
+    public Mono<CartResponseDTO> addProductToCart(String cartId, AddProductRequestDTO requestDTO) {
+        return webClientBuilder.build()
+                .post()
+                .uri(CartServiceUrl + "/" + cartId + "/products")
+                .body(Mono.just(requestDTO), AddProductRequestDTO.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToMono(CartResponseDTO.class);
+    }
+
+    public Mono<CartResponseDTO> updateProductQuantityInCart(String cartId, String productId, UpdateProductQuantityRequestDTO requestDTO) {
+        return webClientBuilder.build()
+                .put()
+                .uri(CartServiceUrl + "/" + cartId + "/products/" + productId)
+                .body(Mono.just(requestDTO), UpdateProductQuantityRequestDTO.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToMono(CartResponseDTO.class);
+    }
+
+    public Mono<CartResponseDTO> checkoutCart(final String cartId) {
+        return webClientBuilder.build()
+                .post()
+                .uri(CartServiceUrl + "/" + cartId + "/checkout")
+                .retrieve()
+                .bodyToMono(CartResponseDTO.class);
+    }
+
+    public Mono<CartResponseDTO> getCartByCustomerId(final String customerId) {
+        return webClientBuilder.build()
+                .get()
+                .uri(CartServiceUrl + "/customer/" + customerId)
+                .retrieve()
+                .bodyToMono(CartResponseDTO.class);
+    }
+
 }
-
-

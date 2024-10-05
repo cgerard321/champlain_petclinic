@@ -2,6 +2,9 @@ package com.petclinic.visits.visitsservicenew.DataLayer;
 
 
 
+import com.petclinic.visits.visitsservicenew.DataLayer.Emergency.Emergency;
+import com.petclinic.visits.visitsservicenew.DataLayer.Emergency.EmergencyRepository;
+import com.petclinic.visits.visitsservicenew.DataLayer.Emergency.UrgencyLevel;
 import com.petclinic.visits.visitsservicenew.DataLayer.Review.Review;
 import com.petclinic.visits.visitsservicenew.DataLayer.Review.ReviewRepository;
 import com.petclinic.visits.visitsservicenew.DataLayer.Status;
@@ -21,11 +24,13 @@ import java.time.format.DateTimeFormatter;
 public class DataSetupService implements CommandLineRunner {
     private final VisitRepo visitRepo;
     private final ReviewRepository reviewRepository;
+    private final EmergencyRepository emergencyRepository;
 
     @Override
     public void run(String... args) throws Exception {
         setupVisits();
         setupReviews();
+        setupEmergencies();
     }
 
     private void setupVisits() {
@@ -47,6 +52,16 @@ public class DataSetupService implements CommandLineRunner {
         // Add more reviews...
         Flux.just(review1)
                 .flatMap(reviewRepository::insert)
+                .subscribe();
+    }
+
+    private void setupEmergencies() {
+        Emergency emergency1 = buildEmergency("emergencyId1", "2022-12-01 10:00", "Severe bleeding", "Bobby", UrgencyLevel.HIGH,  "Accident");
+        Emergency emergency2 = buildEmergency("emergencyId2", "2023-01-15 15:00", "Broken leg", "Tommy", UrgencyLevel.MEDIUM,  "Injury");
+        Emergency emergency3 = buildEmergency("emergencyId3", "2023-06-05 09:30", "Breathing issues", "Max", UrgencyLevel.HIGH,  "Respiratory");
+
+        Flux.just(emergency1, emergency2, emergency3)
+                .flatMap(emergencyRepository::insert)
                 .subscribe();
     }
 
@@ -73,6 +88,19 @@ public class DataSetupService implements CommandLineRunner {
                 .reviewerName(reviewerName)
                 .review(review)
                 .dateSubmitted(parsedReviewDate)
+                .build();
+    }
+
+    private Emergency buildEmergency(String emergencyId, String visitDate, String description, String petName, UrgencyLevel urgencyLevel, String emergencyType) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        LocalDateTime parsedVisitDate = LocalDateTime.parse(visitDate, formatter);
+        return Emergency.builder()
+                .visitEmergencyId(emergencyId)
+                .visitDate(parsedVisitDate)
+                .description(description)
+                .petName(petName)
+                .urgencyLevel(urgencyLevel)
+                .emergencyType(emergencyType)
                 .build();
     }
 }

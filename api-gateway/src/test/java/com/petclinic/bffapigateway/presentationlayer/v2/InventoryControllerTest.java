@@ -50,6 +50,8 @@ public class InventoryControllerTest {
                 .inventoryName("invt1")
                 .inventoryType("Internal")
                 .inventoryDescription("invtone")
+                .inventoryImage("https://www.fda.gov/files/iStock-157317886.jpg")
+                .inventoryBackupImage("https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14")
                 .build();
     }
     private List<InventoryTypeResponseDTO> buildInventoryTypeResponseDTOList(){
@@ -276,12 +278,16 @@ public class InventoryControllerTest {
                 .inventoryName("updatedName")
                 .inventoryType("updatedType")
                 .inventoryDescription("updatedDescription")
+                .inventoryImage("https://www.fda.gov/files/iStock-157317886.jpg")
+                .inventoryBackupImage("https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14")
                 .build();
         InventoryResponseDTO updatedInventory = InventoryResponseDTO.builder()
                 .inventoryId(inventoryId)
                 .inventoryName("updatedName")
                 .inventoryType("updatedType")
                 .inventoryDescription("updatedDescription")
+                .inventoryImage("https://www.fda.gov/files/iStock-157317886.jpg")
+                .inventoryBackupImage("https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14")
                 .build();
 
         when(inventoryServiceClient.updateInventory(eq(updateRequest), eq(inventoryId)))
@@ -310,6 +316,8 @@ public class InventoryControllerTest {
                 .inventoryName("updatedName")
                 .inventoryType("updatedType")
                 .inventoryDescription("updatedDescription")
+                .inventoryImage("https://www.fda.gov/files/iStock-157317886.jpg")
+                .inventoryBackupImage("https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14")
                 .build();
 
         when(inventoryServiceClient.updateInventory(eq(updateRequest), eq(validInventoryId)))
@@ -335,6 +343,8 @@ public class InventoryControllerTest {
                 .inventoryName("invt1")
                 .inventoryType("Internal")
                 .inventoryDescription("invtone")
+                .inventoryImage("https://www.fda.gov/files/iStock-157317886.jpg")
+                .inventoryBackupImage("https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14")
                 .build();
         InventoryResponseDTO createdInventory = buildInventoryDTO();
 
@@ -363,6 +373,8 @@ public class InventoryControllerTest {
                 .inventoryName("invt1")
                 .inventoryType("Internal")
                 .inventoryDescription("invtone")
+                .inventoryImage("https://www.fda.gov/files/iStock-157317886.jpg")
+                .inventoryBackupImage("https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14")
                 .build();
 
         when(inventoryServiceClient.addInventory(eq(invalidInventoryRequest)))
@@ -566,6 +578,57 @@ public class InventoryControllerTest {
         // Assert
         verify(inventoryServiceClient, times(1))
                 .updateProductInInventory(invalidProductRequestDTO, inventoryId, productId);
+    }
+
+    @Test
+    void getQuantityOfProductsInInventory_withValidInventoryId_shouldReturnProductQuantity() {
+        // Arrange
+        String inventoryId = "1";
+        Integer expectedQuantity = 100;  // Simulating that there are 100 products in the inventory
+
+        // Mocking the service to return the expected quantity
+        when(inventoryServiceClient.getQuantityOfProductsInInventory(inventoryId))
+                .thenReturn(Mono.just(expectedQuantity));
+
+        // Act and Assert
+        client.get()
+                .uri(baseInventoryURL + "/" + inventoryId + "/productquantity")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(Integer.class)
+                .value(quantity -> {
+                    assertNotNull(quantity);
+                    assertEquals(expectedQuantity, quantity);
+                });
+
+        // Verify that the service was called with the correct inventoryId
+        verify(inventoryServiceClient, times(1))
+                .getQuantityOfProductsInInventory(eq(inventoryId));
+    }
+    
+    @Test
+    void getQuantityOfProductsInInventory_withServerError_shouldReturnInternalServerError() {
+        // Arrange
+        String inventoryId = "1";
+        String errorMessage = "Internal Server Error";
+
+        // Mocking the service to throw an error (simulating a 500 error from the server)
+        when(inventoryServiceClient.getQuantityOfProductsInInventory(inventoryId))
+                .thenReturn(Mono.error(new RuntimeException(errorMessage)));
+
+        // Act and Assert
+        client.get()
+                .uri(baseInventoryURL + "/" + inventoryId + "/productquantity")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().is5xxServerError()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Internal Server Error");
+
+        // Verify that the service was called with the correct inventoryId
+        verify(inventoryServiceClient, times(1))
+                .getQuantityOfProductsInInventory(eq(inventoryId));
     }
 
 }

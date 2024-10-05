@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.*;
+import com.petclinic.bffapigateway.dtos.Inventory.Status;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterAll;
@@ -51,7 +52,6 @@ class InventoryServiceClientIntegrationTest {
     @Test
     void getProductsInInventoryByInventoryIdAndProductsField() throws JsonProcessingException {
         ProductResponseDTO productResponseDTO = new ProductResponseDTO(
-                "1",
                 "productId",
                 "inventoryId",
                 "name",
@@ -60,8 +60,6 @@ class InventoryServiceClientIntegrationTest {
                 2,
                 15.99,
                 Status.OUT_OF_STOCK
-
-
         );
 
         mockWebServer.enqueue(new MockResponse()
@@ -80,7 +78,6 @@ class InventoryServiceClientIntegrationTest {
     @Test
     void addProductsToInventory() throws JsonProcessingException {
         ProductResponseDTO productResponseDTO = new ProductResponseDTO(
-                "1",
                 "productId",
                 "inventoryId",
                 "name",
@@ -89,7 +86,6 @@ class InventoryServiceClientIntegrationTest {
                 2,
                 15.99,
                 Status.OUT_OF_STOCK
-
         );
 
         mockWebServer.enqueue(new MockResponse()
@@ -145,7 +141,6 @@ class InventoryServiceClientIntegrationTest {
     @Test
     void getProductsInInventoryByInventoryIdAndProductFieldPagination() throws JsonProcessingException {
         ProductResponseDTO productResponseDTO = new ProductResponseDTO(
-                "1",
                 "productId",
                 "inventoryId",
                 "name",
@@ -154,11 +149,8 @@ class InventoryServiceClientIntegrationTest {
                 2,
                 15.99,
                 Status.OUT_OF_STOCK
-
-
         );
         ProductResponseDTO productResponseDTO1 = new ProductResponseDTO(
-                "1",
                 "productId",
                 "inventoryId",
                 "name",
@@ -167,9 +159,6 @@ class InventoryServiceClientIntegrationTest {
                 2,
                 15.99,
                 Status.OUT_OF_STOCK
-
-
-
         );
 
         Flux<ProductResponseDTO> productFlux = Flux.just(productResponseDTO, productResponseDTO1);
@@ -195,5 +184,49 @@ class InventoryServiceClientIntegrationTest {
                 null,null);
         assertEquals(expected, productResponseDTOFlux.block());
     }
+
+    @Test
+    void getQuantityOfProductsInInventory_withValidInventoryId_shouldReturnQuantity() throws JsonProcessingException {
+        // Arrange
+        int expectedQuantity = 10;
+        String inventoryId = "validInventoryId";
+
+        // Mock the response from the MockWebServer
+        mockWebServer.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+                .setBody(String.valueOf(expectedQuantity)));
+
+        // Act
+        Mono<Integer> result = inventoryServiceClient.getQuantityOfProductsInInventory(inventoryId);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNext(expectedQuantity)
+                .verifyComplete();
+    }
+
+    @Test
+    void getQuantityOfProductsInInventory_withEmptyInventory_shouldReturnZero() throws JsonProcessingException {
+        // Arrange
+        int expectedQuantity = 0;
+        String inventoryId = "emptyInventoryId";
+
+        // Mock the response from the MockWebServer
+        mockWebServer.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+                .setBody(String.valueOf(expectedQuantity)));
+
+        // Act
+        Mono<Integer> result = inventoryServiceClient.getQuantityOfProductsInInventory(inventoryId);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNext(expectedQuantity)
+                .verifyComplete();
+    }
+
+
+
+
 
 }
