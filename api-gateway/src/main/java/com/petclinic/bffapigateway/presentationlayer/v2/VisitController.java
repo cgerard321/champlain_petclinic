@@ -118,4 +118,14 @@ public class VisitController {
         return bffApiGatewayController.getVisitsByOwnerId(ownerId);
     }
 
+    @SecuredEndpoint(allowedRoles = Roles.ADMIN)
+    @IsUserSpecific(idToMatch = {"visitId"})
+    @PatchMapping(value = "/{visitId}/{status}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<VisitResponseDTO>> updateVisitStatus(
+            @PathVariable String visitId, @PathVariable String status) {
+        return visitsServiceClient.patchVisitStatus(visitId, status) // Forward to the client
+                .map(visitResponseDTO -> new ResponseEntity<>(visitResponseDTO, HttpStatus.OK))
+                .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND)); // Handle empty responses
+    }
+
 }

@@ -207,4 +207,13 @@ public class VisitController {
 //    public Mono<VetDTO> getVetByIdTest(@PathVariable String vetId){
 //        return visitService.testingGetVetDTO(vetId);
 //    }
+
+    @PatchMapping("/{visitId}/{status}")
+    public Mono<ResponseEntity<VisitResponseDTO>> updateVisitStatus(
+            @PathVariable String visitId, @PathVariable String status) {
+        return visitService.patchVisitStatusInVisit(visitId, status)
+                .map(visitResponseDTO -> new ResponseEntity<>(visitResponseDTO, HttpStatus.OK))
+                .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
 }

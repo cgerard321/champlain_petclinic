@@ -49,6 +49,9 @@ export default function VisitListTable(): JSX.Element {
   const completedVisits = visitsList.filter(
     visit => visit.status === 'COMPLETED'
   );
+  const cancelledVisits = visitsList.filter(
+    visit => visit.status === 'CANCELLED'
+  );
   const handleDelete = async (visitId: string): Promise<void> => {
     const confirmDelete = window.confirm(
       `Are you sure you want to delete visit with ID: ${visitId}?`
@@ -77,6 +80,45 @@ export default function VisitListTable(): JSX.Element {
       }
     }
   };
+
+  // Handle canceling the visit
+  const handleCancel = async (visitId: string): Promise<void> => {
+    const confirmCancel = window.confirm(
+      'Do you confirm you want to cancel the reservation?'
+    );
+
+    if (confirmCancel) {
+      try {
+        const response = await fetch(
+          `http://localhost:8080/api/v2/gateway/visits/${visitId}/CANCELLED`,
+          {
+            method: 'PATCH',
+            credentials: 'include',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error('Failed to cancel the visit');
+        }
+
+        // Update the visit list after cancellation
+        setVisitsList(prevVisits =>
+          prevVisits.map(visit =>
+            visit.visitId === visitId
+              ? { ...visit, status: 'CANCELLED' }
+              : visit
+          )
+        );
+      } catch (error) {
+        console.error('Error canceling visit:', error);
+        alert('Error canceling visit.');
+      }
+    }
+  };
+
   const renderTable = (
     title: string,
     visits: Visit[],
@@ -117,9 +159,11 @@ export default function VisitListTable(): JSX.Element {
                       ? 'green'
                       : visit.status === 'UPCOMING'
                         ? 'orange'
-                        : visit.status === 'COMPLETED'
-                          ? 'blue'
-                          : 'inherit',
+                        : visit.status === 'CANCELLED'
+                          ? 'red'
+                          : visit.status === 'COMPLETED'
+                            ? 'blue'
+                            : 'inherit',
                 }}
               >
                 {visit.status}
@@ -149,6 +193,16 @@ export default function VisitListTable(): JSX.Element {
                     Delete
                   </button>
                 )}
+
+                {visit.status !== 'CANCELLED' &&
+                  visit.status !== 'COMPLETED' && (
+                    <button
+                      className="btn btn-danger"
+                      onClick={() => handleCancel(visit.visitId)}
+                    >
+                      Cancel Visit
+                    </button>
+                  )}
               </td>
             </tr>
           ))}
@@ -185,6 +239,7 @@ export default function VisitListTable(): JSX.Element {
 
       {renderTable('Confirmed Visits', confirmedVisits)}
       {renderTable('Upcoming Visits', upcomingVisits)}
+      {renderTable('Cancelled Visits', cancelledVisits)}
       {renderTable('Completed Visits', completedVisits, true)}
     </div>
   );
