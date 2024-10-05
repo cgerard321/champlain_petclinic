@@ -56,4 +56,37 @@ public class UserController {
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping("/users/{userId}")
+    public Mono<ResponseEntity<UserDetails>> getUserById(@PathVariable final String userId, @CookieValue("Bearer") String jwtToken) {
+        return authServiceClient.getUserById(jwtToken, userId)
+                .map(userDetails -> ResponseEntity.ok().body(userDetails))
+                .defaultIfEmpty(ResponseEntity.status(HttpStatus.NOT_FOUND).build())
+                .onErrorResume(e -> {
+                    log.error("Error fetching user by ID: {}", e.getMessage());
+                    return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
+                });
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @PatchMapping("/users/{userId}/disable")
+    public Mono<ResponseEntity<Void>> disableUser(@PathVariable final String userId, @CookieValue("Bearer") String jwtToken) {
+        return authServiceClient.disableUser(userId, jwtToken)
+                .then(Mono.just(ResponseEntity.ok().<Void>build()))
+                .onErrorResume(e -> {
+                    log.error("Error disabling user: {}", e.getMessage());
+                    return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).<Void>build());
+                });
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @PatchMapping("/users/{userId}/enable")
+    public Mono<ResponseEntity<Void>> enableUser(@PathVariable final String userId, @CookieValue("Bearer") String jwtToken) {
+        return authServiceClient.enableUser(userId, jwtToken)
+                .then(Mono.just(ResponseEntity.ok().<Void>build()))
+                .onErrorResume(e -> {
+                    log.error("Error enabling user: {}", e.getMessage());
+                    return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).<Void>build());
+                });
+    }
 }

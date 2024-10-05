@@ -160,7 +160,18 @@ public class UserController {
      
     }
 
+    @PatchMapping("/{userId}/disable")
+    public ResponseEntity<Void> disableUser(@PathVariable String userId) {
+        userService.disableUser(userId);
+        return ResponseEntity.ok().build();
+    }
 
+
+    @PatchMapping("/{userId}/enable")
+    public ResponseEntity<Void> enableUser(@PathVariable String userId) {
+        userService.enableUser(userId);
+        return ResponseEntity.ok().build();
+    }
 
 
     @PostMapping("/forgot_password")

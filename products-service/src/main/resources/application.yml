@@ -36,6 +36,8 @@ de:
 ---
 
 spring:
+  codec:
+    max-in-memory-size: 16MB
   config:
     activate:
       on-profile: docker
