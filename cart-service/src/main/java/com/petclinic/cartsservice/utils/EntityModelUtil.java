@@ -13,8 +13,6 @@ import java.util.UUID;
 
 public class EntityModelUtil {
 
-
-    // Overloaded method for getCartByCartId
     public static CartResponseModel toCartResponseModel(Cart cart, List<CartProduct> products) {
         double subtotal = 0;
         for (CartProduct product : products) {

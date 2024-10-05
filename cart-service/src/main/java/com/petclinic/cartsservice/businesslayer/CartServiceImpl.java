@@ -107,6 +107,7 @@ public class CartServiceImpl implements CartService {
                  });
      }
 
+
     @Override
     public Mono<CartResponseModel> checkoutCart(String cartId) {
         return cartRepository.findCartByCartId(cartId)
@@ -127,6 +128,8 @@ public class CartServiceImpl implements CartService {
                     cart.setTvc(tvc);
                     cart.setTotal(total);
 
+                    // Clear the products list
+                    cart.setProducts(new ArrayList<>());
 
                     return cartRepository.save(cart)
                             .map(savedCart -> {
@@ -142,7 +145,6 @@ public class CartServiceImpl implements CartService {
                             });
                 });
     }
-
 
     @Override
     public Mono<Integer> getCartItemCount(String cartId) {
