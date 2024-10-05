@@ -15,8 +15,6 @@ interface CartItemProps {
 const formatPrice = (price: number): string => {
   return `$${price.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
 };
-
-
 const CartItem = ({
   item,
   index,
@@ -54,7 +52,9 @@ const CartItem = ({
           value={item.quantity ?? 0}
           onChange={e => changeItemQuantity(e, index)}
         />
-        <button onClick={() => deleteItem(item.productId, index)}>Remove</button>
+        <button onClick={() => deleteItem(item.productId, index)}>
+          Remove
+        </button>
       </div>
       {remainingStock <= 5 && remainingStock > 0 ? (
         <div className="stock-message">
