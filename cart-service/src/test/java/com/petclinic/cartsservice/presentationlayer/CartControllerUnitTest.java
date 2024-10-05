@@ -181,39 +181,6 @@ class CartControllerUnitTest {
     }
 
     @Test
-    void whenCreateNewCart_withValidCustomerId_thenReturnCartResponse() {
-        // Arrange
-        CartResponseModel expectedCartResponseModel = new CartResponseModel();
-        expectedCartResponseModel.setCartId("12345");
-        expectedCartResponseModel.setCustomerId("123");
-
-        when(cartService.createNewCart(any(CartRequestModel.class)))
-                .thenReturn(Mono.just(expectedCartResponseModel));
-
-        String json = """
-                  {
-                    "customerId":"123"
-                  }
-                """;
-
-        // Act & Assert
-        webTestClient
-                .post()
-                .uri("/api/v1/carts")
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(json)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isCreated()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody(CartResponseModel.class)
-                .value(response -> {
-                    assertEquals("12345", response.getCartId());
-                    assertEquals("123", response.getCustomerId());
-                });
-    }
-
-    @Test
     public void getCartItemCount_Success() {
         // Use a valid cart ID
         when(cartService.getCartItemCount(VALID_CART_ID)).thenReturn(Mono.just(3));
@@ -440,4 +407,49 @@ class CartControllerUnitTest {
 
         verify(cartService, times(1)).updateProductQuantityInCart(anyString(), anyString(), anyInt());
     }
+
+    @Test
+    void whenGetCartByValidCustomerId_thenReturnCartResponseModel() {
+        //arrange
+        String validCustomerId = "123e4567-e89b-12d3-a456-426614174000";
+        CartResponseModel cartResponseModel = CartResponseModel.builder()
+                .customerId(validCustomerId)
+                .cartId("cart123")
+                .build();
+
+        when(cartService.findCartByCustomerId(validCustomerId)).thenReturn(Mono.just(cartResponseModel));
+
+        //act & assert
+        webTestClient
+                .get()
+                .uri("/api/v1/carts/customer/" + validCustomerId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(CartResponseModel.class)
+                .value(result -> {
+                    assertEquals(validCustomerId, result.getCustomerId());
+                    assertEquals("cart123", result.getCartId());
+                });
+    }
+
+    @Test
+    void whenGetCartByNonExistingCustomerId_thenReturnNotFound() {
+        //arrange
+        String nonExistingCustomerId = "123e4567-e89b-12d3-a456-426614174999";
+        when(cartService.findCartByCustomerId(nonExistingCustomerId))
+                .thenReturn(Mono.error(new NotFoundException("Cart not found for customer id: " + nonExistingCustomerId)));
+
+        //act & assert
+        webTestClient
+                .get()
+                .uri("/api/v1/carts/customer/" + nonExistingCustomerId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Cart not found for customer id: " + nonExistingCustomerId);
+    }
+
 }
