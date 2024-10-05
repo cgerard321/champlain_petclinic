@@ -29,7 +29,6 @@ import Forbidden from '@/pages/Error/Forbidden.tsx';
 import Unauthorized from '@/pages/Error/Unauthorized.tsx';
 import PageNotFound from '@/pages/Error/PageNotFound.tsx';
 import EmailingPage from '@/pages/Emailing/EmailingPage.tsx';
-import MockPage from '@/pages/Inventory/MockPage.tsx';
 import EditInventory from '@/features/inventories/EditInventory.tsx';
 import { ProtectedRoute } from './shared/components/ProtectedRouteProps';
 import CustomerDetailsPage from '@/pages/Customer/CustomerDetailsPage.tsx';
@@ -44,6 +43,7 @@ import EditEmergency from './features/visits/Emergency/EditEmergency';
 import EmergencyList from './features/visits/Emergency/EmergencyList';
 import ProductDetails from '@/features/products/api/ProductDetails.tsx';
 import AddPetPage from '@/pages/Customer/AddPetPage.tsx';
+import EditProduct from './features/products/components/EditProduct';
 
 const router = createBrowserRouter([
   {
@@ -253,6 +253,14 @@ const router = createBrowserRouter([
         ),
       },
       {
+        path: `${AppRoutePaths.EditProduct}/:productId`,
+        element: (
+          <ProtectedRoute roles={['ADMIN', 'INVENTORY_MANAGER']}>
+            <EditProduct />
+          </ProtectedRoute>
+        ),
+      },
+      {
         path: AppRoutePaths.Visits,
         element: (
           <ProtectedRoute>
@@ -321,14 +329,6 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute roles={['ADMIN', 'VET']}>
             <AddPetPage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: AppRoutePaths.MockPage,
-        element: (
-          <ProtectedRoute>
-            <MockPage />
           </ProtectedRoute>
         ),
       },
