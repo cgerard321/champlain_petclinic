@@ -29,7 +29,6 @@ import Forbidden from '@/pages/Error/Forbidden.tsx';
 import Unauthorized from '@/pages/Error/Unauthorized.tsx';
 import PageNotFound from '@/pages/Error/PageNotFound.tsx';
 import EmailingPage from '@/pages/Emailing/EmailingPage.tsx';
-import MockPage from '@/pages/Inventory/MockPage.tsx';
 import EditInventory from '@/features/inventories/EditInventory.tsx';
 import { ProtectedRoute } from './shared/components/ProtectedRouteProps';
 import CustomerDetailsPage from '@/pages/Customer/CustomerDetailsPage.tsx';
@@ -330,14 +329,6 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute roles={['ADMIN', 'VET']}>
             <AddPetPage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: AppRoutePaths.MockPage,
-        element: (
-          <ProtectedRoute>
-            <MockPage />
           </ProtectedRoute>
         ),
       },
