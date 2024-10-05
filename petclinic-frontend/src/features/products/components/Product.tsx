@@ -151,6 +151,7 @@ export default function Product({
       className={`card ${product.productQuantity < 10 ? 'low-quantity' : ''}`}
       key={product.productId}
     >
+      <ImageContainer imageId={product.imageId} />
       <span
         onClick={() => handleProductClickForProductQuantity(product.productId)}
         style={{ cursor: 'pointer', color: 'blue', fontWeight: 'bold' }}
@@ -165,7 +166,6 @@ export default function Product({
           textDecoration: 'underline',
         }}
       >
-        <ImageContainer imageId={product.imageId} />
         {currentProduct.productName}
       </h2>
 

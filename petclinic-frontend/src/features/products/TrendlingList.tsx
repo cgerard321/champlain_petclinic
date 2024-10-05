@@ -23,13 +23,12 @@ export default function TrendingList(): JSX.Element {
     <div>
       <div className="grid">
         {topFourTrending.map((product: ProductModel) => (
-          <div className="card" key={product.productId}>
           <div
             className={`card ${product.productQuantity < 10 ? 'low-quantity' : ''}`}
             key={product.productId}
           >
-            <h2>{product.productName}</h2>
             <ImageContainer imageId={product.imageId} />
+            <h2>{product.productName}</h2>
             <p>{product.productDescription}</p>
             <p>Rating: {product.averageRating.toFixed(1)}</p>
             <p>Price: ${product.productSalePrice.toFixed(2)}</p>
