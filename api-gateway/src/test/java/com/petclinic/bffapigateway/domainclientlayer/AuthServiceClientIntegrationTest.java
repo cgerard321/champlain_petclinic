@@ -8,6 +8,7 @@ import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Vets.VetRequestDTO;
 import com.petclinic.bffapigateway.dtos.Vets.VetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Vets.Workday;
+import com.petclinic.bffapigateway.exceptions.GenericHttpException;
 import com.petclinic.bffapigateway.utils.Security.Variables.SecurityConst;
 import com.petclinic.bffapigateway.utils.Utility;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.MockServerHttpResponse;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -52,6 +54,9 @@ public class AuthServiceClientIntegrationTest {
     CustomersServiceClient customersServiceClient;
     @MockBean
     VetsServiceClient vetsServiceClient;
+    @MockBean
+    CartServiceClient cartServiceClient;
+
     private MockWebServer server;
     private ObjectMapper objectMapper;
 
@@ -107,11 +112,12 @@ public class AuthServiceClientIntegrationTest {
 
         customersServiceClient = Mockito.mock(CustomersServiceClient.class);
         vetsServiceClient = Mockito.mock(VetsServiceClient.class);
+        cartServiceClient = Mockito.mock(CartServiceClient.class);
         server = new MockWebServer();
         authServiceClient = new AuthServiceClient(
                 WebClient.builder(),
                 customersServiceClient, vetsServiceClient, server.getHostName(),
-                String.valueOf(server.getPort()));
+                String.valueOf(server.getPort()), cartServiceClient);
         objectMapper = new ObjectMapper();
     }
 
@@ -580,4 +586,72 @@ public class AuthServiceClientIntegrationTest {
                 .expectNextCount(1)
                 .verifyComplete();
     }
+
+    @Test
+    void disableUser_ShouldReturnOk() throws IOException {
+
+        final String userId = "valid-user-id";
+        final String token = "valid-jwt-token";
+
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse.setResponseCode(200);
+        server.enqueue(mockResponse);
+
+        final Mono<Void> response = authServiceClient.disableUser(token, userId);
+
+        StepVerifier.create(response)
+                .verifyComplete();
+    }
+
+    @Test
+    void disableNonExistentUser_ShouldReturnError() throws IOException {
+
+        final String userId = "non-existent-user-id";
+        final String token = "valid-jwt-token";
+
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse.setResponseCode(404);
+        server.enqueue(mockResponse);
+
+        final Mono<Void> response = authServiceClient.disableUser(userId, token);
+
+        StepVerifier.create(response)
+                .expectErrorMatches(throwable -> throwable instanceof GenericHttpException &&
+                        ((GenericHttpException) throwable).getHttpStatus() == HttpStatus.BAD_REQUEST)
+                .verify();
+    }
+
+    @Test
+    void enableUser_ShouldReturnOk() throws IOException {
+
+        final String userId = "valid-user-id";
+        final String token = "valid-jwt-token";
+
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse.setResponseCode(200);
+        server.enqueue(mockResponse);
+
+        final Mono<Void> response = authServiceClient.enableUser(token, userId);
+
+        StepVerifier.create(response)
+                .verifyComplete();
+    }
+    @Test
+    void enableNonExistentUser_ShouldReturnError() throws IOException {
+
+        final String userId = "non-existent-user-id";
+        final String token = "valid-jwt-token";
+
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse.setResponseCode(404);
+        server.enqueue(mockResponse);
+
+        final Mono<Void> response = authServiceClient.enableUser(userId, token);
+
+        StepVerifier.create(response)
+                .expectErrorMatches(throwable -> throwable instanceof GenericHttpException &&
+                        ((GenericHttpException) throwable).getHttpStatus() == HttpStatus.BAD_REQUEST) // match against your custom exception
+                .verify();
+    }
+
 }

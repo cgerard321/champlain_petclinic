@@ -91,6 +91,7 @@ const UpdatePetForm: React.FC = (): JSX.Element => {
     event.preventDefault();
     if (!validate() || !pet) return;
     const petRequestData: PetRequestModel = {
+      ownerId: pet.ownerId,
       name: pet.name,
       birthDate: pet.birthDate,
       petTypeId: pet.petTypeId,
