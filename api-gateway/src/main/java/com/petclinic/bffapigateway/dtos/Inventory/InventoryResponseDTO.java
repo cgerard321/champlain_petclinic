@@ -16,5 +16,7 @@ public class InventoryResponseDTO {
     private String inventoryType;
    private String  inventoryName;
     private String inventoryDescription;
-    private List<SupplyResponseDTO> supplies;
+    private String inventoryImage;
+    private String inventoryBackupImage;
+    private List<ProductResponseDTO> products;
 }

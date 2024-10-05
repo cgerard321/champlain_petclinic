@@ -1,5 +1,6 @@
 package com.petclinic.inventoryservice.presentationlayer;
 
+import com.petclinic.inventoryservice.datalayer.Product.Status;
 import lombok.*;
 
 @Data
@@ -13,5 +14,5 @@ public class ProductRequestDTO {
     private Double productPrice;
     private Integer productQuantity;
     private Double productSalePrice;
-
+    private Status status;
 }

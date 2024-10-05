@@ -1,5 +1,6 @@
 package com.petclinic.customersservice.business;
 
+import com.petclinic.customersservice.customersExceptions.exceptions.NotFoundException;
 import com.petclinic.customersservice.data.Pet;
 import com.petclinic.customersservice.data.PetRepo;
 import com.petclinic.customersservice.presentationlayer.PetRequestDTO;
@@ -61,6 +62,15 @@ public class PetServiceImpl implements PetService {
     public Mono<Void> deletePetByPetId(String petId) {
         return petRepo.findPetByPetId(petId)
                 .flatMap(petRepo::delete);
+    }
+
+    @Override
+    public Mono<PetResponseDTO> deletePetByPetIdV2(String petId) {
+        return petRepo.findPetByPetId(petId)
+                .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Pet id not found: " + petId))))
+                .flatMap(found -> petRepo.delete(found)
+                        .then(Mono.just(found)))
+                .map(EntityDTOUtil::toPetResponseDTO);
     }
 
 }

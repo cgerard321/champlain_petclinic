@@ -38,6 +38,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .requestCount(0)
                 .averageRating(0.0)
                 .productType("Food")
+                .productQuantity(44)
                 .build();
 
         Product product2 = Product.builder()
@@ -49,6 +50,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .requestCount(0)
                 .averageRating(0.0)
                 .productType("Accessory")
+                .productQuantity(3)
                 .build();
 
         Product product3 = Product.builder()
@@ -60,6 +62,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .requestCount(0)
                 .averageRating(0.0)
                 .productType("Medication")
+                .productQuantity(53)
                 .build();
 
         Product product4 = Product.builder()
@@ -71,6 +74,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .requestCount(0)
                 .averageRating(0.0)
                 .productType("Accessory")
+                .productQuantity(8)
                 .build();
 
         Product product5 = Product.builder()
@@ -82,6 +86,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .requestCount(0)
                 .averageRating(0.0)
                 .productType("Accessory")
+                .productQuantity(14)
                 .build();
 
         Product product6 = Product.builder()
@@ -93,6 +98,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .requestCount(0)
                 .averageRating(0.0)
                 .productType("Equipment")
+                .productQuantity(58)
                 .build();
 
         Product product7 = Product.builder()
@@ -104,6 +110,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .requestCount(0)
                 .averageRating(0.0)
                 .productType("Accessory")
+                .productQuantity(66)
                 .build();
 
         Product product8 = Product.builder()
@@ -115,6 +122,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .requestCount(0)
                 .averageRating(0.0)
                 .productType("Accessory")
+                .productQuantity(6)
                 .build();
 
         Resource resource1 = new ClassPathResource("images/dog_food.jpg");

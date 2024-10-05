@@ -1,32 +1,32 @@
 .view-button {
-    background-color: rgb(32, 101, 11); 
-    color: white;
-    border: none;
-    padding: 8px 12px;
-    cursor: pointer;
+  background-color: rgb(32, 101, 11);
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  cursor: pointer;
 }
 
 .view-button:hover {
-    background-color: rgb(2, 57, 12); 
+  background-color: rgb(2, 57, 12);
 }
 
 .delete-button {
-    background-color: #dc3545;
-    color: white;
+  background-color: #dc3545;
+  color: white;
 }
 
 .delete-button:hover {
-    background-color: #c82333; 
+  background-color: #c82333;
 }
 
 @media screen and (max-width: 768px) {
-    .cart-table {
-        font-size: 16px;
-    }
+  .cart-table {
+    font-size: 16px;
+  }
 
-    .view-button,
-    .delete-button {
-        padding: 6px 10px;
-        font-size: 14px;
-    }
+  .view-button,
+  .delete-button {
+    padding: 6px 10px;
+    font-size: 14px;
+  }
 }
