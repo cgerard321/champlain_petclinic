@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from 'react-router-dom';
-import React, { FormEvent, useEffect, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { BillRequestModel } from '@/features/bills/models/BillRequestModel.tsx';
 import { getBill, updateBill } from '@/features/bills/api/updateBill.tsx';
 import { Bill } from '@/features/bills/models/Bill.ts';
@@ -46,10 +46,11 @@ const UpdateBillForm: React.FC = (): JSX.Element => {
       } catch (error) {
         console.error('Error fetching bill data', error);
       }
-      fetchBillData().catch(error =>
-        console.error('Error fetching bill data', error)
-      );
     };
+
+    fetchBillData().catch(error =>
+      console.error('Error fetching bill data', error)
+    );
   }, [billId]);
 
   useEffect(() => {
