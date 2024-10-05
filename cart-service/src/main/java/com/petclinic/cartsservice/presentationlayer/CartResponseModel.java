@@ -18,11 +18,15 @@ public class CartResponseModel {
 
     private String cartId;
     private String customerId;
+
     private List<CartProduct> products;
     private double subtotal;
     private double tvq;
     private double tvc;
     private double total;
+
+    private List<CartProduct> wishListProducts;
     private String message;
     private String paymentStatus;
+
 }

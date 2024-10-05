@@ -1,13 +1,16 @@
 import { useState } from 'react';
 import { Button, Form, Modal } from 'react-bootstrap';
 import { ProductModel } from '../models/ProductModels/ProductModel';
+import { ImageModel } from '../models/ProductModels/ImageModel';
 
 interface AddProductProps {
-  addProduct: (product: Omit<ProductModel, 'productId'>) => Promise<void>;
+  addProduct: (product: ProductModel) => Promise<ProductModel>;
+  addImage: (formData: FormData) => Promise<ImageModel>;
 }
 
 export default function AddProduct({
   addProduct,
+  addImage,
 }: AddProductProps): JSX.Element {
   const [show, setShow] = useState(false);
   const [productType, setProductType] = useState('');
@@ -21,6 +24,32 @@ export default function AddProduct({
     event.preventDefault();
 
     const form = event.currentTarget;
+    let createdImage = null;
+
+    const fileInput =
+      form.querySelector<HTMLInputElement>('input[type="file"]');
+
+    if (fileInput && fileInput.files && fileInput.files.length > 0) {
+      const file = fileInput.files[0];
+
+      const formData = new FormData();
+      formData.append('imageName', file.name);
+      formData.append('imageType', file.type);
+      formData.append('imageData', file);
+
+      try {
+        createdImage = await addImage(formData);
+      } catch (error) {
+        console.error('Error adding image:', error);
+      }
+    }
+
+    if (!createdImage) {
+      console.error('Failed creating image');
+      return;
+    }
+
+    const imageId = createdImage.imageId;
     const productName = (
       form.elements.namedItem('productName') as HTMLInputElement
     ).value;
@@ -37,8 +66,11 @@ export default function AddProduct({
     const requestCount = 0;
     const averageRating = 0;
     const status = 'AVAILABLE';
+    const productId = '';
 
-    const newProduct: Omit<ProductModel, 'productId'> = {
+    const newProduct: ProductModel = {
+      productId,
+      imageId,
       productName,
       productDescription,
       productSalePrice,
@@ -119,6 +151,10 @@ export default function AddProduct({
                 onChange={e => setProductType(e.target.value)} /////////////////
                 required
               />
+            </Form.Group>
+            <Form.Group controlId="formFile" className="mb-3">
+              <Form.Label>Upload Image</Form.Label>
+              <Form.Control type="file" />
             </Form.Group>
           </Form>
         </Modal.Body>
