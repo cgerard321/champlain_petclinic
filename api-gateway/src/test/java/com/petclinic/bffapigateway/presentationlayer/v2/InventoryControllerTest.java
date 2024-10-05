@@ -1,10 +1,7 @@
 package com.petclinic.bffapigateway.presentationlayer.v2;
 
 import com.petclinic.bffapigateway.domainclientlayer.InventoryServiceClient;
-import com.petclinic.bffapigateway.dtos.Inventory.InventoryRequestDTO;
-import com.petclinic.bffapigateway.dtos.Inventory.InventoryResponseDTO;
-import com.petclinic.bffapigateway.dtos.Inventory.InventoryTypeResponseDTO;
-import com.petclinic.bffapigateway.dtos.Inventory.ProductResponseDTO;
+import com.petclinic.bffapigateway.dtos.Inventory.*;
 import com.petclinic.bffapigateway.exceptions.InventoryNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
@@ -53,6 +50,8 @@ public class InventoryControllerTest {
                 .inventoryName("invt1")
                 .inventoryType("Internal")
                 .inventoryDescription("invtone")
+                .inventoryImage("https://www.fda.gov/files/iStock-157317886.jpg")
+                .inventoryBackupImage("https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14")
                 .build();
     }
     private List<InventoryTypeResponseDTO> buildInventoryTypeResponseDTOList(){
@@ -279,12 +278,16 @@ public class InventoryControllerTest {
                 .inventoryName("updatedName")
                 .inventoryType("updatedType")
                 .inventoryDescription("updatedDescription")
+                .inventoryImage("https://www.fda.gov/files/iStock-157317886.jpg")
+                .inventoryBackupImage("https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14")
                 .build();
         InventoryResponseDTO updatedInventory = InventoryResponseDTO.builder()
                 .inventoryId(inventoryId)
                 .inventoryName("updatedName")
                 .inventoryType("updatedType")
                 .inventoryDescription("updatedDescription")
+                .inventoryImage("https://www.fda.gov/files/iStock-157317886.jpg")
+                .inventoryBackupImage("https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14")
                 .build();
 
         when(inventoryServiceClient.updateInventory(eq(updateRequest), eq(inventoryId)))
@@ -313,6 +316,8 @@ public class InventoryControllerTest {
                 .inventoryName("updatedName")
                 .inventoryType("updatedType")
                 .inventoryDescription("updatedDescription")
+                .inventoryImage("https://www.fda.gov/files/iStock-157317886.jpg")
+                .inventoryBackupImage("https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14")
                 .build();
 
         when(inventoryServiceClient.updateInventory(eq(updateRequest), eq(validInventoryId)))
@@ -338,6 +343,8 @@ public class InventoryControllerTest {
                 .inventoryName("invt1")
                 .inventoryType("Internal")
                 .inventoryDescription("invtone")
+                .inventoryImage("https://www.fda.gov/files/iStock-157317886.jpg")
+                .inventoryBackupImage("https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14")
                 .build();
         InventoryResponseDTO createdInventory = buildInventoryDTO();
 
@@ -366,6 +373,8 @@ public class InventoryControllerTest {
                 .inventoryName("invt1")
                 .inventoryType("Internal")
                 .inventoryDescription("invtone")
+                .inventoryImage("https://www.fda.gov/files/iStock-157317886.jpg")
+                .inventoryBackupImage("https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14")
                 .build();
 
         when(inventoryServiceClient.addInventory(eq(invalidInventoryRequest)))
@@ -459,5 +468,167 @@ public class InventoryControllerTest {
                 .searchProducts(eq(inventoryId), eq(invalidProductName), eq(invalidProductDescription));
     }
 
+    @Test
+    void getProductByProductIdInInventory_withValidInventoryIdAndProductId_shouldReturnProduct() {
+        // Arrange
+        String inventoryId = "1";
+        String productId = "101";
+        ProductResponseDTO productResponseDTO = ProductResponseDTO.builder()
+                .productId(productId)
+                .productName("Product 101")
+                .productDescription("Description of Product 101")
+                .productPrice(99.99)
+                .build();
+
+        when(inventoryServiceClient.getProductByProductIdInInventory(inventoryId, productId))
+                .thenReturn(Mono.just(productResponseDTO));
+
+        // Act
+        client.get()
+                .uri(baseInventoryURL + "/" + inventoryId + "/products/" + productId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(ProductResponseDTO.class)
+                .isEqualTo(productResponseDTO);
+
+        // Assert
+        verify(inventoryServiceClient, times(1))
+                .getProductByProductIdInInventory(inventoryId, productId);
+    }
+
+    @Test
+    void getProductByProductIdInInventory_withInvalidProductId_shouldReturnNotFound() {
+        // Arrange
+        String inventoryId = "1";
+        String invalidProductId = "999";
+        when(inventoryServiceClient.getProductByProductIdInInventory(inventoryId, invalidProductId))
+                .thenReturn(Mono.empty());
+
+        // Act
+        client.get()
+                .uri(baseInventoryURL + "/" + inventoryId + "/products/" + invalidProductId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound();
+
+        // Assert
+        verify(inventoryServiceClient, times(1))
+                .getProductByProductIdInInventory(inventoryId, invalidProductId);
+    }
+
+    @Test
+    void updateProductInInventory_withValidData_shouldReturnUpdatedProduct() {
+        // Arrange
+        String inventoryId = "1";
+        String productId = "101";
+        ProductRequestDTO productRequestDTO = ProductRequestDTO.builder()
+                .productName("Updated Product 101")
+                .productDescription("Updated Description")
+                .productPrice(149.99)
+                .build();
+
+        ProductResponseDTO updatedProductResponseDTO = ProductResponseDTO.builder()
+                .productId(productId)
+                .productName("Updated Product 101")
+                .productDescription("Updated Description")
+                .productPrice(149.99)
+                .build();
+
+        when(inventoryServiceClient.updateProductInInventory(productRequestDTO, inventoryId, productId))
+                .thenReturn(Mono.just(updatedProductResponseDTO));
+
+        // Act
+        client.put()
+                .uri(baseInventoryURL + "/" + inventoryId + "/products/" + productId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(productRequestDTO)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(ProductResponseDTO.class)
+                .isEqualTo(updatedProductResponseDTO);
+
+        // Assert
+        verify(inventoryServiceClient, times(1))
+                .updateProductInInventory(productRequestDTO, inventoryId, productId);
+    }
+
+    @Test
+    void updateProductInInventory_withInvalidData_shouldReturnBadRequest() {
+        // Arrange
+        String inventoryId = "1";
+        String productId = "101";
+        ProductRequestDTO invalidProductRequestDTO = ProductRequestDTO.builder()
+                .productName("")
+                .productDescription("")
+                .productPrice(-10.0)
+                .build();
+
+        when(inventoryServiceClient.updateProductInInventory(invalidProductRequestDTO, inventoryId, productId))
+                .thenReturn(Mono.empty());
+
+        // Act
+        client.put()
+                .uri(baseInventoryURL + "/" + inventoryId + "/products/" + productId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(invalidProductRequestDTO)
+                .exchange()
+                .expectStatus().isBadRequest();
+
+        // Assert
+        verify(inventoryServiceClient, times(1))
+                .updateProductInInventory(invalidProductRequestDTO, inventoryId, productId);
+    }
+
+    @Test
+    void getQuantityOfProductsInInventory_withValidInventoryId_shouldReturnProductQuantity() {
+        // Arrange
+        String inventoryId = "1";
+        Integer expectedQuantity = 100;  // Simulating that there are 100 products in the inventory
+
+        // Mocking the service to return the expected quantity
+        when(inventoryServiceClient.getQuantityOfProductsInInventory(inventoryId))
+                .thenReturn(Mono.just(expectedQuantity));
+
+        // Act and Assert
+        client.get()
+                .uri(baseInventoryURL + "/" + inventoryId + "/productquantity")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(Integer.class)
+                .value(quantity -> {
+                    assertNotNull(quantity);
+                    assertEquals(expectedQuantity, quantity);
+                });
+
+        // Verify that the service was called with the correct inventoryId
+        verify(inventoryServiceClient, times(1))
+                .getQuantityOfProductsInInventory(eq(inventoryId));
+    }
+    
+    @Test
+    void getQuantityOfProductsInInventory_withServerError_shouldReturnInternalServerError() {
+        // Arrange
+        String inventoryId = "1";
+        String errorMessage = "Internal Server Error";
+
+        // Mocking the service to throw an error (simulating a 500 error from the server)
+        when(inventoryServiceClient.getQuantityOfProductsInInventory(inventoryId))
+                .thenReturn(Mono.error(new RuntimeException(errorMessage)));
+
+        // Act and Assert
+        client.get()
+                .uri(baseInventoryURL + "/" + inventoryId + "/productquantity")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().is5xxServerError()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Internal Server Error");
+
+        // Verify that the service was called with the correct inventoryId
+        verify(inventoryServiceClient, times(1))
+                .getQuantityOfProductsInInventory(eq(inventoryId));
+    }
 
 }

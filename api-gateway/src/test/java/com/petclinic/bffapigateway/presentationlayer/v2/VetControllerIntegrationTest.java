@@ -104,10 +104,10 @@ class VetControllerIntegrationTest {
         webTestClient.get()
                 .uri(VET_ENDPOINT)
                 .cookie("Bearer", jwtTokenForValidAdmin)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentType("text/event-stream;charset=UTF-8")
                 .expectBodyList(VetResponseDTO.class)
                 .hasSize(2);
     }

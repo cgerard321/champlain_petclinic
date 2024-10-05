@@ -12,9 +12,11 @@ import okhttp3.mockwebserver.RecordedRequest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import java.io.IOException;
 import java.util.Date;
@@ -23,6 +25,7 @@ import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.when;
 import static reactor.core.publisher.Mono.just;
 
 public class CustomerServiceClientIntegrationTest {
@@ -313,32 +316,6 @@ public class CustomerServiceClientIntegrationTest {
     }
 
 
-
-    @Test
-    void testUpdatePet() throws Exception {
-        PetResponseDTO petRequestDTO = new PetResponseDTO(); // Create a request DTO
-        petRequestDTO.setPetId("petId-123");
-        petRequestDTO.setName("UpdatedName");
-
-        PetResponseDTO updatedPetResponse = new PetResponseDTO(); // Create an expected response DTO
-        updatedPetResponse.setPetId("petId-123");
-        updatedPetResponse.setName("UpdatedName");
-
-        server.enqueue(new MockResponse()
-                .setResponseCode(200)
-                .setHeader("Content-Type", "application/json")
-                .setBody(mapper.writeValueAsString(updatedPetResponse))); // Use the expected response DTO
-
-        Mono<PetResponseDTO> responseMono = customersServiceClient.updatePet(petRequestDTO, "petId-123");
-
-        PetResponseDTO responseDTO = responseMono.block(); // Blocking for simplicity
-
-        // Verify the response
-        assertEquals(updatedPetResponse.getPetId(), responseDTO.getPetId());
-        assertEquals(updatedPetResponse.getName(), responseDTO.getName());
-    }
-
-
     @Test
     void testPatchPet() throws Exception {
         PetRequestDTO petRequestDTO = new PetRequestDTO(); // Create a request DTO
@@ -430,6 +407,39 @@ public class CustomerServiceClientIntegrationTest {
         assertEquals(firstPetTypeFromFlux.getName(), TEST_PETTYPE.getName());
     }
 
+
+    @Test
+    void testUpdatePet() throws Exception {
+        // Given
+        String petId = "123";
+        PetRequestDTO petRequestDTO = PetRequestDTO.builder()
+                .ownerId("owner1")
+                .name("Buddy")
+                .petTypeId("dog")
+                .build();
+        PetResponseDTO petResponseDTO = new PetResponseDTO();
+        petResponseDTO.setPetId(petId);
+        petResponseDTO.setName("Buddy");
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(200)
+                .setHeader("Content-Type", "application/json")
+                .setBody(mapper.writeValueAsString(petResponseDTO)));
+
+        // When
+        Mono<PetResponseDTO> result = customersServiceClient.updatePet(Mono.just(petRequestDTO), petId);
+
+        // Then
+        StepVerifier.create(result)
+                .expectNextMatches(response -> response.getPetId().equals(petId) && response.getName().equals("Buddy"))
+                .verifyComplete();
+
+        // Verify the request
+        RecordedRequest request = server.takeRequest();
+        assertEquals("/pet/" + petId, request.getPath());
+        assertEquals("PUT", request.getMethod());
+    }
+        
     /*@Test
     void getOwnerPhoto() throws JsonProcessingException {
 
@@ -512,6 +522,8 @@ public class CustomerServiceClientIntegrationTest {
 
 
     //TODO apparently everything???
+
+
 
 
 }

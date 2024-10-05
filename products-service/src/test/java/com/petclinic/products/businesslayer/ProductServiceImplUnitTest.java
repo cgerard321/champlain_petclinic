@@ -179,5 +179,96 @@ class ProductServiceImplUnitTest {
 
         verify(productRepository).findProductsByProductType(productType);
     }
+
+
+    @Test
+    public void testDecreaseProductCount() {
+        String productId = "testProductId";
+        Product product = new Product();
+        product.setProductId(productId);
+        product.setRequestCount(10);
+        product.setProductQuantity(20);
+
+        when(productRepository.findProductByProductId(productId)).thenReturn(Mono.just(product));
+        when(productRepository.save(any(Product.class))).thenReturn(Mono.just(product));
+
+        StepVerifier.create(productService.DecreaseProductCount(productId))
+                .verifyComplete();
+
+        verify(productRepository).findProductByProductId(productId);
+        verify(productRepository).save(any(Product.class));
+    }
+
+    @Test
+    public void testDecreaseProductCount_NotFound() {
+        String productId = "nonExistentProductId";
+
+        when(productRepository.findProductByProductId(productId)).thenReturn(Mono.empty());
+
+        StepVerifier.create(productService.DecreaseProductCount(productId))
+                .expectError(NotFoundException.class)
+                .verify();
+
+        verify(productRepository).findProductByProductId(productId);
+        verify(productRepository, never()).save(any(Product.class));
+    }
+
+    @Test
+    public void testChangeProductQuantity_Increase() {
+        String productId = "06a7d573-bcab-4db3-956f-773324b92a80";
+        Integer newQuantity = 15;
+        Product product = new Product();
+        product.setProductId(productId);
+        product.setProductQuantity(10);
+
+        when(productRepository.findProductByProductId(productId)).thenReturn(Mono.just(product));
+        when(productRepository.save(any(Product.class))).thenReturn(Mono.just(product));
+
+        StepVerifier.create(productService.changeProductQuantity(productId, newQuantity))
+                .verifyComplete();
+
+        verify(productRepository).findProductByProductId(productId);
+        verify(productRepository).save(argThat(savedProduct ->
+                savedProduct.getProductQuantity() == 25 // 10 + 15
+        ));
+    }
+
+    @Test
+    public void testChangeProductQuantity_Decrease() {
+        String productId = "06a7d573-bcab-4db3-956f-773324b92a80";
+        Integer newQuantity = 5;
+        Product product = new Product();
+        product.setProductId(productId);
+        product.setProductQuantity(10);
+
+        when(productRepository.findProductByProductId(productId)).thenReturn(Mono.just(product));
+        when(productRepository.save(any(Product.class))).thenReturn(Mono.just(product));
+
+        StepVerifier.create(productService.changeProductQuantity(productId, newQuantity))
+                .verifyComplete();
+
+        verify(productRepository).findProductByProductId(productId);
+        verify(productRepository).save(argThat(savedProduct ->
+                savedProduct.getProductQuantity() == 5 // 10 - 5
+        ));
+    }
+
+    @Test
+    public void testChangeProductQuantity_NotFound() {
+        String productId = "06a7d573-bcab-4db3-956f-773324b92a81";
+        Integer quantityChange = 5;
+
+        when(productRepository.findProductByProductId(productId)).thenReturn(Mono.empty());
+
+        StepVerifier.create(productService.changeProductQuantity(productId, quantityChange))
+                .expectError(NotFoundException.class)
+                .verify();
+
+        verify(productRepository).findProductByProductId(productId);
+        verify(productRepository, never()).save(any(Product.class));
+    }
+
+
+
 }
 

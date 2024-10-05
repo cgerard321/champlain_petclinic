@@ -110,9 +110,9 @@ public class UserServiceImpl implements UserService {
 
             log.info("Sending email to {}...", userIDLessDTO.getEmail());
 
-            //Commented out the old emailing service and replaced it with the new emailing service
-            //log.info(mailService.sendMail(generateVerificationMail(user)));  //Old
-            generateVerificationMailWithNewEmailingService(user);              //New
+            //Commented out the New emailing service and replaced it with the old emailing service as I implemented the new one but was told by Christine to revert back to the old one
+            log.info(mailService.sendMail(generateVerificationMail(user)));  //Old
+            //generateVerificationMailWithNewEmailingService(user);          //New
 
             log.info("Email sent to {}", userIDLessDTO.getEmail());
 

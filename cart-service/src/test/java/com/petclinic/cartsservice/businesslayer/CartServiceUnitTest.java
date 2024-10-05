@@ -8,11 +8,14 @@ import com.petclinic.cartsservice.domainclientlayer.ProductResponseModel;
 import com.petclinic.cartsservice.presentationlayer.CartRequestModel;
 import com.petclinic.cartsservice.presentationlayer.CartResponseModel;
 import com.petclinic.cartsservice.utils.EntityModelUtil;
+import com.petclinic.cartsservice.utils.exceptions.InvalidInputException;
 import com.petclinic.cartsservice.utils.exceptions.NotFoundException;
+import com.petclinic.cartsservice.utils.exceptions.OutOfStockException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.BeanUtils;
 import reactor.core.publisher.Flux;
@@ -77,6 +80,8 @@ class CartServiceUnitTest {
 
     // UUID for non-existent cart
     private final String nonExistentCartId = "a7d573-bcab-4db3-956f-773324b92a80";
+    private final String validCustomerId = "f470653d-05c5-4c45-b7a0-7d70f003d2ac";
+    private final String nonExistentCustomerId = "non-existent-customer-id";
 
 //    @Test
 //    void whenUpdateCartById_thenReturnCartResponseModel() {
@@ -390,4 +395,263 @@ class CartServiceUnitTest {
          verifyNoInteractions(productClient); //no carts, so productClient shouldn't be called
      }
 
+    @Test
+    void addProductToCart_NewProduct_Success() {
+        String cartId = cart1.getCartId();
+        String productId = product3.getProductId();
+        int quantityToAdd = 2;
+
+        when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart1));
+        when(productClient.getProductByProductId(productId)).thenReturn(Mono.just(ProductResponseModel.builder()
+                .productId(productId)
+                .productName("Product3")
+                .productDescription("Desc3")
+                .productSalePrice(300.0)
+                .productQuantity(10) // 10 in stock
+                .build()));
+        when(cartRepository.save(any(Cart.class))).thenReturn(Mono.just(cart1));
+
+        Mono<CartResponseModel> result = cartService.addProductToCart(cartId, productId, quantityToAdd);
+
+        StepVerifier.create(result)
+                .expectNextMatches(cartResponseModel -> cartResponseModel.getProducts().stream()
+                        .anyMatch(product -> product.getProductId().equals(productId) &&
+                                product.getQuantityInCart() == quantityToAdd))
+                .verifyComplete();
+
+        verify(cartRepository, times(1)).save(any(Cart.class));
+    }
+
+    @Test
+    void addProductToCart_ExistingProduct_Success() {
+        String cartId = cart1.getCartId();
+        String productId = product1.getProductId();
+        int quantityToAdd = 3;
+
+        when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart1));
+        when(productClient.getProductByProductId(productId)).thenReturn(Mono.just(ProductResponseModel.builder()
+                .productId(productId)
+                .productName("Product1")
+                .productQuantity(10) // 10 in stock
+                .build()));
+        when(cartRepository.save(any(Cart.class))).thenReturn(Mono.just(cart1));
+
+        Mono<CartResponseModel> result = cartService.addProductToCart(cartId, productId, quantityToAdd);
+
+        StepVerifier.create(result)
+                .expectNextMatches(cartResponseModel -> cartResponseModel.getProducts().stream()
+                        .anyMatch(product -> product.getProductId().equals(productId) &&
+                                product.getQuantityInCart() == quantityToAdd + 1)) // already 1 in cart
+                .verifyComplete();
+
+        verify(cartRepository, times(1)).save(any(Cart.class));
+    }
+
+    @Test
+    void addProductToCart_QuantityGreaterThanStock_ThrowsOutOfStockException() {
+        String cartId = cart1.getCartId();
+        String productId = product1.getProductId();
+        int quantityToAdd = 11; // exceeding stock of 10
+
+        when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart1));
+        when(productClient.getProductByProductId(productId)).thenReturn(Mono.just(ProductResponseModel.builder()
+                .productId(productId)
+                .productName("Product1")
+                .productQuantity(10) // Only 10 in stock
+                .build()));
+
+        Mono<CartResponseModel> result = cartService.addProductToCart(cartId, productId, quantityToAdd);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof OutOfStockException &&
+                        throwable.getMessage().contains("Only 10 items left in stock"))
+                .verify();
+    }
+
+    @Test
+    void addProductToCart_QuantityLessThanOrEqualToZero_ThrowsInvalidInputException() {
+        String cartId = cart1.getCartId();
+        String productId = product1.getProductId();
+        int quantityToAdd = 0; // Invalid quantity
+
+        when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart1));
+        when(productClient.getProductByProductId(productId)).thenReturn(Mono.just(ProductResponseModel.builder()
+                .productId(productId)
+                .productQuantity(10)
+                .build()));
+
+        Mono<CartResponseModel> result = cartService.addProductToCart(cartId, productId, quantityToAdd);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof InvalidInputException &&
+                        throwable.getMessage().contains("Quantity must be greater than zero"))
+                .verify();
+    }
+
+    @Test
+    void addProductToCart_CartNotFound_ThrowsNotFoundException() {
+        String cartId = nonExistentCartId;
+        String productId = product1.getProductId();
+        int quantityToAdd = 1;
+
+        when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.empty());
+
+        Mono<CartResponseModel> result = cartService.addProductToCart(cartId, productId, quantityToAdd);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof NotFoundException &&
+                        throwable.getMessage().contains("Cart not found"))
+                .verify();
+    }
+
+    @Test
+    void updateProductQuantityInCart_Success() {
+        String cartId = cart1.getCartId();
+        String productId = product1.getProductId();
+        int newQuantity = 3;
+
+        when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart1));
+        when(productClient.getProductByProductId(productId)).thenReturn(Mono.just(ProductResponseModel.builder()
+                .productId(productId)
+                .productQuantity(10) // Stock of 10
+                .build()));
+        when(cartRepository.save(any(Cart.class))).thenReturn(Mono.just(cart1));
+
+        Mono<CartResponseModel> result = cartService.updateProductQuantityInCart(cartId, productId, newQuantity);
+
+        StepVerifier.create(result)
+                .expectNextMatches(cartResponseModel -> cartResponseModel.getProducts().stream()
+                        .anyMatch(product -> product.getProductId().equals(productId) &&
+                                product.getQuantityInCart() == newQuantity))
+                .verifyComplete();
+
+        verify(cartRepository, times(1)).save(any(Cart.class));
+    }
+
+    @Test
+    void updateProductQuantityInCart_QuantityExceedsStock_ThrowsOutOfStockException() {
+        String cartId = cart1.getCartId();
+        String productId = product1.getProductId();
+        int newQuantity = 15; // Exceeds stock
+
+        when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart1));
+        when(productClient.getProductByProductId(productId)).thenReturn(Mono.just(ProductResponseModel.builder()
+                .productId(productId)
+                .productQuantity(10) // Stock of 10
+                .build()));
+
+        Mono<CartResponseModel> result = cartService.updateProductQuantityInCart(cartId, productId, newQuantity);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof OutOfStockException &&
+                        throwable.getMessage().contains("Only 10 items left in stock"))
+                .verify();
+    }
+
+    @Test
+    void updateProductQuantityInCart_ProductNotInCart_ThrowsNotFoundException() {
+        String cartId = cart1.getCartId();
+        String productId = product3.getProductId(); // Product not in the cart
+        int newQuantity = 2;
+
+        when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart1));
+        when(productClient.getProductByProductId(productId)).thenReturn(Mono.just(ProductResponseModel.builder()
+                .productId(productId)
+                .productQuantity(10)
+                .build()));
+
+        Mono<CartResponseModel> result = cartService.updateProductQuantityInCart(cartId, productId, newQuantity);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof NotFoundException &&
+                        throwable.getMessage().contains("Product not found in cart"))
+                .verify();
+    }
+
+    @Test
+    void updateProductQuantityInCart_QuantityLessThanOrEqualToZero_ThrowsInvalidInputException() {
+        String cartId = cart1.getCartId();
+        String productId = product1.getProductId();
+        int newQuantity = 0; // Invalid quantity
+
+        when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart1));
+        when(productClient.getProductByProductId(productId)).thenReturn(Mono.just(ProductResponseModel.builder()
+                .productId(productId)
+                .productQuantity(10)
+                .build()));
+
+        Mono<CartResponseModel> result = cartService.updateProductQuantityInCart(cartId, productId, newQuantity);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof InvalidInputException &&
+                        throwable.getMessage().contains("Quantity must be greater than zero"))
+                .verify();
+    }
+
+
+
+
+    void whenCheckoutCart_thenReturnUpdatedCartWithPaymentProcessed() {
+        // Given
+        String cartId = "98f7b33a-d62a-420a-a84a-05a27c85fc91";
+        Cart cart = new Cart();
+        cart.setCartId(cartId);
+        cart.setCustomerId("customer1");
+
+        CartProduct product = new CartProduct();
+        product.setProductId("product1");
+        product.setProductSalePrice(100.0);
+        product.setQuantityInCart(3); // 3 items at $100 each
+
+        cart.setProducts(List.of(product));
+
+        when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart));
+        when(cartRepository.save(any(Cart.class))).thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
+
+        // When
+        Mono<CartResponseModel> result = cartService.checkoutCart(cartId);
+
+        // Then
+        StepVerifier.create(result)
+                .assertNext(cartResponseModel -> {
+                    assertEquals(cartId, cartResponseModel.getCartId());
+                    assertEquals(300.0, cartResponseModel.getSubtotal()); // 3 * 100.0
+                    assertEquals(29.925, cartResponseModel.getTvq());      // 9.975% tax
+                    assertEquals(15.0, cartResponseModel.getTvc());        // 5% tax
+                    assertEquals(344.925, cartResponseModel.getTotal());   // subtotal + taxes
+                    assertEquals("Payment Processed", cartResponseModel.getPaymentStatus());
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void findCartByCustomerId_withExistingId_thenReturnCartResponseModel() {
+        // Arrange
+        Mockito.when(cartRepository.findCartByCustomerId(validCustomerId))
+                .thenReturn(Mono.just(cart1));
+
+        // Act & Assert
+        StepVerifier.create(cartService.findCartByCustomerId(validCustomerId))
+                .assertNext(cartResponseModel -> {
+                    assertNotNull(cartResponseModel);
+                    assertEquals(cart1.getCartId(), cartResponseModel.getCartId());
+                    assertEquals(cart1.getCustomerId(), cartResponseModel.getCustomerId());
+                    assertEquals(products.size(), cartResponseModel.getProducts().size());
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void findCartByCustomerId_withNonExistentId_thenReturnNotFoundException() {
+        // Arrange
+        Mockito.when(cartRepository.findCartByCustomerId(nonExistentCustomerId))
+                .thenReturn(Mono.empty());
+
+        // Act & Assert
+        StepVerifier.create(cartService.findCartByCustomerId(nonExistentCustomerId))
+                .expectErrorMatches(throwable -> throwable instanceof NotFoundException &&
+                        throwable.getMessage().equals("Cart for customer id was not found: " + nonExistentCustomerId))
+                .verify();
+    }
 }
+

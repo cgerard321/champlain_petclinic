@@ -34,6 +34,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 import java.awt.print.Pageable;
 import java.util.Optional;
@@ -277,6 +278,7 @@ public class BFFApiGatewayController {
         return customersServiceClient.getPetTypes();
     }
 
+    /*
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET})
     @PutMapping("pets/{petId}")
     public Mono<ResponseEntity<PetResponseDTO>> updatePet(@RequestBody PetResponseDTO pet, @PathVariable String petId){
@@ -284,7 +286,7 @@ public class BFFApiGatewayController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-
+*/
 
         /* Visits Methods */
 
@@ -428,6 +430,15 @@ public class BFFApiGatewayController {
                 .map(r -> ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, MediaType.IMAGE_JPEG_VALUE).body(r))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
+    @PostMapping(value = "{vetId}/specialties")
+    public Mono<VetResponseDTO> addSpecialtiesByVetId(
+            @PathVariable String vetId,
+            @RequestBody Mono<SpecialtyDTO> specialties) {
+        return vetsServiceClient.addSpecialtiesByVetId(vetId, specialties);
+    }
+
+ 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @GetMapping("vets/{vetId}/default-photo")
     public Mono<ResponseEntity<PhotoResponseDTO>> getDefaultPhotoByVetId(@PathVariable String vetId) {
