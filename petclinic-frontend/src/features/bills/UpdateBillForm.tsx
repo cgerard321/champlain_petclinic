@@ -4,8 +4,8 @@ import { BillRequestModel } from '@/features/bills/models/BillRequestModel.tsx';
 import { getBill, updateBill } from '@/features/bills/api/updateBill.tsx';
 import { Bill } from '@/features/bills/models/Bill.ts';
 import './UpdateBillForm.css';
-import { getAllOwners } from '@/features/customers/api/getAllOwners.tsx';
-import { getAllVets } from '@/features/veterinarians/api/getAllVets.tsx';
+import { getAllOwners } from '@/features/customers/api/getAllOwners.ts';
+import { getAllVets } from '@/features/veterinarians/api/getAllVets.ts';
 import { OwnerResponseModel } from '@/features/customers/models/OwnerResponseModel.ts';
 import { VetResponseModel } from '@/features/veterinarians/models/VetResponseModel.ts';
 
