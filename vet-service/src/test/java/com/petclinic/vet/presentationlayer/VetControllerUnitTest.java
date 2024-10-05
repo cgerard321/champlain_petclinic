@@ -1,5 +1,6 @@
 package com.petclinic.vet.presentationlayer;
 
+import com.petclinic.vet.dataaccesslayer.Album;
 import com.petclinic.vet.dataaccesslayer.Photo;
 import com.petclinic.vet.dataaccesslayer.Vet;
 import com.petclinic.vet.dataaccesslayer.badges.Badge;
@@ -73,6 +74,8 @@ class VetControllerUnitTest {
     BadgeService badgeService;
     @MockBean
     ConnectionFactoryInitializer connectionFactoryInitializer;
+    @MockBean
+    AlbumService albumService;
 
     VetRequestDTO vetRequestDTO = buildVetRequestDTO();
     VetResponseDTO vetResponseDTO = buildVetResponseDTO();
@@ -1072,5 +1075,43 @@ class VetControllerUnitTest {
     }
 
 */
+
+    @Test
+    void whenGetAllAlbumsByVetId_thenReturnAlbums() {
+
+        String vetId = "ac9adeb8-625b-11ee-8c99-0242ac120002";
+        Album album1 = new Album(1, vetId, "album1.jpg", "image/jpeg", "mockImageData1".getBytes());
+        Album album2 = new Album(2, vetId, "album2.jpg", "image/jpeg", "mockImageData2".getBytes());
+
+        when(albumService.getAllAlbumsByVetId(vetId))
+                .thenReturn(Flux.just(album1, album2));
+
+        client.get()
+                .uri("/vets/" + vetId + "/albums")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBodyList(Album.class)
+                .hasSize(2)
+                .contains(album1, album2);
+    }
+
+    @Test
+    void whenGetAllAlbumsByVetId_withError_thenLogError() {
+
+        String vetId = "ac9adeb8-625b-11ee-8c99-0242ac120002";
+
+        when(albumService.getAllAlbumsByVetId(vetId))
+                .thenReturn(Flux.error(new RuntimeException("Test error")));
+
+        client.get()
+                .uri("/vets/" + vetId + "/albums")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().is5xxServerError();
+
+    }
+
 
 }
