@@ -42,7 +42,8 @@ import AddSupplyToInventory from './features/inventories/AddSupplyToInventory';
 import AddEmergencyForm from './features/visits/Emergency/AddEmergencyForm';
 import EditEmergency from './features/visits/Emergency/EditEmergency';
 import EmergencyList from './features/visits/Emergency/EmergencyList';
-import ProductDetails from './features/products/api/ProductDetails';
+import ProductDetails from '@/features/products/api/ProductDetails.tsx';
+import AddPetPage from '@/pages/Customer/AddPetPage.tsx';
 
 const router = createBrowserRouter([
   {
@@ -270,7 +271,7 @@ const router = createBrowserRouter([
       {
         path: `${AppRoutePaths.Carts}/:cartId`,
         element: (
-          <ProtectedRoute roles={['ADMIN', 'OWNER']}>
+          <ProtectedRoute>
             <UserCart />
           </ProtectedRoute>
         ),
@@ -288,14 +289,6 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute roles={['ADMIN']}>
             <EmailingPage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: `${AppRoutePaths.Carts}/:cartId`, // Route for viewing a specific cart
-        element: (
-          <ProtectedRoute roles={['ADMIN']}>
-            <UserCart />
           </ProtectedRoute>
         ),
       },
@@ -320,6 +313,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute roles={['ADMIN', 'VET']}>
             <UpdateOwnerPetPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.AddPet,
+        element: (
+          <ProtectedRoute roles={['ADMIN', 'VET']}>
+            <AddPetPage />
           </ProtectedRoute>
         ),
       },

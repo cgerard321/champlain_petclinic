@@ -1,6 +1,7 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.petclinic.bffapigateway.dtos.Auth.*;
+import com.petclinic.bffapigateway.dtos.Cart.CartRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Vets.VetRequestDTO;
@@ -20,6 +21,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -38,16 +40,19 @@ public class AuthServiceClient {
 
     private final String authServiceUrl;
 
+    private final CartServiceClient cartServiceClient;
+
     @Autowired
     private Rethrower rethrower;
 
     public AuthServiceClient(
             WebClient.Builder webClientBuilder,
             CustomersServiceClient customersServiceClient, VetsServiceClient vetsServiceClient, @Value("${app.auth-service.host}") String authServiceHost,
-            @Value("${app.auth-service.port}") String authServicePort) {
+            @Value("${app.auth-service.port}") String authServicePort, CartServiceClient cartServiceClient) {
         this.webClientBuilder = webClientBuilder;
         this.customersServiceClient = customersServiceClient;
         this.vetsServiceClient = vetsServiceClient;
+        this.cartServiceClient = cartServiceClient;
         authServiceUrl = "http://" + authServiceHost + ":" + authServicePort;
     }
 
@@ -143,38 +148,44 @@ public class AuthServiceClient {
         String uuid = UUID.randomUUID().toString();
 
         return model.flatMap(register -> {
-                    register.setUserId(uuid);
-                    return webClientBuilder.build().post()
-                            .uri(authServiceUrl + "/users")
-                            .body(Mono.just(register), Register.class)
-                            .accept(MediaType.APPLICATION_JSON)
-                            .retrieve()
-                            .onStatus(HttpStatusCode::is4xxClientError,
-                                    n -> rethrower.rethrow(n,
-                                            x -> new GenericHttpException(x.get("message").toString(), BAD_REQUEST))
-                            )
-                            .bodyToMono(UserPasswordLessDTO.class)
-                            .flatMap(userDetails -> {
-                                Mono<OwnerRequestDTO> ownerRequestDTO = Mono.just(OwnerRequestDTO.builder()
-                                        .firstName(register.getOwner().getFirstName())
-                                        .lastName(register.getOwner().getLastName())
-                                        .address(register.getOwner().getAddress())
-                                        .city(register.getOwner().getCity())
-                                        .province(register.getOwner().getProvince())
-                                        .telephone(register.getOwner().getTelephone())
-                                        .ownerId(uuid)
-                                        .build());
+            register.setUserId(uuid);
+            return webClientBuilder.build().post()
+                    .uri(authServiceUrl + "/users")
+                    .body(Mono.just(register), Register.class)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::is4xxClientError,
+                            n -> rethrower.rethrow(n,
+                                    x -> new GenericHttpException(x.get("message").toString(), BAD_REQUEST))
+                    )
+                    .bodyToMono(UserPasswordLessDTO.class)
+                    .flatMap(userDetails -> {
+                        Mono<OwnerRequestDTO> ownerRequestDTO = Mono.just(OwnerRequestDTO.builder()
+                                .firstName(register.getOwner().getFirstName())
+                                .lastName(register.getOwner().getLastName())
+                                .address(register.getOwner().getAddress())
+                                .city(register.getOwner().getCity())
+                                .province(register.getOwner().getProvince())
+                                .telephone(register.getOwner().getTelephone())
+                                .ownerId(uuid)
+                                .build());
 
-                                return customersServiceClient.addOwner(ownerRequestDTO);
-                                    }
-                            );
-                }
-        ).doOnError(throwable -> {
+                        return customersServiceClient.addOwner(ownerRequestDTO)
+                                .flatMap(ownerResponse -> {
+                                    String customerId = ownerResponse.getOwnerId();
+
+                                    //call cartServiceClient and pass customerId as a parameter in the URL
+                                    return cartServiceClient.assignCartToUser(customerId)
+                                            .thenReturn(ownerResponse);
+                                });
+
+                    });
+        }).doOnError(throwable -> {
             log.error("Error creating user: " + throwable.getMessage());
             customersServiceClient.deleteOwnerV2(uuid);
         });
-
     }
+
 
     public Mono<UserPasswordLessDTO> createInventoryMangerUser(Mono<RegisterInventoryManager> registerInventoryManagerMono) {
         String uuid = UUID.randomUUID().toString();

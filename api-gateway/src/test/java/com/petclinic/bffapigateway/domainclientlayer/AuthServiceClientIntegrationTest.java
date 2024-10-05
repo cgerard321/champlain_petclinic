@@ -54,6 +54,9 @@ public class AuthServiceClientIntegrationTest {
     CustomersServiceClient customersServiceClient;
     @MockBean
     VetsServiceClient vetsServiceClient;
+    @MockBean
+    CartServiceClient cartServiceClient;
+
     private MockWebServer server;
     private ObjectMapper objectMapper;
 
@@ -109,11 +112,12 @@ public class AuthServiceClientIntegrationTest {
 
         customersServiceClient = Mockito.mock(CustomersServiceClient.class);
         vetsServiceClient = Mockito.mock(VetsServiceClient.class);
+        cartServiceClient = Mockito.mock(CartServiceClient.class);
         server = new MockWebServer();
         authServiceClient = new AuthServiceClient(
                 WebClient.builder(),
                 customersServiceClient, vetsServiceClient, server.getHostName(),
-                String.valueOf(server.getPort()));
+                String.valueOf(server.getPort()), cartServiceClient);
         objectMapper = new ObjectMapper();
     }
 
