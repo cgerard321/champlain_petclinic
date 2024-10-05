@@ -64,6 +64,10 @@ class VetControllerIntegrationTest {
         mockServerConfigVetService.registerGetVetByIdEndpoint();
         mockServerConfigVetService.registerGetVetByInvalidIdEndpoint();
 
+        mockServerConfigVetService.registerGetPhotoByVetIdEndpoint("ac9adeb8-625b-11ee-8c99-0242ac120002", "mockPhotoData".getBytes());
+        mockServerConfigVetService.registerGetPhotoByVetIdEndpointNotFound("invalid-vet-id");
+
+
     }
 
     @AfterAll
@@ -100,10 +104,10 @@ class VetControllerIntegrationTest {
         webTestClient.get()
                 .uri(VET_ENDPOINT)
                 .cookie("Bearer", jwtTokenForValidAdmin)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentType("text/event-stream;charset=UTF-8")
                 .expectBodyList(VetResponseDTO.class)
                 .hasSize(2);
     }
@@ -169,31 +173,6 @@ class VetControllerIntegrationTest {
     }
 
 
-    @Test
-    void whenGetVetByFirstName_notExists_thenReturnNotFound() {
-        String firstName = "Unknown";
-
-        mockServerConfigVetService.registerGetVetByFirstNameEndpointNotFound(firstName);
-
-        webTestClient.get()
-                .uri("/api/v2/gateway/vets/firstName/{firstName}", firstName)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isNotFound();
-    }
-
-    @Test
-    void whenGetVetByLastName_notExists_thenReturnNotFound() {
-        String lastName = "Unknown";
-
-        mockServerConfigVetService.registerGetVetByLastNameEndpointNotFound(lastName);
-
-        webTestClient.get()
-                .uri("/api/v2/gateway/vets/lastName/{lastName}", lastName)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isNotFound();
-    }
 
     @Test
     public void getVetById_ValidId_ReturnsVet() {
@@ -341,50 +320,36 @@ class VetControllerIntegrationTest {
                 })
                 .verifyComplete();
     }
+    @Test
+    public void whenGetPhotoByVetId_thenReturnPhoto() {
+        String vetId = "ac9adeb8-625b-11ee-8c99-0242ac120002";
+        byte[] photoData = "mockPhotoData".getBytes();
+        mockServerConfigVetService.registerGetPhotoByVetIdEndpoint(vetId, photoData);
 
-    /*@Test
-    void whenUpdateVet_asAdmin_with_InvalidVetId_thenInvalidInput() {
-
-        VetRequestDTO updatedRequestDTO = VetRequestDTO.builder()
-                .vetId("invalid-vet-id")
-                .vetBillId("bill001")
-                .firstName("John")
-                .lastName("Doe")
-                .email("john.doe@example.com")
-                .phoneNumber("1234567890")
-                .resume("Specialist in dermatology")
-                .workday(workdaySet)
-                .workHoursJson("08:00-16:00")
-                .active(true)
-                .specialties(Set.of(SpecialtyDTO.builder().specialtyId("dermatology").name("Dermatology").build()))
-                .photoDefault(false)
-                .build();
-
-
-
-        Mono<InvalidInputException> result = webTestClient.put()
-                .uri("/api/v2/gateway/vets/{vetId}", updatedRequestDTO.getVetId())
-                .cookie("Bearer", jwtTokenForValidAdmin)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(Mono.just(updatedRequestDTO), VetRequestDTO.class)
-                .accept(MediaType.APPLICATION_JSON)
+        webTestClient.get()
+                .uri(VET_ENDPOINT + "/" + vetId + "/photo")
+                .cookie("Bearer", BEARER_TOKEN)
+                .accept(MediaType.IMAGE_JPEG)
                 .exchange()
-                .expectStatus().isEqualTo(422) // change to is Ok after testing for errors
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .returnResult(InvalidInputException.class)
-                .getResponseBody()
-                .single();
-
-        StepVerifier
-                .create(result)
-                .expectNextMatches(responseError ->{
-
-                    assertNotNull(responseError);
-                    assertEquals("Vet Id provided is invalid: " + updatedRequestDTO.getVetId()
-                            , responseError.getMessage());
-                    return true;
-                })
-                .verifyComplete();
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.IMAGE_JPEG_VALUE)
+                .expectBody(byte[].class)
+                .isEqualTo(photoData);
     }
-*/
+
+
+    @Test
+    public void whenGetPhotoByVetId_withNotFoundVetId_thenReturn404() {
+        String notFoundVetId = ("jj2cbf82-625b-11ee-8c99-0242ac120002");
+
+        mockServerConfigVetService.registerGetPhotoByVetIdEndpointNotFound(notFoundVetId);
+
+        webTestClient.get()
+                .uri(VET_ENDPOINT + "/" + notFoundVetId + "/photo")
+                .cookie("Bearer", BEARER_TOKEN)
+                .accept(MediaType.ALL)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
 }

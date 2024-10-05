@@ -37,9 +37,9 @@
     &lt;TestId&gt;NUnit3x::20234631-6E4D-4617-BF62-DA0E00704F38::net8.0::emailing_service_test.Models.EmailTemplateTests&lt;/TestId&gt;&#xD;
   &lt;/TestAncestor&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=f93bd40c_002D82e0_002D47c2_002Daf0e_002D48951cdf722e/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="SendEmail_RequestFieldContainPlaceholder_ReturnsBadRequest" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
-  &lt;Project Location="C:\Users\Admin\Desktop\PetClinic\champlain_petclinic\emailing-service\emailing-service-test" Presentation="&amp;lt;emailing-service-test&amp;gt;" /&gt;&#xD;
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=f93bd40c_002D82e0_002D47c2_002Daf0e_002D48951cdf722e/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="SendEmail_RequestFieldContainPlaceholder_ReturnsBadRequest" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;Project Location="C:\Users\Admin\Desktop\Sprint2\Try3\champlain_petclinic\emailing-service\emailing-service-test" Presentation="&amp;lt;emailing-service-test&amp;gt;" /&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=fa29416e_002Dd6bc_002D4a7f_002D8900_002D775d10ea20bc/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="All tests from Solution #3" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=fa29416e_002Dd6bc_002D4a7f_002D8900_002D775d10ea20bc/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="All tests from Solution #3" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
   &lt;Solution /&gt;&#xD;
 &lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>

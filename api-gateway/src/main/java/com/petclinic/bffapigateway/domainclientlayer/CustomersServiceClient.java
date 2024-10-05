@@ -164,7 +164,9 @@ public class CustomersServiceClient {
     public Mono<OwnerResponseDTO> addOwner(Mono<OwnerRequestDTO> model) {
         String ownerId = UUID.randomUUID().toString();
         return model.flatMap(requestDTO -> {
-            requestDTO.setOwnerId(ownerId);
+            if(requestDTO.getOwnerId() == null || requestDTO.getOwnerId().isEmpty()){
+                requestDTO.setOwnerId(ownerId);
+            }
             return webClientBuilder.build()
                     .post()
                     .uri(customersServiceUrl + "/owners")
@@ -217,14 +219,31 @@ public class CustomersServiceClient {
                 .retrieve().bodyToMono(PetResponseDTO.class);
     }
 
-    public Mono<PetResponseDTO> updatePet(PetResponseDTO model, final String petId) {
-        return webClientBuilder.build().put()
-                .uri(customersServiceUrl + "/pet/{petId}", petId)
-                .body(just(model), PetResponseDTO.class)
-                .accept(MediaType.APPLICATION_JSON)
-                .retrieve().bodyToMono(PetResponseDTO.class);
+    public Mono<PetResponseDTO> addPet(Mono<PetRequestDTO> model) {
+        String petId = UUID.randomUUID().toString();
+        return model.flatMap(requestDTO -> {
+            if(requestDTO.getPetId() == null || requestDTO.getPetId().isEmpty()){
+                requestDTO.setPetId(petId);
+            }
+            return webClientBuilder.build()
+                    .post()
+                    .uri(customersServiceUrl + "/pet")
+                    .body(BodyInserters.fromValue(requestDTO))
+                    .retrieve()
+                    .bodyToMono(PetResponseDTO.class);
+        });
     }
 
+    public Mono<PetResponseDTO> updatePet(Mono<PetRequestDTO> petRequestDTO, String petId) {
+        return petRequestDTO.flatMap(requestDTO -> {
+            requestDTO.setPetId(petId);
+            return webClientBuilder.build().put()
+                    .uri(customersServiceUrl + "/pet/" + petId)
+                    .body(BodyInserters.fromValue(requestDTO))
+                    .retrieve()
+                    .bodyToMono(PetResponseDTO.class);
+        });
+    }
     public Mono<PetResponseDTO> patchPet(PetRequestDTO model, String petId) {
         return webClientBuilder.build().patch()
                 .uri(customersServiceUrl + "/pet/{petId}", petId)
@@ -243,6 +262,13 @@ public class CustomersServiceClient {
     public Mono<PetResponseDTO> deletePetByPetId(final String petId) {
         return webClientBuilder.build().delete()
                 .uri(customersServiceUrl + "/pet/{petId}", petId)
+                .retrieve()
+                .bodyToMono(PetResponseDTO.class);
+    }
+
+    public Mono<PetResponseDTO> deletePetByPetIdV2(final String petId) {
+        return webClientBuilder.build().delete()
+                .uri(customersServiceUrl + "/pet/{petId}/v2", petId)
                 .retrieve()
                 .bodyToMono(PetResponseDTO.class);
     }

@@ -11,10 +11,7 @@ package com.petclinic.vet.servicelayer;
   * Ticket: feat(VVS-CPC-553): add veterinarian
  */
 
-import com.petclinic.vet.dataaccesslayer.Photo;
-import com.petclinic.vet.dataaccesslayer.PhotoRepository;
-import com.petclinic.vet.dataaccesslayer.Vet;
-import com.petclinic.vet.dataaccesslayer.VetRepository;
+import com.petclinic.vet.dataaccesslayer.*;
 import com.petclinic.vet.dataaccesslayer.badges.Badge;
 import com.petclinic.vet.dataaccesslayer.badges.BadgeRepository;
 import com.petclinic.vet.dataaccesslayer.badges.BadgeTitle;
@@ -40,6 +37,9 @@ import reactor.core.publisher.Mono;
 import javax.sql.DataSource;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -118,20 +118,26 @@ public class VetServiceImpl implements VetService {
                 .map(EntityDtoUtil::vetEntityToResponseDTO);
     }
 
-
     @Override
-    public Mono<VetResponseDTO> getVetByFirstName(String firstName) {
-        return vetRepository.findVetByFirstName(firstName)
-                .switchIfEmpty(Mono.error(new NotFoundException("No vet with this first name was found: " + firstName)))
-                .map(EntityDtoUtil::vetEntityToResponseDTO);
+    public Mono<VetResponseDTO> addSpecialtiesByVetId(String vetId, Mono<SpecialtyDTO> specialtyDTO) {
+        return vetRepository.findVetByVetId(vetId)
+                .switchIfEmpty(Mono.error(new NotFoundException("Vet not found with id: " + vetId)))
+                .flatMap(vet -> specialtyDTO
+                        .map(this::specialtyDtoToEntity) // Convert DTO to entity
+                        .doOnNext(specialty -> vet.getSpecialties().add(specialty)) // Add specialty to the vet's specialties
+                        .then(vetRepository.save(vet)) // Save updated vet
+                )
+                .map(EntityDtoUtil::vetEntityToResponseDTO); // Convert the vet entity back to DTO
+    }
+    private Specialty specialtyDtoToEntity(SpecialtyDTO specialtyDTO) {
+        return Specialty.builder()
+                .specialtyId(specialtyDTO.getSpecialtyId())  // Assuming you have an ID for the specialty
+                .name(specialtyDTO.getName())  // Assuming there's a name field in SpecialtyDTO
+                .build();
     }
 
-    @Override
-    public Mono<VetResponseDTO> getVetByLastName(String lastName) {
-        return vetRepository.findVetByLastName(lastName)
-                .switchIfEmpty(Mono.error(new NotFoundException("No vet with this last name was found: " + lastName)))
-                .map(EntityDtoUtil::vetEntityToResponseDTO);
-    }
+
+
 
     @Transactional
     @Override
@@ -204,5 +210,6 @@ public class VetServiceImpl implements VetService {
                 .zipWith(vetRepository.save(vetEntity))
                 .map(tuple -> tuple.getT2());
     }
+
 
 }

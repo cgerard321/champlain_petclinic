@@ -5,9 +5,8 @@ import org.springframework.data.domain.Pageable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-
 public interface ProductInventoryService {
-    Mono<ProductResponseDTO> addProductToInventory(Mono<ProductRequestDTO> productRequestDTOMono, String inventoryId);
+//    Mono<ProductResponseDTO> addProductToInventory(Mono<ProductRequestDTO> productRequestDTOMono, String inventoryId);
     Mono<InventoryResponseDTO> addInventory(Mono<InventoryRequestDTO> inventoryRequestDTO);
     Mono<InventoryResponseDTO> updateInventory(Mono<InventoryRequestDTO> inventoryRequestDTO, String inventoryId);
 
@@ -29,11 +28,15 @@ public interface ProductInventoryService {
 
     Mono<ProductResponseDTO> getProductByProductIdInInventory(String inventoryId, String productId);
 
-    Mono<InventoryResponseDTO> addSupplyToInventoryByInventoryName(String inventoryName, Mono<SupplyRequestDTO> supplyRequestDTOMono);
+    Mono<InventoryResponseDTO> addProductToInventoryByInventoryName(String inventoryName, Mono<ProductRequestDTO> productRequestDTOMono);
 
-    Flux<SupplyResponseDTO> getSuppliesByInventoryName(String inventoryName);
+    Flux<ProductResponseDTO> getProductsByInventoryName(String inventoryName);
   
     Flux<ProductResponseDTO> getLowStockProducts(String inventoryId, int stockThreshold);
 
+    Flux<ProductResponseDTO> searchProducts(String inventoryId, String productName, String productDescription);
 
+    Mono<ProductResponseDTO> addSupplyToInventory(Mono<ProductRequestDTO> productRequestDTOMono, String inventoryId);
+
+    Mono<Integer> getQuantityOfProductsInInventory(String inventoryId);
     }

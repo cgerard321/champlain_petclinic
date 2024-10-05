@@ -15,5 +15,11 @@ import java.util.List;
 // first creates his account, the cart will be empty
 public class CartRequestDTO {
     private String customerId;
-    private List<String> productIds;
+    private String cartId;
+    private List<CartProductResponseDTO> products;
+    private double subtotal;
+    private double tvq;
+    private double tvc;
+    private double total;
+    private String message;
 }

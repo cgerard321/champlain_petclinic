@@ -25,6 +25,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .requestCount(0)
                 .averageRating(1.3)
                 .productType("Food")
+                .productQuantity(44)
             .build();
 
         Product product2 = Product.builder()
@@ -35,6 +36,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .requestCount(0)
                 .averageRating(4.8)
                 .productType("Accessory")
+                .productQuantity(3)
                 .build();
 
         Product product3 = Product.builder()
@@ -45,6 +47,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .requestCount(0)
                 .averageRating(2.8)
                 .productType("Medication")
+                .productQuantity(53)
                 .build();
 
         Product product4 = Product.builder()
@@ -55,6 +58,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .requestCount(0)
                 .averageRating(1.3)
                 .productType("Accessory")
+                .productQuantity(8)
                 .build();
 
         Product product5 = Product.builder()
@@ -65,6 +69,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .requestCount(0)
                 .averageRating(4.9)
                 .productType("Accessory")
+                .productQuantity(14)
                 .build();
 
         Product product6 = Product.builder()
@@ -75,6 +80,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .requestCount(0)
                 .averageRating(4.7)
                 .productType("Equipment")
+                .productQuantity(58)
                 .build();
 
         Product product7 = Product.builder()
@@ -85,6 +91,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .requestCount(0)
                 .averageRating(3.4)
                 .productType("Accessory")
+                .productQuantity(66)
                 .build();
 
         Product product8 = Product.builder()
@@ -95,6 +102,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .requestCount(0)
                 .averageRating(1.2)
                 .productType("Accessory")
+                .productQuantity(6)
                 .build();
 
         Flux.just(product1, product2, product3, product4, product5, product6, product7, product8)
