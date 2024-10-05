@@ -35,13 +35,12 @@ const UserCart = (): JSX.Element => {
   const { cartId } = useParams<{ cartId: string }>();
   const navigate = useNavigate();
   const [cartItems, setCartItems] = useState<ProductModel[]>([]);
-  const [wishlistItems, setWishlistItems] = useState<ProductModel[]>([]); // New state for wishlist
+  const [wishlistItems, setWishlistItems] = useState<ProductModel[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [errorMessages, setErrorMessages] = useState<{ [key: number]: string }>(
     {}
   );
-
   const [checkoutMessage, setCheckoutMessage] = useState<string | null>(null);
   const [invoice, setInvoice] = useState<Invoice | null>(null);
 
@@ -81,6 +80,7 @@ const UserCart = (): JSX.Element => {
           throw new Error('Invalid data format: products should be an array');
         }
 
+        // Map data.products to the appropriate ProductModel format
         const products: ProductModel[] = data.products.map(
           (product: ProductAPIResponse) => ({
             productId: product.productId,
@@ -88,13 +88,13 @@ const UserCart = (): JSX.Element => {
             productDescription: product.productDescription,
             productSalePrice: product.productSalePrice,
             averageRating: product.averageRating,
-            quantity: product.quantityInCart,
+            quantity: product.quantityInCart || 1,
             productQuantity: product.productQuantity,
           })
         );
 
         setCartItems(products);
-        setWishlistItems(data.wishListProducts || []); // Set wishlist items
+        setWishlistItems(data.wishListProducts || []);
       } catch (err: unknown) {
         if (err instanceof Error) {
           console.error(err.message);
@@ -181,10 +181,12 @@ const UserCart = (): JSX.Element => {
   }, []);
 
   const clearCart = async (): Promise<void> => {
-    if (
-      !cartId ||
-      !window.confirm('Are you sure you want to clear the cart?')
-    ) {
+    if (!cartId) {
+      alert('Invalid cart ID');
+      return;
+    }
+
+    if (!window.confirm('Are you sure you want to clear the cart?')) {
       return;
     }
 
@@ -244,8 +246,8 @@ const UserCart = (): JSX.Element => {
           issueDate: new Date().toISOString(), // Current date
         };
 
-        setInvoice(newInvoice); // Set the new invoice state
-        setCheckoutMessage('Checkout successful!'); // Notify the user
+        setInvoice(newInvoice);
+        setCheckoutMessage('Checkout successful!');
         setCartItems([]); // Clear cart after checkout
       } else {
         setCheckoutMessage('Checkout failed.');
@@ -279,7 +281,7 @@ const UserCart = (): JSX.Element => {
 
       {/* Main Cart Section */}
       <div className="Cart-section">
-        <h2 className="Cart-title">Your Cart</h2> {/* Cart title */}
+        <h2 className="Cart-title">Your Cart</h2>
         <div className="UserCart-items">
           {cartItems.length > 0 ? (
             cartItems.map((item, index) => (
@@ -289,6 +291,7 @@ const UserCart = (): JSX.Element => {
                 index={index}
                 changeItemQuantity={changeItemQuantity}
                 deleteItem={deleteItem}
+                errorMessage={errorMessages[index]}
               />
             ))
           ) : (
@@ -299,30 +302,54 @@ const UserCart = (): JSX.Element => {
           <h3>Cart Summary</h3>
           <p>Subtotal: ${subtotal.toFixed(2)}</p>
           <p>TVQ (9.975%): ${tvq.toFixed(2)}</p>
-          <p>GST (5%): ${tvc.toFixed(2)}</p>
-          <p>Total: ${total.toFixed(2)}</p>
+          <p>TVC (5%): ${tvc.toFixed(2)}</p>
+          <p className="total-price">Total: ${total.toFixed(2)}</p>
         </div>
         <button className="checkout-btn" onClick={handleCheckout}>
           Checkout
         </button>
-        {checkoutMessage && <p className="checkout-message">{checkoutMessage}</p>}
-      </div>
+        {checkoutMessage && (
+          <div className="checkout-message">{checkoutMessage}</div>
+        )}
 
-      <hr />
+        {/* Invoice Section */}
+        {invoice && ( // Render the invoice if available
+          <div className="Invoice">
+            <h2>Invoice Details</h2>
+            <p>Invoice ID: {invoice.invoiceId}</p>
+            <p>Cart ID: {invoice.cartId}</p>
+            <p>Subtotal: ${invoice.subtotal.toFixed(2)}</p>
+            <p>Tax: ${invoice.tax.toFixed(2)}</p>
+            <p>Total: ${invoice.total.toFixed(2)}</p>
+            <p>Issue Date: {new Date(invoice.issueDate).toLocaleString()}</p>
+            <h3>Items:</h3>
+            <ul>
+              {invoice.items.map((item, index) => (
+                <li key={index}>
+                  {item.productName} - Quantity: {item.quantity} - Price: $
+                  {item.productSalePrice.toFixed(2)}
+                </li>
+              ))}
+              <p>Subtotal: ${invoice.subtotal.toFixed(2)}</p>
+              <p>Tax: ${invoice.tax.toFixed(2)}</p>
+              <p>Total: ${invoice.total.toFixed(2)}</p>
+            </ul>
+          </div>
+        )}
+      </div>
 
       {/* Wishlist Section */}
       <div className="Wishlist-section">
-        <h2 className="Wishlist-title">Your Wishlist</h2> {/* Wishlist title */}
+        <h2 className="Wishlist-title">Your Wishlist</h2>
         <div className="UserCart-items">
           {wishlistItems.length > 0 ? (
-            wishlistItems.map((item, index) => (
+            wishlistItems.map(item => (
               <CartItem
                 key={item.productId}
                 item={item}
-                index={index}
-                changeItemQuantity={() => {}}
-                deleteItem={() => {}}
-                showWishlistButton={false} // Hide remove button for now
+                index={-1} // Mark as wishlist item
+                changeItemQuantity={() => {}} // Disable changing quantity for wishlist
+                deleteItem={() => {}} // Disable removing from wishlist
               />
             ))
           ) : (
@@ -330,25 +357,6 @@ const UserCart = (): JSX.Element => {
           )}
         </div>
       </div>
-
-      {/* Invoice Section */}
-      {invoice && (
-        <div className="Invoice-section">
-          <h2>Invoice</h2>
-          <p>Invoice ID: {invoice.invoiceId}</p>
-          <p>Issue Date: {invoice.issueDate}</p>
-          <ul>
-            {invoice.items.map(item => (
-              <li key={item.productId}>
-                {item.quantity} x {item.productName} @ ${item.productSalePrice.toFixed(2)} each
-              </li>
-            ))}
-          </ul>
-          <p>Subtotal: ${invoice.subtotal.toFixed(2)}</p>
-          <p>Tax: ${invoice.tax.toFixed(2)}</p>
-          <p>Total: ${invoice.total.toFixed(2)}</p>
-        </div>
-      )}
     </div>
   );
 };

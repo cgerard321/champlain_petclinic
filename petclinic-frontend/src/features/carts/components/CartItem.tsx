@@ -23,7 +23,7 @@ const CartItem = ({
   deleteItem,
 }: CartItemProps): JSX.Element => {
   const remainingStock = item.productQuantity - (item.quantity ?? 0);
-    return (
+  return (
     <div className="CartItem">
       <div className="CartItem-info">
         <h2 className="info-title">{item.productName}</h2>
@@ -34,10 +34,10 @@ const CartItem = ({
           <input
             type="number"
             min="1"
-            max={item.productQuantity} {/* Keep the max from main */}
+            max={item.productQuantity}
             value={item.quantity || 1}
             onChange={e => changeItemQuantity(e, index)}
-            onBlur={e => changeItemQuantity(e, index)} {/* Confirm quantity change on blur */}
+            onBlur={e => changeItemQuantity(e, index)}
             aria-label={`Quantity of ${item.productName}`}
           />
         </div>
