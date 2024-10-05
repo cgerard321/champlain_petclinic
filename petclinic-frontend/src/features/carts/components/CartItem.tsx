@@ -9,6 +9,7 @@ interface CartItemProps {
     index: number
   ) => void;
   deleteItem: (productId: string, indexToDelete: number) => void;
+  errorMessage?: string;
 }
 
 const formatPrice = (price: number): string => {

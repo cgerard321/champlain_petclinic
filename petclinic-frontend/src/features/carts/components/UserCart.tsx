@@ -231,192 +231,190 @@ const UserCart = (): JSX.Element => {
     }
 
     if (!window.confirm('Are you sure you want to clear the cart?')) {
-      return;
-    }
+      try {
+        const response = await fetch(
+          `http://localhost:8080/api/v2/gateway/carts/${cartId}/clear`,
+          {
+            method: 'DELETE',
+            credentials: 'include',
+          }
+        );
 
-    try {
-      const response = await fetch(
-        `http://localhost:8080/api/v2/gateway/carts/${cartId}/clear`,
-        {
-          method: 'DELETE',
-          credentials: 'include',
+        if (response.ok) {
+          setCartItems([]);
+          setCartItemCount(0);
+          alert('Cart has been successfully cleared!');
+        } else {
+          alert('Failed to clear cart');
         }
-      );
-
-      if (response.ok) {
-        setCartItems([]);
-        setCartItemCount(0);
-        alert('Cart has been successfully cleared!');
-      } else {
+      } catch (error) {
+        console.error('Error clearing cart:', error);
         alert('Failed to clear cart');
       }
-    } catch (error) {
-      console.error('Error clearing cart:', error);
-      alert('Failed to clear cart');
-    }
-  };
-
-  const handleCheckout = async (): Promise<void> => {
-    if (!cartId) {
-      setCheckoutMessage('Invalid cart ID');
-      return;
     }
 
-    try {
-      const response = await fetch(
-        `http://localhost:8080/api/v2/gateway/carts/${cartId}/checkout`,
-        {
-          method: 'POST',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+    const handleCheckout = async (): Promise<void> => {
+      if (!cartId) {
+        setCheckoutMessage('Invalid cart ID');
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `http://localhost:8080/api/v2/gateway/carts/${cartId}/checkout`,
+          {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+
+        if (response.ok) {
+          // Generate the invoice
+          const newInvoice: Invoice = {
+            invoiceId: 'INV-' + new Date().getTime(), // Generate a simple invoice ID
+            cartId,
+            items: cartItems.map(item => ({
+              productId: item.productId,
+              productName: item.productName,
+              productSalePrice: item.productSalePrice,
+              quantity: item.quantity || 1,
+            })),
+            subtotal,
+            tax: tvq + tvc,
+            total,
+            issueDate: new Date().toISOString(), // Current date
+          };
+
+          setInvoice(newInvoice); // Set the new invoice state
+          setCheckoutMessage('Checkout successful!'); // Notify the user
+          setCartItems([]); // Clear cart after checkout
+          setCartItemCount(0);
+        } else {
+          setCheckoutMessage('Checkout failed.');
         }
-      );
-
-      if (response.ok) {
-        // Generate the invoice
-        const newInvoice: Invoice = {
-          invoiceId: 'INV-' + new Date().getTime(), // Generate a simple invoice ID
-          cartId,
-          items: cartItems.map(item => ({
-            productId: item.productId,
-            productName: item.productName,
-            productSalePrice: item.productSalePrice,
-            quantity: item.quantity || 1,
-          })),
-          subtotal,
-          tax: tvq + tvc,
-          total,
-          issueDate: new Date().toISOString(), // Current date
-        };
-
-        setInvoice(newInvoice); // Set the new invoice state
-        setCheckoutMessage('Checkout successful!'); // Notify the user
-        setCartItems([]); // Clear cart after checkout
-        setCartItemCount(0);
-      } else {
+      } catch (error) {
+        console.error('Error during checkout:', error);
         setCheckoutMessage('Checkout failed.');
       }
-    } catch (error) {
-      console.error('Error during checkout:', error);
-      setCheckoutMessage('Checkout failed.');
+    };
+
+    if (loading) {
+      return <div className="loading">Loading cart items...</div>;
     }
-  };
 
-  if (loading) {
-    return <div className="loading">Loading cart items...</div>;
-  }
+    if (error) {
+      return <div className="error">{error}</div>;
+    }
 
-  if (error) {
-    return <div className="error">{error}</div>;
-  }
-
-  return (
-    <div className="UserCart">
-      <NavBar />
-      <h1>User Cart</h1>
-      <div className="cart-header">
-        <h2>Your Cart</h2>
-        <div className="cart-badge-container">
-          <FaShoppingCart aria-label="Shopping Cart" />
-          {cartItemCount > 0 && (
-            <span
-              className="cart-badge"
-              aria-label={`Cart has ${cartItemCount} items`}
-            >
-              {cartItemCount}
-            </span>
-          )}
-        </div>
-      </div>
-      <div className="UserCart-buttons">
-        <button className="go-back-btn" onClick={() => navigate(-1)}>
-          Go Back
-        </button>
-        <button className="clear-cart-btn" onClick={clearCart}>
-          Clear Cart
-        </button>
-      </div>
-      <hr />
-
-      {/* Main Cart Section */}
-      <div className="Cart-section">
-        <h2 className="Cart-title">Your Cart</h2>
-        <div className="UserCart-items">
-          {cartItems.length > 0 ? (
-            cartItems.map((item, index) => (
-              <CartItem
-                key={item.productId}
-                item={item}
-                index={index}
-                changeItemQuantity={changeItemQuantity}
-                deleteItem={deleteItem}
-                errorMessage={errorMessages[index]}
-              />
-            ))
-          ) : (
-            <p>No products in the cart.</p>
-          )}
-        </div>
-        <div className="CartSummary">
-          <h3>Cart Summary</h3>
-          <p>Subtotal: ${subtotal.toFixed(2)}</p>
-          <p>TVQ (9.975%): ${tvq.toFixed(2)}</p>
-          <p>TVC (5%): ${tvc.toFixed(2)}</p>
-          <p className="total-price">Total: ${total.toFixed(2)}</p>
-        </div>
-        <button className="checkout-btn" onClick={handleCheckout}>
-          Checkout
-        </button>
-        {checkoutMessage && (
-          <div className="checkout-message">{checkoutMessage}</div>
-        )}
-
-        {/* Invoice Section */}
-        {invoice && ( // Render the invoice if available
-          <div className="Invoice">
-            <h2>Invoice Details</h2>
-            <p>Invoice ID: {invoice.invoiceId}</p>
-            <p>Cart ID: {invoice.cartId}</p>
-            <p>Subtotal: ${invoice.subtotal.toFixed(2)}</p>
-            <p>Tax: ${invoice.tax.toFixed(2)}</p>
-            <p>Total: ${invoice.total.toFixed(2)}</p>
-            <p>Issue Date: {new Date(invoice.issueDate).toLocaleString()}</p>
-            <h3>Items:</h3>
-            <ul>
-              {invoice.items.map((item, index) => (
-                <li key={index}>
-                  {item.productName} - Quantity: {item.quantity} - Price: $
-                  {item.productSalePrice.toFixed(2)}
-                </li>
-              ))}
-            </ul>
+    return (
+      <div className="UserCart">
+        <NavBar />
+        <h1>User Cart</h1>
+        <div className="cart-header">
+          <h2>Your Cart</h2>
+          <div className="cart-badge-container">
+            <FaShoppingCart aria-label="Shopping Cart" />
+            {cartItemCount > 0 && (
+              <span
+                className="cart-badge"
+                aria-label={`Cart has ${cartItemCount} items`}
+              >
+                {cartItemCount}
+              </span>
+            )}
           </div>
-        )}
-      </div>
+        </div>
+        <div className="UserCart-buttons">
+          <button className="go-back-btn" onClick={() => navigate(-1)}>
+            Go Back
+          </button>
+          <button className="clear-cart-btn" onClick={clearCart}>
+            Clear Cart
+          </button>
+        </div>
+        <hr />
 
-      {/* Wishlist Section */}
-      <div className="Wishlist-section">
-        <h2 className="Wishlist-title">Your Wishlist</h2>
-        <div className="UserCart-items">
-          {wishlistItems.length > 0 ? (
-            wishlistItems.map(item => (
-              <CartItem
-                key={item.productId}
-                item={item}
-                index={-1} // Mark as wishlist item
-                changeItemQuantity={() => {}} // Disable changing quantity for wishlist
-                deleteItem={() => {}} // Disable removing from wishlist
-              />
-            ))
-          ) : (
-            <p>No products in the wishlist.</p>
+        {/* Main Cart Section */}
+        <div className="Cart-section">
+          <h2 className="Cart-title">Your Cart</h2>
+          <div className="UserCart-items">
+            {cartItems.length > 0 ? (
+              cartItems.map((item, index) => (
+                <CartItem
+                  key={item.productId}
+                  item={item}
+                  index={index}
+                  changeItemQuantity={changeItemQuantity}
+                  deleteItem={deleteItem}
+                  errorMessage={errorMessages[index]}
+                />
+              ))
+            ) : (
+              <p>No products in the cart.</p>
+            )}
+          </div>
+          <div className="CartSummary">
+            <h3>Cart Summary</h3>
+            <p>Subtotal: ${subtotal.toFixed(2)}</p>
+            <p>TVQ (9.975%): ${tvq.toFixed(2)}</p>
+            <p>TVC (5%): ${tvc.toFixed(2)}</p>
+            <p className="total-price">Total: ${total.toFixed(2)}</p>
+          </div>
+          <button className="checkout-btn" onClick={handleCheckout}>
+            Checkout
+          </button>
+          {checkoutMessage && (
+            <div className="checkout-message">{checkoutMessage}</div>
+          )}
+
+          {/* Invoice Section */}
+          {invoice && ( // Render the invoice if available
+            <div className="Invoice">
+              <h2>Invoice Details</h2>
+              <p>Invoice ID: {invoice.invoiceId}</p>
+              <p>Cart ID: {invoice.cartId}</p>
+              <p>Subtotal: ${invoice.subtotal.toFixed(2)}</p>
+              <p>Tax: ${invoice.tax.toFixed(2)}</p>
+              <p>Total: ${invoice.total.toFixed(2)}</p>
+              <p>Issue Date: {new Date(invoice.issueDate).toLocaleString()}</p>
+              <h3>Items:</h3>
+              <ul>
+                {invoice.items.map((item, index) => (
+                  <li key={index}>
+                    {item.productName} - Quantity: {item.quantity} - Price: $
+                    {item.productSalePrice.toFixed(2)}
+                  </li>
+                ))}
+              </ul>
+            </div>
           )}
         </div>
+
+        {/* Wishlist Section */}
+        <div className="Wishlist-section">
+          <h2 className="Wishlist-title">Your Wishlist</h2>
+          <div className="UserCart-items">
+            {wishlistItems.length > 0 ? (
+              wishlistItems.map(item => (
+                <CartItem
+                  key={item.productId}
+                  item={item}
+                  index={-1} // Mark as wishlist item
+                  changeItemQuantity={() => {}} // Disable changing quantity for wishlist
+                  deleteItem={() => {}} // Disable removing from wishlist
+                />
+              ))
+            ) : (
+              <p>No products in the wishlist.</p>
+            )}
+          </div>
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 };
 
 export default UserCart;
