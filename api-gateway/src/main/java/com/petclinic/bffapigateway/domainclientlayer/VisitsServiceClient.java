@@ -367,7 +367,7 @@ public class VisitsServiceClient {
                 .retrieve()
                 .bodyToMono(EmergencyResponseDTO.class);
     }
-
+      
     public Mono<VisitResponseDTO> patchVisitStatus(String visitId, String status) {
         return webClient.patch()
                 .uri(reviewUrl + "/" + visitId + "/" + status) // Adjust URI based on visit-service
