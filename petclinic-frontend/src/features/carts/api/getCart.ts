@@ -7,7 +7,7 @@ export const fetchCartIdByCustomerId = async (
     const response = await axiosInstance.get(
       `http://localhost:8080/api/v2/gateway/carts/customer/${userId}`
     );
-    return response.data.cartId; // Adjust according to your API response structure
+    return response.data.cartId;
   } catch (error) {
     console.error('Error fetching cart ID:', error);
     return null;

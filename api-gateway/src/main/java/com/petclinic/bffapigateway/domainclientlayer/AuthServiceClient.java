@@ -174,13 +174,6 @@ public class AuthServiceClient {
                                 .flatMap(ownerResponse -> {
                                     String customerId = ownerResponse.getOwnerId();
 
-                                    /* intellij says that this is never used but for some unknown dark magic
-                                    retarded reason it breaks everything if u remove it DO NOT!! - alex xoxoxo mwah */
-                                    CartRequestDTO cartRequestDTO = CartRequestDTO.builder()
-                                            .customerId(customerId)
-                                            .products(Collections.emptyList())
-                                            .build();
-
                                     //call cartServiceClient and pass customerId as a parameter in the URL
                                     return cartServiceClient.assignCartToUser(customerId)
                                             .thenReturn(ownerResponse);
