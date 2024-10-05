@@ -631,4 +631,68 @@ public class InventoryControllerTest {
                 .getQuantityOfProductsInInventory(eq(inventoryId));
     }
 
+    @Test
+    void addSupplyToInventory_withInvalidRequest_shouldReturnBadRequest() {
+        // Arrange
+        ProductRequestDTO invalidProductRequestDTO = ProductRequestDTO.builder()
+                .productName("")
+                .productDescription("")
+                .productPrice(-10.0)
+                .build();
+
+        String inventoryId = "1"; // Define the inventoryId
+
+        when(inventoryServiceClient.addSupplyToInventory(invalidProductRequestDTO, inventoryId))
+                .thenReturn(Mono.empty());
+
+        // Act
+        client.post()
+                .uri(baseInventoryURL + "/" + inventoryId + "/products") // Use the inventoryId variable
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(invalidProductRequestDTO)
+                .exchange()
+                .expectStatus().isBadRequest();
+
+        // Assert
+        verify(inventoryServiceClient, times(1))
+                .addSupplyToInventory(invalidProductRequestDTO, inventoryId);
+    }
+
+    @Test
+    void addSupplyToInventory_withValidRequest_shouldReturnCreatedProduct() {
+        // Arrange
+        ProductRequestDTO productRequestDTO = ProductRequestDTO.builder()
+                .productName("Product 101")
+                .productDescription("Description of Product 101")
+                .productPrice(99.99)
+                .build();
+
+        String inventoryId = "1"; // Define the inventoryId
+
+        ProductResponseDTO createdProductResponseDTO = ProductResponseDTO.builder()
+                .productId("101")
+                .productName("Product 101")
+                .productDescription("Description of Product 101")
+                .productPrice(99.99)
+                .build();
+
+        when(inventoryServiceClient.addSupplyToInventory(productRequestDTO, inventoryId))
+                .thenReturn(Mono.just(createdProductResponseDTO));
+
+        // Act
+        client.post()
+                .uri(baseInventoryURL + "/" + inventoryId + "/products") // Use the inventoryId variable
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(productRequestDTO)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody(ProductResponseDTO.class)
+                .isEqualTo(createdProductResponseDTO);
+
+        // Assert
+        verify(inventoryServiceClient, times(1))
+                .addSupplyToInventory(productRequestDTO, inventoryId);
+    }
+
+
 }
