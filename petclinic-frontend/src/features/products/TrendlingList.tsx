@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getAllProducts } from '@/features/products/api/getAllProducts';
 import { ProductModel } from '@/features/products/models/ProductModels/ProductModel';
+import ImageContainer from './components/ImageContainer';
 
 export default function TrendingList(): JSX.Element {
   const [trendingList, setTrendingList] = useState<ProductModel[]>([]);
@@ -23,6 +24,7 @@ export default function TrendingList(): JSX.Element {
       <div className="grid">
         {topFourTrending.map((product: ProductModel) => (
           <div className="card" key={product.productId}>
+            <ImageContainer imageId={product.imageId} />
             <h2>{product.productName}</h2>
             <p>{product.productDescription}</p>
             <p>Rating: {product.averageRating.toFixed(1)}</p>

@@ -1,6 +1,5 @@
-package com.petclinic.products.businesslayer.products;
+package com.petclinic.products.businesslayer.images;
 
-import com.petclinic.products.presentationlayer.images.ImageRequestModel;
 import com.petclinic.products.presentationlayer.images.ImageResponseModel;
 import org.springframework.http.codec.multipart.FilePart;
 import reactor.core.publisher.Mono;

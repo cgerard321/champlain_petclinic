@@ -1,4 +1,4 @@
-package com.petclinic.products.datalayer.products;
+package com.petclinic.products.datalayer.images;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,7 +17,6 @@ public class Image {
     @Id
     private String id;
     private String imageId;
-    private String productId;
     private String imageName;
     private String imageType;
     private byte[] imageData;

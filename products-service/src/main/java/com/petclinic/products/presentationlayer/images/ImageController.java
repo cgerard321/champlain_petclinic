@@ -1,6 +1,7 @@
 package com.petclinic.products.presentationlayer.images;
 
-import com.petclinic.products.businesslayer.products.ImageService;
+import com.petclinic.products.businesslayer.images.ImageService;
+import com.petclinic.products.utils.exceptions.InvalidInputException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +22,8 @@ public class ImageController {
     @GetMapping(value = "{imageId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<ImageResponseModel>> getImage(@PathVariable String imageId) {
         return Mono.just(imageId)
+                .filter(id -> id.length() == 36) // validate the course id
+                .switchIfEmpty(Mono.error(new InvalidInputException("Provided image id is invalid: " + imageId)))
                 .flatMap(imageService::getImageByImageId)
                 .map(ResponseEntity::ok);
     }
@@ -29,20 +32,6 @@ public class ImageController {
     public Mono<ResponseEntity<ImageResponseModel>> addImage(@RequestPart("imageName") String imageName,
                                                              @RequestPart("imageType") String imageType,
                                                              @RequestPart("imageData") FilePart imageData) {
-//        return imageData.content()
-//                .reduce(new byte[0], (accumulated, buffer) -> {
-//                    byte[] newBytes = new byte[accumulated.length + buffer.readableByteCount()];
-//                    System.arraycopy(accumulated, 0, newBytes, 0, accumulated.length);
-//                    buffer.read(newBytes, accumulated.length, buffer.readableByteCount());
-//                    DataBufferUtils.release(buffer);
-//                    return newBytes;
-//                })
-//                .flatMap(imageDataBytes -> {
-//                    ImageRequestModel imageRequestModel = new ImageRequestModel();
-//                    imageRequestModel.setImageName(imageName);
-//                    imageRequestModel.setImageType(imageType);
-//                    imageRequestModel.setImageData(imageDataBytes);
-
         return imageService.addImage(imageName, imageType, imageData)
                 .map(c -> ResponseEntity.status(HttpStatus.CREATED).body(c));
     }

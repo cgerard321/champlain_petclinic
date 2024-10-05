@@ -106,6 +106,7 @@ class ProductsServiceClientIntegrationTest {
     void whenAddProduct_thenReturnProduct() throws JsonProcessingException {
         ProductResponseDTO productResponseDTO = new ProductResponseDTO(
                 "productId",
+                "imageId",
                 "Product 1",
                 "desc",
                 10.00,
@@ -131,6 +132,7 @@ class ProductsServiceClientIntegrationTest {
     void whenUpdateProduct_thenReturnUpdatedProduct() throws JsonProcessingException {
         ProductResponseDTO productResponseDTO = new ProductResponseDTO(
                 "productId",
+                "imageId",
                 "Product 1",
                 "desc",
                 10.00,
@@ -156,6 +158,7 @@ class ProductsServiceClientIntegrationTest {
     void whenDeleteProduct_thenDeleteProduct() throws JsonProcessingException {
         ProductResponseDTO productResponseDTO = new ProductResponseDTO(
                 "productId",
+                "imageId",
                 "Product 1",
                 "desc",
                 10.00,

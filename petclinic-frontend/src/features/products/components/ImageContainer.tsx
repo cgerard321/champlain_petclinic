@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getImage } from '../api/getImage';
+import './Image.css';
 
 interface ImageContainerProps {
   imageId: string;
