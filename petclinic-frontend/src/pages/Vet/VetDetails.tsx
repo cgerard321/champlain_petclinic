@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { NavBar } from '@/layouts/AppNavBar.tsx';
 import './VetDetails.css';
 import axios from 'axios';
+import DeleteVetPhoto from "@/pages/Vet/DeleteVetPhoto.tsx";
 
 interface VetResponseType {
   vetId: string;
@@ -84,6 +85,13 @@ export default function VetDetails(): JSX.Element {
       }
     };
 
+    fetchVetDetails().then(() => {
+      fetchVetPhoto();
+      fetchAlbumPhotos();
+      setLoading(false);
+    });
+  }, [vetId]);
+
     const fetchVetPhoto = async (): Promise<void> => {
       try {
         const response = await fetch(
@@ -105,15 +113,13 @@ export default function VetDetails(): JSX.Element {
         setPhoto(imageUrl);
       } catch (error) {
         setError('Failed to fetch vet photo');
+        setPhoto('/images/vet_default.jpg');
       }
     };
 
-    fetchVetDetails().then(() => {
+    const handlePhotoDeleted = (): void => {
       fetchVetPhoto();
-      fetchAlbumPhotos();
-      setLoading(false);
-    });
-  }, [vetId]);
+    }
 
   const renderWorkHours = (workHoursJson: string): JSX.Element => {
     try {
@@ -189,6 +195,7 @@ export default function VetDetails(): JSX.Element {
         {photo && (
           <section className="vet-photo-container">
             <img src={photo} alt="Vet" className="vet-photo" />
+            <DeleteVetPhoto vetId={vetId!} onPhotoDeleted={handlePhotoDeleted} />
           </section>
         )}
 
