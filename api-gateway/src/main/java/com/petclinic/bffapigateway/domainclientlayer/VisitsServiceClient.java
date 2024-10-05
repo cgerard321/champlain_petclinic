@@ -360,12 +360,19 @@ public class VisitsServiceClient {
                 .bodyToMono(EmergencyResponseDTO.class);
     }
 
-    public Mono<EmergencyResponseDTO> deleteEmergency(String emergencyId){
+    public Mono<EmergencyResponseDTO> deleteEmergency(String emergencyId) {
         return webClient
                 .delete()
                 .uri(reviewUrl + "/emergency/" + emergencyId)
                 .retrieve()
                 .bodyToMono(EmergencyResponseDTO.class);
+    }
+
+    public Mono<VisitResponseDTO> patchVisitStatus(String visitId, String status) {
+        return webClient.patch()
+                .uri(reviewUrl + "/" + visitId + "/" + status) // Adjust URI based on visit-service
+                .retrieve()
+                .bodyToMono(VisitResponseDTO.class); // Parse response into VisitResponseDTO
     }
 }
 

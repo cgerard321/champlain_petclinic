@@ -5,6 +5,7 @@ import com.petclinic.visits.visitsservicenew.DataLayer.Visit;
 import com.petclinic.visits.visitsservicenew.DataLayer.VisitRepo;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.*;
 import com.petclinic.visits.visitsservicenew.Utils.EntityDtoUtil;
+import okhttp3.mockwebserver.MockResponse;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,9 +15,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -413,4 +416,85 @@ class VisitsControllerIntegrationTest {
                 .expectNextCount(1)
                 .verifyComplete();
     }
+
+    @Test
+    void updateVisitStatus_ShouldSucceed_WhenStatusUpdatedToCancelled() {
+        String visitId = "visitId9";
+        String status = "CANCELLED";
+
+        VisitResponseDTO cancelledVisitResponse = VisitResponseDTO.builder()
+                .visitId(visitId)
+                .visitDate(LocalDateTime.now())
+                .description("Test visit with cancelled status")
+                .petId("3")
+                .practitionerId(vet.getVetId())  // Ensure vet.getVetId() is not null
+                .status(Status.CANCELLED)         // Expected status after update
+                .build();
+
+        Visit cancelledVisit = Visit.builder()
+                .visitId(visitId)
+                .visitDate(LocalDateTime.now())
+                .description("Test visit with cancelled status")
+                .petId("3")
+                .practitionerId(vet.getVetId())  // Ensure vet.getVetId() is not null
+                .status(Status.UPCOMING)         // Initial status
+                .build();
+
+        // Save the initial visit with status UPCOMING
+        visitRepo.save(cancelledVisit).block();
+
+        // Verify initial status is UPCOMING
+        StepVerifier.create(visitRepo.findByVisitId(visitId))
+                .expectNextMatches(visit -> visit.getStatus() == Status.UPCOMING)
+                .verifyComplete();
+
+        // Mock entityDtoUtil to return the expected VisitResponseDTO when converting to response format
+        when(entityDtoUtil.toVisitResponseDTO(any())).thenReturn(Mono.just(cancelledVisitResponse));
+
+        // Perform the status update via WebTestClient
+        webTestClient.patch()
+                .uri("/visits/{visitId}/{status}", visitId, status)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentTypeCompatibleWith(MediaType.APPLICATION_JSON)
+                .expectBody(VisitResponseDTO.class)
+                .value(Assertions::assertNotNull)   // Ensure the response body is not null
+                .value(response -> assertEquals(Status.CANCELLED, response.getStatus()));  // Assert the status is updated to CANCELLED
+
+        // Verify that the status has been updated to CANCELLED in the repository
+        StepVerifier.create(visitRepo.findByVisitId(visitId))
+                .expectNextMatches(visit -> visit.getStatus() == Status.CANCELLED)
+                .verifyComplete();
+    }
+
+
+
+
+
+    // Test for the NOT_FOUND scenario (when visit does not exist)
+    @Test
+    void updateVisitStatus_ShouldReturnNotFound_WhenVisitDoesNotExist() {
+        String visitId = "nonExistentVisitId";
+        String status = "CANCELLED";
+
+        // Verify that no visit exists with the provided visitId
+        StepVerifier
+                .create(visitRepo.findByVisitId(visitId))
+                .expectNextCount(0) // No visit should exist with this ID
+                .verifyComplete();
+
+        // Perform the status update via WebTestClient, expecting a 404 Not Found response
+        webTestClient.patch()
+                .uri("/visits/{visitId}/{status}", visitId, status)
+                .exchange()
+                .expectStatus().isNotFound();
+
+        // Re-check that no new visits have been created with this ID
+        StepVerifier
+                .create(visitRepo.findByVisitId(visitId))
+                .expectNextCount(0) // Still no visit should exist with this ID
+                .verifyComplete();
+    }
+
 }
