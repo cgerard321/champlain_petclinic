@@ -44,23 +44,24 @@ const UserCart = (): JSX.Element => {
   );
   const [checkoutMessage, setCheckoutMessage] = useState<string | null>(null);
   const [invoice, setInvoice] = useState<Invoice | null>(null);
+  const [cartItemCount, setCartItemCount] = useState<number>(0); // State for cart item count
 
-  // Calculate subtotal
   const subtotal = cartItems.reduce(
     (acc, item) => acc + item.productSalePrice * (item.quantity || 1),
     0
   );
-
-  // Calculate taxes
   const tvq = subtotal * 0.09975; // Quebec tax rate
   const tvc = subtotal * 0.05; // Canadian tax rate
   const total = subtotal + tvq + tvc;
 
-  // Calculate total number of items in the cart
-  const totalItemCount = cartItems.reduce(
-    (acc, item) => acc + (item.quantity || 0),
-    0
-  );
+  // Function to update the cart item count
+  const updateCartItemCount = useCallback(() => {
+    const count = cartItems.reduce(
+      (acc, item) => acc + (item.quantity || 0),
+      0
+    );
+    setCartItemCount(count);
+  }, [cartItems]);
 
   useEffect(() => {
     const fetchCartItems = async (): Promise<void> => {
@@ -117,6 +118,11 @@ const UserCart = (): JSX.Element => {
 
     fetchCartItems();
   }, [cartId]);
+
+  // Recalculate cart item count every time cartItems change
+  useEffect(() => {
+    updateCartItemCount();
+  }, [cartItems, updateCartItemCount]);
 
   const changeItemQuantity = useCallback(
     async (
@@ -183,9 +189,9 @@ const UserCart = (): JSX.Element => {
   );
 
   const deleteItem = useCallback((indexToDelete: number): void => {
-    setCartItems(prevItems =>
-      prevItems.filter((_, index) => index !== indexToDelete)
-    );
+    setCartItems(prevItems => {
+      return prevItems.filter((_, index) => index !== indexToDelete);
+    });
   }, []);
 
   const clearCart = async (): Promise<void> => {
@@ -207,6 +213,7 @@ const UserCart = (): JSX.Element => {
 
       if (response.ok) {
         setCartItems([]);
+        setCartItemCount(0);
         alert('Cart has been successfully cleared!');
       } else {
         alert('Failed to clear cart');
@@ -254,8 +261,8 @@ const UserCart = (): JSX.Element => {
 
         setInvoice(newInvoice); // Set the new invoice state
         setCheckoutMessage('Checkout successful!'); // Notify the user
-        // console.log('Checkout response:', newInvoice); // Remove or comment out console logs
         setCartItems([]); // Clear cart after checkout
+        setCartItemCount(0);
       } else {
         setCheckoutMessage('Checkout failed.');
       }
@@ -276,19 +283,20 @@ const UserCart = (): JSX.Element => {
   return (
     <div className="UserCart">
       <NavBar />
+      <h1>User Cart</h1>
       <div className="cart-header">
-        <h1>User Cart</h1>
-        {totalItemCount > 0 && (
-          <div className="cart-icon-container">
-            <FaShoppingCart className="cart-icon" aria-label="Shopping Cart" />
+        <h2>Your Cart</h2>
+        <div className="cart-badge-container">
+          <FaShoppingCart aria-label="Shopping Cart" />
+          {cartItemCount > 0 && (
             <span
               className="cart-badge"
-              aria-label={`Cart has ${totalItemCount} items`}
+              aria-label={`Cart has ${cartItemCount} items`}
             >
-              {totalItemCount}
+              {cartItemCount}
             </span>
-          </div>
-        )}
+          )}
+        </div>
       </div>
       <div className="cart-actions">
         <button onClick={clearCart}>Clear Cart</button>

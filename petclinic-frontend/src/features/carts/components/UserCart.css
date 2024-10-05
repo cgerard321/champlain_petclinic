@@ -180,3 +180,34 @@
     text-align: center;
   }
 }
+.cart-badge-container {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  margin-left: 10px; /* Adjusted margin */
+}
+
+.cart-badge {
+  position: absolute;
+  top: -10px; /* Adjusted to move the badge slightly up */
+  right: -30px; /* Increased spacing from the cart icon */
+  background-color: #ff4d4f;
+  color: white;
+  border-radius: 50%;
+  padding: 4px 8px; /* Ensured padding to support multi-digit counts */
+  font-size: 0.85rem; /* Font size increased for better visibility */
+  font-weight: bold;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+  min-width: 28px; /* Increased minimum width */
+  text-align: center;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .cart-badge {
+    top: -5px;
+    right: -15px; /* Adjusted right spacing for smaller screens */
+    padding: 3px 6px;
+    font-size: 0.75rem;
+  }
+}
