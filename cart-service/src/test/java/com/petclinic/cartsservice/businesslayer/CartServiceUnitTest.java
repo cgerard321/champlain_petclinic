@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.BeanUtils;
 import reactor.core.publisher.Flux;
@@ -79,6 +80,8 @@ class CartServiceUnitTest {
 
     // UUID for non-existent cart
     private final String nonExistentCartId = "a7d573-bcab-4db3-956f-773324b92a80";
+    private final String validCustomerId = "f470653d-05c5-4c45-b7a0-7d70f003d2ac";
+    private final String nonExistentCustomerId = "non-existent-customer-id";
 
 //    @Test
 //    void whenUpdateCartById_thenReturnCartResponseModel() {
@@ -621,4 +624,34 @@ class CartServiceUnitTest {
                 .verifyComplete();
     }
 
+    @Test
+    void findCartByCustomerId_withExistingId_thenReturnCartResponseModel() {
+        // Arrange
+        Mockito.when(cartRepository.findCartByCustomerId(validCustomerId))
+                .thenReturn(Mono.just(cart1));
+
+        // Act & Assert
+        StepVerifier.create(cartService.findCartByCustomerId(validCustomerId))
+                .assertNext(cartResponseModel -> {
+                    assertNotNull(cartResponseModel);
+                    assertEquals(cart1.getCartId(), cartResponseModel.getCartId());
+                    assertEquals(cart1.getCustomerId(), cartResponseModel.getCustomerId());
+                    assertEquals(products.size(), cartResponseModel.getProducts().size());
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void findCartByCustomerId_withNonExistentId_thenReturnNotFoundException() {
+        // Arrange
+        Mockito.when(cartRepository.findCartByCustomerId(nonExistentCustomerId))
+                .thenReturn(Mono.empty());
+
+        // Act & Assert
+        StepVerifier.create(cartService.findCartByCustomerId(nonExistentCustomerId))
+                .expectErrorMatches(throwable -> throwable instanceof NotFoundException &&
+                        throwable.getMessage().equals("Cart for customer id was not found: " + nonExistentCustomerId))
+                .verify();
+    }
 }
+

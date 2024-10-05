@@ -234,6 +234,12 @@ const CustomerDetails: FC = () => {
           Back to All Owners
         </button>
         <button
+          className="add-pet-button"
+          onClick={() => navigate(`/customers/${ownerId}/pets/new`)}
+        >
+          Add New Pet
+        </button>
+        <button
           className="btn btn-danger"
           onClick={() => handleDelete(owner.ownerId)}
           title="Delete"
