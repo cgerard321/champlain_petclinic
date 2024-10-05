@@ -5,6 +5,7 @@ package com.petclinic.bffapigateway.presentationlayer.v2;
 import com.petclinic.bffapigateway.domainclientlayer.EmailingServiceClient;
 import com.petclinic.bffapigateway.dtos.Emailing.DirectEmailModelRequestDTO;
 import com.petclinic.bffapigateway.dtos.Emailing.EmailModelResponseDTO;
+import com.petclinic.bffapigateway.dtos.Emailing.NotificationEmailModelRequestDTO;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
 import lombok.RequiredArgsConstructor;
@@ -50,6 +51,24 @@ public class EmailingController {
     )
     public Mono<HttpStatus> sendEmail(@RequestBody DirectEmailModelRequestDTO body) {
         return emailingService.sendEmail(body)
+                .map(status -> {
+                    // Here, you can handle the status code returned from the emailing service
+                    return status; // This returns the HTTP status code
+                })
+                .onErrorResume(e -> {
+                    // Handle any exceptions that may occur
+                    return Mono.just(HttpStatus.INTERNAL_SERVER_ERROR); // or another appropriate status
+                });
+    }
+
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @PostMapping(
+            value = "/send/notification",
+            consumes = MediaType.APPLICATION_JSON_VALUE
+    )
+    public Mono<HttpStatus> sendEmailNotification(@RequestBody NotificationEmailModelRequestDTO body) {
+        return emailingService.sendEmailNotification(body)
                 .map(status -> {
                     // Here, you can handle the status code returned from the emailing service
                     return status; // This returns the HTTP status code
