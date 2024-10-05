@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using DotNetEnv;
+using emailing_service.BackgroundTask;
 using emailing_service.BuisnessLayer;
 //using emailing_service.BackgroundTask;
 using emailing_service.Models;
@@ -17,16 +18,18 @@ Env.Load(Directory.GetCurrentDirectory()+"mailer.env");
 // Log the current directory (for debugging)
 Console.WriteLine($"Path of docker is : {Directory.GetCurrentDirectory()}");
 
+
 // Load SMTP settings from environment variables
 try
 {
     // Check for null or empty values
-    var smtpServer = Env.GetString("SMTP_SERVER") ?? throw new ArgumentNullException("SMTP_SERVER");
-    var smtpPort = Env.GetInt("SMTP_PORT");
-    var smtpUsername = Env.GetString("SMTP_USERNAME") ?? throw new ArgumentNullException("SMTP_USERNAME");
-    var smtpPassword = Env.GetString("SMTP_PASSWORD") ?? throw new ArgumentNullException("SMTP_PASSWORD");
-    var smtpEmail = Env.GetString("SMTP_EMAIL") ?? throw new ArgumentNullException("SMTP_EMAIL");
-    var smtpDisplayName = Env.GetString("SMTP_DISPLAY_NAME") ?? throw new ArgumentNullException("SMTP_DISPLAY_NAME");
+    var smtpServer = builder.Configuration["SMTP:SMTP_SERVER"];//Env.GetString("SMTP_SERVER") ?? throw new ArgumentNullException("SMTP_SERVER");
+    var smtpPort = builder.Configuration.GetValue<int>("SMTP:SMTP_PORT");//Env.GetInt("SMTP_PORT");
+    var smtpUsername = builder.Configuration["SMTP:SMTP_USERNAME"];;//Env.GetString("SMTP_USERNAME") ?? throw new ArgumentNullException("SMTP_USERNAME");
+    var smtpEmail = builder.Configuration["SMTP:SMTP_EMAIL"];;//Env.GetString("SMTP_EMAIL") ?? throw new ArgumentNullException("SMTP_EMAIL");
+    var smtpDisplayName = builder.Configuration["SMTP:SMTP_DISPLAY_NAME"];//Env.GetString("SMTP_DISPLAY_NAME") ?? throw new ArgumentNullException("SMTP_DISPLAY_NAME");
+    //We are only getting this from the .env file
+    var smtpPassword = Env.GetString("SMTP_PASS") ?? throw new ArgumentNullException("SMTP_PASS");
 
 
     EmailUtils.emailConnectionString = new ConnectionEmailServer(
@@ -47,7 +50,7 @@ catch (Exception ex)
         "helloWorld",
         "smtpPassword",
         "smtpEmail",
-        "smtpDisplayName"
+        "ChamplainPetClinic"
     );
 }
 //Just initialising the singleton pattern 
@@ -90,10 +93,9 @@ dbHelper.CreateTableAsync(50);
 //builder.Services.AddScoped<IEmailService, EmailServiceImpl>();
 
 
-
 // Add services to the container
 builder.Services.AddControllersWithViews();
-//builder.Services.AddHostedService<RecurringJobService>();
+builder.Services.AddHostedService<RecurringJobService>();
 
 var app = builder.Build();
 

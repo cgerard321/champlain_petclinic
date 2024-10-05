@@ -1,9 +1,6 @@
 package com.petclinic.products.utils;
 
-import com.petclinic.products.utils.exceptions.InvalidAmountException;
-import com.petclinic.products.utils.exceptions.InvalidInputException;
-import com.petclinic.products.utils.exceptions.NotFoundException;
-import com.petclinic.products.utils.exceptions.RatingAlreadyExists;
+import com.petclinic.products.utils.exceptions.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -40,6 +37,12 @@ public class GlobalControllerExceptionHandler {
     @ResponseStatus(UNPROCESSABLE_ENTITY)
     @ExceptionHandler(InvalidAmountException.class)
     public HttpErrorInfo handleInvalidAmountException(ServerHttpRequest request, Exception ex) {
+        return createHttpErrorInfo(UNPROCESSABLE_ENTITY, request, ex);
+    }
+
+    @ResponseStatus(UNPROCESSABLE_ENTITY)
+    @ExceptionHandler(InvalidImageTypeException.class)
+    public HttpErrorInfo handleInvalidImageTypeException(ServerHttpRequest request, Exception ex) {
         return createHttpErrorInfo(UNPROCESSABLE_ENTITY, request, ex);
     }
 
