@@ -10,7 +10,9 @@ import deleteInventory from '@/features/inventories/api/deleteInventory.ts';
 import AddInventory from '@/features/inventories/AddInventoryForm.tsx';
 import AddInventoryType from '@/features/inventories/AddInventoryType.tsx';
 import { ProductModel } from '@/features/inventories/models/ProductModels/ProductModel.ts';
-import AddSupplyForm from '@/features/inventories/AddSupplyForm.tsx';
+import AddProductForm from '@/features/inventories/AddProductForm.tsx';
+import './models/Card.css';
+import DefaultInventoryImage from '@/assets/Inventory/DefaultInventoryImage.jpg';
 
 //TODO: create add inventory form component and change the component being shown on the inventories page on the onClick event of the add inventory button
 export default function InventoriesListTable(): JSX.Element {
@@ -26,7 +28,7 @@ export default function InventoriesListTable(): JSX.Element {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [showAddInventoryForm, setShowAddInventoryForm] = useState(false);
   const [showAddTypeForm, setShowAddTypeForm] = useState(false);
-  const [showAddSupplyModal, setShowAddSupplyModal] = useState(false);
+  const [showAddProductModal, setShowAddProductModal] = useState(false);
   const navigate = useNavigate();
   const [lowStockProductsByInventory, setLowStockProductsByInventory] =
     useState<{ [inventoryName: string]: ProductModel[] }>({});
@@ -35,8 +37,8 @@ export default function InventoriesListTable(): JSX.Element {
     [key: string]: number;
   }>({});
 
-  const toggleAddSupplyModal = (): void => {
-    setShowAddSupplyModal(prev => !prev);
+  const toggleAddProductModal = (): void => {
+    setShowAddProductModal(prev => !prev);
   };
 
   const {
@@ -174,8 +176,8 @@ export default function InventoriesListTable(): JSX.Element {
     await fetchAllInventoryTypes();
   };
 
-  const handleAddSupplySubmit = (): void => {
-    setShowAddSupplyModal(false);
+  const handleAddProductSubmit = (): void => {
+    setShowAddProductModal(false);
   };
 
   const handleInventorySelection = (
@@ -547,15 +549,50 @@ export default function InventoriesListTable(): JSX.Element {
           </div>
         </>
       )}
-      <button className="btn btn-primary" onClick={toggleAddSupplyModal}>
-        Add Supply
+      <button className="btn btn-primary" onClick={toggleAddProductModal}>
+        Add Product
       </button>
-      {showAddSupplyModal && (
-        <AddSupplyForm
-          onClose={toggleAddSupplyModal}
-          onSubmit={handleAddSupplySubmit}
+      {showAddProductModal && (
+        <AddProductForm
+          onClose={toggleAddProductModal}
+          onSubmit={handleAddProductSubmit}
         />
       )}
+      <div className="card-container-custom">
+        {inventoryList.map(inventory => (
+          <div
+            className="card"
+            key={inventory.inventoryName}
+            onClick={() =>
+              navigate(`/inventory/${inventory.inventoryId}/products`)
+            }
+            style={{ cursor: 'pointer' }}
+          >
+            <div className="image-container">
+              <img
+                src={inventory.inventoryImage}
+                alt={inventory.inventoryName}
+                className="card-image"
+                onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+                  const target = e.target as HTMLImageElement;
+                  if (inventory.inventoryBackupImage) {
+                    target.src = inventory.inventoryBackupImage;
+                    target.onerror = () => {
+                      target.onerror = null;
+                      target.src = DefaultInventoryImage;
+                    };
+                  } else {
+                    target.src = DefaultInventoryImage;
+                  }
+                }}
+              />
+            </div>
+            <h2>{inventory.inventoryName}</h2>
+            <p>Type: {inventory.inventoryType}</p>
+            <p>{inventory.inventoryDescription}</p>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
