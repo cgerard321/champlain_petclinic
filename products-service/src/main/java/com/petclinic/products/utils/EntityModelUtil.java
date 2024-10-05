@@ -1,12 +1,17 @@
 package com.petclinic.products.utils;
 
+import com.petclinic.products.datalayer.images.Image;
 import com.petclinic.products.datalayer.products.Product;
 import com.petclinic.products.datalayer.ratings.Rating;
+import com.petclinic.products.presentationlayer.images.ImageRequestModel;
+import com.petclinic.products.presentationlayer.images.ImageResponseModel;
 import com.petclinic.products.presentationlayer.products.ProductRequestModel;
 import com.petclinic.products.presentationlayer.products.ProductResponseModel;
 import com.petclinic.products.presentationlayer.ratings.RatingRequestModel;
 import com.petclinic.products.presentationlayer.ratings.RatingResponseModel;
 import org.springframework.beans.BeanUtils;
+import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.http.codec.multipart.FilePart;
 import reactor.core.publisher.Mono;
 
 import java.util.UUID;
@@ -22,6 +27,7 @@ public class EntityModelUtil {
     public static Product toProductEntity(ProductRequestModel productRequestModel) {
         return Product.builder()
                 .productId(generateUUIDString())
+                .imageId(productRequestModel.getImageId())
                 .productName(productRequestModel.getProductName())
                 .productDescription(productRequestModel.getProductDescription())
                 .productSalePrice(productRequestModel.getProductSalePrice())
@@ -44,7 +50,33 @@ public class EntityModelUtil {
                 .build();
     }
 
+    public static ImageResponseModel toImageResponseModel(Image image) {
+        ImageResponseModel imageResponseModel = new ImageResponseModel();
+        BeanUtils.copyProperties(image, imageResponseModel);
+        return imageResponseModel;
+    }
+
+    public static Image toImageEntity(ImageRequestModel imageRequestModel){
+        return Image.builder()
+                .imageId(generateUUIDString())
+                .imageName(imageRequestModel.getImageName())
+                .imageType(imageRequestModel.getImageType())
+                .imageData(imageRequestModel.getImageData())
+                .build();
+    }
+
     public static String generateUUIDString() {
         return UUID.randomUUID().toString();
+    }
+
+    public static Mono<ImageRequestModel> handleAddImage(String imageName, String imageType, FilePart imageData) {
+        return DataBufferUtils.join(imageData.content())
+                .map(dataBuffer -> {
+                    byte[] imageDataBytes = new byte[dataBuffer.readableByteCount()];
+                    dataBuffer.read(imageDataBytes);
+                    DataBufferUtils.release(dataBuffer);
+
+                    return new ImageRequestModel(imageName, imageType, imageDataBytes);
+                });
     }
 }
