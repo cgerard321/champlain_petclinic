@@ -43,6 +43,7 @@ import EditEmergency from './features/visits/Emergency/EditEmergency';
 import EmergencyList from './features/visits/Emergency/EmergencyList';
 import ProductDetails from '@/features/products/api/ProductDetails.tsx';
 import AddPetPage from '@/pages/Customer/AddPetPage.tsx';
+import EditProduct from './features/products/components/EditProduct';
 
 const router = createBrowserRouter([
   {
@@ -248,6 +249,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <Products />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: `${AppRoutePaths.EditProduct}/:productId`,
+        element: (
+          <ProtectedRoute roles={['ADMIN', 'INVENTORY_MANAGER']}>
+            <EditProduct />
           </ProtectedRoute>
         ),
       },
