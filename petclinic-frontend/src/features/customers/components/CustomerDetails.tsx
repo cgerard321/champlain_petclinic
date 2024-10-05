@@ -10,6 +10,7 @@ const CustomerDetails: FC = () => {
   const { ownerId } = useParams<{ ownerId: string }>();
   const navigate = useNavigate();
 
+  const [isDisabled, setIsDisabled] = useState<boolean>(false);
   const [owner, setOwner] = useState<OwnerResponseModel | null>(null);
   const [pets, setPets] = useState<PetResponseModel[]>([]); // State for pets
   const [bills, setBills] = useState<Bill[]>([]);
@@ -24,6 +25,12 @@ const CustomerDetails: FC = () => {
           { withCredentials: true }
         );
         setOwner(ownerResponse.data);
+
+        const userResponse = await axios.get(
+          `http://localhost:8080/api/v2/gateway/users/${ownerId}`,
+          { withCredentials: true }
+        );
+        setIsDisabled(userResponse.data.disabled);
 
         // Fetch pets by owner ID
         const petsResponse = await axios.get(
@@ -133,6 +140,42 @@ const CustomerDetails: FC = () => {
     const ageDiffMs = Date.now() - birth.getTime();
     const ageDate = new Date(ageDiffMs);
     return Math.abs(ageDate.getUTCFullYear() - 1970);
+  };
+
+  const handleDisableEnable = async (): Promise<void> => {
+    const confirmAction = window.confirm(
+      `Are you sure you want to ${isDisabled ? 'enable' : 'disable'} this user's account?`
+    );
+
+    if (confirmAction) {
+      try {
+        if (isDisabled) {
+          await axios.patch(
+            `http://localhost:8080/api/v2/gateway/users/${ownerId}/enable`,
+            {},
+            { withCredentials: true }
+          );
+          alert('User account enabled successfully.');
+        } else {
+          await axios.patch(
+            `http://localhost:8080/api/v2/gateway/users/${ownerId}/disable`,
+            {},
+            { withCredentials: true }
+          );
+          alert('User account disabled successfully.');
+        }
+
+        const userResponse = await axios.get(
+          `http://localhost:8080/api/v2/gateway/users/${ownerId}`,
+          { withCredentials: true }
+        );
+
+        setIsDisabled(userResponse.data.disabled);
+      } catch (error) {
+        console.error('Error updating user account status:', error);
+        alert('Error updating user account status. Please try again.');
+      }
+    }
   };
 
   const handleEditPetClick = (petId: string): void => {
@@ -246,6 +289,12 @@ const CustomerDetails: FC = () => {
           style={{ backgroundColor: 'red', color: 'white' }}
         >
           Delete Owner
+        </button>
+        <button
+          className={`btn ${isDisabled ? 'btn-success' : 'btn-warning'}`}
+          onClick={handleDisableEnable}
+        >
+          {isDisabled ? 'Enable Account' : 'Disable Account'}
         </button>
       </div>
     </div>

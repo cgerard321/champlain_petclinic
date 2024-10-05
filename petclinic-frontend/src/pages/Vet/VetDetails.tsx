@@ -22,11 +22,13 @@ export default function VetDetails(): JSX.Element {
   const { vetId } = useParams<{ vetId: string }>();
   const [vet, setVet] = useState<VetResponseType | null>(null);
   const [photo, setPhoto] = useState<string | null>(null);
+  const [albumPhotos, setAlbumPhotos] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [isFormOpen, setIsFormOpen] = useState(false); // To handle form visibility
   const [specialtyId, setSpecialtyId] = useState('');
   const [specialtyName, setSpecialtyName] = useState('');
+  const [enlargedPhoto, setEnlargedPhoto] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchVetDetails = async (): Promise<void> => {
@@ -42,6 +44,43 @@ export default function VetDetails(): JSX.Element {
         setVet(data);
       } catch (error) {
         setError('Failed to fetch vet details');
+      }
+    };
+
+    const fetchAlbumPhotos = async (): Promise<void> => {
+      try {
+        const response = await fetch(
+          `http://localhost:8080/api/v2/gateway/vets/${vetId}/albums`,
+          {
+            method: 'GET',
+            headers: {
+              Accept: 'application/json',
+            },
+          }
+        );
+
+        if (!response.ok) {
+          if (response.status === 404) {
+            setAlbumPhotos([]); // No albums found
+          } else {
+            throw new Error(`Error: ${response.statusText}`);
+          }
+        } else {
+          const photos = await response.json();
+          // eslint-disable-next-line no-console
+          console.log('Album Photos:', photos); // Log the album photos
+
+          const imageUrls = photos.map(
+            (photo: { data: string; imgType: string }) => {
+              // Construct the full data URL for the image
+              return `data:${photo.imgType};base64,${photo.data}`;
+            }
+          );
+
+          setAlbumPhotos(imageUrls); // Set the image URLs in the state
+        }
+      } catch (error) {
+        setError('Failed to fetch album photos');
       }
     };
 
@@ -69,9 +108,9 @@ export default function VetDetails(): JSX.Element {
       }
     };
 
-    //fetch both vet details and photo
     fetchVetDetails().then(() => {
       fetchVetPhoto();
+      fetchAlbumPhotos();
       setLoading(false);
     });
   }, [vetId]);
@@ -97,6 +136,14 @@ export default function VetDetails(): JSX.Element {
       console.error('Error parsing work hours:', error);
       return <p>Invalid work hours data</p>;
     }
+  };
+
+  const openPhotoModal = (photoUrl: string): void => {
+    setEnlargedPhoto(photoUrl);
+  };
+
+  const closePhotoModal = (): void => {
+    setEnlargedPhoto(null);
   };
 
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -247,9 +294,39 @@ export default function VetDetails(): JSX.Element {
                 </div>
               )}
             </section>
+
+            <section className="album-photos">
+              <h2>Album Photos</h2>
+              {albumPhotos.length > 0 ? (
+                <div className="album-photo-grid">
+                  {albumPhotos.map((photoUrl, index) => (
+                    <div
+                      key={index}
+                      className="album-photo-card"
+                      onClick={() => openPhotoModal(photoUrl)}
+                    >
+                      <img
+                        src={photoUrl}
+                        alt={`Album Photo ${index + 1}`}
+                        className="album-photo-thumbnail"
+                      />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p>No album photos available</p>
+              )}
+            </section>
           </>
         )}
       </div>
+
+      {/* Modal for enlarged photo */}
+      {enlargedPhoto && (
+        <div className="photo-modal" onClick={closePhotoModal}>
+          <img src={enlargedPhoto} alt="Enlarged Vet Album Photo" />
+        </div>
+      )}
     </div>
   );
 }
