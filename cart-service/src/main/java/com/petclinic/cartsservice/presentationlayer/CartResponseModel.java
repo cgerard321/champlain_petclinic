@@ -26,4 +26,7 @@ public class CartResponseModel {
     private double total;
 
     private List<CartProduct> wishListProducts;
+    private String message;
+    private String paymentStatus;
+
 }

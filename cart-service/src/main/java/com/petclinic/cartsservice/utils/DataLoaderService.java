@@ -27,6 +27,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Premium dry food for adult dogs")
                 .productSalePrice(45.99)
                 .quantityInCart(1)
+                .productQuantity(5)
                 .build();
 
         CartProduct product2 = CartProduct.builder()
@@ -35,6 +36,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Clumping cat litter with odor control")
                 .productSalePrice(12.99)
                 .quantityInCart(2)
+                .productQuantity(8)
                 .build();
 
         CartProduct product3 = CartProduct.builder()
@@ -43,6 +45,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Flea and tick prevention for small dogs")
                 .productSalePrice(9.99)
                 .quantityInCart(3)
+                .productQuantity(10)
                 .build();
 
         CartProduct product4 = CartProduct.builder()
@@ -51,6 +54,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Spacious cage for small birds like parakeets")
                 .productSalePrice(29.99)
                 .quantityInCart(4)
+                .productQuantity(9)
                 .build();
 
         CartProduct wishListProduct1 = CartProduct.builder()

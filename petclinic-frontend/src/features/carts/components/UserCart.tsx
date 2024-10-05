@@ -1,17 +1,49 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useParams, useNavigate } from 'react-router-dom';
 import CartItem from './CartItem';
 import { ProductModel } from '../models/ProductModel';
 import './UserCart.css';
 import { NavBar } from '@/layouts/AppNavBar';
 
+interface ProductAPIResponse {
+  productId: number;
+  productName: string;
+  productDescription: string;
+  productSalePrice: number;
+  averageRating: number;
+  quantityInCart: number;
+  productQuantity: number;
+}
+interface InvoiceItem {
+  productId: string;
+  productName: string;
+  productSalePrice: number;
+  quantity: number;
+}
+
+interface Invoice {
+  invoiceId: string;
+  cartId: string;
+  items: InvoiceItem[];
+  subtotal: number;
+  tax: number;
+  total: number;
+  issueDate: string;
+}
+
 const UserCart = (): JSX.Element => {
   const { cartId } = useParams<{ cartId: string }>();
-  const navigate = useNavigate(); // Initialize useNavigate
+  const navigate = useNavigate();
   const [cartItems, setCartItems] = useState<ProductModel[]>([]);
   const [wishlistItems, setWishlistItems] = useState<ProductModel[]>([]); // New state for wishlist
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [errorMessages, setErrorMessages] = useState<{ [key: number]: string }>(
+    {}
+  );
+
+  const [checkoutMessage, setCheckoutMessage] = useState<string | null>(null);
+  const [invoice, setInvoice] = useState<Invoice | null>(null);
 
   const subtotal = cartItems.reduce(
     (acc, item) => acc + item.productSalePrice * (item.quantity || 1),
@@ -43,16 +75,29 @@ const UserCart = (): JSX.Element => {
         }
 
         const data = await response.json();
-        const products = data.products.map((product: ProductModel) => ({
-          ...product,
-          quantity: product.quantity || 1, // Map quantityInCart to quantity
-        }));
+
+        // Ensure that data.products exists and is an array
+        if (!Array.isArray(data.products)) {
+          throw new Error('Invalid data format: products should be an array');
+        }
+
+        const products: ProductModel[] = data.products.map(
+          (product: ProductAPIResponse) => ({
+            productId: product.productId,
+            productName: product.productName,
+            productDescription: product.productDescription,
+            productSalePrice: product.productSalePrice,
+            averageRating: product.averageRating,
+            quantity: product.quantityInCart,
+            productQuantity: product.productQuantity,
+          })
+        );
 
         setCartItems(products);
         setWishlistItems(data.wishListProducts || []); // Set wishlist items
       } catch (err: unknown) {
         if (err instanceof Error) {
-          console.error(err.message); // Log the actual error
+          console.error(err.message);
           setError('Failed to fetch cart items');
         } else {
           setError('An unexpected error occurred');
@@ -66,15 +111,67 @@ const UserCart = (): JSX.Element => {
   }, [cartId]);
 
   const changeItemQuantity = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>, index: number): void => {
-      const newQuantity = Math.max(1, +event.target.value); // Ensure quantity is at least 1
-      setCartItems(prevItems => {
-        const newItems = [...prevItems];
-        newItems[index].quantity = newQuantity;
-        return newItems;
-      });
+    async (
+      event: React.ChangeEvent<HTMLInputElement>,
+      index: number
+    ): Promise<void> => {
+      const newQuantity = Math.max(1, Number(event.target.value)); // Ensure quantity is at least 1
+      const item = cartItems[index];
+
+      if (newQuantity > item.productQuantity) {
+        // Display error message
+        setErrorMessages(prevErrors => ({
+          ...prevErrors,
+          [index]: `You cannot add more than ${item.productQuantity} items. Only ${item.productQuantity} items left in stock.`,
+        }));
+        return;
+      } else {
+        // Clear error message
+        setErrorMessages(prevErrors => {
+          const { ...rest } = prevErrors;
+          delete rest[index];
+          return rest;
+        });
+      }
+
+      // Update quantity in backend
+      try {
+        const response = await fetch(
+          `http://localhost:8080/api/v2/gateway/carts/${cartId}/products/${item.productId}`,
+          {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              Accept: 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify({ quantity: newQuantity }),
+          }
+        );
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          setErrorMessages(prevErrors => ({
+            ...prevErrors,
+            [index]: errorData.message || 'Failed to update quantity',
+          }));
+        } else {
+          // Update local state
+          setCartItems(prevItems => {
+            const newItems = [...prevItems];
+            newItems[index].quantity = newQuantity;
+            return newItems;
+          });
+        }
+      } catch (err) {
+        console.error('Error updating quantity:', err);
+        setErrorMessages(prevErrors => ({
+          ...prevErrors,
+          [index]: 'Failed to update quantity',
+        }));
+      }
     },
-    []
+    [cartItems, cartId]
   );
 
   const deleteItem = useCallback((indexToDelete: number): void => {
@@ -112,12 +209,59 @@ const UserCart = (): JSX.Element => {
     }
   };
 
+  const handleCheckout = async (): Promise<void> => {
+    if (!cartId) {
+      setCheckoutMessage('Invalid cart ID');
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/v2/gateway/carts/${cartId}/checkout`,
+        {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (response.ok) {
+        // Generate the invoice
+        const newInvoice: Invoice = {
+          invoiceId: 'INV-' + new Date().getTime(), // Generate a simple invoice ID
+          cartId,
+          items: cartItems.map(item => ({
+            productId: item.productId,
+            productName: item.productName,
+            productSalePrice: item.productSalePrice,
+            quantity: item.quantity || 1,
+          })),
+          subtotal,
+          tax: tvq + tvc,
+          total,
+          issueDate: new Date().toISOString(), // Current date
+        };
+
+        setInvoice(newInvoice); // Set the new invoice state
+        setCheckoutMessage('Checkout successful!'); // Notify the user
+        setCartItems([]); // Clear cart after checkout
+      } else {
+        setCheckoutMessage('Checkout failed.');
+      }
+    } catch (error) {
+      console.error('Error during checkout:', error);
+      setCheckoutMessage('Checkout failed.');
+    }
+  };
+
   if (loading) {
-    return <div>Loading...</div>;
+    return <div className="loading">Loading cart items...</div>;
   }
 
   if (error) {
-    return <div>{error}</div>;
+    return <div className="error">{error}</div>;
   }
 
   return (
@@ -155,23 +299,30 @@ const UserCart = (): JSX.Element => {
           <h3>Cart Summary</h3>
           <p>Subtotal: ${subtotal.toFixed(2)}</p>
           <p>TVQ (9.975%): ${tvq.toFixed(2)}</p>
-          <p>TVC (5%): ${tvc.toFixed(2)}</p>
-          <p className="total-price">Total: ${total.toFixed(2)}</p>
+          <p>GST (5%): ${tvc.toFixed(2)}</p>
+          <p>Total: ${total.toFixed(2)}</p>
         </div>
+        <button className="checkout-btn" onClick={handleCheckout}>
+          Checkout
+        </button>
+        {checkoutMessage && <p className="checkout-message">{checkoutMessage}</p>}
       </div>
+
+      <hr />
 
       {/* Wishlist Section */}
       <div className="Wishlist-section">
-        <h2>Wishlist</h2>
-        <div className="Wishlist-items">
+        <h2 className="Wishlist-title">Your Wishlist</h2> {/* Wishlist title */}
+        <div className="UserCart-items">
           {wishlistItems.length > 0 ? (
             wishlistItems.map((item, index) => (
               <CartItem
                 key={item.productId}
                 item={item}
                 index={index}
-                changeItemQuantity={() => {}} // Disable changing quantity for wishlist
-                deleteItem={() => {}} // You may also disable removing from wishlist here
+                changeItemQuantity={() => {}}
+                deleteItem={() => {}}
+                showWishlistButton={false} // Hide remove button for now
               />
             ))
           ) : (
@@ -179,6 +330,25 @@ const UserCart = (): JSX.Element => {
           )}
         </div>
       </div>
+
+      {/* Invoice Section */}
+      {invoice && (
+        <div className="Invoice-section">
+          <h2>Invoice</h2>
+          <p>Invoice ID: {invoice.invoiceId}</p>
+          <p>Issue Date: {invoice.issueDate}</p>
+          <ul>
+            {invoice.items.map(item => (
+              <li key={item.productId}>
+                {item.quantity} x {item.productName} @ ${item.productSalePrice.toFixed(2)} each
+              </li>
+            ))}
+          </ul>
+          <p>Subtotal: ${invoice.subtotal.toFixed(2)}</p>
+          <p>Tax: ${invoice.tax.toFixed(2)}</p>
+          <p>Total: ${invoice.total.toFixed(2)}</p>
+        </div>
+      )}
     </div>
   );
 };

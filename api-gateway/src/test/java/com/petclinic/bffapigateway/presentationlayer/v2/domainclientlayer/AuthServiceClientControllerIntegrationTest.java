@@ -2,6 +2,7 @@ package com.petclinic.bffapigateway.presentationlayer.v2.domainclientlayer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.domainclientlayer.AuthServiceClient;
+import com.petclinic.bffapigateway.domainclientlayer.CartServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VetsServiceClient;
 import com.petclinic.bffapigateway.dtos.Auth.*;
@@ -46,6 +47,9 @@ public class AuthServiceClientControllerIntegrationTest {
     CustomersServiceClient customersServiceClient;
     @MockBean
     VetsServiceClient vetsServiceClient;
+    @MockBean
+    CartServiceClient cartServiceClient;
+
     private MockWebServer server;
     private ObjectMapper objectMapper;
 
@@ -101,11 +105,12 @@ public class AuthServiceClientControllerIntegrationTest {
 
         customersServiceClient = Mockito.mock(CustomersServiceClient.class);
         vetsServiceClient = Mockito.mock(VetsServiceClient.class);
+        cartServiceClient = Mockito.mock(CartServiceClient.class);
         server = new MockWebServer();
         authServiceClient = new AuthServiceClient(
                 WebClient.builder(),
                 customersServiceClient, vetsServiceClient, server.getHostName(),
-                String.valueOf(server.getPort()));
+                String.valueOf(server.getPort()), cartServiceClient);
         objectMapper = new ObjectMapper();
     }
 

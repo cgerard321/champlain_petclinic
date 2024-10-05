@@ -29,15 +29,21 @@ import Forbidden from '@/pages/Error/Forbidden.tsx';
 import Unauthorized from '@/pages/Error/Unauthorized.tsx';
 import PageNotFound from '@/pages/Error/PageNotFound.tsx';
 import EmailingPage from '@/pages/Emailing/EmailingPage.tsx';
-import MockPage from '@/pages/Inventory/MockPage.tsx';
-import InventorySupplies from '@/features/inventories/InventorySupplies.tsx';
 import EditInventory from '@/features/inventories/EditInventory.tsx';
 import { ProtectedRoute } from './shared/components/ProtectedRouteProps';
 import CustomerDetailsPage from '@/pages/Customer/CustomerDetailsPage.tsx';
 import UpdateCustomerPage from '@/pages/Customer/UpdateCustomerPage.tsx';
 import VisitDetails from './features/visits/visits/VisitByVisitId';
 import CustomerVisits from '@/pages/Visit/CustomerVisits.tsx';
-import EditInventoryProducts from '@/features/inventories/EditInventoryProducts.tsx';
+import UpdateOwnerPetPage from '@/pages/Customer/UpdateOwnerPetPage.tsx';
+import EditInventoryProducts from './features/inventories/EditInventoryProducts';
+import AddSupplyToInventory from './features/inventories/AddSupplyToInventory';
+import AddEmergencyForm from './features/visits/Emergency/AddEmergencyForm';
+import EditEmergency from './features/visits/Emergency/EditEmergency';
+import EmergencyList from './features/visits/Emergency/EmergencyList';
+import ProductDetails from '@/features/products/api/ProductDetails.tsx';
+import AddPetPage from '@/pages/Customer/AddPetPage.tsx';
+import EditProduct from './features/products/components/EditProduct';
 
 const router = createBrowserRouter([
   {
@@ -59,10 +65,44 @@ const router = createBrowserRouter([
         ),
       },
       {
+        path: AppRoutePaths.AddSupplyToInventory,
+        element: (
+          <ProtectedRoute>
+            <AddSupplyToInventory />
+          </ProtectedRoute>
+        ),
+      },
+      {
         path: AppRoutePaths.GetVisitByVistId,
         element: (
           <ProtectedRoute>
             <VisitDetails />
+          </ProtectedRoute>
+        ),
+      },
+
+      {
+        path: AppRoutePaths.Emergency,
+        element: (
+          <ProtectedRoute>
+            <AddEmergencyForm />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.EditEmergency,
+        element: (
+          <ProtectedRoute>
+            <EditEmergency />
+          </ProtectedRoute>
+        ),
+      },
+
+      {
+        path: AppRoutePaths.EmergencyList,
+        element: (
+          <ProtectedRoute>
+            <EmergencyList />
           </ProtectedRoute>
         ),
       },
@@ -213,6 +253,14 @@ const router = createBrowserRouter([
         ),
       },
       {
+        path: `${AppRoutePaths.EditProduct}/:productId`,
+        element: (
+          <ProtectedRoute roles={['ADMIN', 'INVENTORY_MANAGER']}>
+            <EditProduct />
+          </ProtectedRoute>
+        ),
+      },
+      {
         path: AppRoutePaths.Visits,
         element: (
           <ProtectedRoute>
@@ -231,7 +279,7 @@ const router = createBrowserRouter([
       {
         path: `${AppRoutePaths.Carts}/:cartId`,
         element: (
-          <ProtectedRoute roles={['ADMIN', 'OWNER']}>
+          <ProtectedRoute>
             <UserCart />
           </ProtectedRoute>
         ),
@@ -253,14 +301,6 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: `${AppRoutePaths.Carts}/:cartId`, // Route for viewing a specific cart
-        element: (
-          <ProtectedRoute roles={['ADMIN']}>
-            <UserCart />
-          </ProtectedRoute>
-        ),
-      },
-      {
         path: AppRoutePaths.CustomerProfile,
         element: (
           <ProtectedRoute roles={['OWNER']}>
@@ -277,18 +317,18 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: AppRoutePaths.MockPage,
+        path: AppRoutePaths.UpdatePet,
         element: (
-          <ProtectedRoute>
-            <MockPage />
+          <ProtectedRoute roles={['ADMIN', 'VET']}>
+            <UpdateOwnerPetPage />
           </ProtectedRoute>
         ),
       },
       {
-        path: AppRoutePaths.InventorySupplies,
+        path: AppRoutePaths.AddPet,
         element: (
-          <ProtectedRoute>
-            <InventorySupplies />
+          <ProtectedRoute roles={['ADMIN', 'VET']}>
+            <AddPetPage />
           </ProtectedRoute>
         ),
       },
@@ -297,6 +337,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <CustomerVisits />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.ProductDetails,
+        element: (
+          <ProtectedRoute>
+            <ProductDetails />
           </ProtectedRoute>
         ),
       },

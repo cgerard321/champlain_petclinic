@@ -8,15 +8,20 @@ import com.petclinic.cartsservice.domainclientlayer.ProductResponseModel;
 import com.petclinic.cartsservice.presentationlayer.CartRequestModel;
 import com.petclinic.cartsservice.presentationlayer.CartResponseModel;
 import com.petclinic.cartsservice.utils.EntityModelUtil;
+import com.petclinic.cartsservice.utils.exceptions.InvalidInputException;
 import com.petclinic.cartsservice.utils.exceptions.NotFoundException;
+import com.petclinic.cartsservice.utils.exceptions.OutOfStockException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -102,6 +107,43 @@ public class CartServiceImpl implements CartService {
                  });
      }
 
+
+    @Override
+    public Mono<CartResponseModel> checkoutCart(String cartId) {
+        return cartRepository.findCartByCartId(cartId)
+                .flatMap(cart -> {
+
+                    double subtotal = cart.getProducts().stream()
+                            .mapToDouble(product -> product.getProductSalePrice() * product.getQuantityInCart())
+                            .sum();
+
+
+                    double tvq = subtotal * 0.09975;
+                    double tvc = subtotal * 0.05;
+                    double total = subtotal + tvq + tvc;
+
+                    // Update the cart model
+                    cart.setSubtotal(subtotal);
+                    cart.setTvq(tvq);
+                    cart.setTvc(tvc);
+                    cart.setTotal(total);
+
+
+                    return cartRepository.save(cart)
+                            .map(savedCart -> {
+                                // Create a response model to send back to the client
+                                CartResponseModel responseModel = new CartResponseModel();
+                                responseModel.setCartId(savedCart.getCartId());
+                                responseModel.setSubtotal(subtotal);
+                                responseModel.setTvq(tvq);
+                                responseModel.setTvc(tvc);
+                                responseModel.setTotal(total);
+                                responseModel.setPaymentStatus("Payment Processed");  // Simulated payment status
+                                return responseModel;
+                            });
+                });
+    }
+
     @Override
     public Mono<Integer> getCartItemCount(String cartId) {
         return cartRepository.findCartByCartId(cartId)
@@ -116,20 +158,144 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public Mono<CartResponseModel> createNewCart(CartRequestModel cartRequestModel) {
+    public Mono<CartResponseModel> assignCartToCustomer(String customerId, List<CartProduct> products) {
+        //check if the customer already has a cart
+        return cartRepository.findCartByCustomerId(customerId)
+                .defaultIfEmpty(new Cart())
+                .flatMap(cart -> {
+                    //set the customerId if it's a new cart
+                    if (cart.getCustomerId() == null) {
+                        cart.setCustomerId(customerId);
+                        cart.setCartId(UUID.randomUUID().toString()); // Generate a new cart ID
+                    }
 
-        Cart cart = new Cart();
-        cart.setCustomerId(cartRequestModel.getCustomerId());
-        cart.setCartId(UUID.randomUUID().toString());
-        Mono<CartResponseModel> cartRequestModelMono = cartRepository.save(cart)
-                .map(savedCart -> {
-                    CartResponseModel cartResponseModel = new CartResponseModel();
-                    cartResponseModel.setCustomerId(savedCart.getCustomerId());
-                    cartResponseModel.setCartId(savedCart.getCartId());
-                    return cartResponseModel;
+                    //add or update products in the cart
+                    List<CartProduct> updatedProducts = cart.getProducts() != null ? cart.getProducts() : new ArrayList<>();
+
+                    for (CartProduct newProduct : products) {
+                        boolean productExists = false;
+
+                        //update quantity if product already exists in the cart
+                        for (CartProduct existingProduct : updatedProducts) {
+                            if (existingProduct.getProductId().equals(newProduct.getProductId())) {
+                                existingProduct.setQuantityInCart(existingProduct.getQuantityInCart() + newProduct.getQuantityInCart());
+                                productExists = true;
+                                break;
+                            }
+                        }
+
+                        //if the product is not in the cart, add it
+                        if (!productExists) {
+                            updatedProducts.add(newProduct);
+                        }
+                    }
+
+                    cart.setProducts(updatedProducts);
+
+                    //save the cart to the repository
+                    return cartRepository.save(cart)
+                            .map(savedCart -> EntityModelUtil.toCartResponseModel(savedCart, savedCart.getProducts()));
                 });
-        return cartRequestModelMono;
     }
+
+    @Override
+    public Mono<CartResponseModel> addProductToCart(String cartId, String productId, int quantity) {
+        // Fetch the latest cart and product information
+        return cartRepository.findCartByCartId(cartId)
+                .switchIfEmpty(Mono.error(new NotFoundException("Cart not found: " + cartId)))
+                .flatMap(cart -> productClient.getProductByProductId(productId)
+                        .flatMap(product -> {
+                            // Validate if the requested quantity is greater than zero
+                            if (quantity <= 0) {
+                                return Mono.error(new InvalidInputException("Quantity must be greater than zero."));
+                            }
+                            // Check if the available stock is sufficient
+                            if (product.getProductQuantity() < quantity) {
+                                return Mono.error(new OutOfStockException("You cannot add more than "
+                                        + product.getProductQuantity() + " items. Only "
+                                        + product.getProductQuantity() + " items left in stock."));
+                            }
+
+                            // Check if the product already exists in the cart
+                            Optional<CartProduct> existingProductOpt = cart.getProducts().stream()
+                                    .filter(p -> p.getProductId().equals(productId))
+                                    .findFirst();
+
+                            if (existingProductOpt.isPresent()) {
+                                // If product is already in the cart, update the quantity
+                                CartProduct existingProduct = existingProductOpt.get();
+                                int newQuantity = existingProduct.getQuantityInCart() + quantity;
+                                if (newQuantity > product.getProductQuantity()) {
+                                    return Mono.error(new OutOfStockException("You cannot add more than "
+                                            + product.getProductQuantity() + " items. Only "
+                                            + product.getProductQuantity() + " items left in stock."));
+                                }
+                                existingProduct.setQuantityInCart(newQuantity);
+                                existingProduct.setProductQuantity(product.getProductQuantity()); // Update stock information
+                            } else {
+                                // If product is not in the cart, create a new entry
+                                CartProduct cartProduct = CartProduct.builder()
+                                        .productId(product.getProductId())
+                                        .productName(product.getProductName())
+                                        .productDescription(product.getProductDescription())
+                                        .productSalePrice(product.getProductSalePrice())
+                                        .averageRating(product.getAverageRating())
+                                        .quantityInCart(quantity)
+                                        .productQuantity(product.getProductQuantity()) // Set stock information
+                                        .build();
+                                cart.getProducts().add(cartProduct);
+                            }
+
+                            // Save the updated cart
+                            return cartRepository.save(cart)
+                                    .map(savedCart -> EntityModelUtil.toCartResponseModel(savedCart, savedCart.getProducts()));
+                        })
+                );
+    }
+
+
+    @Override
+    public Mono<CartResponseModel> updateProductQuantityInCart(String cartId, String productId, int quantity) {
+        return cartRepository.findCartByCartId(cartId)
+                .switchIfEmpty(Mono.error(new NotFoundException("Cart not found: " + cartId)))
+                .flatMap(cart -> productClient.getProductByProductId(productId)
+                        .flatMap(product -> {
+                            if (quantity <= 0) {
+                                return Mono.error(new InvalidInputException("Quantity must be greater than zero."));
+                            }
+                            if (product.getProductQuantity() < quantity) {
+                                return Mono.error(new OutOfStockException("You cannot set quantity more than " + product.getProductQuantity() + " items. Only " + product.getProductQuantity() + " items left in stock."));
+                            }
+
+                            Optional<CartProduct> existingProductOpt = cart.getProducts().stream()
+                                    .filter(p -> p.getProductId().equals(productId))
+                                    .findFirst();
+
+                            if (existingProductOpt.isPresent()) {
+                                CartProduct existingProduct = existingProductOpt.get();
+                                existingProduct.setQuantityInCart(quantity);
+                                existingProduct.setProductQuantity(product.getProductQuantity());
+                            } else {
+                                return Mono.error(new NotFoundException("Product not found in cart: " + productId));
+                            }
+
+                            return cartRepository.save(cart)
+                                    .map(savedCart -> EntityModelUtil.toCartResponseModel(savedCart, savedCart.getProducts()));
+                        })
+                );
+    }
+
+    @Override
+    public Mono<CartResponseModel> findCartByCustomerId(String customerId) {
+        return cartRepository.findCartByCustomerId(customerId)
+                .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Cart for customer id was not found: " + customerId))))
+                .doOnNext(cart -> log.debug("The cart for customer id {} is: {}", customerId, cart.toString()))
+                .flatMap(cart -> {
+                    List<CartProduct> products = cart.getProducts();
+                    return Mono.just(EntityModelUtil.toCartResponseModel(cart, products));
+                });
+    }
+
 
 
 

@@ -17,4 +17,12 @@ public class CartResponseDTO {
     private String customerId;
     private List<CartProductResponseDTO> products;
     private List<CartProductResponseDTO> wishListProducts;
+
+    private double subtotal;
+    private double tvq;
+    private double tvc;
+    private double total;
+    private String message;  
+    private String paymentStatus;  
+
 }

@@ -81,3 +81,25 @@
 }
 
 
+.low-stock-message {
+  color: orange;
+  font-weight: bold;
+  margin-top: 5px;
+}
+
+.error-message {
+  color: red;
+  font-weight: bold;
+  margin-top: 5px;
+}
+
+.stock-message {
+  color: orange;
+  font-weight: bold;
+}
+
+.out-of-stock {
+  color: red;
+  font-weight: bold;
+}
+

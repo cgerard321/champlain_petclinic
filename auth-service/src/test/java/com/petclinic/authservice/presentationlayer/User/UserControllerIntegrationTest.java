@@ -336,10 +336,6 @@ class UserControllerIntegrationTest {
 
     }
 
-    ////////////////////////////////////////////
-    // Removing the following tests as it is testing a function that is no longer in use (The old emailing service)
-    ////////////////////////////////////////////
-    /*
     @Test
     void createUser_ShouldSucceed() {
         UserIDLessRoleLessDTO userDTO = UserIDLessRoleLessDTO.builder()
@@ -418,8 +414,6 @@ class UserControllerIntegrationTest {
 
         userRepo.delete(userRepo.findByEmail(userDTO.getEmail()).get());
     }
-     */
-    ////////////////////////////////////////////
 
 
     @Test

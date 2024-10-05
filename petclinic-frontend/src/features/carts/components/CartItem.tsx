@@ -9,6 +9,7 @@ interface CartItemProps {
     index: number
   ) => void;
   deleteItem: (indexToDelete: number) => void;
+  errorMessage?: string;
 }
 
 const formatPrice = (price: number): string => {
@@ -21,7 +22,8 @@ const CartItem = ({
   changeItemQuantity,
   deleteItem,
 }: CartItemProps): JSX.Element => {
-  return (
+  const remainingStock = item.productQuantity - (item.quantity ?? 0);
+    return (
     <div className="CartItem">
       <div className="CartItem-info">
         <h2 className="info-title">{item.productName}</h2>
@@ -32,9 +34,10 @@ const CartItem = ({
           <input
             type="number"
             min="1"
+            max={item.productQuantity} {/* Keep the max from main */}
             value={item.quantity || 1}
             onChange={e => changeItemQuantity(e, index)}
-            onBlur={e => changeItemQuantity(e, index)} // Confirm quantity change on blur
+            onBlur={e => changeItemQuantity(e, index)} {/* Confirm quantity change on blur */}
             aria-label={`Quantity of ${item.productName}`}
           />
         </div>
@@ -49,6 +52,13 @@ const CartItem = ({
           Remove
         </button>
       </div>
+      {remainingStock <= 5 && remainingStock > 0 ? (
+        <div className="stock-message">
+          Only {remainingStock} items left in stock.
+        </div>
+      ) : remainingStock === 0 ? (
+        <div className="stock-message out-of-stock">Out of stock</div>
+      ) : null}
     </div>
   );
 };
