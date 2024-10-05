@@ -52,6 +52,23 @@ public class MockServerConfigBillService {
                 );
     }
 
+    public void registerDownloadBillPdfEndpoint() {
+        String response = "Mock PDF Content";
+    
+        mockServerClient_BillService
+            .when(
+                request()
+                    .withMethod("GET")
+                    .withPath("/bills/customer/.*/bills/.*/pdf")
+            )
+            .respond(
+                response()
+                    .withStatusCode(200)
+                    .withBody(response)  // Mock PDF content
+                    .withHeader("Content-Type", "application/pdf")
+            );
+    }    
+
     public void stopMockServer() {
         if(clientAndServer != null)
             this.clientAndServer.stop();

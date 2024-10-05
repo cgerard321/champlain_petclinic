@@ -25,12 +25,9 @@ import java.time.Month;
 import java.time.ZoneId;
 import java.util.*;
 
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-
-import java.util.Date;
 
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
@@ -39,12 +36,11 @@ public class BillServiceImplTest {
     @MockBean
     BillRepository repo;
 
-
     @Autowired
     BillService billService;
 
     @Test
-    public void test_getBillById(){
+    public void test_getBillById() {
         Bill billEntity = buildBill();
 
         String BILL_ID = billEntity.getBillId();
@@ -62,23 +58,23 @@ public class BillServiceImplTest {
                 .verifyComplete();
     }
 
-//    @Test
-//    public void test_GetAllBills() {
-//       Bill billEntity = buildBill();
-//
-//       when(repo.findAll()).thenReturn(Flux.just(billEntity));
-//
-//       Flux<BillResponseDTO> billDTOFlux = billService.GetAllBills();
-//
-//       StepVerifier.create(billDTOFlux)
-//               .consumeNextWith(foundBill -> {
-//                   assertNotNull(foundBill);
-//               })
-//               .verifyComplete();
-//    }
+    // @Test
+    // public void test_GetAllBills() {
+    // Bill billEntity = buildBill();
+    //
+    // when(repo.findAll()).thenReturn(Flux.just(billEntity));
+    //
+    // Flux<BillResponseDTO> billDTOFlux = billService.GetAllBills();
+    //
+    // StepVerifier.create(billDTOFlux)
+    // .consumeNextWith(foundBill -> {
+    // assertNotNull(foundBill);
+    // })
+    // .verifyComplete();
+    // }
 
     @Test
-    void getBillsByPage_ShouldSucceed(){
+    void getBillsByPage_ShouldSucceed() {
 
         Bill bill1 = Bill.builder()
                 .billId("billId-1")
@@ -117,8 +113,8 @@ public class BillServiceImplTest {
         when(repo.findAll()).thenReturn(Flux.just(bill1, bill2, bill3));
 
         // Call the method under test
-        Flux<BillResponseDTO> bills = billService.getAllBillsByPage(pageable,null,null,
-                null,null,null, null, null, null);
+        Flux<BillResponseDTO> bills = billService.getAllBillsByPage(pageable, null, null,
+                null, null, null, null, null, null);
 
         // Verify the behavior using StepVerifier
         StepVerifier.create(bills)
@@ -171,9 +167,8 @@ public class BillServiceImplTest {
                 .verifyComplete();
     }
 
-
     @Test
-    public void test_CreateBill(){
+    public void test_CreateBill() {
 
         Bill billEntity = buildBill();
 
@@ -194,8 +189,8 @@ public class BillServiceImplTest {
     }
 
     @Test
-    public void test_DeleteAllBills(){
-        
+    public void test_DeleteAllBills() {
+
         when(repo.deleteAll()).thenReturn(Mono.empty());
 
         Mono<Void> deleteObj = billService.DeleteAllBills();
@@ -206,7 +201,7 @@ public class BillServiceImplTest {
     }
 
     @Test
-    public void test_DeleteBill(){
+    public void test_DeleteBill() {
 
         Bill billEntity = buildBill();
 
@@ -220,7 +215,7 @@ public class BillServiceImplTest {
     }
 
     @Test
-    public void test_DeleteBillByVetId(){
+    public void test_DeleteBillByVetId() {
 
         Bill billEntity = buildBill();
 
@@ -232,8 +227,9 @@ public class BillServiceImplTest {
                 .expectNextCount(0)
                 .verifyComplete();
     }
+
     @Test
-    public void test_DeleteBillsByCustomerId(){
+    public void test_DeleteBillsByCustomerId() {
         Bill billEntity = buildBill();
         when(repo.deleteBillsByCustomerId(anyString())).thenReturn(Flux.empty());
         Flux<Void> deletedObj = billService.DeleteBillsByCustomerId(billEntity.getCustomerId());
@@ -242,8 +238,9 @@ public class BillServiceImplTest {
                 .expectNextCount(0)
                 .verifyComplete();
     }
+
     @Test
-    public void test_GetBillByCustomerId(){
+    public void test_GetBillByCustomerId() {
 
         Bill billEntity = buildBill();
 
@@ -263,7 +260,7 @@ public class BillServiceImplTest {
     }
 
     @Test
-    public void test_GetBillByVetId(){
+    public void test_GetBillByVetId() {
 
         Bill billEntity = buildBill();
 
@@ -287,24 +284,19 @@ public class BillServiceImplTest {
 
         Bill originalBill = buildBill();
 
-
         double updatedAmount = 20.0;
         originalBill.setAmount(updatedAmount);
-
 
         BillRequestDTO updatedBillRequestDTO = buildBillRequestDTO();
         updatedBillRequestDTO.setAmount(updatedAmount);
 
-
         Mono<BillRequestDTO> updatedBillRequestMono = Mono.just(updatedBillRequestDTO);
-
 
         when(repo.findByBillId(anyString())).thenReturn(Mono.just(originalBill));
         when(repo.save(any(Bill.class))).thenReturn(Mono.just(originalBill));
 
-
-        Mono<BillResponseDTO> updatedBillMono = billService.updateBill(originalBill.getBillId(), updatedBillRequestMono);
-
+        Mono<BillResponseDTO> updatedBillMono = billService.updateBill(originalBill.getBillId(),
+                updatedBillRequestMono);
 
         StepVerifier.create(updatedBillMono)
                 .consumeNextWith(updatedBill -> {
@@ -345,7 +337,6 @@ public class BillServiceImplTest {
                 .verifyComplete();
     }
 
-
     @Test
     public void test_deleteNonExistentBillId() {
         String nonExistentBillId = "nonExistentId";
@@ -376,11 +367,9 @@ public class BillServiceImplTest {
                 .verify();
     }
 
-
     @Test
     public void test_GetBillByNonExistentCustomerId() {
         String nonExistentCustomerId = "nonExistentId";
-
 
         when(repo.findByCustomerId(nonExistentCustomerId)).thenReturn(Flux.empty());
 
@@ -406,6 +395,55 @@ public class BillServiceImplTest {
                 .verify();
     }
 
+    @Test
+    public void testGenerateBillPdf() {
+        // Step 1: Mock Bill entity with first and last name
+        Bill mockBill = Bill.builder()
+                .billId("billId-1")
+                .customerId("customerId-1")
+                .ownerFirstName("John")
+                .ownerLastName("Doe")
+                .visitType("General")
+                .vetId("vetId-1")
+                .amount(100.0)
+                .billStatus(BillStatus.PAID)
+                .date(LocalDate.now())
+                .dueDate(LocalDate.now().plusDays(15))
+                .build();
+
+        String customerId = mockBill.getCustomerId();
+        String billId = mockBill.getBillId();
+
+        // Step 2: Mock the repository to return the mock Bill
+        when(repo.findByBillId(billId)).thenReturn(Mono.just(mockBill));
+
+        // Step 3: Call the method under test
+        Mono<byte[]> pdfBytesMono = billService.generateBillPdf(customerId, billId);
+
+        // Step 4: Verify the result using StepVerifier
+        StepVerifier.create(pdfBytesMono)
+                .assertNext(pdfBytes -> {
+                    assertNotNull(pdfBytes);
+                    assertTrue(pdfBytes.length > 0);
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    public void testGenerateBillPdf_BillNotFound() {
+        // Step 1: Mock the repository to return Mono.empty() when a bill is not found
+        when(repo.findByBillId(anyString())).thenReturn(Mono.empty());
+
+        // Step 2: Call the method under test
+        Mono<byte[]> pdfMono = billService.generateBillPdf("nonexistentCustomerId", "nonexistentBillId");
+
+        // Step 3: Verify that the Mono emits an error with the expected message
+        StepVerifier.create(pdfMono)
+                .expectErrorMatches(throwable -> throwable instanceof RuntimeException &&
+                        throwable.getMessage().equals("Bill not found for given customer"))
+                .verify();
+    }
+
     private BillRequestDTO buildInvalidBillRequestDTO() {
         LocalDate date = LocalDate.now();
 
@@ -420,7 +458,7 @@ public class BillServiceImplTest {
                 .build();
     }
 
-    private Bill buildBill(){
+    private Bill buildBill() {
 
         Calendar calendar = Calendar.getInstance();
         calendar.set(2022, Calendar.SEPTEMBER, 25);
@@ -428,13 +466,13 @@ public class BillServiceImplTest {
                 .atZone(ZoneId.systemDefault())
                 .toLocalDate();
 
-        LocalDate dueDate = LocalDate.of(2022,Month.OCTOBER,15);
+        LocalDate dueDate = LocalDate.of(2022, Month.OCTOBER, 15);
 
-
-        return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(13.37).billStatus(BillStatus.PAID).dueDate(dueDate).build();
+        return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date)
+                .amount(13.37).billStatus(BillStatus.PAID).dueDate(dueDate).build();
     }
 
-    private Bill buildUnpaidBill(){
+    private Bill buildUnpaidBill() {
 
         VetResponseDTO vetDTO = buildVetDTO();
         Calendar calendar = Calendar.getInstance();
@@ -445,12 +483,12 @@ public class BillServiceImplTest {
 
         LocalDate dueDate = LocalDate.of(2022, Month.OCTOBER, 5);
 
-
-        return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(13.37).billStatus(BillStatus.UNPAID).dueDate(dueDate).build();
+        return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date)
+                .amount(13.37).billStatus(BillStatus.UNPAID).dueDate(dueDate).build();
 
     }
 
-    private Bill buildOverdueBill(){
+    private Bill buildOverdueBill() {
 
         Calendar calendar = Calendar.getInstance();
         calendar.set(2022, Calendar.SEPTEMBER, 25);
@@ -460,15 +498,11 @@ public class BillServiceImplTest {
 
         LocalDate dueDate = LocalDate.of(2022, Month.AUGUST, 15);
 
-
-        return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(13.37).billStatus(BillStatus.OVERDUE).dueDate(dueDate).build();
+        return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date)
+                .amount(13.37).billStatus(BillStatus.OVERDUE).dueDate(dueDate).build();
     }
 
-
-
-    private BillRequestDTO buildBillRequestDTO(){
-
-
+    private BillRequestDTO buildBillRequestDTO() {
 
         VetResponseDTO vetDTO = buildVetDTO();
 
@@ -478,11 +512,10 @@ public class BillServiceImplTest {
                 .atZone(ZoneId.systemDefault())
                 .toLocalDate();
 
-        LocalDate dueDate =LocalDate.of(2022, Month.OCTOBER, 10);
+        LocalDate dueDate = LocalDate.of(2022, Month.OCTOBER, 10);
 
-
-
-        return BillRequestDTO.builder().customerId("1").vetId("1").visitType("Test Type").date(date).amount(13.37).billStatus(BillStatus.PAID).dueDate(dueDate).build();
+        return BillRequestDTO.builder().customerId("1").vetId("1").visitType("Test Type").date(date).amount(13.37)
+                .billStatus(BillStatus.PAID).dueDate(dueDate).build();
 
     }
 
@@ -501,7 +534,4 @@ public class BillServiceImplTest {
 
     }
 
-
-
 }
-

@@ -25,33 +25,28 @@ import reactor.core.publisher.Mono;
 public class BillController {
     private final BillServiceClient billService;
 
-    @IsUserSpecific(idToMatch = {"customerId"}, bypassRoles = {Roles.ADMIN})
-    @GetMapping(value = "/customer/{customerId}", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<BillResponseDTO> getBillsByOwnerId(final @PathVariable String customerId)
-    {
+    @IsUserSpecific(idToMatch = { "customerId" }, bypassRoles = { Roles.ADMIN })
+    @GetMapping(value = "/customer/{customerId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<BillResponseDTO> getBillsByOwnerId(final @PathVariable String customerId) {
         return billService.getBillsByOwnerId(customerId);
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @PostMapping(value = "/admin",
-            consumes = "application/json",
-            produces = "application/json")
+    @SecuredEndpoint(allowedRoles = { Roles.ADMIN })
+    @PostMapping(value = "/admin", consumes = "application/json", produces = "application/json")
     public Mono<ResponseEntity<BillResponseDTO>> createBill(@RequestBody BillRequestDTO model) {
         return billService.createBill(model).map(s -> ResponseEntity.status(HttpStatus.CREATED).body(s))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @SecuredEndpoint(allowedRoles = { Roles.ADMIN })
     @GetMapping(value = "/admin", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<BillResponseDTO> getAllBills()
-    {
+    public Flux<BillResponseDTO> getAllBills() {
         return billService.getAllBilling();
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @SecuredEndpoint(allowedRoles = { Roles.ADMIN })
     @GetMapping(value = "/admin/{billId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<BillResponseDTO> getBillById(@PathVariable String billId)
-    {
+    public Mono<BillResponseDTO> getBillById(@PathVariable String billId) {
         return billService.getBilling(billId);
     }
 

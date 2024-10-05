@@ -1,19 +1,109 @@
+// package com.petclinic.billing.presentationlayer;
+
+// import com.petclinic.billing.businesslayer.BillService;
+// import com.petclinic.billing.datalayer.BillResponseDTO;
+// import com.petclinic.billing.datalayer.BillStatus;
+// import lombok.extern.slf4j.Slf4j;
+
+// import org.springframework.http.ContentDisposition;
+// import org.springframework.http.HttpHeaders;
+// import org.springframework.http.HttpStatus;
+// import org.springframework.http.MediaType;
+// import org.springframework.http.ResponseEntity;
+// import org.springframework.web.bind.annotation.*;
+// import reactor.core.publisher.Flux;
+// import reactor.core.publisher.Mono;
+
+// /**
+//  * The following class is customer-specific controller
+//  * that exposes endpoints only for customer-specific operations
+//  * such as, viewing bills and filtering by status.
+//  */
+// @RestController
+// @Slf4j
+// @RequestMapping("/customers/{customerId}/bills")
+// public class CustomerBillsController {
+
+//     private final BillService billService;
+
+//     public CustomerBillsController(BillService billService) {
+//         this.billService = billService;
+//     }
+
+//     // Endpoint to get all bills for a specific customer
+//     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+//     public Flux<BillResponseDTO> getBillsByCustomerId(@PathVariable("customerId") String customerId) {
+//         return billService.GetBillsByCustomerId(customerId);
+//     }
+
+//     // Endpoint to filter bills by status for a customer (Paid, Unpaid, Overdue)
+//     @GetMapping(value = "/status", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+//     public Flux<BillResponseDTO> getBillsByStatus(
+//             @PathVariable("customerId") String customerId,
+//             @RequestParam("status") BillStatus status) {
+//         return billService.GetBillsByCustomerIdAndStatus(customerId, status);
+//     }
+
+//     // Endpoint to view details of a specific bill
+//     @GetMapping(value = "/{billId}", produces = MediaType.APPLICATION_JSON_VALUE)
+//     public Mono<BillResponseDTO> getBillDetails(
+//             @PathVariable("customerId") String customerId,
+//             @PathVariable("billId") String billId) {
+//         return billService.GetBillByCustomerIdAndBillId(customerId, billId);
+//     }
+
+//     // @GetMapping(value = "/{billId}/pdf", produces =
+//     // MediaType.APPLICATION_PDF_VALUE)
+//     // public ResponseEntity<byte[]> downloadBillPdf(
+//     // @PathVariable String customerId,
+//     // @PathVariable String billId) {
+//     // byte[] pdf = billService.generateBillPdf(customerId, billId);
+
+//     // HttpHeaders headers = new HttpHeaders();
+//     // headers.setContentType(MediaType.APPLICATION_PDF);
+//     // headers.setContentDisposition(
+//     // ContentDisposition.builder("attachment").filename("bill-" + billId +
+//     // ".pdf").build());
+
+//     // return new ResponseEntity<>(pdf, headers, HttpStatus.OK);
+//     // }
+//     @GetMapping(value = "/{billId}/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
+//     public ResponseEntity<byte[]> downloadBillPdf(
+//             @PathVariable String customerId,
+//             @PathVariable String billId) {
+//         try {
+//             log.info("Generating PDF for customerId: {}, billId: {}", customerId, billId);
+//             byte[] pdf = billService.generateBillPdf(customerId, billId);
+//             log.info("PDF generated successfully");
+
+//             HttpHeaders headers = new HttpHeaders();
+//             headers.setContentType(MediaType.APPLICATION_PDF);
+//             headers.setContentDispositionFormData("attachment", "bill-" + billId + ".pdf");
+
+//             return new ResponseEntity<>(pdf, headers, HttpStatus.OK);
+//         } catch (RuntimeException e) {
+//             log.error("Error generating PDF for billId: {}", billId, e);
+//             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+//         }
+//     }
+
+// }
+
 package com.petclinic.billing.presentationlayer;
 
 import com.petclinic.billing.businesslayer.BillService;
 import com.petclinic.billing.datalayer.BillResponseDTO;
 import com.petclinic.billing.datalayer.BillStatus;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-/**
- * The following class is customer-specific controller
- * that exposes endpoints only for customer-specific operations
- * such as, viewing bills and filtering by status.
- */
 @RestController
 @Slf4j
 @RequestMapping("/customers/{customerId}/bills")
@@ -25,27 +115,37 @@ public class CustomerBillsController {
         this.billService = billService;
     }
 
-    // Endpoint to get all bills for a specific customer
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public Flux<BillResponseDTO> getBillsByCustomerId(@PathVariable("customerId") String customerId) {
         return billService.GetBillsByCustomerId(customerId);
     }
 
-    // Endpoint to filter bills by status for a customer (Paid, Unpaid, Overdue)
     @GetMapping(value = "/status", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<BillResponseDTO> getBillsByStatus(
-            @PathVariable("customerId") String customerId,
-            @RequestParam("status") BillStatus status
-    ) {
+    public Flux<BillResponseDTO> getBillsByStatus(@PathVariable("customerId") String customerId,
+            @RequestParam("status") BillStatus status) {
         return billService.GetBillsByCustomerIdAndStatus(customerId, status);
     }
 
-    // Endpoint to view details of a specific bill
     @GetMapping(value = "/{billId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<BillResponseDTO> getBillDetails(
-            @PathVariable("customerId") String customerId,
-            @PathVariable("billId") String billId
-    ) {
+    public Mono<BillResponseDTO> getBillDetails(@PathVariable("customerId") String customerId,
+            @PathVariable("billId") String billId) {
         return billService.GetBillByCustomerIdAndBillId(customerId, billId);
     }
+
+    @GetMapping(value = "/{billId}/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
+    public Mono<ResponseEntity<byte[]>> downloadBillPdf(@PathVariable String customerId,
+            @PathVariable String billId) {
+        return billService.generateBillPdf(customerId, billId)
+                .map(pdf -> {
+                    HttpHeaders headers = new HttpHeaders();
+                    headers.setContentType(MediaType.APPLICATION_PDF);
+                    headers.setContentDispositionFormData("attachment", "bill-" + billId + ".pdf");
+                    return new ResponseEntity<>(pdf, headers, HttpStatus.OK);
+                })
+                .onErrorResume(e -> {
+                    log.error("Error generating PDF for billId: {}", billId, e);
+                    return Mono.just(new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR));
+                });
+    }
+
 }

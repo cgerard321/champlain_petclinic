@@ -233,6 +233,16 @@ public class BillServiceClient {
                 .retrieve()
                 .bodyToFlux(Void.class);
     }
+
+    public Mono<byte[]> downloadBillPdf(String customerId, String billId) {
+        return webClientBuilder.build()
+                .get()
+                .uri(billServiceUrl + "/customer/{customerId}/bills/{billId}/pdf", customerId, billId)
+                .accept(MediaType.APPLICATION_PDF)
+                .retrieve()
+                .bodyToMono(byte[].class);
+    }
+    
 }
 
 
