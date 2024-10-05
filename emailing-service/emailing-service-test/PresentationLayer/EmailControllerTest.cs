@@ -1,7 +1,9 @@
 using System.Net;
 using System.Text;
 using emailing_service.Models;
+using emailing_service.Models.Database;
 using emailing_service.Models.EmailType;
+using emailing_service.PresentationLayer;
 using emailing_service.Utils;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Newtonsoft.Json;
@@ -14,12 +16,17 @@ public class EmailControllerTests
     private readonly HttpClient _httpClient;
     private readonly string _pathOfDefaultHtml;
     private readonly DirectEmailModel _directEmailModel;
+    private readonly NotificationEmailModel _notificationEmailModel;
+    private readonly DateTime _appropriateDate;
     public EmailControllerTests()
     {
         EmailUtils.sendEmail = false;
         var applicationFactory = new WebApplicationFactory<Program>();
         _httpClient = applicationFactory.CreateClient();
         _pathOfDefaultHtml = "<html><body>%%EMAIL_HEADERS%% %%EMAIL_BODY%% %%EMAIL_FOOTER%% %%EMAIL_NAME%% %%EMAIL_SENDER%%</body></html>";
+        _appropriateDate = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+            TimeZoneInfo.CreateCustomTimeZone("UTC-4", new TimeSpan(-4, 0, 0), "UTC-4", "UTC-4")).AddMinutes(3);
+
         _directEmailModel = new DirectEmailModel(
             "xilef992@gmail.com",
             "This is a test email",
@@ -29,6 +36,18 @@ public class EmailControllerTests
             "this is the email footer",
             "Felix",
             "PetClinic"
+        );
+        _notificationEmailModel = new NotificationEmailModel(
+            "xilef992@gmail.com",
+            "This is a test email",
+            "Default",
+            "This is the emailHeader",
+            "This is the emailbody",
+            "this is the email footer",
+            "Felix",
+            "PetClinic",
+            TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+                TimeZoneInfo.CreateCustomTimeZone("UTC-4", new TimeSpan(-4, 0, 0), "UTC-4", "UTC-4")).AddMinutes(3)
         );
     }
     [SetUp]
@@ -61,6 +80,34 @@ public class EmailControllerTests
         // Assert
         Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
     }
+    [Test]
+    [TestCase("Default")]
+    [TestCase("Example2")]
+    [TestCase("WhyAmIAloneInThis")]
+    public async Task ReceiveHtml_AlreadyExistingTemplate_ReturnsBadRequest(string name)
+    {
+        // Arrange
+        // First, add the template to ensure it exists
+        var initialRequest = new HttpRequestMessage(HttpMethod.Post, $"email/templates/add/{name}")
+        {
+            Content = new StringContent(_pathOfDefaultHtml, Encoding.UTF8, "text/html")
+        };
+        var initialResponse = await _httpClient.SendAsync(initialRequest); // Ensure the template is created first
+        Assert.That(initialResponse.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+        
+        
+        // Act - Attempt to add the same template again
+        var request = new HttpRequestMessage(HttpMethod.Post, $"email/templates/add/{name}")
+        {
+            Content = new StringContent(_pathOfDefaultHtml, Encoding.UTF8, "text/html")
+        };
+    
+        var response = await _httpClient.SendAsync(request);
+
+        // Assert
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+    }
+
 
     [Test]
     [TestCase(null)]
@@ -569,6 +616,512 @@ public class EmailControllerTests
         // Assert
         Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
     }
+    
+    
+    
+    
+    
+    
+    
+    
+    //TODO COME HERE
+    
+    [Test]
+    public async Task SendEmailNotification_EmailModelIsValid_ReturnsOkResult()
+    {
+        EmailUtils.EmailTemplates.Add(new EmailTemplate("Default","<html><body>%%EMAIL_HEADERS%% %%EMAIL_BODY%% %%EMAIL_FOOTER%% %%EMAIL_NAME%% %%EMAIL_SENDER%%</body></html>"));
+        // Arrange
+        var emailModel = _notificationEmailModel;
+        var json = JsonConvert.SerializeObject(emailModel);
+
+        // Act
+        var request = new HttpRequestMessage(HttpMethod.Post, "email/send/notification")
+        {
+            Content = new StringContent(json, Encoding.UTF8, "application/json")
+        };
+        var response = await _httpClient.SendAsync(request);
+
+        // Assert
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+    }
+
+    [Test]
+    public async Task SendEmailNotification_EmailModelIsNull_ReturnsBadRequest()
+    {
+        // Arrange
+        var requestBody = "{}"; 
+        var request = new HttpRequestMessage(HttpMethod.Post, "email/send/notification")
+        {
+            Content = new StringContent(requestBody, Encoding.UTF8, "application/json")
+        };
+
+        // Act
+        var response = await _httpClient.SendAsync(request);
+
+        // Assert
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+    }
+
+    //let's have fun and test all the exceptions!
+    [Test]
+    public async Task SendEmailNotification_EmailModelHasMissingBody_BadRequest()
+    {
+        EmailUtils.EmailTemplates.Add(new EmailTemplate("Default","<html><body>%%EMAIL_HEADERS%% %%EMAIL_BODY%% %%EMAIL_FOOTER%% %%EMAIL_NAME%% %%EMAIL_SENDER%%</body></html>"));
+
+        // Arrange
+        var emailModel = new NotificationEmailModel(); // create an empty DirectEmailModel instance
+        var json = JsonConvert.SerializeObject(emailModel);
+
+        // Act
+        var request = new HttpRequestMessage(HttpMethod.Post, "email/send/notification")
+        {
+            Content = new StringContent(json, Encoding.UTF8, "application/json")
+        };
+        var response = await _httpClient.SendAsync(request);
+
+        // Assert
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+    }
+    public static IEnumerable<NotificationEmailModel> InvalidBodyRequestNotification()
+    {
+        yield return new NotificationEmailModel(
+            "",
+            "This is a test email",
+            "Default",
+            "This is the emailHeader",
+            "This is the email body",
+            "this is the email footer",
+            "Felix",
+            "PetClinic",
+            TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+                TimeZoneInfo.CreateCustomTimeZone("UTC-4", new TimeSpan(-4, 0, 0), "UTC-4", "UTC-4")).AddMinutes(3)
+            
+            
+        );
+
+        yield return new NotificationEmailModel(
+            " ",
+            "Another test email",
+            "Default",
+            "Test email header",
+            "Test email body",
+            "Test email footer",
+            "John",
+            "CompanyXYZ",
+            TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+                TimeZoneInfo.CreateCustomTimeZone("UTC-4", new TimeSpan(-4, 0, 0), "UTC-4", "UTC-4")).AddMinutes(3)
+        );
+        yield return new NotificationEmailModel(
+            null!,
+            "Another test email",
+            "Default",
+            "Test email header",
+            "Test email body",
+            "Test email footer",
+            "John",
+            "CompanyXYZ",
+            TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+                TimeZoneInfo.CreateCustomTimeZone("UTC-4", new TimeSpan(-4, 0, 0), "UTC-4", "UTC-4")).AddMinutes(3)
+        );
+        yield return new NotificationEmailModel(
+            "exam@ple2@test.com",
+            "Another test email",
+            "Default",
+            "Test email header",
+            "Test email body",
+            "Test email footer",
+            "John",
+            "CompanyXYZ",
+            TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+                TimeZoneInfo.CreateCustomTimeZone("UTC-4", new TimeSpan(-4, 0, 0), "UTC-4", "UTC-4")).AddMinutes(3)
+        );
+        yield return new NotificationEmailModel(
+            "@test.com",
+            "Another test email",
+            "Default",
+            "Test email header",
+            "Test email body",
+            "Test email footer",
+            "John",
+            "CompanyXYZ",
+            TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+                TimeZoneInfo.CreateCustomTimeZone("UTC-4", new TimeSpan(-4, 0, 0), "UTC-4", "UTC-4")).AddMinutes(3)
+        );
+        yield return new NotificationEmailModel(
+            "example2@test",
+            "Another test email",
+            "Default",
+            "Test email header",
+            "Test email body",
+            "Test email footer",
+            "John",
+            "CompanyXYZ",
+            TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+                TimeZoneInfo.CreateCustomTimeZone("UTC-4", new TimeSpan(-4, 0, 0), "UTC-4", "UTC-4")).AddMinutes(3)
+        );
+        yield return new NotificationEmailModel(
+            "example2@tes@t.com",
+            "Another test email",
+            "Default",
+            "Test email header",
+            "Test email body",
+            "Test email footer",
+            "John",
+            "CompanyXYZ",
+            TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+                TimeZoneInfo.CreateCustomTimeZone("UTC-4", new TimeSpan(-4, 0, 0), "UTC-4", "UTC-4")).AddMinutes(3)
+        );
+        yield return new NotificationEmailModel(
+            "example2@test.com",
+            "",
+            "Default",
+            "Test email header",
+            "Test email body",
+            "Test email footer",
+            "John",
+            "CompanyXYZ",
+            TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+                TimeZoneInfo.CreateCustomTimeZone("UTC-4", new TimeSpan(-4, 0, 0), "UTC-4", "UTC-4")).AddMinutes(3)
+        );
+        yield return new NotificationEmailModel(
+            "example2@test.com",
+            "    ",
+            "Default",
+            "Test email header",
+            "Test email body",
+            "Test email footer",
+            "John",
+            "CompanyXYZ",
+            TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+                TimeZoneInfo.CreateCustomTimeZone("UTC-4", new TimeSpan(-4, 0, 0), "UTC-4", "UTC-4")).AddMinutes(3)
+        );
+        yield return new NotificationEmailModel(
+            "example2@test.com",
+            null!,
+            "Default",
+            "Test email header",
+            "Test email body",
+            "Test email footer",
+            "John",
+            "CompanyXYZ",
+            TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+                TimeZoneInfo.CreateCustomTimeZone("UTC-4", new TimeSpan(-4, 0, 0), "UTC-4", "UTC-4")).AddMinutes(3)
+        );
+    }
+    [Test, TestCaseSource(nameof(InvalidBodyRequestNotification))]
+    public async Task SendEmailNotification_EmailBodyIsInvalid_BadRequest(NotificationEmailModel emailModel)
+    {
+        EmailUtils.EmailTemplates.Add(new EmailTemplate("Default","<html><body>%%EMAIL_HEADERS%% %%EMAIL_BODY%% %%EMAIL_FOOTER%% %%EMAIL_NAME%% %%EMAIL_SENDER%%</body></html>"));
+        
+        var json = JsonConvert.SerializeObject(emailModel);
+        // Act
+        var request = new HttpRequestMessage(HttpMethod.Post, "email/send/notification")
+        {
+            Content = new StringContent(json, Encoding.UTF8, "application/json")
+        };
+        var response = await _httpClient.SendAsync(request);
+
+        // Assert
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+    }
+    public static IEnumerable<NotificationEmailModel> ValidBodyWithNonExistingTemplateNotification()
+    {
+        yield return new NotificationEmailModel(
+            "example@test.com",
+            "This is a test email",
+            "Example1",
+            "This is the emailHeader",
+            "This is the emailbody",
+            "this is the email footer",
+            "Felix",
+            "PetClinic",
+            TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+                TimeZoneInfo.CreateCustomTimeZone("UTC-4", new TimeSpan(-4, 0, 0), "UTC-4", "UTC-4")).AddMinutes(3)
+
+            
+        );
+
+        yield return new NotificationEmailModel(
+            "example@test.com",
+            "Another test email",
+            "Example2",
+            "Test email header",
+            "Test email body",
+            "Test email footer",
+            "John",
+            "CompanyXYZ",
+            TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+                TimeZoneInfo.CreateCustomTimeZone("UTC-4", new TimeSpan(-4, 0, 0), "UTC-4", "UTC-4")).AddMinutes(3)
+
+            
+        );
+        yield return new NotificationEmailModel(
+            "example@test.com",
+            "Another test email",
+            "Example3",
+            "Test email header",
+            "Test email body",
+            "Test email footer",
+            "John",
+            "CompanyXYZ",
+            TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+                TimeZoneInfo.CreateCustomTimeZone("UTC-4", new TimeSpan(-4, 0, 0), "UTC-4", "UTC-4")).AddMinutes(3)
+
+        );
+    }
+    [Test, TestCaseSource(nameof(ValidBodyWithNonExistingTemplateNotification))]
+    public async Task SendEmailNotification_BadRequest(NotificationEmailModel emailModel)
+    {
+        //EmailUtils.EmailTemplates.Add(new EmailTemplate("Default","<html><body>%%EMAIL_HEADERS%% %%EMAIL_BODY%% %%EMAIL_FOOTER%% %%EMAIL_NAME%% %%EMAIL_SENDER%%</body></html>"));
+        
+        var json = JsonConvert.SerializeObject(emailModel);
+        // Act
+        var request = new HttpRequestMessage(HttpMethod.Post, "email/send/notification")
+        {
+            Content = new StringContent(json, Encoding.UTF8, "application/json")
+        };
+        var response = await _httpClient.SendAsync(request);
+
+        // Assert
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
+    }
+    
+    public static IEnumerable<NotificationEmailModel> EmptyNeededFieldsModelsNotification()
+    {
+        yield return new NotificationEmailModel(
+            "example@test.com",
+            "This is a test email",
+            "Default",
+            null!,
+            "This is the emailbody",
+            "this is the email footer",
+            "Felix",
+            "PetClinic",
+            TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+                TimeZoneInfo.CreateCustomTimeZone("UTC-4", new TimeSpan(-4, 0, 0), "UTC-4", "UTC-4")).AddMinutes(3)
+
+        );
+
+        yield return new NotificationEmailModel(
+            "example@test.com",
+            "Another test email",
+            "Default",
+            "Test email header",
+            null!,
+            "Test email footer",
+            "John",
+            "CompanyXYZ",
+            TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+                TimeZoneInfo.CreateCustomTimeZone("UTC-4", new TimeSpan(-4, 0, 0), "UTC-4", "UTC-4")).AddMinutes(3)
+
+        );
+        yield return new NotificationEmailModel(
+            "example@test.com",
+            "Another test email",
+            "Default",
+            "Test email header",
+            "Test email body",
+            null!,
+            "John",
+            "CompanyXYZ",
+            TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+                TimeZoneInfo.CreateCustomTimeZone("UTC-4", new TimeSpan(-4, 0, 0), "UTC-4", "UTC-4")).AddMinutes(3)
+
+        );
+        yield return new NotificationEmailModel(
+            "example@test.com",
+            "This is a test email",
+            "Default",
+            "This is the emailHeader",
+            "This is the emailbody",
+            "this is the email footer",
+            null!,
+            "PetClinic",
+            TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+                TimeZoneInfo.CreateCustomTimeZone("UTC-4", new TimeSpan(-4, 0, 0), "UTC-4", "UTC-4")).AddMinutes(3)
+
+        );
+
+        yield return new NotificationEmailModel(
+            "example@test.com",
+            "Another test email",
+            "Default",
+            "Test email header",
+            "Test email body",
+            "Test email footer",
+            "John",
+            null!,
+            TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+                TimeZoneInfo.CreateCustomTimeZone("UTC-4", new TimeSpan(-4, 0, 0), "UTC-4", "UTC-4")).AddMinutes(3)
+
+        );
+    }
+    [Test, TestCaseSource(nameof(EmptyNeededFieldsModelsNotification))]
+    public async Task SendEmailNotification_NotAllTheFieldsOfTheTemmplate_ReturnsBadRequest(NotificationEmailModel emailModelParam)
+    {
+        EmailUtils.EmailTemplates.Add(new EmailTemplate("Default","<html><body>%%EMAIL_HEADERS%% %%EMAIL_BODY%% %%EMAIL_FOOTER%% %%EMAIL_NAME%% %%EMAIL_SENDER%%</body></html>"));
+        // Arrange
+        //var httpClient = new HttpClient();
+        var emailModel = emailModelParam;
+        emailModel.TemplateName = "Default";
+        var json = JsonConvert.SerializeObject(emailModel);
+
+        var request = new HttpRequestMessage(HttpMethod.Post, "email/send")
+        {
+            Content = new StringContent(json, Encoding.UTF8, "application/json")
+        };
+        var response = await _httpClient.SendAsync(request);
+        // Act
+        // Assert
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+    }
+    public static IEnumerable<NotificationEmailModel> TemplateRequiredFieldNotSetNotification()
+    {
+        /*yield return new DirectEmailModel(
+            "example@test.com",
+            "This is a test email",
+            "Default",
+            "",
+            "This is the emailbody",
+            "this is the email footer",
+            "Felix",
+            "PetClinic"
+        );*/
+        yield return new NotificationEmailModel(
+            "example@test.com",
+            "This is a test email",
+            "Default",
+            "Test email header",
+            null!,
+            "Test email footer",
+            "John",
+            "CompanyXYZ",
+            TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+                TimeZoneInfo.CreateCustomTimeZone("UTC-4", new TimeSpan(-4, 0, 0), "UTC-4", "UTC-4")).AddMinutes(3)
+
+        );
+        
+        yield return new NotificationEmailModel(
+            "example@test.com",
+            "This is a test email",
+            "Default",
+            "Test email header",
+            "Test email body",
+            "",
+            "John",
+            "CompanyXYZ",
+            TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+                TimeZoneInfo.CreateCustomTimeZone("UTC-4", new TimeSpan(-4, 0, 0), "UTC-4", "UTC-4")).AddMinutes(3)
+
+        );
+        yield return new NotificationEmailModel(
+            "example@test.com",
+            "This is a test email",
+            "Default",
+            "This is the emailHeader",
+            "This is the emailbody",
+            "this is the email footer",
+            "",
+            "PetClinic",
+            TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+                TimeZoneInfo.CreateCustomTimeZone("UTC-4", new TimeSpan(-4, 0, 0), "UTC-4", "UTC-4")).AddMinutes(3)
+
+        );
+
+        yield return new NotificationEmailModel(
+            "example@test.com",
+            "Another test email",
+            "Default",
+            "Test email header",
+            "Test email body",
+            "Test email footer",
+            "John",
+            null!,
+            TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+                TimeZoneInfo.CreateCustomTimeZone("UTC-4", new TimeSpan(-4, 0, 0), "UTC-4", "UTC-4")).AddMinutes(3)
+
+        );
+    }
+    [Test, TestCaseSource(nameof(TemplateRequiredFieldNotSetNotification))]
+    public async Task SendEmailNotification_RequestFieldNeededIsNotSet_ReturnsBadRequest(NotificationEmailModel emailModelParam)
+    {
+        EmailUtils.EmailTemplates.Add(new EmailTemplate("Default","<html><body>%%EMAIL_HEADERS%% %%EMAIL_BODY%% %%EMAIL_FOOTER%% %%EMAIL_NAME%% %%EMAIL_SENDER%%</body></html>"));
+        // Arrange
+        var json = JsonConvert.SerializeObject(emailModelParam);
+
+        var request = new HttpRequestMessage(HttpMethod.Post, "email/send/notification")
+        {
+            Content = new StringContent(json, Encoding.UTF8, "application/json")
+        };
+        var response = await _httpClient.SendAsync(request);
+        // Act
+        // Assert
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+    }
+    public static IEnumerable<NotificationEmailModel> NotificationWithPastDate()
+    {
+        /*yield return new DirectEmailModel(
+            "example@test.com",
+            "This is a test email",
+            "Default",
+            "",
+            "This is the emailbody",
+            "this is the email footer",
+            "Felix",
+            "PetClinic"
+        );*/
+        yield return new NotificationEmailModel(
+            "example@test.com",
+            "This is a test email",
+            "Default",
+            "Test email header",
+            "HelloWorld",
+            "Test email footer",
+            "John",
+            "CompanyXYZ",
+            TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+                TimeZoneInfo.CreateCustomTimeZone("UTC-4", new TimeSpan(-4, 0, 0), "UTC-4", "UTC-4")).AddYears(-10)
+
+        );
+        
+        yield return new NotificationEmailModel(
+            "example@test.com",
+            "This is a test email",
+            "Default",
+            "Test email header",
+            "Test email body",
+            "YesSirMailor",
+            "John",
+            "CompanyXYZ",
+            TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+                TimeZoneInfo.CreateCustomTimeZone("UTC-4", new TimeSpan(-4, 0, 0), "UTC-4", "UTC-4"))
+
+        );
+    }
+    [Test, TestCaseSource(nameof(NotificationWithPastDate))]
+    public async Task SendEmailNotification_SentPastDate_ReturnsBadRequest(NotificationEmailModel emailModelParam)
+    {
+        EmailUtils.EmailTemplates.Add(new EmailTemplate("Default","<html><body>%%EMAIL_HEADERS%% %%EMAIL_BODY%% %%EMAIL_FOOTER%% %%EMAIL_NAME%% %%EMAIL_SENDER%%</body></html>"));
+        // Arrange
+        var json = JsonConvert.SerializeObject(emailModelParam);
+
+        var request = new HttpRequestMessage(HttpMethod.Post, "email/send/notification")
+        {
+            Content = new StringContent(json, Encoding.UTF8, "application/json")
+        };
+        var response = await _httpClient.SendAsync(request);
+        // Act
+        // Assert
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+    }
+    
+    
+    
+    
+    
+    
+    
+    
     
     
     

@@ -596,6 +596,22 @@ public class VetsServiceClient {
                 .bodyToMono(VetResponseDTO.class);
     }
 
+    public Flux<Album> getAllAlbumsByVetId(String vetId) {
+        return webClientBuilder.build()
+                .get()
+                .uri(vetsServiceUrl + "/" + vetId + "/albums")
+                .accept(MediaType.APPLICATION_JSON) // Set Content-Type to application/json
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, error -> {
+                    HttpStatusCode statusCode = error.statusCode();
+                    if (statusCode.equals(HttpStatus.NOT_FOUND)) {
+                        return Mono.error(new ExistingVetNotFoundException("Albums for vet " + vetId + " not found", NOT_FOUND));
+                    }
+                    return Mono.error(new IllegalArgumentException("Client error"));
+                })
+                .onStatus(HttpStatusCode::is5xxServerError, error -> Mono.error(new IllegalArgumentException("Server error")))
+                .bodyToFlux(Album.class);
+    }
 
 
 
