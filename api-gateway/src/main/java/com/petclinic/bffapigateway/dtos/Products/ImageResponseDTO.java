@@ -9,13 +9,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProductRequestDTO {
+public class ImageResponseDTO {
 
     private String imageId;
-    private String productName;
-    private String productDescription;
-    private Double productSalePrice;
-    private Double averageRating;
-    private String productType;
-    private Integer productQuantity;
+    private String imageName;
+    private String imageType;
+    private byte[] imageData;
 }
