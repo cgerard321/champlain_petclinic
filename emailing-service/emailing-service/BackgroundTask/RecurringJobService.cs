@@ -86,13 +86,10 @@ public class RecurringJobService : BackgroundService
         
         foreach (var email in emailsToSend)
         {
-            Console.WriteLine(email.ToString());
             if (email.SendTime < OneMinuteFromNow)
             {
-                Console.WriteLine("WePassedFirstTest!");
                 if (email.SendTime >= nowWithoutSeconds)
                 { 
-                    Console.WriteLine("WePassedSecondTest!");
                     var sendEmailResult = await EmailUtils.SendEmailAsync(
                         email.Email,
                         email.Subject,

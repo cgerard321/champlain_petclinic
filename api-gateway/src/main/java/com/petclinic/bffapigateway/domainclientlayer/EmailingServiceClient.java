@@ -56,15 +56,14 @@ public class EmailingServiceClient {
                     return Mono.just((HttpStatus) response.statusCode());
                 });
     }
-    public Mono<HttpStatus> sendEmailNotification(NotificationEmailModelRequestDTO notificationEmailModelRequestDTO) {
+    public Mono<HttpStatus> sendEmailNotification(NotificationEmailModelRequestDTO directEmailModelRequestDTO) {
         return webClientBuilder.build().post()
                 .uri(emailingServiceUrl + "/send/notification")
                 .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(notificationEmailModelRequestDTO)
+                .bodyValue(directEmailModelRequestDTO)
                 .exchangeToMono(response -> {
                     // Return the status code directly
                     return Mono.just((HttpStatus) response.statusCode());
                 });
     }
-
 }

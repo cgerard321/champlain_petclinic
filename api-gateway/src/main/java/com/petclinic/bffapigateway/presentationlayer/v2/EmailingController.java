@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -28,20 +29,35 @@ public class EmailingController {
     private final EmailingServiceClient emailingService;
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @GetMapping(value = "", produces= MediaType.APPLICATION_JSON_VALUE)
-    public Flux<EmailModelResponseDTO> getAllEmails() {
-        return emailingService.getAllEmails();
+    @GetMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<?>> getAllEmails() {
+        return emailingService.getAllEmails()
+                .collectList() // Collect into a list for checking if empty
+                .flatMap(emails -> {
+                    if (emails.isEmpty()) {
+                        return Mono.just(ResponseEntity.noContent().build()); // Return 204 No Content
+                    }
+                    return Mono.just(ResponseEntity.ok(Flux.fromIterable(emails))); // Return 200 OK with emails
+                })
+                .onErrorResume(e -> {
+                    log.error("Error retrieving emails", e);
+                    return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()); // Handle errors
+                });
     }
-
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @PostMapping(
             value = "/template/{templateName}",
-            consumes= MediaType.TEXT_HTML_VALUE,
-            produces= MediaType.APPLICATION_JSON_VALUE
+            consumes = MediaType.TEXT_HTML_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public Mono<String> sendTemplate(@PathVariable String templateName, @RequestBody String body) {
-        return emailingService.addHtmlTemplate(templateName, body);
+    public Mono<ResponseEntity<Object>> sendTemplate(@PathVariable String templateName, @RequestBody String body) {
+        return emailingService.addHtmlTemplate(templateName, body)
+                .map(result -> ResponseEntity.status(HttpStatus.CREATED).build()) // Return 201 Created
+                .onErrorResume(e -> {
+                    log.error("Error sending template", e);
+                    return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()); // Handle errors
+                });
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
@@ -49,47 +65,26 @@ public class EmailingController {
             value = "/send",
             consumes = MediaType.APPLICATION_JSON_VALUE
     )
-    public Mono<HttpStatus> sendEmail(@RequestBody DirectEmailModelRequestDTO body) {
+    public Mono<ResponseEntity<Object>> sendEmail(@RequestBody DirectEmailModelRequestDTO body) {
         return emailingService.sendEmail(body)
-                .map(status -> {
-                    // Here, you can handle the status code returned from the emailing service
-                    return status; // This returns the HTTP status code
-                })
+                .map(result -> ResponseEntity.status(result).build()) // Return 200 OK
                 .onErrorResume(e -> {
-                    // Handle any exceptions that may occur
-                    return Mono.just(HttpStatus.INTERNAL_SERVER_ERROR); // or another appropriate status
+                    log.error("Error sending email", e);
+                    return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()); // Handle errors
                 });
     }
-
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @PostMapping(
             value = "/send/notification",
             consumes = MediaType.APPLICATION_JSON_VALUE
     )
-    public Mono<HttpStatus> sendEmailNotification(@RequestBody NotificationEmailModelRequestDTO body) {
+    public Mono<ResponseEntity<Object>> sendEmailNotification(@RequestBody NotificationEmailModelRequestDTO body) {
         return emailingService.sendEmailNotification(body)
-                .map(status -> {
-                    // Here, you can handle the status code returned from the emailing service
-                    return status; // This returns the HTTP status code
-                })
+                .map(result -> ResponseEntity.status(result.value()).build()) // Return 200 OK
                 .onErrorResume(e -> {
-                    // Handle any exceptions that may occur
-                    return Mono.just(HttpStatus.INTERNAL_SERVER_ERROR); // or another appropriate status
+                    log.error("Error sending email notification", e);
+                    return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()); // Handle errors
                 });
     }
-
-
-
-    /*
-    * public Mono<String> sendEmail(DirectEmailModelRequestDTO directEmailModelRequestDTO) {
-        return webClientBuilder.build().post()
-                .uri(emailingServiceUrl + "/send")
-                .bodyValue(directEmailModelRequestDTO) // Send HTML content in the body
-                .retrieve()
-                .bodyToMono(String.class)
-                .switchIfEmpty(Mono.error(new RuntimeException("No response from service")));
-    }
-    * */
-
 }
