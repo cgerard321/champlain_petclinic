@@ -316,6 +316,9 @@ public class VetController {
     @GetMapping("{vetId}/albums")
     public Flux<Album> getAllAlbumsByVetId(@PathVariable String vetId) {
         return albumService.getAllAlbumsByVetId(vetId)
+                .doOnNext(album -> log.info("Album ID: {}, Vet ID: {}, Filename: {}, ImgType: {}",
+                        album.getId(), album.getVetId(), album.getFilename(), album.getImgType()))
+                .doOnComplete(() -> log.info("Successfully fetched all albums for vetId: {}", vetId))
                 .doOnError(error -> log.error("Error fetching photos for vet {}", vetId, error));
     }
 

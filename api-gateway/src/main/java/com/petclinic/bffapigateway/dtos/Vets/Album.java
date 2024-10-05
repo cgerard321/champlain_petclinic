@@ -19,4 +19,15 @@ public class Album {
     private String imgType;
     private byte[] data;
     //private List<Photo> photos;
+
+    @Override
+    public String toString() {
+        return "Album{" +
+                "id=" + id +
+                ", vetId='" + vetId + '\'' +
+                ", filename='" + filename + '\'' +
+                ", imgType='" + imgType + '\'' +
+                ", dataSize=" + (data != null ? data.length : 0) + " bytes" +
+                '}';
+    }
 }

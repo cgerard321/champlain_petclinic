@@ -30,4 +30,14 @@ public class Album {
     @Column("img_data")
     private byte[] data;
 
+    @Override
+    public String toString() {
+        return "Album{" +
+                "id=" + id +
+                ", vetId='" + vetId + '\'' +
+                ", filename='" + filename + '\'' +
+                ", imgType='" + imgType + '\'' +
+                ", dataSize=" + (data != null ? data.length : 0) + " bytes" +
+                '}';
+    }
 }

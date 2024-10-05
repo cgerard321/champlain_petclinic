@@ -494,12 +494,18 @@ public class DataSetupService implements CommandLineRunner {
                 .data(StreamUtils.copyToByteArray(John1.getInputStream()))
                 .build();
 
+        log.info("Album created: vetId={}, filename={}, imgType={}, size={} bytes",
+                album1.getVetId(), album1.getFilename(), album1.getImgType(), album1.getData().length);
+
         Album album2 = Album.builder()
                 .vetId(v7.getVetId())
                 .filename("john_photo2.jpg")
                 .imgType("image/jpeg")
                 .data(StreamUtils.copyToByteArray(John2.getInputStream()))
                 .build();
+
+        log.info("Album created: vetId={}, filename={}, imgType={}, size={} bytes",
+                album2.getVetId(), album2.getFilename(), album2.getImgType(), album2.getData().length);
 
         Album album3 = Album.builder()
                 .vetId(v7.getVetId())
@@ -508,12 +514,18 @@ public class DataSetupService implements CommandLineRunner {
                 .data(StreamUtils.copyToByteArray(John3.getInputStream()))
                 .build();
 
+        log.info("Album created: vetId={}, filename={}, imgType={}, size={} bytes",
+                album3.getVetId(), album3.getFilename(), album3.getImgType(), album3.getData().length);
+
         Album album4 = Album.builder()
                 .vetId(v7.getVetId())
                 .filename("john_photo4.jpg")
                 .imgType("image/jpeg")
                 .data(StreamUtils.copyToByteArray(John4.getInputStream()))
                 .build();
+
+        log.info("Album created: vetId={}, filename={}, imgType={}, size={} bytes",
+                album4.getVetId(), album4.getFilename(), album4.getImgType(), album4.getData().length);
 
         Album album5 = Album.builder()
                 .vetId(v7.getVetId())
@@ -522,12 +534,18 @@ public class DataSetupService implements CommandLineRunner {
                 .data(StreamUtils.copyToByteArray(John5.getInputStream()))
                 .build();
 
+        log.info("Album created: vetId={}, filename={}, imgType={}, size={} bytes",
+                album5.getVetId(), album5.getFilename(), album5.getImgType(), album5.getData().length);
+
         Album album6 = Album.builder()
                 .vetId(v2.getVetId())
                 .filename("helen_photo1.jpg")
                 .imgType("image/jpeg")
                 .data(StreamUtils.copyToByteArray(Helen1.getInputStream()))
                 .build();
+
+        log.info("Album created: vetId={}, filename={}, imgType={}, size={} bytes",
+                album6.getVetId(), album6.getFilename(), album6.getImgType(), album6.getData().length);
 
         Album album7 = Album.builder()
                 .vetId(v2.getVetId())
@@ -536,12 +554,18 @@ public class DataSetupService implements CommandLineRunner {
                 .data(StreamUtils.copyToByteArray(Helen2.getInputStream()))
                 .build();
 
+        log.info("Album created: vetId={}, filename={}, imgType={}, size={} bytes",
+                album7.getVetId(), album7.getFilename(), album7.getImgType(), album7.getData().length);
+
         Album album8 = Album.builder()
                 .vetId(v2.getVetId())
                 .filename("helen_photo3.jpg")
                 .imgType("image/jpeg")
                 .data(StreamUtils.copyToByteArray(Helen3.getInputStream()))
                 .build();
+
+        log.info("Album created: vetId={}, filename={}, imgType={}, size={} bytes",
+                album8.getVetId(), album8.getFilename(), album8.getImgType(), album8.getData().length);
 
         Album album9 = Album.builder()
                 .vetId(v2.getVetId())
@@ -550,12 +574,18 @@ public class DataSetupService implements CommandLineRunner {
                 .data(StreamUtils.copyToByteArray(Helen4.getInputStream()))
                 .build();
 
+        log.info("Album created: vetId={}, filename={}, imgType={}, size={} bytes",
+                album9.getVetId(), album9.getFilename(), album9.getImgType(), album9.getData().length);
+
         Album album10 = Album.builder()
                 .vetId(v2.getVetId())
                 .filename("helen_photo5.jpg")
                 .imgType("image/jpeg")
                 .data(StreamUtils.copyToByteArray(Helen5.getInputStream()))
                 .build();
+
+        log.info("Album created: vetId={}, filename={}, imgType={}, size={} bytes",
+                album10.getVetId(), album10.getFilename(), album10.getImgType(), album10.getData().length);
 
         Album album11 = Album.builder()
                 .vetId(v5.getVetId())
@@ -564,12 +594,18 @@ public class DataSetupService implements CommandLineRunner {
                 .data(StreamUtils.copyToByteArray(Henry1.getInputStream()))
                 .build();
 
+        log.info("Album created: vetId={}, filename={}, imgType={}, size={} bytes",
+                album11.getVetId(), album11.getFilename(), album11.getImgType(), album11.getData().length);
+
         Album album12 = Album.builder()
                 .vetId(v5.getVetId())
                 .filename("henry_photo2.jpg")
                 .imgType("image/jpeg")
                 .data(StreamUtils.copyToByteArray(Henry2.getInputStream()))
                 .build();
+
+        log.info("Album created: vetId={}, filename={}, imgType={}, size={} bytes",
+                album12.getVetId(), album12.getFilename(), album12.getImgType(), album12.getData().length);
 
         Album album13 = Album.builder()
                 .vetId(v5.getVetId())
@@ -578,12 +614,18 @@ public class DataSetupService implements CommandLineRunner {
                 .data(StreamUtils.copyToByteArray(Henry3.getInputStream()))
                 .build();
 
+        log.info("Album created: vetId={}, filename={}, imgType={}, size={} bytes",
+                album13.getVetId(), album13.getFilename(), album13.getImgType(), album13.getData().length);
+
         Album album14 = Album.builder()
                 .vetId(v5.getVetId())
                 .filename("henry_photo4.jpg")
                 .imgType("image/jpeg")
                 .data(StreamUtils.copyToByteArray(Henry4.getInputStream()))
                 .build();
+
+        log.info("Album created: vetId={}, filename={}, imgType={}, size={} bytes",
+                album14.getVetId(), album14.getFilename(), album14.getImgType(), album14.getData().length);
 
         Album album15 = Album.builder()
                 .vetId(v5.getVetId())
@@ -592,12 +634,18 @@ public class DataSetupService implements CommandLineRunner {
                 .data(StreamUtils.copyToByteArray(Henry5.getInputStream()))
                 .build();
 
+        log.info("Album created: vetId={}, filename={}, imgType={}, size={} bytes",
+                album15.getVetId(), album15.getFilename(), album15.getImgType(), album15.getData().length);
+
         Album album16 = Album.builder()
                 .vetId(v1.getVetId())
                 .filename("james_photo1.jpg")
                 .imgType("image/jpeg")
                 .data(StreamUtils.copyToByteArray(James1.getInputStream()))
                 .build();
+
+        log.info("Album created: vetId={}, filename={}, imgType={}, size={} bytes",
+                album16.getVetId(), album16.getFilename(), album16.getImgType(), album16.getData().length);
 
         Album album17 = Album.builder()
                 .vetId(v1.getVetId())
@@ -606,12 +654,18 @@ public class DataSetupService implements CommandLineRunner {
                 .data(StreamUtils.copyToByteArray(James2.getInputStream()))
                 .build();
 
+        log.info("Album created: vetId={}, filename={}, imgType={}, size={} bytes",
+                album17.getVetId(), album17.getFilename(), album17.getImgType(), album17.getData().length);
+
         Album album18 = Album.builder()
                 .vetId(v1.getVetId())
                 .filename("james_photo3.jpg")
                 .imgType("image/jpeg")
                 .data(StreamUtils.copyToByteArray(James3.getInputStream()))
                 .build();
+
+        log.info("Album created: vetId={}, filename={}, imgType={}, size={} bytes",
+                album18.getVetId(), album18.getFilename(), album18.getImgType(), album18.getData().length);
 
         Album album19 = Album.builder()
                 .vetId(v1.getVetId())
@@ -620,12 +674,18 @@ public class DataSetupService implements CommandLineRunner {
                 .data(StreamUtils.copyToByteArray(James4.getInputStream()))
                 .build();
 
+        log.info("Album created: vetId={}, filename={}, imgType={}, size={} bytes",
+                album19.getVetId(), album19.getFilename(), album19.getImgType(), album19.getData().length);
+
         Album album20 = Album.builder()
                 .vetId(v1.getVetId())
                 .filename("james_photo5.jpg")
                 .imgType("image/jpeg")
                 .data(StreamUtils.copyToByteArray(James5.getInputStream()))
                 .build();
+
+        log.info("Album created: vetId={}, filename={}, imgType={}, size={} bytes",
+                album20.getVetId(), album20.getFilename(), album20.getImgType(), album20.getData().length);
 
         Album album21 = Album.builder()
                 .vetId(v3.getVetId())
@@ -634,12 +694,18 @@ public class DataSetupService implements CommandLineRunner {
                 .data(StreamUtils.copyToByteArray(Linda1.getInputStream()))
                 .build();
 
+        log.info("Album created: vetId={}, filename={}, imgType={}, size={} bytes",
+                album21.getVetId(), album21.getFilename(), album21.getImgType(), album21.getData().length);
+
         Album album22 = Album.builder()
                 .vetId(v3.getVetId())
                 .filename("linda_photo2.jpg")
                 .imgType("image/jpeg")
                 .data(StreamUtils.copyToByteArray(Linda2.getInputStream()))
                 .build();
+
+        log.info("Album created: vetId={}, filename={}, imgType={}, size={} bytes",
+                album22.getVetId(), album22.getFilename(), album22.getImgType(), album22.getData().length);
 
         Album album23 = Album.builder()
                 .vetId(v3.getVetId())
@@ -648,12 +714,19 @@ public class DataSetupService implements CommandLineRunner {
                 .data(StreamUtils.copyToByteArray(Linda3.getInputStream()))
                 .build();
 
+        log.info("Album created: vetId={}, filename={}, imgType={}, size={} bytes",
+                album23.getVetId(), album23.getFilename(), album23.getImgType(), album23.getData().length);
+
+
         Album album24 = Album.builder()
                 .vetId(v3.getVetId())
                 .filename("linda_photo4.jpg")
                 .imgType("image/jpeg")
                 .data(StreamUtils.copyToByteArray(Linda4.getInputStream()))
                 .build();
+
+        log.info("Album created: vetId={}, filename={}, imgType={}, size={} bytes",
+                album24.getVetId(), album24.getFilename(), album24.getImgType(), album24.getData().length);
 
         Album album25 = Album.builder()
                 .vetId(v3.getVetId())
@@ -662,12 +735,18 @@ public class DataSetupService implements CommandLineRunner {
                 .data(StreamUtils.copyToByteArray(Linda5.getInputStream()))
                 .build();
 
+        log.info("Album created: vetId={}, filename={}, imgType={}, size={} bytes",
+                album25.getVetId(), album25.getFilename(), album25.getImgType(), album25.getData().length);
+
         Album album26 = Album.builder()
                 .vetId(v4.getVetId())
                 .filename("rafael_photo1.jpg")
                 .imgType("image/jpeg")
                 .data(StreamUtils.copyToByteArray(Rafael1.getInputStream()))
                 .build();
+
+        log.info("Album created: vetId={}, filename={}, imgType={}, size={} bytes",
+                album26.getVetId(), album26.getFilename(), album26.getImgType(), album26.getData().length);
 
         Album album27 = Album.builder()
                 .vetId(v4.getVetId())
@@ -676,12 +755,18 @@ public class DataSetupService implements CommandLineRunner {
                 .data(StreamUtils.copyToByteArray(Rafael2.getInputStream()))
                 .build();
 
+        log.info("Album created: vetId={}, filename={}, imgType={}, size={} bytes",
+                album27.getVetId(), album27.getFilename(), album27.getImgType(), album27.getData().length);
+
         Album album28 = Album.builder()
                 .vetId(v4.getVetId())
                 .filename("rafael_photo3.jpg")
                 .imgType("image/jpeg")
                 .data(StreamUtils.copyToByteArray(Rafael3.getInputStream()))
                 .build();
+
+        log.info("Album created: vetId={}, filename={}, imgType={}, size={} bytes",
+                album28.getVetId(), album28.getFilename(), album28.getImgType(), album28.getData().length);
 
         Album album29 = Album.builder()
                 .vetId(v4.getVetId())
@@ -690,12 +775,18 @@ public class DataSetupService implements CommandLineRunner {
                 .data(StreamUtils.copyToByteArray(Rafael4.getInputStream()))
                 .build();
 
+        log.info("Album created: vetId={}, filename={}, imgType={}, size={} bytes",
+                album29.getVetId(), album29.getFilename(), album29.getImgType(), album29.getData().length);
+
         Album album30 = Album.builder()
                 .vetId(v4.getVetId())
                 .filename("rafael_photo5.jpg")
                 .imgType("image/jpeg")
                 .data(StreamUtils.copyToByteArray(Rafael5.getInputStream()))
                 .build();
+
+        log.info("Album created: vetId={}, filename={}, imgType={}, size={} bytes",
+                album30.getVetId(), album30.getFilename(), album30.getImgType(), album30.getData().length);
 
         Album album31 = Album.builder()
                 .vetId(v6.getVetId())
@@ -704,12 +795,19 @@ public class DataSetupService implements CommandLineRunner {
                 .data(StreamUtils.copyToByteArray(Sharon1.getInputStream()))
                 .build();
 
+        log.info("Album created: vetId={}, filename={}, imgType={}, size={} bytes",
+                album31.getVetId(), album31.getFilename(), album31.getImgType(), album31.getData().length);
+
+
         Album album32 = Album.builder()
                 .vetId(v6.getVetId())
                 .filename("sharon_photo2.jpg")
                 .imgType("image/jpeg")
                 .data(StreamUtils.copyToByteArray(Sharon2.getInputStream()))
                 .build();
+
+        log.info("Album created: vetId={}, filename={}, imgType={}, size={} bytes",
+                album32.getVetId(), album32.getFilename(), album32.getImgType(), album32.getData().length);
 
         Album album33 = Album.builder()
                 .vetId(v6.getVetId())
@@ -718,12 +816,18 @@ public class DataSetupService implements CommandLineRunner {
                 .data(StreamUtils.copyToByteArray(Sharon3.getInputStream()))
                 .build();
 
+        log.info("Album created: vetId={}, filename={}, imgType={}, size={} bytes",
+                album33.getVetId(), album33.getFilename(), album33.getImgType(), album33.getData().length);
+
         Album album34 = Album.builder()
                 .vetId(v6.getVetId())
                 .filename("sharon_photo4.jpg")
                 .imgType("image/jpeg")
                 .data(StreamUtils.copyToByteArray(Sharon4.getInputStream()))
                 .build();
+
+        log.info("Album created: vetId={}, filename={}, imgType={}, size={} bytes",
+                album34.getVetId(), album34.getFilename(), album34.getImgType(), album34.getData().length);
 
         Album album35 = Album.builder()
                 .vetId(v6.getVetId())
@@ -732,7 +836,12 @@ public class DataSetupService implements CommandLineRunner {
                 .data(StreamUtils.copyToByteArray(Sharon5.getInputStream()))
                 .build();
 
+        log.info("Album created: vetId={}, filename={}, imgType={}, size={} bytes",
+                album35.getVetId(), album35.getFilename(), album35.getImgType(), album35.getData().length);
+
         Flux.just(album1,album2,album3,album4,album5,album6,album7,album8,album9,album10,album11,album12,album13,album14,album15,album16,album17,album18,album19,album20,album21,album22,album23,album24,album25,album26,album27,album28,album29,album30,album31,album32,album33,album34,album35)
+                .doOnNext(album -> log.info("Album created: vetId={}, filename={}, imgType={}, dataSize={} bytes",
+                        album.getVetId(), album.getFilename(), album.getImgType(), album.getData().length))
                 .flatMap(albumRepository::save)
                 .log()
                 .subscribe();
