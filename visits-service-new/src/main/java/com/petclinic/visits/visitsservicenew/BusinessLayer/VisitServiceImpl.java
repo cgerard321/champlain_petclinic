@@ -415,4 +415,21 @@ public class VisitServiceImpl implements VisitService {
                 .to(user.getEmail())
                 .build();
     }
+
+
+    @Override
+    public Mono<VisitResponseDTO> patchVisitStatusInVisit(String visitId, String status) {
+        // Find the visit by the ID
+        return repo.findByVisitId(visitId)
+                .switchIfEmpty(Mono.defer(() ->
+                        Mono.error(new NotFoundException("Cannot find visit with id: " + visitId))
+                ))
+                // Update the status of the found Visit entity
+                .doOnNext(visit -> visit.setStatus(Status.valueOf(status))) // Update status reactively
+                // Save the updated visit
+                .flatMap(repo::save)
+                // Convert to VisitResponseDTO
+                .flatMap(entityDtoUtil::toVisitResponseDTO);
+    }
+
 }

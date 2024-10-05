@@ -24,6 +24,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -909,7 +910,6 @@ class VisitsServiceClientIntegrationTest {
     }
 
 
-
     //Emergency
     private static final String EMERGENCY_ID = UUID.randomUUID().toString();
 
@@ -1043,5 +1043,45 @@ class VisitsServiceClientIntegrationTest {
                 .verifyComplete();
     }
 
+    @Test
+    void updateVisitStatus_ShouldSucceed_WhenStatusUpdatedToCancelled() {
+        String visitId = "12345";
+        String status = "CANCELLED";
 
+        VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
+                .visitId(visitId)
+                .status(Status.CANCELLED)
+                .description("Test visit with cancelled status")
+                .build();
+
+        // Mocking the service client to return the expected response
+        server.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("{ \"visitId\": \"" + visitId + "\", \"status\": \"CANCELLED\", \"description\": \"Test visit with cancelled status\" }")
+                .setResponseCode(200));
+
+        Mono<VisitResponseDTO> result = visitsServiceClient.patchVisitStatus(visitId, status);
+
+        StepVerifier.create(result)
+                .expectNextMatches(response -> response.getVisitId().equals(visitId) && response.getStatus().equals(Status.CANCELLED))
+                .verifyComplete();
+    }
+
+    // Test for the NOT_FOUND scenario (when visit does not exist)
+    @Test
+    void updateVisitStatus_ShouldReturnNotFound_WhenVisitDoesNotExist() {
+        String visitId = "nonExistentVisitId";
+        String status = "CANCELLED";
+
+        // Mocking the service client to simulate a 404 Not Found response
+        server.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setResponseCode(404));
+
+        Mono<VisitResponseDTO> result = visitsServiceClient.patchVisitStatus(visitId, status);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof WebClientResponseException.NotFound)
+                .verify();
+    }
 }
