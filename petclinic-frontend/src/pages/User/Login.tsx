@@ -41,6 +41,12 @@ export default function Login(): JSX.Element {
         {
           email: formElements.emailInput.value,
           password: formElements.passwordInput.value,
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          withCredentials: true, // Ensure credentials like cookies are passed
         }
       );
 
@@ -49,10 +55,32 @@ export default function Login(): JSX.Element {
         navigate(AppRoutePaths.Home);
       }
     } catch (error) {
-      if (axios.isAxiosError(error) && error.response?.status === 401) {
-        setErrorMessage('Invalid email or password. Please try again.');
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401) {
+          const errorMessage = error.response?.data?.message;
+          // Check for the custom unverified account error
+          if (
+            errorMessage ===
+            'Your account is not verified ! A link has been sent to verify the account !'
+          ) {
+            setErrorMessage(errorMessage);
+          } else if (
+            errorMessage ===
+            'Your account has been disabled. Please contact support.'
+          ) {
+            setErrorMessage(
+              'Your account has been disabled. Please contact support.'
+            );
+          } else {
+            // Handle invalid credentials
+            setErrorMessage('Invalid email or password. Please try again.');
+          }
+        } else {
+          // Handle general error scenario
+          setErrorMessage('Something went wrong, oops!');
+        }
       } else {
-        setErrorMessage('Something went wrong, oops!');
+        setErrorMessage('An unknown error occurred.');
       }
     }
   };
