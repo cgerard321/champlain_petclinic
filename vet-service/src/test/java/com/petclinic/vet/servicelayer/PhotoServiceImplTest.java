@@ -142,4 +142,52 @@ class PhotoServiceImplTest {
                 })
                 .verifyComplete();
     }
+
+    @Test
+    void deletePhotoByVetId_PhotoExists_Success() {
+        // Arrange
+        String vetId = VET_ID;
+
+        // Mock photoRepository.findByVetId(vetId) to return Mono.just(photo)
+        when(photoRepository.findByVetId(vetId)).thenReturn(Mono.just(photo));
+
+        // Mock photoRepository.deleteByVetId(vetId) to return Mono.just(1)
+        when(photoRepository.deleteByVetId(vetId)).thenReturn(Mono.just(1)); // Assuming 1 row deleted
+
+        // Mock photoRepository.save(...) in insertDefaultPhoto
+        when(photoRepository.save(any(Photo.class))).thenReturn(Mono.just(photo));
+
+        // Act
+        Mono<Void> result = photoService.deletePhotoByVetId(vetId);
+
+        // Assert
+        StepVerifier.create(result)
+                .verifyComplete();
+
+        verify(photoRepository, times(1)).findByVetId(vetId);
+        verify(photoRepository, times(1)).deleteByVetId(vetId);
+        verify(photoRepository, times(1)).save(any(Photo.class));
+    }
+
+    @Test
+    void deletePhotoByVetId_PhotoDoesNotExist_ThrowsException() {
+        // Arrange
+        String vetId = VET_ID;
+
+        // Mock photoRepository.findByVetId(vetId) to return Mono.empty()
+        when(photoRepository.findByVetId(vetId)).thenReturn(Mono.empty());
+
+        // Act
+        Mono<Void> result = photoService.deletePhotoByVetId(vetId);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof InvalidInputException &&
+                        throwable.getMessage().equals("Photo not found for vetId: " + vetId))
+                .verify();
+
+        verify(photoRepository, times(1)).findByVetId(vetId);
+        verify(photoRepository, never()).deleteByVetId(anyString());
+        verify(photoRepository, never()).save(any(Photo.class));
+    }
 }
