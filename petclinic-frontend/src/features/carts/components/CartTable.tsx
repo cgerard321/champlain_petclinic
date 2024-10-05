@@ -73,7 +73,6 @@ export default function CartListTable(): JSX.Element {
 
   return (
     <div className="cart-list-container">
-      <h1>User Carts</h1>
       {loading && <div className="loading">Loading carts...</div>}
       {error && <div className="error">{error}</div>}
       {!loading && carts.length === 0 && (
