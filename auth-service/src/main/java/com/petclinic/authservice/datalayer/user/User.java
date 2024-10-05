@@ -73,7 +73,7 @@ public class User implements UserDetails {
 
     private boolean verified;
 
-    private boolean disabled =false;
+    private boolean isDisabled =false;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
@@ -114,6 +114,6 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return verified && !disabled;
+        return verified && !isDisabled;
     }
 }

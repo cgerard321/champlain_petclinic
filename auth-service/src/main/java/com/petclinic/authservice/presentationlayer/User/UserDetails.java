@@ -21,6 +21,6 @@ public class UserDetails {
     private String email;
 
     private Set<Role> roles;
-    private boolean disabled;
+    private boolean isDisabled;
 }
 

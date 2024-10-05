@@ -1,6 +1,8 @@
 package com.petclinic.authservice.presentationlayer.User;
 
 import com.petclinic.authservice.Util.Exceptions.HTTPErrorMessage;
+import com.petclinic.authservice.Util.Exceptions.NotFoundException;
+import com.petclinic.authservice.businesslayer.UserService;
 import com.petclinic.authservice.datalayer.roles.Role;
 import com.petclinic.authservice.domainclientlayer.Mail.MailService;
 import com.petclinic.authservice.domainclientlayer.cart.CartService;
@@ -25,7 +27,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -57,6 +59,9 @@ class UserControllerIntegrationTest {
 
     @MockBean
     CartService cartService;
+
+    @MockBean
+    private UserService userService;
 
     private final String VALID_USER_ID = "7c0d42c2-0c2d-41ce-bd9c-6ca67478956f";
 
@@ -746,7 +751,73 @@ class UserControllerIntegrationTest {
                 .exchange()
                 .expectStatus().isNotFound();
     }
+    @Test
+    void disableUser_Succeed() {
 
+        doNothing().when(userService).disableUser(anyString());
+
+        String token = jwtTokenUtil.generateToken(userRepo.findAll().get(0));
+
+        String userId = VALID_USER_ID;
+
+        webTestClient.patch()
+                .uri("/users/{userId}/disable", userId)
+                .accept(MediaType.APPLICATION_JSON)
+                .cookie("Bearer", token)
+                .exchange()
+                .expectStatus().isOk();
+    }
+
+    @Test
+    void disableUser_WhenUserNotFound() {
+
+        doThrow(new NotFoundException("User not found")).when(userService).disableUser(anyString());
+
+        String token = jwtTokenUtil.generateToken(userRepo.findAll().get(0));
+        String nonExistentUserId = "non-existent-user-id";
+
+        webTestClient.patch()
+                .uri("/users/{userId}/disable", nonExistentUserId)
+                .accept(MediaType.APPLICATION_JSON)
+                .cookie("Bearer", token)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    void enableUser_Succeed() {
+
+        doNothing().when(userService).enableUser(anyString());
+
+        String token = jwtTokenUtil.generateToken(userRepo.findAll().get(0));
+        String userId = VALID_USER_ID;
+
+        webTestClient.patch()
+                .uri("/users/{userId}/enable", userId)
+                .accept(MediaType.APPLICATION_JSON)
+                .cookie("Bearer", token)
+                .exchange()
+                .expectStatus().isOk();
+    }
+
+    @Test
+    void enableUser_ShouldFail_WhenUserNotFound() {
+
+        doThrow(new NotFoundException("User not found")).when(userService).enableUser(anyString());
+
+        String token = jwtTokenUtil.generateToken(userRepo.findAll().get(0));
+        String nonExistentUserId = "non-existent-user-id";
+
+        webTestClient.patch()
+                .uri("/users/{userId}/enable", nonExistentUserId)
+                .accept(MediaType.APPLICATION_JSON)
+                .cookie("Bearer", token)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
 
 
 }
+
+
+

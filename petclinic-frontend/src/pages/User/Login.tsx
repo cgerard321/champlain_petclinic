@@ -56,12 +56,17 @@ export default function Login(): JSX.Element {
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        if (error.response?.status === 401 && error.response?.data?.message === 'Your account has been disabled. Please contact support.') {
-          // Handle account disabled scenario
-          setErrorMessage('Your account has been disabled. Please contact support.');
-        } else if (error.response?.status === 401) {
-          // Handle invalid credentials
-          setErrorMessage('Invalid email or password. Please try again.');
+        if (error.response?.status === 401) {
+          const errorMessage = error.response?.data?.message;
+          // Check for the custom unverified account error
+          if (errorMessage === 'Your account is not verified ! A link has been sent to verify the account !') {
+            setErrorMessage(errorMessage);
+          } else if (errorMessage === 'Your account has been disabled. Please contact support.') {
+            setErrorMessage('Your account has been disabled. Please contact support.');
+          } else {
+            // Handle invalid credentials
+            setErrorMessage('Invalid email or password. Please try again.');
+          }
         } else {
           // Handle general error scenario
           setErrorMessage('Something went wrong, oops!');
