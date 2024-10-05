@@ -5,6 +5,7 @@ import com.petclinic.bffapigateway.domainclientlayer.BillServiceClient;
 import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillStatus;
+import com.petclinic.bffapigateway.dtos.Products.ProductResponseDTO;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Test;
@@ -42,7 +43,7 @@ public class BillControllerUnitTest {
 
 private final String baseBillURL = "/api/v2/gateway/bills";
 
-    private BillResponseDTO billresponse = BillResponseDTO.builder()
+    private final BillResponseDTO billresponse = BillResponseDTO.builder()
             .billId("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
             .customerId("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
             .visitType("general")
@@ -163,24 +164,5 @@ private final String baseBillURL = "/api/v2/gateway/bills";
                         .build())
                 .exchange()
                 .expectStatus().isBadRequest();
-    }
-
-
-
-
-
-    public void whenUpdateBill_thenReturnUpdatedBill() {
-       when(billServiceClient.updateBill("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a",Mono.just(billRequestDTO)))
-               .thenReturn(Mono.just(billresponse));
-
-       webTestClient.put()
-               .uri(baseBillURL + "/admin" + "/e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
-               .bodyValue(billRequestDTO)
-               .exchange()
-               .expectStatus().isOk()
-               .expectBody(BillResponseDTO.class)
-               .isEqualTo(billresponse);
-
-       verify(billServiceClient, times(1)).updateBill("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a", Mono.just(billRequestDTO));
     }
 }
