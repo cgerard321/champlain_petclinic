@@ -138,9 +138,6 @@ public class VetController {
     public Mono<ResponseEntity<Void>> deletePhotoByVetId(@PathVariable String vetId) {
         return vetsServiceClient.deletePhotoByVetId(vetId)
                 .then(Mono.just(ResponseEntity.noContent().<Void>build()))
-                .onErrorResume(ExistingVetNotFoundException.class, ex ->
-                        Mono.just(ResponseEntity.notFound().build())
-                )
                 .doOnError(error -> log.error("Error deleting photo for vetId: {}", vetId, error));
     }
 

@@ -88,7 +88,9 @@ public class PhotoServiceImpl implements PhotoService {
 
     @Override
     public Mono<Void> deletePhotoByVetId(String vetId) {
-        return photoRepository.deleteByVetId(vetId)
+        return photoRepository.findByVetId(vetId)
+                .switchIfEmpty(Mono.error(new InvalidInputException("Photo not found for vetId: " + vetId)))
+                .flatMap(photo -> photoRepository.deleteByVetId(vetId))
                 .then(insertDefaultPhoto(vetId))
                 .then();
     }
