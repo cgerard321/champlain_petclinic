@@ -102,8 +102,6 @@ public class CartServiceImpl implements CartService {
                  });
      }
 
-
-
     @Override
     public Mono<Integer> getCartItemCount(String cartId) {
         return cartRepository.findCartByCartId(cartId)

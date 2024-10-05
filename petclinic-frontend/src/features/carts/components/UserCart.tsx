@@ -9,6 +9,7 @@ const UserCart = (): JSX.Element => {
   const { cartId } = useParams<{ cartId: string }>();
   const navigate = useNavigate(); // Initialize useNavigate
   const [cartItems, setCartItems] = useState<ProductModel[]>([]);
+  const [wishlistItems, setWishlistItems] = useState<ProductModel[]>([]); // New state for wishlist
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -44,10 +45,11 @@ const UserCart = (): JSX.Element => {
         const data = await response.json();
         const products = data.products.map((product: ProductModel) => ({
           ...product,
-          quantity: 1, // Default quantity to 1
+          quantity: product.quantity || 1, // Map quantityInCart to quantity
         }));
 
         setCartItems(products);
+        setWishlistItems(data.wishListProducts || []); // Set wishlist items
       } catch (err: unknown) {
         if (err instanceof Error) {
           console.error(err.message); // Log the actual error
@@ -119,32 +121,63 @@ const UserCart = (): JSX.Element => {
   }
 
   return (
-    <div className="CartItems">
+    <div className="UserCart">
       <NavBar />
-      <h1>User Cart</h1>
-      <button onClick={clearCart}>Clear Cart</button>
-      <button onClick={() => navigate(-1)}>Go Back</button>
-      <hr />
-      <div className="CartItems-items">
-        {cartItems.length > 0 ? (
-          cartItems.map((item, index) => (
-            <CartItem
-              key={item.productId}
-              item={item}
-              index={index}
-              changeItemQuantity={changeItemQuantity}
-              deleteItem={deleteItem}
-            />
-          ))
-        ) : (
-          <p>No products in the cart.</p>
-        )}
+      <div className="UserCart-buttons">
+        <button className="go-back-btn" onClick={() => navigate(-1)}>
+          Go Back
+        </button>
+        <button className="clear-cart-btn" onClick={clearCart}>
+          Clear Cart
+        </button>
       </div>
-      <div className="CartSummary">
-        <p>Subtotal: ${subtotal.toFixed(2)}</p>
-        <p>TVQ (9.975%): ${tvq.toFixed(2)}</p>
-        <p>TVC (5%): ${tvc.toFixed(2)}</p>
-        <p>Total: ${total.toFixed(2)}</p>
+      <hr />
+
+      {/* Main Cart Section */}
+      <div className="Cart-section">
+        <h2 className="Cart-title">Your Cart</h2> {/* Cart title */}
+        <div className="UserCart-items">
+          {cartItems.length > 0 ? (
+            cartItems.map((item, index) => (
+              <CartItem
+                key={item.productId}
+                item={item}
+                index={index}
+                changeItemQuantity={changeItemQuantity}
+                deleteItem={deleteItem}
+              />
+            ))
+          ) : (
+            <p>No products in the cart.</p>
+          )}
+        </div>
+        <div className="CartSummary">
+          <h3>Cart Summary</h3>
+          <p>Subtotal: ${subtotal.toFixed(2)}</p>
+          <p>TVQ (9.975%): ${tvq.toFixed(2)}</p>
+          <p>TVC (5%): ${tvc.toFixed(2)}</p>
+          <p className="total-price">Total: ${total.toFixed(2)}</p>
+        </div>
+      </div>
+
+      {/* Wishlist Section */}
+      <div className="Wishlist-section">
+        <h2>Wishlist</h2>
+        <div className="Wishlist-items">
+          {wishlistItems.length > 0 ? (
+            wishlistItems.map((item, index) => (
+              <CartItem
+                key={item.productId}
+                item={item}
+                index={index}
+                changeItemQuantity={() => {}} // Disable changing quantity for wishlist
+                deleteItem={() => {}} // You may also disable removing from wishlist here
+              />
+            ))
+          ) : (
+            <p>No products in the wishlist.</p>
+          )}
+        </div>
       </div>
     </div>
   );

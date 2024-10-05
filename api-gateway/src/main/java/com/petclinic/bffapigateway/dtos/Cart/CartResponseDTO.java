@@ -16,4 +16,5 @@ public class CartResponseDTO {
     private String cartId;
     private String customerId;
     private List<CartProductResponseDTO> products;
+    private List<CartProductResponseDTO> wishListProducts;
 }

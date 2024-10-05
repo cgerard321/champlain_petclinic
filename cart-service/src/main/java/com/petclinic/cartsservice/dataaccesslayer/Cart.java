@@ -23,6 +23,7 @@ public class Cart {
     private String id;
 
     private List<CartProduct> products;
+    private List<CartProduct> wishListProducts;
     private String cartId;
     private String customerId;
 }

@@ -23,17 +23,31 @@ const CartItem = ({
 }: CartItemProps): JSX.Element => {
   return (
     <div className="CartItem">
-      <h4>{item.productName}</h4>
-      <p>{item.productDescription}</p>
+      <div className="CartItem-info">
+        <h2 className="info-title">{item.productName}</h2>
+        <p className="info-description">{item.productDescription}</p>
+      </div>
       <div className="CartItem-details">
-        <span>{formatPrice(item.productSalePrice)}</span>
-        <input
-          type="number"
-          min="1"
-          value={item.quantity || 1}
-          onChange={e => changeItemQuantity(e, index)}
-        />
-        <button onClick={() => deleteItem(index)}>Remove</button>
+        <div className="item-quantity">
+          <input
+            type="number"
+            min="1"
+            value={item.quantity || 1}
+            onChange={e => changeItemQuantity(e, index)}
+            onBlur={e => changeItemQuantity(e, index)} // Confirm quantity change on blur
+            aria-label={`Quantity of ${item.productName}`}
+          />
+        </div>
+        <span className="CartItem-price">
+          {formatPrice(item.productSalePrice)}
+        </span>
+        <button
+          className="delete-button"
+          onClick={() => deleteItem(index)}
+          aria-label={`Remove ${item.productName} from cart`}
+        >
+          Remove
+        </button>
       </div>
     </div>
   );
