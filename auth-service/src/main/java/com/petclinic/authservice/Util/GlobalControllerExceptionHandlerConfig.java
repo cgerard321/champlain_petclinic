@@ -102,4 +102,9 @@ public class GlobalControllerExceptionHandlerConfig {
 
         return new HTTPErrorMessage(UNPROCESSABLE_ENTITY.value(), ex.getMessage());
     }
+    @ExceptionHandler(DisabledAccountException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public HTTPErrorMessage handleDisabledAccountException(DisabledAccountException ex) {
+        return new HTTPErrorMessage(FORBIDDEN.value(), ex.getMessage());
+    }
 }
