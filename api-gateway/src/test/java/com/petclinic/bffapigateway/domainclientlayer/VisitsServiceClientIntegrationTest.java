@@ -1042,11 +1042,11 @@ class VisitsServiceClientIntegrationTest {
                 .expectNextMatches(emergency -> emergency.getVisitEmergencyId().equals(EMERGENCY_ID))
                 .verifyComplete();
     }
-
+  
     @Test
-    void updateVisitStatus_ShouldSucceed_WhenStatusUpdatedToCancelled() {
-        String visitId = "12345";
-        String status = "CANCELLED";
+      void updateVisitStatus_ShouldSucceed_WhenStatusUpdatedToCancelled() {
+          String visitId = "12345";
+          String status = "CANCELLED";
 
         VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
                 .visitId(visitId)
