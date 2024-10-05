@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { ProductModel } from './models/ProductModels/ProductModel';
-import './InventoriesListTable.css';
+import './InventoriesListTable.module.css';
 import './InventoryProducts.css';
 import useSearchProducts from '@/features/inventories/hooks/useSearchProducts.ts';
 

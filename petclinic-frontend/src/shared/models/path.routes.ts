@@ -34,7 +34,6 @@ export enum AppRoutePaths {
   AddVisit = '/visits/add',
   CustomerProfile = '/customer/profile',
   Emailing = '/emailing',
-  MockPage = '/mockpage',
   VetDetails = '/vets/{vetId}',
   EditVisit = '/visits/:visitId/edit',
   CustomerDetails = '/customers/:ownerId',
@@ -44,4 +43,5 @@ export enum AppRoutePaths {
   CustomerVisits = '/customer/visits',
   UpdatePet = '/pets/:petId/edit',
   ProductDetails = '/productDetails',
+  EditProduct = '/products/edit',
 }
