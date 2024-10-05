@@ -128,6 +128,8 @@ public class CartServiceImpl implements CartService {
                     cart.setTvc(tvc);
                     cart.setTotal(total);
 
+                    // Clear the products list
+                    cart.setProducts(new ArrayList<>());
 
                     return cartRepository.save(cart)
                             .map(savedCart -> {
