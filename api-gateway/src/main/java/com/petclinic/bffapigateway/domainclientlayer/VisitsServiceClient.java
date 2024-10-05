@@ -373,7 +373,6 @@ public class VisitsServiceClient {
                 .uri(reviewUrl + "/" + visitId + "/" + status) // Adjust URI based on visit-service
                 .retrieve()
                 .bodyToMono(VisitResponseDTO.class); // Parse response into VisitResponseDTO
-
     }
 }
 
