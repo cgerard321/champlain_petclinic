@@ -336,8 +336,9 @@ public class InventoryServiceClient {
                 .uri(inventoryServiceUrl + "/{inventoryId}/productquantity", inventoryId)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError,
-                        resp -> rethrower.rethrow(resp, ex -> new InventoryNotFoundException(ex.get("message").toString(), NOT_FOUND)))
+                .onStatus(HttpStatusCode::is4xxClientError, clientResponse ->
+                        clientResponse.bodyToMono(String.class)
+                                .flatMap(errorMessage -> Mono.error(new InventoryNotFoundException(errorMessage, HttpStatus.NOT_FOUND))))
                 .bodyToMono(Integer.class);
     }
 }
