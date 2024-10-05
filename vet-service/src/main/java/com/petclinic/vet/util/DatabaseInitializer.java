@@ -22,7 +22,7 @@ public class DatabaseInitializer {
                             "vet_id VARCHAR(255) NOT NULL, " +
                             "filename VARCHAR(255), " +
                             "img_type VARCHAR(50), " +
-                            "img_data BYTEA, " +
+                            "img_data BYTEA " +
                             ")";
 
                     // Update the images table to include an album_id foreign key
@@ -31,7 +31,7 @@ public class DatabaseInitializer {
                             "vet_id VARCHAR(255) NOT NULL, " +
                             "filename VARCHAR(255) UNIQUE, " +
                             "img_type VARCHAR(20), " +
-                            "img_data BYTEA, " +
+                            "img_data BYTEA " +
                             ")";
 
                     // Badges table remains the same

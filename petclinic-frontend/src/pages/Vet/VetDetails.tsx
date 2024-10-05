@@ -50,13 +50,13 @@ export default function VetDetails(): JSX.Element {
     const fetchAlbumPhotos = async (): Promise<void> => {
       try {
         const response = await fetch(
-            `http://localhost:8080/api/v2/gateway/vets/${vetId}/albums`,
-            {
-              method: 'GET',
-              headers: {
-                Accept: 'application/json',
-              },
-            }
+          `http://localhost:8080/api/v2/gateway/vets/${vetId}/albums`,
+          {
+            method: 'GET',
+            headers: {
+              Accept: 'application/json',
+            },
+          }
         );
 
         if (!response.ok) {
@@ -67,12 +67,15 @@ export default function VetDetails(): JSX.Element {
           }
         } else {
           const photos = await response.json();
+          // eslint-disable-next-line no-console
           console.log('Album Photos:', photos); // Log the album photos
 
-          const imageUrls = photos.map((photo: { data: string, imgType: string }) => {
-            // Construct the full data URL for the image
-            return `data:${photo.imgType};base64,${photo.data}`;
-          });
+          const imageUrls = photos.map(
+            (photo: { data: string; imgType: string }) => {
+              // Construct the full data URL for the image
+              return `data:${photo.imgType};base64,${photo.data}`;
+            }
+          );
 
           setAlbumPhotos(imageUrls); // Set the image URLs in the state
         }
@@ -80,10 +83,6 @@ export default function VetDetails(): JSX.Element {
         setError('Failed to fetch album photos');
       }
     };
-
-
-
-
 
     const fetchVetPhoto = async (): Promise<void> => {
       try {
@@ -109,7 +108,6 @@ export default function VetDetails(): JSX.Element {
       }
     };
 
-    //fetch both vet details and photo
     fetchVetDetails().then(() => {
       fetchVetPhoto();
       fetchAlbumPhotos();
@@ -140,11 +138,11 @@ export default function VetDetails(): JSX.Element {
     }
   };
 
-  const openPhotoModal = (photoUrl: string) => {
+  const openPhotoModal = (photoUrl: string): void => {
     setEnlargedPhoto(photoUrl);
   };
 
-  const closePhotoModal = () => {
+  const closePhotoModal = (): void => {
     setEnlargedPhoto(null);
   };
 
@@ -300,23 +298,23 @@ export default function VetDetails(): JSX.Element {
             <section className="album-photos">
               <h2>Album Photos</h2>
               {albumPhotos.length > 0 ? (
-                  <div className="album-photo-grid">
-                    {albumPhotos.map((photoUrl, index) => (
-                        <div
-                            key={index}
-                            className="album-photo-card"
-                            onClick={() => openPhotoModal(photoUrl)}
-                        >
-                          <img
-                              src={photoUrl}
-                              alt={`Album Photo ${index + 1}`}
-                              className="album-photo-thumbnail"
-                          />
-                        </div>
-                    ))}
-                  </div>
+                <div className="album-photo-grid">
+                  {albumPhotos.map((photoUrl, index) => (
+                    <div
+                      key={index}
+                      className="album-photo-card"
+                      onClick={() => openPhotoModal(photoUrl)}
+                    >
+                      <img
+                        src={photoUrl}
+                        alt={`Album Photo ${index + 1}`}
+                        className="album-photo-thumbnail"
+                      />
+                    </div>
+                  ))}
+                </div>
               ) : (
-                  <p>No album photos available</p>
+                <p>No album photos available</p>
               )}
             </section>
           </>
@@ -325,9 +323,9 @@ export default function VetDetails(): JSX.Element {
 
       {/* Modal for enlarged photo */}
       {enlargedPhoto && (
-          <div className="photo-modal" onClick={closePhotoModal}>
-            <img src={enlargedPhoto} alt="Enlarged Vet Album Photo" />
-          </div>
+        <div className="photo-modal" onClick={closePhotoModal}>
+          <img src={enlargedPhoto} alt="Enlarged Vet Album Photo" />
+        </div>
       )}
     </div>
   );
