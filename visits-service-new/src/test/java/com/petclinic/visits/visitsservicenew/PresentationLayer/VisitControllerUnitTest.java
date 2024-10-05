@@ -30,6 +30,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -732,9 +733,51 @@ class VisitControllerUnitTest {
         verify(emergencyService, times(1)).DeleteEmergency(emergencyId);
     }
 
+    @Test
+    void updateVisitStatus_ShouldReturnOK_WhenStatusUpdatedToCancelled() {
+        String visitId = "12345";
+        String status = "CANCELLED";
 
+        VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
+                .visitId(visitId)
+                .status(Status.CANCELLED)
+                .description("Test visit with cancelled status")
+                .build();
 
+        // Mocking the service layer to return the expected response
+        when(visitService.patchVisitStatusInVisit(eq(visitId), eq(status)))
+                .thenReturn(Mono.just(visitResponseDTO));
 
+        webTestClient.patch()
+                .uri("/visits/{visitId}/{status}", visitId, status)
+                .exchange()
+                .expectStatus().isOk() // Expect 200 OK
+                .expectBody(VisitResponseDTO.class)
+                .value(response -> {
+                    assertEquals(response.getVisitId(), visitId);
+                    assertEquals(response.getStatus(), Status.CANCELLED);
+                });
 
+        // Verify that the service was called with the correct parameters
+        verify(visitService, times(1)).patchVisitStatusInVisit(eq(visitId), eq(status));
+    }
 
+    @Test
+    void updateVisitStatus_ShouldReturnNotFound_WhenVisitDoesNotExist() {
+        String visitId = "nonExistentVisitId";
+        String status = "CANCELLED";
+
+        // Mocking the service to return an empty Mono, simulating a not found scenario
+        when(visitService.patchVisitStatusInVisit(eq(visitId), eq(status)))
+                .thenReturn(Mono.empty());
+
+        webTestClient.patch()
+                .uri("/visits/{visitId}/{status}", visitId, status)
+                .exchange()
+                .expectStatus().isNotFound(); // Expect 404 NOT_FOUND
+
+        // Verify that the service was called
+        verify(visitService, times(1)).patchVisitStatusInVisit(eq(visitId), eq(status));
+    }
+    
 }
