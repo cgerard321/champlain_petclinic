@@ -66,20 +66,21 @@
 .delete-button {
   background-color: #f44336;
   color: white;
-  padding: 16px 33px; 
+  padding: 16px 33px;
   border: none;
-  border-radius: 6px; 
+  border-radius: 6px;
   cursor: pointer;
-  transition: background-color 0.3s, transform 0.3s; 
-  font-size: 1em; 
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
+  transition:
+    background-color 0.3s,
+    transform 0.3s;
+  font-size: 1em;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .delete-button:hover {
   background-color: #d32f2f;
   transform: scale(1.05); /* Slightly increase size on hover for effect */
 }
-
 
 .low-stock-message {
   color: orange;
@@ -102,4 +103,3 @@
   color: red;
   font-weight: bold;
 }
-
