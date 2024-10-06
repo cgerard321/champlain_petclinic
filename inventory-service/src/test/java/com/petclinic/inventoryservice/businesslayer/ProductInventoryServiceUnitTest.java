@@ -1551,39 +1551,91 @@ class ProductInventoryServiceUnitTest {
 
 
     @Test
-    void consumeProduct_reducesProductQuantity_whenSufficientStock() {
-        String inventoryId = "inventory1";
-        String productId = "product1";
-        int quantity = 5;
-        Product product = new Product();
-        product.setProductQuantity(10);
+    void consumeProduct_WithValidFields_ShouldSucceed() {
+        // Arrange
+        String inventoryId = "1";
+        String productId = UUID.randomUUID().toString();
+
+        Product product = Product.builder()
+                .id("1")
+                .inventoryId(inventoryId)
+                .productId(productId)
+                .productName("Product Name")
+                .productPrice(50.0)
+                .productQuantity(10)
+                .productSalePrice(10.10)
+                .build();
+
+        Product updatedProduct = Product.builder()
+                .id("1")
+                .inventoryId(inventoryId)
+                .productId(productId)
+                .productName("Product Name")
+                .productPrice(50.0)
+                .productQuantity(9)
+                .productSalePrice(10.10)
+                .build();
 
         when(productRepository.findProductByInventoryIdAndProductId(inventoryId, productId))
                 .thenReturn(Mono.just(product));
-        when(productRepository.save(any(Product.class)))
-                .thenReturn(Mono.just(product));
 
-        StepVerifier.create(productInventoryService.consumeProduct(inventoryId, productId, quantity))
-                .expectNextMatches(response -> response.getProductQuantity() == 5)
+        when(productRepository.save(any(Product.class)))
+                .thenReturn(Mono.just(updatedProduct));
+
+        // Act
+        Mono<ProductResponseDTO> result = productInventoryService.consumeProduct(inventoryId, productId);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNextMatches(responseDTO -> {
+                    assertNotNull(responseDTO);
+                    assertEquals(productId, responseDTO.getProductId());
+                    assertEquals("Product Name", responseDTO.getProductName());
+                    assertEquals(50.0, responseDTO.getProductPrice());
+                    assertEquals(9, responseDTO.getProductQuantity());
+                    assertEquals(10.10, responseDTO.getProductSalePrice());
+                    return true;
+                })
                 .verifyComplete();
     }
 
     @Test
-    void consumeProduct_throwsInvalidInputException_whenInsufficientStock() {
-        String inventoryId = "inventory1";
-        String productId = "product1";
-        int quantity = 15;
-        Product product = new Product();
-        product.setProductQuantity(10);
+    void consumeProduct_WithInvalidInventoryId_ShouldThrowNotFound() {
+        // Arrange
+        String inventoryId = "NonExistingInventoryId";
+        String productId = UUID.randomUUID().toString();
 
         when(productRepository.findProductByInventoryIdAndProductId(inventoryId, productId))
-                .thenReturn(Mono.just(product));
+                .thenReturn(Mono.empty());
 
-        StepVerifier.create(productInventoryService.consumeProduct(inventoryId, productId, quantity))
-                .expectErrorMatches(throwable -> throwable instanceof InvalidInputException &&
-                        throwable.getMessage().equals("Not enough stock to consume."))
+        // Act
+        Mono<ProductResponseDTO> result = productInventoryService.consumeProduct(inventoryId, productId);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectError(NotFoundException.class)
                 .verify();
     }
+
+    @Test
+    void consumeProduct_WithInvalidProductId_ShouldThrowNotFound() {
+        // Arrange
+        String inventoryId = "1";
+        String productId = "NonExistingProductId";
+
+        when(productRepository.findProductByInventoryIdAndProductId(inventoryId, productId))
+                .thenReturn(Mono.empty());
+
+        // Act
+        Mono<ProductResponseDTO> result = productInventoryService.consumeProduct(inventoryId, productId);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectError(NotFoundException.class)
+                .verify();
+    }
+
+
 }
 
 

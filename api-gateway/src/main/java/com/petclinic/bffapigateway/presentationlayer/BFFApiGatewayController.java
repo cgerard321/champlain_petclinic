@@ -1003,6 +1003,20 @@ public class BFFApiGatewayController {
         return inventoryServiceClient.getProductsInInventoryByInventoryIdAndProductsField(inventoryId, productName, productPrice, productQuantity, productSalePrice);
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER, Roles.VET})
+    @PatchMapping("inventory/{inventoryId}/products/{productId}/consume")
+    public Mono<ResponseEntity<ProductResponseDTO>> consumeProduct(
+            @PathVariable String inventoryId,
+            @PathVariable String productId) {
+
+        return inventoryServiceClient.consumeProduct(inventoryId, productId)
+                .map(s -> ResponseEntity.status(HttpStatus.OK).body(s))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+
+
+
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER,Roles.VET})
     @GetMapping(value = "inventory")//, produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<InventoryResponseDTO> searchInventory(@RequestParam Optional<Integer> page,

@@ -210,9 +210,8 @@ public Flux<InventoryResponseDTO> searchInventories(
 
     @PatchMapping("/{inventoryId}/products/{productId}/consume")
     public Mono<ResponseEntity<ProductResponseDTO>> consumeProduct(@PathVariable String inventoryId,
-                                                                   @PathVariable String productId,
-                                                                   @RequestParam int quantity) {
-        return productInventoryService.consumeProduct(inventoryId, productId, quantity)
+                                                                   @PathVariable String productId) {
+        return productInventoryService.consumeProduct(inventoryId, productId)
                 .map(productResponseDTO -> ResponseEntity.ok().body(productResponseDTO))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }

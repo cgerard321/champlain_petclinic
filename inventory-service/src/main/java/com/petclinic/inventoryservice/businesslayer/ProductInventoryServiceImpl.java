@@ -559,17 +559,19 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
     }
 
     @Override
-    public Mono<ProductResponseDTO> consumeProduct(String inventoryId, String productId, int quantity) {
+    public Mono<ProductResponseDTO> consumeProduct(String inventoryId, String productId) {
         return productRepository.findProductByInventoryIdAndProductId(inventoryId, productId)
                 .flatMap(product -> {
-                    if (product.getProductQuantity() - quantity < 0) {
+                    if (product.getProductQuantity() - 1 < 0) {
                         return Mono.error(new InvalidInputException("Not enough stock to consume."));
                     } else {
-                        product.setProductQuantity(product.getProductQuantity() - quantity);
+                        product.setProductQuantity(product.getProductQuantity() - 1);
                         return productRepository.save(product)
                                 .map(EntityDTOUtil::toProductResponseDTO);
                     }
                 });
+                })
+                .switchIfEmpty(Mono.error(new NotFoundException("Product not found with id: " + productId)));
     }
 
     @Override
