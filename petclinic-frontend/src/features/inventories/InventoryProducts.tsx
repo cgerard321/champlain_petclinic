@@ -84,8 +84,8 @@ const InventoryProducts: React.FC = () => {
   };
 
   const reduceQuantity = async (
-      productId: string,
-      currentQuantity: number
+    productId: string,
+    currentQuantity: number
   ): Promise<void> => {
     if (currentQuantity > 0) {
       try {
@@ -94,14 +94,15 @@ const InventoryProducts: React.FC = () => {
 
         // Send the PATCH request to update the quantity in the backend
         await axios.patch(
-            `http://localhost:8080/api/gateway/inventory/${inventoryId}/products/${productId}/consume`,
-            {
-              productQuantity: updatedQuantity,
-            }
+          `http://localhost:8080/api/gateway/inventory/${inventoryId}/products/${productId}/consume`,
+          {
+            productQuantity: updatedQuantity,
+          }
         );
 
         // Determine the new status based on the updated quantity
-        let updatedStatus: "RE_ORDER" | "OUT_OF_STOCK" | "AVAILABLE" = "AVAILABLE";
+        let updatedStatus: 'RE_ORDER' | 'OUT_OF_STOCK' | 'AVAILABLE' =
+          'AVAILABLE';
         if (updatedQuantity === 0) {
           updatedStatus = 'OUT_OF_STOCK';
         } else if (updatedQuantity <= 20) {
@@ -110,13 +111,13 @@ const InventoryProducts: React.FC = () => {
 
         // Update the product list in the frontend
         const updatedProducts = filteredProducts.map(product =>
-            product.productId === productId
-                ? {
-                  ...product,
-                  productQuantity: updatedQuantity,
-                  status: updatedStatus, // Update status
-                }
-                : product
+          product.productId === productId
+            ? {
+                ...product,
+                productQuantity: updatedQuantity,
+                status: updatedStatus, // Update status
+              }
+            : product
         );
 
         setProducts(updatedProducts);
@@ -126,7 +127,6 @@ const InventoryProducts: React.FC = () => {
       }
     }
   };
-
 
   // UseEffect to monitor changes in productList and apply filtering
   useEffect(() => {
@@ -210,7 +210,7 @@ const InventoryProducts: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-          {filteredProducts.map((product: ProductModel) => (
+            {filteredProducts.map((product: ProductModel) => (
               <tr key={product.productName}>
                 <td>{product.productName}</td>
                 <td>{product.productName}</td>
@@ -218,26 +218,26 @@ const InventoryProducts: React.FC = () => {
                 <td>${product.productSalePrice}</td>
                 <td>{product.productQuantity}</td>
                 <td
-                    style={{
-                      color:
-                          product.status === 'RE_ORDER'
-                              ? '#f4a460'
-                              : product.status === 'OUT_OF_STOCK'
-                                  ? 'red'
-                                  : product.status === 'AVAILABLE'
-                                      ? 'green'
-                                      : 'inherit',
-                    }}
+                  style={{
+                    color:
+                      product.status === 'RE_ORDER'
+                        ? '#f4a460'
+                        : product.status === 'OUT_OF_STOCK'
+                          ? 'red'
+                          : product.status === 'AVAILABLE'
+                            ? 'green'
+                            : 'inherit',
+                  }}
                 >
                   {product.status.replace('_', ' ')}
                 </td>
                 <td>
                   <button
-                      onClick={e => {
-                        e.stopPropagation();
-                        navigate(`${product.productId}/edit`);
-                      }}
-                      className="btn btn-warning"
+                    onClick={e => {
+                      e.stopPropagation();
+                      navigate(`${product.productId}/edit`);
+                    }}
+                    className="btn btn-warning"
                   >
                     Edit
                   </button>
@@ -252,18 +252,17 @@ const InventoryProducts: React.FC = () => {
                 </td>
                 <td>
                   <button
-                      className="btn btn-primary"
-                      onClick={() =>
-                          reduceQuantity(product.productId, product.productQuantity)
-                      }
-                      disabled={product.productQuantity <= 0} // Disable if no more products
+                    className="btn btn-primary"
+                    onClick={() =>
+                      reduceQuantity(product.productId, product.productQuantity)
+                    }
+                    disabled={product.productQuantity <= 0} // Disable if no more products
                   >
                     Consume
                   </button>
                 </td>
               </tr>
-          ))}
-
+            ))}
           </tbody>
         </table>
       ) : (
