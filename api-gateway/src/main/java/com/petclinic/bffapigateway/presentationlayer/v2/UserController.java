@@ -93,7 +93,8 @@ public class UserController {
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @PostMapping(value = "/users/reset_password", consumes = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<Void>> processResetPassword(@RequestBody @Valid Mono<UserPasswordAndTokenRequestModel> resetRequest) {
-        return authServiceClient.changePassword(resetRequest);
+        return authServiceClient.changePassword(resetRequest)
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
 }

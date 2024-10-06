@@ -1,65 +1,103 @@
-import { useState, FC } from 'react';
+import { useState, useEffect, FC } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { processPasswordReset } from '@/features/users/api/processPasswordReset';
-import { UserPasswordAndTokenRequestModel } from '@/features/users/model/UserPasswordAndTokenRequestModel.ts';
-import { useParams } from 'react-router-dom';
 import './ResetPasswordForm.css';
+import { UserPasswordAndTokenRequestModel } from '@/features/users/model/UserPasswordAndTokenRequestModel.ts';
+import { AppRoutePaths } from '@/shared/models/path.routes.ts';
 
 const ResetPasswordForm: FC = (): JSX.Element => {
-  const { token } = useParams<{ token: string }>();
   const [password, setPassword] = useState<string>('');
   const [confirmPassword, setConfirmPassword] = useState<string>('');
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [successMessage, setSuccessMessage] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string>('');
-  const [passwordError, setPasswordError] = useState<string>('');
-  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [successMessage, setSuccessMessage] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [passwordStrength, setPasswordStrength] = useState<number>(0);
+  const [countdown, setCountdown] = useState<number>(5);
 
-  const validatePasswordStrength = (password: string): boolean => {
+  const { token } = useParams<{ token: string }>();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (successMessage) {
+      const timer = setInterval(() => {
+        setCountdown(prevCountdown => {
+          if (prevCountdown === 1) {
+            clearInterval(timer);
+            navigate(AppRoutePaths.Login);
+          }
+          return prevCountdown - 1;
+        });
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [successMessage, navigate]);
+
+  useEffect(() => {
+    if (countdown > 0 && successMessage) {
+      setSuccessMessage(
+        `Password reset successfully. Redirecting to login page in ${countdown} seconds...`
+      );
+    }
+  }, [countdown]);
+
+  const validatePassword = (password: string): boolean => {
     const passwordRegex =
       /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
     return passwordRegex.test(password);
+  };
+
+  const calculatePasswordStrength = (password: string): number => {
+    let strength = 0;
+    if (/[A-Z]/.test(password)) strength++;
+    if (/\d/.test(password)) strength++;
+    if (/[!@#$%^&*]/.test(password)) strength++;
+    if (password.length >= 8) strength++;
+    return strength;
+  };
+
+  const handlePasswordChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ): void => {
+    const newPassword = e.target.value;
+    setPassword(newPassword);
+    setPasswordStrength(calculatePasswordStrength(newPassword));
   };
 
   const handleSubmit = async (
     event: React.FormEvent<HTMLFormElement>
   ): Promise<void> => {
     event.preventDefault();
-    setIsLoading(true);
-    setSuccessMessage('');
     setErrorMessage('');
-    setPasswordError('');
+    setSuccessMessage('');
 
-    if (password !== confirmPassword) {
-      setPasswordError('Passwords do not match');
-      setIsLoading(false);
-      return;
-    }
-
-    if (!validatePasswordStrength(password)) {
-      setPasswordError(
-        'Password must be at least 8 characters long, contain one capital letter, one number, and one symbol.'
+    if (!validatePassword(password)) {
+      setErrorMessage(
+        'Password must have at least one capital letter, one number, one symbol, and be at least 8 characters long.'
       );
-      setIsLoading(false);
       return;
     }
+    if (password !== confirmPassword) {
+      setErrorMessage('Passwords do not match.');
+      return;
+    }
+
+    setIsLoading(true);
 
     const userPasswordAndTokenRequestModel: UserPasswordAndTokenRequestModel = {
-      password,
-      token: token || '', // Use the token from the URL; fallback to an empty string if undefined
+      password: password,
+      token: token || '',
     };
 
     try {
       await processPasswordReset(userPasswordAndTokenRequestModel);
-      setSuccessMessage('Password has been reset successfully.');
+      setSuccessMessage(
+        `Password reset successfully. Redirecting to login page in ${countdown} seconds...`
+      );
     } catch (error) {
-      setErrorMessage('Failed to reset password. Please try again.');
+      setErrorMessage('An error occurred. Please try again.');
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const togglePasswordVisibility = (): void => {
-    setShowPassword(prevState => !prevState);
   };
 
   return (
@@ -71,30 +109,20 @@ const ResetPasswordForm: FC = (): JSX.Element => {
             <label htmlFor="password" className="reset-password-form-label">
               New Password
             </label>
-            <div className="reset-password-form-input-container">
-              <input
-                type={showPassword ? 'text' : 'password'}
-                id="password"
-                className="reset-password-form-control"
-                value={password}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>): void =>
-                  setPassword(e.target.value)
-                }
-                required
-                disabled={isLoading}
-                placeholder="Enter new password"
-              />
-              <button
-                type="button"
-                className="reset-password-form-toggle-visibility"
-                onClick={togglePasswordVisibility}
-                disabled={isLoading}
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
-              >
-                {showPassword ? '🙈' : '👁️'}
-              </button>
-            </div>
+            <input
+              type="password"
+              id="password"
+              className="reset-password-form-control"
+              value={password}
+              onChange={handlePasswordChange}
+              required
+              placeholder="Enter your new password"
+            />
+            <div
+              className={`password-strength-bar strength-${passwordStrength}`}
+            ></div>
           </div>
+
           <div className="reset-password-form-group">
             <label
               htmlFor="confirmPassword"
@@ -102,45 +130,31 @@ const ResetPasswordForm: FC = (): JSX.Element => {
             >
               Confirm Password
             </label>
-            <div className="reset-password-form-input-container">
-              <input
-                type={showPassword ? 'text' : 'password'}
-                id="confirmPassword"
-                className="reset-password-form-control"
-                value={confirmPassword}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>): void =>
-                  setConfirmPassword(e.target.value)
-                }
-                required
-                disabled={isLoading}
-                placeholder="Confirm new password"
-              />
-              <button
-                type="button"
-                className="reset-password-form-toggle-visibility"
-                onClick={togglePasswordVisibility}
-                disabled={isLoading}
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
-              >
-                {showPassword ? '🙈' : '👁️'}
-              </button>
-            </div>
+            <input
+              type="password"
+              id="confirmPassword"
+              className="reset-password-form-control"
+              value={confirmPassword}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setConfirmPassword(e.target.value)
+              }
+              required
+              placeholder="Confirm your new password"
+            />
           </div>
-          {passwordError && (
-            <div className="reset-password-form-alert-error">
-              {passwordError}
-            </div>
-          )}
+
           {errorMessage && (
             <div className="reset-password-form-alert-error">
               {errorMessage}
             </div>
           )}
+
           {successMessage && (
             <div className="reset-password-form-alert-success">
               {successMessage}
             </div>
           )}
+
           <button
             type="submit"
             className="reset-password-form-btn"
