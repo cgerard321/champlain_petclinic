@@ -53,13 +53,12 @@ public class VetController {
 
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @PostMapping(value = "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/users/vets",consumes = "application/json",produces = "application/json")
     public Mono<ResponseEntity<VetResponseDTO>> addVet(@RequestBody Mono<RegisterVet> registerVetDTO) {
         return authServiceClient.addVetUser(registerVetDTO)
                 .map(v -> ResponseEntity.status(HttpStatus.CREATED).body(v))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
-
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
     //@IsUserSpecific(idToMatch = {"vetId"}, bypassRoles = {Roles.ADMIN})

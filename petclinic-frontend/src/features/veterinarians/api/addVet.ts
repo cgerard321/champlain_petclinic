@@ -1,9 +1,28 @@
 import { AxiosResponse } from 'axios';
 import axiosInstance from '@/shared/api/axiosInstance';
-import { VetResponseModel } from '@/features/veterinarians/models/VetResponseModel.ts';
+import { Workday } from '@/features/veterinarians/models/Workday.ts';
 
 export const addVet = async (
-  vet: VetResponseModel
+  vet: {
+    password: string;
+    vet: {
+      resume: string;
+      firstName: string;
+      lastName: string;
+      specialties: { specialtyId: string; name: string }[];
+      phoneNumber: string;
+      workday: Workday[];
+      workHoursJson: string;
+      photoDefault: boolean;
+      vetBillId: string;
+      active: boolean;
+      vetId: string;
+      email: string
+    };
+    userId: string;
+    email: string;
+    username: string
+  },
 ): Promise<AxiosResponse<void>> => {
-  return await axiosInstance.post<void>('/vets', vet);
+  return await axiosInstance.post<void>('/vets/users/vets', vet);
 };

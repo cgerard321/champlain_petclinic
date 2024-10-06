@@ -13,4 +13,7 @@ export interface VetResponseModel {
   workHoursJson: string;
   active: boolean;
   specialties: Speciality[];
+  password: string; // Add this line
+  username: string;
+
 }
