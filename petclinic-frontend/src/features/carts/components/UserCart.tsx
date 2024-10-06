@@ -216,7 +216,7 @@ const UserCart = (): JSX.Element => {
         setCartItems(prevItems =>
           prevItems.filter((_, index) => index !== indexToDelete)
         );
-        alert('Item successfully removed!')
+        alert('Item successfully removed!');
       } catch (error) {
         console.error('Error deleting item: ', error);
         alert('Failed to delete item');
