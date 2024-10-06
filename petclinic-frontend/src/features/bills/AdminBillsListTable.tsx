@@ -14,7 +14,6 @@ import { useNavigate } from 'react-router-dom';
 
 export default function AdminBillsListTable(): JSX.Element {
 
-
   const navigate = useNavigate();
   const { billsList, getBillsList, setCurrentPage, currentPage, hasMore } =
     useGetAllBillsPaginated();
@@ -27,7 +26,7 @@ export default function AdminBillsListTable(): JSX.Element {
   }
 
   const [filter, setFilter] = useState<FilterModel>({
-    customerId: ''
+    customerId: '',
   });
 
   const [searchId, setSearchId] = useState<string>('');
@@ -178,20 +177,15 @@ export default function AdminBillsListTable(): JSX.Element {
     }
   };
 
-
-  function isKeyOfBillResponseDTO(
-    key: string
-  ): key is keyof Bill {
-    return [
-      'customerId'
-    ].includes(key)
+  function isKeyOfBillResponseDTO(key: string): key is keyof Bill {
+    return ['customerId'].includes(key);
   }
 
   const filteredBills = billsList.filter(bill => {
     return Object.keys(filter).every(key => {
-      if(!filter[key]) return true;
-      if(!isKeyOfBillResponseDTO(key)) return true;
-      return bill[key].toString().includes(filter[key].toString())
+      if (!filter[key]) return true;
+      if (!isKeyOfBillResponseDTO(key)) return true;
+      return bill[key].toString().includes(filter[key].toString());
     });
   });
 
@@ -360,15 +354,16 @@ export default function AdminBillsListTable(): JSX.Element {
               placeholder="Customer ID"
               value={filter.customerId}
               onChange={e =>
-                setFilter({ ...filter, customerId: e.target.value})
-              }>
-            </input>
+                setFilter({ ...filter, customerId: e.target.value })
+              }
+            ></input>
           </div>
           <table className="table table-striped">
             <thead>
               <tr>
                 <th>Bill ID</th>
                 <th>Owner Name</th>
+                <th> Owner ID </th>
                 <th>Visit Type</th>
                 <th>Vet Name</th>
                 <th>Date</th>
@@ -424,6 +419,7 @@ export default function AdminBillsListTable(): JSX.Element {
                     <td>
                       {bill.ownerFirstName} {bill.ownerLastName}
                     </td>
+                    <td>{bill.customerId}</td>
                     <td>{bill.visitType}</td>
                     <td>
                       {bill.vetFirstName} {bill.vetLastName}
