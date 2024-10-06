@@ -120,7 +120,6 @@ public class MockServerConfigCustomersService {
                 );
     }
 
-
     public void registerUpdatePetEndpoint() {
         mockServerClient_CustomersService
                 .when(
@@ -136,10 +135,20 @@ public class MockServerConfigCustomersService {
                 );
     }
 
-
-
-
-
+    public void registerDeletePetEndpoint() {
+        mockServerClient_CustomersService
+                .when(
+                        request()
+                                .withMethod("DELETE")
+                                .withPath("/pet/53163352-8398-4513-bdff-b7715c056d1d/v2")
+                )
+                .respond(
+                        response()
+                                .withStatusCode(200)
+                                .withBody(json("{\"petId\":\"53163352-8398-4513-bdff-b7715c056d1d\",\"name\":\"Buddy\",\"birthDate\":\"1999-11-01T00:00:00.000+00:00\",\"petTypeId\":\"1\",\"isActive\":\"true\",\"weight\":\"1.3\"}"))
+                                .withHeader("Content-Type", "application/json")
+                );
+    }
 
     public void stopMockServer() {
         if(clientAndServer != null)
