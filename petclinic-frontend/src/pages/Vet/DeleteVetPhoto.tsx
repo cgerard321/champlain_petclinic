@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { Button } from 'react-bootstrap';
 import { deleteVetPhoto } from '@/features/veterinarians/api/deleteVetPhoto';
 
@@ -11,7 +11,7 @@ const DeleteVetPhoto: React.FC<DeleteVetPhotoProps> = ({
   vetId,
   onPhotoDeleted,
 }) => {
-  const handleDeletePhoto = async () => {
+  const handleDeletePhoto = async (): Promise<void> => {
     const confirmed = window.confirm(
       "Are you sure you want to delete the vet's photo?"
     );
