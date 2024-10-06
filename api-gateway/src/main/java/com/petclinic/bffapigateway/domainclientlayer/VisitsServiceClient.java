@@ -2,7 +2,7 @@ package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-    import com.petclinic.bffapigateway.dtos.Inventory.InventoryRequestDTO;
+import com.petclinic.bffapigateway.dtos.Inventory.InventoryRequestDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.InventoryResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.Emergency.EmergencyRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.Emergency.EmergencyResponseDTO;
@@ -18,16 +18,14 @@ import com.petclinic.bffapigateway.utils.Rethrower;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.MediaType;
+import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -43,9 +41,10 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 @Component
 public class VisitsServiceClient {
     private final WebClient webClient;
-    private  final String reviewUrl;
+    private final String reviewUrl;
 
     private Rethrower rethrower;
+
     @Autowired
     public VisitsServiceClient(
             @Value("${app.visits-service-new.host}") String visitsServiceHost,
@@ -57,17 +56,22 @@ public class VisitsServiceClient {
                 .build();
     }
 
-    public Flux<VisitResponseDTO> getAllVisits(){
+    public Flux<VisitResponseDTO> getAllVisits(String description){
         return this.webClient
                 .get()
-                .uri(reviewUrl)
+                .uri(uriBuilder -> {
+                    if (description != null) {
+                        uriBuilder.queryParam("description", description).build();
+                    }
+                    return uriBuilder.build();
+                })
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, error -> Mono.error(new IllegalArgumentException("Something went wrong and we got a 400 error")))
                 .onStatus(HttpStatusCode::is5xxServerError, error -> Mono.error(new IllegalArgumentException("Something went wrong and we got a 500 error")))
                 .bodyToFlux(VisitResponseDTO.class);
     }
 
-    public Flux<VisitResponseDTO> getVisitsForStatus(final String status){
+    public Flux<VisitResponseDTO> getVisitsForStatus(final String status) {
         return webClient
                 .get()
                 .uri("/status/{status}", status)
@@ -76,14 +80,15 @@ public class VisitsServiceClient {
     }
 
 
-    public Flux<VisitResponseDTO> getVisitsForPet(final String petId){
+    public Flux<VisitResponseDTO> getVisitsForPet(final String petId) {
         return webClient
                 .get()
                 .uri("/pets/{petId}", petId)
                 .retrieve()
                 .bodyToFlux(VisitResponseDTO.class);
     }
-    public Flux<VisitResponseDTO> getVisitByPractitionerId(final String practitionerId){
+
+    public Flux<VisitResponseDTO> getVisitByPractitionerId(final String practitionerId) {
         return webClient
                 .get()
                 .uri("/practitioner/{practitionerId}", practitionerId)
@@ -100,7 +105,7 @@ public class VisitsServiceClient {
                 .bodyToMono(VisitResponseDTO.class);
     }
 
-    public Mono<VisitResponseDTO> addVisit(Mono<VisitRequestDTO> visitRequestDTO){
+    public Mono<VisitResponseDTO> addVisit(Mono<VisitRequestDTO> visitRequestDTO) {
         return visitRequestDTO.flatMap(visitRequestDTO1 -> {
             if (visitRequestDTO1.getVisitDate() != null) {
                 LocalDateTime originalDate = visitRequestDTO1.getVisitDate();
@@ -123,72 +128,86 @@ public class VisitsServiceClient {
         Status newStatus = switch (status) {
             case "CONFIRMED" -> Status.CONFIRMED;
             case "COMPLETED" -> Status.COMPLETED;
+            case "ARCHIVED" -> Status.ARCHIVED;
             default -> Status.CANCELLED;
         };
 
         return webClient
-            .put()
-            .uri("/"+ visitId +"/status/" + newStatus)
-            .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-            .retrieve()
-            .bodyToMono(VisitResponseDTO.class);
+                .put()
+                .uri("/" + visitId + "/status/" + newStatus)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .retrieve()
+                .bodyToMono(VisitResponseDTO.class);
     }
 
     public Mono<VisitResponseDTO> createVisitForPet(VisitRequestDTO visit) {
         return webClient
-            .post()
-            .uri("")
-            .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-            .body(Mono.just(visit), VisitRequestDTO.class)
-            .retrieve()
-            .onStatus(HttpStatusCode::is4xxClientError, response -> {
-                HttpStatusCode httpStatus = response.statusCode();
-                return response.bodyToMono(String.class)
-                    .flatMap(errorMessage -> {
-                        try {
-                            ObjectMapper objectMapper = new ObjectMapper();
-                            JsonNode errorNode = objectMapper.readTree(errorMessage);
-                            String message = errorNode.get("message").asText();
+                .post()
+                .uri("")
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .body(Mono.just(visit), VisitRequestDTO.class)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, response -> {
+                    HttpStatusCode httpStatus = response.statusCode();
+                    return response.bodyToMono(String.class)
+                            .flatMap(errorMessage -> {
+                                try {
+                                    ObjectMapper objectMapper = new ObjectMapper();
+                                    JsonNode errorNode = objectMapper.readTree(errorMessage);
+                                    String message = errorNode.get("message").asText();
 
-                            if (httpStatus == HttpStatus.NOT_FOUND) {
-                                return Mono.error(new NotFoundException(message));
-                            }
-                            else if (httpStatus == HttpStatus.CONFLICT){
-                                return Mono.error(new DuplicateTimeException(message));
-                            }
-                            else {
-                                return Mono.error(new BadRequestException(message));
-                            }
-                        } catch (IOException e) {
-                            // Handle parsing error
-                            return Mono.error(new BadRequestException("Bad Request"));
-                        }
-                    });
-            })
-            .bodyToMono(VisitResponseDTO.class);
+                                    if (httpStatus == HttpStatus.NOT_FOUND) {
+                                        return Mono.error(new NotFoundException(message));
+                                    } else if (httpStatus == HttpStatus.CONFLICT) {
+                                        return Mono.error(new DuplicateTimeException(message));
+                                    } else {
+                                        return Mono.error(new BadRequestException(message));
+                                    }
+                                } catch (IOException e) {
+                                    // Handle parsing error
+                                    return Mono.error(new BadRequestException("Bad Request"));
+                                }
+                            });
+                })
+                .bodyToMono(VisitResponseDTO.class);
     }
 
-    public Mono<Void> deleteVisitByVisitId(String visitId){
+    public Mono<Void> deleteVisitByVisitId(String visitId) {
         return webClient
                 .delete()
                 .uri("/{visitId}", visitId)
                 .retrieve()
                 .bodyToMono(Void.class);
     }
-    public Mono<Void> deleteAllCancelledVisits(){
+
+    public Mono<Void> deleteAllCancelledVisits() {
         return webClient
                 .delete()
                 .uri("/cancelled")
                 .retrieve()
                 .bodyToMono(Void.class);
     }
-    public Mono<Void> deleteCompletedVisitByVisitId(String visitId){
+
+    public Mono<VisitResponseDTO> archiveCompletedVisit(String visitId, Mono<VisitRequestDTO> visitRequestDTO) {
         return webClient
-                .delete()
-                .uri("/completed/{visitId}", visitId)
+                .put()
+                .uri("/completed/" + visitId + "/archive")
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .body(BodyInserters.fromPublisher(visitRequestDTO, VisitRequestDTO.class))
                 .retrieve()
-                .bodyToMono(Void.class);
+                .onStatus(HttpStatusCode::is4xxClientError, response -> response.bodyToMono(String.class)
+                        .flatMap(errorBody -> Mono.error(new BadRequestException(errorBody))))
+                .bodyToMono(VisitResponseDTO.class);
     }
+    public Flux<VisitResponseDTO> getAllArchivedVisits() {
+        return webClient
+                .get()
+                .uri("/archived")
+//                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToFlux(VisitResponseDTO.class);
+    }
+
     /*
     public Flux<VisitDetails> getPreviousVisitsForPet(final String petId) {
         return webClient
@@ -256,8 +275,7 @@ public class VisitsServiceClient {
     }*/
 
 
-
-    public Flux<ReviewResponseDTO> getAllReviews(){
+    public Flux<ReviewResponseDTO> getAllReviews() {
         return webClient
                 .get()
                 .uri(reviewUrl + "/reviews")
@@ -267,7 +285,7 @@ public class VisitsServiceClient {
     }
 
     public Mono<ReviewResponseDTO> createReview(Mono<ReviewRequestDTO> model) {
-        String reviewId= UUID.randomUUID().toString();
+        String reviewId = UUID.randomUUID().toString();
         return model.flatMap(reviewRequestDTO -> {
             return webClient
                     .post()
@@ -299,22 +317,22 @@ public class VisitsServiceClient {
     }
 
     public Mono<VisitResponseDTO> updateVisitByVisitId(String visitId,
-                                                       Mono<VisitRequestDTO> visitRequestDTO){
+                                                       Mono<VisitRequestDTO> visitRequestDTO) {
         return visitRequestDTO.flatMap(requestDTO -> {
-        if (requestDTO.getVisitDate() != null) {
-            LocalDateTime originalDate = requestDTO.getVisitDate();
-            LocalDateTime adjustedDate = originalDate.minusHours(4);
-            requestDTO.setVisitDate(adjustedDate);
-        } else {
-            throw new BadRequestException("Visit date is required");
-        }
-               return webClient
-                        .put()
-                        .uri(reviewUrl + "/" + visitId)
-                        .body(BodyInserters.fromValue(requestDTO))
-                        .retrieve()
-                        .bodyToMono(VisitResponseDTO.class);
-    });
+            if (requestDTO.getVisitDate() != null) {
+                LocalDateTime originalDate = requestDTO.getVisitDate();
+                LocalDateTime adjustedDate = originalDate.minusHours(4);
+                requestDTO.setVisitDate(adjustedDate);
+            } else {
+                throw new BadRequestException("Visit date is required");
+            }
+            return webClient
+                    .put()
+                    .uri(reviewUrl + "/" + visitId)
+                    .body(BodyInserters.fromValue(requestDTO))
+                    .retrieve()
+                    .bodyToMono(VisitResponseDTO.class);
+        });
     }
 
 

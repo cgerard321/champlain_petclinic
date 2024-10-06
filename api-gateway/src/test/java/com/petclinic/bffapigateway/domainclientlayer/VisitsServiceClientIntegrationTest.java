@@ -107,7 +107,7 @@ class VisitsServiceClientIntegrationTest {
         server.enqueue(new MockResponse().setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .setBody(objectMapper.writeValueAsString(Arrays.asList(visitResponseDTO, visitResponseDTO2))).addHeader("Content-Type", "application/json"));
 
-        Flux<VisitResponseDTO> visitResponseDTOFlux = visitsServiceClient.getAllVisits();
+        Flux<VisitResponseDTO> visitResponseDTOFlux = visitsServiceClient.getAllVisits(visitResponseDTO.getDescription());
         StepVerifier.create(visitResponseDTOFlux)
                 .expectNext(visitResponseDTO)
                 .expectNext(visitResponseDTO2)
@@ -115,16 +115,18 @@ class VisitsServiceClientIntegrationTest {
     }
     @Test
     void getAllVisits_400Error()throws IllegalArgumentException{
+        String description = "test"; // Add a description here
         server.enqueue(new MockResponse().setResponseCode(400).addHeader("Content-Type", "application/json"));
-        Flux<VisitResponseDTO> visitResponseDTOFlux = visitsServiceClient.getAllVisits();
+        Flux<VisitResponseDTO> visitResponseDTOFlux = visitsServiceClient.getAllVisits(description); // Pass the description to the method
         StepVerifier.create(visitResponseDTOFlux)
-            .expectErrorMatches(throwable -> throwable instanceof IllegalArgumentException && Objects.equals(throwable.getMessage(), "Something went wrong and we got a 400 error"))
-            .verify();
+                .expectErrorMatches(throwable -> throwable instanceof IllegalArgumentException && Objects.equals(throwable.getMessage(), "Something went wrong and we got a 400 error"))
+                .verify();
     }
     @Test
     void getAllVisits_500Error()throws IllegalArgumentException{
+        String description = "test"; // Add a description here
         server.enqueue(new MockResponse().setResponseCode(500).addHeader("Content-Type", "application/json"));
-        Flux<VisitResponseDTO> visitResponseDTOFlux = visitsServiceClient.getAllVisits();
+        Flux<VisitResponseDTO> visitResponseDTOFlux = visitsServiceClient.getAllVisits(description);
         StepVerifier.create(visitResponseDTOFlux)
             .expectErrorMatches(throwable -> throwable instanceof IllegalArgumentException && Objects.equals(throwable.getMessage(), "Something went wrong and we got a 500 error"))
             .verify();

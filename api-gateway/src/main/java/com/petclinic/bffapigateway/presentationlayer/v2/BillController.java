@@ -16,6 +16,9 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.awt.print.Pageable;
+import java.util.Optional;
+
 @RestController
 @RequiredArgsConstructor
 @Slf4j
@@ -31,6 +34,15 @@ public class BillController {
     {
         return billService.getBillsByOwnerId(customerId);
     }
+
+    @GetMapping(value = "/customer/{customerId}/paginated", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<BillResponseDTO> getBillsByCustomerIdPaginated(
+            @PathVariable String customerId,
+            @RequestParam Optional<Integer> page,
+            @RequestParam Optional<Integer> size) {
+        return billService.getBillsByCustomerIdPaginated(customerId, page, size);
+    }
+
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @PostMapping(value = "/admin",
@@ -53,6 +65,38 @@ public class BillController {
     public Mono<BillResponseDTO> getBillById(@PathVariable String billId)
     {
         return billService.getBilling(billId);
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping()
+    public ResponseEntity<Flux<BillResponseDTO>> getAllBillingByPage(
+            @RequestParam Optional<Integer> page,
+            @RequestParam Optional<Integer> size,
+            @RequestParam(required = false) String billId,
+            @RequestParam(required = false) String customerId,
+            @RequestParam(required = false) String ownerFirstName,
+            @RequestParam(required = false) String ownerLastName,
+            @RequestParam(required = false) String visitType,
+            @RequestParam(required = false) String vetId,
+            @RequestParam(required = false) String vetFirstName,
+            @RequestParam(required = false) String vetLastName) {
+
+        if (page.isEmpty()) {
+            page = Optional.of(0);
+        }
+
+        if (size.isEmpty()) {
+            size = Optional.of(10);
+        }
+        return ResponseEntity.ok().body(billService.getAllBillsByPage(page, size, billId, customerId, ownerFirstName,
+                ownerLastName, visitType, vetId, vetFirstName, vetLastName));
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @DeleteMapping(value = "/{billId}")
+    public Mono<ResponseEntity<Void>> deleteBill(final @PathVariable String billId) {
+        return billService.deleteBill(billId).then(Mono.just(ResponseEntity.noContent().<Void>build()))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
 }

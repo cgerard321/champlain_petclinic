@@ -113,31 +113,4 @@ public class VisitControllerIntegrationTest {
                 .expectNextCount(3)
                 .verifyComplete();
     }
-
-    @Test
-    void whenDeleteCompletedVisitsById_asAdmin_thenReturnNoContent() {
-        String visitId = "visitId1";
-        webTestClient.delete()
-                .uri("/api/v2/gateway/visits/completed/{visitId}", visitId)
-                .accept(MediaType.APPLICATION_JSON)
-                .cookie("Bearer", jwtTokenForValidAdmin) // admin token
-                .exchange()
-                .expectStatus().isNoContent()
-                .expectBody().isEmpty();
-    }
-
-    @Test
-    void whenDeleteCompletedVisit_ByInvalidId_asAdmin_thenReturnNotFound() {
-        String visitId = "InvalidId";
-        webTestClient.delete()
-                .uri("/api/v2/gateway/visits/completed/{visitId}", visitId)
-                .accept(MediaType.APPLICATION_JSON)
-                .cookie("Bearer", jwtTokenForValidAdmin) // admin token
-                .exchange()
-                .expectStatus().isNotFound();
-
-        StepVerifier
-                .create(Mono.empty())
-                .verifyComplete();
-    }
 }

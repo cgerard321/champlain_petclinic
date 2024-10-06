@@ -5,6 +5,7 @@ import com.petclinic.bffapigateway.domainclientlayer.EmailingServiceClient;
 import com.petclinic.bffapigateway.dtos.Emailing.DirectEmailModelRequestDTO;
 import com.petclinic.bffapigateway.dtos.Emailing.EmailModelResponseDTO;
 import com.petclinic.bffapigateway.dtos.Emailing.NotificationEmailModelRequestDTO;
+import com.petclinic.bffapigateway.dtos.Emailing.RawEmailModelRequestDTO;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterAll;
@@ -123,6 +124,24 @@ public class EmailingServiceClientIntegrationTest {
                 .setHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE));
 
         Mono<HttpStatus> result = emailingServiceClient.sendEmailNotification(notificationRequestDTO);
+
+        StepVerifier.create(result)
+                .expectNext(HttpStatus.OK)
+                .verifyComplete();
+    }
+    @Test
+    void sendRawEmail() throws Exception {
+        RawEmailModelRequestDTO rawRequestDTO = new RawEmailModelRequestDTO(
+                "xilef992@gmail.com",
+                "Your Email Title",
+                "Default"
+        );
+
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(200)
+                .setHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE));
+
+        Mono<HttpStatus> result = emailingServiceClient.sendRawEmail(rawRequestDTO);
 
         StepVerifier.create(result)
                 .expectNext(HttpStatus.OK)

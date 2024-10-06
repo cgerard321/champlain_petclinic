@@ -97,7 +97,7 @@ public class BillControllerIntegrationTest {
     void whenGetAllBills_asAdmin_thenReturnAllBills() {
         Flux<BillResponseDTO> result = webTestClient
                 .get()
-                .uri("/api/v2/gateway/bills/admin")
+                .uri("/api/v2/gateway/bills")
                 .cookie("Bearer", jwtTokenForValidAdmin)
                 .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
                 .exchange()
@@ -142,6 +142,40 @@ public class BillControllerIntegrationTest {
                     return true;})
                 .verifyComplete();
     }
+
+
+    @Test
+    void whenGetAllBillsByPageAsAdmin_thenReturnPaginatedBills() {
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder.path("/api/v2/gateway/bills")
+                        .queryParam("page", "1")
+                        .queryParam("size", "10")
+                        .build())
+                .cookie("Bearer", jwtTokenForValidAdmin)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBodyList(BillResponseDTO.class)
+                .consumeWith(response -> {
+                    assert response.getResponseBody().size() <= 10;
+                });
+    }
+
+    @Test
+    void whenGetAllBillsByPageWithInvalidRole_thenUnauthorized() {
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder.path("/api/v2/gateway/bills")
+                        .queryParam("page", "1")
+                        .queryParam("size", "10")
+                        .build())
+                .cookie("User", "invalidToken")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isUnauthorized();
+    }
+
+
 }
 
 

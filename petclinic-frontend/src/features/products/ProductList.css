@@ -40,3 +40,55 @@
   padding: 20px;
   transition: margin-right 0.3s ease;
 }
+.filter-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.filter-container label {
+  margin-bottom: 10px;
+}
+
+.apply-filter-button,
+.clear-filter-button {
+  margin-top: 10px;
+}
+
+.low-quantity {
+  border-top: 5px solid orange;
+  position: relative;
+}
+
+.low-quantity::after {
+  content: 'Low Stock';
+  color: orange;
+  font-weight: bold;
+  font-size: 12px;
+  position: absolute;
+  top: 10px;
+  right: 5px;
+  background: white;
+  padding: 2px 5px;
+  border-radius: 3px;
+}
+
+/* Styles for out of stock */
+.out-of-stock {
+  border-top: 5px solid red;
+  position: relative;
+}
+
+.out-of-stock::after {
+  content: 'Out of Stock';
+  color: red;
+  font-weight: bold;
+  font-size: 12px;
+  position: absolute;
+  top: 10px;
+  right: 5px;
+  background: white;
+  padding: 2px 5px;
+  border-radius: 3px;
+}

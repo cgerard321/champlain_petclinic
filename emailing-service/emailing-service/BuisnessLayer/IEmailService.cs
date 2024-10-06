@@ -10,5 +10,6 @@ public interface IEmailService
     public List<EmailModel> GetAllEmails();
     public OperationResult ReceiveHtml(string templateName, string htmlBody);
     public OperationResult SendEmail(DirectEmailModel model);
-    OperationResult SendEmailNotification(NotificationEmailModel model);
+    public OperationResult SendEmailNotification(NotificationEmailModel model);
+    public OperationResult SendRawEmail(RawEmailModel model);
 }
