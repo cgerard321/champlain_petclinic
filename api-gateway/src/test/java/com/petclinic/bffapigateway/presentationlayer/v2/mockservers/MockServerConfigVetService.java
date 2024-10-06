@@ -380,4 +380,31 @@ public void stopMockServer() {
                                 .withStatusCode(404));
     }
 
+    public void registerDeletePhotoByVetIdEndpoint(String vetId) {
+        mockServerClient_VetService
+                .when(
+                        request()
+                                .withMethod("DELETE")
+                                .withPath("/vets/" + vetId + "/photo")
+                ).respond(
+                        response()
+                                .withStatusCode(204)
+                );
+    }
+
+    public void registerDeletePhotoByVetIdEndpointNotFound(String vetId) {
+        mockServerClient_VetService
+                .when(
+                        request()
+                                .withMethod("DELETE")
+                                .withPath("/vets/" + vetId + "/photo")
+                ).respond(
+                        response()
+                                .withStatusCode(404)
+                                .withHeader("Content-Type", "application/json")
+                                .withBody(json("{\"message\":\"Photo not found for vetId: " + vetId + "\"}"))
+                );
+    }
+
+
 }
