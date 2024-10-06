@@ -20,12 +20,14 @@ public class CartServiceClient {
 
     private final WebClient.Builder webClientBuilder;
     private final String CartServiceUrl;
+    private final String PromoCodeServiceUrl;
 
     public CartServiceClient(WebClient.Builder webClientBuilder,
                                  @Value("${app.cart-service.host}") String CartServiceHost,
                                  @Value("${app.cart-service.port}") String CartServicePort) {
         this.webClientBuilder = webClientBuilder;
         CartServiceUrl = "http://" + CartServiceHost + ":" + CartServicePort + "/api/v1/carts";
+        PromoCodeServiceUrl = "http://" + CartServiceHost + ":" + CartServicePort + "/api/v1/promos";
     }
 
     public Flux<CartResponseDTO> getAllCarts() {
@@ -96,6 +98,53 @@ public class CartServiceClient {
                 .retrieve()
                 .bodyToMono(Void.class);
     }
+    public Flux<PromoCodeResponseDTO> getAllPromoCodes() {
+        return webClientBuilder.build()
+                .get()
+                .uri(PromoCodeServiceUrl)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToFlux(PromoCodeResponseDTO.class);
+    }
+    public Mono<PromoCodeResponseDTO> getPromoCodeById(String promoCodeId) {
+        return webClientBuilder.build()
+                .get()
+                .uri(PromoCodeServiceUrl + "/" + promoCodeId)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToMono(PromoCodeResponseDTO.class);
+    }
+
+    public Mono<PromoCodeResponseDTO> createPromoCode(PromoCodeRequestDTO promoCodeRequestDTO) {
+        return webClientBuilder.build()
+                .post()
+                .uri(PromoCodeServiceUrl)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Mono.just(promoCodeRequestDTO), PromoCodeRequestDTO.class)
+                .retrieve()
+                .bodyToMono(PromoCodeResponseDTO.class);
+    }
+
+    public Mono<PromoCodeResponseDTO> updatePromoCode(String promoCodeId, PromoCodeRequestDTO promoCodeRequestDTO) {
+        return webClientBuilder.build()
+                .put()
+                .uri(PromoCodeServiceUrl + "/" + promoCodeId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Mono.just(promoCodeRequestDTO), PromoCodeRequestDTO.class)
+                .retrieve()
+                .bodyToMono(PromoCodeResponseDTO.class);
+    }
+
+    public Mono<PromoCodeResponseDTO> deletePromoCode(String promoCodeId) {
+        return webClientBuilder.build()
+                .delete()
+                .uri(PromoCodeServiceUrl + "/" + promoCodeId)
+                .retrieve()
+                .bodyToMono(PromoCodeResponseDTO.class);
+    }
+
+
+}
 
     public Mono<CartResponseDTO> addProductToCart(String cartId, AddProductRequestDTO requestDTO) {
         return webClientBuilder.build()
