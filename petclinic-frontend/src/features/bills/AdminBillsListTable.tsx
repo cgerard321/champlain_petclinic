@@ -13,13 +13,26 @@ import './AdminBillsListTable.css';
 import { useNavigate } from 'react-router-dom';
 
 export default function AdminBillsListTable(): JSX.Element {
+
+
   const navigate = useNavigate();
-  const [searchId, setSearchId] = useState<string>('');
-  const [searchedBill, setSearchedBill] = useState<Bill | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const { billsList, getBillsList, setCurrentPage, currentPage, hasMore } =
     useGetAllBillsPaginated();
 
+
+
+  interface FilterModel {
+    [key: string]: string;
+    customerId: string;
+  }
+
+  const [filter, setFilter] = useState<FilterModel>({
+    customerId: ''
+  });
+
+  const [searchId, setSearchId] = useState<string>('');
+  const [searchedBill, setSearchedBill] = useState<Bill | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [showCreateForm, setCreateForm] = useState<boolean>(false);
   const [newBill, setNewBill] = useState<BillRequestModel>({
     customerId: '',
@@ -164,6 +177,23 @@ export default function AdminBillsListTable(): JSX.Element {
       setCurrentPage(currentPage + 1);
     }
   };
+
+
+  function isKeyOfBillResponseDTO(
+    key: string
+  ): key is keyof Bill {
+    return [
+      'customerId'
+    ].includes(key)
+  }
+
+  const filteredBills = billsList.filter(bill => {
+    return Object.keys(filter).every(key => {
+      if(!filter[key]) return true;
+      if(!isKeyOfBillResponseDTO(key)) return true;
+      return bill[key].toString().includes(filter[key].toString())
+    });
+  });
 
   return (
     <div>
@@ -322,6 +352,18 @@ export default function AdminBillsListTable(): JSX.Element {
         </div>
       ) : (
         <div className="admin-bills-list-table-container">
+        <div>
+          <h3>All Bills:</h3>
+          <div className="filter-tab">
+            <input
+              type="text"
+              placeholder="Customer ID"
+              value={filter.customerId}
+              onChange={e =>
+                setFilter({ ...filter, customerId: e.target.value})
+              }>
+            </input>
+          </div>
           <table className="table table-striped">
             <thead>
               <tr>
@@ -374,6 +416,25 @@ export default function AdminBillsListTable(): JSX.Element {
                   </td>
                 </tr>
               ))}
+              {filteredBills
+                .filter(data => data != null)
+                .map((bill: Bill) => (
+                  <tr key={bill.billId}>
+                    <td>{bill.billId}</td>
+                    <td>
+                      {bill.ownerFirstName} {bill.ownerLastName}
+                    </td>
+                    <td>{bill.visitType}</td>
+                    <td>
+                      {bill.vetFirstName} {bill.vetLastName}
+                    </td>
+                    <td>{bill.date}</td>
+                    <td>{bill.amount}</td>
+                    <td>{bill.taxedAmount}</td>
+                    <td>{bill.billStatus}</td>
+                    <td>{bill.dueDate}</td>
+                  </tr>
+                ))}
             </tbody>
           </table>
           <div className="pagination-controls">
@@ -384,7 +445,8 @@ export default function AdminBillsListTable(): JSX.Element {
             {hasMore && <button onClick={handleNextPage}>Next</button>}
           </div>
         </div>
-      )}
+      )
     </div>
-  );
-}
+  )}
+  </div>
+)}
