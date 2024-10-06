@@ -34,6 +34,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 import java.awt.print.Pageable;
 import java.util.Optional;
@@ -277,6 +278,7 @@ public class BFFApiGatewayController {
         return customersServiceClient.getPetTypes();
     }
 
+    /*
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET})
     @PutMapping("pets/{petId}")
     public Mono<ResponseEntity<PetResponseDTO>> updatePet(@RequestBody PetResponseDTO pet, @PathVariable String petId){
@@ -284,7 +286,7 @@ public class BFFApiGatewayController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-
+*/
 
         /* Visits Methods */
 
@@ -428,6 +430,15 @@ public class BFFApiGatewayController {
                 .map(r -> ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, MediaType.IMAGE_JPEG_VALUE).body(r))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
+    @PostMapping(value = "{vetId}/specialties")
+    public Mono<VetResponseDTO> addSpecialtiesByVetId(
+            @PathVariable String vetId,
+            @RequestBody Mono<SpecialtyDTO> specialties) {
+        return vetsServiceClient.addSpecialtiesByVetId(vetId, specialties);
+    }
+
+ 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @GetMapping("vets/{vetId}/default-photo")
     public Mono<ResponseEntity<PhotoResponseDTO>> getDefaultPhotoByVetId(@PathVariable String vetId) {
@@ -572,20 +583,7 @@ public class BFFApiGatewayController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
-            @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
-    @GetMapping("/vets/firstName/{firstName}")
-    public Mono<ResponseEntity<VetResponseDTO>> getVetByFirstName(@PathVariable String firstName) {
-        return vetsServiceClient.getVetByFirstName(firstName)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build());
-    }
-    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
-    @GetMapping("/vets/lastName/{lastName}")
-    public Mono<ResponseEntity<VetResponseDTO>> getVetByLastName(@PathVariable String lastName) {
-        return vetsServiceClient.getVetByLastName(lastName)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build());
-    }
+
     @IsUserSpecific(idToMatch = {"vetId"})
     @GetMapping("/vets/vetBillId/{vetId}")
     public Mono<ResponseEntity<VetResponseDTO>> getVetByBillId(@PathVariable String vetBillId) {
@@ -1005,6 +1003,20 @@ public class BFFApiGatewayController {
         return inventoryServiceClient.getProductsInInventoryByInventoryIdAndProductsField(inventoryId, productName, productPrice, productQuantity, productSalePrice);
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER, Roles.VET})
+    @PatchMapping("inventory/{inventoryId}/products/{productId}/consume")
+    public Mono<ResponseEntity<ProductResponseDTO>> consumeProduct(
+            @PathVariable String inventoryId,
+            @PathVariable String productId) {
+
+        return inventoryServiceClient.consumeProduct(inventoryId, productId)
+                .map(s -> ResponseEntity.status(HttpStatus.OK).body(s))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+
+
+
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER,Roles.VET})
     @GetMapping(value = "inventory")//, produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<InventoryResponseDTO> searchInventory(@RequestParam Optional<Integer> page,
@@ -1113,11 +1125,5 @@ public class BFFApiGatewayController {
                         .defaultIfEmpty(ResponseEntity.notFound().build())
         );
     }
-
-
-
-
-
-
 
 }

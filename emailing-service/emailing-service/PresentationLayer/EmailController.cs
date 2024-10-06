@@ -110,4 +110,68 @@ public class EmailController : Controller
         }
         return Ok();
     }
+    [HttpPost("send/notification")]
+    public IActionResult SendEmailNotification([FromBody] NotificationEmailModel? emailModel)
+    {
+        if( emailModel ==null || emailModel.IsEmpty())
+        {
+            return NoContent();
+        }
+
+        try
+        {
+            _emailService.SendEmailNotification(emailModel);
+        }
+        catch (BadEmailModel e)
+        {
+            Console.WriteLine(e);
+            return BadRequest(new { message = e.Message });
+        }
+        catch (TriedToFindNonExistingTemplate e)
+        {
+            Console.WriteLine(e);
+            return NotFound(new { message = e.Message });
+        }
+        catch(AlreadyPassedDate e)
+        {
+            Console.WriteLine(e);
+            return BadRequest(new { message = e.Message });
+        }
+        /*catch (NullReferenceException e)
+        {
+            Console.WriteLine(e);
+            return NotFound(new { message = e.Message });
+        }*/
+        catch (EmailStringContainsPlaceholder e)
+        {
+            Console.WriteLine(e);
+            return BadRequest(new { message = e.Message });
+        }
+        catch (TemplateRequiredFieldNotSet e)
+        {
+            Console.WriteLine(e);
+            return BadRequest(new { message = e.Message });
+        }
+        return Ok();
+    }
+    
+    [HttpPost("send/raw")]
+    public IActionResult SendEmailRaw([FromBody] RawEmailModel? emailModel)
+    {
+        if( emailModel ==null || emailModel.IsEmpty())
+        {
+            return NoContent();
+        }
+
+        try
+        {
+            _emailService.SendRawEmail(emailModel);
+        }
+        catch (BadEmailModel e)
+        {
+            Console.WriteLine(e);
+            return BadRequest(new { message = e.Message });
+        }
+        return Ok();
+    }
 }

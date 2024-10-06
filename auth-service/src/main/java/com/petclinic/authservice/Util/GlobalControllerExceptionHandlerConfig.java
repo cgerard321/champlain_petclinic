@@ -95,4 +95,16 @@ public class GlobalControllerExceptionHandlerConfig {
 
         return new HTTPErrorMessage(BAD_REQUEST.value(), ex.getMessage());
     }
+
+    @ExceptionHandler(value = EmailSendingFailedException.class)
+    @ResponseStatus(value = UNPROCESSABLE_ENTITY)
+    public HTTPErrorMessage emailSendingException(EmailSendingFailedException ex) {
+
+        return new HTTPErrorMessage(UNPROCESSABLE_ENTITY.value(), ex.getMessage());
+    }
+    @ExceptionHandler(DisabledAccountException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public HTTPErrorMessage handleDisabledAccountException(DisabledAccountException ex) {
+        return new HTTPErrorMessage(FORBIDDEN.value(), ex.getMessage());
+    }
 }

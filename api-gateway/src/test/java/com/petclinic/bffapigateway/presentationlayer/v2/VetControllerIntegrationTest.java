@@ -2,10 +2,7 @@ package com.petclinic.bffapigateway.presentationlayer.v2;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
-import com.petclinic.bffapigateway.dtos.Vets.SpecialtyDTO;
-import com.petclinic.bffapigateway.dtos.Vets.VetRequestDTO;
-import com.petclinic.bffapigateway.dtos.Vets.VetResponseDTO;
-import com.petclinic.bffapigateway.dtos.Vets.Workday;
+import com.petclinic.bffapigateway.dtos.Vets.*;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigAuthService;
 import com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigCustomersService;
@@ -26,10 +23,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static com.google.common.net.HttpHeaders.AUTHORIZATION;
 import static com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigAuthService.jwtTokenForInvalidOwnerId;
@@ -104,10 +98,10 @@ class VetControllerIntegrationTest {
         webTestClient.get()
                 .uri(VET_ENDPOINT)
                 .cookie("Bearer", jwtTokenForValidAdmin)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentType("text/event-stream;charset=UTF-8")
                 .expectBodyList(VetResponseDTO.class)
                 .hasSize(2);
     }
@@ -173,31 +167,6 @@ class VetControllerIntegrationTest {
     }
 
 
-    @Test
-    void whenGetVetByFirstName_notExists_thenReturnNotFound() {
-        String firstName = "Unknown";
-
-        mockServerConfigVetService.registerGetVetByFirstNameEndpointNotFound(firstName);
-
-        webTestClient.get()
-                .uri("/api/v2/gateway/vets/firstName/{firstName}", firstName)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isNotFound();
-    }
-
-    @Test
-    void whenGetVetByLastName_notExists_thenReturnNotFound() {
-        String lastName = "Unknown";
-
-        mockServerConfigVetService.registerGetVetByLastNameEndpointNotFound(lastName);
-
-        webTestClient.get()
-                .uri("/api/v2/gateway/vets/lastName/{lastName}", lastName)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isNotFound();
-    }
 
     @Test
     public void getVetById_ValidId_ReturnsVet() {
@@ -362,6 +331,7 @@ class VetControllerIntegrationTest {
                 .isEqualTo(photoData);
     }
 
+
     @Test
     public void whenGetPhotoByVetId_withNotFoundVetId_thenReturn404() {
         String notFoundVetId = ("jj2cbf82-625b-11ee-8c99-0242ac120002");
@@ -376,5 +346,42 @@ class VetControllerIntegrationTest {
                 .expectStatus().isNotFound();
     }
 
+    @Test
+    public void whenGetAlbumsByVetId_thenReturnAlbums() throws Exception {
+
+        String vetId = "ac9adeb8-625b-11ee-8c99-0242ac120002";
+
+        Album album1 = new Album(1, vetId, "album1", "image/jpeg", "mockImageData1".getBytes());
+        Album album2 = new Album(2, vetId, "album2", "image/jpeg", "mockImageData2".getBytes());
+
+        mockServerConfigVetService.registerGetAlbumsByVetIdEndpoint(vetId, List.of(album1, album2));
+
+        webTestClient.get()
+                .uri(VET_ENDPOINT + "/" + vetId + "/albums")
+                .cookie("Bearer", BEARER_TOKEN)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBodyList(Album.class)
+                .hasSize(2)
+                .contains(album1, album2);
+    }
+
+
+    @Test
+    public void whenGetAlbumsByInvalidVetId_thenReturnNotFound() {
+
+        String invalidVetId = "ac9adeb8-625b-11ee-8c99-0242ac12000200";
+
+        mockServerConfigVetService.registerGetAlbumsByVetIdEndpointNotFound(invalidVetId);
+
+        webTestClient.get()
+                .uri(VET_ENDPOINT + "/" + invalidVetId + "/albums")
+                .cookie("Bearer", BEARER_TOKEN)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
 
 }

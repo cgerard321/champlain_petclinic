@@ -30,10 +30,15 @@ public class ProductClient {
                 .retrieve()
                 .onStatus(HttpStatusCode::isError,
                         error -> switch (error.statusCode().value()) {
-                        case 404 -> Mono.error(new NotFoundException("ProductId not found: " + productId));
-                        case 422 -> Mono.error(new InvalidInputException("ProductId invalid: " + productId));
-                        default -> Mono.error(new IllegalArgumentException("Something went wrong"));
+                            case 404 -> Mono.error(new NotFoundException("ProductId not found: " + productId));
+                            case 422 -> Mono.error(new InvalidInputException("ProductId invalid: " + productId));
+                            default -> Mono.error(new IllegalArgumentException("Something went wrong"));
                         })
-                .bodyToMono(ProductResponseModel.class);
+                .bodyToMono(ProductResponseModel.class)
+                .map(product -> {
+                    // Mock the stock quantity until the real data is available
+                    product.setProductQuantity(10); // Arbitrary stock level for testing
+                    return product;
+                });
     }
 }

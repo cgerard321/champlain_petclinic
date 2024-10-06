@@ -1,6 +1,7 @@
 package com.petclinic.bffapigateway.presentationlayer.v2;
 
 import com.petclinic.bffapigateway.domainclientlayer.CartServiceClient;
+import com.petclinic.bffapigateway.dtos.Cart.CartResponseDTO;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -14,6 +15,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
 @RunWith(SpringRunner.class)
@@ -43,6 +45,48 @@ public class CartControllerTest {
 
         // Assert
         verify(cartServiceClient, times(1)).clearCart("cartId123");
+    }
+
+    @Test
+    void testGetCartByCustomerId_Success() {
+        //arrange
+        String customerId = "98f7b33a-d62a-420a-a84a-05a27c85fc91";
+        CartResponseDTO mockResponse = new CartResponseDTO();
+        mockResponse.setCartId(customerId);
+        mockResponse.setCustomerId("customer1");
+
+        when(cartServiceClient.getCartByCustomerId(customerId)).thenReturn(Mono.just(mockResponse));
+
+        //act
+        client.get()
+                .uri("/api/v2/gateway/carts/customer/" + customerId)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(CartResponseDTO.class)
+                .consumeWith(response -> {
+                    CartResponseDTO responseBody = response.getResponseBody();
+                    assertEquals(customerId, responseBody.getCartId());
+                    assertEquals("customer1", responseBody.getCustomerId());
+                });
+
+        //assert
+        verify(cartServiceClient, times(1)).getCartByCustomerId(customerId);
+    }
+
+    @Test
+    void testGetCartByCustomerId_NotFound() {
+        //arrange
+        String customerId = "non-existent-customer-id";
+        when(cartServiceClient.getCartByCustomerId(customerId)).thenReturn(Mono.empty());
+
+        //act
+        client.get()
+                .uri("/api/v2/gateway/carts/customer/" + customerId)
+                .exchange()
+                .expectStatus().isNotFound();
+
+        //assert
+        verify(cartServiceClient, times(1)).getCartByCustomerId(customerId);
     }
 
 

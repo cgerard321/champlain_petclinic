@@ -1,5 +1,6 @@
 package com.petclinic.vet.presentationlayer;
 
+import com.petclinic.vet.dataaccesslayer.Album;
 import com.petclinic.vet.dataaccesslayer.Photo;
 import com.petclinic.vet.dataaccesslayer.Vet;
 import com.petclinic.vet.dataaccesslayer.badges.Badge;
@@ -73,6 +74,8 @@ class VetControllerUnitTest {
     BadgeService badgeService;
     @MockBean
     ConnectionFactoryInitializer connectionFactoryInitializer;
+    @MockBean
+    AlbumService albumService;
 
     VetRequestDTO vetRequestDTO = buildVetRequestDTO();
     VetResponseDTO vetResponseDTO = buildVetResponseDTO();
@@ -1037,73 +1040,7 @@ class VetControllerUnitTest {
                 .rateDescription("This is a bad vet")
                 .build();
     }
-    @Test
-    void getVetByFirstName_ShouldSucceed() {
-        when(vetService.getVetByFirstName("Pauline")).thenReturn(Mono.just(vetResponseDTO));
 
-        client
-                .get()
-                .uri("/vets/firstName/Pauline")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isEqualTo(HttpStatus.OK)
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$.firstName").isEqualTo(vetResponseDTO.getFirstName());
-
-
-        Mockito.verify(vetService, times(1)).getVetByFirstName("Pauline");
-    }
-
-    @Test
-    void getVetByFirstName_NotFound() {
-        when(vetService.getVetByFirstName("Nonexistent")).thenReturn(Mono.empty());
-
-        client
-                .get()
-                .uri("/vets/firstName/Nonexistent")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isNotFound();
-
-        Mockito.verify(vetService, times(1)).getVetByFirstName("Nonexistent");
-    }
-
-
-
-
-
-    @Test
-    void getVetByLastName_ShouldSucceed() {
-        when(vetService.getVetByLastName("LeBlanc")).thenReturn(Mono.just(vetResponseDTO2));
-
-        client
-                .get()
-                .uri("/vets/lastName/LeBlanc")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$.firstName").isEqualTo(vetResponseDTO2.getFirstName())
-                .jsonPath("$.lastName").isEqualTo(vetResponseDTO2.getLastName());
-
-        Mockito.verify(vetService, times(1)).getVetByLastName("LeBlanc");
-    }
-
-    @Test
-    void getVetByLastName_NotFound() {
-        when(vetService.getVetByLastName("Nonexistent")).thenReturn(Mono.empty());
-
-        client
-                .get()
-                .uri("/vets/lastName/Nonexistent")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isNotFound();
-
-        Mockito.verify(vetService, times(1)).getVetByLastName("Nonexistent");
-    }
  /*   @Test
     void addPhoto_ShouldReturnBadRequest_WhenRequestIsMalformed() throws IOException {
         // Create MultiValueMap for multipart/form-data body
@@ -1139,6 +1076,42 @@ class VetControllerUnitTest {
 
 */
 
+    @Test
+    void whenGetAllAlbumsByVetId_thenReturnAlbums() {
+
+        String vetId = "ac9adeb8-625b-11ee-8c99-0242ac120002";
+        Album album1 = new Album(1, vetId, "album1.jpg", "image/jpeg", "mockImageData1".getBytes());
+        Album album2 = new Album(2, vetId, "album2.jpg", "image/jpeg", "mockImageData2".getBytes());
+
+        when(albumService.getAllAlbumsByVetId(vetId))
+                .thenReturn(Flux.just(album1, album2));
+
+        client.get()
+                .uri("/vets/" + vetId + "/albums")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBodyList(Album.class)
+                .hasSize(2)
+                .contains(album1, album2);
+    }
+
+    @Test
+    void whenGetAllAlbumsByVetId_withError_thenLogError() {
+
+        String vetId = "ac9adeb8-625b-11ee-8c99-0242ac120002";
+
+        when(albumService.getAllAlbumsByVetId(vetId))
+                .thenReturn(Flux.error(new RuntimeException("Test error")));
+
+        client.get()
+                .uri("/vets/" + vetId + "/albums")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().is5xxServerError();
+
+    }
 
 
 }

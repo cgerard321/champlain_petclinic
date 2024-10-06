@@ -42,6 +42,8 @@ public interface UserService {
 
     Mail generateVerificationMail(User user);
 
+    void generateVerificationMailWithNewEmailingService(User user);
+
     UserPasswordLessDTO verifyEmailFromToken(String token);
 
     HashMap<String, Object> login(UserIDLessUsernameLessDTO user) throws IncorrectPasswordException;
@@ -61,6 +63,9 @@ public interface UserService {
     UserPasswordLessDTO getByResetPasswordToken(String token);
 
     void updatePassword(String newPassword, String token);
+
+    void disableUser(String userId);
+    void enableUser(String userId);
 
     void processResetPassword(UserResetPwdWithTokenRequestModel resetRequest);
     UserPasswordLessDTO updateUserRole(String userId, RolesChangeRequestDTO roles, String token);

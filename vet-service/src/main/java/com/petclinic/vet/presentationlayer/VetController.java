@@ -12,6 +12,8 @@ package com.petclinic.vet.presentationlayer;
  */
 
 
+import com.petclinic.vet.dataaccesslayer.Album;
+import com.petclinic.vet.dataaccesslayer.AlbumRepository;
 import com.petclinic.vet.exceptions.InvalidInputException;
 import com.petclinic.vet.exceptions.NotFoundException;
 import com.petclinic.vet.servicelayer.*;
@@ -25,6 +27,7 @@ import com.petclinic.vet.servicelayer.ratings.RatingResponseDTO;
 import com.petclinic.vet.servicelayer.ratings.RatingService;
 import com.petclinic.vet.util.EntityDtoUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -38,18 +41,21 @@ import reactor.core.publisher.Mono;
 
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/vets")
+@Slf4j
 public class VetController {
     private final VetService vetService;
     private final RatingService ratingService;
     private final PhotoService photoService;
     private final EducationService educationService;
     private final BadgeService badgeService;
+    private final AlbumService albumService;
 
 
     //Ratings
@@ -164,28 +170,7 @@ public class VetController {
                 .map(ResponseEntity::ok);
     }
 
-
-
-    @GetMapping("/firstName/{firstName}")
-    public Mono<ResponseEntity<VetResponseDTO>> getVetByFirstName(@PathVariable String firstName) {
-        return vetService.getVetByFirstName(firstName)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build());
-    }
-
-
-    @GetMapping("/lastName/{lastName}")
-    public Mono<ResponseEntity<VetResponseDTO>> getVetByLastName(@PathVariable String lastName) {
-        return vetService.getVetByLastName(lastName)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build());
-    }
-
-
-
-
     //bills
-
 
     @GetMapping("/vetBillId/{vetBillId}")
     public Mono<ResponseEntity<VetResponseDTO>> getVetByBillId(@PathVariable String vetBillId) {
@@ -318,4 +303,24 @@ public class VetController {
                 .map(r->ResponseEntity.status(HttpStatus.OK).body(r))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
+
+    //specialty
+    @PostMapping("{vetId}/specialties")
+    public Mono<VetResponseDTO> addSpecialtiesByVetId(
+            @PathVariable String vetId,
+            @RequestBody Mono<SpecialtyDTO> specialties) {
+
+        return vetService.addSpecialtiesByVetId(vetId, specialties);
+    }
+
+    @GetMapping("{vetId}/albums")
+    public Flux<Album> getAllAlbumsByVetId(@PathVariable String vetId) {
+        return albumService.getAllAlbumsByVetId(vetId)
+                .doOnNext(album -> log.info("Album ID: {}, Vet ID: {}, Filename: {}, ImgType: {}",
+                        album.getId(), album.getVetId(), album.getFilename(), album.getImgType()))
+                .doOnComplete(() -> log.info("Successfully fetched all albums for vetId: {}", vetId))
+                .doOnError(error -> log.error("Error fetching photos for vet {}", vetId, error));
+    }
+
+
 }

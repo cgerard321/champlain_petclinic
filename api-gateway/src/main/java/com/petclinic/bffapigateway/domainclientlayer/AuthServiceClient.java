@@ -1,6 +1,7 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.petclinic.bffapigateway.dtos.Auth.*;
+import com.petclinic.bffapigateway.dtos.Cart.CartRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Vets.VetRequestDTO;
@@ -20,6 +21,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -38,16 +40,19 @@ public class AuthServiceClient {
 
     private final String authServiceUrl;
 
+    private final CartServiceClient cartServiceClient;
+
     @Autowired
     private Rethrower rethrower;
 
     public AuthServiceClient(
             WebClient.Builder webClientBuilder,
             CustomersServiceClient customersServiceClient, VetsServiceClient vetsServiceClient, @Value("${app.auth-service.host}") String authServiceHost,
-            @Value("${app.auth-service.port}") String authServicePort) {
+            @Value("${app.auth-service.port}") String authServicePort, CartServiceClient cartServiceClient) {
         this.webClientBuilder = webClientBuilder;
         this.customersServiceClient = customersServiceClient;
         this.vetsServiceClient = vetsServiceClient;
+        this.cartServiceClient = cartServiceClient;
         authServiceUrl = "http://" + authServiceHost + ":" + authServicePort;
     }
 
@@ -123,6 +128,7 @@ public class AuthServiceClient {
                                                 .lastName(register.getOwner().getLastName())
                                                 .address(register.getOwner().getAddress())
                                                 .city(register.getOwner().getCity())
+                                                .province(register.getOwner().getProvince())
                                                 .telephone(register.getOwner().getTelephone())
                                                 .ownerId(uuid)
                                                 .build();
@@ -136,6 +142,50 @@ public class AuthServiceClient {
         });
 
     }
+
+    public Mono<OwnerResponseDTO> createUserUsingV2Endpoint(Mono<Register> model) {
+
+        String uuid = UUID.randomUUID().toString();
+
+        return model.flatMap(register -> {
+            register.setUserId(uuid);
+            return webClientBuilder.build().post()
+                    .uri(authServiceUrl + "/users")
+                    .body(Mono.just(register), Register.class)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::is4xxClientError,
+                            n -> rethrower.rethrow(n,
+                                    x -> new GenericHttpException(x.get("message").toString(), BAD_REQUEST))
+                    )
+                    .bodyToMono(UserPasswordLessDTO.class)
+                    .flatMap(userDetails -> {
+                        Mono<OwnerRequestDTO> ownerRequestDTO = Mono.just(OwnerRequestDTO.builder()
+                                .firstName(register.getOwner().getFirstName())
+                                .lastName(register.getOwner().getLastName())
+                                .address(register.getOwner().getAddress())
+                                .city(register.getOwner().getCity())
+                                .province(register.getOwner().getProvince())
+                                .telephone(register.getOwner().getTelephone())
+                                .ownerId(uuid)
+                                .build());
+
+                        return customersServiceClient.addOwner(ownerRequestDTO)
+                                .flatMap(ownerResponse -> {
+                                    String customerId = ownerResponse.getOwnerId();
+
+                                    //call cartServiceClient and pass customerId as a parameter in the URL
+                                    return cartServiceClient.assignCartToUser(customerId)
+                                            .thenReturn(ownerResponse);
+                                });
+
+                    });
+        }).doOnError(throwable -> {
+            log.error("Error creating user: " + throwable.getMessage());
+            customersServiceClient.deleteOwnerV2(uuid);
+        });
+    }
+
 
     public Mono<UserPasswordLessDTO> createInventoryMangerUser(Mono<RegisterInventoryManager> registerInventoryManagerMono) {
         String uuid = UUID.randomUUID().toString();
@@ -225,6 +275,29 @@ public class AuthServiceClient {
                 .map(responseEntity -> {
                     HttpHeaders headers = new HttpHeaders();
                     headers.add("Location", "http://localhost:8080/#!/login");
+                    return ResponseEntity.status(HttpStatus.FOUND)
+                            .headers(headers)
+                            .body(responseEntity.getBody());
+                });
+    }
+
+    public Mono<ResponseEntity<UserDetails>> verifyUserUsingV2Endpoint(final String token) {
+
+        return webClientBuilder.build()
+                .get()
+                .uri(authServiceUrl + "/users/verification/{token}", token)
+                .retrieve()
+                .onStatus(
+                        HttpStatusCode::is4xxClientError,
+                        n -> rethrower.rethrow(
+                                n,
+                                x -> new GenericHttpException(x.get("message").toString(), (HttpStatus) n.statusCode()))
+                )
+                //grabbing the response entity and modifying the headers a little before returning it
+                .toEntity(UserDetails.class)
+                .map(responseEntity -> {
+                    HttpHeaders headers = new HttpHeaders();
+                    headers.add("Location", "http://localhost:3000/users/login");
                     return ResponseEntity.status(HttpStatus.FOUND)
                             .headers(headers)
                             .body(responseEntity.getBody());
@@ -339,6 +412,27 @@ public class AuthServiceClient {
                 .onStatus(HttpStatusCode::is4xxClientError, n -> rethrower.rethrow(n,
                         x -> new GenericHttpException(x.get("message").toString(), (HttpStatus) n.statusCode())))
                 .bodyToMono(UserResponseDTO.class);
+    }
+
+    public Mono<Void> disableUser(String userId, String jwtToken) {
+        return webClientBuilder.build()
+                .patch()
+                .uri(authServiceUrl + "/users/{userId}/disable", userId)
+                .cookie("Bearer", jwtToken)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> Mono.error(new GenericHttpException("Error disabling user", HttpStatus.BAD_REQUEST)))
+                .onStatus(HttpStatusCode::is5xxServerError, clientResponse -> Mono.error(new GenericHttpException("Server error", HttpStatus.INTERNAL_SERVER_ERROR)))
+                .bodyToMono(Void.class); 
+    }
+    public Mono<Void> enableUser(String userId, String jwtToken) {
+        return webClientBuilder.build()
+                .patch()
+                .uri(authServiceUrl + "/users/{userId}/enable", userId)
+                .cookie("Bearer", jwtToken)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> Mono.error(new GenericHttpException("Error enabling user", HttpStatus.BAD_REQUEST)))
+                .onStatus(HttpStatusCode::is5xxServerError, clientResponse -> Mono.error(new GenericHttpException("Server error", HttpStatus.INTERNAL_SERVER_ERROR)))
+                .bodyToMono(Void.class);
     }
 
 }

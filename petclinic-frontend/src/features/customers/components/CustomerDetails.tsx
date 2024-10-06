@@ -2,6 +2,7 @@ import { FC, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { OwnerResponseModel } from '@/features/customers/models/OwnerResponseModel';
+import { PetResponseModel } from '@/features/customers/models/PetResponseModel'; // Import the PetResponseModel
 import { Bill } from '@/features/bills/models/Bill';
 import './CustomerDetails.css';
 
@@ -9,7 +10,9 @@ const CustomerDetails: FC = () => {
   const { ownerId } = useParams<{ ownerId: string }>();
   const navigate = useNavigate();
 
+  const [isDisabled, setIsDisabled] = useState<boolean>(false);
   const [owner, setOwner] = useState<OwnerResponseModel | null>(null);
+  const [pets, setPets] = useState<PetResponseModel[]>([]); // State for pets
   const [bills, setBills] = useState<Bill[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -22,6 +25,19 @@ const CustomerDetails: FC = () => {
           { withCredentials: true }
         );
         setOwner(ownerResponse.data);
+
+        const userResponse = await axios.get(
+          `http://localhost:8080/api/v2/gateway/users/${ownerId}`,
+          { withCredentials: true }
+        );
+        setIsDisabled(userResponse.data.disabled);
+
+        // Fetch pets by owner ID
+        const petsResponse = await axios.get(
+          `http://localhost:8080/api/v2/gateway/pets/owner/${ownerId}/pets`,
+          { withCredentials: true }
+        );
+        setPets(petsResponse.data); // Set the pets state
 
         const billsResponse = await axios.get(
           `http://localhost:8080/api/v2/gateway/bills/customer/${ownerId}`,
@@ -126,6 +142,46 @@ const CustomerDetails: FC = () => {
     return Math.abs(ageDate.getUTCFullYear() - 1970);
   };
 
+  const handleDisableEnable = async (): Promise<void> => {
+    const confirmAction = window.confirm(
+      `Are you sure you want to ${isDisabled ? 'enable' : 'disable'} this user's account?`
+    );
+
+    if (confirmAction) {
+      try {
+        if (isDisabled) {
+          await axios.patch(
+            `http://localhost:8080/api/v2/gateway/users/${ownerId}/enable`,
+            {},
+            { withCredentials: true }
+          );
+          alert('User account enabled successfully.');
+        } else {
+          await axios.patch(
+            `http://localhost:8080/api/v2/gateway/users/${ownerId}/disable`,
+            {},
+            { withCredentials: true }
+          );
+          alert('User account disabled successfully.');
+        }
+
+        const userResponse = await axios.get(
+          `http://localhost:8080/api/v2/gateway/users/${ownerId}`,
+          { withCredentials: true }
+        );
+
+        setIsDisabled(userResponse.data.disabled);
+      } catch (error) {
+        console.error('Error updating user account status:', error);
+        alert('Error updating user account status. Please try again.');
+      }
+    }
+  };
+
+  const handleEditPetClick = (petId: string): void => {
+    navigate(`/pets/${petId}/edit`);
+  };
+
   return (
     <div className="customer-details-card">
       <h2>
@@ -166,16 +222,25 @@ const CustomerDetails: FC = () => {
         {/* Owner Pets */}
         <div className="section owner-pets">
           <h3>Owner Pets</h3>
-          {owner.pets && owner.pets.length > 0 ? (
+          {pets && pets.length > 0 ? (
             <ul>
-              {owner.pets.map(pet => (
+              {pets.map(pet => (
                 <li key={pet.petId}>
+                  <strong>Pet ID: </strong>
+                  {pet.petId}
                   <strong>Name: </strong>
                   {pet.name}, <strong>Type: </strong>
                   {petTypeMapping[pet.petTypeId] || 'Unknown'},{' '}
                   <strong>Weight: </strong>
                   {pet.weight}kg,<strong> Age: </strong>
                   {calculateAge(pet.birthDate)}
+                  <button
+                    className="edit-pet-button"
+                    onClick={() => handleEditPetClick(pet.petId)}
+                    style={{ marginLeft: '10px' }}
+                  >
+                    Edit Pet
+                  </button>
                 </li>
               ))}
             </ul>
@@ -212,12 +277,24 @@ const CustomerDetails: FC = () => {
           Back to All Owners
         </button>
         <button
+          className="add-pet-button"
+          onClick={() => navigate(`/customers/${ownerId}/pets/new`)}
+        >
+          Add New Pet
+        </button>
+        <button
           className="btn btn-danger"
           onClick={() => handleDelete(owner.ownerId)}
           title="Delete"
           style={{ backgroundColor: 'red', color: 'white' }}
         >
           Delete Owner
+        </button>
+        <button
+          className={`btn ${isDisabled ? 'btn-success' : 'btn-warning'}`}
+          onClick={handleDisableEnable}
+        >
+          {isDisabled ? 'Enable Account' : 'Disable Account'}
         </button>
       </div>
     </div>

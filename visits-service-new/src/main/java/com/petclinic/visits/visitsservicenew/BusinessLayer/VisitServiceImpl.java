@@ -218,7 +218,15 @@ public class VisitServiceImpl implements VisitService {
                 )
                 .flatMap(repo::deleteAll);
     }
-
+    @Override
+    public Mono<Void> deleteCompletedVisitByVisitId(String visitId) {
+        return repo.findByVisitId(visitId)
+                .filter(visit -> visit.getStatus() == Status.COMPLETED)
+                .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Cannot Find visit id" + visitId))))
+                .flatMap(visit -> repo.deleteByVisitId(visit.getVisitId()))
+                .doOnSuccess(v -> log.info("Successfully deleted completed visit with id: {}", visitId))
+                .doOnError(e -> log.error("Failed to delete completed visit with id: {}", visitId, e));
+    }
 
 //    @Override
 //    public Mono<VetDTO> testingGetVetDTO(String vetId) {
@@ -407,4 +415,21 @@ public class VisitServiceImpl implements VisitService {
                 .to(user.getEmail())
                 .build();
     }
+
+
+    @Override
+    public Mono<VisitResponseDTO> patchVisitStatusInVisit(String visitId, String status) {
+        // Find the visit by the ID
+        return repo.findByVisitId(visitId)
+                .switchIfEmpty(Mono.defer(() ->
+                        Mono.error(new NotFoundException("Cannot find visit with id: " + visitId))
+                ))
+                // Update the status of the found Visit entity
+                .doOnNext(visit -> visit.setStatus(Status.valueOf(status))) // Update status reactively
+                // Save the updated visit
+                .flatMap(repo::save)
+                // Convert to VisitResponseDTO
+                .flatMap(entityDtoUtil::toVisitResponseDTO);
+    }
+
 }

@@ -20,8 +20,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.test.web.reactive.server.WebTestClient;
-
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -57,6 +55,7 @@ class UserControllerIntegrationTest {
 
     @MockBean
     CartService cartService;
+
 
     private final String VALID_USER_ID = "7c0d42c2-0c2d-41ce-bd9c-6ca67478956f";
 
@@ -416,7 +415,6 @@ class UserControllerIntegrationTest {
     }
 
 
-
     @Test
     void createUser_ShouldFail() {
         UserIDLessRoleLessDTO userDTO = UserIDLessRoleLessDTO.builder()
@@ -748,6 +746,76 @@ class UserControllerIntegrationTest {
                 .expectStatus().isNotFound();
     }
 
+    @Test
+    void disableUser_Succeed() {
+
+        User user = userRepo.findAll().get(0);
+        String userId = user.getUserIdentifier().getUserId();
+        String token = jwtTokenUtil.generateToken(user);
+
+        webTestClient.patch()
+                .uri("/users/{userId}/disable", userId)
+                .accept(MediaType.APPLICATION_JSON)
+                .cookie("Bearer", token)
+                .exchange()
+                .expectStatus().isOk();
+
+        User updatedUser = userRepo.findById(user.getId()).orElseThrow();
+        assertTrue(updatedUser.isDisabled(), "The user should be disabled.");
+    }
+
+    @Test
+    void disableUser_WhenUserNotFound() {
+
+        User user = userRepo.findAll().get(0);
+        String token = jwtTokenUtil.generateToken(user);
+        String nonExistentUserId = "non-existent-user-id";
+
+        webTestClient.patch()
+                .uri("/users/{userId}/disable", nonExistentUserId)
+                .accept(MediaType.APPLICATION_JSON)
+                .cookie("Bearer", token)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    void enableUser_Succeed() {
+
+        User user = userRepo.findAll().get(0);
+        user.setDisabled(true);
+        userRepo.save(user);
+        String userId = user.getUserIdentifier().getUserId();
+        String token = jwtTokenUtil.generateToken(user);
+
+        webTestClient.patch()
+                .uri("/users/{userId}/enable", userId)
+                .accept(MediaType.APPLICATION_JSON)
+                .cookie("Bearer", token)
+                .exchange()
+                .expectStatus().isOk();
+
+        User updatedUser = userRepo.findById(user.getId()).orElseThrow();
+        assertFalse(updatedUser.isDisabled(), "The user should be enabled.");
+    }
+
+    @Test
+    void enableUser_ShouldFail_WhenUserNotFound() {
+
+        User user = userRepo.findAll().get(0);
+        String token = jwtTokenUtil.generateToken(user);
+        String nonExistentUserId = "non-existent-user-id";
+
+        webTestClient.patch()
+                .uri("/users/{userId}/enable", nonExistentUserId)
+                .accept(MediaType.APPLICATION_JSON)
+                .cookie("Bearer", token)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
 
 
 }
+
+
+

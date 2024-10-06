@@ -41,6 +41,7 @@ class ProductControllerIntegrationTest {
             .productDescription("Product 1 Description")
             .productSalePrice(100.00)
             .averageRating(0.0)
+            .productQuantity(2)
             .build();
 
     private Product product2 = Product.builder()
@@ -49,6 +50,7 @@ class ProductControllerIntegrationTest {
             .productDescription("Product 2 Description")
             .productSalePrice(50.00)
             .averageRating(0.0)
+            .productQuantity(2)
             .build();
 
     private ProductRequestModel productRequestModel = ProductRequestModel.builder()
@@ -56,6 +58,7 @@ class ProductControllerIntegrationTest {
             .productDescription("Product 3 Description")
             .productSalePrice(25.00)
             .averageRating(0.0)
+            .productQuantity(2)
             .build();
 
     private ProductRequestModel productRequestModelWithInavlidSalePrice = ProductRequestModel.builder()
@@ -63,6 +66,8 @@ class ProductControllerIntegrationTest {
             .productDescription("Product 3 Description")
             .productSalePrice(0.00)
             .averageRating(0.0)
+            .productQuantity(2)
+
             .build();
 
     private ProductRequestModel productRequestModel2 = ProductRequestModel.builder()
@@ -70,6 +75,7 @@ class ProductControllerIntegrationTest {
             .productDescription("Product 4 Description")
             .productSalePrice(25.00)
             .averageRating(0.0)
+            .productQuantity(2)
             .build();
 
     @BeforeEach
@@ -367,5 +373,46 @@ class ProductControllerIntegrationTest {
                     assertEquals(0, productResponseModel.size());
                 });
     }
+
+    @Test
+    public void testChangeProductQuantity() {
+        String productId = "4affcab7-3ab1-4917-a114-2b6301aa5565";
+        ProductRequestModel requestModel = new ProductRequestModel();
+        requestModel.setProductQuantity(5);
+
+        webTestClient.patch()
+                .uri("/api/v1/products/"+product1.getProductId()+ "/quantity")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Mono.just(requestModel), ProductRequestModel.class)
+                .exchange()
+                .expectStatus().isNoContent();
+    }
+
+    @Test
+    public void testDecreaseProductQuantity_NotFound() {
+        String nonExistentProductId = "nonExistentProductId";
+
+        webTestClient.patch()
+                .uri("/products/{productId}", nonExistentProductId)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    public void testChangeProductQuantity_NotFound() {
+        String nonExistentProductId = "nonExistentProductId";
+        ProductRequestModel requestModel = new ProductRequestModel();
+        requestModel.setProductQuantity(5);
+
+        webTestClient.patch()
+                .uri("/products/{productId}/quantity", nonExistentProductId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Mono.just(requestModel), ProductRequestModel.class)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+
+
 
 }

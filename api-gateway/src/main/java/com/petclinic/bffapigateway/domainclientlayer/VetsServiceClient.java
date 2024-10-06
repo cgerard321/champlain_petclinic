@@ -19,6 +19,7 @@ import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -349,45 +350,6 @@ public class VetsServiceClient {
                 )
                 .bodyToMono(VetResponseDTO.class);
     }
-    public Mono<VetResponseDTO> getVetByFirstName(String firstName) {
-
-        return webClientBuilder
-                .build()
-                .get()
-                .uri(vetsServiceUrl + "/firstName/{firstName}", firstName)
-                .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError, error->{
-                    HttpStatusCode statusCode = error.statusCode();
-                    if(statusCode.equals(NOT_FOUND))
-                        return Mono.error(new ExistingVetNotFoundException("vet with this first name not found: "+firstName, NOT_FOUND));
-                    return Mono.error(new IllegalArgumentException("Something went wrong with the client"));
-                })
-                .onStatus(HttpStatusCode::is5xxServerError,error->
-                        Mono.error(new IllegalArgumentException("Something went wrong with the server"))
-                )
-                .bodyToMono(VetResponseDTO.class);
-    }
-    public Mono<VetResponseDTO> getVetByLastName(String lastName) {
-
-        return webClientBuilder
-                .build()
-                .get()
-                .uri(vetsServiceUrl + "/lastName/{lastName}", lastName)
-                .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError, error->{
-                    HttpStatusCode statusCode = error.statusCode();
-                    if(statusCode.equals(NOT_FOUND))
-                        return Mono.error(new ExistingVetNotFoundException("vet with this last name not found: "+lastName, NOT_FOUND));
-                    return Mono.error(new IllegalArgumentException("Something went wrong with the client"));
-                })
-                .onStatus(HttpStatusCode::is5xxServerError,error->
-                        Mono.error(new IllegalArgumentException("Something went wrong with the server"))
-                )
-                .bodyToMono(VetResponseDTO.class);
-    }
-
-
-
 
     public Mono<VetResponseDTO> getVetByVetBillId(String vetBillId) {
 
@@ -612,5 +574,46 @@ public class VetsServiceClient {
                 )
                 .bodyToMono(EducationResponseDTO.class);
     }
+    //specialties
+    public Mono<VetResponseDTO> addSpecialtiesByVetId(String vetId, Mono<SpecialtyDTO> specialties) {
+        return webClientBuilder
+                .build()
+                .post()  // POST for adding new resources
+                .uri(vetsServiceUrl + "/" + vetId + "/specialties")  // Ensure you're pointing to the correct POST endpoint
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .body(BodyInserters.fromPublisher(specialties, SpecialtyDTO.class))  // Use fromPublisher to handle the Mono
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, error -> {
+                    HttpStatusCode statusCode = error.statusCode();
+                    if (statusCode.equals(HttpStatus.NOT_FOUND)) {
+                        return Mono.error(new ExistingVetNotFoundException("Vet not found: " + vetId, HttpStatus.NOT_FOUND));
+                    }
+                    return Mono.error(new IllegalArgumentException("Something went wrong with the client"));
+                })
+                .onStatus(HttpStatusCode::is5xxServerError, error ->
+                        Mono.error(new IllegalArgumentException("Something went wrong with the server"))
+                )
+                .bodyToMono(VetResponseDTO.class);
+    }
+
+    public Flux<Album> getAllAlbumsByVetId(String vetId) {
+        return webClientBuilder.build()
+                .get()
+                .uri(vetsServiceUrl + "/" + vetId + "/albums")
+                .accept(MediaType.APPLICATION_JSON) // Set Content-Type to application/json
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, error -> {
+                    HttpStatusCode statusCode = error.statusCode();
+                    if (statusCode.equals(HttpStatus.NOT_FOUND)) {
+                        return Mono.error(new ExistingVetNotFoundException("Albums for vet " + vetId + " not found", NOT_FOUND));
+                    }
+                    return Mono.error(new IllegalArgumentException("Client error"));
+                })
+                .onStatus(HttpStatusCode::is5xxServerError, error -> Mono.error(new IllegalArgumentException("Server error")))
+                .bodyToFlux(Album.class);
+    }
+
+
+
 
 }

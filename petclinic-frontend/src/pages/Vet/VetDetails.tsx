@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { NavBar } from '@/layouts/AppNavBar.tsx';
 import './VetDetails.css';
+import axios from 'axios';
 
 interface VetResponseType {
   vetId: string;
@@ -21,8 +22,13 @@ export default function VetDetails(): JSX.Element {
   const { vetId } = useParams<{ vetId: string }>();
   const [vet, setVet] = useState<VetResponseType | null>(null);
   const [photo, setPhoto] = useState<string | null>(null);
+  const [albumPhotos, setAlbumPhotos] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [isFormOpen, setIsFormOpen] = useState(false); // To handle form visibility
+  const [specialtyId, setSpecialtyId] = useState('');
+  const [specialtyName, setSpecialtyName] = useState('');
+  const [enlargedPhoto, setEnlargedPhoto] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchVetDetails = async (): Promise<void> => {
@@ -38,6 +44,43 @@ export default function VetDetails(): JSX.Element {
         setVet(data);
       } catch (error) {
         setError('Failed to fetch vet details');
+      }
+    };
+
+    const fetchAlbumPhotos = async (): Promise<void> => {
+      try {
+        const response = await fetch(
+          `http://localhost:8080/api/v2/gateway/vets/${vetId}/albums`,
+          {
+            method: 'GET',
+            headers: {
+              Accept: 'application/json',
+            },
+          }
+        );
+
+        if (!response.ok) {
+          if (response.status === 404) {
+            setAlbumPhotos([]); // No albums found
+          } else {
+            throw new Error(`Error: ${response.statusText}`);
+          }
+        } else {
+          const photos = await response.json();
+          // eslint-disable-next-line no-console
+          console.log('Album Photos:', photos); // Log the album photos
+
+          const imageUrls = photos.map(
+            (photo: { data: string; imgType: string }) => {
+              // Construct the full data URL for the image
+              return `data:${photo.imgType};base64,${photo.data}`;
+            }
+          );
+
+          setAlbumPhotos(imageUrls); // Set the image URLs in the state
+        }
+      } catch (error) {
+        setError('Failed to fetch album photos');
       }
     };
 
@@ -65,9 +108,9 @@ export default function VetDetails(): JSX.Element {
       }
     };
 
-    //fetch both vet details and photo
     fetchVetDetails().then(() => {
       fetchVetPhoto();
+      fetchAlbumPhotos();
       setLoading(false);
     });
   }, [vetId]);
@@ -92,6 +135,45 @@ export default function VetDetails(): JSX.Element {
     } catch (error) {
       console.error('Error parsing work hours:', error);
       return <p>Invalid work hours data</p>;
+    }
+  };
+
+  const openPhotoModal = (photoUrl: string): void => {
+    setEnlargedPhoto(photoUrl);
+  };
+
+  const closePhotoModal = (): void => {
+    setEnlargedPhoto(null);
+  };
+
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  const handleAddSpecialty = async () => {
+    const specialtyDTO = {
+      specialtyId,
+      name: specialtyName,
+    };
+
+    try {
+      await axios.post(
+        `http://localhost:8080/api/v2/gateway/vets/${vetId}/specialties`,
+        specialtyDTO
+      );
+      alert('Specialty added successfully!');
+      setIsFormOpen(false); // Close form on success
+      setSpecialtyId(''); // Clear fields
+      setSpecialtyName('');
+
+      // Update the vet data after adding the specialty
+      setVet(prevVet =>
+        prevVet
+          ? {
+              ...prevVet,
+              specialties: [...prevVet.specialties, specialtyDTO], // Update specialties locally
+            }
+          : null
+      );
+    } catch (error) {
+      setError('Failed to add specialty');
     }
   };
 
@@ -166,10 +248,85 @@ export default function VetDetails(): JSX.Element {
               ) : (
                 <p>No specialties available</p>
               )}
+
+              {/* Button to open the form */}
+              <button onClick={() => setIsFormOpen(true)}>Add Specialty</button>
+
+              {/* Conditionally render the form */}
+              {isFormOpen && (
+                <div className="specialty-form-popup">
+                  <form
+                    onSubmit={e => {
+                      e.preventDefault();
+                      handleAddSpecialty();
+                    }}
+                  >
+                    <div>
+                      <label htmlFor="specialtyId">Specialty ID:</label>
+                      <input
+                        type="text"
+                        id="specialtyId"
+                        value={specialtyId}
+                        onChange={e => setSpecialtyId(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="specialtyName">Specialty Name:</label>
+                      <input
+                        type="text"
+                        id="specialtyName"
+                        value={specialtyName}
+                        onChange={e => setSpecialtyName(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <button type="submit">Submit</button>
+                      <button
+                        type="button"
+                        onClick={() => setIsFormOpen(false)}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              )}
+            </section>
+
+            <section className="album-photos">
+              <h2>Album Photos</h2>
+              {albumPhotos.length > 0 ? (
+                <div className="album-photo-grid">
+                  {albumPhotos.map((photoUrl, index) => (
+                    <div
+                      key={index}
+                      className="album-photo-card"
+                      onClick={() => openPhotoModal(photoUrl)}
+                    >
+                      <img
+                        src={photoUrl}
+                        alt={`Album Photo ${index + 1}`}
+                        className="album-photo-thumbnail"
+                      />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p>No album photos available</p>
+              )}
             </section>
           </>
         )}
       </div>
+
+      {/* Modal for enlarged photo */}
+      {enlargedPhoto && (
+        <div className="photo-modal" onClick={closePhotoModal}>
+          <img src={enlargedPhoto} alt="Enlarged Vet Album Photo" />
+        </div>
+      )}
     </div>
   );
 }
