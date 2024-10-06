@@ -691,6 +691,38 @@ class VisitControllerUnitTest {
 
         verify(emergencyService, times(1)).DeleteEmergency(emergencyId);
     }
+//    @Test
+//    void whenDeleteCompletedVisitByValidVisitId_returnNoContent() {
+//        // Arrange
+//        String visitId = UUID.randomUUID().toString();
+//        when(visitService.deleteCompletedVisitByVisitId(visitId))
+//                .thenReturn(Mono.empty());
+//
+//        // Act & Assert
+//        webTestClient
+//                .delete()
+//                .uri("/visits/completed/{visitId}", visitId)
+//                .exchange()
+//                .expectStatus().isNoContent();  // Expecting 204 NO CONTENT status.
+//
+//        verify(visitService, times(1)).deleteCompletedVisitByVisitId(visitId);
+//    }
+
+//    @Test
+//    void whenDeleteCompletedVisitByInvalidVisitId_returnNotFound() {
+//        // Arrange
+//        String invalidVisitId = "fakeId";
+//        when(visitService.deleteCompletedVisitByVisitId(invalidVisitId)).thenReturn(Mono.error(new NotFoundException("No visit was found with visitId: " + invalidVisitId)));
+//
+//        // Act & Assert
+//        webTestClient
+//                .delete()
+//                .uri("/visits/completed/{visitId}", invalidVisitId)
+//                .exchange()
+//                .expectStatus().isNotFound()
+//                .expectBody();
+//        verify(visitService, times(1)).deleteCompletedVisitByVisitId(invalidVisitId);
+//    }
 
     @Test
     void updateVisitStatus_ShouldReturnOK_WhenStatusUpdatedToCancelled() {

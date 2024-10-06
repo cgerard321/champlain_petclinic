@@ -241,12 +241,12 @@ public class VisitServiceImpl implements VisitService {
 
                 .flatMap(entityDtoUtil::toVisitResponseDTO);
     }
-    @Override
-    public Flux<VisitResponseDTO> getAllArchivedVisits() {
-        return repo.findAllByStatus("ARCHIVED")
-                .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("No archived visits were found"))))
-                .flatMap(entityDtoUtil::toVisitResponseDTO);
-    }
+//    @Override
+//    public Flux<VisitResponseDTO> getAllArchivedVisits() {
+//        return repo.findAllByStatus("ARCHIVED")
+//                .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("No archived visits were found"))))
+//                .flatMap(entityDtoUtil::toVisitResponseDTO);
+//    }
 
     @Override
     public Flux<VisitResponseDTO> getAllArchivedVisits() {

@@ -209,7 +209,6 @@ public class VisitController {
 
 
 
-<<<<<<< HEAD
     //Emergency
 
     @GetMapping(value = "/emergency")
@@ -254,8 +253,7 @@ public class VisitController {
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
-=======
->>>>>>> b9f80b66 (Fully implemented the archive feature and collapsable tables)
+
     @PutMapping(value = "/completed/{visitId}/archive", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<VisitResponseDTO>> archiveCompletedVisit(@PathVariable String visitId, @RequestBody Mono<VisitRequestDTO> visitRequestDTO) {
     return Mono.just(visitId)
@@ -269,17 +267,8 @@ public class VisitController {
     public Flux<VisitResponseDTO> getAllArchivedVisits() {
         return visitService.getAllArchivedVisits();
     }
-    @GetMapping(value = "/archived", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<VisitResponseDTO> getAllArchivedVisits() {
-        return visitService.getAllArchivedVisits();
-    }
 
-//    @DeleteMapping(value = "/completed/{visitId}")
-//    public Mono<ResponseEntity<Void>> deleteCompletedVisitByVisitId(@PathVariable String visitId){
-//        return visitService.deleteCompletedVisitByVisitId(visitId)
-//                .then(Mono.just(new ResponseEntity<Void>(HttpStatus.NO_CONTENT)))
-//                .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));// Return 404 if NotFoundException is thrown
-//    }
+
 //    @GetMapping("/pets/{petId}")
 //    public Mono<PetResponseDTO> getPetByIdTest(@PathVariable int petId){
 //       return visitService.testingGetPetDTO(petId);
