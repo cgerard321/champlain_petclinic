@@ -1119,7 +1119,6 @@ public class EmailControllerTests
         // Assert
         Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
     }
-    //TODO ------------------------
     
     [Test]
     public async Task SendRawEmail_EmailModelIsValid_ReturnsOkResult()
