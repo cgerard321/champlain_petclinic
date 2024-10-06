@@ -94,6 +94,9 @@ public class VisitServiceImpl implements VisitService {
             case ("CANCELLED"):
                 status = Status.CANCELLED;
 
+            case ("ARCHIVED"):
+                status = Status.ARCHIVED;
+
             default:
                 status = Status.COMPLETED;
         }
@@ -218,15 +221,38 @@ public class VisitServiceImpl implements VisitService {
                 )
                 .flatMap(repo::deleteAll);
     }
+
     @Override
-    public Mono<Void> deleteCompletedVisitByVisitId(String visitId) {
+    public Mono<VisitResponseDTO> archiveCompletedVisit(String visitId, Mono<VisitRequestDTO> visitRequestDTO) {
         return repo.findByVisitId(visitId)
+                .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("No completed visit was found with visitId: " + visitId))))
                 .filter(visit -> visit.getStatus() == Status.COMPLETED)
-                .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Cannot Find visit id" + visitId))))
-                .flatMap(visit -> repo.deleteByVisitId(visit.getVisitId()))
-                .doOnSuccess(v -> log.info("Successfully deleted completed visit with id: {}", visitId))
-                .doOnError(e -> log.error("Failed to delete completed visit with id: {}", visitId, e));
+                .switchIfEmpty(Mono.error(new BadRequestException("Cannot archive a visit that is not completed.")))
+                .doOnNext(visit -> {
+                    visit.setStatus(Status.ARCHIVED);
+//                    visit.setVisitId(visitId);
+                })
+                .flatMap(repo::save)
+
+                .flatMap(entityDtoUtil::toVisitResponseDTO);
     }
+    @Override
+    public Flux<VisitResponseDTO> getAllArchivedVisits() {
+        return repo.findAllByStatus("ARCHIVED")
+                .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("No archived visits were found"))))
+                .flatMap(entityDtoUtil::toVisitResponseDTO);
+    }
+
+
+//    @Override
+//    public Mono<Void> deleteCompletedVisitByVisitId(String visitId) {
+//        return repo.findByVisitId(visitId)
+//                .filter(visit -> visit.getStatus() == Status.COMPLETED)
+//                .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Cannot Find visit id" + visitId))))
+//                .flatMap(visit -> repo.deleteByVisitId(visit.getVisitId()))
+//                .doOnSuccess(v -> log.info("Successfully deleted completed visit with id: {}", visitId))
+//                .doOnError(e -> log.error("Failed to delete completed visit with id: {}", visitId, e));
+//    }
 
 //    @Override
 //    public Mono<VetDTO> testingGetVetDTO(String vetId) {
@@ -292,6 +318,10 @@ public class VisitServiceImpl implements VisitService {
 
             case "COMPLETED":
                 newStatus1 = Status.COMPLETED;
+                break;
+
+            case "ARCHIVED":
+                newStatus1 = Status.ARCHIVED;
                 break;
 
             default:

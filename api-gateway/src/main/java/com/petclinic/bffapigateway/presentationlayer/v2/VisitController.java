@@ -105,13 +105,6 @@ public class VisitController {
                         .map(updatedVisit -> ResponseEntity.ok(updatedVisit))
                         .defaultIfEmpty(ResponseEntity.notFound().build())); // Return 404 if not found
     }
-    @IsUserSpecific(idToMatch = {"visitId"})
-    @DeleteMapping(value = "/completed/{visitId}")
-    public Mono<ResponseEntity<Void>> deleteCompletedVisitByVisitId(@PathVariable String visitId) {
-        return visitsServiceClient.deleteCompletedVisitByVisitId(visitId)
-                .then(Mono.just(new ResponseEntity<Void>(HttpStatus.NO_CONTENT)))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
-    }
 
     //customer visits
     @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN})
@@ -173,5 +166,21 @@ public class VisitController {
                 .map(visitResponseDTO -> new ResponseEntity<>(visitResponseDTO, HttpStatus.OK))
                 .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND)); // Handle empty responses
     }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @IsUserSpecific(idToMatch = {"visitId"})
+    @PutMapping(value = "/completed/{visitId}/archive", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<VisitResponseDTO>> archiveCompletedVisit(@PathVariable String visitId, @RequestBody Mono<VisitRequestDTO> visitRequestDTOMono){
+        return visitsServiceClient.archiveCompletedVisit(visitId, visitRequestDTOMono)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping(value = "/archived", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<VisitResponseDTO> getArchivedVisits() {
+        return visitsServiceClient.getAllArchivedVisits();
+    }
+
 
 }

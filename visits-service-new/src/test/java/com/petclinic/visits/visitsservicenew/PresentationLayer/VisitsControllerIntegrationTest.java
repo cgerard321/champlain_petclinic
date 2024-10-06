@@ -20,6 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -65,7 +66,7 @@ class VisitsControllerIntegrationTest {
     String uuidOwner = UUID.randomUUID().toString();
 
     private final String STATUS = "CONFIRMED";
-    private final int dbSize = 4;
+    private final int dbSize = 6;
 
     Set<SpecialtyDTO> set = new HashSet<>();
     Set<Workday> workdaySet = new HashSet<>();
@@ -92,25 +93,39 @@ class VisitsControllerIntegrationTest {
             .photoId(uuidPhoto)
             .ownerId(uuidOwner)
             .build();
+    VisitResponseDTO archivedVisitResponseDTO = VisitResponseDTO.builder()
+            .visitId("visitId4")
+            .visitDate(LocalDateTime.parse("2022-12-24T13:00:00"))
+            .visitEndDate(LocalDateTime.parse("2022-12-24T14:00:00"))
+            .description("Dog Needs Physio-Therapy")
+            .petId("0e4d8481-b611-4e52-baed-af16caa8bf8a")
+            .petName("Leo")
+            .visitDate(LocalDateTime.parse("2022-12-24T13:00:00"))
+            .practitionerId("69f85d2e-625b-11ee-8c99-0242ac120002")
+            .vetFirstName("Rafael")
+            .vetLastName("Ortega")
+            .vetEmail("ortegarafael@email.com")
+            .vetPhoneNumber("(514)-634-8276 #2387")
+            .status(Status.ARCHIVED)
+            .build();
 
     Visit visit1 = buildVisit(uuidVisit1, "this is a dummy description", vet.getVetId());
     Visit visit2 = buildVisit(uuidVisit2, "this is a dummy description", vet.getVetId());
     Visit cancelledVisit1 = buildCancelledVisit(uuidCancelledVisit1, "this is a dummy description", vet.getVetId());
     Visit cancelledVisit2 = buildCancelledVisit(uuidCancelledVisit2, "this is a dummy description", vet.getVetId());
-
+    Visit archivedVisit1 = buildVisitArchivedVisit("visitId1", "this is a dummy description", vet.getVetId());
+    Visit archivedVisit2 = buildVisitArchivedVisit("visitId2", "this is a dummy description for archive2", vet.getVetId());
     private final VisitResponseDTO visitResponseDTO = buildVisitResponseDto(visit1.getVisitId(), vet.getVetId());
     private final VisitRequestDTO visitRequestDTO = buildVisitRequestDto(vet.getVetId());
 
     @BeforeEach
     void dbSetUp() {
-        Publisher<Visit> visitPublisher = visitRepo.deleteAll()
-                .thenMany(visitRepo.save(visit1)
-                        .thenMany(visitRepo.save(visit2)
-                                .thenMany(visitRepo.save(cancelledVisit1)
-                                        .thenMany(visitRepo.save(cancelledVisit2)))));
-
-        StepVerifier.create(visitPublisher).expectNextCount(1).verifyComplete();
+        visitRepo.deleteAll()
+                .thenMany(Flux.just(visit1, visit2, cancelledVisit1, cancelledVisit2, archivedVisit1, archivedVisit2)
+                        .flatMap(visitRepo::save))
+                .blockLast();  // Wait for all operations to complete
     }
+
 
     private Visit buildVisit(String uuid, String description, String vetId) {
         return Visit.builder()
@@ -131,6 +146,18 @@ class VisitsControllerIntegrationTest {
                 .petId("2")
                 .practitionerId(vetId)
                 .status(Status.CANCELLED)
+                .build();
+    }
+
+    private Visit buildVisitArchivedVisit(String uuid, String description, String vetId) {
+        return Visit.builder()
+                .visitId(uuid)
+                .visitDate(LocalDateTime.parse("2022-12-24T13:00:00"))
+                .visitEndDate(LocalDateTime.parse("2022-12-24T14:00:00"))
+                .description(description)
+                .petId("2")
+                .practitionerId(vetId)
+                .status(Status.ARCHIVED)
                 .build();
     }
 
@@ -337,85 +364,172 @@ class VisitsControllerIntegrationTest {
     }
 
     @Test
-    void deleteCompletedVisitByValidVisitId_Return_NoContent() {
-        // Arrange: Create and save a COMPLETED visit
-        String validVisitId = "visitId3";
-        Visit completedVisit = Visit.builder()
-                .visitId(validVisitId)
-                .visitDate(LocalDateTime.now())
-                .description("Completed visit for deletion test")
-                .petId("3")
-                .practitionerId(vet.getVetId())
-                .status(Status.COMPLETED)
-                .build();
+    void getAllArchivedVisits_returnsNotFoundWhenNoArchivedVisits() {
+        visitRepo.deleteAll().block();  // Clear the repository
 
-        visitRepo.save(completedVisit).block();
-
-        // Verify the visit exists and has a status of COMPLETED
-        StepVerifier
-                .create(visitRepo.findByVisitId(validVisitId))
-                .expectNextMatches(visit -> visit.getStatus().equals(Status.COMPLETED))
-                .verifyComplete();
-
-        // Act: Delete the completed visit
         webTestClient
-                .delete()
-                .uri("/visits/completed/" + validVisitId)
+                .get()
+                .uri("/visits/archived")
+                .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isNoContent();
+                .expectStatus().isNotFound()
+                .expectBody();
 
-        // Assert: Verify the visit is deleted
         StepVerifier
-                .create(visitRepo.findByVisitId(validVisitId))
+                .create(visitRepo.findAllByStatus(Status.ARCHIVED.toString()))
                 .expectNextCount(0)
                 .verifyComplete();
     }
 
     @Test
-    void deleteCompletedVisitByInvalidVisitId_Return_NotFound() {
-        String visitId = "InvalidId";
-        webTestClient
-                .delete()
-                .uri("/visits/completed/" + visitId)
-                .exchange()
-                .expectStatus().isNotFound();
+    void getAllArchivedVisits_returnsAllArchivedVisitsFluxDTO() {
+        VisitResponseDTO completedVisit = VisitResponseDTO.builder()
+                .visitId("visitId4")
+                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .visitEndDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .description("Dog Needs Physio-Therapy")
+                .petId("0e4d8481-b611-4e52-baed-af16caa8bf8a")
+                .practitionerId("69f85d2e-625b-11ee-8c99-0242ac120002")
+                .status(Status.ARCHIVED)
+                .build();
 
-        StepVerifier
-                .create(visitRepo.findByVisitId(visitId))
-                .expectNextCount(0) //confirms that visit does not exist in the database
-                .verifyComplete();
+        when(entityDtoUtil.toVisitResponseDTO(any())).thenReturn(Mono.just(completedVisit));
+
+        webTestClient
+                .get()
+                .uri("/visits/archived")
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()  // Verify status is OK
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
+                .expectBodyList(VisitResponseDTO.class)
+                .value(Assertions::assertNotNull);
     }
 
     @Test
-    void deleteCompletedVisitByValidVisitId_Where_StatusIsNotCompleted_Return_NotFound() {
-        String validId = "ValidId";
-        Visit CancelledVisit = Visit.builder()
-                .visitId(validId)
-                .visitDate(LocalDateTime.now())
-                .description("Completed visit for deletion test")
-                .petId("3")
+    void archiveCompletedVisit_archivesVisitAndReturnsVisitResponseDTO() {
+        String validCompletedVisitId = "visitId";
+        Visit completedVisit = Visit.builder()
+                .visitId(validCompletedVisitId)
+                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .description("Dog Needs Physio-Therapy")
+                .petId("0e4d8481-b611-4e52-baed-af16caa8bf8a")
                 .practitionerId(vet.getVetId())
-                .status(Status.CANCELLED)
+                .status(Status.COMPLETED)
+                .build();
+        visitRepo.save(completedVisit).block();
+
+        Visit archivedVisit = Visit.builder()
+                .visitId(validCompletedVisitId)
+                .visitDate(completedVisit.getVisitDate())
+                .description(completedVisit.getDescription())
+                .petId(completedVisit.getPetId())
+                .practitionerId(completedVisit.getPractitionerId())
+                .status(Status.ARCHIVED)
+                .visitEndDate(completedVisit.getVisitDate().plusHours(1))
                 .build();
 
-        visitRepo.save(CancelledVisit).block();
+        VisitResponseDTO archivedVisitResponseDTO = VisitResponseDTO.builder()
+                .visitId(validCompletedVisitId)
+                .visitDate(archivedVisit.getVisitDate())
+                .visitEndDate(archivedVisit.getVisitEndDate())
+                .description(archivedVisit.getDescription())
+                .petId(archivedVisit.getPetId())
+                .practitionerId(archivedVisit.getPractitionerId())
+                .status(Status.ARCHIVED)
+                .build();
 
-        StepVerifier
-                .create(visitRepo.findByVisitId(validId))
-                .expectNextMatches(visit -> visit.getStatus() == Status.CANCELLED)
-                .verifyComplete();
+        // Step 4: Mock the EntityDtoUtil to return the expected DTO
+        when(entityDtoUtil.toVisitResponseDTO(any(Visit.class))).thenReturn(Mono.just(archivedVisitResponseDTO));
 
         webTestClient
-                .delete()
-                .uri("/visits/completed/" + CancelledVisit.getVisitId())
+                .put()
+                .uri("/visits/completed/" + validCompletedVisitId + "/archive")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(visitRequestDTO)
                 .exchange()
-                .expectStatus().isNotFound();
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(VisitResponseDTO.class)
+                .value(response -> {
+                    assertEquals(validCompletedVisitId, response.getVisitId());
+                    assertEquals("Dog Needs Physio-Therapy", response.getDescription());
+                    assertEquals("0e4d8481-b611-4e52-baed-af16caa8bf8a", response.getPetId());
+                    assertEquals(Status.ARCHIVED, response.getStatus());
+                });
 
-        StepVerifier
-                .create(visitRepo.findByVisitId(visit1.getVisitId()))
-                .expectNextCount(1)
+        StepVerifier.create(visitRepo.findByVisitId(validCompletedVisitId))
+                .assertNext(updatedVisit -> {
+                    assertNotNull(updatedVisit, "Archived visit should exist in the repository");
+                    assertEquals(Status.ARCHIVED, updatedVisit.getStatus(), "Visit status should be ARCHIVED");
+                })
                 .verifyComplete();
     }
+//    @Test
+//    void archiveCompletedVisit_withInvalidVisitId_returnsNotFound() {
+//        String invalidVisitId = "invalidId";
+//        VisitRequestDTO visitRequestDTO = buildVisitRequestDTO(UUID.randomUUID().toString());
+//
+//        when(visitService.archiveCompletedVisit(eq(invalidVisitId), any(Mono.class)))
+//                .thenReturn(Mono.error(new NotFoundException("No visit was found with visitId: " + invalidVisitId)));
+//
+//        webTestClient
+//                .put()
+//                .uri("/visits/completed/" + invalidVisitId + "/archive")
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .body(Mono.just(visitRequestDTO), VisitRequestDTO.class)
+//                .exchange()
+//                .expectStatus().isNotFound();
+//
+//        verify(visitService, times(1)).archiveCompletedVisit(eq(invalidVisitId), any(Mono.class));
+//    }
+
+//    @Test
+//    void archiveCompletedVisit_withInvalidVisitId_returnsBadRequest() {
+//        String invalidVisitId = "invalidId";
+//        VisitRequestDTO visitRequestDTO = buildVisitRequestDTO(UUID.randomUUID().toString());
+//
+//        when(visitService.archiveCompletedVisit(eq(invalidVisitId), any(Mono.class)))
+//                .thenReturn(Mono.error(new NotFoundException("No visit was found with visitId: " + invalidVisitId)));
+//
+//        webTestClient
+//                .put()
+//                .uri("/visits/completed/" + invalidVisitId + "/archive")
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .body(Mono.just(visitRequestDTO), VisitRequestDTO.class)
+//                .exchange()
+//                .expectStatus().isNotFound();
+//
+//        verify(visitService, times(1)).archiveCompletedVisit(eq(invalidVisitId), any(Mono.class));
+//    }
+//
+//    @Test
+//    void archiveCompletedVisit_withEmptyVisitId_returnsBadRequest() {
+//        VisitRequestDTO visitRequestDTO = buildVisitRequestDTO(UUID.randomUUID().toString());
+//
+//        webTestClient
+//                .put()
+//                .uri("/visits/completed//archive")
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .body(Mono.just(visitRequestDTO), VisitRequestDTO.class)
+//                .exchange()
+//                .expectStatus().isBadRequest();
+//
+//        verify(visitService, never()).archiveCompletedVisit(anyString(), any(Mono.class));
+//    }
+
+//                .value((visit) -> {
+//                    assertNotNull(visit);
+//                    assertEquals(1, visit.size());
+//                    assertEquals(visit.get(0).getVisitId(), completedVisit.getVisitId());
+//                    assertEquals(visit.get(0).getPractitionerId(), completedVisit.getPractitionerId());
+//                    assertEquals(visit.get(0).getPetId(), completedVisit.getPetId());
+//                    assertEquals(visit.get(0).getDescription(), completedVisit.getDescription());
+//                    assertEquals(visit.get(0).getVisitDate(), completedVisit.getVisitDate());
+//                    assertEquals(visit.get(0).getVisitEndDate(), completedVisit.getVisitEndDate());
+//                    assertEquals(visit.get(0).getStatus(), Status.ARCHIVED);
+//                });
+
 
     @Test
     void updateVisitStatus_ShouldSucceed_WhenStatusUpdatedToCancelled() {
@@ -467,9 +581,6 @@ class VisitsControllerIntegrationTest {
                 .expectNextMatches(visit -> visit.getStatus() == Status.CANCELLED)
                 .verifyComplete();
     }
-
-
-
 
 
     // Test for the NOT_FOUND scenario (when visit does not exist)
