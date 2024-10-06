@@ -10,9 +10,20 @@ import './Emergency.css';
 
 export default function VisitListTable(): JSX.Element {
   const [visitsList, setVisitsList] = useState<Visit[]>([]);
+<<<<<<< HEAD
   const [emergencyList, setEmergencyList] = useState<EmergencyResponseDTO[]>(
     []
   );
+=======
+  const [archivedVisits, setArchivedVisits] = useState<Visit[]>([]);
+
+  //make tables collapsable
+  const [confirmedCollapsed, setConfirmedCollapsed] = useState(false);
+  const [upcomingCollapsed, setUpcomingCollapsed] = useState(false);
+  const [completedCollapsed, setCompletedCollapsed] = useState(false);
+  const [archivedCollapsed, setArchivedCollapsed] = useState(false);
+
+>>>>>>> b9f80b66 (Fully implemented the archive feature and collapsable tables)
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -26,12 +37,32 @@ export default function VisitListTable(): JSX.Element {
     eventSource.onmessage = event => {
       try {
         const newVisit: Visit = JSON.parse(event.data);
-        setVisitsList(oldVisits => {
-          if (!oldVisits.some(visit => visit.visitId === newVisit.visitId)) {
-            return [...oldVisits, newVisit];
-          }
-          return oldVisits;
-        });
+
+        if (newVisit.status === 'ARCHIVED') {
+          // Remove from visitsList if present
+          setVisitsList(oldVisits =>
+            oldVisits.filter(visit => visit.visitId !== newVisit.visitId)
+          );
+        } else {
+          setArchivedVisits(oldArchived =>
+            oldArchived.filter(visit => visit.visitId !== newVisit.visitId)
+          );
+
+          setVisitsList(oldVisits => {
+            const index = oldVisits.findIndex(
+              visit => visit.visitId === newVisit.visitId
+            );
+            if (index !== -1) {
+              // Update existing visit
+              const newVisits = [...oldVisits];
+              newVisits[index] = newVisit;
+              return newVisits;
+            } else {
+              // Add new visit
+              return [...oldVisits, newVisit];
+            }
+          });
+        }
       } catch (error) {
         console.error('Error parsing SSE data:', error);
       }
@@ -48,6 +79,7 @@ export default function VisitListTable(): JSX.Element {
   }, []);
 
   useEffect(() => {
+<<<<<<< HEAD
     // Fetch emergency visits
     async function fetchEmergencies(): Promise<void> {
       try {
@@ -78,6 +110,50 @@ export default function VisitListTable(): JSX.Element {
     }
   };
 
+=======
+    const archivedEventSource = new EventSource(
+      'http://localhost:8080/api/v2/gateway/visits/archived',
+      {
+        withCredentials: true,
+      }
+    );
+
+    archivedEventSource.onmessage = event => {
+      try {
+        const newArchivedVisit: Visit = JSON.parse(event.data);
+
+        setArchivedVisits(oldArchived => {
+          if (
+            !oldArchived.some(
+              visit => visit.visitId === newArchivedVisit.visitId
+            )
+          ) {
+            return [...oldArchived, newArchivedVisit];
+          } else {
+            // Update existing archived visit
+            return oldArchived.map(visit =>
+              visit.visitId === newArchivedVisit.visitId
+                ? newArchivedVisit
+                : visit
+            );
+          }
+        });
+      } catch (error) {
+        console.error('Error parsing SSE data for archived visits:', error);
+      }
+    };
+
+    archivedEventSource.onerror = error => {
+      console.error('Archived EventSource error:', error);
+      archivedEventSource.close();
+    };
+
+    return () => {
+      archivedEventSource.close();
+    };
+  }, []);
+
+>>>>>>> b9f80b66 (Fully implemented the archive feature and collapsable tables)
   const confirmedVisits = visitsList.filter(
     visit => visit.status === 'CONFIRMED'
   );
@@ -87,34 +163,67 @@ export default function VisitListTable(): JSX.Element {
   const completedVisits = visitsList.filter(
     visit => visit.status === 'COMPLETED'
   );
+<<<<<<< HEAD
   const cancelledVisits = visitsList.filter(
     visit => visit.status === 'CANCELLED'
   );
   const handleDelete = async (visitId: string): Promise<void> => {
     const confirmDelete = window.confirm(
       `Are you sure you want to delete visit with ID: ${visitId}?`
+=======
+
+  const handleArchive = async (visitId: string): Promise<void> => {
+    const confirmArchive = window.confirm(
+      `Are you sure you want to archive visit with ID: ${visitId}?`
+>>>>>>> d758947e (Adding back deleted methods)
     );
-    if (confirmDelete) {
+    if (confirmArchive) {
       try {
+        const requestBody = { status: 'ARCHIVED' };
         const response = await fetch(
-          `http://localhost:8080/api/v2/gateway/visits/completed/${visitId}`,
+          `http://localhost:8080/api/v2/gateway/visits/completed/${visitId}/archive`,
           {
-            method: 'DELETE',
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
             credentials: 'include',
+            body: JSON.stringify(requestBody),
           }
         );
+
         if (response.ok) {
-          setVisitsList(prev =>
-            prev.filter(visit => visit.visitId !== visitId)
+          // Fetch the updated visit data from the backend
+          const updatedVisitResponse = await fetch(
+            `http://localhost:8080/api/v2/gateway/visits/${visitId}`,
+            {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              credentials: 'include',
+            }
           );
-          alert('Visit deleted successfully!');
+
+          if (updatedVisitResponse.ok) {
+            const updatedVisit = await updatedVisitResponse.json();
+            setArchivedVisits(oldArchived => [...oldArchived, updatedVisit]);
+            setVisitsList(prev =>
+              prev.filter(visit => visit.visitId !== visitId)
+            );
+            alert('Visit archived successfully!');
+          } else {
+            console.error('Failed to fetch the updated visit.');
+            alert('Failed to fetch the updated visit.');
+          }
         } else {
-          console.error('Failed to delete the visit.');
-          alert('Failed to delete the visit.');
+          const errorData = await response.json();
+          console.error('Failed to archive the visit:', errorData);
+          alert(`Failed to archive the visit: ${errorData.message}`);
         }
       } catch (error) {
-        console.error('Error deleting visit:', error);
-        alert('Error deleting visit.');
+        console.error('Error archiving visit:', error);
+        alert('Error archiving visit.');
       }
     }
   };
@@ -214,9 +323,12 @@ export default function VisitListTable(): JSX.Element {
   const renderTable = (
     title: string,
     visits: Visit[],
-    allowDelete: boolean = false
+    collapsed: boolean,
+    setCollapsed: React.Dispatch<React.SetStateAction<boolean>>,
+    allowArchive: boolean = false
   ): JSX.Element => (
     <div className="visit-table-section">
+<<<<<<< HEAD
       <h2>{title}</h2>
       <table>
         <thead>
@@ -295,10 +407,88 @@ export default function VisitListTable(): JSX.Element {
                     </button>
                   )}
               </td>
+=======
+      <h2
+        onClick={() => setCollapsed(!collapsed)}
+        style={{ cursor: 'pointer' }}
+      >
+        {title} {collapsed ? '(Show)' : '(Hide)'}
+      </h2>
+      {!collapsed && (
+        <table>
+          <thead>
+            <tr>
+              <th>Visit Id</th>
+              <th>Visit Date</th>
+              <th>Description</th>
+              <th>Pet Name</th>
+              <th>Vet First Name</th>
+              <th>Vet Last Name</th>
+              <th>Vet Email</th>
+              <th>Visit End Date</th>
+              <th>Status</th>
+              <th>Actions</th>
+>>>>>>> b9f80b66 (Fully implemented the archive feature and collapsable tables)
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {visits.map(visit => (
+              <tr key={visit.visitId}>
+                <td>{visit.visitId}</td>
+                <td>{new Date(visit.visitDate).toLocaleString()}</td>
+                <td>{visit.description}</td>
+                <td>{visit.petName}</td>
+                <td>{visit.vetFirstName}</td>
+                <td>{visit.vetLastName}</td>
+                <td>{visit.vetEmail}</td>
+                <td>{new Date(visit.visitEndDate).toLocaleString()}</td>
+                <td
+                  style={{
+                    color:
+                      visit.status === 'CONFIRMED'
+                        ? 'green'
+                        : visit.status === 'UPCOMING'
+                          ? 'orange'
+                          : visit.status === 'COMPLETED'
+                            ? 'blue'
+                            : visit.status === 'ARCHIVED'
+                              ? 'green'
+                              : 'inherit',
+                  }}
+                >
+                  {visit.status}
+                </td>
+                <td>
+                  <button
+                    className="btn btn-dark"
+                    onClick={() => navigate(`/visits/${visit.visitId}`)}
+                    title="View"
+                  >
+                    View
+                  </button>
+
+                  <button
+                    className="btn btn-warning"
+                    onClick={() => navigate(`/visits/${visit.visitId}/edit`)} // Edit button that triggers updateVisit
+                    title="Edit"
+                  >
+                    Edit
+                  </button>
+                  {allowArchive && (
+                    <button
+                      className="btn btn-secondary"
+                      onClick={() => handleArchive(visit.visitId)}
+                      title="Archive"
+                    >
+                      Archive
+                    </button>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 
@@ -335,6 +525,7 @@ export default function VisitListTable(): JSX.Element {
         </button>
       </div>
 
+<<<<<<< HEAD
       {/* Emergency Table below buttons, but above visit tables */}
       {renderEmergencyTable('Emergency Visits', emergencyList)}
 
@@ -342,6 +533,34 @@ export default function VisitListTable(): JSX.Element {
       {renderTable('Upcoming Visits', upcomingVisits)}
       {renderTable('Cancelled Visits', cancelledVisits)}
       {renderTable('Completed Visits', completedVisits, true)}
+=======
+      {renderTable(
+        'Confirmed Visits',
+        confirmedVisits,
+        confirmedCollapsed,
+        setConfirmedCollapsed
+      )}
+      {renderTable(
+        'Upcoming Visits',
+        upcomingVisits,
+        upcomingCollapsed,
+        setUpcomingCollapsed
+      )}
+      {renderTable(
+        'Completed Visits',
+        completedVisits,
+        completedCollapsed,
+        setCompletedCollapsed,
+        true
+      )}
+      {renderTable(
+        'Archived Visits',
+        archivedVisits,
+        archivedCollapsed,
+        setArchivedCollapsed,
+        false
+      )}
+>>>>>>> b9f80b66 (Fully implemented the archive feature and collapsable tables)
     </div>
   );
 }

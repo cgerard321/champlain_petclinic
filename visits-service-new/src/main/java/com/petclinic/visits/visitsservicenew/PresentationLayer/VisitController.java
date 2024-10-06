@@ -209,6 +209,7 @@ public class VisitController {
 
 
 
+<<<<<<< HEAD
     //Emergency
 
     @GetMapping(value = "/emergency")
@@ -253,6 +254,8 @@ public class VisitController {
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
+=======
+>>>>>>> b9f80b66 (Fully implemented the archive feature and collapsable tables)
     @PutMapping(value = "/completed/{visitId}/archive", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<VisitResponseDTO>> archiveCompletedVisit(@PathVariable String visitId, @RequestBody Mono<VisitRequestDTO> visitRequestDTO) {
     return Mono.just(visitId)
@@ -260,7 +263,11 @@ public class VisitController {
             .flatMap(id -> visitService.archiveCompletedVisit(id, visitRequestDTO))
             .map(ResponseEntity::ok)
             .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
 
+    @GetMapping(value = "/archived", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<VisitResponseDTO> getAllArchivedVisits() {
+        return visitService.getAllArchivedVisits();
     }
     @GetMapping(value = "/archived", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<VisitResponseDTO> getAllArchivedVisits() {

@@ -42,6 +42,14 @@ public class VisitController {
     public ResponseEntity<Flux<VisitResponseDTO>> getAllVisits() {
         return ResponseEntity.ok().body(visitsServiceClient.getAllVisits());
     }
+    @SecuredEndpoint(allowedRoles = {Roles.ALL})
+    @GetMapping(value = "/{visitId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<VisitResponseDTO>> getVisitByVisitId(@PathVariable String visitId) {
+        return visitsServiceClient.getVisitByVisitId(visitId)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @PostMapping(value = "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)

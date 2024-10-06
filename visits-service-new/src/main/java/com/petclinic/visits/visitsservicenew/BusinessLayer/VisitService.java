@@ -37,6 +37,7 @@ public interface VisitService {
     Mono<VisitResponseDTO> archiveCompletedVisit(String visitId, Mono<VisitRequestDTO> visitRequestDTO);
 
     Flux<VisitResponseDTO> getAllArchivedVisits();
+
 //    Mono<VetDTO> testingGetVetDTO(String vetId);
 //    Mono<PetResponseDTO> testingGetPetDTO(int petId);
 
