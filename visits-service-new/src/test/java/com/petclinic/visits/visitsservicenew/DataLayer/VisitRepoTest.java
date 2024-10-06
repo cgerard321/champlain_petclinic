@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
+import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
 import java.time.LocalDateTime;
@@ -12,6 +13,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static reactor.core.publisher.Mono.when;
 
 @DataMongoTest
 class VisitRepoTest {
@@ -86,7 +88,19 @@ class VisitRepoTest {
                 }).then(this::deleteVisitByVisitId).verifyComplete();
     }
 
+    @Test
+    void findVisitsByDescriptionContainingIgnoreCase() {
+       StepVerifier.create(visitRepo.findVisitsByDescriptionContainingIgnoreCase(visit1.getDescription().toString()))
+               .expectNextCount(2)
+               .verifyComplete();
+    }
 
+    //@Test
+    //void findVisitsByStatus(){
+    //    StepVerifier.create(visitRepo.findAllByStatus(visit1.getStatus().toString()))
+    //            .expectNextCount(2)
+    //            .verifyComplete();
+    //}
 
 
     private Visit buildVisit(String uuid,String description, String vetId){

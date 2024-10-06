@@ -155,19 +155,23 @@ public class VisitControllerUnitTest {
     @Test
     void getAllVisits_whenAllPropertiesExist_thenReturnFluxResponseDTO() {
         // Arrange
-        when(visitsServiceClient.getAllVisits())
+        String description = "test"; // Add a description here
+        when(visitsServiceClient.getAllVisits(description))
                 .thenReturn(Flux.just(visitResponseDTO1));
 
         // Act
         webTestClient.get()
-                .uri(BASE_VISIT_URL)
+                .uri(uriBuilder -> uriBuilder.path(BASE_VISIT_URL)
+                        .queryParam("description", description)
+                        .build())
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBodyList(VisitResponseDTO.class)
                 .hasSize(1);
+
         // Assert
-        verify(visitsServiceClient, times(1)).getAllVisits();
+        verify(visitsServiceClient, times(1)).getAllVisits(description);
     }
 
     @Test
@@ -305,9 +309,10 @@ public class VisitControllerUnitTest {
     }
 
     @Test
-    void getAllVisits_whenNoVisitsExist_thenReturnEmptyFlux() {
+    void getAllVisits_whenNoVisitsExist_thenReturnEmptyFlux(){
+        String description = null;
         // Arrange
-        when(visitsServiceClient.getAllVisits())
+        when(visitsServiceClient.getAllVisits(description))
                 .thenReturn(Flux.empty()); // no visits should not throw an error
         // Act
         webTestClient.get()
@@ -318,7 +323,7 @@ public class VisitControllerUnitTest {
                 .expectBodyList(VisitResponseDTO.class)
                 .hasSize(0);
         // Assert
-        verify(visitsServiceClient, times(1)).getAllVisits();
+        verify(visitsServiceClient, times(1)).getAllVisits(description);
     }
 
     @Test

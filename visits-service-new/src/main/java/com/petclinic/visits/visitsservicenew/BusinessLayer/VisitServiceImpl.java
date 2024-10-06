@@ -1,6 +1,7 @@
 package com.petclinic.visits.visitsservicenew.BusinessLayer;
 
 import com.petclinic.visits.visitsservicenew.DataLayer.Status;
+import com.petclinic.visits.visitsservicenew.DataLayer.Visit;
 import com.petclinic.visits.visitsservicenew.DataLayer.VisitRepo;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.Auth.AuthServiceClient;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.Auth.UserDetails;
@@ -56,8 +57,17 @@ public class VisitServiceImpl implements VisitService {
      * @return all Visits as Flux
      */
     @Override
-    public Flux<VisitResponseDTO> getAllVisits() {
-        return repo.findAll().flatMap(entityDtoUtil::toVisitResponseDTO);
+    public Flux<VisitResponseDTO> getAllVisits(String descritpion) {
+        Flux<Visit> visits;
+
+        if(descritpion != null && !descritpion.isBlank()){
+            visits = repo.findVisitsByDescriptionContainingIgnoreCase(descritpion);
+        }
+        else {
+            visits = repo.findAll();
+        }
+        return visits.flatMap(entityDtoUtil::toVisitResponseDTO);
+        //return repo.findAll().flatMap(entityDtoUtil::toVisitResponseDTO);
     }
 
     /**
