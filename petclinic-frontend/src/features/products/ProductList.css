@@ -54,3 +54,7 @@
 .apply-filter-button, .clear-filter-button {
   margin-top: 10px;
 }
+.filter-container select {
+  width: 100%;
+  max-width: 250px;
+}

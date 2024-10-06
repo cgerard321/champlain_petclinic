@@ -53,7 +53,12 @@ public class ProductsServiceClient {
                     return uriBuilder.build();
                 })
                 .retrieve()
-                .bodyToFlux(ProductResponseDTO.class);
+                .bodyToFlux(ProductResponseDTO.class)
+                .filter(product -> {
+                    boolean ratingFilter = (minRating == null || product.getAverageRating() >= minRating)
+                            && (maxRating == null || product.getAverageRating() <= maxRating);
+                    return ratingFilter;
+                });
     }
 
     public Mono<ProductResponseDTO> getProductByProductId(final String productId) {

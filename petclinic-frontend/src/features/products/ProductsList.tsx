@@ -12,6 +12,7 @@ import { getProductsByType } from '@/features/products/api/getProductsByType.ts'
 import { addImage } from './api/addImage';
 import { ImageModel } from './models/ProductModels/ImageModel';
 import StarRating from "@/features/products/components/StarRating.tsx";
+import './components/StarRating.css';
 
 export default function ProductList(): JSX.Element {
   const [productList, setProductList] = useState<ProductModel[]>([]);
@@ -25,7 +26,7 @@ export default function ProductList(): JSX.Element {
   const [recentlyClickedProducts, setRecentlyClickedProducts] = useState<
     ProductModel[]
   >([]);
-  const [ratingSort, setRatingSort]=useState<string>('');
+  const [ratingSort, setRatingSort]=useState<string>('default');
   const [minStars, setMinStars] = useState<number>(0);
   const [maxStars, setMaxStars] = useState<number>(5);
 
@@ -257,6 +258,9 @@ export default function ProductList(): JSX.Element {
           ) : (
             <p>No products found.</p>
           )}
+        </div>
+        <div>
+          <hr/>
         </div>
         <div>
           <h2>Recently Clicked Products</h2>

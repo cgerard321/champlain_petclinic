@@ -65,6 +65,33 @@ class ProductsServiceClientIntegrationTest {
                 .verifyComplete();
     }
     @Test
+    void getAllProducts_WithRatingFiltering_ThenReturnFilteredProductList() {
+
+        mockWebServer.enqueue(new MockResponse()
+                .setBody("data:{\"productId\":\"4affcab7-3ab1-4917-a114-2b6301aa5565\",\"productName\":\"Rabbit Hutch\",\"productDescription\":\"Outdoor wooden hutch for rabbits\",\"productSalePrice\":79.99,\"averageRating\":4.5}\n\n" +
+                        "data:{\"productId\":\"baee7cd2-b67a-449f-b262-91f45dde8a6d\",\"productName\":\"Flea Collar\",\"productDescription\":\"Flea and tick prevention for small dogs\",\"productSalePrice\":9.99,\"averageRating\":3.0}\n\n" +
+                        "data:{\"productId\":\"1234567\",\"productName\":\"Cheap Collar\",\"productDescription\":\"Cheap flea and tick prevention\",\"productSalePrice\":4.99,\"averageRating\":1.0}\n\n"
+                ).setHeader("Content-Type", "text/event-stream")
+        );
+
+        Double minRating = 3.0;
+        Double maxRating = 5.0;
+
+
+        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(null, null, minRating, maxRating, null);
+
+        // Verify the results
+        StepVerifier.create(productsFlux)
+                .expectNextMatches(product -> product.getProductId().equals("4affcab7-3ab1-4917-a114-2b6301aa5565") &&
+                        product.getAverageRating() >= minRating && product.getAverageRating() <= maxRating)
+                .expectNextMatches(product -> product.getProductId().equals("baee7cd2-b67a-449f-b262-91f45dde8a6d") &&
+                        product.getAverageRating() >= minRating && product.getAverageRating() <= maxRating)
+                .expectComplete()
+                .verify();
+    }
+
+
+    @Test
     void getAllProducts_ThenReturnEmptyResponse() {
 
         mockWebServer.enqueue(new MockResponse()

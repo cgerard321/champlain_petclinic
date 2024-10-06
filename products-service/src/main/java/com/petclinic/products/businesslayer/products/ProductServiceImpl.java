@@ -1,5 +1,6 @@
 package com.petclinic.products.businesslayer.products;
 
+import com.petclinic.products.utils.exceptions.InvalidInputException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +18,8 @@ import lombok.extern.slf4j.Slf4j;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.Arrays;
 
 @Service
 @Slf4j
@@ -51,6 +54,9 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Flux<ProductResponseModel> getAllProducts(Double minPrice, Double maxPrice,Double minRating, Double maxRating, String sort) {
+        if (sort != null && !Arrays.asList("asc", "desc", "default").contains(sort.toLowerCase())) {
+            throw new InvalidInputException("Invalid sort parameter: " + sort);
+        }
         Flux<Product> products;
 
         if (minPrice != null && maxPrice != null) {
