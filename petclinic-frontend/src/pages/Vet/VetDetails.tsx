@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { NavBar } from '@/layouts/AppNavBar.tsx';
 import './VetDetails.css';
 import axios from 'axios';
-import DeleteVetPhoto from "@/pages/Vet/DeleteVetPhoto.tsx";
+import DeleteVetPhoto from '@/pages/Vet/DeleteVetPhoto.tsx';
 
 interface VetResponseType {
   vetId: string;
@@ -92,34 +92,34 @@ export default function VetDetails(): JSX.Element {
     });
   }, [vetId]);
 
-    const fetchVetPhoto = async (): Promise<void> => {
-      try {
-        const response = await fetch(
-          `http://localhost:8080/api/v2/gateway/vets/${vetId}/photo`,
-          {
-            method: 'GET',
-            headers: {
-              Accept: 'image/*',
-            },
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error(`Error: ${response.statusText}`);
+  const fetchVetPhoto = async (): Promise<void> => {
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/v2/gateway/vets/${vetId}/photo`,
+        {
+          method: 'GET',
+          headers: {
+            Accept: 'image/*',
+          },
         }
+      );
 
-        const blob = await response.blob();
-        const imageUrl = URL.createObjectURL(blob);
-        setPhoto(imageUrl);
-      } catch (error) {
-        setError('Failed to fetch vet photo');
-        setPhoto('/images/vet_default.jpg');
+      if (!response.ok) {
+        throw new Error(`Error: ${response.statusText}`);
       }
-    };
 
-    const handlePhotoDeleted = (): void => {
-      fetchVetPhoto();
+      const blob = await response.blob();
+      const imageUrl = URL.createObjectURL(blob);
+      setPhoto(imageUrl);
+    } catch (error) {
+      setError('Failed to fetch vet photo');
+      setPhoto('/images/vet_default.jpg');
     }
+  };
+
+  const handlePhotoDeleted = (): void => {
+    fetchVetPhoto();
+  };
 
   const renderWorkHours = (workHoursJson: string): JSX.Element => {
     try {
@@ -195,7 +195,10 @@ export default function VetDetails(): JSX.Element {
         {photo && (
           <section className="vet-photo-container">
             <img src={photo} alt="Vet" className="vet-photo" />
-            <DeleteVetPhoto vetId={vetId!} onPhotoDeleted={handlePhotoDeleted} />
+            <DeleteVetPhoto
+              vetId={vetId!}
+              onPhotoDeleted={handlePhotoDeleted}
+            />
           </section>
         )}
 
