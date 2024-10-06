@@ -294,7 +294,7 @@ export default function AdminBillsListTable(): JSX.Element {
           </p>
           <p>
             {' '}
-            d<strong>Owner Name:</strong> {searchedBill.ownerFirstName}{' '}
+            <strong>Owner Name:</strong> {searchedBill.ownerFirstName}{' '}
             {searchedBill.ownerLastName}
           </p>
           <p>
