@@ -389,5 +389,3 @@ export default function AdminBillsListTable(): JSX.Element {
     </div>
   );
 }
-
-
