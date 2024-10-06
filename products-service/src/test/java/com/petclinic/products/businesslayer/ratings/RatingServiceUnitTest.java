@@ -181,6 +181,63 @@ class RatingServiceUnitTest {
     }
 
     @Test
+    void whenAddRatingWithEmptyReview_thenReturnRatingWithEmptyReview(){
+        Product prod = Product.builder()
+                .productId(productId)
+                .productName("Sample Name")
+                .productDescription("Sample Description")
+                .productSalePrice(100.0)
+                .averageRating(0.0)
+                .build();
+
+        RatingRequestModel requestModel = RatingRequestModel.builder()
+                .rating(rating1.getRating())
+                .review(null)
+                .build();
+
+        when(productRepository.findProductByProductId(productId))
+                .thenReturn(Mono.just(prod));
+        when(ratingRepository.findRatingByCustomerIdAndProductId(rating1.getCustomerId(), productId))
+                .thenReturn(Mono.empty());
+        when(ratingRepository.save(any(Rating.class))
+        ).thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
+
+        StepVerifier.create(ratingService.addRatingForProduct(productId, rating1.getCustomerId(), Mono.just(requestModel)))
+                .expectNextMatches(response -> {
+                    assertNotNull(response.getRating());
+                    assertNotNull(response.getReview());
+                    assertEquals(requestModel.getRating(), response.getRating());
+                    assertEquals("", response.getReview());
+                    return true;
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    public void whenAddRatingWithLongReview_thenReturnInvalidInput(){
+        RatingRequestModel requestModel = RatingRequestModel.builder()
+                .rating(rating1.getRating())
+                .review("a".repeat(2000))
+                .build();
+
+        StepVerifier.create(ratingService.addRatingForProduct(productId, rating1.getCustomerId(), Mono.just(requestModel)))
+                .expectError(InvalidInputException.class)
+                .verify();
+    }
+
+    @Test
+    public void whenAddRatingWithEmptyRating_thenReturnInvalidInput(){
+        RatingRequestModel requestModel = RatingRequestModel.builder()
+                .rating(null)
+                .review(rating1.getReview())
+                .build();
+
+        StepVerifier.create(ratingService.addRatingForProduct(productId, rating1.getCustomerId(), Mono.just(requestModel)))
+                .expectError(InvalidInputException.class)
+                .verify();
+    }
+
+    @Test
     void whenAddRatingForExistingCustomerRating_thenReturnRatingAlreadyExists(){
         Product prod = Product.builder()
                 .productId(productId)
@@ -260,6 +317,63 @@ class RatingServiceUnitTest {
 
         StepVerifier.create(ratingService.updateRatingForProduct(productId, rating1.getCustomerId(), Mono.just(requestModel)))
                 .expectError(NotFoundException.class)
+                .verify();
+    }
+
+    @Test
+    void whenUpdateRatingWithEmptyReview_thenReturnRatingWithEmptyReview(){
+        Product prod = Product.builder()
+                .productId(productId)
+                .productName("Sample Name")
+                .productDescription("Sample Description")
+                .productSalePrice(100.0)
+                .averageRating(0.0)
+                .build();
+
+        RatingRequestModel requestModel = RatingRequestModel.builder()
+                .rating(rating1.getRating())
+                .review(null)
+                .build();
+
+        when(productRepository.findProductByProductId(productId))
+                .thenReturn(Mono.just(prod));
+        when(ratingRepository.findRatingByCustomerIdAndProductId(rating1.getCustomerId(), productId))
+                .thenReturn(Mono.just(rating1));
+        when(ratingRepository.save(any(Rating.class))
+        ).thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
+
+        StepVerifier.create(ratingService.updateRatingForProduct(productId, rating1.getCustomerId(), Mono.just(requestModel)))
+                .expectNextMatches(response -> {
+                    assertNotNull(response.getRating());
+                    assertNotNull(response.getReview());
+                    assertEquals(requestModel.getRating(), response.getRating());
+                    assertEquals("", response.getReview());
+                    return true;
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    public void whenUpdateRatingWithLongReview_thenReturnInvalidInput(){
+        RatingRequestModel requestModel = RatingRequestModel.builder()
+                .rating(rating1.getRating())
+                .review("a".repeat(2000))
+                .build();
+
+        StepVerifier.create(ratingService.updateRatingForProduct(productId, rating1.getCustomerId(), Mono.just(requestModel)))
+                .expectError(InvalidInputException.class)
+                .verify();
+    }
+
+    @Test
+    public void whenUpdateRatingWithEmptyRating_thenReturnInvalidInput(){
+        RatingRequestModel requestModel = RatingRequestModel.builder()
+                .rating(null)
+                .review(rating1.getReview())
+                .build();
+
+        StepVerifier.create(ratingService.updateRatingForProduct(productId, rating1.getCustomerId(), Mono.just(requestModel)))
+                .expectError(InvalidInputException.class)
                 .verify();
     }
 

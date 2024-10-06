@@ -34,12 +34,14 @@ class RatingRepositoryIntegrationTest {
                 .productId(productId)
                 .customerId(customerId1)
                 .rating((byte) 2)
+                .review("It's not bad neither good")
                 .build();
 
         Rating rating2 = Rating.builder()
                 .productId(productId)
                 .customerId(customerId2)
                 .rating((byte) 5)
+                .review("It's great")
                 .build();
 
         StepVerifier.create(ratingRepository.save(rating1))
@@ -48,6 +50,8 @@ class RatingRepositoryIntegrationTest {
                     assertEquals(insRating.getId(), rating1.getId());
                     assertEquals(insRating.getProductId(), rating1.getProductId());
                     assertEquals(insRating.getCustomerId(), rating1.getCustomerId());
+                    assertEquals(insRating.getRating(), rating1.getRating());
+                    assertEquals(insRating.getReview(), rating1.getReview());
                 })
                 .verifyComplete();
         StepVerifier.create(ratingRepository.save(rating2))
@@ -56,6 +60,8 @@ class RatingRepositoryIntegrationTest {
                     assertEquals(insRating.getId(), rating2.getId());
                     assertEquals(insRating.getProductId(), rating2.getProductId());
                     assertEquals(insRating.getCustomerId(), rating2.getCustomerId());
+                    assertEquals(insRating.getRating(), rating2.getRating());
+                    assertEquals(insRating.getReview(), rating2.getReview());
                 })
                 .verifyComplete();
         StepVerifier.create(ratingRepository.findRatingsByProductId(productId))
@@ -72,6 +78,7 @@ class RatingRepositoryIntegrationTest {
                 .productId(productId)
                 .customerId(customerId)
                 .rating((byte) 5)
+                .review("It's great")
                 .build();
 
         StepVerifier.create(ratingRepository.save(rating))
@@ -81,6 +88,7 @@ class RatingRepositoryIntegrationTest {
                     assertEquals(insRating.getCustomerId(), rating.getCustomerId());
                     assertEquals(insRating.getProductId(), rating.getProductId());
                     assertEquals(insRating.getRating(), rating.getRating());
+                    assertEquals(insRating.getReview(), rating.getReview());
                 })
                 .verifyComplete();
         StepVerifier.create(ratingRepository.findRatingByCustomerIdAndProductId(customerId, productId))
@@ -89,6 +97,7 @@ class RatingRepositoryIntegrationTest {
                     assertEquals(foundRating.getProductId(), rating.getProductId());
                     assertEquals(foundRating.getCustomerId(), rating.getCustomerId());
                     assertEquals(foundRating.getRating(), rating.getRating());
+                    assertEquals(foundRating.getReview(), rating.getReview());
                 })
                 .verifyComplete();
     }
@@ -103,12 +112,14 @@ class RatingRepositoryIntegrationTest {
                 .productId(productId)
                 .customerId(customerId1)
                 .rating((byte) 2)
+                .review("It's not bad neither good")
                 .build();
 
         Rating rating2 = Rating.builder()
                 .productId(productId)
                 .customerId(customerId2)
                 .rating((byte) 5)
+                .review("It's great")
                 .build();
 
         StepVerifier.create(ratingRepository.save(rating1))
@@ -118,6 +129,7 @@ class RatingRepositoryIntegrationTest {
                     assertEquals(insRating.getProductId(), rating1.getProductId());
                     assertEquals(insRating.getCustomerId(), rating1.getCustomerId());
                     assertEquals(insRating.getRating(), rating1.getRating());
+                    assertEquals(insRating.getReview(), rating1.getReview());
                 })
                 .verifyComplete();
         StepVerifier.create(ratingRepository.save(rating2))
@@ -127,6 +139,7 @@ class RatingRepositoryIntegrationTest {
                     assertEquals(insRating.getProductId(), rating2.getProductId());
                     assertEquals(insRating.getCustomerId(), rating2.getCustomerId());
                     assertEquals(insRating.getRating(), rating2.getRating());
+                    assertEquals(insRating.getReview(), rating2.getReview());
                 })
                 .verifyComplete();
         StepVerifier.create(ratingRepository.findRatingsByProductId(productId))
