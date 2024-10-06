@@ -23,8 +23,8 @@ public class CartServiceClient {
     private final String PromoCodeServiceUrl;
 
     public CartServiceClient(WebClient.Builder webClientBuilder,
-                                 @Value("${app.cart-service.host}") String CartServiceHost,
-                                 @Value("${app.cart-service.port}") String CartServicePort) {
+                             @Value("${app.cart-service.host}") String CartServiceHost,
+                             @Value("${app.cart-service.port}") String CartServicePort) {
         this.webClientBuilder = webClientBuilder;
         CartServiceUrl = "http://" + CartServiceHost + ":" + CartServicePort + "/api/v1/carts";
         PromoCodeServiceUrl = "http://" + CartServiceHost + ":" + CartServicePort + "/api/v1/promos";
@@ -46,7 +46,7 @@ public class CartServiceClient {
                 .bodyToMono(CartResponseDTO.class);
     }
 
-    public Mono<CartResponseDTO> removeProductFromCart(String cartId, String productId){
+    public Mono<CartResponseDTO> removeProductFromCart(String cartId, String productId) {
         return webClientBuilder.build()
                 .delete()
                 .uri(CartServiceUrl + "/" + cartId + "/" + productId)
@@ -90,6 +90,7 @@ public class CartServiceClient {
                 .retrieve()
                 .bodyToMono(Void.class);
     }
+
     public Flux<PromoCodeResponseDTO> getAllPromoCodes() {
         return webClientBuilder.build()
                 .get()
@@ -98,6 +99,7 @@ public class CartServiceClient {
                 .retrieve()
                 .bodyToFlux(PromoCodeResponseDTO.class);
     }
+
     public Mono<PromoCodeResponseDTO> getPromoCodeById(String promoCodeId) {
         return webClientBuilder.build()
                 .get()
@@ -134,9 +136,6 @@ public class CartServiceClient {
                 .retrieve()
                 .bodyToMono(PromoCodeResponseDTO.class);
     }
-
-
-}
 
     public Mono<Void> assignCartToUser(String customerId) {
         return webClientBuilder.build().post()
