@@ -35,11 +35,9 @@ export default function InventoriesListTable(): JSX.Element {
   }>({});
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
-  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   const handleMenuClick = (
     e: React.MouseEvent<SVGElement>,
     inventoryId: string
-    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   ) => {
     e.stopPropagation();
     setOpenMenuId(openMenuId === inventoryId ? null : inventoryId);
@@ -57,13 +55,11 @@ export default function InventoriesListTable(): JSX.Element {
   useEffect(() => {
     getInventoryList('', '', '');
     fetchAllInventoryTypes();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage]);
 
   useEffect(() => {
     getInventoryList('', '', '');
     refreshInventoryTypes();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage]);
 
   const clearQueries = (): void => {
@@ -152,10 +148,6 @@ export default function InventoriesListTable(): JSX.Element {
       );
 
       if (response.status === 404) {
-        // eslint-disable-next-line no-console
-        console.log(
-          `No products below threshold in inventory: ${inventory.inventoryName}`
-        );
       }
 
       const data = await response.json();
