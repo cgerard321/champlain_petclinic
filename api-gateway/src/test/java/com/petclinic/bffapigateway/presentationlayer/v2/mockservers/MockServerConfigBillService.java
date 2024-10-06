@@ -2,6 +2,8 @@ package com.petclinic.bffapigateway.presentationlayer.v2.mockservers;
 
 import org.mockserver.client.MockServerClient;
 import org.mockserver.integration.ClientAndServer;
+import org.mockserver.matchers.Times;
+import org.mockserver.model.Parameter;
 
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
@@ -16,6 +18,7 @@ public class MockServerConfigBillService {
         this.clientAndServer = ClientAndServer.startClientAndServer(BILL_SERVICE_SERVER_PORT);
     }
 
+
     public void registerGetAllBillsEndpoint() {
 
         String response = "["
@@ -25,14 +28,20 @@ public class MockServerConfigBillService {
 
         mockServerClient_BillService
                 .when(
-                    request()
-                            .withMethod("GET")
-                            .withPath("/bills")
+                        request()
+                                .withMethod("GET")
+                                .withPath("/bills")
+                                .withQueryStringParameters(
+                                        Parameter.param("page", "[0-9]+"), // Expecting digit characters for page
+                                        Parameter.param("size", "[0-9]+")  // Expecting digit characters for size
+                                ),
+                        Times.unlimited()
                 )
                 .respond(
                         response()
                                 .withStatusCode(200)
                                 .withBody(json(response))
+                                .withHeader("Content-Type", "application/json")
                 );
     }
 
