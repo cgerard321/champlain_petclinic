@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { NavBar } from '@/layouts/AppNavBar.tsx';
 import './VetDetails.css';
 import axios from 'axios';
+import DeleteVetPhoto from '@/pages/Vet/DeleteVetPhoto.tsx';
 
 interface VetResponseType {
   vetId: string;
@@ -29,6 +30,35 @@ export default function VetDetails(): JSX.Element {
   const [specialtyId, setSpecialtyId] = useState('');
   const [specialtyName, setSpecialtyName] = useState('');
   const [enlargedPhoto, setEnlargedPhoto] = useState<string | null>(null);
+
+  const fetchVetPhoto = useCallback(async (): Promise<void> => {
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/v2/gateway/vets/${vetId}/photo`,
+        {
+          method: 'GET',
+          headers: {
+            Accept: 'image/*',
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Error: ${response.statusText}`);
+      }
+
+      const blob = await response.blob();
+      const imageUrl = URL.createObjectURL(blob);
+      setPhoto(imageUrl);
+    } catch (error) {
+      setError('Failed to fetch vet photo');
+      setPhoto('/images/vet_default.jpg');
+    }
+  }, [vetId]);
+
+  const handlePhotoDeleted = (): void => {
+    fetchVetPhoto();
+  };
 
   useEffect(() => {
     const fetchVetDetails = async (): Promise<void> => {
@@ -84,36 +114,12 @@ export default function VetDetails(): JSX.Element {
       }
     };
 
-    const fetchVetPhoto = async (): Promise<void> => {
-      try {
-        const response = await fetch(
-          `http://localhost:8080/api/v2/gateway/vets/${vetId}/photo`,
-          {
-            method: 'GET',
-            headers: {
-              Accept: 'image/*',
-            },
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error(`Error: ${response.statusText}`);
-        }
-
-        const blob = await response.blob();
-        const imageUrl = URL.createObjectURL(blob);
-        setPhoto(imageUrl);
-      } catch (error) {
-        setError('Failed to fetch vet photo');
-      }
-    };
-
     fetchVetDetails().then(() => {
       fetchVetPhoto();
       fetchAlbumPhotos();
       setLoading(false);
     });
-  }, [vetId]);
+  }, [vetId, fetchVetPhoto]);
 
   const renderWorkHours = (workHoursJson: string): JSX.Element => {
     try {
@@ -189,6 +195,10 @@ export default function VetDetails(): JSX.Element {
         {photo && (
           <section className="vet-photo-container">
             <img src={photo} alt="Vet" className="vet-photo" />
+            <DeleteVetPhoto
+              vetId={vetId!}
+              onPhotoDeleted={handlePhotoDeleted}
+            />
           </section>
         )}
 
