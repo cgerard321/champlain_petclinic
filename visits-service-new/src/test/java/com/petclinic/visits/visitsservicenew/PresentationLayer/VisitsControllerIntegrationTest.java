@@ -19,7 +19,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
+
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -31,6 +31,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+import static com.mongodb.client.model.Filters.eq;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -109,14 +110,17 @@ class VisitsControllerIntegrationTest {
             .status(Status.ARCHIVED)
             .build();
 
+
     Visit visit1 = buildVisit(uuidVisit1, "this is a dummy description", vet.getVetId());
     Visit visit2 = buildVisit(uuidVisit2, "this is a dummy description", vet.getVetId());
     Visit cancelledVisit1 = buildCancelledVisit(uuidCancelledVisit1, "this is a dummy description", vet.getVetId());
     Visit cancelledVisit2 = buildCancelledVisit(uuidCancelledVisit2, "this is a dummy description", vet.getVetId());
     Visit archivedVisit1 = buildVisitArchivedVisit("visitId1", "this is a dummy description", vet.getVetId());
     Visit archivedVisit2 = buildVisitArchivedVisit("visitId2", "this is a dummy description for archive2", vet.getVetId());
+
     private final VisitResponseDTO visitResponseDTO = buildVisitResponseDto(visit1.getVisitId(), vet.getVetId());
     private final VisitRequestDTO visitRequestDTO = buildVisitRequestDto(vet.getVetId());
+
 
     @BeforeEach
     void dbSetUp() {
@@ -465,6 +469,7 @@ class VisitsControllerIntegrationTest {
                 })
                 .verifyComplete();
     }
+
 //    @Test
 //    void archiveCompletedVisit_withInvalidVisitId_returnsNotFound() {
 //        String invalidVisitId = "invalidId";
@@ -529,7 +534,6 @@ class VisitsControllerIntegrationTest {
 //                    assertEquals(visit.get(0).getVisitEndDate(), completedVisit.getVisitEndDate());
 //                    assertEquals(visit.get(0).getStatus(), Status.ARCHIVED);
 //                });
-
 
     @Test
     void updateVisitStatus_ShouldSucceed_WhenStatusUpdatedToCancelled() {
@@ -610,3 +614,4 @@ class VisitsControllerIntegrationTest {
 
 
 }
+

@@ -235,18 +235,11 @@ public class VisitServiceImpl implements VisitService {
                 .switchIfEmpty(Mono.error(new BadRequestException("Cannot archive a visit that is not completed.")))
                 .doOnNext(visit -> {
                     visit.setStatus(Status.ARCHIVED);
-//                    visit.setVisitId(visitId);
                 })
                 .flatMap(repo::save)
 
                 .flatMap(entityDtoUtil::toVisitResponseDTO);
     }
-//    @Override
-//    public Flux<VisitResponseDTO> getAllArchivedVisits() {
-//        return repo.findAllByStatus("ARCHIVED")
-//                .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("No archived visits were found"))))
-//                .flatMap(entityDtoUtil::toVisitResponseDTO);
-//    }
 
     @Override
     public Flux<VisitResponseDTO> getAllArchivedVisits() {

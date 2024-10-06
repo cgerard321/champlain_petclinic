@@ -208,16 +208,15 @@ public class VisitController {
     }
 
 
-
     //Emergency
 
     @GetMapping(value = "/emergency")
-    public Flux<EmergencyResponseDTO> getAllEmergency(){
+    public Flux<EmergencyResponseDTO> getAllEmergency() {
         return emergencyService.GetAllEmergencies();
     }
 
-    @GetMapping(value="/emergency/{emergencyId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<EmergencyResponseDTO>> getEmergencyByEmergencyId(@PathVariable String emergencyId){
+    @GetMapping(value = "/emergency/{emergencyId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<EmergencyResponseDTO>> getEmergencyByEmergencyId(@PathVariable String emergencyId) {
         return Mono.just(emergencyId)
                 //.filter(id -> id.length() == 36)
                 //.switchIfEmpty(Mono.error(new InvalidInputException("the provided emergency id is invalid: " + emergencyId)))
@@ -227,27 +226,27 @@ public class VisitController {
     }
 
     @PostMapping(value = "/emergency")
-    public Mono<ResponseEntity<EmergencyResponseDTO>> PostEmergency(@RequestBody Mono<EmergencyRequestDTO> emergencyRequestDTOMono){
+    public Mono<ResponseEntity<EmergencyResponseDTO>> PostEmergency(@RequestBody Mono<EmergencyRequestDTO> emergencyRequestDTOMono) {
         return emergencyService.AddEmergency(emergencyRequestDTOMono)
-                .map(c->ResponseEntity.status(HttpStatus.CREATED).body(c))
+                .map(c -> ResponseEntity.status(HttpStatus.CREATED).body(c))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
-    @PutMapping(value="/emergency/{emergencyId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<EmergencyResponseDTO>> UpdateEmergency(@RequestBody Mono<EmergencyRequestDTO> emergencyRequestDTOMono, @PathVariable String emergencyId){
+    @PutMapping(value = "/emergency/{emergencyId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<EmergencyResponseDTO>> UpdateEmergency(@RequestBody Mono<EmergencyRequestDTO> emergencyRequestDTOMono, @PathVariable String emergencyId) {
         return Mono.just(emergencyId)
                 //.filter(id -> id.length() == 36)
                 //.switchIfEmpty(Mono.error(new InvalidInputException("the provided emergency id is invalid: " + emergencyId)))
-                .flatMap(id-> emergencyService.UpdateEmergency(emergencyRequestDTOMono,emergencyId))
+                .flatMap(id -> emergencyService.UpdateEmergency(emergencyRequestDTOMono, emergencyId))
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
-    @DeleteMapping(value="/emergency/{emergencyId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @DeleteMapping(value = "/emergency/{emergencyId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<EmergencyResponseDTO>> DeteleEmergency(@PathVariable String emergencyId) {
         return Mono.just(emergencyId)
-               // .filter(id -> id.length() == 36)
-               // .switchIfEmpty(Mono.error(new InvalidInputException("the provided emergency id is invalid: " + emergencyId)))
+                // .filter(id -> id.length() == 36)
+                // .switchIfEmpty(Mono.error(new InvalidInputException("the provided emergency id is invalid: " + emergencyId)))
                 .flatMap(emergencyService::DeleteEmergency)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
@@ -256,16 +255,17 @@ public class VisitController {
 
     @PutMapping(value = "/completed/{visitId}/archive", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<VisitResponseDTO>> archiveCompletedVisit(@PathVariable String visitId, @RequestBody Mono<VisitRequestDTO> visitRequestDTO) {
-    return Mono.just(visitId)
-            .switchIfEmpty(Mono.error(new InvalidInputException("the provided visit id is invalid: " + visitId)))
-            .flatMap(id -> visitService.archiveCompletedVisit(id, visitRequestDTO))
-            .map(ResponseEntity::ok)
-            .defaultIfEmpty(ResponseEntity.badRequest().build());
+        return Mono.just(visitId)
+                .switchIfEmpty(Mono.error(new InvalidInputException("the provided visit id is invalid: " + visitId)))
+                .flatMap(id -> visitService.archiveCompletedVisit(id, visitRequestDTO))
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
     @GetMapping(value = "/archived", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<VisitResponseDTO> getAllArchivedVisits() {
-        return visitService.getAllArchivedVisits();
+        return visitService.getAllArchivedVisits()
+                .switchIfEmpty(Mono.error(new NotFoundException("No archived visits found")));
     }
 
 
