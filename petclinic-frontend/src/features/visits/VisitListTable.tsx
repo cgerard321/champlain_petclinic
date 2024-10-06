@@ -71,7 +71,6 @@ export default function VisitListTable(): JSX.Element {
         });
         setVisitsAll(oldVisits => {
           if (!oldVisits.some(visit => visit.visitId === newVisit.visitId)) {
-            console.log('allVisits:', visitsAll);
             return [...oldVisits, newVisit];
           }
           return oldVisits;
@@ -182,8 +181,6 @@ export default function VisitListTable(): JSX.Element {
           visit.description.toLowerCase().includes(searchTerm.toLowerCase())
         )
       );
-      console.log('visitsAll', visitsAll);
-      console.log('visitsList', visitsList);
     } else {
       return;
     }
