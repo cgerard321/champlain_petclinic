@@ -16,6 +16,11 @@ public class ProductResponseModel {
     private String productDescription;
     private Double productSalePrice;
     private Integer quantity;
+    private Integer productStock;
+    private double averageRating;
+    private Integer productQuantity;
+
+
 
     public ProductResponseModel(String productId, String productName, String productDescription, Double productSalePrice) {
         this.productId = productId;

@@ -13,7 +13,7 @@ public interface PetService {
     Flux<PetResponseDTO> getPetsByOwnerId(String ownerId);
     Mono<Pet> updatePetByPetId(String petId, Mono<Pet> petMono);
     Mono<Void> deletePetByPetId(String petId);
-
+    Mono<PetResponseDTO> deletePetByPetIdV2(String petID);
     Mono<Pet> updatePetIsActive(String petId, String isActive);
     Flux<Pet> getAllPets();
 }

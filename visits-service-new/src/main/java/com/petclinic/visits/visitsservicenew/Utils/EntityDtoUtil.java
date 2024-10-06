@@ -1,12 +1,15 @@
 package com.petclinic.visits.visitsservicenew.Utils;
 
 
+import com.petclinic.visits.visitsservicenew.DataLayer.Emergency.Emergency;
 import com.petclinic.visits.visitsservicenew.DataLayer.Review.Review;
 import com.petclinic.visits.visitsservicenew.DataLayer.Visit;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.PetResponseDTO;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.PetsClient;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.VetDTO;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.VetsClient;
+import com.petclinic.visits.visitsservicenew.PresentationLayer.Emergency.EmergencyRequestDTO;
+import com.petclinic.visits.visitsservicenew.PresentationLayer.Emergency.EmergencyResponseDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.Review.ReviewRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.Review.ReviewResponseDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitRequestDTO;
@@ -88,6 +91,23 @@ public class EntityDtoUtil {
                 .build();
     }
 
+    public static EmergencyResponseDTO toEmergencyResponseDTO(Emergency emergency){
+        EmergencyResponseDTO emergencyResponseDTO= new EmergencyResponseDTO();
+        BeanUtils.copyProperties(emergency,emergencyResponseDTO);
+        return emergencyResponseDTO;
+    }
+
+    public static Emergency toEmergencyEntity(EmergencyRequestDTO emergencyRequestDTO){
+        return Emergency.builder()
+                .visitEmergencyId(generateEmergencyIdString())
+                .visitDate(emergencyRequestDTO.getVisitDate())
+                .description(emergencyRequestDTO.getDescription())
+                .petName(emergencyRequestDTO.getPetName())
+                .urgencyLevel(emergencyRequestDTO.getUrgencyLevel())
+                .emergencyType(emergencyRequestDTO.getEmergencyType())
+                .build();
+    }
+
 
     /**
      * Generate a random UUID and returns it. IS NOT ERROR FREEa
@@ -98,6 +118,10 @@ public class EntityDtoUtil {
     }
 
     public static String generateReviewIdString() {
+        return UUID.randomUUID().toString();
+    }
+
+    public static String generateEmergencyIdString() {
         return UUID.randomUUID().toString();
     }
 

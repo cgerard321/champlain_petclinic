@@ -1,5 +1,6 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
+import com.petclinic.bffapigateway.dtos.Products.ProductQuantityRequest;
 import com.petclinic.bffapigateway.dtos.Products.ProductRequestDTO;
 import com.petclinic.bffapigateway.dtos.Products.ProductResponseDTO;
 import lombok.extern.slf4j.Slf4j;
@@ -9,6 +10,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.Collections;
 
 @Component
 @Slf4j
@@ -28,17 +31,6 @@ public class ProductsServiceClient {
                 .build();
 
     }
-
-//    public ProductsServiceClient(WebClient.Builder webClientBuilder,
-//                                 @Value("${app.products-service.host}") String productsServiceHost,
-//                                 @Value("${app.products-service.port}") String productsServicePort) {
-//        this.webClientBuilder = webClientBuilder;
-//        productsServiceUrl = "http://" + productsServiceHost + ":" + productsServicePort + "/api/v1/products";
-//        this.webClient = webClientBuilder
-//                .baseUrl(productsServiceUrl)
-//                .build();
-//
-//    }
 
     public Flux<ProductResponseDTO> getAllProducts(Double minPrice, Double maxPrice) {
         return webClient.get()
@@ -67,7 +59,7 @@ public class ProductsServiceClient {
         return webClientBuilder.build()
                 .post()
                 .uri(productsServiceUrl)
-                .body(Mono.just(productRequestDTO), ProductResponseDTO.class)
+                .body(Mono.just(productRequestDTO), ProductRequestDTO.class)
                 .retrieve()
                 .bodyToMono(ProductResponseDTO.class);
     }
@@ -105,4 +97,24 @@ public class ProductsServiceClient {
                 .retrieve()
                 .bodyToFlux(ProductResponseDTO.class);
     }
+    public Mono<Void> decreaseProductQuantity(final String productId) {
+        return webClientBuilder.build()
+                .patch()
+                .uri(productsServiceUrl + "/" + productId)
+                .retrieve()
+                .bodyToMono(Void.class);
+
+    }
+    public Mono<Void> changeProductQuantity(final String productId, Integer productQuantity) {
+        return webClientBuilder.build()
+                .patch()
+                .uri(productsServiceUrl + "/" + productId + "/quantity")
+                .bodyValue(new ProductQuantityRequest(productQuantity))
+                .retrieve()
+                .bodyToMono(Void.class);
+    }
+
+
+
+
 }

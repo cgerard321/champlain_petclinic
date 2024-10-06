@@ -52,6 +52,8 @@ jacocoTestReport {
 	afterEvaluate {
 		classDirectories.setFrom(files(classDirectories.files.collect {
 			fileTree(dir: it, exclude: [
+//					"com/petclinic/products/utils/DataLoaderService.class",
+					"com/petclinic/products/ProductsServiceApplication.class"
 			])
 		}))
 	}
@@ -61,7 +63,7 @@ jacocoTestCoverageVerification {
 	violationRules {
 		rule {
 			limit {
-				minimum = 0.0
+				minimum = 0.60
 			}
 		}
 	}

@@ -1,0 +1,46 @@
+#titleSection {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  justify-content: center;
+}
+
+#pageTitle {
+  margin: 0px;
+  padding: 0px;
+  margin-top: 30px;
+  margin-bottom: 30px;
+}
+
+#menuSection {
+  display: flex;
+  flex-direction: row;
+  width: fit-content;
+  height: fit-content;
+  justify-self: flex-end;
+}
+
+#menuIcon {
+  width: 42px;
+  height: 42px;
+  position: relative;
+}
+
+#menuText {
+  justify-self: flex-end;
+  font-size: 1.2rem;
+  align-self: center;
+}
+
+#dropdownMenu {
+  top: 30px;
+  left: 30px;
+  padding: 5px 10px;
+  border-radius: 4px;
+  z-index: 1000;
+  position: absolute;
+  background-color: whitesmoke;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  width: 200px;
+  height: fit-content;
+}

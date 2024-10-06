@@ -20,6 +20,8 @@ const EditInventory: React.FC = (): JSX.Element => {
     inventoryName: '',
     inventoryType: '',
     inventoryDescription: '',
+    inventoryImage: '',
+    inventoryBackupImage: '',
   });
   const [inventoryTypes, setInventoryTypes] = useState<InventoryType[]>([]);
   const [error, setError] = useState<{ [key: string]: string }>({});
@@ -40,6 +42,8 @@ const EditInventory: React.FC = (): JSX.Element => {
             inventoryName: response.inventoryName,
             inventoryType: response.inventoryType,
             inventoryDescription: response.inventoryDescription,
+            inventoryImage: response.inventoryImage,
+            inventoryBackupImage: response.inventoryBackupImage,
           });
         } catch (error) {
           console.error(
@@ -195,6 +199,50 @@ const EditInventory: React.FC = (): JSX.Element => {
                 />
                 {error.inventoryDescription && (
                   <span className="error">{error.inventoryDescription}</span>
+                )}
+              </div>
+            </div>
+            <div className="col-4">
+              <div className="form-group">
+                <label>Inventory Image</label>
+                <input
+                  type="text"
+                  name="inventoryImage"
+                  className="form-control"
+                  placeholder="Inventory Image"
+                  value={inventory.inventoryImage}
+                  onChange={e =>
+                    setInventory({
+                      ...inventory,
+                      inventoryImage: e.target.value,
+                    })
+                  }
+                  required
+                />
+                {error.inventoryImage && (
+                  <span className="error">{error.inventoryImage}</span>
+                )}
+              </div>
+            </div>
+            <div className="col-4">
+              <div className="form-group">
+                <label>Inventory Backup Image</label>
+                <input
+                  type="text"
+                  name="inventoryBackupImage"
+                  className="form-control"
+                  placeholder="Inventory Backup Image"
+                  value={inventory.inventoryBackupImage}
+                  onChange={e =>
+                    setInventory({
+                      ...inventory,
+                      inventoryBackupImage: e.target.value,
+                    })
+                  }
+                  required
+                />
+                {error.inventoryBackupImage && (
+                  <span className="error">{error.inventoryBackupImage}</span>
                 )}
               </div>
             </div>

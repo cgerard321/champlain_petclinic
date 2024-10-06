@@ -5,6 +5,7 @@ public enum Status {
     UPCOMING,
     COMPLETED,
     CONFIRMED,
-    CANCELLED
+    CANCELLED,
+    ARCHIVED
 
 }

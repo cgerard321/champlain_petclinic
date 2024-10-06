@@ -2,13 +2,12 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { ProductModel } from './models/ProductModels/ProductModel';
-import './InventoriesListTable.css';
+import './InventoriesListTable.module.css';
 import './InventoryProducts.css';
 import useSearchProducts from '@/features/inventories/hooks/useSearchProducts.ts';
 
 const InventoryProducts: React.FC = () => {
   const { inventoryId } = useParams<{ inventoryId: string }>();
-
   const { productList, setProductList, getProductList } = useSearchProducts();
 
   // Declare state
@@ -28,7 +27,7 @@ const InventoryProducts: React.FC = () => {
       setError(null);
       try {
         const response = await axios.get<ProductModel[]>(
-          `http://localhost:8080/api/gateway/inventory/${inventoryId}/products`
+          `http://localhost:8080/api/v2/gateway/inventories/${inventoryId}/products/search`
         );
         setProducts(response.data);
         setProductList(response.data); // Set productList as well
@@ -49,7 +48,7 @@ const InventoryProducts: React.FC = () => {
   const deleteProduct = async (productId: string): Promise<void> => {
     try {
       await axios.delete(
-        `http://localhost:8080/api/gateway/inventory/${inventoryId}/products/${productId}`
+        `http://localhost:8080/api/v2/gateway/inventories/${inventoryId}/products/${productId}`
       );
       // Filter out the deleted product from both lists
       const updatedProducts = products.filter(
@@ -82,6 +81,51 @@ const InventoryProducts: React.FC = () => {
     // Set filteredProducts when productList changes (after the backend call)
     // Trigger a state change here in case productList is updated asynchronously
     setFilteredProducts(filtered); // Apply status filter immediately
+  };
+
+  const reduceQuantity = async (
+    productId: string,
+    currentQuantity: number
+  ): Promise<void> => {
+    if (currentQuantity > 0) {
+      try {
+        // Calculate the updated quantity
+        const updatedQuantity = currentQuantity - 1;
+
+        // Send the PATCH request to update the quantity in the backend
+        await axios.patch(
+          `http://localhost:8080/api/gateway/inventory/${inventoryId}/products/${productId}/consume`,
+          {
+            productQuantity: updatedQuantity,
+          }
+        );
+
+        // Determine the new status based on the updated quantity
+        let updatedStatus: 'RE_ORDER' | 'OUT_OF_STOCK' | 'AVAILABLE' =
+          'AVAILABLE';
+        if (updatedQuantity === 0) {
+          updatedStatus = 'OUT_OF_STOCK';
+        } else if (updatedQuantity <= 20) {
+          updatedStatus = 'RE_ORDER';
+        }
+
+        // Update the product list in the frontend
+        const updatedProducts = filteredProducts.map(product =>
+          product.productId === productId
+            ? {
+                ...product,
+                productQuantity: updatedQuantity,
+                status: updatedStatus, // Update status
+              }
+            : product
+        );
+
+        setProducts(updatedProducts);
+        setFilteredProducts(updatedProducts); // Update the filtered list if needed
+      } catch (err) {
+        setError('Failed to reduce product quantity.');
+      }
+    }
   };
 
   // UseEffect to monitor changes in productList and apply filtering
@@ -167,8 +211,8 @@ const InventoryProducts: React.FC = () => {
           </thead>
           <tbody>
             {filteredProducts.map((product: ProductModel) => (
-              <tr key={product.productId}>
-                <td>{product.productId}</td>
+              <tr key={product.productName}>
+                <td>{product.productName}</td>
                 <td>{product.productName}</td>
                 <td>{product.productDescription}</td>
                 <td>${product.productSalePrice}</td>
@@ -204,6 +248,17 @@ const InventoryProducts: React.FC = () => {
                     onClick={() => deleteProduct(product.productId)}
                   >
                     Delete
+                  </button>
+                </td>
+                <td>
+                  <button
+                    className="btn btn-primary"
+                    onClick={() =>
+                      reduceQuantity(product.productId, product.productQuantity)
+                    }
+                    disabled={product.productQuantity <= 0} // Disable if no more products
+                  >
+                    Consume
                   </button>
                 </td>
               </tr>

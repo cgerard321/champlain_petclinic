@@ -17,4 +17,4 @@ public class CartProductResponseDTO {
     private Double productSalePrice;
     private Double averageRating;
     private Integer quantityInCart;
-}
+    private Integer productQuantity;}

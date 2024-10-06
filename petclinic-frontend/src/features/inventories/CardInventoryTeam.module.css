@@ -1,0 +1,134 @@
+.cardContainerCustom {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 40px;
+  width: 100%;
+  height: fit-content;
+  margin: 0 auto;
+  min-height: 100px;
+  margin-top: 60px;
+  margin-bottom: 60px;
+}
+
+.card {
+  width: 300px;
+  height: 480px;
+  border-radius: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 15px;
+  border: 1px solid #ccc;
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition:
+    transform 0.3s ease-in-out,
+    box-shadow 0.3s ease-in-out;
+}
+
+.imageContainer {
+  width: 100%;
+  height: 50%;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.cardImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 10px 10px 0 0;
+}
+
+.card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.iconCustomized {
+  width: 26px;
+  height: 26px;
+}
+
+#iconSection {
+  display: flex;
+  flex-direction: column;
+  margin-left: auto;
+  justifiy-content: center;
+  height: fit-content;
+}
+
+#productQuantityNumber {
+  position: relative;
+  font-weight: bold;
+  top: 5px;
+  margin: 0;
+  margin-left: auto;
+}
+
+#inventoryNameText {
+  margin: 0px;
+  font-weight: bold;
+  font-size: 1.3rem;
+  padding: 0;
+  margin-top: auto;
+}
+
+.inventoryNameSection {
+  margin-top: 8%;
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+}
+
+#cardTypeSection {
+  margin-top: 20px;
+}
+
+#cardDescriptionSection {
+  width: 100%;
+}
+
+.checkboxSection {
+  margin-top: auto;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  height: fit-content;
+  width: 100%;
+  position: relative;
+}
+
+#checkboxCard {
+  margin: 0;
+  margin-left: auto;
+  margin-top: auto;
+  width: 20px;
+  height: 20px;
+}
+
+#cardMenu {
+  width: 28px;
+  height: 28px;
+}
+
+.popupMenuDiv {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  background-color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  top: 30px;
+  left: 30px;
+  z-index: 1000;
+  font-size: 14px;
+  font-weight: bold;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  height: fit-content;
+  width: 150px;
+}

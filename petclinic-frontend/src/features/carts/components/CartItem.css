@@ -1,60 +1,105 @@
 .CartItem {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   margin-bottom: 20px;
-  padding: 10px;
-  border-bottom: 1px solid #ddd;
+  padding: 15px;
+  background-color: #fff;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s;
+}
+
+.CartItem:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Slight elevation on hover */
 }
 
 .CartItem-info {
   flex: 3;
+  padding: 10px;
 }
 
-.info-title h2 {
+.info-title {
   margin: 0;
-  font-size: 1.2em;
+  font-size: 1.5em;
+  color: #333;
 }
 
 .info-description {
   color: #666;
+  margin: 5px 0;
+  font-size: 0.9em; /* Smaller font for description */
 }
 
-.info-rating {
-  margin-top: 5px;
-}
-
-.item-actions {
+.CartItem-details {
   display: flex;
   align-items: center;
-}
-
-.item-quantity input {
-  width: 50px;
-  padding: 5px;
-  margin-right: 10px;
-}
-
-.item-delete {
-  color: #f44336; /* Red for delete */
-}
-
-.item-actions-divider {
-  margin: 0 10px;
+  margin-left: 20px;
 }
 
 .CartItem-price {
   flex: 1;
+  font-size: 1.2em;
   text-align: right;
+  color: #333;
+  margin-right: 15px; /* Add margin to separate the price from the delete button */
+}
+
+.item-quantity {
+  margin-right: 20px;
+}
+
+.item-quantity input {
+  width: 60px;
+  padding: 5px;
+  margin-right: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  transition: border-color 0.3s;
+}
+
+.item-quantity input:focus {
+  border-color: #007bff; /* Highlight input on focus */
+  outline: none; /* Remove outline */
 }
 
 .delete-button {
-  background-color: #f44336; /* Red button for delete */
+  background-color: #f44336;
   color: white;
-  padding: 5px 10px;
+  padding: 16px 33px;
   border: none;
+  border-radius: 6px;
   cursor: pointer;
+  transition:
+    background-color 0.3s,
+    transform 0.3s;
+  font-size: 1em;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .delete-button:hover {
   background-color: #d32f2f;
+  transform: scale(1.05); /* Slightly increase size on hover for effect */
+}
+
+.low-stock-message {
+  color: orange;
+  font-weight: bold;
+  margin-top: 5px;
+}
+
+.error-message {
+  color: red;
+  font-weight: bold;
+  margin-top: 5px;
+}
+
+.stock-message {
+  color: orange;
+  font-weight: bold;
+}
+
+.out-of-stock {
+  color: red;
+  font-weight: bold;
 }
