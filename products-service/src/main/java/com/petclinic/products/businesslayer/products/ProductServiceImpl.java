@@ -137,7 +137,8 @@ public class ProductServiceImpl implements ProductService {
         return productRepository.findProductByProductId(productId)
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Product id was not found: " + productId))))
                 .flatMap(product -> {
-                    product.setRequestCount(product.getRequestCount() + 1);
+                    Integer currentCount = product.getRequestCount() != null ? product.getRequestCount() : 0;
+                    product.setRequestCount(currentCount + 1);
                     return productRepository.save(product).then(); // Save and complete
                 });
     }

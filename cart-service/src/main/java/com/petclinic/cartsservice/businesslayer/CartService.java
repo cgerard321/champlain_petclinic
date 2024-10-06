@@ -33,5 +33,6 @@ public interface CartService {
     public Mono<CartResponseModel> assignCartToCustomer(String customerId, List<CartProduct> products);
 
     public Mono<CartResponseModel>  findCartByCustomerId(String customerId);
+    Mono<CartResponseModel> removeProductFromCart(String cartId, String productId);
 }
 

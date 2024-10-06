@@ -281,7 +281,7 @@ class CartControllerUnitTest {
     }
 
     @Test
-    void whenAddCheckoutCart_thenReturnCartResponseModel(){
+    void whenCheckoutCart_thenReturnCartResponseModel(){
         // Arrange
         Cart cart = Cart.builder()
                 .cartId(VALID_CART_ID)
@@ -292,7 +292,7 @@ class CartControllerUnitTest {
         CartResponseModel cartResponseModel = CartResponseModel.builder()
                 .cartId(cart.getCartId())
                 .customerId("1")
-                .products(products)
+                .products(new ArrayList<>())
                 .build();
         when(cartService.checkoutCart(cart.getCartId()))
                 .thenReturn(Mono.just(cartResponseModel));
@@ -308,8 +308,7 @@ class CartControllerUnitTest {
                 .value(response -> {
                     assertEquals(cart.getCartId(), response.getCartId());
                     assertEquals(cart.getCustomerId(), response.getCustomerId());
-                    assertEquals(cart.getProducts().size(), response.getProducts().size());
-                    assertEquals(product1.getProductId(), response.getProducts().get(0).getProductId());
+                    assertEquals(0, response.getProducts().size());
                 });
 
         verify(cartService, times(1)).checkoutCart(cartResponseModel.getCartId());
