@@ -384,4 +384,34 @@ class VetControllerIntegrationTest {
                 .expectStatus().isNotFound();
     }
 
+    @Test
+    void whenDeletePhotoByVetId_thenReturnNoContent() {
+        String vetId = "ac9adeb8-625b-11ee-8c99-0242ac120002";
+        mockServerConfigVetService.registerDeletePhotoByVetIdEndpoint(vetId);
+
+        webTestClient.delete()
+                .uri(VET_ENDPOINT + "/" + vetId + "/photo")
+                .cookie("Bearer", BEARER_TOKEN)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNoContent()
+                .expectBody().isEmpty();
+    }
+
+    @Test
+    void whenDeletePhotoByVetId_PhotoNotFound_thenReturnNotFound() {
+        String vetId = "in9beda9-526t-22gg-1a96-0672ac230007";
+        mockServerConfigVetService.registerDeletePhotoByVetIdEndpointNotFound(vetId);
+
+        webTestClient.delete()
+                .uri(VET_ENDPOINT + "/" + vetId + "/photo")
+                .cookie("Bearer", BEARER_TOKEN)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Photo not found for vetId: " + vetId);
+    }
+
+
 }
