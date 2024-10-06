@@ -11,8 +11,16 @@ import java.util.Optional;
 import com.petclinic.billing.datalayer.BillResponseDTO;
 import com.petclinic.billing.datalayer.BillStatus;
 
-/*
+/**
  * This utility class will generate the PDF for the bill
+ * 
+ * This class takes billing information from a BillResponseDTO 
+ * and generates a PDF document containing the bill details. 
+ * The content is generated in-memory using a ByteArrayOutputStream 
+ * and is returned as a byte array, which could be sent to a client or stored. 
+ * The iText library is used to create and manage the PDF content. 
+ * Optional values are used to handle possible null values in the bill details, 
+ * ensuring the PDF is generated without NullPointerExceptions.
  */
 public class PdfGenerator {
 

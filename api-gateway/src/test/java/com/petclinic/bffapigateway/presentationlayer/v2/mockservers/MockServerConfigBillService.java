@@ -52,22 +52,42 @@ public class MockServerConfigBillService {
                 );
     }
 
+    // public void registerDownloadBillPdfEndpoint() {
+    //     byte[] mockPdfContent = "Mock PDF Content".getBytes();  // Simulate PDF as byte array
+        
+    //     mockServerClient_BillService
+    //         .when(
+    //             request()
+    //                 .withMethod("GET")
+    //                 .withPath("/bills/customer/[a-zA-Z0-9-]+/bills/[a-zA-Z0-9-]+/pdf")
+    //         )
+    //         .respond(
+    //             response()
+    //                 .withStatusCode(200)
+    //                 .withBody(mockPdfContent)  // Mock PDF content as byte array
+    //                 .withHeader("Content-Type", "application/pdf")
+    //         );
+    // }
+
     public void registerDownloadBillPdfEndpoint() {
-        String response = "Mock PDF Content";
-    
+        byte[] mockPdfContent = "Mock PDF Content".getBytes();  // Simulate PDF as byte array
+        
         mockServerClient_BillService
             .when(
                 request()
                     .withMethod("GET")
-                    .withPath("/bills/customer/.*/bills/.*/pdf")
+                    .withPath("/api/v2/gateway/customers/.*/bills/.*/pdf")  // Adjusted to match your test path
             )
             .respond(
                 response()
                     .withStatusCode(200)
-                    .withBody(response)  // Mock PDF content
-                    .withHeader("Content-Type", "application/pdf")
+                    .withBody(mockPdfContent)  // Send PDF content as byte array
+                    .withHeader("Content-Type", "application/pdf")  // Ensure correct Content-Type for PDF
             );
-    } 
+    }
+    
+    
+    
 
     public void stopMockServer() {
         if(clientAndServer != null)
