@@ -125,12 +125,10 @@ class VetControllerUnitTest {
 
     @Test
     void whenAddVet_asAdmin_thenReturnCreatedVetDTO() {
-        // Arrange
         VetResponseDTO createdVetResponseDTO = vetResponseDTO;
         when(authServiceClient.addVetUser(any(Mono.class)))
                 .thenReturn(Mono.just(createdVetResponseDTO));
 
-        // Act
         Mono<VetResponseDTO> result = webTestClient.post()
                 .uri(BASE_VET_URL + "/users/vets")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -143,7 +141,6 @@ class VetControllerUnitTest {
                 .getResponseBody()
                 .single();
 
-        // Assert
         StepVerifier.create(result)
                 .expectNextMatches(vetResponseDTO -> {
                     assertNotNull(vetResponseDTO);
@@ -158,7 +155,7 @@ class VetControllerUnitTest {
                 })
                 .verifyComplete();
 
-        // Verify that addVetUser was called
         verify(authServiceClient, Mockito.times(1)).addVetUser(any(Mono.class));
     }
+
 }
