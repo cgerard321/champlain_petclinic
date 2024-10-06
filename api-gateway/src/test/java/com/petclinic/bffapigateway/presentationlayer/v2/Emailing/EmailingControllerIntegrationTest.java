@@ -4,6 +4,7 @@ import com.petclinic.bffapigateway.domainclientlayer.EmailingServiceClient;
 import com.petclinic.bffapigateway.dtos.Emailing.DirectEmailModelRequestDTO;
 import com.petclinic.bffapigateway.dtos.Emailing.EmailModelResponseDTO;
 import com.petclinic.bffapigateway.dtos.Emailing.NotificationEmailModelRequestDTO;
+import com.petclinic.bffapigateway.dtos.Emailing.RawEmailModelRequestDTO;
 import com.petclinic.bffapigateway.presentationlayer.v2.EmailingController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -112,6 +113,22 @@ class EmailingControllerIntegrationTest {
         bindToController(emailingController).build()
                 .post()
                 .uri("/api/v2/gateway/emailing/send/notification")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromValue(requestDTO))
+                .exchange()
+                .expectStatus().isOk(); // Expect 200 OK
+    }
+    @Test
+    void testSendRawEmail() {
+        RawEmailModelRequestDTO requestDTO = new RawEmailModelRequestDTO(/* initialize fields */);
+
+        // Mock the service response
+        when(emailingService.sendRawEmail(requestDTO)).thenReturn(Mono.just(HttpStatus.OK));
+
+        // Execute the test
+        bindToController(emailingController).build()
+                .post()
+                .uri("/api/v2/gateway/emailing/send/raw")
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(BodyInserters.fromValue(requestDTO))
                 .exchange()

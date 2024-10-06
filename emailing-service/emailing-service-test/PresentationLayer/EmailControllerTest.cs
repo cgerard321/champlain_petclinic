@@ -17,6 +17,7 @@ public class EmailControllerTests
     private readonly string _pathOfDefaultHtml;
     private readonly DirectEmailModel _directEmailModel;
     private readonly NotificationEmailModel _notificationEmailModel;
+    private readonly RawEmailModel _rawEmailModel;
     private readonly DateTime _appropriateDate;
     public EmailControllerTests()
     {
@@ -48,6 +49,11 @@ public class EmailControllerTests
             "PetClinic",
             TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
                 TimeZoneInfo.CreateCustomTimeZone("UTC-4", new TimeSpan(-4, 0, 0), "UTC-4", "UTC-4")).AddMinutes(3)
+        );
+        _rawEmailModel = new RawEmailModel(
+                "xilef992@gmail.com",
+                "This is a test email",
+                "Your pet got killed man, please come get a hug at our clinic"
         );
     }
     [SetUp]
@@ -624,18 +630,17 @@ public class EmailControllerTests
     
     
     
-    //TODO COME HERE
+
     
     [Test]
     public async Task SendEmailNotification_EmailModelIsValid_ReturnsOkResult()
     {
-        EmailUtils.EmailTemplates.Add(new EmailTemplate("Default","<html><body>%%EMAIL_HEADERS%% %%EMAIL_BODY%% %%EMAIL_FOOTER%% %%EMAIL_NAME%% %%EMAIL_SENDER%%</body></html>"));
         // Arrange
         var emailModel = _notificationEmailModel;
         var json = JsonConvert.SerializeObject(emailModel);
 
         // Act
-        var request = new HttpRequestMessage(HttpMethod.Post, "email/send/notification")
+        var request = new HttpRequestMessage(HttpMethod.Post, "email/send/raw")
         {
             Content = new StringContent(json, Encoding.UTF8, "application/json")
         };
@@ -1114,7 +1119,148 @@ public class EmailControllerTests
         // Assert
         Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
     }
+    //TODO ------------------------
     
+    [Test]
+    public async Task SendRawEmail_EmailModelIsValid_ReturnsOkResult()
+    { 
+        // Arrange
+        var emailModel = _rawEmailModel;
+        var json = JsonConvert.SerializeObject(emailModel);
+
+        // Act
+        var request = new HttpRequestMessage(HttpMethod.Post, "email/send/raw")
+        {
+            Content = new StringContent(json, Encoding.UTF8, "application/json")
+        };
+        var response = await _httpClient.SendAsync(request);
+
+        // Assert
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+    }
+
+    [Test]
+    public async Task SendRawEmail_EmailModelIsNull_ReturnsBadRequest()
+    {
+        // Arrange
+        var requestBody = "{}"; 
+        var request = new HttpRequestMessage(HttpMethod.Post, "email/send/raw")
+        {
+            Content = new StringContent(requestBody, Encoding.UTF8, "application/json")
+        };
+
+        // Act
+        var response = await _httpClient.SendAsync(request);
+
+        // Assert
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+    }
+    [Test]
+    public async Task SendRawEmail_EmptyBody_ReturnNoContent()
+    {
+        // Arrange
+        var requestBody = ""; 
+        var request = new HttpRequestMessage(HttpMethod.Post, "email/send/raw")
+        {
+            Content = new StringContent(requestBody, Encoding.UTF8, "application/json")
+        };
+
+        // Act
+        var response = await _httpClient.SendAsync(request);
+
+        // Assert
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.NoContent));
+    }
+
+    //let's have fun and test all the exceptions!
+    [Test]
+    public async Task SendRawEmail_EmailModelHasMissingBody_BadRequest()
+    {
+
+        // Arrange
+        var emailModel = new RawEmailModel(); // create an empty DirectEmailModel instance
+        var json = JsonConvert.SerializeObject(emailModel);
+
+        // Act
+        var request = new HttpRequestMessage(HttpMethod.Post, "email/send/raw")
+        {
+            Content = new StringContent(json, Encoding.UTF8, "application/json")
+        };
+        var response = await _httpClient.SendAsync(request);
+
+        // Assert
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+    }
+    public static IEnumerable<RawEmailModel> InvalidBodyRequestraw()
+    {
+        yield return new RawEmailModel(
+            "",
+            "This is a test email",
+            "Whitespace email just won't work"
+        );
+
+        yield return new RawEmailModel(
+            " ",
+            "Another test email",
+            "Whitespace email just won't work!"
+        );
+        yield return new RawEmailModel(
+            null!,
+            "Another test email",
+            "null email... Who are we sending this to"
+        );
+        yield return new RawEmailModel(
+            "exam@ple2@test.com",
+            "Another test email",
+            "2 @ just won't do it"
+        );
+        yield return new RawEmailModel(
+            "@test.com",
+            "Another test email",
+            "Email with only the domain..."
+        );
+        yield return new RawEmailModel(
+            "example2@test",
+            "Another test email",
+            "Hun? No .com on the email"
+        );
+        yield return new RawEmailModel(
+            "example2@tes@t.com",
+            "Another test email",
+            "This email is completly wrong"
+        );
+        yield return new RawEmailModel(
+            "example2@test.com",
+            "",
+            "Da baby, let's go!!!"
+        );
+        yield return new RawEmailModel(
+            "example2@test.com",
+            "    ",
+            "Naaaannn, this is an example body"
+        );
+        yield return new RawEmailModel(
+            "example2@test.com",
+            null!,
+        "CoolBody right"
+        );
+    }
+    [Test, TestCaseSource(nameof(InvalidBodyRequestraw))]
+    public async Task SendRawEmail_EmailBodyIsInvalid_BadRequest(RawEmailModel emailModel)
+    {
+        EmailUtils.EmailTemplates.Add(new EmailTemplate("Default","<html><body>%%EMAIL_HEADERS%% %%EMAIL_BODY%% %%EMAIL_FOOTER%% %%EMAIL_NAME%% %%EMAIL_SENDER%%</body></html>"));
+        
+        var json = JsonConvert.SerializeObject(emailModel);
+        // Act
+        var request = new HttpRequestMessage(HttpMethod.Post, "email/send/raw")
+        {
+            Content = new StringContent(json, Encoding.UTF8, "application/json")
+        };
+        var response = await _httpClient.SendAsync(request);
+
+        // Assert
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+    }
     
     
     

@@ -244,4 +244,61 @@ public class EmailServiceImpl : IEmailService
             Message = $"Successfully Added email to waiting list!"
         };
     }
+
+    public OperationResult SendRawEmail(RawEmailModel model)
+    {
+        RawEmailModel directEmailModel = model;
+        Console.WriteLine("Found the model!" + directEmailModel);
+        if (String.IsNullOrWhiteSpace(directEmailModel.EmailToSendTo))
+            throw new BadEmailModel("Email To Send To is null or whitespace. EMAIL IS REQUIRED");
+        if(!EmailUtils.CheckIfEmailIsValid(directEmailModel.EmailToSendTo))
+            throw new BadEmailModel("Email To Send To Not Valid");
+        if(String.IsNullOrWhiteSpace(directEmailModel.EmailTitle))
+            throw new BadEmailModel("Email Title is null or whitespace");
+        
+        Task.Run(async () =>
+        {
+            try
+            {
+                var sendEmailResult = await EmailUtils.SendEmailAsync(
+                    directEmailModel.EmailToSendTo,
+                    directEmailModel.EmailTitle,
+                    directEmailModel.Body,
+                    EmailUtils.smtpClient
+                );
+                
+                if (sendEmailResult.Status == "Sent")
+                {
+                    // Add the email to the database with a status of "Sent"
+                    var databaseHelper = new DatabaseHelper();
+                    await databaseHelper.AddEmailAsync(
+                        directEmailModel.EmailToSendTo,
+                        directEmailModel.EmailTitle,
+                        directEmailModel.Body,
+                        "Sent"
+                    );
+                }
+                else
+                {
+                    // Add the email to the database with a status of "Failed"
+                    var databaseHelper = new DatabaseHelper();
+                    await databaseHelper.AddEmailAsync(
+                        directEmailModel.EmailToSendTo,
+                        directEmailModel.EmailTitle,
+                        directEmailModel.Body,
+                        "Failed"
+                    );
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+        });
+        return new OperationResult
+        {
+            IsSuccess = true,
+            Message = $"Successfully sent an email!"
+        };
+    }
 }
