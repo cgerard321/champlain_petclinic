@@ -9,6 +9,7 @@ import com.petclinic.bffapigateway.dtos.Vets.Album;
 import com.petclinic.bffapigateway.dtos.Vets.SpecialtyDTO;
 import com.petclinic.bffapigateway.dtos.Vets.VetRequestDTO;
 import com.petclinic.bffapigateway.dtos.Vets.VetResponseDTO;
+import com.petclinic.bffapigateway.exceptions.ExistingVetNotFoundException;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.utils.Security.Annotations.IsUserSpecific;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
@@ -44,14 +45,14 @@ public class VetController {
 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<VetResponseDTO> getVets(){
+    public Flux<VetResponseDTO> getVets() {
         return vetsServiceClient.getVets();
     }
 
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @PostMapping(value = "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<VetResponseDTO>> addVet(@RequestBody Mono<VetRequestDTO> vetRequestDTO){
+    public Mono<ResponseEntity<VetResponseDTO>> addVet(@RequestBody Mono<VetRequestDTO> vetRequestDTO) {
         return vetsServiceClient.addVet(vetRequestDTO)
                 .map(v -> ResponseEntity.status(HttpStatus.CREATED).body(v))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
@@ -63,7 +64,7 @@ public class VetController {
     @PutMapping(value = "/{vetId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<VetResponseDTO>> updateVet(
             @RequestBody Mono<VetRequestDTO> vetRequestDTOMono,
-            @PathVariable String vetId){
+            @PathVariable String vetId) {
 
         return Mono.just(vetId)
                 .filter(id -> id.length() == 36)
@@ -115,8 +116,9 @@ public class VetController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
 
     }
+
     //specialty
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
     @PostMapping(value = "{vetId}/specialties")
     public Mono<VetResponseDTO> addSpecialtiesByVetId(
             @PathVariable String vetId,
@@ -132,4 +134,11 @@ public class VetController {
     }
 
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
+    @DeleteMapping("{vetId}/photo")
+    public Mono<ResponseEntity<Void>> deletePhotoByVetId(@PathVariable String vetId) {
+        return vetsServiceClient.deletePhotoByVetId(vetId)
+                .then(Mono.just(ResponseEntity.noContent().<Void>build()))
+                .doOnError(error -> log.error("Error deleting photo for vetId: {}", vetId, error));
+    }
 }
