@@ -38,7 +38,7 @@ const ResetPasswordForm: FC = (): JSX.Element => {
         `Password reset successfully. Redirecting to login page in ${countdown} seconds...`
       );
     }
-  }, [countdown]);
+  }, [countdown, successMessage]);
 
   const validatePassword = (password: string): boolean => {
     const passwordRegex =
