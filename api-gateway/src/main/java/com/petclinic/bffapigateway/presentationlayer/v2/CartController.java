@@ -72,6 +72,13 @@ public class CartController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
+    @DeleteMapping(value = "/{cartId}/{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<CartResponseDTO>> removeProductFromCart(@PathVariable String cartId, @PathVariable String productId){
+        return cartServiceClient.removeProductFromCart(cartId, productId)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+}
+
     @PostMapping("/{cartId}/products")
     public Mono<ResponseEntity<CartResponseDTO>> addProductToCart(@PathVariable String cartId, @RequestBody AddProductRequestDTO requestDTO) {
         return cartServiceClient.addProductToCart(cartId, requestDTO)
