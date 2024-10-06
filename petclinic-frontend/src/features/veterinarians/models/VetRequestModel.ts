@@ -14,4 +14,6 @@ export interface VetRequestModel {
   active: boolean;
   specialties: Speciality[];
   photoDefault: boolean;
+  password: string; // Add this line
+  username: string;
 }

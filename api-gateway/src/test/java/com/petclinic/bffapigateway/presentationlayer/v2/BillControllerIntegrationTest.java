@@ -43,6 +43,7 @@ public class BillControllerIntegrationTest {
         mockServerConfigBillService = new MockServerConfigBillService();
         mockServerConfigBillService.registerGetAllBillsEndpoint();
         mockServerConfigBillService.registerCreateBillEndpoint();
+        mockServerConfigBillService.registerUpdateBillEndpoint();
 
         mockServerConfigAuthService = new MockServerConfigAuthService();
         mockServerConfigAuthService.registerValidateTokenForAdminEndpoint();
@@ -68,7 +69,7 @@ public class BillControllerIntegrationTest {
 
 
     private BillResponseDTO billresponse = BillResponseDTO.builder()
-            .billId("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
+            .billId("e6c7398e-8ac4-4e10-9ee0-03ef33f0361b")
             .customerId("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
             .visitType("general")
             .vetId("3")
@@ -175,6 +176,76 @@ public class BillControllerIntegrationTest {
                 .expectStatus().isUnauthorized();
     }
 
+
+    @Test
+    void whenUpdateBill_thenReturnUpdatedBill(){
+
+        BillRequestDTO updatedRequestDTO = BillRequestDTO.builder()
+                .customerId("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
+                .visitType("operation")
+                .vetId("3")
+                .date(LocalDate.parse("2024-10-11"))
+                .amount(100.0)
+                .billStatus(BillStatus.PAID)
+                .dueDate(LocalDate.parse("2024-10-13"))
+                .build();
+
+        Mono<BillResponseDTO> result =
+                webTestClient
+                        .put()
+                        .uri("/api/v2/gateway/bills/admin/{billId}","e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
+                        .cookie("Bearer", jwtTokenForValidAdmin)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(Mono.just(updatedRequestDTO), BillRequestDTO.class)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .exchange()
+                        .expectStatus().isOk()
+                        .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                        .returnResult(BillResponseDTO.class)
+                        .getResponseBody()
+                        .single();
+
+        StepVerifier
+                .create(result)
+                .expectNextMatches(billResponseDTO -> {
+                    assertNotNull(billResponseDTO);
+                    assertEquals(updatedRequestDTO.getCustomerId(), billResponseDTO.getCustomerId());
+                    assertEquals(updatedRequestDTO.getBillStatus(), billResponseDTO.getBillStatus());
+                    assertEquals(updatedRequestDTO.getVetId(), billResponseDTO.getVetId());
+                    assertEquals(updatedRequestDTO.getAmount(), billResponseDTO.getAmount());
+                    assertEquals(updatedRequestDTO.getDate(), billResponseDTO.getDate());
+                    assertEquals(updatedRequestDTO.getDueDate(), billResponseDTO.getDueDate());
+                    assertEquals(updatedRequestDTO.getVisitType(), billResponseDTO.getVisitType());
+                    return true;
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void whenUpdateBill_withInvalidBillId_thenReturnNotFound() {
+        BillRequestDTO updatedRequestDTO = BillRequestDTO.builder()
+                .customerId("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
+                .visitType("operation")
+                .vetId("3")
+                .date(LocalDate.parse("2024-10-11"))
+                .amount(100.0)
+                .billStatus(BillStatus.PAID)
+                .dueDate(LocalDate.parse("2024-10-13"))
+                .build();
+
+        String invalidBillId = "invalid-bill-id";
+
+        webTestClient
+                .put()
+                .uri("/api/v2/gateway/bills/admin/{billId}", invalidBillId)
+                .cookie("Bearer", jwtTokenForValidAdmin)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Mono.just(updatedRequestDTO), BillRequestDTO.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isEqualTo(422)
+                .expectHeader().contentType(MediaType.APPLICATION_JSON);
+    }
 
 }
 
