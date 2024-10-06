@@ -415,4 +415,63 @@ class BillResourceIntegrationTest {
 
         return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(13.37).billStatus(BillStatus.OVERDUE).dueDate(dueDate).build();
     }
+
+    @Test
+    void whenValidPageAndSizeProvided_thenReturnsCorrectBillsPage() {
+        repo.deleteAll().block();
+        for (int i = 1; i <= 15; i++) {
+            repo.save(Bill.builder()
+                    .billId("BillUUID" + i)
+                    .customerId("Cust" + i)
+                    .vetId("1")
+                    .visitType("Routine Check")
+                    .date(LocalDate.now())
+                    .amount(100.0)
+                    .billStatus(BillStatus.PAID)
+                    .dueDate(LocalDate.now().plusDays(30))
+                    .build()).block();
+        }
+
+        client.get()
+                .uri(uriBuilder -> uriBuilder.path("/bills")
+                        .queryParam("page", 1)
+                        .queryParam("size", 5)
+                        .build())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBodyList(BillResponseDTO.class)
+                .hasSize(5);
+    }
+
+    @Test
+    void whenNonExistentPageRequested_thenReturnsEmptyPage() {
+        repo.deleteAll().block();
+        for (int i = 1; i <= 5; i++) {
+            repo.save(Bill.builder()
+                    .billId("BillUUID" + i)
+                    .customerId("Cust" + i)
+                    .vetId("1")
+                    .visitType("Routine Check")
+                    .date(LocalDate.now())
+                    .amount(100.0)
+                    .billStatus(BillStatus.PAID)
+                    .dueDate(LocalDate.now().plusDays(30))
+                    .build()).block();
+        }
+
+        client.get()
+                .uri(uriBuilder -> uriBuilder.path("/bills")
+                        .queryParam("page", 10)
+                        .queryParam("size", 5)
+                        .build())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBodyList(BillResponseDTO.class)
+                .hasSize(0);
+    }
+
 }

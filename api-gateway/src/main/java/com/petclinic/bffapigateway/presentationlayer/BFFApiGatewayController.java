@@ -94,28 +94,55 @@ public class BFFApiGatewayController {
     }
 
     //to be changed
+//    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+//    @GetMapping(value = "bills/bills-pagination", produces = MediaType.APPLICATION_JSON_VALUE)
+//    public Flux<BillResponseDTO> getAllBillingByPage(@RequestParam Optional<Integer> page, @RequestParam Optional<Integer> size,
+//                                                     @RequestParam(required = false) String billId,
+//                                                     @RequestParam(required = false) String customerId,
+//                                                     @RequestParam(required = false) String ownerFirstName,
+//                                                     @RequestParam(required = false) String ownerLastName,
+//                                                     @RequestParam(required = false) String visitType,
+//                                                     @RequestParam(required = false) String vetId,
+//                                                     @RequestParam(required = false) String vetFirstName,
+//                                                     @RequestParam(required = false) String vetLastName) {
+//        if(page.isEmpty()){
+//            page = Optional.of(0);
+//        }
+//
+//        if (size.isEmpty()) {
+//            size = Optional.of(5);
+//        }
+//
+//        return billServiceClient.getAllBillsByPage(page, size, billId, customerId, ownerFirstName, ownerLastName, visitType,
+//                vetId, vetFirstName, vetLastName);
+//    }
+
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @GetMapping(value = "bills/bills-pagination", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Flux<BillResponseDTO> getAllBillingByPage(@RequestParam Optional<Integer> page, @RequestParam Optional<Integer> size,
-                                                     @RequestParam(required = false) String billId,
-                                                     @RequestParam(required = false) String customerId,
-                                                     @RequestParam(required = false) String ownerFirstName,
-                                                     @RequestParam(required = false) String ownerLastName,
-                                                     @RequestParam(required = false) String visitType,
-                                                     @RequestParam(required = false) String vetId,
-                                                     @RequestParam(required = false) String vetFirstName,
-                                                     @RequestParam(required = false) String vetLastName) {
+    @GetMapping(value = "bills", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Flux<BillResponseDTO> getAllBillingByPage(
+            @RequestParam Optional<Integer> page,
+            @RequestParam Optional<Integer> size,
+            @RequestParam(required = false) String billId,
+            @RequestParam(required = false) String customerId,
+            @RequestParam(required = false) String ownerFirstName,
+            @RequestParam(required = false) String ownerLastName,
+            @RequestParam(required = false) String visitType,
+            @RequestParam(required = false) String vetId,
+            @RequestParam(required = false) String vetFirstName,
+            @RequestParam(required = false) String vetLastName) {
+
         if(page.isEmpty()){
             page = Optional.of(0);
         }
 
         if (size.isEmpty()) {
-            size = Optional.of(5);
+            size = Optional.of(10);
         }
 
-        return billServiceClient.getAllBillsByPage(page, size, billId, customerId, ownerFirstName, ownerLastName, visitType,
-                vetId, vetFirstName, vetLastName);
+        return billServiceClient.getAllBillsByPage(page, size, billId, customerId, ownerFirstName, ownerLastName,
+                visitType, vetId, vetFirstName, vetLastName);
     }
+
 
     //to be changed
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET})
@@ -307,8 +334,8 @@ public class BFFApiGatewayController {
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping(value = "visits", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<VisitResponseDTO> getAllVisits() {
-        return visitsServiceClient.getAllVisits();
+    public Flux<VisitResponseDTO> getAllVisits(@RequestParam(required = false) String description){
+        return visitsServiceClient.getAllVisits(description);
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET,Roles.OWNER})

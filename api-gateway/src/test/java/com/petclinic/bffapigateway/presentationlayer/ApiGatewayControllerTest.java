@@ -2422,6 +2422,7 @@ class ApiGatewayControllerTest {
     }
     @Test
     void shouldGetAllVisits() {
+        // Sample VisitResponseDTO objects
         VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
                 .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
                 .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
@@ -2437,6 +2438,7 @@ class ApiGatewayControllerTest {
                 .status(Status.UPCOMING)
                 .visitEndDate(LocalDateTime.parse("2024-11-25 14:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .build();
+
         VisitResponseDTO visitResponseDTO2 = VisitResponseDTO.builder()
                 .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
                 .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
@@ -2452,18 +2454,29 @@ class ApiGatewayControllerTest {
                 .status(Status.UPCOMING)
                 .visitEndDate(LocalDateTime.parse("2024-11-25 14:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .build();
-        when(visitsServiceClient.getAllVisits()).thenReturn(Flux.just(visitResponseDTO,visitResponseDTO2));
 
+        // Mocking the service call
+        String description = "this is a dummy description";
+        when(visitsServiceClient.getAllVisits(description)).thenReturn(Flux.just(visitResponseDTO, visitResponseDTO2));
+
+        // Performing the request and asserting results
         client.get()
-                .uri("/api/gateway/visits")
+                .uri(uriBuilder -> uriBuilder
+                        .path("/api/gateway/visits")
+                        .queryParam("description", description)
+                        .build())
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE+";charset=UTF-8")
+                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE + ";charset=UTF-8")
                 .expectBodyList(VisitResponseDTO.class)
-                .value((list)->assertEquals(list.size(),2));
-        Mockito.verify(visitsServiceClient,times(1)).getAllVisits();
+                .value(list -> assertEquals(2, list.size()));  // Assert list size is 2
+
+        // Verifying the method call with the right argument
+        Mockito.verify(visitsServiceClient, times(1)).getAllVisits(description);
     }
+
+
     @Test
     void getVisitsByOwnerId_shouldReturnOk(){
         //arrange
