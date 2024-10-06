@@ -31,7 +31,6 @@ export default function AdminBillsListTable(): JSX.Element {
   const [owners, setOwners] = useState<OwnerResponseModel[]>([]);
   const [vets, setVets] = useState<VetResponseModel[]>([]);
 
-  // Memoize fetchOwnersAndVets to prevent it from being recreated on each render
   const fetchOwnersAndVets = useCallback(async (): Promise<void> => {
     try {
       const ownersList = await getAllOwners();
@@ -43,7 +42,6 @@ export default function AdminBillsListTable(): JSX.Element {
     }
   }, []);
 
-  // Only memoize the function to fetch bills based on currentPage
   useEffect(() => {
     getBillsList(currentPage, 10);
   }, [currentPage, getBillsList]);
@@ -90,7 +88,7 @@ export default function AdminBillsListTable(): JSX.Element {
     try {
       await addBill(formattedBill);
       setCreateForm(false);
-      getBillsList(currentPage, 10); // Fetch updated list after creating the bill
+      getBillsList(currentPage, 10);
     } catch (err) {
       console.error('Error creating bill:', err);
       setError('Failed to create bill. Please try again.');
@@ -133,8 +131,7 @@ export default function AdminBillsListTable(): JSX.Element {
       const response = await deleteBill(billToDelete);
       if (response.status === 200 || response.status === 204) {
         window.alert('Bill (${billId}) has been deleted successfully');
-        getBillsList(currentPage, 10); // Refresh list after deletion
-      } else {
+        getBillsList(currentPage, 10);
         window.alert('Cannot delete this bill. It may be unpaid or overdue.');
       }
     } catch (error) {
@@ -154,13 +151,13 @@ export default function AdminBillsListTable(): JSX.Element {
 
   const handlePreviousPage = (): void => {
     if (currentPage > 0) {
-      setCurrentPage(currentPage - 1); // Fix: Directly pass the number
+      setCurrentPage(currentPage - 1);
     }
   };
 
   const handleNextPage = (): void => {
     if (hasMore) {
-      setCurrentPage(currentPage + 1); // Fix: Directly pass the number
+      setCurrentPage(currentPage + 1);
     }
   };
 

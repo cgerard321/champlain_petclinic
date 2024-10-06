@@ -18,17 +18,14 @@ export default function useGetAllBillsPaginated(): UseGetAllBillsPaginatedReturn
   const getBillsList = useCallback(
     async (page: number, size: number): Promise<void> => {
       try {
-        // Fetch the exact number of bills for the current page
         const bills = await getAllBillsPaginated(page, size);
 
-        // Update the bills list
         setBillsList(bills);
 
-        // If the number of bills fetched equals the page size, assume there's more data
         if (bills.length === size) {
           setHasMore(true);
         } else {
-          setHasMore(false); // No more pages if less than the page size is fetched
+          setHasMore(false);
         }
       } catch (error) {
         console.error('Error fetching bills:', error);
