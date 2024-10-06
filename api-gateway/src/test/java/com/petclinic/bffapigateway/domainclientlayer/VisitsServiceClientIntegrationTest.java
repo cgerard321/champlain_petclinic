@@ -1084,4 +1084,41 @@ class VisitsServiceClientIntegrationTest {
                 .expectErrorMatches(throwable -> throwable instanceof WebClientResponseException.NotFound)
                 .verify();
     }
+
+    @Test
+    void deleteReview_Success() throws JsonProcessingException {
+        // Simulate a successful deletion response
+        ReviewResponseDTO expectedResponse = ReviewResponseDTO.builder()
+                .reviewId(REVIEW_ID)
+                .build();
+
+        // Enqueue a successful response
+        server.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(objectMapper.writeValueAsString(expectedResponse)));
+
+        // Call the deleteReview method
+        Mono<ReviewResponseDTO> responseMono = visitsServiceClient.deleteReview(REVIEW_ID);
+
+        // Verify that the response matches the expected values
+        StepVerifier.create(responseMono)
+                .expectNextMatches(response -> response.getReviewId().equals(REVIEW_ID))
+                .verifyComplete();
+    }
+
+    @Test
+    void deleteReview_Failure() {
+        // Enqueue a failure response (404 Not Found)
+        server.enqueue(new MockResponse()
+                .setResponseCode(HttpStatus.NOT_FOUND.value()));
+
+        // Call the deleteReview method
+        Mono<ReviewResponseDTO> responseMono = visitsServiceClient.deleteReview(REVIEW_ID);
+
+        // Verify that an error occurs
+        StepVerifier.create(responseMono)
+                .expectErrorMatches(throwable -> throwable instanceof WebClientResponseException.NotFound)
+                .verify();
+    }
+
 }

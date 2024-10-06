@@ -374,5 +374,12 @@ public class VisitsServiceClient {
                 .retrieve()
                 .bodyToMono(VisitResponseDTO.class); // Parse response into VisitResponseDTO
     }
+
+    public Mono<ReviewResponseDTO> deleteReview(String reviewId){
+        return webClient.delete()
+                .uri(reviewUrl + "/reviews/" + reviewId)
+                .retrieve()
+                .bodyToMono(ReviewResponseDTO.class);
+    }
 }
 
