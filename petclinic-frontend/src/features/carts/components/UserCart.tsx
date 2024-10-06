@@ -4,6 +4,7 @@ import CartItem from './CartItem';
 import { ProductModel } from '../models/ProductModel';
 import './UserCart.css';
 import { NavBar } from '@/layouts/AppNavBar';
+import { FaShoppingCart } from 'react-icons/fa'; // Importing the shopping cart icon
 
 interface ProductAPIResponse {
   productId: number;
@@ -14,6 +15,7 @@ interface ProductAPIResponse {
   quantityInCart: number;
   productQuantity: number;
 }
+
 interface InvoiceItem {
   productId: string;
   productName: string;
@@ -43,6 +45,7 @@ const UserCart = (): JSX.Element => {
   );
   const [checkoutMessage, setCheckoutMessage] = useState<string | null>(null);
   const [invoice, setInvoice] = useState<Invoice | null>(null);
+  const [cartItemCount, setCartItemCount] = useState<number>(0); // State for cart item count
 
   const subtotal = cartItems.reduce(
     (acc, item) => acc + item.productSalePrice * (item.quantity || 1),
@@ -51,6 +54,15 @@ const UserCart = (): JSX.Element => {
   const tvq = subtotal * 0.09975; // Quebec tax rate
   const tvc = subtotal * 0.05; // Canadian tax rate
   const total = subtotal + tvq + tvc;
+
+  // Function to update the cart item count
+  const updateCartItemCount = useCallback(() => {
+    const count = cartItems.reduce(
+      (acc, item) => acc + (item.quantity || 0),
+      0
+    );
+    setCartItemCount(count);
+  }, [cartItems]);
 
   useEffect(() => {
     const fetchCartItems = async (): Promise<void> => {
@@ -110,6 +122,11 @@ const UserCart = (): JSX.Element => {
     fetchCartItems();
   }, [cartId]);
 
+  // Recalculate cart item count every time cartItems change
+  useEffect(() => {
+    updateCartItemCount();
+  }, [cartItems, updateCartItemCount]);
+
   const changeItemQuantity = useCallback(
     async (
       event: React.ChangeEvent<HTMLInputElement>,
@@ -128,7 +145,7 @@ const UserCart = (): JSX.Element => {
       } else {
         // Clear error message
         setErrorMessages(prevErrors => {
-          const { ...rest } = prevErrors;
+          const rest = { ...prevErrors };
           delete rest[index];
           return rest;
         });
@@ -175,9 +192,9 @@ const UserCart = (): JSX.Element => {
   );
 
   const deleteItem = useCallback((indexToDelete: number): void => {
-    setCartItems(prevItems =>
-      prevItems.filter((_, index) => index !== indexToDelete)
-    );
+    setCartItems(prevItems => {
+      return prevItems.filter((_, index) => index !== indexToDelete);
+    });
   }, []);
 
   const clearCart = async (): Promise<void> => {
@@ -201,6 +218,7 @@ const UserCart = (): JSX.Element => {
 
       if (response.ok) {
         setCartItems([]);
+        setCartItemCount(0);
         alert('Cart has been successfully cleared!');
       } else {
         alert('Failed to clear cart');
@@ -246,9 +264,10 @@ const UserCart = (): JSX.Element => {
           issueDate: new Date().toISOString(), // Current date
         };
 
-        setInvoice(newInvoice);
-        setCheckoutMessage('Checkout successful!');
+        setInvoice(newInvoice); // Set the new invoice state
+        setCheckoutMessage('Checkout successful!'); // Notify the user
         setCartItems([]); // Clear cart after checkout
+        setCartItemCount(0);
       } else {
         setCheckoutMessage('Checkout failed.');
       }
@@ -269,6 +288,21 @@ const UserCart = (): JSX.Element => {
   return (
     <div className="UserCart">
       <NavBar />
+      <h1>User Cart</h1>
+      <div className="cart-header">
+        <h2>Your Cart</h2>
+        <div className="cart-badge-container">
+          <FaShoppingCart aria-label="Shopping Cart" />
+          {cartItemCount > 0 && (
+            <span
+              className="cart-badge"
+              aria-label={`Cart has ${cartItemCount} items`}
+            >
+              {cartItemCount}
+            </span>
+          )}
+        </div>
+      </div>
       <div className="UserCart-buttons">
         <button className="go-back-btn" onClick={() => navigate(-1)}>
           Go Back
@@ -330,9 +364,6 @@ const UserCart = (): JSX.Element => {
                   {item.productSalePrice.toFixed(2)}
                 </li>
               ))}
-              <p>Subtotal: ${invoice.subtotal.toFixed(2)}</p>
-              <p>Tax: ${invoice.tax.toFixed(2)}</p>
-              <p>Total: ${invoice.total.toFixed(2)}</p>
             </ul>
           </div>
         )}
