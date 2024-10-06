@@ -34,13 +34,13 @@ export default function VetDetails(): JSX.Element {
   const fetchVetPhoto = useCallback(async (): Promise<void> => {
     try {
       const response = await fetch(
-          `http://localhost:8080/api/v2/gateway/vets/${vetId}/photo`,
-          {
-            method: 'GET',
-            headers: {
-              Accept: 'image/*',
-            },
-          }
+        `http://localhost:8080/api/v2/gateway/vets/${vetId}/photo`,
+        {
+          method: 'GET',
+          headers: {
+            Accept: 'image/*',
+          },
+        }
       );
 
       if (!response.ok) {
@@ -196,8 +196,8 @@ export default function VetDetails(): JSX.Element {
           <section className="vet-photo-container">
             <img src={photo} alt="Vet" className="vet-photo" />
             <DeleteVetPhoto
-                vetId={vetId!}
-                onPhotoDeleted={handlePhotoDeleted}
+              vetId={vetId!}
+              onPhotoDeleted={handlePhotoDeleted}
             />
           </section>
         )}
