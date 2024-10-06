@@ -84,6 +84,37 @@ public class PhotoServiceImpl implements PhotoService {
                         }));
     }
 
+    @Override
+    public Mono<Void> deletePhotoByVetId(String vetId) {
+        return photoRepository.findByVetId(vetId)
+                .switchIfEmpty(Mono.error(new InvalidInputException("Photo not found for vetId: " + vetId)))
+                .flatMap(photo -> photoRepository.deleteByVetId(vetId))
+                .then(insertDefaultPhoto(vetId))
+                .then();
+    }
+
+    private Mono<Void> insertDefaultPhoto(String vetId) {
+        return Mono.defer(() -> {
+            try {
+                ClassPathResource defaultPhoto = new ClassPathResource("images/vet_default.jpg");
+                byte[] data = StreamUtils.copyToByteArray(defaultPhoto.getInputStream());
+
+                Photo defaultPhotoEntity = Photo.builder()
+                        .vetId(vetId)
+                        .filename("vet_default.jpg")
+                        .imgType("image/jpeg")
+                        .data(data)
+                        .build();
+
+                return photoRepository.save(defaultPhotoEntity).then();
+
+            } catch (IOException e) {
+                return Mono.error(new RuntimeException("Failed to load default photo", e));
+            }
+        });
+    }
+
+
     private ByteArrayResource createResourceFromPhoto(Photo img) {
         return new ByteArrayResource(img.getData());
     }
