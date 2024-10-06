@@ -1,6 +1,6 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { AppRoutePaths } from './shared/models/path.routes';
-import Login from '@/pages/User/Login';
+import Login from '@/pages/User/Login.tsx';
 import Inventories from '@/pages/Inventory/Inventories.tsx';
 import InventoryProducts from '@/features/inventories/InventoryProducts.tsx';
 import Vet from '@/pages/Vet/Vet.tsx';
@@ -35,6 +35,9 @@ import InventorySupplies from '@/features/inventories/InventorySupplies.tsx';
 import EditingVisit from './features/visits/models/EditingVisit';
 import UpdateCustomerPage from '@/pages/Customer/UpdateCustomerPage.tsx';
 import CustomerDetailsPage from '@/pages/Customer/CustomerDetailsPage.tsx';
+import PromoPage from "@/pages/Promos/PromoListPage.tsx";
+import AddPromoPage from "@/pages/Promos/AddPromoPage.tsx";
+import UpdatePromoPage from "@/pages/Promos/UpdatePromoPage.tsx";
 
 const router = createBrowserRouter([
   {
@@ -223,6 +226,30 @@ const router = createBrowserRouter([
           <ProtectedRoute roles={['ADMIN']}>
             <CartPage />
           </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.Promos,
+        element: (
+            <ProtectedRoute roles={['ADMIN']}>
+              <PromoPage />
+            </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.AddPromo,
+        element: (
+            <ProtectedRoute roles={['ADMIN']}>
+              <AddPromoPage />
+            </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.UpdatePromo,
+        element: (
+            <ProtectedRoute roles={['ADMIN']}>
+              <UpdatePromoPage />
+            </ProtectedRoute>
         ),
       },
       {

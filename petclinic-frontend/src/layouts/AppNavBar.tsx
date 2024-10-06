@@ -93,6 +93,11 @@ export function NavBar(): JSX.Element {
                     Emails
                   </Nav.Link>
                 )}
+                {IsAdmin() && (
+                    <Nav.Link as={Link} to={AppRoutePaths.Promos}>
+                      Promos
+                    </Nav.Link>
+                )}
                 {
                   <Nav.Link as={Link} to={AppRoutePaths.Products}>
                     Shop

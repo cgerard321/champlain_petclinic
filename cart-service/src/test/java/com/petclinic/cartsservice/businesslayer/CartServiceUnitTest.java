@@ -193,6 +193,7 @@ class CartServiceUnitTest {
     }
 
 
+
     @Test
     public void clearCart_Success() {
         Cart mockCart = new Cart("1", "cart1", Arrays.asList("prod1", "prod2"), "customer1");
