@@ -1,4 +1,4 @@
-import { useState, useEffect, JSX } from 'react';
+import { useCallback, useState, useEffect, JSX } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Inventory } from '@/features/inventories/models/Inventory.ts';
 import { InventoryType } from '@/features/inventories/models/InventoryType.ts';
@@ -51,16 +51,6 @@ export default function InventoriesListTable(): JSX.Element {
     getInventoryList,
     setCurrentPage,
   } = useSearchInventories();
-
-  useEffect(() => {
-    getInventoryList('', '', '');
-    fetchAllInventoryTypes();
-  }, [currentPage]);
-
-  useEffect(() => {
-    getInventoryList('', '', '');
-    refreshInventoryTypes();
-  }, [currentPage]);
 
   const clearQueries = (): void => {
     setInventoryName('');
@@ -163,14 +153,14 @@ export default function InventoriesListTable(): JSX.Element {
     }
   };
 
-  const fetchAllInventoryTypes = async (): Promise<void> => {
+  const fetchAllInventoryTypes = useCallback(async (): Promise<void> => {
     const data = await getAllInventoryTypes();
     setInventoryTypeList(data);
-  };
+  }, []);
 
-  const refreshInventoryTypes = async (): Promise<void> => {
+  const refreshInventoryTypes = useCallback(async () => {
     await fetchAllInventoryTypes();
-  };
+  }, [fetchAllInventoryTypes]);
 
   const handleInventorySelection = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -200,6 +190,16 @@ export default function InventoriesListTable(): JSX.Element {
     // Clear the selected inventories
     setSelectedInventories([]);
   };
+
+  useEffect(() => {
+    getInventoryList('', '', '');
+    fetchAllInventoryTypes();
+  }, [currentPage, getInventoryList, fetchAllInventoryTypes]);
+
+  useEffect(() => {
+    getInventoryList('', '', '');
+    refreshInventoryTypes();
+  }, [currentPage, getInventoryList, refreshInventoryTypes]);
 
   return (
     <>
