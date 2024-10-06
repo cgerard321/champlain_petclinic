@@ -1,6 +1,6 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { AppRoutePaths } from './shared/models/path.routes';
-import Login from '@/pages/User/Login.tsx';
+import Login from '@/pages/User/Login';
 import SignUp from '@/pages/User/SignUp';
 import Home from '@/pages/Home/Home.tsx';
 import ProfilePage from '@/pages/Customer/ProfilePage.tsx';
