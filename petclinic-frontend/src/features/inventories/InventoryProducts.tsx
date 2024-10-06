@@ -83,20 +83,26 @@ const InventoryProducts: React.FC = () => {
     setFilteredProducts(filtered); // Apply status filter immediately
   };
 
-  const reduceQuantity = async (productId: string, currentQuantity: number): Promise<void> => {
+  const reduceQuantity = async (
+    productId: string,
+    currentQuantity: number
+  ): Promise<void> => {
     if (currentQuantity > 0) {
       try {
         // Send a PATCH/PUT request to update the quantity in the backend
         const updatedQuantity = currentQuantity - 1;
-        await axios.patch(`http://localhost:8080/api/gateway/inventory/${inventoryId}/products/${productId}`, {
-          productQuantity: updatedQuantity,
-        });
+        await axios.patch(
+          `http://localhost:8080/api/gateway/inventory/${inventoryId}/products/${productId}`,
+          {
+            productQuantity: updatedQuantity,
+          }
+        );
 
         // Update the product list in the frontend
         const updatedProducts = products.map(product =>
-            product.productId === productId
-                ? { ...product, productQuantity: updatedQuantity }
-                : product
+          product.productId === productId
+            ? { ...product, productQuantity: updatedQuantity }
+            : product
         );
         setProducts(updatedProducts);
         setFilteredProducts(updatedProducts); // Update the filtered list if needed
@@ -231,13 +237,14 @@ const InventoryProducts: React.FC = () => {
                 <td>
                   <button
                     className="btn btn-primary"
-                    onClick={() => reduceQuantity(product.productId, product.productQuantity)}
+                    onClick={() =>
+                      reduceQuantity(product.productId, product.productQuantity)
+                    }
                     disabled={product.productQuantity <= 0} // Disable if no more products
                   >
                     Consume
                   </button>
                 </td>
-
               </tr>
             ))}
           </tbody>
