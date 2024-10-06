@@ -97,7 +97,7 @@ public class BillControllerIntegrationTest {
     void whenGetAllBills_asAdmin_thenReturnAllBills() {
         Flux<BillResponseDTO> result = webTestClient
                 .get()
-                .uri("/api/v2/gateway/bills/admin")
+                .uri("/api/v2/gateway/bills")
                 .cookie("Bearer", jwtTokenForValidAdmin)
                 .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
                 .exchange()
