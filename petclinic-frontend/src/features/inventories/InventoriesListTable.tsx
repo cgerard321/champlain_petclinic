@@ -9,12 +9,10 @@ import deleteInventory from '@/features/inventories/api/deleteInventory.ts';
 import AddInventory from '@/features/inventories/AddInventoryForm.tsx';
 import AddInventoryType from '@/features/inventories/AddInventoryType.tsx';
 import { ProductModel } from '@/features/inventories/models/ProductModels/ProductModel.ts';
-import AddProductForm from '@/features/inventories/AddProductForm.tsx';
 import inventoryStyles from './InventoriesListTable.module.css';
 import cardStylesInventory from './CardInventoryTeam.module.css';
 import DefaultInventoryImage from '@/assets/Inventory/DefaultInventoryImage.jpg';
 
-//TODO: create add inventory form component and change the component being shown on the inventories page on the onClick event of the add inventory button
 export default function InventoriesListTable(): JSX.Element {
   const [selectedInventories, setSelectedInventories] = useState<Inventory[]>(
     []
@@ -28,7 +26,6 @@ export default function InventoriesListTable(): JSX.Element {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [showAddInventoryForm, setShowAddInventoryForm] = useState(false);
   const [showAddTypeForm, setShowAddTypeForm] = useState(false);
-  const [showAddProductModal, setShowAddProductModal] = useState(false);
   const navigate = useNavigate();
   const [lowStockProductsByInventory, setLowStockProductsByInventory] =
     useState<{ [inventoryName: string]: ProductModel[] }>({});
@@ -36,9 +33,16 @@ export default function InventoriesListTable(): JSX.Element {
   const [productQuantities, setProductQuantities] = useState<{
     [key: string]: number;
   }>({});
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
-  const toggleAddProductModal = (): void => {
-    setShowAddProductModal(prev => !prev);
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  const handleMenuClick = (
+    e: React.MouseEvent<SVGElement>,
+    inventoryId: string
+    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  ) => {
+    e.stopPropagation();
+    setOpenMenuId(openMenuId === inventoryId ? null : inventoryId);
   };
 
   const {
@@ -176,10 +180,6 @@ export default function InventoriesListTable(): JSX.Element {
     await fetchAllInventoryTypes();
   };
 
-  const handleAddProductSubmit = (): void => {
-    setShowAddProductModal(false);
-  };
-
   const handleInventorySelection = (
     e: React.ChangeEvent<HTMLInputElement>,
     inventory: Inventory
@@ -209,27 +209,21 @@ export default function InventoriesListTable(): JSX.Element {
     setSelectedInventories([]);
   };
 
-  const alertThing = (): void => {
-    alert('BUTTON CLICKED');
-  };
-
   return (
     <>
       <div>
-        <table className={`table table-striped ${inventoryStyles.table}`}>
+        <table className="table table-striped">
           <thead>
             <tr>
-              {/* <td>Inventory ID</td> */}
               <td></td>
-              <td>Name</td>
-              <td>Type</td>
-              <td>Description</td>
-              <td>Quantity of Products</td>
+              <td style={{ fontWeight: 'bold' }}>Name</td>
+              <td style={{ fontWeight: 'bold' }}>Type</td>
+              <td style={{ fontWeight: 'bold' }}>Description</td>
+              <td></td>
               <td></td>
               <td></td>
             </tr>
             <tr>
-              {/* <td></td> */}
               <td></td>
               <td>
                 <input
@@ -283,7 +277,7 @@ export default function InventoriesListTable(): JSX.Element {
               </td>
               <td>
                 <button
-                  className="btn btn-success"
+                  className="btn btn-info"
                   onClick={clearQueries}
                   title="Clear"
                 >
@@ -302,7 +296,7 @@ export default function InventoriesListTable(): JSX.Element {
               </td>
               <td>
                 <button
-                  className="btn btn-success"
+                  className="btn btn-info"
                   onClick={() =>
                     getInventoryList(
                       inventoryName,
@@ -324,85 +318,149 @@ export default function InventoriesListTable(): JSX.Element {
                   </svg>
                 </button>
               </td>
+              <td></td>
             </tr>
           </thead>
-          <tbody>
-            {inventoryList.map(inventory => (
-              <tr key={inventory.inventoryId}>
-                <td>
-                  <input
-                    type="checkbox"
-                    checked={selectedInventories.some(
-                      selectedInventory =>
-                        selectedInventory.inventoryId === inventory.inventoryId
-                    )}
-                    onChange={e => handleInventorySelection(e, inventory)}
-                  />
-                </td>
-                <td
-                  onClick={() =>
-                    navigate(`/inventory/${inventory.inventoryId}/products`)
-                  }
-                  style={{
-                    cursor: 'pointer',
-                    textDecoration: 'underline',
-                    color: 'blue',
-                  }}
-                >
-                  {inventory.inventoryName}
-                </td>
-                <td>{inventory.inventoryType}</td>
-                <td>{inventory.inventoryDescription}</td>
-                <td>
-                  {productQuantities[inventory.inventoryId] !== undefined
-                    ? productQuantities[inventory.inventoryId]
-                    : 'Loading...'}{' '}
-                </td>
-                <td>
-                  <button
-                    onClick={e => {
-                      e.stopPropagation();
-                      navigate(`inventory/${inventory.inventoryId}/edit`);
-                    }}
-                    className="btn btn-warning"
-                  >
-                    Edit
-                  </button>
-                </td>
-                <td>
-                  <button
-                    className="btn btn-danger"
-                    onClick={e => {
-                      e.stopPropagation();
-                      deleteInventoryHandler(inventory);
-                    }}
-                    title="Delete"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="32"
-                      height="32"
-                      fill="currentColor"
-                      className="bi bi-trash"
-                      viewBox="0 0 16 16"
-                    >
-                      <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z" />
-                      <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z" />
-                    </svg>
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
         </table>
-        <div className="d-flex justify-content-center">
+        {/*//Cards start here*/}
+        <div className={cardStylesInventory.cardContainerCustom}>
+          {inventoryList.map(inventory => (
+            <div
+              className={cardStylesInventory.card}
+              key={inventory.inventoryName}
+              onClick={() =>
+                navigate(`/inventory/${inventory.inventoryId}/products`)
+              }
+              onMouseLeave={() => setOpenMenuId(null)}
+              style={{ cursor: 'pointer' }}
+            >
+              <div className={cardStylesInventory.imageContainer}>
+                <img
+                  src={inventory.inventoryImage}
+                  alt={inventory.inventoryName}
+                  className={cardStylesInventory.cardImage}
+                  onError={(
+                    e: React.SyntheticEvent<HTMLImageElement, Event>
+                  ) => {
+                    const target = e.target as HTMLImageElement;
+                    if (inventory.inventoryBackupImage) {
+                      target.src = inventory.inventoryBackupImage;
+                      target.onerror = () => {
+                        target.onerror = null;
+                        target.src = DefaultInventoryImage;
+                      };
+                    } else {
+                      target.src = DefaultInventoryImage;
+                    }
+                  }}
+                />
+              </div>
+              <div className={cardStylesInventory.inventoryNameSection}>
+                <p id={cardStylesInventory.inventoryNameText}>
+                  {inventory.inventoryName}
+                </p>
+                <div id={cardStylesInventory.iconSection}>
+                  <p id={cardStylesInventory.productQuantityNumber}>
+                    {productQuantities[inventory.inventoryId] !== undefined
+                      ? productQuantities[inventory.inventoryId]
+                      : 'Loading...'}{' '}
+                  </p>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    fill="currentColor"
+                    className={`bi bi-box-fill ${cardStylesInventory.iconCustomized}`}
+                    viewBox="0 0 16 16"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M15.528 2.973a.75.75 0 0 1 .472.696v8.662a.75.75 0 0 1-.472.696l-7.25 2.9a.75.75 0 0 1-.557 0l-7.25-2.9A.75.75 0 0 1 0 12.331V3.669a.75.75 0 0 1 .471-.696L7.443.184l.004-.001.274-.11a.75.75 0 0 1 .558 0l.274.11.004.001zm-1.374.527L8 5.962 1.846 3.5 1 3.839v.4l6.5 2.6v7.922l.5.2.5-.2V6.84l6.5-2.6v-.4l-.846-.339Z"
+                    />
+                  </svg>
+                </div>
+              </div>
+              <div id={cardStylesInventory.cardTypeSection}>
+                <p>Type: {inventory.inventoryType}</p>
+              </div>
+              <div id={cardStylesInventory.cardDescriptionSection}>
+                <p>{inventory.inventoryDescription}</p>
+              </div>
+              <div className={cardStylesInventory.checkboxSection}>
+                <svg
+                  id={cardStylesInventory.cardMenu}
+                  onClick={e => handleMenuClick(e, inventory.inventoryId)}
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  fill="currentColor"
+                  className="bi bi-pencil-square"
+                  viewBox="0 0 16 16"
+                >
+                  <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z" />
+                  <path
+                    fillRule="evenodd"
+                    d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"
+                  />
+                </svg>
+                {openMenuId === inventory.inventoryId && (
+                  <div className={cardStylesInventory.popupMenuDiv}>
+                    <button
+                      onClick={e => {
+                        e.stopPropagation();
+                        navigate(`inventory/${inventory.inventoryId}/edit`);
+                      }}
+                      className="btn btn-warning"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      className="btn btn-danger"
+                      onClick={e => {
+                        e.stopPropagation();
+                        deleteInventoryHandler(inventory);
+                      }}
+                      title="Delete"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="32"
+                        height="32"
+                        fill="currentColor"
+                        className="bi bi-trash"
+                        viewBox="0 0 16 16"
+                      >
+                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z" />
+                        <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z" />
+                      </svg>
+                    </button>
+                  </div>
+                )}
+                <input
+                  id={cardStylesInventory.checkboxCard}
+                  type="checkbox"
+                  checked={selectedInventories.some(
+                    selectedInventory =>
+                      selectedInventory.inventoryId === inventory.inventoryId
+                  )}
+                  onChange={e => handleInventorySelection(e, inventory)}
+                  onClick={e => e.stopPropagation()}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+        <div
+          className="d-flex justify-content-center"
+          style={{ marginBottom: '100px' }}
+        >
           <div className="text-center">
             <table>
               <tbody>
                 <tr>
                   <td>
                     <button
-                      className="btn btn-success btn-sm"
+                      className="btn btn-primary btn-sm"
                       onClick={pageBefore}
                     >
                       &lt;
@@ -414,7 +472,7 @@ export default function InventoriesListTable(): JSX.Element {
                   </td>
                   <td>
                     <button
-                      className="btn btn-success btn-sm"
+                      className="btn btn-primary btn-sm"
                       onClick={pageAfter}
                       disabled={inventoryList.length === 0}
                     >
@@ -448,7 +506,7 @@ export default function InventoriesListTable(): JSX.Element {
         <button
           className="btn btn-danger"
           onClick={deleteSelectedInventories}
-          disabled={selectedInventories.length === 0} // Disable if no items selected
+          disabled={selectedInventories.length === 0}
         >
           Delete Selected Inventories
         </button>
@@ -520,7 +578,7 @@ export default function InventoriesListTable(): JSX.Element {
 
         <button
           className="add-inventorytype-button btn btn-primary"
-          onClick={() => setShowAddTypeForm(true)} // Show the form when clicked
+          onClick={() => setShowAddTypeForm(true)}
         >
           Add InventoryType
         </button>
@@ -528,7 +586,7 @@ export default function InventoriesListTable(): JSX.Element {
           <AddInventoryType
             show={showAddTypeForm}
             handleClose={() => setShowAddTypeForm(false)}
-            refreshInventoryTypes={refreshInventoryTypes} // Pass the function to refresh inventory types
+            refreshInventoryTypes={refreshInventoryTypes}
           />
         )}
 
@@ -555,70 +613,6 @@ export default function InventoriesListTable(): JSX.Element {
             </div>
           </>
         )}
-        <button className="btn btn-primary" onClick={toggleAddProductModal}>
-          Add Product
-        </button>
-        {showAddProductModal && (
-          <AddProductForm
-            onClose={toggleAddProductModal}
-            onSubmit={handleAddProductSubmit}
-          />
-        )}
-      </div>
-      <div className={cardStylesInventory.cardContainerCustom}>
-        {inventoryList.map(inventory => (
-          <div
-            className={cardStylesInventory.card}
-            key={inventory.inventoryName}
-            onClick={() =>
-              navigate(`/inventory/${inventory.inventoryId}/products`)
-            }
-            style={{ cursor: 'pointer' }}
-          >
-            <div className={cardStylesInventory.imageContainer}>
-              <img
-                src={inventory.inventoryImage}
-                alt={inventory.inventoryName}
-                className={cardStylesInventory.cardImage}
-                onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-                  const target = e.target as HTMLImageElement;
-                  if (inventory.inventoryBackupImage) {
-                    target.src = inventory.inventoryBackupImage;
-                    target.onerror = () => {
-                      target.onerror = null;
-                      target.src = DefaultInventoryImage;
-                    };
-                  } else {
-                    target.src = DefaultInventoryImage;
-                  }
-                }}
-              />
-            </div>
-            <div className={cardStylesInventory.inventoryNameSection}>
-              <h2>{inventory.inventoryName}</h2>
-              <svg
-                onClick={alertThing}
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                fill="currentColor"
-                className={`bi bi-box-fill ${cardStylesInventory.iconCustomized}`}
-                viewBox="0 0 16 16"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M15.528 2.973a.75.75 0 0 1 .472.696v8.662a.75.75 0 0 1-.472.696l-7.25 2.9a.75.75 0 0 1-.557 0l-7.25-2.9A.75.75 0 0 1 0 12.331V3.669a.75.75 0 0 1 .471-.696L7.443.184l.004-.001.274-.11a.75.75 0 0 1 .558 0l.274.11.004.001zm-1.374.527L8 5.962 1.846 3.5 1 3.839v.4l6.5 2.6v7.922l.5.2.5-.2V6.84l6.5-2.6v-.4l-.846-.339Z"
-                />
-              </svg>
-            </div>
-            <div id={cardStylesInventory.cardTypeSection}>
-              <p>Type: {inventory.inventoryType}</p>
-            </div>
-            <div id={cardStylesInventory.cardDescriptionSection}>
-              <p>{inventory.inventoryDescription}</p>
-            </div>
-          </div>
-        ))}
       </div>
     </>
   );
