@@ -30,8 +30,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import java.util.Date;
-
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
 public class BillServiceImplTest {
@@ -403,6 +401,55 @@ public class BillServiceImplTest {
 
         StepVerifier.create(returnedBill)
                 .expectError()
+                .verify();
+    }
+
+        @Test
+    public void testGenerateBillPdf() {
+        // Step 1: Mock Bill entity with first and last name
+        Bill mockBill = Bill.builder()
+                .billId("billId-1")
+                .customerId("customerId-1")
+                .ownerFirstName("John")
+                .ownerLastName("Doe")
+                .visitType("General")
+                .vetId("vetId-1")
+                .amount(100.0)
+                .billStatus(BillStatus.PAID)
+                .date(LocalDate.now())
+                .dueDate(LocalDate.now().plusDays(15))
+                .build();
+
+        String customerId = mockBill.getCustomerId();
+        String billId = mockBill.getBillId();
+
+        // Step 2: Mock the repository to return the mock Bill
+        when(repo.findByBillId(billId)).thenReturn(Mono.just(mockBill));
+
+        // Step 3: Call the method under test
+        Mono<byte[]> pdfBytesMono = billService.generateBillPdf(customerId, billId);
+
+        // Step 4: Verify the result using StepVerifier
+        StepVerifier.create(pdfBytesMono)
+                .assertNext(pdfBytes -> {
+                    assertNotNull(pdfBytes);
+                    assertTrue(pdfBytes.length > 0);
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    public void testGenerateBillPdf_BillNotFound() {
+        // Step 1: Mock the repository to return Mono.empty() when a bill is not found
+        when(repo.findByBillId(anyString())).thenReturn(Mono.empty());
+
+        // Step 2: Call the method under test
+        Mono<byte[]> pdfMono = billService.generateBillPdf("nonexistentCustomerId", "nonexistentBillId");
+
+        // Step 3: Verify that the Mono emits an error with the expected message
+        StepVerifier.create(pdfMono)
+                .expectErrorMatches(throwable -> throwable instanceof RuntimeException &&
+                        throwable.getMessage().equals("Bill not found for given customer"))
                 .verify();
     }
 
