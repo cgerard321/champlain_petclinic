@@ -11,6 +11,7 @@ import com.petclinic.bffapigateway.dtos.Vets.Album;
 import com.petclinic.bffapigateway.dtos.Vets.SpecialtyDTO;
 import com.petclinic.bffapigateway.dtos.Vets.VetRequestDTO;
 import com.petclinic.bffapigateway.dtos.Vets.VetResponseDTO;
+import com.petclinic.bffapigateway.exceptions.ExistingVetNotFoundException;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.utils.Security.Annotations.IsUserSpecific;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
@@ -118,4 +119,11 @@ public class VetController {
     }
 
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
+    @DeleteMapping("{vetId}/photo")
+    public Mono<ResponseEntity<Void>> deletePhotoByVetId(@PathVariable String vetId) {
+        return vetsServiceClient.deletePhotoByVetId(vetId)
+                .then(Mono.just(ResponseEntity.noContent().<Void>build()))
+                .doOnError(error -> log.error("Error deleting photo for vetId: {}", vetId, error));
+    }
 }
