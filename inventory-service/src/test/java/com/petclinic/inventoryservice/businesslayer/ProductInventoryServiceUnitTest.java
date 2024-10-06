@@ -19,6 +19,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
@@ -1548,6 +1549,41 @@ class ProductInventoryServiceUnitTest {
         verify(productRepository, never()).countByInventoryId(anyString());
     }
 
+
+    @Test
+    void consumeProduct_reducesProductQuantity_whenSufficientStock() {
+        String inventoryId = "inventory1";
+        String productId = "product1";
+        int quantity = 5;
+        Product product = new Product();
+        product.setProductQuantity(10);
+
+        when(productRepository.findProductByInventoryIdAndProductId(inventoryId, productId))
+                .thenReturn(Mono.just(product));
+        when(productRepository.save(any(Product.class)))
+                .thenReturn(Mono.just(product));
+
+        StepVerifier.create(productInventoryService.consumeProduct(inventoryId, productId, quantity))
+                .expectNextMatches(response -> response.getProductQuantity() == 5)
+                .verifyComplete();
+    }
+
+    @Test
+    void consumeProduct_throwsInvalidInputException_whenInsufficientStock() {
+        String inventoryId = "inventory1";
+        String productId = "product1";
+        int quantity = 15;
+        Product product = new Product();
+        product.setProductQuantity(10);
+
+        when(productRepository.findProductByInventoryIdAndProductId(inventoryId, productId))
+                .thenReturn(Mono.just(product));
+
+        StepVerifier.create(productInventoryService.consumeProduct(inventoryId, productId, quantity))
+                .expectErrorMatches(throwable -> throwable instanceof InvalidInputException &&
+                        throwable.getMessage().equals("Not enough stock to consume."))
+                .verify();
+    }
 }
 
 
