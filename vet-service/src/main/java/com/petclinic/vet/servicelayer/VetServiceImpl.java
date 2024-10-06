@@ -146,12 +146,18 @@ public class VetServiceImpl implements VetService {
                 .switchIfEmpty(Mono.error(new NotFoundException("No vet with this vetId was found: " + vetId)))
                 .flatMap(vet -> {
                     log.info("Deleting associated data for vetId: {}", vetId);
-                    //Mono<Integer> deleteBadges = badgeRepository.deleteByVetId(vetId);
-                    //Mono<Integer> deletePhotos = photoRepository.deleteByVetId(vetId);
+
+                    //Mono<Void> deleteBadges = badgeRepository.deleteByVetId(vetId);
+
+                    Mono<Void> deletePhotos = photoRepository.findByVetId(vetId)
+                            .flatMap(photoRepository::delete)
+                            .then();
+
                     Mono<String> deleteRatings = ratingRepository.deleteByVetId(vetId);
+
                     Mono<String> deleteEducations = educationRepository.deleteByVetId(vetId);
 
-                    return Mono.when( deleteRatings, deleteEducations)
+                    return Mono.when(deletePhotos, deleteRatings, deleteEducations)
                             .then(vetRepository.delete(vet))
                             .doOnSuccess(unused -> log.info("Successfully deleted vetId: {}", vetId))
                             .doOnError(error -> log.error("Error deleting vetId: {}", vetId, error));
