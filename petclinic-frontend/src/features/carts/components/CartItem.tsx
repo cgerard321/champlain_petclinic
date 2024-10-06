@@ -15,6 +15,7 @@ interface CartItemProps {
 const formatPrice = (price: number): string => {
   return `$${price.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
 };
+
 const CartItem = ({
   item,
   index,
@@ -45,7 +46,6 @@ const CartItem = ({
         <p className="info-description">{item.productDescription}</p>
       </div>
       <div className="CartItem-details">
-<<<<<<< HEAD
         <div className="item-quantity">
           <input
             type="number"
@@ -65,17 +65,6 @@ const CartItem = ({
           onClick={() => deleteItem(item.productId, index)}
           aria-label={`Remove ${item.productName} from cart`}
         >
-=======
-        <span>{formatPrice(item.productSalePrice)}</span>
-        <input
-          type="number"
-          min="1"
-          max={item.productQuantity}
-          value={item.quantity ?? 0}
-          onChange={e => changeItemQuantity(e, index)}
-        />
-        <button onClick={() => deleteItem(item.productId, index)}>
->>>>>>> ee32fce88de0991246d8860fb0565e219e2554b3
           Remove
         </button>
       </div>
