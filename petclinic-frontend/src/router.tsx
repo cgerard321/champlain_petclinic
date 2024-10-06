@@ -1,6 +1,6 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { AppRoutePaths } from './shared/models/path.routes';
-import Login from '@/pages/User/Login.tsx';
+import Login from '@/pages/User/Login';
 import Inventories from '@/pages/Inventory/Inventories.tsx';
 import InventoryProducts from '@/features/inventories/InventoryProducts.tsx';
 import Vet from '@/pages/Vet/Vet.tsx';
