@@ -6,6 +6,7 @@ import com.petclinic.bffapigateway.domainclientlayer.EmailingServiceClient;
 import com.petclinic.bffapigateway.dtos.Emailing.DirectEmailModelRequestDTO;
 import com.petclinic.bffapigateway.dtos.Emailing.EmailModelResponseDTO;
 import com.petclinic.bffapigateway.dtos.Emailing.NotificationEmailModelRequestDTO;
+import com.petclinic.bffapigateway.dtos.Emailing.RawEmailModelRequestDTO;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
 import lombok.RequiredArgsConstructor;
@@ -87,4 +88,18 @@ public class EmailingController {
                     return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()); // Handle errors
                 });
     }
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @PostMapping(
+            value = "/send/raw",
+            consumes = MediaType.APPLICATION_JSON_VALUE
+    )
+    public Mono<ResponseEntity<Object>> sendRawEmail(@RequestBody RawEmailModelRequestDTO body) {
+        return emailingService.sendRawEmail(body)
+                .map(result -> ResponseEntity.status(result.value()).build()) // Return 200 OK
+                .onErrorResume(e -> {
+                    log.error("Error sending email notification", e);
+                    return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()); // Handle errors
+                });
+    }
+
 }
