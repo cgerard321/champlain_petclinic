@@ -205,7 +205,7 @@ class ReviewServiceUnitTest {
     }
 
 
-  /*  @Test
+    @Test
     public void whenReviewIdDoesNotExistOnDelete_thenReturnNotFound() {
         // Arrange
         String nonExistentReviewId = UUID.randomUUID().toString();
@@ -219,10 +219,10 @@ class ReviewServiceUnitTest {
                 .create(result)
                 .expectErrorMatches(throwable ->
                         throwable instanceof NotFoundException &&
-                                throwable.getMessage().equals("Review id not found: " + nonExistentReviewId)
+                                throwable.getMessage().equals("review id is not found: " + nonExistentReviewId)  // Ensure the message matches the service
                 )
                 .verify();
-    }*/
+    }
 
 
 
