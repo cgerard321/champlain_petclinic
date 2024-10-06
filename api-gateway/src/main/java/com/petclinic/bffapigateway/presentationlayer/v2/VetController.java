@@ -133,7 +133,7 @@ public class VetController {
     }
 
 
-    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS, Roles.VET})
+    @SecuredEndpoint(allowedRoles = {Roles.VET, Roles.VET})
     @DeleteMapping("{vetId}/photo")
     public Mono<ResponseEntity<Void>> deletePhotoByVetId(@PathVariable String vetId) {
         return vetsServiceClient.deletePhotoByVetId(vetId)
