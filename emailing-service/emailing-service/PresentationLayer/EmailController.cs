@@ -154,4 +154,24 @@ public class EmailController : Controller
         }
         return Ok();
     }
+    
+    [HttpPost("send/raw")]
+    public IActionResult SendEmailRaw([FromBody] RawEmailModel? emailModel)
+    {
+        if( emailModel ==null || emailModel.IsEmpty())
+        {
+            return NoContent();
+        }
+
+        try
+        {
+            _emailService.SendRawEmail(emailModel);
+        }
+        catch (BadEmailModel e)
+        {
+            Console.WriteLine(e);
+            return BadRequest(new { message = e.Message });
+        }
+        return Ok();
+    }
 }

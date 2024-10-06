@@ -1,6 +1,6 @@
 :root {
-  --primary-color: #28a745; 
-  --primary-color-dark: #218838; 
+  --primary-color: #28a745;
+  --primary-color-dark: #218838;
   --input-border-color: #ccc;
   --input-focus-border-color: var(--primary-color);
   --background-color: #f9f9f9;
@@ -46,13 +46,15 @@
   border: 1px solid var(--input-border-color);
   border-radius: 4px;
   font-size: 16px;
-  transition: border-color 0.3s, box-shadow 0.3s;
+  transition:
+    border-color 0.3s,
+    box-shadow 0.3s;
 }
 
 .form-input:focus {
   border-color: var(--input-focus-border-color);
   outline: none;
-  box-shadow: 0 0 5px rgba(40, 167, 69, 0.5); 
+  box-shadow: 0 0 5px rgba(40, 167, 69, 0.5);
 }
 
 .submit-button {
@@ -63,7 +65,9 @@
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.3s, transform 0.2s;
+  transition:
+    background-color 0.3s,
+    transform 0.2s;
 }
 
 .submit-button:hover {
@@ -93,7 +97,7 @@
 
 .form-input:focus {
   border-color: var(--input-focus-border-color);
-  box-shadow: 0 0 5px rgba(40, 167, 69, 0.5); 
+  box-shadow: 0 0 5px rgba(40, 167, 69, 0.5);
 }
 
 .submit-button:focus {
