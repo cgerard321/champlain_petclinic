@@ -38,6 +38,35 @@ const ReviewsList: React.FC = (): JSX.Element => {
     }
   };
 
+  const handleDelete = async (reviewId: number): Promise<void> => {
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete review with ID: ${reviewId}?`
+    );
+    if (confirmDelete) {
+      try {
+        const response = await fetch(
+          `http://localhost:8080/api/v2/gateway/visits/reviews/${reviewId}`,
+          {
+            method: 'DELETE',
+            credentials: 'include',
+          }
+        );
+        if (response.ok) {
+          setReviewList(prev =>
+            prev.filter(review => review.reviewId !== reviewId)
+          );
+          alert('Review deleted successfully!');
+        } else {
+          console.error('Failed to delete the review.');
+          alert('Failed to delete the review.');
+        }
+      } catch (error) {
+        console.error('Error deleting review:', error);
+        alert('Error deleting review.');
+      }
+    }
+  };
+
   return (
     <div className="reviews-container">
       <h1>Reviews</h1>
@@ -71,9 +100,7 @@ const ReviewsList: React.FC = (): JSX.Element => {
                   </button>
                   <button
                     className="btn btn-danger"
-                    onClick={() => {
-                      // Add logic to delete a single review
-                    }}
+                    onClick={() => handleDelete(review.reviewId)}
                     title="Delete"
                   >
                     Delete

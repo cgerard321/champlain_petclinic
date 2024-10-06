@@ -189,6 +189,14 @@ public class VisitController {
     public Flux<VisitResponseDTO> getArchivedVisits() {
         return visitsServiceClient.getAllArchivedVisits();
     }
+  
+    @DeleteMapping(value="/reviews/{reviewId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<ReviewResponseDTO>> deleteReview(@PathVariable String reviewId) {
+        return Mono.just(reviewId)
+                .flatMap(visitsServiceClient::deleteReview)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
 
 
 }

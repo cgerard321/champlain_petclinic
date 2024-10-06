@@ -721,4 +721,38 @@ public class VisitControllerUnitTest {
 
         verify(visitsServiceClient, times(1)).getAllArchivedVisits();
     }
+  
+  void deleteReview_whenValidReviewId_thenReturnOkResponse() {
+        // Arrange
+        when(visitsServiceClient.deleteReview(eq("R001")))
+                .thenReturn(Mono.just(reviewResponseDTO)); // Mocking the service client to return a valid review response
+
+        // Act
+        webTestClient.delete()
+                .uri(REVIEWS_URL + "/{reviewId}", "R001")  // Set the valid reviewId
+                .exchange()
+                .expectStatus().isOk()  // Expect 200 OK response
+                .expectBody(ReviewResponseDTO.class)
+                .isEqualTo(reviewResponseDTO);  // Validate the response body
+
+        // Assert
+        verify(visitsServiceClient, times(1)).deleteReview(eq("R001"));  // Ensure the service method was called once
+    }
+
+    @Test
+    void deleteReview_whenInvalidReviewId_thenReturnNotFoundResponse() {
+        // Arrange
+        when(visitsServiceClient.deleteReview(eq("INVALID_ID")))
+                .thenReturn(Mono.empty());  // Mocking the service client to return empty Mono for a nonexistent review
+
+        // Act
+        webTestClient.delete()
+                .uri(REVIEWS_URL + "/{reviewId}", "INVALID_ID")  // Set an invalid reviewId
+                .exchange()
+                .expectStatus().isNotFound();  // Expect 404 Not Found response
+
+        // Assert
+        verify(visitsServiceClient, times(1)).deleteReview(eq("INVALID_ID"));  // Ensure the service method was called once
+    }
+
 }

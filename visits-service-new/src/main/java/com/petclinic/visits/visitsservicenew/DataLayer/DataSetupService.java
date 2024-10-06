@@ -48,8 +48,12 @@ public class DataSetupService implements CommandLineRunner {
 
     private void setupReviews() {
         Review review1 = buildReview("reviewId1", 5, "zako", "very good", "2022-11-24 13:00");
+        Review review2 = buildReview("reviewId2", 5, "Regine", "very good", "2022-11-24 13:00");
+        Review review3 = buildReview("reviewId3", 5, "zako2", "very good", "2022-11-24 13:00");
+        Review review4 = buildReview("reviewId4", 5, "zako3", "very good", "2022-11-24 13:00");
+        Review review5 = buildReview("reviewId5", 5, "zako4", "very good", "2022-11-24 13:00");
         // Add more reviews...
-        Flux.just(review1)
+        Flux.just(review1, review2, review3, review4, review5)
                 .flatMap(reviewRepository::insert)
                 .subscribe();
     }
