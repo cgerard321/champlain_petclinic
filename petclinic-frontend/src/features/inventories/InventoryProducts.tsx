@@ -234,7 +234,7 @@ const InventoryProducts: React.FC = () => {
                     onClick={() => reduceQuantity(product.productId, product.productQuantity)}
                     disabled={product.productQuantity <= 0} // Disable if no more products
                   >
-                    - Consume
+                    Consume
                   </button>
                 </td>
 
