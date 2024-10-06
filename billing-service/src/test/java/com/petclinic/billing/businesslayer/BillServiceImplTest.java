@@ -502,6 +502,45 @@ public class BillServiceImplTest {
     }
 
 
+    @Test
+    void getAllBillsByPage_ShouldReturnPaginatedResults() {
+        // Arrange
+        Bill bill1 = buildBill();
+        Bill bill2 = buildBill();
+        bill2.setBillId("BillUUID2"); // Different ID for distinct objects
+        Pageable pageable = PageRequest.of(0, 1);
+
+        when(repo.findAll()).thenReturn(Flux.just(bill1, bill2));
+
+        // Act
+        Flux<BillResponseDTO> result = billService.getAllBillsByPage(pageable, null, null,
+                null, null, null, null, null, null);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNextMatches(bill -> bill.getBillId().equals("BillUUID"))
+                .expectComplete()
+                .verify();
+    }
+
+
+    @Test
+    void getAllBillsByPage_WhenNoBills_ShouldReturnEmpty() {
+        // Arrange
+        Pageable pageable = PageRequest.of(0, 10);
+
+        when(repo.findAll()).thenReturn(Flux.empty());
+
+        // Act
+        Flux<BillResponseDTO> result = billService.getAllBillsByPage(pageable, null, null,
+                null, null, null, null, null, null);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNextCount(0) // Expect no bills
+                .verifyComplete();
+    }
+
 
 }
 
