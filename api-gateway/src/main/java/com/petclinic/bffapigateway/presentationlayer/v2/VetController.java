@@ -1,8 +1,10 @@
 package com.petclinic.bffapigateway.presentationlayer.v2;
 
 
+import com.petclinic.bffapigateway.domainclientlayer.AuthServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VetsServiceClient;
+import com.petclinic.bffapigateway.dtos.Auth.RegisterVet;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Vets.Album;
@@ -40,6 +42,8 @@ public class VetController {
 
 
     private final VetsServiceClient vetsServiceClient;
+    private final AuthServiceClient authServiceClient;
+
 
 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
@@ -50,13 +54,12 @@ public class VetController {
 
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @PostMapping(value = "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<VetResponseDTO>> addVet(@RequestBody Mono<VetRequestDTO> vetRequestDTO){
-        return vetsServiceClient.addVet(vetRequestDTO)
+    @PostMapping(value = "/users/vets",consumes = "application/json",produces = "application/json")
+    public Mono<ResponseEntity<VetResponseDTO>> addVet(@RequestBody Mono<RegisterVet> registerVetDTO) {
+        return authServiceClient.addVetUser(registerVetDTO)
                 .map(v -> ResponseEntity.status(HttpStatus.CREATED).body(v))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
-
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
     //@IsUserSpecific(idToMatch = {"vetId"}, bypassRoles = {Roles.ADMIN})
@@ -89,23 +92,6 @@ public class VetController {
                 .map(r -> ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, MediaType.IMAGE_JPEG_VALUE).body(r))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
-
-//    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-//    @PostMapping(value = "{vetId}/photos/{photoName}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-//    public Mono<ResponseEntity<Resource>> addPhoto(
-//            @PathVariable String vetId,
-//            @PathVariable String photoName,
-//            @RequestParam("image") MultipartFile image) throws IOException {
-//
-//
-//        // Convert MultipartFile to Resource
-//        Mono<Resource> resourceMono = Mono.just(new ByteArrayResource(image.getBytes()));
-//
-//
-//        return vetsServiceClient.addPhotoToVet(vetId, photoName, resourceMono)
-//                .map(r -> ResponseEntity.status(HttpStatus.CREATED).body(r))
-//                .defaultIfEmpty(ResponseEntity.badRequest().build());
-//    }
 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @GetMapping(value = "{vetId}", produces = MediaType.APPLICATION_JSON_VALUE)
