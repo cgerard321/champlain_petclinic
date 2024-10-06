@@ -15,5 +15,4 @@ export interface VetResponseModel {
   specialties: Speciality[];
   password: string; // Add this line
   username: string;
-
 }

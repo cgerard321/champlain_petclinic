@@ -31,13 +31,15 @@ const AddVet: React.FC = (): JSX.Element => {
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [show, setShow] = useState(false);
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
+  const handleSubmit = async (
+    event: FormEvent<HTMLFormElement>
+  ): Promise<void> => {
     event.preventDefault();
     if (!validate()) return;
 
     // Construct the payload to match Postman structure
     const vetPayload = {
-      userId: 'some-user-id',  // Make sure this is a valid ID
+      userId: 'some-user-id', // Make sure this is a valid ID
       email: vet.email,
       username: vet.username,
       password: vet.password,
@@ -54,13 +56,11 @@ const AddVet: React.FC = (): JSX.Element => {
         active: vet.active,
         specialties: vet.specialties.map(spec => ({
           specialtyId: spec.specialtyId,
-          name: spec.name
+          name: spec.name,
         })),
         photoDefault: vet.photoDefault,
-      }
+      },
     };
-
-    console.log('Vet Request Payload:', vetPayload); // Log the exact payload being sent
 
     try {
       const response = await addVet(vetPayload);
@@ -79,8 +79,6 @@ const AddVet: React.FC = (): JSX.Element => {
       }
     }
   };
-
-
 
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -204,7 +202,6 @@ const AddVet: React.FC = (): JSX.Element => {
               </Form.Control.Feedback>
             </Form.Group>
 
-
             <Form.Group className="mb-3">
               <Form.Label>Email</Form.Label>
               <Form.Control
@@ -232,7 +229,6 @@ const AddVet: React.FC = (): JSX.Element => {
                 {errors.password} {/* Add a feedback message if you want */}
               </Form.Control.Feedback>
             </Form.Group>
-
 
             <Form.Group className="mb-3">
               <Form.Label>Phone Number</Form.Label>

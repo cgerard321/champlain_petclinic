@@ -16,5 +16,4 @@ export interface VetRequestModel {
   photoDefault: boolean;
   password: string; // Add this line
   username: string;
-
 }
