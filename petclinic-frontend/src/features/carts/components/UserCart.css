@@ -32,7 +32,9 @@
 .clear-cart-btn {
   background-color: #f44336;
   color: white;
-  transition: background-color 0.3s, transform 0.2s;
+  transition:
+    background-color 0.3s,
+    transform 0.2s;
 }
 
 .clear-cart-btn:hover {

@@ -51,6 +51,7 @@
   margin-bottom: 10px;
 }
 
-.apply-filter-button, .clear-filter-button {
+.apply-filter-button,
+.clear-filter-button {
   margin-top: 10px;
 }
