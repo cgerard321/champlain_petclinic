@@ -582,7 +582,6 @@ public class VisitControllerUnitTest {
         verify(bffApiGatewayController, times(1)).getVisitsByOwnerId(ownerId);
     }
 
-<<<<<<< HEAD
     @Test
     void updateVisitStatus_ShouldReturnOK_WhenStatusUpdatedToCancelled() {
         String visitId = "12345";
@@ -629,8 +628,6 @@ public class VisitControllerUnitTest {
         // Verify that the service was called
         verify(visitsServiceClient, times(1)).patchVisitStatus(eq(visitId), eq(status));
     }
-=======
->>>>>>> dd9f2622 (Finished tests)
 
     @Test
     void archiveCompletedVisit_whenValidRequest_thenReturnVisitResponseDTO() {
@@ -719,11 +716,4 @@ public class VisitControllerUnitTest {
 
         verify(visitsServiceClient, times(1)).getAllArchivedVisits();
     }
-
-<<<<<<< HEAD
-=======
-
-
-
->>>>>>> dd9f2622 (Finished tests)
 }

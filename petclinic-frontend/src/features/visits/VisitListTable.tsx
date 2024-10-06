@@ -19,6 +19,7 @@ export default function VisitListTable(): JSX.Element {
   const [confirmedCollapsed, setConfirmedCollapsed] = useState(false);
   const [upcomingCollapsed, setUpcomingCollapsed] = useState(false);
   const [completedCollapsed, setCompletedCollapsed] = useState(false);
+  const [cancelledCollapsed, setCancelledCollapsed] = useState(false);
   const [archivedCollapsed, setArchivedCollapsed] = useState(false);
 
   const navigate = useNavigate();
@@ -158,19 +159,13 @@ export default function VisitListTable(): JSX.Element {
   const completedVisits = visitsList.filter(
     visit => visit.status === 'COMPLETED'
   );
-<<<<<<< HEAD
   const cancelledVisits = visitsList.filter(
     visit => visit.status === 'CANCELLED'
   );
-  const handleDelete = async (visitId: string): Promise<void> => {
-    const confirmDelete = window.confirm(
-      `Are you sure you want to delete visit with ID: ${visitId}?`
-=======
 
   const handleArchive = async (visitId: string): Promise<void> => {
     const confirmArchive = window.confirm(
       `Are you sure you want to archive visit with ID: ${visitId}?`
->>>>>>> d758947e (Adding back deleted methods)
     );
     if (confirmArchive) {
       try {
@@ -323,89 +318,6 @@ export default function VisitListTable(): JSX.Element {
     allowArchive: boolean = false
   ): JSX.Element => (
     <div className="visit-table-section">
-<<<<<<< HEAD
-<<<<<<< HEAD
-      <h2>{title}</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Visit Id</th>
-            <th>Visit Date</th>
-            <th>Description</th>
-            <th>Pet Name</th>
-            <th>Vet First Name</th>
-            <th>Vet Last Name</th>
-            <th>Vet Email</th>
-            <th>Visit End Date</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {visits.map(visit => (
-            <tr key={visit.visitId}>
-              <td>{visit.visitId}</td>
-              <td>{new Date(visit.visitDate).toLocaleString()}</td>
-              <td>{visit.description}</td>
-              <td>{visit.petName}</td>
-              <td>{visit.vetFirstName}</td>
-              <td>{visit.vetLastName}</td>
-              <td>{visit.vetEmail}</td>
-              <td>{new Date(visit.visitEndDate).toLocaleString()}</td>
-              <td
-                style={{
-                  color:
-                    visit.status === 'CONFIRMED'
-                      ? 'green'
-                      : visit.status === 'UPCOMING'
-                        ? 'orange'
-                        : visit.status === 'CANCELLED'
-                          ? 'red'
-                          : visit.status === 'COMPLETED'
-                            ? 'blue'
-                            : 'inherit',
-                }}
-              >
-                {visit.status}
-              </td>
-              <td>
-                <button
-                  className="btn btn-dark"
-                  onClick={() => navigate(`/visits/${visit.visitId}`)}
-                  title="View"
-                >
-                  View
-                </button>
-                <button
-                  className="btn btn-warning"
-                  onClick={() => navigate(`/visits/${visit.visitId}/edit`)}
-                  title="Edit"
-                >
-                  Edit
-                </button>
-                {allowDelete && (
-                  <button
-                    className="btn btn-danger"
-                    onClick={() => handleDelete(visit.visitId)}
-                    title="Delete"
-                  >
-                    Delete
-                  </button>
-                )}
-
-                {visit.status !== 'CANCELLED' &&
-                  visit.status !== 'COMPLETED' && (
-                    <button
-                      className="btn btn-danger"
-                      onClick={() => handleCancel(visit.visitId)}
-                    >
-                      Cancel Visit
-                    </button>
-                  )}
-              </td>
-=======
-=======
->>>>>>> 0d52aeb0 (Fix merge issues)
       <h2
         onClick={() => setCollapsed(!collapsed)}
         style={{ cursor: 'pointer' }}
@@ -446,11 +358,14 @@ export default function VisitListTable(): JSX.Element {
                         ? 'green'
                         : visit.status === 'UPCOMING'
                           ? 'orange'
-                          : visit.status === 'COMPLETED'
-                            ? 'blue'
-                            : visit.status === 'ARCHIVED'
-                              ? 'green'
-                              : 'inherit',
+                          : visit.status === 'CANCELLED'
+                            ? 'red'
+                            : visit.status === 'COMPLETED'
+                              ? 'blue'
+                              : visit.status === 'ARCHIVED'
+                                ? 'gray'
+                                : 'inherit',
+                    fontWeight: 'bold',
                   }}
                 >
                   {visit.status}
@@ -463,10 +378,9 @@ export default function VisitListTable(): JSX.Element {
                   >
                     View
                   </button>
-
                   <button
                     className="btn btn-warning"
-                    onClick={() => navigate(`/visits/${visit.visitId}/edit`)} // Edit button that triggers updateVisit
+                    onClick={() => navigate(`/visits/${visit.visitId}/edit`)}
                     title="Edit"
                   >
                     Edit
@@ -480,6 +394,17 @@ export default function VisitListTable(): JSX.Element {
                       Archive
                     </button>
                   )}
+
+                  {visit.status !== 'CANCELLED' &&
+                    visit.status !== 'ARCHIVED' &&
+                    visit.status !== 'COMPLETED' && (
+                      <button
+                        className="btn btn-danger"
+                        onClick={() => handleCancel(visit.visitId)}
+                      >
+                        Cancel Visit
+                      </button>
+                    )}
                 </td>
               </tr>
             ))}
@@ -488,7 +413,6 @@ export default function VisitListTable(): JSX.Element {
       )}
     </div>
   );
-
   return (
     <div>
       <div className="visit-actions">
@@ -525,14 +449,6 @@ export default function VisitListTable(): JSX.Element {
       {/* Emergency Table below buttons, but above visit tables */}
       {renderEmergencyTable('Emergency Visits', emergencyList)}
 
-<<<<<<< HEAD
-      {renderTable('Confirmed Visits', confirmedVisits)}
-      {renderTable('Upcoming Visits', upcomingVisits)}
-      {renderTable('Cancelled Visits', cancelledVisits)}
-      {renderTable('Completed Visits', completedVisits, true)}
-=======
-=======
->>>>>>> 0d52aeb0 (Fix merge issues)
       {renderTable(
         'Confirmed Visits',
         confirmedVisits,
@@ -553,11 +469,16 @@ export default function VisitListTable(): JSX.Element {
         true
       )}
       {renderTable(
+        'Cancelled Visits',
+        cancelledVisits,
+        cancelledCollapsed,
+        setCancelledCollapsed
+      )}
+      {renderTable(
         'Archived Visits',
         archivedVisits,
         archivedCollapsed,
-        setArchivedCollapsed,
-        false
+        setArchivedCollapsed
       )}
     </div>
   );
