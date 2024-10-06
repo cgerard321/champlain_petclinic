@@ -6,10 +6,12 @@ import com.petclinic.billing.datalayer.BillResponseDTO;
 import com.petclinic.billing.datalayer.BillStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import javax.validation.Valid;
@@ -60,7 +62,24 @@ public class BillResource {
                 .map(response -> ResponseEntity.status(HttpStatus.OK).body(response));
     }
 
-    @GetMapping("/bills/bills-pagination")
+//    @GetMapping("/bills/bills-pagination")
+//    public Flux<BillResponseDTO> getAllBillsByPage(
+//            @RequestParam Optional<Integer> page,
+//            @RequestParam Optional<Integer> size,
+//            @RequestParam(required = false) String billId,
+//            @RequestParam(required = false) String customerId,
+//            @RequestParam(required = false) String ownerFirstName,
+//            @RequestParam(required = false) String ownerLastName,
+//            @RequestParam(required = false) String visitType,
+//            @RequestParam(required = false) String vetId,
+//            @RequestParam(required = false) String vetFirstName,
+//            @RequestParam(required = false) String vetLastName
+//    ){
+//        Pageable pageable = PageRequest.of(page.orElse(0), size.orElse(10));
+//        return SERVICE.getAllBillsByPage(pageable, billId, customerId, ownerFirstName, ownerLastName, visitType, vetId, vetFirstName, vetLastName);
+//    }
+
+    @GetMapping("/bills")
     public Flux<BillResponseDTO> getAllBillsByPage(
             @RequestParam Optional<Integer> page,
             @RequestParam Optional<Integer> size,
@@ -71,12 +90,18 @@ public class BillResource {
             @RequestParam(required = false) String visitType,
             @RequestParam(required = false) String vetId,
             @RequestParam(required = false) String vetFirstName,
-            @RequestParam(required = false) String vetLastName
-    ){
-        return SERVICE.getAllBillsByPage(
-                PageRequest.of(page.orElse(0),size.orElse(5)), billId, customerId, ownerFirstName, ownerLastName,
-                visitType, vetId, vetFirstName, vetLastName);
+            @RequestParam(required = false) String vetLastName) {
+
+        if (page.orElse(0) < 0 || size.orElse(10) <= 0) {
+            return Flux.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid page or size"));
+        }
+
+        return SERVICE.getAllBillsByPage(PageRequest.of(page.get(), size.get()), billId, customerId,
+                ownerFirstName, ownerLastName, visitType, vetId, vetFirstName, vetLastName);
     }
+
+
+
 
     @GetMapping("/bills/bills-filtered-count")
     public Mono<Long> getNumberOfBillsWithFilters(@RequestParam(required = false) String billId,

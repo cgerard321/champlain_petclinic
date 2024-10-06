@@ -157,7 +157,13 @@ export default function Product({
 
   return (
     <div
-      className={`card ${product.productQuantity < 10 ? 'low-quantity' : ''}`}
+      className={`card ${
+        product.productQuantity === 0
+          ? 'out-of-stock'
+          : product.productQuantity < 10
+            ? 'low-quantity'
+            : ''
+      }`}
       key={product.productId}
     >
       <ImageContainer imageId={product.imageId} />
