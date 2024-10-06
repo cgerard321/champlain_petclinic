@@ -94,6 +94,31 @@ public class CartServiceImpl implements CartService {
 
 
 //instead lets create a removeProductFromCart, UpdateQuantityOfProductInCart, and AddProductInCart methods
+    @Override
+    public Mono<CartResponseModel> removeProductFromCart(String cartId, String productId){
+        return cartRepository.findCartByCartId(cartId)
+                .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Cart id was not found:" + cartId))))
+                .flatMap(found -> {
+                    List<CartProduct> products = found.getProducts();
+
+                    Optional<CartProduct> productToRemove = products.stream()
+                            .filter(product -> product.getProductId().equals(productId)).findFirst();
+
+                    if (productToRemove.isPresent()) {
+                        products.remove(productToRemove.get());
+
+                        found.setProducts(products);
+
+                        return cartRepository.save(found)
+                                .map(updatedCart -> {
+                                    return EntityModelUtil.toCartResponseModel(updatedCart, products);
+                                });
+                    } else {
+                        return Mono.error(new NotFoundException("Product id was not found: " + productId));
+                    }
+
+                });
+    }
 
 
      @Override
@@ -106,6 +131,7 @@ public class CartServiceImpl implements CartService {
                              .then(Mono.just(EntityModelUtil.toCartResponseModel(found, products)));
                  });
      }
+
 
     @Override
     public Mono<CartResponseModel> checkoutCart(String cartId) {
@@ -127,6 +153,8 @@ public class CartServiceImpl implements CartService {
                     cart.setTvc(tvc);
                     cart.setTotal(total);
 
+                    // Clear the products list
+                    cart.setProducts(new ArrayList<>());
 
                     return cartRepository.save(cart)
                             .map(savedCart -> {
@@ -142,7 +170,6 @@ public class CartServiceImpl implements CartService {
                             });
                 });
     }
-
 
     @Override
     public Mono<Integer> getCartItemCount(String cartId) {

@@ -5,7 +5,7 @@ export default function CartPage(): JSX.Element {
   return (
     <div>
       <NavBar />
-      <h1>Your Carts</h1>
+      <h1>Carts</h1>
       <CartTable />
     </div>
   );

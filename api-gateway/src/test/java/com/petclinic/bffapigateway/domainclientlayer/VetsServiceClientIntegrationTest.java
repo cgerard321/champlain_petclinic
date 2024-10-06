@@ -6,6 +6,7 @@ import com.petclinic.bffapigateway.dtos.Vets.*;
 import com.petclinic.bffapigateway.exceptions.ExistingVetNotFoundException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.RecordedRequest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,6 +22,7 @@ import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.webjars.NotFoundException;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -1938,6 +1940,93 @@ class VetsServiceClientIntegrationTest {
                 .active(false)
                 .photoDefault(true)
                 .build();
+    }
+
+    @Test
+    void shouldReturnAlbums_whenValidVetIdIsProvided() throws Exception {
+
+        String vetId = "69f852ca-625b-11ee-8c99-0242ac120002";
+        Album album1 = new Album(1, vetId, "photo1.jpg", "image/jpeg", "mockImageData1".getBytes());
+        Album album2 = new Album(2, vetId, "photo2.jpg", "image/jpeg", "mockImageData2".getBytes());
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(200)
+                .setBody(mapper.writeValueAsString(List.of(album1, album2)))
+                .addHeader("Content-Type", "application/json"));
+
+        Flux<Album> result = vetsServiceClient.getAllAlbumsByVetId(vetId);
+
+        StepVerifier.create(result)
+                .expectNext(album1)
+                .expectNext(album2)
+                .verifyComplete();
+
+        RecordedRequest recordedRequest = server.takeRequest();
+        assertEquals("/69f852ca-625b-11ee-8c99-0242ac120002/albums", recordedRequest.getPath());
+        assertEquals("GET", recordedRequest.getMethod());
+    }
+
+    @Test
+    void shouldThrowExistingVetNotFoundException_whenVetIdIsInvalid() throws Exception {
+
+        String vetId = "69f852ca-625b-11ee-8c99-0242ac1200020000";
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(404)
+                .setBody(""));
+
+        Flux<Album> result = vetsServiceClient.getAllAlbumsByVetId(vetId);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof ExistingVetNotFoundException &&
+                        throwable.getMessage().contains("Albums for vet 69f852ca-625b-11ee-8c99-0242ac1200020000 not found"))
+                .verify();
+
+        RecordedRequest recordedRequest = server.takeRequest();
+        assertEquals("/69f852ca-625b-11ee-8c99-0242ac1200020000/albums", recordedRequest.getPath());
+        assertEquals("GET", recordedRequest.getMethod());
+    }
+
+    @Test
+    void shouldThrowIllegalArgumentException_whenServerErrorOccurs() throws Exception {
+
+        String vetId = "69f852ca-625b-11ee-8c99-0242ac120002";
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(500)
+                .setBody(""));
+
+        Flux<Album> result = vetsServiceClient.getAllAlbumsByVetId(vetId);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof IllegalArgumentException &&
+                        throwable.getMessage().contains("Server error"))
+                .verify();
+
+        RecordedRequest recordedRequest = server.takeRequest();
+        assertEquals("/" + vetId + "/albums", recordedRequest.getPath());
+        assertEquals("GET", recordedRequest.getMethod());
+    }
+
+    @Test
+    void shouldThrowIllegalArgumentException_whenClientErrorOccurs() throws Exception {
+
+        String vetId = "69f852ca-625b-11ee-8c99-0242ac120002";
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(400)
+                .setBody(""));
+
+        Flux<Album> result = vetsServiceClient.getAllAlbumsByVetId(vetId);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof IllegalArgumentException &&
+                        throwable.getMessage().contains("Client error"))
+                .verify();
+
+        RecordedRequest recordedRequest = server.takeRequest();
+        assertEquals("/" + vetId + "/albums", recordedRequest.getPath());
+        assertEquals("GET", recordedRequest.getMethod());
     }
 
 

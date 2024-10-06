@@ -44,6 +44,15 @@ public class CartServiceClient {
                 .bodyToMono(CartResponseDTO.class);
     }
 
+    public Mono<CartResponseDTO> removeProductFromCart(String cartId, String productId){
+        return webClientBuilder.build()
+                .delete()
+                .uri(CartServiceUrl + "/" + cartId + "/" + productId)
+                .retrieve()
+                .bodyToMono(CartResponseDTO.class);
+
+    }
+
     public Mono<CartResponseDTO> updateCartByCartId(Mono<CartRequestDTO> cartRequestDTOMono, String CartId) {
         return webClientBuilder.build()
                 .put()

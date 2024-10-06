@@ -32,18 +32,7 @@ public class ProductsServiceClient {
 
     }
 
-//    public ProductsServiceClient(WebClient.Builder webClientBuilder,
-//                                 @Value("${app.products-service.host}") String productsServiceHost,
-//                                 @Value("${app.products-service.port}") String productsServicePort) {
-//        this.webClientBuilder = webClientBuilder;
-//        productsServiceUrl = "http://" + productsServiceHost + ":" + productsServicePort + "/api/v1/products";
-//        this.webClient = webClientBuilder
-//                .baseUrl(productsServiceUrl)
-//                .build();
-//
-//    }
-
-    public Flux<ProductResponseDTO> getAllProducts(Double minPrice, Double maxPrice, Double minRating, Double maxRating, String sort) {
+    public Flux<ProductResponseDTO> getAllProducts(Double minPrice, Double maxPrice,Double minRating, Double maxRating, String sort) {
         return webClient.get()
                 .uri(uriBuilder -> {
                     if (minPrice != null) {
@@ -79,7 +68,7 @@ public class ProductsServiceClient {
         return webClientBuilder.build()
                 .post()
                 .uri(productsServiceUrl)
-                .body(Mono.just(productRequestDTO), ProductResponseDTO.class)
+                .body(Mono.just(productRequestDTO), ProductRequestDTO.class)
                 .retrieve()
                 .bodyToMono(ProductResponseDTO.class);
     }
