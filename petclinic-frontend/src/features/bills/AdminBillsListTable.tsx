@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Bill } from '@/features/bills/models/Bill.ts';
 import { getAllBills } from '@/features/bills/api/getAllBills.tsx';
 import { getAllPaidBills } from '@/features/bills/api/getAllPaidBills.tsx';
@@ -32,7 +32,7 @@ export default function AdminBillsListTable(): JSX.Element {
   const [owners, setOwners] = useState<OwnerResponseModel[]>([]);
   const [vets, setVets] = useState<VetResponseModel[]>([]);
 
-  const fetchBills = async (): Promise<void> => {
+  const fetchBills = useCallback(async (): Promise<void> => {
     let allBills;
     switch (selectedStatus) {
       case 'Paid':
@@ -49,7 +49,7 @@ export default function AdminBillsListTable(): JSX.Element {
         break;
     }
     setBills(allBills);
-  };
+  }, [selectedStatus]);
 
   const fetchOwnersAndVets = async (): Promise<void> => {
     const ownersList = await getAllOwners();
@@ -130,210 +130,243 @@ export default function AdminBillsListTable(): JSX.Element {
     setError(null);
   };
 
-  const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
+  const handleStatusChange = (
+    e: React.ChangeEvent<HTMLSelectElement>
+  ): void => {
     setSelectedStatus(e.target.value);
   };
 
   useEffect(() => {
     fetchBills();
     fetchOwnersAndVets();
-  }, [selectedStatus]);
+  }, [selectedStatus, fetchBills]);
 
   return (
+    <div>
       <div>
+        {error && <p style={{ color: 'red' }}>{error}</p>}
+        <input
+          type="text"
+          placeholder="Enter Bill ID"
+          value={searchId}
+          onChange={e => setSearchId(e.target.value)}
+        />
+        <button onClick={handleSearch}>Search</button>
+        {searchedBill && <button onClick={handleGoBack}>Go Back</button>}
+      </div>
+
+      {searchedBill ? (
         <div>
-          {error && <p style={{ color: 'red' }}>{error}</p>}
-          <input
-              type="text"
-              placeholder="Enter Bill ID"
-              value={searchId}
-              onChange={e => setSearchId(e.target.value)}
-          />
-          <button onClick={handleSearch}>Search</button>
-          {searchedBill && <button onClick={handleGoBack}>Go Back</button>}
+          <h3>Searched Bill Details:</h3>
+          <p>
+            <strong>Bill ID:</strong> {searchedBill.billId}
+          </p>
+          <p>
+            <strong>Owner Name:</strong> {searchedBill.ownerFirstName}{' '}
+            {searchedBill.ownerLastName}
+          </p>
+          <p>
+            <strong>Visit Type:</strong> {searchedBill.visitType}
+          </p>
+          <p>
+            <strong>Vet Name:</strong> {searchedBill.vetFirstName}{' '}
+            {searchedBill.vetLastName}
+          </p>
+          <p>
+            <strong>Date:</strong> {searchedBill.date}
+          </p>
+          <p>
+            <strong>Amount:</strong> {searchedBill.amount}
+          </p>
+          <p>
+            <strong>Taxed Amount:</strong> {searchedBill.taxedAmount}
+          </p>
+          <p>
+            <strong>Status:</strong> {searchedBill.billStatus}
+          </p>
+          <p>
+            <strong>Due Date:</strong> {searchedBill.dueDate}
+          </p>
         </div>
+      ) : (
+        <div>
+          {/* Create Bill Button */}
+          <button onClick={() => setCreateForm(!showCreateForm)}>
+            {showCreateForm ? 'Cancel' : 'Create New Bill'}
+          </button>
 
-        {searchedBill ? (
+          {/* Create Bill Form */}
+          {showCreateForm && (
             <div>
-              <h3>Searched Bill Details:</h3>
-              <p>
-                <strong>Bill ID:</strong> {searchedBill.billId}
-              </p>
-              <p>
-                <strong>Owner Name:</strong> {searchedBill.ownerFirstName} {searchedBill.ownerLastName}
-              </p>
-              <p>
-                <strong>Visit Type:</strong> {searchedBill.visitType}
-              </p>
-              <p>
-                <strong>Vet Name:</strong> {searchedBill.vetFirstName} {searchedBill.vetLastName}
-              </p>
-              <p>
-                <strong>Date:</strong> {searchedBill.date}
-              </p>
-              <p>
-                <strong>Amount:</strong> {searchedBill.amount}
-              </p>
-              <p>
-                <strong>Taxed Amount:</strong> {searchedBill.taxedAmount}
-              </p>
-              <p>
-                <strong>Status:</strong> {searchedBill.billStatus}
-              </p>
-              <p>
-                <strong>Due Date:</strong> {searchedBill.dueDate}
-              </p>
-            </div>
-        ) : (
-            <div>
-              {/* Create Bill Button */}
-              <button onClick={() => setCreateForm(!showCreateForm)}>
-                {showCreateForm ? 'Cancel' : 'Create New Bill'}
-              </button>
-
-              {/* Create Bill Form */}
-              {showCreateForm && (
-                  <div>
-                    <h3>Create New Bill</h3>
-                    {error && <p style={{ color: 'red' }}>{error}</p>}
-                    <form
-                        onSubmit={e => {
-                          e.preventDefault();
-                          handleCreateBill();
-                        }}
-                    >
-                      <div>
-                        <label>Customer</label>
-                        <select
-                            value={newBill.customerId}
-                            onChange={e => setNewBill({ ...newBill, customerId: e.target.value })}
-                        >
-                          <option value="">Select Customer</option>
-                          {owners.map(owner => (
-                              <option key={owner.ownerId} value={owner.ownerId}>
-                                {owner.firstName} {owner.lastName}
-                              </option>
-                          ))}
-                        </select>
-                      </div>
-
-                      <div>
-                        <label>Vet</label>
-                        <select
-                            value={newBill.vetId}
-                            onChange={e => setNewBill({ ...newBill, vetId: e.target.value })}
-                        >
-                          <option value="">Select Vet</option>
-                          {vets.map(vet => (
-                              <option key={vet.vetId} value={vet.vetId}>
-                                {vet.firstName} {vet.lastName}
-                              </option>
-                          ))}
-                        </select>
-                      </div>
-
-                      <div>
-                        <label>Visit Type</label>
-                        <input
-                            type="text"
-                            value={newBill.visitType}
-                            onChange={e => setNewBill({ ...newBill, visitType: e.target.value })}
-                        />
-                      </div>
-
-                      <div>
-                        <label>Date</label>
-                        <input
-                            type="date"
-                            value={newBill.date}
-                            onChange={e => setNewBill({ ...newBill, date: e.target.value })}
-                        />
-                      </div>
-
-                      <div>
-                        <label>Amount</label>
-                        <input
-                            type="number"
-                            value={newBill.amount}
-                            onChange={e => setNewBill({ ...newBill, amount: parseFloat(e.target.value) })}
-                        />
-                      </div>
-
-                      <div>
-                        <label>Status</label>
-                        <input
-                            type="text"
-                            value={newBill.billStatus.toUpperCase()}
-                            onChange={e => setNewBill({ ...newBill, billStatus: e.target.value })}
-                        />
-                      </div>
-
-                      <div>
-                        <label>Due Date</label>
-                        <input
-                            type="date"
-                            value={newBill.dueDate}
-                            onChange={e => setNewBill({ ...newBill, dueDate: e.target.value })}
-                        />
-                      </div>
-
-                      <button type="submit">Create Bill</button>
-                    </form>
-                  </div>
-              )}
-
-              {/* Bills Table */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h3>All Bills:</h3>
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <label htmlFor="statusFilter" style={{ marginRight: '10px' }}>Filter by status:</label>
-                  <select id="statusFilter" value={selectedStatus} onChange={handleStatusChange}>
-                    <option value="...">...</option>
-                    <option value="Paid">Paid</option>
-                    <option value="Unpaid">Unpaid</option>
-                    <option value="Overdue">Overdue</option>
+              <h3>Create New Bill</h3>
+              {error && <p style={{ color: 'red' }}>{error}</p>}
+              <form
+                onSubmit={e => {
+                  e.preventDefault();
+                  handleCreateBill();
+                }}
+              >
+                <div>
+                  <label>Customer</label>
+                  <select
+                    value={newBill.customerId}
+                    onChange={e =>
+                      setNewBill({ ...newBill, customerId: e.target.value })
+                    }
+                  >
+                    <option value="">Select Customer</option>
+                    {owners.map(owner => (
+                      <option key={owner.ownerId} value={owner.ownerId}>
+                        {owner.firstName} {owner.lastName}
+                      </option>
+                    ))}
                   </select>
                 </div>
-              </div>
 
-              <table className="table table-striped">
-                <thead>
-                <tr>
-                  <th>Bill ID</th>
-                  <th>Owner Name</th>
-                  <th>Visit Type</th>
-                  <th>Vet Name</th>
-                  <th>Date</th>
-                  <th>Amount</th>
-                  <th>Taxed Amount</th>
-                  <th>Status</th>
-                  <th>Due Date</th>
-                </tr>
-                </thead>
-                <tbody>
-                {bills
-                    .filter(data => data != null)
-                    .map((bill: Bill) => (
-                        <tr key={bill.billId}>
-                          <td>{bill.billId}</td>
-                          <td>{bill.ownerFirstName} {bill.ownerLastName}</td>
-                          <td>{bill.visitType}</td>
-                          <td>{bill.vetFirstName} {bill.vetLastName}</td>
-                          <td>{bill.date}</td>
-                          <td>{bill.amount}</td>
-                          <td>{bill.taxedAmount}</td>
-                          <td>{bill.billStatus}</td>
-                          <td>{bill.dueDate}</td>
-                        </tr>
+                <div>
+                  <label>Vet</label>
+                  <select
+                    value={newBill.vetId}
+                    onChange={e =>
+                      setNewBill({ ...newBill, vetId: e.target.value })
+                    }
+                  >
+                    <option value="">Select Vet</option>
+                    {vets.map(vet => (
+                      <option key={vet.vetId} value={vet.vetId}>
+                        {vet.firstName} {vet.lastName}
+                      </option>
                     ))}
-                </tbody>
-              </table>
+                  </select>
+                </div>
+
+                <div>
+                  <label>Visit Type</label>
+                  <input
+                    type="text"
+                    value={newBill.visitType}
+                    onChange={e =>
+                      setNewBill({ ...newBill, visitType: e.target.value })
+                    }
+                  />
+                </div>
+
+                <div>
+                  <label>Date</label>
+                  <input
+                    type="date"
+                    value={newBill.date}
+                    onChange={e =>
+                      setNewBill({ ...newBill, date: e.target.value })
+                    }
+                  />
+                </div>
+
+                <div>
+                  <label>Amount</label>
+                  <input
+                    type="number"
+                    value={newBill.amount}
+                    onChange={e =>
+                      setNewBill({
+                        ...newBill,
+                        amount: parseFloat(e.target.value),
+                      })
+                    }
+                  />
+                </div>
+
+                <div>
+                  <label>Status</label>
+                  <input
+                    type="text"
+                    value={newBill.billStatus.toUpperCase()}
+                    onChange={e =>
+                      setNewBill({ ...newBill, billStatus: e.target.value })
+                    }
+                  />
+                </div>
+
+                <div>
+                  <label>Due Date</label>
+                  <input
+                    type="date"
+                    value={newBill.dueDate}
+                    onChange={e =>
+                      setNewBill({ ...newBill, dueDate: e.target.value })
+                    }
+                  />
+                </div>
+
+                <button type="submit">Create Bill</button>
+              </form>
             </div>
-        )}
+          )}
 
-      </div>
+          {/* Bills Table */}
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}
+          >
+            <h3>All Bills:</h3>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <label htmlFor="statusFilter" style={{ marginRight: '10px' }}>
+                Filter by status:
+              </label>
+              <select
+                id="statusFilter"
+                value={selectedStatus}
+                onChange={handleStatusChange}
+              >
+                <option value="...">...</option>
+                <option value="Paid">Paid</option>
+                <option value="Unpaid">Unpaid</option>
+                <option value="Overdue">Overdue</option>
+              </select>
+            </div>
+          </div>
+
+          <table className="table table-striped">
+            <thead>
+              <tr>
+                <th>Bill ID</th>
+                <th>Owner Name</th>
+                <th>Visit Type</th>
+                <th>Vet Name</th>
+                <th>Date</th>
+                <th>Amount</th>
+                <th>Taxed Amount</th>
+                <th>Status</th>
+                <th>Due Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {bills
+                .filter(data => data != null)
+                .map((bill: Bill) => (
+                  <tr key={bill.billId}>
+                    <td>{bill.billId}</td>
+                    <td>
+                      {bill.ownerFirstName} {bill.ownerLastName}
+                    </td>
+                    <td>{bill.visitType}</td>
+                    <td>
+                      {bill.vetFirstName} {bill.vetLastName}
+                    </td>
+                    <td>{bill.date}</td>
+                    <td>{bill.amount}</td>
+                    <td>{bill.taxedAmount}</td>
+                    <td>{bill.billStatus}</td>
+                    <td>{bill.dueDate}</td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
   );
-
-
-
 }
