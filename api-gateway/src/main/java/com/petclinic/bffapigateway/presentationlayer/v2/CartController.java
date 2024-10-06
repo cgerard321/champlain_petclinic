@@ -2,8 +2,10 @@ package com.petclinic.bffapigateway.presentationlayer.v2;
 
 
 import com.petclinic.bffapigateway.domainclientlayer.CartServiceClient;
+import com.petclinic.bffapigateway.dtos.Cart.AddProductRequestDTO;
 import com.petclinic.bffapigateway.dtos.Cart.CartRequestDTO;
 import com.petclinic.bffapigateway.dtos.Cart.CartResponseDTO;
+import com.petclinic.bffapigateway.dtos.Cart.UpdateProductQuantityRequestDTO;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -27,7 +30,8 @@ public class CartController {
 
     private final CartServiceClient cartServiceClient;
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    //later we will need to check if the user that is logged in isnt getting someone else's carts, but thats for sprint 3
+    //@SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping("/{cartId}")
     public Mono<ResponseEntity<CartResponseDTO>> getCartById(@PathVariable String cartId) {
         return cartServiceClient.getCartByCartId(cartId)
@@ -68,12 +72,53 @@ public class CartController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
+    @PostMapping("/{cartId}/products")
+    public Mono<ResponseEntity<CartResponseDTO>> addProductToCart(@PathVariable String cartId, @RequestBody AddProductRequestDTO requestDTO) {
+        return cartServiceClient.addProductToCart(cartId, requestDTO)
+                .map(ResponseEntity::ok)
+                .onErrorResume(e -> {
+                    if (e instanceof WebClientResponseException.BadRequest) {
+                        return Mono.just(ResponseEntity.badRequest().build());
+                    } else {
+                        return Mono.error(e);
+                    }
+                });
+    }
+
+    @PutMapping("/{cartId}/products/{productId}")
+    public Mono<ResponseEntity<CartResponseDTO>> updateProductQuantityInCart(@PathVariable String cartId, @PathVariable String productId, @RequestBody UpdateProductQuantityRequestDTO requestDTO) {
+        return cartServiceClient.updateProductQuantityInCart(cartId, productId, requestDTO)
+                .map(ResponseEntity::ok)
+                .onErrorResume(e -> {
+                    if (e instanceof WebClientResponseException.BadRequest) {
+                        return Mono.just(ResponseEntity.badRequest().build());
+                    } else {
+                        return Mono.error(e);
+                    }
+                });
+    }
+
     @PostMapping("/{cartId}/checkout")
     public Mono<ResponseEntity<CartResponseDTO>> checkoutCart(@PathVariable String cartId) {
         return cartServiceClient.checkoutCart(cartId)
                 .map(cart -> new ResponseEntity<>(cart, HttpStatus.OK))
                 .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
+
+    @GetMapping("/customer/{customerId}")
+    public Mono<ResponseEntity<CartResponseDTO>> getCartByCustomerId(@PathVariable String customerId) {
+        return cartServiceClient.getCartByCustomerId(customerId)
+                .map(cart -> ResponseEntity.status(HttpStatus.OK).body(cart))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+    @DeleteMapping(value = "/{cartId}/{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<CartResponseDTO>> removeProductFromCart(@PathVariable String cartId, @PathVariable String productId){
+        return cartServiceClient.removeProductFromCart(cartId, productId)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+
+    }
+
 }
 
 

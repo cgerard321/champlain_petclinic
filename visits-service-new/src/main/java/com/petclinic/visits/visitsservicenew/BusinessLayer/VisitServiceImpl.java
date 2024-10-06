@@ -1,6 +1,7 @@
 package com.petclinic.visits.visitsservicenew.BusinessLayer;
 
 import com.petclinic.visits.visitsservicenew.DataLayer.Status;
+import com.petclinic.visits.visitsservicenew.DataLayer.Visit;
 import com.petclinic.visits.visitsservicenew.DataLayer.VisitRepo;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.Auth.AuthServiceClient;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.Auth.UserDetails;
@@ -56,8 +57,17 @@ public class VisitServiceImpl implements VisitService {
      * @return all Visits as Flux
      */
     @Override
-    public Flux<VisitResponseDTO> getAllVisits() {
-        return repo.findAll().flatMap(entityDtoUtil::toVisitResponseDTO);
+    public Flux<VisitResponseDTO> getAllVisits(String descritpion) {
+        Flux<Visit> visits;
+
+        if(descritpion != null && !descritpion.isBlank()){
+            visits = repo.findVisitsByDescriptionContainingIgnoreCase(descritpion);
+        }
+        else {
+            visits = repo.findAll();
+        }
+        return visits.flatMap(entityDtoUtil::toVisitResponseDTO);
+        //return repo.findAll().flatMap(entityDtoUtil::toVisitResponseDTO);
     }
 
     /**
@@ -87,15 +97,23 @@ public class VisitServiceImpl implements VisitService {
         switch (statusString) { // Transform string back into enumerator
             case ("UPCOMING"):
                 status = Status.UPCOMING;
+                break;
 
             case ("CONFIRMED"):
                 status = Status.CONFIRMED;
+                break;
 
             case ("CANCELLED"):
                 status = Status.CANCELLED;
+                break;
+
+            case ("ARCHIVED"):
+                status = Status.ARCHIVED;
+                break;
 
             default:
                 status = Status.COMPLETED;
+                break;
         }
         return repo.findAllByStatus(statusString)
                 .flatMap(entityDtoUtil::toVisitResponseDTO);
@@ -218,15 +236,28 @@ public class VisitServiceImpl implements VisitService {
                 )
                 .flatMap(repo::deleteAll);
     }
+
     @Override
-    public Mono<Void> deleteCompletedVisitByVisitId(String visitId) {
+    public Mono<VisitResponseDTO> archiveCompletedVisit(String visitId, Mono<VisitRequestDTO> visitRequestDTO) {
         return repo.findByVisitId(visitId)
+                .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("No completed visit was found with visitId: " + visitId))))
                 .filter(visit -> visit.getStatus() == Status.COMPLETED)
-                .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Cannot Find visit id" + visitId))))
-                .flatMap(visit -> repo.deleteByVisitId(visit.getVisitId()))
-                .doOnSuccess(v -> log.info("Successfully deleted completed visit with id: {}", visitId))
-                .doOnError(e -> log.error("Failed to delete completed visit with id: {}", visitId, e));
+                .switchIfEmpty(Mono.error(new BadRequestException("Cannot archive a visit that is not completed.")))
+                .doOnNext(visit -> {
+                    visit.setStatus(Status.ARCHIVED);
+                })
+                .flatMap(repo::save)
+
+                .flatMap(entityDtoUtil::toVisitResponseDTO);
     }
+
+    @Override
+    public Flux<VisitResponseDTO> getAllArchivedVisits() {
+        return repo.findAllByStatus("ARCHIVED")
+                .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("No archived visits were found"))))
+                .flatMap(entityDtoUtil::toVisitResponseDTO);
+    }
+
 
 //    @Override
 //    public Mono<VetDTO> testingGetVetDTO(String vetId) {
@@ -292,6 +323,10 @@ public class VisitServiceImpl implements VisitService {
 
             case "COMPLETED":
                 newStatus1 = Status.COMPLETED;
+                break;
+
+            case "ARCHIVED":
+                newStatus1 = Status.ARCHIVED;
                 break;
 
             default:
@@ -415,4 +450,21 @@ public class VisitServiceImpl implements VisitService {
                 .to(user.getEmail())
                 .build();
     }
+
+
+    @Override
+    public Mono<VisitResponseDTO> patchVisitStatusInVisit(String visitId, String status) {
+        // Find the visit by the ID
+        return repo.findByVisitId(visitId)
+                .switchIfEmpty(Mono.defer(() ->
+                        Mono.error(new NotFoundException("Cannot find visit with id: " + visitId))
+                ))
+                // Update the status of the found Visit entity
+                .doOnNext(visit -> visit.setStatus(Status.valueOf(status))) // Update status reactively
+                // Save the updated visit
+                .flatMap(repo::save)
+                // Convert to VisitResponseDTO
+                .flatMap(entityDtoUtil::toVisitResponseDTO);
+    }
+
 }

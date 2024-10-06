@@ -108,9 +108,6 @@ public class InventoryServiceClient {
     }
 
 
-
-
-
     public Mono<ProductResponseDTO> updateProductInInventory(ProductRequestDTO model, String inventoryId, String productId){
 
 
@@ -276,20 +273,20 @@ public class InventoryServiceClient {
     }
 
 
-    public Mono<InventoryResponseDTO> addSupplyToInventoryByName(String inventoryName, SupplyRequestDTO supplyRequestDTO) {
+    public Mono<InventoryResponseDTO> addProductToInventoryByName(String inventoryName, ProductRequestDTO productRequestDTO) {
         return webClient.post()
-                .uri(inventoryServiceUrl + "/{inventoryName}/supplies", inventoryName)
-                .body(Mono.just(supplyRequestDTO), SupplyRequestDTO.class)
+                .uri(inventoryServiceUrl + "/{inventoryName}/products/by-name", inventoryName)
+                .body(Mono.just(productRequestDTO), ProductRequestDTO.class)
                 .retrieve()
                 .bodyToMono(InventoryResponseDTO.class);
     }
 
 
-    public Flux<SupplyResponseDTO> getSuppliesByInventoryName(String inventoryName) {
+    public Flux<ProductResponseDTO> getProductsByInventoryName(String inventoryName) {
         return webClient.get()
-                .uri("/{inventoryName}/supplies", inventoryName)
+                .uri("/{inventoryName}/products/by-name", inventoryName)
                 .retrieve()
-                .bodyToFlux(SupplyResponseDTO.class);
+                .bodyToFlux(ProductResponseDTO.class);
     }
   
     public Flux<ProductResponseDTO> getLowStockProducts(String inventoryId, int stockThreshold) {
@@ -334,13 +331,25 @@ public class InventoryServiceClient {
                 .bodyToMono(ProductResponseDTO.class);
     }
 
+    public Mono<ProductResponseDTO> consumeProduct(String inventoryId, String productId) {
+        UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(inventoryServiceUrl + "/{inventoryId}/products/{productId}/consume");
+
+        return webClient.patch()
+                .uri(uriBuilder.buildAndExpand(inventoryId, productId).toUri())
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError,
+                        resp -> Mono.error(new NotFoundException("Product not found in inventory: " + inventoryId)))
+                .bodyToMono(ProductResponseDTO.class);
+    }
+
     public Mono<Integer> getQuantityOfProductsInInventory(final String inventoryId) {
         return webClient.get()
                 .uri(inventoryServiceUrl + "/{inventoryId}/productquantity", inventoryId)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError,
-                        resp -> rethrower.rethrow(resp, ex -> new InventoryNotFoundException(ex.get("message").toString(), NOT_FOUND)))
+                .onStatus(HttpStatusCode::is4xxClientError, clientResponse ->
+                        clientResponse.bodyToMono(String.class)
+                                .flatMap(errorMessage -> Mono.error(new InventoryNotFoundException(errorMessage, HttpStatus.NOT_FOUND))))
                 .bodyToMono(Integer.class);
     }
 }

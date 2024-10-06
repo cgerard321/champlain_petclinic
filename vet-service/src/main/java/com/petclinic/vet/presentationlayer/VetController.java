@@ -12,6 +12,8 @@ package com.petclinic.vet.presentationlayer;
  */
 
 
+import com.petclinic.vet.dataaccesslayer.Album;
+import com.petclinic.vet.dataaccesslayer.AlbumRepository;
 import com.petclinic.vet.exceptions.InvalidInputException;
 import com.petclinic.vet.exceptions.NotFoundException;
 import com.petclinic.vet.servicelayer.*;
@@ -25,6 +27,7 @@ import com.petclinic.vet.servicelayer.ratings.RatingResponseDTO;
 import com.petclinic.vet.servicelayer.ratings.RatingService;
 import com.petclinic.vet.util.EntityDtoUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -45,12 +48,14 @@ import java.util.Map;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/vets")
+@Slf4j
 public class VetController {
     private final VetService vetService;
     private final RatingService ratingService;
     private final PhotoService photoService;
     private final EducationService educationService;
     private final BadgeService badgeService;
+    private final AlbumService albumService;
 
 
     //Ratings
@@ -308,7 +313,14 @@ public class VetController {
         return vetService.addSpecialtiesByVetId(vetId, specialties);
     }
 
-
+    @GetMapping("{vetId}/albums")
+    public Flux<Album> getAllAlbumsByVetId(@PathVariable String vetId) {
+        return albumService.getAllAlbumsByVetId(vetId)
+                .doOnNext(album -> log.info("Album ID: {}, Vet ID: {}, Filename: {}, ImgType: {}",
+                        album.getId(), album.getVetId(), album.getFilename(), album.getImgType()))
+                .doOnComplete(() -> log.info("Successfully fetched all albums for vetId: {}", vetId))
+                .doOnError(error -> log.error("Error fetching photos for vet {}", vetId, error));
+    }
 
 
 }

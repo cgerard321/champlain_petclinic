@@ -1,20 +1,8 @@
-.card-container-custom {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 40px;
-  padding: 20px;
-  width: 100%;
-  height: fit-content;
-  margin: 0 auto;
-  min-height: 100px;
-}
-
 .card {
+  /* Common card styles */
   overflow: hidden;
   width: 300px;
-  height: 250px;
+  height: auto;
   margin-right: 15px;
   border-radius: 15px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -29,20 +17,46 @@
     box-shadow 0.3s ease-in-out;
 }
 
-.image-container {
-  width: 100%;
-  height: 300px;
-  overflow: hidden;
+.low-quantity {
+  border-top: 5px solid orange;
+  position: relative;
 }
 
-.card-image {
-  width: 100%;
-  height: auto;
-  object-fit: cover;
-  border-radius: 10px;
+.low-quantity::after {
+  content: 'Low Stock';
+  color: orange;
+  font-weight: bold;
+  font-size: 12px;
+  position: absolute;
+  top: 10px;
+  right: 5px;
+  background: white;
+  padding: 2px 5px;
+  border-radius: 3px;
+}
+
+/* Styles for out of stock */
+.out-of-stock {
+  border-top: 5px solid red;
+  position: relative;
+}
+
+.out-of-stock::after {
+  content: 'Out of Stock';
+  color: red;
+  font-weight: bold;
+  font-size: 12px;
+  position: absolute;
+  top: 10px;
+  right: 5px;
+  background: white;
+  padding: 2px 5px;
+  border-radius: 3px;
 }
 
 .card:hover {
   transform: translateY(-10px);
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
 }
+
+/* Styles for low quantity */

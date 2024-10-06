@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.*;
+import com.petclinic.bffapigateway.dtos.Inventory.Status;
+import com.petclinic.bffapigateway.exceptions.InventoryNotFoundException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterAll;
@@ -51,7 +53,6 @@ class InventoryServiceClientIntegrationTest {
     @Test
     void getProductsInInventoryByInventoryIdAndProductsField() throws JsonProcessingException {
         ProductResponseDTO productResponseDTO = new ProductResponseDTO(
-                "1",
                 "productId",
                 "inventoryId",
                 "name",
@@ -60,8 +61,6 @@ class InventoryServiceClientIntegrationTest {
                 2,
                 15.99,
                 Status.OUT_OF_STOCK
-
-
         );
 
         mockWebServer.enqueue(new MockResponse()
@@ -80,7 +79,6 @@ class InventoryServiceClientIntegrationTest {
     @Test
     void addProductsToInventory() throws JsonProcessingException {
         ProductResponseDTO productResponseDTO = new ProductResponseDTO(
-                "1",
                 "productId",
                 "inventoryId",
                 "name",
@@ -89,7 +87,6 @@ class InventoryServiceClientIntegrationTest {
                 2,
                 15.99,
                 Status.OUT_OF_STOCK
-
         );
 
         mockWebServer.enqueue(new MockResponse()
@@ -145,7 +142,6 @@ class InventoryServiceClientIntegrationTest {
     @Test
     void getProductsInInventoryByInventoryIdAndProductFieldPagination() throws JsonProcessingException {
         ProductResponseDTO productResponseDTO = new ProductResponseDTO(
-                "1",
                 "productId",
                 "inventoryId",
                 "name",
@@ -154,11 +150,8 @@ class InventoryServiceClientIntegrationTest {
                 2,
                 15.99,
                 Status.OUT_OF_STOCK
-
-
         );
         ProductResponseDTO productResponseDTO1 = new ProductResponseDTO(
-                "1",
                 "productId",
                 "inventoryId",
                 "name",
@@ -167,9 +160,6 @@ class InventoryServiceClientIntegrationTest {
                 2,
                 15.99,
                 Status.OUT_OF_STOCK
-
-
-
         );
 
         Flux<ProductResponseDTO> productFlux = Flux.just(productResponseDTO, productResponseDTO1);
@@ -235,6 +225,30 @@ class InventoryServiceClientIntegrationTest {
                 .expectNext(expectedQuantity)
                 .verifyComplete();
     }
+
+    @Test
+    void getQuantityOfProductsInInventory_withInvalidInventoryId_shouldThrowInventoryNotFoundException() {
+        // Arrange
+        String invalidInventoryId = "invalidInventoryId";
+
+        // Mock a 404 Not Found response from the MockWebServer
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(404)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+                .setBody("{\"message\": \"Inventory not found\"}"));
+
+        // Act
+        Mono<Integer> result = inventoryServiceClient.getQuantityOfProductsInInventory(invalidInventoryId);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof InventoryNotFoundException
+                        && throwable.getMessage().contains("Inventory not found"))
+                .verify();
+    }
+
+
+
 
 
 

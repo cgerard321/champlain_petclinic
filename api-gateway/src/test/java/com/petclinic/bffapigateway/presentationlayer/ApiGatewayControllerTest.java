@@ -2422,6 +2422,7 @@ class ApiGatewayControllerTest {
     }
     @Test
     void shouldGetAllVisits() {
+        // Sample VisitResponseDTO objects
         VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
                 .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
                 .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
@@ -2437,6 +2438,7 @@ class ApiGatewayControllerTest {
                 .status(Status.UPCOMING)
                 .visitEndDate(LocalDateTime.parse("2024-11-25 14:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .build();
+
         VisitResponseDTO visitResponseDTO2 = VisitResponseDTO.builder()
                 .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
                 .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
@@ -2452,18 +2454,29 @@ class ApiGatewayControllerTest {
                 .status(Status.UPCOMING)
                 .visitEndDate(LocalDateTime.parse("2024-11-25 14:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .build();
-        when(visitsServiceClient.getAllVisits()).thenReturn(Flux.just(visitResponseDTO,visitResponseDTO2));
 
+        // Mocking the service call
+        String description = "this is a dummy description";
+        when(visitsServiceClient.getAllVisits(description)).thenReturn(Flux.just(visitResponseDTO, visitResponseDTO2));
+
+        // Performing the request and asserting results
         client.get()
-                .uri("/api/gateway/visits")
+                .uri(uriBuilder -> uriBuilder
+                        .path("/api/gateway/visits")
+                        .queryParam("description", description)
+                        .build())
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE+";charset=UTF-8")
+                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE + ";charset=UTF-8")
                 .expectBodyList(VisitResponseDTO.class)
-                .value((list)->assertEquals(list.size(),2));
-        Mockito.verify(visitsServiceClient,times(1)).getAllVisits();
+                .value(list -> assertEquals(2, list.size()));  // Assert list size is 2
+
+        // Verifying the method call with the right argument
+        Mockito.verify(visitsServiceClient, times(1)).getAllVisits(description);
     }
+
+
     @Test
     void getVisitsByOwnerId_shouldReturnOk(){
         //arrange
@@ -3140,12 +3153,21 @@ private InventoryResponseDTO buildInventoryDTO(){
                 .inventoryName("invt1")
                 .inventoryType("Internal")
                 .inventoryDescription("invtone")
+                .inventoryImage("https://www.fda.gov/files/iStock-157317886.jpg")
+                .inventoryBackupImage("https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14")
                 .build();
 }
     @Test
     void addInventory_withValidValue_shouldSucceed() {
 
-        InventoryRequestDTO requestDTO = new InventoryRequestDTO("internal", "Internal", "invt1");
+        //InventoryRequestDTO requestDTO = new InventoryRequestDTO("internal", "Internal", "invt1");
+        InventoryRequestDTO requestDTO = new InventoryRequestDTO();
+        requestDTO.setInventoryName("invt1");
+        requestDTO.setInventoryType("Internal");
+        requestDTO.setInventoryDescription("newDescription");
+        requestDTO.setInventoryImage("https://www.fda.gov/files/iStock-157317886.jpg");
+        requestDTO.setInventoryBackupImage("https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14");
+
 
         InventoryResponseDTO inventoryResponseDTO = buildInventoryDTO();
 
@@ -3174,13 +3196,22 @@ private InventoryResponseDTO buildInventoryDTO(){
 
     @Test
     void updateInventory_withValidValue_shouldSucceed() {
-        InventoryRequestDTO requestDTO = new InventoryRequestDTO("internal", "Internal", "newDescription");
+        //InventoryRequestDTO requestDTO = new InventoryRequestDTO("internal", "Internal", "newDescription");
+        InventoryRequestDTO requestDTO = new InventoryRequestDTO();
+        requestDTO.setInventoryName("invt1");
+        requestDTO.setInventoryType("Internal");
+        requestDTO.setInventoryDescription("newDescription");
+        requestDTO.setInventoryImage("https://www.fda.gov/files/iStock-157317886.jpg");
+        requestDTO.setInventoryBackupImage("https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14");
+
 
         InventoryResponseDTO expectedResponse = InventoryResponseDTO.builder()
                 .inventoryId("1")
                 .inventoryName("newName")
                 .inventoryType("Internal")
                 .inventoryDescription("newDescription")
+                .inventoryImage("https://www.fda.gov/files/iStock-157317886.jpg")
+                .inventoryBackupImage("https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14")
                 .build();
 
         when(inventoryServiceClient.updateInventory(any(), eq(buildInventoryDTO().getInventoryId())))
@@ -3242,6 +3273,8 @@ private InventoryResponseDTO buildInventoryDTO(){
                 .inventoryName("Pet food")
                 .inventoryType("Internal")
                 .inventoryDescription("pet")
+                .inventoryImage("https://www.fda.gov/files/iStock-157317886.jpg")
+                .inventoryBackupImage("https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14")
                 .build();
 
         when(inventoryServiceClient.getInventoryById(validInventoryId))
@@ -3315,7 +3348,6 @@ void deleteAllInventory_shouldSucceed() {
     @Test
     void getProductsInInventoryByInventoryIdAndProductFieldPagination(){
         ProductResponseDTO expectedResponse = ProductResponseDTO.builder()
-                .id("sampleId")
                 .productId("1234")
                 .inventoryId("1")
                 .productName("testName")
@@ -3337,7 +3369,6 @@ void deleteAllInventory_shouldSucceed() {
                 .expectBodyList(ProductResponseDTO.class)
                 .value((list)-> {
                     assertEquals(1,list.size());
-                    assertEquals(list.get(0).getId(),expectedResponse.getId());
                     assertEquals(list.get(0).getProductId(),expectedResponse.getProductId());
                     assertEquals(list.get(0).getInventoryId(),expectedResponse.getInventoryId());
                     assertEquals(list.get(0).getProductName(),expectedResponse.getProductName());
@@ -3350,7 +3381,6 @@ void deleteAllInventory_shouldSucceed() {
     @Test
     void getTotalNumberOfProductsWithRequestParams(){
         ProductResponseDTO expectedResponse = ProductResponseDTO.builder()
-                .id("sampleId")
                 .productId("1234")
                 .inventoryId("1")
                 .productName("testName")
@@ -3378,7 +3408,6 @@ void deleteAllInventory_shouldSucceed() {
 
         // Define the expected response
         ProductResponseDTO expectedResponse = ProductResponseDTO.builder()
-                .id("sampleId")
                 .productId("sampleProductId")
                 .inventoryId("sampleInventoryId")
                 .productName(requestDTO.getProductName())
@@ -3436,7 +3465,6 @@ void deleteAllInventory_shouldSucceed() {
 
         // Define the expected response
         ProductResponseDTO expectedResponse = ProductResponseDTO.builder()
-                .id("sampleId")
                 .productId("sampleProductId")
                 .inventoryId("sampleInventoryId")
                 .productName(requestDTO.getProductName())
@@ -3480,7 +3508,6 @@ void deleteAllInventory_shouldSucceed() {
 
         // Define the expected response
         ProductResponseDTO expectedResponse = ProductResponseDTO.builder()
-                .id("sampleId")
                 .productId("sampleProductId")
                 .inventoryId("sampleInventoryId")
                 .productName(requestDTO.getProductName())
@@ -3518,7 +3545,6 @@ void deleteAllInventory_shouldSucceed() {
 
     private ProductResponseDTO buildProductDTO(){
         return ProductResponseDTO.builder()
-                .id("1")
                 .inventoryId("1")
                 .productId(UUID.randomUUID().toString())
                 .productName("Benzodiazepines")

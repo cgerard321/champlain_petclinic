@@ -5,6 +5,16 @@ import { PetResponseModel } from '../models/PetResponseModel';
 import { PetRequestModel } from '../models/PetRequestModel';
 import { useNavigate, useParams } from 'react-router-dom';
 import './UpdatePetForm.css';
+import { deletePet } from '@/features/customers/api/deletePet.ts';
+
+const petTypeOptions: { [key: string]: string } = {
+  '1': 'Cat',
+  '2': 'Dog',
+  '3': 'Lizard',
+  '4': 'Snake',
+  '5': 'Bird',
+  '6': 'Hamster',
+};
 
 const UpdatePetForm: React.FC = (): JSX.Element => {
   const navigate = useNavigate();
@@ -13,6 +23,8 @@ const UpdatePetForm: React.FC = (): JSX.Element => {
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [successMessage, setSuccessMessage] = useState<string>('');
   const [notFound, setNotFound] = useState<boolean>(false);
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   // Fetch pet data on component mount
   useEffect(() => {
@@ -42,13 +54,23 @@ const UpdatePetForm: React.FC = (): JSX.Element => {
   }, [petId]);
 
   // Handle form field changes
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ): void => {
     if (pet) {
-      const { name, type, value, checked } = e.target;
-      setPet({
-        ...pet,
-        [name]: type === 'checkbox' ? (checked ? 'true' : 'false') : value, // Handle checkbox properly
-      });
+      const { name, type, value } = e.target;
+      if (type === 'checkbox') {
+        const checked = (e.target as HTMLInputElement).checked;
+        setPet({
+          ...pet,
+          [name]: checked ? 'true' : 'false',
+        });
+      } else {
+        setPet({
+          ...pet,
+          [name]: value,
+        });
+      }
     }
   };
 
@@ -61,14 +83,15 @@ const UpdatePetForm: React.FC = (): JSX.Element => {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-  // Handle form submission
 
+  // Handle form submission
   const handleSubmit = async (
     event: FormEvent<HTMLFormElement>
   ): Promise<void> => {
     event.preventDefault();
     if (!validate() || !pet) return;
     const petRequestData: PetRequestModel = {
+      ownerId: pet.ownerId,
       name: pet.name,
       birthDate: pet.birthDate,
       petTypeId: pet.petTypeId,
@@ -80,7 +103,7 @@ const UpdatePetForm: React.FC = (): JSX.Element => {
       const response = await updatePet(petId!, petRequestData);
       if (response.status === 200) {
         setSuccessMessage('Pet updated successfully!');
-        navigate(`/customers/${pet.ownerId}`);
+        setIsUpdateModalOpen(true);
       } else {
         console.error('Error updating pet');
       }
@@ -89,11 +112,37 @@ const UpdatePetForm: React.FC = (): JSX.Element => {
     }
   };
 
+  // Handle delete pet
+  const handleDelete = async (): Promise<void> => {
+    if (petId) {
+      try {
+        const response = await deletePet(petId);
+        if (response.status === 200) {
+          navigate(`/customers/${response.data.ownerId}`); // Redirect after deletion
+        } else {
+          console.error('Error deleting pet');
+        }
+      } catch (error) {
+        console.error('Error deleting pet:', error);
+      }
+    }
+  };
+
   // Handle cancel button click
   const handleCancel = (): void => {
     if (pet) {
       navigate(`/customers/${pet.ownerId}`);
     }
+  };
+
+  // Modal handlers
+  const closeUpdateModal = (): void => {
+    setIsUpdateModalOpen(false);
+    navigate(`/customers/${pet?.ownerId}`); // Redirect after closing the update modal
+  };
+
+  const closeDeleteModal = (): void => {
+    setIsDeleteModalOpen(false);
   };
 
   if (notFound) {
@@ -106,7 +155,7 @@ const UpdatePetForm: React.FC = (): JSX.Element => {
 
   return (
     <div className="update-pet-form">
-      <h1>Edit Pet: {pet.petId}</h1>
+      <h1>Edit Pet: {pet.name}</h1>
       <form onSubmit={handleSubmit}>
         <label>Name: </label>
         <input
@@ -119,12 +168,14 @@ const UpdatePetForm: React.FC = (): JSX.Element => {
         <br />
 
         <label>Pet Type: </label>
-        <input
-          type="text"
-          name="petTypeId"
-          value={pet.petTypeId}
-          onChange={handleChange}
-        />
+        <select name="petTypeId" value={pet.petTypeId} onChange={handleChange}>
+          <option value="">Select a pet type</option>
+          {Object.entries(petTypeOptions).map(([id, name]) => (
+            <option key={id} value={id}>
+              {name}
+            </option>
+          ))}
+        </select>
         {errors.petTypeId && <span className="error">{errors.petTypeId}</span>}
         <br />
 
@@ -146,13 +197,47 @@ const UpdatePetForm: React.FC = (): JSX.Element => {
         />
         {errors.weight && <span className="error">{errors.weight}</span>}
         <br />
+
         <button type="submit">Update Pet</button>
-        <button type="button" onClick={handleCancel}>
-          {' '}
-          Cancel{' '}
+        <button
+          type="button"
+          onClick={() => setIsDeleteModalOpen(true)} // Open delete modal
+          className={'delete-pet-button'}
+        >
+          Delete Pet
+        </button>
+        <button
+          type="button"
+          onClick={handleCancel}
+          className={'cancel-form-button'}
+        >
+          Cancel
         </button>
       </form>
       {successMessage && <p className="success">{successMessage}</p>}
+
+      {isUpdateModalOpen && (
+        <div className="pet-update-modal-overlay">
+          <div className="pet-update-modal">
+            <h2>Success!</h2>
+            <p>Pet has been successfully updated.</p>
+            <button onClick={closeUpdateModal}>Close</button>
+          </div>
+        </div>
+      )}
+
+      {isDeleteModalOpen && (
+        <div className="pet-delete-modal-overlay">
+          <div className="pet-delete-modal">
+            <h2>Confirm Deletion</h2>
+            <p>Are you sure you want to delete this pet?</p>
+            <button onClick={handleDelete}>Yes, Delete</button>
+            <button onClick={closeDeleteModal} className={'cancel-form-button'}>
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

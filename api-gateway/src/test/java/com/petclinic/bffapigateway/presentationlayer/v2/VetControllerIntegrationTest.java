@@ -295,4 +295,42 @@ class VetControllerIntegrationTest {
                 .expectStatus().isNotFound();
     }
 
+    @Test
+    public void whenGetAlbumsByVetId_thenReturnAlbums() throws Exception {
+
+        String vetId = "ac9adeb8-625b-11ee-8c99-0242ac120002";
+
+        Album album1 = new Album(1, vetId, "album1", "image/jpeg", "mockImageData1".getBytes());
+        Album album2 = new Album(2, vetId, "album2", "image/jpeg", "mockImageData2".getBytes());
+
+        mockServerConfigVetService.registerGetAlbumsByVetIdEndpoint(vetId, List.of(album1, album2));
+
+        webTestClient.get()
+                .uri(VET_ENDPOINT + "/" + vetId + "/albums")
+                .cookie("Bearer", BEARER_TOKEN)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBodyList(Album.class)
+                .hasSize(2)
+                .contains(album1, album2);
+    }
+
+
+    @Test
+    public void whenGetAlbumsByInvalidVetId_thenReturnNotFound() {
+
+        String invalidVetId = "ac9adeb8-625b-11ee-8c99-0242ac12000200";
+
+        mockServerConfigVetService.registerGetAlbumsByVetIdEndpointNotFound(invalidVetId);
+
+        webTestClient.get()
+                .uri(VET_ENDPOINT + "/" + invalidVetId + "/albums")
+                .cookie("Bearer", BEARER_TOKEN)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
 }

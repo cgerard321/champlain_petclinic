@@ -88,15 +88,32 @@ public class ProductServiceImpl implements ProductService {
                 .map(EntityModelUtil::toProductResponseModel);
     }
 
+//    @Override
+//    public Mono<ProductResponseModel> updateProductByProductId(String productId, Mono<ProductRequestModel> productRequestModel) {
+//        return productRepository.findProductByProductId(productId)
+//                .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Product id was not found: " + productId))))
+//                .flatMap(found -> productRequestModel
+//                        .map(EntityModelUtil::toProductEntity)
+//                        .doOnNext(entity -> entity.setId(found.getId()))
+//                        .doOnNext(entity -> entity.setProductId(found.getProductId())))
+//                .flatMap(this::getAverageRating)
+//                .flatMap(productRepository::save)
+//                .map(EntityModelUtil::toProductResponseModel);
+//    }
     @Override
     public Mono<ProductResponseModel> updateProductByProductId(String productId, Mono<ProductRequestModel> productRequestModel) {
         return productRepository.findProductByProductId(productId)
-                .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Product id was not found: " + productId))))
-                .flatMap(found -> productRequestModel
-                        .map(EntityModelUtil::toProductEntity)
-                        .doOnNext(entity -> entity.setId(found.getId()))
-                        .doOnNext(entity -> entity.setProductId(found.getProductId())))
-                .flatMap(this::getAverageRating)
+                .switchIfEmpty(Mono.error(new NotFoundException("Product id was not found: " + productId)))
+                .flatMap(existingProduct -> productRequestModel
+                        .map(request -> {
+                            existingProduct.setProductName(request.getProductName());
+                            existingProduct.setProductDescription(request.getProductDescription());
+                            existingProduct.setProductSalePrice(request.getProductSalePrice());
+                            existingProduct.setProductType(request.getProductType());
+                            // Add any other fields that need to be updated
+                            return existingProduct;
+                        })
+                )
                 .flatMap(productRepository::save)
                 .map(EntityModelUtil::toProductResponseModel);
     }
@@ -120,10 +137,13 @@ public class ProductServiceImpl implements ProductService {
         return productRepository.findProductByProductId(productId)
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Product id was not found: " + productId))))
                 .flatMap(product -> {
-                    product.setRequestCount(product.getRequestCount() + 1);
+                    Integer currentCount = product.getRequestCount() != null ? product.getRequestCount() : 0;
+                    product.setRequestCount(currentCount + 1);
                     return productRepository.save(product).then(); // Save and complete
                 });
     }
+
+
 
 
     @Scheduled(cron = "0 0 0 */30 * *")  // Runs every 30 days at midnight
@@ -146,6 +166,31 @@ public class ProductServiceImpl implements ProductService {
                     responseModel.setProductSalePrice(product.getProductSalePrice());
                     responseModel.setProductType(product.getProductType());
                     return responseModel;
+                });
+    }
+
+
+    @Override
+    public Mono<Void> DecreaseProductCount(String productId) {
+        return productRepository.findProductByProductId(productId)
+                .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Product id was not found: " + productId))))
+                .flatMap(product -> {
+                    product.setRequestCount(product.getProductQuantity() - 1);
+                    return productRepository.save(product).then();
+                });
+    }
+
+    @Override
+    public Mono<Void> changeProductQuantity(String productId, Integer productQuantity) {
+        return productRepository.findProductByProductId(productId)
+                .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Product id was not found: " + productId))))
+                .flatMap(product -> {
+                    if (productQuantity > product.getProductQuantity()) {
+                        product.setProductQuantity(product.getProductQuantity() + productQuantity);
+                    }else {
+                        product.setProductQuantity(product.getProductQuantity() - productQuantity);
+                    }
+                    return productRepository.save(product).then();
                 });
     }
 
