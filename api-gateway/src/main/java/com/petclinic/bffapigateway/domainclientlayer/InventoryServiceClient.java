@@ -331,13 +331,25 @@ public class InventoryServiceClient {
                 .bodyToMono(ProductResponseDTO.class);
     }
 
+    public Mono<ProductResponseDTO> consumeProduct(String inventoryId, String productId) {
+        UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(inventoryServiceUrl + "/{inventoryId}/products/{productId}/consume");
+
+        return webClient.patch()
+                .uri(uriBuilder.buildAndExpand(inventoryId, productId).toUri())
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError,
+                        resp -> Mono.error(new NotFoundException("Product not found in inventory: " + inventoryId)))
+                .bodyToMono(ProductResponseDTO.class);
+    }
+
     public Mono<Integer> getQuantityOfProductsInInventory(final String inventoryId) {
         return webClient.get()
                 .uri(inventoryServiceUrl + "/{inventoryId}/productquantity", inventoryId)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError,
-                        resp -> rethrower.rethrow(resp, ex -> new InventoryNotFoundException(ex.get("message").toString(), NOT_FOUND)))
+                .onStatus(HttpStatusCode::is4xxClientError, clientResponse ->
+                        clientResponse.bodyToMono(String.class)
+                                .flatMap(errorMessage -> Mono.error(new InventoryNotFoundException(errorMessage, HttpStatus.NOT_FOUND))))
                 .bodyToMono(Integer.class);
     }
 }

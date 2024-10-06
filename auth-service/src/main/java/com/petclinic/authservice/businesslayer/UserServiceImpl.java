@@ -241,6 +241,29 @@ public class UserServiceImpl implements UserService {
         return userMapper.modelToPasswordLessDTO(save);
     }
 
+    @Override
+    public void disableUser(String userId) {
+        User user = userRepo.findUserByUserIdentifier_UserId(userId);
+        if (user != null) {
+            user.setDisabled(true);
+            userRepo.save(user);
+            log.info("User with ID {} has been disabled", userId);
+        } else {
+            throw new NotFoundException("No user found with userId: " + userId);
+        }
+    }
+
+    @Override
+    public void enableUser(String userId) {
+        User user = userRepo.findUserByUserIdentifier_UserId(userId);
+        if (user != null) {
+            user.setDisabled(false);
+            userRepo.save(user);
+            log.info("User with ID {} has been enabled", userId);
+        } else {
+            throw new NotFoundException("No user found with userId: " + userId);
+        }
+    }
 
     @Override
     public HashMap<String,Object> login(UserIDLessUsernameLessDTO login) throws IncorrectPasswordException {
@@ -250,6 +273,9 @@ public class UserServiceImpl implements UserService {
             throw new NotFoundException("User not found");
         }
 
+        if (loggedInUser.isDisabled()) {
+            throw new DisabledAccountException("Your account has been disabled. Please contact support.");
+        }
 
         try {
             authenticationManager

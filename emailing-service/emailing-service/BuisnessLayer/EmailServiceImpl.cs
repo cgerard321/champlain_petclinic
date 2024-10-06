@@ -38,7 +38,7 @@ public class EmailServiceImpl : IEmailService
         if (string.IsNullOrWhiteSpace(htmlBody))
             throw new TemplateFormatException("HTML content was missing");
         if (EmailUtils.EmailTemplates.FirstOrDefault(e => e.Name == templateName) != null)
-            throw new TemplateFormatException($"Template [{templateName}] already exists.");
+            throw new CreatedAlreadyExistingTemplate($"Template [{templateName}] already exists.");
 
         EmailUtils.EmailTemplates.Add(new EmailTemplate(templateName, htmlBody));
 
@@ -109,54 +109,192 @@ public class EmailServiceImpl : IEmailService
             Console.WriteLine(e);
             throw;
         }
-
-        try
+        // Run the email sending task in a separate thread
+        Task.Run(async () =>
         {
-            // Run the email sending task in a separate thread
-            Task.Run(async () =>
+            try
             {
-                try
+                var sendEmailResult = await EmailUtils.SendEmailAsync(
+                    directEmailModel.EmailToSendTo,
+                    directEmailModel.EmailTitle,
+                    builtEmail,
+                    EmailUtils.smtpClient
+                );
+                
+                if (sendEmailResult.Status == "Sent")
                 {
-                    var sendEmailResult = await EmailUtils.SendEmailAsync(
+                    // Add the email to the database with a status of "Sent"
+                    var databaseHelper = new DatabaseHelper();
+                    await databaseHelper.AddEmailAsync(
                         directEmailModel.EmailToSendTo,
                         directEmailModel.EmailTitle,
                         builtEmail,
-                        EmailUtils.smtpClient
+                        "Sent"
                     );
-                    
-                    if (sendEmailResult.Status == "Sent")
-                    {
-                        // Add the email to the database with a status of "Sent"
-                        var databaseHelper = new DatabaseHelper();
-                        await databaseHelper.AddEmailAsync(
-                            directEmailModel.EmailToSendTo,
-                            directEmailModel.EmailTitle,
-                            builtEmail,
-                            "Sent"
-                        );
-                    }
-                    else
-                    {
-                        // Add the email to the database with a status of "Failed"
-                        var databaseHelper = new DatabaseHelper();
-                        await databaseHelper.AddEmailAsync(
-                            directEmailModel.EmailToSendTo,
-                            directEmailModel.EmailTitle,
-                            builtEmail,
-                            "Failed"
-                        );
-                    }
                 }
-                catch (Exception e)
+                else
                 {
-                    Console.WriteLine(e);
+                    // Add the email to the database with a status of "Failed"
+                    var databaseHelper = new DatabaseHelper();
+                    await databaseHelper.AddEmailAsync(
+                        directEmailModel.EmailToSendTo,
+                        directEmailModel.EmailTitle,
+                        builtEmail,
+                        "Failed"
+                    );
                 }
-            });
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+        });
+
+        return new OperationResult
+        {
+            IsSuccess = true,
+            Message = $"Successfully sent an email!"
+        };
+    }
+    public OperationResult SendEmailNotification(NotificationEmailModel model)
+    {
+        Console.WriteLine("Received Email Call Function!");
+        NotificationEmailModel directEmailModel = model;
+        Console.WriteLine("Found the model!" + directEmailModel);
+        if (String.IsNullOrWhiteSpace(directEmailModel.EmailToSendTo))
+            throw new BadEmailModel("Email To Send To is null or whitespace. EMAIL IS REQUIRED");
+        if(!EmailUtils.CheckIfEmailIsValid(directEmailModel.EmailToSendTo))
+            throw new BadEmailModel("Email To Send To Not Valid");
+        if(String.IsNullOrWhiteSpace(directEmailModel.EmailTitle))
+            throw new BadEmailModel("Email Title is null or whitespace");
+        if (String.IsNullOrWhiteSpace(directEmailModel.TemplateName))
+            directEmailModel.TemplateName = "Default";
+        //This is to handle the time as UTC-4
+        if (directEmailModel.SentDate < TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.CreateCustomTimeZone("UTC-4", new TimeSpan(-4, 0, 0), "UTC-4", "UTC-4")))
+            throw new AlreadyPassedDate($"The Date for the notification  was already passed! {directEmailModel.SentDate} is higher than {DateTime.Now}");
+        EmailTemplate? emailTemplate = EmailUtils.EmailTemplates.FirstOrDefault(e => e.Name == directEmailModel.TemplateName);
+        if (emailTemplate == null)
+            throw new TriedToFindNonExistingTemplate(
+                $"Template {directEmailModel.TemplateName} does not exist. Please create a template first or use the default one (Default)");
+        string builtEmail;
+        try
+        {
+            string header = "";
+            string body = "";
+            string footer = "";
+            string correspondentName = "";
+            string sender = "";
+            if (!String.IsNullOrWhiteSpace(directEmailModel.Header))
+                header = directEmailModel.Header;
+            if (!String.IsNullOrWhiteSpace(directEmailModel.Body))
+                body = directEmailModel.Body;
+            if (!String.IsNullOrWhiteSpace(directEmailModel.Footer))
+                footer = directEmailModel.Footer;
+            if (!String.IsNullOrWhiteSpace(directEmailModel.CorrespondantName))
+                correspondentName = directEmailModel.CorrespondantName;
+            if (!String.IsNullOrWhiteSpace(directEmailModel.SenderName))
+                sender = directEmailModel.SenderName;
+            builtEmail = emailTemplate.BuildEmail(
+                header,
+                body,
+                footer,
+                correspondentName,
+                sender
+            );
         }
-        catch (Exception e)
+        /*catch (NullReferenceException e)
         {
             Console.WriteLine(e);
+            throw;
+        }*/
+        
+        catch (TemplateRequiredFieldNotSet e)
+        {
+            Console.WriteLine(e);
+            throw;
         }
+        catch (TriedToFillEmailFieldWithEmptyWhiteSpace e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+        // Run the email sending task in a separate thread
+        Task.Run(async () =>
+        {
+            try
+            {
+                // Add the email to the database with a status of "Sent"
+                await _databaseHelper.AddEmailNotificationAsync(directEmailModel.EmailToSendTo, 
+                        directEmailModel.EmailTitle, 
+                        builtEmail , 
+                        "NotSent", 
+                        directEmailModel.SentDate
+                    );
+                    
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+        });
+
+        return new OperationResult
+        {
+            IsSuccess = true,
+            Message = $"Successfully Added email to waiting list!"
+        };
+    }
+
+    public OperationResult SendRawEmail(RawEmailModel model)
+    {
+        RawEmailModel directEmailModel = model;
+        Console.WriteLine("Found the model!" + directEmailModel);
+        if (String.IsNullOrWhiteSpace(directEmailModel.EmailToSendTo))
+            throw new BadEmailModel("Email To Send To is null or whitespace. EMAIL IS REQUIRED");
+        if(!EmailUtils.CheckIfEmailIsValid(directEmailModel.EmailToSendTo))
+            throw new BadEmailModel("Email To Send To Not Valid");
+        if(String.IsNullOrWhiteSpace(directEmailModel.EmailTitle))
+            throw new BadEmailModel("Email Title is null or whitespace");
+        
+        Task.Run(async () =>
+        {
+            try
+            {
+                var sendEmailResult = await EmailUtils.SendEmailAsync(
+                    directEmailModel.EmailToSendTo,
+                    directEmailModel.EmailTitle,
+                    directEmailModel.Body,
+                    EmailUtils.smtpClient
+                );
+                
+                if (sendEmailResult.Status == "Sent")
+                {
+                    // Add the email to the database with a status of "Sent"
+                    var databaseHelper = new DatabaseHelper();
+                    await databaseHelper.AddEmailAsync(
+                        directEmailModel.EmailToSendTo,
+                        directEmailModel.EmailTitle,
+                        directEmailModel.Body,
+                        "Sent"
+                    );
+                }
+                else
+                {
+                    // Add the email to the database with a status of "Failed"
+                    var databaseHelper = new DatabaseHelper();
+                    await databaseHelper.AddEmailAsync(
+                        directEmailModel.EmailToSendTo,
+                        directEmailModel.EmailTitle,
+                        directEmailModel.Body,
+                        "Failed"
+                    );
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+        });
         return new OperationResult
         {
             IsSuccess = true,

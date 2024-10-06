@@ -188,6 +188,17 @@ public class InventoryController {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
+    @PatchMapping(value = "/{inventoryId}/products/{productId}/consume", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<Mono<ProductResponseDTO>>> consumeProduct(
+            @PathVariable String inventoryId,
+            @PathVariable String productId) {
+
+        return inventoryServiceClient.consumeProduct(inventoryId, productId)
+                .map(productResponseDTO -> ResponseEntity.ok(Mono.just(productResponseDTO)))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
     @GetMapping(value = "/{inventoryId}/products/{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get a product by its ID in an inventory")
     @ApiResponses(value = {

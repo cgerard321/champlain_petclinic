@@ -62,6 +62,13 @@ public class PetController {
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
+    @PostMapping(value= "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<PetResponseDTO>> addPet(@RequestBody Mono<PetRequestDTO> petRequestDTO) {
+        return customersServiceClient.addPet(petRequestDTO)
+                .map(e -> ResponseEntity.status(HttpStatus.CREATED).body(e))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
     @GetMapping(value = "/{petId}")

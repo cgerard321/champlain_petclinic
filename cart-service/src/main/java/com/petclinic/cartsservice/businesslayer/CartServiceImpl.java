@@ -16,10 +16,12 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -92,6 +94,31 @@ public class CartServiceImpl implements CartService {
 
 
 //instead lets create a removeProductFromCart, UpdateQuantityOfProductInCart, and AddProductInCart methods
+    @Override
+    public Mono<CartResponseModel> removeProductFromCart(String cartId, String productId){
+        return cartRepository.findCartByCartId(cartId)
+                .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Cart id was not found:" + cartId))))
+                .flatMap(found -> {
+                    List<CartProduct> products = found.getProducts();
+
+                    Optional<CartProduct> productToRemove = products.stream()
+                            .filter(product -> product.getProductId().equals(productId)).findFirst();
+
+                    if (productToRemove.isPresent()) {
+                        products.remove(productToRemove.get());
+
+                        found.setProducts(products);
+
+                        return cartRepository.save(found)
+                                .map(updatedCart -> {
+                                    return EntityModelUtil.toCartResponseModel(updatedCart, products);
+                                });
+                    } else {
+                        return Mono.error(new NotFoundException("Product id was not found: " + productId));
+                    }
+
+                });
+    }
 
 
      @Override
@@ -104,6 +131,7 @@ public class CartServiceImpl implements CartService {
                              .then(Mono.just(EntityModelUtil.toCartResponseModel(found, products)));
                  });
      }
+
 
     @Override
     public Mono<CartResponseModel> checkoutCart(String cartId) {
@@ -125,6 +153,8 @@ public class CartServiceImpl implements CartService {
                     cart.setTvc(tvc);
                     cart.setTotal(total);
 
+                    // Clear the products list
+                    cart.setProducts(new ArrayList<>());
 
                     return cartRepository.save(cart)
                             .map(savedCart -> {
@@ -141,7 +171,6 @@ public class CartServiceImpl implements CartService {
                 });
     }
 
-
     @Override
     public Mono<Integer> getCartItemCount(String cartId) {
         return cartRepository.findCartByCartId(cartId)
@@ -156,19 +185,44 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public Mono<CartResponseModel> createNewCart(CartRequestModel cartRequestModel) {
+    public Mono<CartResponseModel> assignCartToCustomer(String customerId, List<CartProduct> products) {
+        //check if the customer already has a cart
+        return cartRepository.findCartByCustomerId(customerId)
+                .defaultIfEmpty(new Cart())
+                .flatMap(cart -> {
+                    //set the customerId if it's a new cart
+                    if (cart.getCustomerId() == null) {
+                        cart.setCustomerId(customerId);
+                        cart.setCartId(UUID.randomUUID().toString()); // Generate a new cart ID
+                    }
 
-        Cart cart = new Cart();
-        cart.setCustomerId(cartRequestModel.getCustomerId());
-        cart.setCartId(UUID.randomUUID().toString());
-        Mono<CartResponseModel> cartRequestModelMono = cartRepository.save(cart)
-                .map(savedCart -> {
-                    CartResponseModel cartResponseModel = new CartResponseModel();
-                    cartResponseModel.setCustomerId(savedCart.getCustomerId());
-                    cartResponseModel.setCartId(savedCart.getCartId());
-                    return cartResponseModel;
+                    //add or update products in the cart
+                    List<CartProduct> updatedProducts = cart.getProducts() != null ? cart.getProducts() : new ArrayList<>();
+
+                    for (CartProduct newProduct : products) {
+                        boolean productExists = false;
+
+                        //update quantity if product already exists in the cart
+                        for (CartProduct existingProduct : updatedProducts) {
+                            if (existingProduct.getProductId().equals(newProduct.getProductId())) {
+                                existingProduct.setQuantityInCart(existingProduct.getQuantityInCart() + newProduct.getQuantityInCart());
+                                productExists = true;
+                                break;
+                            }
+                        }
+
+                        //if the product is not in the cart, add it
+                        if (!productExists) {
+                            updatedProducts.add(newProduct);
+                        }
+                    }
+
+                    cart.setProducts(updatedProducts);
+
+                    //save the cart to the repository
+                    return cartRepository.save(cart)
+                            .map(savedCart -> EntityModelUtil.toCartResponseModel(savedCart, savedCart.getProducts()));
                 });
-        return cartRequestModelMono;
     }
 
     @Override
@@ -258,7 +312,16 @@ public class CartServiceImpl implements CartService {
                 );
     }
 
-
+    @Override
+    public Mono<CartResponseModel> findCartByCustomerId(String customerId) {
+        return cartRepository.findCartByCustomerId(customerId)
+                .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Cart for customer id was not found: " + customerId))))
+                .doOnNext(cart -> log.debug("The cart for customer id {} is: {}", customerId, cart.toString()))
+                .flatMap(cart -> {
+                    List<CartProduct> products = cart.getProducts();
+                    return Mono.just(EntityModelUtil.toCartResponseModel(cart, products));
+                });
+    }
 
 
 

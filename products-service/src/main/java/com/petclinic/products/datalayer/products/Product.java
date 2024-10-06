@@ -17,11 +17,13 @@ public class Product {
     @Id
     private String id;
     private String productId;
+    private String imageId;
     private String productName;
     private String productDescription;
     private Double productSalePrice;
     private Double averageRating;
     private Integer requestCount;
     private String productType;
+    private Integer productQuantity;
 }
 

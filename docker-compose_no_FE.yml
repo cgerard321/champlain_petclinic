@@ -227,9 +227,9 @@ services:
     environment:
       - PMA_HOST=emailing-service-mysql-db
       - MYSQL_ROOT_PASSWORD=Your_password123
-    depends_on:
-      - emailing-service
-      - emailing-service-mysql-db
+    #depends_on:
+    #  - emailing-service
+    #  - emailing-service-mysql-db
 
   # vet mongo container
   mongo:

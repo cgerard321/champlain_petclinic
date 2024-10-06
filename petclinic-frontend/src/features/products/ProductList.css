@@ -40,3 +40,18 @@
   padding: 20px;
   transition: margin-right 0.3s ease;
 }
+.filter-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.filter-container label {
+  margin-bottom: 10px;
+}
+
+.apply-filter-button,
+.clear-filter-button {
+  margin-top: 10px;
+}

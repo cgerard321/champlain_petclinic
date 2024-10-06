@@ -219,6 +219,20 @@ public class CustomersServiceClient {
                 .retrieve().bodyToMono(PetResponseDTO.class);
     }
 
+    public Mono<PetResponseDTO> addPet(Mono<PetRequestDTO> model) {
+        String petId = UUID.randomUUID().toString();
+        return model.flatMap(requestDTO -> {
+            if(requestDTO.getPetId() == null || requestDTO.getPetId().isEmpty()){
+                requestDTO.setPetId(petId);
+            }
+            return webClientBuilder.build()
+                    .post()
+                    .uri(customersServiceUrl + "/pet")
+                    .body(BodyInserters.fromValue(requestDTO))
+                    .retrieve()
+                    .bodyToMono(PetResponseDTO.class);
+        });
+    }
 
     public Mono<PetResponseDTO> updatePet(Mono<PetRequestDTO> petRequestDTO, String petId) {
         return petRequestDTO.flatMap(requestDTO -> {
