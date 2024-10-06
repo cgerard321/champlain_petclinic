@@ -27,7 +27,13 @@ export default function TrendingList(): JSX.Element {
 
           return (
             <div
-              className={`card ${product.productQuantity < 10 ? 'low-quantity' : ''}`}
+              className={`card ${
+                product.productQuantity === 0
+                  ? 'out-of-stock'
+                  : product.productQuantity < 10
+                    ? 'low-quantity'
+                    : ''
+              }`}
               key={product.productId}
             >
               <ImageContainer imageId={product.imageId} />
@@ -39,12 +45,6 @@ export default function TrendingList(): JSX.Element {
               </p>
               <p>Rating: {product.averageRating.toFixed(1)}</p>
               <p>Price: ${product.productSalePrice.toFixed(2)}</p>
-              {/* Conditionally display the "Out of Stock" or "Low Stock" message */}
-              {product.productQuantity === 0 ? (
-                <p className="out-of-stock">Out of Stock</p>
-              ) : product.productQuantity < 10 ? (
-                <p className="low-stock">Low Stock</p>
-              ) : null}
             </div>
           );
         })}
