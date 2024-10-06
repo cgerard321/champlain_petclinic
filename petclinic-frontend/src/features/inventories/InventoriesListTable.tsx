@@ -38,7 +38,7 @@ export default function InventoriesListTable(): JSX.Element {
   const handleMenuClick = (
     e: React.MouseEvent<SVGElement>,
     inventoryId: string
-  ) => {
+  ): void => {
     e.stopPropagation();
     setOpenMenuId(openMenuId === inventoryId ? null : inventoryId);
   };
