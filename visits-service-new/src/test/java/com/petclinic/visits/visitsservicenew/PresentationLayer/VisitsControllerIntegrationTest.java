@@ -363,7 +363,6 @@ class VisitsControllerIntegrationTest {
                 .verifyComplete();
     }
 
-<<<<<<< HEAD
     @Test
     void getAllArchivedVisits_returnsNotFoundWhenNoArchivedVisits() {
         visitRepo.deleteAll().block();  // Clear the repository
@@ -609,88 +608,5 @@ class VisitsControllerIntegrationTest {
                 .verifyComplete();
     }
 
-=======
 
-    
-//    @Test
-//    void deleteCompletedVisitByValidVisitId_Return_NoContent() {
-//        // Arrange: Create and save a COMPLETED visit
-//        String validVisitId = "visitId3";
-//        Visit completedVisit = Visit.builder()
-//                .visitId(validVisitId)
-//                .visitDate(LocalDateTime.now())
-//                .description("Completed visit for deletion test")
-//                .petId("3")
-//                .practitionerId(vet.getVetId())
-//                .status(Status.COMPLETED)
-//                .build();
-//
-//        visitRepo.save(completedVisit).block();
-//
-//        // Verify the visit exists and has a status of COMPLETED
-//        StepVerifier
-//                .create(visitRepo.findByVisitId(validVisitId))
-//                .expectNextMatches(visit -> visit.getStatus().equals(Status.COMPLETED))
-//                .verifyComplete();
-//
-//        // Act: Delete the completed visit
-//        webTestClient
-//                .delete()
-//                .uri("/visits/completed/" + validVisitId)
-//                .exchange()
-//                .expectStatus().isNoContent();
-//
-//        // Assert: Verify the visit is deleted
-//        StepVerifier
-//                .create(visitRepo.findByVisitId(validVisitId))
-//                .expectNextCount(0)
-//                .verifyComplete();
-//    }
-//
-//    @Test
-//    void deleteCompletedVisitByInvalidVisitId_Return_NotFound() {
-//        String visitId = "InvalidId";
-//        webTestClient
-//                .delete()
-//                .uri("/visits/completed/" + visitId)
-//                .exchange()
-//                .expectStatus().isNotFound();
-//
-//        StepVerifier
-//                .create(visitRepo.findByVisitId(visitId))
-//                .expectNextCount(0) //confirms that visit does not exist in the database
-//                .verifyComplete();
-//    }
-//
-//    @Test
-//    void deleteCompletedVisitByValidVisitId_Where_StatusIsNotCompleted_Return_NotFound() {
-//        String validId = "ValidId";
-//        Visit CancelledVisit = Visit.builder()
-//                .visitId(validId)
-//                .visitDate(LocalDateTime.now())
-//                .description("Completed visit for deletion test")
-//                .petId("3")
-//                .practitionerId(vet.getVetId())
-//                .status(Status.CANCELLED)
-//                .build();
-//
-//        visitRepo.save(CancelledVisit).block();
-//
-//        StepVerifier
-//                .create(visitRepo.findByVisitId(validId))
-//                .expectNextMatches(visit -> visit.getStatus() == Status.CANCELLED)
-//                .verifyComplete();
-//
-//        webTestClient
-//                .delete()
-//                .uri("/visits/completed/" + CancelledVisit.getVisitId())
-//                .exchange()
-//                .expectStatus().isNotFound();
-//
-//        StepVerifier
-//                .create(visitRepo.findByVisitId(visit1.getVisitId()))
-//                .expectNextCount(1)
-//                .verifyComplete();
-//    }
->>>>>>> b829ef2f (Fix merge issues)
 }

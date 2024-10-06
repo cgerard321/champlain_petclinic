@@ -10,11 +10,9 @@ import './Emergency.css';
 
 export default function VisitListTable(): JSX.Element {
   const [visitsList, setVisitsList] = useState<Visit[]>([]);
-<<<<<<< HEAD
   const [emergencyList, setEmergencyList] = useState<EmergencyResponseDTO[]>(
     []
   );
-=======
   const [archivedVisits, setArchivedVisits] = useState<Visit[]>([]);
 
   //make tables collapsable
@@ -23,7 +21,6 @@ export default function VisitListTable(): JSX.Element {
   const [completedCollapsed, setCompletedCollapsed] = useState(false);
   const [archivedCollapsed, setArchivedCollapsed] = useState(false);
 
->>>>>>> b9f80b66 (Fully implemented the archive feature and collapsable tables)
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -79,7 +76,6 @@ export default function VisitListTable(): JSX.Element {
   }, []);
 
   useEffect(() => {
-<<<<<<< HEAD
     // Fetch emergency visits
     async function fetchEmergencies(): Promise<void> {
       try {
@@ -110,7 +106,7 @@ export default function VisitListTable(): JSX.Element {
     }
   };
 
-=======
+  useEffect(() => {
     const archivedEventSource = new EventSource(
       'http://localhost:8080/api/v2/gateway/visits/archived',
       {
@@ -153,7 +149,6 @@ export default function VisitListTable(): JSX.Element {
     };
   }, []);
 
->>>>>>> b9f80b66 (Fully implemented the archive feature and collapsable tables)
   const confirmedVisits = visitsList.filter(
     visit => visit.status === 'CONFIRMED'
   );
@@ -329,6 +324,7 @@ export default function VisitListTable(): JSX.Element {
   ): JSX.Element => (
     <div className="visit-table-section">
 <<<<<<< HEAD
+<<<<<<< HEAD
       <h2>{title}</h2>
       <table>
         <thead>
@@ -408,6 +404,8 @@ export default function VisitListTable(): JSX.Element {
                   )}
               </td>
 =======
+=======
+>>>>>>> 0d52aeb0 (Fix merge issues)
       <h2
         onClick={() => setCollapsed(!collapsed)}
         style={{ cursor: 'pointer' }}
@@ -428,7 +426,6 @@ export default function VisitListTable(): JSX.Element {
               <th>Visit End Date</th>
               <th>Status</th>
               <th>Actions</th>
->>>>>>> b9f80b66 (Fully implemented the archive feature and collapsable tables)
             </tr>
           </thead>
           <tbody>
@@ -525,15 +522,17 @@ export default function VisitListTable(): JSX.Element {
         </button>
       </div>
 
-<<<<<<< HEAD
       {/* Emergency Table below buttons, but above visit tables */}
       {renderEmergencyTable('Emergency Visits', emergencyList)}
 
+<<<<<<< HEAD
       {renderTable('Confirmed Visits', confirmedVisits)}
       {renderTable('Upcoming Visits', upcomingVisits)}
       {renderTable('Cancelled Visits', cancelledVisits)}
       {renderTable('Completed Visits', completedVisits, true)}
 =======
+=======
+>>>>>>> 0d52aeb0 (Fix merge issues)
       {renderTable(
         'Confirmed Visits',
         confirmedVisits,
@@ -560,7 +559,6 @@ export default function VisitListTable(): JSX.Element {
         setArchivedCollapsed,
         false
       )}
->>>>>>> b9f80b66 (Fully implemented the archive feature and collapsable tables)
     </div>
   );
 }
