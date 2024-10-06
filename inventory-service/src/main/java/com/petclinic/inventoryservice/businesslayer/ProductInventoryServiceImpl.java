@@ -569,7 +569,6 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                         return productRepository.save(product)
                                 .map(EntityDTOUtil::toProductResponseDTO);
                     }
-                });
                 })
                 .switchIfEmpty(Mono.error(new NotFoundException("Product not found with id: " + productId)));
     }
