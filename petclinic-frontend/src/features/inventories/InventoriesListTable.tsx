@@ -1,4 +1,4 @@
-import { useCallback, useState, useEffect, JSX } from 'react';
+import { useState, useEffect, JSX } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Inventory } from '@/features/inventories/models/Inventory.ts';
 import { InventoryType } from '@/features/inventories/models/InventoryType.ts';
@@ -51,6 +51,20 @@ export default function InventoriesListTable(): JSX.Element {
     getInventoryList,
     setCurrentPage,
   } = useSearchInventories();
+
+  useEffect(() => {
+    getInventoryList('', '', '');
+    fetchAllInventoryTypes();
+  }, [currentPage]);
+
+  const refreshInventoryTypes = async (): Promise<void> => {
+    await fetchAllInventoryTypes();
+  };
+
+  useEffect(() => {
+    getInventoryList('', '', '');
+    refreshInventoryTypes();
+  }, [currentPage]);
 
   const clearQueries = (): void => {
     setInventoryName('');
@@ -138,6 +152,10 @@ export default function InventoriesListTable(): JSX.Element {
       );
 
       if (response.status === 404) {
+        // eslint-disable-next-line no-console
+        console.log(
+          `No products below threshold in inventory: ${inventory.inventoryName}`
+        );
       }
 
       const data = await response.json();
@@ -153,14 +171,10 @@ export default function InventoriesListTable(): JSX.Element {
     }
   };
 
-  const fetchAllInventoryTypes = useCallback(async (): Promise<void> => {
+  const fetchAllInventoryTypes = async (): Promise<void> => {
     const data = await getAllInventoryTypes();
     setInventoryTypeList(data);
-  }, []);
-
-  const refreshInventoryTypes = useCallback(async () => {
-    await fetchAllInventoryTypes();
-  }, [fetchAllInventoryTypes]);
+  };
 
   const handleInventorySelection = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -190,16 +204,6 @@ export default function InventoriesListTable(): JSX.Element {
     // Clear the selected inventories
     setSelectedInventories([]);
   };
-
-  useEffect(() => {
-    getInventoryList('', '', '');
-    fetchAllInventoryTypes();
-  }, [currentPage, getInventoryList, fetchAllInventoryTypes]);
-
-  useEffect(() => {
-    getInventoryList('', '', '');
-    refreshInventoryTypes();
-  }, [currentPage, getInventoryList, refreshInventoryTypes]);
 
   return (
     <>
