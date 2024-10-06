@@ -124,6 +124,7 @@ public class EmailUtilsTest
         // Act & Assert
         Assert.ThrowsAsync<FormatException>(async () =>
             await EmailUtils.SendEmailAsync(invalidEmail, subject, body, _smtpClientMock.Object, isBodyHtml)
+
         );
     }
 }

@@ -4,6 +4,8 @@ package com.petclinic.bffapigateway.domainclientlayer;
 import com.petclinic.bffapigateway.dtos.Emailing.DirectEmailModelRequestDTO;
 import com.petclinic.bffapigateway.dtos.Emailing.EmailModelResponseDTO;
 
+import com.petclinic.bffapigateway.dtos.Emailing.NotificationEmailModelRequestDTO;
+import com.petclinic.bffapigateway.dtos.Emailing.RawEmailModelRequestDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -55,5 +57,24 @@ public class EmailingServiceClient {
                     return Mono.just((HttpStatus) response.statusCode());
                 });
     }
-
+    public Mono<HttpStatus> sendEmailNotification(NotificationEmailModelRequestDTO directEmailModelRequestDTO) {
+        return webClientBuilder.build().post()
+                .uri(emailingServiceUrl + "/send/notification")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(directEmailModelRequestDTO)
+                .exchangeToMono(response -> {
+                    // Return the status code directly
+                    return Mono.just((HttpStatus) response.statusCode());
+                });
+    }
+    public Mono<HttpStatus> sendRawEmail(RawEmailModelRequestDTO rawEmailModelRequestDTO) {
+        return webClientBuilder.build().post()
+                .uri(emailingServiceUrl + "/send/raw")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(rawEmailModelRequestDTO)
+                .exchangeToMono(response -> {
+                    // Return the status code directly
+                    return Mono.just((HttpStatus) response.statusCode());
+                });
+    }
 }

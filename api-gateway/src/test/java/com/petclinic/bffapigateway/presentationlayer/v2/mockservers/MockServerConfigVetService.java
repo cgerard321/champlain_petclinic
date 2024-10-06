@@ -2,6 +2,7 @@ package com.petclinic.bffapigateway.presentationlayer.v2.mockservers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.petclinic.bffapigateway.dtos.Vets.Album;
 import com.petclinic.bffapigateway.dtos.Vets.SpecialtyDTO;
 import com.petclinic.bffapigateway.dtos.Vets.VetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Vets.Workday;
@@ -10,6 +11,7 @@ import org.mockserver.integration.ClientAndServer;
 import org.springframework.http.MediaType;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import static org.mockserver.model.HttpRequest.request;
@@ -23,6 +25,8 @@ public class MockServerConfigVetService {
     private final ClientAndServer clientAndServer;
 
     private final MockServerClient mockServerClient_VetService = new MockServerClient("localhost", VET_SERVICE_SERVER_PORT);
+
+    private final ObjectMapper mapper = new ObjectMapper();
 
     public MockServerConfigVetService() {
         this.clientAndServer = ClientAndServer.startClientAndServer(VET_SERVICE_SERVER_PORT);
@@ -352,4 +356,28 @@ public void stopMockServer() {
                                 .withStatusCode(404)
                 );
     }
+
+
+    public void registerGetAlbumsByVetIdEndpoint(String vetId, List<Album> albums) throws JsonProcessingException {
+        mockServerClient_VetService.when(
+                        request()
+                                .withMethod("GET")
+                                .withPath("/vets/" + vetId + "/albums"))
+                .respond(
+                        response()
+                                .withStatusCode(200)
+                                .withHeader("Content-Type", "application/json")
+                                .withBody(mapper.writeValueAsString(albums)));
+    }
+
+    public void registerGetAlbumsByVetIdEndpointNotFound(String vetId) {
+        mockServerClient_VetService.when(
+                        request()
+                                .withMethod("GET")
+                                .withPath("/" + vetId + "/albums"))
+                .respond(
+                        response()
+                                .withStatusCode(404));
+    }
+
 }

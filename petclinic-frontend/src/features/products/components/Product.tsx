@@ -6,6 +6,7 @@ import { updateUserRating } from '../api/updateUserRating';
 import { getProduct } from '../api/getProduct';
 import { deleteUserRating } from '../api/deleteUserRating';
 import { getProductByProductId } from '@/features/products/api/getProductByProductId.tsx';
+import ImageContainer from './ImageContainer';
 import { changeProductQuantity } from '../api/changeProductQuantity';
 import { useNavigate } from 'react-router-dom';
 import { AppRoutePaths } from '@/shared/models/path.routes';
@@ -23,6 +24,7 @@ export default function Product({
   const [selectedProductForQuantity, setSelectedProductForQuantity] =
     useState<ProductModel | null>(null);
   const [quantity, setQuantity] = useState<number>(0);
+  const [tooLong, setTooLong] = useState<boolean>(false);
 
   const navigate = useNavigate();
 
@@ -34,6 +36,14 @@ export default function Product({
     fetchRating();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (product.productDescription.length > 100) {
+      setTooLong(true);
+    } else {
+      setTooLong(false);
+    }
+  }, [product.productDescription]);
 
   const fetchRating = async (): Promise<void> => {
     try {
@@ -150,6 +160,7 @@ export default function Product({
       className={`card ${product.productQuantity < 10 ? 'low-quantity' : ''}`}
       key={product.productId}
     >
+      <ImageContainer imageId={product.imageId} />
       <span
         onClick={() => handleProductClickForProductQuantity(product.productId)}
         style={{ cursor: 'pointer', color: 'blue', fontWeight: 'bold' }}
@@ -166,8 +177,11 @@ export default function Product({
       >
         {currentProduct.productName}
       </h2>
-
-      <p>{currentProduct.productDescription}</p>
+      <p>
+        {!tooLong
+          ? currentProduct.productDescription
+          : `${currentProduct.productDescription.substring(0, 100)}...`}
+      </p>
       <p>Price: ${currentProduct.productSalePrice.toFixed(2)}</p>
       <p>Rating: {currentProduct.averageRating}</p>
       <p>Your Rating:</p>

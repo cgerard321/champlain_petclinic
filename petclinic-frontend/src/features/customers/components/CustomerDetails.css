@@ -54,9 +54,11 @@
   display: flex;
   justify-content: center;
   margin-top: 30px;
+  gap: 20px;
 }
 
-.customer-details-button {
+.customer-details-button,
+.add-pet-button {
   background-color: #28a745;
   color: white;
   border: none;
@@ -67,10 +69,10 @@
   transition:
     background-color 0.3s,
     transform 0.3s;
-  margin-right: 20px;
 }
 
-.customer-details-button:hover {
+.customer-details-button:hover,
+.add-pet-button:hover {
   background-color: #218838;
   transform: translateY(-2px);
 }

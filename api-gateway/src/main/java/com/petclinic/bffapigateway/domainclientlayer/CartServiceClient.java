@@ -11,6 +11,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Collections;
 import java.util.Map;
 
 @Component
@@ -41,6 +42,15 @@ public class CartServiceClient {
                 .uri(CartServiceUrl + "/" + CartId)
                 .retrieve()
                 .bodyToMono(CartResponseDTO.class);
+    }
+
+    public Mono<CartResponseDTO> removeProductFromCart(String cartId, String productId){
+        return webClientBuilder.build()
+                .delete()
+                .uri(CartServiceUrl + "/" + cartId + "/" + productId)
+                .retrieve()
+                .bodyToMono(CartResponseDTO.class);
+
     }
 
     public Mono<CartResponseDTO> updateCartByCartId(Mono<CartRequestDTO> cartRequestDTOMono, String CartId) {
@@ -79,6 +89,14 @@ public class CartServiceClient {
                 .bodyToMono(Void.class);
     }
 
+    public Mono<Void> assignCartToUser(String customerId) {
+        return webClientBuilder.build().post()
+                .uri(CartServiceUrl + "/" + customerId + "/assign")
+                .bodyValue(Collections.emptyList())  //Pass an empty list of CartProduct
+                .retrieve()
+                .bodyToMono(Void.class);
+    }
+
     public Mono<CartResponseDTO> addProductToCart(String cartId, AddProductRequestDTO requestDTO) {
         return webClientBuilder.build()
                 .post()
@@ -106,4 +124,13 @@ public class CartServiceClient {
                 .retrieve()
                 .bodyToMono(CartResponseDTO.class);
     }
+
+    public Mono<CartResponseDTO> getCartByCustomerId(final String customerId) {
+        return webClientBuilder.build()
+                .get()
+                .uri(CartServiceUrl + "/customer/" + customerId)
+                .retrieve()
+                .bodyToMono(CartResponseDTO.class);
+    }
+
 }

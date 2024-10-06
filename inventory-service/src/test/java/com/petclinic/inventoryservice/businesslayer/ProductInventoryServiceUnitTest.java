@@ -19,6 +19,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
@@ -1547,6 +1548,93 @@ class ProductInventoryServiceUnitTest {
         verify(inventoryRepository, times(1)).findInventoryByInventoryId(inventoryId);
         verify(productRepository, never()).countByInventoryId(anyString());
     }
+
+
+    @Test
+    void consumeProduct_WithValidFields_ShouldSucceed() {
+        // Arrange
+        String inventoryId = "1";
+        String productId = UUID.randomUUID().toString();
+
+        Product product = Product.builder()
+                .id("1")
+                .inventoryId(inventoryId)
+                .productId(productId)
+                .productName("Product Name")
+                .productPrice(50.0)
+                .productQuantity(10)
+                .productSalePrice(10.10)
+                .build();
+
+        Product updatedProduct = Product.builder()
+                .id("1")
+                .inventoryId(inventoryId)
+                .productId(productId)
+                .productName("Product Name")
+                .productPrice(50.0)
+                .productQuantity(9)
+                .productSalePrice(10.10)
+                .build();
+
+        when(productRepository.findProductByInventoryIdAndProductId(inventoryId, productId))
+                .thenReturn(Mono.just(product));
+
+        when(productRepository.save(any(Product.class)))
+                .thenReturn(Mono.just(updatedProduct));
+
+        // Act
+        Mono<ProductResponseDTO> result = productInventoryService.consumeProduct(inventoryId, productId);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNextMatches(responseDTO -> {
+                    assertNotNull(responseDTO);
+                    assertEquals(productId, responseDTO.getProductId());
+                    assertEquals("Product Name", responseDTO.getProductName());
+                    assertEquals(50.0, responseDTO.getProductPrice());
+                    assertEquals(9, responseDTO.getProductQuantity());
+                    assertEquals(10.10, responseDTO.getProductSalePrice());
+                    return true;
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void consumeProduct_WithInvalidInventoryId_ShouldThrowNotFound() {
+        // Arrange
+        String inventoryId = "NonExistingInventoryId";
+        String productId = UUID.randomUUID().toString();
+
+        when(productRepository.findProductByInventoryIdAndProductId(inventoryId, productId))
+                .thenReturn(Mono.empty());
+
+        // Act
+        Mono<ProductResponseDTO> result = productInventoryService.consumeProduct(inventoryId, productId);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectError(NotFoundException.class)
+                .verify();
+    }
+
+    @Test
+    void consumeProduct_WithInvalidProductId_ShouldThrowNotFound() {
+        // Arrange
+        String inventoryId = "1";
+        String productId = "NonExistingProductId";
+
+        when(productRepository.findProductByInventoryIdAndProductId(inventoryId, productId))
+                .thenReturn(Mono.empty());
+
+        // Act
+        Mono<ProductResponseDTO> result = productInventoryService.consumeProduct(inventoryId, productId);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectError(NotFoundException.class)
+                .verify();
+    }
+
 
 }
 
