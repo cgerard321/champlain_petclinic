@@ -80,8 +80,6 @@ public class VisitControllerUnitTest {
             .build();
 
 
-
-
     // ReviewResponseDTO and ReviewRequestDTO for testing purposes
     private final ReviewResponseDTO reviewResponseDTO = ReviewResponseDTO.builder()
             .reviewId("R001")
@@ -153,6 +151,7 @@ public class VisitControllerUnitTest {
         // Assert
         verify(visitsServiceClient, times(1)).getAllReviews();
     }
+
     @Test
     void getAllVisits_whenAllPropertiesExist_thenReturnFluxResponseDTO() {
         // Arrange
@@ -165,7 +164,7 @@ public class VisitControllerUnitTest {
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectBodyList( VisitResponseDTO.class)
+                .expectBodyList(VisitResponseDTO.class)
                 .hasSize(1);
         // Assert
         verify(visitsServiceClient, times(1)).getAllVisits();
@@ -306,7 +305,7 @@ public class VisitControllerUnitTest {
     }
 
     @Test
-    void getAllVisits_whenNoVisitsExist_thenReturnEmptyFlux(){
+    void getAllVisits_whenNoVisitsExist_thenReturnEmptyFlux() {
         // Arrange
         when(visitsServiceClient.getAllVisits())
                 .thenReturn(Flux.empty()); // no visits should not throw an error
@@ -628,5 +627,93 @@ public class VisitControllerUnitTest {
 
         // Verify that the service was called
         verify(visitsServiceClient, times(1)).patchVisitStatus(eq(visitId), eq(status));
+    }
+
+    @Test
+    void archiveCompletedVisit_whenValidRequest_thenReturnVisitResponseDTO() {
+        String visitId = "visitId1";
+        VisitRequestDTO visitRequestDTO = VisitRequestDTO.builder()
+                .description("Updated Visit Description")
+                .status(Status.COMPLETED)
+                .build();
+        VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
+                .visitId(visitId)
+                .description("Updated Visit Description")
+                .status(Status.COMPLETED)
+                .build();
+
+        when(visitsServiceClient.archiveCompletedVisit(eq(visitId), any(Mono.class)))
+                .thenReturn(Mono.just(visitResponseDTO));
+
+        webTestClient.put()
+                .uri(BASE_VISIT_URL + "/completed/{visitId}/archive", visitId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(visitRequestDTO)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(VisitResponseDTO.class)
+                .isEqualTo(visitResponseDTO);
+
+        verify(visitsServiceClient, times(1)).archiveCompletedVisit(eq(visitId), any(Mono.class));
+    }
+
+    @Test
+    void archiveCompletedVisit_whenInvalidRequest_thenReturnBadRequest() {
+        String visitId = "visitId1";
+        VisitRequestDTO visitRequestDTO = VisitRequestDTO.builder()
+                .description("Updated Visit Description")
+                .status(Status.COMPLETED)
+                .build();
+
+        when(visitsServiceClient.archiveCompletedVisit(eq(visitId), any(Mono.class)))
+                .thenReturn(Mono.empty());
+
+        webTestClient.put()
+                .uri(BASE_VISIT_URL + "/completed/{visitId}/archive", visitId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(visitRequestDTO)
+                .exchange()
+                .expectStatus().isBadRequest();
+
+        verify(visitsServiceClient, times(1)).archiveCompletedVisit(eq(visitId), any(Mono.class));
+    }
+
+    @Test
+    void getArchivedVisits_whenArchivedVisitsExist_thenReturnFluxVisitResponseDTO() {
+        VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
+                .visitId("visitId1")
+                .description("Archived Visit")
+                .status(Status.ARCHIVED)
+                .build();
+
+        when(visitsServiceClient.getAllArchivedVisits())
+                .thenReturn(Flux.just(visitResponseDTO));
+
+        webTestClient.get()
+                .uri(BASE_VISIT_URL + "/archived")
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(VisitResponseDTO.class)
+                .hasSize(1)
+                .contains(visitResponseDTO);
+
+        verify(visitsServiceClient, times(1)).getAllArchivedVisits();
+    }
+
+    @Test
+    void getArchivedVisits_whenNoArchivedVisitsExist_thenReturnEmptyFlux() {
+        when(visitsServiceClient.getAllArchivedVisits())
+                .thenReturn(Flux.empty());
+
+        webTestClient.get()
+                .uri(BASE_VISIT_URL + "/archived")
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(VisitResponseDTO.class)
+                .hasSize(0);
+
+        verify(visitsServiceClient, times(1)).getAllArchivedVisits();
     }
 }
