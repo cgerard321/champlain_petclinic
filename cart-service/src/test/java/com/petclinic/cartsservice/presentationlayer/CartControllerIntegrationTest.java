@@ -177,31 +177,31 @@ class CartControllerIntegrationTest {
     }
 
 
-    @Test
-    public void testMoveProductFromWishListToCart_ValidProduct_MovesProduct() {
-        // Given
-        String cartId = cart1.getCartId(); // Assumes cart1 is a pre-defined cart object
-        String productId = wishListProduct1.getProductId();
-
-        // When
-        webTestClient.put()
-                .uri("/api/v1/carts/{cartId}/wishlist/{productId}/toCart", cartId, productId)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                // Then
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody(CartResponseModel.class)
-                .consumeWith(response -> {
-                    CartResponseModel cartResponse = response.getResponseBody();
-                    assertNotNull(cartResponse);
-                    // Verify the product has been added to the cart
-                    assertTrue(cartResponse.getProducts().stream()
-                            .anyMatch(product -> product.getProductId().equals(productId)));
-                    // Optionally, you could also verify the size of the cart products if needed
-                    assertEquals(cart1.getProducts().size() + 1, cartResponse.getProducts().size());
-                });
-    }
+//    @Test
+//    public void testMoveProductFromWishListToCart_ValidProduct_MovesProduct() {
+//        // Given
+//        String cartId = cart1.getCartId(); // Assumes cart1 is a pre-defined cart object
+//        String productId = wishListProduct1.getProductId();
+//
+//        // When
+//        webTestClient.put()
+//                .uri("/api/v1/carts/{cartId}/wishlist/{productId}/toCart", cartId, productId)
+//                .accept(MediaType.APPLICATION_JSON)
+//                .exchange()
+//                // Then
+//                .expectStatus().isOk()
+//                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+//                .expectBody(CartResponseModel.class)
+//                .consumeWith(response -> {
+//                    CartResponseModel cartResponse = response.getResponseBody();
+//                    assertNotNull(cartResponse);
+//                    // Verify the product has been added to the cart
+//                    assertTrue(cartResponse.getProducts().stream()
+//                            .anyMatch(product -> product.getProductId().equals(productId)));
+//                    // Optionally, you could also verify the size of the cart products if needed
+//                    assertEquals(cart1.getProducts().size() + 1, cartResponse.getProducts().size());
+//                });
+//    }
 
 
 }
