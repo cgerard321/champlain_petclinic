@@ -1,6 +1,9 @@
 package com.petclinic.products.presentationlayer.products;
 
 import com.petclinic.products.businesslayer.products.ProductService;
+import com.petclinic.products.utils.exceptions.InvalidInputException;
+import com.petclinic.products.utils.exceptions.NotFoundException;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
@@ -15,7 +18,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
-
 
 @WebFluxTest(controllers = ProductController.class)
 public class ProductControllerUnitTest {
@@ -95,6 +97,21 @@ public class ProductControllerUnitTest {
                 });
 
         verify(productService).getProductByProductId("ae2d3af7-f2a2-407f-ad31-ca7d8220cb7a");
+    }
+
+    @Test
+    public void whenGetProductWithInvalidProductId_thenThrowException() {
+        when(productService.getProductByProductId(eq("ae2d3af7-f2a2-407f-ad31-ca7d8220cb7"))).thenReturn(Mono
+                .error(new InvalidInputException("Provided product id is invalid: ae2d3af7-f2a2-407f-ad31-ca7d8220cb7")));
+
+        webClient.get().uri("/api/v1/products/ae2d3af7-f2a2-407f-ad31-ca7d8220cb7")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().is4xxClientError()
+                .expectBody(ProductResponseModel.class)
+                .value(Assertions::assertNotNull);
+
+        verify(productService, times(0)).getProductByProductId(eq("ae2d3af7-f2a2-407f-ad31-ca7d8220cb7"));
     }
 
     @Test

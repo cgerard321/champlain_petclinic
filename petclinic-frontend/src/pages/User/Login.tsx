@@ -109,7 +109,11 @@ export default function Login(): JSX.Element {
           </button>
         </form>
         <div className="signup-button-container">
-          <Link to={AppRoutePaths.SignUp} className="signup-button">
+          <Link to={AppRoutePaths.ForgotPassword} className="link">
+            Forgot Password
+          </Link>
+          <hr className="separator" />
+          <Link to={AppRoutePaths.SignUp} className="link">
             Sign Up
           </Link>
         </div>
