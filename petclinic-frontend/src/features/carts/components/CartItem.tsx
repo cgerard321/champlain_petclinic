@@ -8,7 +8,7 @@ interface CartItemProps {
     event: React.ChangeEvent<HTMLInputElement>,
     index: number
   ) => void;
-  deleteItem: (indexToDelete: number) => void;
+  deleteItem: (productId: string, indexToDelete: number) => void;
   errorMessage?: string;
 }
 
@@ -22,6 +22,22 @@ const CartItem = ({
   changeItemQuantity,
   deleteItem,
 }: CartItemProps): JSX.Element => {
+  // const handleDeleteItem = async (cartId: string, productId: string) => {
+  //   try {
+  //     const response = await fetch(
+  //       `localhost:8080/api/v2/gateway/carts/${cartId}/${productId}`,
+  //     {
+  //       method: 'DELETE',
+  //       headers:{
+  //         Accept: 'application/json',
+  //       },
+  //       credentials: 'include',
+  //     }
+  //     );
+  //   } catch(err){
+  //     console.log("Error deleting item in cart: ", err)
+  //   }
+  // }
   const remainingStock = item.productQuantity - (item.quantity ?? 0);
   return (
     <div className="CartItem">
@@ -46,7 +62,7 @@ const CartItem = ({
         </span>
         <button
           className="delete-button"
-          onClick={() => deleteItem(index)}
+          onClick={() => deleteItem(item.productId, index)}
           aria-label={`Remove ${item.productName} from cart`}
         >
           Remove
