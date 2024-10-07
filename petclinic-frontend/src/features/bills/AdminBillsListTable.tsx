@@ -7,8 +7,8 @@ import { BillRequestModel } from './models/BillRequestModel';
 import { addBill } from './api/addBill';
 import { OwnerResponseModel } from '../customers/models/OwnerResponseModel';
 import { VetResponseModel } from '../veterinarians/models/VetResponseModel';
-import { deleteBill } from '@/features/bills/api/deleteBill.tsx';
-import useGetAllBillsPaginated from '@/features/bills/hooks/useGetAllBillsPaginated.ts';
+import { deleteBill} from "@/features/bills/api/deleteBill.tsx";
+import useGetAllBillsPaginated from "@/features/bills/hooks/useGetAllBillsPaginated.ts";
 import './AdminBillsListTable.css';
 import { useNavigate } from 'react-router-dom';
 
@@ -25,6 +25,7 @@ export default function AdminBillsListTable(): JSX.Element {
   const [filter, setFilter] = useState<FilterModel>({
     customerId: '',
   });
+
 
   const [searchId, setSearchId] = useState<string>('');
   const [searchedBill, setSearchedBill] = useState<Bill | null>(null);
@@ -124,7 +125,7 @@ export default function AdminBillsListTable(): JSX.Element {
   };
 
   const handleDelete = async (billId: string): Promise<void> => {
-    const billToDelete = billsList.find(bill => bill.billId === billId);
+    const billToDelete = billsList.find((bill: Bill) => bill.billId === billId);
     if (!billToDelete) {
       console.error('Bill not found: ${billId}');
       window.alert('Bill not found: ${billId}');
@@ -178,7 +179,7 @@ export default function AdminBillsListTable(): JSX.Element {
     return ['customerId'].includes(key);
   }
 
-  const filteredBills = billsList.filter(bill => {
+  const filteredBills = billsList.filter((bill: Bill)  => {
     return Object.keys(filter).every(key => {
       if (!filter[key]) return true;
       if (!isKeyOfBillResponseDTO(key)) return true;
@@ -360,7 +361,7 @@ export default function AdminBillsListTable(): JSX.Element {
                 <tr>
                   <th>Bill ID</th>
                   <th>Owner Name</th>
-                  <th> Owner ID </th>
+                  <th>Owner ID </th>
                   <th>Visit Type</th>
                   <th>Vet Name</th>
                   <th>Date</th>
@@ -372,11 +373,14 @@ export default function AdminBillsListTable(): JSX.Element {
                 </tr>
               </thead>
               <tbody>
-                {billsList.map((bill: Bill) => (
+                {filteredBills.map((bill: Bill) => (
                   <tr key={bill.billId}>
                     <td>{bill.billId}</td>
                     <td>
                       {bill.ownerFirstName} {bill.ownerLastName}
+                    </td>
+                    <td>
+                      {bill.customerId}
                     </td>
                     <td>{bill.visitType}</td>
                     <td>
@@ -408,26 +412,6 @@ export default function AdminBillsListTable(): JSX.Element {
                     </td>
                   </tr>
                 ))}
-                {filteredBills
-                  .filter(data => data != null)
-                  .map((bill: Bill) => (
-                    <tr key={bill.billId}>
-                      <td>{bill.billId}</td>
-                      <td>
-                        {bill.ownerFirstName} {bill.ownerLastName}
-                      </td>
-                      <td>{bill.customerId}</td>
-                      <td>{bill.visitType}</td>
-                      <td>
-                        {bill.vetFirstName} {bill.vetLastName}
-                      </td>
-                      <td>{bill.date}</td>
-                      <td>{bill.amount}</td>
-                      <td>{bill.taxedAmount}</td>
-                      <td>{bill.billStatus}</td>
-                      <td>{bill.dueDate}</td>
-                    </tr>
-                  ))}
               </tbody>
             </table>
             <div className="pagination-controls">
