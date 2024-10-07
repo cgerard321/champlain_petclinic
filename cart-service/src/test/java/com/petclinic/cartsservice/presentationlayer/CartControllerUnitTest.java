@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -67,6 +68,25 @@ class CartControllerUnitTest {
             .build();
 
     private final List<CartProduct> products = new ArrayList<>(Arrays.asList(product1, product2));
+
+    CartProduct wishListProduct1 = CartProduct.builder()
+            .productId("06a7d573-bcab-4db3-956f-773324b92a80")
+            .productName("Dog Food")
+            .productDescription("Premium dry food for adult dogs")
+            .productSalePrice(45.99)
+            .quantityInCart(2)
+            .averageRating(5.0)
+            .build();
+
+    CartProduct wishlistProduct2 = CartProduct.builder()
+            .productId("98f7b33a-d62a-420a-a84a-05a27c85fc91")
+            .productName("Cat Litter")
+            .productDescription("Clumping cat litter with odor control")
+            .productSalePrice(12.99)
+            .quantityInCart(1)
+            .averageRating(3.0)
+            .build();
+
 
     @Test
     public void whenGetCartByCartId_thenReturnCartResponseModel() {
@@ -550,6 +570,94 @@ class CartControllerUnitTest {
         verify(cartService, times(0)).removeProductFromCart(anyString(), anyString()); // cartService should not be called
     }
 
+
+    void whenMoveProductFromCartToWishlist_thenSuccess() {
+        // Arrange
+        String cartId = VALID_CART_ID; // Use a valid cart ID
+        String productId = product1.getProductId(); // Use an existing product ID
+        when(cartService.moveProductFromCartToWishlist(cartId, productId)).thenReturn(Mono.empty());
+
+        // Act
+        webTestClient.put() // Change to PUT to match the controller's request type
+                .uri("/api/v1/carts/" + cartId + "/wishlist/" + productId + "/toWishList") // Updated URI to match the controller
+                .exchange()
+                .expectStatus().isOk(); // Expect an OK response
+
+        // Assert
+        verify(cartService, times(1)).moveProductFromCartToWishlist(cartId, productId); // Verify that the service method was called once
+    }
+
+    @Test
+    void whenMoveProductFromWishListToCart_thenSuccess() {
+        // Arrange
+        String cartId = VALID_CART_ID; // Use a valid cart ID
+        String productId = wishListProduct1.getProductId(); // Use a valid product ID
+        when(cartService.moveProductFromWishListToCart(cartId, productId))
+                .thenReturn(Mono.just(new CartResponseModel())); // Mock a successful response
+
+        // Act
+        webTestClient.put()
+                .uri("/api/v1/carts/" + cartId + "/wishlist/" + productId + "/toCart")
+                .exchange()
+                .expectStatus().isOk() // Expect 200 OK
+                .expectBody(CartResponseModel.class) // Expect a response body
+                .consumeWith(response -> {
+                    CartResponseModel body = response.getResponseBody();
+                    assertThat(body).isNotNull(); // Ensure response body is not null
+                });
+
+        // Assert
+        verify(cartService, times(1)).moveProductFromWishListToCart(cartId, productId);
+    }
+
+
+    @Test
+    void whenMoveProductFromWishListToCart_thenInvalidInput() {
+        // Arrange
+        String invalidCartId = "invalidCartId"; // An invalid cart ID
+        String invalidProductId = "invalidProductId"; // An invalid product ID
+
+        // No need to mock the service method as we're testing the controller's response to invalid inputs.
+
+        // Act & Assert
+        webTestClient.put()
+                .uri("/api/v1/carts/" + invalidCartId + "/wishlist/" + invalidProductId + "/toCart")
+                .exchange()
+                .expectStatus().isEqualTo(422) // Expect 422 for invalid input
+                .expectBody(CartResponseModel.class) // Expect a response body
+                .consumeWith(response -> {
+                    CartResponseModel body = response.getResponseBody();
+                    assertThat(body).isNotNull(); // Ensure response body is not null
+                    assertThat(body.getMessage()).isEqualTo("Provided cart id is invalid: " + invalidCartId); // Check error message
+                });
+
+        // Verify that the service method was not called since the IDs are invalid
+        verify(cartService, never()).moveProductFromWishListToCart(invalidCartId, invalidProductId);
+    }
+
+    @Test
+    void whenMoveProductFromWishListToCart_thenProductNotFoundInWishlist() {
+        // Arrange
+        String cartId = VALID_CART_ID; // Use a valid cart ID
+        String productId = wishListProduct1.getProductId(); // Use a valid product ID
+        when(cartService.moveProductFromWishListToCart(cartId, productId))
+                .thenReturn(Mono.error(new NotFoundException("Product not found in wishlist")));
+
+        // Act
+        webTestClient.put()
+                .uri("/api/v1/carts/" + cartId + "/wishlist/" + productId + "/toCart")
+                .exchange()
+                .expectStatus().isEqualTo(422) // Expect 422 for invalid input
+                .expectBody(CartResponseModel.class)
+                .consumeWith(response -> {
+                    CartResponseModel body = response.getResponseBody();
+                    assertThat(body).isNotNull();
+                    assertThat(body.getMessage()).isEqualTo("Product not found in wishlist");
+                });
+
+        // Assert
+        verify(cartService, times(1)).moveProductFromWishListToCart(cartId, productId);
+    }
 
 
 }

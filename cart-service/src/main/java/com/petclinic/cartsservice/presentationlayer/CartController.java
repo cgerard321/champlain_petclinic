@@ -54,17 +54,6 @@ public class CartController {
                 .flatMap(cartService::clearCart);
     }
 
-//    @PutMapping(value = "/{cartId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-//    public Mono<ResponseEntity<CartResponseModel>> updateCartByCartId(@RequestBody Mono<CartRequestModel> cartRequestModel, @PathVariable String cartId) {
-//        return Mono.just(cartId)
-//                .filter(id -> id.length() == 36)
-//                .switchIfEmpty(Mono.error(new InvalidInputException("Provided cart id is invalid: " + cartId)))
-//                .flatMap(id -> cartService.updateCartByCartId(cartRequestModel, id))
-//                .map(ResponseEntity::ok)
-//                .defaultIfEmpty(ResponseEntity.badRequest().build());
-//
-//    }
-    //we are going to subdivide this method into multiple methods
 
     @GetMapping("/{cartId}/count")
     public Mono<ResponseEntity<Map<String, Integer>>> getCartItemCount(@PathVariable String cartId) {
@@ -151,5 +140,66 @@ public class CartController {
 
 
 
+    @DeleteMapping("/{cartId}/{productId}")
+    public Mono<ResponseEntity<CartResponseModel>> removeProductFromCart(@PathVariable String cartId, @PathVariable String productId){
+        return Mono.just(cartId)
+                .filter(id -> id.length() == 36)
+                .switchIfEmpty(Mono.error(new InvalidInputException("Provided cart id is invalid: " + cartId)))
+                .flatMap(validId -> cartService.removeProductFromCart(validId, productId))
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
+    /**
+     * Move product to wishlist.
+     * Moves a specified product from the cart to the wishlist.
+     */
+    @PutMapping("/{cartId}/wishlist/{productId}/toWishList")
+    public Mono<ResponseEntity<CartResponseModel>> moveProductFromCartToWishlist(@PathVariable String cartId, @PathVariable String productId) {
+        return Mono.just(cartId)
+                .filter(id -> id.length() == 36)
+                .switchIfEmpty(Mono.error(new InvalidInputException("Provided cart id is invalid: " + cartId)))
+                .flatMap(validCartId -> Mono.just(productId)
+                        .filter(id -> id.length() == 36)
+                        .switchIfEmpty(Mono.error(new InvalidInputException("Provided product id is invalid: " + productId)))
+                        .flatMap(validProductId -> cartService.moveProductFromCartToWishlist(validCartId, validProductId))
+                )
+                .map(ResponseEntity::ok)
+                .onErrorResume(e -> {
+                    if (e instanceof NotFoundException || e instanceof InvalidInputException) {
+                        CartResponseModel errorResponse = new CartResponseModel();
+                        errorResponse.setMessage(e.getMessage());
+                        return Mono.just(ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(errorResponse));
+                    } else {
+                        return Mono.error(e);
+                    }
+                });
+    }
+
+    /**
+     * Move product from wishlist to cart.
+     * Moves a specified product from the wishlist to the cart.
+     */
+    @PutMapping("/{cartId}/wishlist/{productId}/toCart")
+    public Mono<ResponseEntity<CartResponseModel>> moveProductFromWishListToCart(@PathVariable String cartId, @PathVariable String productId) {
+        return Mono.just(cartId)
+                .filter(id -> id.length() == 36)
+                .switchIfEmpty(Mono.error(new InvalidInputException("Provided cart id is invalid: " + cartId)))
+                .flatMap(validCartId -> Mono.just(productId)
+                        .filter(id -> id.length() == 36)
+                        .switchIfEmpty(Mono.error(new InvalidInputException("Provided product id is invalid: " + productId)))
+                        .flatMap(validProductId -> cartService.moveProductFromWishListToCart(validCartId, validProductId))
+                )
+                .map(ResponseEntity::ok)
+                .onErrorResume(e -> {
+                    if (e instanceof NotFoundException || e instanceof InvalidInputException) {
+                        CartResponseModel errorResponse = new CartResponseModel();
+                        errorResponse.setMessage(e.getMessage());
+                        return Mono.just(ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(errorResponse));
+                    } else {
+                        return Mono.error(e);
+                    }
+                });
+    }
 
 }

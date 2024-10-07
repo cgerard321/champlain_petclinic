@@ -103,3 +103,17 @@
   color: red;
   font-weight: bold;
 }
+
+.wishlist-button {
+  background-color: #ffcc00; /* Change this to your desired color */
+  border: none;
+  padding: 8px 12px;
+  margin-left: 10px; /* Space between buttons */
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.wishlist-button:hover {
+  background-color: #e6b800; /* Darken the button on hover */
+}
+

@@ -2,7 +2,6 @@ package com.petclinic.products.presentationlayer.products;
 
 import com.petclinic.products.datalayer.products.Product;
 import com.petclinic.products.datalayer.products.ProductRepository;
-import com.petclinic.products.utils.exceptions.NotFoundException;
 import org.junit.jupiter.api.*;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +14,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -214,7 +212,8 @@ class ProductControllerIntegrationTest {
                 .expectStatus().isNotFound()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.message").isEqualTo("Product id was not found: " + NON_EXISTENT_PRODUCT_ID);
+                .jsonPath("$.message").isEqualTo("Product id was not found: " +
+                        NON_EXISTENT_PRODUCT_ID);
 
         StepVerifier
                 .create(productRepository.findAll())
@@ -234,7 +233,8 @@ class ProductControllerIntegrationTest {
                 .expectStatus().is4xxClientError()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.message").isEqualTo("Provided product id is invalid: " + "INVALID_PRODUCT_ID");
+                .jsonPath("$.message").isEqualTo("Provided product id is invalid: " +
+                        INVALID_PRODUCT_ID);
 
         StepVerifier
                 .create(productRepository.findAll())
@@ -276,7 +276,8 @@ class ProductControllerIntegrationTest {
                 .expectStatus().isNotFound()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.message").isEqualTo("Product id was not found: " + NON_EXISTENT_PRODUCT_ID);
+                .jsonPath("$.message").isEqualTo("Product id was not found: " +
+                        NON_EXISTENT_PRODUCT_ID);
 
         StepVerifier
                 .create(productRepository.findAll())
@@ -294,7 +295,8 @@ class ProductControllerIntegrationTest {
                 .expectStatus().is4xxClientError()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.message").isEqualTo("Provided product id is invalid: " + INVALID_PRODUCT_ID);
+                .jsonPath("$.message").isEqualTo("Provided product id is invalid: " +
+                        INVALID_PRODUCT_ID);
 
         StepVerifier
                 .create(productRepository.findAll())
@@ -411,8 +413,4 @@ class ProductControllerIntegrationTest {
                 .exchange()
                 .expectStatus().isNotFound();
     }
-
-
-
-
 }

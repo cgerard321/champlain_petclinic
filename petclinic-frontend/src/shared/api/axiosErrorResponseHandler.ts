@@ -1,32 +1,28 @@
 import { AxiosError } from 'axios';
 import router from '@/router';
 
+// map status codes to error pages
+const errorPageRedirects: Record<number, string> = {
+  401: '/unauthorized', // redirect to unauthorized
+  403: '/forbidden', // redirect to forbidden
+  408: '/request-timeout', // redirect to request
+  500: '/internal-server-error', // redirect to internal server
+  503: '/service-unavailable', // redirect to service unavailable
+};
+
+// handles error and redirects based on status codes
 export default function axiosErrorResponseHandler(
   error: AxiosError,
   statusCode: number
 ): void {
-  switch (statusCode) {
-    case 401:
-      // redirect to the unauthorized page
-      router.navigate('/unauthorized');
-      break;
-    case 403:
-      // redirect to the forbidden page
-      router.navigate('/forbidden');
-      break;
-    case 408:
-      // redirect to the request timeout page
-      router.navigate('/request-timeout');
-      break;
-    case 500:
-      // redirect to the internal server error page
-      router.navigate('/internal-server-error');
-      break;
-    case 503:
-      // redirect to the service unavailable page
-      router.navigate('/service-unavailable');
-      break;
-    default:
-      console.error(error, statusCode);
+  const redirectPath = errorPageRedirects[statusCode];
+
+  if (redirectPath) {
+    // log for easy debug
+    console.error(`Redirecting to ${redirectPath} due to error:`, error);
+    router.navigate(redirectPath);
+  } else {
+    // log whatever that wasn't handled
+    console.error('Unhandled error:', error, 'Status code:', statusCode);
   }
 }
