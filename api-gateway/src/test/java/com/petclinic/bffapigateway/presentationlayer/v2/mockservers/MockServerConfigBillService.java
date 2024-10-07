@@ -59,34 +59,32 @@ public class MockServerConfigBillService {
     //         .when(
     //             request()
     //                 .withMethod("GET")
-    //                 .withPath("/bills/customer/[a-zA-Z0-9-]+/bills/[a-zA-Z0-9-]+/pdf")
+    //                 .withPath("/api/v2/gateway/customers/.*/bills/.*/pdf")  // Adjusted to match your test path
     //         )
     //         .respond(
     //             response()
     //                 .withStatusCode(200)
-    //                 .withBody(mockPdfContent)  // Mock PDF content as byte array
-    //                 .withHeader("Content-Type", "application/pdf")
+    //                 .withBody(mockPdfContent)  // Send PDF content as byte array
+    //                 .withHeader("Content-Type", "application/pdf")  // Ensure correct Content-Type for PDF
     //         );
     // }
 
     public void registerDownloadBillPdfEndpoint() {
-        byte[] mockPdfContent = "Mock PDF Content".getBytes();  // Simulate PDF as byte array
+        byte[] mockPdfContent = "Mock PDF Content".getBytes();  
         
         mockServerClient_BillService
             .when(
                 request()
                     .withMethod("GET")
-                    .withPath("/api/v2/gateway/customers/.*/bills/.*/pdf")  // Adjusted to match your test path
+                    .withPath("/api/v2/gateway/customers/1/bills/1234/pdf")  
             )
             .respond(
                 response()
                     .withStatusCode(200)
-                    .withBody(mockPdfContent)  // Send PDF content as byte array
-                    .withHeader("Content-Type", "application/pdf")  // Ensure correct Content-Type for PDF
+                    .withBody(mockPdfContent)  
+                    .withHeader("Content-Type", "application/pdf")  
             );
     }
-    
-    
     
 
     public void stopMockServer() {

@@ -1,5 +1,7 @@
 // package com.petclinic.bffapigateway.presentationlayer.v2;
 
+// import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
+// import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
 // import com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigAuthService;
 // import com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigBillService;
 // import org.junit.jupiter.api.AfterAll;
@@ -13,12 +15,14 @@
 // import org.springframework.test.context.ActiveProfiles;
 // import org.springframework.test.web.reactive.server.WebTestClient;
 // import reactor.core.publisher.Mono;
+// import reactor.test.StepVerifier;
 
+// import static org.junit.jupiter.api.Assertions.assertEquals;
 // import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 // @SpringBootTest
-// @AutoConfigureWebTestClient
 // @ActiveProfiles("test")
+// @AutoConfigureWebTestClient
 // @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 // public class CustomerBillControllerIntegrationTest {
 
@@ -30,6 +34,7 @@
 
 //     @BeforeAll
 //     public void startMockServer() {
+//         // Start the mock servers for bills and authentication services
 //         mockServerConfigBillService = new MockServerConfigBillService();
 //         mockServerConfigBillService.registerDownloadBillPdfEndpoint(); 
 
@@ -39,6 +44,7 @@
 
 //     @AfterAll
 //     public void stopMockServer() {
+//         // Stop the mock servers
 //         mockServerConfigBillService.stopMockServer();
 //         mockServerConfigAuthService.stopMockServer();
 //     }
@@ -46,12 +52,12 @@
 //     @Test
 //     public void testDownloadBillPdf_Integration() {
 //         // Arrange: Mocking the service call to return a PDF byte array
-//         byte[] pdfContent = "Sample PDF Content".getBytes();
-    
+//         byte[] mockPdfContent = "Sample PDF Content".getBytes();
+
 //         // Act & Assert: Mocking a request as a valid customer with a token in a cookie
 //         webTestClient.get()
 //             .uri("/api/v2/gateway/customers/1/bills/1234/pdf")
-//             .cookie("Bearer", MockServerConfigAuthService.jwtTokenForValidOwnerId)  // Use cookie instead of Authorization header
+//             .cookie("Bearer", MockServerConfigAuthService.jwtTokenForValidOwnerId)  // Using JWT token in cookie
 //             .accept(MediaType.APPLICATION_PDF)
 //             .exchange()
 //             .expectStatus().isOk()
@@ -63,14 +69,10 @@
 //                 assert pdf.length > 0;
 //             });
 //     }
-    
-    
 // }
 
 package com.petclinic.bffapigateway.presentationlayer.v2;
 
-import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
-import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
 import com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigAuthService;
 import com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigBillService;
 import org.junit.jupiter.api.AfterAll;
@@ -83,10 +85,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest
@@ -119,7 +118,7 @@ public class CustomerBillControllerIntegrationTest {
     }
 
     @Test
-    public void testDownloadBillPdf_Integration() {
+    public void testDownloadBillPdf_ValidToken_ShouldReturnPdf() {
         // Arrange: Mocking the service call to return a PDF byte array
         byte[] mockPdfContent = "Sample PDF Content".getBytes();
 
@@ -138,5 +137,15 @@ public class CustomerBillControllerIntegrationTest {
                 assert pdf.length > 0;
             });
     }
-}
 
+    @Test
+    public void testDownloadBillPdf_InvalidToken_ShouldReturnUnauthorized() {
+        // Act & Assert: Mocking a request with an invalid token
+        webTestClient.get()
+            .uri("/api/v2/gateway/customers/1/bills/1234/pdf")
+            .cookie("Bearer", "invalid-token")  // Using an invalid JWT token
+            .accept(MediaType.APPLICATION_PDF)
+            .exchange()
+            .expectStatus().isUnauthorized();  // Expect Unauthorized status
+    }
+}

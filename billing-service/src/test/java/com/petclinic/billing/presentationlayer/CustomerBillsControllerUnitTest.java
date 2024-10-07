@@ -32,8 +32,8 @@ public class CustomerBillsControllerUnitTest {
         when(billService.GetBillsByCustomerId(anyString())).thenReturn(Flux.just(billResponse));
 
         client.get()
-                .uri("/customers/{customerId}/bills", billResponse.getCustomerId())
-                .accept(MediaType.APPLICATION_JSON)  // Expect application/json
+                .uri("/bills/customer/{customerId}/bills", billResponse.getCustomerId())
+                .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBodyList(BillResponseDTO.class)
@@ -51,8 +51,8 @@ public class CustomerBillsControllerUnitTest {
         when(billService.GetBillsByCustomerId(anyString())).thenReturn(Flux.empty());
 
         client.get()
-                .uri("/customers/nonExistentCustomer/bills")
-                .accept(MediaType.APPLICATION_JSON)  // Expect application/json
+                .uri("/bills/customer/nonExistentCustomer/bills")
+                .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBodyList(BillResponseDTO.class)
@@ -61,8 +61,6 @@ public class CustomerBillsControllerUnitTest {
         Mockito.verify(billService, times(1)).GetBillsByCustomerId("nonExistentCustomer");
     }
 
-
-    // Helper method to build BillResponseDTO
     private BillResponseDTO buildBillResponseDTO() {
         return BillResponseDTO.builder()
                 .billId("1")
@@ -74,4 +72,3 @@ public class CustomerBillsControllerUnitTest {
                 .build();
     }
 }
-
