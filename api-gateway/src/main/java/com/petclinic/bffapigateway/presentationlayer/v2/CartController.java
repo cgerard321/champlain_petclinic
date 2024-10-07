@@ -113,6 +113,14 @@ public class CartController {
     }
 
 
+    @DeleteMapping("/{cartId}/{productId}")
+    public Mono<ResponseEntity<CartResponseDTO>> removeProductFromCart(@PathVariable String cartId, @PathVariable String productId){
+        return cartServiceClient.removeProductFromCart(cartId, productId)
+                .map(cart -> ResponseEntity.status(HttpStatus.OK).body(cart))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+
 }
 
 
