@@ -286,129 +286,137 @@ const UserCart = (): JSX.Element => {
   }
 
   return (
-      <div className="user-cart-container">
-        <NavBar />
-        <h1 className="cart-title">User Cart</h1>
+    <div className="user-cart-container">
+      <NavBar />
+      <h1 className="cart-title">User Cart</h1>
 
-        {/* Main Content Container */}
-        <div className="content-container">
-          <div className="UserCart-checkout-flex">
-            {/* Main Cart Section */}
-            <div className="UserCart">
-
-              {/* Cart Header with Badge */}
-              <div className="cart-header">
-                <h2 className="cart-header-title">Your Cart</h2>
-                <div className="cart-badge-container">
-                  <FaShoppingCart aria-label="Shopping Cart" />
-                  {cartItemCount > 0 && (
-                      <span
-                          className="cart-badge"
-                          aria-label={`Cart has ${cartItemCount} items`}
-                      >
-                  {cartItemCount}
-                </span>
-                  )}
-                </div>
-              </div>
-
-              {/* Cart Items */}
-              <div className="cart-items-container">
-                {cartItems.length > 0 ? (
-                    cartItems.map((item, index) => (
-                        <CartItem
-                            key={item.productId}
-                            item={item}
-                            index={index}
-                            changeItemQuantity={changeItemQuantity}
-                            deleteItem={deleteItem}
-                            errorMessage={errorMessages[index]}
-                        />
-                    ))
-                ) : (
-                    <p className="empty-cart-message">No products in the cart.</p>
+      {/* Main Content Container */}
+      <div className="content-container">
+        <div className="UserCart-checkout-flex">
+          {/* Main Cart Section */}
+          <div className="UserCart">
+            {/* Cart Header with Badge */}
+            <div className="cart-header">
+              <h2 className="cart-header-title">Your Cart</h2>
+              <div className="cart-badge-container">
+                <FaShoppingCart aria-label="Shopping Cart" />
+                {cartItemCount > 0 && (
+                  <span
+                    className="cart-badge"
+                    aria-label={`Cart has ${cartItemCount} items`}
+                  >
+                    {cartItemCount}
+                  </span>
                 )}
               </div>
-
-              {/* Cart Control Buttons */}
-              <div className="cart-control-buttons">
-                <button className="btn go-back-btn" onClick={() => navigate(-1)}>
-                  Go Back
-                </button>
-                <button className="btn clear-cart-btn" onClick={clearCart}>
-                  Clear Cart
-                </button>
-              </div>
-              <hr />
-
-              {/* Wishlist Section */}
-              <div className="wishlist-section">
-                <h2 className="wishlist-title">Your Wishlist</h2>
-                <div className="wishlist-items-container">
-                  {wishlistItems.length > 0 ? (
-                      wishlistItems.map(item => (
-                          <CartItem
-                              key={item.productId}
-                              item={item}
-                              index={-1} // Mark as wishlist item
-                              changeItemQuantity={() => {}} // Disable changing quantity for wishlist
-                              deleteItem={() => {}} // Disable removing from wishlist
-                          />
-                      ))
-                  ) : (
-                      <p className="empty-wishlist-message">No products in the wishlist.</p>
-                  )}
-                </div>
-              </div>
             </div>
 
-            {/* Checkout Section */}
-            <div className="Checkout-section">
-              <h3>Cart Summary</h3>
-              <div className="CartSummary">
-                <p className="summary-item">Subtotal: ${subtotal.toFixed(2)}</p>
-                <p className="summary-item">TVQ (9.975%): ${tvq.toFixed(2)}</p>
-                <p className="summary-item">TVC (5%): ${tvc.toFixed(2)}</p>
-                <p className="total-price summary-item">Total: ${total.toFixed(2)}</p>
-              </div>
+            {/* Cart Items */}
+            <div className="cart-items-container">
+              {cartItems.length > 0 ? (
+                cartItems.map((item, index) => (
+                  <CartItem
+                    key={item.productId}
+                    item={item}
+                    index={index}
+                    changeItemQuantity={changeItemQuantity}
+                    deleteItem={deleteItem}
+                    errorMessage={errorMessages[index]}
+                  />
+                ))
+              ) : (
+                <p className="empty-cart-message">No products in the cart.</p>
+              )}
+            </div>
 
-              <h3>Checkout</h3>
-              <button className="btn checkout-btn" onClick={handleCheckout}>
-                Checkout
+            {/* Cart Control Buttons */}
+            <div className="cart-control-buttons">
+              <button className="btn go-back-btn" onClick={() => navigate(-1)}>
+                Go Back
               </button>
-              {checkoutMessage && (
-                  <div className="checkout-message">{checkoutMessage}</div>
-              )}
-
-              {/* Invoice Section */}
-              {invoice && (
-                  <div className="invoice-section">
-                    <h2 className="invoice-title">Invoice Details</h2>
-                    <p className="invoice-id">Invoice ID: {invoice.invoiceId}</p>
-                    <p className="cart-id">Cart ID: {invoice.cartId}</p>
-                    <p className="invoice-subtotal">Subtotal: ${invoice.subtotal.toFixed(2)}</p>
-                    <p className="invoice-tax">Tax: ${invoice.tax.toFixed(2)}</p>
-                    <p className="invoice-total">Total: ${invoice.total.toFixed(2)}</p>
-                    <p className="invoice-date">Issue Date: {new Date(invoice.issueDate).toLocaleString()}</p>
-
-                    {/* Invoice Items */}
-                    <h3 className="invoice-items-title">Items:</h3>
-                    <ul className="invoice-items-list">
-                      {invoice.items.map((item, index) => (
-                          <li key={index} className="invoice-item">
-                            {item.productName} - Quantity: {item.quantity} - Price: ${item.productSalePrice.toFixed(2)}
-                          </li>
-                      ))}
-                    </ul>
-                  </div>
-              )}
+              <button className="btn clear-cart-btn" onClick={clearCart}>
+                Clear Cart
+              </button>
             </div>
+            <hr />
+
+            {/* Wishlist Section */}
+            <div className="wishlist-section">
+              <h2 className="wishlist-title">Your Wishlist</h2>
+              <div className="wishlist-items-container">
+                {wishlistItems.length > 0 ? (
+                  wishlistItems.map(item => (
+                    <CartItem
+                      key={item.productId}
+                      item={item}
+                      index={-1} // Mark as wishlist item
+                      changeItemQuantity={() => {}} // Disable changing quantity for wishlist
+                      deleteItem={() => {}} // Disable removing from wishlist
+                    />
+                  ))
+                ) : (
+                  <p className="empty-wishlist-message">
+                    No products in the wishlist.
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Checkout Section */}
+          <div className="Checkout-section">
+            <h3>Cart Summary</h3>
+            <div className="CartSummary">
+              <p className="summary-item">Subtotal: ${subtotal.toFixed(2)}</p>
+              <p className="summary-item">TVQ (9.975%): ${tvq.toFixed(2)}</p>
+              <p className="summary-item">TVC (5%): ${tvc.toFixed(2)}</p>
+              <p className="total-price summary-item">
+                Total: ${total.toFixed(2)}
+              </p>
+            </div>
+
+            <h3>Checkout</h3>
+            <button className="btn checkout-btn" onClick={handleCheckout}>
+              Checkout
+            </button>
+            {checkoutMessage && (
+              <div className="checkout-message">{checkoutMessage}</div>
+            )}
+
+            {/* Invoice Section */}
+            {invoice && (
+              <div className="invoice-section">
+                <h2 className="invoice-title">Invoice Details</h2>
+                <p className="invoice-id">Invoice ID: {invoice.invoiceId}</p>
+                <p className="cart-id">Cart ID: {invoice.cartId}</p>
+                <p className="invoice-subtotal">
+                  Subtotal: ${invoice.subtotal.toFixed(2)}
+                </p>
+                <p className="invoice-tax">Tax: ${invoice.tax.toFixed(2)}</p>
+                <p className="invoice-total">
+                  Total: ${invoice.total.toFixed(2)}
+                </p>
+                <p className="invoice-date">
+                  Issue Date: {new Date(invoice.issueDate).toLocaleString()}
+                </p>
+
+                {/* Invoice Items */}
+                <h3 className="invoice-items-title">Items:</h3>
+                <ul className="invoice-items-list">
+                  {invoice.items.map((item, index) => (
+                    <li key={index} className="invoice-item">
+                      {item.productName} - Quantity: {item.quantity} - Price: $
+                      {item.productSalePrice.toFixed(2)}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         </div>
       </div>
+    </div>
   );
-
-
 };
 
 export default UserCart;
