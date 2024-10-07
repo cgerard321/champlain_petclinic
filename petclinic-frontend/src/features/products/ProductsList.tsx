@@ -1,21 +1,24 @@
 import { useState, useEffect, JSX } from 'react';
 import { getAllProducts } from '@/features/products/api/getAllProducts.ts';
+import { getAllProductBundles } from '@/features/products/api/getAllProductBundles.ts';
 import './ProductList.css';
 import { ProductModel } from '@/features/products/models/ProductModels/ProductModel';
 import Product from './components/Product';
+import ProductBundle from './components/ProductBundle';
 import AddProduct from './components/AddProduct';
 import { addProduct } from '@/features/products/api/addProduct';
 import { useUser } from '@/context/UserContext';
 import './components/Sidebar.css';
 import { getProductsByType } from '@/features/products/api/getProductsByType.ts';
-// import AddImage from './components/AddImage';
 import { addImage } from './api/addImage';
 import { ImageModel } from './models/ProductModels/ImageModel';
 import StarRating from '@/features/products/components/StarRating.tsx';
 import './components/StarRating.css';
+import { ProductBundleModel } from './models/ProductModels/ProductBundleModel';
 
 export default function ProductList(): JSX.Element {
   const [productList, setProductList] = useState<ProductModel[]>([]);
+  const [bundleList, setBundleList] = useState<ProductBundleModel[]>([]);
   const [minPrice, setMinPrice] = useState<number | undefined>(undefined);
   const [maxPrice, setMaxPrice] = useState<number | undefined>(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -38,7 +41,6 @@ export default function ProductList(): JSX.Element {
       minPrice > maxPrice
     ) {
       alert('Min Price cannot be greater than Max Price');
-      return;
     }
   }
 
@@ -57,7 +59,6 @@ export default function ProductList(): JSX.Element {
         setProductList(list);
       } else {
         const filteredList = await getProductsByType(filterType);
-
         setProductList(filteredList);
       }
     } catch (err) {
@@ -66,13 +67,21 @@ export default function ProductList(): JSX.Element {
     } finally {
       setIsLoading(false);
     }
+
+    // Fetch product bundles
+    try {
+      const bundles = await getAllProductBundles();
+      setBundleList(bundles);
+    } catch (err) {
+      console.error('Error fetching product bundles:', err);
+    }
   };
 
   useEffect(() => {
     fetchProducts();
     const savedProducts = localStorage.getItem('recentlyClickedProducts');
     if (savedProducts) {
-      return setRecentlyClickedProducts(JSON.parse(savedProducts));
+      setRecentlyClickedProducts(JSON.parse(savedProducts));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -174,7 +183,7 @@ export default function ProductList(): JSX.Element {
             Min Price:
             <input
               type="number"
-              value={minPrice ?? typeof 'number'}
+              value={minPrice ?? ''}
               onChange={e =>
                 setMinPrice(
                   e.target.value ? parseFloat(e.target.value) : undefined
@@ -188,7 +197,7 @@ export default function ProductList(): JSX.Element {
             Max Price:
             <input
               type="number"
-              value={maxPrice ?? typeof 'number'}
+              value={maxPrice ?? ''}
               onChange={e =>
                 setMaxPrice(
                   e.target.value ? parseFloat(e.target.value) : undefined
@@ -259,6 +268,18 @@ export default function ProductList(): JSX.Element {
         <AddProduct addProduct={handleAddProduct} addImage={handleAddImage} />
       )}
       <div className="main-content">
+        <h2>Product Bundles</h2>
+        <div className="grid">
+          {bundleList.length > 0 ? (
+            bundleList.map((bundle: ProductBundleModel) => (
+              <ProductBundle key={bundle.bundleId} bundle={bundle} />
+            ))
+          ) : (
+            <p>No product bundles available.</p>
+          )}
+        </div>
+
+        <h2>Products</h2>
         <div className="grid">
           {isLoading ? (
             <p>Loading products...</p>
@@ -268,7 +289,7 @@ export default function ProductList(): JSX.Element {
                 key={product.productId}
                 onClick={() => handleProductClick(product)}
               >
-                <Product key={product.productId} product={product} />
+                <Product product={product} />
               </div>
             ))
           ) : (

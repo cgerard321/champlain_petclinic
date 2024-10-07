@@ -1,0 +1,15 @@
+.product-bundle-card {
+  border: 2px solid #4caf50;
+  padding: 16px;
+  margin: 16px;
+  background-color: #e8f5e9;
+}
+
+.product-bundle-products {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.product-bundle-item {
+  margin: 8px;
+}
