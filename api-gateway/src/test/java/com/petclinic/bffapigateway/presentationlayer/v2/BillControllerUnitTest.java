@@ -5,6 +5,7 @@ import com.petclinic.bffapigateway.domainclientlayer.BillServiceClient;
 import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillStatus;
+import com.petclinic.bffapigateway.dtos.Products.ProductResponseDTO;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Test;
@@ -21,6 +22,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 import static org.mockito.Mockito.*;
 
@@ -41,7 +43,7 @@ public class BillControllerUnitTest {
 
 private final String baseBillURL = "/api/v2/gateway/bills";
 
-    private BillResponseDTO billresponse = BillResponseDTO.builder()
+    private final BillResponseDTO billresponse = BillResponseDTO.builder()
             .billId("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
             .customerId("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
             .visitType("general")
@@ -130,4 +132,37 @@ private final String baseBillURL = "/api/v2/gateway/bills";
                 .isEqualTo(billresponse);
     }
 
+    @Test
+    public void whenGetAllBillsByPageWithValidParameters_ThenReturnPagedBills() {
+        when(billServiceClient.getAllBillsByPage(Optional.of(1), Optional.of(5), null, null,
+                null, null, null, null, null, null))
+                .thenReturn(Flux.just(billresponse, billresponse2));
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder.path(baseBillURL)
+                        .queryParam("page", 1)
+                        .queryParam("size", 5)
+                        .build())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(BillResponseDTO.class)
+                .hasSize(2)
+                .contains(billresponse, billresponse2);
+
+        verify(billServiceClient, times(1)).getAllBillsByPage(Optional.of(1),
+                Optional.of(5), null, null, null, null, null,
+                null, null, null);
+    }
+
+    @Test
+    public void whenGetAllBillsByPageWithInvalidParameters_ThenReturnBadRequest() {
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder.path(baseBillURL)
+                        .queryParam("page", -1)
+                        .queryParam("size", "invalid")
+                        .build())
+                .exchange()
+                .expectStatus().isBadRequest();
+    }
 }

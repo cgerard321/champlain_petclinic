@@ -89,21 +89,37 @@ const InventoryProducts: React.FC = () => {
   ): Promise<void> => {
     if (currentQuantity > 0) {
       try {
-        // Send a PATCH/PUT request to update the quantity in the backend
+        // Calculate the updated quantity
         const updatedQuantity = currentQuantity - 1;
+
+        // Send the PATCH request to update the quantity in the backend
         await axios.patch(
-          `http://localhost:8080/api/gateway/inventory/${inventoryId}/products/${productId}`,
+          `http://localhost:8080/api/gateway/inventory/${inventoryId}/products/${productId}/consume`,
           {
             productQuantity: updatedQuantity,
           }
         );
 
+        // Determine the new status based on the updated quantity
+        let updatedStatus: 'RE_ORDER' | 'OUT_OF_STOCK' | 'AVAILABLE' =
+          'AVAILABLE';
+        if (updatedQuantity === 0) {
+          updatedStatus = 'OUT_OF_STOCK';
+        } else if (updatedQuantity <= 20) {
+          updatedStatus = 'RE_ORDER';
+        }
+
         // Update the product list in the frontend
-        const updatedProducts = products.map(product =>
+        const updatedProducts = filteredProducts.map(product =>
           product.productId === productId
-            ? { ...product, productQuantity: updatedQuantity }
+            ? {
+                ...product,
+                productQuantity: updatedQuantity,
+                status: updatedStatus, // Update status
+              }
             : product
         );
+
         setProducts(updatedProducts);
         setFilteredProducts(updatedProducts); // Update the filtered list if needed
       } catch (err) {

@@ -98,21 +98,41 @@ class VisitServiceImplTest {
 
     @Test
     void getAllVisits() {
-        // Mock the behavior of the repository to return a Flux of visits
-        when(visitRepo.findAll()).thenReturn(Flux.just(visit1));
+        // Mock the behavior of the repository for the case when a description is provided
+        Visit visit1 = new Visit(); // replace with your actual Visit object
+        String description = "checkup";
 
-        // Mock the behavior of entityDtoUtil to map visits to visitResponseDTO
-        when(entityDtoUtil.toVisitResponseDTO(any())).thenReturn(Mono.just(visitResponseDTO));
+        when(visitRepo.findVisitsByDescriptionContainingIgnoreCase(description)).thenReturn(Flux.just(visit1));
 
-        // Execute the method under test
-        Flux<VisitResponseDTO> result = visitService.getAllVisits();
+        // Mock the behavior of the repository for the case when no description is provided
+        Visit visit2 = new Visit(); // replace with another Visit object
+        when(visitRepo.findAll()).thenReturn(Flux.just(visit2));
 
-        // Verify the results using StepVerifier
-        StepVerifier.create(result)
-                .expectNext(visitResponseDTO) // Expect the mapped VisitResponseDTO
+        // Mock the behavior of entityDtoUtil to map visits to VisitResponseDTO
+        VisitResponseDTO visitResponseDTO1 = new VisitResponseDTO(); // replace with your actual VisitResponseDTO object
+        VisitResponseDTO visitResponseDTO2 = new VisitResponseDTO(); // another VisitResponseDTO object
+        when(entityDtoUtil.toVisitResponseDTO(visit1)).thenReturn(Mono.just(visitResponseDTO1));
+        when(entityDtoUtil.toVisitResponseDTO(visit2)).thenReturn(Mono.just(visitResponseDTO2));
+
+        // Test case when description is provided
+        Flux<VisitResponseDTO> resultWithDescription = visitService.getAllVisits(description);
+
+        // Verify the results using StepVerifier for the case when description is provided
+        StepVerifier.create(resultWithDescription)
+                .expectNext(visitResponseDTO1) // Expect the mapped VisitResponseDTO for the filtered visit
+                .expectComplete()
+                .verify();
+
+        // Test case when no description is provided
+        Flux<VisitResponseDTO> resultWithoutDescription = visitService.getAllVisits(null);
+
+        // Verify the results using StepVerifier for the case when no description is provided
+        StepVerifier.create(resultWithoutDescription)
+                .expectNext(visitResponseDTO2) // Expect the mapped VisitResponseDTO for all visits
                 .expectComplete()
                 .verify();
     }
+
 
     @Test
     void getVisitByVisitId() {

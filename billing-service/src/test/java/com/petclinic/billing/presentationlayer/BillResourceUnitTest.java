@@ -9,13 +9,15 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.time.LocalDate;
 import java.time.Month;
@@ -284,4 +286,31 @@ class BillResourceUnitTest {
 
         return BillResponseDTO.builder().billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(13.37).billStatus(BillStatus.OVERDUE).dueDate(dueDate).build();
     }
+
+    @Test
+    void whenValidParametersForPaginationProvided_thenShouldCallServiceWithCorrectParams() {
+        // Mocking the service layer response
+        when(billService.getAllBillsByPage(any(), any(), any(), any(), any(), any(), any(), any(), any()))
+                .thenReturn(Flux.just(responseDTO));
+
+        // Triggering the controller endpoint
+        client.get()
+                .uri(uriBuilder -> uriBuilder.path("/bills")
+                        .queryParam("page", 1)
+                        .queryParam("size", 10)
+                        .build())
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(BillResponseDTO.class)
+                .hasSize(1);  // Checking that the response body has exactly 1 element
+
+        // Verifying the correct method calls
+        Mockito.verify(billService, times(1))
+                .getAllBillsByPage(PageRequest.of(1, 10), null, null, null,
+                        null, null, null, null, null);
+    }
+
+
+
+
 }

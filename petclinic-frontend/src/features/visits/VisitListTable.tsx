@@ -10,6 +10,8 @@ import './Emergency.css';
 
 export default function VisitListTable(): JSX.Element {
   const [visitsList, setVisitsList] = useState<Visit[]>([]);
+  const [visitsAll, setVisitsAll] = useState<Visit[]>([]);
+  const [searchTerm, setSearchTerm] = useState<string>(''); // Search term state
   const [emergencyList, setEmergencyList] = useState<EmergencyResponseDTO[]>(
     []
   );
@@ -61,6 +63,18 @@ export default function VisitListTable(): JSX.Element {
             }
           });
         }
+        setVisitsList(oldVisits => {
+          if (!oldVisits.some(visit => visit.visitId === newVisit.visitId)) {
+            return [...oldVisits, newVisit];
+          }
+          return oldVisits;
+        });
+        setVisitsAll(oldVisits => {
+          if (!oldVisits.some(visit => visit.visitId === newVisit.visitId)) {
+            return [...oldVisits, newVisit];
+          }
+          return oldVisits;
+        });
       } catch (error) {
         console.error('Error parsing SSE data:', error);
       }
@@ -150,6 +164,29 @@ export default function VisitListTable(): JSX.Element {
     };
   }, []);
 
+  useEffect(() => {
+    if (searchTerm) {
+      //async (): Promise<void> => {
+      //  try {
+      //    console.log('searchTerm:', searchTerm);
+      //   const list = await getAllVisits(searchTerm);
+      //  setVisitsList(list);
+      //   console.log('visitsList:', visitsList);
+      //  } catch (error) {
+      //    console.error('Error fetching visits:', error);
+      // }
+      //};
+      setVisitsList(
+        visitsAll.filter(visit =>
+          visit.description.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+      );
+    } else {
+      return;
+    }
+  }, [searchTerm, visitsAll, visitsList]);
+
+  // Filter visits based on status
   const confirmedVisits = visitsList.filter(
     visit => visit.status === 'CONFIRMED'
   );
@@ -444,6 +481,16 @@ export default function VisitListTable(): JSX.Element {
         >
           Make a Visit
         </button>
+
+        {/* Search bar for filtering visits */}
+        <div className="search-bar">
+          <input
+            type="text"
+            placeholder="Search by visit description"
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)} // Update the search term when input changes
+          />
+        </div>
       </div>
 
       {/* Emergency Table below buttons, but above visit tables */}
