@@ -156,15 +156,6 @@ public class CartController {
         return cartServiceClient.getPromoCodeById(promoCodeId)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
-                .onErrorResume(e -> {
-                    if (e instanceof WebClientResponseException.UnprocessableEntity) {
-                        return Mono.just(ResponseEntity.unprocessableEntity().build());
-                    } else if ( e instanceof WebClientResponseException.NotFound) {
-                        return Mono.just(ResponseEntity.notFound().build());
-                    } else {
-                        return Mono.error(e);
-                    }
-                });
     }
 }
 
