@@ -7,8 +7,8 @@ import { BillRequestModel } from './models/BillRequestModel';
 import { addBill } from './api/addBill';
 import { OwnerResponseModel } from '../customers/models/OwnerResponseModel';
 import { VetResponseModel } from '../veterinarians/models/VetResponseModel';
-import { deleteBill} from "@/features/bills/api/deleteBill.tsx";
-import useGetAllBillsPaginated from "@/features/bills/hooks/useGetAllBillsPaginated.ts";
+import { deleteBill } from '@/features/bills/api/deleteBill.tsx';
+import useGetAllBillsPaginated from '@/features/bills/hooks/useGetAllBillsPaginated.ts';
 import './AdminBillsListTable.css';
 import { useNavigate } from 'react-router-dom';
 
@@ -25,7 +25,6 @@ export default function AdminBillsListTable(): JSX.Element {
   const [filter, setFilter] = useState<FilterModel>({
     customerId: '',
   });
-
 
   const [searchId, setSearchId] = useState<string>('');
   const [searchedBill, setSearchedBill] = useState<Bill | null>(null);
@@ -179,7 +178,7 @@ export default function AdminBillsListTable(): JSX.Element {
     return ['customerId'].includes(key);
   }
 
-  const filteredBills = billsList.filter((bill: Bill)  => {
+  const filteredBills = billsList.filter((bill: Bill) => {
     return Object.keys(filter).every(key => {
       if (!filter[key]) return true;
       if (!isKeyOfBillResponseDTO(key)) return true;
@@ -379,9 +378,7 @@ export default function AdminBillsListTable(): JSX.Element {
                     <td>
                       {bill.ownerFirstName} {bill.ownerLastName}
                     </td>
-                    <td>
-                      {bill.customerId}
-                    </td>
+                    <td>{bill.customerId}</td>
                     <td>{bill.visitType}</td>
                     <td>
                       {bill.vetFirstName} {bill.vetLastName}
