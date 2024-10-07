@@ -22,6 +22,25 @@ class RatingsServiceClientIntegrationTest {
     private RatingsServiceClient ratingsServiceClient;
 
     @Test
+    void getAllRatingsForProductId() {
+        String productId = UUID.randomUUID().toString();
+        stubFor(get(urlEqualTo("/api/v1/ratings/%s".formatted(productId)))
+                .willReturn(okForContentType(MediaType.TEXT_EVENT_STREAM.toString(), "data:{\"rating\": 5, \"review\": \"It's great\"}\n\ndata: {\"rating\": 1, \"review\": \"Horrible\"}\n\n"))
+        );
+
+        StepVerifier.create(ratingsServiceClient.getAllRatingsForProductId(productId))
+                .assertNext(ratingResponseModel -> {
+                    assertEquals((byte) 5, ratingResponseModel.getRating());
+                    assertEquals("It's great", ratingResponseModel.getReview());
+                })
+                .assertNext(ratingResponseModel -> {
+                    assertEquals((byte) 1, ratingResponseModel.getRating());
+                    assertEquals("Horrible", ratingResponseModel.getReview());
+                })
+                .verifyComplete();
+    }
+
+    @Test
     void getRatingForProductIdAndCustomerId() {
         String productId = UUID.randomUUID().toString();
         String customerId = UUID.randomUUID().toString();

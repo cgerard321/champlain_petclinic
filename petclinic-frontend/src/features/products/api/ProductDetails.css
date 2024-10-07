@@ -24,3 +24,12 @@
   outline: 2px dashed #218838;
   outline-offset: 2px;
 }
+
+.reviewbox {
+  background-color: #dddddd;
+  width: 50vw;
+  border-radius: 5px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+}

@@ -2,6 +2,7 @@ package com.petclinic.bffapigateway.presentationlayer.v2;
 
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
+import com.petclinic.bffapigateway.dtos.Ratings.RatingResponseModel;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import java.util.UUID;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @AutoConfigureWebTestClient
@@ -36,6 +38,40 @@ class RatingControllerIntegrationTest {
     @BeforeEach
     public void resetJWTCache(){
         RatingController.clearCache();
+    }
+
+    @Test
+    void whenGetRatingsForProductId_thenReturnRatings(){
+        String productId = UUID.randomUUID().toString();
+        String customerId = UUID.randomUUID().toString();
+
+        ratingMock.stubFor(get(urlEqualTo("/api/v1/ratings/%s".formatted(productId)))
+                .willReturn(okForContentType("text/event-stream;charset=UTF-8", "data:{\"rating\": 5, \"review\": \"It's great\"}\n\ndata: {\"rating\": 1, \"review\": \"Horrible\"}\n\n"))
+        );
+
+        authMock.stubFor(post(urlEqualTo("/users/validate-token"))
+                .withCookie("Bearer", equalTo(jwtToken))
+                .willReturn(okForContentType("application/json", "{" +
+                        "\"token\": \"" + jwtToken + "\"" +
+                        ",\"userId\": \"" + customerId + "\"" +
+                        ",\"email\": \"some-email@example.com\"" +
+                        ",\"roles\": [\"ALL\"]" +
+                        "}"))
+        );
+
+        webTestClient.get()
+                .uri("/api/v2/gateway/ratings/product/{productId}", productId)
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .cookie("Bearer", jwtToken)
+                .exchange()
+                .expectHeader().contentType("text/event-stream;charset=UTF-8")
+                .expectStatus().isOk()
+                .expectBodyList(RatingResponseModel.class)
+                .value(ratingResponseModels -> {
+                    assertNotNull(ratingResponseModels);
+                })
+                .hasSize(2);
+
     }
 
     @Test

@@ -27,6 +27,7 @@ import java.util.HashMap;
 @RequestMapping("api/v2/gateway/ratings")
 @Validated
 @CrossOrigin(origins = "http://localhost:3000, http://localhost:80")
+@Slf4j
 public class RatingController {
     private final RatingsServiceClient ratingsServiceClient;
     private final AuthServiceClient authServiceClient;
@@ -76,6 +77,12 @@ public class RatingController {
 
     public static void clearCache(){
         jwtUserCache.clear();
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ALL})
+    @GetMapping(value = "/product/{productId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<RatingResponseModel> getAllRatingsForProductId(@PathVariable String productId){
+        return ratingsServiceClient.getAllRatingsForProductId(productId);
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ALL})
