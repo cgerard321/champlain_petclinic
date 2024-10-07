@@ -1931,5 +1931,33 @@ class VetControllerIntegrationTest {
                 .jsonPath("$.message").isEqualTo("Vet not found with id: " + invalidVetId);
     }
 
+    @Test
+    void deleteSpecialtyFromVet_WithValidVetIdAndSpecialtyId_ShouldSucceed() {
+        Vet vet = buildVet("1234");
+
+        Publisher<Vet> setup = vetRepository.deleteAll().thenMany(vetRepository.save(vet));
+        StepVerifier.create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        client.delete()
+                .uri("/vets/" + vet.getVetId() + "/specialties/" + specialtyDTO.getSpecialtyId())
+                .exchange()
+                .expectStatus().isNoContent() // Expecting a 204 No Content status
+                .expectBody().isEmpty(); // No content expected in the response body
+    }
+
+    @Test
+    void deleteSpecialtyFromVet_WithInvalidVetId_ShouldReturnNotFound() {
+        String invalidVetId = "invalid-vet";
+
+        client.delete()
+                .uri("/vets/" + invalidVetId + "/specialties/" + specialtyDTO.getSpecialtyId())
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("No vet found with vetId: " + invalidVetId);
+    }
 
 }
