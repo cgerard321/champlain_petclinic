@@ -253,15 +253,6 @@ public class InventoryServiceClient {
                 .bodyToFlux(InventoryTypeResponseDTO.class);
     }
 
-    public Flux<InventoryNameResponseDTO> getAllInventoryNames(){
-        return webClient.get()
-                .uri(inventoryServiceUrl + "/name")
-                .accept(MediaType.APPLICATION_JSON)
-                .retrieve()
-                .bodyToFlux(InventoryNameResponseDTO.class);
-    }
-
-
 
     public Mono<Void> deleteInventoryByInventoryId(String inventoryId){
         return webClient.delete()
@@ -270,15 +261,6 @@ public class InventoryServiceClient {
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, resp -> rethrower.rethrow(resp, ex -> new NotFoundException(ex.get("message").toString())))
                 .bodyToMono(Void.class);
-    }
-
-
-    public Mono<InventoryResponseDTO> addProductToInventoryByName(String inventoryName, ProductRequestDTO productRequestDTO) {
-        return webClient.post()
-                .uri(inventoryServiceUrl + "/{inventoryName}/products/by-name", inventoryName)
-                .body(Mono.just(productRequestDTO), ProductRequestDTO.class)
-                .retrieve()
-                .bodyToMono(InventoryResponseDTO.class);
     }
 
 

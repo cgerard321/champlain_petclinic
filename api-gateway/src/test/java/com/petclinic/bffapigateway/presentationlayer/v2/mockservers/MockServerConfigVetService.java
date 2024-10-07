@@ -104,60 +104,6 @@ public class MockServerConfigVetService {
                 );
     }
 
-    public void registerAddVetEndpoint() {
-        mockServerClient_VetService
-                .when(
-                        request()
-                                .withMethod("POST")
-                                .withPath("/vets")
-                                .withBody(json("{"
-                                        + "\"vetBillId\":\"bill001\","
-                                        + "\"firstName\":\"John\","
-                                        + "\"lastName\":\"Doe\","
-                                        + "\"email\":\"john.doe@example.com\","
-                                        + "\"phoneNumber\":\"1234567890\","
-                                        + "\"resume\":\"Specialist in dermatology\","
-                                        + "\"workday\":["
-                                        + "\"Wednesday\""
-                                        + "],"
-                                        + "\"workHoursJson\":\"08:00-16:00\","
-                                        + "\"active\":true,"
-                                        + "\"specialties\":["
-                                        + "{"
-                                        + "\"specialtyId\":\"dermatology\","
-                                        + "\"name\":\"Dermatology\""
-                                        + "}"
-                                        + "],"
-                                        + "\"photoDefault\":false"
-                                        + "}"))
-                )
-                .respond(
-                        response()
-                                .withStatusCode(201)
-                                .withBody(json("{"
-                                        + "\"vetId\":\"2e26e7a2-8c6e-4e2d-8d60-ad0882e295eb\","
-                                        + "\"vetBillId\":\"bill001\","
-                                        + "\"firstName\":\"John\","
-                                        + "\"lastName\":\"Doe\","
-                                        + "\"email\":\"john.doe@example.com\","
-                                        + "\"phoneNumber\":\"1234567890\","
-                                        + "\"resume\":\"Specialist in dermatology\","
-                                        + "\"workday\":["
-                                        + "\"Wednesday\""
-                                        + "],"
-                                        + "\"workHoursJson\":\"08:00-16:00\","
-                                        + "\"active\":true,"
-                                        + "\"specialties\":["
-                                        + "{"
-                                        + "\"specialtyId\":\"dermatology\","
-                                        + "\"name\":\"Dermatology\""
-                                        + "}"
-                                        + "]"
-                                        + "}"))
-                );
-    }
-
-
     public void registerUpdateVetEndpoint() {
         mockServerClient_VetService
                 .when(
@@ -379,5 +325,32 @@ public void stopMockServer() {
                         response()
                                 .withStatusCode(404));
     }
+
+    public void registerDeletePhotoByVetIdEndpoint(String vetId) {
+        mockServerClient_VetService
+                .when(
+                        request()
+                                .withMethod("DELETE")
+                                .withPath("/vets/" + vetId + "/photo")
+                ).respond(
+                        response()
+                                .withStatusCode(204)
+                );
+    }
+
+    public void registerDeletePhotoByVetIdEndpointNotFound(String vetId) {
+        mockServerClient_VetService
+                .when(
+                        request()
+                                .withMethod("DELETE")
+                                .withPath("/vets/" + vetId + "/photo")
+                ).respond(
+                        response()
+                                .withStatusCode(404)
+                                .withHeader("Content-Type", "application/json")
+                                .withBody(json("{\"message\":\"Photo not found for vetId: " + vetId + "\"}"))
+                );
+    }
+
 
 }

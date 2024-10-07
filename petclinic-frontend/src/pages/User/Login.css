@@ -143,3 +143,29 @@ input[type='password']::placeholder {
   background-color: #6e3f19;
   transform: scale(0.98);
 }
+
+.signup-button-container {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.link {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: bold;
+  transition: color 0.3s ease;
+  margin: 5px 0;
+}
+
+.link:hover {
+  color: #0056b3;
+}
+
+.separator {
+  width: 90%;
+  border: none;
+  border-top: 2px solid black;
+  margin: 10px 0;
+}
