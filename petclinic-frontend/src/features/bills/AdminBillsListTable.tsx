@@ -11,9 +11,9 @@ import { deleteBill } from '@/features/bills/api/deleteBill.tsx';
 import useGetAllBillsPaginated from '@/features/bills/hooks/useGetAllBillsPaginated.ts';
 import './AdminBillsListTable.css';
 import { useNavigate } from 'react-router-dom';
-import { getAllPaidBills} from "@/features/bills/api/getAllPaidBills.tsx";
-import { getAllOverdueBills} from "@/features/bills/api/getAllOverdueBills.tsx";
-import { getAllUnpaidBills} from "@/features/bills/api/getAllUnpaidBills.tsx";
+import { getAllPaidBills } from '@/features/bills/api/getAllPaidBills.tsx';
+import { getAllOverdueBills } from '@/features/bills/api/getAllOverdueBills.tsx';
+import { getAllUnpaidBills } from '@/features/bills/api/getAllUnpaidBills.tsx';
 
 export default function AdminBillsListTable(): JSX.Element {
   const navigate = useNavigate();
@@ -56,7 +56,6 @@ export default function AdminBillsListTable(): JSX.Element {
     }
   }, [currentPage, getBillsList]);
 
-
   const validateForm = (): boolean => {
     if (
       !newBill.customerId ||
@@ -85,7 +84,9 @@ export default function AdminBillsListTable(): JSX.Element {
     return true;
   };
 
-  const handleFilterChange = async (event: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleFilterChange = async (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ): Promise<void> => {
     const status = event.target.value;
     setSelectedFilter(status);
 
@@ -216,9 +217,9 @@ export default function AdminBillsListTable(): JSX.Element {
       <div>
         <label htmlFor="billFilter">Filter Bills by Status: </label>
         <select
-            id="billFilter"
-            value={selectedFilter}
-            onChange={handleFilterChange}
+          id="billFilter"
+          value={selectedFilter}
+          onChange={handleFilterChange}
         >
           <option value="">All Bills</option>
           <option value="unpaid">Unpaid Bills</option>
