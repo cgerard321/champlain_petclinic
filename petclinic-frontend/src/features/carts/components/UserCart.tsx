@@ -255,6 +255,41 @@ const UserCart = (): JSX.Element => {
     }
   };
 
+  //going to imlement it next sprint
+  // const addToWishlist = async (item: ProductModel): Promise<void> => {
+  //   try {
+  //     const productId = item.productId;
+  //     const response = await fetch(
+  //       `http://localhost:8080/api/v2/gateway/carts/${cartId}/products/${productId}/toWishList`,
+  //       {
+  //         method: 'POST',
+  //         headers: {
+  //           'Content-Type': 'application/json',
+  //           Accept: 'application/json',
+  //         },
+  //         credentials: 'include',
+  //         body: JSON.stringify({
+  //           productId: item.productId,
+  //           productName: item.productName,
+  //           productSalePrice: item.productSalePrice,
+  //         }),
+  //       }
+  //     );
+
+  //     if (!response.ok) {
+  //       const errorData = await response.json();
+  //       throw new Error(errorData.message || 'Failed to add to wishlist');
+  //     }
+
+  //     // Optionally, you can update the wishlistItems state
+  //     setWishlistItems(prevItems => [...prevItems, item]);
+  //     alert(`${item.productName} has been added to your wishlist!`);
+  //   } catch (error) {
+  //     console.error('Error adding to wishlist:', error);
+  //     alert('Failed to add item to wishlist.');
+  //   }
+  // };
+
   const handleCheckout = async (): Promise<void> => {
     if (!cartId) {
       setCheckoutMessage('Invalid cart ID');
@@ -314,6 +349,7 @@ const UserCart = (): JSX.Element => {
   return (
     <div className="user-cart-container">
       <NavBar />
+
       <h1 className="cart-title">User Cart</h1>
 
       {/* Main Content Container */}
@@ -366,33 +402,9 @@ const UserCart = (): JSX.Element => {
             </div>
             <hr />
 
-            {/* Wishlist Section */}
-            <div className="wishlist-section">
-              <h2 className="wishlist-title">Your Wishlist</h2>
-              <div className="wishlist-items-container">
-                {wishlistItems.length > 0 ? (
-                  wishlistItems.map(item => (
-                    <CartItem
-                      key={item.productId}
-                      item={item}
-                      index={-1} // Mark as wishlist item
-                      changeItemQuantity={() => {}} // Disable changing quantity for wishlist
-                      deleteItem={() => {}} // Disable removing from wishlist
-                    />
-                  ))
-                ) : (
-                  <p className="empty-wishlist-message">
-                    No products in the wishlist.
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Checkout Section */}
-          <div className="Checkout-section">
-            <h3>Cart Summary</h3>
+            {/* Cart Summary */}
             <div className="CartSummary">
+              <h3>Cart Summary</h3>
               <p className="summary-item">Subtotal: ${subtotal.toFixed(2)}</p>
               <p className="summary-item">TVQ (9.975%): ${tvq.toFixed(2)}</p>
               <p className="summary-item">TVC (5%): ${tvc.toFixed(2)}</p>
@@ -401,6 +413,7 @@ const UserCart = (): JSX.Element => {
               </p>
             </div>
 
+            {/* Checkout Section */}
             <h3>Checkout</h3>
             <button className="btn checkout-btn" onClick={handleCheckout}>
               Checkout
@@ -438,6 +451,28 @@ const UserCart = (): JSX.Element => {
                 </ul>
               </div>
             )}
+          </div>
+
+          {/* Wishlist Section */}
+          <div className="wishlist-section">
+            <h2 className="wishlist-title">Your Wishlist</h2>
+            <div className="wishlist-items-container">
+              {wishlistItems.length > 0 ? (
+                wishlistItems.map(item => (
+                  <CartItem
+                    key={item.productId}
+                    item={item}
+                    index={-1} // Mark as wishlist item
+                    changeItemQuantity={() => {}} // Disable changing quantity for wishlist
+                    deleteItem={() => {}} // Disable removing from wishlist
+                  />
+                ))
+              ) : (
+                <p className="empty-wishlist-message">
+                  No products in the wishlist.
+                </p>
+              )}
+            </div>
           </div>
         </div>
       </div>

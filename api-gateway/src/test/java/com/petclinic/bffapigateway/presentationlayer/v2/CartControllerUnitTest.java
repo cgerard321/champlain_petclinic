@@ -2,14 +2,13 @@ package com.petclinic.bffapigateway.presentationlayer.v2;
 
 import com.petclinic.bffapigateway.domainclientlayer.CartServiceClient;
 import com.petclinic.bffapigateway.dtos.Cart.CartResponseDTO;
+import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -22,7 +21,7 @@ import static org.mockito.Mockito.*;
 @ContextConfiguration(classes = { CartController.class, CartServiceClient.class })
 @WebFluxTest(controllers = CartController.class)
 @AutoConfigureWebTestClient
-public class CartControllerTest {
+public class CartControllerUnitTest {
 
     @Autowired
     private WebTestClient client;
@@ -87,6 +86,41 @@ public class CartControllerTest {
 
         //assert
         verify(cartServiceClient, times(1)).getCartByCustomerId(customerId);
+    }
+
+    @Test
+    void whenMoveProductFromCartToWishlist_thenSuccess() {
+        // Arrange
+        String cartId = "cartId123";
+        String productId = "productId123";
+        when(cartServiceClient.moveProductFromCartToWishlist(cartId, productId)).thenReturn(Mono.empty());
+
+        // Act
+        client.post()
+                .uri("/api/v2/gateway/carts/" + cartId + "/products/" + productId + "/toWishList")
+                .exchange()
+                .expectStatus().isOk();
+
+        // Assert
+        verify(cartServiceClient, times(1)).moveProductFromCartToWishlist(cartId, productId);
+
+    }
+
+    @Test
+    void whenMoveProductFromWishListToCart_thenSuccess() {
+        // Arrange
+        String cartId = "cartId123";
+        String productId = "productId123";
+        when(cartServiceClient.moveProductFromWishListToCart(cartId, productId)).thenReturn(Mono.empty());
+
+        // Act
+        client.post()
+                .uri("/api/v2/gateway/carts/" + cartId + "/products/" + productId + "/toCart")
+                .exchange()
+                .expectStatus().isOk();
+
+        // Assert
+        verify(cartServiceClient, times(1)).moveProductFromWishListToCart(cartId, productId);
     }
 
 
