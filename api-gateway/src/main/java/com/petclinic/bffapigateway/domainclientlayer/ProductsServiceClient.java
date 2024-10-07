@@ -32,7 +32,7 @@ public class ProductsServiceClient {
 
     }
 
-    public Flux<ProductResponseDTO> getAllProducts(Double minPrice, Double maxPrice) {
+    public Flux<ProductResponseDTO> getAllProducts(Double minPrice, Double maxPrice,Double minRating, Double maxRating, String sort) {
         return webClient.get()
                 .uri(uriBuilder -> {
                     if (minPrice != null) {
@@ -41,10 +41,24 @@ public class ProductsServiceClient {
                     if (maxPrice != null) {
                         uriBuilder.queryParam("maxPrice", maxPrice);
                     }
+                    if (minRating != null) {
+                        uriBuilder.queryParam("minRating", minRating);
+                    }
+                    if (maxRating != null) {
+                        uriBuilder.queryParam("maxRating", maxRating);
+                    }
+                    if (sort != null) {
+                        uriBuilder.queryParam("sort", sort);
+                    }
                     return uriBuilder.build();
                 })
                 .retrieve()
-                .bodyToFlux(ProductResponseDTO.class);
+                .bodyToFlux(ProductResponseDTO.class)
+                .filter(product -> {
+                    boolean ratingFilter = (minRating == null || product.getAverageRating() >= minRating)
+                            && (maxRating == null || product.getAverageRating() <= maxRating);
+                    return ratingFilter;
+                });
     }
 
     public Mono<ProductResponseDTO> getProductByProductId(final String productId) {
