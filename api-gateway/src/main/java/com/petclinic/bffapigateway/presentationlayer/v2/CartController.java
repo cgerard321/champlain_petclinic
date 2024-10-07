@@ -5,6 +5,7 @@ import com.petclinic.bffapigateway.domainclientlayer.CartServiceClient;
 import com.petclinic.bffapigateway.dtos.Cart.AddProductRequestDTO;
 import com.petclinic.bffapigateway.dtos.Cart.CartResponseDTO;
 import com.petclinic.bffapigateway.dtos.Cart.UpdateProductQuantityRequestDTO;
+import com.petclinic.bffapigateway.dtos.Cart.PromoCodeResponseDTO;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
 import lombok.RequiredArgsConstructor;
@@ -139,15 +140,22 @@ public class CartController {
     public Mono<ResponseEntity<CartResponseDTO>> moveProductFromCartToWishlist(@PathVariable String cartId, @PathVariable String productId) {
         return cartServiceClient.moveProductFromCartToWishlist(cartId, productId)
                 .map(ResponseEntity::ok)
-                .onErrorResume(e -> {
-                    if (e instanceof WebClientResponseException.UnprocessableEntity) {
-                        return Mono.just(ResponseEntity.unprocessableEntity().build());
-                    } else if ( e instanceof WebClientResponseException.NotFound) {
-                        return Mono.just(ResponseEntity.notFound().build());
-                    } else {
-                        return Mono.error(e);
-                    }
-                });
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping(value = "promos", produces= MediaType.APPLICATION_JSON_VALUE)
+    public Flux<PromoCodeResponseDTO> getAllPromos() {
+        return cartServiceClient.getAllPromoCodes();
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping(value = "promos/{promoCodeId}", produces= MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<PromoCodeResponseDTO>> getPromoCodeById(@PathVariable String promoCodeId) {
+        return cartServiceClient.getPromoCodeById(promoCodeId)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 }
 

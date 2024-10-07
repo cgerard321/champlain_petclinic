@@ -47,6 +47,9 @@ import AddPetPage from '@/pages/Customer/AddPetPage.tsx';
 import EditProduct from './features/products/components/EditProduct';
 import ForgotPassword from '@/pages/User/ForgotPassword.tsx';
 import ResetPassword from '@/pages/User/ResetPassword.tsx';
+import PromoPage from '@/pages/Promos/PromoListPage.tsx';
+import AddPromoPage from '@/pages/Promos/AddPromoPage.tsx';
+import UpdatePromoPage from '@/pages/Promos/UpdatePromoPage.tsx';
 
 const router = createBrowserRouter([
   {
@@ -300,6 +303,30 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute roles={['ADMIN']}>
             <CartPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.Promos,
+        element: (
+          <ProtectedRoute roles={['ADMIN']}>
+            <PromoPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.AddPromo,
+        element: (
+          <ProtectedRoute roles={['ADMIN']}>
+            <AddPromoPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.UpdatePromo,
+        element: (
+          <ProtectedRoute roles={['ADMIN']}>
+            <UpdatePromoPage />
           </ProtectedRoute>
         ),
       },
