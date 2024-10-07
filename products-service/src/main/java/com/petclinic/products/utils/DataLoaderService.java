@@ -121,7 +121,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .requestCount(0)
                 .averageRating(1.2)
                 .productType("Accessory")
-                .productQuantity(6)
+                .productQuantity(0)
                 .build();
 
         Resource resource1 = new ClassPathResource("images/dog_food.jpg");

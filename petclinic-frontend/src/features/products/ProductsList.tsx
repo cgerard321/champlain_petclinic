@@ -208,7 +208,7 @@ export default function ProductList(): JSX.Element {
             />
           </label>
           <div className="star-rating-container">
-            <h3>Filter by Star Rating</h3>
+            <h2>Filter by Star Rating</h2>
             <div className="star-row">
               <label>Min Stars:</label>
               <StarRating currentRating={minStars} updateRating={setMinStars} />
@@ -228,10 +228,10 @@ export default function ProductList(): JSX.Element {
             <option value="desc">High to Low</option>
           </select>
           <button className="apply-filter-button" onClick={fetchProducts}>
-            Apply Filter
+            Apply
           </button>
           <button className="clear-filter-button" onClick={clearFilters}>
-            Clear Filters
+            Clear
           </button>
         </div>
       </div>

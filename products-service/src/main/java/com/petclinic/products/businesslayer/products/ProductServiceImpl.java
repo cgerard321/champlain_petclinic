@@ -186,6 +186,7 @@ public class ProductServiceImpl implements ProductService {
                     responseModel.setProductDescription(product.getProductDescription());
                     responseModel.setProductSalePrice(product.getProductSalePrice());
                     responseModel.setProductType(product.getProductType());
+                    responseModel.setImageId(product.getImageId());
                     return responseModel;
                 });
     }
