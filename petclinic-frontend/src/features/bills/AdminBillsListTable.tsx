@@ -11,6 +11,9 @@ import { deleteBill } from '@/features/bills/api/deleteBill.tsx';
 import useGetAllBillsPaginated from '@/features/bills/hooks/useGetAllBillsPaginated.ts';
 import './AdminBillsListTable.css';
 import { useNavigate } from 'react-router-dom';
+import { getAllPaidBills} from "@/features/bills/api/getAllPaidBills.tsx";
+import { getAllOverdueBills} from "@/features/bills/api/getAllOverdueBills.tsx";
+import { getAllUnpaidBills} from "@/features/bills/api/getAllUnpaidBills.tsx";
 
 export default function AdminBillsListTable(): JSX.Element {
   const navigate = useNavigate();
@@ -19,6 +22,9 @@ export default function AdminBillsListTable(): JSX.Element {
   const [error, setError] = useState<string | null>(null);
   const { billsList, getBillsList, setCurrentPage, currentPage, hasMore } =
     useGetAllBillsPaginated();
+
+  const [selectedFilter, setSelectedFilter] = useState<string>('');
+  const [filteredBills, setFilteredBills] = useState<Bill[] | null>(null);
 
   const [showCreateForm, setCreateForm] = useState<boolean>(false);
   const [newBill, setNewBill] = useState<BillRequestModel>({
@@ -45,8 +51,11 @@ export default function AdminBillsListTable(): JSX.Element {
   }, []);
 
   useEffect(() => {
-    getBillsList(currentPage, 10);
+    if (!selectedFilter) {
+      getBillsList(currentPage, 10);
+    }
   }, [currentPage, getBillsList]);
+
 
   const validateForm = (): boolean => {
     if (
@@ -74,6 +83,31 @@ export default function AdminBillsListTable(): JSX.Element {
 
     setError(null);
     return true;
+  };
+
+  const handleFilterChange = async (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const status = event.target.value;
+    setSelectedFilter(status);
+
+    // Fetch bills based on the selected filter
+    try {
+      if (status === 'paid') {
+        const paidBills = await getAllPaidBills();
+        setFilteredBills(paidBills);
+      } else if (status === 'unpaid') {
+        const unpaidBills = await getAllUnpaidBills();
+        setFilteredBills(unpaidBills);
+      } else if (status === 'overdue') {
+        const overdueBills = await getAllOverdueBills();
+        setFilteredBills(overdueBills);
+      } else {
+        setFilteredBills(null); // Reset if no filter is selected
+        getBillsList(currentPage, 10); // Reset to paginated fetching
+      }
+    } catch (error) {
+      console.error('Error fetching filtered bills:', error);
+      setError('Error fetching filtered bills. Please try again.');
+    }
   };
 
   const handleCreateBill = async (): Promise<void> => {
@@ -177,6 +211,20 @@ export default function AdminBillsListTable(): JSX.Element {
         />
         <button onClick={handleSearch}>Search</button>
         {searchedBill && <button onClick={handleGoBack}>Go Back</button>}
+      </div>
+
+      <div>
+        <label htmlFor="billFilter">Filter Bills by Status: </label>
+        <select
+            id="billFilter"
+            value={selectedFilter}
+            onChange={handleFilterChange}
+        >
+          <option value="">All Bills</option>
+          <option value="unpaid">Unpaid Bills</option>
+          <option value="paid">Paid Bills</option>
+          <option value="overdue">Overdue Bills</option>
+        </select>
       </div>
 
       <button onClick={() => setCreateForm(!showCreateForm)}>
@@ -338,7 +386,7 @@ export default function AdminBillsListTable(): JSX.Element {
               </tr>
             </thead>
             <tbody>
-              {billsList.map((bill: Bill) => (
+              {(filteredBills || billsList).map((bill: Bill) => (
                 <tr key={bill.billId}>
                   <td>{bill.billId}</td>
                   <td>
