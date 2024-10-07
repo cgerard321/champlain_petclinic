@@ -15,6 +15,7 @@ export enum AppRoutePaths {
   InventoryProducts = '/inventory/:inventoryId/products',
   InventorySupplies = '/inventories/:inventoryName/supplies',
   AdminBills = '/bills/admin',
+  UpdateBill = '/bills/admin/:billId/edit',
   CustomerBills = '/bills/customer',
   PageNotFound = '/page-not-found',
   Unauthorized = '/unauthorized',
@@ -44,4 +45,6 @@ export enum AppRoutePaths {
   UpdatePet = '/pets/:petId/edit',
   ProductDetails = '/productDetails',
   EditProduct = '/products/edit',
+  ForgotPassword = '/users/forgot-password',
+  ResetPassword = '/users/reset-password/:token',
 }

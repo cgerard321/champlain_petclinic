@@ -62,13 +62,16 @@ const CartItem = ({
           Add to Wishlist
         </button> */}
       </div>
-      {remainingStock <= 5 && remainingStock > 0 ? (
-        <div className="stock-message">
-          Only {remainingStock} items left in stock.
-        </div>
-      ) : remainingStock === 0 ? (
-        <div className="stock-message out-of-stock">Out of stock</div>
-      ) : null}
+
+      <div className="stock-message-container">
+        {remainingStock <= 5 && remainingStock > 0 ? (
+          <div className="stock-message">
+            Only {remainingStock} items left in stock.
+          </div>
+        ) : remainingStock === 0 ? (
+          <div className="stock-message out-of-stock">Out of stock</div>
+        ) : null}
+      </div>
     </div>
   );
 };

@@ -607,7 +607,7 @@ class CartServiceUnitTest {
                     assertEquals(cart1.getCustomerId(), cartResponseModel.getCustomerId());
                     assertEquals(products.size(), cartResponseModel.getProducts().size());
                 })
-                .verifyComplete();
+                .verifyComplete(); //test
     }
 
     @Test

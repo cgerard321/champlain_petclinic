@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Bill } from '@/features/bills/models/Bill.ts';
 import { useUser } from '@/context/UserContext';
+import './BillsListTable.css';
 
 export default function BillsListTable(): JSX.Element {
   const { user } = useUser();
@@ -70,40 +71,42 @@ export default function BillsListTable(): JSX.Element {
       {error ? (
         <p>{error}</p>
       ) : (
-        <table className="table table-striped">
-          <thead>
-            <tr>
-              <th>Bill ID</th>
-              <th>Owner Name</th>
-              <th>Visit Type</th>
-              <th>Vet Name</th>
-              <th>Date</th>
-              <th>Amount</th>
-              <th>Taxed Amount</th>
-              <th>Status</th>
-              <th>Due Date</th>
-            </tr>
-          </thead>
-          <tbody>
-            {bills.map(bill => (
-              <tr key={bill.billId}>
-                <td>{bill.billId}</td>
-                <td>
-                  {bill.ownerFirstName} {bill.ownerLastName}
-                </td>
-                <td>{bill.visitType}</td>
-                <td>
-                  {bill.vetFirstName} {bill.vetLastName}
-                </td>
-                <td>{bill.date}</td>
-                <td>{bill.amount}</td>
-                <td>{bill.taxedAmount}</td>
-                <td>{bill.billStatus}</td>
-                <td>{bill.dueDate}</td>
+        <div className="billsListTableContainer">
+          <table className="table table-striped">
+            <thead>
+              <tr>
+                <th>Bill ID</th>
+                <th>Owner Name</th>
+                <th>Visit Type</th>
+                <th>Vet Name</th>
+                <th>Date</th>
+                <th>Amount</th>
+                <th>Taxed Amount</th>
+                <th>Status</th>
+                <th>Due Date</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {bills.map(bill => (
+                <tr key={bill.billId}>
+                  <td>{bill.billId}</td>
+                  <td>
+                    {bill.ownerFirstName} {bill.ownerLastName}
+                  </td>
+                  <td>{bill.visitType}</td>
+                  <td>
+                    {bill.vetFirstName} {bill.vetLastName}
+                  </td>
+                  <td>{bill.date}</td>
+                  <td>{bill.amount}</td>
+                  <td>{bill.taxedAmount}</td>
+                  <td>{bill.billStatus}</td>
+                  <td>{bill.dueDate}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

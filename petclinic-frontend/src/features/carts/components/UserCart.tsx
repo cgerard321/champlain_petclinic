@@ -4,6 +4,7 @@ import CartItem from './CartItem';
 import { ProductModel } from '../models/ProductModel';
 import './UserCart.css';
 import { NavBar } from '@/layouts/AppNavBar';
+import { FaShoppingCart } from 'react-icons/fa'; // Importing the shopping cart icon
 
 interface ProductAPIResponse {
   productId: number;
@@ -14,6 +15,7 @@ interface ProductAPIResponse {
   quantityInCart: number;
   productQuantity: number;
 }
+
 interface InvoiceItem {
   productId: string;
   productName: string;
@@ -43,6 +45,7 @@ const UserCart = (): JSX.Element => {
   );
   const [checkoutMessage, setCheckoutMessage] = useState<string | null>(null);
   const [invoice, setInvoice] = useState<Invoice | null>(null);
+  const [cartItemCount, setCartItemCount] = useState<number>(0); // State for cart item count
 
   const subtotal = cartItems.reduce(
     (acc, item) => acc + item.productSalePrice * (item.quantity || 1),
@@ -51,6 +54,15 @@ const UserCart = (): JSX.Element => {
   const tvq = subtotal * 0.09975; // Quebec tax rate
   const tvc = subtotal * 0.05; // Canadian tax rate
   const total = subtotal + tvq + tvc;
+
+  // Function to update the cart item count
+  const updateCartItemCount = useCallback(() => {
+    const count = cartItems.reduce(
+      (acc, item) => acc + (item.quantity || 0),
+      0
+    );
+    setCartItemCount(count);
+  }, [cartItems]);
 
   useEffect(() => {
     const fetchCartItems = async (): Promise<void> => {
@@ -110,6 +122,11 @@ const UserCart = (): JSX.Element => {
     fetchCartItems();
   }, [cartId]);
 
+  // Recalculate cart item count every time cartItems change
+  useEffect(() => {
+    updateCartItemCount();
+  }, [cartItems, updateCartItemCount]);
+
   const changeItemQuantity = useCallback(
     async (
       event: React.ChangeEvent<HTMLInputElement>,
@@ -128,7 +145,7 @@ const UserCart = (): JSX.Element => {
       } else {
         // Clear error message
         setErrorMessages(prevErrors => {
-          const { ...rest } = prevErrors;
+          const rest = { ...prevErrors };
           delete rest[index];
           return rest;
         });
@@ -175,9 +192,9 @@ const UserCart = (): JSX.Element => {
   );
 
   const deleteItem = useCallback((indexToDelete: number): void => {
-    setCartItems(prevItems =>
-      prevItems.filter((_, index) => index !== indexToDelete)
-    );
+    setCartItems(prevItems => {
+      return prevItems.filter((_, index) => index !== indexToDelete);
+    });
   }, []);
 
   const clearCart = async (): Promise<void> => {
@@ -201,6 +218,7 @@ const UserCart = (): JSX.Element => {
 
       if (response.ok) {
         setCartItems([]);
+        setCartItemCount(0);
         alert('Cart has been successfully cleared!');
       } else {
         alert('Failed to clear cart');
@@ -281,9 +299,10 @@ const UserCart = (): JSX.Element => {
           issueDate: new Date().toISOString(), // Current date
         };
 
-        setInvoice(newInvoice);
-        setCheckoutMessage('Checkout successful!');
+        setInvoice(newInvoice); // Set the new invoice state
+        setCheckoutMessage('Checkout successful!'); // Notify the user
         setCartItems([]); // Clear cart after checkout
+        setCartItemCount(0);
       } else {
         setCheckoutMessage('Checkout failed.');
       }
@@ -301,101 +320,127 @@ const UserCart = (): JSX.Element => {
     return <div className="error">{error}</div>;
   }
 
-  return (
-    <div className="UserCart">
-      <NavBar />
-      <div className="UserCart-buttons">
-        <button className="go-back-btn" onClick={() => navigate(-1)}>
-          Go Back
-        </button>
-        <button className="clear-cart-btn" onClick={clearCart}>
-          Clear Cart
-        </button>
-      </div>
-      <hr />
+return (
+  <div className="user-cart-container">
+    <NavBar />
 
-      {/* Main Cart Section */}
-      <div className="Cart-section">
-        <h2 className="Cart-title">Your Cart</h2>
-        <div className="UserCart-items">
-          {cartItems.length > 0 ? (
-            cartItems.map((item, index) => (
-              <CartItem
-                key={item.productId}
-                item={item}
-                index={index}
-                changeItemQuantity={changeItemQuantity}
-                deleteItem={deleteItem}
-                errorMessage={errorMessages[index]}
-                // addToWishlist={addToWishlist}
-              />
-            ))
-          ) : (
-            <p>No products in the cart.</p>
-          )}
-        </div>
-        <div className="CartSummary">
-          <h3>Cart Summary</h3>
-          <p>Subtotal: ${subtotal.toFixed(2)}</p>
-          <p>TVQ (9.975%): ${tvq.toFixed(2)}</p>
-          <p>TVC (5%): ${tvc.toFixed(2)}</p>
-          <p className="total-price">Total: ${total.toFixed(2)}</p>
-        </div>
-        <button className="checkout-btn" onClick={handleCheckout}>
-          Checkout
-        </button>
-        {checkoutMessage && (
-          <div className="checkout-message">{checkoutMessage}</div>
-        )}
+    <h1 className="cart-title">User Cart</h1>
 
-        {/* Invoice Section */}
-        {invoice && ( // Render the invoice if available
-          <div className="Invoice">
-            <h2>Invoice Details</h2>
-            <p>Invoice ID: {invoice.invoiceId}</p>
-            <p>Cart ID: {invoice.cartId}</p>
-            <p>Subtotal: ${invoice.subtotal.toFixed(2)}</p>
-            <p>Tax: ${invoice.tax.toFixed(2)}</p>
-            <p>Total: ${invoice.total.toFixed(2)}</p>
-            <p>Issue Date: {new Date(invoice.issueDate).toLocaleString()}</p>
-            <h3>Items:</h3>
-            <ul>
-              {invoice.items.map((item, index) => (
-                <li key={index}>
-                  {item.productName} - Quantity: {item.quantity} - Price: $
-                  {item.productSalePrice.toFixed(2)}
-                </li>
-              ))}
-              <p>Subtotal: ${invoice.subtotal.toFixed(2)}</p>
-              <p>Tax: ${invoice.tax.toFixed(2)}</p>
-              <p>Total: ${invoice.total.toFixed(2)}</p>
-            </ul>
+    {/* Main Content Container */}
+    <div className="content-container">
+      <div className="UserCart-checkout-flex">
+        {/* Main Cart Section */}
+        <div className="UserCart">
+          {/* Cart Header with Badge */}
+          <div className="cart-header">
+            <h2 className="cart-header-title">Your Cart</h2>
+            <div className="cart-badge-container">
+              <FaShoppingCart aria-label="Shopping Cart" />
+              {cartItemCount > 0 && (
+                <span
+                  className="cart-badge"
+                  aria-label={`Cart has ${cartItemCount} items`}
+                >
+                  {cartItemCount}
+                </span>
+              )}
+            </div>
           </div>
-        )}
-      </div>
 
-      {/* Wishlist Section */}
-      <div className="Wishlist-section">
-        <h2 className="Wishlist-title">Your Wishlist</h2>
-        <div className="UserCart-items">
-          {wishlistItems.length > 0 ? (
-            wishlistItems.map(item => (
-              <CartItem
-                key={item.productId}
-                item={item}
-                index={-1}
-                changeItemQuantity={() => {}}
-                deleteItem={deleteItem}
-                // addToWishlist={addToWishlist}
-              />
-            ))
-          ) : (
-            <p>No products in the wishlist.</p>
+          {/* Cart Items */}
+          <div className="cart-items-container">
+            {cartItems.length > 0 ? (
+              cartItems.map((item, index) => (
+                <CartItem
+                  key={item.productId}
+                  item={item}
+                  index={index}
+                  changeItemQuantity={changeItemQuantity}
+                  deleteItem={deleteItem}
+                  errorMessage={errorMessages[index]}
+                />
+              ))
+            ) : (
+              <p className="empty-cart-message">No products in the cart.</p>
+            )}
+          </div>
+
+          {/* Cart Control Buttons */}
+          <div className="cart-control-buttons">
+            <button className="btn go-back-btn" onClick={() => navigate(-1)}>
+              Go Back
+            </button>
+            <button className="btn clear-cart-btn" onClick={clearCart}>
+              Clear Cart
+            </button>
+          </div>
+          <hr />
+
+          {/* Cart Summary */}
+          <div className="CartSummary">
+            <h3>Cart Summary</h3>
+            <p className="summary-item">Subtotal: ${subtotal.toFixed(2)}</p>
+            <p className="summary-item">TVQ (9.975%): ${tvq.toFixed(2)}</p>
+            <p className="summary-item">TVC (5%): ${tvc.toFixed(2)}</p>
+            <p className="total-price summary-item">Total: ${total.toFixed(2)}</p>
+          </div>
+
+          {/* Checkout Section */}
+          <h3>Checkout</h3>
+          <button className="btn checkout-btn" onClick={handleCheckout}>
+            Checkout
+          </button>
+          {checkoutMessage && (
+            <div className="checkout-message">{checkoutMessage}</div>
           )}
+
+          {/* Invoice Section */}
+          {invoice && (
+            <div className="invoice-section">
+              <h2 className="invoice-title">Invoice Details</h2>
+              <p className="invoice-id">Invoice ID: {invoice.invoiceId}</p>
+              <p className="cart-id">Cart ID: {invoice.cartId}</p>
+              <p className="invoice-subtotal">Subtotal: ${invoice.subtotal.toFixed(2)}</p>
+              <p className="invoice-tax">Tax: ${invoice.tax.toFixed(2)}</p>
+              <p className="invoice-total">Total: ${invoice.total.toFixed(2)}</p>
+              <p className="invoice-date">Issue Date: {new Date(invoice.issueDate).toLocaleString()}</p>
+
+              {/* Invoice Items */}
+              <h3 className="invoice-items-title">Items:</h3>
+              <ul className="invoice-items-list">
+                {invoice.items.map((item, index) => (
+                  <li key={index} className="invoice-item">
+                    {item.productName} - Quantity: {item.quantity} - Price: ${item.productSalePrice.toFixed(2)}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+
+        {/* Wishlist Section */}
+        <div className="wishlist-section">
+          <h2 className="wishlist-title">Your Wishlist</h2>
+          <div className="wishlist-items-container">
+            {wishlistItems.length > 0 ? (
+              wishlistItems.map(item => (
+                <CartItem
+                  key={item.productId}
+                  item={item}
+                  index={-1} // Mark as wishlist item
+                  changeItemQuantity={() => {}} // Disable changing quantity for wishlist
+                  deleteItem={() => {}} // Disable removing from wishlist
+                />
+              ))
+            ) : (
+              <p className="empty-wishlist-message">No products in the wishlist.</p>
+            )}
+          </div>
         </div>
       </div>
     </div>
-  );
+  </div>
+);
 };
 
 export default UserCart;

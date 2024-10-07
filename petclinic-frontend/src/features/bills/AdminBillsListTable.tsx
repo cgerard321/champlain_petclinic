@@ -1,6 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Bill } from '@/features/bills/models/Bill.ts';
-import { getAllBills } from '@/features/bills/api/getAllBills.tsx';
 import { getBillByBillId } from '@/features/bills/api/GetBillByBillId.tsx';
 import { getAllOwners } from '../customers/api/getAllOwners';
 import { getAllVets } from '../veterinarians/api/getAllVets';
@@ -8,12 +7,18 @@ import { BillRequestModel } from './models/BillRequestModel';
 import { addBill } from './api/addBill';
 import { OwnerResponseModel } from '../customers/models/OwnerResponseModel';
 import { VetResponseModel } from '../veterinarians/models/VetResponseModel';
+import { deleteBill } from '@/features/bills/api/deleteBill.tsx';
+import useGetAllBillsPaginated from '@/features/bills/hooks/useGetAllBillsPaginated.ts';
+import './AdminBillsListTable.css';
+import { useNavigate } from 'react-router-dom';
 
 export default function AdminBillsListTable(): JSX.Element {
-  const [bills, setBills] = useState<Bill[]>([]);
+  const navigate = useNavigate();
   const [searchId, setSearchId] = useState<string>('');
   const [searchedBill, setSearchedBill] = useState<Bill | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const { billsList, getBillsList, setCurrentPage, currentPage, hasMore } =
+    useGetAllBillsPaginated();
 
   const [showCreateForm, setCreateForm] = useState<boolean>(false);
   const [newBill, setNewBill] = useState<BillRequestModel>({
@@ -28,17 +33,20 @@ export default function AdminBillsListTable(): JSX.Element {
   const [owners, setOwners] = useState<OwnerResponseModel[]>([]);
   const [vets, setVets] = useState<VetResponseModel[]>([]);
 
-  const fetchBills = async (): Promise<void> => {
-    const allBills = await getAllBills();
-    setBills(allBills);
-  };
+  const fetchOwnersAndVets = useCallback(async (): Promise<void> => {
+    try {
+      const ownersList = await getAllOwners();
+      const vetsList = await getAllVets();
+      setOwners(ownersList);
+      setVets(vetsList);
+    } catch (err) {
+      setError('Failed to fetch owners and vets');
+    }
+  }, []);
 
-  const fetchOwnersAndVets = async (): Promise<void> => {
-    const ownersList = await getAllOwners();
-    const vetsList = await getAllVets();
-    setOwners(ownersList);
-    setVets(vetsList);
-  };
+  useEffect(() => {
+    getBillsList(currentPage, 10);
+  }, [currentPage, getBillsList]);
 
   const validateForm = (): boolean => {
     if (
@@ -82,7 +90,7 @@ export default function AdminBillsListTable(): JSX.Element {
     try {
       await addBill(formattedBill);
       setCreateForm(false);
-      fetchBills();
+      getBillsList(currentPage, 10);
     } catch (err) {
       console.error('Error creating bill:', err);
       setError('Failed to create bill. Please try again.');
@@ -106,6 +114,36 @@ export default function AdminBillsListTable(): JSX.Element {
     }
   };
 
+  const handleDelete = async (billId: string): Promise<void> => {
+    const billToDelete = billsList.find(bill => bill.billId === billId);
+    if (!billToDelete) {
+      console.error('Bill not found: ${billId}');
+      window.alert('Bill not found: ${billId}');
+      return;
+    }
+
+    const confirmDelete = window.confirm(
+      'Are you sure you want to delete this bill?'
+    );
+    if (!confirmDelete) {
+      return;
+    }
+
+    try {
+      const response = await deleteBill(billToDelete);
+      if (response.status === 200 || response.status === 204) {
+        window.alert('Bill ${billId} has been deleted successfully');
+        getBillsList(currentPage, 10);
+        window.alert('Cannot delete this bill. It may be unpaid or overdue.');
+      }
+    } catch (error) {
+      window.alert('Cannot delete this bill. It may be unpaid or overdue.');
+    }
+  };
+  const handleEditClick = (): void => {
+    navigate(`/bills/admin/${searchId}/edit`);
+  };
+
   const handleGoBack = (): void => {
     setSearchedBill(null);
     setSearchId('');
@@ -113,9 +151,20 @@ export default function AdminBillsListTable(): JSX.Element {
   };
 
   useEffect(() => {
-    fetchBills();
     fetchOwnersAndVets();
-  }, []);
+  }, [fetchOwnersAndVets]);
+
+  const handlePreviousPage = (): void => {
+    if (currentPage > 0) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = (): void => {
+    if (hasMore) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
 
   return (
     <div>
@@ -131,7 +180,6 @@ export default function AdminBillsListTable(): JSX.Element {
         {searchedBill && <button onClick={handleGoBack}>Go Back</button>}
       </div>
 
-      {/* Create Bill Form */}
       <button onClick={() => setCreateForm(!showCreateForm)}>
         {showCreateForm ? 'Cancel' : 'Create New Bill'}
       </button>
@@ -245,6 +293,7 @@ export default function AdminBillsListTable(): JSX.Element {
             <strong>Bill ID:</strong> {searchedBill.billId}
           </p>
           <p>
+            {' '}
             <strong>Owner Name:</strong> {searchedBill.ownerFirstName}{' '}
             {searchedBill.ownerLastName}
           </p>
@@ -270,10 +319,10 @@ export default function AdminBillsListTable(): JSX.Element {
           <p>
             <strong>Due Date:</strong> {searchedBill.dueDate}
           </p>
+          <button onClick={handleEditClick}>Edit Bill</button>
         </div>
       ) : (
-        <div>
-          <h3>All Bills:</h3>
+        <div className="admin-bills-list-table-container">
           <table className="table table-striped">
             <thead>
               <tr>
@@ -286,30 +335,55 @@ export default function AdminBillsListTable(): JSX.Element {
                 <th>Taxed Amount</th>
                 <th>Status</th>
                 <th>Due Date</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {bills
-                .filter(data => data != null)
-                .map((bill: Bill) => (
-                  <tr key={bill.billId}>
-                    <td>{bill.billId}</td>
-                    <td>
-                      {bill.ownerFirstName} {bill.ownerLastName}
-                    </td>
-                    <td>{bill.visitType}</td>
-                    <td>
-                      {bill.vetFirstName} {bill.vetLastName}
-                    </td>
-                    <td>{bill.date}</td>
-                    <td>{bill.amount}</td>
-                    <td>{bill.taxedAmount}</td>
-                    <td>{bill.billStatus}</td>
-                    <td>{bill.dueDate}</td>
-                  </tr>
-                ))}
+              {billsList.map((bill: Bill) => (
+                <tr key={bill.billId}>
+                  <td>{bill.billId}</td>
+                  <td>
+                    {bill.ownerFirstName} {bill.ownerLastName}
+                  </td>
+                  <td>{bill.visitType}</td>
+                  <td>
+                    {bill.vetFirstName} {bill.vetLastName}
+                  </td>
+                  <td>{bill.date}</td>
+                  <td>{bill.amount}</td>
+                  <td>{bill.taxedAmount}</td>
+                  <td>{bill.billStatus}</td>
+                  <td>{bill.dueDate}</td>
+                  <td>
+                    <button
+                      className="btn btn-danger"
+                      onClick={() => handleDelete(bill.billId)}
+                      title="delete"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="32"
+                        height="32"
+                        fill="currentColor"
+                        className="bi bi-trash"
+                        viewBox="0 0 16 16"
+                      >
+                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z" />
+                        <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z" />
+                      </svg>
+                    </button>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
+          <div className="pagination-controls">
+            {currentPage > 0 && (
+              <button onClick={handlePreviousPage}>Previous</button>
+            )}
+            <span> Page {currentPage + 1} </span>
+            {hasMore && <button onClick={handleNextPage}>Next</button>}
+          </div>
         </div>
       )}
     </div>

@@ -1,5 +1,5 @@
-.UserCart {
-  max-width: 1200px;
+.UserCart-container {
+  width: 80vw;
   margin: 0 auto;
   padding: 20px;
   background-color: #f9f9f9;
@@ -7,11 +7,44 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
+.UserCart-checkout-flex {
+  display: flex;
+  width: 100%;
+}
+
+.content-container {
+  width: 75%;
+  margin: 20px auto;
+  padding: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.UserCart {
+  flex: 0 0 75%;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.Checkout-section {
+  flex: 0 0 25%;
+  margin-left: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
 .UserCart h1 {
   font-size: 2.5em;
   color: #333;
   margin-top: 20px;
-  text-align: left; /* Align title to the left */
+  text-align: left;
 }
 
 .UserCart-buttons {
@@ -27,14 +60,13 @@
   border-radius: 6px;
   font-weight: bold;
   cursor: pointer;
+  transition: transform 0.2s;
 }
 
 .clear-cart-btn {
   background-color: #f44336;
   color: white;
-  transition:
-    background-color 0.3s,
-    transform 0.2s;
+  transition: background-color 0.3s, transform 0.2s;
 }
 
 .clear-cart-btn:hover {
@@ -45,11 +77,11 @@
 .go-back-btn {
   background-color: #007bff;
   color: white;
-  transition: background-color 0.3s;
 }
 
 .go-back-btn:hover {
   background-color: #0056b3;
+  transform: scale(1.05);
 }
 
 .UserCart hr {
@@ -132,6 +164,7 @@
   background-color: #fff;
   border-radius: 6px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
 }
 
 .CartSummary h3 {
@@ -146,60 +179,151 @@
   color: #333;
 }
 
+.cart-icon-container {
+  position: relative;
+  display: inline-block;
+  margin-left: 20px;
+}
+
+.cart-icon {
+  font-size: 2em;
+  color: #333;
+}
+
+.cart-badge {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background-color: #ff4d4f;
+  color: white;
+  border-radius: 50%;
+  padding: 4px 7px;
+  font-size: 0.8em;
+  font-weight: bold;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+}
+
+@media screen and (max-width: 768px) {
+  .UserCart {
+    padding: 10px;
+  }
+
+  .cart-header {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .cart-icon-container {
+    margin-left: 0;
+    margin-top: 10px;
+  }
+
+  .cart-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .cart-actions button,
+  .CartSummary button {
+    width: 100%;
+    font-size: 0.9em;
+    padding: 8px 16px;
+  }
+
+  .CartSummary {
+    text-align: center;
+  }
+
+  .cart-badge {
+    top: -5px;
+    right: -15px;
+    padding: 3px 6px;
+    font-size: 0.75rem;
+  }
+}
+
+.cart-badge-container {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  margin-left: 10px;
+}
+
+.cart-badge {
+  position: absolute;
+  top: -10px;
+  right: -30px;
+  background-color: #ff4d4f;
+  color: white;
+  border-radius: 50%;
+  padding: 4px 8px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+  min-width: 28px;
+  text-align: center;
+}
+
 .Wishlist-section {
-  margin-top: 40px; /* Space above wishlist section */
-  padding: 20px; /* Padding for better appearance */
-  background-color: #f1f1f1; /* Light background color for contrast */
-  border-radius: 6px; /* Rounded corners */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+  margin-top: 100px;
+  padding: 20px;
+  background-color: #f1f1f1;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .Wishlist-section h2 {
-  font-size: 2em; /* Increase font size */
+  font-size: 2em;
   color: #333;
-  margin-bottom: 15px; /* Space below heading */
+  margin-bottom: 15px;
 }
 
 .Wishlist-items {
   display: flex;
   flex-direction: column;
-  gap: 15px; /* Space between wishlist items */
+  gap: 15px;
 }
 
 .Wishlist-item {
-  display: flex; /* Flexbox for layout */
-  justify-content: space-between; /* Space out content */
-  align-items: center; /* Align items vertically */
-  padding: 15px; /* Add padding */
-  background-color: #fff; /* White background for items */
-  border: 1px solid #ddd; /* Border for definition */
-  border-radius: 6px; /* Rounded corners */
-  transition: box-shadow 0.3s; /* Transition effect */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  transition: box-shadow 0.3s;
 }
 
 .Wishlist-item:hover {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Shadow effect on hover */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .Wishlist-item img {
-  width: 80px; /* Smaller image */
-  height: 80px; /* Square aspect ratio */
-  object-fit: cover; /* Cover to fill the space */
-  border-radius: 4px; /* Rounded corners */
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 4px;
 }
 
 .Wishlist-item-info {
-  flex: 2; /* Flex property for proper spacing */
-  margin-left: 15px; /* Space between image and info */
+  flex: 2;
+  margin-left: 15px;
 }
 
-.Wishlist-item-actions {
-  display: flex; /* Flex for layout */
-  gap: 10px; /* Space between buttons */
+.Wishlist-item-info h3 {
+  font-size: 1.5em;
+  color: #333;
+  margin-bottom: 5px;
 }
 
-.Wishlist-item-remove {
-  background-color: #f44336; /* Red color for remove button */
+.Wishlist-item-info p {
+  color: #666;
+  font-size: 0.85em;
+}
+
+.Wishlist-item-remove button {
+  background-color: #f44336;
   color: white;
   padding: 5px 10px;
   border: none;
@@ -207,18 +331,22 @@
   cursor: pointer;
 }
 
-.Wishlist-item-remove:hover {
-  background-color: #d32f2f; /* Darker red on hover */
+.Wishlist-item-remove button:hover {
+  background-color: #d32f2f;
 }
 
-.Cart-section {
-  margin-top: 20px; /* Space above the cart section */
+.checkout-btn {
+  background-color: #007bff;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
 }
 
-.Cart-title {
-  margin-bottom: 10px; /* Space below the title */
-  font-size: 1.5rem; /* Adjust font size */
-  color: #333; /* Change text color */
-  border-bottom: 2px solid #ccc; /* Optional: underline for the title */
-  padding-bottom: 5px; /* Space below the border */
+.checkout-btn:hover {
+  background-color: #0056b3;
+  transform: scale(1.05);
 }
