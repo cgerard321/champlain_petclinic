@@ -348,7 +348,7 @@ export default function AdminBillsListTable(): JSX.Element {
             <div className="filter-tab">
               <input
                 type="text"
-                placeholder="Customer ID"
+                placeholder="Bill ID"
                 value={filter.customerId}
                 onChange={e =>
                   setFilter({ ...filter, customerId: e.target.value })
