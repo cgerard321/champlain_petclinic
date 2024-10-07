@@ -45,6 +45,8 @@ import EmergencyList from './features/visits/Emergency/EmergencyList';
 import ProductDetails from '@/features/products/api/ProductDetails.tsx';
 import AddPetPage from '@/pages/Customer/AddPetPage.tsx';
 import EditProduct from './features/products/components/EditProduct';
+import ForgotPassword from '@/pages/User/ForgotPassword.tsx';
+import ResetPassword from '@/pages/User/ResetPassword.tsx';
 
 const router = createBrowserRouter([
   {
@@ -369,6 +371,8 @@ const router = createBrowserRouter([
   },
   { path: AppRoutePaths.Login, element: <Login /> },
   { path: AppRoutePaths.SignUp, element: <SignUp /> },
+  { path: AppRoutePaths.ForgotPassword, element: <ForgotPassword /> },
+  { path: AppRoutePaths.ResetPassword, element: <ResetPassword /> },
   {
     path: '*',
     element: <PageNotFound />,

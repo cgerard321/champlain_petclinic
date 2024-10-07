@@ -1,14 +1,8 @@
 package com.petclinic.bffapigateway.presentationlayer.v2;
 
 import com.petclinic.bffapigateway.domainclientlayer.AuthServiceClient;
-import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
-import com.petclinic.bffapigateway.dtos.Auth.Register;
-import com.petclinic.bffapigateway.dtos.Auth.UserDetails;
-import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
+import com.petclinic.bffapigateway.dtos.Auth.*;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
-import com.petclinic.bffapigateway.dtos.Products.ProductResponseDTO;
-import com.petclinic.bffapigateway.exceptions.InvalidInputException;
-import com.petclinic.bffapigateway.utils.Security.Annotations.IsUserSpecific;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
 import jakarta.validation.Valid;
@@ -20,7 +14,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
@@ -89,4 +82,19 @@ public class UserController {
                     return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).<Void>build());
                 });
     }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
+    @PostMapping(value = "/users/forgot_password", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<Void>> sendForgotPasswordEmail(@RequestBody Mono<UserEmailRequestDTO> userEmailRequestDTO) {
+        return authServiceClient.sendForgottenEmail(userEmailRequestDTO)
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
+    @PostMapping(value = "/users/reset_password", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<Void>> processResetPassword(@RequestBody @Valid Mono<UserPasswordAndTokenRequestModel> resetRequest) {
+        return authServiceClient.changePassword(resetRequest)
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
 }
