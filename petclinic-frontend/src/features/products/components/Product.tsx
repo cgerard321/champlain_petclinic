@@ -1,22 +1,22 @@
 import { JSX, useEffect, useState } from 'react';
 import { ProductModel } from '@/features/products/models/ProductModels/ProductModel';
 import { getUserRating } from '../api/getUserRating';
-import StarRating from './StarRating';
-import { updateUserRating } from '../api/updateUserRating';
-import { getProduct } from '../api/getProduct';
-import { deleteUserRating } from '../api/deleteUserRating';
 import { getProductByProductId } from '@/features/products/api/getProductByProductId.tsx';
 import ImageContainer from './ImageContainer';
 import { changeProductQuantity } from '../api/changeProductQuantity';
 import { useNavigate } from 'react-router-dom';
 import { AppRoutePaths } from '@/shared/models/path.routes';
+import { RatingModel } from '../models/ProductModels/RatingModel';
 
 export default function Product({
   product,
 }: {
   product: ProductModel;
 }): JSX.Element {
-  const [currentUserRating, setUserRating] = useState<number>(0);
+  const [currentUserRating, setUserRating] = useState<RatingModel>({
+    rating: 0,
+    review: '',
+  });
   const [currentProduct, setCurrentProduct] = useState<ProductModel>(product);
   const [selectedProduct, setSelectedProduct] = useState<ProductModel | null>(
     null
@@ -29,7 +29,9 @@ export default function Product({
   const navigate = useNavigate();
 
   const handleProductTitleClick = (): void => {
-    navigate(AppRoutePaths.ProductDetails, { state: { product } });
+    navigate(AppRoutePaths.ProductDetails, {
+      state: { product, rating: currentUserRating },
+    });
   };
 
   useEffect(() => {
@@ -51,29 +53,6 @@ export default function Product({
       setUserRating(rating);
     } catch (err) {
       console.error('Failed to fetch current rating', err);
-    }
-  };
-
-  const deleteRating = async (): Promise<void> => {
-    try {
-      await deleteUserRating(product.productId);
-      setUserRating(0);
-      const resRefresh = await getProduct(product.productId);
-      setCurrentProduct(resRefresh);
-    } catch (err) {
-      console.error('Could not delete data', err);
-    }
-  };
-
-  const updateRating = async (newRating: number): Promise<void> => {
-    if (newRating == 0) return deleteRating();
-    try {
-      const resUpdate = await updateUserRating(product.productId, newRating);
-      setUserRating(resUpdate);
-      const resRefresh = await getProduct(product.productId);
-      setCurrentProduct(resRefresh);
-    } catch (err) {
-      console.error('Could not update/fetch product ratings', err);
     }
   };
 
@@ -190,11 +169,6 @@ export default function Product({
       </p>
       <p>Price: ${currentProduct.productSalePrice.toFixed(2)}</p>
       <p>Rating: {currentProduct.averageRating}</p>
-      <p>Your Rating:</p>
-      <StarRating
-        currentRating={currentUserRating}
-        updateRating={updateRating}
-      />
     </div>
   );
 }

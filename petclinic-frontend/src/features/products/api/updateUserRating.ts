@@ -4,13 +4,15 @@ import { getUserRating } from './getUserRating';
 
 export async function updateUserRating(
   productId: string,
-  newRating: number
-): Promise<number> {
+  newRating: number,
+  newReview: string | null
+): Promise<RatingModel> {
   const doesExist = await getUserRating(productId);
-  if (doesExist == 0) {
+  const emptyResponse = { rating: 0, review: '' };
+  if (doesExist.rating == 0) {
     const res = await axiosInstance.post<RatingModel>(
       '/ratings/' + productId,
-      { rating: newRating },
+      { rating: newRating, review: newReview },
       {
         responseType: 'json',
       }
@@ -18,21 +20,21 @@ export async function updateUserRating(
     switch (res.status) {
       case 401:
         console.error('Could not get token, unauthorized..');
-        return 0;
+        return emptyResponse;
       case 404:
-        return 0;
+        return emptyResponse;
       case 422:
         console.error('IDs are invalid');
-        return 0;
+        return emptyResponse;
       case 201:
-        return res.data.rating;
+        return res.data;
       default:
-        return 0;
+        return emptyResponse;
     }
   } else {
     const res = await axiosInstance.put<RatingModel>(
       '/ratings/' + productId,
-      { rating: newRating },
+      { rating: newRating, review: newReview },
       {
         responseType: 'json',
       }
@@ -40,16 +42,16 @@ export async function updateUserRating(
     switch (res.status) {
       case 401:
         console.error('Could not get token, unauthorized..');
-        return 0;
+        return emptyResponse;
       case 404:
-        return 0;
+        return emptyResponse;
       case 422:
         console.error('IDs are invalid');
-        return 0;
+        return emptyResponse;
       case 200:
-        return res.data.rating;
+        return res.data;
       default:
-        return 0;
+        return emptyResponse;
     }
   }
 }

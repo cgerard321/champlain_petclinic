@@ -1,9 +1,10 @@
 import { JSX, useEffect, useState } from 'react';
 import './StarRating.css';
+import { RatingModel } from '../models/ProductModels/RatingModel';
 
 interface RatingProps {
-  currentRating: number;
-  updateRating: (rating: number) => void;
+  currentRating: RatingModel;
+  updateRating: (rating: number, review: string | null) => void;
 }
 
 function StarRating({ currentRating, updateRating }: RatingProps): JSX.Element {
@@ -22,12 +23,12 @@ function StarRating({ currentRating, updateRating }: RatingProps): JSX.Element {
   };
 
   const starClick = (starIndex: number): void => {
-    updateRating(starIndex);
+    updateRating(starIndex, null);
     renderStars(starIndex);
   };
 
   useEffect(() => {
-    renderStars(currentRating);
+    renderStars(currentRating.rating);
   }, [currentRating]);
 
   return (
@@ -53,7 +54,7 @@ function StarRating({ currentRating, updateRating }: RatingProps): JSX.Element {
           </svg>
         );
       })}
-      {currentRating != 0 && (
+      {currentRating.rating != 0 && (
         <div className="delete-button" onClick={() => starClick(0)}>
           <span>-</span>
         </div>

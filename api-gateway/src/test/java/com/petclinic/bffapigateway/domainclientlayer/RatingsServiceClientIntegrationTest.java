@@ -22,15 +22,37 @@ class RatingsServiceClientIntegrationTest {
     private RatingsServiceClient ratingsServiceClient;
 
     @Test
+    void getAllRatingsForProductId() {
+        String productId = UUID.randomUUID().toString();
+        stubFor(get(urlEqualTo("/api/v1/ratings/%s".formatted(productId)))
+                .willReturn(okForContentType(MediaType.TEXT_EVENT_STREAM.toString(), "data:{\"rating\": 5, \"review\": \"It's great\"}\n\ndata: {\"rating\": 1, \"review\": \"Horrible\"}\n\n"))
+        );
+
+        StepVerifier.create(ratingsServiceClient.getAllRatingsForProductId(productId))
+                .assertNext(ratingResponseModel -> {
+                    assertEquals((byte) 5, ratingResponseModel.getRating());
+                    assertEquals("It's great", ratingResponseModel.getReview());
+                })
+                .assertNext(ratingResponseModel -> {
+                    assertEquals((byte) 1, ratingResponseModel.getRating());
+                    assertEquals("Horrible", ratingResponseModel.getReview());
+                })
+                .verifyComplete();
+    }
+
+    @Test
     void getRatingForProductIdAndCustomerId() {
         String productId = UUID.randomUUID().toString();
         String customerId = UUID.randomUUID().toString();
         stubFor(get(urlEqualTo("/api/v1/ratings/%s/%s".formatted(productId, customerId)))
-                .willReturn(okForContentType(MediaType.APPLICATION_JSON.toString(), "{\"rating\": 5}"))
+                .willReturn(okForContentType(MediaType.APPLICATION_JSON.toString(), "{\"rating\": 5, \"review\": \"It's great\"}"))
         );
 
         StepVerifier.create(ratingsServiceClient.getRatingForProductIdAndCustomerId(productId, customerId))
-                .assertNext(ratingResponseModel -> assertEquals((byte) 5, ratingResponseModel.getRating()))
+                .assertNext(ratingResponseModel -> {
+                    assertEquals((byte) 5, ratingResponseModel.getRating());
+                    assertEquals("It's great", ratingResponseModel.getReview());
+                })
                 .verifyComplete();
     }
 
@@ -41,18 +63,22 @@ class RatingsServiceClientIntegrationTest {
 
         RatingRequestModel requestModel = RatingRequestModel.builder()
                 .rating((byte) 3)
+                .review("It's not bad neither good")
                 .build();
 
         stubFor(post(urlEqualTo("/api/v1/ratings/%s/%s".formatted(productId, customerId)))
-                .withRequestBody(equalToJson("{\"rating\": " + requestModel.getRating() + "}"))
+                .withRequestBody(matchingJsonSchema("{\"rating\": " + requestModel.getRating() + "}"))
                 .willReturn(created()
                         .withHeader("Content-Type", MediaType.APPLICATION_JSON.toString())
-                        .withBody("{\"rating\":" + requestModel.getRating() + "}")
+                        .withBody("{\"rating\":" + requestModel.getRating() + ", \"review\": \"" + requestModel.getReview() + "\"}")
                 )
         );
 
         StepVerifier.create(ratingsServiceClient.addRatingForProductIdAndCustomerId(productId, customerId, Mono.just(requestModel)))
-                .assertNext(ratingResponseModel -> assertEquals(requestModel.getRating(), ratingResponseModel.getRating()))
+                .assertNext(ratingResponseModel -> {
+                    assertEquals(requestModel.getRating(), ratingResponseModel.getRating());
+                    assertEquals(requestModel.getReview(), ratingResponseModel.getReview());
+                })
                 .verifyComplete();
     }
 
@@ -63,15 +89,19 @@ class RatingsServiceClientIntegrationTest {
 
         RatingRequestModel requestModel = RatingRequestModel.builder()
                 .rating((byte) 3)
+                .review("It's not bad neither good")
                 .build();
 
         stubFor(put(urlEqualTo("/api/v1/ratings/%s/%s".formatted(productId, customerId)))
-                .withRequestBody(equalToJson("{\"rating\": " + requestModel.getRating() + "}"))
-                .willReturn(okForContentType(MediaType.APPLICATION_JSON.toString(), "{\"rating\":" + requestModel.getRating() + "}"))
+                .withRequestBody(matchingJsonSchema("{\"rating\": " + requestModel.getRating() + "}"))
+                .willReturn(okForContentType(MediaType.APPLICATION_JSON.toString(), "{\"rating\":" + requestModel.getRating() + ", \"review\": \"" + requestModel.getReview() + "\"}"))
         );
 
         StepVerifier.create(ratingsServiceClient.updateRatingForProductIdAndCustomerId(productId, customerId, Mono.just(requestModel)))
-                .assertNext(ratingResponseModel -> assertEquals(requestModel.getRating(), ratingResponseModel.getRating()))
+                .assertNext(ratingResponseModel -> {
+                    assertEquals(requestModel.getRating(), ratingResponseModel.getRating());
+                    assertEquals(requestModel.getReview(), ratingResponseModel.getReview());
+                })
                 .verifyComplete();
     }
 
@@ -81,11 +111,14 @@ class RatingsServiceClientIntegrationTest {
         String customerId = UUID.randomUUID().toString();
 
         stubFor(delete(urlEqualTo("/api/v1/ratings/%s/%s".formatted(productId, customerId)))
-                .willReturn(okForContentType(MediaType.APPLICATION_JSON.toString(), "{\"rating\": 5}"))
+                .willReturn(okForContentType(MediaType.APPLICATION_JSON.toString(), "{\"rating\": 5, \"review\": \"It's great\"}"))
         );
 
         StepVerifier.create(ratingsServiceClient.deleteRatingFromProductIdAssociatedToCustomerId(productId, customerId))
-                .assertNext(ratingResponseModel -> assertEquals((byte) 5, ratingResponseModel.getRating()))
+                .assertNext(ratingResponseModel -> {
+                    assertEquals((byte) 5, ratingResponseModel.getRating());
+                    assertEquals("It's great", ratingResponseModel.getReview());
+                })
                 .verifyComplete();
     }
 }

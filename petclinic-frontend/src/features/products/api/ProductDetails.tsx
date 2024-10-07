@@ -1,16 +1,83 @@
 import { ProductModel } from '@/features/products/models/ProductModels/ProductModel.ts';
 import { NavBar } from '@/layouts/AppNavBar.tsx';
-import { JSX } from 'react';
+import { useState, useEffect, JSX } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { updateUserRating } from './updateUserRating';
+import { getProduct } from './getProduct';
+import { deleteUserRating } from './deleteUserRating';
 import './ProductDetails.css';
+import StarRating from '../components/StarRating';
+import ReviewBox from '../components/ReviewBox';
+import { RatingModel } from '../models/ProductModels/RatingModel';
+import { getUserRatingsForProduct } from './getUserRatingsForProduct';
+import { getUserRating } from './getUserRating';
 
 export default function ProductDetails(): JSX.Element {
   const location = useLocation();
   const navigate = useNavigate();
-  const { product } = location.state as { product: ProductModel };
+  const { product, rating } = location.state as {
+    product: ProductModel;
+    rating: RatingModel;
+  };
+  const [currentProduct, setCurrentProduct] = useState<ProductModel>(product);
+  const [currentUserRating, setUserRating] = useState<RatingModel>({
+    rating: rating.rating,
+    review: rating.review,
+  });
+  const [productReviews, setProductReviews] = useState<RatingModel[]>([]);
   const navigateToEditProduct = (): void => {
     navigate(`/products/edit/${product.productId}`, { state: { product } });
   };
+
+  const fetchRatings = async (): Promise<void> => {
+    const reviews = await getUserRatingsForProduct(currentProduct.productId);
+    setProductReviews(reviews.filter((r: RatingModel) => r.review !== ''));
+  };
+
+  const fetchRating = async (): Promise<void> => {
+    try {
+      const rating = await getUserRating(product.productId);
+      setUserRating(rating);
+    } catch (err) {
+      console.error('Failed to fetch current rating', err);
+    }
+  };
+
+  const deleteRating = async (): Promise<void> => {
+    try {
+      await deleteUserRating(product.productId);
+      setUserRating({ rating: 0, review: '' });
+      const resRefresh = await getProduct(product.productId);
+      setCurrentProduct(resRefresh);
+    } catch (err) {
+      console.error('Could not delete data', err);
+    }
+  };
+
+  const updateRating = async (
+    newRating: number,
+    newReview: string | null
+  ): Promise<void> => {
+    if (newRating == 0) return deleteRating();
+    try {
+      const resUpdate = await updateUserRating(
+        product.productId,
+        newRating,
+        newReview
+      );
+      setUserRating(resUpdate);
+      const resRefresh = await getProduct(product.productId);
+      setCurrentProduct(resRefresh);
+    } catch (err) {
+      console.error('Could not update/fetch product ratings', err);
+    }
+  };
+
+  useEffect(() => {
+    fetchRatings();
+    fetchRating();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const renderProductDescription = (productName: string): JSX.Element => {
     switch (productName) {
@@ -115,14 +182,56 @@ export default function ProductDetails(): JSX.Element {
   return (
     <>
       <NavBar />
-      <h1>{product.productName}</h1>
-      <p>{renderProductDescription(product.productName)}</p>
-      <p>Price: ${product.productSalePrice.toFixed(2)}</p>
-      <p>Rating: {product.averageRating} / 5</p>
+      <h1>{currentProduct.productName}</h1>
+      <p>{renderProductDescription(currentProduct.productName)}</p>
+      <p>Price: ${currentProduct.productSalePrice.toFixed(2)}</p>
+      <p>Average Rating: {currentProduct.averageRating} / 5</p>
 
       <button className="edit-button" onClick={navigateToEditProduct}>
         Edit Product
       </button>
+      <p>Your Rating:</p>
+      <StarRating
+        currentRating={currentUserRating}
+        updateRating={updateRating}
+      />
+      <ReviewBox
+        updateFunc={(newReview: string) =>
+          updateRating(currentUserRating.rating, newReview)
+        }
+        rating={currentUserRating}
+      />
+      <p>Product Feedback:</p>
+      <ul>
+        {productReviews.length > 0 ? (
+          productReviews?.map((rating: RatingModel, index: number) => (
+            <div key={index} className="reviewbox">
+              <div className="starcontainer">
+                {Array.from({ length: 5 }, (_, k) => (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    key={k}
+                    className={`star-static ${k < rating.rating ? 'shown' : ''}`}
+                  >
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                  </svg>
+                ))}
+              </div>
+              <p>{rating.review}</p>
+            </div>
+          ))
+        ) : (
+          <p>This product does not have any reviews yet!</p>
+        )}
+      </ul>
     </>
   );
 }

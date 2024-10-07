@@ -59,24 +59,28 @@ class RatingControllerIntegrationTest {
 
     Rating rating1Prod1 = Rating.builder()
             .rating((byte) 2)
+            .review("It's not bad neither good")
             .productId("e39286b6-d3ca-4f58-8b6f-30f1f1b9a2f6")
             .customerId("8e599d37-a69a-48d2-880e-1b621abf77b6")
             .build();
 
     Rating rating2Prod1 = Rating.builder()
             .rating((byte) 4)
+            .review("It's good for its value")
             .productId("e39286b6-d3ca-4f58-8b6f-30f1f1b9a2f6")
             .customerId("3a994002-47d9-4dea-9966-9df78050cf09")
             .build();
 
     Rating rating1Prod2 = Rating.builder()
             .rating((byte) 5)
+            .review("It's great")
             .productId("6866ec50-898d-435c-bfec-8ee513c5a6c1")
             .customerId("8e599d37-a69a-48d2-880e-1b621abf77b6")
             .build();
 
     Rating rating2Prod2 = Rating.builder()
             .rating((byte) 3)
+            .review("It's not bad")
             .productId("6866ec50-898d-435c-bfec-8ee513c5a6c1")
             .customerId("3a994002-47d9-4dea-9966-9df78050cf09")
             .build();
@@ -170,6 +174,7 @@ class RatingControllerIntegrationTest {
     @Test
     public void whenAddRatingForProductByCustomer_thenReturnRating(){
         RatingRequestModel ratingRequestModel = RatingRequestModel.builder()
+                .review("It's great")
                 .rating((byte) 5)
                 .build();
         String randomCustomer = UUID.randomUUID().toString();
@@ -186,9 +191,84 @@ class RatingControllerIntegrationTest {
                     RatingResponseModel responseModel = response.getResponseBody();
                     assertNotNull(responseModel);
                     assertEquals(ratingRequestModel.getRating(), responseModel.getRating());
+                    assertEquals(ratingRequestModel.getReview(), responseModel.getReview());
                 });
         StepVerifier.create(ratingRepository.findAll())
                 .expectNextCount(5)
+                .verifyComplete();
+    }
+
+    @Test
+    public void whenAddRatingWithNullReview_thenReturnEmptyStringReview(){
+        RatingRequestModel ratingRequestModel = RatingRequestModel.builder()
+                .review(null)
+                .rating((byte) 5)
+                .build();
+        String randomCustomer = UUID.randomUUID().toString();
+
+        webClient.post()
+                .uri("/api/v1/ratings/" + product1.getProductId() + "/" + randomCustomer)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(ratingRequestModel)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(RatingResponseModel.class)
+                .consumeWith(response -> {
+                    RatingResponseModel responseModel = response.getResponseBody();
+                    assertNotNull(responseModel);
+                    assertEquals(ratingRequestModel.getRating(), responseModel.getRating());
+                    assertNotNull(responseModel.getReview());
+                    assertEquals("", responseModel.getReview());
+                });
+        StepVerifier.create(ratingRepository.findAll())
+                .expectNextCount(5)
+                .verifyComplete();
+    }
+
+    @Test
+    public void whenAddRatingWithTooLongReview_thenReturnInvalidInput(){
+        RatingRequestModel ratingRequestModel = RatingRequestModel.builder()
+                .review("It's great".repeat(200))
+                .rating((byte) 5)
+                .build();
+        String randomCustomer = UUID.randomUUID().toString();
+
+        webClient.post()
+                .uri("/api/v1/ratings/" + product1.getProductId() + "/" + randomCustomer)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(ratingRequestModel)
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Review must be less than 2000 characters");
+
+        StepVerifier.create(ratingRepository.findAll())
+                .expectNextCount(4)
+                .verifyComplete();
+    }
+
+    @Test
+    public void whenAddNullRating_thenReturnInvalidInput(){
+        RatingRequestModel ratingRequestModel = RatingRequestModel.builder()
+                .review("It's great")
+                .rating(null)
+                .build();
+        String randomCustomer = UUID.randomUUID().toString();
+
+        webClient.post()
+                .uri("/api/v1/ratings/" + product1.getProductId() + "/" + randomCustomer)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(ratingRequestModel)
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Rating must be provided");
+
+        StepVerifier.create(ratingRepository.findAll())
+                .expectNextCount(4)
                 .verifyComplete();
     }
 
@@ -373,6 +453,78 @@ class RatingControllerIntegrationTest {
                     assertNotNull(responseModel);
                     assertEquals(ratingRequestModel.getRating(), responseModel.getRating());
                 });
+
+        StepVerifier.create(ratingRepository.findAll())
+                .expectNextCount(4)
+                .verifyComplete();
+    }
+
+    @Test
+    public void whenUpdateWithNullReview_thenReturnEmptyStringReview(){
+        RatingRequestModel ratingRequestModel = RatingRequestModel.builder()
+                .rating((byte) 5)
+                .review(null)
+                .build();
+
+        webClient.put()
+                .uri("/api/v1/ratings/" + product1.getProductId() + "/" + rating1Prod1.getCustomerId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(ratingRequestModel)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(RatingResponseModel.class)
+                .consumeWith(response -> {
+                    RatingResponseModel responseModel = response.getResponseBody();
+                    assertNotNull(responseModel);
+                    assertEquals(ratingRequestModel.getRating(), responseModel.getRating());
+                    assertNotNull(responseModel.getReview());
+                    assertEquals("", responseModel.getReview());
+                });
+
+        StepVerifier.create(ratingRepository.findAll())
+                .expectNextCount(4)
+                .verifyComplete();
+    }
+
+    @Test
+    public void whenUpdateWithLongReview_thenReturnInvalidInput(){
+        RatingRequestModel ratingRequestModel = RatingRequestModel.builder()
+                .rating((byte) 5)
+                .review("It's great".repeat(200))
+                .build();
+
+        webClient.put()
+                .uri("/api/v1/ratings/" + product1.getProductId() + "/" + rating1Prod1.getCustomerId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(ratingRequestModel)
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Review must be less than 2000 characters");
+
+        StepVerifier.create(ratingRepository.findAll())
+                .expectNextCount(4)
+                .verifyComplete();
+    }
+
+    @Test
+    public void whenUpdateWithNullRating_thenReturnInvalidInput(){
+        RatingRequestModel ratingRequestModel = RatingRequestModel.builder()
+                .rating(null)
+                .review("It's great")
+                .build();
+
+        webClient.put()
+                .uri("/api/v1/ratings/" + product1.getProductId() + "/" + rating1Prod1.getCustomerId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(ratingRequestModel)
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Rating must be provided");
 
         StepVerifier.create(ratingRepository.findAll())
                 .expectNextCount(4)
