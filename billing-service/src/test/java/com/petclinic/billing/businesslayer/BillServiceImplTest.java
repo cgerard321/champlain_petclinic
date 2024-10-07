@@ -1,18 +1,23 @@
 package com.petclinic.billing.businesslayer;
 
 import com.petclinic.billing.datalayer.*;
+import com.petclinic.billing.exceptions.InvalidInputException;
+import com.petclinic.billing.exceptions.NotFoundException;
+import org.assertj.core.api.AssertionsForClassTypes;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-
+import org.springframework.beans.BeanUtils;
 import static org.mockito.ArgumentMatchers.*;
 
 import java.time.LocalDate;
@@ -24,6 +29,8 @@ import java.util.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+
+import java.util.Date;
 
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
@@ -385,7 +392,6 @@ public class BillServiceImplTest {
     }
 
     @Test
-
     public void test_createBillWithInvalidData() {
         BillRequestDTO billDTO = buildInvalidBillRequestDTO();
 
