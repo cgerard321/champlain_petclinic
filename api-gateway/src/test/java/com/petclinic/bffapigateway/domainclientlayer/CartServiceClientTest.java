@@ -26,6 +26,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.function.Consumer;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CartServiceClientTest {
@@ -467,6 +468,62 @@ void MoveProductFromCartToWishlist_BadRequest() {
                 })
                 .verify();
     }
+
+    @Test
+    void testRemoveProductFromCart_Success() {
+        String cartId = "98f7b33a-d62a-420a-a84a-05a27c85fc91";
+        String productId = "9a29fff7-564a-4cc9-8fe1-36f6ca9bc223";
+        String responseBody = """
+            {
+                "cartId": "98f7b33a-d62a-420a-a84a-05a27c85fc91",
+                "products": []
+            }
+            """;
+
+        // Simulate a successful removal of a product
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(200)
+                .setBody(responseBody));
+
+        Mono<CartResponseDTO> result = mockCartServiceClient.removeProductFromCart(cartId, productId);
+
+        StepVerifier.create(result)
+                .assertNext(cartResponseDTO -> {
+                    assertEquals(cartId, cartResponseDTO.getCartId());
+                    assertEquals(0, cartResponseDTO.getProducts().size()); // No products in the cart after removal
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void testRemoveProductFromCart_NotFound() {
+        String cartId = "98f7b33a-d62a-420a-a84a-05a27c85fc91";
+        String productId = "non-existent-product-id";
+        String responseBody = """
+            {
+                "message": "Cart or product not found."
+            }
+            """;
+
+        // Simulate a 404 Not Found response when trying to remove a product from a non-existent cart
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(404)
+                .setBody(responseBody));
+
+        Mono<CartResponseDTO> result = mockCartServiceClient.removeProductFromCart(cartId, productId);
+
+        StepVerifier.create(result)
+                .expectErrorSatisfies(throwable -> {
+                    assert throwable instanceof NotFoundException;
+                    NotFoundException exception = (NotFoundException) throwable;
+                    assertEquals("Cart or product not found for cartId: " + cartId + " and productId: " + productId, exception.getMessage()); // Assert the 404 Not Found status
+                })
+                .verify();
+    }
+
+
 
     private void prepareResponse(Consumer<MockResponse> consumer) {
         MockResponse response = new MockResponse();

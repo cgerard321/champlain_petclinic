@@ -4,6 +4,7 @@ import com.petclinic.cartsservice.dataaccesslayer.cartproduct.CartProduct;
 import com.petclinic.cartsservice.domainclientlayer.ProductResponseModel;
 import com.petclinic.cartsservice.presentationlayer.CartRequestModel;
 import com.petclinic.cartsservice.utils.exceptions.InvalidInputException;
+import com.petclinic.cartsservice.utils.exceptions.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import reactor.test.StepVerifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -212,6 +214,82 @@ class CartRepositoryUnitTest {
                 .expectNextCount(0)
                 .verifyComplete();
     }
+
+    @Test
+    void removeProductFromCart_ProductRemovedSuccessfully() {
+        // Arrange: Save the cart first to the repository
+        StepVerifier.create(cartRepository.save(cart1))
+                .expectNextMatches(savedCart -> savedCart.getProducts().contains(product1))
+                .verifyComplete();
+
+        // Act: Remove product1 from the cart
+        StepVerifier.create(cartRepository.findCartByCartId(cart1.getCartId())
+                        .flatMap(cart -> {
+                            cart.getProducts().removeIf(p -> p.getProductId().equals(product1.getProductId()));
+                            return cartRepository.save(cart);
+                        })
+                )
+                .expectNextMatches(updatedCart ->
+                        updatedCart.getProducts().size() == 1 &&
+                                updatedCart.getProducts().contains(product2) // Ensure product1 is removed and product2 remains
+                )
+                .verifyComplete();
+
+        // Verify the cart in the repository has only product2 remaining
+        StepVerifier.create(cartRepository.findCartByCartId(cart1.getCartId()))
+                .expectNextMatches(cart -> cart.getProducts().size() == 1 && cart.getProducts().contains(product2))
+                .verifyComplete();
+    }
+
+    @Test
+    void removeProductFromCart_ProductNotFoundInCart() {
+        // Arrange: Save the cart to the repository
+        StepVerifier.create(cartRepository.save(cart1))
+                .expectNextMatches(savedCart -> savedCart.getProducts().contains(product1))
+                .verifyComplete();
+
+        // Act: Attempt to remove a product (product3) that doesn't exist in the cart
+        StepVerifier.create(cartRepository.findCartByCartId(cart1.getCartId())
+                        .flatMap(cart -> {
+                            Optional<CartProduct> productToRemove = cart.getProducts().stream()
+                                    .filter(p -> p.getProductId().equals(product3.getProductId()))
+                                    .findFirst();
+                            if (productToRemove.isPresent()) {
+                                cart.getProducts().remove(productToRemove.get());
+                                return cartRepository.save(cart);
+                            } else {
+                                return Mono.error(new NotFoundException("Product id was not found: " + product3.getProductId()));
+                            }
+                        })
+                )
+                .expectErrorMatches(throwable ->
+                        throwable instanceof NotFoundException &&
+                                throwable.getMessage().equals("Product id was not found: " + product3.getProductId())
+                )
+                .verify();
+    }
+
+    @Test
+    void removeProductFromCart_CartNotFound() {
+        // Act & Assert: Attempt to remove a product from a non-existent cart
+        StepVerifier.create(cartRepository.findCartByCartId(nonExistentCartId)
+                        .switchIfEmpty(Mono.error(new NotFoundException("Cart id was not found: " + nonExistentCartId)))
+                        .flatMap(cart -> {
+                            cart.getProducts().removeIf(p -> p.getProductId().equals(product1.getProductId()));
+                            return cartRepository.save(cart);
+                        })
+                )
+                .expectErrorMatches(throwable ->
+                        throwable instanceof NotFoundException &&
+                                throwable.getMessage().equals("Cart id was not found: " + nonExistentCartId)
+                )
+                .verify();
+    }
+
+
+
+
+
 
 
 }
