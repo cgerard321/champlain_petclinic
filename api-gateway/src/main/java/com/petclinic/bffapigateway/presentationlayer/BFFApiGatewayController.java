@@ -481,6 +481,7 @@ public class BFFApiGatewayController {
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
+
     @PutMapping(value = "vets/{vetId}/photos/{photoName}")
     public Mono<ResponseEntity<Resource>> updatePhotoByVetId(@PathVariable String vetId, @PathVariable String photoName, @RequestBody Mono<Resource> image) {
         return vetsServiceClient.updatePhotoOfVet(vetId, photoName, image)

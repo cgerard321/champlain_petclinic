@@ -303,6 +303,34 @@ public void stopMockServer() {
                 );
     }
 
+    public void registerUpdatePhotoOfVetEndpoint(String vetId, String photoName, byte[] photoData) {
+        mockServerClient_VetService
+                .when(
+                        request()
+                                .withMethod("PUT")
+                                .withPath("/vets/" + vetId + "/photo/" + photoName)
+                                .withHeader("Content-Type", MediaType.IMAGE_JPEG_VALUE)
+                )
+                .respond(
+                        response()
+                                .withStatusCode(200)
+                                .withHeader("Content-Type", MediaType.IMAGE_JPEG_VALUE)
+                                .withBody(photoData)
+                );
+    }
+  public void registerUpdatePhotoOfVetEndpointNotFound(String vetId, String photoName) {
+        mockServerClient_VetService
+                .when(
+                        request()
+                                .withMethod("PUT")
+                                .withPath("/vets/" + vetId + "/photo/" + photoName)
+                )
+                .respond(
+                        response()
+                                .withStatusCode(404)
+                );
+    }
+
 
     public void registerGetAlbumsByVetIdEndpoint(String vetId, List<Album> albums) throws JsonProcessingException {
         mockServerClient_VetService.when(

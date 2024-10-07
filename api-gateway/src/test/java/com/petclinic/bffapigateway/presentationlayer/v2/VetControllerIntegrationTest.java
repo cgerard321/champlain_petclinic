@@ -15,6 +15,9 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +26,9 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.*;
 
 import static com.google.common.net.HttpHeaders.AUTHORIZATION;
@@ -59,7 +65,8 @@ class VetControllerIntegrationTest {
 
         mockServerConfigVetService.registerGetPhotoByVetIdEndpoint("ac9adeb8-625b-11ee-8c99-0242ac120002", "mockPhotoData".getBytes());
         mockServerConfigVetService.registerGetPhotoByVetIdEndpointNotFound("invalid-vet-id");
-
+        mockServerConfigVetService.registerUpdatePhotoOfVetEndpoint("69f85766-625b-11ee-8c99-0242ac120002", "newPhoto", "mockPhotoData".getBytes());
+        mockServerConfigVetService.registerUpdatePhotoOfVetEndpointNotFound("invalid-vet-id", "newPhoto");
 
     }
 
@@ -291,6 +298,42 @@ class VetControllerIntegrationTest {
                 .uri(VET_ENDPOINT + "/" + notFoundVetId + "/photo")
                 .cookie("Bearer", BEARER_TOKEN)
                 .accept(MediaType.ALL)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+//    @Test
+//    public void whenUpdatePhotoByVetId_thenReturnUpdatedPhoto() {
+//        String vetId = "69f852ca-625b-11ee-8c99-0242ac120002";
+//        String photoName = "vet_default.jpg";
+//        byte[] newPhotoData = "mockPhotoData".getBytes();
+//
+//        mockServerConfigVetService.registerUpdatePhotoOfVetEndpoint(vetId, photoName, newPhotoData);
+//
+//        webTestClient.put()
+//                .uri(VET_ENDPOINT + "/" + vetId + "/photo/" + photoName)
+//                .cookie("Bearer", BEARER_TOKEN)
+//                .contentType(MediaType.IMAGE_JPEG)
+//                .bodyValue(newPhotoData)
+//                .exchange()
+//                .expectStatus().isOk()
+//                .expectHeader().contentType(MediaType.IMAGE_JPEG_VALUE)
+//                .expectBody(byte[].class)
+//                .isEqualTo(newPhotoData);
+//    }
+
+
+    @Test
+    public void whenUpdatePhotoByVetId_withNotFoundVetId_thenReturn404() {
+        String notFoundVetId = "not found";
+        String photoName = "newPhoto";
+
+        mockServerConfigVetService.registerUpdatePhotoOfVetEndpointNotFound(notFoundVetId, photoName);
+
+        webTestClient.put()
+                .uri(VET_ENDPOINT + "/" + notFoundVetId + "/photo/" + photoName)
+                .cookie("Bearer", BEARER_TOKEN)
+                .contentType(MediaType.IMAGE_JPEG)
                 .exchange()
                 .expectStatus().isNotFound();
     }
