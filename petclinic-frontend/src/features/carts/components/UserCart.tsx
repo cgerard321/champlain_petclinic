@@ -4,7 +4,7 @@ import CartItem from './CartItem';
 import { ProductModel } from '../models/ProductModel';
 import './UserCart.css';
 import { NavBar } from '@/layouts/AppNavBar';
-import { FaShoppingCart } from 'react-icons/fa'; // Importing the shopping cart icon
+import { FaShoppingCart } from 'react-icons/fa'; // Importing the shopping cart iconS
 
 interface ProductAPIResponse {
   productId: number;
@@ -191,11 +191,39 @@ const UserCart = (): JSX.Element => {
     [cartItems, cartId]
   );
 
-  const deleteItem = useCallback((indexToDelete: number): void => {
-    setCartItems(prevItems => {
-      return prevItems.filter((_, index) => index !== indexToDelete);
-    });
-  }, []);
+  const deleteItem = useCallback(
+    async (productId: string, indexToDelete: number): Promise<void> => {
+      if (!cartId) {
+        console.error('Cart ID is missing');
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `http://localhost:8080/api/v2/gateway/carts/${cartId}/${productId}`,
+          {
+            method: 'DELETE',
+            headers: {
+              Accept: 'application/json',
+            },
+            credentials: 'include',
+          }
+        );
+        if (!response.ok) {
+          throw new Error('Failed to delete item from the cart');
+        }
+
+        setCartItems(prevItems =>
+          prevItems.filter((_, index) => index !== indexToDelete)
+        );
+        alert('Item successfully removed!');
+      } catch (error) {
+        console.error('Error deleting item: ', error);
+        alert('Failed to delete item');
+      }
+    },
+    [cartId]
+  );
 
   const clearCart = async (): Promise<void> => {
     if (!cartId) {
@@ -204,28 +232,26 @@ const UserCart = (): JSX.Element => {
     }
 
     if (!window.confirm('Are you sure you want to clear the cart?')) {
-      return;
-    }
+      try {
+        const response = await fetch(
+          `http://localhost:8080/api/v2/gateway/carts/${cartId}/clear`,
+          {
+            method: 'DELETE',
+            credentials: 'include',
+          }
+        );
 
-    try {
-      const response = await fetch(
-        `http://localhost:8080/api/v2/gateway/carts/${cartId}/clear`,
-        {
-          method: 'DELETE',
-          credentials: 'include',
+        if (response.ok) {
+          setCartItems([]);
+          setCartItemCount(0);
+          alert('Cart has been successfully cleared!');
+        } else {
+          alert('Failed to clear cart');
         }
-      );
-
-      if (response.ok) {
-        setCartItems([]);
-        setCartItemCount(0);
-        alert('Cart has been successfully cleared!');
-      } else {
+      } catch (error) {
+        console.error('Error clearing cart:', error);
         alert('Failed to clear cart');
       }
-    } catch (error) {
-      console.error('Error clearing cart:', error);
-      alert('Failed to clear cart');
     }
   };
 
