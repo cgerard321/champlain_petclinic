@@ -4,6 +4,8 @@ import com.petclinic.bffapigateway.dtos.Cart.AddProductRequestDTO;
 import com.petclinic.bffapigateway.dtos.Cart.CartRequestDTO;
 import com.petclinic.bffapigateway.dtos.Cart.CartResponseDTO;
 import com.petclinic.bffapigateway.dtos.Cart.UpdateProductQuantityRequestDTO;
+import com.petclinic.bffapigateway.dtos.Cart.PromoCodeRequestDTO;
+import com.petclinic.bffapigateway.dtos.Cart.PromoCodeResponseDTO;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -20,6 +22,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -470,6 +473,150 @@ void MoveProductFromCartToWishlist_BadRequest() {
         consumer.accept(response);
         this.mockWebServer.enqueue(response);
     }
+
+    @Test
+    void testGetAllPromoCodes() {
+        String responseBody = """
+            [
+                {
+                    "id": "promo1",
+                    "name": "Promo 1",
+                    "code": "PROMO1",
+                    "discount": 10.0,
+                    "expirationDate": "2024-12-31T23:59:59"
+                },
+                {
+                    "id": "promo2",
+                    "name": "Promo 2",
+                    "code": "PROMO2",
+                    "discount": 20.0,
+                    "expirationDate": "2024-12-31T23:59:59"
+                }
+            ]
+            """;
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody(responseBody));
+
+        Flux<PromoCodeResponseDTO> result = mockCartServiceClient.getAllPromoCodes();
+
+        List<PromoCodeResponseDTO> promos = result.collectList().block();
+
+        assertEquals(2, promos.size());
+
+        assertEquals("Promo 1", promos.get(0).getName());
+        assertEquals("PROMO1", promos.get(0).getCode());
+        assertEquals(10.0, promos.get(0).getDiscount());
+        assertEquals(LocalDateTime.of(2024, 12, 31, 23, 59, 59), promos.get(0).getExpirationDate());
+
+        assertEquals("Promo 2", promos.get(1).getName());
+        assertEquals("PROMO2", promos.get(1).getCode());
+        assertEquals(20.0, promos.get(1).getDiscount());
+        assertEquals(LocalDateTime.of(2024, 12, 31, 23, 59, 59), promos.get(1).getExpirationDate());
+    }
+    @Test
+    void testGetPromoCodeById() {
+        String responseBody = """
+            {
+                "id": "promo1",
+                "name": "Promo 1",
+                "code": "PROMO1",
+                "discount": 10.0,
+                "expirationDate": "2024-12-31T23:59:59"
+            }
+            """;
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody(responseBody));
+
+        Mono<PromoCodeResponseDTO> result = mockCartServiceClient.getPromoCodeById("promo1");
+
+        StepVerifier.create(result)
+                .expectNextMatches(promo ->
+                        promo.getId().equals("promo1") &&
+                                promo.getCode().equals("PROMO1") &&
+                                promo.getExpirationDate().equals(LocalDateTime.of(2024, 12, 31, 23, 59, 59))
+                )
+                .verifyComplete();
+    }
+
+    @Test
+    void testCreatePromoCode() {
+        String responseBody = """
+            {
+                "id": "promo1",
+                "name": "Promo 1",
+                "code": "PROMO1",
+                "discount": 10.0,
+                "expirationDate": "2024-12-31T23:59:59"
+            }
+            """;
+
+        PromoCodeRequestDTO promoCodeRequestDTO = new PromoCodeRequestDTO("Promo 1", "PROMO1", 10.0, "2024-12-31T23:59:59");
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody(responseBody));
+
+        Mono<PromoCodeResponseDTO> result = mockCartServiceClient.createPromoCode(promoCodeRequestDTO);
+
+        StepVerifier.create(result)
+                .expectNextMatches(promo ->
+                        promo.getId().equals("promo1") &&
+                                promo.getCode().equals("PROMO1") &&
+                                promo.getExpirationDate().equals(LocalDateTime.of(2024, 12, 31, 23, 59, 59))
+                )
+                .verifyComplete();
+    }
+
+    @Test
+    void testUpdatePromoCode() {
+        String responseBody = """
+            {
+                "id": "promo1",
+                "name": "Updated Promo 1",
+                "code": "PROMO1",
+                "discount": 15.0,
+                "expirationDate": "2024-12-31T23:59:59"
+            }
+            """;
+
+        PromoCodeRequestDTO promoCodeRequestDTO = new PromoCodeRequestDTO("Updated Promo 1", "PROMO1", 15.0, "2024-12-31T23:59:59");
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody(responseBody));
+
+        Mono<PromoCodeResponseDTO> result = mockCartServiceClient.updatePromoCode("promo1", promoCodeRequestDTO);
+
+        StepVerifier.create(result)
+                .expectNextMatches(promo ->
+                        promo.getId().equals("promo1") &&
+                                promo.getDiscount() == 15.0 &&
+                                promo.getExpirationDate().equals(LocalDateTime.of(2024, 12, 31, 23, 59, 59))
+                )
+                .verifyComplete();
+    }
+    @Test
+    void testDeletePromoCode() {
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(200));
+
+        Mono<PromoCodeResponseDTO> result = mockCartServiceClient.deletePromoCode("12345");
+
+        StepVerifier.create(result)
+                .verifyComplete();
+    }
+
+
+
+
+
+
+
 
 
 }
