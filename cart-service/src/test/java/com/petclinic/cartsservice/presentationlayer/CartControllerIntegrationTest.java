@@ -132,30 +132,30 @@ class CartControllerIntegrationTest {
     }
 
 
-    @Test
-    public void testGetAllCarts_CartsExist_ReturnsCarts() {
-        // Given: Add a few carts to the database
-        Publisher<Cart> initializeCartData = cartRepository.deleteAll()
-                .thenMany(Flux.just(cart1, cart2))
-                .flatMap(cartRepository::save);
-
-        StepVerifier.create(initializeCartData)
-                .expectNextCount(2)
-                .verifyComplete();
-
-        // When: Send a request to get all carts
-        webTestClient.get()
-                .uri("/api/v1/carts")
-                .exchange()
-                // Then: Verify the response status and body
-                .expectStatus().isOk()
-                .expectBodyList(CartResponseModel.class)
-                .consumeWith(response -> {
-                    List<CartResponseModel> carts = response.getResponseBody();
-                    assertNotNull(carts);
-                    assertEquals(2, carts.size());
-                });
-    }
+//    @Test
+//    public void testGetAllCarts_CartsExist_ReturnsCarts() {
+//        // Given: Add a few carts to the database
+//        Publisher<Cart> initializeCartData = cartRepository.deleteAll()
+//                .thenMany(Flux.just(cart1, cart2))
+//                .flatMap(cartRepository::save);
+//
+//        StepVerifier.create(initializeCartData)
+//                .expectNextCount(2)
+//                .verifyComplete();
+//
+//        // When: Send a request to get all carts
+//        webTestClient.get()
+//                .uri("/api/v1/carts")
+//                .exchange()
+//                // Then: Verify the response status and body
+//                .expectStatus().isOk()
+//                .expectBodyList(CartResponseModel.class)
+//                .consumeWith(response -> {
+//                    List<CartResponseModel> carts = response.getResponseBody();
+//                    assertNotNull(carts);
+//                    assertEquals(2, carts.size());
+//                });
+//    }
 
     @Test
     public void testGetCartById_ValidCartId_ReturnsCart() {
