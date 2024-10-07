@@ -54,7 +54,7 @@ export default function AdminBillsListTable(): JSX.Element {
     if (!selectedFilter) {
       getBillsList(currentPage, 10);
     }
-  }, [currentPage, getBillsList]);
+  }, [currentPage, getBillsList, selectedFilter]);
 
   const validateForm = (): boolean => {
     if (
