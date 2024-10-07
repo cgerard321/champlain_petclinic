@@ -51,10 +51,7 @@ jacocoTestReport {
 	dependsOn test
 	afterEvaluate {
 		classDirectories.setFrom(files(classDirectories.files.collect {
-			fileTree(dir: it, exclude: [
-//					"com/petclinic/products/utils/DataLoaderService.class",
-					"com/petclinic/products/ProductsServiceApplication.class"
-			])
+			fileTree(dir: it)
 		}))
 	}
 }
