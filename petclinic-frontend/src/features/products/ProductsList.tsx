@@ -211,11 +211,17 @@ export default function ProductList(): JSX.Element {
             <h2>Filter by Star Rating</h2>
             <div className="star-row">
               <label>Min Stars:</label>
-              <StarRating currentRating={minStars} updateRating={setMinStars} />
+              <StarRating
+                currentRating={{ rating: minStars, review: '' }}
+                updateRating={setMinStars}
+              />
             </div>
             <div className="star-row">
               <label>Max Stars:</label>
-              <StarRating currentRating={maxStars} updateRating={setMaxStars} />
+              <StarRating
+                currentRating={{ rating: maxStars, review: '' }}
+                updateRating={setMaxStars}
+              />
             </div>
           </div>
           <select
