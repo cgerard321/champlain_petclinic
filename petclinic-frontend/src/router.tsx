@@ -54,7 +54,7 @@ import CustomerEmergency from './pages/Visit/CustomerEmergency';
 import AddEmergencyForm from './features/visits/Emergency/AddEmergencyForm';
 import LowStockProducts from '@/features/inventories/LowStockProducts.tsx';
 import EmergencyDetails from './features/visits/EmergencyByEmergencyId';
-import CustomerPromoPage from "@/pages/Promos/CustomerPromoPage.tsx";
+import CustomerPromoPage from '@/pages/Promos/CustomerPromoPage.tsx';
 
 const router = createBrowserRouter([
   {
@@ -350,9 +350,9 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.CustomerPromos,
         element: (
-            <ProtectedRoute>
-              <CustomerPromoPage />
-            </ProtectedRoute>
+          <ProtectedRoute>
+            <CustomerPromoPage />
+          </ProtectedRoute>
         ),
       },
       {
