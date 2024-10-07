@@ -69,11 +69,53 @@ class ProductControllerUnitTest {
             .build();
 
 
+    @Test
+    void whenGetAllProductsWithValidMinAndMaxRating_thenReturnFluxProductResponseDTO() {
+        when(productsServiceClient.getAllProducts(null, null, 3.0, 5.0, null))
+                .thenReturn(Flux.just(productResponseDTO1, productResponseDTO2));
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder.path("/api/v2/gateway/products")
+                        .queryParam("minRating", "3.0")
+                        .queryParam("maxRating", "5.0")
+                        .build())
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(ProductResponseDTO.class)
+                .value(productResponseDTOS -> {
+                    assertNotNull(productResponseDTOS);
+                    assertEquals(2, productResponseDTOS.size());
+                    assertEquals(productResponseDTO1.getProductId(), productResponseDTOS.get(0).getProductId());
+                    assertEquals(productResponseDTO2.getProductId(), productResponseDTOS.get(1).getProductId());
+                });
+
+        verify(productsServiceClient, times(1)).getAllProducts(null, null, 3.0, 5.0, null);
+    }
+
+    @Test
+    void whenGetAllProductsWithMinRatingGreaterThanMaxRating_thenReturnBadRequest() {
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder.path("/api/v2/gateway/products")
+                        .queryParam("minRating", "5.0")
+                        .queryParam("maxRating", "3.0")
+                        .build())
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody(String.class)
+                .value(response -> {
+                    assertNotNull(response);
+                    assertTrue(response.contains("minRating cannot be greater than maxRating"));
+                });
+    }
+
+
 
     @Test
     void getAllProducts_whenProductsExist_thenReturnFluxProductResponseDTO() {
 
-        when(productsServiceClient.getAllProducts(null, null))
+        when(productsServiceClient.getAllProducts(null, null,null,null,null))
                 .thenReturn(Flux.just(productResponseDTO1,productResponseDTO2));
 
         webTestClient.get()
@@ -88,13 +130,13 @@ class ProductControllerUnitTest {
                     assertEquals(productResponseDTO1.getProductId(), productResponseDTOS.get(0).getProductId());
                     assertEquals(productResponseDTO2.getProductId(), productResponseDTOS.get(1).getProductId());
                 });
-        verify(productsServiceClient, times(1)).getAllProducts(null, null);
+        verify(productsServiceClient, times(1)).getAllProducts(null, null,null,null,null);
     }
 
     @Test
     void getAllProducts_whenNoProductsExist_thenReturnEmptyFlux() {
 
-        when(productsServiceClient.getAllProducts(null, null))
+        when(productsServiceClient.getAllProducts(null, null,null,null,null))
                 .thenReturn(Flux.empty());
 
         webTestClient.get()
@@ -107,7 +149,7 @@ class ProductControllerUnitTest {
                     assertNotNull(productResponseDTOS);
                     assertEquals(0, productResponseDTOS.size());
                 });
-        verify(productsServiceClient, times(1)).getAllProducts(null, null);
+        verify(productsServiceClient, times(1)).getAllProducts(null, null,null,null,null);
     }
 
     @Test
@@ -199,14 +241,17 @@ class ProductControllerUnitTest {
     @Test
     void whenGetAllProductsWithNegativeMinPrice_thenReturnBadRequest() {
         webTestClient.get()
-                .uri("/api/v2/gateway/products?minPrice=-10")
+                .uri(uriBuilder -> uriBuilder.path("/api/v2/gateway/products")
+                        .queryParam("minPrice", "-10")
+                        .queryParam("maxPrice", "100")
+                        .build())
                 .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
                 .exchange()
                 .expectStatus().isBadRequest()
                 .expectBody(String.class)
                 .value(response -> {
                     assertNotNull(response);
-                    assertTrue(response.contains("Price values cannot be negative"));
+                    assertTrue(response.contains("Price and rating values cannot be negative"));
                 });
     }
 

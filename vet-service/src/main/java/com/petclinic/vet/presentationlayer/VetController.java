@@ -317,6 +317,15 @@ public class VetController {
         return vetService.addSpecialtiesByVetId(vetId, specialties);
     }
 
+    @DeleteMapping("{vetId}/specialties/{specialtyId}")
+    public Mono<ResponseEntity<Void>> deleteSpecialtiesBySpecialtyId(
+            @PathVariable String vetId,
+            @PathVariable String specialtyId) {
+        return vetService.deleteSpecialtiesBySpecialtyId(vetId, specialtyId)
+                .then(Mono.just(ResponseEntity.noContent().<Void>build()))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
     @GetMapping("{vetId}/albums")
     public Flux<Album> getAllAlbumsByVetId(@PathVariable String vetId) {
         return albumService.getAllAlbumsByVetId(vetId)

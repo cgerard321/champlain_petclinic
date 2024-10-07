@@ -132,9 +132,8 @@ export default function AdminBillsListTable(): JSX.Element {
     try {
       const response = await deleteBill(billToDelete);
       if (response.status === 200 || response.status === 204) {
-        window.alert('Bill ${billId} has been deleted successfully');
+        window.alert(`Bill ${billId} has been deleted successfully`);
         getBillsList(currentPage, 10);
-        window.alert('Cannot delete this bill. It may be unpaid or overdue.');
       }
     } catch (error) {
       window.alert('Cannot delete this bill. It may be unpaid or overdue.');

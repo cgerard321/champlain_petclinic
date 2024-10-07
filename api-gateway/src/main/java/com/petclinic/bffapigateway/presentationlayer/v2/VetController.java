@@ -95,6 +95,35 @@ public class VetController {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
+    @PutMapping("{vetId}/photo/{photoName}")
+    public Mono<ResponseEntity<Resource>> updatePhotoByVetId(
+            @PathVariable String vetId,
+            @PathVariable String photoName,
+            @RequestBody Mono<Resource> photo) {
+
+        return vetsServiceClient.updatePhotoOfVet(vetId, photoName, photo)
+                .map(r -> ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, MediaType.IMAGE_JPEG_VALUE).body(r))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+//    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+//    @PostMapping(value = "{vetId}/photos/{photoName}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+//    public Mono<ResponseEntity<Resource>> addPhoto(
+//            @PathVariable String vetId,
+//            @PathVariable String photoName,
+//            @RequestParam("image") MultipartFile image) throws IOException {
+//
+//
+//        // Convert MultipartFile to Resource
+//        Mono<Resource> resourceMono = Mono.just(new ByteArrayResource(image.getBytes()));
+//
+//
+//        return vetsServiceClient.addPhotoToVet(vetId, photoName, resourceMono)
+//                .map(r -> ResponseEntity.status(HttpStatus.CREATED).body(r))
+//                .defaultIfEmpty(ResponseEntity.badRequest().build());
+//    }
+    
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @GetMapping(value = "{vetId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<VetResponseDTO>> getVetByVetId(@PathVariable String vetId) {
         return vetsServiceClient.getVetByVetId(vetId)
@@ -109,6 +138,15 @@ public class VetController {
             @PathVariable String vetId,
             @RequestBody Mono<SpecialtyDTO> specialties) {
         return vetsServiceClient.addSpecialtiesByVetId(vetId, specialties);
+    }
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET})    
+    @DeleteMapping(value = "{vetId}/specialties/{specialtyId}")
+    public Mono<ResponseEntity<Void>> deleteSpecialtiesByVetId(
+            @PathVariable String vetId,
+            @PathVariable String specialtyId) {
+        return vetsServiceClient.deleteSpecialtiesByVetId(vetId, specialtyId)
+                .then(Mono.just(ResponseEntity.noContent().<Void>build()))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
