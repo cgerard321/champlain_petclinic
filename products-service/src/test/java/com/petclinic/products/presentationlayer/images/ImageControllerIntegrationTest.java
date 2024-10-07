@@ -54,7 +54,9 @@ class ImageControllerIntegrationTest {
 
     private final String imageName = "dog_food.jpg";
     private final String invalidImageName = "invalid_image.gif";
-    private final String imageTypeRequest = "image/jpeg";
+    private final String imageTypeRequestJPEG = "image/jpeg";
+    private final String imageTypeRequestJPG = "image/jpg";
+    private final String imageTypeRequestPNG = "image/png";
     private final String invalidImageTypeRequest = "image/gif";
     private final byte[] imageBytes = Files.readAllBytes(Paths.get("src/main/resources/images/dog_food.jpg"));
 
@@ -100,7 +102,8 @@ class ImageControllerIntegrationTest {
                 .exchange()
                 .expectStatus().isNotFound()
                 .expectBody()
-                .jsonPath("$.message").isEqualTo("Image id not found: " + "ebd0c33e-86c7-4de7-9dc6-cbd413c91d57");
+                .jsonPath("$.message").isEqualTo("Image id not found: " +
+                        "ebd0c33e-86c7-4de7-9dc6-cbd413c91d57");
     }
 
     @Test
@@ -112,23 +115,24 @@ class ImageControllerIntegrationTest {
                 .exchange()
                 .expectStatus().is4xxClientError()
                 .expectBody()
-                .jsonPath("$.message").isEqualTo("Provided image id is invalid: " + "invalid_id");
+                .jsonPath("$.message").isEqualTo("Provided image id is invalid: invalid_id");
     }
 
     @Test
-    public void whenAddImage_thenReturnImageResponseModel() {
+    public void whenAddJPEG_thenReturnImageResponseModel() {
         MockMultipartFile file = new MockMultipartFile(
                 "file",
                 imageName,
-                imageTypeRequest,
+                imageTypeRequestJPEG,
                 imageBytes
         );
 
         MultipartBodyBuilder builder = new MultipartBodyBuilder();
         builder.part("file", file.getResource())
-                .header("Content-Disposition", "form-data; name=imageData; filename=" + file.getOriginalFilename());
+                .header("Content-Disposition", "form-data; name=imageData; filename=" +
+                        file.getOriginalFilename());
         builder.part("imageName", imageName);
-        builder.part("imageType", imageTypeRequest);
+        builder.part("imageType", imageTypeRequestJPEG);
 
         webTestClient.post()
                 .uri(baseURI)
@@ -140,7 +144,69 @@ class ImageControllerIntegrationTest {
                 .value(imageResponseModel -> {
                     assertNotNull(imageResponseModel);
                     assertEquals(imageName, imageResponseModel.getImageName());
-                    assertEquals(imageTypeRequest, imageResponseModel.getImageType());
+                    assertEquals(imageTypeRequestJPEG, imageResponseModel.getImageType());
+                    assertArrayEquals(imageBytes, imageResponseModel.getImageData());
+                });
+    }
+
+    @Test
+    public void whenAddJPG_thenReturnImageResponseModel() {
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                imageName,
+                imageTypeRequestJPG,
+                imageBytes
+        );
+
+        MultipartBodyBuilder builder = new MultipartBodyBuilder();
+        builder.part("file", file.getResource())
+                .header("Content-Disposition", "form-data; name=imageData; filename=" +
+                        file.getOriginalFilename());
+        builder.part("imageName", imageName);
+        builder.part("imageType", imageTypeRequestJPG);
+
+        webTestClient.post()
+                .uri(baseURI)
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+                .body(BodyInserters.fromMultipartData(builder.build()))
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody(ImageResponseModel.class)
+                .value(imageResponseModel -> {
+                    assertNotNull(imageResponseModel);
+                    assertEquals(imageName, imageResponseModel.getImageName());
+                    assertEquals(imageTypeRequestJPG, imageResponseModel.getImageType());
+                    assertArrayEquals(imageBytes, imageResponseModel.getImageData());
+                });
+    }
+
+    @Test
+    public void whenAddPNG_thenReturnImageResponseModel() {
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                imageName,
+                imageTypeRequestPNG,
+                imageBytes
+        );
+
+        MultipartBodyBuilder builder = new MultipartBodyBuilder();
+        builder.part("file", file.getResource())
+                .header("Content-Disposition", "form-data; name=imageData; filename=" +
+                        file.getOriginalFilename());
+        builder.part("imageName", imageName);
+        builder.part("imageType", imageTypeRequestPNG);
+
+        webTestClient.post()
+                .uri(baseURI)
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+                .body(BodyInserters.fromMultipartData(builder.build()))
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody(ImageResponseModel.class)
+                .value(imageResponseModel -> {
+                    assertNotNull(imageResponseModel);
+                    assertEquals(imageName, imageResponseModel.getImageName());
+                    assertEquals(imageTypeRequestPNG, imageResponseModel.getImageType());
                     assertArrayEquals(imageBytes, imageResponseModel.getImageData());
                 });
     }
@@ -156,7 +222,8 @@ class ImageControllerIntegrationTest {
 
         MultipartBodyBuilder builder = new MultipartBodyBuilder();
         builder.part("file", file.getResource())
-                .header("Content-Disposition", "form-data; name=imageData; filename=" + file.getOriginalFilename());
+                .header("Content-Disposition", "form-data; name=imageData; filename=" +
+                        file.getOriginalFilename());
         builder.part("imageName", imageName);
         builder.part("imageType", invalidImageTypeRequest);
 
@@ -167,6 +234,7 @@ class ImageControllerIntegrationTest {
                 .exchange()
                 .expectStatus().is4xxClientError()
                 .expectBody()
-                .jsonPath("$.message").isEqualTo("Image type not supported: " + invalidImageTypeRequest);
+                .jsonPath("$.message").isEqualTo("Image type not supported: " +
+                        invalidImageTypeRequest);
     }
 }
