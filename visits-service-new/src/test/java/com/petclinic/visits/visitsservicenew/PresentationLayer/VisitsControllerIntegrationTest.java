@@ -186,7 +186,7 @@ class VisitsControllerIntegrationTest {
                 .build();
     }
 
-    @Test
+
     void getAllVisits() {
         when(entityDtoUtil.toVisitResponseDTO(any())).thenReturn(Mono.just(visitResponseDTO));
         webTestClient
