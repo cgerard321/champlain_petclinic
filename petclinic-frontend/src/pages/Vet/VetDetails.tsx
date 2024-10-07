@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { NavBar } from '@/layouts/AppNavBar.tsx';
 import './VetDetails.css';
@@ -16,7 +16,7 @@ interface VetResponseType {
   workday: string[];
   workHoursJson: string;
   active: boolean;
-  specialties: { name: string }[];
+  specialties: { specialtyId: string; name: string }[];
 }
 
 export default function VetDetails(): JSX.Element {
@@ -59,6 +59,7 @@ export default function VetDetails(): JSX.Element {
   const handlePhotoDeleted = (): void => {
     fetchVetPhoto();
   };
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const fetchVetDetails = async (): Promise<void> => {
@@ -119,7 +120,48 @@ export default function VetDetails(): JSX.Element {
       fetchAlbumPhotos();
       setLoading(false);
     });
-  }, [vetId, fetchVetPhoto]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [vetId]);
+
+  const handleImageClick = (): void => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleUpdateVetProfilePhoto = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ): Promise<void> => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const localImageUrl = URL.createObjectURL(file);
+    setPhoto(localImageUrl);
+
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/v2/gateway/vets/${vetId}/photo/${file.name}`,
+        {
+          method: 'PUT',
+          body: file,
+          headers: {
+            'Content-Type': 'application/octet-stream',
+            Accept: 'image/*',
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Error: ${response.statusText}`);
+      }
+
+      const updatedBlob = await response.blob();
+      const updatedImageUrl = URL.createObjectURL(updatedBlob);
+      setPhoto(updatedImageUrl);
+    } catch (error) {
+      setError('Failed to update vet photo');
+    }
+  };
 
   const renderWorkHours = (workHoursJson: string): JSX.Element => {
     try {
@@ -183,6 +225,29 @@ export default function VetDetails(): JSX.Element {
     }
   };
 
+  const handleDeleteSpecialty = async (specialtyId: string): Promise<void> => {
+    try {
+      // Make a DELETE request to the API
+      await axios.delete(
+        `http://localhost:8080/api/v2/gateway/vets/${vetId}/specialties/${specialtyId}`
+      );
+
+      // Update the vet data after deleting the specialty
+      setVet(prevVet =>
+        prevVet
+          ? {
+              ...prevVet,
+              specialties: prevVet.specialties.filter(
+                specialty => specialty.specialtyId !== specialtyId
+              ), // Remove the deleted specialty from the local state
+            }
+          : null
+      );
+    } catch (error) {
+      setError('Failed to delete specialty');
+    }
+  };
+
   if (loading) return <p>Loading vet details...</p>;
   if (error) return <p>{error}</p>;
 
@@ -194,7 +259,19 @@ export default function VetDetails(): JSX.Element {
 
         {photo && (
           <section className="vet-photo-container">
-            <img src={photo} alt="Vet" className="vet-photo" />
+            <img
+              src={photo}
+              alt="Vet"
+              className="vet-photo"
+              onClick={handleImageClick}
+            />
+            <input
+              type="file"
+              ref={fileInputRef}
+              style={{ display: 'none ' }}
+              onChange={handleUpdateVetProfilePhoto}
+              accept="image/*"
+            />
             <DeleteVetPhoto
               vetId={vetId!}
               onPhotoDeleted={handlePhotoDeleted}
@@ -252,7 +329,16 @@ export default function VetDetails(): JSX.Element {
               {vet.specialties && vet.specialties.length > 0 ? (
                 <ul>
                   {vet.specialties.map((specialty, index) => (
-                    <li key={index}>{specialty.name}</li>
+                    <li key={index}>
+                      {specialty.name}
+                      <button
+                        onClick={() =>
+                          handleDeleteSpecialty(specialty.specialtyId)
+                        }
+                      >
+                        Delete
+                      </button>
+                    </li>
                   ))}
                 </ul>
               ) : (

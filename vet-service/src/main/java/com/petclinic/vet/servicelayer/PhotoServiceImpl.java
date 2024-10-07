@@ -71,15 +71,15 @@ public class PhotoServiceImpl implements PhotoService {
         return photoRepository.findByVetId(vetId)
                 .switchIfEmpty(Mono.error(new NotFoundException("Photo for vet " + vetId + " does not exist.")))
                 .flatMap(existingPhoto -> photo.map(resource -> {
-                            Photo updatedPhoto = EntityDtoUtil.toPhotoEntity(vetId, photoName, resource);
+                            Photo updatedPhoto = EntityDtoUtil.toPhotoEntity(
+                                    vetId, photoName, resource);
                             updatedPhoto.setId(existingPhoto.getId());
                             return updatedPhoto;
                         })
                         .flatMap(updatedPhoto -> {
                             return photoRepository.save(updatedPhoto)
                                     .map(savedPhoto -> {
-                                        ByteArrayResource savedResource = new ByteArrayResource(savedPhoto.getData());
-                                        return savedResource;
+                                        return new ByteArrayResource(savedPhoto.getData());
                                     });
                         }));
     }
