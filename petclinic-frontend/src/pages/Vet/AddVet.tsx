@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { AppRoutePaths } from '@/shared/models/path.routes';
 import { Button, Modal, Form } from 'react-bootstrap';
 import { Workday } from '@/features/veterinarians/models/Workday.ts';
+import axios from 'axios';
 
 const AddVet: React.FC = (): JSX.Element => {
   const navigate = useNavigate();
@@ -24,6 +25,8 @@ const AddVet: React.FC = (): JSX.Element => {
     active: false,
     specialties: [],
     photoDefault: false,
+    password: '', // Add this line
+    username: '',
   });
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [show, setShow] = useState(false);
@@ -34,8 +37,33 @@ const AddVet: React.FC = (): JSX.Element => {
     event.preventDefault();
     if (!validate()) return;
 
+    // Construct the payload to match Postman structure
+    const vetPayload = {
+      userId: 'some-user-id', // Make sure this is a valid ID
+      email: vet.email,
+      username: vet.username,
+      password: vet.password,
+      vet: {
+        vetId: vet.vetId || 'some-vet-id',
+        vetBillId: vet.vetBillId || 'some-vet-bill-id',
+        firstName: vet.firstName,
+        lastName: vet.lastName,
+        email: vet.email,
+        phoneNumber: vet.phoneNumber,
+        resume: vet.resume,
+        workday: vet.workday,
+        workHoursJson: JSON.stringify(vet.workHoursJson),
+        active: vet.active,
+        specialties: vet.specialties.map(spec => ({
+          specialtyId: spec.specialtyId,
+          name: spec.name,
+        })),
+        photoDefault: vet.photoDefault,
+      },
+    };
+
     try {
-      const response = await addVet(vet);
+      const response = await addVet(vetPayload);
       if (response.status === 201) {
         handleClose();
         navigate(AppRoutePaths.Vet);
@@ -44,7 +72,11 @@ const AddVet: React.FC = (): JSX.Element => {
         console.error('Failed to add vet');
       }
     } catch (error) {
-      console.error('Error:', error);
+      if (axios.isAxiosError(error)) {
+        console.error('Error:', error.response?.data || error.message);
+      } else {
+        console.error('Error:', error);
+      }
     }
   };
 
@@ -64,7 +96,9 @@ const AddVet: React.FC = (): JSX.Element => {
     const newErrors: { [key: string]: string } = {};
     if (!vet.firstName) newErrors.firstName = 'First name is required';
     if (!vet.lastName) newErrors.lastName = 'Last name is required';
+    if (!vet.username) newErrors.username = 'Username is required';
     if (!vet.email) newErrors.email = 'Email is required';
+    if (!vet.password) newErrors.password = 'Password is required'; // Add this line
     if (!vet.phoneNumber) newErrors.phoneNumber = 'Phone number is required';
     if (!vet.resume) newErrors.resume = 'Resume is required';
     setErrors(newErrors);
@@ -155,6 +189,20 @@ const AddVet: React.FC = (): JSX.Element => {
             </Form.Group>
 
             <Form.Group className="mb-3">
+              <Form.Label>Username</Form.Label>
+              <Form.Control
+                type="text"
+                name="username"
+                value={vet.username}
+                onChange={handleChange}
+                isInvalid={!!errors.username}
+              />
+              <Form.Control.Feedback type="invalid">
+                {errors.username}
+              </Form.Control.Feedback>
+            </Form.Group>
+
+            <Form.Group className="mb-3">
               <Form.Label>Email</Form.Label>
               <Form.Control
                 type="email"
@@ -165,6 +213,20 @@ const AddVet: React.FC = (): JSX.Element => {
               />
               <Form.Control.Feedback type="invalid">
                 {errors.email}
+              </Form.Control.Feedback>
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Password</Form.Label>
+              <Form.Control
+                type="password" // Change type to password for security
+                name="password"
+                value={vet.password} // Bind it to the password value
+                onChange={handleChange} // Use the existing handleChange function
+                isInvalid={!!errors.password} // Optional: you can add validation
+              />
+              <Form.Control.Feedback type="invalid">
+                {errors.password} {/* Add a feedback message if you want */}
               </Form.Control.Feedback>
             </Form.Group>
 

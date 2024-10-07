@@ -325,8 +325,9 @@ public class UserServiceImpl implements UserService {
         try {
             updateResetPasswordToken(token, email);
 
-
-            String resetPasswordLink =  "http://localhost:8080/#!/reset_password/" + token;
+            // why :-;
+            // String resetPasswordLink =  "http://localhost:8080/#!/reset_password/" + token;
+            String resetPasswordLink =  userResetPwdRequestModel.getUrl() + token;
             sendEmailForgotPassword(email, resetPasswordLink);
         } catch (Exception ex) {
             throw new InvalidInputException(ex.getMessage());

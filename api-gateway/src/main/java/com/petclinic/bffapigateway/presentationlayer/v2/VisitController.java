@@ -39,8 +39,8 @@ public class VisitController {
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping(value = "", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public ResponseEntity<Flux<VisitResponseDTO>> getAllVisits() {
-        return ResponseEntity.ok().body(visitsServiceClient.getAllVisits());
+    public ResponseEntity<Flux<VisitResponseDTO>> getAllVisits(@RequestParam(required = false) String description){
+        return ResponseEntity.ok().body(visitsServiceClient.getAllVisits(description));
     }
     @SecuredEndpoint(allowedRoles = {Roles.ALL})
     @GetMapping(value = "/{visitId}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -188,6 +188,14 @@ public class VisitController {
     @GetMapping(value = "/archived", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<VisitResponseDTO> getArchivedVisits() {
         return visitsServiceClient.getAllArchivedVisits();
+    }
+  
+    @DeleteMapping(value="/reviews/{reviewId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<ReviewResponseDTO>> deleteReview(@PathVariable String reviewId) {
+        return Mono.just(reviewId)
+                .flatMap(visitsServiceClient::deleteReview)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
 

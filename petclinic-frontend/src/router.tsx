@@ -15,6 +15,7 @@ import AddReviewForm from './features/visits/Review/AddReviewForm';
 import EditReviewForm from './features/visits/Review/EditReviewForm';
 import Review from './pages/Review/Review';
 import CartPage from '@/pages/Carts/Cart.tsx';
+import UpdateBillPage from '@/pages/Bills/UpdateBill.tsx';
 import UserCart from '@/features/carts/components/UserCart.tsx';
 import AddingCustomer from '@/pages/Customer/AddingCustomer.tsx';
 import AllOwners from '@/pages/Customer/AllOwners.tsx';
@@ -44,6 +45,8 @@ import EmergencyList from './features/visits/Emergency/EmergencyList';
 import ProductDetails from '@/features/products/api/ProductDetails.tsx';
 import AddPetPage from '@/pages/Customer/AddPetPage.tsx';
 import EditProduct from './features/products/components/EditProduct';
+import ForgotPassword from '@/pages/User/ForgotPassword.tsx';
+import ResetPassword from '@/pages/User/ResetPassword.tsx';
 
 const router = createBrowserRouter([
   {
@@ -193,6 +196,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute roles={['ADMIN']}>
             <AdminBillingPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.UpdateBill,
+        element: (
+          <ProtectedRoute roles={['ADMIN']}>
+            <UpdateBillPage />
           </ProtectedRoute>
         ),
       },
@@ -360,6 +371,8 @@ const router = createBrowserRouter([
   },
   { path: AppRoutePaths.Login, element: <Login /> },
   { path: AppRoutePaths.SignUp, element: <SignUp /> },
+  { path: AppRoutePaths.ForgotPassword, element: <ForgotPassword /> },
+  { path: AppRoutePaths.ResetPassword, element: <ResetPassword /> },
   {
     path: '*',
     element: <PageNotFound />,

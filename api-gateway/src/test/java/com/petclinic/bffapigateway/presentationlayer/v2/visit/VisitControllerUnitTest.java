@@ -155,19 +155,23 @@ public class VisitControllerUnitTest {
     @Test
     void getAllVisits_whenAllPropertiesExist_thenReturnFluxResponseDTO() {
         // Arrange
-        when(visitsServiceClient.getAllVisits())
+        String description = "test"; // Add a description here
+        when(visitsServiceClient.getAllVisits(description))
                 .thenReturn(Flux.just(visitResponseDTO1));
 
         // Act
         webTestClient.get()
-                .uri(BASE_VISIT_URL)
+                .uri(uriBuilder -> uriBuilder.path(BASE_VISIT_URL)
+                        .queryParam("description", description)
+                        .build())
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBodyList(VisitResponseDTO.class)
                 .hasSize(1);
+
         // Assert
-        verify(visitsServiceClient, times(1)).getAllVisits();
+        verify(visitsServiceClient, times(1)).getAllVisits(description);
     }
 
     @Test
@@ -305,9 +309,10 @@ public class VisitControllerUnitTest {
     }
 
     @Test
-    void getAllVisits_whenNoVisitsExist_thenReturnEmptyFlux() {
+    void getAllVisits_whenNoVisitsExist_thenReturnEmptyFlux(){
+        String description = null;
         // Arrange
-        when(visitsServiceClient.getAllVisits())
+        when(visitsServiceClient.getAllVisits(description))
                 .thenReturn(Flux.empty()); // no visits should not throw an error
         // Act
         webTestClient.get()
@@ -318,7 +323,7 @@ public class VisitControllerUnitTest {
                 .expectBodyList(VisitResponseDTO.class)
                 .hasSize(0);
         // Assert
-        verify(visitsServiceClient, times(1)).getAllVisits();
+        verify(visitsServiceClient, times(1)).getAllVisits(description);
     }
 
     @Test
@@ -716,4 +721,38 @@ public class VisitControllerUnitTest {
 
         verify(visitsServiceClient, times(1)).getAllArchivedVisits();
     }
+  
+  void deleteReview_whenValidReviewId_thenReturnOkResponse() {
+        // Arrange
+        when(visitsServiceClient.deleteReview(eq("R001")))
+                .thenReturn(Mono.just(reviewResponseDTO)); // Mocking the service client to return a valid review response
+
+        // Act
+        webTestClient.delete()
+                .uri(REVIEWS_URL + "/{reviewId}", "R001")  // Set the valid reviewId
+                .exchange()
+                .expectStatus().isOk()  // Expect 200 OK response
+                .expectBody(ReviewResponseDTO.class)
+                .isEqualTo(reviewResponseDTO);  // Validate the response body
+
+        // Assert
+        verify(visitsServiceClient, times(1)).deleteReview(eq("R001"));  // Ensure the service method was called once
+    }
+
+    @Test
+    void deleteReview_whenInvalidReviewId_thenReturnNotFoundResponse() {
+        // Arrange
+        when(visitsServiceClient.deleteReview(eq("INVALID_ID")))
+                .thenReturn(Mono.empty());  // Mocking the service client to return empty Mono for a nonexistent review
+
+        // Act
+        webTestClient.delete()
+                .uri(REVIEWS_URL + "/{reviewId}", "INVALID_ID")  // Set an invalid reviewId
+                .exchange()
+                .expectStatus().isNotFound();  // Expect 404 Not Found response
+
+        // Assert
+        verify(visitsServiceClient, times(1)).deleteReview(eq("INVALID_ID"));  // Ensure the service method was called once
+    }
+
 }

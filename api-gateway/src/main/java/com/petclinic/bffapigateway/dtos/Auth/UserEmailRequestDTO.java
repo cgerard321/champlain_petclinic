@@ -12,4 +12,5 @@ import lombok.NoArgsConstructor;
 @Data
 public class UserEmailRequestDTO {
     private String email;
+    private String url;
 }

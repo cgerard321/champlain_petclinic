@@ -334,8 +334,8 @@ public class BFFApiGatewayController {
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping(value = "visits", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<VisitResponseDTO> getAllVisits() {
-        return visitsServiceClient.getAllVisits();
+    public Flux<VisitResponseDTO> getAllVisits(@RequestParam(required = false) String description){
+        return visitsServiceClient.getAllVisits(description);
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET,Roles.OWNER})
@@ -480,6 +480,7 @@ public class BFFApiGatewayController {
                 .map(r -> ResponseEntity.status(HttpStatus.CREATED).body(r))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
+
 
     @PutMapping(value = "vets/{vetId}/photos/{photoName}")
     public Mono<ResponseEntity<Resource>> updatePhotoByVetId(@PathVariable String vetId, @PathVariable String photoName, @RequestBody Mono<Resource> image) {

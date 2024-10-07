@@ -3,6 +3,7 @@ package com.petclinic.bffapigateway.presentationlayer.v2;
 import com.petclinic.bffapigateway.domainclientlayer.BillServiceClient;
 import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
+import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.utils.Security.Annotations.IsUserSpecific;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
@@ -98,5 +99,16 @@ public class BillController {
         return billService.deleteBill(billId).then(Mono.just(ResponseEntity.noContent().<Void>build()))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
+    
+    @PutMapping(value = "/admin/{billId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<BillResponseDTO>> updateBill(@PathVariable String billId, @RequestBody Mono<BillRequestDTO> billRequestDTO) {
 
+        return Mono.just(billId)
+                .filter(id -> id.length() == 36)
+                .switchIfEmpty(Mono.error(new InvalidInputException("Provided bill ID is invalid: " + billId)))
+                .flatMap(id -> billService.updateBill(id, billRequestDTO))
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+
+    }
 }

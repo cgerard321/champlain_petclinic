@@ -71,18 +71,49 @@ public class PhotoServiceImpl implements PhotoService {
         return photoRepository.findByVetId(vetId)
                 .switchIfEmpty(Mono.error(new NotFoundException("Photo for vet " + vetId + " does not exist.")))
                 .flatMap(existingPhoto -> photo.map(resource -> {
-                            Photo updatedPhoto = EntityDtoUtil.toPhotoEntity(vetId, photoName, resource);
+                            Photo updatedPhoto = EntityDtoUtil.toPhotoEntity(
+                                    vetId, photoName, resource);
                             updatedPhoto.setId(existingPhoto.getId());
                             return updatedPhoto;
                         })
                         .flatMap(updatedPhoto -> {
                             return photoRepository.save(updatedPhoto)
                                     .map(savedPhoto -> {
-                                        ByteArrayResource savedResource = new ByteArrayResource(savedPhoto.getData());
-                                        return savedResource;
+                                        return new ByteArrayResource(savedPhoto.getData());
                                     });
                         }));
     }
+
+    @Override
+    public Mono<Void> deletePhotoByVetId(String vetId) {
+        return photoRepository.findByVetId(vetId)
+                .switchIfEmpty(Mono.error(new InvalidInputException("Photo not found for vetId: " + vetId)))
+                .flatMap(photo -> photoRepository.deleteByVetId(vetId))
+                .then(insertDefaultPhoto(vetId))
+                .then();
+    }
+
+    private Mono<Void> insertDefaultPhoto(String vetId) {
+        return Mono.defer(() -> {
+            try {
+                ClassPathResource defaultPhoto = new ClassPathResource("images/vet_default.jpg");
+                byte[] data = StreamUtils.copyToByteArray(defaultPhoto.getInputStream());
+
+                Photo defaultPhotoEntity = Photo.builder()
+                        .vetId(vetId)
+                        .filename("vet_default.jpg")
+                        .imgType("image/jpeg")
+                        .data(data)
+                        .build();
+
+                return photoRepository.save(defaultPhotoEntity).then();
+
+            } catch (IOException e) {
+                return Mono.error(new RuntimeException("Failed to load default photo", e));
+            }
+        });
+    }
+
 
     private ByteArrayResource createResourceFromPhoto(Photo img) {
         return new ByteArrayResource(img.getData());
