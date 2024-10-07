@@ -284,7 +284,8 @@ class ProductControllerIntegrationTest {
                 .expectStatus().isNotFound()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.message").isEqualTo("Product id was not found: " + NON_EXISTENT_PRODUCT_ID);
+                .jsonPath("$.message").isEqualTo("Product id was not found: " +
+                        NON_EXISTENT_PRODUCT_ID);
 
         StepVerifier
                 .create(productRepository.findAll())
@@ -304,7 +305,8 @@ class ProductControllerIntegrationTest {
                 .expectStatus().is4xxClientError()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.message").isEqualTo("Provided product id is invalid: " + "INVALID_PRODUCT_ID");
+                .jsonPath("$.message").isEqualTo("Provided product id is invalid: " +
+                        INVALID_PRODUCT_ID);
 
         StepVerifier
                 .create(productRepository.findAll())
@@ -346,7 +348,8 @@ class ProductControllerIntegrationTest {
                 .expectStatus().isNotFound()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.message").isEqualTo("Product id was not found: " + NON_EXISTENT_PRODUCT_ID);
+                .jsonPath("$.message").isEqualTo("Product id was not found: " +
+                        NON_EXISTENT_PRODUCT_ID);
 
         StepVerifier
                 .create(productRepository.findAll())
@@ -364,7 +367,8 @@ class ProductControllerIntegrationTest {
                 .expectStatus().is4xxClientError()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.message").isEqualTo("Provided product id is invalid: " + INVALID_PRODUCT_ID);
+                .jsonPath("$.message").isEqualTo("Provided product id is invalid: " +
+                        INVALID_PRODUCT_ID);
 
         StepVerifier
                 .create(productRepository.findAll())
@@ -481,8 +485,4 @@ class ProductControllerIntegrationTest {
                 .exchange()
                 .expectStatus().isNotFound();
     }
-
-
-
-
 }

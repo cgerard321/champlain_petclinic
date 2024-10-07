@@ -18,7 +18,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 @Service
-@Profile("!test")
 public class DataLoaderService implements CommandLineRunner {
 
     @Autowired

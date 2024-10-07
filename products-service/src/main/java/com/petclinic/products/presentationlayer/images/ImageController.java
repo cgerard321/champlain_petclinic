@@ -22,7 +22,7 @@ public class ImageController {
     @GetMapping(value = "{imageId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<ImageResponseModel>> getImage(@PathVariable String imageId) {
         return Mono.just(imageId)
-                .filter(id -> id.length() == 36) // validate the course id
+                .filter(id -> id.length() == 36)
                 .switchIfEmpty(Mono.error(new InvalidInputException("Provided image id is invalid: " + imageId)))
                 .flatMap(imageService::getImageByImageId)
                 .map(ResponseEntity::ok);

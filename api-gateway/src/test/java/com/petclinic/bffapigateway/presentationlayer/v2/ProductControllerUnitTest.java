@@ -169,7 +169,8 @@ class ProductControllerUnitTest {
 
     @Test
     public void whenUpdateProduct_thenReturnUpdatedProduct() {
-        when(productsServiceClient.updateProduct("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a", productRequest1)).thenReturn(Mono.just(productResponse1));
+        when(productsServiceClient.updateProduct("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a", productRequest1))
+                .thenReturn(Mono.just(productResponse1));
 
         webTestClient.put()
                 .uri(baseInventoryURL + "/e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")

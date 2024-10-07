@@ -6,6 +6,7 @@ import com.petclinic.products.datalayer.products.ProductRepository;
 import com.petclinic.products.datalayer.ratings.Rating;
 import com.petclinic.products.datalayer.ratings.RatingRepository;
 import com.petclinic.products.presentationlayer.products.ProductResponseModel;
+import com.petclinic.products.utils.exceptions.NotFoundException;
 import com.petclinic.products.utils.exceptions.InvalidInputException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,8 +14,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -181,6 +185,20 @@ class ProductServiceUnitTest {
         StepVerifier.create(result)
                 .expectNextCount(0)
                 .verifyComplete();
+    }
+
+    @Test
+    public void whenGetProductWithNonExistentProductId_thenThrowException() {
+        when(productRepository.findProductByProductId("ae2d3af7-f2a2-407f-ad31-ca7d8220cb77"))
+                .thenReturn(Mono.empty());
+
+        Mono<ProductResponseModel> product = productService.getProductByProductId("ae2d3af7-f2a2-407f-ad31-ca7d8220cb77");
+
+        StepVerifier
+                .create(product)
+                .expectNextCount(0)
+                .expectError(NotFoundException.class)
+                .verify();
     }
 
 }
