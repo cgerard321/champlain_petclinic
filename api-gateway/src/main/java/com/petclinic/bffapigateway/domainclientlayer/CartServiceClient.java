@@ -91,14 +91,6 @@ public class CartServiceClient {
                 .bodyToMono(Void.class);
     }
 
-    public Mono<Void> assignCartToUser(String customerId) {
-        return webClientBuilder.build().post()
-                .uri(CartServiceUrl + "/" + customerId + "/assign")
-                .bodyValue(Collections.emptyList())  //Pass an empty list of CartProduct
-                .retrieve()
-                .bodyToMono(Void.class);
-    }
-
     public Flux<PromoCodeResponseDTO> getAllPromoCodes() {
         return webClientBuilder.build()
                 .get()
