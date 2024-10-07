@@ -596,6 +596,25 @@ public class VetsServiceClient {
                 .bodyToMono(VetResponseDTO.class);
     }
 
+    public Mono<Void> deleteSpecialtiesByVetId(String vetId, String specialtyId) {
+        return webClientBuilder
+                .build()
+                .delete()
+                .uri(vetsServiceUrl + "/" + vetId + "/specialties/" + specialtyId)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, error -> {
+                    HttpStatusCode statusCode = error.statusCode();
+                    if (statusCode.equals(HttpStatus.NOT_FOUND)) {
+                        return Mono.error(new ExistingVetNotFoundException("Vet not found: " + vetId, HttpStatus.NOT_FOUND));
+                    }
+                    return Mono.error(new IllegalArgumentException("Something went wrong with the client"));
+                })
+                .onStatus(HttpStatusCode::is5xxServerError, error ->
+                        Mono.error(new IllegalArgumentException("Something went wrong with the server"))
+                )
+                .bodyToMono(Void.class);
+    }
+
     public Flux<Album> getAllAlbumsByVetId(String vetId) {
         return webClientBuilder.build()
                 .get()

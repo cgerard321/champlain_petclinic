@@ -123,6 +123,15 @@ public class VetController {
             @RequestBody Mono<SpecialtyDTO> specialties) {
         return vetsServiceClient.addSpecialtiesByVetId(vetId, specialties);
     }
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET})
+    @DeleteMapping(value = "{vetId}/specialties/{specialtyId}")
+    public Mono<ResponseEntity<Void>> deleteSpecialtiesByVetId(
+            @PathVariable String vetId,
+            @PathVariable String specialtyId) {
+        return vetsServiceClient.deleteSpecialtiesByVetId(vetId, specialtyId)
+                .then(Mono.just(ResponseEntity.noContent().<Void>build()))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @GetMapping(value = "{vetId}/albums", produces = MediaType.APPLICATION_JSON_VALUE)
