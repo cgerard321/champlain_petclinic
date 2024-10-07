@@ -2135,7 +2135,7 @@ class ApiGatewayControllerTest {
 
     }
     @Test
-    void getBillingByRequestMissingPath(){
+    void getBillUsingMissingPath(){
         client.get()
                 .uri("/bills")
                 .accept(MediaType.APPLICATION_JSON)
@@ -2213,7 +2213,7 @@ class ApiGatewayControllerTest {
     }
 
     @Test
-    void getPutBillingRequestNotFound(){
+    void putBillRequestNotFound(){
         client.put()
                 .uri("/bills/{billId}", 100)
                 .accept(MediaType.APPLICATION_JSON)
@@ -2225,7 +2225,7 @@ class ApiGatewayControllerTest {
     }
 
     @Test
-    void getPutBillingMissingPath(){
+    void putBillWithMissingPath(){
         client.put()
                 .uri("/bills")
                 .accept(MediaType.APPLICATION_JSON)
