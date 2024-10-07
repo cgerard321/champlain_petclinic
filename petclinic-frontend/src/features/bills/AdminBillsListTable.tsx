@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Bill } from '@/features/bills/models/Bill.ts';
-import { getBillByBillId } from '@/features/bills/api/GetBillByBillId.tsx';
+import { getBillByBillId } from '@/features/bills/api/getBillByBillId.tsx';
 import { getAllOwners } from '../customers/api/getAllOwners';
 import { getAllVets } from '../veterinarians/api/getAllVets';
 import { BillRequestModel } from './models/BillRequestModel';

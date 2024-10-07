@@ -17,3 +17,4 @@ export async function getAllPaidBills(): Promise<Bill[]> {
         })
         .filter((data?: JSON) => data !== null);
 }
+
