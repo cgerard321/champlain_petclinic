@@ -15,7 +15,7 @@ interface VetResponseType {
   workday: string[];
   workHoursJson: string;
   active: boolean;
-  specialties: { specialtyId: string; name: string; }[];
+  specialties: { specialtyId: string; name: string }[];
 }
 
 export default function VetDetails(): JSX.Element {
@@ -181,19 +181,19 @@ export default function VetDetails(): JSX.Element {
     try {
       // Make a DELETE request to the API
       await axios.delete(
-          `http://localhost:8080/api/v2/gateway/vets/${vetId}/specialties/${specialtyId}`
+        `http://localhost:8080/api/v2/gateway/vets/${vetId}/specialties/${specialtyId}`
       );
 
       // Update the vet data after deleting the specialty
       setVet(prevVet =>
-          prevVet
-              ? {
-                ...prevVet,
-                specialties: prevVet.specialties.filter(
-                    specialty => specialty.specialtyId !== specialtyId
-                ), // Remove the deleted specialty from the local state
-              }
-              : null
+        prevVet
+          ? {
+              ...prevVet,
+              specialties: prevVet.specialties.filter(
+                specialty => specialty.specialtyId !== specialtyId
+              ), // Remove the deleted specialty from the local state
+            }
+          : null
       );
     } catch (error) {
       setError('Failed to delete specialty');
@@ -265,12 +265,15 @@ export default function VetDetails(): JSX.Element {
               {vet.specialties && vet.specialties.length > 0 ? (
                 <ul>
                   {vet.specialties.map((specialty, index) => (
-                    <li
-                        key={index}>{specialty.name}
-                        <button
-                            onClick={() => handleDeleteSpecialty(specialty.specialtyId)}>
-                            Delete
-                        </button>
+                    <li key={index}>
+                      {specialty.name}
+                      <button
+                        onClick={() =>
+                          handleDeleteSpecialty(specialty.specialtyId)
+                        }
+                      >
+                        Delete
+                      </button>
                     </li>
                   ))}
                 </ul>

@@ -123,7 +123,7 @@ public class VetController {
             @RequestBody Mono<SpecialtyDTO> specialties) {
         return vetsServiceClient.addSpecialtiesByVetId(vetId, specialties);
     }
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET})    
     @DeleteMapping(value = "{vetId}/specialties/{specialtyId}")
     public Mono<ResponseEntity<Void>> deleteSpecialtiesByVetId(
             @PathVariable String vetId,
