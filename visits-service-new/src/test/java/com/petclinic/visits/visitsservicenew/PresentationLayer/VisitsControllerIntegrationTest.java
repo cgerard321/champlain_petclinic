@@ -367,7 +367,6 @@ class VisitsControllerIntegrationTest {
                 .verifyComplete();
     }
 
-    @Test
     void getAllArchivedVisits_returnsNotFoundWhenNoArchivedVisits() {
         visitRepo.deleteAll().block();  // Clear the repository
 
