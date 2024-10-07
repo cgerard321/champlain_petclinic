@@ -30,7 +30,6 @@ public interface CartService {
     Mono<CartResponseModel> assignCartToCustomer(String customerId, List<CartProduct> products);
 
     Mono<CartResponseModel>  findCartByCustomerId(String customerId);
-    Mono<CartResponseModel> removeProductFromCart(String cartId, String productId);
 
     //move product between cart and wishlist
     Mono<CartResponseModel> moveProductFromCartToWishlist(String cartId, String productId);
