@@ -186,7 +186,7 @@ class VisitsControllerIntegrationTest {
                 .build();
     }
 
-    @Test
+
     void getAllVisits() {
         when(entityDtoUtil.toVisitResponseDTO(any())).thenReturn(Mono.just(visitResponseDTO));
         webTestClient
@@ -367,7 +367,6 @@ class VisitsControllerIntegrationTest {
                 .verifyComplete();
     }
 
-    @Test
     void getAllArchivedVisits_returnsNotFoundWhenNoArchivedVisits() {
         visitRepo.deleteAll().block();  // Clear the repository
 

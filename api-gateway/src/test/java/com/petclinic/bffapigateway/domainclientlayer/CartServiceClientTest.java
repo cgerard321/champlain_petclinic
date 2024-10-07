@@ -1,20 +1,22 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.dtos.Cart.AddProductRequestDTO;
 import com.petclinic.bffapigateway.dtos.Cart.CartRequestDTO;
 import com.petclinic.bffapigateway.dtos.Cart.CartResponseDTO;
 import com.petclinic.bffapigateway.dtos.Cart.UpdateProductQuantityRequestDTO;
 import com.petclinic.bffapigateway.dtos.Cart.PromoCodeRequestDTO;
 import com.petclinic.bffapigateway.dtos.Cart.PromoCodeResponseDTO;
+import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
+import org.assertj.core.condition.Not;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -297,6 +299,175 @@ public class CartServiceClientTest {
                 })
                 .verify();
     }
+
+    @Test
+    void MoveProductFromCartToWishlist_Success() {
+        String cartId = "98f7b33a-d62a-420a-a84a-05a27c85fc91";
+        String productId = "9a29fff7-564a-4cc9-8fe1-36f6ca9bc223";
+        String responseBody = """
+                {
+                    "cartId": "98f7b33a-d62a-420a-a84a-05a27c85fc91",
+                    "products": [
+                        {
+                            "productId": "9a29fff7-564a-4cc9-8fe1-36f6ca9bc223",
+                            "quantityInCart": 1
+                        }
+                    ]
+                }
+                """;
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody(responseBody));
+
+        Mono<CartResponseDTO> result = mockCartServiceClient.moveProductFromCartToWishlist(cartId, productId);
+
+        StepVerifier.create(result)
+                .assertNext(cartResponseDTO -> {
+                    assertEquals(cartId, cartResponseDTO.getCartId());
+                    assertEquals(1, cartResponseDTO.getProducts().size());
+                    assertEquals("9a29fff7-564a-4cc9-8fe1-36f6ca9bc223", cartResponseDTO.getProducts().get(0).getProductId());
+                    assertEquals(1, cartResponseDTO.getProducts().get(0).getQuantityInCart());
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void MoveProductFromCartToWishlist_NotFound() {
+        String cartId = "98f7b33a-d62a-420a-a84a-05a27c85fc91";
+        String productId = "non-existent-product-id";
+        String responseBody = """
+            {
+                "message": "Product with id non-existent-product-id was not found in the cart."
+            }
+            """;
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(404)
+                .setBody(responseBody));
+
+        Mono<CartResponseDTO> result = mockCartServiceClient.moveProductFromCartToWishlist(cartId, productId);
+
+        StepVerifier.create(result)
+                .expectErrorSatisfies(throwable -> {
+                    assert throwable instanceof NotFoundException;
+                    NotFoundException exception = (NotFoundException) throwable;
+                    assertEquals("Cart or product not found for cartId: " + cartId + " and productId: " + productId, exception.getMessage());
+                })
+                .verify();
+    }
+
+@Test
+void MoveProductFromCartToWishlist_BadRequest() {
+    String cartId = "98f7b33a-d62a-420a-a84a-05a27c85fc91";
+    String productId = "9a29fff7-564a-4cc9-8fe1-36f6ca9bc223";
+    String responseBody = """
+        {
+            "message": "Product with id 9a29fff7-564a-4cc9-8fe1-36f6ca9bc223 was not found in the cart."
+        }
+        """;
+
+    prepareResponse(response -> response
+            .setHeader("Content-Type", "application/json")
+            .setResponseCode(422)
+            .setBody(responseBody));
+
+    Mono<CartResponseDTO> result = mockCartServiceClient.moveProductFromCartToWishlist(cartId, productId);
+
+    StepVerifier.create(result)
+            .expectErrorSatisfies(throwable -> {
+                assert throwable instanceof InvalidInputException;
+                InvalidInputException exception = (InvalidInputException) throwable;
+                assertEquals("Invalid input for cartId: " + cartId + " or productId: " + productId, exception.getMessage());
+            })
+            .verify();
+}
+
+    @Test
+    void MoveProductFromWishListToCart_Success() {
+        String cartId = "98f7b33a-d62a-420a-a84a-05a27c85fc91";
+        String productId = "9a29fff7-564a-4cc9-8fe1-36f6ca9bc223";
+        String responseBody = """
+                {
+                    "cartId": "98f7b33a-d62a-420a-a84a-05a27c85fc91",
+                    "products": [
+                        {
+                            "productId": "9a29fff7-564a-4cc9-8fe1-36f6ca9bc223",
+                            "quantityInCart": 1
+                        }
+                    ]
+                }
+                """;
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody(responseBody));
+
+        Mono<CartResponseDTO> result = mockCartServiceClient.moveProductFromWishListToCart(cartId, productId);
+
+        StepVerifier.create(result)
+                .assertNext(cartResponseDTO -> {
+                    assertEquals(cartId, cartResponseDTO.getCartId());
+                    assertEquals(1, cartResponseDTO.getProducts().size());
+                    assertEquals("9a29fff7-564a-4cc9-8fe1-36f6ca9bc223", cartResponseDTO.getProducts().get(0).getProductId());
+                    assertEquals(1, cartResponseDTO.getProducts().get(0).getQuantityInCart());
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void MoveProductFromWishListToCart_NotFound() {
+        String cartId = "98f7b33a-d62a-420a-a84a-05a27c85fc91";
+        String productId = "non-existent-product-id";
+        String responseBody = """
+            {
+                "message": "Product with id non-existent-product-id was not found in the wishlist."
+            }
+            """;
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(404)
+                .setBody(responseBody));
+
+        Mono<CartResponseDTO> result = mockCartServiceClient.moveProductFromWishListToCart(cartId, productId);
+
+        StepVerifier.create(result)
+                .expectErrorSatisfies(throwable -> {
+                    assert throwable instanceof NotFoundException;
+                    NotFoundException exception = (NotFoundException) throwable;
+                    assertEquals("Cart or product not found for cartId: " + cartId + " and productId: " + productId, exception.getMessage());
+                })
+                .verify();
+    }
+
+    @Test
+    void MoveProductFromWishListToCart_BadRequest() {
+        String cartId = "98f7b33a-d62a-420a-a84a-05a27c85fc91";
+        String productId = "9a29fff7-564a-4cc9-8fe1-36f6ca9bc223";
+        String responseBody = """
+{
+                "message": "Invalid input for cartId: 98f7b33a-d62a-420a-a84a-05a27c85fc91 or productId: 9a29fff7-564a-4cc9-8fe1-36f6ca9bc223"
+            }
+            """;
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(422)
+                .setBody(responseBody));
+
+        Mono<CartResponseDTO> result = mockCartServiceClient.moveProductFromWishListToCart(cartId, productId);
+
+        StepVerifier.create(result)
+                .expectErrorSatisfies(throwable -> {
+                    assert throwable instanceof InvalidInputException;
+                    InvalidInputException exception = (InvalidInputException) throwable;
+                    assertEquals("Invalid input for cartId: " + cartId + " or productId: " + productId, exception.getMessage());
+                })
+                .verify();
+    }
+
     private void prepareResponse(Consumer<MockResponse> consumer) {
         MockResponse response = new MockResponse();
         consumer.accept(response);
