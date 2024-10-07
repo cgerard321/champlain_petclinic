@@ -10,6 +10,7 @@ interface CartItemProps {
   ) => void;
   deleteItem: (indexToDelete: number) => void;
   errorMessage?: string;
+  // addToWishlist: (item: ProductModel) => void;
 }
 
 const formatPrice = (price: number): string => {
@@ -21,8 +22,10 @@ const CartItem = ({
   index,
   changeItemQuantity,
   deleteItem,
+  // addToWishlist,
 }: CartItemProps): JSX.Element => {
   const remainingStock = item.productQuantity - (item.quantity ?? 0);
+
   return (
     <div className="CartItem">
       <div className="CartItem-info">
@@ -51,6 +54,13 @@ const CartItem = ({
         >
           Remove
         </button>
+        {/* <button 
+          className="wishlist-button" // Add a class for styling
+          onClick={() => addToWishlist(item)} // Call the addToWishlist function
+          aria-label={`Add ${item.productName} to wishlist`}
+        >
+          Add to Wishlist
+        </button> */}
       </div>
       {remainingStock <= 5 && remainingStock > 0 ? (
         <div className="stock-message">

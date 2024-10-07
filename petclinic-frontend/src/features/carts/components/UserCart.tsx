@@ -211,6 +211,41 @@ const UserCart = (): JSX.Element => {
     }
   };
 
+  //going to imlement it next sprint
+  // const addToWishlist = async (item: ProductModel): Promise<void> => {
+  //   try {
+  //     const productId = item.productId;
+  //     const response = await fetch(
+  //       `http://localhost:8080/api/v2/gateway/carts/${cartId}/products/${productId}/toWishList`,
+  //       {
+  //         method: 'POST',
+  //         headers: {
+  //           'Content-Type': 'application/json',
+  //           Accept: 'application/json',
+  //         },
+  //         credentials: 'include',
+  //         body: JSON.stringify({
+  //           productId: item.productId,
+  //           productName: item.productName,
+  //           productSalePrice: item.productSalePrice,
+  //         }),
+  //       }
+  //     );
+
+  //     if (!response.ok) {
+  //       const errorData = await response.json();
+  //       throw new Error(errorData.message || 'Failed to add to wishlist');
+  //     }
+
+  //     // Optionally, you can update the wishlistItems state
+  //     setWishlistItems(prevItems => [...prevItems, item]);
+  //     alert(`${item.productName} has been added to your wishlist!`);
+  //   } catch (error) {
+  //     console.error('Error adding to wishlist:', error);
+  //     alert('Failed to add item to wishlist.');
+  //   }
+  // };
+
   const handleCheckout = async (): Promise<void> => {
     if (!cartId) {
       setCheckoutMessage('Invalid cart ID');
@@ -292,6 +327,7 @@ const UserCart = (): JSX.Element => {
                 changeItemQuantity={changeItemQuantity}
                 deleteItem={deleteItem}
                 errorMessage={errorMessages[index]}
+                // addToWishlist={addToWishlist}
               />
             ))
           ) : (
@@ -347,9 +383,10 @@ const UserCart = (): JSX.Element => {
               <CartItem
                 key={item.productId}
                 item={item}
-                index={-1} // Mark as wishlist item
-                changeItemQuantity={() => {}} // Disable changing quantity for wishlist
-                deleteItem={() => {}} // Disable removing from wishlist
+                index={-1}
+                changeItemQuantity={() => {}}
+                deleteItem={deleteItem}
+                // addToWishlist={addToWishlist}
               />
             ))
           ) : (
