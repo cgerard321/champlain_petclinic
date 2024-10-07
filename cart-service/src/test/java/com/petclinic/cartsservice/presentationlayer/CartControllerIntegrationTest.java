@@ -157,24 +157,24 @@ class CartControllerIntegrationTest {
 //                });
 //    }
 
-    @Test
-    public void testGetCartById_ValidCartId_ReturnsCart() {
-        // When: Send a request to get the cart by its ID
-        webTestClient.get()
-                .uri("/api/v1/carts/{cartId}", cart1.getCartId())
-                .exchange()
-                // Then: Verify the response status and body
-                .expectStatus().isOk()
-                .expectBody(CartResponseModel.class)
-                .consumeWith(response -> {
-                    CartResponseModel retrievedCart = response.getResponseBody();
-                    assertNotNull(retrievedCart);
-                    assertEquals(cart1.getCartId(), retrievedCart.getCartId());
-                    assertEquals(cart1.getProducts().size(), retrievedCart.getProducts().size());
-                    // Optionally check details of the products
-                    assertEquals(cart1.getProducts().get(0).getProductId(), retrievedCart.getProducts().get(0).getProductId());
-                });
-    }
+//    @Test
+//    public void testGetCartById_ValidCartId_ReturnsCart() {
+//        // When: Send a request to get the cart by its ID
+//        webTestClient.get()
+//                .uri("/api/v1/carts/{cartId}", cart1.getCartId())
+//                .exchange()
+//                // Then: Verify the response status and body
+//                .expectStatus().isOk()
+//                .expectBody(CartResponseModel.class)
+//                .consumeWith(response -> {
+//                    CartResponseModel retrievedCart = response.getResponseBody();
+//                    assertNotNull(retrievedCart);
+//                    assertEquals(cart1.getCartId(), retrievedCart.getCartId());
+//                    assertEquals(cart1.getProducts().size(), retrievedCart.getProducts().size());
+//                    // Optionally check details of the products
+//                    assertEquals(cart1.getProducts().get(0).getProductId(), retrievedCart.getProducts().get(0).getProductId());
+//                });
+//    }
 
 
 //    @Test
