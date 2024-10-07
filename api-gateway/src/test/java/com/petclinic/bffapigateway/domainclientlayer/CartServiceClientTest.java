@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.function.Consumer;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CartServiceClientTest {
@@ -494,8 +495,8 @@ void MoveProductFromCartToWishlist_BadRequest() {
 
     @Test
     void testRemoveProductFromCart_NotFound() {
-        String cartId = "invalid-cart-id";
-        String productId = "invalid-product-id";
+        String cartId = "98f7b33a-d62a-420a-a84a-05a27c85fc91";
+        String productId = "non-existent-product-id";
         String responseBody = """
             {
                 "message": "Cart or product not found."
@@ -512,13 +513,15 @@ void MoveProductFromCartToWishlist_BadRequest() {
 
         StepVerifier.create(result)
                 .expectErrorSatisfies(throwable -> {
-                    assert throwable instanceof WebClientResponseException;
-                    WebClientResponseException exception = (WebClientResponseException) throwable;
-                    assertEquals(404, exception.getRawStatusCode()); // Assert the 404 Not Found status
-                    assert exception.getResponseBodyAsString().contains("Cart or product not found");
+                    assert throwable instanceof NotFoundException;
+                    NotFoundException exception = (NotFoundException) throwable;
+                    assertEquals("Cart or product not found for cartId: " + cartId + " and productId: " + productId, exception.getMessage()); // Assert the 404 Not Found status
                 })
                 .verify();
     }
+
+
+
     private void prepareResponse(Consumer<MockResponse> consumer) {
         MockResponse response = new MockResponse();
         consumer.accept(response);
