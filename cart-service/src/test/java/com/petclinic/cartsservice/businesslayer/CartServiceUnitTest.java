@@ -590,7 +590,7 @@ class CartServiceUnitTest {
 
 
 
-
+    @Test
     void whenCheckoutCart_thenReturnUpdatedCartWithPaymentProcessed() {
         // Given
         String cartId = "98f7b33a-d62a-420a-a84a-05a27c85fc91";
@@ -638,7 +638,7 @@ class CartServiceUnitTest {
                     assertEquals(cart1.getCustomerId(), cartResponseModel.getCustomerId());
                     assertEquals(products.size(), cartResponseModel.getProducts().size());
                 })
-                .verifyComplete();
+                .verifyComplete(); //test
     }
 
     @Test
