@@ -216,7 +216,7 @@ export default function ProductList(): JSX.Element {
                   value={ratingSort}
                   onChange={e => setRatingSort(e.target.value)}>
             <option value="default">Sort by Rating</option>
-            <option value="asc" >Low to High</option>
+            <option value="asc">Low to High</option>
             <option value="desc">High to Low</option>
           </select>
           <button className="apply-filter-button" onClick={fetchProducts}>
