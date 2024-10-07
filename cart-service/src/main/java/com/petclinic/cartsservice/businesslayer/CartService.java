@@ -25,6 +25,7 @@ public interface CartService {
 
     Mono<Integer> getCartItemCount(String cartId);
     Mono<CartResponseModel> deleteCartByCartId(String cartId);
+    Mono<CartResponseModel> removeProductFromCart(String cartId, String productId);
     Mono<CartResponseModel> addProductToCart(String cartId, String productId, int quantity);
     Mono<CartResponseModel> updateProductQuantityInCart(String cartId, String productId, int quantity);
 
