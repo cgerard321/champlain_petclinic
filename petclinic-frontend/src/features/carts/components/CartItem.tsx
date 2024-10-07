@@ -8,8 +8,9 @@ interface CartItemProps {
     event: React.ChangeEvent<HTMLInputElement>,
     index: number
   ) => void;
-  deleteItem: (indexToDelete: number) => void;
+  deleteItem: (productId: string, indexToDelete: number) => void;
   errorMessage?: string;
+  // addToWishlist: (item: ProductModel) => void;
 }
 
 const formatPrice = (price: number): string => {
@@ -21,8 +22,26 @@ const CartItem = ({
   index,
   changeItemQuantity,
   deleteItem,
+  // addToWishlist,
 }: CartItemProps): JSX.Element => {
+  // const handleDeleteItem = async (cartId: string, productId: string) => {
+  //   try {
+  //     const response = await fetch(
+  //       `localhost:8080/api/v2/gateway/carts/${cartId}/${productId}`,
+  //     {
+  //       method: 'DELETE',
+  //       headers:{
+  //         Accept: 'application/json',
+  //       },
+  //       credentials: 'include',
+  //     }
+  //     );
+  //   } catch(err){
+  //     console.log("Error deleting item in cart: ", err)
+  //   }
+  // }
   const remainingStock = item.productQuantity - (item.quantity ?? 0);
+
   return (
     <div className="CartItem">
       <div className="CartItem-info">
@@ -46,19 +65,29 @@ const CartItem = ({
         </span>
         <button
           className="delete-button"
-          onClick={() => deleteItem(index)}
+          onClick={() => deleteItem(item.productId, index)}
           aria-label={`Remove ${item.productName} from cart`}
         >
           Remove
         </button>
+        {/* <button 
+          className="wishlist-button" // Add a class for styling
+          onClick={() => addToWishlist(item)} // Call the addToWishlist function
+          aria-label={`Add ${item.productName} to wishlist`}
+        >
+          Add to Wishlist
+        </button> */}
       </div>
-      {remainingStock <= 5 && remainingStock > 0 ? (
-        <div className="stock-message">
-          Only {remainingStock} items left in stock.
-        </div>
-      ) : remainingStock === 0 ? (
-        <div className="stock-message out-of-stock">Out of stock</div>
-      ) : null}
+
+      <div className="stock-message-container">
+        {remainingStock <= 5 && remainingStock > 0 ? (
+          <div className="stock-message">
+            Only {remainingStock} items left in stock.
+          </div>
+        ) : remainingStock === 0 ? (
+          <div className="stock-message out-of-stock">Out of stock</div>
+        ) : null}
+      </div>
     </div>
   );
 };

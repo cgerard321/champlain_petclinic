@@ -28,7 +28,6 @@ public class ImageServiceImpl implements ImageService{
     @Override
     public Mono<ImageResponseModel> addImage(String imageName, String imageType, FilePart imageData) {
         return EntityModelUtil.handleAddImage(imageName, imageType, imageData)
-//                .filter(imageRequestModel -> imageRequestModel.getImageData() != null)
                 .filter(imageRequestModel -> imageRequestModel.getImageType().equals("image/jpeg") ||
                         imageRequestModel.getImageType().equals("image/png") ||
                         imageRequestModel.getImageType().equals("image/jpg"))

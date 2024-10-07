@@ -322,7 +322,7 @@ export default function AdminBillsListTable(): JSX.Element {
           <button onClick={handleEditClick}>Edit Bill</button>
         </div>
       ) : (
-        <div className="container">
+        <div className="admin-bills-list-table-container">
           <table className="table table-striped">
             <thead>
               <tr>
