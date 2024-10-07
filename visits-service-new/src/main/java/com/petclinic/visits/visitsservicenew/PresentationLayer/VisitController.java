@@ -28,7 +28,6 @@ import reactor.core.publisher.Mono;
 public class VisitController {
     /**
      * We are Accessing the Controller
-     *
      */
     private final VisitService visitService;
     private final ReviewService reviewService;
@@ -37,20 +36,23 @@ public class VisitController {
     /**
      * Simple Get all Visits
      * Accessible through localhost:8080/visits
+     *
      * @return All visits
      */
     @GetMapping(value="", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<VisitResponseDTO> getAllVisits(){
-        return visitService.getAllVisits();
+    public Flux<VisitResponseDTO> getAllVisits(@RequestParam(required = false) String description){
+
+        return visitService.getAllVisits(description);
     }
 
     /**
      * Get all the visits with the vet ID given
      * localhost:8080/visits/practitioner/{VET_ID}
+     *
      * @param practitionerId The Vet ID
      * @return List of visits that have the Given vetID
      */
-    @GetMapping(value="practitioner/{practitionerId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(value = "practitioner/{practitionerId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<VisitResponseDTO> getVisitsByPractitionerId(@PathVariable String practitionerId) {
         return visitService.getVisitsForPractitioner(practitionerId);
     }
@@ -58,33 +60,36 @@ public class VisitController {
     /**
      * Get all the visits with the pet ID given
      * localhost:8080/visits/pets/{petID}
+     *
      * @param petId The Pet id to find the visit for
      * @return All the visit with the common pet ID
      */
-    @GetMapping(value="/pets/{petId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<VisitResponseDTO> getVisitsForPet(@PathVariable String petId){
+    @GetMapping(value = "/pets/{petId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<VisitResponseDTO> getVisitsForPet(@PathVariable String petId) {
         return visitService.getVisitsForPet(petId);
     }
 
     /**
      * Get all the visits by their status ( EX : DataLayer/Status ( ENUM ) )
      * localhost:8080/visits/status/{Status.toString}
+     *
      * @param status The status we are searching for
      * @return All the visits with the status we searched for
      */
     @GetMapping(value = "/status/{status}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<VisitResponseDTO> getVisitsForStatus(@PathVariable String status){
+    public Flux<VisitResponseDTO> getVisitsForStatus(@PathVariable String status) {
         return visitService.getVisitsForStatus(status);
     }
 
     /**
      * Get a visit by its ID
      * localhost:8080/visits/{searchedVisitID}
+     *
      * @param visitId The ID of the visit we are searching for
      * @return The visit we searched for or a not found exception
      */
     @GetMapping("/{visitId}")
-    public Mono<ResponseEntity<VisitResponseDTO>> getVisitByVisitId(@PathVariable String visitId){
+    public Mono<ResponseEntity<VisitResponseDTO>> getVisitByVisitId(@PathVariable String visitId) {
         return visitService.getVisitByVisitId(visitId)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
@@ -100,41 +105,45 @@ public class VisitController {
     /**
      * Add a new visit. ALSO SEND AN EMAIL
      * localhost:8080/visits @POST
+     *
      * @param visitRequestDTOMono The Request DTO
      * @return The response model of the visit we created
      */
     @PostMapping("")
-    public Mono<VisitResponseDTO> addVisit(@RequestBody Mono<VisitRequestDTO> visitRequestDTOMono){
+    public Mono<VisitResponseDTO> addVisit(@RequestBody Mono<VisitRequestDTO> visitRequestDTOMono) {
         return visitService.addVisit(visitRequestDTOMono);
     }
 
     /**
      * Replace the information of a visit ( Not visit ID )
      * localhost:8080/visits,{existing visit ID} @PUT
-     * @param visitId The visit we want to modify
+     *
+     * @param visitId             The visit we want to modify
      * @param visitRequestDTOMono The new body of the visit
      * @return The new modified visit
      */
     @PutMapping(value = "/{visitId}", consumes = "application/json", produces = "application/json")
-    public Mono<VisitResponseDTO> updateVisitByVisitId(@PathVariable String visitId, @RequestBody Mono<VisitRequestDTO> visitRequestDTOMono){
+    public Mono<VisitResponseDTO> updateVisitByVisitId(@PathVariable String visitId, @RequestBody Mono<VisitRequestDTO> visitRequestDTOMono) {
         return visitService.updateVisit(visitId, visitRequestDTOMono);
     }
 
     /**
      * Change the status of a visit
      * localhost:8080/visits/{existing visit ID}/status/{new Status} @PUT
+     *
      * @param visitId The visit ID of the visit we want to change the status
-     * @param status The new status DataLayer/Status.toString
+     * @param status  The new status DataLayer/Status.toString
      * @return The modified Visit
      */
     @PutMapping(value = "/{visitId}/status/{status}", produces = "application/json")
-    public Mono<VisitResponseDTO> updateStatusForVisitByVisitId(@PathVariable String visitId, @PathVariable String status){
+    public Mono<VisitResponseDTO> updateStatusForVisitByVisitId(@PathVariable String visitId, @PathVariable String status) {
         return visitService.updateStatusForVisitByVisitId(visitId, status);
     }
 
     /**
      * Delete a visit by its ID
      * localhost:8080/visits/{visitId} @DEL
+     *
      * @param visitId The ID of the visit we want to delete
      * @return The body of the visit we just deleted
      */
@@ -147,22 +156,23 @@ public class VisitController {
     /**
      * Delete all visit whose status DataLayer/Status is Cancelled
      * localhost:8080/visits/{visitId} @DEL
+     *
      * @return Deleted Visits
      */
     @DeleteMapping("/cancelled")
-    public Mono<ResponseEntity<Void>> deleteAllCancelLedVisits(){
+    public Mono<ResponseEntity<Void>> deleteAllCancelLedVisits() {
         return visitService.deleteAllCancelledVisits()
                 .then(Mono.just(new ResponseEntity<Void>(HttpStatus.NO_CONTENT)));
     }
 
 
     @GetMapping(value = "/reviews")
-    public Flux<ReviewResponseDTO> getAllReviews(){
+    public Flux<ReviewResponseDTO> getAllReviews() {
         return reviewService.GetAllReviews();
     }
 
-    @GetMapping(value="/reviews/{reviewId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<ReviewResponseDTO>> getReviewByReviewId(@PathVariable String reviewId){
+    @GetMapping(value = "/reviews/{reviewId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<ReviewResponseDTO>> getReviewByReviewId(@PathVariable String reviewId) {
         return Mono.just(reviewId)
                 .filter(id -> id.length() == 36)
                 .switchIfEmpty(Mono.error(new InvalidInputException("the provided review id is invalid: " + reviewId)))
@@ -172,49 +182,42 @@ public class VisitController {
     }
 
     @PostMapping(value = "/reviews")
-    public Mono<ResponseEntity<ReviewResponseDTO>> PostReview(@RequestBody Mono<ReviewRequestDTO> reviewRequestDTOMono){
+    public Mono<ResponseEntity<ReviewResponseDTO>> PostReview(@RequestBody Mono<ReviewRequestDTO> reviewRequestDTOMono) {
         return reviewService.AddReview(reviewRequestDTOMono)
-                .map(c->ResponseEntity.status(HttpStatus.CREATED).body(c))
+                .map(c -> ResponseEntity.status(HttpStatus.CREATED).body(c))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
-    @PutMapping(value="/reviews/{reviewId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<ReviewResponseDTO>> UpdateReview(@RequestBody Mono<ReviewRequestDTO> reviewRequestDTOMono, @PathVariable String reviewId){
+    @PutMapping(value = "/reviews/{reviewId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<ReviewResponseDTO>> UpdateReview(@RequestBody Mono<ReviewRequestDTO> reviewRequestDTOMono, @PathVariable String reviewId) {
         return Mono.just(reviewId)
                 .filter(id -> id.length() == 36)
                 .switchIfEmpty(Mono.error(new InvalidInputException("the provided review id is invalid: " + reviewId)))
-                .flatMap(id-> reviewService.UpdateReview(reviewRequestDTOMono,reviewId))
+                .flatMap(id -> reviewService.UpdateReview(reviewRequestDTOMono, reviewId))
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
-    @DeleteMapping(value="/reviews/{reviewId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @DeleteMapping(value = "/reviews/{reviewId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<ReviewResponseDTO>> DeteleReview(@PathVariable String reviewId) {
         return Mono.just(reviewId)
-                .filter(id -> id.length() == 36)
+               // .filter(id -> id.length() == 36)
                 .switchIfEmpty(Mono.error(new InvalidInputException("the provided review id is invalid: " + reviewId)))
                 .flatMap(reviewService::DeleteReview)
                 .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.badRequest().build());
-    }
-
-    @DeleteMapping(value = "/completed/{visitId}")
-    public Mono<ResponseEntity<Void>> deleteCompletedVisitByVisitId(@PathVariable String visitId){
-        return visitService.deleteCompletedVisitByVisitId(visitId)
-                .then(Mono.just(new ResponseEntity<Void>(HttpStatus.NO_CONTENT)))
-                .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));// Return 404 if NotFoundException is thrown
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
 
     //Emergency
 
     @GetMapping(value = "/emergency")
-    public Flux<EmergencyResponseDTO> getAllEmergency(){
+    public Flux<EmergencyResponseDTO> getAllEmergency() {
         return emergencyService.GetAllEmergencies();
     }
 
-    @GetMapping(value="/emergency/{emergencyId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<EmergencyResponseDTO>> getEmergencyByEmergencyId(@PathVariable String emergencyId){
+    @GetMapping(value = "/emergency/{emergencyId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<EmergencyResponseDTO>> getEmergencyByEmergencyId(@PathVariable String emergencyId) {
         return Mono.just(emergencyId)
                 //.filter(id -> id.length() == 36)
                 //.switchIfEmpty(Mono.error(new InvalidInputException("the provided emergency id is invalid: " + emergencyId)))
@@ -224,31 +227,48 @@ public class VisitController {
     }
 
     @PostMapping(value = "/emergency")
-    public Mono<ResponseEntity<EmergencyResponseDTO>> PostEmergency(@RequestBody Mono<EmergencyRequestDTO> emergencyRequestDTOMono){
+    public Mono<ResponseEntity<EmergencyResponseDTO>> PostEmergency(@RequestBody Mono<EmergencyRequestDTO> emergencyRequestDTOMono) {
         return emergencyService.AddEmergency(emergencyRequestDTOMono)
-                .map(c->ResponseEntity.status(HttpStatus.CREATED).body(c))
+                .map(c -> ResponseEntity.status(HttpStatus.CREATED).body(c))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
-    @PutMapping(value="/emergency/{emergencyId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<EmergencyResponseDTO>> UpdateEmergency(@RequestBody Mono<EmergencyRequestDTO> emergencyRequestDTOMono, @PathVariable String emergencyId){
+    @PutMapping(value = "/emergency/{emergencyId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<EmergencyResponseDTO>> UpdateEmergency(@RequestBody Mono<EmergencyRequestDTO> emergencyRequestDTOMono, @PathVariable String emergencyId) {
         return Mono.just(emergencyId)
                 //.filter(id -> id.length() == 36)
                 //.switchIfEmpty(Mono.error(new InvalidInputException("the provided emergency id is invalid: " + emergencyId)))
-                .flatMap(id-> emergencyService.UpdateEmergency(emergencyRequestDTOMono,emergencyId))
+                .flatMap(id -> emergencyService.UpdateEmergency(emergencyRequestDTOMono, emergencyId))
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
-    @DeleteMapping(value="/emergency/{emergencyId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @DeleteMapping(value = "/emergency/{emergencyId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<EmergencyResponseDTO>> DeteleEmergency(@PathVariable String emergencyId) {
         return Mono.just(emergencyId)
-               // .filter(id -> id.length() == 36)
-               // .switchIfEmpty(Mono.error(new InvalidInputException("the provided emergency id is invalid: " + emergencyId)))
+                // .filter(id -> id.length() == 36)
+                // .switchIfEmpty(Mono.error(new InvalidInputException("the provided emergency id is invalid: " + emergencyId)))
                 .flatMap(emergencyService::DeleteEmergency)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
+
+
+    @PutMapping(value = "/completed/{visitId}/archive", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<VisitResponseDTO>> archiveCompletedVisit(@PathVariable String visitId, @RequestBody Mono<VisitRequestDTO> visitRequestDTO) {
+        return Mono.just(visitId)
+                .switchIfEmpty(Mono.error(new InvalidInputException("the provided visit id is invalid: " + visitId)))
+                .flatMap(id -> visitService.archiveCompletedVisit(id, visitRequestDTO))
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
+    @GetMapping(value = "/archived", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<VisitResponseDTO> getAllArchivedVisits() {
+        return visitService.getAllArchivedVisits()
+                .switchIfEmpty(Mono.error(new NotFoundException("No archived visits found")));
+    }
+
 
 //    @GetMapping("/pets/{petId}")
 //    public Mono<PetResponseDTO> getPetByIdTest(@PathVariable int petId){
@@ -259,4 +279,13 @@ public class VisitController {
 //    public Mono<VetDTO> getVetByIdTest(@PathVariable String vetId){
 //        return visitService.testingGetVetDTO(vetId);
 //    }
+
+    @PatchMapping("/{visitId}/{status}")
+    public Mono<ResponseEntity<VisitResponseDTO>> updateVisitStatus(
+            @PathVariable String visitId, @PathVariable String status) {
+        return visitService.patchVisitStatusInVisit(visitId, status)
+                .map(visitResponseDTO -> new ResponseEntity<>(visitResponseDTO, HttpStatus.OK))
+                .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
 }

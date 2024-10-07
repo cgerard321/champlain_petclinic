@@ -8,6 +8,7 @@ import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -40,7 +41,7 @@ class ProductControllerIntegrationTest {
             .productName("Product 1")
             .productDescription("Product 1 Description")
             .productSalePrice(100.00)
-            .averageRating(0.0)
+            .averageRating(4.5)
             .productQuantity(2)
             .build();
 
@@ -49,7 +50,7 @@ class ProductControllerIntegrationTest {
             .productName("Product 2")
             .productDescription("Product 2 Description")
             .productSalePrice(50.00)
-            .averageRating(0.0)
+            .averageRating(3.0)
             .productQuantity(2)
             .build();
 
@@ -57,7 +58,7 @@ class ProductControllerIntegrationTest {
             .productName("Product 3")
             .productDescription("Product 3 Description")
             .productSalePrice(25.00)
-            .averageRating(0.0)
+            .averageRating(4.5)
             .productQuantity(2)
             .build();
 
@@ -89,6 +90,75 @@ class ProductControllerIntegrationTest {
                 .expectNextCount(2)
                 .verifyComplete();
     }
+    @Test
+    public void whenGetAllProductsSortedByRatingAsc_thenReturnProductsSortedAscending() {
+
+        // Save
+        productRepository.saveAll(List.of(product1, product2));
+
+        // Act
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder.path("/api/v1/products")
+                        .queryParam("sort", "asc")
+                        .build())
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType("text/event-stream;charset=UTF-8")
+                .expectBodyList(ProductResponseModel.class)
+                .value(productResponseModel -> {
+                    assertNotNull(productResponseModel);
+                    assertEquals(2, productResponseModel.size());
+                    assertEquals(product2.getProductId(), productResponseModel.get(0).getProductId());
+                    assertEquals(product1.getProductId(), productResponseModel.get(1).getProductId());
+                });
+    }
+    @Test
+    public void whenGetAllProductsSortedByRatingDesc_thenReturnProductsSortedDescending() {
+
+        // Save the products to the repository
+        productRepository.saveAll(List.of(product1, product2));
+        // Act
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder.path("/api/v1/products")
+                        .queryParam("sort", "desc")
+                        .build())
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType("text/event-stream;charset=UTF-8")
+                .expectBodyList(ProductResponseModel.class)
+                .value(productResponseModel -> {
+                    assertNotNull(productResponseModel);
+                    assertEquals(2, productResponseModel.size());
+                    assertEquals(product1.getProductId(), productResponseModel.get(0).getProductId());
+                    assertEquals(product2.getProductId(), productResponseModel.get(1).getProductId());
+                });
+    }
+
+    @Test
+    public void whenGetAllProductsWithInvalidSortParameter_thenReturnBadRequest() {
+        // Arrange
+        String invalidSortParameter = "invalidSort";
+
+        // Act & Assert
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder.path("/api/v1/products")
+                        .queryParam("sort", invalidSortParameter)
+                        .build())
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
+                .expectHeader().contentType("text/event-stream;charset=UTF-8")
+                .expectBody(String.class)
+                .value(responseBody -> {
+                    assertNotNull(responseBody);
+                    String expectedMessage = "Invalid sort parameter: " + invalidSortParameter;
+                    assertTrue(responseBody.contains(expectedMessage));
+                });
+    }
+
+
     @Test
     public void whenGetAllProducts_thenReturnAllProducts() {
         StepVerifier.create(productRepository.findAll())
@@ -214,7 +284,8 @@ class ProductControllerIntegrationTest {
                 .expectStatus().isNotFound()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.message").isEqualTo("Product id was not found: " + NON_EXISTENT_PRODUCT_ID);
+                .jsonPath("$.message").isEqualTo("Product id was not found: " +
+                        NON_EXISTENT_PRODUCT_ID);
 
         StepVerifier
                 .create(productRepository.findAll())
@@ -234,7 +305,8 @@ class ProductControllerIntegrationTest {
                 .expectStatus().is4xxClientError()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.message").isEqualTo("Provided product id is invalid: " + "INVALID_PRODUCT_ID");
+                .jsonPath("$.message").isEqualTo("Provided product id is invalid: " +
+                        INVALID_PRODUCT_ID);
 
         StepVerifier
                 .create(productRepository.findAll())
@@ -276,7 +348,8 @@ class ProductControllerIntegrationTest {
                 .expectStatus().isNotFound()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.message").isEqualTo("Product id was not found: " + NON_EXISTENT_PRODUCT_ID);
+                .jsonPath("$.message").isEqualTo("Product id was not found: " +
+                        NON_EXISTENT_PRODUCT_ID);
 
         StepVerifier
                 .create(productRepository.findAll())
@@ -294,7 +367,8 @@ class ProductControllerIntegrationTest {
                 .expectStatus().is4xxClientError()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.message").isEqualTo("Provided product id is invalid: " + INVALID_PRODUCT_ID);
+                .jsonPath("$.message").isEqualTo("Provided product id is invalid: " +
+                        INVALID_PRODUCT_ID);
 
         StepVerifier
                 .create(productRepository.findAll())
@@ -411,8 +485,4 @@ class ProductControllerIntegrationTest {
                 .exchange()
                 .expectStatus().isNotFound();
     }
-
-
-
-
 }

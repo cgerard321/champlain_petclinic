@@ -8,8 +8,9 @@ interface CartItemProps {
     event: React.ChangeEvent<HTMLInputElement>,
     index: number
   ) => void;
-  deleteItem: (indexToDelete: number) => void;
+  deleteItem: (productId: string, indexToDelete: number) => void;
   errorMessage?: string;
+  // addToWishlist: (item: ProductModel) => void;
 }
 
 const formatPrice = (price: number): string => {
@@ -21,31 +22,72 @@ const CartItem = ({
   index,
   changeItemQuantity,
   deleteItem,
+  // addToWishlist,
 }: CartItemProps): JSX.Element => {
+  // const handleDeleteItem = async (cartId: string, productId: string) => {
+  //   try {
+  //     const response = await fetch(
+  //       `localhost:8080/api/v2/gateway/carts/${cartId}/${productId}`,
+  //     {
+  //       method: 'DELETE',
+  //       headers:{
+  //         Accept: 'application/json',
+  //       },
+  //       credentials: 'include',
+  //     }
+  //     );
+  //   } catch(err){
+  //     console.log("Error deleting item in cart: ", err)
+  //   }
+  // }
   const remainingStock = item.productQuantity - (item.quantity ?? 0);
 
   return (
     <div className="CartItem">
-      <h4>{item.productName}</h4>
-      <p>{item.productDescription}</p>
-      <div className="CartItem-details">
-        <span>{formatPrice(item.productSalePrice)}</span>
-        <input
-          type="number"
-          min="1"
-          max={item.productQuantity}
-          value={item.quantity ?? 0}
-          onChange={e => changeItemQuantity(e, index)}
-        />
-        <button onClick={() => deleteItem(index)}>Remove</button>
+      <div className="CartItem-info">
+        <h2 className="info-title">{item.productName}</h2>
+        <p className="info-description">{item.productDescription}</p>
       </div>
-      {remainingStock <= 5 && remainingStock > 0 ? (
-        <div className="stock-message">
-          Only {remainingStock} items left in stock.
+      <div className="CartItem-details">
+        <div className="item-quantity">
+          <input
+            type="number"
+            min="1"
+            max={item.productQuantity}
+            value={item.quantity || 1}
+            onChange={e => changeItemQuantity(e, index)}
+            onBlur={e => changeItemQuantity(e, index)}
+            aria-label={`Quantity of ${item.productName}`}
+          />
         </div>
-      ) : remainingStock === 0 ? (
-        <div className="stock-message out-of-stock">Out of stock</div>
-      ) : null}
+        <span className="CartItem-price">
+          {formatPrice(item.productSalePrice)}
+        </span>
+        <button
+          className="delete-button"
+          onClick={() => deleteItem(item.productId, index)}
+          aria-label={`Remove ${item.productName} from cart`}
+        >
+          Remove
+        </button>
+        {/* <button 
+          className="wishlist-button" // Add a class for styling
+          onClick={() => addToWishlist(item)} // Call the addToWishlist function
+          aria-label={`Add ${item.productName} to wishlist`}
+        >
+          Add to Wishlist
+        </button> */}
+      </div>
+
+      <div className="stock-message-container">
+        {remainingStock <= 5 && remainingStock > 0 ? (
+          <div className="stock-message">
+            Only {remainingStock} items left in stock.
+          </div>
+        ) : remainingStock === 0 ? (
+          <div className="stock-message out-of-stock">Out of stock</div>
+        ) : null}
+      </div>
     </div>
   );
 };

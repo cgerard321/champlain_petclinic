@@ -15,23 +15,25 @@ import java.util.List;
 public interface CartService {
 
 
-    public Mono<CartResponseModel> getCartByCartId(String cartId);
-    public Flux<CartResponseModel> getAllCarts();
-//    Mono<CartResponseModel> updateCartByCartId(Mono<CartRequestModel> cartRequestModel, String cartId);
-    // Combining both features: clearCart and updateCartByCartId
+    Mono<CartResponseModel> getCartByCartId(String cartId);
+    Flux<CartResponseModel> getAllCarts();
     Flux<CartResponseModel> clearCart(String cartId);  // From feat/CART-CPC-1144_clear_cart_feature
-
-    //Mono<CartResponseModel> updateCartByCartId(Mono<CartRequestModel> cartRequestModel, String cartId);
 
     Mono<Integer> getCartItemCount(String cartId);
     Mono<CartResponseModel> deleteCartByCartId(String cartId);
+    Mono<CartResponseModel> removeProductFromCart(String cartId, String productId);
     Mono<CartResponseModel> addProductToCart(String cartId, String productId, int quantity);
     Mono<CartResponseModel> updateProductQuantityInCart(String cartId, String productId, int quantity);
 
     Mono<CartResponseModel> checkoutCart(String cartId);
 
-    public Mono<CartResponseModel> assignCartToCustomer(String customerId, List<CartProduct> products);
+    Mono<CartResponseModel> assignCartToCustomer(String customerId, List<CartProduct> products);
 
-    public Mono<CartResponseModel>  findCartByCustomerId(String customerId);
+    Mono<CartResponseModel>  findCartByCustomerId(String customerId);
+
+    //move product between cart and wishlist
+    Mono<CartResponseModel> moveProductFromCartToWishlist(String cartId, String productId);
+    Mono<CartResponseModel> moveProductFromWishListToCart(String cartId, String productId);
+
 }
 

@@ -34,35 +34,6 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
     private final InventoryTypeRepository inventoryTypeRepository;
     private final InventoryNameRepository inventoryNameRepository;
 
-//    @Override
-//    public Mono<ProductResponseDTO> addProductToInventory(Mono<ProductRequestDTO> productRequestDTOMono, String inventoryId) {
-//        return productRequestDTOMono
-//                .publishOn(Schedulers.boundedElastic())
-//                .flatMap(requestDTO -> inventoryRepository.findInventoryByInventoryId(inventoryId)
-//                        .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with id: " + inventoryId)))
-//                        .flatMap(inventory -> {
-//                            if (requestDTO.getProductName() == null || requestDTO.getProductPrice() == null || requestDTO.getProductQuantity() == null || requestDTO.getProductSalePrice() == null) {
-//                                return Mono.error(new InvalidInputException("Product must have an inventory id, product name, product price, and product quantity."));
-//                            } else if (requestDTO.getProductPrice() < 0 || requestDTO.getProductQuantity() < 0 || requestDTO.getProductSalePrice() < 0) {
-//                                return Mono.error(new InvalidInputException("Product price and quantity must be greater than 0."));
-//                            } else {
-//                                Product product = EntityDTOUtil.toProductEntity(requestDTO);
-//                                product.setInventoryId(inventoryId);
-//                                product.setProductId(EntityDTOUtil.generateUUID());
-//                                // Set Status based on the product quantity
-////                                if (product.getProductQuantity() == 0) {
-////                                    product.setStatus(Status.OUT_OF_STOCK);
-////                                } else if (product.getProductQuantity() < 20) {
-////                                    product.setStatus(Status.RE_ORDER);
-////                                } else {
-////                                    product.setStatus(Status.AVAILABLE);
-////                                }
-//                                return productRepository.save(product)
-//                                        .map(EntityDTOUtil::toProductResponseDTO);
-//                            }
-//                        }))
-//                .switchIfEmpty(Mono.error(new InvalidInputException("Unable to save product to the repository, an error occurred.")));
-//    }
 
     @Override
 
@@ -416,38 +387,6 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                 .switchIfEmpty(Mono.error(new NotFoundException("Inventory id:" + inventoryId + "and product:" + productId + "are not found")));
     }
 
-    @Override
-    public Mono<InventoryResponseDTO> addProductToInventoryByInventoryName(String inventoryName, Mono<ProductRequestDTO> productRequestDTOMono) {
-        return productRequestDTOMono
-                .flatMap(productRequestDTO ->
-                        inventoryRepository.findByInventoryName(inventoryName)
-                                .switchIfEmpty(Mono.error(new InventoryNotFoundException("No inventory found for name: " + inventoryName)))
-                                .flatMap(inventory -> {
-                                    Product product = toProductEntity(productRequestDTO);
-                                    product.setProductId(UUID.randomUUID().toString());
-                                    product.setInventoryId(inventory.getInventoryId());
-
-                                    inventory.addProduct(product);
-                                    return inventoryRepository.save(inventory);
-                                })
-                                .map(updatedInventory -> {
-
-                                    List<ProductResponseDTO> productResponseDTOs = updatedInventory.getProducts().stream()
-                                            .map(EntityDTOUtil::toProductResponseDTO)
-                                            .collect(Collectors.toList());
-
-                                    return new InventoryResponseDTO(
-                                            updatedInventory.getInventoryId(),
-                                            updatedInventory.getInventoryName(),
-                                            updatedInventory.getInventoryType(),
-                                            updatedInventory.getInventoryDescription(),
-                                            updatedInventory.getInventoryImage(),
-                                            updatedInventory.getInventoryBackupImage(),
-                                            productResponseDTOs
-                                    );
-                                })
-                );
-    }
 
     //delete all products and delete all inventory
     @Override
@@ -479,19 +418,6 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
     public Flux<InventoryTypeResponseDTO> getAllInventoryTypes() {
         return inventoryTypeRepository.findAll()
                 .map(EntityDTOUtil::toInventoryTypeResponseDTO);
-    }
-
-    @Override
-    public Flux<InventoryNameResponseDTO> getAllInventoryNames() {
-        return inventoryNameRepository.findAll()
-                .map(EntityDTOUtil::toInventoryNameResponseDTO);
-    }
-
-    @Override
-    public Flux<ProductResponseDTO> getProductsByInventoryName(String inventoryName) {
-        return inventoryRepository.findByInventoryName(inventoryName)
-                .flatMapMany(inventory -> Flux.fromIterable(inventory.getProducts()))
-                .map(EntityDTOUtil::toProductResponseDTO);
     }
   
   @Override
@@ -556,6 +482,21 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                         }))
                 .switchIfEmpty(Mono.error(new InvalidInputException("Unable to save supply to the inventory, an error occurred.")));
 
+    }
+
+    @Override
+    public Mono<ProductResponseDTO> consumeProduct(String inventoryId, String productId) {
+        return productRepository.findProductByInventoryIdAndProductId(inventoryId, productId)
+                .flatMap(product -> {
+                    if (product.getProductQuantity() - 1 < 0) {
+                        return Mono.error(new InvalidInputException("Not enough stock to consume."));
+                    } else {
+                        product.setProductQuantity(product.getProductQuantity() - 1);
+                        return productRepository.save(product)
+                                .map(EntityDTOUtil::toProductResponseDTO);
+                    }
+                })
+                .switchIfEmpty(Mono.error(new NotFoundException("Product not found with id: " + productId)));
     }
 
     @Override

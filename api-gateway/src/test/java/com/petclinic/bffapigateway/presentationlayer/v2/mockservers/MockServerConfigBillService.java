@@ -2,6 +2,8 @@ package com.petclinic.bffapigateway.presentationlayer.v2.mockservers;
 
 import org.mockserver.client.MockServerClient;
 import org.mockserver.integration.ClientAndServer;
+import org.mockserver.matchers.Times;
+import org.mockserver.model.Parameter;
 
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
@@ -16,6 +18,7 @@ public class MockServerConfigBillService {
         this.clientAndServer = ClientAndServer.startClientAndServer(BILL_SERVICE_SERVER_PORT);
     }
 
+
     public void registerGetAllBillsEndpoint() {
 
         String response = "["
@@ -25,14 +28,20 @@ public class MockServerConfigBillService {
 
         mockServerClient_BillService
                 .when(
-                    request()
-                            .withMethod("GET")
-                            .withPath("/bills")
+                        request()
+                                .withMethod("GET")
+                                .withPath("/bills")
+                                .withQueryStringParameters(
+                                        Parameter.param("page", "[0-9]+"), // Expecting digit characters for page
+                                        Parameter.param("size", "[0-9]+")  // Expecting digit characters for size
+                                ),
+                        Times.unlimited()
                 )
                 .respond(
                         response()
                                 .withStatusCode(200)
                                 .withBody(json(response))
+                                .withHeader("Content-Type", "application/json")
                 );
     }
 
@@ -52,22 +61,6 @@ public class MockServerConfigBillService {
                 );
     }
 
-    // public void registerDownloadBillPdfEndpoint() {
-    //     byte[] mockPdfContent = "Mock PDF Content".getBytes();  // Simulate PDF as byte array
-        
-    //     mockServerClient_BillService
-    //         .when(
-    //             request()
-    //                 .withMethod("GET")
-    //                 .withPath("/api/v2/gateway/customers/.*/bills/.*/pdf")  // Adjusted to match your test path
-    //         )
-    //         .respond(
-    //             response()
-    //                 .withStatusCode(200)
-    //                 .withBody(mockPdfContent)  // Send PDF content as byte array
-    //                 .withHeader("Content-Type", "application/pdf")  // Ensure correct Content-Type for PDF
-    //         );
-    // }
 
     public void registerDownloadBillPdfEndpoint() {
         byte[] mockPdfContent = "Mock PDF Content".getBytes();  
@@ -86,6 +79,23 @@ public class MockServerConfigBillService {
             );
     }
     
+
+    public void registerUpdateBillEndpoint() {
+        String response = "{\"billId\":\"e6c7398e-8ac4-4e10-9ee0-03ef33f0361a\",\"customerId\":\"e6c7398e-8ac4-4e10-9ee0-03ef33f0361a\",\"visitType\":\"operation\",\"vetId\":\"3\",\"date\":\"2024-10-11\",\"amount\":100.00, \"taxedAmount\": 0.0, \"billStatus\":\"PAID\", \"dueDate\":\"2024-10-13\"}";
+
+        mockServerClient_BillService
+                .when(
+                        request()
+                                .withMethod("PUT")
+                                .withPath("/bills/e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
+                                .withBody(json("{\"customerId\":\"e6c7398e-8ac4-4e10-9ee0-03ef33f0361a\",\"visitType\":\"operation\",\"vetId\":\"3\",\"date\":\"2024-10-11\",\"amount\":100.00, \"billStatus\":\"PAID\", \"dueDate\":\"2024-10-13\"}"))
+                )
+                .respond(
+                        response()
+                                .withStatusCode(200)
+                                .withBody(json(response))
+                );
+    }
 
     public void stopMockServer() {
         if(clientAndServer != null)

@@ -18,7 +18,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 @Service
-@Profile("!test")
 public class DataLoaderService implements CommandLineRunner {
 
     @Autowired
@@ -36,7 +35,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Premium dry food for adult dogs")
                 .productSalePrice(45.99)
                 .requestCount(0)
-                .averageRating(0.0)
+                .averageRating(1.3)
                 .productType("Food")
                 .productQuantity(44)
                 .build();
@@ -48,7 +47,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Clumping cat litter with odor control")
                 .productSalePrice(12.99)
                 .requestCount(0)
-                .averageRating(0.0)
+                .averageRating(4.8)
                 .productType("Accessory")
                 .productQuantity(3)
                 .build();
@@ -60,7 +59,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Flea and tick prevention for small dogs")
                 .productSalePrice(9.99)
                 .requestCount(0)
-                .averageRating(0.0)
+                .averageRating(2.8)
                 .productType("Medication")
                 .productQuantity(53)
                 .build();
@@ -72,7 +71,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Spacious cage for small birds like parakeets")
                 .productSalePrice(29.99)
                 .requestCount(0)
-                .averageRating(0.0)
+                .averageRating(1.3)
                 .productType("Accessory")
                 .productQuantity(8)
                 .build();
@@ -84,7 +83,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Filter system for small to medium-sized aquariums")
                 .productSalePrice(19.99)
                 .requestCount(0)
-                .averageRating(0.0)
+                .averageRating(4.9)
                 .productType("Accessory")
                 .productQuantity(14)
                 .build();
@@ -96,7 +95,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Lightweight saddle for riding horses")
                 .productSalePrice(199.99)
                 .requestCount(0)
-                .averageRating(0.0)
+                .averageRating(4.7)
                 .productType("Equipment")
                 .productQuantity(58)
                 .build();
@@ -108,7 +107,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Outdoor wooden hutch for rabbits")
                 .productSalePrice(79.99)
                 .requestCount(0)
-                .averageRating(0.0)
+                .averageRating(3.4)
                 .productType("Accessory")
                 .productQuantity(66)
                 .build();
@@ -120,9 +119,9 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Submersible heater for tropical fish tanks")
                 .productSalePrice(14.99)
                 .requestCount(0)
-                .averageRating(0.0)
+                .averageRating(1.2)
                 .productType("Accessory")
-                .productQuantity(6)
+                .productQuantity(0)
                 .build();
 
         Resource resource1 = new ClassPathResource("images/dog_food.jpg");

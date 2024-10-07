@@ -29,4 +29,7 @@ public interface VisitRepo extends ReactiveMongoRepository<Visit, String> {
 
     // In your VisitRepo interface
     Flux<Visit> findByVisitDateAndPractitionerId(LocalDateTime visitDate, String practitionerId);
+
+    Flux<Visit> findVisitsByDescriptionContainingIgnoreCase(String Description);
+
 }

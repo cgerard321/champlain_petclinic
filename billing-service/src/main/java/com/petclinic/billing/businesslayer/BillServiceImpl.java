@@ -12,7 +12,9 @@ import com.petclinic.billing.util.PdfGenerator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -47,10 +49,41 @@ public class BillServiceImpl implements BillService{
                 .map(EntityDtoUtil::toBillResponseDto);
     }
 
+//    @Override
+//    public Flux<BillResponseDTO> getAllBillsByPage(Pageable pageable, String billId, String customerId,
+//                                                   String ownerFirstName, String ownerLastName, String visitType,
+//                                                   String vetId, String vetFirstName, String vetLastName) {
+//        Predicate<Bill> filterCriteria = bill ->
+//                (billId == null || bill.getBillId().equals(billId)) &&
+//                        (customerId == null || bill.getCustomerId().equals(customerId)) &&
+//                        (ownerFirstName == null || bill.getOwnerFirstName().equals(ownerFirstName)) &&
+//                        (ownerLastName == null || bill.getOwnerLastName().equals(ownerLastName)) &&
+//                        (visitType == null || bill.getVisitType().equals(visitType)) &&
+//                        (vetId == null || bill.getVetId().equals(vetId)) &&
+//                        (vetFirstName == null || bill.getVetFirstName().equals(vetFirstName)) &&
+//                        (vetLastName == null || bill.getVetLastName().equals(vetLastName));
+//
+//
+//        if(billId == null && customerId == null && ownerFirstName == null && ownerLastName == null && visitType == null
+//                && vetId == null && vetFirstName == null && vetLastName == null){
+//            return billRepository.findAll()
+//                    .map(EntityDtoUtil::toBillResponseDto)
+//                    .skip(pageable.getPageNumber() * pageable.getPageSize())
+//                    .take(pageable.getPageSize());
+//        } else {
+//            return billRepository.findAll()
+//                    .filter(filterCriteria)
+//                    .map(EntityDtoUtil::toBillResponseDto)
+//                    .skip(pageable.getPageNumber() * pageable.getPageSize())
+//                    .take(pageable.getPageSize());
+//        }
+//    }
+
     @Override
     public Flux<BillResponseDTO> getAllBillsByPage(Pageable pageable, String billId, String customerId,
                                                    String ownerFirstName, String ownerLastName, String visitType,
                                                    String vetId, String vetFirstName, String vetLastName) {
+
         Predicate<Bill> filterCriteria = bill ->
                 (billId == null || bill.getBillId().equals(billId)) &&
                         (customerId == null || bill.getCustomerId().equals(customerId)) &&
@@ -61,20 +94,11 @@ public class BillServiceImpl implements BillService{
                         (vetFirstName == null || bill.getVetFirstName().equals(vetFirstName)) &&
                         (vetLastName == null || bill.getVetLastName().equals(vetLastName));
 
-
-        if(billId == null && customerId == null && ownerFirstName == null && ownerLastName == null && visitType == null
-                && vetId == null && vetFirstName == null && vetLastName == null){
-            return billRepository.findAll()
-                    .map(EntityDtoUtil::toBillResponseDto)
-                    .skip(pageable.getPageNumber() * pageable.getPageSize())
-                    .take(pageable.getPageSize());
-        } else {
-            return billRepository.findAll()
-                    .filter(filterCriteria)
-                    .map(EntityDtoUtil::toBillResponseDto)
-                    .skip(pageable.getPageNumber() * pageable.getPageSize())
-                    .take(pageable.getPageSize());
-        }
+        return billRepository.findAll()
+                .filter(filterCriteria)
+                .skip(pageable.getPageNumber() * pageable.getPageSize())
+                .take(pageable.getPageSize())
+                .map(EntityDtoUtil::toBillResponseDto);
     }
 
     @Override
@@ -140,7 +164,13 @@ public class BillServiceImpl implements BillService{
 
     @Override
     public Mono<Void> DeleteBill(String billId) {
-        return billRepository.deleteBillByBillId(billId);
+        return billRepository.findByBillId(billId)
+                .flatMap(bill -> {
+                    if (bill.getBillStatus() == BillStatus.UNPAID || bill.getBillStatus() == BillStatus.OVERDUE) {
+                        return Mono.error(new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Cannot delete a bill that is unpaid or overdue."));
+                    }
+                    return billRepository.deleteBillByBillId(billId);
+                });
     }
 
 
@@ -182,6 +212,7 @@ public class BillServiceImpl implements BillService{
 //                        .thenReturn(rc);
 //    }
 
+
     // Fetch a specific bill for a customer
     @Override
     public Mono<BillResponseDTO> GetBillByCustomerIdAndBillId(String customerId, String billId) {
@@ -212,4 +243,10 @@ public class BillServiceImpl implements BillService{
                     }
                 });
     }
+
+
+
+
+
+
 }

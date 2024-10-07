@@ -23,14 +23,17 @@ public class ProductController {
     @GetMapping(value = "", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ProductResponseModel> getAllProducts(
             @RequestParam(required = false) Double minPrice,
-            @RequestParam(required = false) Double maxPrice) {
-        return productService.getAllProducts(minPrice, maxPrice);
+            @RequestParam(required = false) Double maxPrice,
+            @RequestParam(required = false) Double minRating,
+            @RequestParam(required = false) Double maxRating,
+            @RequestParam(required = false) String sort) {
+        return productService.getAllProducts(minPrice, maxPrice, minRating, maxRating, sort);
     }
 
     @GetMapping(value = "/{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<ProductResponseModel>> getProductByProductId(@PathVariable String productId) {
         return Mono.just(productId)
-                .filter(id -> id.length() == 36) // validate the product id
+                .filter(id -> id.length() == 36)
                 .switchIfEmpty(Mono.error(new InvalidInputException("Provided product id is invalid: " + productId)))
                 .flatMap(productService::getProductByProductId)
                 .map(ResponseEntity::ok);
@@ -62,7 +65,7 @@ public class ProductController {
     @DeleteMapping(value = "/{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<ProductResponseModel>> deleteProduct(@PathVariable String productId) {
         return Mono.just(productId)
-                .filter(id -> id.length() == 36) // validate the product id
+                .filter(id -> id.length() == 36)
                 .switchIfEmpty(Mono.error(new InvalidInputException("Provided product id is invalid: " + productId)))
                 .flatMap(productService::deleteProductByProductId)
                 .map(ResponseEntity::ok)

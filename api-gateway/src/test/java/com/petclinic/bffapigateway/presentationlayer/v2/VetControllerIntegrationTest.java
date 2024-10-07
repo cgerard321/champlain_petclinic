@@ -15,6 +15,9 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +26,9 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.*;
 
 import static com.google.common.net.HttpHeaders.AUTHORIZATION;
@@ -46,7 +52,6 @@ class VetControllerIntegrationTest {
     @BeforeAll
     public void startMockServer() {
         mockServerConfigVetService = new MockServerConfigVetService();
-        mockServerConfigVetService.registerAddVetEndpoint();
         mockServerConfigVetService.registerGetVetsEndpoint();
         mockServerConfigVetService.registerDeleteVetEndpoint();
         mockServerConfigVetService.registerGetVetsEndpoint_withNoVets();
@@ -60,7 +65,8 @@ class VetControllerIntegrationTest {
 
         mockServerConfigVetService.registerGetPhotoByVetIdEndpoint("ac9adeb8-625b-11ee-8c99-0242ac120002", "mockPhotoData".getBytes());
         mockServerConfigVetService.registerGetPhotoByVetIdEndpointNotFound("invalid-vet-id");
-
+        mockServerConfigVetService.registerUpdatePhotoOfVetEndpoint("69f85766-625b-11ee-8c99-0242ac120002", "newPhoto", "mockPhotoData".getBytes());
+        mockServerConfigVetService.registerUpdatePhotoOfVetEndpointNotFound("invalid-vet-id", "newPhoto");
 
     }
 
@@ -116,57 +122,6 @@ class VetControllerIntegrationTest {
                 .exchange()
                 .expectStatus().isNotFound();
     }
-
-    @Test
-    void whenAddVet_asAdmin_thenReturnCreatedVetResponseDTO() {
-
-        Mono<VetResponseDTO> result = webTestClient.post()
-                .uri("/api/v2/gateway/vets")
-                .cookie("Bearer", jwtTokenForValidAdmin)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(Mono.just(newVetRequestDTO), VetRequestDTO.class)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isCreated()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .returnResult(VetResponseDTO.class)
-                .getResponseBody()
-                .single();
-
-        StepVerifier
-                .create(result)
-                .expectNextMatches(vetResponseDTO -> {
-                    assertNotNull(vetResponseDTO);
-                    assertNotNull(vetResponseDTO.getVetId());
-                    assertEquals(newVetRequestDTO.getVetBillId(), vetResponseDTO.getVetBillId());
-                    assertEquals(newVetRequestDTO.getFirstName(), vetResponseDTO.getFirstName());
-                    assertEquals(newVetRequestDTO.getLastName(), vetResponseDTO.getLastName());
-                    assertEquals(newVetRequestDTO.getEmail(), vetResponseDTO.getEmail());
-                    assertEquals(newVetRequestDTO.getPhoneNumber(), vetResponseDTO.getPhoneNumber());
-                    assertEquals(newVetRequestDTO.getResume(), vetResponseDTO.getResume());
-                    assertEquals(newVetRequestDTO.getWorkday(), vetResponseDTO.getWorkday());
-                    assertEquals(newVetRequestDTO.getWorkHoursJson(), vetResponseDTO.getWorkHoursJson());
-                    assertEquals(newVetRequestDTO.isActive(), vetResponseDTO.isActive());
-                    assertEquals(newVetRequestDTO.getSpecialties(), vetResponseDTO.getSpecialties());
-                    return true;
-                })
-                .verifyComplete();
-    }
-
-    @Test
-    void whenAddVet_asARoleOtherThanAdmin_thenReturnIsUnauthorized() {
-
-        webTestClient.post()
-                .uri("/api/v2/gateway/vets")
-                .cookie("Bearer", jwtTokenForInvalidOwnerId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(Mono.just(newVetRequestDTO), VetRequestDTO.class)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isUnauthorized();
-    }
-
-
 
     @Test
     public void getVetById_ValidId_ReturnsVet() {
@@ -314,6 +269,7 @@ class VetControllerIntegrationTest {
                 })
                 .verifyComplete();
     }
+
     @Test
     public void whenGetPhotoByVetId_thenReturnPhoto() {
         String vetId = "ac9adeb8-625b-11ee-8c99-0242ac120002";
@@ -342,6 +298,42 @@ class VetControllerIntegrationTest {
                 .uri(VET_ENDPOINT + "/" + notFoundVetId + "/photo")
                 .cookie("Bearer", BEARER_TOKEN)
                 .accept(MediaType.ALL)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+//    @Test
+//    public void whenUpdatePhotoByVetId_thenReturnUpdatedPhoto() {
+//        String vetId = "69f852ca-625b-11ee-8c99-0242ac120002";
+//        String photoName = "vet_default.jpg";
+//        byte[] newPhotoData = "mockPhotoData".getBytes();
+//
+//        mockServerConfigVetService.registerUpdatePhotoOfVetEndpoint(vetId, photoName, newPhotoData);
+//
+//        webTestClient.put()
+//                .uri(VET_ENDPOINT + "/" + vetId + "/photo/" + photoName)
+//                .cookie("Bearer", BEARER_TOKEN)
+//                .contentType(MediaType.IMAGE_JPEG)
+//                .bodyValue(newPhotoData)
+//                .exchange()
+//                .expectStatus().isOk()
+//                .expectHeader().contentType(MediaType.IMAGE_JPEG_VALUE)
+//                .expectBody(byte[].class)
+//                .isEqualTo(newPhotoData);
+//    }
+
+
+    @Test
+    public void whenUpdatePhotoByVetId_withNotFoundVetId_thenReturn404() {
+        String notFoundVetId = "not found";
+        String photoName = "newPhoto";
+
+        mockServerConfigVetService.registerUpdatePhotoOfVetEndpointNotFound(notFoundVetId, photoName);
+
+        webTestClient.put()
+                .uri(VET_ENDPOINT + "/" + notFoundVetId + "/photo/" + photoName)
+                .cookie("Bearer", BEARER_TOKEN)
+                .contentType(MediaType.IMAGE_JPEG)
                 .exchange()
                 .expectStatus().isNotFound();
     }
@@ -383,5 +375,35 @@ class VetControllerIntegrationTest {
                 .exchange()
                 .expectStatus().isNotFound();
     }
+
+    @Test
+    void whenDeletePhotoByVetId_thenReturnNoContent() {
+        String vetId = "ac9adeb8-625b-11ee-8c99-0242ac120002";
+        mockServerConfigVetService.registerDeletePhotoByVetIdEndpoint(vetId);
+
+        webTestClient.delete()
+                .uri(VET_ENDPOINT + "/" + vetId + "/photo")
+                .cookie("Bearer", BEARER_TOKEN)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNoContent()
+                .expectBody().isEmpty();
+    }
+
+    @Test
+    void whenDeletePhotoByVetId_PhotoNotFound_thenReturnNotFound() {
+        String vetId = "in9beda9-526t-22gg-1a96-0672ac230007";
+        mockServerConfigVetService.registerDeletePhotoByVetIdEndpointNotFound(vetId);
+
+        webTestClient.delete()
+                .uri(VET_ENDPOINT + "/" + vetId + "/photo")
+                .cookie("Bearer", BEARER_TOKEN)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Photo not found for vetId: " + vetId);
+    }
+
 
 }

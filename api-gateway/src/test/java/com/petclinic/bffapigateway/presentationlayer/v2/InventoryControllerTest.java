@@ -631,4 +631,124 @@ public class InventoryControllerTest {
                 .getQuantityOfProductsInInventory(eq(inventoryId));
     }
 
+    @Test
+    void addSupplyToInventory_withInvalidRequest_shouldReturnBadRequest() {
+        // Arrange
+        ProductRequestDTO invalidProductRequestDTO = ProductRequestDTO.builder()
+                .productName("")
+                .productDescription("")
+                .productPrice(-10.0)
+                .build();
+
+        String inventoryId = "1"; // Define the inventoryId
+
+        when(inventoryServiceClient.addSupplyToInventory(invalidProductRequestDTO, inventoryId))
+                .thenReturn(Mono.empty());
+
+        // Act
+        client.post()
+                .uri(baseInventoryURL + "/" + inventoryId + "/products") // Use the inventoryId variable
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(invalidProductRequestDTO)
+                .exchange()
+                .expectStatus().isBadRequest();
+
+        // Assert
+        verify(inventoryServiceClient, times(1))
+                .addSupplyToInventory(invalidProductRequestDTO, inventoryId);
+    }
+
+    @Test
+    void addSupplyToInventory_withValidRequest_shouldReturnCreatedProduct() {
+        // Arrange
+        ProductRequestDTO productRequestDTO = ProductRequestDTO.builder()
+                .productName("Product 101")
+                .productDescription("Description of Product 101")
+                .productPrice(99.99)
+                .build();
+
+        String inventoryId = "1"; // Define the inventoryId
+
+        ProductResponseDTO createdProductResponseDTO = ProductResponseDTO.builder()
+                .productId("101")
+                .productName("Product 101")
+                .productDescription("Description of Product 101")
+                .productPrice(99.99)
+                .build();
+
+        when(inventoryServiceClient.addSupplyToInventory(productRequestDTO, inventoryId))
+                .thenReturn(Mono.just(createdProductResponseDTO));
+
+        // Act
+        client.post()
+                .uri(baseInventoryURL + "/" + inventoryId + "/products") // Use the inventoryId variable
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(productRequestDTO)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody(ProductResponseDTO.class)
+                .isEqualTo(createdProductResponseDTO);
+
+        // Assert
+        verify(inventoryServiceClient, times(1))
+                .addSupplyToInventory(productRequestDTO, inventoryId);
+    }
+
+
+    @Test
+    void consumeProduct_withValidData_shouldReturnUpdatedProduct() {
+        // Arrange
+        String inventoryId = "1";
+        String productId = "101";
+        ProductRequestDTO productRequestDTO = ProductRequestDTO.builder()
+                .productName("Product 101")
+                .productDescription("Description of Product 101")
+                .productPrice(99.99)
+                .build();
+
+        ProductResponseDTO updatedProductResponseDTO = ProductResponseDTO.builder()
+                .productId(productId)
+                .productName("Product 101")
+                .productDescription("Description of Product 101")
+                .productPrice(99.99)
+                .build();
+
+        when(inventoryServiceClient.consumeProduct(inventoryId, productId))
+                .thenReturn(Mono.just(updatedProductResponseDTO));
+
+        // Act
+        client.patch()
+                .uri(baseInventoryURL + "/" + inventoryId + "/products/" + productId + "/consume")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(productRequestDTO)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(ProductResponseDTO.class)
+                .isEqualTo(updatedProductResponseDTO);
+
+        // Assert
+        verify(inventoryServiceClient, times(1))
+                .consumeProduct(inventoryId, productId);
+    }
+
+    @Test
+    void consumeProduct_withInvalidData_shouldReturnNotFound() {
+        // Arrange
+        String inventoryId = "1";
+        String invalidProductId = "999";
+        when(inventoryServiceClient.consumeProduct(inventoryId, invalidProductId))
+                .thenReturn(Mono.empty());
+
+        // Act
+        client.patch()
+                .uri(baseInventoryURL + "/" + inventoryId + "/products/" + invalidProductId + "/consume")
+                .contentType(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound();
+
+        // Assert
+        verify(inventoryServiceClient, times(1))
+                .consumeProduct(inventoryId, invalidProductId);
+    }
+
 }

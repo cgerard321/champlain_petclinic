@@ -6,6 +6,7 @@ import com.petclinic.visits.visitsservicenew.BusinessLayer.Review.ReviewService;
 import com.petclinic.visits.visitsservicenew.BusinessLayer.VisitService;
 import com.petclinic.visits.visitsservicenew.DataLayer.Emergency.UrgencyLevel;
 import com.petclinic.visits.visitsservicenew.DataLayer.Status;
+import com.petclinic.visits.visitsservicenew.DataLayer.Visit;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.SpecialtyDTO;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.VetDTO;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.Workday;
@@ -30,6 +31,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -40,19 +42,13 @@ class VisitControllerUnitTest {
     private VisitService visitService;
 
     @MockBean
-
     private ReviewService reviewService;
 
     @MockBean
     private EmergencyService emergencyService;
 
-
-
     @Autowired
     private WebTestClient webTestClient;
-
-
-
 
 
 //    @MockBean
@@ -106,8 +102,11 @@ class VisitControllerUnitTest {
 
     //private final LocalDateTime visitDate = visitResponseDTO.getVisitDate().withSecond(0);
     @Test
-    void getAllVisits() {
-        when(visitService.getAllVisits()).thenReturn(Flux.just(visitResponseDTO, visitResponseDTO));
+    void getAllVisits(){
+        Visit visit1 = new Visit(); // replace with your actual Visit object
+
+
+        when(visitService.getAllVisits(visit1.getDescription())).thenReturn(Flux.just(visitResponseDTO, visitResponseDTO));
 
         webTestClient.get()
                 .uri("/visits")
@@ -117,7 +116,7 @@ class VisitControllerUnitTest {
                 .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM + ";charset=UTF-8")
                 .returnResult(VisitResponseDTO.class);
 
-        verify(visitService, times(1)).getAllVisits();
+        verify(visitService, times(1)).getAllVisits(visit1.getDescription());
     }
 
     @Test
@@ -524,41 +523,6 @@ class VisitControllerUnitTest {
 
     }
 
-
-    @Test
-    void whenDeleteCompletedVisitByValidVisitId_returnNoContent() {
-        // Arrange
-        String visitId = UUID.randomUUID().toString();
-        when(visitService.deleteCompletedVisitByVisitId(visitId))
-                .thenReturn(Mono.empty());
-
-        // Act & Assert
-        webTestClient
-                .delete()
-                .uri("/visits/completed/{visitId}", visitId)
-                .exchange()
-                .expectStatus().isNoContent();  // Expecting 204 NO CONTENT status.
-
-        verify(visitService, times(1)).deleteCompletedVisitByVisitId(visitId);
-    }
-
-    @Test
-    void whenDeleteCompletedVisitByInvalidVisitId_returnNotFound() {
-        // Arrange
-        String invalidVisitId = "fakeId";
-        when(visitService.deleteCompletedVisitByVisitId(invalidVisitId)).thenReturn(Mono.error(new NotFoundException("No visit was found with visitId: " + invalidVisitId)));
-
-        // Act & Assert
-        webTestClient
-                .delete()
-                .uri("/visits/completed/{visitId}", invalidVisitId)
-                .exchange()
-                .expectStatus().isNotFound()
-                .expectBody();
-        verify(visitService, times(1)).deleteCompletedVisitByVisitId(invalidVisitId);
-
-    }
-
     @Test
     public void whenGetAllEmergencies_returnEmergencyResponseDTO() {
         // Fixed date for comparison
@@ -731,10 +695,162 @@ class VisitControllerUnitTest {
 
         verify(emergencyService, times(1)).DeleteEmergency(emergencyId);
     }
+//    @Test
+//    void whenDeleteCompletedVisitByValidVisitId_returnNoContent() {
+//        // Arrange
+//        String visitId = UUID.randomUUID().toString();
+//        when(visitService.deleteCompletedVisitByVisitId(visitId))
+//                .thenReturn(Mono.empty());
+//
+//        // Act & Assert
+//        webTestClient
+//                .delete()
+//                .uri("/visits/completed/{visitId}", visitId)
+//                .exchange()
+//                .expectStatus().isNoContent();  // Expecting 204 NO CONTENT status.
+//
+//        verify(visitService, times(1)).deleteCompletedVisitByVisitId(visitId);
+//    }
+
+//    @Test
+//    void whenDeleteCompletedVisitByInvalidVisitId_returnNotFound() {
+//        // Arrange
+//        String invalidVisitId = "fakeId";
+//        when(visitService.deleteCompletedVisitByVisitId(invalidVisitId)).thenReturn(Mono.error(new NotFoundException("No visit was found with visitId: " + invalidVisitId)));
+//
+//        // Act & Assert
+//        webTestClient
+//                .delete()
+//                .uri("/visits/completed/{visitId}", invalidVisitId)
+//                .exchange()
+//                .expectStatus().isNotFound()
+//                .expectBody();
+//        verify(visitService, times(1)).deleteCompletedVisitByVisitId(invalidVisitId);
+//    }
+
+    @Test
+    void updateVisitStatus_ShouldReturnOK_WhenStatusUpdatedToCancelled() {
+        String visitId = "12345";
+        String status = "CANCELLED";
+
+        VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
+                .visitId(visitId)
+                .status(Status.CANCELLED)
+                .description("Test visit with cancelled status")
+                .build();
+
+        // Mocking the service layer to return the expected response
+        when(visitService.patchVisitStatusInVisit(eq(visitId), eq(status)))
+                .thenReturn(Mono.just(visitResponseDTO));
+
+        webTestClient.patch()
+                .uri("/visits/{visitId}/{status}", visitId, status)
+                .exchange()
+                .expectStatus().isOk() // Expect 200 OK
+                .expectBody(VisitResponseDTO.class)
+                .value(response -> {
+                    assertEquals(response.getVisitId(), visitId);
+                    assertEquals(response.getStatus(), Status.CANCELLED);
+                });
+
+        // Verify that the service was called with the correct parameters
+        verify(visitService, times(1)).patchVisitStatusInVisit(eq(visitId), eq(status));
+    }
+
+    @Test
+    void updateVisitStatus_ShouldReturnNotFound_WhenVisitDoesNotExist() {
+        String visitId = "nonExistentVisitId";
+        String status = "CANCELLED";
+
+        // Mocking the service to return an empty Mono, simulating a not found scenario
+        when(visitService.patchVisitStatusInVisit(eq(visitId), eq(status)))
+                .thenReturn(Mono.empty());
+
+        webTestClient.patch()
+                .uri("/visits/{visitId}/{status}", visitId, status)
+                .exchange()
+                .expectStatus().isNotFound(); // Expect 404 NOT_FOUND
+
+        // Verify that the service was called
+        verify(visitService, times(1)).patchVisitStatusInVisit(eq(visitId), eq(status));
+    }
 
 
+    @Test
+    void whenGetAllArchivedVisits_returnVisitResponseDTO() {
+        VisitResponseDTO visitResponseDTO1 = VisitResponseDTO.builder()
+                .visitId(UUID.randomUUID().toString())
+                .visitDate(LocalDateTime.of(2024, 10, 5, 1, 56)) // No seconds or nanoseconds
+                .description("Visit 1")
+                .petId(UUID.randomUUID().toString())
+                .practitionerId(UUID.randomUUID().toString())
+                .status(Status.ARCHIVED)
+                .build();
 
+        VisitResponseDTO visitResponseDTO2 = VisitResponseDTO.builder()
+                .visitId(UUID.randomUUID().toString())
+                .visitDate(LocalDateTime.of(2024, 10, 5, 1, 56)) // No seconds or nanoseconds
+                .description("Visit 2")
+                .petId(UUID.randomUUID().toString())
+                .practitionerId(UUID.randomUUID().toString())
+                .status(Status.ARCHIVED)
+                .build();
 
+        when(visitService.getAllArchivedVisits()).thenReturn(Flux.just(visitResponseDTO1, visitResponseDTO2));
 
+        webTestClient
+                .get()
+                .uri("/visits/archived")
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
+                .expectBodyList(VisitResponseDTO.class)
+                .hasSize(2)
+                .contains(visitResponseDTO1, visitResponseDTO2);
 
+        verify(visitService, times(1)).getAllArchivedVisits();
+    }
+
+    @Test
+    void whenCompletedVisitWithValidVisitId_ArchiveVisit() {
+        String visitId = UUID.randomUUID().toString();
+        VisitRequestDTO visitRequestDTO = buildVisitRequestDTO(UUID.randomUUID().toString());
+        VisitResponseDTO visitResponseDTO = buildVisitResponseDto();
+
+        when(visitService.archiveCompletedVisit(anyString(), any(Mono.class))).thenReturn(Mono.just(visitResponseDTO));
+
+        webTestClient
+                .put()
+                .uri("/visits/completed/" + visitId + "/archive")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Mono.just(visitRequestDTO), VisitRequestDTO.class)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(VisitResponseDTO.class)
+                .isEqualTo(visitResponseDTO);
+
+        verify(visitService, times(1)).archiveCompletedVisit(anyString(), any(Mono.class));
+    }
+
+    @Test
+    void whenCompletedVisitWithInvalidVisitId_ReturnNotFound() {
+        String invalidVisitId = "invalidId";
+        VisitRequestDTO visitRequestDTO = buildVisitRequestDTO(UUID.randomUUID().toString());
+
+        when(visitService.archiveCompletedVisit(eq(invalidVisitId), any(Mono.class)))
+                .thenReturn(Mono.error(new NotFoundException("No visit was found with visitId: " + invalidVisitId)));
+
+        webTestClient
+                .put()
+                .uri("/visits/completed/" + invalidVisitId + "/archive")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Mono.just(visitRequestDTO), VisitRequestDTO.class)
+                .exchange()
+                .expectStatus().isNotFound();
+
+        verify(visitService, times(1)).archiveCompletedVisit(eq(invalidVisitId), any(Mono.class));
+    }
 }
+

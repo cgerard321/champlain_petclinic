@@ -24,6 +24,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -106,7 +107,7 @@ class VisitsServiceClientIntegrationTest {
         server.enqueue(new MockResponse().setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .setBody(objectMapper.writeValueAsString(Arrays.asList(visitResponseDTO, visitResponseDTO2))).addHeader("Content-Type", "application/json"));
 
-        Flux<VisitResponseDTO> visitResponseDTOFlux = visitsServiceClient.getAllVisits();
+        Flux<VisitResponseDTO> visitResponseDTOFlux = visitsServiceClient.getAllVisits(visitResponseDTO.getDescription());
         StepVerifier.create(visitResponseDTOFlux)
                 .expectNext(visitResponseDTO)
                 .expectNext(visitResponseDTO2)
@@ -114,16 +115,18 @@ class VisitsServiceClientIntegrationTest {
     }
     @Test
     void getAllVisits_400Error()throws IllegalArgumentException{
+        String description = "test"; // Add a description here
         server.enqueue(new MockResponse().setResponseCode(400).addHeader("Content-Type", "application/json"));
-        Flux<VisitResponseDTO> visitResponseDTOFlux = visitsServiceClient.getAllVisits();
+        Flux<VisitResponseDTO> visitResponseDTOFlux = visitsServiceClient.getAllVisits(description); // Pass the description to the method
         StepVerifier.create(visitResponseDTOFlux)
-            .expectErrorMatches(throwable -> throwable instanceof IllegalArgumentException && Objects.equals(throwable.getMessage(), "Something went wrong and we got a 400 error"))
-            .verify();
+                .expectErrorMatches(throwable -> throwable instanceof IllegalArgumentException && Objects.equals(throwable.getMessage(), "Something went wrong and we got a 400 error"))
+                .verify();
     }
     @Test
     void getAllVisits_500Error()throws IllegalArgumentException{
+        String description = "test"; // Add a description here
         server.enqueue(new MockResponse().setResponseCode(500).addHeader("Content-Type", "application/json"));
-        Flux<VisitResponseDTO> visitResponseDTOFlux = visitsServiceClient.getAllVisits();
+        Flux<VisitResponseDTO> visitResponseDTOFlux = visitsServiceClient.getAllVisits(description);
         StepVerifier.create(visitResponseDTOFlux)
             .expectErrorMatches(throwable -> throwable instanceof IllegalArgumentException && Objects.equals(throwable.getMessage(), "Something went wrong and we got a 500 error"))
             .verify();
@@ -909,7 +912,6 @@ class VisitsServiceClientIntegrationTest {
     }
 
 
-
     //Emergency
     private static final String EMERGENCY_ID = UUID.randomUUID().toString();
 
@@ -1042,6 +1044,83 @@ class VisitsServiceClientIntegrationTest {
                 .expectNextMatches(emergency -> emergency.getVisitEmergencyId().equals(EMERGENCY_ID))
                 .verifyComplete();
     }
+  
+    @Test
+      void updateVisitStatus_ShouldSucceed_WhenStatusUpdatedToCancelled() {
+          String visitId = "12345";
+          String status = "CANCELLED";
 
+        VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
+                .visitId(visitId)
+                .status(Status.CANCELLED)
+                .description("Test visit with cancelled status")
+                .build();
+
+        // Mocking the service client to return the expected response
+        server.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("{ \"visitId\": \"" + visitId + "\", \"status\": \"CANCELLED\", \"description\": \"Test visit with cancelled status\" }")
+                .setResponseCode(200));
+
+        Mono<VisitResponseDTO> result = visitsServiceClient.patchVisitStatus(visitId, status);
+
+        StepVerifier.create(result)
+                .expectNextMatches(response -> response.getVisitId().equals(visitId) && response.getStatus().equals(Status.CANCELLED))
+                .verifyComplete();
+    }
+
+    // Test for the NOT_FOUND scenario (when visit does not exist)
+    @Test
+    void updateVisitStatus_ShouldReturnNotFound_WhenVisitDoesNotExist() {
+        String visitId = "nonExistentVisitId";
+        String status = "CANCELLED";
+
+        // Mocking the service client to simulate a 404 Not Found response
+        server.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setResponseCode(404));
+
+        Mono<VisitResponseDTO> result = visitsServiceClient.patchVisitStatus(visitId, status);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof WebClientResponseException.NotFound)
+                .verify();
+    }
+
+    @Test
+    void deleteReview_Success() throws JsonProcessingException {
+        // Simulate a successful deletion response
+        ReviewResponseDTO expectedResponse = ReviewResponseDTO.builder()
+                .reviewId(REVIEW_ID)
+                .build();
+
+        // Enqueue a successful response
+        server.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(objectMapper.writeValueAsString(expectedResponse)));
+
+        // Call the deleteReview method
+        Mono<ReviewResponseDTO> responseMono = visitsServiceClient.deleteReview(REVIEW_ID);
+
+        // Verify that the response matches the expected values
+        StepVerifier.create(responseMono)
+                .expectNextMatches(response -> response.getReviewId().equals(REVIEW_ID))
+                .verifyComplete();
+    }
+
+    @Test
+    void deleteReview_Failure() {
+        // Enqueue a failure response (404 Not Found)
+        server.enqueue(new MockResponse()
+                .setResponseCode(HttpStatus.NOT_FOUND.value()));
+
+        // Call the deleteReview method
+        Mono<ReviewResponseDTO> responseMono = visitsServiceClient.deleteReview(REVIEW_ID);
+
+        // Verify that an error occurs
+        StepVerifier.create(responseMono)
+                .expectErrorMatches(throwable -> throwable instanceof WebClientResponseException.NotFound)
+                .verify();
+    }
 
 }

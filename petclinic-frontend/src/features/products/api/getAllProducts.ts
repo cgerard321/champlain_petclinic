@@ -3,11 +3,19 @@ import { ProductModel } from '@/features/products/models/ProductModels/ProductMo
 
 export async function getAllProducts(
   minPrice?: number,
-  maxPrice?: number
+  maxPrice?: number,
+  minRating?: number,
+  maxRating?: number,
+  sort?: string
 ): Promise<ProductModel[]> {
-  const params: Record<string, number> = {};
+  const params: Record<string, unknown> = {};
   if (minPrice !== undefined && minPrice !== null) params.minPrice = minPrice;
   if (maxPrice !== undefined && maxPrice !== null) params.maxPrice = maxPrice;
+  if (minRating !== undefined && minRating !== null)
+    params.minRating = minRating;
+  if (maxRating !== undefined && maxRating !== null)
+    params.maxRating = maxRating;
+  if (sort) params.sort = sort;
 
   const res = await axiosInstance.get('/products', {
     responseType: 'stream',

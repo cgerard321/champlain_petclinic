@@ -66,34 +66,32 @@ public class CartServiceImpl implements CartService {
                 });
     }
 
-//    @Override
-//    public Mono<CartResponseModel> updateCartByCartId(Mono<CartRequestModel> cartRequestModel, String cartId) {
-//        return cartRepository.findCartByCartId(cartId)
-//                .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Cart id was not found: " + cartId))))
-//                .flatMap(foundCart -> cartRequestModel
-//                        .flatMap(request -> {
-//                            List<String> productIds = request.getProductIds();
-//
-//                            Cart cartEntity = EntityModelUtil.toCartEntity(request);
-//                            cartEntity.setProductIds(productIds);
-//                            cartEntity.setId(foundCart.getId());
-//                            cartEntity.setCartId(foundCart.getCartId());
-//                            return cartRepository.save(cartEntity);
-//
-//                        })
-//                )
-//                .flatMap(cart -> {
-//                    List<String> productIds = cart.getProductIds();
-//                    return productIds
-//                            .stream().map(productId -> productClient.getProductByProductId(productId).flux())
-//                            .reduce(Flux.empty(), Flux::merge)
-//                            .collectList()
-//                            .map(products -> EntityModelUtil.toCartResponseModel(cart, products));
-//                });
-//    }
-
 
 //instead lets create a removeProductFromCart, UpdateQuantityOfProductInCart, and AddProductInCart methods
+    @Override
+    public Mono<CartResponseModel> removeProductFromCart(String cartId, String productId){
+        return cartRepository.findCartByCartId(cartId)
+                .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Cart id was not found:" + cartId))))
+                .flatMap(found -> {
+                    List<CartProduct> products = found.getProducts();
+
+                    Optional<CartProduct> productToRemove = products.stream()
+                            .filter(product -> product.getProductId().equals(productId)).findFirst();
+
+                    if (productToRemove.isPresent()) {
+                        products.remove(productToRemove.get());
+
+                        found.setProducts(products);
+
+                        return cartRepository.save(found)
+                                .map(updatedCart -> {
+                                    return EntityModelUtil.toCartResponseModel(updatedCart, products);
+                                });
+                    } else {
+                        return Mono.error(new NotFoundException("Product id was not found: " + productId));
+                    }
+                });
+    }
 
 
      @Override
@@ -106,6 +104,7 @@ public class CartServiceImpl implements CartService {
                              .then(Mono.just(EntityModelUtil.toCartResponseModel(found, products)));
                  });
      }
+
 
     @Override
     public Mono<CartResponseModel> checkoutCart(String cartId) {
@@ -127,6 +126,8 @@ public class CartServiceImpl implements CartService {
                     cart.setTvc(tvc);
                     cart.setTotal(total);
 
+                    // Clear the products list
+                    cart.setProducts(new ArrayList<>());
 
                     return cartRepository.save(cart)
                             .map(savedCart -> {
@@ -142,7 +143,6 @@ public class CartServiceImpl implements CartService {
                             });
                 });
     }
-
 
     @Override
     public Mono<Integer> getCartItemCount(String cartId) {
@@ -293,6 +293,66 @@ public class CartServiceImpl implements CartService {
                 .flatMap(cart -> {
                     List<CartProduct> products = cart.getProducts();
                     return Mono.just(EntityModelUtil.toCartResponseModel(cart, products));
+                });
+    }
+
+    @Override
+    public Mono<CartResponseModel> moveProductFromCartToWishlist(String cartId, String productId) {
+        return cartRepository.findCartByCartId(cartId)
+                .switchIfEmpty(Mono.error(new NotFoundException("Cart not found: " + cartId)))
+                .flatMap(cart -> {
+                    return Mono.justOrEmpty(cart.getProducts().stream()
+                                    .filter(p -> p.getProductId().equals(productId))
+                                    .findFirst())
+                            .switchIfEmpty(Mono.error(new NotFoundException("Product not found in cart: " + productId)))
+                            .flatMap(cartProduct -> {
+                                // Create a new mutable list for cart's wishlist products
+                                List<CartProduct> wishListProducts = cart.getWishListProducts() != null
+                                        ? new ArrayList<>(cart.getWishListProducts())
+                                        : new ArrayList<>();
+
+                                // Add the product to the wishlist
+                                wishListProducts.add(cartProduct);
+                                cart.setWishListProducts(wishListProducts);
+
+                                // Remove the product from the main cart products list
+                                List<CartProduct> updatedProducts = new ArrayList<>(cart.getProducts());
+                                updatedProducts.remove(cartProduct);
+                                cart.setProducts(updatedProducts);
+
+                                // Save the updated cart and return the response
+                                return cartRepository.save(cart)
+                                        .map(savedCart -> EntityModelUtil.toCartResponseModel(savedCart, savedCart.getProducts()));
+                            });
+                });
+    }
+
+    @Override
+    public Mono<CartResponseModel> moveProductFromWishListToCart(String cartId, String productId) {
+        return cartRepository.findCartByCartId(cartId)
+                .switchIfEmpty(Mono.error(new NotFoundException("Cart not found: " + cartId)))
+                .flatMap(cart -> {
+                    return Mono.justOrEmpty(cart.getWishListProducts().stream()
+                                    .filter(p -> p.getProductId().equals(productId))
+                                    .findFirst())
+                            .switchIfEmpty(Mono.error(new NotFoundException("Product: " + productId + " not found in wishlist of cart: " + cartId)))
+                            .flatMap(wishListProduct -> {
+                                // Create a new list for cart products and wishlist products
+                                List<CartProduct> updatedCartProducts = new ArrayList<>(cart.getProducts() != null ? cart.getProducts() : new ArrayList<>());
+                                List<CartProduct> updatedWishListProducts = new ArrayList<>(cart.getWishListProducts());
+
+                                // Add the product to the cart and remove it from the wishlist
+                                updatedCartProducts.add(wishListProduct);
+                                updatedWishListProducts.remove(wishListProduct);
+
+                                // Update the cart with the new lists
+                                cart.setProducts(updatedCartProducts);
+                                cart.setWishListProducts(updatedWishListProducts);
+
+                                // Save the updated cart and map to CartResponseModel
+                                return cartRepository.save(cart)
+                                        .map(savedCart -> EntityModelUtil.toCartResponseModel(savedCart, savedCart.getProducts()));
+                            });
                 });
     }
 

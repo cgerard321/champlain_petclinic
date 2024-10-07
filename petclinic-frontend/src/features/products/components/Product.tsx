@@ -24,6 +24,7 @@ export default function Product({
   const [selectedProductForQuantity, setSelectedProductForQuantity] =
     useState<ProductModel | null>(null);
   const [quantity, setQuantity] = useState<number>(0);
+  const [tooLong, setTooLong] = useState<boolean>(false);
 
   const navigate = useNavigate();
 
@@ -35,6 +36,14 @@ export default function Product({
     fetchRating();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (product.productDescription.length > 100) {
+      setTooLong(true);
+    } else {
+      setTooLong(false);
+    }
+  }, [product.productDescription]);
 
   const fetchRating = async (): Promise<void> => {
     try {
@@ -148,7 +157,13 @@ export default function Product({
 
   return (
     <div
-      className={`card ${product.productQuantity < 10 ? 'low-quantity' : ''}`}
+      className={`card ${
+        product.productQuantity === 0
+          ? 'out-of-stock'
+          : product.productQuantity < 10
+            ? 'low-quantity'
+            : ''
+      }`}
       key={product.productId}
     >
       <ImageContainer imageId={product.imageId} />
@@ -168,8 +183,11 @@ export default function Product({
       >
         {currentProduct.productName}
       </h2>
-
-      <p>{currentProduct.productDescription}</p>
+      <p>
+        {!tooLong
+          ? currentProduct.productDescription
+          : `${currentProduct.productDescription.substring(0, 100)}...`}
+      </p>
       <p>Price: ${currentProduct.productSalePrice.toFixed(2)}</p>
       <p>Rating: {currentProduct.averageRating}</p>
       <p>Your Rating:</p>

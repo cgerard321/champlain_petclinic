@@ -1,14 +1,17 @@
 package com.petclinic.bffapigateway.presentationlayer.v2;
 
 
+import com.petclinic.bffapigateway.domainclientlayer.AuthServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VetsServiceClient;
+import com.petclinic.bffapigateway.dtos.Auth.RegisterVet;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Vets.Album;
 import com.petclinic.bffapigateway.dtos.Vets.SpecialtyDTO;
 import com.petclinic.bffapigateway.dtos.Vets.VetRequestDTO;
 import com.petclinic.bffapigateway.dtos.Vets.VetResponseDTO;
+import com.petclinic.bffapigateway.exceptions.ExistingVetNotFoundException;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.utils.Security.Annotations.IsUserSpecific;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
@@ -40,6 +43,8 @@ public class VetController {
 
 
     private final VetsServiceClient vetsServiceClient;
+    private final AuthServiceClient authServiceClient;
+
 
 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
@@ -50,13 +55,12 @@ public class VetController {
 
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @PostMapping(value = "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<VetResponseDTO>> addVet(@RequestBody Mono<VetRequestDTO> vetRequestDTO){
-        return vetsServiceClient.addVet(vetRequestDTO)
+    @PostMapping(value = "/users/vets",consumes = "application/json",produces = "application/json")
+    public Mono<ResponseEntity<VetResponseDTO>> addVet(@RequestBody Mono<RegisterVet> registerVetDTO) {
+        return authServiceClient.addVetUser(registerVetDTO)
                 .map(v -> ResponseEntity.status(HttpStatus.CREATED).body(v))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
-
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
     //@IsUserSpecific(idToMatch = {"vetId"}, bypassRoles = {Roles.ADMIN})
@@ -90,6 +94,18 @@ public class VetController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
+    @PutMapping("{vetId}/photo/{photoName}")
+    public Mono<ResponseEntity<Resource>> updatePhotoByVetId(
+            @PathVariable String vetId,
+            @PathVariable String photoName,
+            @RequestBody Mono<Resource> photo) {
+
+        return vetsServiceClient.updatePhotoOfVet(vetId, photoName, photo)
+                .map(r -> ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, MediaType.IMAGE_JPEG_VALUE).body(r))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
 //    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
 //    @PostMapping(value = "{vetId}/photos/{photoName}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 //    public Mono<ResponseEntity<Resource>> addPhoto(
@@ -106,7 +122,7 @@ public class VetController {
 //                .map(r -> ResponseEntity.status(HttpStatus.CREATED).body(r))
 //                .defaultIfEmpty(ResponseEntity.badRequest().build());
 //    }
-
+    
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @GetMapping(value = "{vetId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<VetResponseDTO>> getVetByVetId(@PathVariable String vetId) {
@@ -123,6 +139,15 @@ public class VetController {
             @RequestBody Mono<SpecialtyDTO> specialties) {
         return vetsServiceClient.addSpecialtiesByVetId(vetId, specialties);
     }
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET})    
+    @DeleteMapping(value = "{vetId}/specialties/{specialtyId}")
+    public Mono<ResponseEntity<Void>> deleteSpecialtiesByVetId(
+            @PathVariable String vetId,
+            @PathVariable String specialtyId) {
+        return vetsServiceClient.deleteSpecialtiesByVetId(vetId, specialtyId)
+                .then(Mono.just(ResponseEntity.noContent().<Void>build()))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @GetMapping(value = "{vetId}/albums", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -132,4 +157,11 @@ public class VetController {
     }
 
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
+    @DeleteMapping("{vetId}/photo")
+    public Mono<ResponseEntity<Void>> deletePhotoByVetId(@PathVariable String vetId) {
+        return vetsServiceClient.deletePhotoByVetId(vetId)
+                .then(Mono.just(ResponseEntity.noContent().<Void>build()))
+                .doOnError(error -> log.error("Error deleting photo for vetId: {}", vetId, error));
+    }
 }

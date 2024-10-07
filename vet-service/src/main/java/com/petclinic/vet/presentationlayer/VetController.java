@@ -283,10 +283,14 @@ public class VetController {
     }
 */
 
+    @DeleteMapping("{vetId}/photo")
+    public Mono<ResponseEntity<Void>> deletePhotoByVetId(@PathVariable String vetId) {
+        return photoService.deletePhotoByVetId(vetId)
+                .then(Mono.just(ResponseEntity.noContent().<Void>build()))
+                .onErrorResume(NotFoundException.class, e -> Mono.just(ResponseEntity.notFound().build()));
+    }
 
-
-
-
+    
 
     @PutMapping("{vetId}/photos/{photoName}")
     public Mono<ResponseEntity<Resource>> updatePhotoByVetId(@PathVariable String vetId, @PathVariable String photoName, @RequestBody Mono<Resource> photo){
@@ -311,6 +315,15 @@ public class VetController {
             @RequestBody Mono<SpecialtyDTO> specialties) {
 
         return vetService.addSpecialtiesByVetId(vetId, specialties);
+    }
+
+    @DeleteMapping("{vetId}/specialties/{specialtyId}")
+    public Mono<ResponseEntity<Void>> deleteSpecialtiesBySpecialtyId(
+            @PathVariable String vetId,
+            @PathVariable String specialtyId) {
+        return vetService.deleteSpecialtiesBySpecialtyId(vetId, specialtyId)
+                .then(Mono.just(ResponseEntity.noContent().<Void>build()))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @GetMapping("{vetId}/albums")

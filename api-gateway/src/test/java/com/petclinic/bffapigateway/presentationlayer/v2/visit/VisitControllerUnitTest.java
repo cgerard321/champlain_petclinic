@@ -80,8 +80,6 @@ public class VisitControllerUnitTest {
             .build();
 
 
-
-
     // ReviewResponseDTO and ReviewRequestDTO for testing purposes
     private final ReviewResponseDTO reviewResponseDTO = ReviewResponseDTO.builder()
             .reviewId("R001")
@@ -153,22 +151,27 @@ public class VisitControllerUnitTest {
         // Assert
         verify(visitsServiceClient, times(1)).getAllReviews();
     }
+
     @Test
     void getAllVisits_whenAllPropertiesExist_thenReturnFluxResponseDTO() {
         // Arrange
-        when(visitsServiceClient.getAllVisits())
+        String description = "test"; // Add a description here
+        when(visitsServiceClient.getAllVisits(description))
                 .thenReturn(Flux.just(visitResponseDTO1));
 
         // Act
         webTestClient.get()
-                .uri(BASE_VISIT_URL)
+                .uri(uriBuilder -> uriBuilder.path(BASE_VISIT_URL)
+                        .queryParam("description", description)
+                        .build())
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectBodyList( VisitResponseDTO.class)
+                .expectBodyList(VisitResponseDTO.class)
                 .hasSize(1);
+
         // Assert
-        verify(visitsServiceClient, times(1)).getAllVisits();
+        verify(visitsServiceClient, times(1)).getAllVisits(description);
     }
 
     @Test
@@ -307,8 +310,9 @@ public class VisitControllerUnitTest {
 
     @Test
     void getAllVisits_whenNoVisitsExist_thenReturnEmptyFlux(){
+        String description = null;
         // Arrange
-        when(visitsServiceClient.getAllVisits())
+        when(visitsServiceClient.getAllVisits(description))
                 .thenReturn(Flux.empty()); // no visits should not throw an error
         // Act
         webTestClient.get()
@@ -319,7 +323,7 @@ public class VisitControllerUnitTest {
                 .expectBodyList(VisitResponseDTO.class)
                 .hasSize(0);
         // Assert
-        verify(visitsServiceClient, times(1)).getAllVisits();
+        verify(visitsServiceClient, times(1)).getAllVisits(description);
     }
 
     @Test
@@ -581,6 +585,174 @@ public class VisitControllerUnitTest {
 
         // Assert
         verify(bffApiGatewayController, times(1)).getVisitsByOwnerId(ownerId);
+    }
+
+    @Test
+    void updateVisitStatus_ShouldReturnOK_WhenStatusUpdatedToCancelled() {
+        String visitId = "12345";
+        String status = "CANCELLED";
+
+        VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
+                .visitId(visitId)
+                .status(Status.CANCELLED)
+                .description("Test visit with cancelled status")
+                .build();
+
+        // Mocking the service layer to return the expected response
+        when(visitsServiceClient.patchVisitStatus(eq(visitId), eq(status)))
+                .thenReturn(Mono.just(visitResponseDTO));
+
+        webTestClient.patch()
+                .uri(BASE_VISIT_URL + "/{visitId}/{status}", visitId, status)
+                .exchange()
+                .expectStatus().isOk() // Expect 200 OK
+                .expectBody(VisitResponseDTO.class)
+                .value(response -> {
+                    assertEquals(response.getVisitId(), visitId);
+                    assertEquals(response.getStatus(), Status.CANCELLED);
+                });
+
+        // Verify that the service was called with the correct parameters
+        verify(visitsServiceClient, times(1)).patchVisitStatus(eq(visitId), eq(status));
+    }
+
+    @Test
+    void updateVisitStatus_ShouldReturnNotFound_WhenVisitDoesNotExist() {
+        String visitId = "nonExistentVisitId";
+        String status = "CANCELLED";
+
+        // Mocking the service to return an empty Mono, simulating a not found scenario
+        when(visitsServiceClient.patchVisitStatus(eq(visitId), eq(status)))
+                .thenReturn(Mono.empty());
+
+        webTestClient.patch()
+                .uri(BASE_VISIT_URL + "/{visitId}/{status}", visitId, status)
+                .exchange()
+                .expectStatus().isNotFound(); // Expect 404 NOT_FOUND
+
+        // Verify that the service was called
+        verify(visitsServiceClient, times(1)).patchVisitStatus(eq(visitId), eq(status));
+    }
+
+    @Test
+    void archiveCompletedVisit_whenValidRequest_thenReturnVisitResponseDTO() {
+        String visitId = "visitId1";
+        VisitRequestDTO visitRequestDTO = VisitRequestDTO.builder()
+                .description("Updated Visit Description")
+                .status(Status.COMPLETED)
+                .build();
+        VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
+                .visitId(visitId)
+                .description("Updated Visit Description")
+                .status(Status.COMPLETED)
+                .build();
+
+        when(visitsServiceClient.archiveCompletedVisit(eq(visitId), any(Mono.class)))
+                .thenReturn(Mono.just(visitResponseDTO));
+
+        webTestClient.put()
+                .uri(BASE_VISIT_URL + "/completed/{visitId}/archive", visitId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(visitRequestDTO)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(VisitResponseDTO.class)
+                .isEqualTo(visitResponseDTO);
+
+        verify(visitsServiceClient, times(1)).archiveCompletedVisit(eq(visitId), any(Mono.class));
+    }
+
+    @Test
+    void archiveCompletedVisit_whenInvalidRequest_thenReturnBadRequest() {
+        String visitId = "visitId1";
+        VisitRequestDTO visitRequestDTO = VisitRequestDTO.builder()
+                .description("Updated Visit Description")
+                .status(Status.COMPLETED)
+                .build();
+
+        when(visitsServiceClient.archiveCompletedVisit(eq(visitId), any(Mono.class)))
+                .thenReturn(Mono.empty());
+
+        webTestClient.put()
+                .uri(BASE_VISIT_URL + "/completed/{visitId}/archive", visitId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(visitRequestDTO)
+                .exchange()
+                .expectStatus().isBadRequest();
+
+        verify(visitsServiceClient, times(1)).archiveCompletedVisit(eq(visitId), any(Mono.class));
+    }
+
+    @Test
+    void getArchivedVisits_whenArchivedVisitsExist_thenReturnFluxVisitResponseDTO() {
+        VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
+                .visitId("visitId1")
+                .description("Archived Visit")
+                .status(Status.ARCHIVED)
+                .build();
+
+        when(visitsServiceClient.getAllArchivedVisits())
+                .thenReturn(Flux.just(visitResponseDTO));
+
+        webTestClient.get()
+                .uri(BASE_VISIT_URL + "/archived")
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(VisitResponseDTO.class)
+                .hasSize(1)
+                .contains(visitResponseDTO);
+
+        verify(visitsServiceClient, times(1)).getAllArchivedVisits();
+    }
+
+    @Test
+    void getArchivedVisits_whenNoArchivedVisitsExist_thenReturnEmptyFlux() {
+        when(visitsServiceClient.getAllArchivedVisits())
+                .thenReturn(Flux.empty());
+
+        webTestClient.get()
+                .uri(BASE_VISIT_URL + "/archived")
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(VisitResponseDTO.class)
+                .hasSize(0);
+
+        verify(visitsServiceClient, times(1)).getAllArchivedVisits();
+    }
+  
+  void deleteReview_whenValidReviewId_thenReturnOkResponse() {
+        // Arrange
+        when(visitsServiceClient.deleteReview(eq("R001")))
+                .thenReturn(Mono.just(reviewResponseDTO)); // Mocking the service client to return a valid review response
+
+        // Act
+        webTestClient.delete()
+                .uri(REVIEWS_URL + "/{reviewId}", "R001")  // Set the valid reviewId
+                .exchange()
+                .expectStatus().isOk()  // Expect 200 OK response
+                .expectBody(ReviewResponseDTO.class)
+                .isEqualTo(reviewResponseDTO);  // Validate the response body
+
+        // Assert
+        verify(visitsServiceClient, times(1)).deleteReview(eq("R001"));  // Ensure the service method was called once
+    }
+
+    @Test
+    void deleteReview_whenInvalidReviewId_thenReturnNotFoundResponse() {
+        // Arrange
+        when(visitsServiceClient.deleteReview(eq("INVALID_ID")))
+                .thenReturn(Mono.empty());  // Mocking the service client to return empty Mono for a nonexistent review
+
+        // Act
+        webTestClient.delete()
+                .uri(REVIEWS_URL + "/{reviewId}", "INVALID_ID")  // Set an invalid reviewId
+                .exchange()
+                .expectStatus().isNotFound();  // Expect 404 Not Found response
+
+        // Assert
+        verify(visitsServiceClient, times(1)).deleteReview(eq("INVALID_ID"));  // Ensure the service method was called once
     }
 
 }
