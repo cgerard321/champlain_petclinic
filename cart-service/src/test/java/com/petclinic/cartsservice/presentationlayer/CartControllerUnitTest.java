@@ -472,6 +472,105 @@ class CartControllerUnitTest {
     }
 
     @Test
+    public void whenRemoveProductFromCart_withValidCartIdAndProductId_thenReturnUpdatedCart() {
+        // Arrange
+        String cartId = "98f7b33a-d62a-420a-a84a-05a27c85fc91";
+        String productIdToRemove = "9a29fff7-564a-4cc9-8fe1-36f6ca9bc223";
+
+        List<CartProduct> updatedProducts = new ArrayList<>(Arrays.asList(product2)); // Product1 removed
+
+        Cart cart = Cart.builder()
+                .cartId(cartId)
+                .products(updatedProducts)
+                .customerId("1")
+                .build();
+
+        CartResponseModel updatedCartResponse = CartResponseModel.builder()
+                .cartId(cartId)
+                .customerId("1")
+                .products(updatedProducts)
+                .build();
+
+        when(cartService.removeProductFromCart(cartId, productIdToRemove)).thenReturn(Mono.just(updatedCartResponse));
+
+        // Act & Assert
+        webTestClient
+                .delete()
+                .uri("/api/v1/carts/" + cartId + "/" + productIdToRemove)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(CartResponseModel.class)
+                .value(result -> {
+                    assertEquals(cartId, result.getCartId());
+                    assertEquals(1, result.getProducts().size()); // Only one product should remain
+                    assertEquals(product2.getProductId(), result.getProducts().get(0).getProductId());
+                });
+
+        verify(cartService, times(1)).removeProductFromCart(cartId, productIdToRemove);
+    }
+
+    @Test
+    public void whenRemoveProductFromCart_withNonExistentCart_thenReturnNotFound() {
+        // Arrange
+        String nonExistentCartId = "98f7b33a-d62a-420a-a84a-05a27c85fc92";
+        String productIdToRemove = "9a29fff7-564a-4cc9-8fe1-36f6ca9bc223";
+
+        when(cartService.removeProductFromCart(nonExistentCartId, productIdToRemove))
+                .thenReturn(Mono.error(new NotFoundException("Cart not found: " + nonExistentCartId)));
+
+        // Act & Assert
+        webTestClient
+                .delete()
+                .uri("/api/v1/carts/" + nonExistentCartId + "/" + productIdToRemove)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound();
+
+        verify(cartService, times(1)).removeProductFromCart(nonExistentCartId, productIdToRemove);
+    }
+
+    @Test
+    public void whenRemoveProductFromCart_withNonExistentProductId_thenReturnNotFound() {
+        // Arrange
+        String cartId = "98f7b33a-d62a-420a-a84a-05a27c85fc91";
+        String nonExistentProductId = "non-existent-product-id";
+
+        when(cartService.removeProductFromCart(cartId, nonExistentProductId))
+                .thenReturn(Mono.error(new NotFoundException("Product not found in cart: " + nonExistentProductId)));
+
+        // Act & Assert
+        webTestClient
+                .delete()
+                .uri("/api/v1/carts/" + cartId + "/" + nonExistentProductId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound();
+
+        verify(cartService, times(1)).removeProductFromCart(cartId, nonExistentProductId);
+    }
+
+    @Test
+    public void whenRemoveProductFromCart_withInvalidCartId_thenThrowInvalidInputException() {
+        // Arrange
+        String invalidCartId = "12345"; // Invalid cartId (not 36 characters)
+        String productIdToRemove = "9a29fff7-564a-4cc9-8fe1-36f6ca9bc223";
+
+        // Act & Assert
+        webTestClient
+                .delete()
+                .uri("/api/v1/carts/" + invalidCartId + "/" + productIdToRemove)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isEqualTo(422)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Provided cart id is invalid: " + invalidCartId); // Assert the error message
+
+        verify(cartService, times(0)).removeProductFromCart(anyString(), anyString()); // cartService should not be called
+    }
+
+
     void whenMoveProductFromCartToWishlist_thenSuccess() {
         // Arrange
         String cartId = VALID_CART_ID; // Use a valid cart ID

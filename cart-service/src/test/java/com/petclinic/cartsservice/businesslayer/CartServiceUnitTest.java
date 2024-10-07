@@ -24,6 +24,7 @@ import reactor.test.StepVerifier;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -624,6 +625,68 @@ class CartServiceUnitTest {
     }
 
     @Test
+    void removeProductFromCart_RemovesProductSuccessfully() {
+        // Arrange: Mock the cart retrieval
+        when(cartRepository.findCartByCartId(cart1.getCartId())).thenReturn(Mono.just(cart1));
+
+        // Simulate removing product1 from the cart (which leaves only product2)
+        Cart updatedCart = Cart.builder()
+                .cartId(cart1.getCartId())
+                .customerId(cart1.getCustomerId())
+                .products(Collections.singletonList(product2)) // only product2 remains after removal
+                .build();
+
+        // Mock the save method to return the updated cart
+        when(cartRepository.save(any(Cart.class))).thenReturn(Mono.just(updatedCart));
+
+        // Act: Call the removeProductFromCart method
+        StepVerifier.create(cartService.removeProductFromCart(cart1.getCartId(), product1.getProductId()))
+                .expectNextMatches(cartResponse ->
+                        cartResponse.getProducts().size() == 1 && // one product removed
+                                cartResponse.getProducts().get(0).getProductId().equals(product2.getProductId()) // remaining product is product2
+                )
+                .verifyComplete();
+
+        // Assert: Verify that the repository was called
+        verify(cartRepository, times(1)).findCartByCartId(cart1.getCartId());
+        verify(cartRepository, times(1)).save(any(Cart.class)); // check that the cart is saved with the remaining products
+    }
+
+
+    @Test
+    void removeProductFromCart_CartNotFound() {
+        // Arrange: Mock an empty Mono for cart retrieval
+        when(cartRepository.findCartByCartId(nonExistentCartId)).thenReturn(Mono.empty());
+
+        // Act & Assert: Expect a NotFoundException when the cart is not found
+        StepVerifier.create(cartService.removeProductFromCart(nonExistentCartId, product1.getProductId()))
+                .expectErrorMatches(throwable -> throwable instanceof NotFoundException &&
+                        throwable.getMessage().contains("Cart id was not found:" + nonExistentCartId))
+                .verify();
+
+        // Verify repository interaction
+        verify(cartRepository, times(1)).findCartByCartId(nonExistentCartId);
+    }
+
+    @Test
+    void removeProductFromCart_ProductNotFoundInCart() {
+        // Arrange: Mock the cart retrieval to return the existing cart1
+        when(cartRepository.findCartByCartId(cart1.getCartId())).thenReturn(Mono.just(cart1));
+
+        // Act & Assert: Expect a NotFoundException when trying to remove a product that is not in the cart
+        StepVerifier.create(cartService.removeProductFromCart(cart1.getCartId(), product3.getProductId())) // product3 is not in cart1
+                .expectErrorMatches(throwable ->
+                        throwable instanceof NotFoundException &&
+                                throwable.getMessage().equals("Product id was not found: " + product3.getProductId()) // check exception message
+                )
+                .verify();
+
+        // Verify repository interaction
+        verify(cartRepository, times(1)).findCartByCartId(cart1.getCartId());
+        verifyNoMoreInteractions(cartRepository); // No save operation should happen since the product is not found
+    }
+
+
     void whenMoveProductFromCartToWishlist_thenSuccess() {
         // Arrange
         String cartId = cart1.getCartId();
@@ -752,4 +815,5 @@ class CartServiceUnitTest {
 
 
 }
+
 

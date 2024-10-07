@@ -75,6 +75,15 @@ public class CartController {
 
     }
 
+    @DeleteMapping("/{cartId}/{productId}")
+    public Mono<ResponseEntity<CartResponseModel>> removeProductFromCart(@PathVariable String cartId, @PathVariable String productId){
+        return Mono.just(cartId)
+                .filter(id -> id.length() == 36)
+                .switchIfEmpty(Mono.error(new InvalidInputException("Provided cart id is invalid: " + cartId)))
+                .flatMap(validId -> cartService.removeProductFromCart(validId, productId))
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
     @PostMapping("/{customerId}/assign")
     public Mono<ResponseEntity<CartResponseModel>> assignCartToCustomer(
             @PathVariable String customerId,
@@ -129,16 +138,6 @@ public class CartController {
                 .map(ResponseEntity::ok);
     }
 
-
-    @DeleteMapping("/{cartId}/{productId}")
-    public Mono<ResponseEntity<CartResponseModel>> removeProductFromCart(@PathVariable String cartId, @PathVariable String productId){
-        return Mono.just(cartId)
-                .filter(id -> id.length() == 36)
-                .switchIfEmpty(Mono.error(new InvalidInputException("Provided cart id is invalid: " + cartId)))
-                .flatMap(validId -> cartService.removeProductFromCart(validId, productId))
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.badRequest().build());
-    }
 
     /**
      * Move product to wishlist.
