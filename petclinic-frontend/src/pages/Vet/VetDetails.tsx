@@ -120,6 +120,7 @@ export default function VetDetails(): JSX.Element {
       fetchAlbumPhotos();
       setLoading(false);
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [vetId]);
 
   const handleImageClick = (): void => {
