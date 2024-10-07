@@ -145,9 +145,6 @@ public class CartServiceClient {
                 .bodyToMono(Void.class);
     }
 
-
-}
-
     public Mono<CartResponseDTO> addProductToCart(String cartId, AddProductRequestDTO requestDTO) {
         return webClientBuilder.build()
                 .post()
