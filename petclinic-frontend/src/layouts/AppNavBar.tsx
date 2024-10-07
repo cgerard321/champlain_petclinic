@@ -187,9 +187,9 @@ export function NavBar(): JSX.Element {
                   </Nav.Link>
                 )}
                 {!IsAdmin() && (
-                    <Nav.Link as={Link} to={AppRoutePaths.CustomerPromos}>
-                      Promos
-                    </Nav.Link>
+                  <Nav.Link as={Link} to={AppRoutePaths.CustomerPromos}>
+                    Promos
+                  </Nav.Link>
                 )}
                 {
                   <Nav.Link as={Link} to={AppRoutePaths.Products}>

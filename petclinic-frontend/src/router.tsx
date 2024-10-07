@@ -50,7 +50,7 @@ import ResetPassword from '@/pages/User/ResetPassword.tsx';
 import PromoPage from '@/pages/Promos/PromoListPage.tsx';
 import AddPromoPage from '@/pages/Promos/AddPromoPage.tsx';
 import UpdatePromoPage from '@/pages/Promos/UpdatePromoPage.tsx';
-import CustomerPromoPage from "@/pages/Promos/CustomerPromoPage.tsx";
+import CustomerPromoPage from '@/pages/Promos/CustomerPromoPage.tsx';
 
 const router = createBrowserRouter([
   {
@@ -318,9 +318,9 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.CustomerPromos,
         element: (
-            <ProtectedRoute>
-              <CustomerPromoPage />
-            </ProtectedRoute>
+          <ProtectedRoute>
+            <CustomerPromoPage />
+          </ProtectedRoute>
         ),
       },
       {
