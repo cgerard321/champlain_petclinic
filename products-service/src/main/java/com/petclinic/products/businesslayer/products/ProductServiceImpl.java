@@ -1,5 +1,6 @@
 package com.petclinic.products.businesslayer.products;
 
+import com.petclinic.products.utils.exceptions.InvalidInputException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -14,10 +15,11 @@ import com.petclinic.products.presentationlayer.products.ProductResponseModel;
 import com.petclinic.products.utils.exceptions.InvalidAmountException;
 import com.petclinic.products.utils.exceptions.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.Arrays;
 
 @Service
 @Slf4j
@@ -51,7 +53,10 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Flux<ProductResponseModel> getAllProducts(Double minPrice, Double maxPrice) {
+    public Flux<ProductResponseModel> getAllProducts(Double minPrice, Double maxPrice,Double minRating, Double maxRating, String sort) {
+        if (sort != null && !Arrays.asList("asc", "desc", "default").contains(sort.toLowerCase())) {
+            throw new InvalidInputException("Invalid sort parameter: " + sort);
+        }
         Flux<Product> products;
 
         if (minPrice != null && maxPrice != null) {
@@ -66,8 +71,24 @@ public class ProductServiceImpl implements ProductService {
 
         return products
                 .flatMap(this::getAverageRating)
+                .filter(product -> {
+                    double avgRating = product.getAverageRating();
+                    boolean meetsMinRating = (minRating == null || avgRating >= minRating);
+                    boolean meetsMaxRating = (maxRating == null || avgRating <= maxRating);
+                    return meetsMinRating && meetsMaxRating;
+                })
+                .collectList()
+                .flatMapMany(productList -> {
+                    if ("asc".equals(sort)) {
+                        productList.sort((p1, p2) -> Double.compare(p1.getAverageRating(), p2.getAverageRating()));
+                    } else if ("desc".equals(sort)) {
+                        productList.sort((p1, p2) -> Double.compare(p2.getAverageRating(), p1.getAverageRating()));
+                    }
+                    return Flux.fromIterable(productList);
+                })
                 .map(EntityModelUtil::toProductResponseModel);
     }
+
 
     @Override
     public Mono<ProductResponseModel> getProductByProductId(String productId) {
@@ -165,6 +186,7 @@ public class ProductServiceImpl implements ProductService {
                     responseModel.setProductDescription(product.getProductDescription());
                     responseModel.setProductSalePrice(product.getProductSalePrice());
                     responseModel.setProductType(product.getProductType());
+                    responseModel.setImageId(product.getImageId());
                     return responseModel;
                 });
     }

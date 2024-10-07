@@ -11,6 +11,8 @@ import { getProductsByType } from '@/features/products/api/getProductsByType.ts'
 // import AddImage from './components/AddImage';
 import { addImage } from './api/addImage';
 import { ImageModel } from './models/ProductModels/ImageModel';
+import StarRating from '@/features/products/components/StarRating.tsx';
+import './components/StarRating.css';
 
 export default function ProductList(): JSX.Element {
   const [productList, setProductList] = useState<ProductModel[]>([]);
@@ -24,6 +26,9 @@ export default function ProductList(): JSX.Element {
   const [recentlyClickedProducts, setRecentlyClickedProducts] = useState<
     ProductModel[]
   >([]);
+  const [ratingSort, setRatingSort] = useState<string>('default');
+  const [minStars, setMinStars] = useState<number>(0);
+  const [maxStars, setMaxStars] = useState<number>(5);
 
   function FilterByPriceErrorHandling(): void {
     // Validate inputs for filter by price
@@ -42,7 +47,13 @@ export default function ProductList(): JSX.Element {
     setIsLoading(true);
     try {
       if (filterType.trim() === '') {
-        const list = await getAllProducts(minPrice, maxPrice);
+        const list = await getAllProducts(
+          minPrice,
+          maxPrice,
+          minStars,
+          maxStars,
+          ratingSort
+        );
         setProductList(list);
       } else {
         const filteredList = await getProductsByType(filterType);
@@ -107,9 +118,15 @@ export default function ProductList(): JSX.Element {
     setIsSidebarOpen(false);
   };
 
-  const clearFilters = (): void => {
+  const clearFilters = async (): Promise<void> => {
     setMinPrice(undefined);
     setMaxPrice(undefined);
+    setFilterType('');
+    setRatingSort('');
+    setMaxStars(5);
+    setMinStars(0);
+    const list = await getAllProducts(minPrice, maxPrice, minStars, maxStars);
+    setProductList(list);
   };
 
   const handleProductClick = (product: ProductModel): void => {
@@ -190,11 +207,31 @@ export default function ProductList(): JSX.Element {
               onChange={e => setFilterType(e.target.value)}
             />
           </label>
+          <div className="star-rating-container">
+            <h2>Filter by Star Rating</h2>
+            <div className="star-row">
+              <label>Min Stars:</label>
+              <StarRating currentRating={minStars} updateRating={setMinStars} />
+            </div>
+            <div className="star-row">
+              <label>Max Stars:</label>
+              <StarRating currentRating={maxStars} updateRating={setMaxStars} />
+            </div>
+          </div>
+          <select
+            name="rating"
+            value={ratingSort}
+            onChange={e => setRatingSort(e.target.value)}
+          >
+            <option value="default">Sort by Rating</option>
+            <option value="asc">Low to High</option>
+            <option value="desc">High to Low</option>
+          </select>
           <button className="apply-filter-button" onClick={fetchProducts}>
-            Apply Filter
+            Apply
           </button>
           <button className="clear-filter-button" onClick={clearFilters}>
-            Clear Filters
+            Clear
           </button>
         </div>
       </div>
@@ -229,6 +266,9 @@ export default function ProductList(): JSX.Element {
           ) : (
             <p>No products found.</p>
           )}
+        </div>
+        <div>
+          <hr />
         </div>
         <div>
           <h2>Recently Clicked Products</h2>
