@@ -89,6 +89,34 @@ public class MockServerConfigAuthService {
                 );
     }
 
+    public void registerForgotPasswordEndpoint() {
+        mockServerClient_AuthService
+                .when(
+                        request()
+                                .withMethod("POST")
+                                .withPath("/users/forgot_password")
+                                .withBody(json("{\"email\":\"test@example.com\",\"url\":\"http://example.com/reset-password\"}"))
+                )
+                .respond(
+                        response()
+                                .withStatusCode(200)
+                );
+    }
+
+    public void registerResetPasswordEndpoint() {
+        mockServerClient_AuthService
+                .when(
+                        request()
+                                .withMethod("POST")
+                                .withPath("/users/reset_password")
+                                .withBody(json("{\"password\":\"Cookie123!\",\"token\":\"valid-token\"}"))
+                )
+                .respond(
+                        response()
+                                .withStatusCode(200)
+                );
+    }
+
     public void stopMockServer() {
         if(clientAndServer != null)
             this.clientAndServer.stop();
