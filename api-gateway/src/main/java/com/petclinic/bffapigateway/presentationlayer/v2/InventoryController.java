@@ -55,13 +55,6 @@ public class InventoryController {
         return ResponseEntity.ok().body(inventoryServiceClient.getAllInventoryTypes());
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
-    @GetMapping(value = "/names")
-    @ApiResponses(value = {@ApiResponse(description = "All available inventory names", responseCode = "200")})
-    public ResponseEntity<Flux<InventoryNameResponseDTO>> getAllInventoryNames() {
-        return ResponseEntity.ok().body(inventoryServiceClient.getAllInventoryNames());
-    }
-
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
     @PostMapping(value = "/types")
@@ -121,24 +114,7 @@ public class InventoryController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
-    @PostMapping("/{inventoryName}/products/by-name")
-    @ApiResponses(value = {
-            @ApiResponse(description = "Add a product to inventory by Name", responseCode = "201"),
-            @ApiResponse(description = "Inventory name not found", responseCode = "404")
-    })
-    public Mono<ResponseEntity<InventoryResponseDTO>> addProductToInventoryByName(
-            @PathVariable String inventoryName,
-            @RequestBody Mono<ProductRequestDTO> productRequestDTOMono) {
-
-        return productRequestDTOMono.flatMap(productRequestDTO ->
-                inventoryServiceClient.addProductToInventoryByName(inventoryName, productRequestDTO)
-                        .map(inventoryResponseDTO -> ResponseEntity.status(HttpStatus.CREATED).body(inventoryResponseDTO))
-                        .onErrorResume(e -> Mono.just(ResponseEntity.notFound().build()))
-        );
-    }
-
+    
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
     @GetMapping("/{inventoryName}/products/by-name")
