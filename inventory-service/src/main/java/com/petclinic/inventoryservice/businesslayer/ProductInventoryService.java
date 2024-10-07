@@ -24,13 +24,9 @@ public interface ProductInventoryService {
 
     Flux<InventoryResponseDTO> searchInventories(Pageable page, String inventoryName, String inventoryType, String inventoryDescription);
     Flux<InventoryTypeResponseDTO> getAllInventoryTypes();
-    Flux<InventoryNameResponseDTO> getAllInventoryNames();
 
     Mono<ProductResponseDTO> getProductByProductIdInInventory(String inventoryId, String productId);
 
-    Mono<InventoryResponseDTO> addProductToInventoryByInventoryName(String inventoryName, Mono<ProductRequestDTO> productRequestDTOMono);
-
-    Flux<ProductResponseDTO> getProductsByInventoryName(String inventoryName);
   
     Flux<ProductResponseDTO> getLowStockProducts(String inventoryId, int stockThreshold);
 

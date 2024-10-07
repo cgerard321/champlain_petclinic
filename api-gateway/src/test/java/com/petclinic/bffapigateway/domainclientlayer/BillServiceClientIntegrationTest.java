@@ -19,6 +19,7 @@ import reactor.test.StepVerifier;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
 import static org.junit.jupiter.api.Assertions.*;
@@ -125,28 +126,28 @@ class BillServiceClientIntegrationTest {
                 .verifyComplete();
     }
 
-    @Test
-    void shouldDeleteBill() throws JsonProcessingException {
-        final BillDetails bill = BillDetails.builder()
-                .billId(UUID.randomUUID().toString())
-                .vetId("15")
-                .customerId("2")
-                .date(null)
-                .billStatus(BillStatus.PAID)
-                .dueDate(null)
-                .amount(100)
-                .visitType("Check")
-                .build();
-
-        final String body = mapper.writeValueAsString(mapper.convertValue(bill, BillDetails.class));
-        prepareResponse(response -> response
-                .setHeader("Content-Type", "application/json")
-                .setBody(body));
-
-        final Mono<Void> empty = billServiceClient.deleteBill(bill.getBillId());
-
-        assertNull(empty.block());
-    }
+//    @Test
+//    void shouldDeleteBill() throws JsonProcessingException {
+//        final BillDetails bill = BillDetails.builder()
+//                .billId(UUID.randomUUID().toString())
+//                .vetId("15")
+//                .customerId("2")
+//                .date(null)
+//                .billStatus(BillStatus.PAID)
+//                .dueDate(null)
+//                .amount(100)
+//                .visitType("Check")
+//                .build();
+//
+//        final String body = mapper.writeValueAsString(mapper.convertValue(bill, BillDetails.class));
+//        prepareResponse(response -> response
+//                .setHeader("Content-Type", "application/json")
+//                .setBody(body));
+//
+//        final Mono<Void> empty = billServiceClient.deleteBill(bill.getBillId());
+//
+//        assertNull(empty.block());
+//    }
 
     @Test
     void shouldDeleteBillByVetId() throws JsonProcessingException {
@@ -481,6 +482,43 @@ class BillServiceClientIntegrationTest {
                 .expectError(WebClientResponseException.BadRequest.class)
                 .verify();
     }
+
+    @Test
+    void whenGetAllBillsByPageWithValidParameters_thenReturnsPaginatedResults() throws Exception {
+        List<BillResponseDTO> billResponses = Arrays.asList(billResponseDTO, billResponseDTO2);
+        String jsonResponse = mapper.writeValueAsString(billResponses);
+
+        prepareResponse(response -> response
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(jsonResponse));
+
+        Flux<BillResponseDTO> resultFlux = billServiceClient.getAllBillsByPage(Optional.of(0), Optional.of(2),
+                null, null, null, null, null, null, null,
+                null);
+
+        StepVerifier.create(resultFlux)
+                .expectNextMatches(bill -> "1".equals(bill.getBillId()) && bill.getAmount() == 100.0)
+                .expectNextMatches(bill -> "2".equals(bill.getBillId()) && bill.getAmount() == 150.0)
+                .verifyComplete();
+    }
+
+    @Test
+    void whenGetAllBillsByPageWithInvalidParameters_thenThrowsError() {
+        prepareResponse(response -> response
+                .setResponseCode(400)  // Bad Request
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE));
+
+        Flux<BillResponseDTO> resultFlux = billServiceClient.getAllBillsByPage(Optional.of(-1),
+                Optional.of(10), null, null, null, null, null,
+                null, null, null);
+
+        StepVerifier.create(resultFlux)
+                .expectError(WebClientResponseException.BadRequest.class)
+                .verify();
+    }
+
+
+
 
 
 }

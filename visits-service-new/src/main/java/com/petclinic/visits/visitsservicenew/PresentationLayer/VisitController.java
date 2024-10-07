@@ -39,9 +39,10 @@ public class VisitController {
      *
      * @return All visits
      */
-    @GetMapping(value = "", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<VisitResponseDTO> getAllVisits() {
-        return visitService.getAllVisits();
+    @GetMapping(value="", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<VisitResponseDTO> getAllVisits(@RequestParam(required = false) String description){
+
+        return visitService.getAllVisits(description);
     }
 
     /**
@@ -200,11 +201,11 @@ public class VisitController {
     @DeleteMapping(value = "/reviews/{reviewId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<ReviewResponseDTO>> DeteleReview(@PathVariable String reviewId) {
         return Mono.just(reviewId)
-                .filter(id -> id.length() == 36)
+               // .filter(id -> id.length() == 36)
                 .switchIfEmpty(Mono.error(new InvalidInputException("the provided review id is invalid: " + reviewId)))
                 .flatMap(reviewService::DeleteReview)
                 .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.badRequest().build());
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
 

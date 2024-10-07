@@ -56,10 +56,15 @@ public class VisitsServiceClient {
                 .build();
     }
 
-    public Flux<VisitResponseDTO> getAllVisits() {
+    public Flux<VisitResponseDTO> getAllVisits(String description){
         return this.webClient
                 .get()
-                .uri(reviewUrl)
+                .uri(uriBuilder -> {
+                    if (description != null) {
+                        uriBuilder.queryParam("description", description).build();
+                    }
+                    return uriBuilder.build();
+                })
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, error -> Mono.error(new IllegalArgumentException("Something went wrong and we got a 400 error")))
                 .onStatus(HttpStatusCode::is5xxServerError, error -> Mono.error(new IllegalArgumentException("Something went wrong and we got a 500 error")))
@@ -386,6 +391,13 @@ public class VisitsServiceClient {
                 .uri(reviewUrl + "/" + visitId + "/" + status) // Adjust URI based on visit-service
                 .retrieve()
                 .bodyToMono(VisitResponseDTO.class); // Parse response into VisitResponseDTO
+    }
+
+    public Mono<ReviewResponseDTO> deleteReview(String reviewId){
+        return webClient.delete()
+                .uri(reviewUrl + "/reviews/" + reviewId)
+                .retrieve()
+                .bodyToMono(ReviewResponseDTO.class);
     }
 }
 
