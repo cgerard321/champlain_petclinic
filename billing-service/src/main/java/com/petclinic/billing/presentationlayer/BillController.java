@@ -6,7 +6,6 @@ import com.petclinic.billing.datalayer.BillResponseDTO;
 import com.petclinic.billing.datalayer.BillStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.MediaType;
@@ -15,22 +14,21 @@ import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import javax.validation.Valid;
-import java.time.LocalDate;
 import java.util.Optional;
 
 @RestController
 @Slf4j
-public class BillResource {
-    private final BillService SERVICE;
+public class BillController {
+    private final BillService billService;
 
-    BillResource(BillService service){
-        this.SERVICE = service;
+    BillController(BillService service){
+        this.billService = service;
     }
 
     // Create Bill //
     @PostMapping("/bills")
     public Mono<ResponseEntity<BillResponseDTO>> createBill(@Valid @RequestBody Mono<BillRequestDTO> billDTO){
-        return SERVICE.CreateBill(billDTO)
+        return billService.createBill(billDTO)
                 .map(e -> ResponseEntity.status(HttpStatus.CREATED).body(e))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
@@ -38,12 +36,12 @@ public class BillResource {
     // Read Bill //
     @GetMapping(value = "/bills/{billId}")
     public Mono<BillResponseDTO> getBillByBillId(@PathVariable String billId){
-        return SERVICE.getBillByBillId(billId);
+        return billService.getBillByBillId(billId);
     }
 
     @GetMapping(value = "/bills", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<BillResponseDTO> findAllBills() {
-        return SERVICE.GetAllBills();
+        return billService.getAllBills();
     }
 
     //to be changed
@@ -58,7 +56,7 @@ public class BillResource {
     //to be changed
     @GetMapping("/bills/bills-count")
     public Mono<ResponseEntity<Long>> getTotalNumberOfBills(){
-        return SERVICE.GetAllBills().count()
+        return billService.getAllBills().count()
                 .map(response -> ResponseEntity.status(HttpStatus.OK).body(response));
     }
 
@@ -96,7 +94,7 @@ public class BillResource {
             return Flux.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid page or size"));
         }
 
-        return SERVICE.getAllBillsByPage(PageRequest.of(page.get(), size.get()), billId, customerId,
+        return billService.getAllBillsByPage(PageRequest.of(page.get(), size.get()), billId, customerId,
                 ownerFirstName, ownerLastName, visitType, vetId, vetFirstName, vetLastName);
     }
 
@@ -114,29 +112,29 @@ public class BillResource {
                                                         @RequestParam(required = false) String vetLastName
     ){
 
-        return SERVICE.getNumberOfBillsWithFilters(billId, customerId, ownerFirstName, ownerLastName, visitType, vetId,
+        return billService.getNumberOfBillsWithFilters(billId, customerId, ownerFirstName, ownerLastName, visitType, vetId,
                 vetFirstName, vetLastName);
     }
 
 
     @GetMapping(value = "/bills/paid", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<BillResponseDTO> findAllPaidBills() {
-        return SERVICE.GetAllBillsByStatus(BillStatus.PAID);
+    public Flux<BillResponseDTO> getAllPaidBills() {
+        return billService.getAllBillsByStatus(BillStatus.PAID);
     }
 
     @GetMapping(value = "/bills/unpaid", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<BillResponseDTO> findAllUnpaidBills() {
-        return SERVICE.GetAllBillsByStatus(BillStatus.UNPAID);
+    public Flux<BillResponseDTO> getAllUnpaidBills() {
+        return billService.getAllBillsByStatus(BillStatus.UNPAID);
     }
 
     @GetMapping(value = "/bills/overdue", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<BillResponseDTO> findAllOverdueBills() {
-        return SERVICE.GetAllBillsByStatus(BillStatus.OVERDUE);
+    public Flux<BillResponseDTO> getAllOverdueBills() {
+        return billService.getAllBillsByStatus(BillStatus.OVERDUE);
     }
 
     @PutMapping(value ="/bills/{billId}")
     public Mono<ResponseEntity<BillResponseDTO>> updateBill(@PathVariable String billId, @RequestBody Mono<BillRequestDTO> billRequestDTO){
-        return SERVICE.updateBill(billId, billRequestDTO)
+        return billService.updateBill(billId, billRequestDTO)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
@@ -144,14 +142,14 @@ public class BillResource {
     @GetMapping(value = "/bills/customer/{customerId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<BillResponseDTO> getBillsByCustomerId(@PathVariable("customerId") String customerId)
     {
-        return SERVICE.GetBillsByCustomerId(customerId);
+        return billService.getBillsByCustomerId(customerId);
     }
 
 
     @GetMapping(value = "/bills/vet/{vetId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<BillResponseDTO> getBillsByVetId(@PathVariable("vetId") String vetId)
     {
-        return SERVICE.GetBillsByVetId(vetId);
+        return billService.getBillsByVetId(vetId);
     }
 
     // Delete Bill //
@@ -159,25 +157,25 @@ public class BillResource {
     @DeleteMapping(value = "/bills")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public Mono<Void> deleteAllBills(){
-        return SERVICE.DeleteAllBills();
+        return billService.deleteAllBills();
     }
 
     @DeleteMapping(value = "/bills/{billId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public Mono<Void> deleteBill(@PathVariable("billId") String billId){
-        return SERVICE.DeleteBill(billId);
+        return billService.deleteBill(billId);
     }
 
     @DeleteMapping (value = "/bills/vet/{vetId}")
     @ResponseStatus (HttpStatus.NO_CONTENT)
     public Flux<Void> deleteBillsByVetId (@PathVariable("vetId") String vetId){
-        return SERVICE.DeleteBillsByVetId(vetId);
+        return billService.deleteBillsByVetId(vetId);
     }
 
     @DeleteMapping (value = "/bills/customer/{customerId}")
     @ResponseStatus (HttpStatus.NO_CONTENT)
     public Flux<Void> deleteBillsByCustomerId (@PathVariable("customerId") String customerId){
-        return SERVICE.DeleteBillsByCustomerId(customerId);
+        return billService.deleteBillsByCustomerId(customerId);
     }
 
 }

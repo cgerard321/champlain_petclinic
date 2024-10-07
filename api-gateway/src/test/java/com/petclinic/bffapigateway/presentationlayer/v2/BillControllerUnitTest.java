@@ -5,7 +5,6 @@ import com.petclinic.bffapigateway.domainclientlayer.BillServiceClient;
 import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillStatus;
-import com.petclinic.bffapigateway.dtos.Products.ProductResponseDTO;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Test;
@@ -102,7 +101,7 @@ private final String baseBillURL = "/api/v2/gateway/bills";
 
     @Test
     public void whenGetAllBills_thenReturnAllBills(){
-       when(billServiceClient.getAllBilling())
+       when(billServiceClient.getAllBills())
                .thenReturn(Flux.just(billresponse, billresponse2));
 
        webTestClient
@@ -117,7 +116,7 @@ private final String baseBillURL = "/api/v2/gateway/bills";
                .contains(billresponse, billresponse2);
 
        verify(billServiceClient, times(1))
-               .getAllBilling();
+               .getAllBills();
     }
 
     @Test

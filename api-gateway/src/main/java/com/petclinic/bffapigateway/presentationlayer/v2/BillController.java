@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.awt.print.Pageable;
 import java.util.Optional;
 
 @RestController
@@ -58,19 +57,19 @@ public class BillController {
     @GetMapping(value = "/admin", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<BillResponseDTO> getAllBills()
     {
-        return billService.getAllBilling();
+        return billService.getAllBills();
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping(value = "/admin/{billId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<BillResponseDTO> getBillById(@PathVariable String billId)
     {
-        return billService.getBilling(billId);
+        return billService.getBillById(billId);
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping()
-    public ResponseEntity<Flux<BillResponseDTO>> getAllBillingByPage(
+    public ResponseEntity<Flux<BillResponseDTO>> getAllBillsByPage(
             @RequestParam Optional<Integer> page,
             @RequestParam Optional<Integer> size,
             @RequestParam(required = false) String billId,
