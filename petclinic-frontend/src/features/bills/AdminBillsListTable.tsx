@@ -14,12 +14,21 @@ import { useNavigate } from 'react-router-dom';
 
 export default function AdminBillsListTable(): JSX.Element {
   const navigate = useNavigate();
-  const [searchId, setSearchId] = useState<string>('');
-  const [searchedBill, setSearchedBill] = useState<Bill | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const { billsList, getBillsList, setCurrentPage, currentPage, hasMore } =
     useGetAllBillsPaginated();
 
+  interface FilterModel {
+    [key: string]: string;
+    customerId: string;
+  }
+
+  const [filter, setFilter] = useState<FilterModel>({
+    customerId: '',
+  });
+
+  const [searchId, setSearchId] = useState<string>('');
+  const [searchedBill, setSearchedBill] = useState<Bill | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [showCreateForm, setCreateForm] = useState<boolean>(false);
   const [newBill, setNewBill] = useState<BillRequestModel>({
     customerId: '',
@@ -115,7 +124,7 @@ export default function AdminBillsListTable(): JSX.Element {
   };
 
   const handleDelete = async (billId: string): Promise<void> => {
-    const billToDelete = billsList.find(bill => bill.billId === billId);
+    const billToDelete = billsList.find((bill: Bill) => bill.billId === billId);
     if (!billToDelete) {
       console.error('Bill not found: ${billId}');
       window.alert('Bill not found: ${billId}');
@@ -164,6 +173,18 @@ export default function AdminBillsListTable(): JSX.Element {
       setCurrentPage(currentPage + 1);
     }
   };
+
+  function isKeyOfBillResponseDTO(key: string): key is keyof Bill {
+    return ['customerId'].includes(key);
+  }
+
+  const filteredBills = billsList.filter((bill: Bill) => {
+    return Object.keys(filter).every(key => {
+      if (!filter[key]) return true;
+      if (!isKeyOfBillResponseDTO(key)) return true;
+      return bill[key].toString().includes(filter[key].toString());
+    });
+  });
 
   return (
     <div>
@@ -322,66 +343,81 @@ export default function AdminBillsListTable(): JSX.Element {
         </div>
       ) : (
         <div className="admin-bills-list-table-container">
-          <table className="table table-striped">
-            <thead>
-              <tr>
-                <th>Bill ID</th>
-                <th>Owner Name</th>
-                <th>Visit Type</th>
-                <th>Vet Name</th>
-                <th>Date</th>
-                <th>Amount</th>
-                <th>Taxed Amount</th>
-                <th>Status</th>
-                <th>Due Date</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {billsList.map((bill: Bill) => (
-                <tr key={bill.billId}>
-                  <td>{bill.billId}</td>
-                  <td>
-                    {bill.ownerFirstName} {bill.ownerLastName}
-                  </td>
-                  <td>{bill.visitType}</td>
-                  <td>
-                    {bill.vetFirstName} {bill.vetLastName}
-                  </td>
-                  <td>{bill.date}</td>
-                  <td>{bill.amount}</td>
-                  <td>{bill.taxedAmount}</td>
-                  <td>{bill.billStatus}</td>
-                  <td>{bill.dueDate}</td>
-                  <td>
-                    <button
-                      className="btn btn-danger"
-                      onClick={() => handleDelete(bill.billId)}
-                      title="delete"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="32"
-                        height="32"
-                        fill="currentColor"
-                        className="bi bi-trash"
-                        viewBox="0 0 16 16"
-                      >
-                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z" />
-                        <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z" />
-                      </svg>
-                    </button>
-                  </td>
+          <div>
+            <h3>All Bills:</h3>
+            <div className="filter-tab">
+              <input
+                type="text"
+                placeholder="Bill ID"
+                value={filter.customerId}
+                onChange={e =>
+                  setFilter({ ...filter, customerId: e.target.value })
+                }
+              ></input>
+            </div>
+            <table className="table table-striped">
+              <thead>
+                <tr>
+                  <th>Bill ID</th>
+                  <th>Owner Name</th>
+                  <th>Owner ID </th>
+                  <th>Visit Type</th>
+                  <th>Vet Name</th>
+                  <th>Date</th>
+                  <th>Amount</th>
+                  <th>Taxed Amount</th>
+                  <th>Status</th>
+                  <th>Due Date</th>
+                  <th>Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-          <div className="pagination-controls">
-            {currentPage > 0 && (
-              <button onClick={handlePreviousPage}>Previous</button>
-            )}
-            <span> Page {currentPage + 1} </span>
-            {hasMore && <button onClick={handleNextPage}>Next</button>}
+              </thead>
+              <tbody>
+                {filteredBills.map((bill: Bill) => (
+                  <tr key={bill.billId}>
+                    <td>{bill.billId}</td>
+                    <td>
+                      {bill.ownerFirstName} {bill.ownerLastName}
+                    </td>
+                    <td>{bill.customerId}</td>
+                    <td>{bill.visitType}</td>
+                    <td>
+                      {bill.vetFirstName} {bill.vetLastName}
+                    </td>
+                    <td>{bill.date}</td>
+                    <td>{bill.amount}</td>
+                    <td>{bill.taxedAmount}</td>
+                    <td>{bill.billStatus}</td>
+                    <td>{bill.dueDate}</td>
+                    <td>
+                      <button
+                        className="btn btn-danger"
+                        onClick={() => handleDelete(bill.billId)}
+                        title="delete"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="32"
+                          height="32"
+                          fill="currentColor"
+                          className="bi bi-trash"
+                          viewBox="0 0 16 16"
+                        >
+                          <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z" />
+                          <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z" />
+                        </svg>
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <div className="pagination-controls">
+              {currentPage > 0 && (
+                <button onClick={handlePreviousPage}>Previous</button>
+              )}
+              <span> Page {currentPage + 1} </span>
+              {hasMore && <button onClick={handleNextPage}>Next</button>}
+            </div>
           </div>
         </div>
       )}
