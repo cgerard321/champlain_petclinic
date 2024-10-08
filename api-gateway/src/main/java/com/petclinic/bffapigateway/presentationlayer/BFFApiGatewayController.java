@@ -1062,15 +1062,6 @@ public class BFFApiGatewayController {
         return inventoryServiceClient.searchInventory(page, size, inventoryName, inventoryType, inventoryDescription);
     }
 
-
-
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER})
-    @DeleteMapping(value = "inventory/{inventoryId}/products")
-    public Mono<ResponseEntity<Void>> deleteAllProductsFromInventory(@PathVariable String inventoryId) {
-        return inventoryServiceClient.deleteAllProductForInventory(inventoryId).then(Mono.just(ResponseEntity.noContent().<Void>build()))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
-    }
-
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER})
     @DeleteMapping(value = "inventory")
     public Mono<ResponseEntity<Void>> deleteAllInventories() {
