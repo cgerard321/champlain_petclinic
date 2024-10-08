@@ -1191,6 +1191,36 @@ class InventoryControllerIntegrationTest {
                 .jsonPath("$.message").isEqualTo("Inventory not found with id: " + invalidInventoryId);
     }
 
+    @Test
+    void deleteAllProductsInInventory_withValidInventoryId_shouldSucceed() {
+        // Arrange
+        String inventoryId = "inventoryId_3";
+
+        // Act & Assert
+        webTestClient.delete()
+                .uri("/inventory/{inventoryId}/products", inventoryId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNoContent();
+    }
+
+
+    @Test
+    void deleteAllProductsInInventory_withInvalidInventoryId_shouldReturnNotFound() {
+        // Arrange
+        String invalidInventoryId = "invalidInventoryId";
+
+        // Act & Assert
+        webTestClient.delete()
+                .uri("/inventory/{inventoryId}/products", invalidInventoryId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Invalid Inventory Id");
+    }
+
 
 
 }

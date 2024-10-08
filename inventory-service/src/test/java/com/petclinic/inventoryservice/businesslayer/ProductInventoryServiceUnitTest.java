@@ -725,7 +725,7 @@ class ProductInventoryServiceUnitTest {
                 .thenReturn(Mono.empty());
 
         // Act
-        Mono<Void> result = productInventoryService.deleteAllProductInventory(inventoryId);
+        Mono<Void> result = productInventoryService.deleteAllProductsForAnInventory(inventoryId);
 
         // Assert
         StepVerifier.create(result)
@@ -743,7 +743,7 @@ class ProductInventoryServiceUnitTest {
                 .thenReturn(Mono.empty());
 
         // Act and Assert
-        Mono<Void> result = productInventoryService.deleteAllProductInventory(inventoryId);
+        Mono<Void> result = productInventoryService.deleteAllProductsForAnInventory(inventoryId);
         StepVerifier.create(result)
                 .expectError(RuntimeException.class)
                 .verify();
