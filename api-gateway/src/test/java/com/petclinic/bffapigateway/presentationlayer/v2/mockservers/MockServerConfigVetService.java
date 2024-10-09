@@ -376,17 +376,6 @@ public void stopMockServer() {
                                 .withBody(json("{\"message\":\"Photo not found for vetId: " + vetId + "\"}"))
                 );
     }
-    public void registerGetEducationByVetIdEndpoint(String vetId, List<EducationRequestDTO> educations) throws JsonProcessingException {
-        mockServerClient_VetService.when(
-                        request()
-                                .withMethod("GET")
-                                .withPath("/vets/" + vetId + "/educations"))
-                .respond(
-                        response()
-                                .withStatusCode(200)
-                                .withHeader("Content-Type", "application/json")
-                                .withBody(mapper.writeValueAsString(educations)));
-    }
     public void registerDeleteAlbumPhotoEndpoint(String vetId, Integer albumId) {
         mockServerClient_VetService
                 .when(
@@ -427,6 +416,17 @@ public void stopMockServer() {
                                 .withHeader("Content-Type", "application/json")
                                 .withBody(json("{\"message\":\"Server error occurred while deleting album photo with ID: " + albumId + "\"}"))
                 );
+    }
+    public void registerGetEducationByVetIdEndpoint(String vetId, List<EducationRequestDTO> educations) throws JsonProcessingException {
+        mockServerClient_VetService.when(
+                        request()
+                                .withMethod("GET")
+                                .withPath("/vets/" + vetId + "/educations"))
+                .respond(
+                        response()
+                                .withStatusCode(200)
+                                .withHeader("Content-Type", "application/json")
+                                .withBody(mapper.writeValueAsString(educations)));
     }
 
     public void registerGetEducationByVetIdEndpointNotFound(String vetId) {

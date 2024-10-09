@@ -162,19 +162,19 @@ public class VetController {
                 .then(Mono.just(ResponseEntity.noContent().<Void>build()))
                 .doOnError(error -> log.error("Error deleting photo for vetId: {}", vetId, error));
     }
-
-    //education
-    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
-    @GetMapping(value = "/{vetId}/educations", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Flux<EducationResponseDTO> getEducationsByVetId(@PathVariable String vetId) {
-        return vetsServiceClient.getEducationsByVetId(vetId);
-
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
     @DeleteMapping("/{vetId}/albums/{Id}")
     public Mono<ResponseEntity<Void>> deleteAlbumPhoto(@PathVariable String vetId,@PathVariable Integer Id) {
         return vetsServiceClient.deleteAlbumPhotoById(vetId,Id)
                 .then(Mono.defer(() -> Mono.just(ResponseEntity.noContent().<Void>build())))
                 .onErrorResume(NotFoundException.class, e -> Mono.defer(() -> Mono.just(ResponseEntity.<Void>notFound().build())));
+    }
+
+    //education
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
+    @GetMapping(value = "/{vetId}/educations", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Flux<EducationResponseDTO> getEducationsByVetId(@PathVariable String vetId) {
+        return vetsServiceClient.getEducationsByVetId(vetId);
     }
 
 }
