@@ -30,8 +30,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import java.util.Date;
-
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
 public class BillServiceImplTest {
@@ -406,13 +404,57 @@ public class BillServiceImplTest {
                 .verify();
     }
 
+            @Test
+    public void testGenerateBillPdf() {
+
+        Bill mockBill = Bill.builder()
+                .billId("billId-1")
+                .customerId("customerId-1")
+                .ownerFirstName("John")
+                .ownerLastName("Doe")
+                .visitType("General")
+                .vetId("vetId-1")
+                .amount(100.0)
+                .billStatus(BillStatus.PAID)
+                .date(LocalDate.now())
+                .dueDate(LocalDate.now().plusDays(15))
+                .build();
+
+        String customerId = mockBill.getCustomerId();
+        String billId = mockBill.getBillId();
+
+        when(repo.findByBillId(billId)).thenReturn(Mono.just(mockBill));
+
+        Mono<byte[]> pdfBytesMono = billService.generateBillPdf(customerId, billId);
+
+        StepVerifier.create(pdfBytesMono)
+                .assertNext(pdfBytes -> {
+                    assertNotNull(pdfBytes);
+                    assertTrue(pdfBytes.length > 0);
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    public void testGenerateBillPdf_BillNotFound() {
+
+        when(repo.findByBillId(anyString())).thenReturn(Mono.empty());
+
+        Mono<byte[]> pdfMono = billService.generateBillPdf("nonexistentCustomerId", "nonexistentBillId");
+
+        StepVerifier.create(pdfMono)
+                .expectErrorMatches(throwable -> throwable instanceof RuntimeException &&
+                        throwable.getMessage().equals("Bill not found for given customer"))
+                .verify();
+    }
+
     private BillRequestDTO buildInvalidBillRequestDTO() {
         LocalDate date = LocalDate.now();
 
         return BillRequestDTO.builder()
                 .customerId("1")
                 .vetId("2")
-                .visitType("") // Empty visitType, which is considered invalid
+                .visitType("") 
                 .date(date)
                 .amount(100.0)
                 .billStatus(BillStatus.PAID)
