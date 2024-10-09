@@ -5,6 +5,7 @@ import { ProductModel } from './models/ProductModels/ProductModel';
 import './InventoriesListTable.module.css';
 import './InventoryProducts.css';
 import useSearchProducts from '@/features/inventories/hooks/useSearchProducts.ts';
+import deleteAllProductsFromInventory from './api/deleteAllProductsFromInventory';
 
 const InventoryProducts: React.FC = () => {
   const { inventoryId } = useParams<{ inventoryId: string }>();
@@ -58,6 +59,19 @@ const InventoryProducts: React.FC = () => {
       setFilteredProducts(updatedProducts); // Update filteredProducts as well
     } catch (err) {
       setError('Failed to delete product.');
+    }
+  };
+
+  const handleDeleteAllProducts = async (): Promise<void> => {
+    try {
+      // Call the deleteAllProductsFromInventory function
+      await deleteAllProductsFromInventory({ inventoryId: inventoryId! });
+      // Clear the product lists after successful deletion
+      setProducts([]);
+      setFilteredProducts([]);
+      alert('All products deleted successfully.');
+    } catch (err) {
+      setError('Failed to delete all products.');
     }
   };
 
@@ -273,6 +287,9 @@ const InventoryProducts: React.FC = () => {
         onClick={() => navigate(`/inventory/${inventoryId}/products/add`)}
       >
         Add
+      </button>
+      <button className="btn btn-danger" onClick={handleDeleteAllProducts}>
+        Delete All Products
       </button>
     </div>
   );

@@ -112,8 +112,8 @@ public Flux<InventoryResponseDTO> searchInventories(
 
     //delete all products and delete all inventory
     @DeleteMapping("/{inventoryId}/products")
-    public Mono<ResponseEntity<Void>> deleteProductInventory(@PathVariable String inventoryId) {
-        return productInventoryService.deleteAllProductInventory(inventoryId)
+    public Mono<ResponseEntity<Void>> deleteProductsForAnInventory(@PathVariable String inventoryId) {
+        return productInventoryService.deleteAllProductsForAnInventory(inventoryId)
                 .then(Mono.just(new ResponseEntity<Void>(HttpStatus.NO_CONTENT)))
                 .defaultIfEmpty(new ResponseEntity<Void>(HttpStatus.NOT_FOUND));
     }
@@ -187,6 +187,7 @@ public Flux<InventoryResponseDTO> searchInventories(
                 .map(productResponseDTO -> ResponseEntity.ok().body(productResponseDTO))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
+
 }
 
 
