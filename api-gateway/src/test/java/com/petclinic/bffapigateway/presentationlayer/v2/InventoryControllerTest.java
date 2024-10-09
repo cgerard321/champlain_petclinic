@@ -751,4 +751,26 @@ public class InventoryControllerTest {
                 .consumeProduct(inventoryId, invalidProductId);
     }
 
+    @Test
+    void deleteAllProductsInInventory_ShouldSucceed() {
+
+        String inventoryId = "inventory1";
+        // Mock the service call to simulate the successful deletion of all products in an inventory.
+        // Assuming your service client has a method called `deleteAllProductsInInventory`.
+        when(inventoryServiceClient.deleteAllProductsInInventory(inventoryId))
+                .thenReturn(Mono.empty());  // Using Mono.empty() to simulate a void return (successful deletion without a return value).
+
+        // Make the DELETE request to the API.
+        client.delete()
+                .uri("/api/v2/gateway/inventories/" + inventoryId +"/products")  // Assuming the endpoint for deleting all products in an inventory is the same with the inventory ID.
+                .exchange()
+                .expectStatus().isNoContent()
+                .expectBody().isEmpty();
+
+        // Verify that the deleteAllProductsInInventory method on the service client was called exactly once.
+        verify(inventoryServiceClient, times(1))
+                .deleteAllProductsInInventory(inventoryId);
+    }
+
+
 }

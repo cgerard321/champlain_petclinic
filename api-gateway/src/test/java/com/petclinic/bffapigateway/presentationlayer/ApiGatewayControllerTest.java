@@ -3316,29 +3316,6 @@ void deleteAllInventory_shouldSucceed() {
             .deleteAllInventories();
 }
 
-    @Test
-    void deleteAllProductInventory_shouldSucceed() {
-        // Assuming you want to test for a specific inventoryId
-        String inventoryId = "someInventoryId";
-
-        // Mock the service call to simulate the successful deletion of all product inventories for a specific inventoryId.
-        // Adjust the method name if `deleteAllProductInventoriesForInventory` is not the correct name.
-        when(inventoryServiceClient.deleteAllProductForInventory(eq(inventoryId)))
-                .thenReturn(Mono.empty());  // Using Mono.empty() to simulate a void return (successful deletion without a return value).
-
-        // Make the DELETE request to the API for a specific inventoryId.
-        client.delete()
-                .uri("/api/gateway/inventory/{inventoryId}/products", inventoryId)
-                .exchange()
-                .expectStatus().isNoContent()
-                .expectBody().isEmpty();
-
-        // Verify that the deleteAllProductInventoriesForInventory method on the service client was called exactly once with the specific inventoryId.
-        verify(inventoryServiceClient, times(1))
-                .deleteAllProductForInventory(eq(inventoryId));
-    }
-    //inventory tests
-
 
     @Test
     void getProductsInInventoryByInventoryIdAndProductFieldPagination(){

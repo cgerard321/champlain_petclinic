@@ -586,7 +586,7 @@ class InventoryControllerUnitTest {
     void deleteProductInventory_ValidInventoryId_ShouldCallServiceDelete() {
         // Arrange
         String inventoryId = "1";
-        when(productInventoryService.deleteAllProductInventory(inventoryId)).thenReturn(Mono.empty());
+        when(productInventoryService.deleteAllProductsForAnInventory(inventoryId)).thenReturn(Mono.empty());
 
         // Act & Assert
         webTestClient
@@ -595,7 +595,7 @@ class InventoryControllerUnitTest {
                 .exchange()
                 .expectStatus().isNoContent();  // Expecting 204 NO CONTENT status.
 
-        verify(productInventoryService, times(1)).deleteAllProductInventory(inventoryId);
+        verify(productInventoryService, times(1)).deleteAllProductsForAnInventory(inventoryId);
     }
 
 
@@ -1637,5 +1637,25 @@ class InventoryControllerUnitTest {
         // Verify that the service was called with the correct inventoryId
         verify(productInventoryService, times(1)).getQuantityOfProductsInInventory(inventoryId);
     }
+
+    @Test
+    void deleteAllProductsInInventory_withValidInventoryId_shouldSucceed() {
+        // Arrange
+        String inventoryId = "inventoryId_1";
+
+        // Mock the service to return an empty Mono
+        when(productInventoryService.deleteAllProductsForAnInventory(inventoryId))
+                .thenReturn(Mono.empty());
+
+        // Act and Assert
+        webTestClient.delete()
+                .uri("/inventory/{inventoryId}/products", inventoryId)
+                .exchange()
+                .expectStatus().isNoContent();
+
+        // Verify that the service was called with the correct inventoryId
+        verify(productInventoryService, times(1)).deleteAllProductsForAnInventory(inventoryId);
+    }
+
 
 }
