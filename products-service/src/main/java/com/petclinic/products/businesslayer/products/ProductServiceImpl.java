@@ -1,6 +1,9 @@
 package com.petclinic.products.businesslayer.products;
 
+import com.petclinic.products.datalayer.products.ProductStatus;
 import com.petclinic.products.utils.exceptions.InvalidInputException;
+import lombok.Data;
+import org.slf4j.helpers.CheckReturnValue;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +22,9 @@ import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.Date;
 
 @Service
 @Slf4j
@@ -216,4 +221,22 @@ public class ProductServiceImpl implements ProductService {
                 });
     }
 
-}
+
+    @Scheduled(cron = "0 0 0 * * ?") // Runs daily at midnight
+    public void updateProductStatuses(String productId) {
+        productRepository.findProductByProductId(productId)
+                .flatMap(product -> {
+                    LocalDate today = LocalDate.now();
+                    if (product.getReleaseDate().isAfter(today)) {
+                        product.setProductStatus(ProductStatus.PRE_ORDER);
+                    }else {
+                        product.setProductStatus(ProductStatus.AVAILABLE);
+                    }return  productRepository.save(product).then();
+                });
+
+
+    }
+
+
+
+    }
