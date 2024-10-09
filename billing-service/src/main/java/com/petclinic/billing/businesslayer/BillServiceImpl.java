@@ -1,11 +1,14 @@
 package com.petclinic.billing.businesslayer;
 
+import com.itextpdf.text.DocumentException;
 import com.petclinic.billing.datalayer.*;
 //import com.petclinic.billing.domainclientlayer.OwnerClient;
 //import com.petclinic.billing.domainclientlayer.VetClient;
 import com.petclinic.billing.domainclientlayer.OwnerClient;
 import com.petclinic.billing.domainclientlayer.VetClient;
 import com.petclinic.billing.util.EntityDtoUtil;
+import com.petclinic.billing.util.PdfGenerator;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -210,6 +213,36 @@ public class BillServiceImpl implements BillService{
 //    }
 
 
+    // Fetch a specific bill for a customer
+    @Override
+    public Mono<BillResponseDTO> GetBillByCustomerIdAndBillId(String customerId, String billId) {
+        return billRepository.findByBillId(billId)
+                .filter(bill -> bill.getCustomerId().equals(customerId))
+                .map(EntityDtoUtil::toBillResponseDto);
+    }
+
+    // Fetch filtered bills by status for a customer
+    @Override
+    public Flux<BillResponseDTO> GetBillsByCustomerIdAndStatus(String customerId, BillStatus status) {
+        return billRepository.findByCustomerIdAndBillStatus(customerId, status)
+                .map(EntityDtoUtil::toBillResponseDto);
+    }
+
+    @Override
+    public Mono<byte[]> generateBillPdf(String customerId, String billId) {
+        return billRepository.findByBillId(billId)
+                .filter(bill -> bill.getCustomerId().equals(customerId))
+                .switchIfEmpty(Mono.error(new RuntimeException("Bill not found for given customer")))
+                .map(EntityDtoUtil::toBillResponseDto)
+                .flatMap(bill -> {
+                    try {
+                        byte[] pdfBytes = PdfGenerator.generateBillPdf(bill);
+                        return Mono.just(pdfBytes);
+                    } catch (DocumentException e) {
+                        return Mono.error(new RuntimeException("Error generating PDF", e));
+                    }
+                });
+    }
 
 
 
