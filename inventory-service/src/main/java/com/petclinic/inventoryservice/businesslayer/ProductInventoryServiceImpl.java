@@ -36,7 +36,6 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
 
 
     @Override
-
     public Mono<InventoryResponseDTO> addInventory(Mono<InventoryRequestDTO> inventoryRequestDTO) {
         return inventoryRequestDTO
                 .map(EntityDTOUtil::toInventoryEntity)
@@ -387,15 +386,14 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                 .switchIfEmpty(Mono.error(new NotFoundException("Inventory id:" + inventoryId + "and product:" + productId + "are not found")));
     }
 
-
-    //delete all products and delete all inventory
     @Override
-    public Mono<Void> deleteAllProductInventory (String inventoryId){
+    public Mono<Void> deleteAllProductsForAnInventory(String inventoryId) {
         return inventoryRepository.findInventoryByInventoryId(inventoryId)
-                .switchIfEmpty(Mono.error(new RuntimeException("Invalid Inventory Id")))
+                .switchIfEmpty(Mono.error(new NotFoundException("Invalid Inventory Id")))
                 .flatMapMany(inv -> productRepository.deleteByInventoryId(inventoryId))
                 .then();
     }
+
 
     @Override
     public Mono<Void> deleteAllInventory () {
