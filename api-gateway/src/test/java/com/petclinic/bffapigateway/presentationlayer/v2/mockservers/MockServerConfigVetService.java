@@ -376,6 +376,7 @@ public void stopMockServer() {
                                 .withBody(json("{\"message\":\"Photo not found for vetId: " + vetId + "\"}"))
                 );
     }
+
     public void registerGetEducationByVetIdEndpoint(String vetId, List<EducationRequestDTO> educations) throws JsonProcessingException {
         mockServerClient_VetService.when(
                         request()
@@ -387,6 +388,50 @@ public void stopMockServer() {
                                 .withHeader("Content-Type", "application/json")
                                 .withBody(mapper.writeValueAsString(educations)));
     }
+
+    public void registerDeleteAlbumPhotoEndpoint(String vetId, Integer albumId) {
+        mockServerClient_VetService
+                .when(
+                        request()
+                                .withMethod("DELETE")
+                                .withPath("/vets/" + vetId + "/albums/" + albumId)
+                )
+                .respond(
+                        response()
+                                .withStatusCode(204) // 204 No Content indicates successful deletion
+                );
+    }
+
+    public void registerDeleteAlbumPhotoEndpointNotFound(String vetId, Integer albumId) {
+        mockServerClient_VetService
+                .when(
+                        request()
+                                .withMethod("DELETE")
+                                .withPath("/vets/" + vetId + "/albums/" + albumId)
+                )
+                .respond(
+                        response()
+                                .withStatusCode(404) // 404 Not Found indicates the album photo does not exist
+                                .withHeader("Content-Type", "application/json")
+                                .withBody(json("{\"message\":\"Album photo not found: " + albumId + "\"}"))
+                );
+    }
+    public void registerDeleteAlbumPhotoEndpointWithServerError(String vetId, Integer albumId) {
+        mockServerClient_VetService
+                .when(
+                        request()
+                                .withMethod("DELETE")
+                                .withPath("/vets/" + vetId + "/albums/" + albumId)
+                )
+                .respond(
+                        response()
+                                .withStatusCode(500) // 500 Internal Server Error
+                                .withHeader("Content-Type", "application/json")
+                                .withBody(json("{\"message\":\"Server error occurred while deleting album photo with ID: " + albumId + "\"}"))
+                );
+    }
+
+
 
     public void registerGetEducationByVetIdEndpointNotFound(String vetId) {
         mockServerClient_VetService.when(
