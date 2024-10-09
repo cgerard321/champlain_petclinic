@@ -7,10 +7,7 @@ import com.petclinic.bffapigateway.domainclientlayer.VetsServiceClient;
 import com.petclinic.bffapigateway.dtos.Auth.RegisterVet;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
-import com.petclinic.bffapigateway.dtos.Vets.Album;
-import com.petclinic.bffapigateway.dtos.Vets.SpecialtyDTO;
-import com.petclinic.bffapigateway.dtos.Vets.VetRequestDTO;
-import com.petclinic.bffapigateway.dtos.Vets.VetResponseDTO;
+import com.petclinic.bffapigateway.dtos.Vets.*;
 import com.petclinic.bffapigateway.exceptions.ExistingVetNotFoundException;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.utils.Security.Annotations.IsUserSpecific;
@@ -164,4 +161,12 @@ public class VetController {
                 .then(Mono.just(ResponseEntity.noContent().<Void>build()))
                 .doOnError(error -> log.error("Error deleting photo for vetId: {}", vetId, error));
     }
+
+    //education
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
+    @GetMapping(value = "/{vetId}/educations", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Flux<EducationResponseDTO> getEducationsByVetId(@PathVariable String vetId) {
+        return vetsServiceClient.getEducationsByVetId(vetId);
+    }
+
 }

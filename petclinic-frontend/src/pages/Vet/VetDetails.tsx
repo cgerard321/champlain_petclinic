@@ -19,9 +19,22 @@ interface VetResponseType {
   specialties: { specialtyId: string; name: string }[];
 }
 
+interface EducationResponseType {
+  educationId: string;
+  vetId: string;
+  schoolName: string;
+  degree: string;
+  fieldOfStudy: string;
+  startDate: string;
+  endDate: string;
+}
+
 export default function VetDetails(): JSX.Element {
   const { vetId } = useParams<{ vetId: string }>();
   const [vet, setVet] = useState<VetResponseType | null>(null);
+  const [education, setEducation] = useState<EducationResponseType[] | null>(
+    null
+  );
   const [photo, setPhoto] = useState<string | null>(null);
   const [albumPhotos, setAlbumPhotos] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -78,6 +91,22 @@ export default function VetDetails(): JSX.Element {
       }
     };
 
+    const fetchEducationDetails = async (): Promise<void> => {
+      try {
+        const response = await fetch(
+          `http://localhost:8080/api/v2/gateway/vets/${vetId}/educations`
+        );
+
+        if (!response.ok) {
+          throw new Error(`Error: ${response.statusText}`);
+        }
+        const data: EducationResponseType[] = await response.json();
+        setEducation(data);
+      } catch (error) {
+        setError('Failed to fetch education details');
+      }
+    };
+
     const fetchAlbumPhotos = async (): Promise<void> => {
       try {
         const response = await fetch(
@@ -117,6 +146,7 @@ export default function VetDetails(): JSX.Element {
 
     fetchVetDetails().then(() => {
       fetchVetPhoto();
+      fetchEducationDetails();
       fetchAlbumPhotos();
       setLoading(false);
     });
@@ -388,6 +418,34 @@ export default function VetDetails(): JSX.Element {
                     </div>
                   </form>
                 </div>
+              )}
+            </section>
+
+            <section className="vet-education-info">
+              <h2>Vet Education</h2>
+              {education && education.length > 0 ? (
+                education.map((edu, index) => (
+                  <div key={index}>
+                    <p>
+                      <strong>School Name:</strong> {edu.schoolName}
+                    </p>
+                    <p>
+                      <strong>Degree:</strong> {edu.degree}
+                    </p>
+                    <p>
+                      <strong>Field of Study:</strong> {edu.fieldOfStudy}
+                    </p>
+                    <p>
+                      <strong>Start Date:</strong> {edu.startDate}
+                    </p>
+                    <p>
+                      <strong>End Date:</strong> {edu.endDate}
+                    </p>
+                    <hr />
+                  </div>
+                ))
+              ) : (
+                <p>No education details available</p>
               )}
             </section>
 

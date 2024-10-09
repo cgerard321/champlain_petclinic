@@ -2,10 +2,7 @@ package com.petclinic.bffapigateway.presentationlayer.v2.mockservers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.petclinic.bffapigateway.dtos.Vets.Album;
-import com.petclinic.bffapigateway.dtos.Vets.SpecialtyDTO;
-import com.petclinic.bffapigateway.dtos.Vets.VetResponseDTO;
-import com.petclinic.bffapigateway.dtos.Vets.Workday;
+import com.petclinic.bffapigateway.dtos.Vets.*;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.integration.ClientAndServer;
 import org.springframework.http.MediaType;
@@ -379,6 +376,26 @@ public void stopMockServer() {
                                 .withBody(json("{\"message\":\"Photo not found for vetId: " + vetId + "\"}"))
                 );
     }
+    public void registerGetEducationByVetIdEndpoint(String vetId, List<EducationRequestDTO> educations) throws JsonProcessingException {
+        mockServerClient_VetService.when(
+                        request()
+                                .withMethod("GET")
+                                .withPath("/vets/" + vetId + "/educations"))
+                .respond(
+                        response()
+                                .withStatusCode(200)
+                                .withHeader("Content-Type", "application/json")
+                                .withBody(mapper.writeValueAsString(educations)));
+    }
 
+    public void registerGetEducationByVetIdEndpointNotFound(String vetId) {
+        mockServerClient_VetService.when(
+                        request()
+                                .withMethod("GET")
+                                .withPath("/vets/" + vetId + "/educations"))
+                .respond(
+                        response()
+                                .withStatusCode(404));
+    }
 
 }

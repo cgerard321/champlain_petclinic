@@ -405,5 +405,39 @@ class VetControllerIntegrationTest {
                 .jsonPath("$.message").isEqualTo("Photo not found for vetId: " + vetId);
     }
 
+    @Test
+    void whenGetEducationByVetId_thenReturnEducation() throws JsonProcessingException {
+        String vetId = "ac9adeb8-625b-11ee-8c99-0242ac120002";
+
+        EducationRequestDTO education1 = new EducationRequestDTO(vetId, "school1", "degree1", "field1", "2020-01-01", "2021-01-01");
+        EducationRequestDTO education2 = new EducationRequestDTO(vetId, "school2", "degree2", "field2", "2021-01-01", "2022-01-01");
+
+        mockServerConfigVetService.registerGetEducationByVetIdEndpoint(vetId, List.of(education1, education2));
+
+        webTestClient.get()
+                .uri(VET_ENDPOINT + "/" + vetId + "/educations")
+                .cookie("Bearer", BEARER_TOKEN)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBodyList(EducationRequestDTO.class)
+                .hasSize(2)
+                .contains(education1, education2);
+    }
+
+    @Test
+    void whenGetEducationByInvalidVetId_thenReturnNotFound() {
+        String invalidVetId = "ac9adeb8-625b-11ee-8c99-0242ac12000200";
+
+        mockServerConfigVetService.registerGetEducationByVetIdEndpointNotFound(invalidVetId);
+
+        webTestClient.get()
+                .uri(VET_ENDPOINT + "/" + invalidVetId + "/educations")
+                .cookie("Bearer", BEARER_TOKEN)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
 
 }
