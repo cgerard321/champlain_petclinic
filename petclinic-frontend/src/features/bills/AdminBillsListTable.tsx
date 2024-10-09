@@ -13,7 +13,7 @@ import { useNavigate } from 'react-router-dom';
 import { getAllPaidBills } from '@/features/bills/api/getAllPaidBills.tsx';
 import { getAllOverdueBills } from '@/features/bills/api/getAllOverdueBills.tsx';
 import { getAllUnpaidBills } from '@/features/bills/api/getAllUnpaidBills.tsx';
-import { getBillByBillId } from './api/getBillByBillId.tsx';
+import { getBillByBillId } from '@/features/bills/api/GetBillByBillId.tsx';
 
 export default function AdminBillsListTable(): JSX.Element {
   const navigate = useNavigate();
