@@ -335,5 +335,11 @@ public class VetController {
                 .doOnError(error -> log.error("Error fetching photos for vet {}", vetId, error));
     }
 
+    @DeleteMapping("/{vetId}/albums/{Id}")
+    public Mono<ResponseEntity<Void>> deleteAlbumPhoto(@PathVariable String vetId,@PathVariable Integer Id) {
+        return albumService.deleteAlbumPhotoById(vetId, Id)
+                .then(Mono.defer(() -> Mono.just(ResponseEntity.noContent().<Void>build())))
+                .onErrorResume(NotFoundException.class, e -> Mono.defer(() -> Mono.just(ResponseEntity.<Void>notFound().build())));
+    }
 
 }
