@@ -24,6 +24,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.*;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import org.springframework.web.multipart.MultipartFile;
@@ -164,4 +165,12 @@ public class VetController {
                 .then(Mono.just(ResponseEntity.noContent().<Void>build()))
                 .doOnError(error -> log.error("Error deleting photo for vetId: {}", vetId, error));
     }
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
+    @DeleteMapping("/{vetId}/albums/{Id}")
+    public Mono<ResponseEntity<Void>> deleteAlbumPhoto(@PathVariable String vetId,@PathVariable Integer Id) {
+        return vetsServiceClient.deleteAlbumPhotoById(vetId,Id)
+                .then(Mono.defer(() -> Mono.just(ResponseEntity.noContent().<Void>build())))
+                .onErrorResume(NotFoundException.class, e -> Mono.defer(() -> Mono.just(ResponseEntity.<Void>notFound().build())));
+    }
+
 }

@@ -10,6 +10,7 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import org.springframework.core.io.Resource;
+import reactor.core.publisher.Mono;
 
 @Service
 @RequiredArgsConstructor
@@ -28,5 +29,12 @@ public class AlbumServiceImpl implements AlbumService{
                 .doOnComplete(() -> log.info("Successfully fetched all albums for vetId: {}", vetId))
                 .doOnError(error -> log.error("Error fetching albums for vetId: {}", vetId, error));
     }
+    @Override
+    public Mono<Void> deleteAlbumPhotoById(String vetId, Integer Id) {
+        return albumRepository.findById(Id)
+                .switchIfEmpty(Mono.error(new NotFoundException("Album photo not found: " + Id)))
+                .flatMap(albumRepository::delete);
+    }
+
 
 }
