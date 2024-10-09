@@ -18,6 +18,7 @@ import { AppRoutePaths } from '@/shared/models/path.routes';
 import { AxiosError } from 'axios';
 import ImageContainer from '../components/ImageContainer';
 import { Button } from 'react-bootstrap';
+import { IsAdmin } from '@/context/UserContext';
 
 export default function ProductDetails(): JSX.Element {
   const navigate = useNavigate();
@@ -126,14 +127,19 @@ export default function ProductDetails(): JSX.Element {
           <p>Is Loading..</p>
         </div>
       ) : (
-        <div>
+        <div className="product-container">
           <div className="productimage-container">
             <ImageContainer imageId={currentProduct.imageId} />
           </div>
           <div className="productdetails-container">
-            <div className="productadmin-container">
-              <Button onClick={navigateToEditProduct}>Edit</Button>
-              <Button>Delete</Button>
+            <div
+              className="productadmin-container"
+              style={{ visibility: `${IsAdmin() ? 'visible' : 'hidden'}` }}
+            >
+              <Button variant="warning" onClick={navigateToEditProduct}>
+                Edit
+              </Button>
+              <Button variant="danger">Delete</Button>
             </div>
             <h2>{currentProduct.productName}</h2>
             <h3>{currentProduct.productSalePrice}$</h3>
@@ -142,8 +148,15 @@ export default function ProductDetails(): JSX.Element {
                 currentRating={currentProduct.averageRating}
                 viewOnly={true}
               />
-              <p>{currentProduct.averageRating}</p>
+              <h3>{currentProduct.averageRating}</h3>
             </div>
+            <div className="quantityalert-container">
+              {currentProduct.status}
+            </div>
+            <div className="cartactions-container">
+              <Button>Add to Cart</Button>
+            </div>
+            <p>Type: {currentProduct.productType}</p>
           </div>
           <p>Your Rating:</p>
           <StarRating
