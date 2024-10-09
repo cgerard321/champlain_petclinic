@@ -25,7 +25,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 
 @SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"spring.data.mongodb.port: 0"})
 @AutoConfigureWebTestClient
-class BillResourceIntegrationTest {
+class BillControllerIntegrationTest {
 
     @Autowired
     private WebTestClient client;
@@ -83,7 +83,7 @@ class BillResourceIntegrationTest {
     }
 
     @Test
-    void findAllPaidBills() {
+    void getAllPaidBills() {
 
         Bill billEntity = buildBill();
 
@@ -108,7 +108,7 @@ class BillResourceIntegrationTest {
     }
 
     @Test
-    void findAllUnpaidBills() {
+    void getAllUnpaidBills() {
         // Send a GET request to /bills/unpaid and expect a JSON response
         Bill billEntity = buildUnpaidBill();
 
@@ -133,7 +133,7 @@ class BillResourceIntegrationTest {
     }
 
     @Test
-    void findAllOverdueBills() {
+    void getAllOverdueBills() {
         // Send a GET request to /bills/overdue and expect a JSON response
         Bill billEntity = buildOverdueBill();
 
