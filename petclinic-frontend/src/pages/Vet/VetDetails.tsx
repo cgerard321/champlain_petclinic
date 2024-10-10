@@ -486,7 +486,10 @@ export default function VetDetails(): JSX.Element {
                       />
                       <button
                         className="delete-photo-button"
-                        onClick={() => handleDeleteAlbumPhoto(photo.id)} // Pass the photo ID for deletion
+                        onClick={e => {
+                          e.stopPropagation(); // This prevents the modal from opening
+                          handleDeleteAlbumPhoto(photo.id); // Pass the photo ID for deletion
+                        }}
                       >
                         Delete Image
                       </button>
