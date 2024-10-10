@@ -3,7 +3,7 @@ import { NavBar } from '@/layouts/AppNavBar.tsx';
 import './Home.css';
 import { getAllVets } from '@/features/veterinarians/api/getAllVets.ts';
 import { VetResponseModel } from '@/features/veterinarians/models/VetResponseModel.ts';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 
 const vetServices = [
   '✔️ General Check-ups',
@@ -27,6 +27,7 @@ function getRandomVets(vets: VetResponseModel[]): VetResponseModel[] {
 
 export default function Home(): JSX.Element {
   useParams<{ vetId: string }>();
+  const navigate = useNavigate();
   const [, setVets] = useState<VetResponseModel[]>([]);
   const [randomVets, setRandomVets] = useState<VetResponseModel[]>([]);
   const [loading, setLoading] = useState(true);
@@ -85,6 +86,10 @@ export default function Home(): JSX.Element {
     fetchVets();
   }, []);
 
+  const handleCardClick = (vetId: string): void => {
+    navigate(`/vets/${vetId}`);
+  };
+
   if (loading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
 
@@ -107,7 +112,12 @@ export default function Home(): JSX.Element {
               const services = getRandomServices();
               const vetPhoto = vetPhotos[vet.vetId] || '/images/vet_default.jpg';
               return (
-                <div key={vet.vetId} className="vet-card">
+                <div
+                  key={vet.vetId}
+                  className="vet-card"
+                  onClick={() => handleCardClick(vet.vetId)}
+                  style={{ cursor: 'pointer' }}
+                >
                   <h2>
                     {vet.firstName} {vet.lastName}
                   </h2>
