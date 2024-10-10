@@ -79,18 +79,18 @@ public class MockServerConfigBillService {
     }
 
     public void registerDownloadBillPdfEndpoint() {
-        String response = "Mock PDF Content";
+        byte[] mockPdfContent = "Mock PDF Content".getBytes();
 
         mockServerClient_BillService
             .when(
                 request()
                     .withMethod("GET")
-                    .withPath("/bills/customer/.*/bills/.*/pdf")
+                    .withPath("/api/v2/gateway/customers/1/bills/1234/pdf")
             )
             .respond(
                 response()
                     .withStatusCode(200)
-                    .withBody(response)  
+                    .withBody(mockPdfContent)  
                     .withHeader("Content-Type", "application/pdf")
             );
     } 
