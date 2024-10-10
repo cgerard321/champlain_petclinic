@@ -21,6 +21,7 @@ import { Button } from 'react-bootstrap';
 import { IsAdmin } from '@/context/UserContext';
 
 export default function ProductDetails(): JSX.Element {
+  const isAdmin = IsAdmin();
   const navigate = useNavigate();
   const { productId } = useParams();
   const [currentProduct, setCurrentProduct] =
@@ -101,15 +102,23 @@ export default function ProductDetails(): JSX.Element {
     newReview: string | null
   ): Promise<void> => {
     if (!productId) return;
-    if (newRating == 0) return deleteRating();
-    try {
-      const resUpdate = await updateUserRating(productId, newRating, newReview);
-      setUserRating(resUpdate);
-      const resRefresh = await getProduct(productId);
-      setCurrentProduct(resRefresh);
-    } catch (err) {
-      console.error('Could not update/fetch product ratings', err);
+    // We await because we want to avoid race condition with fetchRatings in backend
+    if (newRating == 0) await deleteRating();
+    else {
+      try {
+        const resUpdate = await updateUserRating(
+          productId,
+          newRating,
+          newReview
+        );
+        setUserRating(resUpdate);
+        const resRefresh = await getProduct(productId);
+        setCurrentProduct(resRefresh);
+      } catch (err) {
+        console.error('Could not update/fetch product ratings', err);
+      }
     }
+    fetchRatings();
   };
 
   useEffect(() => {
@@ -134,12 +143,19 @@ export default function ProductDetails(): JSX.Element {
           <div className="productdetails-container">
             <div
               className="productadmin-container"
-              style={{ visibility: `${IsAdmin() ? 'visible' : 'hidden'}` }}
+              style={{ visibility: `${isAdmin ? 'visible' : 'hidden'}` }}
             >
               <Button variant="warning" onClick={navigateToEditProduct}>
                 Edit
               </Button>
-              <Button variant="danger">Delete</Button>
+              <Button
+                variant="danger"
+                onClick={() =>
+                  alert('This feature has not yet been implemented')
+                }
+              >
+                Delete
+              </Button>
             </div>
             <h2>{currentProduct.productName}</h2>
             <h3>{currentProduct.productSalePrice}$</h3>
@@ -148,34 +164,43 @@ export default function ProductDetails(): JSX.Element {
                 currentRating={currentProduct.averageRating}
                 viewOnly={true}
               />
-              <h3>{currentProduct.averageRating}</h3>
+              <h3>{currentProduct.averageRating} / 5</h3>
             </div>
             <div className="quantityalert-container">
               {currentProduct.status}
             </div>
             <div className="cartactions-container">
-              <Button>Add to Cart</Button>
+              <Button
+                onClick={() =>
+                  alert('This feature has not yet been implemented')
+                }
+              >
+                Add to Cart
+              </Button>
             </div>
             <p>Type: {currentProduct.productType}</p>
+            <h3>Description</h3>
+            <p>{currentProduct.productDescription}</p>
           </div>
-          <p>Your Rating:</p>
-          <StarRating
-            currentRating={currentUserRating.rating}
-            viewOnly={false}
-            updateRating={updateRating}
-          />
-
-          <div className="reviewproduct-container">
-            <h2>Review</h2>
-            <ReviewBox
-              updateFunc={(newReview: string) =>
-                updateRating(currentUserRating.rating, newReview)
-              }
-              rating={currentUserRating}
-            />
-          </div>
-          <div className="reviewsforproduct-container">
-            <ul>
+          <div className="review-section-container">
+            <div className="reviewproduct-container">
+              <h2>Review</h2>
+              <p>Leave a rating:</p>
+              <StarRating
+                currentRating={currentUserRating.rating}
+                viewOnly={false}
+                updateRating={updateRating}
+              />
+              <ReviewBox
+                updateFunc={(newReview: string) =>
+                  updateRating(currentUserRating.rating, newReview)
+                }
+                rating={currentUserRating}
+              />
+            </div>
+            <br></br>
+            <h3>Users feedback</h3>
+            <div className="reviewsforproduct-container">
               {productReviews.length > 0 ? (
                 productReviews?.map((rating: RatingModel, index: number) => (
                   <div key={index} className="reviewbox">
@@ -204,7 +229,7 @@ export default function ProductDetails(): JSX.Element {
               ) : (
                 <p>This product does not have any reviews yet!</p>
               )}
-            </ul>
+            </div>
           </div>
         </div>
       )}

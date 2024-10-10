@@ -1,6 +1,7 @@
 import { JSX, useEffect, useState } from 'react';
-import { Alert, Button } from 'react-bootstrap';
+import { Alert, Button, Form } from 'react-bootstrap';
 import { RatingModel } from '../models/ProductModels/RatingModel';
+import './ReviewBox.css';
 
 function ReviewBox({
   updateFunc,
@@ -19,19 +20,24 @@ function ReviewBox({
   }, [rating.review]);
 
   return (
-    <div>
+    <div className="reviewbox-container">
       {wasSubmitted === false ? (
         <>
           {isError && <Alert variant="warning">{isError}</Alert>}
-          <textarea
+          <Form.Control
+            as="textarea"
+            rows={3}
             className="review-box"
             placeholder="Leave your review here.."
             onChange={e => setReviewText(e.target.value)}
             value={reviewText}
-          ></textarea>
+          ></Form.Control>
           <Button
             onClick={() => {
               updateFunc(reviewText);
+              if (rating.review.length > 2000) {
+                setError('Review cannot exceed 2000 characters!');
+              }
               if (rating.rating !== 0) {
                 setSubmitted(true);
                 setError(null);
@@ -45,8 +51,8 @@ function ReviewBox({
         </>
       ) : (
         <>
-          <p>You left a review on this product:</p>
-          <p>{reviewText}</p>
+          <h5>You previously left a review on this product:</h5>
+          <p className="past-review">{reviewText}</p>
           <Button onClick={() => setSubmitted(false)}>Edit</Button>
         </>
       )}

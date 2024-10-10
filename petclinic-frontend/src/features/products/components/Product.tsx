@@ -5,6 +5,8 @@ import ImageContainer from './ImageContainer';
 import { changeProductQuantity } from '../api/changeProductQuantity';
 import { generatePath, useNavigate } from 'react-router-dom';
 import { AppRoutePaths } from '@/shared/models/path.routes';
+import StarRating from './StarRating';
+import './Product.css';
 
 export default function Product({
   product,
@@ -150,7 +152,10 @@ export default function Product({
           : `${currentProduct.productDescription.substring(0, 100)}...`}
       </p>
       <p>Price: ${currentProduct.productSalePrice.toFixed(2)}</p>
-      <p>Rating: {currentProduct.averageRating}</p>
+      <StarRating
+        currentRating={currentProduct.averageRating}
+        viewOnly={true}
+      />
     </div>
   );
 }

@@ -37,7 +37,7 @@
 .product-container {
   margin: 5vw;
   display: grid;
-  grid-template-columns: 0.5fr 0.5fr;
+  grid-template-columns: 0.75fr 0.5fr;
 }
 
 .productimage-container {
@@ -96,4 +96,27 @@
   .productadmin-container {
     justify-content: left;
   }
+}
+
+.review-section-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: left;
+}
+
+.reviewproduct-container > h2 {
+  text-align: left;
+}
+
+.reviewsforproduct-container {
+  display: flex;
+  gap: 1rem;
+  flex-direction: column;
+  flex-wrap: wrap;
+}
+
+.reviewbox > p {
+  width: 100%;
+  word-wrap: break-word;
+  white-space: normal;
 }
