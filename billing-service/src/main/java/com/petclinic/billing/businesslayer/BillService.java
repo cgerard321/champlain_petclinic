@@ -56,4 +56,13 @@ public interface BillService {
 
     Mono<Void> DeleteAllBills();
 
+    // Fetch a specific bill for a customer
+    Mono<BillResponseDTO> GetBillByCustomerIdAndBillId(String customerId, String billId);
+
+    // Fetch filtered bills by status
+    Flux<BillResponseDTO> GetBillsByCustomerIdAndStatus(String customerId, BillStatus status);
+
+    // Method to generate the bill PDF
+    Mono<byte[]> generateBillPdf(String customerId, String billId);
+
 }

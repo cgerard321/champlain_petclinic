@@ -21,7 +21,6 @@ import java.awt.print.Pageable;
 import java.time.LocalDate;
 import java.util.Optional;
 
-
 @Component
 @Slf4j
 public class BillServiceClient {
@@ -29,12 +28,10 @@ public class BillServiceClient {
     private final WebClient.Builder webClientBuilder;
     private final String billServiceUrl;
 
-
     public BillServiceClient(
             WebClient.Builder webClientBuilder,
             @Value("${app.billing-service.host}") String billingServiceHost,
-            @Value("${app.billing-service.port}") String billingServicePort
-    ) {
+            @Value("${app.billing-service.port}") String billingServicePort) {
         this.webClientBuilder = webClientBuilder;
 
         billServiceUrl = "http://" + billingServiceHost + ":" + billingServicePort + "/bills";
@@ -46,21 +43,24 @@ public class BillServiceClient {
                 .uri(billServiceUrl + "/{billId}", billId)
                 .retrieve()
                 .bodyToMono(BillResponseDTO.class)
-                .doOnNext(t -> t.setTaxedAmount(((t.getAmount() * 15)/100)+ t.getAmount()))
+                .doOnNext(t -> t.setTaxedAmount(((t.getAmount() * 15) / 100) + t.getAmount()))
                 .doOnNext(t -> t.setTaxedAmount(Math.round(t.getTaxedAmount() * 100.0) / 100.0));
     }
+
     public Flux<BillResponseDTO> getBillsByOwnerId(final String customerId) {
         return webClientBuilder.build().get()
                 .uri(billServiceUrl + "/customer/{customerId}", customerId)
                 .retrieve()
                 .bodyToFlux(BillResponseDTO.class);
     }
+
     public Flux<BillResponseDTO> getBillsByVetId(final String vetId) {
         return webClientBuilder.build().get()
                 .uri(billServiceUrl + "/vet/{vetId}", vetId)
                 .retrieve()
                 .bodyToFlux(BillResponseDTO.class);
     }
+
     public Flux<BillResponseDTO> getAllBilling() {
         return webClientBuilder.build().get()
                 .uri(billServiceUrl)
@@ -68,13 +68,51 @@ public class BillServiceClient {
                 .bodyToFlux(BillResponseDTO.class);
     }
 
-    //to be changed
-//    public Flux<BillResponseDTO> getAllBillsByPage(Optional<Integer> page, Optional<Integer> size) {
-//        return webClientBuilder.build().get()
-//                .uri(billServiceUrl + "/bills-pagination?page="+page.orElse(0)+"&size="+size.orElse(5))
-//                .retrieve()
-//                .bodyToFlux(BillResponseDTO.class);
-//    }
+    // to be changed
+    // public Flux<BillResponseDTO> getAllBillsByPage(Optional<Integer> page,
+    // Optional<Integer> size) {
+    // return webClientBuilder.build().get()
+    // .uri(billServiceUrl +
+    // "/bills-pagination?page="+page.orElse(0)+"&size="+size.orElse(5))
+    // .retrieve()
+    // .bodyToFlux(BillResponseDTO.class);
+    // }
+
+//     public Flux<BillResponseDTO> getAllBillsByPage(Optional<Integer> page, Optional<Integer> size, String billId,
+//             String customerId,
+//             String ownerFirstName, String ownerLastName, String visitType,
+//             String vetId, String vetFirstName, String vetLastName) {
+
+//         UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(billServiceUrl + "/bills-pagination");
+
+//         builder.queryParam("page", page);
+//         builder.queryParam("size", size);
+
+//         // Add query parameters conditionally if they are not null or empty
+//         if (billId != null && !billId.isEmpty()) {
+//             builder.queryParam("billId", billId);
+//         }
+//         if (customerId != null && !customerId.isEmpty()) {
+//             builder.queryParam("customerId", customerId);
+//         }
+//         if (ownerFirstName != null && !ownerFirstName.isEmpty()) {
+//             builder.queryParam("ownerFirstName", ownerFirstName);
+//         }
+//         if (ownerLastName != null && !ownerLastName.isEmpty()) {
+//             builder.queryParam("ownerLastName", ownerLastName);
+//         }
+//         if (visitType != null && !visitType.isEmpty()) {
+//             builder.queryParam("visitType", visitType);
+//         }
+//         if (vetId != null && !vetId.isEmpty()) {
+//             builder.queryParam("vetId", vetId);
+//         }
+//         if (vetFirstName != null && !vetFirstName.isEmpty()) {
+//             builder.queryParam("vetFirstName", vetFirstName);
+//         }
+//         if (vetLastName != null && !vetLastName.isEmpty()) {
+//             builder.queryParam("vetLastName", vetLastName);
+//         }
 
 //    public Flux<BillResponseDTO> getAllBillsByPage(Optional<Integer> page, Optional<Integer> size, String billId, String customerId,
 //                                                    String ownerFirstName, String ownerLastName, String visitType,
@@ -119,7 +157,7 @@ public class BillServiceClient {
 //    }
 
 
-    //to be changed
+    // to be changed
     public Mono<Long> getTotalNumberOfBills() {
         return webClientBuilder.build().get()
                 .uri(billServiceUrl + "/bills-count")
@@ -128,8 +166,8 @@ public class BillServiceClient {
     }
 
     public Mono<Long> getTotalNumberOfBillsWithFilters(String billId, String customerId,
-                                                       String ownerFirstName, String ownerLastName, String visitType,
-                                                       String vetId, String vetFirstName, String vetLastName){
+            String ownerFirstName, String ownerLastName, String visitType,
+            String vetId, String vetFirstName, String vetLastName) {
         UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(billServiceUrl + "/bills-filtered-count");
 
         // Add query parameters conditionally if they are not null or empty
@@ -185,7 +223,8 @@ public class BillServiceClient {
                 .retrieve()
                 .bodyToFlux(BillResponseDTO.class);
     }
-    public Mono<BillResponseDTO> createBill(final BillRequestDTO model){
+
+    public Mono<BillResponseDTO> createBill(final BillRequestDTO model) {
         return webClientBuilder.build().post()
                 .uri(billServiceUrl)
                 .body(Mono.just(model), BillRequestDTO.class)
@@ -193,7 +232,7 @@ public class BillServiceClient {
                 .retrieve().bodyToMono(BillResponseDTO.class);
     }
 
-    public Mono<BillResponseDTO> updateBill(String billId, Mono<BillRequestDTO> billRequestDTO){
+    public Mono<BillResponseDTO> updateBill(String billId, Mono<BillRequestDTO> billRequestDTO) {
         return webClientBuilder
                 .build()
                 .put()
@@ -308,4 +347,13 @@ public class BillServiceClient {
 
 }
 
+    public Mono<byte[]> downloadBillPdf(String customerId, String billId) {
+        return webClientBuilder.build()
+                .get()
+                .uri(billServiceUrl + "/customer/{customerId}/bills/{billId}/pdf", customerId, billId)
+                .accept(MediaType.APPLICATION_PDF)
+                .retrieve()
+                .bodyToMono(byte[].class);
+    }
 
+}
