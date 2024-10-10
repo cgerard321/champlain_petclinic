@@ -36,5 +36,18 @@ public class AlbumServiceImpl implements AlbumService{
                 .flatMap(albumRepository::delete);
     }
 
+    @Override
+    public Mono<Album> addPhotoToAlbum(String vetId, String filename, String imgType, byte[] data) {
+        Album newAlbum = Album.builder()
+                .vetId(vetId)
+                .filename(filename)
+                .imgType(imgType)
+                .data(data)
+                .build();
+
+        return albumRepository.save(newAlbum)
+                .doOnSuccess(album -> log.info("Added new photo for vetId: {}, filename: {}", vetId, filename))
+                .doOnError(error -> log.error("Failed to add photo for vetId: {}", vetId, error));
+    }
 
 }

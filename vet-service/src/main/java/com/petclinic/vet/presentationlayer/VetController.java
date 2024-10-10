@@ -265,24 +265,6 @@ public class VetController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-
-  /*  @PostMapping("{vetId}/photos/{photoName}")
-    public Mono<ResponseEntity<Resource>> addPhoto(
-            @PathVariable String vetId,
-            @PathVariable String photoName,
-            @RequestParam("file") MultipartFile file) throws IOException {
-
-
-        // Convert MultipartFile to Resource
-        Mono<Resource> photoResource = Mono.just(new ByteArrayResource(file.getBytes()));
-
-
-        return photoService.insertPhotoOfVet(vetId, photoName, photoResource)
-                .map(p -> ResponseEntity.status(HttpStatus.CREATED).body(p))
-                .defaultIfEmpty(ResponseEntity.badRequest().build());
-    }
-*/
-
     @DeleteMapping("{vetId}/photo")
     public Mono<ResponseEntity<Void>> deletePhotoByVetId(@PathVariable String vetId) {
         return photoService.deletePhotoByVetId(vetId)
@@ -341,5 +323,36 @@ public class VetController {
                 .then(Mono.defer(() -> Mono.just(ResponseEntity.noContent().<Void>build())))
                 .onErrorResume(NotFoundException.class, e -> Mono.defer(() -> Mono.just(ResponseEntity.<Void>notFound().build())));
     }
+
+    @PostMapping("/{vetId}/albums")
+    public Mono<ResponseEntity<Void>> uploadPhoto(
+            @PathVariable String vetId,
+            @RequestParam("file") MultipartFile file) {
+
+        log.info("Received file for vetId: {}", vetId);
+        log.info("File name: {}, Content type: {}, Size: {} bytes",
+                file.getOriginalFilename(),
+                file.getContentType(),
+                file.getSize());
+
+        try {
+            String filename = file.getOriginalFilename();
+            String imgType = file.getContentType();
+            byte[] data = file.getBytes();
+
+            return albumService.addPhotoToAlbum(vetId, filename, imgType, data)
+                    .then(Mono.just(ResponseEntity.ok().<Void>build()))  // Explicitly specify <Void> here
+                    .doOnError(e -> {
+                        log.error("Error while saving photo for vetId: {}", vetId, e);
+                        Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
+                    });
+        } catch (IOException e) {
+            log.error("Error while processing the uploaded file", e);
+            return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
+        }
+    }
+
+
+
 
 }

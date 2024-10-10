@@ -154,6 +154,18 @@ public class VetController {
                 .doOnError(error -> log.error("Error fetching photos for vet {}", vetId, error));
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @PostMapping("/{vetId}/albums")
+    public Mono<ResponseEntity<Void>> uploadVetAlbumPhoto(@PathVariable String vetId, @RequestParam("file") MultipartFile file) {
+        return vetsServiceClient.addPhotoToAlbum(vetId, file)
+                .then(Mono.just(ResponseEntity.ok().<Void>build()))
+                .onErrorResume(e -> {
+                    log.error("Error uploading photo for vet {}", vetId, e);
+                    return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).<Void>build());
+                });
+    }
+
+
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
     @DeleteMapping("{vetId}/photo")

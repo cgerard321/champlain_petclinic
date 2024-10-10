@@ -9,4 +9,5 @@ import reactor.core.publisher.Mono;
 public interface AlbumService {
     Flux<Album> getAllAlbumsByVetId(String vetId);
     Mono<Void> deleteAlbumPhotoById(String vetId, Integer Id);
+    Mono<Album> addPhotoToAlbum(String vetId, String filename, String imgType, byte[] data);
 }
