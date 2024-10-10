@@ -16,40 +16,60 @@
 .vets-list {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
+  justify-content: space-between;
   margin: 20px 0;
+  gap: 20px;
 }
 
 .vet-card {
-  background-color: #f8f8f8;
-  border: 2px solid #e0e0e0;
-  border-radius: 12px;
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 15px;
   padding: 20px;
-  margin: 10px;
-  width: 20%;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s;
+  width: calc(33.33% - 20px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
   box-sizing: border-box;
 }
 
 .vet-card:hover {
-  transform: scale(1.05);
+  transform: translateY(-10px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* Removed hover effect on the photo */
+.vet-photo-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+}
+
+.vet-photo {
+  width: 80%;
+  height: 160px;
+  border-radius: 12px;
+  object-fit: cover;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* Keep shadow */
+  transition: none; /* No transition on hover */
 }
 
 .vet-card h2 {
-  font-size: 1.3em;
-  margin: 0;
+  font-size: 1.2em;
+  margin: 10px 0;
 }
 
 .vet-card p {
   font-style: italic;
-  color: #888;
+  color: #777;
+  margin: 5px 0;
 }
 
 .vet-card ul {
   list-style-type: none;
   padding: 0;
-  margin: 10px 0 0 0;
+  margin: 15px 0 0 0;
 }
 
 .vet-card li {
@@ -57,14 +77,20 @@
   margin: 4px 0;
 }
 
+@media (max-width: 1024px) {
+  .vet-card {
+    width: calc(50% - 20px);
+  }
+}
+
 @media (max-width: 768px) {
   .vet-card {
-    width: 45%;
+    width: calc(50% - 20px);
   }
 }
 
 @media (max-width: 480px) {
   .vet-card {
-    width: 90%;
+    width: 100%;
   }
 }
