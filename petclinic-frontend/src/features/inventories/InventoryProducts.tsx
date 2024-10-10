@@ -6,6 +6,7 @@ import './InventoriesListTable.module.css';
 import './InventoryProducts.css';
 import useSearchProducts from '@/features/inventories/hooks/useSearchProducts.ts';
 import deleteAllProductsFromInventory from './api/deleteAllProductsFromInventory';
+import createPdf from './api/createPdf';
 
 const InventoryProducts: React.FC = () => {
   const { inventoryId } = useParams<{ inventoryId: string }>();
@@ -20,6 +21,16 @@ const InventoryProducts: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+
+  const handleCreatePdf = async (): Promise<void> => {
+    if (inventoryId) {
+      try {
+        await createPdf(inventoryId);
+      } catch (error) {
+        console.error('Failed to create PDF', error);
+      }
+    }
+  };
 
   // Fetch products from the backend
   useEffect(() => {
@@ -169,6 +180,9 @@ const InventoryProducts: React.FC = () => {
         onClick={() => navigate('/inventories')}
       >
         Back
+      </button>
+      <button className="btn btn-primary" onClick={handleCreatePdf}>
+        Download PDF
       </button>
 
       <div className="products-filtering">

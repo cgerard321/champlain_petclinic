@@ -772,5 +772,38 @@ public class InventoryControllerTest {
                 .deleteAllProductsInInventory(inventoryId);
     }
 
+    @Test
+    public void testCreateSupplyPdf_NotFound() {
+        client.get()
+                .uri("/inventory/validInventoryId/products/download")
+                .exchange()
+                .expectStatus().isNotFound();
+
+        // Verify the service method was not called
+        verify(inventoryServiceClient, never()).createSupplyPdf(anyString());
+    }
+    @Test
+    public void testCreateSupplyPdf_Success() {
+        // Arrange
+        String inventoryId = "inventory1";
+        byte[] pdfContent = "PDF Content".getBytes();
+
+        // Mock the service method to return the PDF content
+        when(inventoryServiceClient.createSupplyPdf(inventoryId))
+                .thenReturn(Mono.just(pdfContent));
+
+        // Act
+        client.get()
+                .uri(baseInventoryURL + "/" + inventoryId + "/products/download")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(byte[].class)
+                .isEqualTo(pdfContent);
+
+        // Verify that the service method was called with the correct inventoryId
+        verify(inventoryServiceClient, times(1))
+                .createSupplyPdf(eq(inventoryId));
+    }
+
 
 }
