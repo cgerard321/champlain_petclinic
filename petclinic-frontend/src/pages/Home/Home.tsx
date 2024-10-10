@@ -52,13 +52,13 @@ export default function Home(): JSX.Element {
 
       const blob = await response.blob();
       const imageUrl = URL.createObjectURL(blob);
-      setVetPhotos((prevPhotos) => ({
+      setVetPhotos(prevPhotos => ({
         ...prevPhotos,
         [vetId]: imageUrl,
       }));
     } catch (error) {
       console.error('Failed to fetch vet photo:', error);
-      setVetPhotos((prevPhotos) => ({
+      setVetPhotos(prevPhotos => ({
         ...prevPhotos,
         [vetId]: '/images/vet_default.jpg',
       }));
@@ -66,13 +66,14 @@ export default function Home(): JSX.Element {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     const fetchVets = async () => {
       try {
         const fetchedVets = await getAllVets();
         setVets(fetchedVets);
         const selectedVets = getRandomVets(fetchedVets);
         setRandomVets(selectedVets);
-        selectedVets.forEach((vet) => {
+        selectedVets.forEach(vet => {
           fetchVetPhoto(vet.vetId);
         });
       } catch (err) {
@@ -106,11 +107,12 @@ export default function Home(): JSX.Element {
         </p>
 
         <div>
-          <h1>Vets 🐩</h1>
+          <h1>Meet Our Vets 🐩</h1>
           <div className="vets-list">
-            {randomVets.map((vet) => {
+            {randomVets.map(vet => {
               const services = getRandomServices();
-              const vetPhoto = vetPhotos[vet.vetId] || '/images/vet_default.jpg';
+              const vetPhoto =
+                vetPhotos[vet.vetId] || '/images/vet_default.jpg';
               return (
                 <div
                   key={vet.vetId}
