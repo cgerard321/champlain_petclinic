@@ -13,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.webjars.NotFoundException;
@@ -632,6 +633,25 @@ public class VetsServiceClient {
                 .bodyToFlux(Album.class);
     }
 
+    public Mono<Void> addPhotoToAlbum(String vetId, MultipartFile file) {
+        return webClientBuilder.build()
+                .post()
+                .uri(vetsServiceUrl + "/" + vetId + "/albums")
+                .contentType(MediaType.MULTIPART_FORM_DATA)  // This indicates you're sending a file
+                .body(BodyInserters.fromMultipartData("file", file.getResource()))  // Add the file as part of the body
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, error -> {
+                    HttpStatusCode statusCode = error.statusCode();
+                    if (statusCode.equals(HttpStatus.NOT_FOUND)) {
+                        return Mono.error(new ExistingVetNotFoundException("Vet " + vetId + " not found", NOT_FOUND));
+                    }
+                    return Mono.error(new IllegalArgumentException("Client error"));
+                })
+                .onStatus(HttpStatusCode::is5xxServerError, error -> Mono.error(new IllegalArgumentException("Server error")))
+                .bodyToMono(Void.class);
+    }
+
+
 
     public Mono<Void> deletePhotoByVetId(String vetId) {
         return webClientBuilder
@@ -669,6 +689,7 @@ public class VetsServiceClient {
                 )
                 .bodyToMono(Void.class);
     }
+
 
 
 }

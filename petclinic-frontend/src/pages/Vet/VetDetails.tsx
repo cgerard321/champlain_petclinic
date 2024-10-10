@@ -49,6 +49,62 @@ export default function VetDetails(): JSX.Element {
   const [specialtyId, setSpecialtyId] = useState('');
   const [specialtyName, setSpecialtyName] = useState('');
   const [enlargedPhoto, setEnlargedPhoto] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const albumFileInputRef = useRef<HTMLInputElement>(null);
+
+  const fetchAlbumPhotos = async (): Promise<void> => {
+    try {
+      const response = await fetch(
+          `http://localhost:8080/api/v2/gateway/vets/${vetId}/albums`,
+          {
+            method: 'GET',
+            headers: {
+              Accept: 'application/json',
+            },
+          }
+      );
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          setAlbumPhotos([]); // No albums found
+        } else {
+          throw new Error(`Error: ${response.statusText}`);
+        }
+      } else {
+        const photos: AlbumPhotoType[] = await response.json();
+        setAlbumPhotos(photos); // Set the album photos in state
+      }
+    } catch (error) {
+      setError('Failed to fetch album photos');
+    }
+  };
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      await axios.post(`http://localhost:8080/api/v2/gateway/vets/${vetId}/albums`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+        withCredentials: true,
+      });
+
+      // Show success message
+      alert('Photo uploaded successfully!');
+
+      // Refresh album photos after successful upload
+      fetchAlbumPhotos();
+    } catch (error) {
+      setError('Failed to upload photo');
+    }
+  };
+
+
+
 
   const fetchVetPhoto = useCallback(async (): Promise<void> => {
     try {
@@ -80,7 +136,6 @@ export default function VetDetails(): JSX.Element {
     setIsDefaultPhoto(true);
     fetchVetPhoto();
   };
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const fetchVetDetails = async (): Promise<void> => {
@@ -115,33 +170,6 @@ export default function VetDetails(): JSX.Element {
       }
     };
 
-    const fetchAlbumPhotos = async (): Promise<void> => {
-      try {
-        const response = await fetch(
-          `http://localhost:8080/api/v2/gateway/vets/${vetId}/albums`,
-          {
-            method: 'GET',
-            headers: {
-              Accept: 'application/json',
-            },
-          }
-        );
-
-        if (!response.ok) {
-          if (response.status === 404) {
-            setAlbumPhotos([]); // No albums found
-          } else {
-            throw new Error(`Error: ${response.statusText}`);
-          }
-        } else {
-          const photos: AlbumPhotoType[] = await response.json();
-          setAlbumPhotos(photos); // Set the album photos in state
-        }
-      } catch (error) {
-        setError('Failed to fetch album photos');
-      }
-    };
-
     fetchVetDetails().then(() => {
       fetchVetPhoto();
       fetchEducationDetails();
@@ -154,6 +182,12 @@ export default function VetDetails(): JSX.Element {
   const handleImageClick = (): void => {
     if (fileInputRef.current) {
       fileInputRef.current.click();
+    }
+  };
+
+  const handleAlbumImageClick = (): void => {
+    if (albumFileInputRef.current) {
+      albumFileInputRef.current.click();
     }
   };
 
@@ -467,6 +501,17 @@ export default function VetDetails(): JSX.Element {
 
             <section className="album-photos">
               <h2>Album Photos</h2>
+
+              {/* Input and button to upload photo */}
+              <input
+                  type="file"
+                  ref={albumFileInputRef}
+                  style={{ display: 'none' }}
+                  onChange={handlePhotoUpload}
+                  accept="image/*"
+              />
+              <button onClick={handleAlbumImageClick}>Add Photo</button>
+
               {albumPhotos.length > 0 ? (
                 <div className="album-photo-grid">
                   {albumPhotos.map((photo, index) => (
