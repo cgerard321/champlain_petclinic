@@ -78,7 +78,6 @@ export default function VetCardTable({
                 Specialties:{' '}
                 {vet.specialties.map(specialty => specialty.name).join(', ')}
               </p>
-              <p>Work Hours: {vet.workHours}</p>
               <div className="card-actions">
                 <button
                   className="btn btn-primary"
