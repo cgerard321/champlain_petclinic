@@ -278,7 +278,7 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: `${AppRoutePaths.EditProduct}/:productId`,
+        path: AppRoutePaths.EditProduct,
         element: (
           <ProtectedRoute roles={['ADMIN', 'INVENTORY_MANAGER']}>
             <EditProduct />

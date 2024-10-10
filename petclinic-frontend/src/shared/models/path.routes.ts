@@ -48,8 +48,8 @@ export enum AppRoutePaths {
   SignUp = '/users/signup',
   CustomerVisits = '/customer/visits',
   UpdatePet = '/pets/:petId/edit',
-  ProductDetails = '/productDetails',
-  EditProduct = '/products/edit',
+  ProductDetails = '/products/:productId',
+  EditProduct = '/products/edit/:productId',
   ForgotPassword = '/users/forgot-password',
   ResetPassword = '/users/reset-password/:token',
 }

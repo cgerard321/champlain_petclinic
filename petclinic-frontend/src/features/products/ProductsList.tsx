@@ -212,14 +212,16 @@ export default function ProductList(): JSX.Element {
             <div className="star-row">
               <label>Min Stars:</label>
               <StarRating
-                currentRating={{ rating: minStars, review: '' }}
+                currentRating={minStars}
+                viewOnly={false}
                 updateRating={setMinStars}
               />
             </div>
             <div className="star-row">
               <label>Max Stars:</label>
               <StarRating
-                currentRating={{ rating: maxStars, review: '' }}
+                currentRating={maxStars}
+                viewOnly={false}
                 updateRating={setMaxStars}
               />
             </div>
