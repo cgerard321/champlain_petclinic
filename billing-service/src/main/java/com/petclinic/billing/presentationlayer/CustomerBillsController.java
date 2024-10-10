@@ -43,7 +43,7 @@ public class CustomerBillsController {
 
     @GetMapping(value = "/{billId}/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
     public Mono<ResponseEntity<byte[]>> downloadBillPdf(@PathVariable String customerId,
-            @PathVariable String billId) {
+                                                        @PathVariable String billId) {
         return billService.generateBillPdf(customerId, billId)
                 .map(pdf -> {
                     HttpHeaders headers = new HttpHeaders();
