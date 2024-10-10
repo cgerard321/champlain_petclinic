@@ -1,5 +1,6 @@
 package com.petclinic.products.presentationlayer.products;
 
+import com.petclinic.products.datalayer.products.ProductStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,4 +21,5 @@ public class ProductResponseModel {
     private Integer requestCount;
     private String productType;
     private Integer productQuantity;
+    private ProductStatus productStatus;
 }

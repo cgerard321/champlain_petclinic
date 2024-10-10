@@ -16,6 +16,7 @@ import reactor.core.publisher.Mono;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 
 @Service
 public class DataLoaderService implements CommandLineRunner {
@@ -38,6 +39,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .averageRating(1.3)
                 .productType("Food")
                 .productQuantity(44)
+                .releaseDate(LocalDate.parse("2002-09-26"))
                 .build();
 
         Product product2 = Product.builder()
@@ -50,6 +52,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .averageRating(4.8)
                 .productType("Accessory")
                 .productQuantity(3)
+                .releaseDate(LocalDate.parse("2020-06-30"))
                 .build();
 
         Product product3 = Product.builder()
@@ -62,6 +65,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .averageRating(2.8)
                 .productType("Medication")
                 .productQuantity(53)
+                .releaseDate(LocalDate.parse("2019-09-29"))
                 .build();
 
         Product product4 = Product.builder()
@@ -74,6 +78,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .averageRating(1.3)
                 .productType("Accessory")
                 .productQuantity(8)
+                .releaseDate(LocalDate.parse("2023-05-06"))
                 .build();
 
         Product product5 = Product.builder()
@@ -86,6 +91,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .averageRating(4.9)
                 .productType("Accessory")
                 .productQuantity(14)
+                .releaseDate(LocalDate.parse("2025-09-29"))
                 .build();
 
         Product product6 = Product.builder()
@@ -98,6 +104,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .averageRating(4.7)
                 .productType("Equipment")
                 .productQuantity(58)
+                .releaseDate(LocalDate.parse("1988-09-29"))
                 .build();
 
         Product product7 = Product.builder()
@@ -110,6 +117,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .averageRating(3.4)
                 .productType("Accessory")
                 .productQuantity(66)
+                .releaseDate(LocalDate.parse("2024-02-22"))
                 .build();
 
         Product product8 = Product.builder()
@@ -122,6 +130,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .averageRating(1.2)
                 .productType("Accessory")
                 .productQuantity(0)
+                .releaseDate(LocalDate.parse("2022-09-19"))
                 .build();
 
         Resource resource1 = new ClassPathResource("images/dog_food.jpg");
