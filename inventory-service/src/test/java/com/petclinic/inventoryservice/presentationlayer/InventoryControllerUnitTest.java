@@ -14,6 +14,7 @@ import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -27,8 +28,7 @@ import java.util.UUID;
 
 import static com.petclinic.inventoryservice.datalayer.Product.Status.AVAILABLE;
 import static com.petclinic.inventoryservice.datalayer.Product.Status.RE_ORDER;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -1656,6 +1656,31 @@ class InventoryControllerUnitTest {
         // Verify that the service was called with the correct inventoryId
         verify(productInventoryService, times(1)).deleteAllProductsForAnInventory(inventoryId);
     }
+
+    @Test
+    void createPdfReportForInventory_withValidInventoryId_shouldReturnPdfFile() {
+        // Arrange
+        String inventoryId = "inventoryId_1";
+        byte[] pdfContent = "PDF Content".getBytes();
+
+        // Mock the service to return the PDF content
+        when(productInventoryService.createSupplyPdf(inventoryId))
+                .thenReturn(Mono.just(pdfContent));
+
+        // Act and Assert
+        webTestClient.get()
+                .uri("/inventory/{inventoryId}/products/download", inventoryId)
+                .accept(MediaType.APPLICATION_PDF)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_PDF)
+                .expectBody(byte[].class)
+                .value(content -> {
+                    assertNotNull(content);
+                    assertArrayEquals(pdfContent, content); // Check if the returned content matches the mocked content
+                });
+
+}
 
 
 }

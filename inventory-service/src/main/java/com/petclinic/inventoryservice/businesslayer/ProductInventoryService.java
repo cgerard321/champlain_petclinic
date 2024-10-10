@@ -39,4 +39,6 @@ public interface ProductInventoryService {
     Mono<Integer> getQuantityOfProductsInInventory(String inventoryId);
     Mono<ProductResponseDTO> consumeProduct(String inventoryId, String productId);
 
+    Mono<byte[]> createSupplyPdf(String inventoryId);
+
 }
