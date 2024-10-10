@@ -1622,6 +1622,73 @@ class VetsServiceClientIntegrationTest {
         assertEquals("2019", education.getEndDate());
 
     }
+    @Test
+    public void testGetAllEducationsByVetId_NotFound() {
+        String validVetId = "678910";
+
+        // Prepare mock 404 response
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(404)
+                .setBody("vetId not found: " + validVetId));
+
+        // Simulate the service call and handle the exception in the same way as in your method
+        final EducationResponseDTO education = vetsServiceClient.getEducationsByVetId(validVetId)
+                .onErrorResume(throwable -> {
+                    if (throwable instanceof NotFoundException && throwable.getMessage().equals("Education not found for vetId: " + validVetId)) {
+                        return Mono.empty();  // Handle not found scenario
+                    } else {
+                        return Mono.error(throwable);  // Propagate other errors
+                    }
+                })
+                .blockFirst();  // blockFirst() used since it's a reactive stream
+
+        // Assert that the result is null because the vetId wasn't found
+        assertNull(education, "The education should be null when vetId is not found");
+    }
+
+    @Test
+    public void getAllEducationsOfVetId_ClientError() throws IllegalArgumentException {
+        String validVetId="678910";
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(400)
+                .setBody("Something went wrong with the client"));
+
+        final EducationResponseDTO education = vetsServiceClient.getEducationsByVetId(validVetId)
+                .onErrorResume(throwable -> {
+                    if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong with the client")) {
+                        return Mono.empty();
+                    } else {
+                        return Mono.error(throwable);
+                    }
+                })
+                .blockFirst();
+
+        assertNull(education);
+    }
+    @Test
+    public void getAllEducationsOfVetId_ServerError() throws IllegalArgumentException {
+        String validVetId="678910";
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(500)
+                .setBody("Something went wrong with the server"));
+
+        final EducationResponseDTO education = vetsServiceClient.getEducationsByVetId(validVetId)
+                .onErrorResume(throwable -> {
+                    if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong with the server")) {
+                        return Mono.empty();
+                    } else {
+                        return Mono.error(throwable);
+                    }
+                })
+                .blockFirst();
+
+        assertNull(education);
+    }
 
     @Test
     void addEducationsToAVet() throws JsonProcessingException {
