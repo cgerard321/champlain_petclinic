@@ -50,6 +50,7 @@ import ResetPassword from '@/pages/User/ResetPassword.tsx';
 import PromoPage from '@/pages/Promos/PromoListPage.tsx';
 import AddPromoPage from '@/pages/Promos/AddPromoPage.tsx';
 import UpdatePromoPage from '@/pages/Promos/UpdatePromoPage.tsx';
+import LowStockProducts from '@/features/inventories/LowStockProducts.tsx';
 
 const router = createBrowserRouter([
   {
@@ -78,6 +79,16 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
+
+      {
+        path: AppRoutePaths.LowStockProducts,
+        element: (
+          <ProtectedRoute>
+            <LowStockProducts />
+          </ProtectedRoute>
+        ),
+      },
+
       {
         path: AppRoutePaths.GetVisitByVistId,
         element: (
