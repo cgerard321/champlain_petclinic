@@ -221,7 +221,7 @@ public class InventoryServiceClient {
 
     //delete all
 
-    public Mono<Void> deleteAllProductForInventory(final String inventoryId) {
+    public Mono<Void> deleteAllProductsInInventory(final String inventoryId) {
         return webClient.delete()
                 .uri(inventoryServiceUrl + "/{inventoryId}/products", inventoryId)
                 .accept(MediaType.APPLICATION_JSON)
