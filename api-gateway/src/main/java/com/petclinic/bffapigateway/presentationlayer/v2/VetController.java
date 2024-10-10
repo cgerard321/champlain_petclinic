@@ -7,10 +7,7 @@ import com.petclinic.bffapigateway.domainclientlayer.VetsServiceClient;
 import com.petclinic.bffapigateway.dtos.Auth.RegisterVet;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
-import com.petclinic.bffapigateway.dtos.Vets.Album;
-import com.petclinic.bffapigateway.dtos.Vets.SpecialtyDTO;
-import com.petclinic.bffapigateway.dtos.Vets.VetRequestDTO;
-import com.petclinic.bffapigateway.dtos.Vets.VetResponseDTO;
+import com.petclinic.bffapigateway.dtos.Vets.*;
 import com.petclinic.bffapigateway.exceptions.ExistingVetNotFoundException;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.utils.Security.Annotations.IsUserSpecific;
@@ -24,6 +21,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.*;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import org.springframework.web.multipart.MultipartFile;
@@ -164,4 +162,19 @@ public class VetController {
                 .then(Mono.just(ResponseEntity.noContent().<Void>build()))
                 .doOnError(error -> log.error("Error deleting photo for vetId: {}", vetId, error));
     }
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
+    @DeleteMapping("/{vetId}/albums/{Id}")
+    public Mono<ResponseEntity<Void>> deleteAlbumPhoto(@PathVariable String vetId,@PathVariable Integer Id) {
+        return vetsServiceClient.deleteAlbumPhotoById(vetId,Id)
+                .then(Mono.defer(() -> Mono.just(ResponseEntity.noContent().<Void>build())))
+                .onErrorResume(NotFoundException.class, e -> Mono.defer(() -> Mono.just(ResponseEntity.<Void>notFound().build())));
+    }
+
+    //education
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
+    @GetMapping(value = "/{vetId}/educations", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Flux<EducationResponseDTO> getEducationsByVetId(@PathVariable String vetId) {
+        return vetsServiceClient.getEducationsByVetId(vetId);
+    }
+
 }

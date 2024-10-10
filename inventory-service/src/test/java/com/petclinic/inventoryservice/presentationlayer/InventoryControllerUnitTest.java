@@ -1421,7 +1421,7 @@ class InventoryControllerUnitTest {
     void getLowStockProducts_WithDefaultThreshold_ShouldReturnLowStockProducts() {
         // Arrange
         String inventoryId = "inventoryId_1";
-        int defaultThreshold = 16;
+        int defaultThreshold = 20;
 
         when(productInventoryService.getLowStockProducts(inventoryId, defaultThreshold))
                 .thenReturn(Flux.fromIterable(lowStockProducts));

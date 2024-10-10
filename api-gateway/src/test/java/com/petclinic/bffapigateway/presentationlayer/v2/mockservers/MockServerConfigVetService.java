@@ -2,10 +2,7 @@ package com.petclinic.bffapigateway.presentationlayer.v2.mockservers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.petclinic.bffapigateway.dtos.Vets.Album;
-import com.petclinic.bffapigateway.dtos.Vets.SpecialtyDTO;
-import com.petclinic.bffapigateway.dtos.Vets.VetResponseDTO;
-import com.petclinic.bffapigateway.dtos.Vets.Workday;
+import com.petclinic.bffapigateway.dtos.Vets.*;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.integration.ClientAndServer;
 import org.springframework.http.MediaType;
@@ -379,6 +376,67 @@ public void stopMockServer() {
                                 .withBody(json("{\"message\":\"Photo not found for vetId: " + vetId + "\"}"))
                 );
     }
+    public void registerDeleteAlbumPhotoEndpoint(String vetId, Integer albumId) {
+        mockServerClient_VetService
+                .when(
+                        request()
+                                .withMethod("DELETE")
+                                .withPath("/vets/" + vetId + "/albums/" + albumId)
+                )
+                .respond(
+                        response()
+                                .withStatusCode(204) // 204 No Content indicates successful deletion
+                );
+    }
 
+    public void registerDeleteAlbumPhotoEndpointNotFound(String vetId, Integer albumId) {
+        mockServerClient_VetService
+                .when(
+                        request()
+                                .withMethod("DELETE")
+                                .withPath("/vets/" + vetId + "/albums/" + albumId)
+                )
+                .respond(
+                        response()
+                                .withStatusCode(404) // 404 Not Found indicates the album photo does not exist
+                                .withHeader("Content-Type", "application/json")
+                                .withBody(json("{\"message\":\"Album photo not found: " + albumId + "\"}"))
+                );
+    }
+    public void registerDeleteAlbumPhotoEndpointWithServerError(String vetId, Integer albumId) {
+        mockServerClient_VetService
+                .when(
+                        request()
+                                .withMethod("DELETE")
+                                .withPath("/vets/" + vetId + "/albums/" + albumId)
+                )
+                .respond(
+                        response()
+                                .withStatusCode(500) // 500 Internal Server Error
+                                .withHeader("Content-Type", "application/json")
+                                .withBody(json("{\"message\":\"Server error occurred while deleting album photo with ID: " + albumId + "\"}"))
+                );
+    }
+    public void registerGetEducationByVetIdEndpoint(String vetId, List<EducationRequestDTO> educations) throws JsonProcessingException {
+        mockServerClient_VetService.when(
+                        request()
+                                .withMethod("GET")
+                                .withPath("/vets/" + vetId + "/educations"))
+                .respond(
+                        response()
+                                .withStatusCode(200)
+                                .withHeader("Content-Type", "application/json")
+                                .withBody(mapper.writeValueAsString(educations)));
+    }
+
+    public void registerGetEducationByVetIdEndpointNotFound(String vetId) {
+        mockServerClient_VetService.when(
+                        request()
+                                .withMethod("GET")
+                                .withPath("/vets/" + vetId + "/educations"))
+                .respond(
+                        response()
+                                .withStatusCode(404));
+    }
 
 }
