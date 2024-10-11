@@ -43,7 +43,7 @@ export default function BillsListTable(): JSX.Element {
             const chunk = decoder.decode(value, { stream: true });
             const formattedChunks = chunk.trim().split(/\n\n/);
 
-            formattedChunks.forEach((formattedChunk) => {
+            formattedChunks.forEach(formattedChunk => {
               const cleanChunk = formattedChunk.trim().replace(/^data:\s*/, '');
 
               if (cleanChunk) {
@@ -74,7 +74,7 @@ export default function BillsListTable(): JSX.Element {
     } else {
       setFilteredBills(
         bills.filter(
-          (bill) => bill.billStatus.toLowerCase() === selectedStatus.toLowerCase()
+          bill => bill.billStatus.toLowerCase() === selectedStatus.toLowerCase()
         )
       );
     }
@@ -121,7 +121,7 @@ export default function BillsListTable(): JSX.Element {
         <select
           id="statusFilter"
           value={selectedStatus}
-          onChange={(e) => setSelectedStatus(e.target.value)}
+          onChange={e => setSelectedStatus(e.target.value)}
           style={{ width: '150px' }}
         >
           <option value="all">All</option>
@@ -151,7 +151,7 @@ export default function BillsListTable(): JSX.Element {
               </tr>
             </thead>
             <tbody>
-              {filteredBills.map((bill) => (
+              {filteredBills.map(bill => (
                 <tr key={bill.billId}>
                   <td>{bill.billId}</td>
                   <td>
@@ -168,7 +168,9 @@ export default function BillsListTable(): JSX.Element {
                   <td>{bill.dueDate}</td>
                   <td>
                     <button
-                      onClick={() => handleDownloadPdf(user.userId, bill.billId)}
+                      onClick={() =>
+                        handleDownloadPdf(user.userId, bill.billId)
+                      }
                     >
                       Download PDF
                     </button>
@@ -182,4 +184,3 @@ export default function BillsListTable(): JSX.Element {
     </div>
   );
 }
-
