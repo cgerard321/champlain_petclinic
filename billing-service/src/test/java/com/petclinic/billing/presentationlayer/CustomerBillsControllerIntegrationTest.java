@@ -67,7 +67,8 @@ public class CustomerBillsControllerIntegrationTest {
                 .verifyComplete();
 
         client.get()
-                .uri("/customers/{customerId}/bills/{billId}/pdf", bill.getCustomerId(), bill.getBillId())
+                // .uri("/customers/{customerId}/bills/{billId}/pdf", bill.getCustomerId(), bill.getBillId())
+                .uri("/bills/customer/{customerId}/bills/{billId}/pdf", bill.getCustomerId(), bill.getBillId())
                 .accept(MediaType.APPLICATION_PDF)
                 .exchange()
                 .expectStatus().isOk()

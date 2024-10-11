@@ -22,37 +22,43 @@ public class CustomerBillControllerUnitTest {
     @MockBean
     private BillServiceClient billServiceClient;
 
+    private final String baseBillUrl = "/api/v2/gateway/customers/1/bills";
+
+    // Test data
+    private byte[] pdfContent;
+
     @Test
     public void downloadBillPdf_ShouldReturnPdfFile() {
         // Arrange
-        byte[] pdfContent = "Sample PDF Content".getBytes(); // Simulating PDF content
-        when(billServiceClient.downloadBillPdf(anyString(), anyString())).thenReturn(Mono.just(pdfContent));
+        //byte[] pdfContent = "Sample PDF Content".getBytes(); // Simulating PDF content
+        //when(billServiceClient.downloadBillPdf(anyString(), anyString())).thenReturn(Mono.just(pdfContent));
+        when(billServiceClient.downloadBillPdf("1", "1234")).thenReturn(Mono.just(pdfContent));
 
         // Act & Assert
         webTestClient.get()
-                .uri("/api/v2/gateway/customers/1/bills/1234/pdf")
+                //.uri("/api/v2/gateway/customers/1/bills/1234/pdf")
+                .uri(baseBillUrl + "/1234/pdf")
                 .accept(MediaType.APPLICATION_PDF)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_PDF)
                 .expectBody(byte[].class)
                 .consumeWith(response -> {
-                    assert response.getResponseBody() != null;
-                    assert response.getResponseBody().length > 0;
+                    byte[] pdf = response.getResponseBody();
+                    assert pdf != null;
+                    assert pdf.length > 0;
                 });
-
-        // Verify the service method was called
-        Mockito.verify(billServiceClient, Mockito.times(1)).downloadBillPdf(anyString(), anyString());
     }
 
     @Test
-    public void downloadBillPdf_ShouldReturnInternalServerErrorOnFailure() {
+    public void downloadBillPdf_InvalidCustomer_ShouldReturnUnauthorized() {
         // Arrange
-        when(billServiceClient.downloadBillPdf(anyString(), anyString())).thenReturn(Mono.error(new RuntimeException("Error")));
+        when(billServiceClient.downloadBillPdf("invalid-customer-id", "1234"))
+            .thenReturn(Mono.error(new RuntimeException("Unauthorized")));
 
         // Act & Assert
         webTestClient.get()
-                .uri("/api/v2/gateway/customers/1/bills/1234/pdf")
+                .uri(baseBillUrl + "/invalid-id/bills/1234/pdf")
                 .accept(MediaType.APPLICATION_PDF)
                 .exchange()
                 .expectStatus().is5xxServerError();

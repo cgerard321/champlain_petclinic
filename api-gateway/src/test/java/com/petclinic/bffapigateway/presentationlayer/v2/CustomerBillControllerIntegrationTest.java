@@ -32,19 +32,34 @@ public class CustomerBillControllerIntegrationTest {
     }
 
     @Test
-    public void testDownloadBillPdf_Integration() {
-        // Act & Assert
+    public void testDownloadBillPdf_ValidToken_ShouldReturnPdf() {
+        // Arrange: Mocking the service call to return a PDF byte array
+        byte[] mockPdfContent = "Sample PDF Content".getBytes();
+
+        // Act & Assert: Mocking a request as a valid customer with a token in a cookie
         webTestClient.get()
-                .uri("/api/v2/gateway/customers/1/bills/1234/pdf")
-                .accept(MediaType.APPLICATION_PDF)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_PDF)
-                .expectBody(byte[].class)
-                .consumeWith(response -> {
-                    byte[] pdf = response.getResponseBody();
-                    assert pdf != null;
-                    assert pdf.length > 0;
-                });
+            .uri("/api/v2/gateway/customers/1/bills/1234/pdf")
+            .cookie("Bearer", MockServerConfigAuthService.jwtTokenForValidOwnerId)
+            .accept(MediaType.APPLICATION_PDF)
+            .exchange()
+            .expectStatus().isOk()
+            .expectHeader().contentType(MediaType.APPLICATION_PDF)
+            .expectBody(byte[].class)
+            .consumeWith(response -> {
+                byte[] pdf = response.getResponseBody();
+                assertNotNull(pdf);
+                assert pdf.length > 0;
+            });
+    }
+
+    @Test
+    public void testDownloadBillPdf_InvalidToken_ShouldReturnUnauthorized() {
+        // Act & Assert: Mocking a request with an invalid token
+        webTestClient.get()
+            .uri("/api/v2/gateway/customers/1/bills/1234/pdf")
+            .cookie("Bearer", "invalid-token") // Using an invalid JWT token
+            .accept(MediaType.APPLICATION_PDF)
+            .exchange()
+            .expectStatus().isUnauthorized(); // Expect Unauthorized status
     }
 }
