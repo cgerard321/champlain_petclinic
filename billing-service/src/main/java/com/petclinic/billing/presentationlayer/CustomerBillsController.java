@@ -4,7 +4,6 @@ import com.petclinic.billing.businesslayer.BillService;
 import com.petclinic.billing.datalayer.BillResponseDTO;
 import com.petclinic.billing.datalayer.BillStatus;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -15,7 +14,7 @@ import reactor.core.publisher.Mono;
 
 @RestController
 @Slf4j
-@RequestMapping("/customers/{customerId}/bills")
+@RequestMapping("/bills/customer/{customerId}/bills")
 public class CustomerBillsController {
 
     private final BillService billService;
@@ -31,13 +30,13 @@ public class CustomerBillsController {
 
     @GetMapping(value = "/status", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<BillResponseDTO> getBillsByStatus(@PathVariable("customerId") String customerId,
-            @RequestParam("status") BillStatus status) {
+                                                  @RequestParam("status") BillStatus status) {
         return billService.GetBillsByCustomerIdAndStatus(customerId, status);
     }
 
     @GetMapping(value = "/{billId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<BillResponseDTO> getBillDetails(@PathVariable("customerId") String customerId,
-            @PathVariable("billId") String billId) {
+                                                @PathVariable("billId") String billId) {
         return billService.GetBillByCustomerIdAndBillId(customerId, billId);
     }
 
@@ -56,5 +55,4 @@ public class CustomerBillsController {
                     return Mono.just(new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR));
                 });
     }
-
 }

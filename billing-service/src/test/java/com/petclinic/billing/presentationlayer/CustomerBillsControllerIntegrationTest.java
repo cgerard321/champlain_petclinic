@@ -2,19 +2,14 @@ package com.petclinic.billing.presentationlayer;
 
 import com.petclinic.billing.datalayer.Bill;
 import com.petclinic.billing.datalayer.BillRepository;
-
 import com.petclinic.billing.datalayer.BillStatus;
-
-
 import org.junit.jupiter.api.Test;
-
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
-
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -45,19 +40,18 @@ public class CustomerBillsControllerIntegrationTest {
                 .verifyComplete();
 
         client.get()
-                .uri("/customers/{customerId}/bills", bill.getCustomerId())
-                .accept(MediaType.APPLICATION_JSON) 
+                .uri("/bills/customer/{customerId}/bills", bill.getCustomerId())
+                .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$[0].customerId").isEqualTo(bill.getCustomerId()); 
+                .jsonPath("$[0].customerId").isEqualTo(bill.getCustomerId());
     }
-
 
     @Test
     void testDownloadBillPdf() {
 
-        Bill bill = buildBill(); 
+        Bill bill = buildBill();
 
         Mono<Void> setup = billRepository.deleteAll()
                 .then(billRepository.save(bill))
@@ -67,7 +61,6 @@ public class CustomerBillsControllerIntegrationTest {
                 .verifyComplete();
 
         client.get()
-                // .uri("/customers/{customerId}/bills/{billId}/pdf", bill.getCustomerId(), bill.getBillId())
                 .uri("/bills/customer/{customerId}/bills/{billId}/pdf", bill.getCustomerId(), bill.getBillId())
                 .accept(MediaType.APPLICATION_PDF)
                 .exchange()
@@ -111,5 +104,4 @@ public class CustomerBillsControllerIntegrationTest {
                 .billStatus(BillStatus.PAID)
                 .build();
     }
-
 }

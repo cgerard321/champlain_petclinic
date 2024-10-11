@@ -1,7 +1,5 @@
 package com.petclinic.billing.util;
 
-import java.io.ByteArrayOutputStream;
-
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Paragraph;
@@ -24,7 +22,6 @@ import com.petclinic.billing.datalayer.BillStatus;
  * Optional values are used to handle possible null values in the bill details, 
  * ensuring the PDF is generated without NullPointerExceptions.
  */
-
 public class PdfGenerator {
 
     public static byte[] generateBillPdf(BillResponseDTO bill) throws DocumentException {
@@ -46,5 +43,5 @@ public class PdfGenerator {
 
         return byteArrayOutputStream.toByteArray();
     }
-    
+
 }

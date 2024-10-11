@@ -32,9 +32,8 @@ public class CustomerBillsControllerUnitTest {
         when(billService.GetBillsByCustomerId(anyString())).thenReturn(Flux.just(billResponse));
 
         client.get()
-                // .uri("/customers/{customerId}/bills", billResponse.getCustomerId())
                 .uri("/bills/customer/{customerId}/bills", billResponse.getCustomerId())
-                .accept(MediaType.APPLICATION_JSON) 
+                .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBodyList(BillResponseDTO.class)
@@ -52,9 +51,8 @@ public class CustomerBillsControllerUnitTest {
         when(billService.GetBillsByCustomerId(anyString())).thenReturn(Flux.empty());
 
         client.get()
-                // .uri("/customers/nonExistentCustomer/bills")
                 .uri("/bills/customer/nonExistentCustomer/bills")
-                .accept(MediaType.APPLICATION_JSON) 
+                .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBodyList(BillResponseDTO.class)
