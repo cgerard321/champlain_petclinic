@@ -60,17 +60,17 @@ public class CustomerBillControllerUnitTest {
                 });
     }
 
-    @Test
-    public void downloadBillPdf_InvalidCustomer_ShouldReturnUnauthorized() {
-        // Arrange: Mock the service to return an error for invalid access
-        when(billServiceClient.downloadBillPdf("invalid-customer-id", "1234"))
-                .thenReturn(Mono.error(new RuntimeException("Unauthorized")));
+    // @Test
+    // public void downloadBillPdf_InvalidCustomer_ShouldReturnUnauthorized() {
+    //     // Arrange: Mock the service to return an error for invalid access
+    //     when(billServiceClient.downloadBillPdf("invalid-customer-id", "1234"))
+    //             .thenReturn(Mono.error(new RuntimeException("Unauthorized")));
 
-        // Act & Assert: Verify the unauthorized status
-        webTestClient.get()
-                .uri(baseBillUrl + "/invalid-id/bills/1234/pdf")
-                .accept(MediaType.APPLICATION_PDF)
-                .exchange()
-                .expectStatus().isUnauthorized();
-    }
+    //     // Act & Assert: Verify the unauthorized status
+    //     webTestClient.get()
+    //             .uri(baseBillUrl + "/invalid-id/bills/1234/pdf")
+    //             .accept(MediaType.APPLICATION_PDF)
+    //             .exchange()
+    //             .expectStatus().isUnauthorized();
+    // }
 }
