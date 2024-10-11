@@ -134,49 +134,52 @@ export default function BillsListTable(): JSX.Element {
       {error ? (
         <p>{error}</p>
       ) : (
-        <table className="table table-striped">
-          <thead>
-            <tr>
-              <th>Bill ID</th>
-              <th>Owner Name</th>
-              <th>Visit Type</th>
-              <th>Vet Name</th>
-              <th>Date</th>
-              <th>Amount</th>
-              <th>Taxed Amount</th>
-              <th>Status</th>
-              <th>Due Date</th>
-              <th>Download PDF</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredBills.map((bill) => (
-              <tr key={bill.billId}>
-                <td>{bill.billId}</td>
-                <td>
-                  {bill.ownerFirstName} {bill.ownerLastName}
-                </td>
-                <td>{bill.visitType}</td>
-                <td>
-                  {bill.vetFirstName} {bill.vetLastName}
-                </td>
-                <td>{bill.date}</td>
-                <td>{bill.amount}</td>
-                <td>{bill.taxedAmount}</td>
-                <td>{bill.billStatus}</td>
-                <td>{bill.dueDate}</td>
-                <td>
-                  <button
-                    onClick={() => handleDownloadPdf(user.userId, bill.billId)}
-                  >
-                    Download PDF
-                  </button>
-                </td>
+        <div className="billsListTableContainer">
+          <table className="table table-striped">
+            <thead>
+              <tr>
+                <th>Bill ID</th>
+                <th>Owner Name</th>
+                <th>Visit Type</th>
+                <th>Vet Name</th>
+                <th>Date</th>
+                <th>Amount</th>
+                <th>Taxed Amount</th>
+                <th>Status</th>
+                <th>Due Date</th>
+                <th>Download PDF</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filteredBills.map((bill) => (
+                <tr key={bill.billId}>
+                  <td>{bill.billId}</td>
+                  <td>
+                    {bill.ownerFirstName} {bill.ownerLastName}
+                  </td>
+                  <td>{bill.visitType}</td>
+                  <td>
+                    {bill.vetFirstName} {bill.vetLastName}
+                  </td>
+                  <td>{bill.date}</td>
+                  <td>{bill.amount}</td>
+                  <td>{bill.taxedAmount}</td>
+                  <td>{bill.billStatus}</td>
+                  <td>{bill.dueDate}</td>
+                  <td>
+                    <button
+                      onClick={() => handleDownloadPdf(user.userId, bill.billId)}
+                    >
+                      Download PDF
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );
 }
+
