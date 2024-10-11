@@ -21,7 +21,7 @@ import reactor.core.publisher.Mono;
 @Validated
 @CrossOrigin(origins = "http://localhost:3000, http://localhost:80")
 public class CustomerBillController {
-
+    
     private final BillServiceClient billService;
 
     @IsUserSpecific(idToMatch = {"customerId"})
