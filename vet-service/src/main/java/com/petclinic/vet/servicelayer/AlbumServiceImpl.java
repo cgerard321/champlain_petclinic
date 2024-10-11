@@ -38,16 +38,16 @@ public class AlbumServiceImpl implements AlbumService{
 
     @Override
     public Mono<Album> addPhotoToAlbum(String vetId, String filename, String imgType, byte[] data) {
-        Album newAlbum = Album.builder()
+        Album albumPhoto = Album.builder()
                 .vetId(vetId)
                 .filename(filename)
                 .imgType(imgType)
                 .data(data)
                 .build();
 
-        return albumRepository.save(newAlbum)
-                .doOnSuccess(album -> log.info("Added new photo for vetId: {}, filename: {}", vetId, filename))
-                .doOnError(error -> log.error("Failed to add photo for vetId: {}", vetId, error));
+        return albumRepository.save(albumPhoto)
+                .doOnSuccess(album -> log.info("Added photo {} for vet {}", filename, vetId))
+                .doOnError(error -> log.error("Error adding photo for vet {}: {}", vetId, error.getMessage()));
     }
 
 }

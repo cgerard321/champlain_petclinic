@@ -5,6 +5,7 @@ import com.petclinic.bffapigateway.exceptions.ExistingRatingNotFoundException;
 import com.petclinic.bffapigateway.exceptions.ExistingVetNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -83,6 +84,7 @@ public class VetsServiceClient {
                 .bodyToMono(PhotoResponseDTO.class);
     }
 
+    /*
     public Mono<Resource> addPhotoToVet(String vetId, String photoName, Mono<Resource> image) {
         return webClientBuilder
                 .build()
@@ -102,6 +104,8 @@ public class VetsServiceClient {
                 )
                 .bodyToMono(Resource.class);
     }
+
+     */
 
     public Mono<Resource> updatePhotoOfVet(String vetId, String photoName, Mono<Resource> image){
         return webClientBuilder
@@ -633,24 +637,17 @@ public class VetsServiceClient {
                 .bodyToFlux(Album.class);
     }
 
-    public Mono<Void> addPhotoToAlbum(String vetId, MultipartFile file) {
+    public Mono<Album> addPhotoToAlbum(String vetId, String filename, String imgType, byte[] data) {
         return webClientBuilder.build()
                 .post()
-                .uri(vetsServiceUrl + "/" + vetId + "/albums")
-                .contentType(MediaType.MULTIPART_FORM_DATA)  // This indicates you're sending a file
-                .body(BodyInserters.fromMultipartData("file", file.getResource()))  // Add the file as part of the body
+                .uri(vetsServiceUrl + "/" + vetId + "/albums/photo")
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+                .body(BodyInserters.fromMultipartData("file", new ByteArrayResource(data))
+                        .with("filename", filename)
+                        .with("imgType", imgType))
                 .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError, error -> {
-                    HttpStatusCode statusCode = error.statusCode();
-                    if (statusCode.equals(HttpStatus.NOT_FOUND)) {
-                        return Mono.error(new ExistingVetNotFoundException("Vet " + vetId + " not found", NOT_FOUND));
-                    }
-                    return Mono.error(new IllegalArgumentException("Client error"));
-                })
-                .onStatus(HttpStatusCode::is5xxServerError, error -> Mono.error(new IllegalArgumentException("Server error")))
-                .bodyToMono(Void.class);
+                .bodyToMono(Album.class);
     }
-
 
 
     public Mono<Void> deletePhotoByVetId(String vetId) {

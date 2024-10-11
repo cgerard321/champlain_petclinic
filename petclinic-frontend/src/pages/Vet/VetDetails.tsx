@@ -83,10 +83,10 @@ export default function VetDetails(): JSX.Element {
     if (!file) return;
 
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append('file', file); // This is correct for file upload
 
     try {
-      await axios.post(`http://localhost:8080/api/v2/gateway/vets/${vetId}/albums`, formData, {
+      await axios.post(`http://localhost:8080/api/v2/gateway/vets/${vetId}/albums/photo`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -102,6 +102,7 @@ export default function VetDetails(): JSX.Element {
       setError('Failed to upload photo');
     }
   };
+
 
 
 

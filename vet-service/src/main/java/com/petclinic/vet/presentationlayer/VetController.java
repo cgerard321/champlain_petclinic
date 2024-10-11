@@ -324,35 +324,22 @@ public class VetController {
                 .onErrorResume(NotFoundException.class, e -> Mono.defer(() -> Mono.just(ResponseEntity.<Void>notFound().build())));
     }
 
-    @PostMapping("/{vetId}/albums")
-    public Mono<ResponseEntity<Void>> uploadPhoto(
+    @PostMapping("{vetId}/albums/photo")
+    public Mono<ResponseEntity<Album>> addPhotoToAlbum(
             @PathVariable String vetId,
-            @RequestParam("file") MultipartFile file) {
-
-        log.info("Received file for vetId: {}", vetId);
-        log.info("File name: {}, Content type: {}, Size: {} bytes",
-                file.getOriginalFilename(),
-                file.getContentType(),
-                file.getSize());
-
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("filename") String filename,
+            @RequestParam("imgType") String imgType) {
         try {
-            String filename = file.getOriginalFilename();
-            String imgType = file.getContentType();
             byte[] data = file.getBytes();
-
             return albumService.addPhotoToAlbum(vetId, filename, imgType, data)
-                    .then(Mono.just(ResponseEntity.ok().<Void>build()))  // Explicitly specify <Void> here
-                    .doOnError(e -> {
-                        log.error("Error while saving photo for vetId: {}", vetId, e);
-                        Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
-                    });
+                    .map(album -> ResponseEntity.ok(album))
+                    .doOnError(error -> log.error("Error adding photo to album for vet {}: {}", vetId, error.getMessage()));
         } catch (IOException e) {
-            log.error("Error while processing the uploaded file", e);
-            return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
+            log.error("Error processing file for vet {}", vetId, e);
+            return Mono.just(ResponseEntity.badRequest().build());
         }
     }
-
-
 
 
 }
