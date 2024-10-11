@@ -143,6 +143,20 @@ class InventoryControllerIntegrationTest {
                 .create(productPublisher1)
                 .expectNextCount(1)
                 .verifyComplete();
+
+        Publisher<Product> productPublisher2 = productRepository.save(Product.builder()
+                .productId("productId_2")
+                .inventoryId("inventoryId_3")
+                .productName("Benzodiazepines")
+                .productDescription("Sedative Medication")
+                .productPrice(100.00)
+                .productQuantity(0)
+                .productSalePrice(15.99)
+                .build());
+        StepVerifier
+                .create(productPublisher2)
+                .expectNextCount(1)
+                .verifyComplete();
     }
 
 
@@ -1157,6 +1171,70 @@ class InventoryControllerIntegrationTest {
     }
 
     @Test
+    public void searchProducts_withNotExistingInventoryId_shouldReturnNotFound() {
+        String inventoryId = "invalid";
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder.path("/inventory/{inventoryId}/products/search")
+                        .build(inventoryId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Inventory not found with InventoryId: " + inventoryId);
+    }
+
+    @Test
+    public void searchProductsByInventoryIdProductNameAndProductDescription_withInvalidInventoryId_shouldReturnNotFound() {
+        String inventoryId = "invalid";
+        String productName = "Benzodiazepines";
+        String productDescription = "Sedative Medication";
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder.path("/inventory/{inventoryId}/products/search")
+                        .queryParam("productName", productName)
+                        .queryParam("productDescription", productDescription)
+                        .build(inventoryId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Inventory not found with InventoryId: " + inventoryId + "\nOr ProductName: " + productName + "\nOr ProductDescription: " + productDescription);
+    }
+
+    @Test
+    public void searchProductsByInventoryIdAndProductName_withInvalidInventoryId_shouldReturnNotFound() {
+        String inventoryId = "invalid";
+        String productName = "Benzodiazepines";
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder.path("/inventory/{inventoryId}/products/search")
+                        .queryParam("productName", productName)
+                        .build(inventoryId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Inventory not found with InventoryId: " + inventoryId + "\nOr ProductName: " + productName);
+    }
+
+    @Test
+    public void searchProductsByInventoryIdAndProductDescription_withInvalidInventoryId_shouldReturnNotFound() {
+        String inventoryId = "invalid";
+        String productDescription = "Sedative Medication";
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder.path("/inventory/{inventoryId}/products/search")
+                        .queryParam("productDescription", productDescription)
+                        .build(inventoryId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Inventory not found with InventoryId: " + inventoryId + "\nOr ProductDescription: " + productDescription);
+    }
+
+    @Test
     void getQuantityOfProductsInInventory_withValidInventoryId_shouldReturnProductCount() {
         // Arrange
         String inventoryId = "inventoryId_3";  // This inventory has products
@@ -1221,6 +1299,96 @@ class InventoryControllerIntegrationTest {
                 .jsonPath("$.message").isEqualTo("Invalid Inventory Id");
     }
 
+    @Test
+    void consumeProductStream_withValidInventoryId_shouldSucceed() {
+        // Arrange
+        String inventoryId = "inventoryId_3";
+        String productId = "productId_1";
 
+        // Act & Assert
+        webTestClient.patch()
+                .uri("/inventory/{inventoryId}/products/{productId}/consume", inventoryId, productId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(ProductResponseDTO.class)
+                .value(dto -> {
+                    assertNotNull(dto);
+                    assertEquals(productId, dto.getProductId());
+                    assertEquals(9, dto.getProductQuantity());
+                });
+    }
+
+    @Test
+    void consumeProductStream_withInvalidInventoryId_shouldReturnNotFound() {
+        // Arrange
+        String invalidInventoryId = "invalidInventoryId";
+        String productId = "productId_1";
+
+        // Act & Assert
+        webTestClient.patch()
+                .uri("/inventory/{inventoryId}/products/{productId}/consume", invalidInventoryId, productId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Inventory not found with InventoryId: " + invalidInventoryId +
+                        "\nOr ProductId: " + productId);
+    }
+
+    @Test
+    void consumeProductStream_withInvalidProductId_shouldReturnNotFound() {
+        // Arrange
+        String inventoryId = "inventoryId_3";
+        String invalidProductId = "invalidProductId";
+
+        // Act & Assert
+        webTestClient.patch()
+                .uri("/inventory/{inventoryId}/products/{productId}/consume", inventoryId, invalidProductId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Inventory not found with InventoryId: " + inventoryId +
+                        "\nOr ProductId: " + invalidProductId);
+    }
+
+    @Test
+    void consumeProductStream_withValidInventoryIdAndInvalidProductId_shouldReturnNotFound() {
+        // Arrange
+        String inventoryId = "inventoryId_3";
+        String invalidProductId = "invalidProductId";
+
+        // Act & Assert
+        webTestClient.patch()
+                .uri("/inventory/{inventoryId}/products/{productId}/consume", inventoryId, invalidProductId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Inventory not found with InventoryId: " + inventoryId +
+                        "\nOr ProductId: " + invalidProductId);
+    }
+
+    @Test
+    void consumeProductStream_withNotEnoughProductQuantity_shouldReturnInvalidInput() {
+        // Arrange
+        String inventoryId = "inventoryId_3";
+        String productId = "productId_2";
+
+        // Act & Assert
+        webTestClient.patch()
+                .uri("/inventory/{inventoryId}/products/{productId}/consume", inventoryId, productId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Not enough stock to consume.");
+    }
 
 }

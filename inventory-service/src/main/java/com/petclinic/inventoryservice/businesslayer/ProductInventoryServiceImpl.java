@@ -500,7 +500,8 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                                 .map(EntityDTOUtil::toProductResponseDTO);
                     }
                 })
-                .switchIfEmpty(Mono.error(new NotFoundException("Product not found with id: " + productId)));
+                .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with InventoryId: " + inventoryId +
+                        "\nOr ProductId: " + productId)));
     }
 
     @Override
