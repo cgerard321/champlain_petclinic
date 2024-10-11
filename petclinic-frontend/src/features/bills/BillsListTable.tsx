@@ -81,7 +81,10 @@ export default function BillsListTable(): JSX.Element {
   }, [selectedStatus, bills]);
 
   // Function to handle downloading the PDF for a bill
-  const handleDownloadPdf = async (customerId: string, billId: string) => {
+  const handleDownloadPdf = async (
+    customerId: string,
+    billId: string
+  ): Promise<void> => {
     try {
       const response = await fetch(
         `http://localhost:8080/api/v2/gateway/customers/${customerId}/bills/${billId}/pdf`,
