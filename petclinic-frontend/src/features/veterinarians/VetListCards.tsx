@@ -65,17 +65,20 @@ export default function VetCardTable({
             className="card"
             onClick={() => handleCardClick(vet.vetId)}
           >
-            <img
-              src={vetPhotos[vet.vetId] || '/images/vet_default.jpg'}
-              alt="Vet photo"
-              className="card-image"
-            />
+            <div className="photo-container">
+              <img
+                src={vetPhotos[vet.vetId] || '/images/vet_default.jpg'}
+                alt="Vet photo"
+                className="card-image"
+              />
+            </div>
+
             <div className="card-content">
               <h3>
                 {vet.firstName} {vet.lastName}
               </h3>
               <p>
-                Specialties:{' '}
+                <strong>Specialties:</strong>{' '}
                 {vet.specialties.map(specialty => specialty.name).join(', ')}
               </p>
               <div className="card-actions">
