@@ -7,7 +7,7 @@
   }
 
   
-  .card {
+  .card-vets {
     overflow: hidden;
     width: 450px !important;
     height: auto;
@@ -23,7 +23,7 @@
     cursor: pointer;
   }
   
-  .card:hover {
+  .card-vets:hover {
     transform: translateY(-10px);
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
   }
