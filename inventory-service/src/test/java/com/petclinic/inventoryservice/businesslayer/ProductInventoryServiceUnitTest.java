@@ -19,6 +19,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -725,7 +727,7 @@ class ProductInventoryServiceUnitTest {
                 .thenReturn(Mono.empty());
 
         // Act
-        Mono<Void> result = productInventoryService.deleteAllProductInventory(inventoryId);
+        Mono<Void> result = productInventoryService.deleteAllProductsForAnInventory(inventoryId);
 
         // Assert
         StepVerifier.create(result)
@@ -743,7 +745,7 @@ class ProductInventoryServiceUnitTest {
                 .thenReturn(Mono.empty());
 
         // Act and Assert
-        Mono<Void> result = productInventoryService.deleteAllProductInventory(inventoryId);
+        Mono<Void> result = productInventoryService.deleteAllProductsForAnInventory(inventoryId);
         StepVerifier.create(result)
                 .expectError(RuntimeException.class)
                 .verify();
@@ -1634,6 +1636,71 @@ class ProductInventoryServiceUnitTest {
                 .expectError(NotFoundException.class)
                 .verify();
     }
+
+    @Test
+    void createSupplyPdf_InvalidInventoryId_ShouldThrowIllegalArgumentException() {
+        // Arrange
+        String invalidInventoryId = "";
+
+        // Act
+        Mono<byte[]> result = productInventoryService.createSupplyPdf(invalidInventoryId);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectError(IllegalArgumentException.class)
+                .verify();
+    }
+
+    @Test
+    void createSupplyPdf_NoProductsFound_ShouldThrowNotFoundException() {
+        // Arrange
+        String inventoryId = "valid-id";
+        Mockito.when(productRepository.findAllProductsByInventoryId(inventoryId))
+                .thenReturn(Flux.empty());
+
+        // Act
+        Mono<byte[]> result = productInventoryService.createSupplyPdf(inventoryId);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof NotFoundException &&
+                        throwable.getMessage().contains("No products found for inventory ID"))
+                .verify();
+    }
+
+    @Test
+    void createSupplyPdf_SuccessfullyGeneratesPdf() {
+        // Arrange
+        String inventoryId = "valid-id";
+
+        Product product1 = new Product();
+        product1.setProductName("Product A");
+        product1.setProductQuantity(10);
+        product1.setProductDescription("Description A");
+        product1.setProductPrice(100.0);
+
+        Product product2 = new Product();
+        product2.setProductName("Product B");
+        product2.setProductQuantity(20);
+        product2.setProductDescription("Description B");
+        product2.setProductPrice(200.0);
+
+        List<Product> productList = Arrays.asList(product1, product2);
+        Mockito.when(productRepository.findAllProductsByInventoryId(inventoryId))
+                .thenReturn(Flux.fromIterable(productList));
+
+        // Act
+        Mono<byte[]> result = productInventoryService.createSupplyPdf(inventoryId);
+
+        // Assert
+        StepVerifier.create(result)
+                .assertNext(pdfBytes -> {
+                    assertNotNull(pdfBytes);
+                    assertTrue(pdfBytes.length > 0);
+                })
+                .verifyComplete();
+    }
+
 
 
 }

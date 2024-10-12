@@ -1,5 +1,9 @@
 package com.petclinic.inventoryservice.businesslayer;
 
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.pdf.PdfWriter;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryNameRepository;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryRepository;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryTypeRepository;
@@ -17,6 +21,8 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import org.springframework.data.domain.Pageable;
 
+import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -36,7 +42,6 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
 
 
     @Override
-
     public Mono<InventoryResponseDTO> addInventory(Mono<InventoryRequestDTO> inventoryRequestDTO) {
         return inventoryRequestDTO
                 .map(EntityDTOUtil::toInventoryEntity)
@@ -387,15 +392,14 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                 .switchIfEmpty(Mono.error(new NotFoundException("Inventory id:" + inventoryId + "and product:" + productId + "are not found")));
     }
 
-
-    //delete all products and delete all inventory
     @Override
-    public Mono<Void> deleteAllProductInventory (String inventoryId){
+    public Mono<Void> deleteAllProductsForAnInventory(String inventoryId) {
         return inventoryRepository.findInventoryByInventoryId(inventoryId)
-                .switchIfEmpty(Mono.error(new RuntimeException("Invalid Inventory Id")))
+                .switchIfEmpty(Mono.error(new NotFoundException("Invalid Inventory Id")))
                 .flatMapMany(inv -> productRepository.deleteByInventoryId(inventoryId))
                 .then();
     }
+
 
     @Override
     public Mono<Void> deleteAllInventory () {
@@ -507,7 +511,47 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                         productRepository.countByInventoryId(inventoryId)
                 );
     }
+
+    @Override
+    public Mono<byte[]> createSupplyPdf(String inventoryId) {
+        if (inventoryId == null || inventoryId.trim().isEmpty()) {
+            return Mono.error(new IllegalArgumentException("Invalid inventory ID provided."));
+        }
+
+        return productRepository.findAllProductsByInventoryId(inventoryId)
+                .collectList()
+                .flatMap(supplies -> {
+                    if (supplies.isEmpty()) {
+                        return Mono.error(new NotFoundException("No products found for inventory ID: " + inventoryId));
+                    }
+                    try {
+                        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                        Document document = new Document();
+                        PdfWriter.getInstance(document, byteArrayOutputStream);
+
+                        document.open();
+                        document.add(new Paragraph("Supplies Report for Inventory ID: " + inventoryId));
+                        document.add(new Paragraph(" ")); // Blank line
+
+                        for (Product supply : supplies) {
+                            document.add(new Paragraph("Product Name: " + supply.getProductName()));
+                            document.add(new Paragraph("Quantity: " + supply.getProductQuantity()));
+                            document.add(new Paragraph("Description: " + supply.getProductDescription()));
+                            document.add(new Paragraph("Price: $" + supply.getProductPrice()));
+                            document.add(new Paragraph(" "));
+                        }
+
+                        document.close();
+
+                        return Mono.just(byteArrayOutputStream.toByteArray());
+                    } catch (DocumentException e) {
+                        return Mono.error(new RuntimeException("Error generating PDF", e));
+                    }
+                });
+    }
+
 }
+
 
 
 

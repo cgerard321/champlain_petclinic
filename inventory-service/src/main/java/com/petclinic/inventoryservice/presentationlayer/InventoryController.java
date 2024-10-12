@@ -3,7 +3,10 @@ package com.petclinic.inventoryservice.presentationlayer;
 import com.petclinic.inventoryservice.businesslayer.ProductInventoryService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -112,8 +115,8 @@ public Flux<InventoryResponseDTO> searchInventories(
 
     //delete all products and delete all inventory
     @DeleteMapping("/{inventoryId}/products")
-    public Mono<ResponseEntity<Void>> deleteProductInventory(@PathVariable String inventoryId) {
-        return productInventoryService.deleteAllProductInventory(inventoryId)
+    public Mono<ResponseEntity<Void>> deleteProductsForAnInventory(@PathVariable String inventoryId) {
+        return productInventoryService.deleteAllProductsForAnInventory(inventoryId)
                 .then(Mono.just(new ResponseEntity<Void>(HttpStatus.NO_CONTENT)))
                 .defaultIfEmpty(new ResponseEntity<Void>(HttpStatus.NOT_FOUND));
     }
@@ -157,7 +160,7 @@ public Flux<InventoryResponseDTO> searchInventories(
   
     @GetMapping("/{inventoryId}/products/lowstock")
     public Flux<ProductResponseDTO> getLowStockProducts(@PathVariable String inventoryId, @RequestParam Optional<Integer> threshold) {
-        int stockThreshold = threshold.orElse(16);
+        int stockThreshold = threshold.orElse(20);
         return productInventoryService.getLowStockProducts(inventoryId, stockThreshold);
 
     }
@@ -187,6 +190,27 @@ public Flux<InventoryResponseDTO> searchInventories(
                 .map(productResponseDTO -> ResponseEntity.ok().body(productResponseDTO))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
+
+    @GetMapping(value = "/{inventoryId}/products/download", produces = MediaType.APPLICATION_PDF_VALUE)
+    public Mono<ResponseEntity<ByteArrayResource>> createSupplyPdf(@PathVariable String inventoryId) {
+        return productInventoryService.createSupplyPdf(inventoryId)
+                .map(pdfContent -> {
+                    ByteArrayResource resource = new ByteArrayResource(pdfContent);
+                    HttpHeaders headers = new HttpHeaders();
+                    headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"supply_report_" + inventoryId + ".pdf\"");
+
+                    return ResponseEntity.ok()
+                            .contentLength(pdfContent.length)
+                            .contentType(MediaType.APPLICATION_PDF)
+                            .headers(headers)
+                            .body(resource);
+
+                });
+
+
+
+    }
+
 }
 
 

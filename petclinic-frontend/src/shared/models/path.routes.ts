@@ -2,6 +2,7 @@ export enum AppRoutePaths {
   Default = '/',
   EditInventory = 'inventories/inventory/:inventoryId/edit',
   EditInventoryProducts = 'inventory/:inventoryId/products/:productId/edit',
+  LowStockProducts = '/products/lowstock',
   AddSupplyToInventory = 'inventory/:inventoryId/products/add',
   CustomerEmergency = '/customer/emergency',
   Review = '/reviews',
@@ -48,8 +49,8 @@ export enum AppRoutePaths {
   SignUp = '/users/signup',
   CustomerVisits = '/customer/visits',
   UpdatePet = '/pets/:petId/edit',
-  ProductDetails = '/productDetails',
-  EditProduct = '/products/edit',
+  ProductDetails = '/products/:productId',
+  EditProduct = '/products/edit/:productId',
   ForgotPassword = '/users/forgot-password',
   ResetPassword = '/users/reset-password/:token',
 }

@@ -751,4 +751,59 @@ public class InventoryControllerTest {
                 .consumeProduct(inventoryId, invalidProductId);
     }
 
+    @Test
+    void deleteAllProductsInInventory_ShouldSucceed() {
+
+        String inventoryId = "inventory1";
+        // Mock the service call to simulate the successful deletion of all products in an inventory.
+        // Assuming your service client has a method called `deleteAllProductsInInventory`.
+        when(inventoryServiceClient.deleteAllProductsInInventory(inventoryId))
+                .thenReturn(Mono.empty());  // Using Mono.empty() to simulate a void return (successful deletion without a return value).
+
+        // Make the DELETE request to the API.
+        client.delete()
+                .uri("/api/v2/gateway/inventories/" + inventoryId +"/products")  // Assuming the endpoint for deleting all products in an inventory is the same with the inventory ID.
+                .exchange()
+                .expectStatus().isNoContent()
+                .expectBody().isEmpty();
+
+        // Verify that the deleteAllProductsInInventory method on the service client was called exactly once.
+        verify(inventoryServiceClient, times(1))
+                .deleteAllProductsInInventory(inventoryId);
+    }
+
+    @Test
+    public void testCreateSupplyPdf_NotFound() {
+        client.get()
+                .uri("/inventory/validInventoryId/products/download")
+                .exchange()
+                .expectStatus().isNotFound();
+
+        // Verify the service method was not called
+        verify(inventoryServiceClient, never()).createSupplyPdf(anyString());
+    }
+    @Test
+    public void testCreateSupplyPdf_Success() {
+        // Arrange
+        String inventoryId = "inventory1";
+        byte[] pdfContent = "PDF Content".getBytes();
+
+        // Mock the service method to return the PDF content
+        when(inventoryServiceClient.createSupplyPdf(inventoryId))
+                .thenReturn(Mono.just(pdfContent));
+
+        // Act
+        client.get()
+                .uri(baseInventoryURL + "/" + inventoryId + "/products/download")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(byte[].class)
+                .isEqualTo(pdfContent);
+
+        // Verify that the service method was called with the correct inventoryId
+        verify(inventoryServiceClient, times(1))
+                .createSupplyPdf(eq(inventoryId));
+    }
+
+
 }

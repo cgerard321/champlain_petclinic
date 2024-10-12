@@ -18,7 +18,6 @@ public interface ProductInventoryService {
 
     Mono<Void> deleteInventoryByInventoryId(String inventoryId);
 
-    Mono<Void> deleteAllProductInventory(String inventoryId);
     Mono<Void> deleteAllInventory();
     Mono<InventoryTypeResponseDTO> addInventoryType(Mono<InventoryTypeRequestDTO> inventoryTypeRequestDTO);
 
@@ -27,6 +26,9 @@ public interface ProductInventoryService {
 
     Mono<ProductResponseDTO> getProductByProductIdInInventory(String inventoryId, String productId);
 
+    Mono<Void> deleteAllProductsForAnInventory(String inventoryId);
+
+//    Mono<Void> deleteAllProductInventory(String inventoryId);
   
     Flux<ProductResponseDTO> getLowStockProducts(String inventoryId, int stockThreshold);
 
@@ -37,4 +39,6 @@ public interface ProductInventoryService {
     Mono<Integer> getQuantityOfProductsInInventory(String inventoryId);
     Mono<ProductResponseDTO> consumeProduct(String inventoryId, String productId);
 
-    }
+    Mono<byte[]> createSupplyPdf(String inventoryId);
+
+}
