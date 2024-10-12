@@ -33,7 +33,5 @@ public interface BillRepository extends ReactiveMongoRepository<Bill, String> {
     Flux<Bill> findAllBillsByBillStatus(BillStatus status);
 
     Flux<Bill> findByCustomerIdAndBillStatus(String customerId, BillStatus status);
-    
-    Flux<Bill> findByCustomerIdAndStatus(String customerId, BillStatus status);
 
 }

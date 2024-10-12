@@ -237,12 +237,13 @@ public class BillServiceImpl implements BillService {
                 });
     }
 
-    @Override
     public Mono<Double> calculateCurrentBalance(String customerId) {
-        return billRepository.findByCustomerIdAndStatus(customerId, BillStatus.UNPAID)
-                .concatWith(billRepository.findByCustomerIdAndStatus(customerId, BillStatus.OVERDUE))
+        return billRepository.findByCustomerIdAndBillStatus(customerId, BillStatus.UNPAID)
+                .concatWith(billRepository.findByCustomerIdAndBillStatus(customerId, BillStatus.OVERDUE))
                 .map(Bill::getAmount)
-                .reduce(0.0, Double::sum);
+                .reduce(0.0, Double::sum)
+                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Customer not found")));
     }
+    
 
 }
