@@ -116,7 +116,7 @@ public class EntityDtoUtil {
                 });
     }
 
-    public static Emergency toEmergencyEntity(EmergencyRequestDTO emergencyRequestDTO){
+    public  Emergency toEmergencyEntity(EmergencyRequestDTO emergencyRequestDTO){
         Emergency emergency = new Emergency();
         BeanUtils.copyProperties(emergencyRequestDTO, emergency);
         return emergency;
