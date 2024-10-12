@@ -1,4 +1,3 @@
-// src/features/bills/CurrentBalance.tsx
 import { useEffect, useState } from 'react';
 import { useUser } from '@/context/UserContext';
 
@@ -40,11 +39,7 @@ export default function CurrentBalance(): JSX.Element {
   return (
     <div className="balance-container">
       <h3>Current Balance</h3>
-      {error ? (
-        <p>{error}</p>
-      ) : (
-        <p>${currentBalance?.toFixed(2) || '0.00'}</p>
-      )}
+      {error ? <p>{error}</p> : <p>${currentBalance?.toFixed(2) || '0.00'}</p>}
     </div>
   );
 }
