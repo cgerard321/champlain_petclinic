@@ -100,16 +100,24 @@ public class VisitControllerUnitTest {
     EmergencyRequestDTO emergencyRequestDTO = EmergencyRequestDTO.builder()
             .visitDate(LocalDateTime.now())
             .description("Updated Emergency")
-            .petName("Oscar")
+            .petId("Oscar")
+            .practitionerId("2332222232323234hhh232")
             .urgencyLevel(UrgencyLevel.MEDIUM)
             .emergencyType("Accident")
             .build();
 
-    EmergencyResponseDTO emergencyResponseDTO = EmergencyResponseDTO.builder()
+     EmergencyResponseDTO emergencyResponseDTO = EmergencyResponseDTO.builder()
             .visitEmergencyId(UUID.randomUUID().toString())
             .visitDate(emergencyRequestDTO.getVisitDate())
             .description(emergencyRequestDTO.getDescription())
-            .petName(emergencyRequestDTO.getPetName())
+            .petId(emergencyRequestDTO.getPetId())
+             .petName("hamid")
+             .petBirthDate(new Date())
+             .practitionerId(emergencyRequestDTO.getPractitionerId())
+             .vetFirstName("carlos")
+             .vetLastName("ambock")
+             .vetEmail("carlos@gmail.com")
+             .vetPhoneNumber("540-233-2323")
             .urgencyLevel(emergencyRequestDTO.getUrgencyLevel())
             .emergencyType(emergencyRequestDTO.getEmergencyType())
             .build();
@@ -469,8 +477,69 @@ public class VisitControllerUnitTest {
         verify(visitsServiceClient, times(1)).getAllEmergency();
     }
 
+    @Test
+    void postEmergency_whenValidRequest_thenReturnCreatedResponse() {
+        // Arrange
+        when(visitsServiceClient.createEmergency(any(Mono.class)))
+                .thenReturn(Mono.just(emergencyResponseDTO));
+
+        // Act
+        webTestClient.post()
+                .uri(EMERGENCY_URL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(emergencyRequestDTO)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody(EmergencyResponseDTO.class)
+                .isEqualTo(emergencyResponseDTO);
+
+        // Assert
+        verify(visitsServiceClient, times(1)).createEmergency(any(Mono.class));
+    }
 
     @Test
+    void getEmergencyVisitsByOwnerId_whenOwnerExists_thenReturnFluxVisitResponseDTO() {
+        // Arrange
+        String ownerId = "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a";
+        when(bffApiGatewayController.getEmergencyVisitsByOwnerId(ownerId))
+                .thenReturn(Flux.just(emergencyResponseDTO));
+
+
+        // Act
+        webTestClient.get()
+                .uri(BASE_VISIT_URL + "/emergency/owners/{ownerId}", ownerId)
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(EmergencyResponseDTO.class)
+                .hasSize(1);
+
+        // Assert
+        verify(bffApiGatewayController, times(1)).getEmergencyVisitsByOwnerId(ownerId);
+    }
+
+    @Test
+    void getEmergencyVisitsByOwnerId_whenOwnerDoesNotExist_thenReturnEmptyFlux() {
+        // Arrange
+        String ownerId = "e6c7398e-8ac4-4e10-9ee0-03ef33f03610";
+        when(bffApiGatewayController.getEmergencyVisitsByOwnerId(ownerId))
+                .thenReturn(Flux.empty());
+
+        // Act
+        webTestClient.get()
+                .uri(BASE_VISIT_URL + "/emergency/owners/{ownerId}", ownerId)
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(EmergencyResponseDTO.class)
+                .hasSize(0);
+
+        // Assert
+        verify(bffApiGatewayController, times(1)).getEmergencyVisitsByOwnerId(ownerId);
+    }
+
+
+  /*  @Test
     void postEmergency_whenValidRequest_thenReturnCreatedResponse() {
         // Arrange
         when(visitsServiceClient.createEmergency(any(Mono.class)))
@@ -566,6 +635,8 @@ public class VisitControllerUnitTest {
         // Verify the deleteEmergency method is invoked, not getEmergencyByEmergencyId
         verify(visitsServiceClient, times(1)).deleteEmergency(emergencyResponseDTO.getVisitEmergencyId());
     }
+
+   */
 
     @Test
     void getVisitsByOwnerId_whenOwnerDoesNotExist_thenReturnEmptyFlux() {

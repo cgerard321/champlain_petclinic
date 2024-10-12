@@ -346,7 +346,28 @@ public class VisitsServiceClient {
                 .bodyToFlux(EmergencyResponseDTO.class);
     }
 
+    public Flux<EmergencyResponseDTO> getEmergencyVisitForPet(final String petId) {
+        return webClient
+                .get()
+                .uri("/emergency/pets/{petId}", petId)
+                .retrieve()
+                .bodyToFlux(EmergencyResponseDTO.class);
+    }
+
     public Mono<EmergencyResponseDTO> createEmergency(Mono<EmergencyRequestDTO> model) {
+        String emergencyId= UUID.randomUUID().toString();
+        return model.flatMap(emergencyRequestDTO -> {
+            return webClient
+                    .post()
+                    .uri(reviewUrl + "/emergency")
+                    .body(BodyInserters.fromValue(emergencyRequestDTO))
+                    .retrieve()
+                    .bodyToMono(EmergencyResponseDTO.class);
+        });
+
+    }
+
+   /* public Mono<EmergencyResponseDTO> createEmergency(Mono<EmergencyRequestDTO> model) {
         String emergencyId= UUID.randomUUID().toString();
         return model.flatMap(emergencyRequestDTO -> {
             return webClient
@@ -385,6 +406,7 @@ public class VisitsServiceClient {
                 .retrieve()
                 .bodyToMono(EmergencyResponseDTO.class);
     }
+    */
 
     public Mono<VisitResponseDTO> patchVisitStatus(String visitId, String status) {
         return webClient.patch()
