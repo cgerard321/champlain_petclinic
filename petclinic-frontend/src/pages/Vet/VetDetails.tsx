@@ -18,12 +18,31 @@ interface VetResponseType {
   active: boolean;
   specialties: { specialtyId: string; name: string }[];
 }
+interface AlbumPhotoType {
+  id: string;
+  data: string;
+  imgType: string;
+}
+
+interface EducationResponseType {
+  educationId: string;
+  vetId: string;
+  schoolName: string;
+  degree: string;
+  fieldOfStudy: string;
+  startDate: string;
+  endDate: string;
+}
 
 export default function VetDetails(): JSX.Element {
   const { vetId } = useParams<{ vetId: string }>();
   const [vet, setVet] = useState<VetResponseType | null>(null);
+  const [education, setEducation] = useState<EducationResponseType[] | null>(
+    null
+  );
   const [photo, setPhoto] = useState<string | null>(null);
-  const [albumPhotos, setAlbumPhotos] = useState<string[]>([]);
+  const [isDefaultPhoto, setIsDefaultPhoto] = useState(false);
+  const [albumPhotos, setAlbumPhotos] = useState<AlbumPhotoType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [isFormOpen, setIsFormOpen] = useState(false); // To handle form visibility
@@ -53,10 +72,12 @@ export default function VetDetails(): JSX.Element {
     } catch (error) {
       setError('Failed to fetch vet photo');
       setPhoto('/images/vet_default.jpg');
+      setIsDefaultPhoto(true); // This indicates the default photo is being used
     }
   }, [vetId]);
 
   const handlePhotoDeleted = (): void => {
+    setIsDefaultPhoto(true);
     fetchVetPhoto();
   };
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -75,6 +96,22 @@ export default function VetDetails(): JSX.Element {
         setVet(data);
       } catch (error) {
         setError('Failed to fetch vet details');
+      }
+    };
+
+    const fetchEducationDetails = async (): Promise<void> => {
+      try {
+        const response = await fetch(
+          `http://localhost:8080/api/v2/gateway/vets/${vetId}/educations`
+        );
+
+        if (!response.ok) {
+          throw new Error(`Error: ${response.statusText}`);
+        }
+        const data: EducationResponseType[] = await response.json();
+        setEducation(data);
+      } catch (error) {
+        setError('Failed to fetch education details');
       }
     };
 
@@ -97,18 +134,8 @@ export default function VetDetails(): JSX.Element {
             throw new Error(`Error: ${response.statusText}`);
           }
         } else {
-          const photos = await response.json();
-          // eslint-disable-next-line no-console
-          console.log('Album Photos:', photos); // Log the album photos
-
-          const imageUrls = photos.map(
-            (photo: { data: string; imgType: string }) => {
-              // Construct the full data URL for the image
-              return `data:${photo.imgType};base64,${photo.data}`;
-            }
-          );
-
-          setAlbumPhotos(imageUrls); // Set the image URLs in the state
+          const photos: AlbumPhotoType[] = await response.json();
+          setAlbumPhotos(photos); // Set the album photos in state
         }
       } catch (error) {
         setError('Failed to fetch album photos');
@@ -117,6 +144,7 @@ export default function VetDetails(): JSX.Element {
 
     fetchVetDetails().then(() => {
       fetchVetPhoto();
+      fetchEducationDetails();
       fetchAlbumPhotos();
       setLoading(false);
     });
@@ -137,6 +165,7 @@ export default function VetDetails(): JSX.Element {
 
     const localImageUrl = URL.createObjectURL(file);
     setPhoto(localImageUrl);
+    setIsDefaultPhoto(false); // Set to false because a new photo is uploaded
 
     try {
       const response = await fetch(
@@ -158,8 +187,23 @@ export default function VetDetails(): JSX.Element {
       const updatedBlob = await response.blob();
       const updatedImageUrl = URL.createObjectURL(updatedBlob);
       setPhoto(updatedImageUrl);
+      setIsDefaultPhoto(false);
     } catch (error) {
       setError('Failed to update vet photo');
+    }
+  };
+  const handleDeleteAlbumPhoto = async (photoId: string): Promise<void> => {
+    try {
+      await axios.delete(
+        `http://localhost:8080/api/v2/gateway/vets/${vetId}/albums/${photoId}`
+      );
+
+      // Update the state to remove the deleted photo
+      setAlbumPhotos(prevPhotos =>
+        prevPhotos.filter(photo => photo.id !== photoId)
+      );
+    } catch (error) {
+      setError('Failed to delete album photo');
     }
   };
 
@@ -272,10 +316,12 @@ export default function VetDetails(): JSX.Element {
               onChange={handleUpdateVetProfilePhoto}
               accept="image/*"
             />
-            <DeleteVetPhoto
-              vetId={vetId!}
-              onPhotoDeleted={handlePhotoDeleted}
-            />
+            {!isDefaultPhoto && (
+              <DeleteVetPhoto
+                vetId={vetId!}
+                onPhotoDeleted={handlePhotoDeleted}
+              />
+            )}
           </section>
         )}
 
@@ -391,21 +437,62 @@ export default function VetDetails(): JSX.Element {
               )}
             </section>
 
+            <section className="vet-education-info">
+              <h2>Vet Education</h2>
+              {education && education.length > 0 ? (
+                education.map((edu, index) => (
+                  <div key={index}>
+                    <p>
+                      <strong>School Name:</strong> {edu.schoolName}
+                    </p>
+                    <p>
+                      <strong>Degree:</strong> {edu.degree}
+                    </p>
+                    <p>
+                      <strong>Field of Study:</strong> {edu.fieldOfStudy}
+                    </p>
+                    <p>
+                      <strong>Start Date:</strong> {edu.startDate}
+                    </p>
+                    <p>
+                      <strong>End Date:</strong> {edu.endDate}
+                    </p>
+                    <hr />
+                  </div>
+                ))
+              ) : (
+                <p>No education details available</p>
+              )}
+            </section>
+
             <section className="album-photos">
               <h2>Album Photos</h2>
               {albumPhotos.length > 0 ? (
                 <div className="album-photo-grid">
-                  {albumPhotos.map((photoUrl, index) => (
+                  {albumPhotos.map((photo, index) => (
                     <div
                       key={index}
                       className="album-photo-card"
-                      onClick={() => openPhotoModal(photoUrl)}
+                      onClick={() =>
+                        openPhotoModal(
+                          `data:${photo.imgType};base64,${photo.data}`
+                        )
+                      }
                     >
                       <img
-                        src={photoUrl}
+                        src={`data:${photo.imgType};base64,${photo.data}`} // Construct the image URL from data and type
                         alt={`Album Photo ${index + 1}`}
                         className="album-photo-thumbnail"
                       />
+                      <button
+                        className="delete-photo-button"
+                        onClick={e => {
+                          e.stopPropagation(); // This prevents the modal from opening
+                          handleDeleteAlbumPhoto(photo.id); // Pass the photo ID for deletion
+                        }}
+                      >
+                        Delete Image
+                      </button>
                     </div>
                   ))}
                 </div>

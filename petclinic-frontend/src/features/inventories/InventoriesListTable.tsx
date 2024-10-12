@@ -1,4 +1,4 @@
-import { useState, useEffect, JSX } from 'react';
+import { useState, useEffect, JSX, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Inventory } from '@/features/inventories/models/Inventory.ts';
 import { InventoryType } from '@/features/inventories/models/InventoryType.ts';
@@ -27,9 +27,10 @@ export default function InventoriesListTable(): JSX.Element {
   const [showAddInventoryForm, setShowAddInventoryForm] = useState(false);
   const [showAddTypeForm, setShowAddTypeForm] = useState(false);
   const navigate = useNavigate();
-  const [lowStockProductsByInventory, setLowStockProductsByInventory] =
-    useState<{ [inventoryName: string]: ProductModel[] }>({});
-  const [showLowStock, setShowLowStock] = useState(false);
+  const lowStockProductsByInventory = useRef<{
+    [inventoryName: string]: ProductModel[];
+  }>({});
+
   const [productQuantities, setProductQuantities] = useState<{
     [key: string]: number;
   }>({});
@@ -153,20 +154,19 @@ export default function InventoriesListTable(): JSX.Element {
         }
       );
 
-      if (response.status === 404) {
-        // eslint-disable-next-line no-console
-        console.log(
+      if (response.ok) {
+        const data = await response.json();
+        if (data && data.length > 0) {
+          // Update the ref directly
+          lowStockProductsByInventory.current = {
+            ...lowStockProductsByInventory.current,
+            [inventory.inventoryName]: data,
+          };
+        }
+      } else {
+        console.error(
           `No products below threshold in inventory: ${inventory.inventoryName}`
         );
-      }
-
-      const data = await response.json();
-      if (data && data.length > 0) {
-        setLowStockProductsByInventory(prevState => ({
-          ...prevState,
-          [inventory.inventoryName]: data, //Group products by inventory name
-        }));
-        setShowLowStock(true);
       }
     } catch (error) {
       console.error('Error fetching low stock products:', error);
@@ -536,11 +536,19 @@ export default function InventoriesListTable(): JSX.Element {
           className="low-stock-button btn btn-warning mx-1"
           onClick={async () => {
             if (inventoryList.length > 0) {
-              setLowStockProductsByInventory({});
+              lowStockProductsByInventory.current = {}; // Clear the current ref value
               try {
+                // Collect all low stock products for each inventory
                 for (const inventory of inventoryList) {
                   await getAllLowStockProducts(inventory);
                 }
+
+                // Navigate to the other page and pass the collected data
+                navigate('/products/lowstock', {
+                  state: {
+                    lowStockProducts: lowStockProductsByInventory.current,
+                  },
+                });
               } catch (error) {
                 console.error('Error fetching low stock products:', error);
               }
@@ -551,28 +559,6 @@ export default function InventoriesListTable(): JSX.Element {
         >
           Check Low Stock for All Inventories
         </button>
-
-        {showLowStock &&
-          Object.keys(lowStockProductsByInventory).length > 0 && (
-            <div>
-              <h3>Low Stock Products</h3>
-              {Object.entries(lowStockProductsByInventory).map(
-                ([inventoryName, products]) => (
-                  <div key={inventoryName}>
-                    <h4>Inventory: {inventoryName}</h4>
-                    <ul>
-                      {products.map(product => (
-                        <li key={product.productId}>
-                          {product.productName}: {product.productQuantity} units
-                          left
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )
-              )}
-            </div>
-          )}
 
         <button
           className="add-inventorytype-button btn btn-primary"

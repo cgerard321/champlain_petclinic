@@ -191,12 +191,6 @@ export function NavBar(): JSX.Element {
                     Promos
                   </Nav.Link>
                 )}
-                {
-                  <Nav.Link as={Link} to={AppRoutePaths.Products}>
-                    Shop
-                  </Nav.Link>
-                }
-
                 {IsAdmin() && (
                   <Nav.Link as={Link} to={AppRoutePaths.Carts}>
                     Carts

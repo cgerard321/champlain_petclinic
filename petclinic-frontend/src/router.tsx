@@ -52,6 +52,8 @@ import AddPromoPage from '@/pages/Promos/AddPromoPage.tsx';
 import UpdatePromoPage from '@/pages/Promos/UpdatePromoPage.tsx';
 import CustomerEmergency from './pages/Visit/CustomerEmergency';
 import AddEmergencyForm from './features/visits/Emergency/AddEmergencyForm';
+import LowStockProducts from '@/features/inventories/LowStockProducts.tsx';
+ main
 
 const router = createBrowserRouter([
   {
@@ -80,6 +82,16 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
+
+      {
+        path: AppRoutePaths.LowStockProducts,
+        element: (
+          <ProtectedRoute>
+            <LowStockProducts />
+          </ProtectedRoute>
+        ),
+      },
+
       {
         path: AppRoutePaths.GetVisitByVistId,
         element: (
@@ -278,7 +290,7 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: `${AppRoutePaths.EditProduct}/:productId`,
+        path: AppRoutePaths.EditProduct,
         element: (
           <ProtectedRoute roles={['ADMIN', 'INVENTORY_MANAGER']}>
             <EditProduct />

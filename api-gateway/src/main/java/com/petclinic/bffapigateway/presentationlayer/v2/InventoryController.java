@@ -10,10 +10,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.*;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -77,9 +75,9 @@ public class InventoryController {
         }
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
     @DeleteMapping(value = "{inventoryId}/products/{productId}")
-    public Mono<ResponseEntity<Void>> deleteProductInInventory(@PathVariable String inventoryId, @PathVariable String productId){
+    public Mono<ResponseEntity<Void>> deleteProductInInventory(@PathVariable String inventoryId, @PathVariable String productId) {
         return inventoryServiceClient.deleteProductInInventory(inventoryId, productId).then(Mono.just(ResponseEntity.noContent().<Void>build()))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
@@ -93,6 +91,13 @@ public class InventoryController {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
+    @DeleteMapping(value = "/{inventoryId}/products")
+    public Mono<ResponseEntity<Void>> deleteAllProductsFromInventory(@PathVariable String inventoryId) {
+        return inventoryServiceClient.deleteAllProductsInInventory(inventoryId).then(Mono.just(ResponseEntity.noContent().<Void>build()))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
     @PutMapping(value = "/{inventoryId}")
     public Mono<ResponseEntity<InventoryResponseDTO>> updateInventory(
             @PathVariable String inventoryId,
@@ -101,7 +106,7 @@ public class InventoryController {
         return Mono.just(inventoryId)
                 .filter(id -> id.length() == 36)
                 .switchIfEmpty(Mono.error(new InvalidInputException("Provided inventory ID is invalid: " + inventoryId)))
-                .flatMap(id -> inventoryServiceClient.updateInventory( inventoryRequestDTO,id))
+                .flatMap(id -> inventoryServiceClient.updateInventory(inventoryRequestDTO, id))
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
@@ -114,7 +119,6 @@ public class InventoryController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
     @GetMapping("/{inventoryName}/products/by-name")
@@ -190,17 +194,15 @@ public class InventoryController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER,Roles.VET})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER, Roles.VET})
     @GetMapping(value = "inventory/{inventoryId}/products")//, produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ProductResponseDTO> getProductsInInventoryByInventoryIdAndFields(@PathVariable String inventoryId,
                                                                                  @RequestParam(required = false) String productName,
                                                                                  @RequestParam(required = false) Double productPrice,
                                                                                  @RequestParam(required = false) Integer productQuantity,
-                                                                                 @RequestParam(required = false) Double productSalePrice){
+                                                                                 @RequestParam(required = false) Double productSalePrice) {
         return inventoryServiceClient.getProductsInInventoryByInventoryIdAndProductsField(inventoryId, productName, productPrice, productQuantity, productSalePrice);
     }
-
-
 
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
@@ -219,6 +221,7 @@ public class InventoryController {
                 .map(productResponseDTO -> ResponseEntity.ok(productResponseDTO))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
+
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
     @PostMapping("/{inventoryId}/products")
     public Mono<ResponseEntity<ProductResponseDTO>> addSupplyToInventory(
@@ -232,12 +235,23 @@ public class InventoryController {
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
     @GetMapping("/{inventoryId}/productquantity")
     public Mono<ResponseEntity<Integer>> getQuantityOfProductsInInventory(
-            @PathVariable String inventoryId){
+            @PathVariable String inventoryId) {
         return inventoryServiceClient.getQuantityOfProductsInInventory(inventoryId)
                 .map(quantity -> ResponseEntity.ok(quantity))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
 
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
+    @GetMapping("/{inventoryId}/products/download")
+    public Mono<ResponseEntity<byte[]>> createSupplyPdf(@PathVariable String inventoryId) {
+        return inventoryServiceClient.createSupplyPdf(inventoryId)
+                .map(pdfContent -> {
+                    HttpHeaders headers = new HttpHeaders();
+                    headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"inventory_report.pdf\"");
+                    return new ResponseEntity<>(pdfContent, headers, HttpStatus.OK);
+                });
 
+
+    }
 }

@@ -5,6 +5,8 @@ import { ProductModel } from './models/ProductModels/ProductModel';
 import './InventoriesListTable.module.css';
 import './InventoryProducts.css';
 import useSearchProducts from '@/features/inventories/hooks/useSearchProducts.ts';
+import deleteAllProductsFromInventory from './api/deleteAllProductsFromInventory';
+import createPdf from './api/createPdf';
 
 const InventoryProducts: React.FC = () => {
   const { inventoryId } = useParams<{ inventoryId: string }>();
@@ -19,6 +21,16 @@ const InventoryProducts: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+
+  const handleCreatePdf = async (): Promise<void> => {
+    if (inventoryId) {
+      try {
+        await createPdf(inventoryId);
+      } catch (error) {
+        console.error('Failed to create PDF', error);
+      }
+    }
+  };
 
   // Fetch products from the backend
   useEffect(() => {
@@ -58,6 +70,19 @@ const InventoryProducts: React.FC = () => {
       setFilteredProducts(updatedProducts); // Update filteredProducts as well
     } catch (err) {
       setError('Failed to delete product.');
+    }
+  };
+
+  const handleDeleteAllProducts = async (): Promise<void> => {
+    try {
+      // Call the deleteAllProductsFromInventory function
+      await deleteAllProductsFromInventory({ inventoryId: inventoryId! });
+      // Clear the product lists after successful deletion
+      setProducts([]);
+      setFilteredProducts([]);
+      alert('All products deleted successfully.');
+    } catch (err) {
+      setError('Failed to delete all products.');
     }
   };
 
@@ -155,6 +180,9 @@ const InventoryProducts: React.FC = () => {
         onClick={() => navigate('/inventories')}
       >
         Back
+      </button>
+      <button className="btn btn-primary" onClick={handleCreatePdf}>
+        Download PDF
       </button>
 
       <div className="products-filtering">
@@ -273,6 +301,9 @@ const InventoryProducts: React.FC = () => {
         onClick={() => navigate(`/inventory/${inventoryId}/products/add`)}
       >
         Add
+      </button>
+      <button className="btn btn-danger" onClick={handleDeleteAllProducts}>
+        Delete All Products
       </button>
     </div>
   );

@@ -1,0 +1,19 @@
+.reviewbox-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.review-box {
+  height: 7vh;
+  text-align: left;
+}
+
+.reviewbox-container > button {
+  width: 10vw;
+}
+
+.past-review {
+  width: 50vw;
+  word-wrap: break-word;
+  white-space: normal;
+}
