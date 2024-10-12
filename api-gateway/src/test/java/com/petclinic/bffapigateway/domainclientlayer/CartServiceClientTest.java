@@ -301,6 +301,11 @@ public class CartServiceClientTest {
                 .verify();
     }
 
+    /*
+    --------------------------------------------------------------------------------------------------------------------
+        from here it's the tests related to the wishlist
+    */
+
     @Test
     void MoveProductFromCartToWishlist_Success() {
         String cartId = "98f7b33a-d62a-420a-a84a-05a27c85fc91";
@@ -360,7 +365,7 @@ public class CartServiceClientTest {
     }
 
 @Test
-void MoveProductFromCartToWishlist_BadRequest() {
+void MoveProductFromCartToWishlist_InvalidInput() {
     String cartId = "98f7b33a-d62a-420a-a84a-05a27c85fc91";
     String productId = "9a29fff7-564a-4cc9-8fe1-36f6ca9bc223";
     String responseBody = """
@@ -444,7 +449,7 @@ void MoveProductFromCartToWishlist_BadRequest() {
     }
 
     @Test
-    void MoveProductFromWishListToCart_BadRequest() {
+    void MoveProductFromWishListToCart_InvalidInput() {
         String cartId = "98f7b33a-d62a-420a-a84a-05a27c85fc91";
         String productId = "9a29fff7-564a-4cc9-8fe1-36f6ca9bc223";
         String responseBody = """
@@ -468,6 +473,11 @@ void MoveProductFromCartToWishlist_BadRequest() {
                 })
                 .verify();
     }
+
+    /*
+    --------------------------------------------------------------------------------------------------------------------
+        from here it's the tests related to remove product from cart
+    */
 
     @Test
     void testRemoveProductFromCart_Success() {
@@ -667,13 +677,5 @@ void MoveProductFromCartToWishlist_BadRequest() {
         StepVerifier.create(result)
                 .verifyComplete();
     }
-
-
-
-
-
-
-
-
 
 }

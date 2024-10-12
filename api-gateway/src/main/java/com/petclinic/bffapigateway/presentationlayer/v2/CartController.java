@@ -118,19 +118,26 @@ public class CartController {
     }
 
 
-
+    /*
+    --------------------------------------------------------------------------------------------------------------------
+        from here it's related to the wishlist
+    */
 
 
     @PostMapping("/{cartId}/products/{productId}/toCart")
     public Mono<ResponseEntity<CartResponseDTO>> moveProductFromWishListToCart(@PathVariable String cartId, @PathVariable String productId) {
         return cartServiceClient.moveProductFromWishListToCart(cartId, productId)
                 .map(ResponseEntity::ok)
+                .doOnSuccess(response -> log.info("Moved product {} from wishlist to cart {}.", productId, cartId))
                 .onErrorResume(e -> {
                     if (e instanceof WebClientResponseException.UnprocessableEntity) {
+                        log.error("Invalid input for cartId: {} or productId: {} - {}", cartId, productId, e.getMessage());
                         return Mono.just(ResponseEntity.unprocessableEntity().build());
-                    } else if ( e instanceof WebClientResponseException.NotFound) {
+                    } else if (e instanceof WebClientResponseException.NotFound) {
+                        log.error("Cart or product not found for cartId: {} and productId: {} - {}", cartId, productId, e.getMessage());
                         return Mono.just(ResponseEntity.notFound().build());
                     } else {
+                        log.error("An unexpected error occurred: {}", e.getMessage());
                         return Mono.error(e);
                     }
                 });
@@ -140,8 +147,20 @@ public class CartController {
     public Mono<ResponseEntity<CartResponseDTO>> moveProductFromCartToWishlist(@PathVariable String cartId, @PathVariable String productId) {
         return cartServiceClient.moveProductFromCartToWishlist(cartId, productId)
                 .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build());
-
+                .doOnSuccess(response -> log.info("Moved product {} to wishlist from cart {}.", productId, cartId))
+                .defaultIfEmpty(ResponseEntity.notFound().build())
+                .onErrorResume(e -> {
+                    if (e instanceof WebClientResponseException.UnprocessableEntity) {
+                        log.error("Invalid input for cartId: {} or productId: {} - {}", cartId, productId, e.getMessage());
+                        return Mono.just(ResponseEntity.unprocessableEntity().build());
+                    } else if (e instanceof WebClientResponseException.NotFound) {
+                        log.error("Cart or product not found for cartId: {} and productId: {} - {}", cartId, productId, e.getMessage());
+                        return Mono.just(ResponseEntity.notFound().build());
+                    } else {
+                        log.error("An unexpected error occurred: {}", e.getMessage());
+                        return Mono.error(e);
+                    }
+                });
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})

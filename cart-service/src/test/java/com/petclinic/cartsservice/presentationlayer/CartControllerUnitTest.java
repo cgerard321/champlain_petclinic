@@ -570,7 +570,7 @@ class CartControllerUnitTest {
         verify(cartService, times(0)).removeProductFromCart(anyString(), anyString()); // cartService should not be called
     }
 
-
+    @Test
     void whenMoveProductFromCartToWishlist_thenSuccess() {
         // Arrange
         String cartId = VALID_CART_ID; // Use a valid cart ID
@@ -658,6 +658,5 @@ class CartControllerUnitTest {
         // Assert
         verify(cartService, times(1)).moveProductFromWishListToCart(cartId, productId);
     }
-
 
 }
