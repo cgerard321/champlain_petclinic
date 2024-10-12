@@ -3,6 +3,8 @@ package com.petclinic.products.utils;
 import com.petclinic.products.datalayer.images.Image;
 import com.petclinic.products.datalayer.images.ImageRepository;
 import com.petclinic.products.datalayer.products.Product;
+import com.petclinic.products.datalayer.products.ProductBundle;
+import com.petclinic.products.datalayer.products.ProductBundleRepository;
 import com.petclinic.products.datalayer.products.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -16,6 +18,7 @@ import reactor.core.publisher.Mono;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.List;
 
 @Service
 public class DataLoaderService implements CommandLineRunner {
@@ -25,6 +28,8 @@ public class DataLoaderService implements CommandLineRunner {
 
     @Autowired
     ImageRepository imageRepository;
+    @Autowired
+    private ProductBundleRepository productBundleRepository;
 
     @Override
     public void run(String... args) throws Exception {
@@ -124,6 +129,15 @@ public class DataLoaderService implements CommandLineRunner {
                 .productQuantity(0)
                 .build();
 
+        ProductBundle bundle1 = ProductBundle.builder()
+                .bundleId("b1e7d573-bcab-4db3-956f-773324b92a80")
+                .bundleName("Dog Bundle")
+                .bundleDescription("Bundle of dog food and flea collar")
+                .productIds(List.of("06a7d573-bcab-4db3-956f-773324b92a80", "baee7cd2-b67a-449f-b262-91f45dde8a6d", "1501f30e-1db1-44b2-a555-bca6f64450e4"))
+                .originalTotalPrice(55.98)
+                .bundlePrice(49.99)
+                .build();
+
         Resource resource1 = new ClassPathResource("images/dog_food.jpg");
         Resource resource2 = new ClassPathResource("images/cat_litter.png");
         Resource resource3 = new ClassPathResource("images/flea_collar.jpg");
@@ -207,6 +221,11 @@ public class DataLoaderService implements CommandLineRunner {
                 .imageType("image/jpeg")
                 .imageData(imageBytes8)
                 .build();
+
+        Flux.just(bundle1)
+                .flatMap(s -> productBundleRepository.insert(Mono.just(s))
+                        .log(s.toString()))
+                .subscribe();
 
         Flux.just(product1, product2, product3, product4, product5, product6, product7, product8)
                 .flatMap(s -> productRepository.insert(Mono.just(s))
