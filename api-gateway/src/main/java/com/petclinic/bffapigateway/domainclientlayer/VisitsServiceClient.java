@@ -367,6 +367,14 @@ public class VisitsServiceClient {
 
     }
 
+    public Mono<EmergencyResponseDTO> getEmergencyByEmergencyId(String visitEmergencyId) {
+        return webClient
+                .get()
+                .uri(reviewUrl + "/emergency/" + visitEmergencyId)
+                .retrieve()
+                .bodyToMono(EmergencyResponseDTO.class);
+    }
+
    /* public Mono<EmergencyResponseDTO> createEmergency(Mono<EmergencyRequestDTO> model) {
         String emergencyId= UUID.randomUUID().toString();
         return model.flatMap(emergencyRequestDTO -> {

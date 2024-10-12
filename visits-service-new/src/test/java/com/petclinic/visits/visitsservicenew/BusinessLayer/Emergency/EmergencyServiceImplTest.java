@@ -29,6 +29,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
@@ -281,6 +282,52 @@ class EmergencyServiceImplTest {
                         && dto.getUrgencyLevel() == UrgencyLevel.HIGH
                         && dto.getEmergencyType().equals("Injury"))
                 .verifyComplete();
+    }
+
+
+    @Test
+    public void whenGetEmergencyByVisitEmergencyId_thenReturnEmergency() {
+        // Arrange: Create mock Emergency and EmergencyResponseDTO objects
+        Emergency emergency1 = Emergency.builder()
+                .visitEmergencyId("uuidEmergency")
+                .visitDate(LocalDateTime.now())
+                .description("Severe injury")
+                .petId(uuidPet)
+                .practitionerId(uuidVet)
+                .urgencyLevel(UrgencyLevel.HIGH)
+                .emergencyType("Injury")
+                .build();
+
+        EmergencyResponseDTO responseDTO = EmergencyResponseDTO.builder()
+                .visitEmergencyId("uuidEmergency")
+                .visitDate(emergency1.getVisitDate())
+                .description(emergency1.getDescription())
+                .petId(uuidPet)
+                .petName("Buddy") // Mocked pet name
+                .petBirthDate(new Date()) // Mocked date
+                .practitionerId(uuidVet)
+                .vetFirstName("John")
+                .vetLastName("Doe")
+                .vetEmail("john.doe@email.com")
+                .vetPhoneNumber("(514)-123-4567")
+                .urgencyLevel(emergency1.getUrgencyLevel())
+                .emergencyType(emergency1.getEmergencyType())
+                .build();
+
+        // Mock the repository and the entity to DTO conversion
+        when(emergencyRepository.findEmergenciesByVisitEmergencyId(anyString())).thenReturn(Mono.just(emergency1));
+        when(entityDtoUtil.toEmergencyResponseDTO(any(Emergency.class))).thenReturn(Mono.just(responseDTO));
+
+        // Act & Assert: Verify the result using StepVerifier
+        StepVerifier.create(emergencyService.GetEmergencyByEmergencyId(responseDTO.getVisitEmergencyId()))
+                .expectNextMatches(visitDTO ->
+                        visitDTO.getVisitEmergencyId().equals(emergency1.getVisitEmergencyId()) &&
+                                visitDTO.getVetFirstName().equals("John") &&
+                                visitDTO.getVetLastName().equals("Doe") &&
+                                visitDTO.getUrgencyLevel() == emergency1.getUrgencyLevel()
+                )
+                .expectComplete()
+                .verify();
     }
 
 
