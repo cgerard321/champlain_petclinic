@@ -30,19 +30,19 @@ public class CustomerBillsController {
 
     @GetMapping(value = "/status", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<BillResponseDTO> getBillsByStatus(@PathVariable("customerId") String customerId,
-                                                  @RequestParam("status") BillStatus status) {
+            @RequestParam("status") BillStatus status) {
         return billService.GetBillsByCustomerIdAndStatus(customerId, status);
     }
 
     @GetMapping(value = "/{billId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<BillResponseDTO> getBillDetails(@PathVariable("customerId") String customerId,
-                                                @PathVariable("billId") String billId) {
+            @PathVariable("billId") String billId) {
         return billService.GetBillByCustomerIdAndBillId(customerId, billId);
     }
 
     @GetMapping(value = "/{billId}/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
     public Mono<ResponseEntity<byte[]>> downloadBillPdf(@PathVariable String customerId,
-                                                        @PathVariable String billId) {
+            @PathVariable String billId) {
         return billService.generateBillPdf(customerId, billId)
                 .map(pdf -> {
                     HttpHeaders headers = new HttpHeaders();
@@ -55,4 +55,10 @@ public class CustomerBillsController {
                     return Mono.just(new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR));
                 });
     }
+
+    @GetMapping(value = "/current-balance", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<Double> getCurrentBalance(@PathVariable String customerId) {
+        return billService.calculateCurrentBalance(customerId);
+    }
+
 }
