@@ -1,82 +1,85 @@
 .container {
-    width: 90%;
-    margin: 0 auto;
-    padding-top: 20px;
-    position: relative; /* Aseguramos la relación con los elementos */
+  width: 90%;
+  margin: 0 auto;
+  padding-top: 20px;
+  position: relative; /* Aseguramos la relación con los elementos */
 }
 
 h2 {
-    text-align: center;
-    font-size: 2em;
-    margin-bottom: 20px;
+  text-align: center;
+  font-size: 2em;
+  margin-bottom: 20px;
 }
 
 table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
 }
 
-table, th, td {
-    border: 1px solid #ddd;
+table,
+th,
+td {
+  border: 1px solid #ddd;
 }
 
-th, td {
-    padding: 12px;
-    text-align: left;
+th,
+td {
+  padding: 12px;
+  text-align: left;
 }
 
 th {
-    background-color: #f2f2f2;
-    font-weight: bold;
+  background-color: #f2f2f2;
+  font-weight: bold;
 }
 
 tr:nth-child(even) {
-    background-color: #f9f9f9;
+  background-color: #f9f9f9;
 }
 
 tr:hover {
-    background-color: #f1f1f1;
+  background-color: #f1f1f1;
 }
 
 button {
-    padding: 8px 12px;
-    border: none;
-    cursor: pointer;
-    border-radius: 4px;
+  padding: 8px 12px;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
 }
 
 button:hover {
-    opacity: 0.9;
+  opacity: 0.9;
 }
 
 button.update {
-    background-color: #4CAF50;
-    color: white;
+  background-color: #4caf50;
+  color: white;
 }
 
 button.delete {
-    background-color: #f44336;
-    color: white;
+  background-color: #f44336;
+  color: white;
 }
 
 .add-button {
-    display: inline-block;
-    background-color: #007BFF;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-left: auto;
+  display: inline-block;
+  background-color: #007bff;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-left: auto;
 }
 
 .add-button:hover {
-    background-color: #0056b3;
+  background-color: #0056b3;
 }
 
 .actions {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 10px;
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 10px;
 }
