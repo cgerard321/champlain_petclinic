@@ -28,7 +28,9 @@
   padding: 20px;
   width: calc(33.33% - 20px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
   box-sizing: border-box;
 }
 
