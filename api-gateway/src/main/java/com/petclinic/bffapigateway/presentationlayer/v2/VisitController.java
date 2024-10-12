@@ -128,7 +128,20 @@ public class VisitController {
         return visitsServiceClient.getAllEmergency();
     }
 
-    @GetMapping(value="/emergency/{emergencyId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN})
+    @GetMapping(value = "/emergency/owners/{ownerId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<EmergencyResponseDTO> getEmergencyVisitsByOwnerId(final @PathVariable String ownerId) {
+        return bffApiGatewayController.getEmergencyVisitsByOwnerId(ownerId);
+    }
+
+    @PostMapping(value = "/emergency")
+    public Mono<ResponseEntity<EmergencyResponseDTO>> PostEmergency(@RequestBody Mono<EmergencyRequestDTO> emergencyRequestDTOMono){
+        return visitsServiceClient.createEmergency(emergencyRequestDTOMono)
+                .map(c->ResponseEntity.status(HttpStatus.CREATED).body(c))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
+    /*@GetMapping(value="/emergency/{emergencyId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<EmergencyResponseDTO>> getEmergencyByEmergencyId(@PathVariable String emergencyId){
         return Mono.just(emergencyId)
                 //.filter(id -> id.length() == 36)
@@ -164,6 +177,7 @@ public class VisitController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
+     */
 
     @SecuredEndpoint(allowedRoles = Roles.ADMIN)
     @IsUserSpecific(idToMatch = {"visitId"})

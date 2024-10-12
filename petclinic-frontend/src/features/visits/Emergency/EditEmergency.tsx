@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from 'react-router-dom';
+/*import { useNavigate, useParams } from 'react-router-dom';
 import * as React from 'react';
 import { FormEvent, useState, useEffect } from 'react';
 import { EmergencyRequestDTO } from './Model/EmergencyRequestDTO';
@@ -188,3 +188,4 @@ const EditEmergency: React.FC = (): JSX.Element => {
 };
 
 export default EditEmergency;
+*/
