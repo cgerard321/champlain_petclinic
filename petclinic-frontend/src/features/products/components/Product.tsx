@@ -1,22 +1,18 @@
 import { JSX, useEffect, useState } from 'react';
 import { ProductModel } from '@/features/products/models/ProductModels/ProductModel';
-import { getUserRating } from '../api/getUserRating';
 import { getProductByProductId } from '@/features/products/api/getProductByProductId.tsx';
 import ImageContainer from './ImageContainer';
 import { changeProductQuantity } from '../api/changeProductQuantity';
-import { useNavigate } from 'react-router-dom';
+import { generatePath, useNavigate } from 'react-router-dom';
 import { AppRoutePaths } from '@/shared/models/path.routes';
-import { RatingModel } from '../models/ProductModels/RatingModel';
+import StarRating from './StarRating';
+import './Product.css';
 
 export default function Product({
   product,
 }: {
   product: ProductModel;
 }): JSX.Element {
-  const [currentUserRating, setUserRating] = useState<RatingModel>({
-    rating: 0,
-    review: '',
-  });
   const [currentProduct, setCurrentProduct] = useState<ProductModel>(product);
   const [selectedProduct, setSelectedProduct] = useState<ProductModel | null>(
     null
@@ -29,15 +25,12 @@ export default function Product({
   const navigate = useNavigate();
 
   const handleProductTitleClick = (): void => {
-    navigate(AppRoutePaths.ProductDetails, {
-      state: { product, rating: currentUserRating },
-    });
+    navigate(
+      generatePath(AppRoutePaths.ProductDetails, {
+        productId: product.productId,
+      })
+    );
   };
-
-  useEffect(() => {
-    fetchRating();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   useEffect(() => {
     if (product.productDescription.length > 100) {
@@ -46,15 +39,6 @@ export default function Product({
       setTooLong(false);
     }
   }, [product.productDescription]);
-
-  const fetchRating = async (): Promise<void> => {
-    try {
-      const rating = await getUserRating(product.productId);
-      setUserRating(rating);
-    } catch (err) {
-      console.error('Failed to fetch current rating', err);
-    }
-  };
 
   // const handleProductClick = async (productId: string): Promise<void> => {
   //   try {
@@ -168,7 +152,10 @@ export default function Product({
           : `${currentProduct.productDescription.substring(0, 100)}...`}
       </p>
       <p>Price: ${currentProduct.productSalePrice.toFixed(2)}</p>
-      <p>Rating: {currentProduct.averageRating}</p>
+      <StarRating
+        currentRating={currentProduct.averageRating}
+        viewOnly={true}
+      />
     </div>
   );
 }

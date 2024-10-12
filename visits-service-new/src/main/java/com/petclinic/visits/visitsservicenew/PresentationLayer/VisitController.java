@@ -211,11 +211,22 @@ public class VisitController {
 
     //Emergency
 
+    @GetMapping(value = "/emergency/pets/{petId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<EmergencyResponseDTO> getEmergencyVisitsForPet(@PathVariable String petId) {
+        return emergencyService.getEmergencyVisitsForPet(petId);
+    }
     @GetMapping(value = "/emergency")
     public Flux<EmergencyResponseDTO> getAllEmergency() {
         return emergencyService.GetAllEmergencies();
     }
 
+    @PostMapping(value = "/emergency")
+    public Mono<ResponseEntity<EmergencyResponseDTO>> PostEmergency(@RequestBody Mono<EmergencyRequestDTO> emergencyRequestDTOMono) {
+        return emergencyService.AddEmergency(emergencyRequestDTOMono)
+                .map(c -> ResponseEntity.status(HttpStatus.CREATED).body(c))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+/*
     @GetMapping(value = "/emergency/{emergencyId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<EmergencyResponseDTO>> getEmergencyByEmergencyId(@PathVariable String emergencyId) {
         return Mono.just(emergencyId)
@@ -252,7 +263,7 @@ public class VisitController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
-
+*/
 
     @PutMapping(value = "/completed/{visitId}/archive", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<VisitResponseDTO>> archiveCompletedVisit(@PathVariable String visitId, @RequestBody Mono<VisitRequestDTO> visitRequestDTO) {
