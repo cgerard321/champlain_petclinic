@@ -36,7 +36,9 @@ export default function ProductList(): JSX.Element {
     maxStars: number
   ): Promise<void> => {
     if (minStars >= maxStars) {
-      setValidationMessage('Minimum stars cannot be greater than or equal to maximum stars.');
+      setValidationMessage(
+        'Minimum stars cannot be greater than or equal to maximum stars.'
+      );
     } else {
       setValidationMessage('');
     }
