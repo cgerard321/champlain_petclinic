@@ -538,6 +538,24 @@ public class VisitControllerUnitTest {
         verify(bffApiGatewayController, times(1)).getEmergencyVisitsByOwnerId(ownerId);
     }
 
+    @Test
+    void getEmergencyByEmergencyId_whenValidEmergencyId_thenReturnEmergencyResponseDTO() {
+        // Arrange
+        when(visitsServiceClient.getEmergencyByEmergencyId(emergencyResponseDTO.getVisitEmergencyId()))
+                .thenReturn(Mono.just(emergencyResponseDTO));
+
+        // Act
+        webTestClient.get()
+                .uri(EMERGENCY_URL + "/{emergencyId}", emergencyResponseDTO.getVisitEmergencyId())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(EmergencyResponseDTO.class)
+                .isEqualTo(emergencyResponseDTO);
+
+        // Assert
+        verify(visitsServiceClient, times(1)).getEmergencyByEmergencyId(emergencyResponseDTO.getVisitEmergencyId());
+    }
 
   /*  @Test
     void postEmergency_whenValidRequest_thenReturnCreatedResponse() {
