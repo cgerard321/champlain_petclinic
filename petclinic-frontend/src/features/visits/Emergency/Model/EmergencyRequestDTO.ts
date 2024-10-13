@@ -5,6 +5,10 @@ export interface EmergencyRequestDTO {
 
   description: string;
 
+  petId: string;
+
+  practitionerId: string;
+
   petName: string;
 
   urgencyLevel: UrgencyLevel;
