@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { NavBar } from '@/layouts/AppNavBar.tsx';
 import AddVet from '@/pages/Vet/AddVet.tsx';
-import VetListTable from '@/features/veterinarians/VetListTable.tsx';
 import UploadVetPhoto from '@/pages/Vet/UploadVetPhoto.tsx';
 import { VetRequestModel } from '@/features/veterinarians/models/VetRequestModel.ts';
+import VetCardTable from '@/features/veterinarians/VetListCards';
 
 export default function Vet(): JSX.Element {
   const [searchQuery, setSearchQuery] = useState('');
@@ -75,7 +75,7 @@ export default function Vet(): JSX.Element {
       {error && <p style={{ color: 'red' }}>{error}</p>}
 
       {results.length > 0 ? (
-        <VetListTable vets={results} onDeleteVet={setResults} />
+        <VetCardTable vets={results} onDeleteVet={setResults} />
       ) : (
         <p>No results found.</p>
       )}

@@ -59,9 +59,9 @@ public class DataSetupService implements CommandLineRunner {
     }
 
     private void setupEmergencies() {
-        Emergency emergency1 = buildEmergency("emergencyId1", "2022-12-01 10:00", "Severe bleeding", "Bobby", UrgencyLevel.HIGH, "Accident");
-        Emergency emergency2 = buildEmergency("emergencyId2", "2023-01-15 15:00", "Broken leg", "Tommy", UrgencyLevel.MEDIUM, "Injury");
-        Emergency emergency3 = buildEmergency("emergencyId3", "2023-06-05 09:30", "Breathing issues", "Max", UrgencyLevel.HIGH, "Respiratory");
+        Emergency emergency1 = buildEmergency("emergencyId1", "2022-12-01 10:00", "Severe bleeding", "ecb109cd-57ea-4b85-b51e-99751fd1c349", "69f852ca-625b-11ee-8c99-0242ac120002", UrgencyLevel.HIGH, "Accident");
+        Emergency emergency2 = buildEmergency("emergencyId2", "2023-01-15 15:00", "Broken leg", "0e4d8481-b611-4e52-baed-af16caa8bf8a", "69f85766-625b-11ee-8c99-0242ac120002", UrgencyLevel.MEDIUM, "Injury");
+        Emergency emergency3 = buildEmergency("emergencyId3", "2023-06-05 09:30", "Breathing issues", "0e4d8481-b611-4e52-baed-af16caa8bf8a","69f85bda-625b-11ee-8c99-0242ac120002", UrgencyLevel.HIGH, "Respiratory");
 
         Flux.just(emergency1, emergency2, emergency3)
                 .flatMap(emergencyRepository::insert)
@@ -94,14 +94,15 @@ public class DataSetupService implements CommandLineRunner {
                 .build();
     }
 
-    private Emergency buildEmergency(String emergencyId, String visitDate, String description, String petName, UrgencyLevel urgencyLevel, String emergencyType) {
+    private Emergency buildEmergency(String emergencyId, String visitDate, String description, String petId, String practitionerId, UrgencyLevel urgencyLevel, String emergencyType) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         LocalDateTime parsedVisitDate = LocalDateTime.parse(visitDate, formatter);
         return Emergency.builder()
                 .visitEmergencyId(emergencyId)
                 .visitDate(parsedVisitDate)
                 .description(description)
-                .petName(petName)
+                .petId(petId)
+                .practitionerId(practitionerId)
                 .urgencyLevel(urgencyLevel)
                 .emergencyType(emergencyType)
                 .build();
