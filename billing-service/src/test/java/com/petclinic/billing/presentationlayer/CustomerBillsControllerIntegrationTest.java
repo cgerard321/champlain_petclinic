@@ -78,19 +78,17 @@ public class CustomerBillsControllerIntegrationTest {
 
         @Test
         public void getCurrentBalance_ValidCustomer_ShouldReturnBalance() {
-            billRepository.deleteAll().block(); // Clear any existing data
+            billRepository.deleteAll().block(); 
             
-            Bill bill = buildBill2(); // Build and save the test bill
+            Bill bill = buildBill2(); 
             billRepository.save(bill).block();
             
-            // Confirm the bill is saved and retrieve the amount
             StepVerifier.create(billRepository.findByCustomerId(bill.getCustomerId()))
                         .assertNext(savedBill -> assertEquals(150.0, savedBill.getAmount()))
                         .verifyComplete();
         
             double expectedBalance = 150.0;
             
-            // Make the API call and validate the balance
             client.get()
                   .uri("/bills/customer/" + bill.getCustomerId() + "/bills/current-balance")
                   .exchange()
@@ -99,9 +97,6 @@ public class CustomerBillsControllerIntegrationTest {
                   .value(balance -> assertEquals(expectedBalance, balance, 0.01));
         }
         
-        
-        
-
         @Test
         public void getCurrentBalance_InvalidCustomer_ShouldReturnNotFound() {
 
