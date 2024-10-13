@@ -1,4 +1,3 @@
-
 import { AxiosResponse } from 'axios';
 import axiosInstance from '@/shared/api/axiosInstance';
 import { PetResponseModel } from '@/features/customers/models/PetResponseModel.ts';
