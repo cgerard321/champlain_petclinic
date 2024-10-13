@@ -498,8 +498,13 @@ class VetControllerIntegrationTest {
         String vetId = "69f85766-625b-11ee-8c99-0242ac120002";
         String educationId = "eb859d39-692b-4e9d-9928-f5a67812ce44";
 
-        EducationRequestDTO updatedEducation =
-                new EducationRequestDTO(vetId, "school1", "degree1", "field1", "2020-01-01", "2021-01-01");
+        EducationRequestDTO updatedEducation = new EducationRequestDTO(
+                        vetId,
+                        "school1",
+                        "degree1",
+                        "field1",
+                        "2020-01-01",
+                        "2021-01-01");
 
         mockServerConfigVetService.registerUpdateEducationByVetIdAndEducationIdEndpoint(vetId, educationId, updatedEducation);
 
@@ -537,8 +542,13 @@ class VetControllerIntegrationTest {
         String invalidVetId = "ac9adeb8-625b-11ee-8c99-0242ac12000200";
         String educationId = "eb859d39-692b-4e9d-9928-f5a67812ce44";
 
-        EducationRequestDTO updatedEducation =
-                new EducationRequestDTO(invalidVetId, "school1", "degree1", "field1", "2020-01-01", "2021-01-01");
+        EducationRequestDTO updatedEducation = new EducationRequestDTO(
+                invalidVetId,
+                "school1",
+                "degree1",
+                "field1",
+                "2020-01-01",
+                "2021-01-01");
 
         mockServerConfigVetService.registerUpdateEducationByVetIdAndEducationIdEndpointNotFound(invalidVetId, educationId, updatedEducation);
 

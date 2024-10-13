@@ -4,6 +4,7 @@ import { NavBar } from '@/layouts/AppNavBar.tsx';
 import './VetDetails.css';
 import axios from 'axios';
 import DeleteVetPhoto from '@/pages/Vet/DeleteVetPhoto.tsx';
+import UpdateVetEducation from '@/pages/Vet/UpdateVetEducation';
 
 interface VetResponseType {
   vetId: string;
@@ -49,6 +50,9 @@ export default function VetDetails(): JSX.Element {
   const [specialtyId, setSpecialtyId] = useState('');
   const [specialtyName, setSpecialtyName] = useState('');
   const [enlargedPhoto, setEnlargedPhoto] = useState<string | null>(null);
+
+  const [selectedEducation, setSelectedEducation] =
+    useState<EducationResponseType | null>(null);
 
   const fetchVetPhoto = useCallback(async (): Promise<void> => {
     try {
@@ -457,11 +461,28 @@ export default function VetDetails(): JSX.Element {
                     <p>
                       <strong>End Date:</strong> {edu.endDate}
                     </p>
+                    <button
+                      className="btn btn-primary"
+                      onClick={event => {
+                        event.stopPropagation();
+                        setSelectedEducation(edu);
+                      }}
+                    >
+                      Update Education
+                    </button>
                     <hr />
                   </div>
                 ))
               ) : (
                 <p>No education details available</p>
+              )}
+              {selectedEducation && vetId && (
+                <UpdateVetEducation
+                  vetId={vetId}
+                  education={selectedEducation}
+                  educationId={selectedEducation.educationId}
+                  onClose={() => setSelectedEducation(null)}
+                />
               )}
             </section>
 
