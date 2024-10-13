@@ -534,56 +534,56 @@ class VisitsControllerIntegrationTest {
 //                    assertEquals(visit.get(0).getStatus(), Status.ARCHIVED);
 //                });
 
-//    @Test
-//    void updateVisitStatus_ShouldSucceed_WhenStatusUpdatedToCancelled() {
-//        String visitId = "visitId9";
-//        String status = "CANCELLED";
-//
-//        VisitResponseDTO cancelledVisitResponse = VisitResponseDTO.builder()
-//                .visitId(visitId)
-//                .visitDate(LocalDateTime.now())
-//                .description("Test visit with cancelled status")
-//                .petId("3")
-//                .practitionerId(vet.getVetId())  // Ensure vet.getVetId() is not null
-//                .status(Status.CANCELLED)         // Expected status after update
-//                .build();
-//
-//        Visit cancelledVisit = Visit.builder()
-//                .visitId(visitId)
-//                .visitDate(LocalDateTime.now())
-//                .description("Test visit with cancelled status")
-//                .petId("3")
-//                .practitionerId(vet.getVetId())  // Ensure vet.getVetId() is not null
-//                .status(Status.UPCOMING)         // Initial status
-//                .build();
-//
-//        // Save the initial visit with status UPCOMING
-//        visitRepo.save(cancelledVisit).block();
-//
-//        // Verify initial status is UPCOMING
-//        StepVerifier.create(visitRepo.findByVisitId(visitId))
-//                .expectNextMatches(visit -> visit.getStatus() == Status.UPCOMING)
-//                .verifyComplete();
-//
-//        // Mock entityDtoUtil to return the expected VisitResponseDTO when converting to response format
-//        when(entityDtoUtil.toVisitResponseDTO(any())).thenReturn(Mono.just(cancelledVisitResponse));
-//
-//        // Perform the status update via WebTestClient
-//        webTestClient.patch()
-//                .uri("/visits/{visitId}/{status}", visitId, status)
-//                .accept(MediaType.APPLICATION_JSON)
-//                .exchange()
-//                .expectStatus().isOk()
-//                .expectHeader().contentTypeCompatibleWith(MediaType.APPLICATION_JSON)
-//                .expectBody(VisitResponseDTO.class)
-//                .value(Assertions::assertNotNull)   // Ensure the response body is not null
-//                .value(response -> assertEquals(Status.CANCELLED, response.getStatus()));  // Assert the status is updated to CANCELLED
-//
-//        // Verify that the status has been updated to CANCELLED in the repository
-//        StepVerifier.create(visitRepo.findByVisitId(visitId))
-//                .expectNextMatches(visit -> visit.getStatus() == Status.CANCELLED)
-//                .verifyComplete();
-//    }
+    @Test
+    void updateVisitStatus_ShouldSucceed_WhenStatusUpdatedToCancelled() {
+        String visitId = "visitId9";
+        String status = "CANCELLED";
+
+        VisitResponseDTO cancelledVisitResponse = VisitResponseDTO.builder()
+                .visitId(visitId)
+                .visitDate(LocalDateTime.now())
+                .description("Test visit with cancelled status")
+                .petId("3")
+                .practitionerId(vet.getVetId())  // Ensure vet.getVetId() is not null
+                .status(Status.CANCELLED)         // Expected status after update
+                .build();
+
+        Visit cancelledVisit = Visit.builder()
+                .visitId(visitId)
+                .visitDate(LocalDateTime.now())
+                .description("Test visit with cancelled status")
+                .petId("3")
+                .practitionerId(vet.getVetId())  // Ensure vet.getVetId() is not null
+                .status(Status.UPCOMING)         // Initial status
+                .build();
+
+        // Save the initial visit with status UPCOMING
+        visitRepo.save(cancelledVisit).block();
+
+        // Verify initial status is UPCOMING
+        StepVerifier.create(visitRepo.findByVisitId(visitId))
+                .expectNextMatches(visit -> visit.getStatus() == Status.UPCOMING)
+                .verifyComplete();
+
+        // Mock entityDtoUtil to return the expected VisitResponseDTO when converting to response format
+        when(entityDtoUtil.toVisitResponseDTO(any())).thenReturn(Mono.just(cancelledVisitResponse));
+
+        // Perform the status update via WebTestClient
+        webTestClient.patch()
+                .uri("/visits/{visitId}/{status}", visitId, status)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentTypeCompatibleWith(MediaType.APPLICATION_JSON)
+                .expectBody(VisitResponseDTO.class)
+                .value(Assertions::assertNotNull)   // Ensure the response body is not null
+                .value(response -> assertEquals(Status.CANCELLED, response.getStatus()));  // Assert the status is updated to CANCELLED
+
+        // Verify that the status has been updated to CANCELLED in the repository
+        StepVerifier.create(visitRepo.findByVisitId(visitId))
+                .expectNextMatches(visit -> visit.getStatus() == Status.CANCELLED)
+                .verifyComplete();
+    }
 
 
     // Test for the NOT_FOUND scenario (when visit does not exist)
