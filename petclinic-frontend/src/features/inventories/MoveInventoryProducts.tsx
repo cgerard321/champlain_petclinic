@@ -1,4 +1,5 @@
-import React, { FormEvent, useState, useEffect, JSX } from 'react';
+import * as React from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   getAllInventories,
@@ -27,7 +28,7 @@ export default function MoveInventoryProducts(): JSX.Element {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchInventories = async () => {
+    const fetchInventories = async (): Promise<void> => {
       try {
         const response = await getAllInventories();
         setInventories(response);
@@ -70,7 +71,7 @@ export default function MoveInventoryProducts(): JSX.Element {
 
   const handleNewInventoryChange = (
     event: React.ChangeEvent<HTMLSelectElement>
-  ) => {
+  ): void => {
     setNewInventoryId(event.target.value);
   };
 
