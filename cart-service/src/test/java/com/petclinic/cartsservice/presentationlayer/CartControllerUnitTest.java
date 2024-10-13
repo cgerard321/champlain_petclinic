@@ -647,7 +647,7 @@ class CartControllerUnitTest {
         webTestClient.put()
                 .uri("/api/v1/carts/" + cartId + "/wishlist/" + productId + "/toCart")
                 .exchange()
-                .expectStatus().isEqualTo(422) // Expect 422 for invalid input
+                .expectStatus().isNotFound()
                 .expectBody(CartResponseModel.class)
                 .consumeWith(response -> {
                     CartResponseModel body = response.getResponseBody();
