@@ -53,6 +53,7 @@ import UpdatePromoPage from '@/pages/Promos/UpdatePromoPage.tsx';
 import CustomerEmergency from './pages/Visit/CustomerEmergency';
 import AddEmergencyForm from './features/visits/Emergency/AddEmergencyForm';
 import LowStockProducts from '@/features/inventories/LowStockProducts.tsx';
+import EmergencyDetails from './features/visits/EmergencyByEmergencyId';
 
 const router = createBrowserRouter([
   {
@@ -113,6 +114,15 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <AddEmergencyForm />
+          </ProtectedRoute>
+        ),
+      },
+
+      {
+        path: AppRoutePaths.EmergencyById,
+        element: (
+          <ProtectedRoute>
+            <EmergencyDetails />
           </ProtectedRoute>
         ),
       },

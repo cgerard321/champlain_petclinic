@@ -82,6 +82,14 @@ public class EmergencyServiceImpl implements EmergencyService{
                 });
     }
 
+    @Override
+    public Mono<EmergencyResponseDTO> GetEmergencyByEmergencyId(String emergencyId) {
+        return emergencyRepository.findEmergenciesByVisitEmergencyId(emergencyId)
+                .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("No visit was found with visitId: " + emergencyId))))
+                .doOnNext(visit -> log.debug("The Emergency visit entity is: " + visit.toString()))
+                .flatMap(entityDtoUtil::toEmergencyResponseDTO);
+    }
+
     /*@Override
     public Mono<EmergencyResponseDTO> AddEmergency(Mono<EmergencyRequestDTO> emergencyRequestDTOMono) {
         return emergencyRequestDTOMono

@@ -1121,6 +1121,53 @@ class VisitsServiceClientIntegrationTest {
                 .verifyComplete();
     }
 
+    @Test
+    void getEmergencyByEmergencyId() throws JsonProcessingException {
+        // Create an EmergencyRequestDTO with HIGH urgency level
+        EmergencyRequestDTO emergencyRequestDTO = EmergencyRequestDTO.builder()
+                .visitDate(LocalDateTime.now())
+                .description("Updated Emergency")
+                .petId("2")
+                .practitionerId("2332222232323234hhh232")
+                .urgencyLevel(UrgencyLevel.HIGH)  // Set urgency level to HIGH
+                .emergencyType("Accident")
+                .build();
+
+        // Create an EmergencyResponseDTO with HIGH urgency level to match the request
+        EmergencyResponseDTO emergencyResponse = EmergencyResponseDTO.builder()
+                .visitEmergencyId(UUID.randomUUID().toString())
+                .visitDate(emergencyRequestDTO.getVisitDate())
+                .description(emergencyRequestDTO.getDescription())
+                .petId(emergencyRequestDTO.getPetId())
+                .petName("hamid")
+                .petBirthDate(new Date())  // Set pet birth date
+                .practitionerId(emergencyRequestDTO.getPractitionerId())
+                .vetFirstName("carlos")
+                .vetLastName("ambock")
+                .vetEmail("carlos@gmail.com")
+                .vetPhoneNumber("540-233-2323")
+                .urgencyLevel(UrgencyLevel.HIGH)  // Set urgency level to HIGH
+                .emergencyType(emergencyRequestDTO.getEmergencyType())
+                .build();
+
+        // Enqueue a mock response with the above emergencyResponse
+        server.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(objectMapper.writeValueAsString(emergencyResponse)));
+
+        // Fetch the emergency by ID from the service client
+        Mono<EmergencyResponseDTO> emergencyMono = visitsServiceClient.getEmergencyByEmergencyId(emergencyResponse.getVisitEmergencyId());
+
+        // Verify the response using StepVerifier
+        StepVerifier.create(emergencyMono)
+                .expectNextMatches(emergency ->
+                        emergency.getVisitEmergencyId().equals(emergencyResponse.getVisitEmergencyId()) &&  // Check if ID matches
+                                emergency.getUrgencyLevel().equals(UrgencyLevel.HIGH) &&  // Check urgency level is HIGH
+                                emergency.getDescription().equals("Updated Emergency"))  // Ensure description matches
+                .verifyComplete();
+    }
+
+
     /*
 
     @Test

@@ -141,6 +141,16 @@ public class VisitController {
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
+    @GetMapping(value="/emergency/{visitEmergencyId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<EmergencyResponseDTO>> getEmergencyByEmergencyId(@PathVariable String visitEmergencyId){
+        return Mono.just(visitEmergencyId)
+                //.filter(id -> id.length() == 36)
+                //.switchIfEmpty(Mono.error(new InvalidInputException("the provided emergency id is invalid: " + emergencyId)))
+                .flatMap(visitsServiceClient::getEmergencyByEmergencyId)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
     /*@GetMapping(value="/emergency/{emergencyId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<EmergencyResponseDTO>> getEmergencyByEmergencyId(@PathVariable String emergencyId){
         return Mono.just(emergencyId)
