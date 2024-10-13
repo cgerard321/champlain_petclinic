@@ -166,11 +166,21 @@ public Flux<InventoryResponseDTO> searchInventories(
     }
 
     @GetMapping("/{inventoryId}/products/search")
-    public Flux<ProductResponseDTO> searchProducts(@PathVariable String inventoryId,
-                                                   @RequestParam(required = false) String productName,
-                                                   @RequestParam(required = false) String productDescription) {
-        return productInventoryService.searchProducts(inventoryId, productName, productDescription);
+    public Mono<ResponseEntity<Flux<ProductResponseDTO>>> searchProducts(@PathVariable String inventoryId,
+                                                                         @RequestParam(required = false) String productName,
+                                                                         @RequestParam(required = false) String productDescription) {
+        return productInventoryService.searchProducts(inventoryId, productName, productDescription)
+                .collectList()
+                .flatMap(products -> {
+                    if (products.isEmpty()) {
+                        return Mono.just(ResponseEntity.notFound().build());
+                    } else {
+                        return Mono.just(ResponseEntity.ok(Flux.fromIterable(products)));
+                    }
+                });
     }
+
+
     @PostMapping("/{inventoryId}/products")
     public Mono<ResponseEntity<ProductResponseDTO>> addSupplyToInventory(@RequestBody Mono<ProductRequestDTO> newProduct, @PathVariable String inventoryId) {
         return productInventoryService.addSupplyToInventory(newProduct, inventoryId)
