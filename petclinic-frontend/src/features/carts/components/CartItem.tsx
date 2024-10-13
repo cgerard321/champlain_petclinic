@@ -11,6 +11,8 @@ interface CartItemProps {
   deleteItem: (productId: string, indexToDelete: number) => void;
   errorMessage?: string;
   addToWishlist: (item: ProductModel) => void;
+  addToCart: (item: ProductModel) => void;
+  isInWishlist: boolean;
 }
 
 const formatPrice = (price: number): string => {
@@ -23,6 +25,8 @@ const CartItem = ({
   changeItemQuantity,
   deleteItem,
   addToWishlist,
+  addToCart,
+  isInWishlist,
 }: CartItemProps): JSX.Element => {
   // const handleDeleteItem = async (cartId: string, productId: string) => {
   //   try {
@@ -70,13 +74,25 @@ const CartItem = ({
         >
           Remove
         </button>
-        <button
-          className="wishlist-button"
-          onClick={() => addToWishlist(item)} // Call the addToWishlist function
-          aria-label={`Add ${item.productName} to wishlist`}
-        >
-          Add to Wishlist
-        </button>
+        {!isInWishlist && (
+          <button
+            className="wishlist-button"
+            onClick={() => addToWishlist(item)}
+            aria-label={`Add ${item.productName} to wishlist`}
+          >
+            Add to Wishlist
+          </button>
+        )}
+
+        {isInWishlist && (
+          <button
+            className="addToCart-button"
+            onClick={() => addToCart(item)}
+            aria-label={`Add ${item.productName} to wishlist`}
+          >
+            Add to Cart
+          </button>
+        )}
       </div>
 
       <div className="stock-message-container">
