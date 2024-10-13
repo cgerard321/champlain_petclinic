@@ -295,10 +295,6 @@ public class BillServiceClient {
                 .bodyToFlux(BillResponseDTO.class);
     }
 
-
-
-
-
     public Flux<BillResponseDTO> getBillsByCustomerIdPaginated(final String customerId, Optional<Integer> page, Optional<Integer> size) {
         return webClientBuilder.build().get()
                 .uri(billServiceUrl + "/customer/" + customerId + "/paginated?page=" + page.orElse(0) + "&size=" + size.orElse(10))
@@ -313,6 +309,14 @@ public class BillServiceClient {
                 .accept(MediaType.APPLICATION_PDF)
                 .retrieve()
                 .bodyToMono(byte[].class);
+    }
+
+    public Mono<Double> getCurrentBalance(String customerId) {
+        return webClientBuilder.build()
+                .get()
+                .uri(billServiceUrl + "/customer/{customerId}/bills/current-balance", customerId)
+                .retrieve()
+                .bodyToMono(Double.class);
     }
 
 }

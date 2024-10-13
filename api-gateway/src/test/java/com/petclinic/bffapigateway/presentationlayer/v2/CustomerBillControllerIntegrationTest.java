@@ -13,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest
@@ -31,10 +32,10 @@ public class CustomerBillControllerIntegrationTest {
     public void startMockServer() {
         // Start the mock servers for bills and authentication services
         mockServerConfigBillService = new MockServerConfigBillService();
-        mockServerConfigBillService.registerDownloadBillPdfEndpoint(); 
+        mockServerConfigBillService.registerDownloadBillPdfEndpoint();
 
         mockServerConfigAuthService = new MockServerConfigAuthService();
-        mockServerConfigAuthService.registerValidateTokenForOwnerEndpoint(); 
+        mockServerConfigAuthService.registerValidateTokenForOwnerEndpoint();
     }
 
     @AfterAll
@@ -46,33 +47,51 @@ public class CustomerBillControllerIntegrationTest {
 
     // @Test
     // public void testDownloadBillPdf_ValidToken_ShouldReturnPdf() {
-    //     // Arrange: Mocking the service call to return a PDF byte array
-    //     byte[] mockPdfContent = "Sample PDF Content".getBytes();
+    // // Arrange: Mocking the service call to return a PDF byte array
+    // byte[] mockPdfContent = "Sample PDF Content".getBytes();
 
-    //     // Act & Assert: Mocking a request as a valid customer with a token in a cookie
-    //     webTestClient.get()
-    //         .uri("/api/v2/gateway/customers/1/bills/1234/pdf")
-    //         .cookie("Bearer", MockServerConfigAuthService.jwtTokenForValidOwnerId)  // Using JWT token in cookie
-    //         .accept(MediaType.APPLICATION_PDF)
-    //         .exchange()
-    //         .expectStatus().isOk()
-    //         .expectHeader().contentType(MediaType.APPLICATION_PDF)
-    //         .expectBody(byte[].class)
-    //         .consumeWith(response -> {
-    //             byte[] pdf = response.getResponseBody();
-    //             assertNotNull(pdf);
-    //             assert pdf.length > 0;
-    //         });
+    // // Act & Assert: Mocking a request as a valid customer with a token in a
+    // cookie
+    // webTestClient.get()
+    // .uri("/api/v2/gateway/customers/1/bills/1234/pdf")
+    // .cookie("Bearer", MockServerConfigAuthService.jwtTokenForValidOwnerId) //
+    // Using JWT token in cookie
+    // .accept(MediaType.APPLICATION_PDF)
+    // .exchange()
+    // .expectStatus().isOk()
+    // .expectHeader().contentType(MediaType.APPLICATION_PDF)
+    // .expectBody(byte[].class)
+    // .consumeWith(response -> {
+    // byte[] pdf = response.getResponseBody();
+    // assertNotNull(pdf);
+    // assert pdf.length > 0;
+    // });
     // }
 
     @Test
     public void testDownloadBillPdf_InvalidToken_ShouldReturnUnauthorized() {
         // Act & Assert: Mocking a request with an invalid token
         webTestClient.get()
-            .uri("/api/v2/gateway/customers/1/bills/1234/pdf")
-            .cookie("Bearer", "invalid-token")  // Using an invalid JWT token
-            .accept(MediaType.APPLICATION_PDF)
-            .exchange()
-            .expectStatus().isUnauthorized();  // Expect Unauthorized status
+                .uri("/api/v2/gateway/customers/1/bills/1234/pdf")
+                .cookie("Bearer", "invalid-token") // Using an invalid JWT token
+                .accept(MediaType.APPLICATION_PDF)
+                .exchange()
+                .expectStatus().isUnauthorized(); // Expect Unauthorized status
     }
+
+    // @Test
+    // public void testGetCurrentBalance_ValidToken_ShouldReturnBalance() {
+        
+    //     mockServerConfigBillService.registerGetCurrentBalanceEndpoint();
+
+    //     webTestClient.get()
+    //             .uri("/api/v2/gateway/customers/1/bills/current-balance")
+    //             .cookie("Bearer", MockServerConfigAuthService.jwtTokenForValidOwnerId) 
+    //             .accept(MediaType.APPLICATION_JSON)
+    //             .exchange()
+    //             .expectStatus().isOk()
+    //             .expectBody(Double.class)
+    //             .value(balance -> assertEquals(150.0, balance));
+    // }
+
 }

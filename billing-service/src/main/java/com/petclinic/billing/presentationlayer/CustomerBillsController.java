@@ -16,7 +16,7 @@ import reactor.core.publisher.Mono;
 @Slf4j
 @RequestMapping("/bills/customer/{customerId}/bills")
 public class CustomerBillsController {
-
+    
     private final BillService billService;
 
     public CustomerBillsController(BillService billService) {
@@ -55,7 +55,7 @@ public class CustomerBillsController {
                     return Mono.just(new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR));
                 });
     }
-
+    
     @GetMapping(value = "/current-balance", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<Double> getCurrentBalance(@PathVariable String customerId) {
         return billService.calculateCurrentBalance(customerId);

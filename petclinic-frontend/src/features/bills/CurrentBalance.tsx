@@ -12,7 +12,8 @@ export default function CurrentBalance(): JSX.Element {
     const fetchCurrentBalance = async (): Promise<void> => {
       try {
         const response = await fetch(
-          `http://localhost:8080/api/v2/gateway/customers/${user.userId}/current-balance`,
+          // `http://localhost:8080/api/v2/gateway/customers/${user.userId}/current-balance`,
+          `http://localhost:8080/api/v2/gateway/customers/${user.userId}/bills/current-balance`,
           {
             headers: {
               'Content-Type': 'application/json',

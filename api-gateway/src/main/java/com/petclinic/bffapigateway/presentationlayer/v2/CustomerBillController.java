@@ -24,16 +24,16 @@ public class CustomerBillController {
     
     private final BillServiceClient billService;
 
-    @IsUserSpecific(idToMatch = {"customerId"})
+    @IsUserSpecific(idToMatch = { "customerId" })
     @GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<BillResponseDTO> getBillsByCustomerId(@PathVariable String customerId) {
         return billService.getBillsByOwnerId(customerId);
     }
 
-    @IsUserSpecific(idToMatch = {"customerId"})
+    @IsUserSpecific(idToMatch = { "customerId" })
     @GetMapping(value = "/{billId}/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
     public Mono<ResponseEntity<byte[]>> downloadBillPdf(
-            @PathVariable String customerId, 
+            @PathVariable String customerId,
             @PathVariable String billId) {
 
         return billService.downloadBillPdf(customerId, billId)
@@ -50,4 +50,11 @@ public class CustomerBillController {
                     return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
                 });
     }
+
+    @IsUserSpecific(idToMatch = { "customerId" })
+    @GetMapping(value = "/current-balance", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<Double> getCurrentBalance(@PathVariable String customerId) {
+        return billService.getCurrentBalance(customerId);
+    }
+
 }
