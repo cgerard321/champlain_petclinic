@@ -5,4 +5,5 @@ export interface Inventory {
   inventoryDescription: string;
   inventoryImage: string;
   inventoryBackupImage: string;
+  imageUploaded: Uint8Array | null;
 }
