@@ -299,9 +299,10 @@ public class InventoryServiceClient {
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError,
-                        resp -> Mono.error(new NotFoundException("No products found in inventory: " + inventoryId)))
+                        resp -> rethrower.rethrow(resp, ex -> new ProductListNotFoundException(ex.get("message").toString(), NOT_FOUND)))
                 .bodyToFlux(ProductResponseDTO.class);
     }
+
     public Mono<ProductResponseDTO> addSupplyToInventory(final ProductRequestDTO model, final String inventoryId){
 
         return webClient.post()
@@ -321,7 +322,7 @@ public class InventoryServiceClient {
                 .uri(uriBuilder.buildAndExpand(inventoryId, productId).toUri())
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError,
-                        resp -> Mono.error(new NotFoundException("Product not found in inventory: " + inventoryId)))
+                        resp -> Mono.error(new InventoryNotFoundException("Product not found in inventory: " + inventoryId, NOT_FOUND)))
                 .bodyToMono(ProductResponseDTO.class);
     }
 
@@ -334,6 +335,7 @@ public class InventoryServiceClient {
                         clientResponse.bodyToMono(String.class)
                                 .flatMap(errorMessage -> Mono.error(new InventoryNotFoundException(errorMessage, HttpStatus.NOT_FOUND))))
                 .bodyToMono(Integer.class);
+
     }
 
     public Mono<byte[]> createSupplyPdf(String inventoryId) {

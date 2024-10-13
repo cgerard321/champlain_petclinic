@@ -6,6 +6,7 @@ import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.*;
 import com.petclinic.bffapigateway.dtos.Inventory.Status;
 import com.petclinic.bffapigateway.exceptions.InventoryNotFoundException;
+import com.petclinic.bffapigateway.exceptions.ProductListNotFoundException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterAll;
@@ -247,11 +248,138 @@ class InventoryServiceClientIntegrationTest {
                 .verify();
     }
 
+    @Test
+    void searchProducts_withValidSearchQuery_shouldReturnProducts() throws JsonProcessingException {
+        // Arrange
+        ProductResponseDTO product1 = new ProductResponseDTO(
+                "productId1",
+                "inventoryId",
+                "name1",
+                "desc1",
+                10.00,
+                2,
+                15.99,
+                Status.OUT_OF_STOCK
+        );
+        ProductResponseDTO product2 = new ProductResponseDTO(
+                "productId2",
+                "inventoryId",
+                "name2",
+                "desc2",
+                20.00,
+                4,
+                25.99,
+                Status.AVAILABLE
+        );
+        ArrayList<ProductResponseDTO> products = new ArrayList<>();
+        products.add(product1);
+        products.add(product2);
 
+        // Mock the response from the MockWebServer
+        mockWebServer.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+                .setBody(objectMapper.writeValueAsString(products)));
 
+        // Act
+        Flux<ProductResponseDTO> result = inventoryServiceClient.searchProducts("inventoryId", "name1", "desc1");
 
+        // Assert
+        StepVerifier.create(result)
+                .expectNext(product1)
+                .expectNext(product2)
+                .verifyComplete();
+    }
 
+    @Test
+    void searchProducts_withEmptySearchQuery_shouldReturnEmptyList() throws JsonProcessingException {
+        // Arrange
+        ArrayList<ProductResponseDTO> products = new ArrayList<>();
 
+        // Mock the response from the MockWebServer
+        mockWebServer.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+                .setBody(objectMapper.writeValueAsString(products)));
+
+        // Act
+        Flux<ProductResponseDTO> result = inventoryServiceClient.searchProducts("inventoryId", "", "");
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNextCount(0)
+                .verifyComplete();
+    }
+
+    @Test
+    void consumeProduct_withValidInventoryIdAndProductId_shouldReturnProduct() throws JsonProcessingException {
+        // Arrange
+        ProductResponseDTO product = new ProductResponseDTO(
+                "productId",
+                "inventoryId",
+                "name",
+                "desc",
+                10.00,
+                2,
+                15.99,
+                Status.OUT_OF_STOCK
+        );
+
+        // Mock the response from the MockWebServer
+        mockWebServer.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+                .setBody(objectMapper.writeValueAsString(product)));
+
+        // Act
+        Mono<ProductResponseDTO> result = inventoryServiceClient.consumeProduct("inventoryId", "productId");
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNext(product)
+                .verifyComplete();
+    }
+
+    @Test
+    void consumeProduct_withInvalidInventoryId_shouldThrowInventoryNotFoundException() {
+        // Arrange
+        String invalidInventoryId = "invalidInventoryId";
+        String productId = "productId";
+
+        // Mock a 404 Not Found response from the MockWebServer
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(404)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("{\"message\": \"Product not found in inventory: " + invalidInventoryId + "\"}"));
+
+        // Act
+        Mono<ProductResponseDTO> result = inventoryServiceClient.consumeProduct(invalidInventoryId, productId);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof InventoryNotFoundException
+                        && throwable.getMessage().contains("Product not found in inventory: " + invalidInventoryId))
+                .verify();
+    }
+
+    @Test
+    void consumeProduct_withInvalidProductId_shouldThrowProductListNotFoundException() {
+        // Arrange
+        String inventoryId = "inventoryId";
+        String invalidProductId = "invalidProductId";
+
+        // Mock a 404 Not Found response from the MockWebServer
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(404)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("{\"message\": \"Product not found in inventory: " + inventoryId + "\"}"));
+
+        // Act
+        Mono<ProductResponseDTO> result = inventoryServiceClient.consumeProduct(inventoryId, invalidProductId);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof InventoryNotFoundException
+                        && throwable.getMessage().contains("Product not found in inventory: " + inventoryId))
+                .verify();
+    }
 
 
 }
