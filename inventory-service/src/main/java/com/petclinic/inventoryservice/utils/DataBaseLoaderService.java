@@ -8,6 +8,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
+import java.io.InputStream;
 import java.util.UUID;
 
 @Service
@@ -88,6 +89,8 @@ public class DataBaseLoaderService  implements CommandLineRunner {
                 .build();
 
 
+        InputStream inputStream = getClass().getResourceAsStream("/images/Medical-EquipmentImage.jpg");
+        byte[] medicalEquipmentImage = ImageUtil.readImage(inputStream);
 
         Inventory inventory1 = Inventory.builder()
                 .inventoryId(UUID.randomUUID().toString())
@@ -96,6 +99,7 @@ public class DataBaseLoaderService  implements CommandLineRunner {
                 .inventoryDescription("Medical equipment for surgery")
                 .inventoryImage("https://alliedusa.net/wp-content/uploads/2022/06/Tips-for-Choosing-Medical-Equipment-For-Your-Practice.jpg")
                 .inventoryBackupImage("https://northsidemedicalsupply.com/wp-content/uploads/2022/12/Medical-Supply-or-Equipment.jpg")
+                .imageUploaded(medicalEquipmentImage)
                 .build();
 
         Inventory inventory2 = Inventory.builder()
