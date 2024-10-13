@@ -638,16 +638,41 @@ public class VetsServiceClient {
     }
 
     public Mono<Album> addPhotoToAlbum(String vetId, String filename, String imgType, byte[] data) {
+        // Log the incoming request details
+        log.info("Sending request to add photo to album for vetId: {}, filename: {}, imgType: {}", vetId, filename, imgType);
+
+        // Create a multipart form data structure
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+        body.add("file", new ByteArrayResource(data));  // Add byte[] as a file
+        body.add("filename", filename);
+        body.add("imgType", imgType);
+
+        // Log the request payload
+        log.info("Multipart form data created for vetId: {}, filename: {}", vetId, filename);
+
+        // Send a POST request to add the photo to the album
         return webClientBuilder.build()
                 .post()
                 .uri(vetsServiceUrl + "/" + vetId + "/albums/photo")
                 .contentType(MediaType.MULTIPART_FORM_DATA)
-                .body(BodyInserters.fromMultipartData("file", new ByteArrayResource(data))
-                        .with("filename", filename)
-                        .with("imgType", imgType))
+                .body(BodyInserters.fromMultipartData(body))  // Send multipart form data
                 .retrieve()
-                .bodyToMono(Album.class);
+                .onStatus(HttpStatusCode::is4xxClientError, error -> {
+                    log.error("Client error while adding photo for vetId: {}", vetId);  // Log client error
+                    HttpStatusCode statusCode = error.statusCode();
+                    if (statusCode.equals(HttpStatus.NOT_FOUND)) {
+                        return Mono.error(new NotFoundException("Vet or album not found for vetId: " + vetId));
+                    }
+                    return Mono.error(new IllegalArgumentException("Client error occurred"));
+                })
+                .onStatus(HttpStatusCode::is5xxServerError, error -> {
+                    log.error("Server error while adding photo for vetId: {}", vetId);  // Log server error
+                    return Mono.error(new IllegalArgumentException("Server error occurred"));
+                })
+                .bodyToMono(Album.class);  // Return the saved Album entity
     }
+
+
 
 
     public Mono<Void> deletePhotoByVetId(String vetId) {

@@ -38,6 +38,10 @@ public class AlbumServiceImpl implements AlbumService{
 
     @Override
     public Mono<Album> addPhotoToAlbum(String vetId, String filename, String imgType, byte[] data) {
+        // Log the incoming parameters
+        log.info("Received request to add photo to album for vetId: {}, filename: {}, imgType: {}", vetId, filename, imgType);
+
+        // Create a new Album entity with the uploaded data
         Album albumPhoto = Album.builder()
                 .vetId(vetId)
                 .filename(filename)
@@ -45,9 +49,14 @@ public class AlbumServiceImpl implements AlbumService{
                 .data(data)
                 .build();
 
+        // Log album creation
+        log.info("Created Album entity for vetId: {}, filename: {}", vetId, filename);
+
+        // Save the album to the repository
         return albumRepository.save(albumPhoto)
                 .doOnSuccess(album -> log.info("Added photo {} for vet {}", filename, vetId))
                 .doOnError(error -> log.error("Error adding photo for vet {}: {}", vetId, error.getMessage()));
     }
+
 
 }

@@ -330,13 +330,25 @@ public class VetController {
             @RequestParam("file") MultipartFile file,
             @RequestParam("filename") String filename,
             @RequestParam("imgType") String imgType) {
+
+        // Log the incoming request
+        log.info("Received request to add photo to album for vetId: {}, filename: {}, imgType: {}", vetId, filename, imgType);
+
         try {
+            // Extract the byte[] data from the uploaded file
             byte[] data = file.getBytes();
+            log.info("File size: {} bytes", data.length);  // Log the size of the file
+
+            // Pass the extracted data to the AlbumService
             return albumService.addPhotoToAlbum(vetId, filename, imgType, data)
-                    .map(album -> ResponseEntity.ok(album))
-                    .doOnError(error -> log.error("Error adding photo to album for vet {}: {}", vetId, error.getMessage()));
+                    .map(album -> {
+                        log.info("Photo successfully added to vetId: {}", vetId);  // Log success
+                        return ResponseEntity.status(HttpStatus.CREATED).body(album);
+                    })
+                    .doOnError(error -> log.error("Error adding photo to album for vetId {}: {}", vetId, error.getMessage()))  // Log error if occurred
+                    .defaultIfEmpty(ResponseEntity.notFound().build());  // Handle the case where vet or album is not found
         } catch (IOException e) {
-            log.error("Error processing file for vet {}", vetId, e);
+            log.error("Error processing file for vetId: {}", vetId, e);  // Log the file processing error
             return Mono.just(ResponseEntity.badRequest().build());
         }
     }

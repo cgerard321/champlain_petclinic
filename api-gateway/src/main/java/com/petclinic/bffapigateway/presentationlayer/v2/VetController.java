@@ -154,24 +154,36 @@ public class VetController {
                 .doOnError(error -> log.error("Error fetching photos for vet {}", vetId, error));
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
     @PostMapping("{vetId}/albums/photo")
     public Mono<ResponseEntity<Album>> addPhotoToAlbum(
             @PathVariable String vetId,
             @RequestParam("file") MultipartFile file,
-            @RequestParam("filename") String filename,  // Explicitly pass filename
-            @RequestParam("imgType") String imgType) {   // Explicitly pass image type
-        try {
-            byte[] data = file.getBytes();  // Get the byte array of the file data
+            @RequestParam("filename") String filename,
+            @RequestParam("imgType") String imgType) {
 
+        log.info("Received request to add photo to album for vetId: {}, filename: {}, imgType: {}", vetId, filename, imgType);  // Log the request details
+
+        try {
+            // Extract byte data from the uploaded file
+            byte[] data = file.getBytes();
+            log.info("File size: {} bytes", data.length);  // Log file size
+
+            // Pass the file data, filename, and type to the service to add the photo
             return vetsServiceClient.addPhotoToAlbum(vetId, filename, imgType, data)
-                    .map(album -> ResponseEntity.ok(album))
-                    .defaultIfEmpty(ResponseEntity.notFound().build());
+                    .map(album -> {
+                        log.info("Successfully added photo to album for vetId: {}", vetId);  // Log success
+                        return ResponseEntity.status(HttpStatus.CREATED).body(album);
+                    })
+                    .doOnError(error -> log.error("Error adding photo to album for vetId {}: {}", vetId, error.getMessage()))  // Log error
+                    .defaultIfEmpty(ResponseEntity.notFound().build());  // Handle case where vet/album not found
         } catch (IOException e) {
-            log.error("Error processing file for vet {}", vetId, e);
+            log.error("Error processing file for vetId: {}", vetId, e);  // Log file processing error
             return Mono.just(ResponseEntity.badRequest().build());
         }
     }
+
+
 
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
