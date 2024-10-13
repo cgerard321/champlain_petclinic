@@ -350,6 +350,15 @@ export default function VisitListTable(): JSX.Element {
                 >
                   Delete
                 </button>
+                <button
+                  className="btn btn-dark"
+                  onClick={() =>
+                    navigate(`/visits/emergency/${emergency.visitEmergencyId}`)
+                  }
+                  title="View"
+                >
+                  View
+                </button>
               </td>
             </tr>
           ))}

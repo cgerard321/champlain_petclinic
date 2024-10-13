@@ -671,6 +671,52 @@ class VisitControllerUnitTest {
         verify(emergencyService, times(1)).AddEmergency(any(Mono.class));
     }
 
+    @Test
+    public void whenGetEmergencyById_returnEmergencyResponseDTO() {
+        Emergency emergency = Emergency.builder()
+                .visitEmergencyId("uuidEmergency")
+                .visitDate(LocalDateTime.now())
+                .description("Severe injury")
+                .petId("uuidPet")
+                .practitionerId(uuidVet)
+                .urgencyLevel(UrgencyLevel.HIGH)
+                .emergencyType("Injury")
+                .build();
+        String emergencyId = UUID.randomUUID().toString();
+
+        EmergencyResponseDTO emergencyResponseDTO = EmergencyResponseDTO.builder()
+                .visitEmergencyId(emergencyId)
+                .visitDate(emergency.getVisitDate())
+                .description(emergency.getDescription())
+                .petId("uuidPet")
+                .petName("Buddy") // Pet name from mocked pet
+                .petBirthDate(new Date())
+                .practitionerId(uuidVet)
+                .vetFirstName("John")
+                .vetLastName("Doe")
+                .vetEmail("john.doe@email.com")
+                .vetPhoneNumber("(514)-123-4567")
+                .urgencyLevel(emergency.getUrgencyLevel())
+                .emergencyType(emergency.getEmergencyType())
+                .build();
+
+        when(emergencyService.GetEmergencyByEmergencyId(emergencyId)).thenReturn(Mono.just(emergencyResponseDTO));
+
+        webTestClient
+                .get()
+                .uri("/visits/emergency/" + emergencyId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(EmergencyResponseDTO.class)
+                .isEqualTo(emergencyResponseDTO);
+
+        verify(emergencyService, times(1)).GetEmergencyByEmergencyId(emergencyId);
+    }
+
+
+
 
 
    /* @Test

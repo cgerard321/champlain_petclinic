@@ -18,5 +18,7 @@ public interface EmergencyService {
     /*Mono<EmergencyResponseDTO> UpdateEmergency(Mono<EmergencyRequestDTO> emergencyRequestDTOMono, String emergencyId);
     Mono<EmergencyResponseDTO> DeleteEmergency(String emergencyId);
 
-    Mono<EmergencyResponseDTO> GetEmergencyByEmergencyId(String emergencyId); */
+     */
+
+    Mono<EmergencyResponseDTO> GetEmergencyByEmergencyId(String emergencyId);
 }
