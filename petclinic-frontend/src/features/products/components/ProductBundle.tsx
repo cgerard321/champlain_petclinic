@@ -3,6 +3,7 @@ import { ProductBundleModel } from '@/features/products/models/ProductModels/Pro
 import { getProductByProductId } from '@/features/products/api/getProductByProductId';
 import { ProductModel } from '@/features/products/models/ProductModels/ProductModel';
 import './ProductBundle.css';
+import ImageContainer from './ImageContainer';
 
 /* eslint-disable react/prop-types */
 
@@ -31,13 +32,22 @@ const ProductBundle: React.FC<ProductBundleProps> = ({ bundle }) => {
       <div className="product-bundle-products">
         {products.map(product => (
           <div key={product.productId} className="product-bundle-item">
+            <ImageContainer imageId={product.imageId} />
             <p>{product.productName}</p>
             <p>Price: ${product.productSalePrice.toFixed(2)}</p>
           </div>
         ))}
       </div>
-      <p>Original Total Price: ${bundle.originalTotalPrice.toFixed(2)}</p>
-      <p>Bundle Price: ${bundle.bundlePrice.toFixed(2)}</p>
+      <p>
+        Original Total Price:{' '}
+        <span className="original-price">
+          ${bundle.originalTotalPrice.toFixed(2)}
+        </span>
+      </p>
+      <p>
+        Bundle Price:{' '}
+        <span className="bundle-price">${bundle.bundlePrice.toFixed(2)}</span>
+      </p>
     </div>
   );
 };

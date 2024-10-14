@@ -2,14 +2,54 @@
   border: 2px solid #4caf50;
   padding: 16px;
   margin: 16px;
-  background-color: #e8f5e9;
+  width: 300px;
+  border-radius: 5px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .product-bundle-products {
   display: flex;
   flex-wrap: wrap;
+  height: 470px; 
+  overflow-y: auto;
+  border: 1px solid black;
+  border-radius: 15px;
+  scrollbar-width: none;
+  margin: 20px 0;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
 }
 
 .product-bundle-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   margin: 8px;
+  width: 100%;
 }
+
+.product-bundle-item img {
+  max-width: 100px;
+  height: auto;
+  margin-bottom: 8px;
+}
+
+
+.original-price {
+  text-decoration: line-through;
+  color: #ff0000;
+}
+
+.bundle-price {
+  font-size: 1.5em;
+  color: #4caf50;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .product-bundle-card {
+    width: auto;
+    margin: 16px 8px;
+  }
+}
+
+
