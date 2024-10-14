@@ -177,4 +177,11 @@ public class VetController {
         return vetsServiceClient.getEducationsByVetId(vetId);
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
+    @GetMapping("{vetId}/ratings")
+    public Flux<RatingResponseDTO> getRatingsByVetId(@PathVariable String vetId) {
+        return vetsServiceClient.getRatingsByVetId(vetId);
+    }
+
+
 }

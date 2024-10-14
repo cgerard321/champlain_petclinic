@@ -34,7 +34,7 @@ public class BadgeServiceImpl implements BadgeService{
                                 return ratingRepository.findAllByVetId(vetId)
                                         .switchIfEmpty(Flux.error(new NotFoundException("vetId is Not Found" + vetId)))
                                         .map(EntityDtoUtil::toDTO)
-                                        .reduce(0.0, (acc, rating) -> acc + rating.getRateScore())
+                                        .reduce(0.0, (acc, rating) -> acc + rating.getRating())
                                         .map(sum -> sum / count);
                             }
                         })

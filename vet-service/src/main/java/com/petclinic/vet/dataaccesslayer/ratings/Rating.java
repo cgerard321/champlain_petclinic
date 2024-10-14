@@ -10,13 +10,11 @@ import org.springframework.data.annotation.Id;
 @AllArgsConstructor
 public class Rating {
     @Id
-    private String id;
     private String ratingId;
     private String vetId;
-    private Double rateScore;
+    private Double rating;
     private String rateDescription;
-    private PredefinedDescription predefinedDescription;
+    private PredefinedDescription experience;
     private String rateDate;
-    private String date;
 
 }

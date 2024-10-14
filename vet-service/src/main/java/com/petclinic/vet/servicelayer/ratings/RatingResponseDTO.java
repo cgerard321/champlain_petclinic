@@ -13,9 +13,8 @@ import lombok.NoArgsConstructor;
 public class RatingResponseDTO {
     private String ratingId;
     private String vetId;
-    private Double rateScore;
+    private Double rating;
     private String rateDescription;
-    private PredefinedDescription predefinedDescription;
+    private PredefinedDescription experience;
     private String rateDate;
-    private String date;
 }

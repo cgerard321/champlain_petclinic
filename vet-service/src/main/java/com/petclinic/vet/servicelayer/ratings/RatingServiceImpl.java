@@ -60,8 +60,8 @@ public class RatingServiceImpl implements RatingService {
         return vetRepository.findVetByVetId(vetId)
                 .switchIfEmpty(Mono.error(new NotFoundException("vetId not found: " + vetId)))
                 .flatMap(r -> ratingRequestDTO.flatMap(dto -> {
-                    if (dto.getRateScore() < 1 || dto.getRateScore() > 5) {
-                        return Mono.error(new InvalidInputException("rateScore should be between 1 and 5: " + dto.getRateScore()));
+                    if (dto.getRating() < 1 || dto.getRating() > 5) {
+                        return Mono.error(new InvalidInputException("rateScore should be between 1 and 5: " + dto.getRating()));
                     } else {
                         return Mono.just(dto);
                     }
@@ -75,7 +75,7 @@ public class RatingServiceImpl implements RatingService {
                 .map(EntityDtoUtil::toEntity)
                 .doOnNext(r -> {
                     r.setRatingId(UUID.randomUUID().toString());
-                    r.setDate(String.valueOf(LocalDate.now().getYear()));
+                    r.setRateDate(String.valueOf(LocalDate.now().getYear()));
                 })
                 .flatMap(ratingRepository::insert)
                 .map(EntityDtoUtil::toDTO);
@@ -101,18 +101,27 @@ public class RatingServiceImpl implements RatingService {
                         return ratingRepository.findAllByVetId(vetId)
                                 .switchIfEmpty(Mono.error(new NotFoundException("vetId is Not Found" + vetId)))
                                 .map(EntityDtoUtil::toDTO)
-                                .reduce(0.0, (acc, rating) -> acc + rating.getRateScore())
+                                .reduce(0.0, (acc, rating) -> acc + rating.getRating())
                                 .map(sum -> sum / count);
                     }
                 });
     }
-    public Flux<RatingResponseDTO> getRatingsOfAVetBasedOnDate(String vetId, Map<String,String> queryParams) {
+    public Flux<RatingResponseDTO> getRatingsOfAVetBasedOnDate(String vetId, Map<String, String> queryParams) {
         String year = queryParams.get("year");
-        return ratingRepository.findAllByVetId(vetId).mapNotNull(rating -> {
-                    if (Integer.parseInt(rating.getDate()) >= (Integer.parseInt(year)))
+        return ratingRepository.findAllByVetId(vetId)
+                .mapNotNull(rating -> {
+
+                    if (Integer.parseInt(rating.getRateDate().substring(0, 4)) >= Integer.parseInt(year)) {
                         return EntityDtoUtil.toDTO(rating);
+                    }
                     return null;
-                }).sort((o1, o2) -> Integer.compare(Integer.parseInt(o2.getDate()),Integer.parseInt(o1.getDate())))
+                })
+                .sort((o1, o2) -> {
+
+                    String year1 = o1.getRateDate().split(", ")[1];
+                    String year2 = o2.getRateDate().split(", ")[1];
+                    return Integer.compare(Integer.parseInt(year2), Integer.parseInt(year1));
+                })
                 .publishOn(Schedulers.boundedElastic());
     }
 
@@ -145,22 +154,23 @@ public class RatingServiceImpl implements RatingService {
                 .switchIfEmpty(Mono.error(new NotFoundException("vetId not found: " + vetId)))
                 .then(ratingRepository.findByVetIdAndRatingId(vetId, ratingId)
                         .switchIfEmpty(Mono.error(new NotFoundException("ratingId not found: " + ratingId)))
-                        .flatMap(rating -> ratingRequestDTOMono
+                        .flatMap(existingRating -> ratingRequestDTOMono
                                 .flatMap(r -> {
-                                    if (r.getRateScore() < 1 || r.getRateScore() > 5)
-                                        return Mono.error(new InvalidInputException("rateScore should be between 1 and 5" + r.getRateScore()));
-                                    if (r.getPredefinedDescription() != null){
+                                    if (r.getRating() < 1 || r.getRating() > 5)
+                                        return Mono.error(new InvalidInputException("rateScore should be between 1 and 5: " + r.getRating()));
+                                    if (r.getPredefinedDescription() != null) {
                                         r.setRateDescription(r.getPredefinedDescription().name());
                                     }
                                     return Mono.just(r);
                                 })
                                 .map(EntityDtoUtil::toEntity)
-                                .doOnNext(e -> e.setId(rating.getId()))
-                                .doOnNext(e -> e.setRatingId(rating.getRatingId()))
+                                .doOnNext(updatedRating -> updatedRating.setRatingId(existingRating.getRatingId())) // Use ratingId
+                                .doOnNext(updatedRating -> updatedRating.setVetId(existingRating.getVetId())) // Set vetId
                                 .flatMap(ratingRepository::save)
                                 .map(EntityDtoUtil::toDTO))
                 );
     }
+
 
 
 
@@ -176,7 +186,7 @@ public class RatingServiceImpl implements RatingService {
                     }
                     return ratingFlux
                             .map(EntityDtoUtil::toDTO)
-                            .map(RatingResponseDTO::getRateScore)
+                            .map(RatingResponseDTO::getRating)
                             .doOnNext(rating -> ratingCount.put(rating, ratingCount.get(rating) + 1))
                             .then(Mono.just(ratingCount))
                             .map(ratingCountMap -> {
