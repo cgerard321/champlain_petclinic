@@ -56,5 +56,4 @@ public class CustomerBillController {
     public Mono<Double> getCurrentBalance(@PathVariable String customerId) {
         return billService.getCurrentBalance(customerId);
     }
-
 }
