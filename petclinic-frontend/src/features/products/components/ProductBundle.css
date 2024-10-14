@@ -1,18 +1,18 @@
 .product-bundle-card {
   position: relative;
-  border: 3px solid #4caf50;
-  background-color: #f3fff3;
+  border: 3px outset #4caf50;
+  background-image: linear-gradient(to bottom right, white, #f1f1f1);
   padding: 16px;
   margin: 16px;
-  width: 300px;
+  width: 320px;
   border-radius: 5px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
 }
 
 .product-bundle-products {
   display: flex;
   flex-wrap: wrap;
-  height: 500px; 
+  height: 250px; 
   overflow-y: auto;
   border: 1px solid black;
   border-radius: 15px;
@@ -24,10 +24,16 @@
 
 .product-bundle-item {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
   margin: 8px;
   width: 100%;
+}
+
+.product-details {
+  display: flex;
+  flex-direction: column;
+  margin-left: 10px;
 }
 
 .deal-stamp {
