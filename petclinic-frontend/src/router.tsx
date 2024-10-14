@@ -51,6 +51,8 @@ import PromoPage from '@/pages/Promos/PromoListPage.tsx';
 import AddPromoPage from '@/pages/Promos/AddPromoPage.tsx';
 import UpdatePromoPage from '@/pages/Promos/UpdatePromoPage.tsx';
 import LowStockProducts from '@/features/inventories/LowStockProducts.tsx';
+import ReviewsCustomer from '@/pages/Review/CustomerReviews.tsx';
+import AddReviewsCustomer from '@/pages/Review/CustomerAddReviewForm.tsx';
 
 const router = createBrowserRouter([
   {
@@ -398,6 +400,22 @@ const router = createBrowserRouter([
         ),
       },
     ],
+  },
+  {
+    path: AppRoutePaths.CustomerReviews,
+    element: (
+      <ProtectedRoute>
+        <ReviewsCustomer />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: AppRoutePaths.CustomerAddReview,
+    element: (
+      <ProtectedRoute>
+        <AddReviewsCustomer />
+      </ProtectedRoute>
+    ),
   },
   {
     path: AppRoutePaths.Default,

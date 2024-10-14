@@ -1,5 +1,6 @@
 package com.petclinic.visits.visitsservicenew.BusinessLayer.Review;
 
+import com.petclinic.visits.visitsservicenew.DataLayer.Review.Review;
 import com.petclinic.visits.visitsservicenew.DataLayer.Review.ReviewRepository;
 import com.petclinic.visits.visitsservicenew.Exceptions.NotFoundException;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.Review.ReviewRequestDTO;
@@ -65,6 +66,26 @@ public class ReviewServiceImpl implements ReviewService {
         return reviewRepository.findReviewByReviewId(reviewId)
                 .switchIfEmpty(Mono.defer(()-> Mono.error(new NotFoundException("review id is not found: "+ reviewId))))
                 .doOnNext(c-> log.debug("the review entity is: " + c.toString()))
+                .map(EntityDtoUtil::toReviewResponseDTO);
+    }
+
+    @Override
+    public Flux<ReviewResponseDTO> GetAllReviewsByOwnerId(String ownerId) {
+        return reviewRepository.findAllByOwnerId(ownerId)
+                .map(EntityDtoUtil::toReviewResponseDTO);
+    }
+
+    @Override
+    public Mono<ReviewResponseDTO> addReview(String ownerId, Mono<ReviewRequestDTO> reviewRequestDTOMono) {
+        return reviewRequestDTOMono.map(dto -> {
+                    Review review = new Review();
+                    review.setOwnerId(ownerId);
+                    review.setRating(dto.getRating());
+                    review.setReviewerName(dto.getReviewerName());
+                    review.setReview(dto.getReview());
+                    review.setDateSubmitted(dto.getDateSubmitted());
+                    return review;
+                }).flatMap(reviewRepository::save)
                 .map(EntityDtoUtil::toReviewResponseDTO);
     }
 

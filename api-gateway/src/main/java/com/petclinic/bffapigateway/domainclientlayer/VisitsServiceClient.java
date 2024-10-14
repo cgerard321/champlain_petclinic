@@ -399,5 +399,27 @@ public class VisitsServiceClient {
                 .retrieve()
                 .bodyToMono(ReviewResponseDTO.class);
     }
+
+    //reviews for owner
+    public Flux<ReviewResponseDTO> getReviewsByOwnerId(String ownerId) {
+        return webClient
+                .get()
+                .uri(reviewUrl + "/owners/" + ownerId + "/reviews")
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToFlux(ReviewResponseDTO.class);
+    }
+
+    public Mono<ReviewResponseDTO> addCustomerReview(String ownerId, ReviewRequestDTO reviewRequestDTO) {
+        return webClient
+                .post()
+                .uri("/owners/{ownerId}/reviews", ownerId)
+                .body(BodyInserters.fromValue(reviewRequestDTO))
+                .retrieve()
+                .bodyToMono(ReviewResponseDTO.class);
+    }
+
+
+
 }
 
