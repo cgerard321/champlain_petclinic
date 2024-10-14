@@ -419,6 +419,18 @@ public class VisitsServiceClient {
                 .bodyToMono(ReviewResponseDTO.class);
     }
 
+    public Mono<Void> deleteReview(String ownerId, String reviewId) {
+        return webClient
+                .delete()
+                .uri("/owners/{ownerId}/reviews/{reviewId}", ownerId, reviewId)
+                .retrieve()
+                .onStatus(status -> status.is4xxClientError(), clientResponse ->
+                        Mono.error(new NotFoundException("Review not found for owner ID: " + ownerId + " and review ID: " + reviewId)))
+                .onStatus(status -> status.is5xxServerError(), clientResponse ->
+                        Mono.error(new RuntimeException("Server error during review deletion")))
+                .bodyToMono(Void.class);
+    }
+
 
 
 }

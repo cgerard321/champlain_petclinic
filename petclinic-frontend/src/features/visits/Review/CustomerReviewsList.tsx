@@ -8,7 +8,6 @@ import { AppRoutePaths } from '@/shared/models/path.routes.ts';
 
 const CustomerReviewsList: React.FC = (): JSX.Element => {
   const [reviewList, setReviewList] = useState<ReviewResponseDTO[]>([]);
-  const [showConfirmDialog, setShowConfirmDialog] = useState<boolean>(false);
   const navigate = useNavigate();
   const { user } = useUser();
 
@@ -30,16 +29,6 @@ const CustomerReviewsList: React.FC = (): JSX.Element => {
       console.error('Error in fetchReviewsData:', error)
     );
   }, [user.userId]);
-
-  const handleDeleteAllReviews = (confirm: boolean): void => {
-    if (confirm) {
-      // Logic to delete all reviews (e.g., API call to delete)
-      setReviewList([]);
-      setShowConfirmDialog(false);
-    } else {
-      setShowConfirmDialog(false);
-    }
-  };
 
   const handleDelete = async (reviewId: number): Promise<void> => {
     const confirmDelete = window.confirm(
@@ -125,41 +114,9 @@ const CustomerReviewsList: React.FC = (): JSX.Element => {
         className="btn btn-warning"
         onClick={() => navigate(AppRoutePaths.CustomerVisits)}
         title="Let a review"
-        //CAMBIAR ESTOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
       >
         Return to visits
       </button>
-
-      <button
-        className="delete-all-reviews-button btn btn-success"
-        onClick={() => setShowConfirmDialog(true)}
-      >
-        Delete All Reviews
-      </button>
-
-      {showConfirmDialog && (
-        <>
-          <div
-            className="overlay"
-            onClick={() => setShowConfirmDialog(false)}
-          ></div>
-          <div className="confirm-dialog">
-            <p>Are you sure you want to delete all reviews?</p>
-            <button
-              className="btn-danger mx-1"
-              onClick={() => handleDeleteAllReviews(true)}
-            >
-              Yes
-            </button>
-            <button
-              className="btn-warning mx-1"
-              onClick={() => setShowConfirmDialog(false)}
-            >
-              No
-            </button>
-          </div>
-        </>
-      )}
     </div>
   );
 };

@@ -300,6 +300,10 @@ public class VisitController {
         return reviewService.GetAllReviewsByOwnerId(ownerId);
     }
 
-
+    @DeleteMapping(value = "/owners/{ownerId}/reviews/{reviewId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<Void>> deleteReviewCustomer(@PathVariable String ownerId, @PathVariable String reviewId) {
+        return reviewService.deleteReview(ownerId, reviewId)
+                .then(Mono.just(ResponseEntity.noContent().build()));
+    }
 
 }

@@ -12,4 +12,5 @@ public interface ReviewRepository extends ReactiveMongoRepository<Review, String
     Mono<Review> findReviewByReviewId(String reviewId);
 
     Flux<Review> findAllByOwnerId(String ownerId);
+    Mono<Review> findReviewByOwnerIdAndReviewId(String ownerId, String reviewId);
 }

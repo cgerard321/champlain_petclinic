@@ -16,4 +16,5 @@ public interface ReviewService {
 
     Flux<ReviewResponseDTO> GetAllReviewsByOwnerId(String ownerId);
     Mono<ReviewResponseDTO> addReview(String ownerId, Mono<ReviewRequestDTO> reviewRequestDTOMono);
+    Mono<ReviewResponseDTO> deleteReview(String ownerId, String reviewId);
 }
