@@ -96,17 +96,10 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public Mono<ReviewResponseDTO> deleteReview(String ownerId, String reviewId) {
-        if (reviewId == null) {
-            return reviewRepository.findAllByOwnerId(ownerId)
-                    .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("No reviews found for owner ID: " + ownerId))))
-                    .flatMap(reviewRepository::delete)
-                    .then(Mono.just(new ReviewResponseDTO()));
-        } else {
-            return reviewRepository.findReviewByOwnerIdAndReviewId(ownerId, reviewId)
-                    .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Review not found for owner ID: " + ownerId + " and review ID: " + reviewId))))
-                    .flatMap(found -> reviewRepository.delete(found).then(Mono.just(found)))
-                    .map(EntityDtoUtil::toReviewResponseDTO);
-        }
+        return reviewRepository.findReviewByOwnerIdAndReviewId(ownerId, reviewId)
+                .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Review not found for owner ID: " + ownerId + " and review ID: " + reviewId))))
+                .flatMap(found -> reviewRepository.delete(found).then(Mono.just(found)))
+                .map(EntityDtoUtil::toReviewResponseDTO);
     }
 
 

@@ -83,9 +83,7 @@ const CustomerReviewsList: React.FC = (): JSX.Element => {
                 <td>
                   <button
                     className="btn btn-warning"
-                    onClick={() =>
-                      navigate(`/updateReview/${review.reviewId}/edit`)
-                    }
+                    onClick={() => navigate(AppRoutePaths.UpdateReview)}
                     title="Edit"
                   >
                     Edit

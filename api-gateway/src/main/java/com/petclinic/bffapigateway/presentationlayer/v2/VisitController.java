@@ -221,7 +221,4 @@ public class VisitController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.noContent().build());
     }
-
-
-
 }

@@ -74,6 +74,23 @@ export default function CustomerVisitListTable(): JSX.Element {
 
   return (
     <div>
+      <div className="visit-actions">
+        <button
+          className="btn btn-warning"
+          onClick={() => navigate(AppRoutePaths.CustomerAddReview)}
+          title="Leave a Review"
+        >
+          Leave a Review
+        </button>
+        <button
+          className="btn btn-dark"
+          onClick={() => navigate(AppRoutePaths.CustomerReviews)}
+          title="View Reviews"
+        >
+          View Reviews
+        </button>
+      </div>
+
       {error ? (
         <p>{error}</p>
       ) : (
@@ -102,23 +119,6 @@ export default function CustomerVisitListTable(): JSX.Element {
           </tbody>
         </table>
       )}
-
-      <div className="visit-actions">
-        <button
-          className="btn btn-warning"
-          onClick={() => navigate(AppRoutePaths.CustomerAddReview)}
-          title="Leave a Review"
-        >
-          Leave a Review
-        </button>
-        <button
-          className="btn btn-dark"
-          onClick={() => navigate(AppRoutePaths.CustomerReviews)}
-          title="View Reviews"
-        >
-          View Reviews
-        </button>
-      </div>
     </div>
   );
 }
