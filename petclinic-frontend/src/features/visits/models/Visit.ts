@@ -6,7 +6,7 @@ export interface Visit {
   vetFirstName: string;
   vetLastName: string;
   vetEmail: string;
-  vetPhoneNumber: string;
+  vetPhone: string;
   status: string;
   visitEndDate: string;
 }
