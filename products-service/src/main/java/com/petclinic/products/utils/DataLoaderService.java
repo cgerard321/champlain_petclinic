@@ -157,14 +157,14 @@ public class DataLoaderService implements CommandLineRunner {
                 .bundlePrice(129.99)
                 .build();
 
-        Resource resource1 = new ClassPathResource("images/dog_food.jpg");
+        Resource resource1 = new ClassPathResource("images/dog_food.png");
         Resource resource2 = new ClassPathResource("images/cat_litter.png");
-        Resource resource3 = new ClassPathResource("images/flea_collar.jpg");
-        Resource resource4 = new ClassPathResource("images/bird_cage.jpg");
+        Resource resource3 = new ClassPathResource("images/flea_collar.png");
+        Resource resource4 = new ClassPathResource("images/bird_cage.png");
         Resource resource5 = new ClassPathResource("images/aquarium_filter.png");
-        Resource resource6 = new ClassPathResource("images/horse_saddle.jpg");
-        Resource resource7 = new ClassPathResource("images/rabbit_hutch.jpg");
-        Resource resource8 = new ClassPathResource("images/fish_tank_heater.jpg");
+        Resource resource6 = new ClassPathResource("images/horse_saddle.png");
+        Resource resource7 = new ClassPathResource("images/rabbit_hutch.png");
+        Resource resource8 = new ClassPathResource("images/fish_tank_heater.png");
 
         InputStream inputStream1 = resource1.getInputStream();
         InputStream inputStream2 = resource2.getInputStream();

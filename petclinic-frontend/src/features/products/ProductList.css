@@ -5,6 +5,14 @@
   margin-top: 20px;
 }
 
+.product-bundles-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center; /* Centers the product bundles */
+  gap: 56px;
+  margin: 20px 0;
+}
+
 .card {
   background-color: #fff;
   border: 1px solid #e0e0e0;

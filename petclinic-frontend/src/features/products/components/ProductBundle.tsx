@@ -27,7 +27,8 @@ const ProductBundle: React.FC<ProductBundleProps> = ({ bundle }) => {
 
   return (
     <div className="product-bundle-card">
-      <h3>{bundle.bundleName}</h3>
+      <div className="deal-stamp">DEAL</div>
+      <h3 className="bundle-title">{bundle.bundleName}</h3>
       <p>{bundle.bundleDescription}</p>
       <div className="product-bundle-products">
         {products.map(product => (
@@ -35,6 +36,9 @@ const ProductBundle: React.FC<ProductBundleProps> = ({ bundle }) => {
             <ImageContainer imageId={product.imageId} />
             <p>{product.productName}</p>
             <p>Price: ${product.productSalePrice.toFixed(2)}</p>
+            <p>
+              {products.length - 1 === products.indexOf(product) ? '' : '+'}
+            </p>
           </div>
         ))}
       </div>
