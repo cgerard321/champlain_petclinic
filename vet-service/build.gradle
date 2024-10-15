@@ -8,7 +8,12 @@ plugins {
 
 group = 'com.petclinic.vet'
 version = '1.0.0-SNAPSHOT'
-sourceCompatibility = "1.9"
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
 
 configurations {
     compileOnly {
@@ -77,4 +82,3 @@ test {
         events "passed", "skipped", "failed"
     }
 }
-targetCompatibility = JavaVersion.VERSION_1_9
