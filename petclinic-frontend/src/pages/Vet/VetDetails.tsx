@@ -4,6 +4,7 @@ import { NavBar } from '@/layouts/AppNavBar.tsx';
 import './VetDetails.css';
 import axios from 'axios';
 import DeleteVetPhoto from '@/pages/Vet/DeleteVetPhoto.tsx';
+import DeleteVetEducation from "@/pages/Vet/DeleteVetEducation.tsx";
 
 interface VetResponseType {
   vetId: string;
@@ -49,6 +50,14 @@ export default function VetDetails(): JSX.Element {
   const [specialtyId, setSpecialtyId] = useState('');
   const [specialtyName, setSpecialtyName] = useState('');
   const [enlargedPhoto, setEnlargedPhoto] = useState<string | null>(null);
+
+  const handleEducationDeleted = (deletedEducationId: string): void => {
+    setEducation(prevEducation =>
+        prevEducation
+            ? prevEducation.filter(edu => edu.educationId !== deletedEducationId)
+            : null
+    );
+  };
 
   const fetchVetPhoto = useCallback(async (): Promise<void> => {
     try {
@@ -457,6 +466,11 @@ export default function VetDetails(): JSX.Element {
                     <p>
                       <strong>End Date:</strong> {edu.endDate}
                     </p>
+                    <DeleteVetEducation
+                        vetId={vetId!}
+                        educationId={edu.educationId}
+                        onEducationDeleted={handleEducationDeleted}
+                    />
                     <hr />
                   </div>
                 ))
