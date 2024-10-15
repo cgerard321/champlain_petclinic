@@ -50,7 +50,7 @@ jobs:
       run: chmod +x ./gradlew
       working-directory: ./visits-service-new
     - name: Build with Gradle
-      run: ./gradlew clean build
+      run: ./gradlew clean build --warning-mode all
       working-directory: ./visits-service-new
 
   vet_service_test:
@@ -147,7 +147,7 @@ jobs:
       run: chmod +x ./gradlew
       working-directory: ./inventory-service
     - name: Build with Gradle
-      run: ./gradlew clean build
+      run: ./gradlew clean build --warning-mode all
       working-directory: ./inventory-service
 
   products_service_test:
@@ -186,7 +186,7 @@ jobs:
         run: chmod +x ./gradlew
         working-directory: ./cart-service
       - name: Build with Gradle
-        run: ./gradlew clean build
+        run: ./gradlew clean build --warning-mode all
         working-directory: ./cart-service
 
     
