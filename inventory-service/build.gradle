@@ -17,7 +17,7 @@ java {
 }
 
 ext {
-    mapstructVersion = "1.5.5.Final"
+    mapstructVersion = "1.4.1.Final"
 }
 
 repositories {
@@ -44,6 +44,9 @@ dependencies {
     testImplementation 'io.projectreactor:reactor-test'
     testImplementation 'com.squareup.okhttp3:okhttp:4.11.0'
     testImplementation 'com.squareup.okhttp3:mockwebserver:4.11.0'
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+    }
 }
 
 jacoco {
