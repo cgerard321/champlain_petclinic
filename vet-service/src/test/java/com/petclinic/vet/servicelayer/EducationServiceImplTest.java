@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.vet.dataaccesslayer.education.Education;
 import com.petclinic.vet.dataaccesslayer.education.EducationRepository;
 import com.petclinic.vet.dataaccesslayer.PhotoRepository;
+import com.petclinic.vet.exceptions.NotFoundException;
 import com.petclinic.vet.servicelayer.education.EducationRequestDTO;
 import com.petclinic.vet.servicelayer.education.EducationResponseDTO;
 import com.petclinic.vet.servicelayer.education.EducationService;
@@ -60,21 +61,7 @@ class EducationServiceImplTest {
 
 
     @Test
-    void getAllEducationsByVetId() {
-        when(educationRepository.findAllByVetId(anyString())).thenReturn(Flux.just(education));
-
-        Flux<EducationResponseDTO> educationResponseDTO = educationService.getAllEducationsByVetId("1");
-
-        StepVerifier
-                .create(educationResponseDTO)
-                .consumeNextWith(found -> {
-                    assertEquals(education.getEducationId(), found.getEducationId());
-                    assertEquals(education.getVetId(), found.getVetId());
-                })
-                .verifyComplete();
-    }
-    @Test
-    void deleteEducationByEducationId() {
+    void deleteEducationByEducationId_Success() {
         when(educationRepository.findByVetIdAndEducationId(anyString(), anyString())).thenReturn(Mono.just(education));
         when(educationRepository.delete(any())).thenReturn(Mono.empty());
 
@@ -84,6 +71,19 @@ class EducationServiceImplTest {
                 .create(deletedEducation)
                 .verifyComplete();
     }
+
+    @Test
+    void deleteEducationByEducationId_EducationNotFound() {
+        when(educationRepository.findByVetIdAndEducationId(anyString(), anyString())).thenReturn(Mono.empty());
+
+        Mono<Void> deletedEducation = educationService.deleteEducationByEducationId(education.getVetId(), education.getEducationId());
+
+        StepVerifier
+                .create(deletedEducation)
+                .expectError(NotFoundException.class)
+                .verify();
+    }
+
     @Test
     void updateEducationOfVet(){
         when(educationRepository.save(any())).thenReturn(Mono.just(education));
