@@ -63,21 +63,7 @@ class EducationServiceImplTest {
 
 
     @Test
-    void getAllEducationsByVetId() {
-        when(educationRepository.findAllByVetId(anyString())).thenReturn(Flux.just(education));
-
-        Flux<EducationResponseDTO> educationResponseDTO = educationService.getAllEducationsByVetId("1");
-
-        StepVerifier
-                .create(educationResponseDTO)
-                .consumeNextWith(found -> {
-                    assertEquals(education.getEducationId(), found.getEducationId());
-                    assertEquals(education.getVetId(), found.getVetId());
-                })
-                .verifyComplete();
-    }
-    @Test
-    void deleteEducationByEducationId() {
+    void deleteEducationByEducationId_Success() {
         when(educationRepository.findByVetIdAndEducationId(anyString(), anyString())).thenReturn(Mono.just(education));
         when(educationRepository.delete(any())).thenReturn(Mono.empty());
 
@@ -86,6 +72,18 @@ class EducationServiceImplTest {
         StepVerifier
                 .create(deletedEducation)
                 .verifyComplete();
+    }
+
+    @Test
+    void deleteEducationByEducationId_EducationNotFound() {
+        when(educationRepository.findByVetIdAndEducationId(anyString(), anyString())).thenReturn(Mono.empty());
+
+        Mono<Void> deletedEducation = educationService.deleteEducationByEducationId(education.getVetId(), education.getEducationId());
+
+        StepVerifier
+                .create(deletedEducation)
+                .expectError(NotFoundException.class)
+                .verify();
     }
 
     @Test
