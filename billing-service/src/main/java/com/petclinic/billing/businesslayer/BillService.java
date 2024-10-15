@@ -1,6 +1,7 @@
 package com.petclinic.billing.businesslayer;
 
 
+import com.petclinic.billing.datalayer.Bill;
 import com.petclinic.billing.datalayer.BillRequestDTO;
 import com.petclinic.billing.datalayer.BillResponseDTO;
 import com.petclinic.billing.datalayer.BillStatus;
@@ -17,6 +18,7 @@ public interface BillService {
 
     Flux<BillResponseDTO> GetAllBillsByStatus(BillStatus status);
 
+    Mono<Bill>CreateBillForDB(Mono<Bill> bill);
 
     Flux<BillResponseDTO> GetAllBills();
 
