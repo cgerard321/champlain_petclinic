@@ -142,6 +142,7 @@ jobs:
       uses: gradle/actions/setup-gradle@v3
       with: 
         gradle-version: wrapper
+        cache-disabled: true
     - name: Make gradlew executable
       run: chmod +x ./gradlew
       working-directory: ./inventory-service
