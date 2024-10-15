@@ -58,13 +58,15 @@ public class VetController {
     private final AlbumService albumService;
 
 
-    //Ratings
     @GetMapping("{vetId}/ratings")
     public Flux<RatingResponseDTO> getAllRatingsByVetId(@PathVariable String vetId) {
-        return ratingService.getAllRatingsByVetId(EntityDtoUtil.verifyId(vetId));
-
-
+        return ratingService.getAllRatingsByVetId(EntityDtoUtil.verifyId(vetId))
+                .doOnNext(rating -> log.info("Rating ID: {}, Vet ID: {}, Rating: {}, Customer Name: {}, Experience: {}",
+                        rating.getRatingId(), rating.getVetId(), rating.getRating(), rating.getCustomerName(), rating.getExperience()))
+                .doOnComplete(() -> log.info("Successfully fetched all ratings for vetId: {}", vetId))
+                .doOnError(error -> log.error("Error fetching ratings for vet {}", vetId, error));
     }
+
 
 
     @GetMapping("{vetId}/ratings/count")

@@ -125,19 +125,6 @@ ul {
 .album-photo-thumbnail:hover {
   transform: scale(1.08);
 }
-.album-photo-card {
-  position: relative;
-  display: inline-block;
-  margin: 10px;
-}
-
-.album-photo-thumbnail {
-  width: 200px;
-  height: 150px;
-  object-fit: cover;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-}
 
 .delete-photo-button {
   display: block;
@@ -159,12 +146,7 @@ ul {
   background-color: white;
   border-radius: 8px;
   border: 1px solid #ddd;
-}
-
-.vet-ratings-info h2 {
-  font-size: 1.5rem;
-  margin-bottom: 10px;
-  color: #4b4b4b;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .rating-card {
@@ -173,6 +155,16 @@ ul {
   border-radius: 8px;
   margin-bottom: 10px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+  cursor: default;
+}
+
+.rating-card hr {
+  display: none;
+}
+
+.rating-card:hover {
+  transform: scale(1.08);
 }
 
 .rating-card p {
@@ -189,6 +181,3 @@ ul {
   color: #333;
 }
 
-.rating-card hr {
-  border-top: 1px solid #ddd;
-}

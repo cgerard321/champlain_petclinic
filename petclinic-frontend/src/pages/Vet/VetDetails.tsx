@@ -40,6 +40,7 @@ interface RatingResponseType {
   rateDescription: string;
   experience: string;
   rateDate: string;
+  customerName: string;
 }
 
 export default function VetDetails(): JSX.Element {
@@ -420,6 +421,7 @@ export default function VetDetails(): JSX.Element {
           {ratings && ratings.length > 0 ? (
               ratings.map((rating, index) => (
                   <div key={index} className="rating-card">
+                    <p><strong>Customer:</strong> {rating.customerName || "Anonymous"}</p>
                     <p><strong>Rating:</strong> {rating.rating} / 5</p>
                     <p><strong>Experience:</strong> {rating.experience}</p>
                     <p><strong>Description:</strong> {rating.rateDescription}</p>
@@ -431,7 +433,6 @@ export default function VetDetails(): JSX.Element {
               <p>No ratings available</p>
           )}
         </section>
-
 
 
         {vet && (

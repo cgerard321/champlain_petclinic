@@ -116,18 +116,17 @@ public class EntityDtoUtil {
 
     public static RatingResponseDTO toDTO(Rating rating) {
         RatingResponseDTO dto = new RatingResponseDTO();
+        dto.setCustomerName(rating.getCustomerName());
         dto.setRatingId(rating.getRatingId());
         dto.setVetId(rating.getVetId());
         dto.setRating(rating.getRating());
         dto.setRateDescription(rating.getRateDescription());
         dto.setExperience(rating.getExperience());
 
-        // Parse the full date from the stored rateDate string
-        LocalDate localDate = LocalDate.parse(rating.getRateDate()); // "yyyy-MM-dd"
+        LocalDate localDate = LocalDate.parse(rating.getRateDate());
 
-        // Format the date to "MMMM, yyyy"
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM, yyyy");
-        dto.setRateDate(localDate.format(formatter)); // Outputs "May, 2024" for example
+        dto.setRateDate(localDate.format(formatter));
 
         return dto;
     }
@@ -149,10 +148,11 @@ public class EntityDtoUtil {
 
     public static Rating toEntity(RatingRequestDTO ratingRequestDTO) {
         Rating rating = new Rating();
+        rating.setCustomerName(ratingRequestDTO.getCustomerName());
         rating.setVetId(ratingRequestDTO.getVetId());
-        rating.setRating(ratingRequestDTO.getRating());  // Renamed from rateScore to rating
+        rating.setRating(ratingRequestDTO.getRating());
         rating.setRateDescription(ratingRequestDTO.getRateDescription());
-        rating.setExperience(ratingRequestDTO.getPredefinedDescription());  // Renamed from predefinedDescription to experience
+        rating.setExperience(ratingRequestDTO.getPredefinedDescription());
         rating.setRateDate(ratingRequestDTO.getRateDate());
         return rating;
     }

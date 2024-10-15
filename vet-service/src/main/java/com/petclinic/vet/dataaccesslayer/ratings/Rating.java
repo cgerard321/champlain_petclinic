@@ -16,5 +16,6 @@ public class Rating {
     private String rateDescription;
     private PredefinedDescription experience;
     private String rateDate;
+    private String customerName;
 
 }
