@@ -140,12 +140,11 @@ jobs:
         java-version: 17
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v3
-      with: 
-        gradle-version: wrapper
-        
     - name: Make gradlew executable
       run: chmod +x ./gradlew
       working-directory: ./inventory-service
+    - name: Debug Check Version Gradle
+      run: ./gradlew --version
     - name: Build with Gradle
       run: ./gradlew clean build --warning-mode all
       working-directory: ./inventory-service
