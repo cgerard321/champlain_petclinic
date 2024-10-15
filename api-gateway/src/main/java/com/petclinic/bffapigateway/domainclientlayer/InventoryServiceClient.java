@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -334,5 +335,14 @@ public class InventoryServiceClient {
                                 .flatMap(errorMessage -> Mono.error(new InventoryNotFoundException(errorMessage, HttpStatus.NOT_FOUND))))
                 .bodyToMono(Integer.class);
     }
+
+    public Mono<byte[]> createSupplyPdf(String inventoryId) {
+        return webClient.get()
+                .uri("/{inventoryId}/products/download", inventoryId)
+                .accept(MediaType.APPLICATION_PDF) // Expect PDF response
+                .retrieve()
+                .bodyToMono(byte[].class); // Directly read the body as byte[]
+    }
+
 }
 

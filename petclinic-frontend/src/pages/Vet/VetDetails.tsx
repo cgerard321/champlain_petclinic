@@ -41,6 +41,7 @@ export default function VetDetails(): JSX.Element {
     null
   );
   const [photo, setPhoto] = useState<string | null>(null);
+  const [isDefaultPhoto, setIsDefaultPhoto] = useState(false);
   const [albumPhotos, setAlbumPhotos] = useState<AlbumPhotoType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -71,10 +72,12 @@ export default function VetDetails(): JSX.Element {
     } catch (error) {
       setError('Failed to fetch vet photo');
       setPhoto('/images/vet_default.jpg');
+      setIsDefaultPhoto(true); // This indicates the default photo is being used
     }
   }, [vetId]);
 
   const handlePhotoDeleted = (): void => {
+    setIsDefaultPhoto(true);
     fetchVetPhoto();
   };
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -162,6 +165,7 @@ export default function VetDetails(): JSX.Element {
 
     const localImageUrl = URL.createObjectURL(file);
     setPhoto(localImageUrl);
+    setIsDefaultPhoto(false); // Set to false because a new photo is uploaded
 
     try {
       const response = await fetch(
@@ -183,6 +187,7 @@ export default function VetDetails(): JSX.Element {
       const updatedBlob = await response.blob();
       const updatedImageUrl = URL.createObjectURL(updatedBlob);
       setPhoto(updatedImageUrl);
+      setIsDefaultPhoto(false);
     } catch (error) {
       setError('Failed to update vet photo');
     }
@@ -311,10 +316,12 @@ export default function VetDetails(): JSX.Element {
               onChange={handleUpdateVetProfilePhoto}
               accept="image/*"
             />
-            <DeleteVetPhoto
-              vetId={vetId!}
-              onPhotoDeleted={handlePhotoDeleted}
-            />
+            {!isDefaultPhoto && (
+              <DeleteVetPhoto
+                vetId={vetId!}
+                onPhotoDeleted={handlePhotoDeleted}
+              />
+            )}
           </section>
         )}
 
@@ -479,7 +486,10 @@ export default function VetDetails(): JSX.Element {
                       />
                       <button
                         className="delete-photo-button"
-                        onClick={() => handleDeleteAlbumPhoto(photo.id)} // Pass the photo ID for deletion
+                        onClick={e => {
+                          e.stopPropagation(); // This prevents the modal from opening
+                          handleDeleteAlbumPhoto(photo.id); // Pass the photo ID for deletion
+                        }}
                       >
                         Delete Image
                       </button>

@@ -23,7 +23,14 @@ public class EmergencyResponseDTO {
     private String description;
 
 
+    private String petId;
     private String petName;
+    private Date petBirthDate;
+    private String practitionerId;
+    private String vetFirstName;
+    private String vetLastName;
+    private String vetEmail;
+    private String vetPhoneNumber;
 
 
     private UrgencyLevel urgencyLevel;

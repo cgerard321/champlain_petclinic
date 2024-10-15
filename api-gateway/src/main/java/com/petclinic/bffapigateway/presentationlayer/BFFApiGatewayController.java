@@ -11,6 +11,7 @@ import com.petclinic.bffapigateway.dtos.Inventory.*;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.*;
 import com.petclinic.bffapigateway.dtos.Vets.*;
+import com.petclinic.bffapigateway.dtos.Visits.Emergency.EmergencyResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.VisitRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewResponseDTO;
@@ -345,6 +346,15 @@ public class BFFApiGatewayController {
 //not ideal since returns complete pet dto
         return getPetsByOwnerId(ownerId).flatMap(petResponseDTO -> getVisitsForPet(petResponseDTO.getPetId()));
     }
+
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET,Roles.OWNER})
+    @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN,Roles.VET})
+    @GetMapping(value = "visits/emergency/owners/{ownerId}", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<EmergencyResponseDTO> getEmergencyVisitsByOwnerId(@PathVariable String ownerId){
+//not ideal since returns complete pet dto
+        return getPetsByOwnerId(ownerId).flatMap(petResponseDTO -> getEmergencyVisitsForPet(petResponseDTO.getPetId()));
+    }
     @GetMapping(value = "visits/vets/{practitionerId}", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<VisitResponseDTO> getVisitByPractitionerId(@PathVariable String practitionerId){
         return visitsServiceClient.getVisitByPractitionerId(practitionerId);
@@ -353,6 +363,11 @@ public class BFFApiGatewayController {
     @GetMapping(value = "visits/pets/{petId}", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<VisitResponseDTO> getVisitsForPet(@PathVariable String petId){
         return visitsServiceClient.getVisitsForPet(petId);
+    }
+
+    @GetMapping(value = "visits/emergency/pets/{petId}", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<EmergencyResponseDTO> getEmergencyVisitsForPet(@PathVariable String petId){
+        return visitsServiceClient.getEmergencyVisitForPet(petId);
     }
 
     @GetMapping(value = "visits/status/{status}", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
@@ -1092,7 +1107,7 @@ public class BFFApiGatewayController {
 
     @GetMapping(value="inventory/{inventoryId}/products/lowstock")
     public Flux<ProductResponseDTO>getLowStockProducts(@PathVariable String inventoryId, @RequestParam Optional<Integer> threshold){
-        int stockThreshold = threshold.orElse(16);
+        int stockThreshold = threshold.orElse(20);
         return inventoryServiceClient.getLowStockProducts(inventoryId, stockThreshold);
     }
 
