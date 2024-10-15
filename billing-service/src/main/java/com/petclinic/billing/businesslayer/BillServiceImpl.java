@@ -18,6 +18,7 @@ import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.util.function.Predicate;
 
@@ -35,12 +36,18 @@ public class BillServiceImpl implements BillService{
 
         return billRepository.findByBillId(billUUID).map(EntityDtoUtil::toBillResponseDto)
                 .doOnNext(t -> t.setTaxedAmount(((t.getAmount() * 15)/100)+ t.getAmount()))
-                .doOnNext(t -> t.setTaxedAmount(Math.round(t.getTaxedAmount() * 100.0) / 100.0));
+                .doOnNext(t -> t.setTaxedAmount(Math.round(t.getTaxedAmount() * 100.0) / 100.0))
+                .doOnNext(t -> t.setTimeRemaining(timeRemaining(t)));
     }
 
     @Override
     public Flux<BillResponseDTO> GetAllBillsByStatus(BillStatus status) {
         return billRepository.findAllBillsByBillStatus(status).map(EntityDtoUtil::toBillResponseDto);
+    }
+
+    @Override
+    public Mono<Bill> CreateBillForDB(Mono<Bill> bill) {
+        return bill.flatMap(billRepository::insert);
     }
 
     @Override
@@ -198,6 +205,16 @@ public class BillServiceImpl implements BillService{
         return billRepository.deleteBillsByCustomerId(customerId);
 
     }
+
+    private long timeRemaining(BillResponseDTO bill){
+        if (bill.getDueDate().isBefore(LocalDate.now())) {
+            return 0;
+        }
+
+        return Duration.between(LocalDate.now().atStartOfDay(), bill.getDueDate().atStartOfDay()).toDays();
+    }
+
+
 
 //    private Mono<RequestContextAdd> vetRequestResponse(RequestContextAdd rc) {
 //        return
