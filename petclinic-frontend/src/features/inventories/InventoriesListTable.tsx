@@ -12,6 +12,7 @@ import { ProductModel } from '@/features/inventories/models/ProductModels/Produc
 import inventoryStyles from './InventoriesListTable.module.css';
 import cardStylesInventory from './CardInventoryTeam.module.css';
 import DefaultInventoryImage from '@/assets/Inventory/DefaultInventoryImage.jpg';
+import { useLocation } from 'react-router-dom';
 
 export default function InventoriesListTable(): JSX.Element {
   const [selectedInventories, setSelectedInventories] = useState<Inventory[]>(
@@ -207,6 +208,16 @@ export default function InventoriesListTable(): JSX.Element {
     setSelectedInventories([]);
   };
 
+  const location = useLocation();
+  const lastConsultedInventoryId = location.state?.lastConsultedInventoryId || null;
+
+  const handleCardClick = (inventoryId: string) => {
+    navigate(`/inventory/${inventoryId}/products`, {
+      state: { lastConsultedInventoryId: inventoryId },
+    });
+  };
+
+
   return (
     <>
       <div>
@@ -324,10 +335,16 @@ export default function InventoriesListTable(): JSX.Element {
         <div className={cardStylesInventory.cardContainerCustom}>
           {inventoryList.map(inventory => (
             <div
-              className={cardStylesInventory.card}
+              className={`
+              ${cardStylesInventory.card} 
+              ${
+                inventory.inventoryId === lastConsultedInventoryId
+                  ? cardStylesInventory.highlightedCard
+                  : ''
+              }`}
               key={inventory.inventoryName}
               onClick={() =>
-                navigate(`/inventory/${inventory.inventoryId}/products`)
+                handleCardClick(inventory.inventoryId)
               }
               onMouseLeave={() => setOpenMenuId(null)}
               style={{ cursor: 'pointer' }}

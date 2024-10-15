@@ -177,7 +177,7 @@ const InventoryProducts: React.FC = () => {
 
       <button
         className="btn btn-secondary"
-        onClick={() => navigate('/inventories')}
+        onClick={() => navigate('/inventories', { state: { lastConsultedInventoryId: inventoryId } })}
       >
         Back
       </button>
