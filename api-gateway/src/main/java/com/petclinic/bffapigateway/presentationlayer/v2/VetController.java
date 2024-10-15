@@ -177,4 +177,13 @@ public class VetController {
         return vetsServiceClient.getEducationsByVetId(vetId);
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS, Roles.VET})
+    @DeleteMapping("/{vetId}/educations/{educationId}")
+    public Mono<ResponseEntity<Void>> deleteEducation(
+            @PathVariable String vetId,
+            @PathVariable String educationId) {
+        return vetsServiceClient.deleteEducation(vetId, educationId)
+                .then(Mono.just(ResponseEntity.noContent().<Void>build()));
+    }
+
 }

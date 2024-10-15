@@ -225,12 +225,13 @@ public class VetController {
 
 
     @DeleteMapping("{vetId}/educations/{educationId}")
-    public Mono<Void> deleteEducationByEducationId(@PathVariable String vetId,
-                                                   @PathVariable String educationId){
-        return educationService.deleteEducationByEducationId(vetId, educationId);
-
-
+    public Mono<ResponseEntity<Void>> deleteEducationByEducationId(@PathVariable String vetId,
+                                                                   @PathVariable String educationId){
+        return educationService.deleteEducationByEducationId(vetId, educationId)
+                .then(Mono.just(ResponseEntity.noContent().<Void>build()))
+                .onErrorResume(NotFoundException.class, e -> Mono.just(ResponseEntity.notFound().build()));
     }
+
     @PutMapping("{vetId}/educations/{educationId}")
     public Mono<ResponseEntity<EducationResponseDTO>> updateEducationByVetIdAndEducationId(@PathVariable String vetId,
                                                                                            @PathVariable String educationId,

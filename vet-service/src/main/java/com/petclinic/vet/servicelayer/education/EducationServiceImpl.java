@@ -34,7 +34,7 @@ public class EducationServiceImpl implements EducationService {
     @Override
     public Mono<Void> deleteEducationByEducationId(String vetId, String educationId) {
         return educationRepository.findByVetIdAndEducationId(vetId, educationId)
-                .switchIfEmpty(Mono.error(new Exception("Education with id " + educationId + " not found.")))
+                .switchIfEmpty(Mono.error(new NotFoundException("Education with id " + educationId + " not found for vetId " + vetId)))
                 .flatMap(educationRepository::delete);
     }
 

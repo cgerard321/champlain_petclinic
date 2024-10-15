@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.dtos.Vets.*;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.integration.ClientAndServer;
+import org.mockserver.model.JsonBody;
 import org.springframework.http.MediaType;
 
 import java.util.Collections;
@@ -437,6 +438,35 @@ public void stopMockServer() {
                 .respond(
                         response()
                                 .withStatusCode(404));
+    }
+
+    public void registerDeleteEducationByVetIdEndpoint(String vetId, String educationId) {
+        mockServerClient_VetService
+                .when(
+                        request()
+                                .withMethod("DELETE")
+                                .withPath("/vets/" + vetId + "/educations/" + educationId)
+                )
+                .respond(
+                        response()
+                                .withStatusCode(204)
+                );
+    }
+
+    public void registerDeleteEducationByVetIdEndpointNotFound(String vetId, String educationId) {
+        String responseBody = "{\"message\":\"Education not found: " + educationId + "\"}";
+        mockServerClient_VetService
+                .when(
+                        request()
+                                .withMethod("DELETE")
+                                .withPath("/vets/" + vetId + "/educations/" + educationId)
+                )
+                .respond(
+                        response()
+                                .withStatusCode(404)
+                                .withHeader("Content-Type", "application/json")
+                                .withBody(responseBody)  // Use raw JSON string
+                );
     }
 
 }
