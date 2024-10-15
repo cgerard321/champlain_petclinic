@@ -205,5 +205,15 @@ public class VetController {
         return vetsServiceClient.getRatingsByVetId(vetId)
                 .doOnError(error -> log.error("Error fetching ratings for vet {}", vetId, error));
     }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
+    @DeleteMapping("/{vetId}/educations/{educationId}")
+    public Mono<ResponseEntity<Void>> deleteEducation(
+            @PathVariable String vetId,
+            @PathVariable String educationId) {
+        return vetsServiceClient.deleteEducation(vetId, educationId)
+                .then(Mono.just(ResponseEntity.noContent().<Void>build()))
+                .onErrorResume(NotFoundException.class, e -> Mono.just(ResponseEntity.notFound().build()));
+    }
 }
 
