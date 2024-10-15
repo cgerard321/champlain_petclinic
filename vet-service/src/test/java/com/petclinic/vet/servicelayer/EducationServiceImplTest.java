@@ -84,6 +84,7 @@ class EducationServiceImplTest {
                 .create(deletedEducation)
                 .verifyComplete();
     }
+
     @Test
     void updateEducationOfVet(){
         when(educationRepository.save(any())).thenReturn(Mono.just(education));

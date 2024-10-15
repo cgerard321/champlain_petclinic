@@ -188,4 +188,13 @@ public class VetController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
+    @DeleteMapping("/{vetId}/educations/{educationId}")
+    public Mono<ResponseEntity<Void>> deleteEducation(
+            @PathVariable String vetId,
+            @PathVariable String educationId) {
+        return vetsServiceClient.deleteEducation(vetId, educationId)
+                .then(Mono.just(ResponseEntity.noContent().<Void>build()));
+    }
+
 }
