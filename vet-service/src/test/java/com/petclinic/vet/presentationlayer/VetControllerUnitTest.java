@@ -624,11 +624,31 @@ class VetControllerUnitTest {
                 .uri("/vets/" + vetId + "/educations/{educationId}", educationId)
                 .accept(APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk();
+                .expectStatus().isNoContent();
+
+        Mockito.verify(educationService, times(1))
+                .deleteEducationByEducationId(vetId, educationId);
+    }
+
+    @Test
+    void deleteEducationForVetByEducationId_EducationNotFound() {
+        String educationId = "non-existent-id";
+        String vetId = "694ac37f-1e07-43c2-93bc-61839e61d989";
+
+        when(educationService.deleteEducationByEducationId(vetId, educationId))
+                .thenReturn(Mono.error(new NotFoundException("Education not found")));
+
+        client
+                .delete()
+                .uri("/vets/" + vetId + "/educations/{educationId}", educationId)
+                .accept(APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound();
 
         Mockito.verify(educationService, times(1))
                 .deleteEducationByEducationId(vetId,educationId);
     }
+
     @Test
     void updateEducationWithValidVetIdAndValidEducationId_shouldSucceed(){
         EducationRequestDTO updatedEducation = EducationRequestDTO.builder()
