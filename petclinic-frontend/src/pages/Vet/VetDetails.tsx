@@ -5,6 +5,8 @@ import './VetDetails.css';
 import axios from 'axios';
 import DeleteVetPhoto from '@/pages/Vet/DeleteVetPhoto.tsx';
 import UpdateVetEducation from '@/pages/Vet/UpdateVetEducation';
+import DeleteVetEducation from '@/pages/Vet/DeleteVetEducation';
+
 
 interface VetResponseType {
   vetId: string;
@@ -79,6 +81,14 @@ export default function VetDetails(): JSX.Element {
       setIsDefaultPhoto(true); // This indicates the default photo is being used
     }
   }, [vetId]);
+  
+  const handleEducationDeleted = (deletedEducationId: string): void => {
+    setEducation(prevEducation =>
+        prevEducation
+            ? prevEducation.filter(edu => edu.educationId !== deletedEducationId)
+            : null
+    );
+  };
 
   const handlePhotoDeleted = (): void => {
     setIsDefaultPhoto(true);
@@ -532,6 +542,11 @@ export default function VetDetails(): JSX.Element {
                     >
                       Update Education
                     </button>
+                    <DeleteVetEducation
+                        vetId={vetId!}
+                        educationId={edu.educationId}
+                        onEducationDeleted={handleEducationDeleted}
+                    />
                     <hr />
                   </div>
                 ))
