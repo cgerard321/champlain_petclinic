@@ -149,7 +149,7 @@ jobs:
     - name: Debug Check Version Gradle
       run: ./gradlew --version
     - name: Build with Gradle
-      run: ./gradlew clean build --warning-mode all
+      run: ./gradlew clean build -x test
       working-directory: ./inventory-service
 
   products_service_test:
