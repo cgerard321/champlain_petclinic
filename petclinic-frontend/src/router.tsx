@@ -57,7 +57,6 @@ import ReviewsCustomer from '@/pages/Review/CustomerReviews.tsx';
 import AddReviewsCustomer from '@/pages/Review/CustomerAddReviewForm.tsx';
 import EmergencyDetails from './features/visits/EmergencyByEmergencyId';
 
-
 const router = createBrowserRouter([
   {
     children: [
