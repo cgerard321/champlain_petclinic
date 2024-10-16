@@ -62,7 +62,7 @@ export default function VetCardTable({
         vets.map(vet => (
           <div
             key={vet.vetId}
-            className="card"
+            className="card-vets"
             onClick={() => handleCardClick(vet.vetId)}
           >
             <div className="photo-container">
