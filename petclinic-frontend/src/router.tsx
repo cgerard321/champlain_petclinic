@@ -54,6 +54,8 @@ import CustomerEmergency from './pages/Visit/CustomerEmergency';
 import AddEmergencyForm from './features/visits/Emergency/AddEmergencyForm';
 import LowStockProducts from '@/features/inventories/LowStockProducts.tsx';
 import MoveInventoryProducts from '@/features/inventories/MoveInventoryProducts.tsx';
+import ReviewsCustomer from '@/pages/Review/CustomerReviews.tsx';
+import AddReviewsCustomer from '@/pages/Review/CustomerAddReviewForm.tsx';
 import EmergencyDetails from './features/visits/EmergencyByEmergencyId';
 
 const router = createBrowserRouter([
@@ -428,6 +430,22 @@ const router = createBrowserRouter([
         ),
       },
     ],
+  },
+  {
+    path: AppRoutePaths.CustomerReviews,
+    element: (
+      <ProtectedRoute>
+        <ReviewsCustomer />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: AppRoutePaths.CustomerAddReview,
+    element: (
+      <ProtectedRoute>
+        <AddReviewsCustomer />
+      </ProtectedRoute>
+    ),
   },
   {
     path: AppRoutePaths.Default,
