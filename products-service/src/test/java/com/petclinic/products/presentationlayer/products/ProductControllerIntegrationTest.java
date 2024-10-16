@@ -2,6 +2,7 @@ package com.petclinic.products.presentationlayer.products;
 
 import com.petclinic.products.datalayer.products.Product;
 import com.petclinic.products.datalayer.products.ProductRepository;
+import com.petclinic.products.datalayer.products.ProductType;
 import com.petclinic.products.utils.exceptions.NotFoundException;
 import org.junit.jupiter.api.*;
 import org.reactivestreams.Publisher;
@@ -19,6 +20,7 @@ import reactor.test.StepVerifier;
 import java.util.List;
 import java.util.UUID;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
@@ -479,5 +481,43 @@ class ProductControllerIntegrationTest {
                 .body(Mono.just(requestModel), ProductRequestModel.class)
                 .exchange()
                 .expectStatus().isNotFound();
+    }
+    @Test
+    public void testGetProductsByValidType() {
+        webTestClient.get()
+                .uri("/api/v1/products/filter?productType=FOOD")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(ProductResponseModel.class)
+                .consumeWith(response -> {
+                    var products = response.getResponseBody();
+                    assertThat(products).isNotNull();
+                    assertThat(products.size()).isEqualTo(1);  // Expecting 1 product of type FOOD
+                    assertThat(products.get(0).getProductType()).isEqualTo(ProductType.FOOD);
+                });
+    }
+    @Test
+    public void testGetProductsByInvalidType() {
+        webTestClient.get()
+                .uri("/api/v1/products/filter?productType=INVALID_TYPE")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().is4xxClientError();  // Expecting 400 or 404 error
+    }
+
+    @Test
+    public void testGetProductsByValidTypeNoResults() {
+        webTestClient.get()
+                .uri("/api/v1/products/filter?productType=ACCESSORY")  // Assuming there are no products of this type
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(ProductResponseModel.class)
+                .consumeWith(response -> {
+                    var products = response.getResponseBody();
+                    assertThat(products).isNotNull();
+                    assertThat(products.size()).isEqualTo(0);  // Expecting no products of type ACCESSORY
+                });
     }
 }

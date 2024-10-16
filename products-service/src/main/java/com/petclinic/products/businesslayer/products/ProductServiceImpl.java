@@ -1,5 +1,6 @@
 package com.petclinic.products.businesslayer.products;
 
+import com.petclinic.products.datalayer.products.ProductType;
 import com.petclinic.products.utils.exceptions.InvalidInputException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -195,6 +197,10 @@ public class ProductServiceImpl implements ProductService {
                         product.setProductQuantity(productQuantity);
                     return productRepository.save(product).then();
                 });
+    }
+    @Override
+    public List<Product> getProductsByType(ProductType productType) {
+        return productRepository.findByProductType(productType);
     }
 
 }

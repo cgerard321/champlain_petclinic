@@ -1,5 +1,6 @@
 package com.petclinic.products.presentationlayer.products;
 
+import com.petclinic.products.datalayer.products.ProductType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,6 +16,7 @@ public class ProductRequestModel {
     private String productName;
     private String productDescription;
     private Double productSalePrice;
-    private String productType;
+    private Double averageRating;
     private Integer productQuantity;
+    private ProductType productType;
 }
