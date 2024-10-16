@@ -3,6 +3,7 @@ import { useUser } from '@/context/UserContext';
 import { EmergencyResponseDTO } from './Emergency/Model/EmergencyResponseDTO';
 import './Emergency.css';
 import { useNavigate } from 'react-router-dom';
+import { getAllEmergencyForOwner } from './Emergency/Api/getAllEmergency';
 
 export default function EmergencyVisitCustomer(): JSX.Element {
   const { user } = useUser();
@@ -11,64 +12,49 @@ export default function EmergencyVisitCustomer(): JSX.Element {
 
   const navigate = useNavigate();
 
+  type EmergencyData = string | EmergencyResponseDTO[];
   useEffect(() => {
-    if (!user.userId) return;
-
     const fetchEmergencyVisits = async (): Promise<void> => {
+      if (!user.userId) return; // Ensure userId is available
+
       try {
-        const response = await fetch(
-          `http://localhost:8080/api/v2/gateway/visits/emergency/owners/${user.userId}`,
-          {
-            headers: { Accept: 'text/event-stream' },
-            credentials: 'include',
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error(`Error: ${response.status} ${response.statusText}`);
-        }
-
-        const reader = response.body?.getReader();
-        const decoder = new TextDecoder('utf-8');
-
-        let done = false;
-        const emergenciesArray: EmergencyResponseDTO[] = [];
-
-        while (!done) {
-          const { value, done: streamDone } = (await reader?.read()) || {};
-          done = streamDone || true;
-
-          if (value) {
-            const chunk = decoder.decode(value, { stream: true });
-            const formattedChunks = chunk.trim().split(/\n\n/);
-
-            formattedChunks.forEach(formattedChunk => {
-              const cleanChunk = formattedChunk.trim().replace(/^data:\s*/, '');
-
-              if (cleanChunk) {
-                try {
-                  const newEmergency: EmergencyResponseDTO =
-                    JSON.parse(cleanChunk);
-                  emergenciesArray.push(newEmergency);
-                  setEmergencies([...emergenciesArray]);
-                } catch (e) {
-                  setError('Error parsing chunk');
-                }
-              }
-            });
-          }
-        }
-      } catch (err) {
-        if (err instanceof Error) {
-          setError(`Failed to fetch emergency visits: ${err.message}`);
+        const response = await getAllEmergencyForOwner(user.userId);
+        const formattedResponse = formatEmergencyData(response);
+        if (Array.isArray(formattedResponse)) {
+          setEmergencies(formattedResponse); // Set the emergencies if response is an array
         } else {
-          setError('Failed to fetch emergency visits');
+          console.error('Fetched data is not an array:', formattedResponse);
         }
+      } catch (error) {
+        console.error('Error fetching emergency visits:', error);
+        setError('Failed to fetch emergency visits');
       }
     };
 
-    fetchEmergencyVisits();
+    fetchEmergencyVisits().catch(error =>
+      console.error('Error in fetchEmergencyVisits:', error)
+    );
   }, [user.userId]);
+
+  const formatEmergencyData = (data: EmergencyData): EmergencyResponseDTO[] => {
+    if (typeof data === 'string') {
+      // If the data is a string that starts with 'data:', split and parse it
+      const formattedData = data
+        .split('\n\n')
+        .map(chunk => {
+          const cleanChunk = chunk.trim().replace(/^data:\s*/, '');
+          if (cleanChunk) {
+            return JSON.parse(cleanChunk); // Parse each valid chunk
+          }
+          return null;
+        })
+        .filter((item): item is EmergencyResponseDTO => item !== null); // Filter to ensure only EmergencyResponseDTO types
+
+      return formattedData; // Return as EmergencyResponseDTO[]
+    }
+
+    return []; // Return an empty array if data is not in the expected format
+  };
 
   return (
     <div>
@@ -88,7 +74,6 @@ export default function EmergencyVisitCustomer(): JSX.Element {
               <th>Visit Date</th>
               <th>Description</th>
               <th> PetId</th>
-              <th>Pet Birthdate </th>
               <th>Pet Name</th>
               <th> PractitionnerId</th>
               <th>vetFirstName</th>
@@ -103,7 +88,6 @@ export default function EmergencyVisitCustomer(): JSX.Element {
                 <td>{new Date(emergency.visitDate).toLocaleString()}</td>
                 <td>{emergency.description}</td>
                 <td> {emergency.petId}</td>
-                <td> {new Date(emergency.vetBirthDate).toLocaleString()}</td>
                 <td>{emergency.petName}</td>
                 <td>{emergency.practitionerId}</td>
                 <td>{emergency.vetFirstName}</td>
