@@ -223,7 +223,6 @@ export default function VetDetails(): JSX.Element {
       const mergeHours = (hours: string[]): string => {
         if (hours.length === 0) return '';
 
-        // Change the hour format to 12-hour format
         // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
         const formatHour = (hour: number) => {
           const isPM = hour >= 12;
@@ -231,7 +230,6 @@ export default function VetDetails(): JSX.Element {
           return `${adjustedHour} ${isPM ? 'PM' : 'AM'}`;
         };
 
-        // Convert the ugly hour string (Hour_8_9) to a number
         // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
         const extractHour = (hourString: string) =>
           parseInt(hourString.split('_')[1], 10);
@@ -247,16 +245,14 @@ export default function VetDetails(): JSX.Element {
 
         for (let i = 1; i < hourRanges.length; i++) {
           if (hourRanges[i][0] === currentRange[1]) {
-            currentRange[1] = hourRanges[i][1]; // Extend the range if the next hour is continuous
+            currentRange[1] = hourRanges[i][1];
           } else {
-            // Push the completed range and start a new one
             mergedRanges.push(
               `${formatHour(currentRange[0])} - ${formatHour(currentRange[1])}`
             );
             currentRange = hourRanges[i];
           }
         }
-        // Push the last range
         mergedRanges.push(
           `${formatHour(currentRange[0])} - ${formatHour(currentRange[1])}`
         );
