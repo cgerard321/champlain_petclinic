@@ -388,6 +388,19 @@ class InventoryControllerIntegrationTest {
                 });
     }
 
+    @Test
+    void getAllInventory_shouldSucceed2() {
+        webTestClient.get()
+                .uri("/inventory/all")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBodyList(InventoryResponseDTO.class)
+                .value((list) -> {
+                    assertNotNull(list);
+                });
+    }
 
     @Test
     public void getInventoryByInventoryId_withValidInventoryId_Should_Succeed(){
