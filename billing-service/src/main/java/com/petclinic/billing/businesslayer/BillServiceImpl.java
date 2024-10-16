@@ -10,6 +10,7 @@ import com.petclinic.billing.util.EntityDtoUtil;
 import com.petclinic.billing.util.PdfGenerator;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -25,6 +26,7 @@ import java.util.function.Predicate;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class BillServiceImpl implements BillService{
 
     private final BillRepository billRepository;
@@ -34,7 +36,11 @@ public class BillServiceImpl implements BillService{
     @Override
     public Mono<BillResponseDTO> getBillByBillId(String billUUID) {
 
-        return billRepository.findByBillId(billUUID).map(EntityDtoUtil::toBillResponseDto)
+        return billRepository.findByBillId(billUUID)
+                .doOnNext(bill -> {
+                    log.info("Retrieved Bill: {}", bill);
+                })
+                .map(EntityDtoUtil::toBillResponseDto)
                 .doOnNext(t -> t.setTaxedAmount(((t.getAmount() * 15)/100)+ t.getAmount()))
                 .doOnNext(t -> t.setTaxedAmount(Math.round(t.getTaxedAmount() * 100.0) / 100.0))
                 .doOnNext(t -> t.setTimeRemaining(timeRemaining(t)));

@@ -5,13 +5,14 @@ package com.petclinic.billing.util;
 import com.petclinic.billing.datalayer.Bill;
 import com.petclinic.billing.datalayer.BillRequestDTO;
 import com.petclinic.billing.datalayer.BillResponseDTO;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.UUID;
 
-
+@Slf4j
 public class EntityDtoUtil {
 
 
@@ -33,6 +34,10 @@ public class EntityDtoUtil {
         billResponseDTO.setBillStatus(bill.getBillStatus());
         billResponseDTO.setDueDate(bill.getDueDate());
         billResponseDTO.setTimeRemaining(timeRemaining(bill));
+
+        log.info("Mapped BillResponseDTO: {}", billResponseDTO);
+
+
         return billResponseDTO;
     }
 
