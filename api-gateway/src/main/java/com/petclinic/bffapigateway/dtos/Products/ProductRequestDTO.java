@@ -21,4 +21,5 @@ public class ProductRequestDTO {
     private String productType;
     private Integer productQuantity;
     private LocalDate releaseDate;
+    private ProductStatus productStatus;
 }

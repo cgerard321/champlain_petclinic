@@ -137,6 +137,8 @@ export default function Product({
         +
       </span>
 
+  
+
       <h2
         onClick={handleProductTitleClick}
         style={{
@@ -157,22 +159,24 @@ export default function Product({
         currentRating={currentProduct.averageRating}
         viewOnly={true}
       />
-       {/* {currentProduct.productStatus === 'PRE_ORDER' && (
-      <div
-        style={{
-          position: 'absolute',
-          bottom: '10px',
-          right: '10px',
-          backgroundColor: '#FFD700',     FIX THIS TODAY
-          padding: '5px 10px',
-          borderRadius: '5px',
-          fontWeight: 'bold',
-          color: '#333',
-        }}
-      >
-        {currentProduct.productStatus}
-      </div>
-    )} */}
+       {currentProduct.productStatus === 'PRE_ORDER' && (
+        <div
+          style={{
+            position: 'absolute',
+            top: '10px',
+            right: '10px',
+            backgroundColor: '#FFD700',  
+            padding: '5px 10px',
+            borderRadius: '5px',
+            fontWeight: 'bold',
+            color: '#333',
+            zIndex: 1,
+            boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+          }}
+        >
+          PRE-ORDER
+        </div>
+      )}
 
     </div>
   );

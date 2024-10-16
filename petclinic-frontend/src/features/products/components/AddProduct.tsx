@@ -68,10 +68,8 @@ export default function AddProduct({
     let productStatus: 'PRE_ORDER' | 'AVAILABLE' | 'OUT_OF_STOCK';
     if (releaseDate && releaseDate > new Date()) {
       productStatus = 'PRE_ORDER';
-    } else if (productQuantity > 0) {
-      productStatus = 'AVAILABLE';
-    } else {
-      productStatus = 'OUT_OF_STOCK';
+    } else{
+      productStatus = "AVAILABLE"
     }
   
     const newProduct: ProductModel = {
