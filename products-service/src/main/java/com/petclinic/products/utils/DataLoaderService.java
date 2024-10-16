@@ -2,6 +2,7 @@ package com.petclinic.products.utils;
 
 import com.petclinic.products.datalayer.images.Image;
 import com.petclinic.products.datalayer.images.ImageRepository;
+import com.petclinic.products.datalayer.products.DeliveryType;
 import com.petclinic.products.datalayer.products.Product;
 import com.petclinic.products.datalayer.products.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,11 +34,12 @@ public class DataLoaderService implements CommandLineRunner {
                 .imageId("08a5af6b-3501-4157-9a99-1aa82387b9e4")
                 .productName("Dog Food")
                 .productDescription("Premium dry food for adult dogs")
-                .productSalePrice(45.99)
+                .productSalePrice(46.99)
                 .requestCount(0)
                 .averageRating(1.3)
                 .productType("Food")
                 .productQuantity(44)
+                .deliveryType(DeliveryType.DELIVERY)
                 .build();
 
         Product product2 = Product.builder()
@@ -45,11 +47,12 @@ public class DataLoaderService implements CommandLineRunner {
                 .imageId("36b06c01-10f3-4645-9c45-900afc5a8b8a")
                 .productName("Cat Litter")
                 .productDescription("Clumping cat litter with odor control")
-                .productSalePrice(12.99)
+                .productSalePrice(13.99)
                 .requestCount(0)
                 .averageRating(4.8)
                 .productType("Accessory")
                 .productQuantity(3)
+                .deliveryType(DeliveryType.PICKUP)
                 .build();
 
         Product product3 = Product.builder()
@@ -57,11 +60,12 @@ public class DataLoaderService implements CommandLineRunner {
                 .imageId("be4e60a4-2369-46e8-abee-20c1a8dce3e5")
                 .productName("Flea Collar")
                 .productDescription("Flea and tick prevention for small dogs")
-                .productSalePrice(9.99)
+                .productSalePrice(8.99)
                 .requestCount(0)
                 .averageRating(2.8)
                 .productType("Medication")
                 .productQuantity(53)
+                .deliveryType(DeliveryType.DELIVERY)
                 .build();
 
         Product product4 = Product.builder()
@@ -69,11 +73,12 @@ public class DataLoaderService implements CommandLineRunner {
                 .imageId("7074e0ef-d041-452f-8a0f-cb9ab20d1fed")
                 .productName("Bird Cage")
                 .productDescription("Spacious cage for small birds like parakeets")
-                .productSalePrice(29.99)
+                .productSalePrice(28.99)
                 .requestCount(0)
                 .averageRating(1.3)
                 .productType("Accessory")
                 .productQuantity(8)
+                .deliveryType(DeliveryType.PICKUP)
                 .build();
 
         Product product5 = Product.builder()
@@ -81,11 +86,12 @@ public class DataLoaderService implements CommandLineRunner {
                 .imageId("392c42d9-9505-4c27-b82e-20351b25d33f")
                 .productName("Aquarium Filter")
                 .productDescription("Filter system for small to medium-sized aquariums")
-                .productSalePrice(19.99)
+                .productSalePrice(18.99)
                 .requestCount(0)
                 .averageRating(4.9)
                 .productType("Accessory")
                 .productQuantity(14)
+                .deliveryType(DeliveryType.DELIVERY_AND_PICKUP)
                 .build();
 
         Product product6 = Product.builder()
@@ -93,11 +99,12 @@ public class DataLoaderService implements CommandLineRunner {
                 .imageId("664aa14b-db66-4b25-9d05-f3a9164eb401")
                 .productName("Horse Saddle")
                 .productDescription("Lightweight saddle for riding horses")
-                .productSalePrice(199.99)
+                .productSalePrice(198.99)
                 .requestCount(0)
                 .averageRating(4.7)
                 .productType("Equipment")
                 .productQuantity(58)
+                .deliveryType(DeliveryType.DELIVERY)
                 .build();
 
         Product product7 = Product.builder()
@@ -105,11 +112,12 @@ public class DataLoaderService implements CommandLineRunner {
                 .imageId("3377a03f-8105-47d7-8d8a-d89fd170c7e6")
                 .productName("Rabbit Hutch")
                 .productDescription("Outdoor wooden hutch for rabbits")
-                .productSalePrice(79.99)
+                .productSalePrice(78.99)
                 .requestCount(0)
                 .averageRating(3.4)
                 .productType("Accessory")
                 .productQuantity(66)
+                .deliveryType(DeliveryType.DELIVERY_AND_PICKUP)
                 .build();
 
         Product product8 = Product.builder()
@@ -117,11 +125,12 @@ public class DataLoaderService implements CommandLineRunner {
                 .imageId("c76ed4c1-fc5d-4868-8b39-1bca6b0be368")
                 .productName("Fish Tank Heater")
                 .productDescription("Submersible heater for tropical fish tanks")
-                .productSalePrice(14.99)
+                .productSalePrice(13.99)
                 .requestCount(0)
                 .averageRating(1.2)
                 .productType("Accessory")
                 .productQuantity(0)
+                .deliveryType(DeliveryType.PICKUP)
                 .build();
 
         Resource resource1 = new ClassPathResource("images/dog_food.jpg");

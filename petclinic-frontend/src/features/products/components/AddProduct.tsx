@@ -1,7 +1,8 @@
-import { useState } from 'react';
-import { Button, Form, Modal } from 'react-bootstrap';
-import { ProductModel } from '../models/ProductModels/ProductModel';
-import { ImageModel } from '../models/ProductModels/ImageModel';
+import {useState} from 'react';
+import {Button, Form, Modal} from 'react-bootstrap';
+import {ProductModel} from '../models/ProductModels/ProductModel';
+import {ImageModel} from '../models/ProductModels/ImageModel';
+import {DeliverType} from "@/features/products/models/ProductModels/DeliverType.ts";
 
 interface AddProductProps {
   addProduct: (product: ProductModel) => Promise<ProductModel>;
@@ -14,6 +15,7 @@ export default function AddProduct({
 }: AddProductProps): JSX.Element {
   const [show, setShow] = useState(false);
   const [productType, setProductType] = useState('');
+  const [deliveryType, setDeliveryType] = useState<DeliverType>(DeliverType.DELIVERY);
 
   const handleClose = (): void => setShow(false);
   const handleShow = (): void => setShow(true);
@@ -63,6 +65,7 @@ export default function AddProduct({
       (form.elements.namedItem('productQuantity') as HTMLInputElement).value,
       10
     );
+
     const requestCount = 0;
     const averageRating = 0;
     const status = 'AVAILABLE';
@@ -79,6 +82,8 @@ export default function AddProduct({
       requestCount,
       status,
       productType,
+      deliveryType
+
     };
 
     try {
@@ -155,6 +160,18 @@ export default function AddProduct({
             <Form.Group controlId="formFile" className="mb-3">
               <Form.Label>Upload Image</Form.Label>
               <Form.Control type="file" />
+            </Form.Group>
+            <Form.Group className="mb-3" controlId="formGridDeliveryType">
+              <Form.Label>Delivery Type</Form.Label>
+              <Form.Select
+                  value={deliveryType}
+                  onChange={(e) => setDeliveryType(e.target.value as DeliverType)}
+              >
+                <option value={DeliverType.DELIVERY}>Delivery</option>
+                <option value={DeliverType.PICKUP}>Pickup</option>
+                <option value={DeliverType.DELIVERY_AND_PICKUP}>Delivery and Pickup</option>
+                <option value={DeliverType.NO_DELIVERY_OPTION}>No Delivery Option</option>
+              </Form.Select>
             </Form.Group>
           </Form>
         </Modal.Body>

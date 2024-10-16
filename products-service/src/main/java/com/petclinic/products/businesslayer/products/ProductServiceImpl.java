@@ -131,13 +131,16 @@ public class ProductServiceImpl implements ProductService {
                             existingProduct.setProductDescription(request.getProductDescription());
                             existingProduct.setProductSalePrice(request.getProductSalePrice());
                             existingProduct.setProductType(request.getProductType());
-                            // Add any other fields that need to be updated
+                            existingProduct.setProductQuantity(request.getProductQuantity());
+                            //existingProduct.setDeliveryType(request.getDeliveryType()); // Added update
+                            // Update any other necessary fields
                             return existingProduct;
                         })
                 )
                 .flatMap(productRepository::save)
                 .map(EntityModelUtil::toProductResponseModel);
     }
+
 
     @Override
     public Mono<ProductResponseModel> deleteProductByProductId(String productId) {

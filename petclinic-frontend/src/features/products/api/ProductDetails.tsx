@@ -43,6 +43,18 @@ export default function ProductDetails(): JSX.Element {
       }
     );
   };
+  const getDeliveryTypeLabel = (deliveryType: string): string => {
+    if (deliveryType === 'DELIVERY') {
+      return 'Standard Delivery';
+    } else if (deliveryType === 'PICKUP') {
+      return 'Pickup';
+    } else if (deliveryType === 'DELIVERY_AND_PICKUP') {
+      return 'Delivery and Pickup';
+    }else if(deliveryType === 'NO_DELIVERY_OPTION') {
+      return 'No delivery option';
+    }
+    return 'Unknown Delivery Type';
+  };
 
   const fetchProduct = async (): Promise<void> => {
     if (!productId) return;
@@ -142,17 +154,17 @@ export default function ProductDetails(): JSX.Element {
           </div>
           <div className="productdetails-container">
             <div
-              className="productadmin-container"
-              style={{ visibility: `${isAdmin ? 'visible' : 'hidden'}` }}
+                className="productadmin-container"
+                style={{visibility: `${isAdmin ? 'visible' : 'hidden'}`}}
             >
               <Button variant="warning" onClick={navigateToEditProduct}>
                 Edit
               </Button>
               <Button
-                variant="danger"
-                onClick={() =>
-                  alert('This feature has not yet been implemented')
-                }
+                  variant="danger"
+                  onClick={() =>
+                      alert('This feature has not yet been implemented')
+                  }
               >
                 Delete
               </Button>
@@ -161,8 +173,8 @@ export default function ProductDetails(): JSX.Element {
             <h3>{currentProduct.productSalePrice}$</h3>
             <div className="avgrating-container">
               <StarRating
-                currentRating={currentProduct.averageRating}
-                viewOnly={true}
+                  currentRating={currentProduct.averageRating}
+                  viewOnly={true}
               />
               <h3>{currentProduct.averageRating} / 5</h3>
             </div>
@@ -171,20 +183,23 @@ export default function ProductDetails(): JSX.Element {
             </div>
             <div className="cartactions-container">
               <Button
-                onClick={() =>
-                  alert('This feature has not yet been implemented')
-                }
+                  onClick={() =>
+                      alert('This feature has not yet been implemented')
+                  }
               >
                 Add to Cart
               </Button>
             </div>
             <p>Type: {currentProduct.productType}</p>
+            <div className="deliveryTypeEdit-container">
+              <p>{getDeliveryTypeLabel(currentProduct.deliveryType)}</p>
+            </div>
             <h3>Description</h3>
             <p>{currentProduct.productDescription}</p>
           </div>
           <div className="review-section-container">
             <div className="reviewproduct-container">
-              <h2>Review</h2>
+            <h2>Review</h2>
               <p>Leave a rating:</p>
               <StarRating
                 currentRating={currentUserRating.rating}

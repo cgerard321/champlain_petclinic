@@ -120,3 +120,12 @@
   word-wrap: break-word;
   white-space: normal;
 }
+.deliveryTypeEdit-container {
+  display: flex;
+  justify-content: center;
+  background-color: #93d2fb;
+  border-radius: 5px;
+  color: #2375d9;
+  padding-right: 0;
+  margin-right: 0
+}

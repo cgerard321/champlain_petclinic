@@ -34,6 +34,7 @@ public class EntityModelUtil {
                 .averageRating(productRequestModel.getAverageRating())
                 .productType(productRequestModel.getProductType())
                 .productQuantity(productRequestModel.getProductQuantity())
+                .deliveryType(productRequestModel.getDeliveryType())
                 .build();
     }
 
