@@ -210,19 +210,80 @@ export default function VetDetails(): JSX.Element {
   const renderWorkHours = (workHoursJson: string): JSX.Element => {
     try {
       const workHours: Record<string, string[]> = JSON.parse(workHoursJson);
+      const daysOfWeek = [
+        'Monday',
+        'Tuesday',
+        'Wednesday',
+        'Thursday',
+        'Friday',
+        'Saturday',
+        'Sunday',
+      ];
+
+      const mergeHours = (hours: string[]): string => {
+        if (hours.length === 0) return '';
+
+        // Change the hour format to 12-hour format
+        const formatHour = (hour: number) => {
+          const isPM = hour >= 12;
+          const adjustedHour = hour > 12 ? hour - 12 : hour;
+          return `${adjustedHour} ${isPM ? 'PM' : 'AM'}`;
+        };
+
+        // Convert the ugly hour string (Hour_8_9) to a number
+        const extractHour = (hourString: string) => parseInt(hourString.split('_')[1], 10);
+
+        const hourRanges: [number, number][] = hours.map(hour => {
+          const start = extractHour(hour);
+          const end = start + 1;
+          return [start, end];
+        });
+
+        let mergedRanges: string[] = [];
+        let currentRange = hourRanges[0];
+
+        for (let i = 1; i < hourRanges.length; i++) {
+          if (hourRanges[i][0] === currentRange[1]) {
+            currentRange[1] = hourRanges[i][1]; // Extend the range if the next hour is continuous
+          } else {
+            // Push the completed range and start a new one
+            mergedRanges.push(`${formatHour(currentRange[0])} - ${formatHour(currentRange[1])}`);
+            currentRange = hourRanges[i];
+          }
+        }
+        // Push the last range
+        mergedRanges.push(`${formatHour(currentRange[0])} - ${formatHour(currentRange[1])}`);
+
+        return mergedRanges.join(', ');
+      };
+
       return (
-        <div>
-          {Object.entries(workHours).map(([day, hours], index) => (
-            <div key={index}>
-              <strong>{day}:</strong>
-              <ul>
-                {hours.map((hour, idx) => (
-                  <li key={idx}>{hour}</li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
+          <div>
+            <table>
+              <thead>
+              <tr>
+                <th>Day</th>
+                <th>Hours</th>
+              </tr>
+              </thead>
+              <tbody>
+              {daysOfWeek.map(day => (
+                  <tr key={day}>
+                    <td><strong>{day}</strong></td>
+                    <td>
+                      {workHours[day]?.length ? (
+                          // Merge the hours and display them
+                          mergeHours(workHours[day])
+                      ) : (
+                          // If no hours then show message
+                          'No hours available'
+                      )}
+                    </td>
+                  </tr>
+              ))}
+              </tbody>
+            </table>
+          </div>
       );
     } catch (error) {
       console.error('Error parsing work hours:', error);
