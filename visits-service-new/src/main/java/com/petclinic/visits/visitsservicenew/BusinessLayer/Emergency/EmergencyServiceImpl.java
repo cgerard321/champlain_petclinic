@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.UUID;
+
 @Service
 @Slf4j
 public class EmergencyServiceImpl implements EmergencyService{
@@ -67,6 +69,7 @@ public class EmergencyServiceImpl implements EmergencyService{
 
                                 // Create an Emergency entity
                                 Emergency emergency = Emergency.builder()
+                                        .visitEmergencyId(UUID.randomUUID().toString())
                                         .visitDate(emergencyRequestDTO.getVisitDate())
                                         .description(emergencyRequestDTO.getDescription())
                                         .petId(emergencyRequestDTO.getPetId())
