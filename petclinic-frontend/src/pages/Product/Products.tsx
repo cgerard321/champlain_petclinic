@@ -23,19 +23,16 @@ export default function Products(): JSX.Element {
             <div className="block">
                 <ProductSearch/>
             </div>
-            <div className="block">
-                <h1>Products</h1>
-            </div>
-            <div className="block">
-                <h3>Here are the trending Products</h3>
-            </div>
-            <div className="block">
+            <div className="trending-list-container-gold">
+
+                <h2>Trending Items</h2>
                 <TrendingList/>
             </div>
-            <div className="block">
-                <hr/>
-            </div>
-            <ProductsList/>
+
+                <div className="block">
+                    <hr/>
+                </div>
+                <ProductsList/>
         </div>
     );
 }
