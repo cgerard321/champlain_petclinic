@@ -48,6 +48,26 @@ class ReviewServiceUnitTest {
             .dateSubmitted(LocalDateTime.now())
             .build();
 
+    Review review3 = Review.builder()
+            .id(UUID.randomUUID().toString())
+            .ownerId("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
+            .reviewId(UUID.randomUUID().toString())
+            .rating(4)
+            .reviewerName("Jane Doe")
+            .review("Very good experience")
+            .dateSubmitted(LocalDateTime.now())
+            .build();
+
+    Review review4 = Review.builder()
+            .id(UUID.randomUUID().toString())
+            .ownerId("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
+            .reviewId(UUID.randomUUID().toString())
+            .rating(4)
+            .reviewerName("Jane Doe")
+            .review("Very good experience")
+            .dateSubmitted(LocalDateTime.now())
+            .build();
+
     @Test
     public void whenGetAllReviews_thenReturnReviews() {
         // Arrange
@@ -221,6 +241,87 @@ class ReviewServiceUnitTest {
                         throwable instanceof NotFoundException &&
                                 throwable.getMessage().equals("review id is not found: " + nonExistentReviewId)  // Ensure the message matches the service
                 )
+                .verify();
+    }
+
+    @Test
+    void getAllReviewsByOwnerId_shouldReturnEmptyFlux_whenNoReviewsFound() {
+        String ownerId = "nonExistentOwnerId";
+        when(reviewRepository.findAllByOwnerId(ownerId)).thenReturn(Flux.empty());
+
+        Flux<ReviewResponseDTO> result = reviewService.GetAllReviewsByOwnerId(ownerId);
+
+        StepVerifier.create(result)
+                .verifyComplete();
+    }
+
+    @Test
+    void getAllReviewsByOwnerId_shouldReturnError_whenRepositoryFails() {
+        String ownerId = "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a";
+        when(reviewRepository.findAllByOwnerId(ownerId)).thenReturn(Flux.error(new RuntimeException("Database error")));
+
+        Flux<ReviewResponseDTO> result = reviewService.GetAllReviewsByOwnerId(ownerId);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof RuntimeException && throwable.getMessage().equals("Database error"))
+                .verify();
+    }
+
+    @Test
+    void addReview_shouldReturnError_whenRepositoryFails() {
+        String ownerId = "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a";
+        ReviewRequestDTO reviewRequestDTO = ReviewRequestDTO.builder()
+                .review("Great service!")
+                .rating(5)
+                .build();
+
+        when(reviewRepository.save(any(Review.class))).thenReturn(Mono.error(new RuntimeException("Database error")));
+
+        Mono<ReviewResponseDTO> result = reviewService.addReview(ownerId, Mono.just(reviewRequestDTO));
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof RuntimeException && throwable.getMessage().equals("Database error"))
+                .verify();
+    }
+
+    @Test
+    void deleteReview_shouldDeleteReviewSuccessfully() {
+        String ownerId = "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a";
+        String reviewId = "reviewId123";
+        Review review = new Review();
+        review.setReviewId(reviewId);
+        review.setOwnerId(ownerId);
+
+        ReviewResponseDTO reviewResponseDTO = ReviewResponseDTO.builder()
+                .reviewId(reviewId)
+                .ownerId(ownerId)
+                .build();
+
+        when(reviewRepository.findReviewByOwnerIdAndReviewId(ownerId, reviewId)).thenReturn(Mono.just(review));
+        when(reviewRepository.delete(review)).thenReturn(Mono.empty());
+
+        Mono<ReviewResponseDTO> result = reviewService.deleteReview(ownerId, reviewId);
+
+        StepVerifier.create(result)
+                .expectNextMatches(response -> response.getReviewId().equals(reviewId) && response.getOwnerId().equals(ownerId))
+                .verifyComplete();
+    }
+
+    @Test
+    void deleteReview_shouldReturnError_whenRepositoryFails() {
+        String ownerId = "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a";
+        String reviewId = "reviewId123";
+        Review review = new Review();
+        review.setReviewId(reviewId);
+        review.setOwnerId(ownerId);
+
+        when(reviewRepository.findReviewByOwnerIdAndReviewId(ownerId, reviewId)).thenReturn(Mono.just(review));
+        when(reviewRepository.delete(review)).thenReturn(Mono.error(new RuntimeException("Database error")));
+
+        Mono<ReviewResponseDTO> result = reviewService.deleteReview(ownerId, reviewId);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof RuntimeException && throwable.getMessage().equals("Database error"))
                 .verify();
     }
 

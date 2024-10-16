@@ -1680,7 +1680,51 @@ class InventoryControllerUnitTest {
                     assertArrayEquals(pdfContent, content); // Check if the returned content matches the mocked content
                 });
 
-}
+    }
+
+    @Test
+    public void testUpdateProductInventoryId_Success() {
+        // Mock response DTO
+        ProductResponseDTO mockResponse = new ProductResponseDTO();
+        mockResponse.setProductId("prod123");
+        mockResponse.setInventoryId("newInventory123");
+
+        // Mock the service method
+        when(productInventoryService.updateProductInventoryId(anyString(), anyString(), anyString()))
+                .thenReturn(Mono.just(mockResponse));
+
+        // Perform the PUT request
+        webTestClient.put()
+                .uri("/inventory/currentInventory123/products/prod123/updateInventoryId/newInventory123")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(ProductResponseDTO.class)
+                .value(response -> {
+                    // Assert that the returned DTO has the expected values
+                    assert response.getProductId().equals("prod123");
+                    assert response.getInventoryId().equals("newInventory123");
+                });
+    }
+
+    @Test
+    void testUpdateProductInventoryId_NotFound() {
+        // Given
+        String currentInventoryId = "invalidInventoryId";
+        String productId = "invalidProductId";
+        String newInventoryId = "invalidNewInventoryId";
+
+        // Mocking the service to return empty Mono
+        when(productInventoryService.updateProductInventoryId(currentInventoryId, productId, newInventoryId))
+                .thenReturn(Mono.empty());
+
+        // When and Then
+        webTestClient.put()
+                .uri("/inventory/{currentInventoryId}/products/{productId}/updateInventoryId/{newInventoryId}",
+                        currentInventoryId, productId, newInventoryId)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
 
 
 }

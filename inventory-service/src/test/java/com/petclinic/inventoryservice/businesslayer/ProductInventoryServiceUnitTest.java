@@ -6,6 +6,7 @@ import com.petclinic.inventoryservice.datalayer.Inventory.InventoryTypeRepositor
 import com.petclinic.inventoryservice.datalayer.Product.Product;
 import com.petclinic.inventoryservice.datalayer.Product.ProductRepository;
 import com.petclinic.inventoryservice.presentationlayer.*;
+import com.petclinic.inventoryservice.utils.EntityDTOUtil;
 import com.petclinic.inventoryservice.utils.exceptions.InvalidInputException;
 import com.petclinic.inventoryservice.utils.exceptions.NotFoundException;
 import org.junit.jupiter.api.Test;
@@ -41,6 +42,7 @@ class ProductInventoryServiceUnitTest {
     InventoryRepository inventoryRepository;
     @MockBean
     InventoryTypeRepository inventoryTypeRepository;
+
 
 //    ProductResponseDTO productResponseDTO = ProductResponseDTO.builder()
 //            .inventoryId("1")
@@ -1701,6 +1703,93 @@ class ProductInventoryServiceUnitTest {
                 .verifyComplete();
     }
 
+    @Test
+    void updateProductInventoryId_withValidProduct_shouldUpdateAndReturnProduct() {
+        // Arrange
+        String currentInventoryId = "1";
+        String productId = "101";
+        String newInventoryId = "2";
+
+        Product product = Product.builder()
+                .id("1")
+                .inventoryId(currentInventoryId)
+                .productId(productId)
+                .productName("Product Name")
+                .productPrice(50.0)
+                .productQuantity(10)
+                .productSalePrice(10.10)
+                .build();
+
+        // Mocking behavior
+        when(productRepository.findProductByInventoryIdAndProductId(currentInventoryId, productId))
+                .thenReturn(Mono.just(product));
+
+        // Update the inventory ID on the product before saving
+        product.setInventoryId(newInventoryId);
+
+        when(productRepository.save(any(Product.class)))
+                .thenReturn(Mono.just(product));
+
+        // Act
+        Mono<ProductResponseDTO> result = productInventoryService.updateProductInventoryId(currentInventoryId, productId, newInventoryId);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNextMatches(updatedProduct -> {
+                    assertNotNull(updatedProduct);
+                    assertEquals(newInventoryId, updatedProduct.getInventoryId());
+                    return true; // This indicates that the assertion has passed
+                })
+                .verifyComplete();
+
+        // Verify that the methods were called
+        verify(productRepository, times(1)).findProductByInventoryIdAndProductId(currentInventoryId, productId);
+        verify(productRepository, times(1)).save(any());
+    }
+
+
+    @Test
+    void updateProductInventoryId_withInvalidProductId_shouldThrowNotFoundException() {
+        // Arrange
+        String currentInventoryId = "1";
+        String invalidProductId = "999";
+        String newInventoryId = "2";
+
+        // Mocking behavior
+        when(productRepository.findProductByInventoryIdAndProductId(currentInventoryId, invalidProductId))
+                .thenReturn(Mono.empty());
+
+        // Act & Assert
+        NotFoundException exception = assertThrows(NotFoundException.class,
+                () -> productInventoryService.updateProductInventoryId(currentInventoryId, invalidProductId, newInventoryId).block());
+
+        assertEquals("Product not found with id: " + invalidProductId, exception.getMessage());
+        verify(productRepository, times(1)).findProductByInventoryIdAndProductId(currentInventoryId, invalidProductId);
+        verify(productRepository, times(0)).save(any());
+    }
+
+    @Test
+    void getAllInventories_shouldReturnAllInventories() {
+        // Arrange
+        Inventory inventory = new Inventory();
+        inventory.setInventoryId("1");
+        inventory.setInventoryName("Sample Inventory");
+        inventory.setInventoryType("Type A");
+        inventory.setInventoryDescription("This is a sample inventory.");
+
+        InventoryResponseDTO inventoryResponseDTO = EntityDTOUtil.toInventoryResponseDTO(inventory); // Convert to DTO
+
+        // Mock repository behavior
+        when(inventoryRepository.findAll()).thenReturn(Flux.just(inventory));
+
+        // Act
+        Flux<InventoryResponseDTO> result = productInventoryService.getAllInventories();
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNextMatches(responseDTO -> responseDTO.getInventoryId().equals(inventoryResponseDTO.getInventoryId()))
+                .verifyComplete();
+    }
 
 
 }

@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 public class Review {
     @Id
     private String id;
+    private String ownerId;
     private String reviewId;
     private int rating;
     private String reviewerName;
