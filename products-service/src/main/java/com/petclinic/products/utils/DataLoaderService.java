@@ -3,6 +3,9 @@ package com.petclinic.products.utils;
 import com.petclinic.products.datalayer.images.Image;
 import com.petclinic.products.datalayer.images.ImageRepository;
 import com.petclinic.products.datalayer.products.DeliveryType;
+import com.petclinic.products.datalayer.notifications.Notification;
+import com.petclinic.products.datalayer.notifications.NotificationRepository;
+import com.petclinic.products.datalayer.notifications.NotificationType;
 import com.petclinic.products.datalayer.products.Product;
 import com.petclinic.products.datalayer.products.ProductBundle;
 import com.petclinic.products.datalayer.products.ProductBundleRepository;
@@ -22,6 +25,7 @@ import reactor.core.publisher.Mono;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.EnumSet;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -40,6 +44,9 @@ public class DataLoaderService implements CommandLineRunner {
 
     @Autowired
     RatingRepository ratingRepository;
+
+    @Autowired
+    NotificationRepository notificationRepository;
 
     @Override
     public void run(String... args) throws Exception {
@@ -379,6 +386,72 @@ public class DataLoaderService implements CommandLineRunner {
                 .imageData(imageBytes8)
                 .build();
 
+        Notification notif1 = Notification.builder()
+                .productId(product1.getProductId())
+                .customerId("dc66b03c-0aac-431c-a76b-0d7430fae6fd")
+                .previousPrice(product1.getProductSalePrice())
+                .previousQuantity(product1.getProductQuantity())
+                .notificationType(EnumSet.allOf(NotificationType.class))
+                .build();
+
+        Notification notif2 = Notification.builder()
+                .productId(product2.getProductId())
+                .customerId("d73d5705-344c-49b1-b7a4-acff2b9cae90")
+                .previousPrice(product2.getProductSalePrice())
+                .previousQuantity(product2.getProductQuantity())
+                .notificationType(EnumSet.of(NotificationType.PRICE))
+                .build();
+
+        Notification notif3 = Notification.builder()
+                .productId(product3.getProductId())
+                .customerId("c065c884-61ef-477e-9501-4eb6ff2336b9")
+                .previousPrice(product3.getProductSalePrice())
+                .previousQuantity(product3.getProductQuantity())
+                .notificationType(EnumSet.of(NotificationType.QUANTITY))
+                .build();
+
+        Notification notif4 = Notification.builder()
+                .productId(product4.getProductId())
+                .customerId("d8de5408-8b06-4003-88b1-c26a978e043c")
+                .previousPrice(product4.getProductSalePrice())
+                .previousQuantity(product4.getProductQuantity())
+                .notificationType(EnumSet.of(NotificationType.PRICE))
+                .build();
+
+        Notification notif5 = Notification.builder()
+                .productId(product5.getProductId())
+                .customerId("dad3626d-0cab-4564-8462-45d09f12371a")
+                .previousPrice(product5.getProductSalePrice())
+                .previousQuantity(product5.getProductQuantity())
+                .notificationType(EnumSet.allOf(NotificationType.class))
+                .build();
+
+        Notification notif6 = Notification.builder()
+                .productId(product6.getProductId())
+                .customerId("2ce1cdeb-d245-45c1-bfcd-6e3a21afe7d8")
+                .previousPrice(product6.getProductSalePrice())
+                .previousQuantity(product6.getProductQuantity())
+                .notificationType(EnumSet.of(NotificationType.QUANTITY))
+                .build();
+
+        Notification notif7 = Notification.builder()
+                .productId(product7.getProductId())
+                .customerId("f2cf12d1-37a6-44e6-822a-5872adf8a8b6")
+                .previousPrice(product7.getProductSalePrice())
+                .previousQuantity(product7.getProductQuantity())
+                .notificationType(EnumSet.of(NotificationType.QUANTITY))
+                .build();
+
+        Notification notif8 = Notification.builder()
+                .productId(product8.getProductId())
+                .customerId("ed7ccc4b-50fd-4e40-bcfe-9dae51d4ad02")
+                .previousPrice(product8.getProductSalePrice())
+                .previousQuantity(product8.getProductQuantity())
+                .notificationType(EnumSet.of(NotificationType.PRICE))
+                .build();
+
+
+
         Flux.just(bundle1, bundle2, bundle3)
                 .flatMap(s -> productBundleRepository.insert(Mono.just(s))
                         .log(s.toString()))
@@ -405,6 +478,11 @@ public class DataLoaderService implements CommandLineRunner {
 
         Flux.just(image1, image2, image3, image4, image5, image6, image7, image8)
                 .flatMap(s -> imageRepository.insert(Mono.just(s))
+                        .log(s.toString()))
+                .subscribe();
+
+        Flux.just(notif1, notif2, notif3, notif4, notif5, notif6, notif7, notif8)
+                .flatMap(s -> notificationRepository.insert(Mono.just(s))
                         .log(s.toString()))
                 .subscribe();
     }
