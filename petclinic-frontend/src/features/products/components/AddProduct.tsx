@@ -14,64 +14,92 @@ export default function AddProduct({
 }: AddProductProps): JSX.Element {
   const [show, setShow] = useState(false);
   const [productType, setProductType] = useState('');
+  const [dateAdded, setDateAdded] = useState('');
+  const [releaseDate, setReleaseDate] = useState('');
+  const [error, setError] = useState('');
 
-  const handleClose = (): void => setShow(false);
+  const handleClose = (): void => {
+    setShow(false);
+    setError('');
+  };
   const handleShow = (): void => setShow(true);
+
+  const validateDates = (): boolean => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const addedDate = new Date(dateAdded);
+    const releaseDateObj = releaseDate ? new Date(releaseDate) : null;
+
+    if (addedDate > today) {
+      setError('Date Added cannot be in the future.');
+      return false;
+    }
+
+    if (releaseDateObj && releaseDateObj < addedDate) {
+      setError('Release Date cannot be before Date Added.');
+      return false;
+    }
+
+    setError('');
+    return true;
+  };
 
   const handleSubmit = async (
     event: React.FormEvent<HTMLFormElement>
   ): Promise<void> => {
     event.preventDefault();
-  
+    
+    if (!validateDates()) {
+      return;
+    }
+
     const form = event.currentTarget;
     let createdImage = null;
-  
+
     const fileInput = form.querySelector<HTMLInputElement>('input[type="file"]');
-  
+
     if (fileInput && fileInput.files && fileInput.files.length > 0) {
       const file = fileInput.files[0];
-  
+
       const formData = new FormData();
       formData.append('imageName', file.name);
       formData.append('imageType', file.type);
       formData.append('imageData', file);
-  
+
       try {
         createdImage = await addImage(formData);
       } catch (error) {
         console.error('Error adding image:', error);
       }
     }
-  
+
     if (!createdImage) {
       console.error('Failed creating image');
       return;
     }
-  
+
     const imageId = createdImage.imageId;
     const productName = (form.elements.namedItem('productName') as HTMLInputElement).value;
     const productDescription = (form.elements.namedItem('productDescription') as HTMLInputElement).value;
     const productSalePrice = parseFloat((form.elements.namedItem('productSalePrice') as HTMLInputElement).value);
     const productQuantity = parseInt((form.elements.namedItem('productQuantity') as HTMLInputElement).value, 10);
-    const productType = (form.elements.namedItem('productType') as HTMLInputElement).value;
     const requestCount = 0;
     const averageRating = 0;
     const productId = ''; 
-    
-    const dateAddedInput = (form.elements.namedItem('dateAdded') as HTMLInputElement).value;
-    const dateAdded = dateAddedInput ? new Date(dateAddedInput) : new Date();
 
-    const releaseDateInput = (form.elements.namedItem('releaseDate') as HTMLInputElement).value;
-    const releaseDate = releaseDateInput ? new Date(releaseDateInput) : undefined;
-    
-   
+    const dateAddedObj = new Date(dateAdded);
+    const releaseDateObj = releaseDate ? new Date(releaseDate) : undefined;
+
     let productStatus: 'PRE_ORDER' | 'AVAILABLE' | 'OUT_OF_STOCK';
-    if (releaseDate && releaseDate > new Date()) {
+    if (releaseDateObj && releaseDateObj > new Date()) {
       productStatus = 'PRE_ORDER';
-    } else{
-      productStatus = "AVAILABLE"
+    } else if (productQuantity > 0) {
+      productStatus = 'AVAILABLE';
+    } else {
+      error
+      productStatus = 'OUT_OF_STOCK';
     }
-  
+
     const newProduct: ProductModel = {
       productId,
       imageId,
@@ -83,10 +111,10 @@ export default function AddProduct({
       productStatus,
       requestCount,
       productType,
-      dateAdded,
-      releaseDate,
+      dateAdded: dateAddedObj,
+      releaseDate: releaseDateObj,
     };
-  
+
     try {
       await addProduct(newProduct);
       handleClose();
@@ -163,6 +191,9 @@ export default function AddProduct({
               <Form.Control
                 type="date"
                 name="dateAdded"
+                value={dateAdded}
+                onChange={(e) => setDateAdded(e.target.value)}
+                max={new Date().toISOString().split('T')[0]}
                 required
               />
             </Form.Group>
@@ -171,6 +202,9 @@ export default function AddProduct({
               <Form.Control
                 type="date"
                 name="releaseDate"
+                value={releaseDate}
+                onChange={(e) => setReleaseDate(e.target.value)}
+                min={dateAdded}
               />
             </Form.Group>
             <Form.Group controlId="formFile" className="mb-3">
@@ -191,3 +225,5 @@ export default function AddProduct({
     </div>
   );
 }
+
+
