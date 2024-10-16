@@ -112,14 +112,22 @@ public class EntityDtoUtil {
                             .vetLastName(vetResponseDTO.getLastName())
                             .vetEmail(vetResponseDTO.getEmail())
                             .vetPhoneNumber(vetResponseDTO.getPhoneNumber())
+                            .emergencyType(emergency.getEmergencyType())
+                            .urgencyLevel(emergency.getUrgencyLevel())
                             .build());
                 });
     }
 
     public  Emergency toEmergencyEntity(EmergencyRequestDTO emergencyRequestDTO){
-        Emergency emergency = new Emergency();
-        BeanUtils.copyProperties(emergencyRequestDTO, emergency);
-        return emergency;
+        return Emergency.builder()
+                .visitEmergencyId(generateVisitIdString())
+                .visitDate(emergencyRequestDTO.getVisitDate())
+                .description(emergencyRequestDTO.getDescription())
+                .petId(emergencyRequestDTO.getPetId())
+                .practitionerId(emergencyRequestDTO.getPractitionerId())
+                .urgencyLevel(emergencyRequestDTO.getUrgencyLevel())
+                .emergencyType(emergencyRequestDTO.getEmergencyType())
+                .build();
     }
 
 
