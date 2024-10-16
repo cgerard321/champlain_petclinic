@@ -1,11 +1,14 @@
 package com.petclinic.products.utils;
 
 import com.petclinic.products.datalayer.images.Image;
+import com.petclinic.products.datalayer.notifications.Notification;
 import com.petclinic.products.datalayer.products.Product;
 import com.petclinic.products.datalayer.products.ProductBundle;
 import com.petclinic.products.datalayer.ratings.Rating;
 import com.petclinic.products.presentationlayer.images.ImageRequestModel;
 import com.petclinic.products.presentationlayer.images.ImageResponseModel;
+import com.petclinic.products.presentationlayer.notifications.NotificationRequestModel;
+import com.petclinic.products.presentationlayer.notifications.NotificationResponseModel;
 import com.petclinic.products.presentationlayer.products.ProductBundleRequestModel;
 import com.petclinic.products.presentationlayer.products.ProductBundleResponseModel;
 import com.petclinic.products.presentationlayer.products.ProductRequestModel;
@@ -70,6 +73,23 @@ public class EntityModelUtil {
                 .imageName(imageRequestModel.getImageName())
                 .imageType(imageRequestModel.getImageType())
                 .imageData(imageRequestModel.getImageData())
+                .build();
+    }
+
+    public static NotificationResponseModel toNotificationResponseModel(Notification notification, Product product) {
+        NotificationResponseModel notificationResponseModel = new NotificationResponseModel();
+        BeanUtils.copyProperties(notification, notificationResponseModel);
+        BeanUtils.copyProperties(product, notificationResponseModel);
+        return notificationResponseModel;
+    }
+
+    public static Notification toNotificationEntity(NotificationRequestModel requestModel, Product product, String customerId) {
+        return Notification.builder()
+                .productId(product.getProductId())
+                .customerId(customerId)
+                .previousPrice(product.getProductSalePrice())
+                .previousQuantity(product.getProductQuantity())
+                .notificationType(requestModel.getNotificationType())
                 .build();
     }
 
