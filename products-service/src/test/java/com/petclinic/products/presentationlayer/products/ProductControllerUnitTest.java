@@ -120,7 +120,6 @@ public class ProductControllerUnitTest {
                 .productName("Bird Cage")
                 .productDescription("Spacious cage for small birds like parakeets")
                 .productSalePrice(29.99)
-                .averageRating(0.0)
                 .build();
 
         ProductResponseModel productResponseModel = ProductResponseModel.builder()
@@ -154,7 +153,6 @@ public class ProductControllerUnitTest {
                 .productName("Bird Cage")
                 .productDescription("Spacious cage for small birds like parakeets")
                 .productSalePrice(29.99)
-                .averageRating(0.0)
                 .build();
 
         ProductResponseModel productResponseModel = ProductResponseModel.builder()
