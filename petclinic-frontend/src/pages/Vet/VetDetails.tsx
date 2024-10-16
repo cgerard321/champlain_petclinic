@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { NavBar } from '@/layouts/AppNavBar.tsx';
@@ -231,7 +232,8 @@ export default function VetDetails(): JSX.Element {
         };
 
         // Convert the ugly hour string (Hour_8_9) to a number
-        const extractHour = (hourString: string) => parseInt(hourString.split('_')[1], 10);
+        const extractHour = (hourString: string) =>
+          parseInt(hourString.split('_')[1], 10);
 
         const hourRanges: [number, number][] = hours.map(hour => {
           const start = extractHour(hour);
@@ -239,7 +241,7 @@ export default function VetDetails(): JSX.Element {
           return [start, end];
         });
 
-        let mergedRanges: string[] = [];
+        const mergedRanges: string[] = [];
         let currentRange = hourRanges[0];
 
         for (let i = 1; i < hourRanges.length; i++) {
@@ -247,43 +249,47 @@ export default function VetDetails(): JSX.Element {
             currentRange[1] = hourRanges[i][1]; // Extend the range if the next hour is continuous
           } else {
             // Push the completed range and start a new one
-            mergedRanges.push(`${formatHour(currentRange[0])} - ${formatHour(currentRange[1])}`);
+            mergedRanges.push(
+              `${formatHour(currentRange[0])} - ${formatHour(currentRange[1])}`
+            );
             currentRange = hourRanges[i];
           }
         }
         // Push the last range
-        mergedRanges.push(`${formatHour(currentRange[0])} - ${formatHour(currentRange[1])}`);
+        mergedRanges.push(
+          `${formatHour(currentRange[0])} - ${formatHour(currentRange[1])}`
+        );
 
         return mergedRanges.join(', ');
       };
 
       return (
-          <div>
-            <table>
-              <thead>
+        <div>
+          <table>
+            <thead>
               <tr>
                 <th>Day</th>
                 <th>Hours</th>
               </tr>
-              </thead>
-              <tbody>
+            </thead>
+            <tbody>
               {daysOfWeek.map(day => (
-                  <tr key={day}>
-                    <td><strong>{day}</strong></td>
-                    <td>
-                      {workHours[day]?.length ? (
-                          // Merge the hours and display them
-                          mergeHours(workHours[day])
-                      ) : (
-                          // If no hours then show message
-                          'No hours available'
-                      )}
-                    </td>
-                  </tr>
+                <tr key={day}>
+                  <td>
+                    <strong>{day}</strong>
+                  </td>
+                  <td>
+                    {workHours[day]?.length
+                      ? // Merge the hours and display them
+                        mergeHours(workHours[day])
+                      : // If no hours then show message
+                        'No hours available'}
+                  </td>
+                </tr>
               ))}
-              </tbody>
-            </table>
-          </div>
+            </tbody>
+          </table>
+        </div>
       );
     } catch (error) {
       console.error('Error parsing work hours:', error);
