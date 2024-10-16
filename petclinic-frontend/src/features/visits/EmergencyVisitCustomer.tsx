@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from 'react';
 import { useUser } from '@/context/UserContext';
 import { EmergencyResponseDTO } from './Emergency/Model/EmergencyResponseDTO';
