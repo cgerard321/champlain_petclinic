@@ -1,16 +1,17 @@
 import * as React from 'react';
 import { FormEvent, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { addReview } from './Api/addReview';
+import { addCustomerReview } from './Api/addCustomerReview';
 import { ReviewRequestDTO } from './Model/ReviewRequestDTO';
 import './AddForm.css';
+import { useUser } from '@/context/UserContext';
+import { AppRoutePaths } from '@/shared/models/path.routes.ts';
 
-// Define an interface for the error if known
 interface ApiError {
   message: string;
 }
 
-const AddReviewForm: React.FC = (): JSX.Element => {
+const AddCustomerReviewForm: React.FC = (): JSX.Element => {
   const [review, setReview] = useState<ReviewRequestDTO>({
     rating: 0,
     ownerId: '',
@@ -26,6 +27,7 @@ const AddReviewForm: React.FC = (): JSX.Element => {
   const [showNotification, setShowNotification] = useState<boolean>(false);
 
   const navigate = useNavigate();
+  const { user } = useUser(); // Assuming this hook provides the user info
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -60,18 +62,34 @@ const AddReviewForm: React.FC = (): JSX.Element => {
     event: FormEvent<HTMLFormElement>
   ): Promise<void> => {
     event.preventDefault();
+
+    // Validate form inputs
     if (!validate()) return;
 
+    // Set loading state
     setIsLoading(true);
     setErrorMessage('');
     setSuccessMessage('');
 
+    // Ensure the ownerId is set
+    setReview(prevReview => ({
+      ...prevReview,
+      ownerId: user.userId, // Set ownerId from the logged-in user
+    }));
+
     try {
-      await addReview(review);
+      // Call the addCustomerReview API with the updated review state
+      await addCustomerReview(user.userId, review);
+
+      // Success handling
       setSuccessMessage('Review added successfully!');
       setShowNotification(true);
-      setTimeout(() => setShowNotification(false), 3000); // Hide notification after 3 seconds
-      navigate('/reviews'); // Navigate to a different page or clear form
+
+      // Auto-hide success message after 3 seconds
+      setTimeout(() => setShowNotification(false), 3000);
+
+      // Navigate to a different page or reset the form
+      navigate(AppRoutePaths.CustomerReviews);
       setReview({
         rating: 0,
         ownerId: '',
@@ -80,17 +98,18 @@ const AddReviewForm: React.FC = (): JSX.Element => {
         dateSubmitted: new Date(),
       });
     } catch (error) {
-      // Use type assertion or check error type
+      // Error handling
       const apiError = error as ApiError;
       setErrorMessage(`Error adding review: ${apiError.message}`);
     } finally {
+      // Reset loading state
       setIsLoading(false);
     }
   };
 
   return (
     <div className="add-review-form">
-      <h2>Add a Review</h2>
+      <h2>Add a Customer Review</h2>
       {isLoading && <div className="loader">Loading...</div>}
       <form onSubmit={handleSubmit}>
         <div>
@@ -151,4 +170,4 @@ const AddReviewForm: React.FC = (): JSX.Element => {
   );
 };
 
-export default AddReviewForm;
+export default AddCustomerReviewForm;

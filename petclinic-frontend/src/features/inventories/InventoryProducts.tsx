@@ -237,7 +237,7 @@ const InventoryProducts: React.FC = () => {
               <th>Price</th>
               <th>Quantity</th>
               <th>Status</th>
-              <th colSpan={2}>Actions</th>
+              <th colSpan={4}>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -289,6 +289,17 @@ const InventoryProducts: React.FC = () => {
                     }
                   >
                     Reduce Quantity
+                  </button>
+                </td>
+                <td>
+                  <button
+                    onClick={e => {
+                      e.stopPropagation();
+                      navigate(`${product.productId}/move`);
+                    }}
+                    className="btn btn-info"
+                  >
+                    Move
                   </button>
                 </td>
               </tr>
