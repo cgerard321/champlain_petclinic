@@ -221,6 +221,20 @@ public Flux<InventoryResponseDTO> searchInventories(
 
     }
 
+    @PutMapping("/{currentInventoryId}/products/{productId}/updateInventoryId/{newInventoryId}")
+    public Mono<ResponseEntity<ProductResponseDTO>> updateProductInventoryId(@PathVariable String currentInventoryId,
+                                                                             @PathVariable String productId,
+                                                                             @PathVariable String newInventoryId){
+        return productInventoryService.updateProductInventoryId(currentInventoryId, productId, newInventoryId)
+                .map(productResponseDTO -> ResponseEntity.ok().body(productResponseDTO))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/all")
+    public Flux<InventoryResponseDTO> getAllInventories() {
+        return productInventoryService.getAllInventories();
+    }
+
 }
 
 

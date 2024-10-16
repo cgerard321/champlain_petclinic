@@ -805,5 +805,82 @@ public class InventoryControllerTest {
                 .createSupplyPdf(eq(inventoryId));
     }
 
+    @Test
+    void updateProductInventoryId_withValidData_shouldReturnUpdatedProduct() {
+        // Arrange
+        String currentInventoryId = "1";
+        String productId = "101";
+        String newInventoryId = "2";
+        ProductResponseDTO updatedProductResponseDTO = ProductResponseDTO.builder()
+                .productId(productId)
+                .productName("Updated Product 101")
+                .productDescription("Updated Description")
+                .productPrice(149.99)
+                .build();
+
+        when(inventoryServiceClient.updateProductInventoryId(currentInventoryId, productId, newInventoryId))
+                .thenReturn(Mono.just(updatedProductResponseDTO));
+
+        // Act
+        client.put()
+                .uri(baseInventoryURL + "/" + currentInventoryId + "/products/" + productId + "/updateInventoryId/" + newInventoryId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(ProductResponseDTO.class)
+                .isEqualTo(updatedProductResponseDTO);
+
+        // Assert
+        verify(inventoryServiceClient, times(1))
+                .updateProductInventoryId(currentInventoryId, productId, newInventoryId);
+    }
+
+    @Test
+    void updateProductInventoryId_withInvalidData_shouldReturnNotFound() {
+        // Arrange
+        String currentInventoryId = "1";
+        String productId = "999"; // Assuming this product doesn't exist
+        String newInventoryId = "2";
+        when(inventoryServiceClient.updateProductInventoryId(currentInventoryId, productId, newInventoryId))
+                .thenReturn(Mono.empty());
+
+        // Act
+        client.put()
+                .uri(baseInventoryURL + "/" + currentInventoryId + "/products/" + productId + "/updateInventoryId/" + newInventoryId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound();
+
+        // Assert
+        verify(inventoryServiceClient, times(1))
+                .updateProductInventoryId(currentInventoryId, productId, newInventoryId);
+    }
+
+    @Test
+    void getAllInventories_shouldReturnAllInventories() {
+        // Arrange
+        InventoryResponseDTO inventoryResponseDTO1 = buildInventoryDTO();
+        InventoryResponseDTO inventoryResponseDTO2 = buildInventoryDTO().builder()
+                .inventoryId("2")
+                .inventoryName("invt2")
+                .build();
+
+        when(inventoryServiceClient.getAllInventories())
+                .thenReturn(Flux.just(inventoryResponseDTO1, inventoryResponseDTO2));
+
+        // Act
+        client.get()
+                .uri(baseInventoryURL + "/all")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(InventoryResponseDTO.class)
+                .hasSize(2)
+                .contains(inventoryResponseDTO1, inventoryResponseDTO2);
+
+        // Assert
+        verify(inventoryServiceClient, times(1)).getAllInventories();
+    }
+
 
 }

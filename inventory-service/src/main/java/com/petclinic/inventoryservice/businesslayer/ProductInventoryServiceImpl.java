@@ -4,6 +4,7 @@ import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.pdf.PdfWriter;
+import com.petclinic.inventoryservice.datalayer.Inventory.Inventory;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryNameRepository;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryRepository;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryTypeRepository;
@@ -549,6 +550,26 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                         return Mono.error(new RuntimeException("Error generating PDF", e));
                     }
                 });
+
+
+
+    }
+
+    @Override
+    public Mono<ProductResponseDTO> updateProductInventoryId(String currentInventoryId, String productId, String newInventoryId) {
+        return productRepository.findProductByInventoryIdAndProductId(currentInventoryId, productId)
+                .flatMap(product -> {
+                    product.setInventoryId(newInventoryId);
+                    return productRepository.save(product);
+                })
+                .map(EntityDTOUtil::toProductResponseDTO)
+                .switchIfEmpty(Mono.error(new NotFoundException("Product not found with id: " + productId)));
+    }
+
+    @Override
+    public Flux<InventoryResponseDTO> getAllInventories() {
+        return inventoryRepository.findAll() // Fetch all inventories from the repository
+                .map(EntityDTOUtil::toInventoryResponseDTO); // Convert each inventory entity to DTO
     }
 
 }

@@ -22,6 +22,8 @@ import reactor.test.StepVerifier;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -380,6 +382,107 @@ class InventoryServiceClientIntegrationTest {
                         && throwable.getMessage().contains("Product not found in inventory: " + inventoryId))
                 .verify();
     }
+    @Test
+    void updateProductInventoryId_withValidIds_shouldReturnUpdatedProduct() throws JsonProcessingException {
+        // Arrange
+        String currentInventoryId = "currentInventoryId";
+        String productId = "productId";
+        String newInventoryId = "newInventoryId";
 
+        ProductResponseDTO updatedProductResponseDTO = new ProductResponseDTO(
+                productId,
+                newInventoryId,
+                "name",
+                "desc",
+                10.00,
+                2,
+                15.99,
+                Status.OUT_OF_STOCK
+        );
+
+        // Mock the response from the MockWebServer
+        mockWebServer.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+                .setBody(objectMapper.writeValueAsString(updatedProductResponseDTO))
+                .addHeader("Content-Type", "application/json"));
+
+        // Act
+        Mono<ProductResponseDTO> result = inventoryServiceClient.updateProductInventoryId(currentInventoryId, productId, newInventoryId);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNext(updatedProductResponseDTO)
+                .verifyComplete();
+    }
+
+    @Test
+    void updateProductInventoryId_withInvalidProductId_shouldThrowNotFoundException() {
+        // Arrange
+        String currentInventoryId = "currentInventoryId";
+        String productId = "invalidProductId";
+        String newInventoryId = "newInventoryId";
+
+        // Mock a 404 Not Found response from the MockWebServer
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(404)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+                .setBody("{\"message\": \"Product not found in inventory: " + currentInventoryId + "\"}"));
+
+        // Act
+        Mono<ProductResponseDTO> result = inventoryServiceClient.updateProductInventoryId(currentInventoryId, productId, newInventoryId);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable != null
+                        && throwable.getMessage().contains("Product not found in inventory: " + currentInventoryId))
+                .verify();
+    }
+
+    @Test
+    void getAllInventories_shouldReturnAllInventories() throws JsonProcessingException {
+        // Arrange
+        ProductResponseDTO productResponseDTO1 = new ProductResponseDTO(
+                "productId1",
+                "inventoryId1",
+                "name1",
+                "desc1",
+                10.00,
+                2,
+                15.99,
+                Status.OUT_OF_STOCK
+        );
+
+        ProductResponseDTO productResponseDTO2 = new ProductResponseDTO(
+                "productId2",
+                "inventoryId2",
+                "name2",
+                "desc2",
+                12.00,
+                3,
+                17.99,
+                Status.OUT_OF_STOCK
+        );
+
+        // Create lists of products for inventories
+        List<ProductResponseDTO> productResponseDTOList1 = new ArrayList<>(Arrays.asList(productResponseDTO1));
+        List<ProductResponseDTO> productResponseDTOList2 = new ArrayList<>(Arrays.asList(productResponseDTO2));
+
+        InventoryResponseDTO inventoryResponseDTO1 = new InventoryResponseDTO("inventoryId1", "Medication", "Medications", "desc1", "", "", productResponseDTOList1);
+        InventoryResponseDTO inventoryResponseDTO2 = new InventoryResponseDTO("inventoryId2", "Vaccine", "Vaccines", "desc2", "", "", productResponseDTOList2);
+
+        // Mock the response from the MockWebServer
+        mockWebServer.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+                .setBody(objectMapper.writeValueAsString(Arrays.asList(inventoryResponseDTO1, inventoryResponseDTO2)))
+                .addHeader("Content-Type", "application/json"));
+
+        // Act
+        Flux<InventoryResponseDTO> result = inventoryServiceClient.getAllInventories();
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNext(inventoryResponseDTO1, inventoryResponseDTO2)
+                .verifyComplete();
+    }
 
 }
