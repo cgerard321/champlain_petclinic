@@ -47,7 +47,9 @@ public class ProductServiceImpl implements ProductService {
                             .stream()
                             .mapToDouble(Byte::doubleValue)
                             .sum();
-                    product.setAverageRating(sumOfRatings / ratings.size());
+                    Double ratio = sumOfRatings / ratings.size();
+                    // This sets truncates to 2 decimal places without converting data types
+                    product.setAverageRating(Math.floor(ratio * 100) / 100);
                     return Mono.just(product);
                 });
     }
