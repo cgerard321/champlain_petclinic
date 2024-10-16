@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.dtos.Products.ProductRequestDTO;
 
 import com.petclinic.bffapigateway.dtos.Products.ProductResponseDTO;
+import com.petclinic.bffapigateway.dtos.Products.ProductStatus;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterAll;
@@ -20,6 +21,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.io.IOException;
+
 
 class ProductsServiceClientIntegrationTest {
 
@@ -141,7 +143,10 @@ class ProductsServiceClientIntegrationTest {
                 0.00,
                 0,
                 "type",
-                6
+                6,
+                ProductStatus.AVAILABLE
+
+
         );
 
         mockWebServer.enqueue(new MockResponse()
@@ -168,7 +173,8 @@ class ProductsServiceClientIntegrationTest {
                 0.00,
                 0,
                 "type",
-                6
+                6,
+                ProductStatus.AVAILABLE
         );
 
         mockWebServer.enqueue(new MockResponse()
@@ -195,7 +201,10 @@ class ProductsServiceClientIntegrationTest {
                 0.00,
                 0,
                 "type",
-                6
+                6,
+                ProductStatus.AVAILABLE
+
+
         );
 
         mockWebServer.enqueue(new MockResponse()

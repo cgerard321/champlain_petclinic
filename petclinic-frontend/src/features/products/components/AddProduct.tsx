@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Button, Form, Modal } from 'react-bootstrap';
 import { ProductModel } from '../models/ProductModels/ProductModel';
 import { ImageModel } from '../models/ProductModels/ImageModel';
@@ -22,52 +22,58 @@ export default function AddProduct({
     event: React.FormEvent<HTMLFormElement>
   ): Promise<void> => {
     event.preventDefault();
-
+  
     const form = event.currentTarget;
     let createdImage = null;
-
-    const fileInput =
-      form.querySelector<HTMLInputElement>('input[type="file"]');
-
+  
+    const fileInput = form.querySelector<HTMLInputElement>('input[type="file"]');
+  
     if (fileInput && fileInput.files && fileInput.files.length > 0) {
       const file = fileInput.files[0];
-
+  
       const formData = new FormData();
       formData.append('imageName', file.name);
       formData.append('imageType', file.type);
       formData.append('imageData', file);
-
+  
       try {
         createdImage = await addImage(formData);
       } catch (error) {
         console.error('Error adding image:', error);
       }
     }
-
+  
     if (!createdImage) {
       console.error('Failed creating image');
       return;
     }
-
+  
     const imageId = createdImage.imageId;
-    const productName = (
-      form.elements.namedItem('productName') as HTMLInputElement
-    ).value;
-    const productDescription = (
-      form.elements.namedItem('productDescription') as HTMLInputElement
-    ).value;
-    const productSalePrice = parseFloat(
-      (form.elements.namedItem('productSalePrice') as HTMLInputElement).value
-    );
-    const productQuantity = parseInt(
-      (form.elements.namedItem('productQuantity') as HTMLInputElement).value,
-      10
-    );
+    const productName = (form.elements.namedItem('productName') as HTMLInputElement).value;
+    const productDescription = (form.elements.namedItem('productDescription') as HTMLInputElement).value;
+    const productSalePrice = parseFloat((form.elements.namedItem('productSalePrice') as HTMLInputElement).value);
+    const productQuantity = parseInt((form.elements.namedItem('productQuantity') as HTMLInputElement).value, 10);
+    const productType = (form.elements.namedItem('productType') as HTMLInputElement).value;
     const requestCount = 0;
     const averageRating = 0;
-    const status = 'AVAILABLE';
-    const productId = '';
+    const productId = ''; 
+    
+    const dateAddedInput = (form.elements.namedItem('dateAdded') as HTMLInputElement).value;
+    const dateAdded = dateAddedInput ? new Date(dateAddedInput) : new Date();
 
+    const releaseDateInput = (form.elements.namedItem('releaseDate') as HTMLInputElement).value;
+    const releaseDate = releaseDateInput ? new Date(releaseDateInput) : undefined;
+    
+   
+    let productStatus: 'PRE_ORDER' | 'AVAILABLE' | 'OUT_OF_STOCK';
+    if (releaseDate && releaseDate > new Date()) {
+      productStatus = 'PRE_ORDER';
+    } else if (productQuantity > 0) {
+      productStatus = 'AVAILABLE';
+    } else {
+      productStatus = 'OUT_OF_STOCK';
+    }
+  
     const newProduct: ProductModel = {
       productId,
       imageId,
@@ -76,11 +82,13 @@ export default function AddProduct({
       productSalePrice,
       averageRating,
       productQuantity,
+      productStatus,
       requestCount,
-      status,
       productType,
+      dateAdded,
+      releaseDate,
     };
-
+  
     try {
       await addProduct(newProduct);
       handleClose();
@@ -88,7 +96,7 @@ export default function AddProduct({
       console.error('Error adding product:', error);
     }
   };
-
+  
   return (
     <div>
       <Button variant="secondary" onClick={handleShow}>
@@ -148,8 +156,23 @@ export default function AddProduct({
                 name="productType"
                 placeholder="Product Type"
                 value={productType}
-                onChange={e => setProductType(e.target.value)} /////////////////
+                onChange={e => setProductType(e.target.value)}
                 required
+              />
+            </Form.Group>
+            <Form.Group className="mb-3" controlId="formGridDateAdded">
+              <Form.Label>Date Added</Form.Label>
+              <Form.Control
+                type="date"
+                name="dateAdded"
+                required
+              />
+            </Form.Group>
+            <Form.Group className="mb-3" controlId="formGridReleaseDate">
+              <Form.Label>Release Date (for pre-orders)</Form.Label>
+              <Form.Control
+                type="date"
+                name="releaseDate"
               />
             </Form.Group>
             <Form.Group controlId="formFile" className="mb-3">

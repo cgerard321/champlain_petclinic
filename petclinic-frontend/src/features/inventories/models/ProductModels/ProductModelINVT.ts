@@ -4,5 +4,5 @@ export interface ProductModelINVT {
   productPrice: number;
   productQuantity: number;
   productSalePrice: number;
-  productStatus: 'RE_ORDER' | 'OUT_OF_STOCK' | 'AVAILABLE';
+  status: 'PRE_ORDER' | 'OUT_OF_STOCK' | 'AVAILABLE';
 }

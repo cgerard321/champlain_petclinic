@@ -126,12 +126,12 @@ const InventoryProducts: React.FC = () => {
         );
 
         // Determine the new status based on the updated quantity
-        let updatedStatus: 'RE_ORDER' | 'OUT_OF_STOCK' | 'AVAILABLE' =
+        let updatedStatus: 'PRE_ORDER' | 'OUT_OF_STOCK' | 'AVAILABLE' =
           'AVAILABLE';
         if (updatedQuantity === 0) {
           updatedStatus = 'OUT_OF_STOCK';
         } else if (updatedQuantity <= 20) {
-          updatedStatus = 'RE_ORDER';
+          updatedStatus = 'PRE_ORDER';
         }
 
         // Update the product list in the frontend
@@ -248,7 +248,7 @@ const InventoryProducts: React.FC = () => {
                 <td
                   style={{
                     color:
-                      product.status === 'RE_ORDER'
+                      product.status === 'PRE_ORDER'
                         ? '#f4a460'
                         : product.status === 'OUT_OF_STOCK'
                           ? 'red'

@@ -20,7 +20,7 @@ public class EntityDTOUtil {
         if (product.getProductQuantity() == 0) {
             status = Status.OUT_OF_STOCK;
         } else if (product.getProductQuantity() < 20) {
-            status = Status.RE_ORDER;
+            status = Status.PRE_ORDER;
         } else {
             status = Status.AVAILABLE;
         }

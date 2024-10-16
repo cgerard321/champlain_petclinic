@@ -97,7 +97,7 @@ const LowStockPage: React.FC = () => {
                         <td
                           style={{
                             color:
-                              product.status === 'RE_ORDER'
+                              product.status === 'PRE_ORDER'
                                 ? '#f4a460'
                                 : product.status === 'OUT_OF_STOCK'
                                   ? 'red'

@@ -22,5 +22,6 @@ public class ProductResponseDTO {
     private Integer requestCount;
     private String productType;
     private Integer productQuantity;
-    private LocalDate releaseDate;
+    private ProductStatus productStatus;
+
 }
