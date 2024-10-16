@@ -5,10 +5,10 @@ import { ProductModel } from '@/features/products/models/ProductModels/ProductMo
 import Product from './components/Product';
 import AddProduct from './components/AddProduct';
 import { addProduct } from '@/features/products/api/addProduct';
+import { deleteProduct } from '@/features/products/api/deleteProduct'; // Import deleteProduct
 import { useUser } from '@/context/UserContext';
 import './components/Sidebar.css';
 import { getProductsByType } from '@/features/products/api/getProductsByType.ts';
-// import AddImage from './components/AddImage';
 import { addImage } from './api/addImage';
 import { ImageModel } from './models/ProductModels/ImageModel';
 import StarRating from '@/features/products/components/StarRating.tsx';
@@ -23,20 +23,13 @@ export default function ProductList(): JSX.Element {
   const [isRightRole, setIsRightRole] = useState<boolean>(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
   const [filterType, setFilterType] = useState<string>('');
-  const [recentlyClickedProducts, setRecentlyClickedProducts] = useState<
-    ProductModel[]
-  >([]);
+  const [recentlyClickedProducts, setRecentlyClickedProducts] = useState<ProductModel[]>([]);
   const [ratingSort, setRatingSort] = useState<string>('default');
   const [minStars, setMinStars] = useState<number>(0);
   const [maxStars, setMaxStars] = useState<number>(5);
 
   function FilterByPriceErrorHandling(): void {
-    // Validate inputs for filter by price
-    if (
-      minPrice !== undefined &&
-      maxPrice !== undefined &&
-      minPrice > maxPrice
-    ) {
+    if (minPrice !== undefined && maxPrice !== undefined && minPrice > maxPrice) {
       alert('Min Price cannot be greater than Max Price');
       return;
     }
@@ -47,17 +40,10 @@ export default function ProductList(): JSX.Element {
     setIsLoading(true);
     try {
       if (filterType.trim() === '') {
-        const list = await getAllProducts(
-          minPrice,
-          maxPrice,
-          minStars,
-          maxStars,
-          ratingSort
-        );
+        const list = await getAllProducts(minPrice, maxPrice, minStars, maxStars, ratingSort);
         setProductList(list);
       } else {
         const filteredList = await getProductsByType(filterType);
-
         setProductList(filteredList);
       }
     } catch (err) {
@@ -81,7 +67,7 @@ export default function ProductList(): JSX.Element {
     const hasRightRole =
       user?.roles !== undefined &&
       Array.from(user.roles).some(
-        role => role.name === 'ADMIN' || role.name === 'INVENTORY_MANAGER'
+        role => role.name === 'ADMIN' 
       );
     setIsRightRole(hasRightRole);
   }, [user]);
@@ -97,9 +83,7 @@ export default function ProductList(): JSX.Element {
     }
   };
 
-  const handleAddProduct = async (
-    product: ProductModel
-  ): Promise<ProductModel> => {
+  const handleAddProduct = async (product: ProductModel): Promise<ProductModel> => {
     try {
       const savedProduct = await addProduct(product);
       await fetchProducts();
@@ -109,11 +93,19 @@ export default function ProductList(): JSX.Element {
     }
   };
 
+  const handleDeleteProduct = async (productId: string): Promise<void> => {
+    try {
+      await deleteProduct(productId); // Call deleteProduct
+      setProductList(prevProducts => prevProducts.filter(product => product.productId !== productId));
+    } catch (error) {
+      console.error('Failed to delete product:', error);
+    }
+  };
+
   const toggleSidebar = (): void => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  // Handler to close sidebar when clicking outside
   const handleOverlayClick = (): void => {
     setIsSidebarOpen(false);
   };
@@ -141,10 +133,7 @@ export default function ProductList(): JSX.Element {
         updatedProducts.pop();
       }
 
-      localStorage.setItem(
-        'recentlyClickedProducts',
-        JSON.stringify(updatedProducts)
-      );
+      localStorage.setItem('recentlyClickedProducts', JSON.stringify(updatedProducts));
 
       return updatedProducts;
     });
@@ -152,20 +141,10 @@ export default function ProductList(): JSX.Element {
 
   return (
     <div className="product-list-container">
-      {isSidebarOpen && (
-        <div className="overlay" onClick={handleOverlayClick}></div>
-      )}
+      {isSidebarOpen && <div className="overlay" onClick={handleOverlayClick}></div>}
 
-      <div
-        className={`sidebar ${isSidebarOpen ? 'open' : ''}`}
-        id="sidebar"
-        aria-hidden={!isSidebarOpen}
-      >
-        <button
-          className="close-button"
-          onClick={toggleSidebar}
-          aria-label="Close Filters"
-        >
+      <div className={`sidebar ${isSidebarOpen ? 'open' : ''}`} id="sidebar" aria-hidden={!isSidebarOpen}>
+        <button className="close-button" onClick={toggleSidebar} aria-label="Close Filters">
           &times;
         </button>
         <div className="filter-container">
@@ -175,11 +154,7 @@ export default function ProductList(): JSX.Element {
             <input
               type="number"
               value={minPrice ?? typeof 'number'}
-              onChange={e =>
-                setMinPrice(
-                  e.target.value ? parseFloat(e.target.value) : undefined
-                )
-              }
+              onChange={e => setMinPrice(e.target.value ? parseFloat(e.target.value) : undefined)}
               min="0"
               placeholder="e.g., 10"
             />
@@ -189,11 +164,7 @@ export default function ProductList(): JSX.Element {
             <input
               type="number"
               value={maxPrice ?? typeof 'number'}
-              onChange={e =>
-                setMaxPrice(
-                  e.target.value ? parseFloat(e.target.value) : undefined
-                )
-              }
+              onChange={e => setMaxPrice(e.target.value ? parseFloat(e.target.value) : undefined)}
               min="0"
               placeholder="e.g., 100"
             />
@@ -211,26 +182,14 @@ export default function ProductList(): JSX.Element {
             <h2>Filter by Star Rating</h2>
             <div className="star-row">
               <label>Min Stars:</label>
-              <StarRating
-                currentRating={minStars}
-                viewOnly={false}
-                updateRating={setMinStars}
-              />
+              <StarRating currentRating={minStars} viewOnly={false} updateRating={setMinStars} />
             </div>
             <div className="star-row">
               <label>Max Stars:</label>
-              <StarRating
-                currentRating={maxStars}
-                viewOnly={false}
-                updateRating={setMaxStars}
-              />
+              <StarRating currentRating={maxStars} viewOnly={false} updateRating={setMaxStars} />
             </div>
           </div>
-          <select
-            name="rating"
-            value={ratingSort}
-            onChange={e => setRatingSort(e.target.value)}
-          >
+          <select name="rating" value={ratingSort} onChange={e => setRatingSort(e.target.value)}>
             <option value="default">Sort by Rating</option>
             <option value="asc">Low to High</option>
             <option value="desc">High to Low</option>
@@ -245,12 +204,7 @@ export default function ProductList(): JSX.Element {
       </div>
 
       {!isSidebarOpen && (
-        <button
-          className="toggle-sidebar-button"
-          onClick={toggleSidebar}
-          aria-expanded={isSidebarOpen}
-          aria-controls="sidebar"
-        >
+        <button className="toggle-sidebar-button" onClick={toggleSidebar} aria-expanded={isSidebarOpen} aria-controls="sidebar">
           &#9776; Filters
         </button>
       )}
@@ -258,17 +212,20 @@ export default function ProductList(): JSX.Element {
       {isRightRole && (
         <AddProduct addProduct={handleAddProduct} addImage={handleAddImage} />
       )}
+
       <div className="main-content">
         <div className="grid">
           {isLoading ? (
             <p>Loading products...</p>
           ) : productList.length > 0 ? (
             productList.map((product: ProductModel) => (
-              <div
-                key={product.productId}
-                onClick={() => handleProductClick(product)}
-              >
+              <div key={product.productId} onClick={() => handleProductClick(product)}>
                 <Product key={product.productId} product={product} />
+                {isRightRole && (
+                  <button onClick={() => handleDeleteProduct(product.productId)} style={{ color: 'red' }}>
+                    Delete
+                  </button>
+                )}
               </div>
             ))
           ) : (
@@ -287,6 +244,6 @@ export default function ProductList(): JSX.Element {
           </div>
         </div>
       </div>
-    </div>
+</div>
   );
 }
