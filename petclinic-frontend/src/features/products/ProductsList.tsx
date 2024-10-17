@@ -269,7 +269,7 @@ export default function ProductList(): JSX.Element {
       )}
       <div className="main-content">
         <h2>Product Bundles</h2>
-        <div className="grid">
+        <div className="product-bundles-grid">
           {bundleList.length > 0 ? (
             bundleList.map((bundle: ProductBundleModel) => (
               <ProductBundle key={bundle.bundleId} bundle={bundle} />
