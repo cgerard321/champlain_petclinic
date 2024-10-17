@@ -393,9 +393,9 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.AllUsers,
         element: (
-            <ProtectedRoute roles={['ADMIN']}>
-              <AllUsers />
-            </ProtectedRoute>
+          <ProtectedRoute roles={['ADMIN']}>
+            <AllUsers />
+          </ProtectedRoute>
         ),
       },
       {

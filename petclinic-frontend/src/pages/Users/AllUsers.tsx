@@ -14,12 +14,11 @@ const AllUsers: React.FC = (): JSX.Element => {
   const [users, setUsers] = useState<UserResponseModel[]>([]);
 
   useEffect(() => {
-
-    const fetchUsers = async () => {
+    const fetchUsers = async (): Promise<void> => {
       try {
         const response = await axios.get(
-            'http://localhost:8080/api/v2/gateway/users',
-            { withCredentials: true }
+          'http://localhost:8080/api/v2/gateway/users',
+          { withCredentials: true }
         );
         setUsers(response.data);
       } catch (error) {
@@ -31,34 +30,34 @@ const AllUsers: React.FC = (): JSX.Element => {
   }, []);
 
   return (
-      <div>
-        <NavBar />
+    <div>
+      <NavBar />
 
-        <div className="users-container">
-          <h1>Users</h1>
+      <div className="users-container">
+        <h1>Users</h1>
 
-          <table>
-            <thead>
+        <table>
+          <thead>
             <tr>
               <th>User Id</th>
               <th>Username</th>
               <th>Email</th>
               <th>Verified</th>
             </tr>
-            </thead>
-            <tbody>
+          </thead>
+          <tbody>
             {users.map(user => (
-                <tr key={user.userId}>
-                  <td>{user.userId}</td>
-                  <td>{user.username}</td>
-                  <td>{user.email}</td>
-                  <td>{user.verified ? 'Yes' : 'No'}</td>
-                </tr>
+              <tr key={user.userId}>
+                <td>{user.userId}</td>
+                <td>{user.username}</td>
+                <td>{user.email}</td>
+                <td>{user.verified ? 'Yes' : 'No'}</td>
+              </tr>
             ))}
-            </tbody>
-          </table>
-        </div>
+          </tbody>
+        </table>
       </div>
+    </div>
   );
 };
 
