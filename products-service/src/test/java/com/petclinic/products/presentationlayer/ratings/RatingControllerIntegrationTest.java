@@ -712,9 +712,4 @@ class RatingControllerIntegrationTest {
                 .expectNextCount(4)
                 .verifyComplete();
     }
-	// THIS SHOULD BE DELETED BEFORE MERGE TO MAIN
-	@Test
-	public void qodanaFailTest(){
-		fail("Qodana should have started the archive/artifact upload task by now");
-	}
 }
