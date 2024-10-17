@@ -459,7 +459,7 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                             "\nOr ProductDescription: " + productDescription)));
         }
 
-        return productRepository
+        return productRepository // Fetch all products from the repository if no criteria provided
                 .findAllProductsByInventoryId(inventoryId)
                 .map(EntityDTOUtil::toProductResponseDTO)
                 .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with InventoryId: " + inventoryId)));
