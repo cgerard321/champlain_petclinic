@@ -31,11 +31,13 @@ jobs:
         run: ./gradlew build
 
       - name: Create coverage-data directory and copy contents
+        if: success() || failure()
         run: |
           mkdir -p .qodana/code-coverage
           cp -R */build/reports/* .qodana/code-coverage/
 
       - name: Archive coverage data
+        if: success() || failure()
         uses: actions/upload-artifact@v4
         with:
           name: gradle-coverage-data.zip
