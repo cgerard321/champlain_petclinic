@@ -2,15 +2,19 @@ package com.petclinic.visits.visitsservicenew.BusinessLayer;
 
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitResponseDTO;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.web.bind.annotation.RequestParam;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.io.ByteArrayInputStream;
 
 /**
  * Simple interface for all the request controller. Implemented in VisitServiceImpl
  */
 public interface VisitService {
     Flux<VisitResponseDTO> getAllVisits(String description);
+
     Flux<VisitResponseDTO> getVisitsForPet(String petId);
 
     Flux<VisitResponseDTO> getVisitsForStatus(String statusString);
@@ -36,6 +40,8 @@ public interface VisitService {
     Mono<VisitResponseDTO> archiveCompletedVisit(String visitId, Mono<VisitRequestDTO> visitRequestDTO);
 
     Flux<VisitResponseDTO> getAllArchivedVisits();
+
+    Mono<InputStreamResource> exportVisitsToCSV();
 
 //    Mono<VetDTO> testingGetVetDTO(String vetId);
 //    Mono<PetResponseDTO> testingGetPetDTO(int petId);
