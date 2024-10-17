@@ -279,6 +279,8 @@ class RatingControllerIntegrationTest {
                 .build();
         String randomCustomer = UUID.randomUUID().toString();
 
+        Double sum = (rating1Prod1.getRating().doubleValue() + rating2Prod1.getRating().doubleValue() + ratingRequestModel.getRating().doubleValue()) / 3d;
+
         webClient.post()
                 .uri("/api/v1/ratings/" + product1.getProductId() + "/" + randomCustomer)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -304,7 +306,7 @@ class RatingControllerIntegrationTest {
                     assertNotNull(responseModel);
                     assertEquals(product1.getProductId(), responseModel.getProductId());
                     assertEquals(
-                            (rating1Prod1.getRating().doubleValue() + rating2Prod1.getRating().doubleValue() + ratingRequestModel.getRating().doubleValue()) / 3d,
+                            (Math.floor(sum * 100) / 100),
                             responseModel.getAverageRating());
                 });
 
