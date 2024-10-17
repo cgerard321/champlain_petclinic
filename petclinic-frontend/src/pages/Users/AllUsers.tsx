@@ -6,6 +6,7 @@ import axios from 'axios';
 const AllUsers: React.FC = (): JSX.Element => {
   interface UserResponseModel {
     userId: string;
+    roles: { id: number; name: string }[];
     username: string;
     email: string;
     verified: boolean;
@@ -40,6 +41,7 @@ const AllUsers: React.FC = (): JSX.Element => {
           <thead>
             <tr>
               <th>User Id</th>
+              <th>Roles</th>
               <th>Username</th>
               <th>Email</th>
               <th>Verified</th>
@@ -49,6 +51,7 @@ const AllUsers: React.FC = (): JSX.Element => {
             {users.map(user => (
               <tr key={user.userId}>
                 <td>{user.userId}</td>
+                <td>{user.roles.map(role => role.name).join(', ')}</td>
                 <td>{user.username}</td>
                 <td>{user.email}</td>
                 <td>{user.verified ? 'Yes' : 'No'}</td>

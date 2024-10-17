@@ -72,7 +72,7 @@ public class UserServiceImpl implements UserService {
         return userMapper.modelToDetailsList(userRepo.findAll());
     }
 
-
+@Override
     public List<UserDetails> getAllUsers() {
         List<User> users = userRepo.findAll();
         return userMapper.modelToDetailsList(users);
