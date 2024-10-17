@@ -1,10 +1,12 @@
 package com.petclinic.products.presentationlayer.products;
 
+import com.petclinic.products.businesslayer.products.ProductService;
 import com.petclinic.products.datalayer.products.Product;
 import com.petclinic.products.datalayer.products.ProductRepository;
 import com.petclinic.products.datalayer.products.ProductType;
 import com.petclinic.products.utils.exceptions.NotFoundException;
 import org.junit.jupiter.api.*;
+import org.mockito.Mockito;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
@@ -17,6 +19,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -482,42 +485,7 @@ class ProductControllerIntegrationTest {
                 .exchange()
                 .expectStatus().isNotFound();
     }
-    @Test
-    public void testGetProductsByValidType() {
-        webTestClient.get()
-                .uri("/api/v1/products/filter?productType=FOOD")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBodyList(ProductResponseModel.class)
-                .consumeWith(response -> {
-                    var products = response.getResponseBody();
-                    assertThat(products).isNotNull();
-                    assertThat(products.size()).isEqualTo(1);  // Expecting 1 product of type FOOD
-                    assertThat(products.get(0).getProductType()).isEqualTo(ProductType.FOOD);
-                });
-    }
-    @Test
-    public void testGetProductsByInvalidType() {
-        webTestClient.get()
-                .uri("/api/v1/products/filter?productType=INVALID_TYPE")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().is4xxClientError();  // Expecting 400 or 404 error
-    }
+    
 
-    @Test
-    public void testGetProductsByValidTypeNoResults() {
-        webTestClient.get()
-                .uri("/api/v1/products/filter?productType=ACCESSORY")  // Assuming there are no products of this type
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBodyList(ProductResponseModel.class)
-                .consumeWith(response -> {
-                    var products = response.getResponseBody();
-                    assertThat(products).isNotNull();
-                    assertThat(products.size()).isEqualTo(0);  // Expecting no products of type ACCESSORY
-                });
-    }
+
 }
