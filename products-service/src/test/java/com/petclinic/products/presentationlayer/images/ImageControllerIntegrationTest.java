@@ -41,8 +41,8 @@ class ImageControllerIntegrationTest {
     private final Image image1 = Image.builder()
             .imageId("c76ed4c1-fc5d-4868-8b39-1bca6b0be368")
             .imageName("Fish Tank Heater")
-            .imageType("image/jpg")
-            .imageData(Files.readAllBytes(Paths.get("src/main/resources/images/fish_tank_heater.jpg")))
+            .imageType("image/png")
+            .imageData(Files.readAllBytes(Paths.get("src/main/resources/images/fish_tank_heater.png")))
             .build();
 
     private final Image image2 = Image.builder()
@@ -52,13 +52,13 @@ class ImageControllerIntegrationTest {
             .imageData("dummy_image_data2".getBytes())
             .build();
 
-    private final String imageName = "dog_food.jpg";
+    private final String imageName = "dog_food.png";
     private final String invalidImageName = "invalid_image.gif";
     private final String imageTypeRequestJPEG = "image/jpeg";
     private final String imageTypeRequestJPG = "image/jpg";
     private final String imageTypeRequestPNG = "image/png";
     private final String invalidImageTypeRequest = "image/gif";
-    private final byte[] imageBytes = Files.readAllBytes(Paths.get("src/main/resources/images/dog_food.jpg"));
+    private final byte[] imageBytes = Files.readAllBytes(Paths.get("src/main/resources/images/dog_food.png"));
 
     ImageControllerIntegrationTest() throws IOException {
     }
