@@ -13,6 +13,7 @@ import { addImage } from './api/addImage';
 import { ImageModel } from './models/ProductModels/ImageModel';
 import StarRating from '@/features/products/components/StarRating.tsx';
 import './components/StarRating.css';
+import {ProductType} from "@/features/products/api/ProductTypeEnum.ts";
 
 export default function ProductList(): JSX.Element {
   const [productList, setProductList] = useState<ProductModel[]>([]);
@@ -173,67 +174,69 @@ export default function ProductList(): JSX.Element {
           <label>
             Min Price:
             <input
-              type="number"
-              value={minPrice ?? typeof 'number'}
-              onChange={e =>
-                setMinPrice(
-                  e.target.value ? parseFloat(e.target.value) : undefined
-                )
-              }
-              min="0"
-              placeholder="e.g., 10"
+                type="number"
+                value={minPrice ?? typeof 'number'}
+                onChange={e =>
+                    setMinPrice(
+                        e.target.value ? parseFloat(e.target.value) : undefined
+                    )
+                }
+                min="0"
+                placeholder="e.g., 10"
             />
           </label>
           <label>
             Max Price:
             <input
-              type="number"
-              value={maxPrice ?? typeof 'number'}
-              onChange={e =>
-                setMaxPrice(
-                  e.target.value ? parseFloat(e.target.value) : undefined
-                )
-              }
-              min="0"
-              placeholder="e.g., 100"
+                type="number"
+                value={maxPrice ?? typeof 'number'}
+                onChange={e =>
+                    setMaxPrice(
+                        e.target.value ? parseFloat(e.target.value) : undefined
+                    )
+                }
+                min="0"
+                placeholder="e.g., 100"
             />
           </label>
           <label>
             Product Type:
             <select
-              value={filterType}
-              onChange={e => setFilterType(e.target.value)}
+                value={filterType}
+                onChange={e => setFilterType(e.target.value)}
             >
               <option value="">Select Product Type</option>
-              <option value="FOOD">Food</option>
-              <option value="MEDICATION">Medication</option>
-              <option value="ACCESSORY">Accessory</option>
-              <option value="EQUIPMENT">Equipment</option>
+              {Object.values(ProductType).map((type) => (
+                  <option key={type} value={type}>
+                    {type.charAt(0).toUpperCase() + type.slice(1).toLowerCase()}
+                  </option>
+              ))}
             </select>
           </label>
+
           <div className="star-rating-container">
             <h2>Filter by Star Rating</h2>
             <div className="star-row">
               <label>Min Stars:</label>
               <StarRating
-                currentRating={minStars}
-                viewOnly={false}
-                updateRating={setMinStars}
+                  currentRating={minStars}
+                  viewOnly={false}
+                  updateRating={setMinStars}
               />
             </div>
             <div className="star-row">
               <label>Max Stars:</label>
               <StarRating
-                currentRating={maxStars}
-                viewOnly={false}
-                updateRating={setMaxStars}
+                  currentRating={maxStars}
+                  viewOnly={false}
+                  updateRating={setMaxStars}
               />
             </div>
           </div>
           <select
-            name="rating"
-            value={ratingSort}
-            onChange={e => setRatingSort(e.target.value)}
+              name="rating"
+              value={ratingSort}
+              onChange={e => setRatingSort(e.target.value)}
           >
             <option value="default">Sort by Rating</option>
             <option value="asc">Low to High</option>
@@ -249,18 +252,18 @@ export default function ProductList(): JSX.Element {
       </div>
 
       {!isSidebarOpen && (
-        <button
-          className="toggle-sidebar-button"
-          onClick={toggleSidebar}
-          aria-expanded={isSidebarOpen}
-          aria-controls="sidebar"
-        >
-          &#9776; Filters
-        </button>
+          <button
+              className="toggle-sidebar-button"
+              onClick={toggleSidebar}
+              aria-expanded={isSidebarOpen}
+              aria-controls="sidebar"
+          >
+            &#9776; Filters
+          </button>
       )}
 
       {isRightRole && (
-        <AddProduct addProduct={handleAddProduct} addImage={handleAddImage} />
+          <AddProduct addProduct={handleAddProduct} addImage={handleAddImage} />
       )}
       <div className="main-content">
         <div className="grid">
