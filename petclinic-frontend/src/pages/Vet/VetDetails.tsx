@@ -109,12 +109,12 @@ export default function VetDetails(): JSX.Element {
       setIsDefaultPhoto(true); // This indicates the default photo is being used
     }
   }, [vetId]);
-  
+
   const handleEducationDeleted = (deletedEducationId: string): void => {
     setEducation(prevEducation =>
-        prevEducation
-            ? prevEducation.filter(edu => edu.educationId !== deletedEducationId)
-            : null
+      prevEducation
+        ? prevEducation.filter(edu => edu.educationId !== deletedEducationId)
+        : null
     );
   };
 
@@ -618,9 +618,9 @@ export default function VetDetails(): JSX.Element {
                       Update Education
                     </button>
                     <DeleteVetEducation
-                        vetId={vetId!}
-                        educationId={edu.educationId}
-                        onEducationDeleted={handleEducationDeleted}
+                      vetId={vetId!}
+                      educationId={edu.educationId}
+                      onEducationDeleted={handleEducationDeleted}
                     />
                     <hr />
                   </div>
