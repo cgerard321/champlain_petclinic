@@ -262,5 +262,14 @@ public Mono<CartResponseDTO> deleteCartByCartId(String CardId) {
                 .doOnError(e -> log.error("Error moving product {} from wishlist to cart {}: {}", productId, cartId, e.getMessage()));
     }
 
+    public Mono<CartResponseDTO> addProductToWishList(String cartId, String productId, int quantity) {
+        return webClientBuilder.build()
+                .post()
+                .uri(CartServiceUrl + "/" + cartId + "/products/" + productId + "/quantity/" + quantity)
+                .retrieve()
+                .bodyToMono(CartResponseDTO.class)
+                .doOnSuccess(cartResponseDTO -> log.info("Added product {} from product view to wishlist in cart {}", productId, cartId));
+
+    }
 
 }

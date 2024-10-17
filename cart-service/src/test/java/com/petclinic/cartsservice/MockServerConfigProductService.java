@@ -22,10 +22,11 @@ public class MockServerConfigProductService {
 
     public void registerGetProduct1ByProductIdEndpoint() {
         ProductResponseModel productResponseModel = ProductResponseModel.builder()
-                .productId("06a7d573-bcab-4db3-956f-773324b92a88")
+                .productId("06a7d573-bcab-4db3-956f-773324b92a80")
                 .productName("Dog Food")
                 .productDescription("Dog Food")
-                .productSalePrice(10.0)
+                .productSalePrice(45.99)
+                .productQuantity(5)
                 .build();
 
         mockServerClient
@@ -39,7 +40,7 @@ public class MockServerConfigProductService {
                                 .withStatusCode(200)
                                 .withHeader("Content-Type", "application/json")
                                 .withBody("{\"productId\":\"06a7d573-bcab-4db3-956f-773324b92a88\",\"productName\":" +
-                                        "\"Dog Food\",\"productDescription\":\"Dog Food\",\"productSalePrice\":10.0}"));
+                                        "\"Dog Food\",\"productDescription\":\"Premium dry food for adult dogs\",\"productSalePrice\":10.0}"));
     }
 
     public void registerGetProduct_NonExisting_ByProductIdEndpoint() {

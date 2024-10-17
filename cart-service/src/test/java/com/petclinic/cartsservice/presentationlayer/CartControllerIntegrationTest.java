@@ -41,9 +41,7 @@ class CartControllerIntegrationTest {
     public static final String NON_EXISTING_CART_ID = "3ee10bc4-2957-42dc-8d2b-2ecb76301a3c";
     public static final String NON_EXISTING_PRODUCT_ID = "3ee10bc4-2957-42dc-8d2b-2ecb76301a3c";
 
-
-
-    private MockServerConfigProductService mockServerConfigProductService;
+    private static MockServerConfigProductService mockServerConfigProductService;
 
     CartProduct product1 = CartProduct.builder()
             .productId("06a7d573-bcab-4db3-956f-773324b92a80")
@@ -112,13 +110,13 @@ class CartControllerIntegrationTest {
             .build();
 
     @BeforeAll
-    public void startServer(){
+    public static void startServer(){
         mockServerConfigProductService = new MockServerConfigProductService();
         mockServerConfigProductService.registerGetProduct1ByProductIdEndpoint();
     }
 
     @AfterAll
-    public void stopServer(){
+    public static void stopServer(){
         mockServerConfigProductService.stopServer();
     }
 
@@ -132,52 +130,6 @@ class CartControllerIntegrationTest {
                 .expectNextCount(1)
                 .verifyComplete();
     }
-
-
-//    @Test
-//    public void testGetAllCarts_CartsExist_ReturnsCarts() {
-//        // Given: Add a few carts to the database
-//        Publisher<Cart> initializeCartData = cartRepository.deleteAll()
-//                .thenMany(Flux.just(cart1, cart2))
-//                .flatMap(cartRepository::save);
-//
-//        StepVerifier.create(initializeCartData)
-//                .expectNextCount(2)
-//                .verifyComplete();
-//
-//        // When: Send a request to get all carts
-//        webTestClient.get()
-//                .uri("/api/v1/carts")
-//                .exchange()
-//                // Then: Verify the response status and body
-//                .expectStatus().isOk()
-//                .expectBodyList(CartResponseModel.class)
-//                .consumeWith(response -> {
-//                    List<CartResponseModel> carts = response.getResponseBody();
-//                    assertNotNull(carts);
-//                    assertEquals(2, carts.size());
-//                });
-//    }
-
-//    @Test
-//    public void testGetCartById_ValidCartId_ReturnsCart() {
-//        // When: Send a request to get the cart by its ID
-//        webTestClient.get()
-//                .uri("/api/v1/carts/{cartId}", cart1.getCartId())
-//                .exchange()
-//                // Then: Verify the response status and body
-//                .expectStatus().isOk()
-//                .expectBody(CartResponseModel.class)
-//                .consumeWith(response -> {
-//                    CartResponseModel retrievedCart = response.getResponseBody();
-//                    assertNotNull(retrievedCart);
-//                    assertEquals(cart1.getCartId(), retrievedCart.getCartId());
-//                    assertEquals(cart1.getProducts().size(), retrievedCart.getProducts().size());
-//                    // Optionally check details of the products
-//                    assertEquals(cart1.getProducts().get(0).getProductId(), retrievedCart.getProducts().get(0).getProductId());
-//                });
-//    }
-
 
     @Test
     public void testMoveProductFromWishListToCart_ValidProduct_MovesProduct() {
@@ -396,4 +348,32 @@ class CartControllerIntegrationTest {
                     assertNotNull(errorMessage);
                 });
     }
+
+    //TODO: fix my integration tests for addProductToWishList
+//    @Test
+//    void whenAddProductToWishList_thenProductIsNotAlreadyInWishList_thenSuccess(){
+//        // Given
+//        String cartId = cart1.getCartId();
+//        String productId = product1.getProductId();
+//        int quantity = 1;
+//
+//        // When
+//        webTestClient.post()
+//                .uri("/api/v1/carts/{cartId}/products/{productId}/quantity/{quantity}", cartId, productId, quantity)
+//                .accept(MediaType.APPLICATION_JSON)
+//                .exchange()
+//                // Then
+//                .expectStatus().isOk()
+//                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+//                .expectBody(CartResponseModel.class)
+//                .consumeWith(response -> {
+//                    CartResponseModel cartResponse = response.getResponseBody();
+//                    assertNotNull(cartResponse);
+//                    // Verify the product has been added to the wishlist
+//                    assertTrue(cartResponse.getWishListProducts().stream()
+//                            .anyMatch(product -> product.getProductId().equals(productId)));
+//                    // Verify the size of the wishlist products
+//                    assertEquals(cart1.getWishListProducts().size() + 1, cartResponse.getWishListProducts().size());
+//                });
+//    }
 }

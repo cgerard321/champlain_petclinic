@@ -363,17 +363,21 @@ public class CartServiceImpl implements CartService {
         return cartRepository.findCartByCartId(cartId)
                 .switchIfEmpty(Mono.error(new NotFoundException("Cart not found: " + cartId)))
                 .flatMap(cart -> productClient.getProductByProductId(productId)
-                        //add an error handling to see if the product is not found
                         .switchIfEmpty(Mono.error(new NotFoundException("Product not found: " + productId)))
                         .flatMap(product -> {
                             if (quantity <= 0) {
-                                return Mono.error(new InvalidInputException("Quantity must be greater than zero."));
+                                return Mono.error(new InvalidInputException("Quantity must be greater than zero"));
                             }
                             if (product.getProductQuantity() < quantity) {
-                                return Mono.error(new OutOfStockException("You cannot add more than " + product.getProductQuantity() + " items. Only " + product.getProductQuantity() + " items left in stock."));
+                                return Mono.error(new OutOfStockException("Only "  + product.getProductQuantity() + " items left in stock. You added: " + quantity));
                             }
 
-                            Optional<CartProduct> existingProductOpt = cart.getWishListProducts().stream()
+                            // Create a mutable copy of the wishlist
+                            List<CartProduct> wishListProducts = cart.getWishListProducts() != null
+                                    ? new ArrayList<>(cart.getWishListProducts())
+                                    : new ArrayList<>();
+
+                            Optional<CartProduct> existingProductOpt = wishListProducts.stream()
                                     .filter(p -> p.getProductId().equals(productId))
                                     .findFirst();
 
@@ -391,14 +395,18 @@ public class CartServiceImpl implements CartService {
                                         .quantityInCart(quantity)
                                         .productQuantity(product.getProductQuantity())
                                         .build();
-                                cart.getWishListProducts().add(cartProduct);
+                                wishListProducts.add(cartProduct);
                             }
+
+                            // Update the cart with the modified wishlist
+                            cart.setWishListProducts(wishListProducts);
 
                             return cartRepository.save(cart)
                                     .map(savedCart -> EntityModelUtil.toCartResponseModel(savedCart, savedCart.getWishListProducts()));
                         })
                 );
     }
+
 
 
 }
