@@ -13,6 +13,7 @@ import com.petclinic.vet.presentationlayer.VetRequestDTO;
 import com.petclinic.vet.presentationlayer.VetResponseDTO;
 import com.petclinic.vet.servicelayer.VetAverageRatingDTO;
 import com.petclinic.vet.util.EntityDtoUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -23,6 +24,7 @@ import java.time.LocalDate;
 import java.util.*;
 
 @Service
+@Slf4j
 public class RatingServiceImpl implements RatingService {
     private final VetRepository vetRepository;
     private final RatingRepository ratingRepository;
@@ -39,11 +41,18 @@ public class RatingServiceImpl implements RatingService {
     @Override
     public Flux<RatingResponseDTO> getAllRatingsByVetId(String vetId) {
         return vetRepository.findVetByVetId(vetId)
+                .doOnSubscribe(subscription -> log.debug("Fetching ratings for vetId: {}", vetId))
                 .switchIfEmpty(Mono.error(new NotFoundException("vetId not found: " + vetId)))
                 .flatMapMany(vet -> ratingRepository.findAllByVetId(vetId)
+                        .doOnNext(rating -> log.info("Rating ID: {}, Vet ID: {}, Rating: {}, Customer Name: {}, Experience: {}",
+                                rating.getRatingId(), rating.getVetId(), rating.getRateScore(), rating.getCustomerName(), rating.getPredefinedDescription()))
+                        .switchIfEmpty(Flux.error(new NotFoundException("No ratings found for vet " + vetId)))
                         .map(EntityDtoUtil::toDTO)
-                );
+                )
+                .doOnComplete(() -> log.info("Successfully fetched all ratings for vetId: {}", vetId))
+                .doOnError(error -> log.error("Error fetching ratings for vetId: {}", vetId, error));
     }
+
 
     @Override
     public Mono<Void> deleteRatingByRatingId(String vetId, String ratingId) {

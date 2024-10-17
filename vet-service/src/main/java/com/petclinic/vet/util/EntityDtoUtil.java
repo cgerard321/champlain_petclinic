@@ -36,6 +36,8 @@ import org.springframework.core.io.Resource;
 
 import javax.sql.DataSource;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class EntityDtoUtil {
@@ -114,9 +116,26 @@ public class EntityDtoUtil {
 
     public static RatingResponseDTO toDTO(Rating rating) {
         RatingResponseDTO dto = new RatingResponseDTO();
-        BeanUtils.copyProperties(rating, dto);
+        dto.setCustomerName(rating.getCustomerName());
+        dto.setRatingId(rating.getRatingId());
+        dto.setVetId(rating.getVetId());
+        dto.setRateScore(rating.getRateScore());
+        dto.setRateDescription(rating.getRateDescription());
+        dto.setPredefinedDescription(rating.getPredefinedDescription());
+
+        if (rating.getRateDate() != null) {
+            LocalDate localDate = LocalDate.parse(rating.getRateDate());
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM, yyyy");
+            dto.setRateDate(localDate.format(formatter));
+        } else {
+            dto.setRateDate(null);
+        }
+
+        dto.setDate(rating.getDate() != null ? rating.getDate() : "N/A");
+
         return dto;
     }
+
 
     public static EducationResponseDTO toDTO(Education education) {
         EducationResponseDTO dto = new EducationResponseDTO();
@@ -132,9 +151,15 @@ public class EntityDtoUtil {
 
     public static Rating toEntity(RatingRequestDTO ratingRequestDTO) {
         Rating rating = new Rating();
-        BeanUtils.copyProperties(ratingRequestDTO, rating);
+        rating.setCustomerName(ratingRequestDTO.getCustomerName());
+        rating.setVetId(ratingRequestDTO.getVetId());
+        rating.setRateScore(ratingRequestDTO.getRateScore());
+        rating.setRateDescription(ratingRequestDTO.getRateDescription());
+        rating.setPredefinedDescription(ratingRequestDTO.getPredefinedDescription());
+        rating.setRateDate(ratingRequestDTO.getRateDate());
         return rating;
     }
+
 
     public static Set<SpecialtyDTO> toDTOSet(Set<Specialty> specialties) {
         Set<SpecialtyDTO> specialtyDTOS = new HashSet<>();

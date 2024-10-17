@@ -17,4 +17,5 @@ public class RatingRequestDTO {
 
     private String ownerId;
     private PredefinedDescription predefinedDescription;
+    private String customerName;
 }

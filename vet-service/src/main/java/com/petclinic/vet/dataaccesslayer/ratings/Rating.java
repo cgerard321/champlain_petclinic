@@ -18,5 +18,6 @@ public class Rating {
     private PredefinedDescription predefinedDescription;
     private String rateDate;
     private String date;
+    private String customerName;
 
 }

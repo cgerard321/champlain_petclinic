@@ -18,4 +18,5 @@ public class RatingResponseDTO {
     private PredefinedDescription predefinedDescription;
     private String rateDate;
     private String date;
+    private String customerName;
 }
