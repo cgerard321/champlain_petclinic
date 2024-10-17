@@ -59,6 +59,13 @@ public class UserController {
 
     private final JwtTokenUtil jwtService;
 
+    @GetMapping("/all")
+    public ResponseEntity<List<UserDetails>> getAllUsers() {
+        List<UserDetails> users = userService.getAllUsers();
+        return ResponseEntity.ok(users);
+    }
+
+
     @GetMapping("/withoutPages")
     public List<UserDetails> getUserWithoutPage() {
         return userService.findAllWithoutPage();
