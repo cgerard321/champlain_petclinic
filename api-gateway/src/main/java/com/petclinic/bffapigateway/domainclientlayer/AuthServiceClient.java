@@ -11,6 +11,7 @@ import com.petclinic.bffapigateway.utils.Rethrower;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -54,6 +55,15 @@ public class AuthServiceClient {
         this.vetsServiceClient = vetsServiceClient;
         this.cartServiceClient = cartServiceClient;
         authServiceUrl = "http://" + authServiceHost + ":" + authServicePort;
+    }
+
+    public Flux<UserDetails> getAllUsers(String jwtToken) {
+        return webClientBuilder.build()
+                .get()
+                .uri(authServiceUrl + "/users/all")
+                .cookie("Bearer", jwtToken)
+                .retrieve()
+                .bodyToFlux(UserDetails.class);
     }
 
 
