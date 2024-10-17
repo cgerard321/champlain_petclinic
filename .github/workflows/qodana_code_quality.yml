@@ -31,14 +31,18 @@ jobs:
         run: ./gradlew build
 
       - name: Create coverage-data directory and copy contents
+        if: success() || failure()
         run: |
           mkdir -p .qodana/code-coverage
-          cp -R */build/reports/* .qodana/code-coverage/
+          for service in $(find -maxdepth 1 -type d -name '*service*' -o -name '*gateway*' | sed 's/.\///'); do
+            [[ -d $service/build/reports ]] && cp -R "$service/build/reports" ".qodana/code-coverage/$service" 2>/dev/null || :
+          done
 
       - name: Archive coverage data
+        if: success() || failure()
         uses: actions/upload-artifact@v4
         with:
-          name: gradle-coverage-data.zip
+          name: gradle-coverage-data
           path: .qodana/code-coverage
 
 #      - name: 'Qodana Scan'
