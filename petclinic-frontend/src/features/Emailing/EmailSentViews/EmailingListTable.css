@@ -1,0 +1,122 @@
+.visit-actions {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 20px;
+}
+
+.visit-table-section {
+  margin-top: 40px;
+}
+
+.btn {
+  padding: 10px 20px;
+  margin: 5px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+table th,
+table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+table th {
+  background-color: #f2f2f2;
+}
+
+table tr:hover {
+  background-color: #f5f5f5;
+}
+
+h1,
+h2 {
+  font-size: 24px;
+  margin-bottom: 15px;
+}
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.popup-content {
+  background-color: white;
+  width: 70%;
+  max-width: 1000px;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+  position: relative;
+  max-height: 90vh; /* Confine the popup height to 80% of viewport height */
+  overflow-y: auto; /* Enable vertical scroll if content overflows */
+  overflow-x: hidden; /* Prevent horizontal overflow */
+}
+
+.popup-content table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.popup-content th,
+.popup-content td {
+  padding: 10px;
+  border: 1px solid #ddd;
+}
+
+.popup-content th {
+  background-color: #f2f2f2;
+}
+
+.popup-content button {
+  display: inline-block;
+  padding: 10px 20px;
+  margin-top: 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.popup-content button:hover {
+  background-color: #0056b3;
+}
+
+.popup-content .close-btn {
+  background-color: #9c1616;
+  margin-left: 10px;
+}
+
+.refresh-button {
+  background-color: #80a8ff;
+  margin-left: 10px;
+  float: right;
+}
+
+tbody {
+  display: block; /* Make tbody scrollable */
+  max-height: 40vh; /* Limit the height of the table's content to fit within the popup */
+  overflow-y: auto; /* Enable vertical scroll for table rows */
+}
+
+thead,
+tr {
+  display: table; /* Ensure thead and tr behave like a table */
+  width: 100%; /* Stretch to full width */
+  table-layout: fixed; /* Fix the layout so columns align */
+}
