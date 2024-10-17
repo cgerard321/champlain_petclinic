@@ -251,7 +251,7 @@ export default function AdminBillsListTable(): JSX.Element {
       </div>
 
       <div>
-        <h1> Filter by Customer ID </h1>
+        <h1> Search by Customer ID </h1>
         <input
           type="text"
           placeholder="Customer ID"
