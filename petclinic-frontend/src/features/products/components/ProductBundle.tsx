@@ -48,9 +48,6 @@ const ProductBundle: React.FC<ProductBundleProps> = ({ bundle }) => {
         Bundle Price:{' '}
         <span className="bundle-price">${bundle.bundlePrice.toFixed(2)}</span>
       </p>
-
-      <p>Original Total Price: ${bundle.originalTotalPrice.toFixed(2)}</p>
-      <p>Bundle Price: ${bundle.bundlePrice.toFixed(2)}</p>
     </div>
   );
 };
