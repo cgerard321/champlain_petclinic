@@ -3,6 +3,7 @@ package com.petclinic.products.businesslayer;
 import com.petclinic.products.businesslayer.products.ProductServiceImpl;
 import com.petclinic.products.datalayer.products.Product;
 import com.petclinic.products.datalayer.products.ProductRepository;
+import com.petclinic.products.datalayer.products.ProductType;
 import com.petclinic.products.datalayer.ratings.Rating;
 import com.petclinic.products.datalayer.ratings.RatingRepository;
 import com.petclinic.products.presentationlayer.products.ProductResponseModel;
@@ -41,7 +42,7 @@ class ProductServiceUnitTest {
             .productDescription("Premium dry food for adult dogs")
             .productSalePrice(45.99)
             .averageRating(0.0)
-            .productType("Food")
+            .productType(ProductType.FOOD)
             .build();
 
     Product product2 = Product.builder()
@@ -50,7 +51,7 @@ class ProductServiceUnitTest {
             .productDescription("Clumping cat litter with odor control")
             .productSalePrice(12.99)
             .averageRating(0.0)
-            .productType("Accessory")
+            .productType(ProductType.ACCESSORY)
             .build();
 
 
@@ -171,7 +172,7 @@ class ProductServiceUnitTest {
         StepVerifier.create(result)
                 .expectNextMatches(product ->
                         product.getProductId().equals(product1.getProductId()) &&
-                                product.getProductType().equals("Food"))
+                                product.getProductType().equals(ProductType.FOOD))
                 .verifyComplete();
     }
 

@@ -6,6 +6,7 @@ import com.petclinic.products.datalayer.products.Product;
 import com.petclinic.products.datalayer.products.ProductRepository;
 import com.petclinic.products.datalayer.ratings.Rating;
 import com.petclinic.products.datalayer.ratings.RatingRepository;
+import com.petclinic.products.datalayer.products.ProductType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
@@ -40,7 +41,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Premium dry food for adult dogs")
                 .productSalePrice(45.99)
                 .requestCount(0)
-                .productType("Food")
+                .productType(ProductType.FOOD)
                 .productQuantity(44)
                 .build();
 
@@ -51,7 +52,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Clumping cat litter with odor control")
                 .productSalePrice(12.99)
                 .requestCount(0)
-                .productType("Accessory")
+                .productType(ProductType.ACCESSORY)
                 .productQuantity(3)
                 .build();
 
@@ -62,7 +63,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Flea and tick prevention for small dogs")
                 .productSalePrice(9.99)
                 .requestCount(0)
-                .productType("Medication")
+                .productType(ProductType.MEDICATION)
                 .productQuantity(53)
                 .build();
 
@@ -73,7 +74,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Spacious cage for small birds like parakeets")
                 .productSalePrice(29.99)
                 .requestCount(0)
-                .productType("Accessory")
+                .productType(ProductType.ACCESSORY)
                 .productQuantity(8)
                 .build();
 
@@ -84,7 +85,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Filter system for small to medium-sized aquariums")
                 .productSalePrice(19.99)
                 .requestCount(0)
-                .productType("Accessory")
+                .productType(ProductType.ACCESSORY)
                 .productQuantity(14)
                 .build();
 
@@ -95,7 +96,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Lightweight saddle for riding horses")
                 .productSalePrice(199.99)
                 .requestCount(0)
-                .productType("Equipment")
+                .productType(ProductType.EQUIPMENT)
                 .productQuantity(58)
                 .build();
 
@@ -106,7 +107,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Outdoor wooden hutch for rabbits")
                 .productSalePrice(79.99)
                 .requestCount(0)
-                .productType("Accessory")
+                .productType(ProductType.ACCESSORY)
                 .productQuantity(66)
                 .build();
 
@@ -117,7 +118,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Submersible heater for tropical fish tanks")
                 .productSalePrice(14.99)
                 .requestCount(0)
-                .productType("Accessory")
+                .productType(ProductType.ACCESSORY)
                 .productQuantity(0)
                 .build();
 
