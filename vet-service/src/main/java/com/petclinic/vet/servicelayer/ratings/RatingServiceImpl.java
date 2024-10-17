@@ -76,8 +76,8 @@ public class RatingServiceImpl implements RatingService {
                     }
                 }))
                 .map(requestDto -> {
-                    if (requestDto.getPredefinedDescription() != null){
-                        requestDto.setRateDescription(requestDto.getPredefinedDescription().name());
+                    if (requestDto.getExperience() != null){
+                        requestDto.setRateDescription(requestDto.getExperience().name());
                     }
                     return requestDto;
                 })
@@ -115,6 +115,7 @@ public class RatingServiceImpl implements RatingService {
                     }
                 });
     }
+
     public Flux<RatingResponseDTO> getRatingsOfAVetBasedOnDate(String vetId, Map<String, String> queryParams) {
         String year = queryParams.get("year");
         return ratingRepository.findAllByVetId(vetId)
@@ -167,8 +168,8 @@ public class RatingServiceImpl implements RatingService {
                                 .flatMap(r -> {
                                     if (r.getRating() < 1 || r.getRating() > 5)
                                         return Mono.error(new InvalidInputException("rateScore should be between 1 and 5: " + r.getRating()));
-                                    if (r.getPredefinedDescription() != null) {
-                                        r.setRateDescription(r.getPredefinedDescription().name());
+                                    if (r.getExperience() != null) {
+                                        r.setRateDescription(r.getExperience().name());
                                     }
                                     return Mono.just(r);
                                 })

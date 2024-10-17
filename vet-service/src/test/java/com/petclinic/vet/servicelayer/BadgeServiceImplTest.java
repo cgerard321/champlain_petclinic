@@ -154,7 +154,7 @@ class BadgeServiceImplTest {
         return Rating.builder()
                 .ratingId(ratingId)
                 .vetId(vetId)
-                .rateScore(rateScore)
+                .rating(rateScore)
                 .build();
     }
 }

@@ -14,6 +14,6 @@ public class RatingRequestDTO {
     private Double rating;
     private String rateDescription;
     private String rateDate;
-    private PredefinedDescription predefinedDescription;
+    private PredefinedDescription experience;
     private String customerName;
 }

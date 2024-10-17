@@ -30,7 +30,7 @@ class RatingRepositoryTest {
     Rating rating1 = Rating.builder()
             .ratingId("1")
             .vetId("1")
-            .rateScore(5.0)
+            .rating(5.0)
             .rateDate("21/09/2023")
             .rateDescription("Vet was very gentle with my hamster.")
             .build();
@@ -38,7 +38,7 @@ class RatingRepositoryTest {
     Rating rating2 = Rating.builder()
             .ratingId("2")
             .vetId("2")
-            .rateScore(4.0)
+            .rating(4.0)
             .rateDate("10/09/2023")
             .rateDescription("Vet very kind, but a bit slow.")
             .build();
@@ -46,7 +46,7 @@ class RatingRepositoryTest {
     Rating rating3 = Rating.builder()
             .ratingId("3")
             .vetId("3")
-            .rateScore(1.0)
+            .rating(1.0)
             .rateDate("11/19/2022")
             .rateDescription("Vet very mean and slow.")
             .build();
@@ -79,7 +79,7 @@ class RatingRepositoryTest {
                 .consumeNextWith(foundRating -> {
                     assertEquals(rating1.getRatingId(), foundRating.getRatingId());
                     assertEquals(rating1.getVetId(), foundRating.getVetId());
-                    assertEquals(rating1.getRateScore(), foundRating.getRateScore());
+                    assertEquals(rating1.getRating(), foundRating.getRating());
                 })
                 .verifyComplete();
     }
@@ -96,9 +96,9 @@ class RatingRepositoryTest {
         Rating rating = Rating.builder()
                 .ratingId("3")
                 .vetId("1")
-                .rateScore(1.0)
+                .rating(1.0)
                 .rateDescription("My dog wouldn't stop crying after his appointment")
-                .predefinedDescription(null)
+                .experience(null)
                 .rateDate("13/09/2023")
                 .build();
 
@@ -106,7 +106,7 @@ class RatingRepositoryTest {
                 .consumeNextWith(createdRating -> {
                     assertEquals(rating.getRatingId(), createdRating.getRatingId());
                     assertEquals(rating.getVetId(), createdRating.getVetId());
-                    assertEquals(rating.getRateScore(), createdRating.getRateScore());
+                    assertEquals(rating.getRating(), createdRating.getRating());
                     assertEquals(rating.getRateDescription(), createdRating.getRateDescription());
                     assertEquals(rating.getRateDate(), createdRating.getRateDate());
                 })
@@ -127,9 +127,9 @@ class RatingRepositoryTest {
         Rating rating = Rating.builder()
                 .ratingId(existingRatingId)
                 .vetId("2")
-                .rateScore(2.0)
+                .rating(2.0)
                 .rateDescription("Vet cancelled last minute.")
-                .predefinedDescription(PredefinedDescription.POOR)
+                .experience(PredefinedDescription.POOR)
                 .rateDate("20/09/2023")
                 .build();
 
@@ -137,9 +137,9 @@ class RatingRepositoryTest {
                 .consumeNextWith(updatedRating -> {
                     assertEquals(rating.getRatingId(), updatedRating.getRatingId());
                     assertEquals(rating.getVetId(), updatedRating.getVetId());
-                    assertEquals(rating.getRateScore(), updatedRating.getRateScore());
+                    assertEquals(rating.getRating(), updatedRating.getRating());
                     assertEquals(rating.getRateDescription(), updatedRating.getRateDescription());
-                    assertEquals(rating.getPredefinedDescription(), updatedRating.getPredefinedDescription());
+                    assertEquals(rating.getExperience(), updatedRating.getExperience());
                     assertEquals(rating.getRateDate(), updatedRating.getRateDate());
                 })
                 .verifyComplete();
@@ -171,7 +171,7 @@ class RatingRepositoryTest {
         Rating rating = Rating.builder()
                 .ratingId("1")
                 .vetId("1")
-                .rateScore(5.0)
+                .rating(5.0)
                 .build();
 
         Mono<Long> findRatings = ratingRepository.countAllByVetId(rating.getVetId());

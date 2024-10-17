@@ -129,7 +129,7 @@ class VetControllerUnitTest {
                 .expectBody()
                 .jsonPath("$[0].ratingId").isEqualTo(ratingDTO.getRatingId())
                 .jsonPath("$[0].vetId").isEqualTo(ratingDTO.getVetId())
-                .jsonPath("$[0].rateScore").isEqualTo(ratingDTO.getRateScore());
+                .jsonPath("$[0].rating").isEqualTo(ratingDTO.getRating());
 
         Mockito.verify(ratingService, times(1))
                 .getAllRatingsByVetId(VET_ID);
@@ -157,11 +157,11 @@ class VetControllerUnitTest {
     void addRatingWithVetId_ValidValues_ShouldSucceed() {
         RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
                 .vetId(VET_ID)
-                .rateScore(3.5)
+                .rating(3.5)
                 .rateDescription("The vet was decent but lacked table manners.")
                 .rateDate("16/09/2023")
                 .build();
-        RatingResponseDTO rating = buildRatingResponseDTO(ratingRequestDTO.getRateDescription(), ratingRequestDTO.getRateScore());
+        RatingResponseDTO rating = buildRatingResponseDTO(ratingRequestDTO.getRateDescription(), ratingRequestDTO.getRating());
 
         when(ratingService.addRatingToVet(anyString(), any(Mono.class)))
                 .thenReturn(Mono.just(rating));
@@ -182,7 +182,7 @@ class VetControllerUnitTest {
     @Test
     void updateRatingWithValidVetIdAndValidRatingId_withValidValues_shouldSucceed(){
         RatingRequestDTO updatedRating = RatingRequestDTO.builder()
-                .rateScore(2.0)
+                .rating(2.0)
                 .vetId(VET_ID)
                 .rateDescription("Vet cancelled last minute.")
                 .rateDate("20/09/2023")
@@ -190,7 +190,7 @@ class VetControllerUnitTest {
 
         RatingResponseDTO ratingResponse = RatingResponseDTO.builder()
                 .ratingId("2")
-                .rateScore(2.0)
+                .rating(2.0)
                 .vetId(VET_ID)
                 .rateDescription("Vet cancelled last minute.")
                 .rateDate("20/09/2023")
@@ -213,7 +213,7 @@ class VetControllerUnitTest {
                     assertNotNull(ratingResponseDTO.getRatingId());
                     assertThat(ratingResponseDTO.getRatingId()).isEqualTo(ratingResponse.getRatingId());
                     assertThat(ratingResponseDTO.getVetId()).isEqualTo(updatedRating.getVetId());
-                    assertThat(ratingResponseDTO.getRateScore()).isEqualTo(updatedRating.getRateScore());
+                    assertThat(ratingResponseDTO.getRating()).isEqualTo(updatedRating.getRating());
                     assertThat(ratingResponseDTO.getRateDescription()).isEqualTo(updatedRating.getRateDescription());
                     assertThat(ratingResponseDTO.getRateDate()).isEqualTo(updatedRating.getRateDate());
                 });
@@ -250,7 +250,7 @@ class VetControllerUnitTest {
                 .thenReturn(Mono.just(vetResponseDTO));
 
         when(ratingService.getAverageRatingByVetId(vetId))
-                .thenReturn(Mono.just(ratingDTO.getRateScore()));
+                .thenReturn(Mono.just(ratingDTO.getRating()));
 
 
         client.get()
@@ -934,7 +934,7 @@ class VetControllerUnitTest {
         return RatingResponseDTO.builder()
                 .ratingId("2")
                 .vetId("cf25e779-548b-4788-aefa-6d58621c2feb")
-                .rateScore(score)
+                .rating(score)
                 .rateDescription(description)
                 .rateDate("16/09/2023")
                 .build();
@@ -943,10 +943,10 @@ class VetControllerUnitTest {
         return RatingResponseDTO.builder()
                 .ratingId("2")
                 .vetId("cf25e779-548b-4788-aefa-6d58621c2feb")
-                .rateScore(score)
+                .rating(score)
                 .rateDescription(description)
                 .rateDate("16/09/2023")
-                .date("2023")
+                .rateDate("2023")
                 .build();
     }
 
@@ -954,10 +954,10 @@ class VetControllerUnitTest {
         return RatingResponseDTO.builder()
                 .ratingId("2")
                 .vetId("cf25e779-548b-4788-aefa-6d58621c2feb")
-                .rateScore(score)
+                .rating(score)
                 .rateDescription(description)
                 .rateDate("16/09/2023")
-                .date("2022")
+                .rateDate("2022")
                 .build();
     }
 
@@ -1000,20 +1000,20 @@ class VetControllerUnitTest {
     private RatingResponseDTO buildRatingResponseWithDate(){
         return RatingResponseDTO .builder()
                 .vetId("1232")
-                .date("2023")
-                .predefinedDescription(PredefinedDescription.GOOD)
+                .rateDate("2023")
+                .experience(PredefinedDescription.GOOD)
                 .ratingId("1312")
-                .rateScore(2.0)
+                .rating(2.0)
                 .rateDescription("This is a bad vet")
                 .build();
     }
     private RatingResponseDTO buildRatingResponseWithDate2(){
         return RatingResponseDTO .builder()
                 .vetId("1232")
-                .date("2022")
-                .predefinedDescription(PredefinedDescription.POOR)
+                .rateDate("2022")
+                .experience(PredefinedDescription.POOR)
                 .ratingId("1234")
-                .rateScore(2.0)
+                .rating(2.0)
                 .rateDescription("This is a bad vet")
                 .build();
     }
@@ -1021,10 +1021,10 @@ class VetControllerUnitTest {
     private Rating buildNewRatingWithDate(){
         return Rating.builder()
                 .vetId("1232")
-                .date("2023")
-                .id("1")
-                .rateScore(3.0)
-                .predefinedDescription(PredefinedDescription.POOR)
+                .rateDate("2023")
+                .ratingId("1")
+                .rating(3.0)
+                .experience(PredefinedDescription.POOR)
                 .rateDate("21")
                 .rateDescription("This is a medium vet")
                 .build();
@@ -1033,10 +1033,10 @@ class VetControllerUnitTest {
     private Rating buildNewRatingWithDate2(){
         return Rating.builder()
                 .vetId("1281")
-                .date("2022")
-                .id("2")
-                .rateScore(1.0)
-                .predefinedDescription(PredefinedDescription.POOR)
+                .rateDate("2022")
+                .ratingId("2")
+                .rating(1.0)
+                .experience(PredefinedDescription.POOR)
                 .rateDate("10")
                 .rateDescription("This is a bad vet")
                 .build();

@@ -135,7 +135,7 @@ class ApiGatewayControllerTest {
                     Assertions.assertNotNull(responseDTO.get(0).getRatingId());
                     assertThat(responseDTO.get(0).getRatingId()).isEqualTo(ratingResponseDTO.getRatingId());
                     assertThat(responseDTO.get(0).getVetId()).isEqualTo(ratingResponseDTO.getVetId());
-                    assertThat(responseDTO.get(0).getRateScore()).isEqualTo(ratingResponseDTO.getRateScore());
+                    assertThat(responseDTO.get(0).getRating()).isEqualTo(ratingResponseDTO.getRating());
                 });
     }
 
@@ -221,7 +221,8 @@ class ApiGatewayControllerTest {
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$[0].date").isEqualTo("2023");
+                .jsonPath("$[0].rateDate").isEqualTo("2023")
+                .jsonPath("$[1].rateDate").isEqualTo("2023");
 
     }
 
@@ -231,11 +232,11 @@ class ApiGatewayControllerTest {
 
         RatingRequestDTO rating = RatingRequestDTO.builder()
                 .vetId(VET_ID)
-                .rateScore(4.0)
+                .rating(4.0)
                 .build();
 
         when(vetsServiceClient.getAverageRatingByVetId(anyString()))
-                .thenReturn(Mono.just(ratingResponseDTO.getRateScore()));
+                .thenReturn(Mono.just(ratingResponseDTO.getRating()));
 
         client
                 .get()
@@ -246,7 +247,7 @@ class ApiGatewayControllerTest {
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody(Double.class)
                 .value(resp->
-                        assertEquals(rating.getRateScore(), ratingResponseDTO.getRateScore()));
+                        assertEquals(rating.getRating(), ratingResponseDTO.getRating()));
 
     }
 
@@ -271,17 +272,17 @@ class ApiGatewayControllerTest {
     void addRatingToAVet_withRateDescriptionAndPredefinedDesc_ShouldSetRateDescriptionToPredefinedDesc() {
         RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
                 .vetId(VET_ID)
-                .rateScore(3.5)
+                .rating(3.5)
                 .rateDescription("The vet was decent but lacked table manners.")
-                .predefinedDescription(PredefinedDescription.GOOD)
+                .experience(PredefinedDescription.GOOD)
                 .rateDate("16/09/2023")
                 .build();
         RatingResponseDTO ratingResponseDTO = RatingResponseDTO.builder()
                 .ratingId("12356789")
                 .vetId(VET_ID)
-                .rateScore(3.5)
+                .rating(3.5)
                 .rateDescription("GOOD")
-                .predefinedDescription(PredefinedDescription.GOOD)
+                .experience(PredefinedDescription.GOOD)
                 .rateDate("16/09/2023")
                 .build();
         when(vetsServiceClient.addRatingToVet(anyString(), any(Mono.class)))
@@ -301,17 +302,17 @@ class ApiGatewayControllerTest {
     void addRatingToVet_withPredefinedDescriptionOnly_ShouldSetRateDescriptionToPredefinedDesc() {
         RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
                 .vetId(VET_ID)
-                .rateScore(3.5)
+                .rating(3.5)
                 .rateDescription(null)
-                .predefinedDescription(PredefinedDescription.GOOD)
+                .experience(PredefinedDescription.GOOD)
                 .rateDate("16/09/2023")
                 .build();
         RatingResponseDTO ratingResponseDTO = RatingResponseDTO.builder()
                 .ratingId("12356789")
                 .vetId(VET_ID)
-                .rateScore(3.5)
+                .rating(3.5)
                 .rateDescription("GOOD")
-                .predefinedDescription(PredefinedDescription.GOOD)
+                .experience(PredefinedDescription.GOOD)
                 .rateDate("16/09/2023")
                 .build();
         when(vetsServiceClient.addRatingToVet(anyString(), any(Mono.class)))
@@ -331,17 +332,17 @@ class ApiGatewayControllerTest {
     void addRatingToVet_withRateDescriptionOnly_ShouldSetPredefinedDescriptionToNull() {
         RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
                 .vetId(VET_ID)
-                .rateScore(3.5)
+                .rating(3.5)
                 .rateDescription("The vet was decent but lacked table manners.")
-                .predefinedDescription(null)
+                .experience(null)
                 .rateDate("16/09/2023")
                 .build();
         RatingResponseDTO ratingResponseDTO = RatingResponseDTO.builder()
                 .ratingId("12356789")
                 .vetId(VET_ID)
-                .rateScore(3.5)
+                .rating(3.5)
                 .rateDescription("The vet was decent but lacked table manners.")
-                .predefinedDescription(null)
+                .experience(null)
                 .rateDate("16/09/2023")
                 .build();
         when(vetsServiceClient.addRatingToVet(anyString(), any(Mono.class)))
@@ -361,17 +362,17 @@ class ApiGatewayControllerTest {
     void updateRatingForVet_withRateDescriptionAndPredefinedDesc_ShouldSetRateDescriptionToPredefinedDesc() {
         RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
                 .vetId(VET_ID)
-                .rateScore(3.5)
+                .rating(3.5)
                 .rateDescription("The vet was decent but lacked table manners.")
-                .predefinedDescription(PredefinedDescription.GOOD)
+                .experience(PredefinedDescription.GOOD)
                 .rateDate("16/09/2023")
                 .build();
         RatingResponseDTO ratingResponseDTO = RatingResponseDTO.builder()
                 .ratingId("12356789")
                 .vetId(VET_ID)
-                .rateScore(3.5)
+                .rating(3.5)
                 .rateDescription("GOOD")
-                .predefinedDescription(PredefinedDescription.GOOD)
+                .experience(PredefinedDescription.GOOD)
                 .rateDate("16/09/2023")
                 .build();
         when(vetsServiceClient.updateRatingByVetIdAndByRatingId(anyString(), anyString(), any(Mono.class)))
@@ -390,17 +391,17 @@ class ApiGatewayControllerTest {
     void updateRatingForVet_withPredefinedDescriptionOnly_ShouldSetRateDescriptionToPredefinedDesc() {
         RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
                 .vetId(VET_ID)
-                .rateScore(3.5)
+                .rating(3.5)
                 .rateDescription(null)
-                .predefinedDescription(PredefinedDescription.GOOD)
+                .experience(PredefinedDescription.GOOD)
                 .rateDate("16/09/2023")
                 .build();
         RatingResponseDTO ratingResponseDTO = RatingResponseDTO.builder()
                 .ratingId("12356789")
                 .vetId(VET_ID)
-                .rateScore(3.5)
+                .rating(3.5)
                 .rateDescription("GOOD")
-                .predefinedDescription(PredefinedDescription.GOOD)
+                .experience(PredefinedDescription.GOOD)
                 .rateDate("16/09/2023")
                 .build();
         when(vetsServiceClient.updateRatingByVetIdAndByRatingId(anyString(), anyString(), any(Mono.class)))
@@ -420,17 +421,17 @@ class ApiGatewayControllerTest {
     void updateRatingForVet_withRateDescriptionOnly_ShouldSetRateDescriptionToItsValue() {
         RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
                 .vetId(VET_ID)
-                .rateScore(3.5)
+                .rating(3.5)
                 .rateDescription("The vet was decent but lacked table manners.")
-                .predefinedDescription(null)
+                .experience(null)
                 .rateDate("16/09/2023")
                 .build();
         RatingResponseDTO ratingResponseDTO = RatingResponseDTO.builder()
                 .ratingId("12356789")
                 .vetId(VET_ID)
-                .rateScore(3.5)
+                .rating(3.5)
                 .rateDescription("The vet was decent but lacked table manners.")
-                .predefinedDescription(null)
+                .experience(null)
                 .rateDate("16/09/2023")
                 .build();
         when(vetsServiceClient.updateRatingByVetIdAndByRatingId(anyString(), anyString(), any(Mono.class)))
@@ -3594,16 +3595,16 @@ void deleteAllInventory_shouldSucceed() {
         return RatingResponseDTO.builder()
                 .ratingId("123456")
                 .vetId("181faeb5-c024-425c-9f08-663600008f06")
-                .rateScore(4.0)
-                .date("2023")
+                .rating(4.0)
+                .rateDate("2023")
                 .build();
     }
     private RatingResponseDTO buildRatingResponseDTO2() {
         return RatingResponseDTO.builder()
                 .ratingId("123456")
                 .vetId("181faeb5-c024-425c-9f08-663600008f06")
-                .rateScore(4.0)
-                .date("2022")
+                .rating(4.0)
+                .rateDate("2023")
                 .build();
     }
 private VetAverageRatingDTO buildVetAverageRatingDTO(){

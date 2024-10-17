@@ -84,7 +84,7 @@ class VetControllerIntegrationTest {
     String NON_EXISTING_VET_ID = "ab1u0l25-90a3-5hj1-asd9-8695h4157881";
 
     RatingRequestDTO updatedRating = RatingRequestDTO.builder()
-            .rateScore(2.0)
+            .rating(2.0)
             .vetId("db0c8f13-89d2-4ef7-bcd5-3776a3734150")
             .rateDescription("Vet cancelled last minute.")
             .rateDate("20/09/2023")
@@ -125,10 +125,10 @@ class VetControllerIntegrationTest {
                     assertEquals(2, list.size());
                     assertEquals(rating1.getRatingId(), list.get(0).getRatingId());
                     assertEquals(rating1.getVetId(), list.get(0).getVetId());
-                    assertEquals(rating1.getRateScore(), list.get(0).getRateScore());
+                    assertEquals(rating1.getRating(), list.get(0).getRating());
                     assertEquals(rating2.getRatingId(), list.get(1).getRatingId());
                     assertEquals(rating2.getVetId(), list.get(1).getVetId());
-                    assertEquals(rating2.getRateScore(), list.get(1).getRateScore());
+                    assertEquals(rating2.getRating(), list.get(1).getRating());
                 });
     }
 
@@ -194,9 +194,9 @@ class VetControllerIntegrationTest {
 
         RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
                 .vetId(VET_ID)
-                .rateScore(5.0)
+                .rating(5.0)
                 .rateDescription(null)
-                .predefinedDescription(PredefinedDescription.GOOD)
+                .experience(PredefinedDescription.GOOD)
                 .rateDate("21/09/2023")
                 .build();
 
@@ -213,9 +213,9 @@ class VetControllerIntegrationTest {
                     assertNotNull(ratingResponseDTO);
                     assertNotNull(ratingResponseDTO.getRatingId());
                     assertThat(ratingResponseDTO.getVetId()).isEqualTo(ratingRequestDTO.getVetId());
-                    assertThat(ratingResponseDTO.getRateScore()).isEqualTo(ratingRequestDTO.getRateScore());
-                    assertThat(ratingResponseDTO.getRateDescription()).isEqualTo(ratingRequestDTO.getPredefinedDescription().name());
-                    assertThat(ratingResponseDTO.getPredefinedDescription()).isEqualTo(ratingRequestDTO.getPredefinedDescription());
+                    assertThat(ratingResponseDTO.getRating()).isEqualTo(ratingRequestDTO.getRating());
+                    assertThat(ratingResponseDTO.getRateDescription()).isEqualTo(ratingRequestDTO.getExperience().name());
+                    assertThat(ratingResponseDTO.getExperience()).isEqualTo(ratingRequestDTO.getExperience());
                     assertThat(ratingResponseDTO.getRateDate()).isEqualTo(ratingRequestDTO.getRateDate());
                 });
     }
@@ -228,9 +228,9 @@ class VetControllerIntegrationTest {
 
         RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
                 .vetId(VET_ID)
-                .rateScore(5.0)
+                .rating(5.0)
                 .rateDescription("Vet was very gentle with my hamster.")
-                .predefinedDescription(PredefinedDescription.GOOD)
+                .experience(PredefinedDescription.GOOD)
                 .rateDate("21/09/2023")
                 .build();
 
@@ -247,9 +247,9 @@ class VetControllerIntegrationTest {
                     assertNotNull(ratingResponseDTO);
                     assertNotNull(ratingResponseDTO.getRatingId());
                     assertThat(ratingResponseDTO.getVetId()).isEqualTo(ratingRequestDTO.getVetId());
-                    assertThat(ratingResponseDTO.getRateScore()).isEqualTo(ratingRequestDTO.getRateScore());
-                    assertThat(ratingResponseDTO.getRateDescription()).isEqualTo(ratingRequestDTO.getPredefinedDescription().name());
-                    assertThat(ratingResponseDTO.getPredefinedDescription()).isEqualTo(ratingRequestDTO.getPredefinedDescription());
+                    assertThat(ratingResponseDTO.getRating()).isEqualTo(ratingRequestDTO.getRating());
+                    assertThat(ratingResponseDTO.getRateDescription()).isEqualTo(ratingRequestDTO.getExperience().name());
+                    assertThat(ratingResponseDTO.getExperience()).isEqualTo(ratingRequestDTO.getExperience());
                     assertThat(ratingResponseDTO.getRateDate()).isEqualTo(ratingRequestDTO.getRateDate());
                 });
     }
@@ -269,7 +269,7 @@ class VetControllerIntegrationTest {
 
         RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
                 .vetId(invalidVetId)
-                .rateScore(3.5)
+                .rating(3.5)
                 .rateDescription("The vet was decent but lacked table manners.")
                 .rateDate("16/09/2023")
                 .build();
@@ -295,7 +295,7 @@ class VetControllerIntegrationTest {
 
         RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
                 .vetId(VET_ID)
-                .rateScore(8.0)
+                .rating(8.0)
                 .rateDescription("The vet was decent but lacked table manners.")
                 .rateDate("16/09/2023")
                 .build();
@@ -309,7 +309,7 @@ class VetControllerIntegrationTest {
                 .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.message").isEqualTo("rateScore should be between 1 and 5: " + ratingRequestDTO.getRateScore());
+                .jsonPath("$.message").isEqualTo("rateScore should be between 1 and 5: " + ratingRequestDTO.getRating());
     }
 
     @Test
@@ -321,9 +321,9 @@ class VetControllerIntegrationTest {
 
         RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
                 .vetId(VET_ID)
-                .rateScore(5.0)
+                .rating(5.0)
                 .rateDescription(null)
-                .predefinedDescription(PredefinedDescription.GOOD)
+                .experience(PredefinedDescription.GOOD)
                 .rateDate("21/09/2023")
                 .build();
 
@@ -340,9 +340,9 @@ class VetControllerIntegrationTest {
                     assertNotNull(ratingResponseDTO);
                     assertNotNull(ratingResponseDTO.getRatingId());
                     assertThat(ratingResponseDTO.getVetId()).isEqualTo(ratingRequestDTO.getVetId());
-                    assertThat(ratingResponseDTO.getRateScore()).isEqualTo(ratingRequestDTO.getRateScore());
-                    assertThat(ratingResponseDTO.getRateDescription()).isEqualTo(ratingRequestDTO.getPredefinedDescription().name());
-                    assertThat(ratingResponseDTO.getPredefinedDescription()).isEqualTo(ratingRequestDTO.getPredefinedDescription());
+                    assertThat(ratingResponseDTO.getRating()).isEqualTo(ratingRequestDTO.getRating());
+                    assertThat(ratingResponseDTO.getRateDescription()).isEqualTo(ratingRequestDTO.getExperience().name());
+                    assertThat(ratingResponseDTO.getExperience()).isEqualTo(ratingRequestDTO.getExperience());
                     assertThat(ratingResponseDTO.getRateDate()).isEqualTo(ratingRequestDTO.getRateDate());
                 });
     }
@@ -373,7 +373,7 @@ class VetControllerIntegrationTest {
                     assertNotNull(ratingResponseDTO.getRatingId());
                     assertThat(ratingResponseDTO.getRatingId()).isEqualTo(existingRatingId);
                     assertThat(ratingResponseDTO.getVetId()).isEqualTo(updatedRating.getVetId());
-                    assertThat(ratingResponseDTO.getRateScore()).isEqualTo(updatedRating.getRateScore());
+                    assertThat(ratingResponseDTO.getRating()).isEqualTo(updatedRating.getRating());
                     assertThat(ratingResponseDTO.getRateDescription()).isEqualTo(updatedRating.getRateDescription());
                     assertThat(ratingResponseDTO.getRateDate()).isEqualTo(updatedRating.getRateDate());
                 });
@@ -419,9 +419,9 @@ class VetControllerIntegrationTest {
 
         RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
                 .vetId(VET_ID)
-                .rateScore(5.0)
+                .rating(5.0)
                 .rateDescription(null)
-                .predefinedDescription(PredefinedDescription.GOOD)
+                .experience(PredefinedDescription.GOOD)
                 .rateDate("21/09/2023")
                 .build();
 
@@ -438,9 +438,9 @@ class VetControllerIntegrationTest {
                     assertNotNull(ratingResponseDTO);
                     assertNotNull(ratingResponseDTO.getRatingId());
                     assertThat(ratingResponseDTO.getVetId()).isEqualTo(ratingRequestDTO.getVetId());
-                    assertThat(ratingResponseDTO.getRateScore()).isEqualTo(ratingRequestDTO.getRateScore());
-                    assertThat(ratingResponseDTO.getRateDescription()).isEqualTo(ratingRequestDTO.getPredefinedDescription().name());
-                    assertThat(ratingResponseDTO.getPredefinedDescription()).isEqualTo(ratingRequestDTO.getPredefinedDescription());
+                    assertThat(ratingResponseDTO.getRating()).isEqualTo(ratingRequestDTO.getRating());
+                    assertThat(ratingResponseDTO.getRateDescription()).isEqualTo(ratingRequestDTO.getExperience().name());
+                    assertThat(ratingResponseDTO.getExperience()).isEqualTo(ratingRequestDTO.getExperience());
                     assertThat(ratingResponseDTO.getRateDate()).isEqualTo(ratingRequestDTO.getRateDate());
                 });
     }
@@ -489,7 +489,7 @@ class VetControllerIntegrationTest {
         Double invalidRateScore=9.0;
 
         RatingRequestDTO invalidRating = RatingRequestDTO.builder()
-                .rateScore(invalidRateScore)
+                .rating(invalidRateScore)
                 .vetId(vet.getVetId())
                 .rateDescription("Vet cancelled last minute.")
                 .rateDate("20/09/2023")
@@ -589,7 +589,7 @@ class VetControllerIntegrationTest {
 
         RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
                 .vetId(vet.getVetId())
-                .rateScore(rating1.getRateScore()).build();
+                .rating(rating1.getRating()).build();
 
 
         client.get()
@@ -600,7 +600,7 @@ class VetControllerIntegrationTest {
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody(Double.class)
                 .value(resp -> {
-                    assertEquals(rating1.getRateScore(), ratingRequestDTO.getRateScore());
+                    assertEquals(rating1.getRating(), ratingRequestDTO.getRating());
                 });
     }
 
@@ -637,13 +637,13 @@ class VetControllerIntegrationTest {
 
 
         RatingResponseDTO ratingWithDate = RatingResponseDTO.builder()
-                .date(rating1.getDate())
+                .rateDate(rating1.getRateDate())
                 .ratingId(rating1.getRatingId())
                 .vetId(VET_ID)
-                .date(existingDate)
-                .rateScore(rating1.getRateScore())
+                .rateDate(existingDate)
+                .rating(rating1.getRating())
                 .rateDescription(rating1.getRateDescription())
-                .predefinedDescription(rating1.getPredefinedDescription())
+                .experience(rating1.getExperience())
                 .build();
 
         client
@@ -657,10 +657,10 @@ class VetControllerIntegrationTest {
                     assertEquals(2, list.size());
                     assertEquals(rating1.getRatingId(),list.get(0).getRatingId());
                     assertEquals(rating1.getVetId(),list.get(0).getVetId());
-                    assertEquals(rating1.getRateScore(),list.get(0).getRateScore());
+                    assertEquals(rating1.getRating(),list.get(0).getRating());
                     assertEquals(rating1.getRateDate(),list.get(0).getRateDate());
                     assertEquals(rating1.getRateDescription(),list.get(0).getRateDescription());
-                    assertEquals(existingDate, list.get(0).getDate());
+                    assertEquals(existingDate, list.get(0).getRateDate());
                 });
     }
 
@@ -718,17 +718,17 @@ class VetControllerIntegrationTest {
     void getTopThreeVetWithTheHighestRating_ShouldSucceed(){
 
         VetAverageRatingDTO vetAverageRatingDTO1 = VetAverageRatingDTO.builder()
-                .averageRating(rating1.getRateScore())
+                .averageRating(rating1.getRating())
                 .vetId(vet.getVetId())
                 .build();
 
         VetAverageRatingDTO vetAverageRatingDTO2 = VetAverageRatingDTO.builder()
-                .averageRating(rating2.getRateScore())
+                .averageRating(rating2.getRating())
                 .vetId(vet.getVetId())
                 .build();
 
         VetAverageRatingDTO vetAverageRatingDTO3 = VetAverageRatingDTO.builder()
-                .averageRating(rating3.getRateScore())
+                .averageRating(rating3.getRating())
                 .vetId(vet.getVetId())
                 .build();
 
@@ -744,9 +744,9 @@ class VetControllerIntegrationTest {
                     assertEquals(rating1.getVetId(), vetAverageRatingDTO1.getVetId());
                     assertEquals(rating2.getVetId(), vetAverageRatingDTO2.getVetId());
                     assertEquals(rating3.getVetId(), vetAverageRatingDTO3.getVetId());
-                    assertEquals(rating1.getRateScore(), vetAverageRatingDTO1.getAverageRating());
-                    assertEquals(rating2.getRateScore(), vetAverageRatingDTO2.getAverageRating());
-                    assertEquals(rating3.getRateScore(), vetAverageRatingDTO3.getAverageRating());
+                    assertEquals(rating1.getRating(), vetAverageRatingDTO1.getAverageRating());
+                    assertEquals(rating2.getRating(), vetAverageRatingDTO2.getAverageRating());
+                    assertEquals(rating3.getRating(), vetAverageRatingDTO3.getAverageRating());
 
 
                 });
@@ -1799,8 +1799,8 @@ class VetControllerIntegrationTest {
         return Rating.builder()
                 .ratingId(ratingId)
                 .vetId(vetId)
-                .rateScore(rateScore)
-                .date("2023")
+                .rating(rateScore)
+                .rateDate("2023")
                 .build();
     }
 

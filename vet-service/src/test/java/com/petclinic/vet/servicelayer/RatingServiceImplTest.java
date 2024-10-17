@@ -73,7 +73,7 @@ class RatingServiceImplTest {
                 .consumeNextWith(foundRating -> {
                     assertEquals(rating.getRatingId(), foundRating.getRatingId());
                     assertEquals(rating.getVetId(), foundRating.getVetId());
-                    assertEquals(rating.getRateScore(), foundRating.getRateScore());
+                    assertEquals(rating.getRating(), foundRating.getRating());
                 })
 
                 .verifyComplete();
@@ -99,7 +99,7 @@ class RatingServiceImplTest {
         ratingService.addRatingToVet(rating.getVetId(), Mono.just(ratingRequestDTO))
                 .map(ratingResponseDTO -> {
                     assertEquals(ratingResponseDTO.getVetId(), ratingRequestDTO.getVetId());
-                    assertEquals(ratingResponseDTO.getRateScore(), ratingRequestDTO.getRateScore());
+                    assertEquals(ratingResponseDTO.getRating(), ratingRequestDTO.getRating());
                     assertNotNull(ratingResponseDTO.getRatingId());
                     return ratingResponseDTO;
                 });
@@ -116,10 +116,10 @@ class RatingServiceImplTest {
         StepVerifier
                 .create(ratingResponseDTO)
                 .consumeNextWith(existingRating -> {
-                    assertNotNull(rating.getId());
+                    assertNotNull(rating.getRatingId());
                     assertEquals(rating.getRatingId(), existingRating.getRatingId());
                     assertEquals(rating.getVetId(), existingRating.getVetId());
-                    assertEquals(rating.getRateScore(), existingRating.getRateScore());
+                    assertEquals(rating.getRating(), existingRating.getRating());
                     assertEquals(rating.getRateDate(), existingRating.getRateDate());
                     assertEquals(rating.getRateDescription(), existingRating.getRateDescription());
                 })
@@ -163,11 +163,11 @@ class RatingServiceImplTest {
     @Test
     void getTopThreeVetsWithHighestRating() {
 
-        rating.setRateScore(4.0);
+        rating.setRating(4.0);
         rating.setVetId("68790");
-        rating2.setRateScore(1.0);
+        rating2.setRating(1.0);
         rating2.setVetId("68792");
-        rating3.setRateScore(2.0);
+        rating3.setRating(2.0);
         rating3.setVetId("68793");
 
         Vet vet1 = Vet.builder()
@@ -237,15 +237,15 @@ class RatingServiceImplTest {
     }
     @Test
     void getRatingBasedOnDate()throws JsonProcessingException{
-        rating.setRateScore(4.0);
-        rating.setDate("2021");
+        rating.setRating(4.0);
+        rating.setRateDate("2021");
         rating.setVetId("68790");
-        rating2.setRateScore(1.0);
+        rating2.setRating(1.0);
         rating2.setVetId("68792");
-        rating2.setDate("2022");
-        rating3.setRateScore(2.0);
+        rating2.setRateDate("2022");
+        rating3.setRating(2.0);
         rating3.setVetId("68793");
-        rating3.setDate("2023");
+        rating3.setRateDate("2023");
 
 
         Vet vet1 = Vet.builder()
@@ -311,30 +311,27 @@ class RatingServiceImplTest {
 
     private Rating buildRating() {
         return Rating.builder()
-                .id("1")
                 .ratingId("ratingId")
                 .vetId("vetId")
-                .rateScore(5.0)
+                .rating(5.0)
                 .rateDescription("Vet is the best vet in the wooooorld!")
                 .rateDate("16/09/2023")
                 .build();
     }
     private Rating buildRating2() {
         return Rating.builder()
-                .id("2")
                 .ratingId("ratingId2")
                 .vetId("vetId2")
-                .rateScore(1.0)
+                .rating(1.0)
                 .rateDescription("Vet is the worst vet in the wooooorld!")
                 .rateDate("10/08/2023")
                 .build();
     }
     private Rating buildRating3() {
         return Rating.builder()
-                .id("3")
                 .ratingId("ratingId3")
                 .vetId("vetId3")
-                .rateScore(2.0)
+                .rating(2.0)
                 .rateDescription("Vet is the almost worst vet in the wooooorld!")
                 .rateDate("05/18/2023")
                 .build();
@@ -342,7 +339,7 @@ class RatingServiceImplTest {
     private RatingRequestDTO buildRatingRequestDTO() {
         RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
                 .vetId("vetId")
-                .rateScore(5.0)
+                .rating(5.0)
                 .build();
         return ratingRequestDTO;
     }

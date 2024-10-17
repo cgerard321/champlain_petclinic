@@ -152,7 +152,7 @@ public class EntityDtoUtil {
         rating.setVetId(ratingRequestDTO.getVetId());
         rating.setRating(ratingRequestDTO.getRating());
         rating.setRateDescription(ratingRequestDTO.getRateDescription());
-        rating.setExperience(ratingRequestDTO.getPredefinedDescription());
+        rating.setExperience(ratingRequestDTO.getExperience());
         rating.setRateDate(ratingRequestDTO.getRateDate());
         return rating;
     }
