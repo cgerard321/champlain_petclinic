@@ -3,6 +3,8 @@ package com.petclinic.products.utils;
 import com.petclinic.products.datalayer.images.Image;
 import com.petclinic.products.datalayer.images.ImageRepository;
 import com.petclinic.products.datalayer.products.Product;
+import com.petclinic.products.datalayer.products.ProductBundle;
+import com.petclinic.products.datalayer.products.ProductBundleRepository;
 import com.petclinic.products.datalayer.products.ProductRepository;
 import com.petclinic.products.datalayer.ratings.Rating;
 import com.petclinic.products.datalayer.ratings.RatingRepository;
@@ -18,12 +20,17 @@ import reactor.core.publisher.Mono;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 public class DataLoaderService implements CommandLineRunner {
 
     @Autowired
     ProductRepository productRepository;
+
+    @Autowired
+    ProductBundleRepository productBundleRepository;
 
     @Autowired
     ImageRepository imageRepository;
@@ -120,6 +127,34 @@ public class DataLoaderService implements CommandLineRunner {
                 .productType("Accessory")
                 .productQuantity(0)
                 .build();
+
+        ProductBundle bundle1 = ProductBundle.builder()
+                .bundleId(UUID.randomUUID().toString())
+                .bundleName("Dog Bundle")
+                .bundleDescription("Dog Food & Flea Collar")
+                .productIds(List.of("06a7d573-bcab-4db3-956f-773324b92a80", "baee7cd2-b67a-449f-b262-91f45dde8a6d"))
+                .originalTotalPrice(product1.getProductSalePrice() + product3.getProductSalePrice())
+                .bundlePrice(49.99)
+                .build();
+
+        ProductBundle bundle2 = ProductBundle.builder()
+                .bundleId(UUID.randomUUID().toString())
+                .bundleName("Fish Bundle")
+                .bundleDescription("Cat Litter & Fish Tank Heater")
+                .productIds(List.of("4d508fb7-f1f2-4952-829d-10dd7254cf26", "1501f30e-1db1-44b2-a555-bca6f64450e4"))
+                .originalTotalPrice(product5.getProductSalePrice() + product8.getProductSalePrice())
+                .bundlePrice(24.99)
+                .build();
+
+        ProductBundle bundle3 = ProductBundle.builder()
+                .bundleId(UUID.randomUUID().toString())
+                .bundleName("Accessory Bundle")
+                .bundleDescription("All Accessories")
+                .productIds(List.of("1501f30e-1db1-44b2-a555-bca6f64450e4", "4affcab7-3ab1-4917-a114-2b6301aa5565", "4d508fb7-f1f2-4952-829d-10dd7254cf26", "ae2d3af7-f2a2-407f-ad31-ca7d8220cb7a", "98f7b33a-d62a-420a-a84a-05a27c85fc91"))
+                .originalTotalPrice(product8.getProductSalePrice() + product7.getProductSalePrice() + product5.getProductSalePrice() + product4.getProductSalePrice() + product2.getProductSalePrice())
+                .bundlePrice(129.99)
+                .build();
+
 
         Rating rating1prod1 = Rating.builder()
                 .productId(product1.getProductId())
@@ -233,14 +268,14 @@ public class DataLoaderService implements CommandLineRunner {
                 .review("Doesn't heat evenly")
                 .build();
 
-        Resource resource1 = new ClassPathResource("images/dog_food.jpg");
+        Resource resource1 = new ClassPathResource("images/dog_food.png");
         Resource resource2 = new ClassPathResource("images/cat_litter.png");
-        Resource resource3 = new ClassPathResource("images/flea_collar.jpg");
-        Resource resource4 = new ClassPathResource("images/bird_cage.jpg");
+        Resource resource3 = new ClassPathResource("images/flea_collar.png");
+        Resource resource4 = new ClassPathResource("images/bird_cage.png");
         Resource resource5 = new ClassPathResource("images/aquarium_filter.png");
-        Resource resource6 = new ClassPathResource("images/horse_saddle.jpg");
-        Resource resource7 = new ClassPathResource("images/rabbit_hutch.jpg");
-        Resource resource8 = new ClassPathResource("images/fish_tank_heater.jpg");
+        Resource resource6 = new ClassPathResource("images/horse_saddle.png");
+        Resource resource7 = new ClassPathResource("images/rabbit_hutch.png");
+        Resource resource8 = new ClassPathResource("images/fish_tank_heater.png");
 
         InputStream inputStream1 = resource1.getInputStream();
         InputStream inputStream2 = resource2.getInputStream();
@@ -263,8 +298,8 @@ public class DataLoaderService implements CommandLineRunner {
 
         Image image1 = Image.builder()
                 .imageId("08a5af6b-3501-4157-9a99-1aa82387b9e4")
-                .imageName("dog_food.jpg")
-                .imageType("image/jpeg")
+                .imageName("dog_food.png")
+                .imageType("image/png")
                 .imageData(imageBytes1)
                 .build();
 
@@ -277,15 +312,15 @@ public class DataLoaderService implements CommandLineRunner {
 
         Image image3 = Image.builder()
                 .imageId("be4e60a4-2369-46e8-abee-20c1a8dce3e5")
-                .imageName("flea_collar.jpg")
-                .imageType("image/jpeg")
+                .imageName("flea_collar.png")
+                .imageType("image/png")
                 .imageData(imageBytes3)
                 .build();
 
         Image image4 = Image.builder()
                 .imageId("7074e0ef-d041-452f-8a0f-cb9ab20d1fed")
-                .imageName("bird_cage.jpg")
-                .imageType("image/jpeg")
+                .imageName("bird_cage.png")
+                .imageType("image/png")
                 .imageData(imageBytes4)
                 .build();
 
@@ -298,24 +333,29 @@ public class DataLoaderService implements CommandLineRunner {
 
         Image image6 = Image.builder()
                 .imageId("664aa14b-db66-4b25-9d05-f3a9164eb401")
-                .imageName("horse_saddle.jpg")
-                .imageType("image/jpeg")
+                .imageName("horse_saddle.png")
+                .imageType("image/png")
                 .imageData(imageBytes6)
                 .build();
 
         Image image7 = Image.builder()
                 .imageId("3377a03f-8105-47d7-8d8a-d89fd170c7e6")
-                .imageName("rabbit_hutch.jpg")
-                .imageType("image/jpeg")
+                .imageName("rabbit_hutch.png")
+                .imageType("image/png")
                 .imageData(imageBytes7)
                 .build();
 
         Image image8 = Image.builder()
                 .imageId("c76ed4c1-fc5d-4868-8b39-1bca6b0be368")
-                .imageName("fish_tank_heater.jpg")
-                .imageType("image/jpeg")
+                .imageName("fish_tank_heater.png")
+                .imageType("image/png")
                 .imageData(imageBytes8)
                 .build();
+
+        Flux.just(bundle1, bundle2, bundle3)
+                .flatMap(s -> productBundleRepository.insert(Mono.just(s))
+                        .log(s.toString()))
+                .subscribe();
 
         Flux.just(product1, product2, product3, product4, product5, product6, product7, product8)
                 .flatMap(s -> productRepository.insert(Mono.just(s))
