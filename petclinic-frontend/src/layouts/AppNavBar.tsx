@@ -12,7 +12,6 @@ import { AppRoutePaths } from '@/shared/models/path.routes';
 import { useEffect, useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Navbar, Nav, NavDropdown, Container } from 'react-bootstrap';
-// @ts-ignore
 import { FaShoppingCart } from 'react-icons/fa'; // Importing the shopping cart icon
 import './AppNavBar.css';
 
@@ -150,11 +149,11 @@ export function NavBar(): JSX.Element {
                   </NavDropdown>
                 )}
                 {IsAdmin() && (
-                    <NavDropdown title="Users" id="users-dropdown">
-                      <NavDropdown.Item as={Link} to={AppRoutePaths.AllUsers}>
-                        Users List
-                      </NavDropdown.Item>
-                    </NavDropdown>
+                  <NavDropdown title="Users" id="users-dropdown">
+                    <NavDropdown.Item as={Link} to={AppRoutePaths.AllUsers}>
+                      Users List
+                    </NavDropdown.Item>
+                  </NavDropdown>
                 )}
                 {!IsAdmin() && (
                   <Nav.Link as={Link} to={AppRoutePaths.CustomerBills}>
