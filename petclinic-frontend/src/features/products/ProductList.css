@@ -141,3 +141,11 @@
   display: flex;
   justify-content: center;
 }
+
+.product-bundles-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 56px;
+  margin: 20px 0;
+  }
