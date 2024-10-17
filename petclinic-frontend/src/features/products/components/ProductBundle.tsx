@@ -26,6 +26,7 @@ const ProductBundle: React.FC<ProductBundleProps> = ({ bundle }) => {
     <div className="product-bundle-card">
       <div className="deal-stamp">DEAL</div>
       <h3 className="bundle-title">{bundle.bundleName}</h3>
+      <h3>{bundle.bundleName}</h3>
       <p>{bundle.bundleDescription}</p>
       <div className="product-bundle-products">
         {products.map(product => (
@@ -47,6 +48,10 @@ const ProductBundle: React.FC<ProductBundleProps> = ({ bundle }) => {
         Bundle Price:{' '}
         <span className="bundle-price">${bundle.bundlePrice.toFixed(2)}</span>
       </p>
+
+      <p>Original Total Price: ${bundle.originalTotalPrice.toFixed(2)}</p>
+      <p>Bundle Price: ${bundle.bundlePrice.toFixed(2)}</p>
+      <button>Add Bundle to Cart</button>
     </div>
   );
 };
