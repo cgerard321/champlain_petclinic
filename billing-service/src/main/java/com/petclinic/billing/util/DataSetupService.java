@@ -41,9 +41,8 @@ public class DataSetupService implements CommandLineRunner {
                 .date(LocalDate.of(2024, 3, 1))
                 .amount(300.0)
                 .taxedAmount(0.0)
-                .billStatus(BillStatus.PAID)
+                .billStatus(BillStatus.OVERDUE)
                 .dueDate(LocalDate.of(2024, 3, 31))
-                .timeRemaining(0L)
                 .build();
 
         Bill b2 = Bill.builder()
@@ -60,7 +59,6 @@ public class DataSetupService implements CommandLineRunner {
                 .taxedAmount(0.0)
                 .billStatus(BillStatus.PAID)
                 .dueDate(LocalDate.of(2024, 4, 30))
-                .timeRemaining(0L)
                 .build();
 
         Bill b3 = Bill.builder()
@@ -75,9 +73,8 @@ public class DataSetupService implements CommandLineRunner {
                 .date(LocalDate.of(2024, 5, 1))
                 .amount(150.0)
                 .taxedAmount(0.0)
-                .billStatus(BillStatus.UNPAID)
+                .billStatus(BillStatus.PAID)
                 .dueDate(LocalDate.of(2024, 5, 31))
-                .timeRemaining(0L)
                 .build();
 
         Bill b4 = Bill.builder()
@@ -92,9 +89,8 @@ public class DataSetupService implements CommandLineRunner {
                 .date(LocalDate.of(2024, 6, 1))
                 .amount(200.0)
                 .taxedAmount(0.0)
-                .billStatus(BillStatus.UNPAID)
+                .billStatus(BillStatus.PAID)
                 .dueDate(LocalDate.of(2024, 6, 30))
-                .timeRemaining(0L)
                 .build();
 
         Bill b5 = Bill.builder()
@@ -106,12 +102,11 @@ public class DataSetupService implements CommandLineRunner {
                 .vetId("2")
                 .vetFirstName("James")
                 .vetLastName("Patterson")
-                .date(LocalDate.of(2024, 7, 1))
+                .date(LocalDate.of(2024, 10, 1))
                 .amount(130.0)
                 .taxedAmount(0.0)
                 .billStatus(BillStatus.UNPAID)
-                .dueDate(LocalDate.of(2024, 7, 31))
-                .timeRemaining(0L)
+                .dueDate(LocalDate.of(2024, 11, 30))
                 .build();
 
         Bill b6 = Bill.builder()
@@ -128,7 +123,6 @@ public class DataSetupService implements CommandLineRunner {
                 .taxedAmount(0.0)
                 .billStatus(BillStatus.UNPAID)
                 .dueDate(LocalDate.of(2024, 8, 30))
-                .timeRemaining(0L)
                 .build();
 
         Bill b7 = Bill.builder()
@@ -143,9 +137,8 @@ public class DataSetupService implements CommandLineRunner {
                 .date(LocalDate.of(2024, 9, 1))
                 .amount(200.0)
                 .taxedAmount(0.0)
-                .billStatus(BillStatus.UNPAID)
+                .billStatus(BillStatus.PAID)
                 .dueDate(LocalDate.of(2024, 9, 30))
-                .timeRemaining(0L)
                 .build();
 
         Bill b8 = Bill.builder()
@@ -160,9 +153,8 @@ public class DataSetupService implements CommandLineRunner {
                 .date(LocalDate.of(2024, 3, 1))
                 .amount(150.0)
                 .taxedAmount(0.0)
-                .billStatus(BillStatus.UNPAID)
+                .billStatus(BillStatus.PAID)
                 .dueDate(LocalDate.of(2024, 4, 30))
-                .timeRemaining(0L)
                 .build();
 
         Bill b9 = Bill.builder()
@@ -179,7 +171,6 @@ public class DataSetupService implements CommandLineRunner {
                 .taxedAmount(0.0)
                 .billStatus(BillStatus.PAID)
                 .dueDate(LocalDate.of(2024, 5, 31))
-                .timeRemaining(0L)
                 .build();
 
         Bill b10 = Bill.builder()
@@ -196,7 +187,6 @@ public class DataSetupService implements CommandLineRunner {
                 .taxedAmount(0.0)
                 .billStatus(BillStatus.PAID)
                 .dueDate(LocalDate.of(2024, 6, 30))
-                .timeRemaining(0L)
                 .build();
 
         Bill b11 = Bill.builder()
@@ -211,9 +201,8 @@ public class DataSetupService implements CommandLineRunner {
                 .date(LocalDate.of(2024, 7, 1))
                 .amount(500.0)
                 .taxedAmount(0.0)
-                .billStatus(BillStatus.UNPAID)
-                .dueDate(LocalDate.of(2024, 8, 31))
-                .timeRemaining(0L)
+                .billStatus(BillStatus.PAID)
+                .dueDate(LocalDate.of(2024, 8, 30))
                 .build();
 
         Bill b12 = Bill.builder()
@@ -230,7 +219,6 @@ public class DataSetupService implements CommandLineRunner {
                 .taxedAmount(0.0)
                 .billStatus(BillStatus.PAID)
                 .dueDate(LocalDate.of(2024, 8, 30))
-                .timeRemaining(0L)
                 .build();
 
         Bill b13 = Bill.builder()
@@ -242,12 +230,11 @@ public class DataSetupService implements CommandLineRunner {
                 .vetId("2")
                 .vetFirstName("James")
                 .vetLastName("Patterson")
-                .date(LocalDate.of(2024, 9, 1))
+                .date(LocalDate.of(2024, 10, 1))
                 .amount(200.0)
                 .taxedAmount(0.0)
                 .billStatus(BillStatus.UNPAID)
-                .dueDate(LocalDate.of(2024, 9, 30))
-                .timeRemaining(0L)
+                .dueDate(LocalDate.of(2024, 11, 30))
                 .build();
 
         Bill b14 = Bill.builder()
@@ -264,7 +251,6 @@ public class DataSetupService implements CommandLineRunner {
                 .taxedAmount(0.0)
                 .billStatus(BillStatus.PAID)
                 .dueDate(LocalDate.of(2024, 4, 30))
-                .timeRemaining(0L)
                 .build();
 
         Bill b15 = Bill.builder()
@@ -276,12 +262,11 @@ public class DataSetupService implements CommandLineRunner {
                 .vetId("2")
                 .vetFirstName("James")
                 .vetLastName("Patterson")
-                .date(LocalDate.of(2024, 5, 1))
+                .date(LocalDate.of(2024, 10, 1))
                 .amount(150.0)
                 .taxedAmount(0.0)
                 .billStatus(BillStatus.UNPAID)
-                .dueDate(LocalDate.of(2024, 5, 31))
-                .timeRemaining(0L)
+                .dueDate(LocalDate.of(2024, 11, 30))
                 .build();
 
         Flux.just(b1,b2,b3,b4,b5, b6, b7, b8, b9, b10, b11, b12, b13, b14, b15)

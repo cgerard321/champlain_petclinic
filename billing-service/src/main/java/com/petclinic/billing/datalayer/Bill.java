@@ -27,5 +27,4 @@ public class Bill {
     private double taxedAmount;
     private BillStatus billStatus;
     private LocalDate dueDate;
-    private Long timeRemaining;
 }
