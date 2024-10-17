@@ -309,6 +309,12 @@ const InventoryProducts: React.FC = () => {
       ) : (
         <p>No products found.</p>
       )}
+      <button
+        className="btn btn-add"
+        onClick={() => navigate(`/inventory/${inventoryId}/products/add`)}
+      >
+        Add
+      </button>
       <button className="btn btn-danger" onClick={handleDeleteAllProducts}>
         Delete All Products
       </button>
