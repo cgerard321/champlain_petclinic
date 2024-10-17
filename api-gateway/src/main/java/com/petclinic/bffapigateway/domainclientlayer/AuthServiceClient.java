@@ -66,6 +66,16 @@ public class AuthServiceClient {
                 .bodyToFlux(UserDetails.class);
     }
 
+    public Mono<Void> deleteUser(String jwtToken, String userId) {
+        return webClientBuilder.build()
+                .delete()
+                .uri(authServiceUrl + "/users/{userId}", userId)
+                .cookie("Bearer", jwtToken)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> Mono.error(new GenericHttpException("Error deleting user", HttpStatus.BAD_REQUEST)))
+                .onStatus(HttpStatusCode::is5xxServerError, clientResponse -> Mono.error(new GenericHttpException("Server error", HttpStatus.INTERNAL_SERVER_ERROR)))
+                .bodyToMono(Void.class);
+    }
 
     public Mono<UserDetails> getUserById(String jwtToken, String userId) {
         return webClientBuilder.build()
@@ -103,14 +113,6 @@ public class AuthServiceClient {
                 .bodyToFlux(UserDetails.class);
     }
 
-    public Mono<Void> deleteUser(String jwtToken, String userId) {
-        return webClientBuilder.build()
-                .delete()
-                .uri(authServiceUrl + "/users/{userId}", userId)
-                .cookie("Bearer", jwtToken)
-                .retrieve()
-                .bodyToMono(void.class);
-    }
 
     //FUCK REACTIVE
     /*
