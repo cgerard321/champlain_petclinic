@@ -122,9 +122,9 @@ export default function AdminBillsListTable(): JSX.Element {
     const billsToFilter = filteredBills || billsList;
 
     return billsToFilter.filter(bill => {
-
       const matchesStatus =
-        !selectedFilter || bill.billStatus.toLowerCase() === selectedFilter.toLowerCase();
+        !selectedFilter ||
+        bill.billStatus.toLowerCase() === selectedFilter.toLowerCase();
 
       const matchesCustomerId =
         !filter.customerId || bill.customerId.includes(filter.customerId);
