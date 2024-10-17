@@ -4,6 +4,7 @@ import com.petclinic.products.businesslayer.products.ProductBundleService;
 import com.petclinic.products.businesslayer.products.ProductService;
 import com.petclinic.products.utils.EntityModelUtil;
 import com.petclinic.products.utils.exceptions.InvalidInputException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,7 @@ public class ProductController {
     private final ProductBundleService bundleService;
     private final ProductService productService;
 
+    @Autowired
     public ProductController(ProductBundleService productBundleService, ProductService productService) {
         this.productService = productService;
         this.bundleService = productBundleService;

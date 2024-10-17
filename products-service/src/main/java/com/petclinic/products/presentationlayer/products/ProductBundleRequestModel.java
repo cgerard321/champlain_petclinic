@@ -14,5 +14,6 @@ public class ProductBundleRequestModel {
     private String bundleName;
     private String bundleDescription;
     private List<String> productIds;
+    private Double originalTotalPrice;
     private Double bundlePrice;
 }
