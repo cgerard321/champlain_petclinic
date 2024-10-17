@@ -53,6 +53,7 @@ import UpdatePromoPage from '@/pages/Promos/UpdatePromoPage.tsx';
 import CustomerEmergency from './pages/Visit/CustomerEmergency';
 import AddEmergencyForm from './features/visits/Emergency/AddEmergencyForm';
 import LowStockProducts from '@/features/inventories/LowStockProducts.tsx';
+import MoveInventoryProducts from '@/features/inventories/MoveInventoryProducts.tsx';
 import ReviewsCustomer from '@/pages/Review/CustomerReviews.tsx';
 import AddReviewsCustomer from '@/pages/Review/CustomerAddReviewForm.tsx';
 import EmergencyDetails from './features/visits/EmergencyByEmergencyId';
@@ -60,6 +61,14 @@ import EmergencyDetails from './features/visits/EmergencyByEmergencyId';
 const router = createBrowserRouter([
   {
     children: [
+      {
+        path: AppRoutePaths.MoveInventoryProducts,
+        element: (
+          <ProtectedRoute>
+            <MoveInventoryProducts />
+          </ProtectedRoute>
+        ),
+      },
       {
         path: AppRoutePaths.EditInventory,
         element: (
