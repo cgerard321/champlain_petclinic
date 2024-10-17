@@ -298,8 +298,8 @@ public class DataLoaderService implements CommandLineRunner {
 
         Image image1 = Image.builder()
                 .imageId("08a5af6b-3501-4157-9a99-1aa82387b9e4")
-                .imageName("dog_food.jpg")
-                .imageType("image/jpeg")
+                .imageName("dog_food.png")
+                .imageType("image/png")
                 .imageData(imageBytes1)
                 .build();
 
@@ -312,15 +312,15 @@ public class DataLoaderService implements CommandLineRunner {
 
         Image image3 = Image.builder()
                 .imageId("be4e60a4-2369-46e8-abee-20c1a8dce3e5")
-                .imageName("flea_collar.jpg")
-                .imageType("image/jpeg")
+                .imageName("flea_collar.png")
+                .imageType("image/png")
                 .imageData(imageBytes3)
                 .build();
 
         Image image4 = Image.builder()
                 .imageId("7074e0ef-d041-452f-8a0f-cb9ab20d1fed")
-                .imageName("bird_cage.jpg")
-                .imageType("image/jpeg")
+                .imageName("bird_cage.png")
+                .imageType("image/png")
                 .imageData(imageBytes4)
                 .build();
 
@@ -333,22 +333,22 @@ public class DataLoaderService implements CommandLineRunner {
 
         Image image6 = Image.builder()
                 .imageId("664aa14b-db66-4b25-9d05-f3a9164eb401")
-                .imageName("horse_saddle.jpg")
-                .imageType("image/jpeg")
+                .imageName("horse_saddle.png")
+                .imageType("image/png")
                 .imageData(imageBytes6)
                 .build();
 
         Image image7 = Image.builder()
                 .imageId("3377a03f-8105-47d7-8d8a-d89fd170c7e6")
-                .imageName("rabbit_hutch.jpg")
-                .imageType("image/jpeg")
+                .imageName("rabbit_hutch.png")
+                .imageType("image/png")
                 .imageData(imageBytes7)
                 .build();
 
         Image image8 = Image.builder()
                 .imageId("c76ed4c1-fc5d-4868-8b39-1bca6b0be368")
-                .imageName("fish_tank_heater.jpg")
-                .imageType("image/jpeg")
+                .imageName("fish_tank_heater.png")
+                .imageType("image/png")
                 .imageData(imageBytes8)
                 .build();
 
