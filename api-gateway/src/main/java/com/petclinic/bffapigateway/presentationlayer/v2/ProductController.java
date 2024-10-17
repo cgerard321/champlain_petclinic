@@ -103,7 +103,7 @@ public class ProductController {
     }
 
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
     @PatchMapping(value = "{productId}/quantity", consumes = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<Object>> changeProductQuantity(
             @PathVariable String productId,
