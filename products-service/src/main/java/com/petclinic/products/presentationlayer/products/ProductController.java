@@ -1,5 +1,6 @@
 package com.petclinic.products.presentationlayer.products;
 
+import com.petclinic.products.businesslayer.products.ProductBundleService;
 import com.petclinic.products.businesslayer.products.ProductService;
 import com.petclinic.products.utils.EntityModelUtil;
 import com.petclinic.products.utils.exceptions.InvalidInputException;
@@ -14,10 +15,12 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/api/v1/products")
 public class ProductController {
 
+    private final ProductBundleService bundleService;
     private final ProductService productService;
 
-    public ProductController(ProductService productService) {
+    public ProductController(ProductBundleService productBundleService, ProductService productService) {
         this.productService = productService;
+        this.bundleService = productBundleService;
     }
 
     @GetMapping(value = "", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
@@ -85,5 +88,34 @@ public class ProductController {
                 .flatMap(request -> productService.changeProductQuantity(productId, request.getProductQuantity()))
                 .then(Mono.just(ResponseEntity.noContent().build()));
     }
+
+    // New endpoints for product bundles
+    @GetMapping(value = "/bundles", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Flux<ProductBundleResponseModel> getAllProductBundles() {
+        return bundleService.getAllProductBundles();
+    }
+    @GetMapping(value = "/bundles/{bundleId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<ProductBundleResponseModel>> getProductBundleById(@PathVariable String bundleId) {
+        return bundleService.getProductBundleById(bundleId)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+    @PostMapping(value = "/bundles", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<ProductBundleResponseModel>> createProductBundle(@RequestBody Mono<ProductBundleRequestModel> requestModel) {
+        return bundleService.createProductBundle(requestModel)
+                .map(bundle -> ResponseEntity.status(HttpStatus.CREATED).body(bundle));
+    }
+    @PutMapping(value = "/bundles/{bundleId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<ProductBundleResponseModel>> updateProductBundle(@PathVariable String bundleId,
+                                                                                @RequestBody Mono<ProductBundleRequestModel> requestModel) {
+        return bundleService.updateProductBundle(bundleId, requestModel)
+                .map(ResponseEntity::ok);
+    }
+    @DeleteMapping(value = "/bundles/{bundleId}")
+    public Mono<ResponseEntity<Void>> deleteProductBundle(@PathVariable String bundleId) {
+        return bundleService.deleteProductBundle(bundleId)
+                .then(Mono.just(ResponseEntity.noContent().build()));
+    }
+
 
 }
