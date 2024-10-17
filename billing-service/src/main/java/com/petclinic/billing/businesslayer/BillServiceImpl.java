@@ -42,8 +42,8 @@ public class BillServiceImpl implements BillService{
                 })
                 .map(EntityDtoUtil::toBillResponseDto)
                 .doOnNext(t -> t.setTaxedAmount(((t.getAmount() * 15)/100)+ t.getAmount()))
-                .doOnNext(t -> t.setTaxedAmount(Math.round(t.getTaxedAmount() * 100.0) / 100.0))
-                .doOnNext(t -> t.setTimeRemaining(timeRemaining(t)));
+                .doOnNext(t -> t.setTaxedAmount(Math.round(t.getTaxedAmount() * 100.0) / 100.0));
+               // .doOnNext(t -> t.setTimeRemaining(timeRemaining(t)));
     }
 
     @Override
@@ -211,7 +211,7 @@ public class BillServiceImpl implements BillService{
         return billRepository.deleteBillsByCustomerId(customerId);
 
     }
-
+/*
     private long timeRemaining(BillResponseDTO bill){
         if (bill.getDueDate().isBefore(LocalDate.now())) {
             return 0;
@@ -219,6 +219,8 @@ public class BillServiceImpl implements BillService{
 
         return Duration.between(LocalDate.now().atStartOfDay(), bill.getDueDate().atStartOfDay()).toDays();
     }
+
+ */
 
 
 
