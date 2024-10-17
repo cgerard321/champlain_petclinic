@@ -35,7 +35,7 @@ jobs:
         run: |
           mkdir -p .qodana/code-coverage
           for service in $(find -maxdepth 1 -type d -name '*service*' -o -name '*gateway*' | sed 's/.\///'); do
-            cp -R "$service/build/reports" ".qodana/code-coverage/$service"
+            [[ -d $service/build/reports ]] && cp -R "$service/build/reports" ".qodana/code-coverage/$service"
           done
 
       - name: Archive coverage data
