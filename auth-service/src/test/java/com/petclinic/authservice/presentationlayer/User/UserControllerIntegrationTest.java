@@ -544,7 +544,7 @@ class UserControllerIntegrationTest {
                 .expectStatus().isOk()
                 .expectBodyList(UserDetails.class)
                 .value(users -> {
-                    assertEquals(18,users.size());
+                    assertEquals(19,users.size());
                 });
     }
     @Test
@@ -611,7 +611,7 @@ class UserControllerIntegrationTest {
                 .expectStatus().isOk()
                 .expectBodyList(UserDetails.class)
                 .value(users -> {
-                    assertEquals(18,users.size());
+                    assertEquals(19,users.size());
                 });
     }
 
