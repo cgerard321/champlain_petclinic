@@ -8,6 +8,7 @@ import { FaShoppingCart } from 'react-icons/fa'; // Importing the shopping cart 
 
 interface ProductAPIResponse {
   productId: number;
+  imageId: string;
   productName: string;
   productDescription: string;
   productSalePrice: number;
@@ -87,6 +88,7 @@ const UserCart = (): JSX.Element => {
         }
 
         const data = await response.json();
+        console.log(data)
 
         // Ensure that data.products exists and is an array
         if (!Array.isArray(data.products)) {
@@ -97,6 +99,7 @@ const UserCart = (): JSX.Element => {
         const products: ProductModel[] = data.products.map(
           (product: ProductAPIResponse) => ({
             productId: product.productId,
+            imageId: product.imageId,
             productName: product.productName,
             productDescription: product.productDescription,
             productSalePrice: product.productSalePrice,
@@ -269,6 +272,7 @@ const UserCart = (): JSX.Element => {
           credentials: 'include',
           body: JSON.stringify({
             productId: item.productId,
+            imageId: item.imageId,
             productName: item.productName,
             productSalePrice: item.productSalePrice,
           }),
@@ -305,6 +309,7 @@ const UserCart = (): JSX.Element => {
           credentials: 'include',
           body: JSON.stringify({
             productId: item.productId,
+            imageId: item.imageId,
             productName: item.productName,
             productSalePrice: item.productSalePrice,
           }),
@@ -352,6 +357,7 @@ const UserCart = (): JSX.Element => {
           cartId,
           items: cartItems.map(item => ({
             productId: item.productId,
+            imageId: item.imageId,
             productName: item.productName,
             productSalePrice: item.productSalePrice,
             quantity: item.quantity || 1,

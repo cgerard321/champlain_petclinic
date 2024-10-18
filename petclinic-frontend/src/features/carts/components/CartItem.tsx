@@ -45,9 +45,13 @@ const CartItem = ({
   //   }
   // }
   const remainingStock = item.productQuantity - (item.quantity ?? 0);
+  console.log(item)
+  console.log(item.imageId)
+
 
   return (
     <div className="CartItem">
+      <img src={`http://localhost:8080/api/v2/gateway/images/${item.imageId}`} alt={item.productName} className="CartItem-image" />
       <div className="CartItem-info">
         <h2 className="info-title">{item.productName}</h2>
         <p className="info-description">{item.productDescription}</p>
