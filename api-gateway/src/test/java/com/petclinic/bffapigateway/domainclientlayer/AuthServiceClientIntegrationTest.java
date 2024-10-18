@@ -674,4 +674,50 @@ public class AuthServiceClientIntegrationTest {
                 .verify();
     }
 
+    @Test
+    @DisplayName("Should get all roles")
+    void shouldGetAllRoles() throws Exception {
+        Role role1 = Role.builder().name("ROLE_USER").build();
+        Role role2 = Role.builder().name("ROLE_ADMIN").build();
+
+        String rolesJson = new ObjectMapper().writeValueAsString(List.of(role1, role2));
+
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(200)
+                .setBody(rolesJson);
+
+        server.enqueue(mockResponse);
+
+        Flux<Role> rolesFlux = authServiceClient.getAllRoles("jwtToken");
+
+        StepVerifier.create(rolesFlux)
+                .expectNext(role1)
+                .expectNext(role2)
+                .verifyComplete();
+    }
+
+    @Test
+    @DisplayName("Should create a role")
+    void shouldCreateRole() throws Exception {
+        RoleRequestModel roleRequestModel = RoleRequestModel.builder().name("ROLE_USER").build();
+        Role role = Role.builder().name("ROLE_USER").build();
+
+        String roleJson = new ObjectMapper().writeValueAsString(role);
+
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(201)
+                .setBody(roleJson);
+
+        server.enqueue(mockResponse);
+
+        Mono<Role> roleMono = authServiceClient.createRole("jwtToken", roleRequestModel);
+
+        StepVerifier.create(roleMono)
+                .expectNext(role)
+                .verifyComplete();
+    }
 }
