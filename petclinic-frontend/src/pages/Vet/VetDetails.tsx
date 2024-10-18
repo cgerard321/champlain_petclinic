@@ -591,9 +591,13 @@ export default function VetDetails(): JSX.Element {
                       >
                         {formVisible ? 'Cancel' : 'Add Education'}
                       </button>
-                      {formVisible && <AddEducation vetId={vetId} onClose={() => setFormVisible(false)} />}
+                      {formVisible && (
+                        <AddEducation
+                          vetId={vetId}
+                          onClose={() => setFormVisible(false)}
+                        />
+                      )}
                     </div>
-
 
                     <button
                       className="btn btn-primary"
