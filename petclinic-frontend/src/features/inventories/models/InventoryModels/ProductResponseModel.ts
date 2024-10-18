@@ -7,5 +7,5 @@ export interface ProductResponseModel {
   productPrice: number;
   productQuantity: number;
   productSalePrice: number;
-  productStatus: 'RE_ORDER' | 'OUT_OF_STOCK' | 'AVAILABLE';
+  status: 'RE_ORDER' | 'OUT_OF_STOCK' | 'AVAILABLE';
 }

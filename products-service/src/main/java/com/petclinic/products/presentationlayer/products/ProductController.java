@@ -1,8 +1,12 @@
 package com.petclinic.products.presentationlayer.products;
 
+import com.petclinic.products.businesslayer.products.ProductBundleService;
 import com.petclinic.products.businesslayer.products.ProductService;
+import com.petclinic.products.datalayer.products.Product;
+import com.petclinic.products.datalayer.products.ProductType;
 import com.petclinic.products.utils.EntityModelUtil;
 import com.petclinic.products.utils.exceptions.InvalidInputException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -10,14 +14,19 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/products")
 public class ProductController {
 
+    private final ProductBundleService bundleService;
     private final ProductService productService;
 
-    public ProductController(ProductService productService) {
+    @Autowired
+    public ProductController(ProductBundleService productBundleService, ProductService productService) {
         this.productService = productService;
+        this.bundleService = productBundleService;
     }
 
     @GetMapping(value = "", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
@@ -85,5 +94,42 @@ public class ProductController {
                 .flatMap(request -> productService.changeProductQuantity(productId, request.getProductQuantity()))
                 .then(Mono.just(ResponseEntity.noContent().build()));
     }
+    @GetMapping("/filter")
+    public List<ProductResponseModel> getProductsByType(@RequestParam ProductType productType) {
+        List<Product> products = productService.getProductsByType(productType);
+        // Convert the entities to response models (if needed)
+        return products.stream()
+                .map(EntityModelUtil::toProductResponseModel)
+                .toList();
+    }
+
+    // New endpoints for product bundles
+    @GetMapping(value = "/bundles", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Flux<ProductBundleResponseModel> getAllProductBundles() {
+        return bundleService.getAllProductBundles();
+    }
+    @GetMapping(value = "/bundles/{bundleId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<ProductBundleResponseModel>> getProductBundleById(@PathVariable String bundleId) {
+        return bundleService.getProductBundleById(bundleId)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+    @PostMapping(value = "/bundles", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<ProductBundleResponseModel>> createProductBundle(@RequestBody Mono<ProductBundleRequestModel> requestModel) {
+        return bundleService.createProductBundle(requestModel)
+                .map(bundle -> ResponseEntity.status(HttpStatus.CREATED).body(bundle));
+    }
+    @PutMapping(value = "/bundles/{bundleId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<ProductBundleResponseModel>> updateProductBundle(@PathVariable String bundleId,
+                                                                                @RequestBody Mono<ProductBundleRequestModel> requestModel) {
+        return bundleService.updateProductBundle(bundleId, requestModel)
+                .map(ResponseEntity::ok);
+    }
+    @DeleteMapping(value = "/bundles/{bundleId}")
+    public Mono<ResponseEntity<Void>> deleteProductBundle(@PathVariable String bundleId) {
+        return bundleService.deleteProductBundle(bundleId)
+                .then(Mono.just(ResponseEntity.noContent().build()));
+    }
+
 
 }

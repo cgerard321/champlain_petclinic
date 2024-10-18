@@ -131,6 +131,19 @@ public class UserServiceImpl implements UserService {
             return userRepo.save(user);
     }
 
+    @Override
+    public User updateUser(String userId, UserPasswordLessDTO userPasswordLessDTO) {
+        User existingUser = userRepo.findUserByUserIdentifier_UserId(userId);
+        if (existingUser != null) {
+            existingUser.setUserIdentifier(new UserIdentifier(userId));
+            existingUser.setUsername(userPasswordLessDTO.getUsername());
+            existingUser.setEmail(userPasswordLessDTO.getEmail());
+            return userRepo.save(existingUser);
+        } else {
+            throw new NotFoundException("User not found for ID: " + userId);
+        }
+    }
+
 //    @Override
 //    public void deleteUser
 //            (long userId) {

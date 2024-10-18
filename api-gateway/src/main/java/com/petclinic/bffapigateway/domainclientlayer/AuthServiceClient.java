@@ -18,6 +18,7 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -66,6 +67,16 @@ public class AuthServiceClient {
                 .bodyToFlux(UserDetails.class);
     }
 
+    public Mono<Void> deleteUser(String jwtToken, String userId) {
+        return webClientBuilder.build()
+                .delete()
+                .uri(authServiceUrl + "/users/{userId}", userId)
+                .cookie("Bearer", jwtToken)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> Mono.error(new GenericHttpException("Error deleting user", HttpStatus.BAD_REQUEST)))
+                .onStatus(HttpStatusCode::is5xxServerError, clientResponse -> Mono.error(new GenericHttpException("Server error", HttpStatus.INTERNAL_SERVER_ERROR)))
+                .bodyToMono(Void.class);
+    }
 
     public Mono<UserDetails> getUserById(String jwtToken, String userId) {
         return webClientBuilder.build()
@@ -103,14 +114,6 @@ public class AuthServiceClient {
                 .bodyToFlux(UserDetails.class);
     }
 
-    public Mono<Void> deleteUser(String jwtToken, String userId) {
-        return webClientBuilder.build()
-                .delete()
-                .uri(authServiceUrl + "/users/{userId}", userId)
-                .cookie("Bearer", jwtToken)
-                .retrieve()
-                .bodyToMono(void.class);
-    }
 
     //FUCK REACTIVE
     /*
@@ -306,7 +309,7 @@ public class AuthServiceClient {
 //                        )
 //                .bodyToMono(UserDetails.class);
 //    }
-//
+
     public Mono<ResponseEntity<UserDetails>> verifyUser(final String token) {
 
         return webClientBuilder.build()
@@ -483,6 +486,20 @@ public class AuthServiceClient {
                 .onStatus(HttpStatusCode::is5xxServerError, clientResponse -> Mono.error(new GenericHttpException("Server error", HttpStatus.INTERNAL_SERVER_ERROR)))
                 .bodyToMono(Void.class);
     }
+
+    public Mono<UserPasswordLessDTO> updateUser(String userId, UserPasswordLessDTO userPasswordLessDTO, String jwToken) {
+        return webClientBuilder.build()
+                .put()
+                .uri(authServiceUrl + "/users/{userId}", userId)
+                .bodyValue(userPasswordLessDTO)
+                .cookie("Bearer", jwToken)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, n -> rethrower.rethrow(n,
+                        x -> new GenericHttpException(x.get("message").toString(), (HttpStatus) n.statusCode())))
+                .bodyToMono(UserPasswordLessDTO.class);
+    }
+
 
 }
 

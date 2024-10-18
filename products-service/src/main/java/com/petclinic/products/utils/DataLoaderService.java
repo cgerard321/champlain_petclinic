@@ -3,9 +3,12 @@ package com.petclinic.products.utils;
 import com.petclinic.products.datalayer.images.Image;
 import com.petclinic.products.datalayer.images.ImageRepository;
 import com.petclinic.products.datalayer.products.Product;
+import com.petclinic.products.datalayer.products.ProductBundle;
+import com.petclinic.products.datalayer.products.ProductBundleRepository;
 import com.petclinic.products.datalayer.products.ProductRepository;
 import com.petclinic.products.datalayer.ratings.Rating;
 import com.petclinic.products.datalayer.ratings.RatingRepository;
+import com.petclinic.products.datalayer.products.ProductType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
@@ -18,12 +21,17 @@ import reactor.core.publisher.Mono;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 public class DataLoaderService implements CommandLineRunner {
 
     @Autowired
     ProductRepository productRepository;
+
+    @Autowired
+    ProductBundleRepository productBundleRepository;
 
     @Autowired
     ImageRepository imageRepository;
@@ -40,7 +48,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Premium dry food for adult dogs")
                 .productSalePrice(45.99)
                 .requestCount(0)
-                .productType("Food")
+                .productType(ProductType.FOOD)
                 .productQuantity(44)
                 .build();
 
@@ -51,7 +59,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Clumping cat litter with odor control")
                 .productSalePrice(12.99)
                 .requestCount(0)
-                .productType("Accessory")
+                .productType(ProductType.ACCESSORY)
                 .productQuantity(3)
                 .build();
 
@@ -62,7 +70,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Flea and tick prevention for small dogs")
                 .productSalePrice(9.99)
                 .requestCount(0)
-                .productType("Medication")
+                .productType(ProductType.MEDICATION)
                 .productQuantity(53)
                 .build();
 
@@ -73,7 +81,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Spacious cage for small birds like parakeets")
                 .productSalePrice(29.99)
                 .requestCount(0)
-                .productType("Accessory")
+                .productType(ProductType.ACCESSORY)
                 .productQuantity(8)
                 .build();
 
@@ -84,7 +92,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Filter system for small to medium-sized aquariums")
                 .productSalePrice(19.99)
                 .requestCount(0)
-                .productType("Accessory")
+                .productType(ProductType.ACCESSORY)
                 .productQuantity(14)
                 .build();
 
@@ -95,7 +103,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Lightweight saddle for riding horses")
                 .productSalePrice(199.99)
                 .requestCount(0)
-                .productType("Equipment")
+                .productType(ProductType.EQUIPMENT)
                 .productQuantity(58)
                 .build();
 
@@ -106,7 +114,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Outdoor wooden hutch for rabbits")
                 .productSalePrice(79.99)
                 .requestCount(0)
-                .productType("Accessory")
+                .productType(ProductType.ACCESSORY)
                 .productQuantity(66)
                 .build();
 
@@ -117,9 +125,37 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Submersible heater for tropical fish tanks")
                 .productSalePrice(14.99)
                 .requestCount(0)
-                .productType("Accessory")
+                .productType(ProductType.ACCESSORY)
                 .productQuantity(0)
                 .build();
+
+        ProductBundle bundle1 = ProductBundle.builder()
+                .bundleId(UUID.randomUUID().toString())
+                .bundleName("Dog Bundle")
+                .bundleDescription("Dog Food & Flea Collar")
+                .productIds(List.of("06a7d573-bcab-4db3-956f-773324b92a80", "baee7cd2-b67a-449f-b262-91f45dde8a6d"))
+                .originalTotalPrice(product1.getProductSalePrice() + product3.getProductSalePrice())
+                .bundlePrice(49.99)
+                .build();
+
+        ProductBundle bundle2 = ProductBundle.builder()
+                .bundleId(UUID.randomUUID().toString())
+                .bundleName("Fish Bundle")
+                .bundleDescription("Cat Litter & Fish Tank Heater")
+                .productIds(List.of("4d508fb7-f1f2-4952-829d-10dd7254cf26", "1501f30e-1db1-44b2-a555-bca6f64450e4"))
+                .originalTotalPrice(product5.getProductSalePrice() + product8.getProductSalePrice())
+                .bundlePrice(24.99)
+                .build();
+
+        ProductBundle bundle3 = ProductBundle.builder()
+                .bundleId(UUID.randomUUID().toString())
+                .bundleName("Accessory Bundle")
+                .bundleDescription("All Accessories")
+                .productIds(List.of("1501f30e-1db1-44b2-a555-bca6f64450e4", "4affcab7-3ab1-4917-a114-2b6301aa5565", "4d508fb7-f1f2-4952-829d-10dd7254cf26", "ae2d3af7-f2a2-407f-ad31-ca7d8220cb7a", "98f7b33a-d62a-420a-a84a-05a27c85fc91"))
+                .originalTotalPrice(product8.getProductSalePrice() + product7.getProductSalePrice() + product5.getProductSalePrice() + product4.getProductSalePrice() + product2.getProductSalePrice())
+                .bundlePrice(129.99)
+                .build();
+
 
         Rating rating1prod1 = Rating.builder()
                 .productId(product1.getProductId())
@@ -233,14 +269,14 @@ public class DataLoaderService implements CommandLineRunner {
                 .review("Doesn't heat evenly")
                 .build();
 
-        Resource resource1 = new ClassPathResource("images/dog_food.jpg");
+        Resource resource1 = new ClassPathResource("images/dog_food.png");
         Resource resource2 = new ClassPathResource("images/cat_litter.png");
-        Resource resource3 = new ClassPathResource("images/flea_collar.jpg");
-        Resource resource4 = new ClassPathResource("images/bird_cage.jpg");
+        Resource resource3 = new ClassPathResource("images/flea_collar.png");
+        Resource resource4 = new ClassPathResource("images/bird_cage.png");
         Resource resource5 = new ClassPathResource("images/aquarium_filter.png");
-        Resource resource6 = new ClassPathResource("images/horse_saddle.jpg");
-        Resource resource7 = new ClassPathResource("images/rabbit_hutch.jpg");
-        Resource resource8 = new ClassPathResource("images/fish_tank_heater.jpg");
+        Resource resource6 = new ClassPathResource("images/horse_saddle.png");
+        Resource resource7 = new ClassPathResource("images/rabbit_hutch.png");
+        Resource resource8 = new ClassPathResource("images/fish_tank_heater.png");
 
         InputStream inputStream1 = resource1.getInputStream();
         InputStream inputStream2 = resource2.getInputStream();
@@ -316,6 +352,11 @@ public class DataLoaderService implements CommandLineRunner {
                 .imageType("image/jpeg")
                 .imageData(imageBytes8)
                 .build();
+
+        Flux.just(bundle1, bundle2, bundle3)
+                .flatMap(s -> productBundleRepository.insert(Mono.just(s))
+                        .log(s.toString()))
+                .subscribe();
 
         Flux.just(product1, product2, product3, product4, product5, product6, product7, product8)
                 .flatMap(s -> productRepository.insert(Mono.just(s))
