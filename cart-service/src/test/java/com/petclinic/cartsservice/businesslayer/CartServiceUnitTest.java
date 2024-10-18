@@ -469,6 +469,24 @@ class CartServiceUnitTest {
     }
 
     @Test
+    void checkoutCart_NoProductsInCart_ThrowsInvalidInputException() {
+        // Create a cart with no products
+        Cart emptyCart = Cart.builder()
+                .cartId("123")
+                .customerId("1")
+                .products(new ArrayList<>())
+                .build();
+
+        when(cartRepository.findCartByCartId(emptyCart.getCartId())).thenReturn(Mono.just(emptyCart));
+
+        Mono<CartResponseModel> result = cartService.checkoutCart(emptyCart.getCartId());
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof InvalidInputException &&
+                        throwable.getMessage().contains("Cart is empty"))
+                .verify();
+    }
+    @Test
     void updateProductQuantityInCart_QuantityLessThanOrEqualToZero_ThrowsInvalidInputException() {
         String cartId = cart1.getCartId();
         String productId = product1.getProductId();

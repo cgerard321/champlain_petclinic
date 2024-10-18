@@ -233,17 +233,6 @@ public Mono<CartResponseDTO> deleteCartByCartId(String CardId) {
                 .post()
                 .uri(CartServiceUrl + "/" + cartId + "/checkout")
                 .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError, error -> {
-                    HttpStatusCode statusCode = error.statusCode();
-                    if (statusCode.equals(HttpStatus.NOT_FOUND)) {
-                        return Mono.error(new NotFoundException("Cart not found for cartId: " + cartId));
-                    }
-                    else if (statusCode.equals(HttpStatus.UNPROCESSABLE_ENTITY)) {
-                        return Mono.error(new InvalidInputException("Cart id invalid for cart id: " + cartId));
-                    }
-                    return Mono.error(new IllegalArgumentException("Client error"));
-                })
-                .onStatus(HttpStatusCode::is5xxServerError, error -> Mono.error(new IllegalArgumentException("Server error")))
                 .bodyToMono(CartResponseDTO.class);
     }
 

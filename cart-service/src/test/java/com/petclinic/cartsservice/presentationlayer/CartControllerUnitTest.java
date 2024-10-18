@@ -26,6 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @WebFluxTest(controllers = CartController.class)
 class CartControllerUnitTest {
@@ -109,10 +110,10 @@ class CartControllerUnitTest {
         webTestClient
                 .get()
                 .uri("/api/v1/carts/" + cart.getCartId())
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentType(APPLICATION_JSON)
                 .expectBody(CartResponseModel.class)
                 .value(result -> {
                     assertEquals(cart.getCartId(), result.getCartId());
@@ -154,10 +155,10 @@ class CartControllerUnitTest {
         webTestClient
                 .get()
                 .uri("/api/v1/carts")
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentType(APPLICATION_JSON)
                 .expectBodyList(CartResponseModel.class)
                 .value(result -> {
                     assertEquals(2, result.size());
@@ -180,7 +181,7 @@ class CartControllerUnitTest {
         webTestClient
                 .get()
                 .uri("/api/v1/carts/" + NOT_FOUND_CART_ID)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNotFound();
     }
@@ -195,7 +196,7 @@ class CartControllerUnitTest {
         webTestClient
                 .get()
                 .uri("/api/v1/carts/" + invalidCartId)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isEqualTo(422);
     }
@@ -244,10 +245,10 @@ class CartControllerUnitTest {
         webTestClient
                 .delete()
                 .uri("/api/v1/carts/" + cart.getCartId())
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentType(APPLICATION_JSON)
                 .expectBody(CartResponseModel.class)
                 .isEqualTo(cartResponseModel);
 
@@ -285,9 +286,9 @@ class CartControllerUnitTest {
         // Act & Assert
         webTestClient.post()
                 .uri("/api/v1/carts/" + cartId + "/products")
-                .contentType(MediaType.APPLICATION_JSON)
+                .contentType(APPLICATION_JSON)
                 .bodyValue(requestModel)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(CartResponseModel.class)
@@ -320,10 +321,10 @@ class CartControllerUnitTest {
         webTestClient
                 .post()
                 .uri("/api/v1/carts/" + cart.getCartId() + "/checkout")
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentType(APPLICATION_JSON)
                 .expectBody(CartResponseModel.class)
                 .value(response -> {
                     assertEquals(cart.getCartId(), response.getCartId());
@@ -346,7 +347,7 @@ class CartControllerUnitTest {
         // Act & Assert
         webTestClient.post()
                 .uri("/api/v1/carts/" + cartId + "/products")
-                .contentType(MediaType.APPLICATION_JSON)
+                .contentType(APPLICATION_JSON)
                 .bodyValue(requestModel)
                 .exchange()
                 .expectStatus().isBadRequest()
@@ -368,7 +369,7 @@ class CartControllerUnitTest {
         // Act & Assert
         webTestClient.post()
                 .uri("/api/v1/carts/" + cartId + "/products")
-                .contentType(MediaType.APPLICATION_JSON)
+                .contentType(APPLICATION_JSON)
                 .bodyValue(requestModel)
                 .exchange()
                 .expectStatus().isBadRequest()
@@ -394,7 +395,7 @@ class CartControllerUnitTest {
         // Act & Assert
         webTestClient.put()
                 .uri("/api/v1/carts/" + cartId + "/products/" + productId)
-                .contentType(MediaType.APPLICATION_JSON)
+                .contentType(APPLICATION_JSON)
                 .bodyValue(requestModel)
                 .exchange()
                 .expectStatus().isOk()
@@ -417,7 +418,7 @@ class CartControllerUnitTest {
         // Act & Assert
         webTestClient.put()
                 .uri("/api/v1/carts/" + cartId + "/products/" + productId)
-                .contentType(MediaType.APPLICATION_JSON)
+                .contentType(APPLICATION_JSON)
                 .bodyValue(requestModel)
                 .exchange()
                 .expectStatus().isBadRequest()
@@ -442,15 +443,28 @@ class CartControllerUnitTest {
         webTestClient
                 .get()
                 .uri("/api/v1/carts/customer/" + validCustomerId)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentType(APPLICATION_JSON)
                 .expectBody(CartResponseModel.class)
                 .value(result -> {
                     assertEquals(validCustomerId, result.getCustomerId());
                     assertEquals("cart123", result.getCartId());
                 });
+    }
+
+    @Test
+    void checkoutCart_NotFound() {
+        // Arrange
+        when(cartService.checkoutCart(NOT_FOUND_CART_ID)).thenReturn(Mono.error(new NotFoundException("Cart not found")));
+
+        // Act and Assert
+        webTestClient.post()
+                .uri("/api/cart/" + NOT_FOUND_CART_ID + "/checkout")
+                .contentType(APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound();
     }
 
     @Test
@@ -464,7 +478,7 @@ class CartControllerUnitTest {
         webTestClient
                 .get()
                 .uri("/api/v1/carts/customer/" + nonExistingCustomerId)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNotFound()
                 .expectBody()
@@ -497,10 +511,10 @@ class CartControllerUnitTest {
         webTestClient
                 .delete()
                 .uri("/api/v1/carts/" + cartId + "/" + productIdToRemove)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentType(APPLICATION_JSON)
                 .expectBody(CartResponseModel.class)
                 .value(result -> {
                     assertEquals(cartId, result.getCartId());
@@ -524,7 +538,7 @@ class CartControllerUnitTest {
         webTestClient
                 .delete()
                 .uri("/api/v1/carts/" + nonExistentCartId + "/" + productIdToRemove)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNotFound();
 
@@ -544,7 +558,7 @@ class CartControllerUnitTest {
         webTestClient
                 .delete()
                 .uri("/api/v1/carts/" + cartId + "/" + nonExistentProductId)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNotFound();
 
@@ -561,7 +575,7 @@ class CartControllerUnitTest {
         webTestClient
                 .delete()
                 .uri("/api/v1/carts/" + invalidCartId + "/" + productIdToRemove)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isEqualTo(422)
                 .expectBody()
