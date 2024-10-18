@@ -103,6 +103,16 @@ public class UserController {
                 });
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @PutMapping(value = "users/{userId}",
+            consumes = "application/json",
+            produces = "application/json")
+    public Mono<UserPasswordLessDTO> updateUser(final @PathVariable String userId,
+                                                @RequestBody UserPasswordLessDTO model,
+                                                @CookieValue("Bearer") String jwtToken) {
+        return authServiceClient.updateUser(userId, model, jwtToken);
+    }
+
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @PostMapping(value = "/users/forgot_password", consumes = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<Void>> sendForgotPasswordEmail(@RequestBody Mono<UserEmailRequestDTO> userEmailRequestDTO) {

@@ -1,9 +1,13 @@
 package com.petclinic.products.businesslayer.products;
 
+import com.petclinic.products.datalayer.products.Product;
+import com.petclinic.products.datalayer.products.ProductType;
 import com.petclinic.products.presentationlayer.products.ProductRequestModel;
 import com.petclinic.products.presentationlayer.products.ProductResponseModel;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 public interface ProductService {
 
@@ -16,4 +20,6 @@ public interface ProductService {
     Mono<Void> DecreaseProductCount(String productId);//When item is sold in cart//temporarily in cart.
     Mono<Void> changeProductQuantity(String productId, Integer productQuantity);
     Flux<ProductResponseModel> getProductsByType(String productType);
+    List<Product> getProductsByType(ProductType productType);
+
 }
