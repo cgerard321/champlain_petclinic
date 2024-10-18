@@ -654,4 +654,24 @@ public class AuthServiceClientIntegrationTest {
                 .verify();
     }
 
+    @Test
+    @DisplayName("Should return error when deleting a user with invalid token")
+    void deleteUser_ShouldReturnError() throws Exception {
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse.setResponseCode(401);
+
+        server.enqueue(mockResponse);
+
+        String jwtToken = "invalidJwtToken";
+        String userId = "userId";
+
+        final Mono<Void> deleteUserResponse = authServiceClient.deleteUser(jwtToken, userId);
+
+        // check status response in step verifier
+        StepVerifier.create(deleteUserResponse)
+                .expectErrorMatches(throwable -> throwable instanceof GenericHttpException &&
+                        ((GenericHttpException) throwable).getHttpStatus() == HttpStatus.BAD_REQUEST)
+                .verify();
+    }
+
 }

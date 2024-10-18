@@ -30,6 +30,27 @@ const AllUsers: React.FC = (): JSX.Element => {
     fetchUsers();
   }, []);
 
+  const handleDelete = async (userId: string): Promise<void> => {
+    const confirmed = window.confirm(
+      '      Are you sure you want to permanently delete this user?      '
+    );
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      await axios.delete(
+        `http://localhost:8080/api/v2/gateway/users/${userId}`,
+        {
+          withCredentials: true,
+        }
+      );
+      setUsers(users.filter(user => user.userId !== userId));
+    } catch (error) {
+      console.error('Error deleting user:', error);
+    }
+  };
+
   return (
     <div>
       <NavBar />
@@ -55,6 +76,11 @@ const AllUsers: React.FC = (): JSX.Element => {
                 <td>{user.username}</td>
                 <td>{user.email}</td>
                 <td>{user.verified ? 'Yes' : 'No'}</td>
+                <td>
+                  <button onClick={() => handleDelete(user.userId)}>
+                    Delete
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
