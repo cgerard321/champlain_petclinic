@@ -362,5 +362,18 @@ public class InventoryServiceClient {
                 .bodyToFlux(InventoryResponseDTO.class);
     }
 
+    public Mono<ProductResponseDTO> restockLowStockProduct(final String inventoryId, final String productId, final Integer productQuantity) {
+        return webClient.put()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/{inventoryId}/products/{productId}/restockProduct")
+                        .queryParam("productQuantity", productQuantity)  // Add the productQuantity as a query param
+                        .build(inventoryId, productId))
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError,
+                        resp -> Mono.error(new NotFoundException("Product: " + productId + " not found in inventory: " + inventoryId)))
+                .bodyToMono(ProductResponseDTO.class);
+    }
+
 }
 

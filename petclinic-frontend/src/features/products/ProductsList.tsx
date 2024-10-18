@@ -14,9 +14,13 @@ import { ImageModel } from './models/ProductModels/ImageModel';
 import StarRating from '@/features/products/components/StarRating.tsx';
 import './components/StarRating.css';
 import { ProductType } from '@/features/products/api/ProductTypeEnum.ts';
+import { getAllProductBundles } from './api/getAllProductBundles';
+import { ProductBundleModel } from './models/ProductModels/ProductBundleModel';
+import ProductBundle from './components/ProductBundle';
 
 export default function ProductList(): JSX.Element {
   const [productList, setProductList] = useState<ProductModel[]>([]);
+  const [bundleList, setBundleList] = useState<ProductBundleModel[]>([]);
   const [minPrice, setMinPrice] = useState<number | undefined>(undefined);
   const [maxPrice, setMaxPrice] = useState<number | undefined>(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -30,6 +34,20 @@ export default function ProductList(): JSX.Element {
   const [ratingSort, setRatingSort] = useState<string>('default');
   const [minStars, setMinStars] = useState<number>(0);
   const [maxStars, setMaxStars] = useState<number>(5);
+  const [validationMessage, setValidationMessage] = useState<string>('');
+
+  const validationStars = async (
+    minStars: number,
+    maxStars: number
+  ): Promise<void> => {
+    if (minStars >= maxStars) {
+      setValidationMessage(
+        'Minimum stars cannot be greater than or equal to maximum stars.'
+      );
+    } else {
+      setValidationMessage('');
+    }
+  };
 
   function FilterByPriceErrorHandling(): void {
     // Validate inputs for filter by price
@@ -39,7 +57,6 @@ export default function ProductList(): JSX.Element {
       minPrice > maxPrice
     ) {
       alert('Min Price cannot be greater than Max Price');
-      return;
     }
   }
 
@@ -58,7 +75,6 @@ export default function ProductList(): JSX.Element {
         setProductList(list);
       } else {
         const filteredList = await getProductsByType(filterType);
-
         setProductList(filteredList);
       }
     } catch (err) {
@@ -67,13 +83,20 @@ export default function ProductList(): JSX.Element {
     } finally {
       setIsLoading(false);
     }
+    // Fetch product bundles
+    try {
+      const bundles = await getAllProductBundles();
+      setBundleList(bundles);
+    } catch (err) {
+      console.error('Error fetching product bundles:', err);
+    }
   };
 
   useEffect(() => {
     fetchProducts();
     const savedProducts = localStorage.getItem('recentlyClickedProducts');
     if (savedProducts) {
-      return setRecentlyClickedProducts(JSON.parse(savedProducts));
+      setRecentlyClickedProducts(JSON.parse(savedProducts));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -126,6 +149,7 @@ export default function ProductList(): JSX.Element {
     setRatingSort('');
     setMaxStars(5);
     setMinStars(0);
+    setValidationMessage('');
     const list = await getAllProducts(minPrice, maxPrice, minStars, maxStars);
     setProductList(list);
   };
@@ -221,7 +245,10 @@ export default function ProductList(): JSX.Element {
               <StarRating
                 currentRating={minStars}
                 viewOnly={false}
-                updateRating={setMinStars}
+                updateRating={rating => {
+                  setMinStars(rating);
+                  validationStars(rating, maxStars);
+                }}
               />
             </div>
             <div className="star-row">
@@ -229,9 +256,15 @@ export default function ProductList(): JSX.Element {
               <StarRating
                 currentRating={maxStars}
                 viewOnly={false}
-                updateRating={setMaxStars}
+                updateRating={rating => {
+                  setMaxStars(rating);
+                  validationStars(minStars, rating);
+                }}
               />
             </div>
+            {validationMessage && (
+              <div style={{ color: 'red' }}>{validationMessage}</div>
+            )}
           </div>
           <select
             name="rating"
@@ -242,7 +275,11 @@ export default function ProductList(): JSX.Element {
             <option value="asc">Low to High</option>
             <option value="desc">High to Low</option>
           </select>
-          <button className="apply-filter-button" onClick={fetchProducts}>
+          <button
+            className="apply-filter-button"
+            disabled={validationMessage !== ''}
+            onClick={fetchProducts}
+          >
             Apply
           </button>
           <button className="clear-filter-button" onClick={clearFilters}>
@@ -266,6 +303,17 @@ export default function ProductList(): JSX.Element {
         <AddProduct addProduct={handleAddProduct} addImage={handleAddImage} />
       )}
       <div className="main-content">
+        <h2>Product Bundles</h2>
+        <div className="grid product-bundles-grid">
+          {bundleList.length > 0 ? (
+            bundleList.map((bundle: ProductBundleModel) => (
+              <ProductBundle key={bundle.bundleId} bundle={bundle} />
+            ))
+          ) : (
+            <p>No product bundles available.</p>
+          )}
+        </div>
+        <h2>Products</h2>
         <div className="grid">
           {isLoading ? (
             <p>Loading products...</p>

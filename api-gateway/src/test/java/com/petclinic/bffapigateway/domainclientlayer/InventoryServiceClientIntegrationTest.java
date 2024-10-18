@@ -15,10 +15,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -248,6 +248,72 @@ class InventoryServiceClientIntegrationTest {
                         && throwable.getMessage().contains("Inventory not found"))
                 .verify();
     }
+
+
+    @Test
+    void restockLowStockProduct_ValidRequest_ShouldReturnProduct() throws JsonProcessingException {
+        // Arrange
+        String inventoryId = "inventoryId_1";
+        String productId = "productId_1";
+        Integer productQuantity = 10;
+
+        ProductResponseDTO productResponseDTO = new ProductResponseDTO(
+                productId,
+                inventoryId,
+                "Restocked Product",
+                "Restocked Description",
+                100.00,
+                productQuantity,
+                15.99,
+                Status.AVAILABLE
+        );
+
+        // Mock the response from the MockWebServer
+        mockWebServer.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+                .setBody(objectMapper.writeValueAsString(productResponseDTO)));
+
+        // Act
+        Mono<ProductResponseDTO> result = inventoryServiceClient.restockLowStockProduct(inventoryId, productId, productQuantity);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNextMatches(response -> {
+                    assertEquals(productId, response.getProductId());
+                    assertEquals(inventoryId, response.getInventoryId());
+                    assertEquals(productQuantity, response.getProductQuantity());
+                    return true;
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void restockLowStockProduct_withInvalidInventoryIdOrProductId_shouldThrowNotFoundException() {
+        // Arrange
+        String inventoryId = "invalidInventoryId";
+        String productId = "invalidProductId";
+        Integer productQuantity = 10;
+
+        // Mock a 404 Not Found response from the MockWebServer
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(404)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+                .setBody("{\"message\": \"Product not found\"}"));
+
+        // Act
+        Mono<ProductResponseDTO> result = inventoryServiceClient.restockLowStockProduct(inventoryId, productId, productQuantity);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof NotFoundException
+                        && throwable.getMessage().contains("Product: " + productId + " not found in inventory: " + inventoryId))
+                .verify();
+    }
+
+
+
+
+
 
     @Test
     void updateProductInventoryId_withValidIds_shouldReturnUpdatedProduct() throws JsonProcessingException {
