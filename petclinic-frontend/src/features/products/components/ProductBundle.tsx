@@ -26,7 +26,6 @@ const ProductBundle: React.FC<ProductBundleProps> = ({ bundle }) => {
     <div className="product-bundle-card">
       <div className="deal-stamp">DEAL</div>
       <h3 className="bundle-title">{bundle.bundleName}</h3>
-      <h3>{bundle.bundleName}</h3>
       <p>{bundle.bundleDescription}</p>
       <div className="product-bundle-products">
         {products.map(product => (
