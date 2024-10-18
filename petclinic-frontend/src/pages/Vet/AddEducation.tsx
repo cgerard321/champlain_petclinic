@@ -1,10 +1,10 @@
-// AddEducation.tsx
+// eslint-disable-next-line import/default
 import React, { useState } from 'react';
 import axios from 'axios';
 import { Button, Modal, Form } from 'react-bootstrap';
 
 interface AddEducationProps {
-  vetId: string | undefined; // Change here to allow undefined
+  vetId: string | undefined;
   onClose: () => void;
 }
 
@@ -17,10 +17,12 @@ const AddEducation: React.FC<AddEducationProps> = ({ vetId, onClose }) => {
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [show, setShow] = useState(false);
 
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   const handleShow = () => setShow(true);
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   const handleClose = () => {
     setShow(false);
-    onClose(); // Ensure the modal closes correctly
+    onClose();
   };
 
   const validate = (): boolean => {
@@ -34,6 +36,7 @@ const AddEducation: React.FC<AddEducationProps> = ({ vetId, onClose }) => {
     return Object.keys(newErrors).length === 0;
   };
 
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!validate()) return;
@@ -48,9 +51,12 @@ const AddEducation: React.FC<AddEducationProps> = ({ vetId, onClose }) => {
     };
 
     try {
-      await axios.post(`http://localhost:8080/api/v2/gateway/vets/${vetId}/educations`, educationData);
-      handleClose(); // Close the form
-      window.location.reload(); // Optionally reload to see updated data
+      await axios.post(
+        `http://localhost:8080/api/v2/gateway/vets/${vetId}/educations`,
+        educationData
+      );
+      handleClose();
+      window.location.reload();
     } catch (error) {
       console.error('Failed to add education:', error);
     }
@@ -62,7 +68,12 @@ const AddEducation: React.FC<AddEducationProps> = ({ vetId, onClose }) => {
         Add Education
       </Button>
 
-      <Modal show={show} onHide={handleClose} backdrop="static" keyboard={false}>
+      <Modal
+        show={show}
+        onHide={handleClose}
+        backdrop="static"
+        keyboard={false}
+      >
         <Modal.Header closeButton>
           <Modal.Title>Add Education</Modal.Title>
         </Modal.Header>
