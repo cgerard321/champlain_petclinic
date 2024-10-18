@@ -5,6 +5,8 @@ import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
 public interface ProductRepository extends ReactiveMongoRepository<Product, String> {
 
     Mono<Product> findProductByProductId(String productId);
@@ -21,6 +23,7 @@ public interface ProductRepository extends ReactiveMongoRepository<Product, Stri
     @Query("{ 'productSalePrice' : { $lte: ?0 } }")
     Flux<Product> findByProductSalePriceLessThanEqual(Double maxPrice);
     Flux<Product> findProductsByProductType(String productType);
+    List<Product> findByProductType(ProductType productType);
 
 
 }

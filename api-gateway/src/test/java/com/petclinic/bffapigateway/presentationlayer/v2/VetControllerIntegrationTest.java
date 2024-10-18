@@ -1,6 +1,7 @@
 package com.petclinic.bffapigateway.presentationlayer.v2;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Vets.*;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
@@ -583,4 +584,47 @@ class VetControllerIntegrationTest {
                 .expectStatus().isNotFound();
     }
 
+    @Test
+    void getRatingsByVetId_ValidId_ReturnsRatings() throws JsonProcessingException {
+        String validVetId = "c02cbf82-625b-11ee-8c99-0242ac120002";
+        RatingResponseDTO ratingResponseDTO = RatingResponseDTO.builder()
+                .ratingId("123456")
+                .vetId(validVetId)
+                .rateScore(4.5)
+                .rateDescription("Great service!")
+                .predefinedDescription(PredefinedDescription.EXCELLENT)
+                .rateDate("2024-10-12")
+                .customerName("John Doe")
+                .build();
+        String jsonResponse = new ObjectMapper().writeValueAsString(List.of(ratingResponseDTO));
+        mockServerConfigVetService.registerGetRatingsByVetIdEndpoint(validVetId, jsonResponse);
+        webTestClient.get()
+                .uri(VET_ENDPOINT + "/" + validVetId + "/ratings")
+                .cookie("Bearer", jwtTokenForValidAdmin)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                // Then: expect successful response with valid ratings
+                .expectStatus().isOk()
+                .expectBodyList(RatingResponseDTO.class)
+                .hasSize(1)
+                .contains(ratingResponseDTO);
+    }
+    @Test
+    void getRatingsByVetId_InvalidId_ReturnsNotFound() {
+        String invalidVetId = "deb1950c-3c56-45dc-874b-89e352695eb7777";
+        mockServerConfigVetService.registerGetRatingsByVetIdEndpointNotFound(invalidVetId);
+        webTestClient.get()
+                .uri(VET_ENDPOINT + "/" + invalidVetId + "/ratings")
+                .cookie("Bearer", jwtTokenForValidAdmin)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody(String.class)
+                .consumeWith(response -> {
+                    String responseBody = response.getResponseBody();
+                    assertNotNull(responseBody);
+                    assertTrue(responseBody.contains("vetId not found: " + invalidVetId));
+                });
+    }
 }
+

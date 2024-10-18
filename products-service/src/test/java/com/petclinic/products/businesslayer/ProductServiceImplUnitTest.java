@@ -4,6 +4,7 @@ package com.petclinic.products.businesslayer;
 import com.petclinic.products.businesslayer.products.ProductServiceImpl;
 import com.petclinic.products.datalayer.products.Product;
 import com.petclinic.products.datalayer.products.ProductRepository;
+import com.petclinic.products.datalayer.products.ProductType;
 import com.petclinic.products.presentationlayer.products.ProductResponseModel;
 import com.petclinic.products.utils.exceptions.NotFoundException;
 import org.junit.jupiter.api.Test;
@@ -15,6 +16,12 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -122,62 +129,43 @@ class ProductServiceImplUnitTest {
         verify(productRepository, never()).save(any(Product.class));
     }
     @Test
-    void testGetProductsByType_ValidType() {
+    void shouldReturnProductsWhenProductTypeIsValid() {
         // Arrange
-        String productType = "Food";
-        Product product1 = Product.builder()
-                .productId("1")
-                .productName("Dog Food")
-                .productDescription("Premium dog food")
-                .productSalePrice(50.0)
-                .productType(productType)
-                .build();
+        Product foodProduct1 = new Product();
+        foodProduct1.setProductId("1");
+        foodProduct1.setProductName("Dog Food");
+        foodProduct1.setProductType(ProductType.FOOD);
 
-        Product product2 = Product.builder()
-                .productId("2")
-                .productName("Cat Food")
-                .productDescription("Premium cat food")
-                .productSalePrice(30.0)
-                .productType(productType)
-                .build();
+        Product foodProduct2 = new Product();
+        foodProduct2.setProductId("2");
+        foodProduct2.setProductName("Cat Food");
+        foodProduct2.setProductType(ProductType.FOOD);
 
-        when(productRepository.findProductsByProductType(productType)).thenReturn(Flux.just(product1, product2));
+        List<Product> foodProducts = Arrays.asList(foodProduct1, foodProduct2);
+
+        when(productRepository.findByProductType(ProductType.FOOD)).thenReturn(foodProducts);
 
         // Act
-        Flux<ProductResponseModel> result = productService.getProductsByType(productType);
+        List<Product> result = productService.getProductsByType(ProductType.FOOD);
 
         // Assert
-        StepVerifier.create(result)
-                .expectNextMatches(responseModel ->
-                        responseModel.getProductId().equals("1") &&
-                                responseModel.getProductName().equals("Dog Food") &&
-                                responseModel.getProductType().equals(productType)
-                )
-                .expectNextMatches(responseModel ->
-                        responseModel.getProductId().equals("2") &&
-                                responseModel.getProductName().equals("Cat Food") &&
-                                responseModel.getProductType().equals(productType)
-                )
-                .verifyComplete();
-
-        verify(productRepository).findProductsByProductType(productType);
+        assertEquals(2, result.size());
+        assertEquals(ProductType.FOOD, result.get(0).getProductType());
+        verify(productRepository, times(1)).findByProductType(ProductType.FOOD);
     }
 
-    @Test
-    void testGetProductsByType_InvalidType() {
-        // Arrange
-        String productType = "NonExistentType";
 
-        when(productRepository.findProductsByProductType(productType)).thenReturn(Flux.empty());
+    @Test
+    void shouldReturnEmptyListWhenProductTypeIsInvalid() {
+        // Arrange
+        when(productRepository.findByProductType(ProductType.ACCESSORY)).thenReturn(Collections.emptyList());
 
         // Act
-        Flux<ProductResponseModel> result = productService.getProductsByType(productType);
+        List<Product> result = productService.getProductsByType(ProductType.ACCESSORY);
 
         // Assert
-        StepVerifier.create(result)
-                .verifyComplete();
-
-        verify(productRepository).findProductsByProductType(productType);
+        assertTrue(result.isEmpty());
+        verify(productRepository, times(1)).findByProductType(ProductType.ACCESSORY);
     }
 
 
