@@ -166,9 +166,9 @@ export default function ProductDetails(): JSX.Element {
               />
               <h3>{currentProduct.averageRating} / 5</h3>
             </div>
-            <div className="quantityalert-container">
+            {/* <div className="quantityalert-container">
               {currentProduct.status}
-            </div>
+            </div> */}
             <div className="cartactions-container">
               <Button
                 onClick={() =>

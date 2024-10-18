@@ -26,8 +26,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static com.petclinic.inventoryservice.datalayer.Product.Status.AVAILABLE;
-import static com.petclinic.inventoryservice.datalayer.Product.Status.RE_ORDER;
+import static com.petclinic.inventoryservice.datalayer.Product.Status.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;

@@ -154,6 +154,7 @@ const InventoryProducts: React.FC = () => {
           }
         );
 
+        // Determine the new status based on the updated quantity
         let updatedStatus: 'RE_ORDER' | 'OUT_OF_STOCK' | 'AVAILABLE' =
           'AVAILABLE';
         if (updatedQuantity === 0) {

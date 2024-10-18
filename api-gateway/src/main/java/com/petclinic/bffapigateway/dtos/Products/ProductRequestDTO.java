@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -18,4 +20,6 @@ public class ProductRequestDTO {
     private Double averageRating;
     private Integer productQuantity;
     private ProductType productType;
+    private LocalDate releaseDate;
+    private ProductStatus productStatus;
 }
