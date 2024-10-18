@@ -1,7 +1,8 @@
 import { FC, useEffect, useState } from 'react';
 import './AllRoles.css';
 import { NavBar } from '@/layouts/AppNavBar.tsx';
-import axiosInstance from '@/shared/api/axiosInstance.ts';
+import { getAllRoles } from '@/features/users/api/getAllRoles';
+import { addRole } from '@/features/users/api/addRole';
 
 const AllRoles: FC = (): JSX.Element => {
   interface RoleResponseModel {
@@ -16,7 +17,7 @@ const AllRoles: FC = (): JSX.Element => {
   useEffect(() => {
     const fetchRoles = async (): Promise<void> => {
       try {
-        const response = await axiosInstance.get('/roles');
+        const response = await getAllRoles();
         setRoles(response.data);
       } catch (error) {
         console.error('Error fetching roles:', error);
@@ -28,11 +29,11 @@ const AllRoles: FC = (): JSX.Element => {
 
   const handleCreateRole = async (): Promise<void> => {
     try {
-      await axiosInstance.post('/roles', { name: newRoleName.toUpperCase() });
+      await addRole({ name: newRoleName.toUpperCase() });
       setIsModalOpen(false);
       setNewRoleName('');
       // Refresh roles list
-      const response = await axiosInstance.get('/roles');
+      const response = await getAllRoles();
       setRoles(response.data);
     } catch (error) {
       console.error('Error creating role:', error);
