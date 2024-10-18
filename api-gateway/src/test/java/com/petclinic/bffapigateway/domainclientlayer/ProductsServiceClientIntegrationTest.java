@@ -216,14 +216,14 @@ class ProductsServiceClientIntegrationTest {
     }
 
     @Test
-    void whenPatchListingStatusWithNonExistingProduct_thenThrowNotFoundException() {
+    void whenPatchListingStatusWithNonExistingProductId_thenThrowNotFoundException() {
         mockWebServer.enqueue(new MockResponse()
                 .setResponseCode(404)
                 .setBody("Product not found for ProductId: 691e6945-0d4a-4b20-85cc-afd251faccfd")
                 .addHeader("Content-Type", "application/json"));
 
         Mono<ProductResponseDTO> productResponseDTOMono = productsServiceClient
-                .patchListingStatus("productId", new ProductRequestDTO(
+                .patchListingStatus("691e6945-0d4a-4b20-85cc-afd251faccfd", new ProductRequestDTO(
                         null, null, null, null, null,
                         null, null, false));
 
