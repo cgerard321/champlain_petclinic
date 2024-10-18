@@ -5,6 +5,7 @@ import './VetDetails.css';
 import axios from 'axios';
 import DeleteVetPhoto from '@/pages/Vet/DeleteVetPhoto.tsx';
 import UpdateVetEducation from '@/pages/Vet/UpdateVetEducation';
+import AddEducation from '@/pages/Vet/AddEducation.tsx';
 
 interface VetResponseType {
   vetId: string;
@@ -59,6 +60,7 @@ export default function VetDetails(): JSX.Element {
   const [specialtyId, setSpecialtyId] = useState('');
   const [specialtyName, setSpecialtyName] = useState('');
   const [enlargedPhoto, setEnlargedPhoto] = useState<string | null>(null);
+  const [formVisible, setFormVisible] = useState<boolean>(false);
 
   const [selectedEducation, setSelectedEducation] =
     useState<EducationResponseType | null>(null);
@@ -580,6 +582,19 @@ export default function VetDetails(): JSX.Element {
                     <p>
                       <strong>End Date:</strong> {edu.endDate}
                     </p>
+                    <div style={{ marginBottom: '20px', textAlign: 'right' }}>
+                      <button
+                        onClick={() => setFormVisible(prev => !prev)}
+                        style={{
+                          backgroundColor: formVisible ? '#ff6347' : '#4CAF50',
+                        }}
+                      >
+                        {formVisible ? 'Cancel' : 'Add Education'}
+                      </button>
+                      {formVisible && <AddEducation vetId={vetId} onClose={() => setFormVisible(false)} />}
+                    </div>
+
+
                     <button
                       className="btn btn-primary"
                       onClick={event => {
