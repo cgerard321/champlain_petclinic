@@ -3,11 +3,15 @@ package com.petclinic.bffapigateway.domainclientlayer;
 import com.petclinic.bffapigateway.dtos.Products.ProductQuantityRequest;
 import com.petclinic.bffapigateway.dtos.Products.ProductRequestDTO;
 import com.petclinic.bffapigateway.dtos.Products.ProductResponseDTO;
+import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -86,6 +90,30 @@ public class ProductsServiceClient {
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .bodyToMono(ProductResponseDTO.class);
+    }
+
+    public Mono<ProductResponseDTO> patchListingStatus(final String productId, ProductRequestDTO productRequestDTO) {
+        return webClientBuilder.build()
+                .patch()
+                .uri(productsServiceUrl + "/" + productId + "/status")
+                .body(Mono.just(productRequestDTO), ProductRequestDTO.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, error -> {
+                    HttpStatusCode statusCode = error.statusCode();
+                    if (statusCode.equals(HttpStatus.NOT_FOUND))
+                        return Mono.error(new NotFoundException("Product not found for ProductId: " + productId));
+
+                    else if (statusCode.equals(HttpStatus.UNPROCESSABLE_ENTITY))
+                        return Mono.error(new InvalidInputException("Invalid input for ProductId: " + productId));
+
+                    return Mono.error(new IllegalArgumentException("Client error"));
+                })
+                .onStatus(HttpStatusCode::is5xxServerError, error ->
+                        Mono.error(new IllegalArgumentException("Something went wrong with the server"))
+                )
+                .bodyToMono(ProductResponseDTO.class);
+
     }
 
     public Mono<ProductResponseDTO> deleteProduct(final String productId) {

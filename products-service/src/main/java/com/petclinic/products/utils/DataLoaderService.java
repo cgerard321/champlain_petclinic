@@ -38,6 +38,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .averageRating(1.3)
                 .productType("Food")
                 .productQuantity(44)
+                .isUnlisted(false)
                 .build();
 
         Product product2 = Product.builder()
@@ -50,6 +51,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .averageRating(4.8)
                 .productType("Accessory")
                 .productQuantity(3)
+                .isUnlisted(false)
                 .build();
 
         Product product3 = Product.builder()
@@ -62,6 +64,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .averageRating(2.8)
                 .productType("Medication")
                 .productQuantity(53)
+                .isUnlisted(false)
                 .build();
 
         Product product4 = Product.builder()
@@ -74,6 +77,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .averageRating(1.3)
                 .productType("Accessory")
                 .productQuantity(8)
+                .isUnlisted(false)
                 .build();
 
         Product product5 = Product.builder()
@@ -86,6 +90,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .averageRating(4.9)
                 .productType("Accessory")
                 .productQuantity(14)
+                .isUnlisted(false)
                 .build();
 
         Product product6 = Product.builder()
@@ -98,6 +103,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .averageRating(4.7)
                 .productType("Equipment")
                 .productQuantity(58)
+                .isUnlisted(false)
                 .build();
 
         Product product7 = Product.builder()
@@ -110,6 +116,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .averageRating(3.4)
                 .productType("Accessory")
                 .productQuantity(66)
+                .isUnlisted(false)
                 .build();
 
         Product product8 = Product.builder()
@@ -122,6 +129,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .averageRating(1.2)
                 .productType("Accessory")
                 .productQuantity(0)
+                .isUnlisted(false)
                 .build();
 
         Resource resource1 = new ClassPathResource("images/dog_food.jpg");

@@ -55,9 +55,20 @@ public class ProductController {
     public Mono<ResponseEntity<ProductResponseModel>> updateProduct(@RequestBody Mono<ProductRequestModel> productRequestModel,
                                                                     @PathVariable String productId) {
         return Mono.just(productId)
-                .filter(id -> id.length() == 36) // validate the product id
+                .filter(id -> id.length() == 36)
                 .switchIfEmpty(Mono.error(new InvalidInputException("Provided product id is invalid: " + productId)))
                 .flatMap(id -> productService.updateProductByProductId(id, productRequestModel))
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
+    @PatchMapping(value = "/{productId}/status")
+    public Mono<ResponseEntity<ProductResponseModel>> patchListingStatus(@PathVariable String productId,
+                                                    @RequestBody Mono<ProductRequestModel> productRequestModel) {
+        return Mono.just(productId)
+                .filter(id -> id.length() == 36)
+                .switchIfEmpty(Mono.error(new InvalidInputException("Provided product id is invalid: " + productId)))
+                .flatMap(id -> productService.patchListingStatus(id, productRequestModel))
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }

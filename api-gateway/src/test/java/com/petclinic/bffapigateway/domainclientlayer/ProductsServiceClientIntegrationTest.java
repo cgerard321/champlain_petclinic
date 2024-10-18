@@ -141,7 +141,8 @@ class ProductsServiceClientIntegrationTest {
                 0.00,
                 0,
                 "type",
-                6
+                6,
+                false
         );
 
         mockWebServer.enqueue(new MockResponse()
@@ -168,7 +169,8 @@ class ProductsServiceClientIntegrationTest {
                 0.00,
                 0,
                 "type",
-                6
+                6,
+                false
         );
 
         mockWebServer.enqueue(new MockResponse()
@@ -185,6 +187,104 @@ class ProductsServiceClientIntegrationTest {
     }
 
     @Test
+    void whenPatchListingStatus_thenReturnUpdatedProduct() throws JsonProcessingException {
+        ProductResponseDTO productResponseDTO = new ProductResponseDTO(
+                "productId",
+                "imageId",
+                "Product 1",
+                "desc",
+                10.00,
+                0.00,
+                0,
+                "type",
+                6,
+                true
+        );
+
+        mockWebServer.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(objectMapper.writeValueAsString(productResponseDTO))
+                .addHeader("Content-Type", "application/json"));
+
+        Mono<ProductResponseDTO> productResponseDTOMono = productsServiceClient
+                .patchListingStatus(productResponseDTO.getProductId(), new ProductRequestDTO(
+                        null, null, null, null, null, null, null, false));
+
+        StepVerifier.create(productResponseDTOMono)
+                .expectNextMatches(product -> product.getProductId().equals("productId"))
+                .verifyComplete();
+    }
+
+    @Test
+    void whenPatchListingStatusWithNonExistingProduct_thenThrowNotFoundException() {
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(404)
+                .setBody("Product not found for ProductId: 691e6945-0d4a-4b20-85cc-afd251faccfd")
+                .addHeader("Content-Type", "application/json"));
+
+        Mono<ProductResponseDTO> productResponseDTOMono = productsServiceClient
+                .patchListingStatus("productId", new ProductRequestDTO(
+                        null, null, null, null, null,
+                        null, null, false));
+
+        StepVerifier.create(productResponseDTOMono)
+                .expectErrorMatches(throwable -> throwable != null &&
+                        throwable.getMessage().equals("Product not found for ProductId: 691e6945-0d4a-4b20-85cc-afd251faccfd"))
+                .verify();
+    }
+
+    @Test
+    void whenPatchListingStatusWithInvalidProductId_thenThrowInvalidInputException() {
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(422)
+                .setBody("Invalid input for ProductId: invalid-product-id")
+                .addHeader("Content-Type", "application/json"));
+
+        Mono<ProductResponseDTO> productResponseDTOMono = productsServiceClient
+                .patchListingStatus("invalid-product-id", new ProductRequestDTO(
+                        null, null, null, null, null, null, null, false));
+
+        StepVerifier.create(productResponseDTOMono)
+                .expectErrorMatches(throwable -> throwable != null &&
+                        throwable.getMessage().equals("Invalid input for ProductId: invalid-product-id"))
+                .verify();
+    }
+
+    @Test
+    void whenPatchListingStatus_andCauseServerFailure_thenThrowIllegalArgumentException() {
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(500)
+                .setBody("Invalid input for ProductId: productId")
+                .addHeader("Content-Type", "application/json"));
+
+        Mono<ProductResponseDTO> productResponseDTOMono = productsServiceClient
+                .patchListingStatus("productId", new ProductRequestDTO(
+                        null, null, null, null, null, null, null, false));
+
+        StepVerifier.create(productResponseDTOMono)
+                .expectErrorMatches(throwable -> throwable != null &&
+                        throwable.getMessage().equals("Something went wrong with the server"))
+                .verify();
+    }
+
+    @Test
+    void whenPatchListingStatus_andCauseClientFailure_thenThrowIllegalArgumentException() {
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(400)
+                .setBody("Invalid input for ProductId: productId")
+                .addHeader("Content-Type", "application/json"));
+
+        Mono<ProductResponseDTO> productResponseDTOMono = productsServiceClient
+                .patchListingStatus("productId", new ProductRequestDTO(
+                        null, null, null, null, null, null, null, false));
+
+        StepVerifier.create(productResponseDTOMono)
+                .expectErrorMatches(throwable -> throwable != null &&
+                        throwable.getMessage().equals("Client error"))
+                .verify();
+    }
+
+    @Test
     void whenDeleteProduct_thenDeleteProduct() throws JsonProcessingException {
         ProductResponseDTO productResponseDTO = new ProductResponseDTO(
                 "productId",
@@ -195,7 +295,8 @@ class ProductsServiceClientIntegrationTest {
                 0.00,
                 0,
                 "type",
-                6
+                6,
+                false
         );
 
         mockWebServer.enqueue(new MockResponse()

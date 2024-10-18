@@ -18,4 +18,5 @@ public class ProductRequestDTO {
     private Double averageRating;
     private String productType;
     private Integer productQuantity;
+    private Boolean isUnlisted;
 }
