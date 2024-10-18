@@ -100,19 +100,33 @@ public class MockServerConfigBillService {
     public void registerGetCurrentBalanceEndpoint() {
         String response = "150.0"; 
     
+        // mockServerClient_BillService
+        //     .when(
+        //         request()
+        //             .withMethod("GET")
+        //             .withPath("/bills/customer/{customerId}/bills/current-balance")
+        //             .withPathParameter("customerId", "[a-zA-Z0-9\\-]+")
+        //     )
+        //     .respond(
+        //         response()
+        //             .withStatusCode(200)
+        //             .withBody(response)
+        //             .withHeader("Content-Type", "application/json")
+        //     );
         mockServerClient_BillService
-            .when(
-                request()
-                    .withMethod("GET")
-                    .withPath("/bills/customer/{customerId}/bills/current-balance")
-                    .withPathParameter("customerId", "[a-zA-Z0-9\\-]+")
-            )
-            .respond(
-                response()
-                    .withStatusCode(200)
-                    .withBody(response)
-                    .withHeader("Content-Type", "application/json")
-            );
+    .when(
+        request()
+            .withMethod("GET")
+            .withPath("/api/v2/gateway/customers/{customerId}/bills/current-balance")
+            .withPathParameter("customerId", "[a-zA-Z0-9\\-]+")
+    )
+    .respond(
+        response()
+            .withStatusCode(200)
+            .withBody(response)
+            .withHeader("Content-Type", "application/json")
+    );
+
     }
     
 

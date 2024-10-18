@@ -79,19 +79,14 @@ public class CustomerBillControllerIntegrationTest {
                 .expectStatus().isUnauthorized(); // Expect Unauthorized status
     }
 
-    // @Test
-    // public void testGetCurrentBalance_ValidToken_ShouldReturnBalance() {
-        
-    //     mockServerConfigBillService.registerGetCurrentBalanceEndpoint();
-
-    //     webTestClient.get()
-    //             .uri("/api/v2/gateway/customers/1/bills/current-balance")
-    //             .cookie("Bearer", MockServerConfigAuthService.jwtTokenForValidOwnerId) 
-    //             .accept(MediaType.APPLICATION_JSON)
-    //             .exchange()
-    //             .expectStatus().isOk()
-    //             .expectBody(Double.class)
-    //             .value(balance -> assertEquals(150.0, balance));
-    // }
-
+    @Test
+    public void testGetCurrentBalance_InvalidToken_ShouldReturnUnauthorized() {
+        // Act & Assert: Mocking a request with an invalid token
+        webTestClient.get()
+                .uri("/api/v2/gateway/customers/1/bills/current-balance")
+                .cookie("Bearer", "invalid-token")  // Using an invalid JWT token
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isUnauthorized();  // Expect Unauthorized status
+    }
 }

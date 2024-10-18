@@ -16,6 +16,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 @WebFluxTest(controllers = CustomerBillController.class)
@@ -73,4 +74,34 @@ public class CustomerBillControllerUnitTest {
     //             .exchange()
     //             .expectStatus().isUnauthorized();
     // }
+
+        @Test
+    public void getCurrentBalance_ShouldReturnBalance() {
+        // Arrange: Mock the service to return a balance value
+        when(billServiceClient.getCurrentBalance("1")).thenReturn(Mono.just(150.0));
+
+        // Act & Assert: Verify the balance response
+        webTestClient.get()
+                .uri(baseBillUrl + "/current-balance")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(Double.class)
+                .value(balance -> assertEquals(150.0, balance));
+    }
+
+    @Test
+    public void getCurrentBalance_NegativeBalance_ShouldReturnNegativeValue() {
+        // Arrange: Mock the service to return a negative balance value
+        when(billServiceClient.getCurrentBalance("1")).thenReturn(Mono.just(-20.0));
+
+        // Act & Assert: Verify the negative balance response
+        webTestClient.get()
+                .uri(baseBillUrl + "/current-balance")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(Double.class)
+                .value(balance -> assertEquals(-20.0, balance));
+    }
 }
