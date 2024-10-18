@@ -130,12 +130,12 @@ const InventoryProducts: React.FC = () => {
     setFilteredProducts(filtered);
   };
 
-  const handleDeleteClick = (productId: string) => {
+  const handleDeleteClick = (productId: string): void => {
     setProductToDelete(productId);
     setShowConfirmation(true);
   };
 
-  const cancelDelete = () => {
+  const cancelDelete = (): void => {
     setShowConfirmation(false);
     setProductToDelete(null);
   };
