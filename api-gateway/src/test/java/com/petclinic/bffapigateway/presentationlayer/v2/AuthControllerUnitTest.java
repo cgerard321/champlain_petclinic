@@ -145,4 +145,37 @@ class AuthControllerUnitTest {
                 .expectStatus().isNotFound();
     }
 
+    @Test
+    @DisplayName("Should delete a user successfully")
+    void deleteUser_ShouldReturnNoContent() {
+        String jwtToken = "validJwtToken";
+        String userId = "userId";
+
+        when(authServiceClient.deleteUser(jwtToken, userId))
+                .thenReturn(Mono.empty());
+
+        client.delete()
+                .uri("/api/v2/gateway/users/{userId}", userId)
+                .cookie("Bearer", jwtToken)
+                .exchange()
+                .expectStatus().isNoContent();
+    }
+
+
+    @Test
+    @DisplayName("Should return error when deleting a user fails")
+    void deleteUser_ShouldReturnInternalServerError() {
+        String jwtToken = "validJwtToken";
+        String userId = "userId";
+
+        when(authServiceClient.deleteUser(jwtToken, userId))
+                .thenReturn(Mono.error(new RuntimeException("Error deleting user")));
+
+        client.delete()
+                .uri("/api/v2/gateway/users/{userId}", userId)
+                .cookie("Bearer", jwtToken)
+                .exchange()
+                .expectStatus().is5xxServerError();
+    }
+
 }

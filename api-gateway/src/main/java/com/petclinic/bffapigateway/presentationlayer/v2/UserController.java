@@ -71,6 +71,17 @@ public class UserController {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @DeleteMapping("/users/{userId}")
+    public Mono<ResponseEntity<Void>> deleteUser(@PathVariable final String userId, @CookieValue("Bearer") String jwtToken) {
+        return authServiceClient.deleteUser(jwtToken, userId)
+                .then(Mono.just(ResponseEntity.noContent().<Void>build()))
+                .onErrorResume(e -> {
+                    log.error("Error deleting user: {}", e.getMessage());
+                    return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).<Void>build());
+                });
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @PatchMapping("/users/{userId}/disable")
     public Mono<ResponseEntity<Void>> disableUser(@PathVariable final String userId, @CookieValue("Bearer") String jwtToken) {
         return authServiceClient.disableUser(userId, jwtToken)
