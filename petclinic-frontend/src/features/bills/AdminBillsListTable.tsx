@@ -22,6 +22,14 @@ export default function AdminBillsListTable(): JSX.Element {
   const [error, setError] = useState<string | null>(null);
   const { billsList, getBillsList, setCurrentPage, currentPage, hasMore } =
     useGetAllBillsPaginated();
+  const [filter, setFilter] = useState<FilterModel>({
+    customerId: '',
+  });
+
+  interface FilterModel {
+    [key: string]: string;
+    customerId: string;
+  }
 
   const [selectedFilter, setSelectedFilter] = useState<string>('');
   const [filteredBills, setFilteredBills] = useState<Bill[] | null>(null);
@@ -90,7 +98,6 @@ export default function AdminBillsListTable(): JSX.Element {
     const status = event.target.value;
     setSelectedFilter(status);
 
-    // Fetch bills based on the selected filter
     try {
       if (status === 'paid') {
         const paidBills = await getAllPaidBills();
@@ -102,13 +109,28 @@ export default function AdminBillsListTable(): JSX.Element {
         const overdueBills = await getAllOverdueBills();
         setFilteredBills(overdueBills);
       } else {
-        setFilteredBills(null); // Reset if no filter is selected
-        getBillsList(currentPage, 10); // Reset to paginated fetching
+        setFilteredBills(null);
+        getBillsList(currentPage, 10);
       }
     } catch (error) {
       console.error('Error fetching filtered bills:', error);
       setError('Error fetching filtered bills. Please try again.');
     }
+  };
+
+  const getFilteredBills = (): Bill[] => {
+    const billsToFilter = filteredBills || billsList;
+
+    return billsToFilter.filter(bill => {
+      const matchesStatus =
+        !selectedFilter ||
+        bill.billStatus.toLowerCase() === selectedFilter.toLowerCase();
+
+      const matchesCustomerId =
+        !filter.customerId || bill.customerId.includes(filter.customerId);
+
+      return matchesStatus && matchesCustomerId; // Combine filters
+    });
   };
 
   const handleCreateBill = async (): Promise<void> => {
@@ -226,6 +248,16 @@ export default function AdminBillsListTable(): JSX.Element {
           <option value="paid">Paid Bills</option>
           <option value="overdue">Overdue Bills</option>
         </select>
+      </div>
+
+      <div>
+        <h1> Search by Customer ID </h1>
+        <input
+          type="text"
+          placeholder="Customer ID"
+          value={filter.customerId}
+          onChange={e => setFilter({ ...filter, customerId: e.target.value })}
+        ></input>
       </div>
 
       <button onClick={() => setCreateForm(!showCreateForm)}>
@@ -375,6 +407,7 @@ export default function AdminBillsListTable(): JSX.Element {
             <thead>
               <tr>
                 <th>Bill ID</th>
+                <th> Customer ID </th>
                 <th>Owner Name</th>
                 <th>Visit Type</th>
                 <th>Vet Name</th>
@@ -387,9 +420,10 @@ export default function AdminBillsListTable(): JSX.Element {
               </tr>
             </thead>
             <tbody>
-              {(filteredBills || billsList).map((bill: Bill) => (
+              {getFilteredBills().map((bill: Bill) => (
                 <tr key={bill.billId}>
                   <td>{bill.billId}</td>
+                  <td>{bill.customerId}</td>
                   <td>
                     {bill.ownerFirstName} {bill.ownerLastName}
                   </td>

@@ -814,6 +814,36 @@ class UserControllerIntegrationTest {
                 .expectStatus().isNotFound();
     }
 
+    @Test
+    void getAllUsers_ShouldWork() {
+
+        String token = jwtTokenUtil.generateToken(userRepo.findAll().get(0));
+
+        webTestClient.get()
+                .uri("/users/all")
+                .accept(MediaType.APPLICATION_JSON)
+                .cookie("Bearer", token)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(UserDetails.class)
+                .value(users -> {
+                    assertNotNull(users);
+                    assertFalse(users.isEmpty());
+                });
+    }
+
+    @Test
+    void getAllUsers_ShouldReturnUnauthorized_WithInvalidToken() {
+
+        String invalidToken = "InvalidToken";
+
+        webTestClient.get()
+                .uri("/users/all")
+                .accept(MediaType.APPLICATION_JSON)
+                .cookie("Bearer", invalidToken)
+                .exchange()
+                .expectStatus().isUnauthorized();
+    }
 
 }
 

@@ -57,4 +57,5 @@ export enum AppRoutePaths {
   ResetPassword = '/users/reset-password/:token',
   CustomerReviews = '/customers/visits/reviews',
   CustomerAddReview = '/customers/visits/reviews/add',
+  AllUsers = '/users',
 }
