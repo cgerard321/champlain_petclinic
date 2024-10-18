@@ -31,6 +31,7 @@ public class DatabaseLoaderService implements CommandLineRunner {
         roleRepo.save(Role.builder().name("VET").build());
         roleRepo.save(Role.builder().name("OWNER").build());
         roleRepo.save(Role.builder().name("INVENTORY_MANAGER").build());
+        roleRepo.save(Role.builder().name("RECEPTIONIST").build());
 
 
         Set<Role> manager = new HashSet<>();
@@ -58,6 +59,19 @@ public class DatabaseLoaderService implements CommandLineRunner {
                 .build();
 
         userRepo.save(admin);
+
+        Set <Role> receptionist = new HashSet<>();
+        receptionist.add(roleRepo.findById(5L).get());
+        User receptionist1 = User.builder()
+                .username("Receptionist1")
+                .userIdentifier(new UserIdentifier())
+                .roles(receptionist)
+                .email("reception@reception.com")
+                .password(passwordEncoder.encode("pwd"))
+                .verified(true)
+                .build();
+
+        userRepo.save(receptionist1);
 
 
         Set<Role> roles2 = new HashSet<>();
@@ -220,6 +234,8 @@ public class DatabaseLoaderService implements CommandLineRunner {
                 .password(passwordEncoder.encode("pwd"))
                 .verified(true)
                 .build();
+
+
 
         userRepo.saveAll(List.of(vet1, vet2, vet3, vet4, vet5, vet6, vet7));
 

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.dtos.Products.ProductRequestDTO;
 
 import com.petclinic.bffapigateway.dtos.Products.ProductResponseDTO;
+import com.petclinic.bffapigateway.dtos.Products.ProductType;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterAll;
@@ -140,8 +141,8 @@ class ProductsServiceClientIntegrationTest {
                 10.00,
                 0.00,
                 0,
-                "type",
-                6
+                6,
+                ProductType.FOOD
         );
 
         mockWebServer.enqueue(new MockResponse()
@@ -167,8 +168,8 @@ class ProductsServiceClientIntegrationTest {
                 10.00,
                 0.00,
                 0,
-                "type",
-                6
+                6,
+                ProductType.FOOD
         );
 
         mockWebServer.enqueue(new MockResponse()
@@ -194,8 +195,8 @@ class ProductsServiceClientIntegrationTest {
                 10.00,
                 0.00,
                 0,
-                "type",
-                6
+                6,
+                ProductType.FOOD
         );
 
         mockWebServer.enqueue(new MockResponse()

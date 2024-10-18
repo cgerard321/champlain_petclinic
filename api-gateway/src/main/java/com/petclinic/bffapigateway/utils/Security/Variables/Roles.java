@@ -10,6 +10,7 @@ public enum Roles {
     ADMIN ( "ADMIN"),
     VET ( "VET"),
     OWNER ( "OWNER"),
+    RECEPTIONIST ( "RECEPTIONIST"),
     INVENTORY_MANAGER ( "INVENTORY_MANAGER"),
     ANONYMOUS ( "ANONYMOUS"),
     ALL ( "ALL");

@@ -188,4 +188,11 @@ public class VetController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
+    @GetMapping(value = "{vetId}/ratings", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Flux<RatingResponseDTO> getRatingsByVetId(@PathVariable String vetId) {
+        return vetsServiceClient.getRatingsByVetId(vetId)
+                .doOnError(error -> log.error("Error fetching ratings for vet {}", vetId, error));
+    }
 }
+
