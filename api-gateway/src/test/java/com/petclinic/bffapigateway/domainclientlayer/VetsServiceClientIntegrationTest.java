@@ -78,20 +78,35 @@ class VetsServiceClientIntegrationTest {
 
     @Test
     void getAllRatingsByVetId_ValidId() throws JsonProcessingException {
+
+        RatingResponseDTO ratingResponseDTO = RatingResponseDTO.builder()
+                .ratingId("123456")
+                .vetId("deb1950c-3c56-45dc-874b-89e352695eb7")
+                .rateScore(4.5)
+                .rateDescription("Excellent service!")
+                .predefinedDescription(PredefinedDescription.EXCELLENT)
+                .rateDate("2023-10-15")
+                .customerName("John Doe")
+                .build();
+
+        String jsonResponse = new ObjectMapper().writeValueAsString(ratingResponseDTO);
+
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
-                .setBody("    {\n" +
-                        "        \"ratingId\": \"123456\",\n" +
-                        "        \"vetId\": \"deb1950c-3c56-45dc-874b-89e352695eb7\",\n" +
-                        "        \"rateScore\": 4.5\n" +
-                        "    }"));
+                .setBody(jsonResponse));
 
         final RatingResponseDTO rating = vetsServiceClient.getRatingsByVetId("deb1950c-3c56-45dc-874b-89e352695eb7").blockFirst();
+
+        assertNotNull(rating);
         assertEquals("123456", rating.getRatingId());
         assertEquals("deb1950c-3c56-45dc-874b-89e352695eb7", rating.getVetId());
-        //Had to make it optional so it could diferentiate between double and object
         assertEquals(Optional.of(4.5), Optional.ofNullable(rating.getRateScore()));
+        assertEquals("Excellent service!", rating.getRateDescription());
+        assertEquals("EXCELLENT", rating.getPredefinedDescription().name());
+        assertEquals("2023-10-15", rating.getRateDate());
+        assertEquals("John Doe", rating.getCustomerName());
     }
+
 
     @Test
     void getAllRatingsByInvalidVetId_shouldNotSucceed() throws JsonProcessingException {
