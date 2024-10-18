@@ -114,4 +114,49 @@ class PromoCodeRepositoryUnitTest {
                 .verifyComplete();
     }
 
+    @Test
+    void findAllByExpirationDateGreaterThanEqualAndActiveIsTrue_withValidAndExpiredPromos_thenReturnOnlyActivePromos() {
+        // Arrange: Set up two promo codes, one active and valid, the other expired
+        PromoCode activePromoCode = PromoCode.builder()
+                .id("activePromo")
+                .code("ACTIVE2024")
+                .Name("Active Promo")
+                .expirationDate(LocalDateTime.parse("2024-12-31T23:59:59"))
+                .isActive(true)
+                .build();
+
+        PromoCode expiredPromoCode = PromoCode.builder()
+                .id("expiredPromo")
+                .code("EXPIRED2023")
+                .Name("Expired Promo")
+                .expirationDate(LocalDateTime.parse("2023-01-01T23:59:59"))
+                .isActive(true)
+                .build();
+
+        // Save both promo codes in the repository
+        StepVerifier.create(promoRepository.save(activePromoCode)).expectNextCount(1).verifyComplete();
+        StepVerifier.create(promoRepository.save(expiredPromoCode)).expectNextCount(1).verifyComplete();
+
+        // Act: Query for active promo codes based on current date and active status
+        LocalDateTime currentDate = LocalDateTime.now();
+        StepVerifier.create(promoRepository.findAllByExpirationDateGreaterThanEqual(currentDate))
+                .assertNext(foundPromoCode -> {
+                    assertNotNull(foundPromoCode);
+                    assertEquals("activePromo", foundPromoCode.getId()); // Only active promo code should be returned
+                    assertEquals("ACTIVE2024", foundPromoCode.getCode());
+                    assertEquals("Active Promo", foundPromoCode.getName());
+                    assertEquals(LocalDateTime.parse("2024-12-31T23:59:59"), foundPromoCode.getExpirationDate());
+                })
+                .verifyComplete();
+
+        // Ensure the expired promo is not returned
+        StepVerifier.create(promoRepository.findPromoCodeById("expiredPromo"))
+                .expectNextMatches(promo -> promo.getExpirationDate().isBefore(currentDate) && promo.isActive())
+                .verifyComplete();
+    }
+
+
+
+
+
 }

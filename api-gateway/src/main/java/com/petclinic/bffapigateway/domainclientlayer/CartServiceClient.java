@@ -137,6 +137,23 @@ public Mono<CartResponseDTO> deleteCartByCartId(String CardId) {
                 .bodyToFlux(PromoCodeResponseDTO.class);
     }
 
+    public Flux<PromoCodeResponseDTO> getActivePromos() {
+        return webClientBuilder.build()
+                .get()
+                .uri(PromoCodeServiceUrl + "/actives")
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, error -> {
+                    HttpStatusCode statusCode = error.statusCode();
+                    if (statusCode.equals(HttpStatus.NOT_FOUND)) {
+                        return Mono.error(new NotFoundException("No active promos found"));
+                    }
+                    return Mono.error(new IllegalArgumentException("Client error"));
+                })
+                .onStatus(HttpStatusCode::is5xxServerError, error -> Mono.error(new IllegalArgumentException("Server error")))
+                .bodyToFlux(PromoCodeResponseDTO.class);
+    }
+
     public Mono<PromoCodeResponseDTO> getPromoCodeById(String promoCodeId) {
         return webClientBuilder.build()
                 .get()

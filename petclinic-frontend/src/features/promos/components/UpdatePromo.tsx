@@ -1,16 +1,12 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
+
 import { useEffect, useState } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { useNavigate, useParams } from 'react-router-dom';
 import './FormPromo.css';
-
-interface PromoCodeRequestModel {
-  name: string;
-  code: string;
-  discount: number;
-  expirationDate: string;
-}
+import { PromoApi } from '@/features/promos/api/PromoApi.tsx';
+import { PromoCodeRequestModel } from '@/features/promos/models/PromoCodeRequestModel.tsx';
 
 export default function UpdatePromo(): JSX.Element {
   const [name, setName] = useState<string>('');
@@ -26,27 +22,11 @@ export default function UpdatePromo(): JSX.Element {
   useEffect(() => {
     const fetchPromo = async () => {
       try {
-        const response = await fetch(
-          `http://localhost:8080/api/v2/gateway/promos/${promoId}`,
-          {
-            method: 'GET',
-            headers: {
-              Accept: 'application/json',
-            },
-            credentials: 'include',
-          }
-        );
-        if (!response.ok) {
-          throw new Error(`Error: ${response.status} ${response.statusText}`);
-        }
-
-        const promo = await response.json();
+        const promo = await PromoApi.fetchPromoById(promoId!); // Usar el método de la clase API
         setName(promo.name);
         setCode(promo.code);
         setDiscount(promo.discount.toString());
-        const promoExpirationDate = new Date(
-          promo.expirationDate.split('T')[0]
-        );
+        const promoExpirationDate = new Date(promo.expirationDate.split('T')[0]);
         setExpirationDate(promoExpirationDate);
       } catch (err) {
         setError('Failed to fetch promo data.');
@@ -74,8 +54,8 @@ export default function UpdatePromo(): JSX.Element {
     const formattedExpirationDate = new Date(expirationDate);
     formattedExpirationDate.setHours(23, 59, 59, 999);
     const formattedExpirationDateString = formattedExpirationDate
-      .toISOString()
-      .replace('.999Z', '');
+        .toISOString()
+        .replace('.999Z', '');
 
     const updatedPromo: PromoCodeRequestModel = {
       name,
@@ -85,25 +65,7 @@ export default function UpdatePromo(): JSX.Element {
     };
 
     try {
-      const response = await fetch(
-        `http://localhost:8080/api/v2/gateway/promos/${promoId}`,
-        {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-          },
-          body: JSON.stringify(updatedPromo),
-          credentials: 'include',
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(
-          `Failed to update promo: ${response.status} ${response.statusText}`
-        );
-      }
-
+      await PromoApi.updatePromo(promoId!, updatedPromo);
       setSuccessMessage('Promo updated successfully!');
       setError(null);
     } catch (err) {
@@ -118,62 +80,62 @@ export default function UpdatePromo(): JSX.Element {
   };
 
   return (
-    <div className="promo-form">
-      <h3>Update Promo</h3>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
+      <div className="promo-form">
+        <h3>Update Promo</h3>
+        {error && <p style={{ color: 'red' }}>{error}</p>}
+        {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
 
-      <div className="form-group">
-        <label htmlFor="promo-name">Name:</label>
-        <input
-          type="text"
-          id="promo-name"
-          value={name}
-          onChange={e => setName(e.target.value)}
-          placeholder="Promo Name"
-        />
-      </div>
+        <div className="form-group">
+          <label htmlFor="promo-name">Name:</label>
+          <input
+              type="text"
+              id="promo-name"
+              value={name}
+              onChange={e => setName(e.target.value)}
+              placeholder="Promo Name"
+          />
+        </div>
 
-      <div className="form-group">
-        <label htmlFor="promo-code">Code:</label>
-        <input
-          type="text"
-          id="promo-code"
-          value={code}
-          onChange={e => setCode(e.target.value)}
-          placeholder="Promo Code"
-        />
-      </div>
+        <div className="form-group">
+          <label htmlFor="promo-code">Code:</label>
+          <input
+              type="text"
+              id="promo-code"
+              value={code}
+              onChange={e => setCode(e.target.value)}
+              placeholder="Promo Code"
+          />
+        </div>
 
-      <div className="form-group">
-        <label htmlFor="promo-discount">Discount (%):</label>
-        <input
-          type="text"
-          id="promo-discount"
-          value={discount}
-          onChange={e => setDiscount(e.target.value)}
-          placeholder="Discount Percentage"
-        />
-      </div>
+        <div className="form-group">
+          <label htmlFor="promo-discount">Discount (%):</label>
+          <input
+              type="text"
+              id="promo-discount"
+              value={discount}
+              onChange={e => setDiscount(e.target.value)}
+              placeholder="Discount Percentage"
+          />
+        </div>
 
-      <div className="form-group">
-        <label htmlFor="expiration-date">Expiration Date:</label>
-        <DatePicker
-          selected={expirationDate}
-          onChange={(date: Date | null) => setExpirationDate(date)}
-          dateFormat="yyyy-MM-dd"
-          placeholderText="Select Expiration Date"
-        />
-      </div>
+        <div className="form-group">
+          <label htmlFor="expiration-date">Expiration Date:</label>
+          <DatePicker
+              selected={expirationDate}
+              onChange={(date: Date | null) => setExpirationDate(date)}
+              dateFormat="yyyy-MM-dd"
+              placeholderText="Select Expiration Date"
+          />
+        </div>
 
-      <div className="form-actions">
-        <button className="update-button" onClick={handleUpdatePromo}>
-          Update Promo
-        </button>
-        <button className="cancel-button" onClick={handleCancel}>
-          Cancel
-        </button>
+        <div className="form-actions">
+          <button className="update-button" onClick={handleUpdatePromo}>
+            Update Promo
+          </button>
+          <button className="cancel-button" onClick={handleCancel}>
+            Cancel
+          </button>
+        </div>
       </div>
-    </div>
   );
 }

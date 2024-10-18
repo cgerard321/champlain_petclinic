@@ -4,6 +4,7 @@ import com.petclinic.cartsservice.businesslayer.PromoCodeService;
 import com.petclinic.cartsservice.domainclientlayer.PromoCodeRequestModel;
 import com.petclinic.cartsservice.domainclientlayer.PromoCodeResponseModel;
 import com.petclinic.cartsservice.utils.exceptions.InvalidInputException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,7 @@ import reactor.core.publisher.Mono;
 
 @CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 @RequestMapping("/api/v1/promos")
+@Slf4j
 public class PromoCodeController {
 
     private final PromoCodeService promoCodeService;
@@ -68,6 +70,13 @@ public class PromoCodeController {
                 .flatMap(promoCodeService::deletePromoCode)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.badRequest().build());  // Handle case where no promo code is found
+    }
+
+
+    @GetMapping(value = "/actives", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Flux<PromoCodeResponseModel> getActivePromos() {
+        return promoCodeService.getActivePromos()
+                .doOnNext(promo -> log.debug("Active Promo: " + promo));
     }
 
 

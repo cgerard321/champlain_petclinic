@@ -13,6 +13,8 @@ import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -28,6 +30,13 @@ public class PromoCodeServiceImpl implements PromoCodeService {
         return promoRepository.findAll()
                 .map(EntityModelUtil::toPromoCodeResponseModel)
                 .doOnNext(promoCodeResponse -> log.debug("Promo Code: " + promoCodeResponse));
+    }
+    @Override
+    public Flux<PromoCodeResponseModel> getActivePromos() {
+        LocalDateTime currentDateTime = LocalDateTime.now();
+        return promoRepository.findAllByExpirationDateGreaterThanEqual(currentDateTime)
+                .map(EntityModelUtil::toPromoCodeResponseModel)
+                .doOnNext(promo -> log.debug("Active Promo: " + promo));
     }
 
     @Override

@@ -63,5 +63,10 @@ public class PromoCodeController {
 
     }
 
+    @GetMapping(value = "/actives", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Flux<PromoCodeResponseDTO> getActivePromos() {
+        return cartServiceClient.getActivePromos();
+    }
+
 
 }

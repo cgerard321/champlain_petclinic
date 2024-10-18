@@ -668,6 +668,47 @@ void MoveProductFromCartToWishlist_BadRequest() {
                 .verifyComplete();
     }
 
+    @Test
+    void testGetActivePromos() {
+        String responseBody = """
+        [
+            {
+                "id": "promo1",
+                "name": "Active Promo 1",
+                "code": "ACTIVEPROMO1",
+                "discount": 10.0,
+                "expirationDate": "2024-12-31T23:59:59",
+                "active": true
+            },
+            {
+                "id": "promo2",
+                "name": "Active Promo 2",
+                "code": "ACTIVEPROMO2",
+                "discount": 20.0,
+                "expirationDate": "2024-12-31T23:59:59",
+                "active": true
+            }
+        ]
+        """;
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody(responseBody));
+
+        Flux<PromoCodeResponseDTO> result = mockCartServiceClient.getAllPromoCodes();  // Assuming active promos are fetched using this method
+
+        List<PromoCodeResponseDTO> promos = result.collectList().block();
+
+        assertEquals(2, promos.size());
+        assertEquals("Active Promo 1", promos.get(0).getName());
+        assertEquals("ACTIVEPROMO1", promos.get(0).getCode());
+        assertEquals(true, promos.get(0).isActive());
+
+        assertEquals("Active Promo 2", promos.get(1).getName());
+        assertEquals("ACTIVEPROMO2", promos.get(1).getCode());
+        assertEquals(true, promos.get(1).isActive());
+    }
+
 
 
 

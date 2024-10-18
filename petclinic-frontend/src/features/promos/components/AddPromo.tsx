@@ -1,16 +1,12 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
+
 import { useState } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { useNavigate } from 'react-router-dom';
 import './FormPromo.css';
-
-interface PromoCodeRequestModel {
-  name: string;
-  code: string;
-  discount: number;
-  expirationDate: string;
-}
+import { PromoApi } from '@/features/promos/api/PromoApi.tsx'
+import { PromoCodeRequestModel } from '@/features/promos/models/PromoCodeRequestModel.tsx';
 
 export default function AddPromo(): JSX.Element {
   const [name, setName] = useState<string>('');
@@ -38,8 +34,8 @@ export default function AddPromo(): JSX.Element {
     const formattedExpirationDate = new Date(expirationDate);
     formattedExpirationDate.setHours(23, 59, 59, 999);
     const formattedExpirationDateString = formattedExpirationDate
-      .toISOString()
-      .replace('.999Z', '');
+        .toISOString()
+        .replace('.999Z', '');
 
     const newPromo: PromoCodeRequestModel = {
       name,
@@ -49,25 +45,7 @@ export default function AddPromo(): JSX.Element {
     };
 
     try {
-      const response = await fetch(
-        `http://localhost:8080/api/v2/gateway/promos`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-          },
-          body: JSON.stringify(newPromo),
-          credentials: 'include',
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(
-          `Failed to add promo: ${response.status} ${response.statusText}`
-        );
-      }
-
+      await PromoApi.addPromo(newPromo); // Usar el método de la clase API
       setSuccessMessage('Promo added successfully!');
       setError(null);
 
@@ -87,62 +65,62 @@ export default function AddPromo(): JSX.Element {
   };
 
   return (
-    <div className="promo-form">
-      <h3>Add New Promo</h3>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
+      <div className="promo-form">
+        <h3>Add New Promo</h3>
+        {error && <p style={{ color: 'red' }}>{error}</p>}
+        {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
 
-      <div className="form-group">
-        <label htmlFor="promo-name">Name:</label>
-        <input
-          type="text"
-          id="promo-name"
-          value={name}
-          onChange={e => setName(e.target.value)}
-          placeholder="Promo Name"
-        />
-      </div>
+        <div className="form-group">
+          <label htmlFor="promo-name">Name:</label>
+          <input
+              type="text"
+              id="promo-name"
+              value={name}
+              onChange={e => setName(e.target.value)}
+              placeholder="Promo Name"
+          />
+        </div>
 
-      <div className="form-group">
-        <label htmlFor="promo-code">Code:</label>
-        <input
-          type="text"
-          id="promo-code"
-          value={code}
-          onChange={e => setCode(e.target.value)}
-          placeholder="Promo Code"
-        />
-      </div>
+        <div className="form-group">
+          <label htmlFor="promo-code">Code:</label>
+          <input
+              type="text"
+              id="promo-code"
+              value={code}
+              onChange={e => setCode(e.target.value)}
+              placeholder="Promo Code"
+          />
+        </div>
 
-      <div className="form-group">
-        <label htmlFor="promo-discount">Discount (%):</label>
-        <input
-          type="text"
-          id="promo-discount"
-          value={discount}
-          onChange={e => setDiscount(e.target.value)} // Se almacena como string
-          placeholder="Discount Percentage"
-        />
-      </div>
+        <div className="form-group">
+          <label htmlFor="promo-discount">Discount (%):</label>
+          <input
+              type="text"
+              id="promo-discount"
+              value={discount}
+              onChange={e => setDiscount(e.target.value)} // Se almacena como string
+              placeholder="Discount Percentage"
+          />
+        </div>
 
-      <div className="form-group">
-        <label htmlFor="expiration-date">Expiration Date:</label>
-        <DatePicker
-          selected={expirationDate}
-          onChange={(date: Date | null) => setExpirationDate(date)}
-          dateFormat="yyyy-MM-dd"
-          placeholderText="Select Expiration Date"
-        />
-      </div>
+        <div className="form-group">
+          <label htmlFor="expiration-date">Expiration Date:</label>
+          <DatePicker
+              selected={expirationDate}
+              onChange={(date: Date | null) => setExpirationDate(date)}
+              dateFormat="yyyy-MM-dd"
+              placeholderText="Select Expiration Date"
+          />
+        </div>
 
-      <div className="form-actions">
-        <button className="add-button" onClick={handleAddPromo}>
-          Add Promo
-        </button>
-        <button className="cancel-button" onClick={handleCancel}>
-          Cancel
-        </button>
+        <div className="form-actions">
+          <button className="add-button" onClick={handleAddPromo}>
+            Add Promo
+          </button>
+          <button className="cancel-button" onClick={handleCancel}>
+            Cancel
+          </button>
+        </div>
       </div>
-    </div>
   );
 }

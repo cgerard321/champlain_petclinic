@@ -292,6 +292,57 @@ public class PromoCodeControllerUnitTest {
                 .expectStatus().isNotFound();  // Expect 404 Not Found
     }
 
+    @Test
+    public void whenGetActivePromos_thenReturnListOfActivePromoCodes() {
+        // Arrange: Crear una lista de PromoCodeResponseModel con promociones activas
+        PromoCodeResponseModel activePromo1 = PromoCodeResponseModel.builder()
+                .id("promo1-id")
+                .Name("Active Promo 1")
+                .code("ACTIVE1")
+                .discount(15.0)
+                .expirationDate(LocalDateTime.now().plusDays(10))
+                .isActive(true)
+                .build();
+
+        PromoCodeResponseModel activePromo2 = PromoCodeResponseModel.builder()
+                .id("promo2-id")
+                .Name("Active Promo 2")
+                .code("ACTIVE2")
+                .discount(20.0)
+                .expirationDate(LocalDateTime.now().plusDays(20))
+                .isActive(true)
+                .build();
+
+        // Mocking the service to return the list of active promo codes
+        when(promoCodeService.getActivePromos()).thenReturn(Flux.just(activePromo1, activePromo2));
+
+        // Act & Assert
+        webTestClient.get()
+                .uri("/api/v1/promos/actives")  // URI para obtener promociones activas
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()  // Expectar 200 OK
+                .expectBodyList(PromoCodeResponseModel.class)
+                .hasSize(2)  // Esperamos dos promociones activas
+                .contains(activePromo1, activePromo2);  // Verificar que ambas promociones activas están presentes
+    }
+
+    @Test
+    public void whenGetActivePromos_thenReturnEmptyList() {
+        // Arrange: Simular que no hay promociones activas
+        when(promoCodeService.getActivePromos()).thenReturn(Flux.empty());
+
+        // Act & Assert
+        webTestClient.get()
+                .uri("/api/v1/promos/actives")  // URI para obtener promociones activas
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()  // Expectar 200 OK
+                .expectBodyList(PromoCodeResponseModel.class)
+                .hasSize(0);  // Esperamos una lista vacía
+    }
+
+
 
 
 
