@@ -1584,7 +1584,7 @@ class VetControllerIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(education2)
                 .exchange()
-                .expectStatus().isOk()
+                .expectStatus().isCreated()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody(EducationResponseDTO.class)
                 .value(dto -> {

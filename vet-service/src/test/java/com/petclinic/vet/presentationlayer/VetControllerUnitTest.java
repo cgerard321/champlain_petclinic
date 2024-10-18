@@ -729,7 +729,7 @@ class VetControllerUnitTest {
                 .bodyValue(educationRequestDTO)
                 .accept(APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk()
+                .expectStatus().isCreated()
                 .expectHeader().contentType(APPLICATION_JSON)
                 .expectBody();
 
