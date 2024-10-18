@@ -81,9 +81,7 @@ export const IsReceptionist = (): boolean => {
   const context = useUser();
   return (
     context.user?.roles !== undefined &&
-    Array.from(context.user.roles).some(
-     (role: Role) => role.name === 'RECEPTIONIST'
-    )
+    Array.from(context.user.roles).some((role: Role) => role.name === 'RECEPTIONIST')
   );
 };
 
