@@ -1,5 +1,6 @@
 import './CartItem.css';
 import { ProductModel } from '../models/ProductModel';
+import ImageContainer from './ImageContainer';
 
 interface CartItemProps {
   item: ProductModel;
@@ -51,7 +52,9 @@ const CartItem = ({
 
   return (
     <div className="CartItem">
-      <img src={`http://localhost:8080/api/v2/gateway/images/${item.imageId}`} alt={item.productName} className="CartItem-image" />
+
+      <ImageContainer imageId={item.imageId}/>
+
       <div className="CartItem-info">
         <h2 className="info-title">{item.productName}</h2>
         <p className="info-description">{item.productDescription}</p>
