@@ -7,6 +7,7 @@ import './InventoryProducts.css';
 import useSearchProducts from '@/features/inventories/hooks/useSearchProducts.ts';
 import deleteAllProductsFromInventory from './api/deleteAllProductsFromInventory';
 import createPdf from './api/createPdf';
+import ConfirmationModal from '@/features/inventories/ConfirmationModal.tsx';
 
 const InventoryProducts: React.FC = () => {
   const { inventoryId } = useParams<{ inventoryId: string }>();
@@ -20,6 +21,8 @@ const InventoryProducts: React.FC = () => {
   const [filteredProducts, setFilteredProducts] = useState<ProductModel[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
+  const [productToDelete, setProductToDelete] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const handleCreatePdf = async (): Promise<void> => {
@@ -78,18 +81,23 @@ const InventoryProducts: React.FC = () => {
   }, [inventoryId, setProductList]);
 
   // Delete product by productId
-  const deleteProduct = async (productId: string): Promise<void> => {
-    try {
-      await axios.delete(
-        `http://localhost:8080/api/v2/gateway/inventories/${inventoryId}/products/${productId}`
-      );
-      const updatedProducts = products.filter(
-        product => product.productId !== productId
-      );
-      setProducts(updatedProducts);
-      setFilteredProducts(updatedProducts);
-    } catch (err) {
-      setError('Failed to delete product.');
+  const deleteProduct = async (): Promise<void> => {
+    if (productToDelete) {
+      try {
+        await axios.delete(
+          `http://localhost:8080/api/v2/gateway/inventories/${inventoryId}/products/${productToDelete}`
+        );
+        const updatedProducts = products.filter(
+          product => product.productId !== productToDelete
+        );
+        setProducts(updatedProducts);
+        setFilteredProducts(updatedProducts);
+      } catch (err) {
+        setError('Failed to delete product.');
+      } finally {
+        setShowConfirmation(false);
+        setProductToDelete(null);
+      }
     }
   };
 
@@ -120,6 +128,16 @@ const InventoryProducts: React.FC = () => {
     }
 
     setFilteredProducts(filtered);
+  };
+
+  const handleDeleteClick = (productId: string) => {
+    setProductToDelete(productId);
+    setShowConfirmation(true);
+  };
+
+  const cancelDelete = () => {
+    setShowConfirmation(false);
+    setProductToDelete(null);
   };
 
   const reduceQuantity = async (
@@ -276,7 +294,7 @@ const InventoryProducts: React.FC = () => {
                 <td>
                   <button
                     className="btn btn-danger"
-                    onClick={() => deleteProduct(product.productId)}
+                    onClick={() => handleDeleteClick(product.productId)}
                   >
                     Delete
                   </button>
@@ -304,6 +322,12 @@ const InventoryProducts: React.FC = () => {
                 </td>
               </tr>
             ))}
+            <ConfirmationModal
+              show={showConfirmation}
+              message="Are you sure you want to delete this product?"
+              onConfirm={deleteProduct}
+              onCancel={cancelDelete}
+            />
           </tbody>
         </table>
       ) : (
