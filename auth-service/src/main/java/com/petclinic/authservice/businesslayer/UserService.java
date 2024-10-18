@@ -35,6 +35,7 @@ import java.util.List;
 
 public interface UserService {
 
+    List<UserDetails> getAllUsers();
 
     User createUser(UserIDLessRoleLessDTO user);
 
@@ -63,6 +64,7 @@ public interface UserService {
     UserPasswordLessDTO getByResetPasswordToken(String token);
 
     void updatePassword(String newPassword, String token);
+
 
     void disableUser(String userId);
     void enableUser(String userId);

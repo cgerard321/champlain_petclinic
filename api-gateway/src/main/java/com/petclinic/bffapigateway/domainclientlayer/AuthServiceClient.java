@@ -11,6 +11,7 @@ import com.petclinic.bffapigateway.utils.Rethrower;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -56,6 +57,25 @@ public class AuthServiceClient {
         authServiceUrl = "http://" + authServiceHost + ":" + authServicePort;
     }
 
+    public Flux<UserDetails> getAllUsers(String jwtToken) {
+        return webClientBuilder.build()
+                .get()
+                .uri(authServiceUrl + "/users/all")
+                .cookie("Bearer", jwtToken)
+                .retrieve()
+                .bodyToFlux(UserDetails.class);
+    }
+
+    public Mono<Void> deleteUser(String jwtToken, String userId) {
+        return webClientBuilder.build()
+                .delete()
+                .uri(authServiceUrl + "/users/{userId}", userId)
+                .cookie("Bearer", jwtToken)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> Mono.error(new GenericHttpException("Error deleting user", HttpStatus.BAD_REQUEST)))
+                .onStatus(HttpStatusCode::is5xxServerError, clientResponse -> Mono.error(new GenericHttpException("Server error", HttpStatus.INTERNAL_SERVER_ERROR)))
+                .bodyToMono(Void.class);
+    }
 
     public Mono<UserDetails> getUserById(String jwtToken, String userId) {
         return webClientBuilder.build()
@@ -93,14 +113,6 @@ public class AuthServiceClient {
                 .bodyToFlux(UserDetails.class);
     }
 
-    public Mono<Void> deleteUser(String jwtToken, String userId) {
-        return webClientBuilder.build()
-                .delete()
-                .uri(authServiceUrl + "/users/{userId}", userId)
-                .cookie("Bearer", jwtToken)
-                .retrieve()
-                .bodyToMono(void.class);
-    }
 
     //FUCK REACTIVE
     /*
