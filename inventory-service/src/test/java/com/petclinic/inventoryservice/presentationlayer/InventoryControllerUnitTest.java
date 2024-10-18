@@ -26,8 +26,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static com.petclinic.inventoryservice.datalayer.Product.Status.AVAILABLE;
-import static com.petclinic.inventoryservice.datalayer.Product.Status.RE_ORDER;
+import static com.petclinic.inventoryservice.datalayer.Product.Status.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -1183,7 +1182,7 @@ class InventoryControllerUnitTest {
                 .productPrice(100.00)
                 .productQuantity(10)
                 .productSalePrice(10.99)
-                .status(RE_ORDER)  // Expected status
+                .status(PRE_ORDER)  // Expected status
                 .build();
 
         // Mocking the service method to return the expected response
@@ -1201,7 +1200,7 @@ class InventoryControllerUnitTest {
                 .expectBody(ProductResponseDTO.class)
                 .value(dto -> {
                     assertNotNull(dto);
-                    assertEquals(RE_ORDER, dto.getStatus());  // Assert the status is REORDER
+                    assertEquals(PRE_ORDER, dto.getStatus());  // Assert the status is REORDER
                 });
 
         verify(productInventoryService, times(1)).addSupplyToInventory(any(), eq(inventoryId));
@@ -1383,7 +1382,7 @@ class InventoryControllerUnitTest {
                 .productPrice(200.00)
                 .productQuantity(15)
                 .productSalePrice(15.99)
-                .status(RE_ORDER)  // Expect the status to be REORDER
+                .status(PRE_ORDER)  // Expect the status to be REORDER
                 .build();
 
         // Mocking the service to return the updated product with the REORDER status
@@ -1407,7 +1406,7 @@ class InventoryControllerUnitTest {
                     assertEquals(responseDTO.getProductPrice(), dto.getProductPrice());
                     assertEquals(responseDTO.getProductQuantity(), dto.getProductQuantity());
                     assertEquals(responseDTO.getProductSalePrice(), dto.getProductSalePrice());
-                    assertEquals(RE_ORDER, dto.getStatus());  // Verify the status is REORDER
+                    assertEquals(PRE_ORDER, dto.getStatus());  // Verify the status is REORDER
                 });
 
         // Verify that the service method was called exactly once
