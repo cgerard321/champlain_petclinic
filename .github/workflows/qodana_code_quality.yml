@@ -58,12 +58,20 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
+            const commentList = await github.rest.issues.listComments({
+              owner: conect.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number
+            });
+
+            console.log(commentList);
+
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: '${{ steps.zipreports.outputs.JACOCO_SUMMARY }}'
-            })
+            });
         
 
 #      - name: 'Qodana Scan'
