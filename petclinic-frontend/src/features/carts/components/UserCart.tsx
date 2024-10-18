@@ -8,7 +8,7 @@ import { NavBar } from '@/layouts/AppNavBar';
 import { FaShoppingCart } from 'react-icons/fa'; // Importing the shopping cart icon
 
 interface ProductAPIResponse {
-  productId: string; // Changed to string to match ProductModel
+  productId: number;
   productName: string;
   productDescription: string;
   productSalePrice: number;
