@@ -81,7 +81,16 @@ public class RecurringJobService : BackgroundService
         _logger.LogInformation("Recurring task executed at: {time}", now);
         
         // Fetch emails scheduled to be sent at the current time
-        List<EmailModelNotification> emailsToSend = await _databaseHelper.GetAllEmailsNotificationAsync();
+        List<EmailModelNotification> emailsToSend;
+        try
+        {
+            emailsToSend = await _databaseHelper.GetAllEmailsNotificationAsync();
+        }
+        catch (emailing_service.Utils.Exception.MissingDatabaseException ex)
+        {
+            Console.WriteLine("Database Offline, we could not send the message");             
+            emailsToSend = new List<EmailModelNotification>();
+        }
 
         
         foreach (var email in emailsToSend)

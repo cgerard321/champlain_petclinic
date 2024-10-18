@@ -4,6 +4,7 @@ package com.petclinic.visits.visitsservicenew.PresentationLayer;
 import com.petclinic.visits.visitsservicenew.BusinessLayer.Emergency.EmergencyService;
 import com.petclinic.visits.visitsservicenew.BusinessLayer.Review.ReviewService;
 import com.petclinic.visits.visitsservicenew.BusinessLayer.VisitService;
+import com.petclinic.visits.visitsservicenew.DataLayer.Emergency.Emergency;
 import com.petclinic.visits.visitsservicenew.DataLayer.Emergency.UrgencyLevel;
 import com.petclinic.visits.visitsservicenew.DataLayer.Status;
 import com.petclinic.visits.visitsservicenew.DataLayer.Visit;
@@ -27,6 +28,7 @@ import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -66,6 +68,7 @@ class VisitControllerUnitTest {
 //    private final String STATUS = "COMPLETED";
 
 
+
     Set<SpecialtyDTO> set = new HashSet<>();
     Set<Workday> workdaySet = new HashSet<>();
 
@@ -99,6 +102,8 @@ class VisitControllerUnitTest {
     private final String Visit_UUID_OK = visitResponseDTO.getVisitId();
     private final String Practitioner_Id_OK = visitResponseDTO.getPractitionerId();
     private final String Pet_Id_OK = visitResponseDTO.getPetId();
+
+
 
     //private final LocalDateTime visitDate = visitResponseDTO.getVisitDate().withSecond(0);
     @Test
@@ -523,7 +528,198 @@ class VisitControllerUnitTest {
 
     }
 
+
+    //Emergency
     @Test
+    void getAllEmergency(){
+        Emergency emrgency = new Emergency(); // replace with your actual Visit object
+
+        LocalDateTime fixedDate = LocalDateTime.of(2024, 9, 27, 16, 43);
+        EmergencyResponseDTO emergencyResponseDTO1 = EmergencyResponseDTO.builder()
+                .visitEmergencyId("4f54a019-e002-4c04-a61f-e75836abff04")
+                .visitDate(fixedDate)
+                .description("Emergency 1")
+                .petId("2")
+                .petName("Max")
+                .petBirthDate(new Date())
+                .practitionerId(UUID.randomUUID().toString())
+                .vetFirstName("hamid")
+                .vetLastName("hamid")
+                .vetEmail("Hamid@gmail.com")
+                .vetPhoneNumber("434-233-2322")
+                .urgencyLevel(UrgencyLevel.HIGH)
+                .emergencyType("Accident")
+                .build();
+
+        EmergencyResponseDTO emergencyResponseDTO2 = EmergencyResponseDTO.builder()
+                .visitEmergencyId("4f54a019-e002-4c04-a61f-e75836abff03")
+                .visitDate(fixedDate)
+                .description("Emergency 1")
+                .petId("2")
+                .petName("Max")
+                .petBirthDate(new Date())
+                .practitionerId(UUID.randomUUID().toString())
+                .vetFirstName("hamid")
+                .vetLastName("hamid")
+                .vetEmail("Hamid@gmail.com")
+                .vetPhoneNumber("434-233-2322")
+                .urgencyLevel(UrgencyLevel.HIGH)
+                .emergencyType("Accident")
+                .build();
+
+
+        when(emergencyService.GetAllEmergencies()).thenReturn(Flux.just(emergencyResponseDTO1, emergencyResponseDTO2));
+
+        webTestClient.get()
+                .uri("/visits/emergency")
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM + ";charset=UTF-8")
+                .returnResult(VisitResponseDTO.class);
+
+        verify(emergencyService, times(1)).GetAllEmergencies();
+    }
+
+    @Test
+    void getEmergencyVisitsByPetId() {
+
+                LocalDateTime fixedDate = LocalDateTime.of(2024, 9, 27, 16, 43);
+        EmergencyResponseDTO emergencyResponseDTO1 = EmergencyResponseDTO.builder()
+                .visitEmergencyId("4f54a019-e002-4c04-a61f-e75836abff04")
+                .visitDate(fixedDate)
+                .description("Emergency 1")
+                .petId("2")
+                .petName("Max")
+                .petBirthDate(new Date())
+                .practitionerId(UUID.randomUUID().toString())
+                .vetFirstName("hamid")
+                .vetLastName("hamid")
+                .vetEmail("Hamid@gmail.com")
+                .vetPhoneNumber("434-233-2322")
+                .urgencyLevel(UrgencyLevel.HIGH)
+                .emergencyType("Accident")
+                .build();
+        when(emergencyService.getEmergencyVisitsForPet(anyString())).thenReturn(Flux.just(emergencyResponseDTO1));
+
+       String Pet_Id_Emergency = emergencyResponseDTO1.getPetId();
+        webTestClient.get()
+                .uri("/visits/emergency/pets/" + Pet_Id_Emergency)
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM + ";charset=UTF-8")
+                .returnResult(VisitResponseDTO.class);
+
+        verify(emergencyService, times(1)).getEmergencyVisitsForPet(Pet_Id_Emergency);
+    }
+
+
+    @Test
+    public void whenAddEmergency_returnEmergencyResponseDTO() {
+
+        Emergency emergency = Emergency.builder()
+                .visitEmergencyId("uuidEmergency")
+                .visitDate(LocalDateTime.now())
+                .description("Severe injury")
+                .petId("uuidPet")
+                .practitionerId(uuidVet)
+                .urgencyLevel(UrgencyLevel.HIGH)
+                .emergencyType("Injury")
+                .build();
+
+        // Request DTO
+        EmergencyRequestDTO emergencyRequestDTO = EmergencyRequestDTO.builder()
+                .visitDate(LocalDateTime.now())
+                .description("Severe injury")
+                .petId("uuidPet")
+                .practitionerId(uuidVet)
+                .urgencyLevel(UrgencyLevel.HIGH)
+                .emergencyType("Injury")
+                .build();
+
+        EmergencyResponseDTO emergencyResponseDTO = EmergencyResponseDTO.builder()
+                .visitEmergencyId("uuidEmergency")
+                .visitDate(emergency.getVisitDate())
+                .description(emergency.getDescription())
+                .petId("uuidPet")
+                .petName("Buddy") // Pet name from mocked pet
+                .petBirthDate(new Date())
+                .practitionerId(uuidVet)
+                .vetFirstName("John")
+                .vetLastName("Doe")
+                .vetEmail("john.doe@email.com")
+                .vetPhoneNumber("(514)-123-4567")
+                .urgencyLevel(emergency.getUrgencyLevel())
+                .emergencyType(emergency.getEmergencyType())
+                .build();
+
+        when(emergencyService.AddEmergency(any(Mono.class))).thenReturn(Mono.just(emergencyResponseDTO));
+
+        webTestClient
+                .post()
+                .uri("/visits/emergency")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Mono.just(emergencyRequestDTO), EmergencyRequestDTO.class)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(EmergencyResponseDTO.class)
+                .isEqualTo(emergencyResponseDTO);
+
+        verify(emergencyService, times(1)).AddEmergency(any(Mono.class));
+    }
+
+    @Test
+    public void whenGetEmergencyById_returnEmergencyResponseDTO() {
+        Emergency emergency = Emergency.builder()
+                .visitEmergencyId("uuidEmergency")
+                .visitDate(LocalDateTime.now())
+                .description("Severe injury")
+                .petId("uuidPet")
+                .practitionerId(uuidVet)
+                .urgencyLevel(UrgencyLevel.HIGH)
+                .emergencyType("Injury")
+                .build();
+        String emergencyId = UUID.randomUUID().toString();
+
+        EmergencyResponseDTO emergencyResponseDTO = EmergencyResponseDTO.builder()
+                .visitEmergencyId(emergencyId)
+                .visitDate(emergency.getVisitDate())
+                .description(emergency.getDescription())
+                .petId("uuidPet")
+                .petName("Buddy") // Pet name from mocked pet
+                .petBirthDate(new Date())
+                .practitionerId(uuidVet)
+                .vetFirstName("John")
+                .vetLastName("Doe")
+                .vetEmail("john.doe@email.com")
+                .vetPhoneNumber("(514)-123-4567")
+                .urgencyLevel(emergency.getUrgencyLevel())
+                .emergencyType(emergency.getEmergencyType())
+                .build();
+
+        when(emergencyService.GetEmergencyByEmergencyId(emergencyId)).thenReturn(Mono.just(emergencyResponseDTO));
+
+        webTestClient
+                .get()
+                .uri("/visits/emergency/" + emergencyId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(EmergencyResponseDTO.class)
+                .isEqualTo(emergencyResponseDTO);
+
+        verify(emergencyService, times(1)).GetEmergencyByEmergencyId(emergencyId);
+    }
+
+
+
+
+
+   /* @Test
     public void whenGetAllEmergencies_returnEmergencyResponseDTO() {
         // Fixed date for comparison
         LocalDateTime fixedDate = LocalDateTime.of(2024, 9, 27, 16, 43);
@@ -727,6 +923,8 @@ class VisitControllerUnitTest {
 //                .expectBody();
 //        verify(visitService, times(1)).deleteCompletedVisitByVisitId(invalidVisitId);
 //    }
+
+    */
 
     @Test
     void updateVisitStatus_ShouldReturnOK_WhenStatusUpdatedToCancelled() {

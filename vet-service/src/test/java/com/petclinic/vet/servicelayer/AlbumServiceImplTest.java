@@ -4,6 +4,7 @@ import com.petclinic.vet.dataaccesslayer.Album;
 import com.petclinic.vet.dataaccesslayer.AlbumRepository;
 import com.petclinic.vet.exceptions.NotFoundException;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.r2dbc.init.R2dbcScriptDatabaseInitializer;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
@@ -13,7 +14,9 @@ import org.springframework.r2dbc.connection.init.ConnectionFactoryInitializer;
 import reactor.core.publisher.Flux;
 
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
+
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 @SpringBootTest
@@ -81,6 +84,34 @@ public class AlbumServiceImplTest {
                 .expectErrorMatches(throwable -> throwable instanceof RuntimeException &&
                         throwable.getMessage().equals("Some error occurred"))
                 .verify();
+    }
+    @Test
+    void deleteAlbumPhotoById_whenAlbumExists_shouldSucceed() {
+        Mockito.when(albumRepository.findById(album.getId())).thenReturn(Mono.just(album));
+        Mockito.when(albumRepository.delete(album)).thenReturn(Mono.empty());
+
+        Mono<Void> result = albumService.deleteAlbumPhotoById(VET_ID, album.getId());
+
+        StepVerifier.create(result)
+                .verifyComplete();
+
+        verify(albumRepository, times(1)).findById(album.getId());
+        verify(albumRepository, times(1)).delete(album);
+    }
+
+    @Test
+    void deleteAlbumPhotoById_whenAlbumDoesNotExist_shouldThrowNotFoundException() {
+        Mockito.when(albumRepository.findById(album.getId())).thenReturn(Mono.empty());
+
+        Mono<Void> result = albumService.deleteAlbumPhotoById(VET_ID, album.getId());
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof NotFoundException &&
+                        throwable.getMessage().equals("Album photo not found: " + album.getId()))
+                .verify();
+
+        verify(albumRepository, times(1)).findById(album.getId());
+        verify(albumRepository, times(0)).delete(album);
     }
 
 }

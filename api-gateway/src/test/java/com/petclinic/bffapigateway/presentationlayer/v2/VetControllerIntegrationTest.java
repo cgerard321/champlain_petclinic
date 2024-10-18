@@ -35,6 +35,7 @@ import static com.google.common.net.HttpHeaders.AUTHORIZATION;
 import static com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigAuthService.jwtTokenForInvalidOwnerId;
 import static com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigAuthService.jwtTokenForValidAdmin;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -404,6 +405,182 @@ class VetControllerIntegrationTest {
                 .expectBody()
                 .jsonPath("$.message").isEqualTo("Photo not found for vetId: " + vetId);
     }
+    @Test
+    void whenDeleteAlbumPhotoById_thenReturnNoContent() {
+        String vetId = "ac9adeb8-625b-11ee-8c99-0242ac120002";
+        Integer albumId = 1;
 
+        // Mock the delete endpoint in the Mock Server
+        mockServerConfigVetService.registerDeleteAlbumPhotoEndpoint(vetId, albumId);
+
+        webTestClient.delete()
+                .uri(VET_ENDPOINT + "/" + vetId + "/albums/" + albumId)
+                .cookie("Bearer", BEARER_TOKEN)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNoContent() // Expect 204 No Content
+                .expectBody().isEmpty();
+    }
+
+    @Test
+    void whenDeleteAlbumPhotoById_withNonExistentId_thenReturnNotFound() {
+        String vetId = "ac9adeb8-625b-11ee-8c99-0242ac120002";
+        Integer nonExistentAlbumId = 999;
+
+        // Mock the not found scenario in the Mock Server
+        mockServerConfigVetService.registerDeleteAlbumPhotoEndpointNotFound(vetId, nonExistentAlbumId);
+
+        webTestClient.delete()
+                .uri(VET_ENDPOINT + "/" + vetId + "/albums/" + nonExistentAlbumId)
+                .cookie("Bearer", BEARER_TOKEN)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound() // Expect 404 Not Found
+                .expectBody()
+                .equals(HttpStatus.NO_CONTENT.value());
+    }
+
+    @Test
+    void whenDeleteAlbumPhotoById_withServerError_thenReturnServerError() {
+        String vetId = "ac9adeb8-625b-11ee-8c99-0242ac120002";
+        Integer albumId = 2;
+
+        // Mock the server error scenario in the Mock Server
+        mockServerConfigVetService.registerDeleteAlbumPhotoEndpointWithServerError(vetId, albumId);
+
+        webTestClient.delete()
+                .uri(VET_ENDPOINT + "/" + vetId + "/albums/" + albumId)
+                .cookie("Bearer", BEARER_TOKEN)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().is4xxClientError(); // Expect 500 Server Error
+    }
+
+
+    @Test
+    void whenGetEducationByVetId_thenReturnEducation() throws JsonProcessingException {
+        String vetId = "ac9adeb8-625b-11ee-8c99-0242ac120002";
+
+        EducationRequestDTO education1 = new EducationRequestDTO(vetId, "school1", "degree1", "field1", "2020-01-01", "2021-01-01");
+        EducationRequestDTO education2 = new EducationRequestDTO(vetId, "school2", "degree2", "field2", "2021-01-01", "2022-01-01");
+
+        mockServerConfigVetService.registerGetEducationByVetIdEndpoint(vetId, List.of(education1, education2));
+
+        webTestClient.get()
+                .uri(VET_ENDPOINT + "/" + vetId + "/educations")
+                .cookie("Bearer", BEARER_TOKEN)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBodyList(EducationRequestDTO.class)
+                .hasSize(2)
+                .contains(education1, education2);
+    }
+
+    @Test
+    void whenGetEducationByInvalidVetId_thenReturnNotFound() {
+        String invalidVetId = "ac9adeb8-625b-11ee-8c99-0242ac12000200";
+
+        mockServerConfigVetService.registerGetEducationByVetIdEndpointNotFound(invalidVetId);
+
+        webTestClient.get()
+                .uri(VET_ENDPOINT + "/" + invalidVetId + "/educations")
+                .cookie("Bearer", BEARER_TOKEN)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+
+    @Test
+    void whenUpdateEducationByVetIdAndEducationId_thenReturnUpdatedEducation() {
+        String vetId = "69f85766-625b-11ee-8c99-0242ac120002";
+        String educationId = "eb859d39-692b-4e9d-9928-f5a67812ce44";
+
+        EducationRequestDTO updatedEducation = new EducationRequestDTO(
+                        vetId,
+                        "school1",
+                        "degree1",
+                        "field1",
+                        "2020-01-01",
+                        "2021-01-01");
+
+        mockServerConfigVetService.registerUpdateEducationByVetIdAndEducationIdEndpoint(vetId, educationId, updatedEducation);
+
+        Mono<EducationRequestDTO> result = webTestClient.put()
+                .uri(VET_ENDPOINT + "/" + vetId + "/educations/" + educationId)
+                .cookie("Bearer", BEARER_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(updatedEducation)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .returnResult(EducationRequestDTO.class)
+                .getResponseBody()
+                .single();
+
+        StepVerifier
+                .create(result)
+                .expectNextMatches(educationResponse -> {
+                    assertNotNull(educationResponse);
+                    assertEquals(updatedEducation.getVetId(), educationResponse.getVetId());
+                    assertEquals(updatedEducation.getSchoolName(), educationResponse.getSchoolName());
+                    assertEquals(updatedEducation.getDegree(), educationResponse.getDegree());
+                    assertEquals(updatedEducation.getFieldOfStudy(), educationResponse.getFieldOfStudy());
+                    assertEquals(updatedEducation.getStartDate(), educationResponse.getStartDate());
+                    assertEquals(updatedEducation.getEndDate(), educationResponse.getEndDate());
+                    return true;
+                })
+                .verifyComplete();
+    }
+
+
+    @Test
+     void whenUpdateEducationByInvalidVetIdAndEducationId_thenReturnNotFound(){
+        String invalidVetId = "ac9adeb8-625b-11ee-8c99-0242ac12000200";
+        String educationId = "eb859d39-692b-4e9d-9928-f5a67812ce44";
+
+        EducationRequestDTO updatedEducation = new EducationRequestDTO(
+                invalidVetId,
+                "school1",
+                "degree1",
+                "field1",
+                "2020-01-01",
+                "2021-01-01");
+
+        mockServerConfigVetService.registerUpdateEducationByVetIdAndEducationIdEndpointNotFound(invalidVetId, educationId, updatedEducation);
+
+        webTestClient.put()
+                .uri(VET_ENDPOINT + "/" + invalidVetId + "/educations/" + educationId)
+                .cookie("Bearer", BEARER_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(updatedEducation)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+
+    @Test
+    void whenUpdateEducationByVetIdAndInvalidEducationId_thenReturnNotFound(){
+        String vetId = "69f85766-625b-11ee-8c99-0242ac120002";
+        String invalidEducationid = "eb859d39-692b-4e9d-9928-f5a67812ce44322";
+
+        EducationRequestDTO updatedEducation =
+                new EducationRequestDTO(vetId, "school1", "degree1", "field1", "2020-01-01", "2021-01-01");
+
+        mockServerConfigVetService.registerUpdateEducationByVetIdAndEducationIdEndpointNotFound(vetId, invalidEducationid, updatedEducation);
+
+        webTestClient.put()
+                .uri(VET_ENDPOINT + "/" + vetId + "/educations/" + invalidEducationid)
+                .cookie("Bearer", BEARER_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(updatedEducation)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
 
 }

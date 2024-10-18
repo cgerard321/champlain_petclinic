@@ -17,7 +17,8 @@ public class EmergencyRequestDTO {
 
     private String description;
 
-    private String petName;
+    private String petId;
+    private String practitionerId;
 
     private UrgencyLevel urgencyLevel;
 

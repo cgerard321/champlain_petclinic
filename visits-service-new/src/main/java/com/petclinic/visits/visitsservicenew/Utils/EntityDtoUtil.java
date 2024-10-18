@@ -91,18 +91,40 @@ public class EntityDtoUtil {
                 .build();
     }
 
-    public static EmergencyResponseDTO toEmergencyResponseDTO(Emergency emergency){
-        EmergencyResponseDTO emergencyResponseDTO= new EmergencyResponseDTO();
-        BeanUtils.copyProperties(emergency,emergencyResponseDTO);
-        return emergencyResponseDTO;
+    public  Mono<EmergencyResponseDTO> toEmergencyResponseDTO(Emergency emergency){
+        Mono<PetResponseDTO> petResponseDTOMono = petsClient.getPetById(emergency.getPetId());
+        Mono<VetDTO> vetResponseDTOMono = vetsClient.getVetByVetId(emergency.getPractitionerId());
+
+        return Mono.zip(petResponseDTOMono, vetResponseDTOMono)
+                .flatMap(tuple -> {
+                    PetResponseDTO petResponseDTO = tuple.getT1();
+                    VetDTO vetResponseDTO = tuple.getT2();
+
+                    return Mono.just(EmergencyResponseDTO.builder()
+                            .visitEmergencyId(emergency.getVisitEmergencyId())
+                            .visitDate(emergency.getVisitDate())
+                            .description(emergency.getDescription())
+                            .petId(emergency.getPetId())
+                            .petName(petResponseDTO.getName())
+                            .petBirthDate(petResponseDTO.getBirthDate())
+                            .practitionerId(emergency.getPractitionerId())
+                            .vetFirstName(vetResponseDTO.getFirstName())
+                            .vetLastName(vetResponseDTO.getLastName())
+                            .vetEmail(vetResponseDTO.getEmail())
+                            .vetPhoneNumber(vetResponseDTO.getPhoneNumber())
+                            .emergencyType(emergency.getEmergencyType())
+                            .urgencyLevel(emergency.getUrgencyLevel())
+                            .build());
+                });
     }
 
-    public static Emergency toEmergencyEntity(EmergencyRequestDTO emergencyRequestDTO){
+    public  Emergency toEmergencyEntity(EmergencyRequestDTO emergencyRequestDTO){
         return Emergency.builder()
-                .visitEmergencyId(generateEmergencyIdString())
+                .visitEmergencyId(generateVisitIdString())
                 .visitDate(emergencyRequestDTO.getVisitDate())
                 .description(emergencyRequestDTO.getDescription())
-                .petName(emergencyRequestDTO.getPetName())
+                .petId(emergencyRequestDTO.getPetId())
+                .practitionerId(emergencyRequestDTO.getPractitionerId())
                 .urgencyLevel(emergencyRequestDTO.getUrgencyLevel())
                 .emergencyType(emergencyRequestDTO.getEmergencyType())
                 .build();

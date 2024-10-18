@@ -39,8 +39,9 @@ import CustomerVisits from '@/pages/Visit/CustomerVisits.tsx';
 import UpdateOwnerPetPage from '@/pages/Customer/UpdateOwnerPetPage.tsx';
 import EditInventoryProducts from './features/inventories/EditInventoryProducts';
 import AddSupplyToInventory from './features/inventories/AddSupplyToInventory';
-import AddEmergencyForm from './features/visits/Emergency/AddEmergencyForm';
-import EditEmergency from './features/visits/Emergency/EditEmergency';
+import AllUsers from '@/pages/Users/AllUsers.tsx';
+//import AddEmergencyForm from './features/visits/Emergency/AddEmergencyForm';
+//import EditEmergency from './features/visits/Emergency/EditEmergency';
 import EmergencyList from './features/visits/Emergency/EmergencyList';
 import ProductDetails from '@/features/products/api/ProductDetails.tsx';
 import AddPetPage from '@/pages/Customer/AddPetPage.tsx';
@@ -50,10 +51,25 @@ import ResetPassword from '@/pages/User/ResetPassword.tsx';
 import PromoPage from '@/pages/Promos/PromoListPage.tsx';
 import AddPromoPage from '@/pages/Promos/AddPromoPage.tsx';
 import UpdatePromoPage from '@/pages/Promos/UpdatePromoPage.tsx';
+import CustomerEmergency from './pages/Visit/CustomerEmergency';
+import AddEmergencyForm from './features/visits/Emergency/AddEmergencyForm';
+import LowStockProducts from '@/features/inventories/LowStockProducts.tsx';
+import MoveInventoryProducts from '@/features/inventories/MoveInventoryProducts.tsx';
+import ReviewsCustomer from '@/pages/Review/CustomerReviews.tsx';
+import AddReviewsCustomer from '@/pages/Review/CustomerAddReviewForm.tsx';
+import EmergencyDetails from './features/visits/EmergencyByEmergencyId';
 
 const router = createBrowserRouter([
   {
     children: [
+      {
+        path: AppRoutePaths.MoveInventoryProducts,
+        element: (
+          <ProtectedRoute>
+            <MoveInventoryProducts />
+          </ProtectedRoute>
+        ),
+      },
       {
         path: AppRoutePaths.EditInventory,
         element: (
@@ -78,11 +94,29 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
+
+      {
+        path: AppRoutePaths.LowStockProducts,
+        element: (
+          <ProtectedRoute>
+            <LowStockProducts />
+          </ProtectedRoute>
+        ),
+      },
+
       {
         path: AppRoutePaths.GetVisitByVistId,
         element: (
           <ProtectedRoute>
             <VisitDetails />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.CustomerEmergency,
+        element: (
+          <ProtectedRoute>
+            <CustomerEmergency />
           </ProtectedRoute>
         ),
       },
@@ -95,6 +129,16 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
+
+      {
+        path: AppRoutePaths.EmergencyById,
+        element: (
+          <ProtectedRoute>
+            <EmergencyDetails />
+          </ProtectedRoute>
+        ),
+      },
+      /*
       {
         path: AppRoutePaths.EditEmergency,
         element: (
@@ -102,7 +146,7 @@ const router = createBrowserRouter([
             <EditEmergency />
           </ProtectedRoute>
         ),
-      },
+      },*/
 
       {
         path: AppRoutePaths.EmergencyList,
@@ -267,7 +311,7 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: `${AppRoutePaths.EditProduct}/:productId`,
+        path: AppRoutePaths.EditProduct,
         element: (
           <ProtectedRoute roles={['ADMIN', 'INVENTORY_MANAGER']}>
             <EditProduct />
@@ -347,6 +391,14 @@ const router = createBrowserRouter([
         ),
       },
       {
+        path: AppRoutePaths.AllUsers,
+        element: (
+          <ProtectedRoute roles={['ADMIN']}>
+            <AllUsers />
+          </ProtectedRoute>
+        ),
+      },
+      {
         path: AppRoutePaths.EditVisit,
         element: (
           <ProtectedRoute>
@@ -387,6 +439,22 @@ const router = createBrowserRouter([
         ),
       },
     ],
+  },
+  {
+    path: AppRoutePaths.CustomerReviews,
+    element: (
+      <ProtectedRoute>
+        <ReviewsCustomer />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: AppRoutePaths.CustomerAddReview,
+    element: (
+      <ProtectedRoute>
+        <AddReviewsCustomer />
+      </ProtectedRoute>
+    ),
   },
   {
     path: AppRoutePaths.Default,

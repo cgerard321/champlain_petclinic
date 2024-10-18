@@ -301,62 +301,62 @@ public class CartServiceImpl implements CartService {
         return cartRepository.findCartByCartId(cartId)
                 .switchIfEmpty(Mono.error(new NotFoundException("Cart not found: " + cartId)))
                 .flatMap(cart -> {
-                    return Mono.justOrEmpty(cart.getProducts().stream()
-                                    .filter(p -> p.getProductId().equals(productId))
-                                    .findFirst())
-                            .switchIfEmpty(Mono.error(new NotFoundException("Product not found in cart: " + productId)))
-                            .flatMap(cartProduct -> {
-                                // Create a new mutable list for cart's wishlist products
-                                List<CartProduct> wishListProducts = cart.getWishListProducts() != null
-                                        ? new ArrayList<>(cart.getWishListProducts())
-                                        : new ArrayList<>();
+                    // Find the product in the main cart
+                    CartProduct cartProduct = cart.getProducts().stream()
+                            .filter(p -> p.getProductId().equals(productId))
+                            .findFirst()
+                            .orElseThrow(() -> new NotFoundException("Product not found in cart: " + productId));
 
-                                // Add the product to the wishlist
-                                wishListProducts.add(cartProduct);
-                                cart.setWishListProducts(wishListProducts);
+                    // Create new mutable lists for products and wishlist
+                    List<CartProduct> updatedProducts = new ArrayList<>(cart.getProducts());
+                    List<CartProduct> updatedWishListProducts = cart.getWishListProducts() != null
+                            ? new ArrayList<>(cart.getWishListProducts())
+                            : new ArrayList<>();
 
-                                // Remove the product from the main cart products list
-                                List<CartProduct> updatedProducts = new ArrayList<>(cart.getProducts());
-                                updatedProducts.remove(cartProduct);
-                                cart.setProducts(updatedProducts);
+                    // Add the product to the wishlist and remove it from the cart
+                    updatedWishListProducts.add(cartProduct);
+                    updatedProducts.remove(cartProduct);
 
-                                // Save the updated cart and return the response
-                                return cartRepository.save(cart)
-                                        .map(savedCart -> EntityModelUtil.toCartResponseModel(savedCart, savedCart.getProducts()));
-                            });
+                    // Update the cart with the new lists
+                    cart.setProducts(updatedProducts);
+                    cart.setWishListProducts(updatedWishListProducts);
+
+                    // Save the updated cart and map to CartResponseModel
+                    return cartRepository.save(cart)
+                            .map(savedCart -> EntityModelUtil.toCartResponseModel(savedCart, savedCart.getProducts()));
                 });
     }
+
+
 
     @Override
     public Mono<CartResponseModel> moveProductFromWishListToCart(String cartId, String productId) {
         return cartRepository.findCartByCartId(cartId)
                 .switchIfEmpty(Mono.error(new NotFoundException("Cart not found: " + cartId)))
                 .flatMap(cart -> {
-                    return Mono.justOrEmpty(cart.getWishListProducts().stream()
-                                    .filter(p -> p.getProductId().equals(productId))
-                                    .findFirst())
-                            .switchIfEmpty(Mono.error(new NotFoundException("Product: " + productId + " not found in wishlist of cart: " + cartId)))
-                            .flatMap(wishListProduct -> {
-                                // Create a new list for cart products and wishlist products
-                                List<CartProduct> updatedCartProducts = new ArrayList<>(cart.getProducts() != null ? cart.getProducts() : new ArrayList<>());
-                                List<CartProduct> updatedWishListProducts = new ArrayList<>(cart.getWishListProducts());
+                    // Find the product in the wishlist
+                    CartProduct wishListProduct = cart.getWishListProducts().stream()
+                            .filter(p -> p.getProductId().equals(productId))
+                            .findFirst()
+                            .orElseThrow(() -> new NotFoundException("Product not found in wishlist: " + productId));
 
-                                // Add the product to the cart and remove it from the wishlist
-                                updatedCartProducts.add(wishListProduct);
-                                updatedWishListProducts.remove(wishListProduct);
+                    // Create new mutable lists for products and wishlist
+                    List<CartProduct> updatedProducts = new ArrayList<>(cart.getProducts());
+                    List<CartProduct> updatedWishListProducts = new ArrayList<>(cart.getWishListProducts());
 
-                                // Update the cart with the new lists
-                                cart.setProducts(updatedCartProducts);
-                                cart.setWishListProducts(updatedWishListProducts);
+                    // Add the product to the cart's products list and remove it from the wishlist
+                    updatedProducts.add(wishListProduct);
+                    updatedWishListProducts.remove(wishListProduct);
 
-                                // Save the updated cart and map to CartResponseModel
-                                return cartRepository.save(cart)
-                                        .map(savedCart -> EntityModelUtil.toCartResponseModel(savedCart, savedCart.getProducts()));
-                            });
+                    // Update the cart with the new lists
+                    cart.setProducts(updatedProducts);
+                    cart.setWishListProducts(updatedWishListProducts);
+
+                    // Save the updated cart and map to CartResponseModel
+                    return cartRepository.save(cart)
+                            .map(savedCart -> EntityModelUtil.toCartResponseModel(savedCart, savedCart.getProducts()));
                 });
     }
-
-
 
 
 }

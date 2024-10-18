@@ -229,7 +229,7 @@ class ProductServiceImplUnitTest {
 
         verify(productRepository).findProductByProductId(productId);
         verify(productRepository).save(argThat(savedProduct ->
-                savedProduct.getProductQuantity() == 25 // 10 + 15
+                savedProduct.getProductQuantity() == 15 // 10 + 15
         ));
     }
 

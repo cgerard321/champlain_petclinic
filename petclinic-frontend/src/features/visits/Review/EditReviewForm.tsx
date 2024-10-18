@@ -15,6 +15,7 @@ const EditReviewForm: React.FC = (): JSX.Element => {
   const { reviewId } = useParams<{ reviewId: string }>(); // Get reviewId from URL params
   const [review, setReview] = useState<ReviewRequestDTO>({
     rating: 0,
+    ownerId: '',
     reviewerName: '',
     review: '',
     dateSubmitted: new Date(),
@@ -34,6 +35,7 @@ const EditReviewForm: React.FC = (): JSX.Element => {
           const response: ReviewResponseDTO = await getReview(reviewId);
           setReview({
             rating: response.rating,
+            ownerId: response.ownerId,
             reviewerName: response.reviewerName,
             review: response.review,
             dateSubmitted: new Date(response.dateSubmitted),

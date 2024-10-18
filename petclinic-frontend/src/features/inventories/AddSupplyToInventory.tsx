@@ -3,13 +3,14 @@ import { FormEvent, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { addSupplyToInventory } from '@/features/inventories/api/AddSupplyToInventory.ts';
 import { ProductRequestModel } from '@/features/inventories/models/InventoryModels/ProductRequestModel';
+import './AddSupplyToInventory.css';
 
 interface ApiError {
   message: string;
 }
 
 const AddSupplyToInventory: React.FC = (): JSX.Element => {
-  const { inventoryId } = useParams<{ inventoryId: string }>(); // Get params from URL
+  const { inventoryId } = useParams<{ inventoryId: string }>();
   const [product, setProduct] = useState<ProductRequestModel>({
     productName: '',
     productDescription: '',
@@ -86,78 +87,107 @@ const AddSupplyToInventory: React.FC = (): JSX.Element => {
   };
 
   return (
-    <div>
-      <h1>Add Supply</h1>
-      {error && <p style={{ color: 'red' }}>{error.message}</p>}
-
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Product Name</label>
-          <input
-            type="text"
-            name="productName"
-            value={product.productName}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <div>
-          <label>Product Description</label>
-          <input
-            type="text"
-            name="productDescription"
-            value={product.productDescription}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <div>
-          <label>Product Price</label>
-          <input
-            type="number"
-            name="productPrice"
-            value={product.productPrice}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <div>
-          <label>Product Quantity</label>
-          <input
-            type="number"
-            name="productQuantity"
-            value={product.productQuantity}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <div>
-          <label>Product Sale Price</label>
-          <input
-            type="number"
-            name="productSalePrice"
-            value={product.productSalePrice}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <button type="submit">Add Supply</button>
-      </form>
-      <div>
-        {loading && <p>Loading...</p>}
-        {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
-        {showNotification ? (
-          <div className="notification">
-            {successMessage && (
-              <p style={{ color: 'white' }}>{successMessage}</p>
+    <div className="add-supply-container">
+      <div className="add-supply-form-container">
+        <h1>Add Supply</h1>
+        {errorMessage && (
+          <p className="add-supply-error-message">{errorMessage}</p>
+        )}
+        <form onSubmit={handleSubmit}>
+          <div className="add-supply-form-group">
+            <label>Product Name</label>
+            <input
+              className="add-supply-input"
+              type="text"
+              name="productName"
+              value={product.productName}
+              onChange={handleChange}
+              required
+            />
+            {error.productName && (
+              <span className="add-supply-error-text">{error.productName}</span>
             )}
           </div>
-        ) : null}
+
+          <div className="add-supply-form-group">
+            <label>Product Description</label>
+            <input
+              className="add-supply-input"
+              type="text"
+              name="productDescription"
+              value={product.productDescription}
+              onChange={handleChange}
+              required
+            />
+            {error.productDescription && (
+              <span className="add-supply-error-text">
+                {error.productDescription}
+              </span>
+            )}
+          </div>
+
+          <div className="add-supply-form-group">
+            <label>Product Price</label>
+            <input
+              className="add-supply-input"
+              type="number"
+              name="productPrice"
+              value={product.productPrice}
+              onChange={handleChange}
+              required
+            />
+            {error.productPrice && (
+              <span className="add-supply-error-text">
+                {error.productPrice}
+              </span>
+            )}
+          </div>
+
+          <div className="add-supply-form-group">
+            <label>Product Quantity</label>
+            <input
+              className="add-supply-input"
+              type="number"
+              name="productQuantity"
+              value={product.productQuantity}
+              onChange={handleChange}
+              required
+            />
+            {error.productQuantity && (
+              <span className="add-supply-error-text">
+                {error.productQuantity}
+              </span>
+            )}
+          </div>
+
+          <div className="add-supply-form-group">
+            <label>Product Sale Price</label>
+            <input
+              className="add-supply-input"
+              type="number"
+              name="productSalePrice"
+              value={product.productSalePrice}
+              onChange={handleChange}
+              required
+            />
+            {error.productSalePrice && (
+              <span className="add-supply-error-text">
+                {error.productSalePrice}
+              </span>
+            )}
+          </div>
+
+          <button
+            className="add-supply-submit-button"
+            type="submit"
+            disabled={loading}
+          >
+            {loading ? 'Adding...' : 'Add Supply'}
+          </button>
+        </form>
+        {showNotification && (
+          <p className="add-supply-success-message">{successMessage}</p>
+        )}
       </div>
     </div>
   );

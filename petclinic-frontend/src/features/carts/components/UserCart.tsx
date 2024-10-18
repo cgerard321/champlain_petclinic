@@ -46,6 +46,7 @@ const UserCart = (): JSX.Element => {
   const [checkoutMessage, setCheckoutMessage] = useState<string | null>(null);
   const [invoice, setInvoice] = useState<Invoice | null>(null);
   const [cartItemCount, setCartItemCount] = useState<number>(0); // State for cart item count
+  const [wishlistUpdated, setWishlistUpdated] = useState(false);
 
   const subtotal = cartItems.reduce(
     (acc, item) => acc + item.productSalePrice * (item.quantity || 1),
@@ -120,12 +121,11 @@ const UserCart = (): JSX.Element => {
     };
 
     fetchCartItems();
-  }, [cartId]);
-
-  // Recalculate cart item count every time cartItems change
-  useEffect(() => {
+    // Reset wishlistUpdated to avoid unnecessary fetches
+    setWishlistUpdated(false);
+    // Recalculate cart item count after setting cart items
     updateCartItemCount();
-  }, [cartItems, updateCartItemCount]);
+  }, [cartId, updateCartItemCount, wishlistUpdated]);
 
   const changeItemQuantity = useCallback(
     async (
@@ -254,41 +254,78 @@ const UserCart = (): JSX.Element => {
       }
     }
   };
+  //TODO: Remove the Item that has been moved
+  const addToWishlist = async (item: ProductModel): Promise<void> => {
+    try {
+      const productId = item.productId;
+      const response = await fetch(
+        `http://localhost:8080/api/v2/gateway/carts/${cartId}/wishlist/${productId}/toWishList`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify({
+            productId: item.productId,
+            productName: item.productName,
+            productSalePrice: item.productSalePrice,
+          }),
+        }
+      );
 
-  //going to imlement it next sprint
-  // const addToWishlist = async (item: ProductModel): Promise<void> => {
-  //   try {
-  //     const productId = item.productId;
-  //     const response = await fetch(
-  //       `http://localhost:8080/api/v2/gateway/carts/${cartId}/products/${productId}/toWishList`,
-  //       {
-  //         method: 'POST',
-  //         headers: {
-  //           'Content-Type': 'application/json',
-  //           Accept: 'application/json',
-  //         },
-  //         credentials: 'include',
-  //         body: JSON.stringify({
-  //           productId: item.productId,
-  //           productName: item.productName,
-  //           productSalePrice: item.productSalePrice,
-  //         }),
-  //       }
-  //     );
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to add to wishlist');
+      }
 
-  //     if (!response.ok) {
-  //       const errorData = await response.json();
-  //       throw new Error(errorData.message || 'Failed to add to wishlist');
-  //     }
+      // Optionally, you can update the wishlistItems state
+      setWishlistItems(prevItems => [...prevItems, item]);
+      alert(`${item.productName} has been added to your wishlist!`);
+      // Trigger the useEffect by updating the wishlistUpdated state
+      setWishlistUpdated(true);
+    } catch (error) {
+      console.error('Error adding to wishlist:', error);
+      alert('Failed to add item to wishlist.');
+    }
+  };
 
-  //     // Optionally, you can update the wishlistItems state
-  //     setWishlistItems(prevItems => [...prevItems, item]);
-  //     alert(`${item.productName} has been added to your wishlist!`);
-  //   } catch (error) {
-  //     console.error('Error adding to wishlist:', error);
-  //     alert('Failed to add item to wishlist.');
-  //   }
-  // };
+  const addToCart = async (item: ProductModel): Promise<void> => {
+    try {
+      const productId = item.productId;
+      const response = await fetch(
+        `http://localhost:8080/api/v2/gateway/carts/${cartId}/wishlist/${productId}/toCart`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify({
+            productId: item.productId,
+            productName: item.productName,
+            productSalePrice: item.productSalePrice,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to add to cart');
+      }
+
+      // Optionally, you can update the wishlistItems state
+      setWishlistItems(prevItems => [...prevItems, item]);
+      alert(`${item.productName} has been added to your cart!`);
+      // Trigger the useEffect by updating the wishlistUpdated state
+      setWishlistUpdated(true);
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      alert('Failed to add item to cart.');
+    }
+  };
 
   const handleCheckout = async (): Promise<void> => {
     if (!cartId) {
@@ -384,6 +421,9 @@ const UserCart = (): JSX.Element => {
                     changeItemQuantity={changeItemQuantity}
                     deleteItem={deleteItem}
                     errorMessage={errorMessages[index]}
+                    addToWishlist={addToWishlist}
+                    addToCart={() => {}}
+                    isInWishlist={false}
                   />
                 ))
               ) : (
@@ -462,9 +502,12 @@ const UserCart = (): JSX.Element => {
                   <CartItem
                     key={item.productId}
                     item={item}
-                    index={-1} // Mark as wishlist item
-                    changeItemQuantity={() => {}} // Disable changing quantity for wishlist
-                    deleteItem={() => {}} // Disable removing from wishlist
+                    index={-1}
+                    changeItemQuantity={() => {}}
+                    deleteItem={() => {}}
+                    addToWishlist={() => {}}
+                    addToCart={addToCart}
+                    isInWishlist={true}
                   />
                 ))
               ) : (

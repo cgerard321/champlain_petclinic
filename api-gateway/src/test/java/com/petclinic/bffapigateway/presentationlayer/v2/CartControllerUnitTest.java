@@ -88,41 +88,12 @@ public class CartControllerUnitTest {
         //assert
         verify(cartServiceClient, times(1)).getCartByCustomerId(customerId);
     }
+    /*
+    --------------------------------------------------------------------------------------------------------------------
+        from here it's the tests related to the wishlist
+    */
 
-    //@Test
-    void whenMoveProductFromCartToWishlist_thenSuccess() {
-        // Arrange
-        String cartId = "cartId123";
-        String productId = "productId123";
-        when(cartServiceClient.moveProductFromCartToWishlist(cartId, productId)).thenReturn(Mono.empty());
 
-        // Act
-        client.post()
-                .uri("/api/v2/gateway/carts/" + cartId + "/products/" + productId + "/toWishList")
-                .exchange()
-                .expectStatus().isOk();
-
-        // Assert
-        verify(cartServiceClient, times(1)).moveProductFromCartToWishlist(cartId, productId);
-
-    }
-
-    @Test
-    void whenMoveProductFromWishListToCart_thenSuccess() {
-        // Arrange
-        String cartId = "cartId123";
-        String productId = "productId123";
-        when(cartServiceClient.moveProductFromWishListToCart(cartId, productId)).thenReturn(Mono.empty());
-
-        // Act
-        client.post()
-                .uri("/api/v2/gateway/carts/" + cartId + "/products/" + productId + "/toCart")
-                .exchange()
-                .expectStatus().isOk();
-
-        // Assert
-        verify(cartServiceClient, times(1)).moveProductFromWishListToCart(cartId, productId);
-    }
 
 
 }

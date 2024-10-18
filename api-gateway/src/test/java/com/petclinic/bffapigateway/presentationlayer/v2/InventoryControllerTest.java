@@ -751,4 +751,136 @@ public class InventoryControllerTest {
                 .consumeProduct(inventoryId, invalidProductId);
     }
 
+    @Test
+    void deleteAllProductsInInventory_ShouldSucceed() {
+
+        String inventoryId = "inventory1";
+        // Mock the service call to simulate the successful deletion of all products in an inventory.
+        // Assuming your service client has a method called `deleteAllProductsInInventory`.
+        when(inventoryServiceClient.deleteAllProductsInInventory(inventoryId))
+                .thenReturn(Mono.empty());  // Using Mono.empty() to simulate a void return (successful deletion without a return value).
+
+        // Make the DELETE request to the API.
+        client.delete()
+                .uri("/api/v2/gateway/inventories/" + inventoryId +"/products")  // Assuming the endpoint for deleting all products in an inventory is the same with the inventory ID.
+                .exchange()
+                .expectStatus().isNoContent()
+                .expectBody().isEmpty();
+
+        // Verify that the deleteAllProductsInInventory method on the service client was called exactly once.
+        verify(inventoryServiceClient, times(1))
+                .deleteAllProductsInInventory(inventoryId);
+    }
+
+    @Test
+    public void testCreateSupplyPdf_NotFound() {
+        client.get()
+                .uri("/inventory/validInventoryId/products/download")
+                .exchange()
+                .expectStatus().isNotFound();
+
+        // Verify the service method was not called
+        verify(inventoryServiceClient, never()).createSupplyPdf(anyString());
+    }
+    @Test
+    public void testCreateSupplyPdf_Success() {
+        // Arrange
+        String inventoryId = "inventory1";
+        byte[] pdfContent = "PDF Content".getBytes();
+
+        // Mock the service method to return the PDF content
+        when(inventoryServiceClient.createSupplyPdf(inventoryId))
+                .thenReturn(Mono.just(pdfContent));
+
+        // Act
+        client.get()
+                .uri(baseInventoryURL + "/" + inventoryId + "/products/download")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(byte[].class)
+                .isEqualTo(pdfContent);
+
+        // Verify that the service method was called with the correct inventoryId
+        verify(inventoryServiceClient, times(1))
+                .createSupplyPdf(eq(inventoryId));
+    }
+
+    @Test
+    void updateProductInventoryId_withValidData_shouldReturnUpdatedProduct() {
+        // Arrange
+        String currentInventoryId = "1";
+        String productId = "101";
+        String newInventoryId = "2";
+        ProductResponseDTO updatedProductResponseDTO = ProductResponseDTO.builder()
+                .productId(productId)
+                .productName("Updated Product 101")
+                .productDescription("Updated Description")
+                .productPrice(149.99)
+                .build();
+
+        when(inventoryServiceClient.updateProductInventoryId(currentInventoryId, productId, newInventoryId))
+                .thenReturn(Mono.just(updatedProductResponseDTO));
+
+        // Act
+        client.put()
+                .uri(baseInventoryURL + "/" + currentInventoryId + "/products/" + productId + "/updateInventoryId/" + newInventoryId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(ProductResponseDTO.class)
+                .isEqualTo(updatedProductResponseDTO);
+
+        // Assert
+        verify(inventoryServiceClient, times(1))
+                .updateProductInventoryId(currentInventoryId, productId, newInventoryId);
+    }
+
+    @Test
+    void updateProductInventoryId_withInvalidData_shouldReturnNotFound() {
+        // Arrange
+        String currentInventoryId = "1";
+        String productId = "999"; // Assuming this product doesn't exist
+        String newInventoryId = "2";
+        when(inventoryServiceClient.updateProductInventoryId(currentInventoryId, productId, newInventoryId))
+                .thenReturn(Mono.empty());
+
+        // Act
+        client.put()
+                .uri(baseInventoryURL + "/" + currentInventoryId + "/products/" + productId + "/updateInventoryId/" + newInventoryId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound();
+
+        // Assert
+        verify(inventoryServiceClient, times(1))
+                .updateProductInventoryId(currentInventoryId, productId, newInventoryId);
+    }
+
+    @Test
+    void getAllInventories_shouldReturnAllInventories() {
+        // Arrange
+        InventoryResponseDTO inventoryResponseDTO1 = buildInventoryDTO();
+        InventoryResponseDTO inventoryResponseDTO2 = buildInventoryDTO().builder()
+                .inventoryId("2")
+                .inventoryName("invt2")
+                .build();
+
+        when(inventoryServiceClient.getAllInventories())
+                .thenReturn(Flux.just(inventoryResponseDTO1, inventoryResponseDTO2));
+
+        // Act
+        client.get()
+                .uri(baseInventoryURL + "/all")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(InventoryResponseDTO.class)
+                .hasSize(2)
+                .contains(inventoryResponseDTO1, inventoryResponseDTO2);
+
+        // Assert
+        verify(inventoryServiceClient, times(1)).getAllInventories();
+    }
+
+
 }

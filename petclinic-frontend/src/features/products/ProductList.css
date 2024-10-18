@@ -51,11 +51,10 @@
   margin-bottom: 10px;
 }
 
-
-  .filter-container select {
-    width: 100%;
-    max-width: 250px;
-  }
+.filter-container select {
+  width: 100%;
+  max-width: 250px;
+}
 
 .low-quantity {
   border-top: 5px solid orange;
@@ -142,5 +141,3 @@
   display: flex;
   justify-content: center;
 }
-
-

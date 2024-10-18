@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -75,11 +76,9 @@ public class DataLoaderService implements CommandLineRunner {
                 .averageRating(0.0)
                 .build();
 
-        List<CartProduct> products1 = List.of(product1, product2);
-
-        List<CartProduct> products2 = List.of(product3, product4);
-
-        List<CartProduct> wishListProducts = List.of(wishListProduct1, wishlistProduct2);
+        List<CartProduct> products1 = new ArrayList<>(List.of(product1, product2));
+        List<CartProduct> products2 = new ArrayList<>(List.of(product3, product4));
+        List<CartProduct> wishListProducts = new ArrayList<>(List.of(wishListProduct1, wishlistProduct2));
 
         Cart cart1 = Cart.builder()
                 .cartId("98f7b33a-d62a-420a-a84a-05a27c85fc91")
@@ -95,15 +94,11 @@ public class DataLoaderService implements CommandLineRunner {
                 .wishListProducts(wishListProducts)
                 .build();
 
-
-        Flux.just(cart1)
-                .flatMap(s -> cartRepository.insert(Mono.just(s))
-                        .log(s.toString()))
-                .subscribe();
-
-        Flux.just(cart2)
-                .flatMap(s -> cartRepository.insert(Mono.just(s))
-                        .log(s.toString()))
+        // Insert both carts using a single Flux and log success or error
+        Flux.just(cart1, cart2)
+                .flatMap(cartRepository::insert)
+                .doOnNext(savedCart -> System.out.println("Inserted cart: " + savedCart.getCartId()))
+                .doOnError(error -> System.err.println("Error inserting cart: " + error.getMessage()))
                 .subscribe();
     }
 }

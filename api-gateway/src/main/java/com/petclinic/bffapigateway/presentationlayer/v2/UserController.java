@@ -14,7 +14,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -47,6 +50,12 @@ public class UserController {
     public Mono<ResponseEntity<OwnerResponseDTO>> createUserUsingV2Endpoint(@RequestBody @Valid Mono<Register> model) {
         return authServiceClient.createUserUsingV2Endpoint(model).map(s -> ResponseEntity.status(HttpStatus.CREATED).body(s))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping("/users")
+    public Flux<UserDetails> getAllUsers(@CookieValue("Bearer") String jwtToken) {
+        return authServiceClient.getAllUsers(jwtToken);
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})

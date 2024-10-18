@@ -14,6 +14,7 @@ import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -27,8 +28,7 @@ import java.util.UUID;
 
 import static com.petclinic.inventoryservice.datalayer.Product.Status.AVAILABLE;
 import static com.petclinic.inventoryservice.datalayer.Product.Status.RE_ORDER;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -586,7 +586,7 @@ class InventoryControllerUnitTest {
     void deleteProductInventory_ValidInventoryId_ShouldCallServiceDelete() {
         // Arrange
         String inventoryId = "1";
-        when(productInventoryService.deleteAllProductInventory(inventoryId)).thenReturn(Mono.empty());
+        when(productInventoryService.deleteAllProductsForAnInventory(inventoryId)).thenReturn(Mono.empty());
 
         // Act & Assert
         webTestClient
@@ -595,7 +595,7 @@ class InventoryControllerUnitTest {
                 .exchange()
                 .expectStatus().isNoContent();  // Expecting 204 NO CONTENT status.
 
-        verify(productInventoryService, times(1)).deleteAllProductInventory(inventoryId);
+        verify(productInventoryService, times(1)).deleteAllProductsForAnInventory(inventoryId);
     }
 
 
@@ -1421,7 +1421,7 @@ class InventoryControllerUnitTest {
     void getLowStockProducts_WithDefaultThreshold_ShouldReturnLowStockProducts() {
         // Arrange
         String inventoryId = "inventoryId_1";
-        int defaultThreshold = 16;
+        int defaultThreshold = 20;
 
         when(productInventoryService.getLowStockProducts(inventoryId, defaultThreshold))
                 .thenReturn(Flux.fromIterable(lowStockProducts));
@@ -1637,5 +1637,94 @@ class InventoryControllerUnitTest {
         // Verify that the service was called with the correct inventoryId
         verify(productInventoryService, times(1)).getQuantityOfProductsInInventory(inventoryId);
     }
+
+    @Test
+    void deleteAllProductsInInventory_withValidInventoryId_shouldSucceed() {
+        // Arrange
+        String inventoryId = "inventoryId_1";
+
+        // Mock the service to return an empty Mono
+        when(productInventoryService.deleteAllProductsForAnInventory(inventoryId))
+                .thenReturn(Mono.empty());
+
+        // Act and Assert
+        webTestClient.delete()
+                .uri("/inventory/{inventoryId}/products", inventoryId)
+                .exchange()
+                .expectStatus().isNoContent();
+
+        // Verify that the service was called with the correct inventoryId
+        verify(productInventoryService, times(1)).deleteAllProductsForAnInventory(inventoryId);
+    }
+
+    @Test
+    void createPdfReportForInventory_withValidInventoryId_shouldReturnPdfFile() {
+        // Arrange
+        String inventoryId = "inventoryId_1";
+        byte[] pdfContent = "PDF Content".getBytes();
+
+        // Mock the service to return the PDF content
+        when(productInventoryService.createSupplyPdf(inventoryId))
+                .thenReturn(Mono.just(pdfContent));
+
+        // Act and Assert
+        webTestClient.get()
+                .uri("/inventory/{inventoryId}/products/download", inventoryId)
+                .accept(MediaType.APPLICATION_PDF)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_PDF)
+                .expectBody(byte[].class)
+                .value(content -> {
+                    assertNotNull(content);
+                    assertArrayEquals(pdfContent, content); // Check if the returned content matches the mocked content
+                });
+
+    }
+
+    @Test
+    public void testUpdateProductInventoryId_Success() {
+        // Mock response DTO
+        ProductResponseDTO mockResponse = new ProductResponseDTO();
+        mockResponse.setProductId("prod123");
+        mockResponse.setInventoryId("newInventory123");
+
+        // Mock the service method
+        when(productInventoryService.updateProductInventoryId(anyString(), anyString(), anyString()))
+                .thenReturn(Mono.just(mockResponse));
+
+        // Perform the PUT request
+        webTestClient.put()
+                .uri("/inventory/currentInventory123/products/prod123/updateInventoryId/newInventory123")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(ProductResponseDTO.class)
+                .value(response -> {
+                    // Assert that the returned DTO has the expected values
+                    assert response.getProductId().equals("prod123");
+                    assert response.getInventoryId().equals("newInventory123");
+                });
+    }
+
+    @Test
+    void testUpdateProductInventoryId_NotFound() {
+        // Given
+        String currentInventoryId = "invalidInventoryId";
+        String productId = "invalidProductId";
+        String newInventoryId = "invalidNewInventoryId";
+
+        // Mocking the service to return empty Mono
+        when(productInventoryService.updateProductInventoryId(currentInventoryId, productId, newInventoryId))
+                .thenReturn(Mono.empty());
+
+        // When and Then
+        webTestClient.put()
+                .uri("/inventory/{currentInventoryId}/products/{productId}/updateInventoryId/{newInventoryId}",
+                        currentInventoryId, productId, newInventoryId)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
 
 }

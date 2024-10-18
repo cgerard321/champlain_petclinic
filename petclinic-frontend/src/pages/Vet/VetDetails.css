@@ -125,3 +125,30 @@ ul {
 .album-photo-thumbnail:hover {
   transform: scale(1.08);
 }
+.album-photo-card {
+  position: relative;
+  display: inline-block;
+  margin: 10px;
+}
+
+.album-photo-thumbnail {
+  width: 200px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+.delete-photo-button {
+  display: block;
+  margin-top: 5px;
+  background-color: red;
+  color: white;
+  padding: 5px 10px;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+}
+.delete-photo-button:hover {
+  background-color: darkred;
+}

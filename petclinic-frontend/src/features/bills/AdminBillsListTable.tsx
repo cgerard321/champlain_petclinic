@@ -1,6 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Bill } from '@/features/bills/models/Bill.ts';
-import { getBillByBillId } from '@/features/bills/api/GetBillByBillId.tsx';
 import { getAllOwners } from '../customers/api/getAllOwners';
 import { getAllVets } from '../veterinarians/api/getAllVets';
 import { BillRequestModel } from './models/BillRequestModel';
@@ -11,6 +10,10 @@ import { deleteBill } from '@/features/bills/api/deleteBill.tsx';
 import useGetAllBillsPaginated from '@/features/bills/hooks/useGetAllBillsPaginated.ts';
 import './AdminBillsListTable.css';
 import { useNavigate } from 'react-router-dom';
+import { getAllPaidBills } from '@/features/bills/api/getAllPaidBills.tsx';
+import { getAllOverdueBills } from '@/features/bills/api/getAllOverdueBills.tsx';
+import { getAllUnpaidBills } from '@/features/bills/api/getAllUnpaidBills.tsx';
+import { getBillByBillId } from '@/features/bills/api/GetBillByBillId.tsx';
 
 export default function AdminBillsListTable(): JSX.Element {
   const navigate = useNavigate();
@@ -19,6 +22,17 @@ export default function AdminBillsListTable(): JSX.Element {
   const [error, setError] = useState<string | null>(null);
   const { billsList, getBillsList, setCurrentPage, currentPage, hasMore } =
     useGetAllBillsPaginated();
+  const [filter, setFilter] = useState<FilterModel>({
+    customerId: '',
+  });
+
+  interface FilterModel {
+    [key: string]: string;
+    customerId: string;
+  }
+
+  const [selectedFilter, setSelectedFilter] = useState<string>('');
+  const [filteredBills, setFilteredBills] = useState<Bill[] | null>(null);
 
   const [showCreateForm, setCreateForm] = useState<boolean>(false);
   const [newBill, setNewBill] = useState<BillRequestModel>({
@@ -45,8 +59,10 @@ export default function AdminBillsListTable(): JSX.Element {
   }, []);
 
   useEffect(() => {
-    getBillsList(currentPage, 10);
-  }, [currentPage, getBillsList]);
+    if (!selectedFilter) {
+      getBillsList(currentPage, 10);
+    }
+  }, [currentPage, getBillsList, selectedFilter]);
 
   const validateForm = (): boolean => {
     if (
@@ -74,6 +90,47 @@ export default function AdminBillsListTable(): JSX.Element {
 
     setError(null);
     return true;
+  };
+
+  const handleFilterChange = async (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ): Promise<void> => {
+    const status = event.target.value;
+    setSelectedFilter(status);
+
+    try {
+      if (status === 'paid') {
+        const paidBills = await getAllPaidBills();
+        setFilteredBills(paidBills);
+      } else if (status === 'unpaid') {
+        const unpaidBills = await getAllUnpaidBills();
+        setFilteredBills(unpaidBills);
+      } else if (status === 'overdue') {
+        const overdueBills = await getAllOverdueBills();
+        setFilteredBills(overdueBills);
+      } else {
+        setFilteredBills(null);
+        getBillsList(currentPage, 10);
+      }
+    } catch (error) {
+      console.error('Error fetching filtered bills:', error);
+      setError('Error fetching filtered bills. Please try again.');
+    }
+  };
+
+  const getFilteredBills = (): Bill[] => {
+    const billsToFilter = filteredBills || billsList;
+
+    return billsToFilter.filter(bill => {
+      const matchesStatus =
+        !selectedFilter ||
+        bill.billStatus.toLowerCase() === selectedFilter.toLowerCase();
+
+      const matchesCustomerId =
+        !filter.customerId || bill.customerId.includes(filter.customerId);
+
+      return matchesStatus && matchesCustomerId; // Combine filters
+    });
   };
 
   const handleCreateBill = async (): Promise<void> => {
@@ -177,6 +234,30 @@ export default function AdminBillsListTable(): JSX.Element {
         />
         <button onClick={handleSearch}>Search</button>
         {searchedBill && <button onClick={handleGoBack}>Go Back</button>}
+      </div>
+
+      <div>
+        <label htmlFor="billFilter">Filter Bills by Status: </label>
+        <select
+          id="billFilter"
+          value={selectedFilter}
+          onChange={handleFilterChange}
+        >
+          <option value="">All Bills</option>
+          <option value="unpaid">Unpaid Bills</option>
+          <option value="paid">Paid Bills</option>
+          <option value="overdue">Overdue Bills</option>
+        </select>
+      </div>
+
+      <div>
+        <h1> Search by Customer ID </h1>
+        <input
+          type="text"
+          placeholder="Customer ID"
+          value={filter.customerId}
+          onChange={e => setFilter({ ...filter, customerId: e.target.value })}
+        ></input>
       </div>
 
       <button onClick={() => setCreateForm(!showCreateForm)}>
@@ -326,6 +407,7 @@ export default function AdminBillsListTable(): JSX.Element {
             <thead>
               <tr>
                 <th>Bill ID</th>
+                <th> Customer ID </th>
                 <th>Owner Name</th>
                 <th>Visit Type</th>
                 <th>Vet Name</th>
@@ -338,9 +420,10 @@ export default function AdminBillsListTable(): JSX.Element {
               </tr>
             </thead>
             <tbody>
-              {billsList.map((bill: Bill) => (
+              {getFilteredBills().map((bill: Bill) => (
                 <tr key={bill.billId}>
                   <td>{bill.billId}</td>
+                  <td>{bill.customerId}</td>
                   <td>
                     {bill.ownerFirstName} {bill.ownerLastName}
                   </td>

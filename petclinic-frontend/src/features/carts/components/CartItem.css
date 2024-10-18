@@ -117,3 +117,17 @@
   background-color: #e6b800; /* Darken the button on hover */
 }
 
+.addToCart-button {
+  background-color: #28a745; /* Green */
+  border: none;
+  padding: 8px 12px;
+  margin-left: 10px; /* Space between buttons */
+  cursor: pointer;
+  transition: background-color 0.3s;
+  color: white; /* Ensuring the text is readable */
+  border-radius: 6px; /* Rounded corners for consistency */
+}
+
+.addToCart-button:hover {
+  background-color: #218838; /* Darker green for hover effect */
+}

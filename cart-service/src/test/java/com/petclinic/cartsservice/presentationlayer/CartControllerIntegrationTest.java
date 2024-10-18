@@ -23,8 +23,7 @@ import java.util.List;
 
 
 import static com.mongodb.assertions.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"spring.data.mongodb.port = 0"})
@@ -40,6 +39,9 @@ class CartControllerIntegrationTest {
     private CartRepository cartRepository;
 
     public static final String NON_EXISTING_CART_ID = "3ee10bc4-2957-42dc-8d2b-2ecb76301a3c";
+    public static final String NON_EXISTING_PRODUCT_ID = "3ee10bc4-2957-42dc-8d2b-2ecb76301a3c";
+
+
 
     private MockServerConfigProductService mockServerConfigProductService;
 
@@ -177,31 +179,221 @@ class CartControllerIntegrationTest {
 //    }
 
 
-//    @Test
-//    public void testMoveProductFromWishListToCart_ValidProduct_MovesProduct() {
-//        // Given
-//        String cartId = cart1.getCartId(); // Assumes cart1 is a pre-defined cart object
-//        String productId = wishListProduct1.getProductId();
-//
-//        // When
-//        webTestClient.put()
-//                .uri("/api/v1/carts/{cartId}/wishlist/{productId}/toCart", cartId, productId)
-//                .accept(MediaType.APPLICATION_JSON)
-//                .exchange()
-//                // Then
-//                .expectStatus().isOk()
-//                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-//                .expectBody(CartResponseModel.class)
-//                .consumeWith(response -> {
-//                    CartResponseModel cartResponse = response.getResponseBody();
-//                    assertNotNull(cartResponse);
-//                    // Verify the product has been added to the cart
-//                    assertTrue(cartResponse.getProducts().stream()
-//                            .anyMatch(product -> product.getProductId().equals(productId)));
-//                    // Optionally, you could also verify the size of the cart products if needed
-//                    assertEquals(cart1.getProducts().size() + 1, cartResponse.getProducts().size());
-//                });
-//    }
+    @Test
+    public void testMoveProductFromWishListToCart_ValidProduct_MovesProduct() {
+        // Given
+        String cartId = cart1.getCartId();
+        String productId = wishListProduct1.getProductId();
+
+        // When
+        webTestClient.put()
+                .uri("/api/v1/carts/{cartId}/wishlist/{productId}/toCart", cartId, productId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                // Then
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(CartResponseModel.class)
+                .consumeWith(response -> {
+                    CartResponseModel cartResponse = response.getResponseBody();
+                    assertNotNull(cartResponse);
+                    // Verify the product has been added to the cart
+                    assertTrue(cartResponse.getProducts().stream()
+                            .anyMatch(product -> product.getProductId().equals(productId)));
+                    // Verify the product is no longer in the wishlist
+                    assertFalse(cartResponse.getWishListProducts().stream()
+                            .anyMatch(product -> product.getProductId().equals(productId)));
+                    // Verify the size of the cart products
+                    assertEquals(cart1.getProducts().size() + 1, cartResponse.getProducts().size());
+                });
+    }
+
+    @Test
+    public void testMoveProductFromWishListToCart_NonExistentProduct_ReturnsNotFound() {
+        // Given
+        String cartId = cart1.getCartId();
+        String productId = NON_EXISTING_PRODUCT_ID;
+
+        // When
+        webTestClient.put()
+                .uri("/api/v1/carts/{cartId}/wishlist/{productId}/toCart", cartId, productId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                // Then
+                .expectStatus().isNotFound()
+                .expectBody(CartResponseModel.class)  // Expect the error response model
+                .consumeWith(response -> {
+                    CartResponseModel errorResponse = response.getResponseBody();
+                    assertNotNull(errorResponse);  // Ensure the response is not null
+                });
+    }
 
 
+    @Test
+    public void testMoveProductFromWishListToCart_NonExistentCart_ReturnsNotFound() {
+        // Given
+        String cartId = NON_EXISTING_CART_ID;
+        String productId = wishListProduct1.getProductId();
+
+        // When
+        webTestClient.put()
+                .uri("/api/v1/carts/{cartId}/wishlist/{productId}/toCart", cartId, productId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                // Then
+                .expectStatus().isNotFound()
+                .expectBody(String.class)
+                .consumeWith(response -> {
+                    String errorMessage = response.getResponseBody();
+                    assertNotNull(errorMessage);
+                });
+    }
+
+    @Test
+    public void testMoveProductFromWishListToCart_withInvalidCartId_thenReturnsUnprocessableEntity() {
+        // Given
+        String cartId = "invalidCartId";
+        String productId = wishListProduct1.getProductId();
+
+        // When
+        webTestClient.put()
+                .uri("/api/v1/carts/{cartId}/wishlist/{productId}/toCart", cartId, productId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                // Then
+                .expectStatus().isEqualTo(422)
+                .expectBody(String.class)
+                .consumeWith(response -> {
+                    String errorMessage = response.getResponseBody();
+                    assertNotNull(errorMessage);
+                });
+    }
+
+    @Test
+    public void testMoveProductFromWishListToCart_withInvalidProductId_thenReturnsUnprocessableEntity(){
+        // Given
+        String cartId = cart1.getCartId();
+        String productId = "invalidProductId";
+
+        // When
+        webTestClient.put()
+                .uri("/api/v1/carts/{cartId}/wishlist/{productId}/toCart", cartId, productId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                // Then
+                .expectStatus().isEqualTo(422)
+                .expectBody(String.class)
+                .consumeWith(response -> {
+                    String errorMessage = response.getResponseBody();
+                    assertNotNull(errorMessage);
+                });
+    }
+    @Test
+    public void testMoveProductFromCartToWishList_ValidProduct_MovesProduct() {
+        // Given
+        String cartId = cart1.getCartId();
+        String productId = product1.getProductId();
+
+        // When
+        webTestClient.put()
+                .uri("/api/v1/carts/{cartId}/wishlist/{productId}/toWishList", cartId, productId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                // Then
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(CartResponseModel.class)
+                .consumeWith(response -> {
+                    CartResponseModel cartResponse = response.getResponseBody();
+                    assertNotNull(cartResponse);
+                    // Verify the product has been added to the wishlist
+                    assertTrue(cartResponse.getWishListProducts().stream()
+                            .anyMatch(product -> product.getProductId().equals(productId)));
+                    // Verify the product is no longer in the cart
+                    assertFalse(cartResponse.getProducts().stream()
+                            .anyMatch(product -> product.getProductId().equals(productId)));
+                    // Verify the size of the wishlist products
+                    assertEquals(cart1.getWishListProducts().size() + 1, cartResponse.getWishListProducts().size());
+                });
+    }
+
+    @Test
+    public void testMoveProductFromCartToWishList_NonExistentProduct_ReturnsNotFound() {
+        // Given
+        String cartId = cart1.getCartId();
+        String productId = NON_EXISTING_PRODUCT_ID;
+
+        // When
+        webTestClient.put()
+                .uri("/api/v1/carts/{cartId}/wishlist/{productId}/toWishList", cartId, productId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                // Then
+                .expectStatus().isNotFound()
+                .expectBody(CartResponseModel.class)  // Expect the error response model
+                .consumeWith(response -> {
+                    CartResponseModel errorResponse = response.getResponseBody();
+                    assertNotNull(errorResponse);  // Ensure the response is not null
+                });
+    }
+
+    @Test
+    public void testMoveProductFromCartToWishList_NonExistentCart_ReturnsNotFound() {
+        // Given
+        String cartId = NON_EXISTING_CART_ID;
+        String productId = product1.getProductId();
+
+        // When
+        webTestClient.put()
+                .uri("/api/v1/carts/{cartId}/wishlist/{productId}/toWishList", cartId, productId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                // Then
+                .expectStatus().isNotFound()
+                .expectBody(String.class)
+                .consumeWith(response -> {
+                    String errorMessage = response.getResponseBody();
+                    assertNotNull(errorMessage);
+                });
+    }
+
+    @Test
+    public void testMoveProductFromCartToWishList_withInvalidCartId_thenReturnsUnprocessableEntity() {
+        // Given
+        String cartId = "invalidCartId";
+        String productId = product1.getProductId();
+
+        // When
+        webTestClient.put()
+                .uri("/api/v1/carts/{cartId}/wishlist/{productId}/toWishList", cartId, productId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                // Then
+                .expectStatus().isEqualTo(422)
+                .expectBody(String.class)
+                .consumeWith(response -> {
+                    String errorMessage = response.getResponseBody();
+                    assertNotNull(errorMessage);
+                });
+    }
+
+    @Test
+    public void testMoveProductFromCartToWishList_withInvalidProductId_thenReturnsUnprocessableEntity() {
+        // Given
+        String cartId = cart1.getCartId();
+        String productId = "invalidProductId";
+
+        // When
+        webTestClient.put()
+                .uri("/api/v1/carts/{cartId}/wishlist/{productId}/toWishList", cartId, productId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                // Then
+                .expectStatus().isEqualTo(422)
+                .expectBody(String.class)
+                .consumeWith(response -> {
+                    String errorMessage = response.getResponseBody();
+                    assertNotNull(errorMessage);
+                });
+    }
 }

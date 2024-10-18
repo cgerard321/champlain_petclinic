@@ -651,6 +651,24 @@ public class VetsServiceClient {
                 )
                 .bodyToMono(Void.class);
     }
+    public Mono<Void> deleteAlbumPhotoById(String vetId, Integer Id) {
+        return webClientBuilder
+                .build()
+                .delete()
+                .uri(vetsServiceUrl + "/" + vetId + "/albums/" + Id)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, error -> {
+                    HttpStatusCode statusCode = error.statusCode();
+                    if (statusCode.equals(HttpStatus.NOT_FOUND)) {
+                        return Mono.error(new NotFoundException("Album photo not found: " + Id));
+                    }
+                    return Mono.error(new IllegalArgumentException("Client error occurred while deleting album photo with ID: " + Id));
+                })
+                .onStatus(HttpStatusCode::is5xxServerError, error ->
+                        Mono.error(new IllegalArgumentException("Server error occurred while deleting album photo with ID: " + Id))
+                )
+                .bodyToMono(Void.class);
+    }
 
 
 }

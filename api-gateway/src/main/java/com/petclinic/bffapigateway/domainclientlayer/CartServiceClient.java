@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.webjars.NotFoundException;
@@ -242,40 +243,24 @@ public Mono<CartResponseDTO> deleteCartByCartId(String CardId) {
 
     public Mono<CartResponseDTO> moveProductFromCartToWishlist(String cartId, String productId) {
         return webClientBuilder.build()
-                .post()
-                .uri(CartServiceUrl + "/" + cartId + "/products/" + productId + "/toWishList")
+                .put()
+                .uri(CartServiceUrl + "/" + cartId + "/wishlist/" + productId + "/toWishList")
                 .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError, error -> {
-                    HttpStatusCode statusCode = error.statusCode();
-                    if (statusCode.equals(HttpStatus.UNPROCESSABLE_ENTITY)) {
-                        return Mono.error(new InvalidInputException("Invalid input for cartId: " + cartId + " or productId: " + productId));
-                    }
-                    else if (statusCode.equals(HttpStatus.NOT_FOUND)) {
-                        return Mono.error(new NotFoundException("Cart or product not found for cartId: " + cartId + " and productId: " + productId));
-                    }
-                    return Mono.error(new IllegalArgumentException("Client error"));
-                })
-                .onStatus(HttpStatusCode::is5xxServerError, error -> Mono.error(new IllegalArgumentException("Server error")))
-                .bodyToMono(CartResponseDTO.class);
+                .bodyToMono(CartResponseDTO.class)  // Use bodyToMono to return CartResponseDTO directly
+                .doOnSuccess(cartResponseDTO -> log.info("Moved product {} to wishlist from cart {}", productId, cartId))
+                .doOnError(e -> log.error("CartServiceClient Error moving product {} to wishlist from cart {}: {}", productId, cartId, e.getMessage()));
     }
+
 
     public Mono<CartResponseDTO> moveProductFromWishListToCart(String cartId, String productId) {
         return webClientBuilder.build()
-                .post()
-                .uri(CartServiceUrl + "/" + cartId + "/products/" + productId + "/toCart")
+                .put()
+                .uri(CartServiceUrl + "/" + cartId + "/wishlist/" + productId + "/toCart")
                 .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError, error -> {
-                    HttpStatusCode statusCode = error.statusCode();
-                    if (statusCode.equals(HttpStatus.UNPROCESSABLE_ENTITY)) {
-                        return Mono.error(new InvalidInputException("Invalid input for cartId: " + cartId + " or productId: " + productId));
-                    }
-                    else if (statusCode.equals(HttpStatus.NOT_FOUND)) {
-                        return Mono.error(new NotFoundException("Cart or product not found for cartId: " + cartId + " and productId: " + productId));
-                    }
-                    return Mono.error(new IllegalArgumentException("Client error"));
-                })
-                .onStatus(HttpStatusCode::is5xxServerError, error -> Mono.error(new IllegalArgumentException("Server error")))
-                .bodyToMono(CartResponseDTO.class);
+                .bodyToMono(CartResponseDTO.class) // Use bodyToMono to return CartResponseDTO directly
+                .doOnSuccess(cartResponseDTO -> log.info("Moved product {} from wishlist to cart {}", productId, cartId))
+                .doOnError(e -> log.error("Error moving product {} from wishlist to cart {}: {}", productId, cartId, e.getMessage()));
     }
+
 
 }

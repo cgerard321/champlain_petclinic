@@ -54,6 +54,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @WebFluxTest(controllers=VetController.class)
 @ContextConfiguration(classes = {VetController.class})
@@ -109,7 +110,7 @@ class VetControllerUnitTest {
     ClassPathResource cpr=new ClassPathResource("images/full_food_bowl.png");
     ClassPathResource cpr2=new ClassPathResource("images/vet_default.jpg");
 
-
+    Integer ALBUM_ID = 1;
 
     private static final String PHOTO_NAME = "test.jpg";
 
@@ -121,10 +122,10 @@ class VetControllerUnitTest {
         client
                 .get()
                 .uri("/vets/" + VET_ID + "/ratings")
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentType(APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$[0].ratingId").isEqualTo(ratingDTO.getRatingId())
                 .jsonPath("$[0].vetId").isEqualTo(ratingDTO.getVetId())
@@ -144,7 +145,7 @@ class VetControllerUnitTest {
         client
                 .delete()
                 .uri("/vets/" + vetId + "/ratings/{ratingId}", ratingId)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNoContent();
 
@@ -168,10 +169,10 @@ class VetControllerUnitTest {
         client.post()
                 .uri("/vets/{vetId}/ratings", VET_ID)
                 .bodyValue(ratingRequestDTO)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isCreated()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentType(APPLICATION_JSON)
                 .expectBody();
 
         Mockito.verify(ratingService, times(1))
@@ -200,12 +201,12 @@ class VetControllerUnitTest {
 
         client.put()
                 .uri("/vets/"+VET_ID+"/ratings/"+ratingResponse.getRatingId())
-                .accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON)
+                .accept(APPLICATION_JSON)
+                .contentType(APPLICATION_JSON)
                 .bodyValue(updatedRating)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentType(APPLICATION_JSON)
                 .expectBody(RatingResponseDTO.class)
                 .value(ratingResponseDTO -> {
                     assertNotNull(ratingResponseDTO);
@@ -229,7 +230,7 @@ class VetControllerUnitTest {
         client
                 .get()
                 .uri("/vets/" + VET_ID + "/ratings/count")
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -254,10 +255,10 @@ class VetControllerUnitTest {
 
         client.get()
                 .uri("/vets/" + vetId + "/ratings" + "/average")
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentType(APPLICATION_JSON)
                 .expectBody(Double.class)
                 .value(d ->{
                     assertEquals(d,averageRating);
@@ -275,10 +276,10 @@ class VetControllerUnitTest {
 
         client.get()
                 .uri("/vets/topVets")
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentType(APPLICATION_JSON)
                 .expectBodyList(VetAverageRatingDTO.class)
                 .value(vetDTOs -> {
                     assertEquals(3, vetDTOs.size());
@@ -304,10 +305,10 @@ class VetControllerUnitTest {
                 .thenReturn(Flux.just(ratingDateResponseDTO,ratingDateResponseDTO2));
         client.get()
                 .uri("/vets/"+VET_ID+"/ratings/date?year={year}",exisingYearDate)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentType(APPLICATION_JSON)
                 .expectBodyList(RatingResponseDTO.class)
                 .value(ratingDTOs ->{
                             assertEquals(2, ratingDTOs.size());
@@ -327,7 +328,7 @@ class VetControllerUnitTest {
         client
                 .get()
                 .uri("/vets/" + VET_ID + "/ratings/percentages")
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(String.class)
@@ -346,10 +347,10 @@ class VetControllerUnitTest {
         client
                 .get()
                 .uri("/vets")
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentType(APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$[0].vetId").isEqualTo(vetResponseDTO.getVetId())
                 .jsonPath("$[0].resume").isEqualTo(vetResponseDTO.getResume())
@@ -371,10 +372,10 @@ class VetControllerUnitTest {
         client
                 .get()
                 .uri("/vets/" + VET_ID)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentType(APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$.vetId").isEqualTo(vet.getVetId())
                 .jsonPath("$.vetBillId").isEqualTo(vet.getVetBillId())
@@ -398,10 +399,10 @@ class VetControllerUnitTest {
         client
                 .get()
                 .uri("/vets/vetBillId/" + VET_BILL_ID)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentType(APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$.vetId").isEqualTo(vet.getVetId())
                 .jsonPath("$.vetBillId").isEqualTo(vet.getVetBillId())
@@ -423,10 +424,10 @@ class VetControllerUnitTest {
         client
                 .get()
                 .uri("/vets/active")
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentType(APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$[0].vetId").isEqualTo(vetResponseDTO2.getVetId())
                 .jsonPath("$[0].resume").isEqualTo(vetResponseDTO2.getResume())
@@ -449,10 +450,10 @@ class VetControllerUnitTest {
                 .post()
                 .uri("/vets")
                 .body(Mono.just(vetRequestDTO), VetRequestDTO.class)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isCreated()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentType(APPLICATION_JSON)
                 .expectBody(VetResponseDTO.class)
                 .value((dto) -> {
                     assertThat(dto.getFirstName()).isEqualTo(vetResponseDTO.getFirstName());
@@ -478,10 +479,10 @@ class VetControllerUnitTest {
                 .put()
                 .uri("/vets/" + VET_ID)
                 .body(Mono.just(vetRequestDTO), VetRequestDTO.class)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentType(APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$.vetId").isEqualTo(vetResponseDTO.getVetId())
                 .jsonPath("$.resume").isEqualTo(vetResponseDTO.getResume())
@@ -502,10 +503,10 @@ class VetControllerUnitTest {
         client
                 .get()
                 .uri("/vets/inactive")
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentType(APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$[0].vetId").isEqualTo(vetResponseDTO.getVetId())
                 .jsonPath("$[0].resume").isEqualTo(vetResponseDTO.getResume())
@@ -527,7 +528,7 @@ class VetControllerUnitTest {
         client
                 .delete()
                 .uri("/vets/" + VET_ID)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNoContent();
 
@@ -543,10 +544,10 @@ class VetControllerUnitTest {
         client
                 .get()
                 .uri("/vets/" + INVALID_VET_ID)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentType(APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$").isNotEmpty();
     }
@@ -560,10 +561,10 @@ class VetControllerUnitTest {
                 .put()
                 .uri("/vets/" + INVALID_VET_ID)
                 .body(Mono.just(vetRequestDTO), VetRequestDTO.class)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentType(APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$").isNotEmpty();
 
@@ -577,10 +578,10 @@ class VetControllerUnitTest {
         client
                 .delete()
                 .uri("/vets/" + INVALID_VET_ID)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentType(APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$").isNotEmpty();
 
@@ -594,10 +595,10 @@ class VetControllerUnitTest {
         client
                 .get()
                 .uri("/vets/" + VET_ID + "/educations")
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentType(APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$[0].educationId").isEqualTo(educationResponseDTO1.getEducationId())
                 .jsonPath("$[0].vetId").isEqualTo(educationResponseDTO1.getVetId())
@@ -621,7 +622,7 @@ class VetControllerUnitTest {
         client
                 .delete()
                 .uri("/vets/" + vetId + "/educations/{educationId}", educationId)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk();
 
@@ -654,12 +655,12 @@ class VetControllerUnitTest {
 
         client.put()
                 .uri("/vets/"+VET_ID+"/educations/"+educationResponse.getEducationId())
-                .accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON)
+                .accept(APPLICATION_JSON)
+                .contentType(APPLICATION_JSON)
                 .bodyValue(updatedEducation)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentType(APPLICATION_JSON)
                 .expectBody(EducationResponseDTO.class)
                 .value(educationResponseDTO -> {
                     assertNotNull(educationResponseDTO);
@@ -704,10 +705,10 @@ class VetControllerUnitTest {
         client.post()
                 .uri("/vets/{vetId}/educations", VET_ID)
                 .bodyValue(educationRequestDTO)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentType(APPLICATION_JSON)
                 .expectBody();
 
         Mockito.verify(educationService, times(1)).addEducationToVet(anyString(), any(Mono.class));
@@ -765,7 +766,7 @@ class VetControllerUnitTest {
         client.put()
                 .uri("/vets/{vetId}/photos/{photoName}", VET_ID, photo.getFilename())
                 .bodyValue(photoResource)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.IMAGE_JPEG_VALUE)
@@ -789,7 +790,7 @@ class VetControllerUnitTest {
                 .uri("/vets/{vetId}/badge", VET_ID)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentType(APPLICATION_JSON)
                 .expectBody(BadgeResponseDTO.class)
                 .value(responseDTO -> {
                     assertEquals(badgeResponseDTO.getBadgeTitle(), responseDTO.getBadgeTitle());
@@ -809,7 +810,7 @@ class VetControllerUnitTest {
                 .uri("/vets/{vetId}/default-photo", VET_ID)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentType(APPLICATION_JSON)
                 .expectBody(PhotoResponseDTO.class)
                 .value(responseDTO -> {
                     assertEquals(photoResponseDTO.getFilename(), responseDTO.getFilename());
@@ -1088,10 +1089,10 @@ class VetControllerUnitTest {
 
         client.get()
                 .uri("/vets/" + vetId + "/albums")
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentType(APPLICATION_JSON)
                 .expectBodyList(Album.class)
                 .hasSize(2)
                 .contains(album1, album2);
@@ -1107,10 +1108,45 @@ class VetControllerUnitTest {
 
         client.get()
                 .uri("/vets/" + vetId + "/albums")
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(APPLICATION_JSON)
                 .exchange()
                 .expectStatus().is5xxServerError();
 
+    }
+    @Test
+    void whenDeleteAlbumPhotoById_thenReturnNoContent() {
+        when(albumService.deleteAlbumPhotoById(VET_ID, ALBUM_ID))
+                .thenReturn(Mono.empty());
+
+        client.delete()
+                .uri("/vets/" + VET_ID + "/albums/" + ALBUM_ID)
+                .accept(APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNoContent(); // Expecting 204 No Content
+    }
+
+    @Test
+    void whenDeleteAlbumPhotoById_withNonExistentId_thenReturnNotFound() {
+        when(albumService.deleteAlbumPhotoById(VET_ID, ALBUM_ID))
+                .thenReturn(Mono.error(new NotFoundException("Album photo not found: " + ALBUM_ID)));
+
+        client.delete()
+                .uri("/vets/" + VET_ID + "/albums/" + ALBUM_ID)
+                .accept(APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound(); // Expecting 404 Not Found
+    }
+
+    @Test
+    void whenDeleteAlbumPhotoById_withError_thenReturnServerError() {
+        when(albumService.deleteAlbumPhotoById(VET_ID, ALBUM_ID))
+                .thenReturn(Mono.error(new RuntimeException("Test error")));
+
+        client.delete()
+                .uri("/vets/" + VET_ID + "/albums/" + ALBUM_ID)
+                .accept(APPLICATION_JSON)
+                .exchange()
+                .expectStatus().is5xxServerError(); // Expecting 500 Internal Server Error
     }
 
 

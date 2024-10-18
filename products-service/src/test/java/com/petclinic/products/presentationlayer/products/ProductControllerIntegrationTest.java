@@ -58,7 +58,6 @@ class ProductControllerIntegrationTest {
             .productName("Product 3")
             .productDescription("Product 3 Description")
             .productSalePrice(25.00)
-            .averageRating(4.5)
             .productQuantity(2)
             .build();
 
@@ -66,7 +65,6 @@ class ProductControllerIntegrationTest {
             .productName("Product 3")
             .productDescription("Product 3 Description")
             .productSalePrice(0.00)
-            .averageRating(0.0)
             .productQuantity(2)
 
             .build();
@@ -75,7 +73,6 @@ class ProductControllerIntegrationTest {
             .productName("Product 4")
             .productDescription("Product 4 Description")
             .productSalePrice(25.00)
-            .averageRating(0.0)
             .productQuantity(2)
             .build();
 
@@ -217,7 +214,6 @@ class ProductControllerIntegrationTest {
                     assertEquals(productRequestModel.getProductName(), productResponseModel.getProductName());
                     assertEquals(productRequestModel.getProductDescription(), productResponseModel.getProductDescription());
                     assertEquals(productRequestModel.getProductSalePrice(), productResponseModel.getProductSalePrice());
-                    assertEquals(productRequestModel.getAverageRating(), productResponseModel.getAverageRating());
                 });
 
         StepVerifier
@@ -263,7 +259,6 @@ class ProductControllerIntegrationTest {
                     assertEquals(productRequestModel.getProductName(), productResponseModel.getProductName());
                     assertEquals(productRequestModel.getProductDescription(), productResponseModel.getProductDescription());
                     assertEquals(productRequestModel.getProductSalePrice(), productResponseModel.getProductSalePrice());
-                    assertEquals(productRequestModel.getAverageRating(), productResponseModel.getAverageRating());
                 });
 
         StepVerifier

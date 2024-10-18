@@ -10,3 +10,16 @@ export interface ProductModel {
   requestCount: number;
   productType: string;
 }
+
+export const emptyProductModel: ProductModel = {
+  productId: '',
+  imageId: '',
+  productName: '',
+  productDescription: '',
+  productSalePrice: 0,
+  averageRating: 0,
+  productQuantity: 0,
+  status: 'OUT_OF_STOCK',
+  requestCount: 0,
+  productType: '',
+};

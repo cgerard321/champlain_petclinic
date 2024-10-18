@@ -570,7 +570,7 @@ class CartControllerUnitTest {
         verify(cartService, times(0)).removeProductFromCart(anyString(), anyString()); // cartService should not be called
     }
 
-
+    @Test
     void whenMoveProductFromCartToWishlist_thenSuccess() {
         // Arrange
         String cartId = VALID_CART_ID; // Use a valid cart ID
@@ -647,7 +647,7 @@ class CartControllerUnitTest {
         webTestClient.put()
                 .uri("/api/v1/carts/" + cartId + "/wishlist/" + productId + "/toCart")
                 .exchange()
-                .expectStatus().isEqualTo(422) // Expect 422 for invalid input
+                .expectStatus().isNotFound()
                 .expectBody(CartResponseModel.class)
                 .consumeWith(response -> {
                     CartResponseModel body = response.getResponseBody();
@@ -658,6 +658,5 @@ class CartControllerUnitTest {
         // Assert
         verify(cartService, times(1)).moveProductFromWishListToCart(cartId, productId);
     }
-
 
 }

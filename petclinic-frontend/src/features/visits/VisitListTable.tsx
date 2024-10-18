@@ -306,9 +306,14 @@ export default function VisitListTable(): JSX.Element {
             <th>Visit Emergency Id</th>
             <th>Visit Date</th>
             <th>Description</th>
+            <th> PetId</th>
+            <th>Pet Birthdate </th>
             <th>Pet Name</th>
-            <th>Urgency Level</th>
-            <th>Emergency Type</th>
+            <th> PractitionnerId</th>
+            <th>vetFirstName</th>
+            <th>vetLastName</th>
+            <th>Email</th>
+            <th>Phone Number</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -318,9 +323,14 @@ export default function VisitListTable(): JSX.Element {
               <td>{emergency.visitEmergencyId}</td>
               <td>{new Date(emergency.visitDate).toLocaleString()}</td>
               <td>{emergency.description}</td>
+              <td> {emergency.petId}</td>
+              <td> {new Date(emergency.vetBirthDate).toLocaleString()}</td>
               <td>{emergency.petName}</td>
-              <td>{emergency.urgencyLevel}</td>
-              <td>{emergency.emergencyType}</td>
+              <td>{emergency.practitionerId}</td>
+              <td>{emergency.vetFirstName}</td>
+              <td>{emergency.vetLastName}</td>
+              <td>{emergency.vetEmail}</td>
+              <td>{emergency.vetPhoneNumber}</td>
               <td>
                 <button
                   className="btn btn-warning"
@@ -339,6 +349,15 @@ export default function VisitListTable(): JSX.Element {
                   title="Delete"
                 >
                   Delete
+                </button>
+                <button
+                  className="btn btn-dark"
+                  onClick={() =>
+                    navigate(`/visits/emergency/${emergency.visitEmergencyId}`)
+                  }
+                  title="View"
+                >
+                  View
                 </button>
               </td>
             </tr>

@@ -148,6 +148,13 @@ export function NavBar(): JSX.Element {
                     )}
                   </NavDropdown>
                 )}
+                {IsAdmin() && (
+                  <NavDropdown title="Users" id="users-dropdown">
+                    <NavDropdown.Item as={Link} to={AppRoutePaths.AllUsers}>
+                      Users List
+                    </NavDropdown.Item>
+                  </NavDropdown>
+                )}
                 {!IsAdmin() && (
                   <Nav.Link as={Link} to={AppRoutePaths.CustomerBills}>
                     Bills
@@ -156,6 +163,11 @@ export function NavBar(): JSX.Element {
                 {!IsAdmin() && (
                   <Nav.Link as={Link} to={AppRoutePaths.CustomerVisits}>
                     Visits
+                  </Nav.Link>
+                )}
+                {!IsAdmin() && (
+                  <Nav.Link as={Link} to={AppRoutePaths.CustomerEmergency}>
+                    Emergency
                   </Nav.Link>
                 )}
                 {IsAdmin() && (
@@ -186,12 +198,6 @@ export function NavBar(): JSX.Element {
                     Promos
                   </Nav.Link>
                 )}
-                {
-                  <Nav.Link as={Link} to={AppRoutePaths.Products}>
-                    Shop
-                  </Nav.Link>
-                }
-
                 {IsAdmin() && (
                   <Nav.Link as={Link} to={AppRoutePaths.Carts}>
                     Carts

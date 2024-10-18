@@ -211,11 +211,33 @@ public class VisitController {
 
     //Emergency
 
+    @GetMapping(value = "/emergency/pets/{petId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<EmergencyResponseDTO> getEmergencyVisitsForPet(@PathVariable String petId) {
+        return emergencyService.getEmergencyVisitsForPet(petId);
+    }
     @GetMapping(value = "/emergency")
     public Flux<EmergencyResponseDTO> getAllEmergency() {
         return emergencyService.GetAllEmergencies();
     }
 
+    @PostMapping(value = "/emergency")
+    public Mono<ResponseEntity<EmergencyResponseDTO>> PostEmergency(@RequestBody Mono<EmergencyRequestDTO> emergencyRequestDTOMono) {
+        return emergencyService.AddEmergency(emergencyRequestDTOMono)
+                .map(c -> ResponseEntity.status(HttpStatus.CREATED).body(c))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
+    @GetMapping(value = "/emergency/{emergencyId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<EmergencyResponseDTO>> getEmergencyByEmergencyId(@PathVariable String emergencyId) {
+        return Mono.just(emergencyId)
+                //.filter(id -> id.length() == 36)
+                //.switchIfEmpty(Mono.error(new InvalidInputException("the provided emergency id is invalid: " + emergencyId)))
+                .flatMap(emergencyService::GetEmergencyByEmergencyId)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
+/*
     @GetMapping(value = "/emergency/{emergencyId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<EmergencyResponseDTO>> getEmergencyByEmergencyId(@PathVariable String emergencyId) {
         return Mono.just(emergencyId)
@@ -252,7 +274,7 @@ public class VisitController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
-
+*/
 
     @PutMapping(value = "/completed/{visitId}/archive", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<VisitResponseDTO>> archiveCompletedVisit(@PathVariable String visitId, @RequestBody Mono<VisitRequestDTO> visitRequestDTO) {
@@ -286,6 +308,24 @@ public class VisitController {
         return visitService.patchVisitStatusInVisit(visitId, status)
                 .map(visitResponseDTO -> new ResponseEntity<>(visitResponseDTO, HttpStatus.OK))
                 .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
+    @PostMapping(value = "/owners/{ownerId}/reviews", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<ReviewResponseDTO>> addReviewCustomer(@PathVariable String ownerId, @RequestBody Mono<ReviewRequestDTO> reviewRequestDTOMono) {
+        return reviewService.addReview(ownerId, reviewRequestDTOMono)
+                .map(c -> ResponseEntity.status(HttpStatus.CREATED).body(c))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
+    @GetMapping(value = "/owners/{ownerId}/reviews", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Flux<ReviewResponseDTO> getReviewsByOwnerId(@PathVariable String ownerId) {
+        return reviewService.GetAllReviewsByOwnerId(ownerId);
+    }
+
+    @DeleteMapping(value = "/owners/{ownerId}/reviews/{reviewId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<Void>> deleteReviewCustomer(@PathVariable String ownerId, @PathVariable String reviewId) {
+        return reviewService.deleteReview(ownerId, reviewId)
+                .then(Mono.just(ResponseEntity.noContent().build()));
     }
 
 }

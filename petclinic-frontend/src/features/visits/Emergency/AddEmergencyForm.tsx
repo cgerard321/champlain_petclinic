@@ -8,13 +8,15 @@ import './AddEmergencyForm.css';
 
 // Define an interface for the error if known
 interface ApiError {
-  message: string;
+  message?: string;
 }
 
 const AddEmergencyForm: React.FC = (): JSX.Element => {
   const [emergency, setEmergency] = useState<EmergencyRequestDTO>({
     visitDate: new Date(),
     description: '',
+    petId: '', // Added petId
+    practitionerId: '', // Added practitionerId
     petName: '',
     urgencyLevel: UrgencyLevel.LOW, // Default urgency level
     emergencyType: '',
@@ -43,7 +45,7 @@ const AddEmergencyForm: React.FC = (): JSX.Element => {
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     setEmergency(prevEmergency => ({
       ...prevEmergency,
-      visitDate: new Date(e.target.value),
+      visitDate: new Date(e.target.value), // Ensure the correct date is passed
     }));
   };
 
@@ -54,6 +56,9 @@ const AddEmergencyForm: React.FC = (): JSX.Element => {
     if (!emergency.petName) newErrors.petName = 'Pet name is required';
     if (!emergency.emergencyType)
       newErrors.emergencyType = 'Emergency type is required';
+    if (!emergency.petId) newErrors.petId = 'Pet ID is required'; // Validation for petId
+    if (!emergency.practitionerId)
+      newErrors.practitionerId = 'Practitioner ID is required'; // Validation for practitionerId
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -73,17 +78,21 @@ const AddEmergencyForm: React.FC = (): JSX.Element => {
       setSuccessMessage('Emergency added successfully!');
       setShowNotification(true);
       setTimeout(() => setShowNotification(false), 3000); // Hide notification after 3 seconds
-      navigate('/visits'); // Navigate to a different page or clear form
+      navigate('/customer/emergency'); // Navigate to a different page or clear form
       setEmergency({
         visitDate: new Date(),
         description: '',
+        petId: '', // Reset petId
+        practitionerId: '', // Reset practitionerId
         petName: '',
         urgencyLevel: UrgencyLevel.LOW,
         emergencyType: '',
       });
     } catch (error) {
       const apiError = error as ApiError;
-      setErrorMessage(`Error adding emergency: ${apiError.message}`);
+      setErrorMessage(
+        `Error adding emergency: ${apiError.message || 'An unknown error occurred'}`
+      );
     } finally {
       setIsLoading(false);
     }
@@ -143,11 +152,35 @@ const AddEmergencyForm: React.FC = (): JSX.Element => {
           </select>
         </div>
         <div>
+          <label>Pet ID:</label>
+          <input
+            type="text"
+            name="petId"
+            value={emergency.petId}
+            onChange={handleInputChange}
+            required
+          />
+          {errors.petId && <span className="error">{errors.petId}</span>}
+        </div>
+        <div>
+          <label>Practitioner ID:</label>
+          <input
+            type="text"
+            name="practitionerId"
+            value={emergency.practitionerId}
+            onChange={handleInputChange}
+            required
+          />
+          {errors.practitionerId && (
+            <span className="error">{errors.practitionerId}</span>
+          )}
+        </div>
+        <div>
           <label>Date:</label>
           <input
             type="date"
             name="visitDate"
-            value={emergency.visitDate.toISOString().split('T')[0]}
+            value={emergency.visitDate.toISOString().split('T')[0]} // Format the date correctly
             onChange={handleDateChange}
             required
           />

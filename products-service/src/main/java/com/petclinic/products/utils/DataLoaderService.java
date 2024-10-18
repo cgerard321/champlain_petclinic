@@ -4,6 +4,8 @@ import com.petclinic.products.datalayer.images.Image;
 import com.petclinic.products.datalayer.images.ImageRepository;
 import com.petclinic.products.datalayer.products.Product;
 import com.petclinic.products.datalayer.products.ProductRepository;
+import com.petclinic.products.datalayer.ratings.Rating;
+import com.petclinic.products.datalayer.ratings.RatingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
@@ -26,6 +28,9 @@ public class DataLoaderService implements CommandLineRunner {
     @Autowired
     ImageRepository imageRepository;
 
+    @Autowired
+    RatingRepository ratingRepository;
+
     @Override
     public void run(String... args) throws Exception {
         Product product1 = Product.builder()
@@ -35,7 +40,6 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Premium dry food for adult dogs")
                 .productSalePrice(45.99)
                 .requestCount(0)
-                .averageRating(1.3)
                 .productType("Food")
                 .productQuantity(44)
                 .build();
@@ -47,7 +51,6 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Clumping cat litter with odor control")
                 .productSalePrice(12.99)
                 .requestCount(0)
-                .averageRating(4.8)
                 .productType("Accessory")
                 .productQuantity(3)
                 .build();
@@ -59,7 +62,6 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Flea and tick prevention for small dogs")
                 .productSalePrice(9.99)
                 .requestCount(0)
-                .averageRating(2.8)
                 .productType("Medication")
                 .productQuantity(53)
                 .build();
@@ -71,7 +73,6 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Spacious cage for small birds like parakeets")
                 .productSalePrice(29.99)
                 .requestCount(0)
-                .averageRating(1.3)
                 .productType("Accessory")
                 .productQuantity(8)
                 .build();
@@ -83,7 +84,6 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Filter system for small to medium-sized aquariums")
                 .productSalePrice(19.99)
                 .requestCount(0)
-                .averageRating(4.9)
                 .productType("Accessory")
                 .productQuantity(14)
                 .build();
@@ -95,7 +95,6 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Lightweight saddle for riding horses")
                 .productSalePrice(199.99)
                 .requestCount(0)
-                .averageRating(4.7)
                 .productType("Equipment")
                 .productQuantity(58)
                 .build();
@@ -107,7 +106,6 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Outdoor wooden hutch for rabbits")
                 .productSalePrice(79.99)
                 .requestCount(0)
-                .averageRating(3.4)
                 .productType("Accessory")
                 .productQuantity(66)
                 .build();
@@ -119,9 +117,120 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Submersible heater for tropical fish tanks")
                 .productSalePrice(14.99)
                 .requestCount(0)
-                .averageRating(1.2)
                 .productType("Accessory")
                 .productQuantity(0)
+                .build();
+
+        Rating rating1prod1 = Rating.builder()
+                .productId(product1.getProductId())
+                .customerId("810440e8-cae0-48f7-aa4f-830239b82b78")
+                .rating((byte) 5)
+                .review("My dog loves this food!")
+                .build();
+
+        Rating rating2prod1 = Rating.builder()
+                .productId(product1.getProductId())
+                .customerId("584c5329-2b9a-43d4-ad2b-debaa92d6c02")
+                .rating((byte) 1)
+                .review("My dog died because of it, horrible!")
+                .build();
+
+        Rating rating1prod2 = Rating.builder()
+                .productId(product2.getProductId())
+                .customerId("810440e8-cae0-48f7-aa4f-830239b82b78")
+                .rating((byte) 4)
+                .review("Great litter, clumps well")
+                .build();
+
+        Rating rating2prod2 = Rating.builder()
+                .productId(product2.getProductId())
+                .customerId("584c5329-2b9a-43d4-ad2b-debaa92d6c02")
+                .rating((byte) 2)
+                .review("Doesn't control odor well")
+                .build();
+
+        Rating rating1prod3 = Rating.builder()
+                .productId(product3.getProductId())
+                .customerId("810440e8-cae0-48f7-aa4f-830239b82b78")
+                .rating((byte) 3)
+                .review("Works well, but doesn't last long")
+                .build();
+
+        Rating rating2prod3 = Rating.builder()
+                .productId(product3.getProductId())
+                .customerId("584c5329-2b9a-43d4-ad2b-debaa92d6c02")
+                .rating((byte) 5)
+                .review("Keeps fleas away for months!")
+                .build();
+
+        Rating rating1prod4 = Rating.builder()
+                .productId(product4.getProductId())
+                .customerId("810440e8-cae0-48f7-aa4f-830239b82b78")
+                .rating((byte) 5)
+                .review("Great cage, easy to clean")
+                .build();
+
+        Rating rating2prod4 = Rating.builder()
+                .productId(product4.getProductId())
+                .customerId("584c5329-2b9a-43d4-ad2b-debaa92d6c02")
+                .rating((byte) 4)
+                .review("Good for small birds")
+                .build();
+
+        Rating rating1prod5 = Rating.builder()
+                .productId(product5.getProductId())
+                .customerId("810440e8-cae0-48f7-aa4f-830239b82b78")
+                .rating((byte) 4)
+                .review("Works well, but a bit noisy")
+                .build();
+
+        Rating rating2prod5 = Rating.builder()
+                .productId(product5.getProductId())
+                .customerId("584c5329-2b9a-43d4-ad2b-debaa92d6c02")
+                .rating((byte) 3)
+                .review("Not enough power for my tank")
+                .build();
+
+        Rating rating1prod6 = Rating.builder()
+                .productId(product6.getProductId())
+                .customerId("810440e8-cae0-48f7-aa4f-830239b82b78")
+                .rating((byte) 5)
+                .review("Great saddle, very comfortable")
+                .build();
+
+        Rating rating2prod6 = Rating.builder()
+                .productId(product6.getProductId())
+                .customerId("584c5329-2b9a-43d4-ad2b-debaa92d6c02")
+                .rating((byte) 4)
+                .review("Good for beginners")
+                .build();
+
+        Rating rating1prod7 = Rating.builder()
+                .productId(product7.getProductId())
+                .customerId("810440e8-cae0-48f7-aa4f-830239b82b78")
+                .rating((byte) 4)
+                .review("Spacious hutch, easy to clean")
+                .build();
+
+        Rating rating2prod7 = Rating.builder()
+                .productId(product7.getProductId())
+                .customerId("584c5329-2b9a-43d4-ad2b-debaa92d6c02")
+                .rating((byte) 3)
+                .review("Not enough ventilation")
+                .build();
+
+        Rating rating1prod8 = Rating.builder()
+                .productId(product8.getProductId())
+                .customerId("810440e8-cae0-48f7-aa4f-830239b82b78")
+                .rating((byte) 3)
+                .review("Works well, but hard to adjust")
+                .build();
+
+        Rating rating2prod8 = Rating.builder()
+                .productId(product8.getProductId())
+                .customerId("584c5329-2b9a-43d4-ad2b-debaa92d6c02")
+                .rating((byte) 2)
+                .review("Doesn't heat evenly")
                 .build();
 
         Resource resource1 = new ClassPathResource("images/dog_food.jpg");
@@ -210,6 +319,20 @@ public class DataLoaderService implements CommandLineRunner {
 
         Flux.just(product1, product2, product3, product4, product5, product6, product7, product8)
                 .flatMap(s -> productRepository.insert(Mono.just(s))
+                        .log(s.toString()))
+                .subscribe();
+
+        Flux.just(
+                rating1prod1, rating2prod1,
+                rating1prod2, rating2prod2,
+                rating1prod3, rating2prod3,
+                rating1prod4, rating2prod4,
+                rating1prod5, rating2prod5,
+                rating1prod6, rating2prod6,
+                rating1prod7, rating2prod7,
+                rating1prod8, rating2prod8
+        )
+                .flatMap(s -> ratingRepository.insert(Mono.just(s))
                         .log(s.toString()))
                 .subscribe();
 
