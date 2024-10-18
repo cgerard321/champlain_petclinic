@@ -1182,7 +1182,7 @@ class InventoryControllerUnitTest {
                 .productPrice(100.00)
                 .productQuantity(10)
                 .productSalePrice(10.99)
-                .status(PRE_ORDER)  // Expected status
+                .status(RE_ORDER)  // Expected status
                 .build();
 
         // Mocking the service method to return the expected response
@@ -1200,7 +1200,7 @@ class InventoryControllerUnitTest {
                 .expectBody(ProductResponseDTO.class)
                 .value(dto -> {
                     assertNotNull(dto);
-                    assertEquals(PRE_ORDER, dto.getStatus());  // Assert the status is REORDER
+                    assertEquals(RE_ORDER, dto.getStatus());  // Assert the status is REORDER
                 });
 
         verify(productInventoryService, times(1)).addSupplyToInventory(any(), eq(inventoryId));
@@ -1382,7 +1382,7 @@ class InventoryControllerUnitTest {
                 .productPrice(200.00)
                 .productQuantity(15)
                 .productSalePrice(15.99)
-                .status(PRE_ORDER)  // Expect the status to be REORDER
+                .status(RE_ORDER)  // Expect the status to be REORDER
                 .build();
 
         // Mocking the service to return the updated product with the REORDER status
@@ -1406,7 +1406,7 @@ class InventoryControllerUnitTest {
                     assertEquals(responseDTO.getProductPrice(), dto.getProductPrice());
                     assertEquals(responseDTO.getProductQuantity(), dto.getProductQuantity());
                     assertEquals(responseDTO.getProductSalePrice(), dto.getProductSalePrice());
-                    assertEquals(PRE_ORDER, dto.getStatus());  // Verify the status is REORDER
+                    assertEquals(RE_ORDER, dto.getStatus());  // Verify the status is REORDER
                 });
 
         // Verify that the service method was called exactly once
@@ -1724,6 +1724,83 @@ class InventoryControllerUnitTest {
                 .exchange()
                 .expectStatus().isNotFound();
     }
+
+    @Test
+    void restockLowStockProduct_ValidRequest_ShouldSucceed() {
+        // Arrange
+        String inventoryId = "inventoryId_1";
+        String productId = "productId_1";
+        Integer productQuantity = 10;
+
+        ProductResponseDTO updatedProductResponseDTO = ProductResponseDTO.builder()
+                .inventoryId(inventoryId)
+                .productId(productId)
+                .productName("Restocked Product")
+                .productDescription("Restocked product description")
+                .productPrice(100.00)
+                .productQuantity(productQuantity)
+                .build();
+
+        when(productInventoryService.restockLowStockProduct(inventoryId, productId, productQuantity))
+                .thenReturn(Mono.just(updatedProductResponseDTO));
+
+        // Act and Assert
+        webTestClient
+                .put()
+                .uri("/inventory/{inventoryId}/products/{productId}/restockProduct?productQuantity={productQuantity}", inventoryId, productId, productQuantity)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(ProductResponseDTO.class)
+                .value(responseDTO -> {
+                    assertNotNull(responseDTO);
+                    assertEquals(updatedProductResponseDTO.getInventoryId(), responseDTO.getInventoryId());
+                    assertEquals(updatedProductResponseDTO.getProductId(), responseDTO.getProductId());
+                    assertEquals(updatedProductResponseDTO.getProductQuantity(), responseDTO.getProductQuantity());
+                });
+
+        // Verify that the service method was called with the correct arguments
+        verify(productInventoryService, times(1)).restockLowStockProduct(inventoryId, productId, productQuantity);
+    }
+
+    @Test
+    void restockLowStockProduct_InvalidQuantity_ShouldReturnBadRequest() {
+        // Arrange
+        String inventoryId = "inventoryId_1";
+        String productId = "productId_1";
+        Integer invalidQuantity = 0;
+
+        // Act and Assert
+        webTestClient
+                .put()
+                .uri("/inventory/{inventoryId}/products/{productId}/restockProduct?productQuantity={productQuantity}", inventoryId, productId, invalidQuantity)
+                .exchange()
+                .expectStatus().isBadRequest();
+
+        // Verify that the service method was not called
+        verify(productInventoryService, times(0)).restockLowStockProduct(any(), any(), any());
+    }
+
+    @Test
+    void restockLowStockProduct_ProductNotFound_ShouldReturnNotFound() {
+        // Arrange
+        String inventoryId = "inventoryId_1";
+        String productId = "nonExistentProductId";
+        Integer productQuantity = 10;
+
+        when(productInventoryService.restockLowStockProduct(inventoryId, productId, productQuantity))
+                .thenReturn(Mono.empty());
+
+        // Act and Assert
+        webTestClient
+                .put()
+                .uri("/inventory/{inventoryId}/products/{productId}/restockProduct?productQuantity={productQuantity}", inventoryId, productId, productQuantity)
+                .exchange()
+                .expectStatus().isNotFound();
+
+        // Verify that the service method was called with the correct arguments
+        verify(productInventoryService, times(1)).restockLowStockProduct(inventoryId, productId, productQuantity);
+    }
+
 
 
 }

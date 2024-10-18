@@ -47,7 +47,7 @@ class EntityDTOUtilTest {
 
         // Assert
         assertNotNull(responseDTO);
-        assertEquals(Status.PRE_ORDER, responseDTO.getStatus());
+        assertEquals(Status.RE_ORDER, responseDTO.getStatus());
         assertEquals(10, responseDTO.getProductQuantity());
     }
 
