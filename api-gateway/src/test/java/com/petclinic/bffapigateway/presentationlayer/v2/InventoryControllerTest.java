@@ -882,5 +882,109 @@ public class InventoryControllerTest {
         verify(inventoryServiceClient, times(1)).getAllInventories();
     }
 
+    @Test
+    void restockLowStockProduct_withValidRequest_ShouldSucceed() {
+        // Arrange
+        String inventoryId = "inventory1";
+        String productId = "product1";
+        Integer productQuantity = 10;
+
+        ProductResponseDTO restockedProduct = ProductResponseDTO.builder()
+                .productId(productId)
+                .inventoryId(inventoryId)
+                .productName("Restocked Product")
+                .productDescription("Restocked Product Description")
+                .productPrice(100.0)
+                .productQuantity(productQuantity)
+                .build();
+
+        when(inventoryServiceClient.restockLowStockProduct(inventoryId, productId, productQuantity))
+                .thenReturn(Mono.just(restockedProduct));
+
+        // Act and Assert
+        client.put()
+                .uri("/api/v2/gateway/inventories/" + inventoryId + "/products/" + productId + "/restockProduct?productQuantity=" + productQuantity)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(ProductResponseDTO.class)
+                .isEqualTo(restockedProduct);
+
+        // Verify that the service client was called
+        verify(inventoryServiceClient, times(1))
+                .restockLowStockProduct(inventoryId, productId, productQuantity);
+    }
+
+
+    @Test
+    void restockLowStockProduct_withInvalidQuantity_ShouldReturnBadRequest() {
+        // Arrange
+        String inventoryId = "inventory1";
+        String productId = "product1";
+        Integer invalidQuantity = -5;
+
+        // Act and Assert
+        client.put()
+                .uri("/api/v2/gateway/inventories/" + inventoryId + "/products/" + productId + "/restockProduct?productQuantity=" + invalidQuantity)
+                .exchange()
+                .expectStatus().isBadRequest();
+
+        // Verify that the service client was not called
+        verify(inventoryServiceClient, never())
+                .restockLowStockProduct(inventoryId, productId, invalidQuantity);
+    }
+
+    @Test
+    void restockLowStockProduct_withNullProductQuantity_ShouldReturnBadRequest() {
+        // Arrange
+        String inventoryId = "inventory1";
+        String productId = "product1";
+        Integer productQuantity = null; // Simulating a null quantity
+
+        // Act and Assert
+        client.put()
+                .uri("/api/v2/gateway/inventories/" + inventoryId + "/products/" + productId + "/restockProduct")
+                .exchange()
+                .expectStatus().isBadRequest(); // Expecting 400 Bad Request
+
+        // Verify that the service client was never called
+        verify(inventoryServiceClient, never())
+                .restockLowStockProduct(eq(inventoryId), eq(productId), eq(productQuantity));
+    }
+
+    @Test
+    void restockLowStockProduct_withNegativeProductQuantity_ShouldReturnBadRequest() {
+        // Arrange
+        String inventoryId = "inventory1";
+        String productId = "product1";
+        Integer productQuantity = -5; // Simulating a negative quantity
+
+        // Act and Assert
+        client.put()
+                .uri("/api/v2/gateway/inventories/" + inventoryId + "/products/" + productId + "/restockProduct?productQuantity=" + productQuantity)
+                .exchange()
+                .expectStatus().isBadRequest(); // Expecting 400 Bad Request
+
+        // Verify that the service client was never called
+        verify(inventoryServiceClient, never())
+                .restockLowStockProduct(eq(inventoryId), eq(productId), eq(productQuantity));
+    }
+
+    @Test
+    void restockLowStockProduct_withZeroProductQuantity_ShouldReturnBadRequest() {
+        // Arrange
+        String inventoryId = "inventory1";
+        String productId = "product1";
+        Integer productQuantity = 0; // Simulating zero quantity
+
+        // Act and Assert
+        client.put()
+                .uri("/api/v2/gateway/inventories/" + inventoryId + "/products/" + productId + "/restockProduct?productQuantity=" + productQuantity)
+                .exchange()
+                .expectStatus().isBadRequest(); // Expecting 400 Bad Request
+
+        // Verify that the service client was never called
+        verify(inventoryServiceClient, never())
+                .restockLowStockProduct(eq(inventoryId), eq(productId), eq(productQuantity));
+    }
 
 }
