@@ -19,6 +19,7 @@ import { AxiosError } from 'axios';
 import ImageContainer from '../components/ImageContainer';
 import { Button } from 'react-bootstrap';
 import { IsAdmin } from '@/context/UserContext';
+import { deleteProduct } from '@/features/products/api/deleteProduct';
 
 export default function ProductDetails(): JSX.Element {
   const isAdmin = IsAdmin();
@@ -97,6 +98,17 @@ export default function ProductDetails(): JSX.Element {
     }
   };
 
+  const handleDeleteProduct = async (): Promise<void> => {
+    if (!productId) return;
+    try {
+      await deleteProduct(productId);
+      navigate(AppRoutePaths.ProductsList); 
+    } catch (error) {
+      console.error('Failed to delete product:', error);
+     
+    }
+  };
+
   const updateRating = async (
     newRating: number,
     newReview: string | null
@@ -149,13 +161,11 @@ export default function ProductDetails(): JSX.Element {
                 Edit
               </Button>
               <Button
-                variant="danger"
-                onClick={() =>
-                  alert('This feature has not yet been implemented')
-                }
-              >
-                Delete
-              </Button>
+  variant="danger"
+  onClick={handleDeleteProduct}
+>
+  Delete
+</Button>
             </div>
             <h2>{currentProduct.productName}</h2>
             <h3>{currentProduct.productSalePrice}$</h3>

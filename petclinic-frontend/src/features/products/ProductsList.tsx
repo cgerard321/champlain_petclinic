@@ -5,7 +5,6 @@ import { ProductModel } from '@/features/products/models/ProductModels/ProductMo
 import Product from './components/Product';
 import AddProduct from './components/AddProduct';
 import { addProduct } from '@/features/products/api/addProduct';
-import { deleteProduct } from '@/features/products/api/deleteProduct'; // Import deleteProduct
 import { useUser } from '@/context/UserContext';
 import './components/Sidebar.css';
 import { getProductsByType } from '@/features/products/api/getProductsByType.ts';
@@ -13,9 +12,13 @@ import { addImage } from './api/addImage';
 import { ImageModel } from './models/ProductModels/ImageModel';
 import StarRating from '@/features/products/components/StarRating.tsx';
 import './components/StarRating.css';
+import { getAllProductBundles } from './api/getAllProductBundles';
+import { ProductBundleModel } from './models/ProductModels/ProductBundleModel';
+import ProductBundle from './components/ProductBundle';
 
 export default function ProductList(): JSX.Element {
   const [productList, setProductList] = useState<ProductModel[]>([]);
+  const [bundleList, setBundleList] = useState<ProductBundleModel[]>([]);
   const [minPrice, setMinPrice] = useState<number | undefined>(undefined);
   const [maxPrice, setMaxPrice] = useState<number | undefined>(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -27,11 +30,24 @@ export default function ProductList(): JSX.Element {
   const [ratingSort, setRatingSort] = useState<string>('default');
   const [minStars, setMinStars] = useState<number>(0);
   const [maxStars, setMaxStars] = useState<number>(5);
+  const [validationMessage, setValidationMessage] = useState<string>('');
+
+  const validationStars = async (
+    minStars: number,
+    maxStars: number
+  ): Promise<void> => {
+    if (minStars >= maxStars) {
+      setValidationMessage(
+        'Minimum stars cannot be greater than or equal to maximum stars.'
+      );
+    } else {
+      setValidationMessage('');
+    }
+  };
 
   function FilterByPriceErrorHandling(): void {
     if (minPrice !== undefined && maxPrice !== undefined && minPrice > maxPrice) {
       alert('Min Price cannot be greater than Max Price');
-      return;
     }
   }
 
@@ -52,13 +68,20 @@ export default function ProductList(): JSX.Element {
     } finally {
       setIsLoading(false);
     }
+    // Fetch product bundles
+    try {
+      const bundles = await getAllProductBundles();
+      setBundleList(bundles);
+    } catch (err) {
+      console.error('Error fetching product bundles:', err);
+    }
   };
 
   useEffect(() => {
     fetchProducts();
     const savedProducts = localStorage.getItem('recentlyClickedProducts');
     if (savedProducts) {
-      return setRecentlyClickedProducts(JSON.parse(savedProducts));
+      setRecentlyClickedProducts(JSON.parse(savedProducts));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -93,15 +116,6 @@ export default function ProductList(): JSX.Element {
     }
   };
 
-  const handleDeleteProduct = async (productId: string): Promise<void> => {
-    try {
-      await deleteProduct(productId); // Call deleteProduct
-      setProductList(prevProducts => prevProducts.filter(product => product.productId !== productId));
-    } catch (error) {
-      console.error('Failed to delete product:', error);
-    }
-  };
-
   const toggleSidebar = (): void => {
     setIsSidebarOpen(!isSidebarOpen);
   };
@@ -117,6 +131,7 @@ export default function ProductList(): JSX.Element {
     setRatingSort('');
     setMaxStars(5);
     setMinStars(0);
+    setValidationMessage('');
     const list = await getAllProducts(minPrice, maxPrice, minStars, maxStars);
     setProductList(list);
   };
@@ -182,19 +197,40 @@ export default function ProductList(): JSX.Element {
             <h2>Filter by Star Rating</h2>
             <div className="star-row">
               <label>Min Stars:</label>
-              <StarRating currentRating={minStars} viewOnly={false} updateRating={setMinStars} />
+              <StarRating
+                currentRating={minStars}
+                viewOnly={false}
+                updateRating={rating => {
+                  setMinStars(rating);
+                  validationStars(rating, maxStars);
+                }}
+              />
             </div>
             <div className="star-row">
               <label>Max Stars:</label>
-              <StarRating currentRating={maxStars} viewOnly={false} updateRating={setMaxStars} />
+              <StarRating
+                currentRating={maxStars}
+                viewOnly={false}
+                updateRating={rating => {
+                  setMaxStars(rating);
+                  validationStars(minStars, rating);
+                }}
+              />
             </div>
+            {validationMessage && (
+              <div style={{ color: 'red' }}>{validationMessage}</div>
+            )}
           </div>
           <select name="rating" value={ratingSort} onChange={e => setRatingSort(e.target.value)}>
             <option value="default">Sort by Rating</option>
             <option value="asc">Low to High</option>
             <option value="desc">High to Low</option>
           </select>
-          <button className="apply-filter-button" onClick={fetchProducts}>
+          <button
+            className="apply-filter-button"
+            disabled={validationMessage !== ''}
+            onClick={fetchProducts}
+          >
             Apply
           </button>
           <button className="clear-filter-button" onClick={clearFilters}>
@@ -214,25 +250,33 @@ export default function ProductList(): JSX.Element {
       )}
 
       <div className="main-content">
+        <h2>Product Bundles</h2>
+        <div className="grid product-bundles-grid">
+          {bundleList.length > 0 ? (
+            bundleList.map((bundle: ProductBundleModel) => (
+              <ProductBundle key={bundle.bundleId} bundle={bundle} />
+            ))
+          ) : (
+            <p>No product bundles available.</p>
+          )}
+        </div>
+        <h2>Products</h2>
         <div className="grid">
           {isLoading ? (
             <p>Loading products...</p>
           ) : productList.length > 0 ? (
             productList.map((product: ProductModel) => (
-              <div key={product.productId} onClick={() => handleProductClick(product)}>
+              <div
+                key={product.productId}
+                onClick={() => handleProductClick(product)}
+              >
                 <Product key={product.productId} product={product} />
-                {isRightRole && (
-                  <button onClick={() => handleDeleteProduct(product.productId)} style={{ color: 'red' }}>
-                    Delete
-                  </button>
-                )}
               </div>
             ))
           ) : (
             <p>No products found.</p>
           )}
         </div>
-        <div>
           <hr />
         </div>
         <div>
@@ -244,6 +288,6 @@ export default function ProductList(): JSX.Element {
           </div>
         </div>
       </div>
-</div>
+
   );
 }

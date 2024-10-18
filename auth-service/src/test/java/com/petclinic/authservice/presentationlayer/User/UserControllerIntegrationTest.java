@@ -814,6 +814,121 @@ class UserControllerIntegrationTest {
                 .expectStatus().isNotFound();
     }
 
+    @Test
+    void getAllUsers_ShouldWork() {
+
+        String token = jwtTokenUtil.generateToken(userRepo.findAll().get(0));
+
+        webTestClient.get()
+                .uri("/users/all")
+                .accept(MediaType.APPLICATION_JSON)
+                .cookie("Bearer", token)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(UserDetails.class)
+                .value(users -> {
+                    assertNotNull(users);
+                    assertFalse(users.isEmpty());
+                });
+    }
+
+    @Test
+    void getAllUsers_ShouldReturnUnauthorized_WithInvalidToken() {
+
+        String invalidToken = "InvalidToken";
+
+        webTestClient.get()
+                .uri("/users/all")
+                .accept(MediaType.APPLICATION_JSON)
+                .cookie("Bearer", invalidToken)
+                .exchange()
+                .expectStatus().isUnauthorized();
+    }
+
+    @Test
+    void updateUser_validUserId() {
+        String userId = VALID_USER_ID;
+        UserPasswordLessDTO updatedUser = UserPasswordLessDTO.builder()
+                .username("newUsername")
+                .email("newEmail@example.com")
+                .build();
+        String token = jwtTokenUtil.generateToken(userRepo.findAll().get(0));
+
+        webTestClient
+                .put()
+                .uri("/users/" + userId)
+                .accept(MediaType.APPLICATION_JSON)
+                .cookie("Bearer", token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(updatedUser)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(User.class)
+                .value(user -> {
+                    assertNotNull(user);
+                    assertEquals(updatedUser.getUsername(), user.getUsername());
+                    assertEquals(updatedUser.getEmail(), user.getEmail());
+                });
+    }
+
+    @Test
+    void updateUser_InvalidUserId() {
+        String invalidUserId = "invalidId";
+        UserPasswordLessDTO updatedUser = UserPasswordLessDTO.builder()
+                .username("newUsername")
+                .email("newEmail@example.com")
+                .build();
+        String token = jwtTokenUtil.generateToken(userRepo.findAll().get(0));
+
+        webTestClient
+                .put()
+                .uri("/users/" + invalidUserId)
+                .accept(MediaType.APPLICATION_JSON)
+                .cookie("Bearer", token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(updatedUser)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    void updateUser_NoCookie() {
+        String userId = VALID_USER_ID;
+        UserPasswordLessDTO updatedUser = UserPasswordLessDTO.builder()
+                .username("newUsername")
+                .email("newEmail@example.com")
+                .build();
+
+        webTestClient
+                .put()
+                .uri("/users/" + userId)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(updatedUser)
+                .exchange()
+                .expectStatus().isUnauthorized();
+    }
+
+    @Test
+    void updateUser_UserNotFound() {
+        String userId = "nonExistentUserId";
+        UserPasswordLessDTO updatedUser = UserPasswordLessDTO.builder()
+                .username("newUsername")
+                .email("newEmail@example.com")
+                .build();
+        String token = jwtTokenUtil.generateToken(userRepo.findAll().get(0));
+
+        webTestClient
+                .put()
+                .uri("/users/" + userId)
+                .accept(MediaType.APPLICATION_JSON)
+                .cookie("Bearer", token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(updatedUser)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
 
 }
 

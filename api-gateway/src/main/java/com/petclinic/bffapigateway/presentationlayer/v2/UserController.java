@@ -14,7 +14,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -50,6 +53,12 @@ public class UserController {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping("/users")
+    public Flux<UserDetails> getAllUsers(@CookieValue("Bearer") String jwtToken) {
+        return authServiceClient.getAllUsers(jwtToken);
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping("/users/{userId}")
     public Mono<ResponseEntity<UserDetails>> getUserById(@PathVariable final String userId, @CookieValue("Bearer") String jwtToken) {
         return authServiceClient.getUserById(jwtToken, userId)
@@ -58,6 +67,17 @@ public class UserController {
                 .onErrorResume(e -> {
                     log.error("Error fetching user by ID: {}", e.getMessage());
                     return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
+                });
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @DeleteMapping("/users/{userId}")
+    public Mono<ResponseEntity<Void>> deleteUser(@PathVariable final String userId, @CookieValue("Bearer") String jwtToken) {
+        return authServiceClient.deleteUser(jwtToken, userId)
+                .then(Mono.just(ResponseEntity.noContent().<Void>build()))
+                .onErrorResume(e -> {
+                    log.error("Error deleting user: {}", e.getMessage());
+                    return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).<Void>build());
                 });
     }
 
@@ -81,6 +101,16 @@ public class UserController {
                     log.error("Error enabling user: {}", e.getMessage());
                     return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).<Void>build());
                 });
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @PutMapping(value = "users/{userId}",
+            consumes = "application/json",
+            produces = "application/json")
+    public Mono<UserPasswordLessDTO> updateUser(final @PathVariable String userId,
+                                                @RequestBody UserPasswordLessDTO model,
+                                                @CookieValue("Bearer") String jwtToken) {
+        return authServiceClient.updateUser(userId, model, jwtToken);
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
