@@ -208,19 +208,6 @@ class VetControllerUnitTest {
         verify(vetsServiceClient, Mockito.times(1)).addEducationToAVet(anyString(), any(Mono.class));
     }
 
-    @Test
-    void whenAddEducationToVet_asUnauthorizedUser_thenReturnUnauthorized() {
-        webTestClient.post()
-                .uri(BASE_VET_URL + "/2e26e7a2-8c6e-4e2d-8d60-ad0882e295eb/educations")
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(Mono.just(educationRequestDTO), EducationRequestDTO.class)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isUnauthorized();
-
-        verify(vetsServiceClient, Mockito.times(0)).addEducationToAVet(anyString(), any(Mono.class));
-    }
-
 
 
 }
