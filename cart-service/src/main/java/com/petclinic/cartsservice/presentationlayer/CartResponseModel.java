@@ -24,9 +24,12 @@ public class CartResponseModel {
     private double tvq;
     private double tvc;
     private double total;
+    private String invoiceId;
 
     private List<CartProduct> wishListProducts;
     private String message;
     private String paymentStatus;
 
+    public CartResponseModel(String invoiceId, String cartId, List<CartProduct> products, double total) {
+    }
 }

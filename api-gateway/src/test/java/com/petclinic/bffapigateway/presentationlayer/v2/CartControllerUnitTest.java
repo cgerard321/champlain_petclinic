@@ -93,7 +93,65 @@ public class CartControllerUnitTest {
         from here it's the tests related to the wishlist
     */
 
+    @Test
+    void testCheckoutCart_Success() {
+        // Arrange
+        when(cartServiceClient.checkoutCart("cartId123")).thenReturn(Mono.empty()); // Simulate a successful cart checkout action
 
+        // Act
+        client.post()
+                .uri("/api/v2/gateway/carts/cartId123/checkout")
+                .exchange()
+                .expectStatus().isOk();
+
+        // Assert
+        verify(cartServiceClient, times(1)).checkoutCart("cartId123");
+    }
+
+    @Test
+    void testCheckoutCart_Failure() {
+        // Arrange
+        when(cartServiceClient.checkoutCart("cartId123")).thenReturn(Mono.error(new RuntimeException("Checkout failed"))); // Simulate a failed cart checkout action
+
+        // Act
+        client.post()
+                .uri("/api/v2/gateway/carts/cartId123/checkout")
+                .exchange()
+                .expectStatus().isBadRequest();
+
+        // Assert
+        verify(cartServiceClient, times(1)).checkoutCart("cartId123");
+    }
+
+    @Test
+    void testCheckoutCart_Success() {
+        // Arrange
+        when(cartServiceClient.checkoutCart("cartId123")).thenReturn(Mono.empty()); // Simulate a successful cart checkout action
+
+        // Act
+        client.post()
+                .uri("/api/v2/gateway/carts/cartId123/checkout")
+                .exchange()
+                .expectStatus().isOk();
+
+        // Assert
+        verify(cartServiceClient, times(1)).checkoutCart("cartId123");
+    }
+
+    @Test
+    void testCheckoutCart_Failure() {
+        // Arrange
+        when(cartServiceClient.checkoutCart("cartId123")).thenReturn(Mono.error(new RuntimeException("Checkout failed"))); // Simulate a failed cart checkout action
+
+        // Act
+        client.post()
+                .uri("/api/v2/gateway/carts/cartId123/checkout")
+                .exchange()
+                .expectStatus().isBadRequest();
+
+        // Assert
+        verify(cartServiceClient, times(1)).checkoutCart("cartId123");
+    }
 
 
 }

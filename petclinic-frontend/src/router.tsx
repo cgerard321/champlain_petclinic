@@ -344,6 +344,7 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
+
       {
         path: AppRoutePaths.Carts,
         element: (

@@ -30,6 +30,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation "org.mapstruct:mapstruct:${mapstructVersion}"
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb-reactive'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'jakarta.validation:jakarta.validation-api:3.0.0'
+    implementation 'jakarta.servlet:jakarta.servlet-api:5.0.0'
 
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
@@ -43,6 +46,7 @@ dependencies {
     testAnnotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    implementation 'com.squareup.retrofit2:converter-jackson:2.9.0'
     testImplementation 'io.projectreactor:reactor-test'
     testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo.spring30x:4.9.2'
     testImplementation("org.mock-server:mockserver-netty:5.13.0")
