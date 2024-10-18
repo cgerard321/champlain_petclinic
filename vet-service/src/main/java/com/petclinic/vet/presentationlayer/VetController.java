@@ -244,9 +244,13 @@ public class VetController {
 
 
     @PostMapping("{vetId}/educations")
-    public Mono<EducationResponseDTO> addEducationToVet(@PathVariable String vetId, @RequestBody Mono<EducationRequestDTO> educationRequestDTOMono){
-        return educationService.addEducationToVet(vetId, educationRequestDTOMono);
+    public Mono<ResponseEntity<EducationResponseDTO>> addEducationToVet(@PathVariable String vetId,
+                                                                        @RequestBody Mono<EducationRequestDTO> educationRequestDTOMono) {
+        return educationService.addEducationToVet(vetId, educationRequestDTOMono)
+                .map(education -> ResponseEntity.status(HttpStatus.CREATED).body(education))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
+
 
 
 

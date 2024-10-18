@@ -5,10 +5,7 @@ import com.petclinic.bffapigateway.domainclientlayer.VetsServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VisitsServiceClient;
 import com.petclinic.bffapigateway.dtos.Auth.RegisterVet;
 import com.petclinic.bffapigateway.dtos.Auth.Role;
-import com.petclinic.bffapigateway.dtos.Vets.SpecialtyDTO;
-import com.petclinic.bffapigateway.dtos.Vets.VetRequestDTO;
-import com.petclinic.bffapigateway.dtos.Vets.VetResponseDTO;
-import com.petclinic.bffapigateway.dtos.Vets.Workday;
+import com.petclinic.bffapigateway.dtos.Vets.*;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
 import org.mockito.InjectMocks;
 import org.mockito.Mockito;
@@ -120,6 +117,25 @@ class VetControllerUnitTest {
             .name(Roles.ADMIN.name())
             .build();
 
+    EducationRequestDTO educationRequestDTO = EducationRequestDTO.builder()
+            .vetId("2e26e7a2-8c6e-4e2d-8d60-ad0882e295eb")
+            .schoolName("Harvard University")
+            .degree("Doctor of Veterinary Medicine")
+            .fieldOfStudy("Veterinary Science")
+            .startDate("2015-08-01")
+            .endDate("2019-05-30")
+            .build();
+
+    EducationResponseDTO educationResponseDTO = EducationResponseDTO.builder()
+            .educationId("edu12345")
+            .vetId("2e26e7a2-8c6e-4e2d-8d60-ad0882e295eb")
+            .schoolName("Harvard University")
+            .degree("Doctor of Veterinary Medicine")
+            .fieldOfStudy("Veterinary Science")
+            .startDate("2015-08-01")
+            .endDate("2019-05-30")
+            .build();
+
     //#endregion
 
 
@@ -157,5 +173,41 @@ class VetControllerUnitTest {
 
         verify(authServiceClient, Mockito.times(1)).addVetUser(any(Mono.class));
     }
+
+    @Test
+    void whenAddEducationToVet_asAdmin_thenReturnCreatedEducationDTO() {
+        when(vetsServiceClient.addEducationToAVet(anyString(), any(Mono.class)))
+                .thenReturn(Mono.just(educationResponseDTO));
+
+        Mono<EducationResponseDTO> result = webTestClient.post()
+                .uri(BASE_VET_URL + "/2e26e7a2-8c6e-4e2d-8d60-ad0882e295eb/educations")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Mono.just(educationRequestDTO), EducationRequestDTO.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .returnResult(EducationResponseDTO.class)
+                .getResponseBody()
+                .single();
+
+        StepVerifier.create(result)
+                .expectNextMatches(education -> {
+                    assertNotNull(education);
+                    assertEquals(educationResponseDTO.getEducationId(), education.getEducationId());
+                    assertEquals(educationResponseDTO.getVetId(), education.getVetId());
+                    assertEquals(educationResponseDTO.getSchoolName(), education.getSchoolName());
+                    assertEquals(educationResponseDTO.getDegree(), education.getDegree());
+                    assertEquals(educationResponseDTO.getFieldOfStudy(), education.getFieldOfStudy());
+                    assertEquals(educationResponseDTO.getStartDate(), education.getStartDate());
+                    assertEquals(educationResponseDTO.getEndDate(), education.getEndDate());
+                    return true;
+                })
+                .verifyComplete();
+
+        verify(vetsServiceClient, Mockito.times(1)).addEducationToAVet(anyString(), any(Mono.class));
+    }
+
+
 
 }
