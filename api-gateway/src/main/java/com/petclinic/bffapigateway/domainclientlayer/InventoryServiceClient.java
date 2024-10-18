@@ -344,5 +344,36 @@ public class InventoryServiceClient {
                 .bodyToMono(byte[].class); // Directly read the body as byte[]
     }
 
+    public Mono<ProductResponseDTO> updateProductInventoryId(String currentInventoryId, String productId, String newInventoryId) {
+        return webClient.put()
+                .uri(inventoryServiceUrl + "/{currentInventoryId}/products/{productId}/updateInventoryId/{newInventoryId}", currentInventoryId, productId, newInventoryId)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError,
+                        resp -> Mono.error(new NotFoundException("Product not found in inventory: " + currentInventoryId)))
+                .bodyToMono(ProductResponseDTO.class);
+    }
+
+    public Flux<InventoryResponseDTO> getAllInventories() {
+        return webClient.get()
+                .uri(inventoryServiceUrl)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToFlux(InventoryResponseDTO.class);
+    }
+
+    public Mono<ProductResponseDTO> restockLowStockProduct(final String inventoryId, final String productId, final Integer productQuantity) {
+        return webClient.put()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/{inventoryId}/products/{productId}/restockProduct")
+                        .queryParam("productQuantity", productQuantity)  // Add the productQuantity as a query param
+                        .build(inventoryId, productId))
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError,
+                        resp -> Mono.error(new NotFoundException("Product: " + productId + " not found in inventory: " + inventoryId)))
+                .bodyToMono(ProductResponseDTO.class);
+    }
+
 }
 

@@ -22,5 +22,6 @@ public class UserDetails {
 
     private Set<Role> roles;
     private boolean isDisabled;
+    private boolean verified;
 }
 

@@ -141,4 +141,42 @@ public class ProductController {
                 });
     }
 
+    // New endpoints for product bundles
+    @SecuredEndpoint(allowedRoles = {Roles.ALL})
+    @GetMapping(value = "/bundles", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Flux<ProductBundleResponseDTO> getAllProductBundles() {
+        return productsServiceClient.getAllProductBundles();
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ALL})
+    @GetMapping(value = "/bundles/{bundleId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<ProductBundleResponseDTO>> getProductBundleById(@PathVariable String bundleId) {
+        return productsServiceClient.getProductBundleById(bundleId)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
+    @PostMapping(value = "/bundles", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<ProductBundleResponseDTO>> createProductBundle(@RequestBody ProductBundleRequestDTO requestDTO) {
+        return productsServiceClient.createProductBundle(requestDTO)
+                .map(bundle -> ResponseEntity.status(201).body(bundle));
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
+    @PutMapping(value = "/bundles/{bundleId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<ProductBundleResponseDTO>> updateProductBundle(@PathVariable String bundleId,
+                                                                              @RequestBody ProductBundleRequestDTO requestDTO) {
+        return productsServiceClient.updateProductBundle(bundleId, requestDTO)
+                .map(ResponseEntity::ok);
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @DeleteMapping(value = "/bundles/{bundleId}")
+    public Mono<ResponseEntity<Void>> deleteProductBundle(@PathVariable String bundleId) {
+        return productsServiceClient.deleteProductBundle(bundleId)
+                .then(Mono.just(ResponseEntity.noContent().build()));
+    }
+
+
 }

@@ -1,5 +1,6 @@
 package com.petclinic.products.presentationlayer.products;
 
+import com.petclinic.products.businesslayer.products.ProductBundleService;
 import com.petclinic.products.businesslayer.products.ProductService;
 import com.petclinic.products.utils.exceptions.InvalidInputException;
 import com.petclinic.products.utils.exceptions.NotFoundException;
@@ -23,6 +24,9 @@ import static org.mockito.Mockito.*;
 public class ProductControllerUnitTest {
     @MockBean
     private ProductService productService;
+
+    @MockBean
+    private ProductBundleService productBundleService;
 
     @Autowired
     private WebTestClient webClient;
@@ -120,7 +124,6 @@ public class ProductControllerUnitTest {
                 .productName("Bird Cage")
                 .productDescription("Spacious cage for small birds like parakeets")
                 .productSalePrice(29.99)
-                .averageRating(0.0)
                 .build();
 
         ProductResponseModel productResponseModel = ProductResponseModel.builder()
@@ -154,7 +157,6 @@ public class ProductControllerUnitTest {
                 .productName("Bird Cage")
                 .productDescription("Spacious cage for small birds like parakeets")
                 .productSalePrice(29.99)
-                .averageRating(0.0)
                 .build();
 
         ProductResponseModel productResponseModel = ProductResponseModel.builder()
@@ -206,5 +208,152 @@ public class ProductControllerUnitTest {
 
         verify(productService).deleteProductByProductId("ae2d3af7-f2a2-407f-ad31-ca7d8220cb7a");
     }
+
+    @Test
+    public void whenGetAllProductBundles_thenReturnBundles() {
+        ProductBundleResponseModel bundle1 = ProductBundleResponseModel.builder()
+                .bundleId("bundle1")
+                .bundleName("Bundle 1")
+                .bundleDescription("Description 1")
+                .bundlePrice(49.99)
+                .build();
+
+        ProductBundleResponseModel bundle2 = ProductBundleResponseModel.builder()
+                .bundleId("bundle2")
+                .bundleName("Bundle 2")
+                .bundleDescription("Description 2")
+                .bundlePrice(119.99)
+                .build();
+
+        when(productBundleService.getAllProductBundles()).thenReturn(Flux.just(bundle1, bundle2));
+
+        webClient.get().uri("/api/v1/products/bundles")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(ProductBundleResponseModel.class)
+                .value(bundles -> {
+                    assertNotNull(bundles);
+                    assertEquals(2, bundles.size());
+                    assertEquals("bundle1", bundles.get(0).getBundleId());
+                    assertEquals("bundle2", bundles.get(1).getBundleId());
+                });
+
+        verify(productBundleService).getAllProductBundles();
+    }
+
+    @Test
+    public void whenGetProductBundleById_thenReturnBundle() {
+        ProductBundleResponseModel bundle = ProductBundleResponseModel.builder()
+                .bundleId("bundle1")
+                .bundleName("Bundle 1")
+                .bundleDescription("Description 1")
+                .bundlePrice(49.99)
+                .build();
+
+        when(productBundleService.getProductBundleById("bundle1")).thenReturn(Mono.just(bundle));
+
+        webClient.get().uri("/api/v1/products/bundles/bundle1")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(ProductBundleResponseModel.class)
+                .value(response -> {
+                    assertNotNull(response);
+                    assertEquals("bundle1", response.getBundleId());
+                });
+
+        verify(productBundleService).getProductBundleById("bundle1");
+    }
+
+    @Test
+    public void whenGetProductBundleByInvalidId_thenReturnNotFound() {
+        when(productBundleService.getProductBundleById("invalid-id")).thenReturn(Mono.empty());
+
+        webClient.get().uri("/api/v1/products/bundles/invalid-id")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound();
+
+        verify(productBundleService).getProductBundleById("invalid-id");
+    }
+
+    @Test
+    public void whenCreateProductBundle_thenReturnCreatedBundle() {
+        ProductBundleRequestModel requestModel = ProductBundleRequestModel.builder()
+                .bundleName("Bundle 1")
+                .bundleDescription("Description 1")
+                .bundlePrice(49.99)
+                .build();
+
+        ProductBundleResponseModel responseModel = ProductBundleResponseModel.builder()
+                .bundleId("bundle1")
+                .bundleName("Bundle 1")
+                .bundleDescription("Description 1")
+                .bundlePrice(49.99)
+                .build();
+
+        when(productBundleService.createProductBundle(any(Mono.class))).thenReturn(Mono.just(responseModel));
+
+        webClient.post().uri("/api/v1/products/bundles")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestModel)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody(ProductBundleResponseModel.class)
+                .value(response -> {
+                    assertNotNull(response);
+                    assertEquals("bundle1", response.getBundleId());
+                });
+
+        verify(productBundleService).createProductBundle(any(Mono.class));
+    }
+
+    @Test
+    public void whenUpdateProductBundle_thenReturnUpdatedBundle() {
+        ProductBundleRequestModel requestModel = ProductBundleRequestModel.builder()
+                .bundleName("Updated Bundle")
+                .bundleDescription("Updated Description")
+                .bundlePrice(49.99)
+                .build();
+
+        ProductBundleResponseModel responseModel = ProductBundleResponseModel.builder()
+                .bundleId("bundle1")
+                .bundleName("Updated Bundle")
+                .bundleDescription("Updated Description")
+                .bundlePrice(49.99)
+                .build();
+
+        when(productBundleService.updateProductBundle(eq("bundle1"), any(Mono.class))).thenReturn(Mono.just(responseModel));
+
+        webClient.put().uri("/api/v1/products/bundles/bundle1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestModel)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(ProductBundleResponseModel.class)
+                .value(response -> {
+                    assertNotNull(response);
+                    assertEquals("bundle1", response.getBundleId());
+                });
+
+        verify(productBundleService).updateProductBundle(eq("bundle1"), any(Mono.class));
+    }
+
+    @Test
+    public void whenDeleteProductBundle_thenReturnNoContent() {
+        when(productBundleService.deleteProductBundle("bundle1")).thenReturn(Mono.empty());
+
+        webClient.delete().uri("/api/v1/products/bundles/bundle1")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNoContent();
+
+        verify(productBundleService).deleteProductBundle("bundle1");
+    }
+
+
 
 }

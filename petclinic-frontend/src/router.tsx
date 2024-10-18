@@ -39,6 +39,7 @@ import CustomerVisits from '@/pages/Visit/CustomerVisits.tsx';
 import UpdateOwnerPetPage from '@/pages/Customer/UpdateOwnerPetPage.tsx';
 import EditInventoryProducts from './features/inventories/EditInventoryProducts';
 import AddSupplyToInventory from './features/inventories/AddSupplyToInventory';
+import AllUsers from '@/pages/Users/AllUsers.tsx';
 //import AddEmergencyForm from './features/visits/Emergency/AddEmergencyForm';
 //import EditEmergency from './features/visits/Emergency/EditEmergency';
 import EmergencyList from './features/visits/Emergency/EmergencyList';
@@ -53,6 +54,7 @@ import UpdatePromoPage from '@/pages/Promos/UpdatePromoPage.tsx';
 import CustomerEmergency from './pages/Visit/CustomerEmergency';
 import AddEmergencyForm from './features/visits/Emergency/AddEmergencyForm';
 import LowStockProducts from '@/features/inventories/LowStockProducts.tsx';
+import MoveInventoryProducts from '@/features/inventories/MoveInventoryProducts.tsx';
 import ReviewsCustomer from '@/pages/Review/CustomerReviews.tsx';
 import AddReviewsCustomer from '@/pages/Review/CustomerAddReviewForm.tsx';
 import EmergencyDetails from './features/visits/EmergencyByEmergencyId';
@@ -60,6 +62,14 @@ import EmergencyDetails from './features/visits/EmergencyByEmergencyId';
 const router = createBrowserRouter([
   {
     children: [
+      {
+        path: AppRoutePaths.MoveInventoryProducts,
+        element: (
+          <ProtectedRoute>
+            <MoveInventoryProducts />
+          </ProtectedRoute>
+        ),
+      },
       {
         path: AppRoutePaths.EditInventory,
         element: (
@@ -377,6 +387,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute roles={['OWNER']}>
             <ProfilePage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.AllUsers,
+        element: (
+          <ProtectedRoute roles={['ADMIN']}>
+            <AllUsers />
           </ProtectedRoute>
         ),
       },

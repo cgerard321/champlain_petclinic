@@ -2,9 +2,12 @@ package com.petclinic.products.utils;
 
 import com.petclinic.products.datalayer.images.Image;
 import com.petclinic.products.datalayer.products.Product;
+import com.petclinic.products.datalayer.products.ProductBundle;
 import com.petclinic.products.datalayer.ratings.Rating;
 import com.petclinic.products.presentationlayer.images.ImageRequestModel;
 import com.petclinic.products.presentationlayer.images.ImageResponseModel;
+import com.petclinic.products.presentationlayer.products.ProductBundleRequestModel;
+import com.petclinic.products.presentationlayer.products.ProductBundleResponseModel;
 import com.petclinic.products.presentationlayer.products.ProductRequestModel;
 import com.petclinic.products.presentationlayer.products.ProductResponseModel;
 import com.petclinic.products.presentationlayer.ratings.RatingRequestModel;
@@ -31,7 +34,6 @@ public class EntityModelUtil {
                 .productName(productRequestModel.getProductName())
                 .productDescription(productRequestModel.getProductDescription())
                 .productSalePrice(productRequestModel.getProductSalePrice())
-                .averageRating(productRequestModel.getAverageRating())
                 .productType(productRequestModel.getProductType())
                 .productQuantity(productRequestModel.getProductQuantity())
                 .isUnlisted(productRequestModel.getIsUnlisted())
@@ -81,5 +83,24 @@ public class EntityModelUtil {
 
                     return new ImageRequestModel(imageName, imageType, imageDataBytes);
                 });
+    }
+
+    public static ProductBundleResponseModel toProductBundleResponseModel(ProductBundle bundle) {
+        return ProductBundleResponseModel.builder()
+                .bundleId(bundle.getBundleId())
+                .bundleName(bundle.getBundleName())
+                .bundleDescription(bundle.getBundleDescription())
+                .productIds(bundle.getProductIds())
+                .originalTotalPrice(bundle.getOriginalTotalPrice())
+                .bundlePrice(bundle.getBundlePrice())
+                .build();
+    }
+    public static ProductBundle toProductBundleEntity(ProductBundleRequestModel requestModel) {
+        return ProductBundle.builder()
+                .bundleName(requestModel.getBundleName())
+                .bundleDescription(requestModel.getBundleDescription())
+                .productIds(requestModel.getProductIds())
+                .bundlePrice(requestModel.getBundlePrice())
+                .build();
     }
 }

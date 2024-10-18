@@ -1,5 +1,6 @@
 export enum AppRoutePaths {
   Default = '/',
+  MoveInventoryProducts = 'inventory/:inventoryId/products/:productId/move',
   EditInventory = 'inventories/inventory/:inventoryId/edit',
   EditInventoryProducts = 'inventory/:inventoryId/products/:productId/edit',
   LowStockProducts = '/products/lowstock',
@@ -56,4 +57,5 @@ export enum AppRoutePaths {
   ResetPassword = '/users/reset-password/:token',
   CustomerReviews = '/customers/visits/reviews',
   CustomerAddReview = '/customers/visits/reviews/add',
+  AllUsers = '/users',
 }

@@ -1,9 +1,6 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
-import com.petclinic.bffapigateway.dtos.Products.ProductQuantityRequest;
-import com.petclinic.bffapigateway.dtos.Products.ProductRequestDTO;
-import com.petclinic.bffapigateway.dtos.Products.ProductResponseDTO;
-import com.petclinic.bffapigateway.exceptions.InvalidInputException;
+import com.petclinic.bffapigateway.dtos.Products.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -155,6 +152,44 @@ public class ProductsServiceClient {
                 .retrieve()
                 .bodyToMono(Void.class);
     }
+
+    // Methods for product bundles
+    public Flux<ProductBundleResponseDTO> getAllProductBundles() {
+        return webClient.get()
+                .uri("/bundles")
+                .retrieve()
+                .bodyToFlux(ProductBundleResponseDTO.class);
+    }
+    public Mono<ProductBundleResponseDTO> getProductBundleById(String bundleId) {
+        return webClient.get()
+                .uri("/bundles/{bundleId}", bundleId)
+                .retrieve()
+                .bodyToMono(ProductBundleResponseDTO.class);
+    }
+    public Mono<ProductBundleResponseDTO> createProductBundle(ProductBundleRequestDTO requestDTO) {
+        return webClient.post()
+                .uri("/bundles")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestDTO)
+                .retrieve()
+                .bodyToMono(ProductBundleResponseDTO.class);
+    }
+    public Mono<ProductBundleResponseDTO> updateProductBundle(String bundleId, ProductBundleRequestDTO requestDTO) {
+        return webClient.put()
+                .uri("/bundles/{bundleId}", bundleId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestDTO)
+                .retrieve()
+                .bodyToMono(ProductBundleResponseDTO.class);
+    }
+    public Mono<Void> deleteProductBundle(String bundleId) {
+        return webClient.delete()
+                .uri("/bundles/{bundleId}", bundleId)
+                .retrieve()
+                .bodyToMono(Void.class);
+    }
+
+
 
 
 
