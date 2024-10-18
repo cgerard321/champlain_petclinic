@@ -56,12 +56,12 @@ public class DataSetupService implements CommandLineRunner {
         BillRequestDTO b30 = new BillRequestDTO("7c0d42c2-0c2d-41ce-bd9c-6ca67478956f", "general", "3", LocalDate.of(2023, 12, 20), 59.99, BillStatus.UNPAID, LocalDate.of(2024, 1, 26));
 
         Flux.just(b6, b7, b8, b9, b10, b11, b12, b13, b14, b15, b16, b17, b18, b19, b20, b21, b22, b23, b24, b25, b26, b27, b28, b29, b30)
-                .flatMap(b -> billService.CreateBill(Mono.just(b))
+                .flatMap(b -> billService.createBill(Mono.just(b))
                         .log(b.toString()))
                 .subscribe();
 
         Flux.just(b1,b2,b3,b4,b5)
-                .flatMap(b -> billService.CreateBill(Mono.just(b))
+                .flatMap(b -> billService.createBill(Mono.just(b))
                         .log(b.toString()))
                 .subscribe();
     }
