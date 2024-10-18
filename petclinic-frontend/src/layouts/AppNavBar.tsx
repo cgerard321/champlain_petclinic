@@ -2,7 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import {
   IsAdmin,
   IsInventoryManager,
-  IsOwner,
+  IsOwner, IsReceptionist,
   IsVet,
   useUser,
 } from '@/context/UserContext';
@@ -246,6 +246,11 @@ export function NavBar(): JSX.Element {
                 {IsAdmin() && (
                   <NavDropdown.Item as={Link} to={AppRoutePaths.Home}>
                     Admin Panel
+                  </NavDropdown.Item>
+                )}
+                {IsReceptionist() && (
+                  <NavDropdown.Item as={Link} to={AppRoutePaths.AddingCustomer}>
+                    Receptionist Panel
                   </NavDropdown.Item>
                 )}
                 <NavDropdown.Item
