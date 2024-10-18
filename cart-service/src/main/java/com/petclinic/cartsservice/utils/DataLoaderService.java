@@ -64,6 +64,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Filter system for small to medium-sized aquariums")
                 .productSalePrice(19.99)
                 .quantityInCart(1)
+                .productQuantity(9)
                 .averageRating(0.0)
                 .build();
 
@@ -73,6 +74,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Lightweight saddle for riding horses")
                 .productSalePrice(199.99)
                 .quantityInCart(1)
+                .productQuantity(0)
                 .averageRating(0.0)
                 .build();
 
