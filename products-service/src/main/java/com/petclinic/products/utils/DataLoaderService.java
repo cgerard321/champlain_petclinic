@@ -49,6 +49,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .requestCount(0)
                 .productType("Food")
                 .productQuantity(44)
+                .isUnlisted(false)
                 .build();
 
         Product product2 = Product.builder()
@@ -60,6 +61,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .requestCount(0)
                 .productType("Accessory")
                 .productQuantity(3)
+                .isUnlisted(false)
                 .build();
 
         Product product3 = Product.builder()
@@ -71,6 +73,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .requestCount(0)
                 .productType("Medication")
                 .productQuantity(53)
+                .isUnlisted(false)
                 .build();
 
         Product product4 = Product.builder()
@@ -82,6 +85,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .requestCount(0)
                 .productType("Accessory")
                 .productQuantity(8)
+                .isUnlisted(false)
                 .build();
 
         Product product5 = Product.builder()
@@ -93,6 +97,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .requestCount(0)
                 .productType("Accessory")
                 .productQuantity(14)
+                .isUnlisted(false)
                 .build();
 
         Product product6 = Product.builder()
@@ -104,6 +109,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .requestCount(0)
                 .productType("Equipment")
                 .productQuantity(58)
+                .isUnlisted(false)
                 .build();
 
         Product product7 = Product.builder()
@@ -115,6 +121,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .requestCount(0)
                 .productType("Accessory")
                 .productQuantity(66)
+                .isUnlisted(false)
                 .build();
 
         Product product8 = Product.builder()
@@ -126,6 +133,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .requestCount(0)
                 .productType("Accessory")
                 .productQuantity(0)
+                .isUnlisted(false)
                 .build();
 
         ProductBundle bundle1 = ProductBundle.builder()

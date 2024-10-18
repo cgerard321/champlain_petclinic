@@ -17,4 +17,5 @@ public class ProductRequestModel {
     private Double productSalePrice;
     private String productType;
     private Integer productQuantity;
+    private Boolean isUnlisted;
 }

@@ -25,5 +25,6 @@ public class Product {
     private Integer requestCount;
     private String productType;
     private Integer productQuantity;
+    private Boolean isUnlisted;
 }
 

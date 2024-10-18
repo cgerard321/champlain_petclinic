@@ -20,4 +20,5 @@ public class ProductResponseModel {
     private Integer requestCount;
     private String productType;
     private Integer productQuantity;
+    private Boolean isUnlisted;
 }

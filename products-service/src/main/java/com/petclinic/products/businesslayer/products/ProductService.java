@@ -11,6 +11,7 @@ public interface ProductService {
     Mono<ProductResponseModel> getProductByProductId(String productId);
     Mono<ProductResponseModel> addProduct(Mono<ProductRequestModel> productRequestModel);
     Mono<ProductResponseModel> updateProductByProductId(String productId, Mono<ProductRequestModel> productRequestModel);
+    Mono<ProductResponseModel> patchListingStatus(String productId, Mono<ProductRequestModel> productRequestModel);
     Mono<ProductResponseModel> deleteProductByProductId(String productId);
     Mono<Void> requestCount(String productId);
     Mono<Void> DecreaseProductCount(String productId);//When item is sold in cart//temporarily in cart.

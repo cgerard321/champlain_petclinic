@@ -10,10 +10,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -50,6 +52,7 @@ class ProductControllerUnitTest {
             .productDescription("Product 1 Description")
             .productSalePrice(100.0)
             .averageRating(0.00)
+            .isUnlisted(true)
             .build();
 
     private final ProductResponseDTO productResponseDTO1 = ProductResponseDTO.builder()
@@ -224,6 +227,101 @@ class ProductControllerUnitTest {
                 });
 
         verify(productsServiceClient, times(1)).updateProduct(productId, productRequest1);
+    }
+
+    @Test
+    public void whenPatchListingStatus_thenReturnUpdatedProduct() {
+        ProductRequestDTO patchProductRequest = ProductRequestDTO.builder()
+                .isUnlisted(true)
+                .build();
+
+        when(productsServiceClient.patchListingStatus("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a", patchProductRequest))
+                .thenReturn(Mono.just(productResponse1));
+
+        webTestClient.patch()
+                .uri(baseInventoryURL + "/e6c7398e-8ac4-4e10-9ee0-03ef33f0361a/status")
+                .bodyValue(patchProductRequest)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(ProductResponseDTO.class)
+                .isEqualTo(productResponse1);
+
+        verify(productsServiceClient, times(1)).patchListingStatus("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a", patchProductRequest);
+    }
+
+    @Test
+    public void whenPatchListingStatusNonExistentProduct_thenReturnNotFound() {
+        ProductRequestDTO patchProductRequest = ProductRequestDTO.builder()
+                .isUnlisted(true)
+                .build();
+
+        WebClientResponseException notFoundException = WebClientResponseException.create(
+                HttpStatus.NOT_FOUND.value(),
+                HttpStatus.NOT_FOUND.getReasonPhrase(),
+                null,
+                null,
+                null
+        );
+
+        when(productsServiceClient.patchListingStatus(anyString(), eq(patchProductRequest)))
+                .thenReturn(Mono.error(notFoundException));
+
+        webTestClient.patch()
+                .uri(baseInventoryURL + "/691e6945-0d4a-4b20-85cc-afd251faccfd/status")
+                .bodyValue(patchProductRequest)
+                .exchange()
+                .expectStatus().isNotFound();
+
+        verify(productsServiceClient, times(1)).patchListingStatus(anyString(), eq(patchProductRequest));
+    }
+
+    @Test
+    public void whenPatchListingStatusWithInvalidProductId_thenReturnUnprocessableEntity() {
+        ProductRequestDTO patchProductRequest = ProductRequestDTO.builder()
+                .isUnlisted(true)
+                .build();
+
+        WebClientResponseException unprocessableEntityException = WebClientResponseException.create(
+                HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                HttpStatus.UNPROCESSABLE_ENTITY.getReasonPhrase(),
+                null,
+                null,
+                null
+        );
+
+        when(productsServiceClient.patchListingStatus(anyString(), eq(patchProductRequest)))
+                .thenReturn(Mono.error(unprocessableEntityException));
+
+        webTestClient.patch()
+                .uri(baseInventoryURL + "/e6c7398e-8ac4-4e10-9ee0-03ef33f0361a/status")
+                .bodyValue(patchProductRequest)
+                .exchange()
+                .expectStatus().is4xxClientError();  // Expect 422 status
+
+        verify(productsServiceClient, times(1)).patchListingStatus(anyString(), eq(patchProductRequest));
+    }
+
+    @Test
+    public void whenPatchListingStatusServiceThrowsException_thenReturnInternalServerError() {
+        ProductRequestDTO patchProductRequest = ProductRequestDTO.builder()
+                .isUnlisted(true)
+                .build();
+
+        when(productsServiceClient.patchListingStatus("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a", patchProductRequest))
+                .thenReturn(Mono.error(new RuntimeException("Service layer exception")));
+
+        webTestClient.patch()
+                .uri(baseInventoryURL + "/e6c7398e-8ac4-4e10-9ee0-03ef33f0361a/status")
+                .bodyValue(patchProductRequest)
+                .exchange()
+                .expectStatus().is5xxServerError()
+                .expectBody()
+                .consumeWith(response -> {
+                    String responseBody = new String(response.getResponseBody());
+                    assertTrue(responseBody.contains("Internal Server Error"));
+                });
+
+        verify(productsServiceClient, times(1)).patchListingStatus("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a", patchProductRequest);
     }
 
     @Test
