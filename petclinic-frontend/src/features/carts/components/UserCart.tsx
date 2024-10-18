@@ -619,3 +619,4 @@ const UserCart = (): JSX.Element => {
 };
 
 export default UserCart;
+
