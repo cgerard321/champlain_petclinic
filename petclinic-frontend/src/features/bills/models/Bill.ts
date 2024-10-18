@@ -12,4 +12,5 @@ export interface Bill {
   taxedAmount: number;
   billStatus: string;
   dueDate: string;
+  timeRemaining: number;
 }

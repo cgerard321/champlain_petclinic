@@ -1,5 +1,6 @@
 package com.petclinic.billing.datalayer;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -24,6 +25,6 @@ public class BillResponseDTO {
     private double taxedAmount;
     private BillStatus billStatus;
     private LocalDate dueDate;
-
+    private Long timeRemaining;
 
     }
