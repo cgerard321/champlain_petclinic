@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.dtos.Products.ProductRequestDTO;
 
 import com.petclinic.bffapigateway.dtos.Products.ProductResponseDTO;
+import com.petclinic.bffapigateway.dtos.Products.ProductType;
 import com.petclinic.bffapigateway.dtos.Products.ProductStatus;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -142,8 +143,8 @@ class ProductsServiceClientIntegrationTest {
                 10.00,
                 0.00,
                 0,
-                "type",
                 6,
+                ProductType.FOOD,
                 ProductStatus.AVAILABLE
 
 
@@ -172,8 +173,8 @@ class ProductsServiceClientIntegrationTest {
                 10.00,
                 0.00,
                 0,
-                "type",
                 6,
+                ProductType.FOOD,
                 ProductStatus.AVAILABLE
         );
 
@@ -200,8 +201,8 @@ class ProductsServiceClientIntegrationTest {
                 10.00,
                 0.00,
                 0,
-                "type",
                 6,
+                ProductType.FOOD,
                 ProductStatus.AVAILABLE
 
 

@@ -8,6 +8,7 @@ import com.petclinic.products.datalayer.products.ProductBundleRepository;
 import com.petclinic.products.datalayer.products.ProductRepository;
 import com.petclinic.products.datalayer.ratings.Rating;
 import com.petclinic.products.datalayer.ratings.RatingRepository;
+import com.petclinic.products.datalayer.products.ProductType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
@@ -48,7 +49,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Premium dry food for adult dogs")
                 .productSalePrice(45.99)
                 .requestCount(0)
-                .productType("Food")
+                .productType(ProductType.FOOD)
                 .productQuantity(44)
                 .releaseDate(LocalDate.parse("2002-09-26"))
                 .build();
@@ -60,7 +61,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Clumping cat litter with odor control")
                 .productSalePrice(12.99)
                 .requestCount(0)
-                .productType("Accessory")
+                .productType(ProductType.ACCESSORY)
                 .productQuantity(3)
                 .releaseDate(LocalDate.parse("2020-06-30"))
                 .build();
@@ -72,7 +73,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Flea and tick prevention for small dogs")
                 .productSalePrice(9.99)
                 .requestCount(0)
-                .productType("Medication")
+                .productType(ProductType.MEDICATION)
                 .productQuantity(53)
                 .releaseDate(LocalDate.parse("2019-09-29"))
                 .build();
@@ -84,7 +85,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Spacious cage for small birds like parakeets")
                 .productSalePrice(29.99)
                 .requestCount(0)
-                .productType("Accessory")
+                .productType(ProductType.ACCESSORY)
                 .productQuantity(8)
                 .releaseDate(LocalDate.parse("2023-05-06"))
                 .build();
@@ -96,7 +97,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Filter system for small to medium-sized aquariums")
                 .productSalePrice(19.99)
                 .requestCount(0)
-                .productType("Accessory")
+                .productType(ProductType.ACCESSORY)
                 .productQuantity(14)
                 .releaseDate(LocalDate.parse("2025-09-29"))
                 .build();
@@ -108,7 +109,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Lightweight saddle for riding horses")
                 .productSalePrice(199.99)
                 .requestCount(0)
-                .productType("Equipment")
+                .productType(ProductType.EQUIPMENT)
                 .productQuantity(58)
                 .releaseDate(LocalDate.parse("1988-09-29"))
                 .build();
@@ -120,7 +121,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Outdoor wooden hutch for rabbits")
                 .productSalePrice(79.99)
                 .requestCount(0)
-                .productType("Accessory")
+                .productType(ProductType.ACCESSORY)
                 .productQuantity(66)
                 .releaseDate(LocalDate.parse("2024-02-22"))
                 .build();
@@ -132,7 +133,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productDescription("Submersible heater for tropical fish tanks")
                 .productSalePrice(14.99)
                 .requestCount(0)
-                .productType("Accessory")
+                .productType(ProductType.ACCESSORY)
                 .productQuantity(0)
                 .releaseDate(LocalDate.parse("2022-09-19"))
                 .build();
