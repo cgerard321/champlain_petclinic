@@ -39,6 +39,8 @@ public interface UserService {
 
     User createUser(UserIDLessRoleLessDTO user);
 
+    User updateUser(String userID, UserPasswordLessDTO userPasswordLessDTO);
+
     List<UserDetails> findAllWithoutPage();
 
     Mail generateVerificationMail(User user);
