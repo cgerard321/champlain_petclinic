@@ -31,12 +31,20 @@ jobs:
         run: ./gradlew build
 
       - name: Create coverage-data directory and copy contents
+        id: zipreports
         if: success() || failure()
         run: |
           mkdir -p .qodana/code-coverage
+          echo 'JACOCO_SUMMARY<<EOF' > $GITHUB_OUTPUT
           for service in $(find -maxdepth 1 -type d -name '*service*' -o -name '*gateway*' | sed 's/.\///'); do
-            [[ -d $service/build/reports ]] && cp -R "$service/build/reports" ".qodana/code-coverage/$service" 2>/dev/null || :
+            if [ -d $service/build && -d $service/build/reports ]; then
+              cp -R "$service/build/reports" ".qodana/code-coverage/$service"
+              if [[ -d "$service/build/reports/jacoco" ]]; then
+                cat "$service/build/reports/jacoco/test/html/index.html" >> $GITHUB_OUTPUT
+              fi
+            fi
           done
+          echo 'EOF' >> $GITHUB_OUTPUT
 
       - name: Archive coverage data
         if: success() || failure()
@@ -53,7 +61,7 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: 'Comment test'
+              body: '${{ steps.zipreports.outputs.JACOCO_SUMMARY }}'
             })
         
 
