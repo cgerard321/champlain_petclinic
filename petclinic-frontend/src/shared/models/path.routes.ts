@@ -35,6 +35,7 @@ export enum AppRoutePaths {
   Products = '/products',
   Visits = '/visits',
   Carts = '/carts',
+  Invoice = '/invoice',
   UserCart = '/carts/:cartId',
   AddVisit = '/visits/add',
   CustomerProfile = '/customer/profile',
