@@ -9,6 +9,7 @@ import { FaShoppingCart } from 'react-icons/fa'; // Importing the shopping cart 
 
 interface ProductAPIResponse {
   productId: number;
+
   productName: string;
   productDescription: string;
   productSalePrice: number;

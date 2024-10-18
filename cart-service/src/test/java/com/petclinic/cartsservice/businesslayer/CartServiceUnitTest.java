@@ -17,7 +17,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.BeanUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -50,6 +49,7 @@ class CartServiceUnitTest {
             .productSalePrice(100.0)
             .quantityInCart(1)
             .averageRating(4.5)
+            .productQuantity(10) // Initialized productQuantity
             .build();
 
     private final CartProduct product2 = CartProduct.builder()
@@ -59,6 +59,7 @@ class CartServiceUnitTest {
             .productSalePrice(200.0)
             .quantityInCart(1)
             .averageRating(4.0)
+            .productQuantity(5) // Initialized productQuantity
             .build();
 
     private final CartProduct product3 = CartProduct.builder()
@@ -68,6 +69,7 @@ class CartServiceUnitTest {
             .productSalePrice(300.0)
             .quantityInCart(1)
             .averageRating(3.5)
+            .productQuantity(15) // Initialized productQuantity
             .build();
 
     private final List<CartProduct> products = new ArrayList<>(Arrays.asList(product1, product2));
@@ -79,6 +81,7 @@ class CartServiceUnitTest {
             .productSalePrice(45.99)
             .quantityInCart(2)
             .averageRating(5.0)
+            .productQuantity(8) // Initialized productQuantity
             .build();
 
     CartProduct wishlistProduct2 = CartProduct.builder()
@@ -88,10 +91,10 @@ class CartServiceUnitTest {
             .productSalePrice(12.99)
             .quantityInCart(1)
             .averageRating(3.0)
+            .productQuantity(5) // Initialized productQuantity
             .build();
 
     List<CartProduct> wishListProducts = List.of(wishListProduct1, wishlistProduct2);
-
 
     private final Cart cart1 = Cart.builder()
             .cartId("98f7b33a-d62a-420a-a84a-05a27c85fc91")
@@ -107,39 +110,39 @@ class CartServiceUnitTest {
     private final String nonExistentProductId = "a7d573-bcab-5555-956f-773324b92a80";
 
 
-     @Test
-     public void whenGetCartById_thenReturnCartResponseModel() {
-         when(cartRepository.findCartByCartId(cart1.getCartId())).thenReturn(Mono.just(cart1));
+    @Test
+    public void whenGetCartById_thenReturnCartResponseModel() {
+        when(cartRepository.findCartByCartId(cart1.getCartId())).thenReturn(Mono.just(cart1));
 
-         Mono<CartResponseModel> result = cartService.getCartByCartId(cart1.getCartId());
+        Mono<CartResponseModel> result = cartService.getCartByCartId(cart1.getCartId());
 
-         StepVerifier.create(result)
-                 .expectNextMatches(cartResponseModel -> cartResponseModel.getCartId().equals(cart1.getCartId()))
-                 .verifyComplete();
-     }
+        StepVerifier.create(result)
+                .expectNextMatches(cartResponseModel -> cartResponseModel.getCartId().equals(cart1.getCartId()))
+                .verifyComplete();
+    }
 
-     @Test
-     public void whenGetCartByCartId_withNonExistentCartId_thenThrowNotFoundException() {
-         when(cartRepository.findCartByCartId(nonExistentCartId)).thenReturn(Mono.empty());
+    @Test
+    public void whenGetCartByCartId_withNonExistentCartId_thenThrowNotFoundException() {
+        when(cartRepository.findCartByCartId(nonExistentCartId)).thenReturn(Mono.empty());
 
-         Mono<CartResponseModel> result = cartService.getCartByCartId(nonExistentCartId);
+        Mono<CartResponseModel> result = cartService.getCartByCartId(nonExistentCartId);
 
-         StepVerifier.create(result)
-                 .expectErrorMatches(throwable -> throwable instanceof NotFoundException
-                         && throwable.getMessage().equals("Cart id was not found: " + nonExistentCartId))
-                 .verify();
-     }
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof NotFoundException
+                        && throwable.getMessage().equals("Cart id was not found: " + nonExistentCartId))
+                .verify();
+    }
 
-     @Test
-     public void whenGetAllCarts_thenReturnCartResponseModel() {
-         when(cartRepository.findAll()).thenReturn(Flux.just(cart1));
+    @Test
+    public void whenGetAllCarts_thenReturnCartResponseModel() {
+        when(cartRepository.findAll()).thenReturn(Flux.just(cart1));
 
-         Flux<CartResponseModel> result = cartService.getAllCarts();
+        Flux<CartResponseModel> result = cartService.getAllCarts();
 
-         StepVerifier.create(result)
-                 .expectNextMatches(cartResponseModel -> cartResponseModel.getCartId().equals(cart1.getCartId()))
-                 .verifyComplete();
-     }
+        StepVerifier.create(result)
+                .expectNextMatches(cartResponseModel -> cartResponseModel.getCartId().equals(cart1.getCartId()))
+                .verifyComplete();
+    }
 
 
 
@@ -167,9 +170,6 @@ class CartServiceUnitTest {
 
 //     }
 
-
-
-    
 
 
 
@@ -216,51 +216,51 @@ class CartServiceUnitTest {
 //     }
 
     @Test
-     void getAllCarts_ReturnsCartResponseModelWithProducts() {
-         //mocking cart retrieval
-         when(cartRepository.findAll()).thenReturn(Flux.just(cart1));
+    void getAllCarts_ReturnsCartResponseModelWithProducts() {
+        //mocking cart retrieval
+        when(cartRepository.findAll()).thenReturn(Flux.just(cart1));
 
 
-         //run the test
-         StepVerifier.create(cartService.getAllCarts())
-                 .expectNextMatches(cartResponseModel ->
-                         cartResponseModel.getCustomerId().equals("1") &&
-                                 cartResponseModel.getProducts().size() == 2 &&
-                                 cartResponseModel.getProducts().get(0).getProductName().equals("Product1") &&
-                                 cartResponseModel.getProducts().get(1).getProductName().equals("Product2")
-                 )
-                 .verifyComplete();
+        //run the test
+        StepVerifier.create(cartService.getAllCarts())
+                .expectNextMatches(cartResponseModel ->
+                        cartResponseModel.getCustomerId().equals("1") &&
+                                cartResponseModel.getProducts().size() == 2 &&
+                                cartResponseModel.getProducts().get(0).getProductName().equals("Product1") &&
+                                cartResponseModel.getProducts().get(1).getProductName().equals("Product2")
+                )
+                .verifyComplete();
 
-         // Verify interactions
-         verify(cartRepository, times(1)).findAll();
-     }
+        // Verify interactions
+        verify(cartRepository, times(1)).findAll();
+    }
 
-     @Test
-     void getAllCarts_ReturnsCartWithoutProducts() {
-         //mocking cart retrieval with an empty product list
-         Cart cartWithNoProducts = Cart.builder()
-                 .cartId("123")
-                 .customerId("2")
-                 .products(new ArrayList<>())
-                 .build();
+    @Test
+    void getAllCarts_ReturnsCartWithoutProducts() {
+        //mocking cart retrieval with an empty product list
+        Cart cartWithNoProducts = Cart.builder()
+                .cartId("123")
+                .customerId("2")
+                .products(new ArrayList<>())
+                .build();
 
-         when(cartRepository.findAll()).thenReturn(Flux.just(cartWithNoProducts));
+        when(cartRepository.findAll()).thenReturn(Flux.just(cartWithNoProducts));
 
-         // Run the test
-         StepVerifier.create(cartService.getAllCarts())
-                 .expectNextMatches(cartResponseModel ->
-                         cartResponseModel.getCustomerId().equals("2") &&
-                                 cartResponseModel.getProducts().isEmpty() //no products in the cart
-                 )
-                 .verifyComplete();
+        // Run the test
+        StepVerifier.create(cartService.getAllCarts())
+                .expectNextMatches(cartResponseModel ->
+                        cartResponseModel.getCustomerId().equals("2") &&
+                                cartResponseModel.getProducts().isEmpty() //no products in the cart
+                )
+                .verifyComplete();
 
-         // Verify interactions
-         verify(cartRepository, times(1)).findAll();
-         verifyNoInteractions(productClient); //no products, so productClient shouldn't be called
-     }
+        // Verify interactions
+        verify(cartRepository, times(1)).findAll();
+        verifyNoInteractions(productClient); //no products, so productClient shouldn't be called
+    }
 
-     @Test
-     void getAllCarts_ReturnsMultipleCartsWithProducts() {
+    @Test
+    void getAllCarts_ReturnsMultipleCartsWithProducts() {
         when(cartRepository.findAll()).thenReturn(Flux.just(cart1));
 
         //mocking product retrieval
@@ -275,25 +275,25 @@ class CartServiceUnitTest {
                 )
                 .verifyComplete();
 
-         // Verify interactions
-         verify(cartRepository, times(1)).findAll();
-         verifyNoInteractions(productClient); //no products, so productClient shouldn't be called
-     }
+        // Verify interactions
+        verify(cartRepository, times(1)).findAll();
+        verifyNoInteractions(productClient); //no products, so productClient shouldn't be called
+    }
 
-     @Test
-     void getAllCarts_ReturnsEmptyListWhenNoCarts() {
-         //mocking empty cart retrieval
-         when(cartRepository.findAll()).thenReturn(Flux.empty());
+    @Test
+    void getAllCarts_ReturnsEmptyListWhenNoCarts() {
+        //mocking empty cart retrieval
+        when(cartRepository.findAll()).thenReturn(Flux.empty());
 
-         //run the test
-         StepVerifier.create(cartService.getAllCarts())
-                 .expectNextCount(0) //no carts should be returned
-                 .verifyComplete();
+        //run the test
+        StepVerifier.create(cartService.getAllCarts())
+                .expectNextCount(0) //no carts should be returned
+                .verifyComplete();
 
-         //verify interactions
-         verify(cartRepository, times(1)).findAll();
-         verifyNoInteractions(productClient); //no carts, so productClient shouldn't be called
-     }
+        //verify interactions
+        verify(cartRepository, times(1)).findAll();
+        verifyNoInteractions(productClient); //no carts, so productClient shouldn't be called
+    }
 
     @Test
     void addProductToCart_NewProduct_Success() {
@@ -341,7 +341,7 @@ class CartServiceUnitTest {
         StepVerifier.create(result)
                 .expectNextMatches(cartResponseModel -> cartResponseModel.getProducts().stream()
                         .anyMatch(product -> product.getProductId().equals(productId) &&
-                                product.getQuantityInCart() == quantityToAdd + 1)) // already 1 in cart
+                                product.getQuantityInCart() == (quantityToAdd + 1))) // already 1 in cart
                 .verifyComplete();
 
         verify(cartRepository, times(1)).save(any(Cart.class));
@@ -502,6 +502,7 @@ class CartServiceUnitTest {
         product.setProductId("product1");
         product.setProductSalePrice(100.0);
         product.setQuantityInCart(3); // 3 items at $100 each
+        product.setProductQuantity(10); // Stock available
 
         cart.setProducts(List.of(product));
 
@@ -564,6 +565,7 @@ class CartServiceUnitTest {
                 .cartId(cart1.getCartId())
                 .customerId(cart1.getCustomerId())
                 .products(Collections.singletonList(product2)) // only product2 remains after removal
+                .wishListProducts(cart1.getWishListProducts()) // maintain existing wishlist
                 .build();
 
         // Mock the save method to return the updated cart
@@ -703,17 +705,14 @@ class CartServiceUnitTest {
     void whenMoveProductFromWishListToCart_thenSuccess() {
         // Arrange
         String cartId = cart1.getCartId();
-        String productId = product1.getProductId();
+        String productId = wishListProduct1.getProductId();
 
-        // Create mutable copies of products and wishlist
+        // Prepare updated lists
         List<CartProduct> updatedProducts = new ArrayList<>(cart1.getProducts());
-        List<CartProduct> updatedWishListProducts = cart1.getWishListProducts() != null
-                ? new ArrayList<>(cart1.getWishListProducts())
-                : new ArrayList<>();
+        updatedProducts.add(wishListProduct1); // Move from wishlist to cart
 
-        // Use productId to remove product
-        updatedWishListProducts.removeIf(p -> p.getProductId().equals(productId)); // safer removal
-        updatedProducts.add(product1); // Adding back to products
+        List<CartProduct> updatedWishListProducts = new ArrayList<>(cart1.getWishListProducts());
+        updatedWishListProducts.removeIf(p -> p.getProductId().equals(productId));
 
         // The cart after the operation
         Cart updatedCart = Cart.builder()
@@ -723,27 +722,31 @@ class CartServiceUnitTest {
                 .wishListProducts(updatedWishListProducts)
                 .build();
 
+        // Mocking repository behavior
         when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart1));
         when(cartRepository.save(any(Cart.class))).thenReturn(Mono.just(updatedCart));
 
         // Act
         Mono<CartResponseModel> result = cartService.moveProductFromWishListToCart(cartId, productId);
 
-        // Assert
+        // Assert using StepVerifier
         StepVerifier.create(result)
-                .expectNextMatches(cartResponse -> {
-                    // Check that the product is removed from the wishlist and added to the products list
-                    return cartResponse.getWishListProducts().stream().noneMatch(p -> p.getProductId().equals(productId)) &&
-                            cartResponse.getProducts().stream().anyMatch(p -> p.getProductId().equals(productId));
+                .assertNext(cartResponse -> {
+                    // Verify product is in the cart
+                    assertTrue(cartResponse.getProducts().stream()
+                                    .anyMatch(p -> p.getProductId().equals(productId)),
+                            "Product should be moved to the cart.");
+
+                    // Verify product is removed from the wishlist
+                    assertTrue(cartResponse.getWishListProducts().stream()
+                                    .noneMatch(p -> p.getProductId().equals(productId)),
+                            "Product should be removed from the wishlist.");
                 })
                 .verifyComplete();
 
-        // Verify cartRepository interactions
+        // Verify repository interactions
+        verify(cartRepository, times(1)).findCartByCartId(cartId);
         verify(cartRepository, times(1)).save(any(Cart.class));
-
-        // Ensure that cart1 is properly modified and its wishlist is updated
-        assertTrue(updatedWishListProducts.stream().noneMatch(p -> p.getProductId().equals(productId)));
-        assertTrue(updatedProducts.stream().anyMatch(p -> p.getProductId().equals(productId)));
     }
 
 
@@ -1000,5 +1003,3 @@ class CartServiceUnitTest {
 
 
 }
-
-
