@@ -13,6 +13,7 @@ import { addImage } from './api/addImage';
 import { ImageModel } from './models/ProductModels/ImageModel';
 import StarRating from '@/features/products/components/StarRating.tsx';
 import './components/StarRating.css';
+import { ProductType } from '@/features/products/api/ProductTypeEnum.ts';
 import { getAllProductBundles } from './api/getAllProductBundles';
 import { ProductBundleModel } from './models/ProductModels/ProductBundleModel';
 import ProductBundle from './components/ProductBundle';
@@ -224,13 +225,19 @@ export default function ProductList(): JSX.Element {
           </label>
           <label>
             Product Type:
-            <input
-              type="text"
-              placeholder="Enter product type"
+            <select
               value={filterType}
               onChange={e => setFilterType(e.target.value)}
-            />
+            >
+              <option value="">Select Product Type</option>
+              {Object.values(ProductType).map(type => (
+                <option key={type} value={type}>
+                  {type.charAt(0).toUpperCase() + type.slice(1).toLowerCase()}
+                </option>
+              ))}
+            </select>
           </label>
+
           <div className="star-rating-container">
             <h2>Filter by Star Rating</h2>
             <div className="star-row">
