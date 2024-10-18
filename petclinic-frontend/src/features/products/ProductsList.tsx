@@ -259,7 +259,11 @@ export default function ProductList(): JSX.Element {
             <option value="asc">Low to High</option>
             <option value="desc">High to Low</option>
           </select>
-          <button className="apply-filter-button" disabled={validationMessage !== ''} onClick={fetchProducts}>
+          <button
+            className="apply-filter-button"
+            disabled={validationMessage !== ''}
+            onClick={fetchProducts}
+          >
             Apply
           </button>
           <button className="clear-filter-button" onClick={clearFilters}>
