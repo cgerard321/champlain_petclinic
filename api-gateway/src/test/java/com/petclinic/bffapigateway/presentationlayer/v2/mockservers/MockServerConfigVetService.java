@@ -470,4 +470,34 @@ public class MockServerConfigVetService {
                                 .withBody("{\"message\":\"Education not found for vetId: " + vetId + " and educationId: " + educationId + "\"}")
                 );
     }
+
+    public void registerGetRatingsByVetIdEndpoint(String vetId, String ratingsJson) {
+        mockServerClient_VetService
+                .when(
+                        request()
+                                .withMethod("GET")
+                                .withPath("/vets/" + vetId + "/ratings")
+                )
+                .respond(
+                        response()
+                                .withStatusCode(200)
+                                .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                                .withBody(ratingsJson)
+                );
+    }
+
+    public void registerGetRatingsByVetIdEndpointNotFound(String vetId) {
+        mockServerClient_VetService
+                .when(
+                        request()
+                                .withMethod("GET")
+                                .withPath("/vets/" + vetId + "/ratings")
+                )
+                .respond(
+                        response()
+                                .withStatusCode(404)
+                                .withBody("{\"message\":\"No ratings found for vetId: " + vetId + "\"}")
+                );
+    }
+
 }
