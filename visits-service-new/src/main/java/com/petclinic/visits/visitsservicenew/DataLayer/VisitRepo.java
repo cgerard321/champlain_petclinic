@@ -32,4 +32,7 @@ public interface VisitRepo extends ReactiveMongoRepository<Visit, String> {
 
     Flux<Visit> findVisitsByDescriptionContainingIgnoreCase(String Description);
 
+    Flux<Visit> getVisitsByReminderFalse();
+
+    Flux<Visit> getVisitsByReminderTrue();
 }

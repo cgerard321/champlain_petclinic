@@ -4144,8 +4144,41 @@ private VetAverageRatingDTO buildVetAverageRatingDTO(){
                 .build();
     }
 
+    @Test
+    void getVisitsByReminderIsFalse_ShouldReturnVisits() {
+        // Arrange
+        VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
+                .visitId(UUID.randomUUID().toString())
+                .description("Test Visit")
+                .build();
 
+        when(visitsServiceClient.getAllVisitsByReminderIsFalse())
+                .thenReturn(Flux.just(visitResponseDTO));
 
+        // Act & Assert
+        client.get()
+                .uri("/visits/reminder/false")
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    void getVisitsByReminderIsTrue_ShouldReturnVisits() {
+        // Arrange
+        VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
+                .visitId(UUID.randomUUID().toString())
+                .description("Test Visit")
+                .build();
+
+        when(visitsServiceClient.getAllVisitsByReminderIsTrue())
+                .thenReturn(Flux.just(visitResponseDTO));
+
+        // Act & Assert
+        client.get()
+                .uri("/visits/reminder/true")
+                .exchange()
+                .expectStatus().isNotFound();
+    }
 
 
 

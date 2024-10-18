@@ -653,6 +653,35 @@ class VisitsControllerIntegrationTest {
                 });
     }
 
+    @Test
+    void getAllVisitsByReminderIsFalse() {
+        when(entityDtoUtil.toVisitResponseDTO(any())).thenReturn(Mono.just(visitResponseDTO));
+        webTestClient
+                .get()
+                .uri("/visits/reminder/false")
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE + ";charset=UTF-8")
+                .expectBodyList(VisitResponseDTO.class)
+                .value((list) -> assertEquals(list.size(), 9));
+    }
+
+    @Test
+    void getAllVisitsByReminderIsTrue() {
+        when(entityDtoUtil.toVisitResponseDTO(any())).thenReturn(Mono.just(visitResponseDTO));
+        webTestClient
+                .get()
+                .uri("/visits/reminder/true")
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE + ";charset=UTF-8")
+                .expectBodyList(VisitResponseDTO.class)
+                .value((list) -> assertEquals(list.size(), 13)); // Update the expected size accordingly
+    }
+
+
 
 }
 

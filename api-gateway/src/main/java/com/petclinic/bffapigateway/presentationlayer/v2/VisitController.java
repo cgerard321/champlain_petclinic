@@ -231,6 +231,17 @@ public class VisitController {
     public Flux<ReviewResponseDTO> getReviewsByOwnerId(final @PathVariable String ownerId) {
         return visitsServiceClient.getReviewsByOwnerId(ownerId);
     }
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping(value = "/reminder/false", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<VisitResponseDTO> getAllVisitsByReminderIsFalse() {
+        return visitsServiceClient.getAllVisitsByReminderIsFalse();
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping(value = "/reminder/true", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<VisitResponseDTO> getAllVisitsByReminderTrue() {
+        return visitsServiceClient.getAllVisitsByReminderIsTrue();
+    }
 
     @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN})
     @PostMapping(value = "/owners/{ownerId}/reviews", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)

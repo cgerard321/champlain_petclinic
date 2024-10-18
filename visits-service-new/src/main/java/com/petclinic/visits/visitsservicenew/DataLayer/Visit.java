@@ -34,4 +34,7 @@ public class Visit {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     LocalDateTime visitEndDate;
 
+    private boolean reminder;
+
+    private String ownerEmail;
 }

@@ -43,6 +43,10 @@ public interface VisitService {
 
     Mono<InputStreamResource> exportVisitsToCSV();
 
+    Flux<VisitResponseDTO> getAllVisitsByReminderIsFalse();
+
+    Flux<VisitResponseDTO> getAllVisitsByReminderIsTrue();
+
 //    Mono<VetDTO> testingGetVetDTO(String vetId);
 //    Mono<PetResponseDTO> testingGetPetDTO(int petId);
 

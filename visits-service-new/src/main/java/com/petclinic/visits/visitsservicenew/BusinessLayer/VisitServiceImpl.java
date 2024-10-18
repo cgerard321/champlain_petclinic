@@ -61,12 +61,13 @@ public class VisitServiceImpl implements VisitService {
      * @return all Visits as Flux
      */
     @Override
-    public Flux<VisitResponseDTO> getAllVisits(String descritpion) {
+    public Flux<VisitResponseDTO> getAllVisits(String description) {
         Flux<Visit> visits;
 
-        if (descritpion != null && !descritpion.isBlank()) {
-            visits = repo.findVisitsByDescriptionContainingIgnoreCase(descritpion);
-        } else {
+        if(description != null && !description.isBlank()){
+            visits = repo.findVisitsByDescriptionContainingIgnoreCase(description);
+        }
+        else {
             visits = repo.findAll();
         }
         return visits.flatMap(entityDtoUtil::toVisitResponseDTO);
@@ -499,6 +500,18 @@ public class VisitServiceImpl implements VisitService {
                 // Save the updated visit
                 .flatMap(repo::save)
                 // Convert to VisitResponseDTO
+                .flatMap(entityDtoUtil::toVisitResponseDTO);
+    }
+
+    @Override
+    public Flux<VisitResponseDTO> getAllVisitsByReminderIsFalse() {
+        return repo.getVisitsByReminderFalse()
+                .flatMap(entityDtoUtil::toVisitResponseDTO);
+    }
+
+    @Override
+    public Flux<VisitResponseDTO> getAllVisitsByReminderIsTrue() {
+        return repo.getVisitsByReminderTrue()
                 .flatMap(entityDtoUtil::toVisitResponseDTO);
     }
 

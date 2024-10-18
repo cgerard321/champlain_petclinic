@@ -112,4 +112,88 @@ class VisitRepoTest {
                 .practitionerId(vetId)
                 .status(Status.UPCOMING).build();
     }
+
+    @Test
+    void getVisitsByReminderFalse_ShouldReturnVisitsWithoutReminder() {
+        // Prepare test data with reminder set to false
+        Visit visit1 = Visit.builder()
+                .visitId("visit1")
+                .visitDate(LocalDateTime.now())
+                .description("Visit with reminder false")
+                .petId("1")
+                .practitionerId("vet1")
+                .status(Status.UPCOMING)
+                .reminder(false)  // Reminder is false
+                .visitEndDate(LocalDateTime.now().plusHours(1))
+                .reminder(false)
+                .ownerEmail("ownerEmail@gmail.com")
+                .build();
+
+        Visit visit2 = Visit.builder()
+                .visitId("visit2")
+                .visitDate(LocalDateTime.now().plusDays(1))
+                .description("Another visit with reminder false")
+                .petId("2")
+                .practitionerId("vet2")
+                .status(Status.COMPLETED)
+                .visitEndDate(LocalDateTime.now().plusDays(1).plusHours(1))
+                .reminder(false)  // Reminder is false
+                .ownerEmail("ownerEmail@gmail.com")
+                .build();
+
+        // Save the visits to the repository
+        visitRepo.saveAll(Flux.just(visit1, visit2)).blockLast();
+
+        // Execute the method to get visits with reminder = false
+        Flux<Visit> visitsByReminderFalse = visitRepo.getVisitsByReminderFalse();
+
+        // Verify that both visits are returned
+        StepVerifier.create(visitsByReminderFalse)
+                .expectNextMatches(visit -> !visit.isReminder())  // First visit
+                .expectNextMatches(visit -> !visit.isReminder())  // Second visit
+                .thenCancel()  // Cancel the verification upon receiving the first visit
+                .verify();
+    }
+
+    @Test
+    void getVisitsByReminderTrue_ShouldReturnVisitsWithReminder() {
+        // Prepare test data with reminder set to true
+        Visit visit1 = Visit.builder()
+                .visitId("visit1")
+                .visitDate(LocalDateTime.now())
+                .description("Visit with reminder true")
+                .petId("1")
+                .practitionerId("vet1")
+                .status(Status.UPCOMING)
+                .reminder(true)  // Reminder is true
+                .visitEndDate(LocalDateTime.now().plusHours(1))
+                .ownerEmail("ownerEmail@gmail.com")
+                .build();
+
+        Visit visit2 = Visit.builder()
+                .visitId("visit2")
+                .visitDate(LocalDateTime.now().plusDays(1))
+                .description("Another visit with reminder true")
+                .petId("2")
+                .practitionerId("vet2")
+                .status(Status.COMPLETED)
+                .visitEndDate(LocalDateTime.now().plusDays(1).plusHours(1))
+                .reminder(true)  // Reminder is true
+                .ownerEmail("ownerEmail@gmail.com")
+                .build();
+
+        // Save the visits to the repository
+        visitRepo.saveAll(Flux.just(visit1, visit2)).blockLast();
+
+        // Execute the method to get visits with reminder = true
+        Flux<Visit> visitsByReminderTrue = visitRepo.getVisitsByReminderTrue();
+
+        // Verify that both visits are returned
+        StepVerifier.create(visitsByReminderTrue)
+                .expectNextMatches(visit -> visit.isReminder())  // First visit
+                .expectNextMatches(visit -> visit.isReminder())  // Second visit
+                .thenCancel()  // Cancel the verification upon receiving the first visit
+                .verify();
+    }
+
 }

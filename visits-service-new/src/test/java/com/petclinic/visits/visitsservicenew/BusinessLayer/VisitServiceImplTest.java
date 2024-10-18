@@ -716,4 +716,69 @@ class VisitServiceImplTest {
         VisitRequestDTO requestDTO = buildVisitRequestDTO();
         return Mono.just(requestDTO);
     }
+
+    @Test
+    void getAllVisitsByReminderIsFalse() {
+        // Arrange
+        Visit visit = buildVisit("Visit with reminder false");
+        VisitResponseDTO visitResponseDTO = buildVisitResponseDTO();
+
+        when(visitRepo.getVisitsByReminderFalse()).thenReturn(Flux.just(visit));
+        when(entityDtoUtil.toVisitResponseDTO(visit)).thenReturn(Mono.just(visitResponseDTO));
+
+        // Act
+        Flux<VisitResponseDTO> result = visitService.getAllVisitsByReminderIsFalse();
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNext(visitResponseDTO)
+                .verifyComplete();
+    }
+
+    @Test
+    void getAllVisitsByReminderIsTrue() {
+        // Arrange
+        Visit visit = buildVisit("Visit with reminder true");
+        VisitResponseDTO visitResponseDTO = buildVisitResponseDTO();
+
+        when(visitRepo.getVisitsByReminderTrue()).thenReturn(Flux.just(visit));
+        when(entityDtoUtil.toVisitResponseDTO(visit)).thenReturn(Mono.just(visitResponseDTO));
+
+        // Act
+        Flux<VisitResponseDTO> result = visitService.getAllVisitsByReminderIsTrue();
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNext(visitResponseDTO)
+                .verifyComplete();
+    }
+
+    @Test
+    void getAllVisitsByReminderIsFalse_NoVisitsFound() {
+        // Arrange
+        when(visitRepo.getVisitsByReminderFalse()).thenReturn(Flux.empty());
+
+        // Act
+        Flux<VisitResponseDTO> result = visitService.getAllVisitsByReminderIsFalse();
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNextCount(0)
+                .verifyComplete();
+    }
+
+    @Test
+    void getAllVisitsByReminderIsTrue_NoVisitsFound() {
+        // Arrange
+        when(visitRepo.getVisitsByReminderTrue()).thenReturn(Flux.empty());
+
+        // Act
+        Flux<VisitResponseDTO> result = visitService.getAllVisitsByReminderIsTrue();
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNextCount(0)
+                .verifyComplete();
+    }
+
 }

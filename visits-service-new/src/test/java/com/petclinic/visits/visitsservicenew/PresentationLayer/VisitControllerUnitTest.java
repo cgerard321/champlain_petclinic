@@ -1120,5 +1120,73 @@ class VisitControllerUnitTest {
                 .exchange()
                 .expectStatus().is5xxServerError();
     }
+
+    @Test
+    void getAllVisitsByReminderIsFalse_shouldReturnVisits() {
+        VisitResponseDTO visitResponseDTO = buildVisitResponseDto();
+
+        when(visitService.getAllVisitsByReminderIsFalse()).thenReturn(Flux.just(visitResponseDTO));
+
+        webTestClient.get()
+                .uri("/visits/reminder/false")
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM + ";charset=UTF-8")
+                .expectBodyList(VisitResponseDTO.class)
+                .hasSize(1)
+                .contains(visitResponseDTO);
+
+        verify(visitService, times(1)).getAllVisitsByReminderIsFalse();
+    }
+
+    @Test
+    void getAllVisitsByReminderIsFalse_shouldReturnError() {
+        when(visitService.getAllVisitsByReminderIsFalse()).thenReturn(Flux.error(new RuntimeException("Error")));
+
+        webTestClient.get()
+                .uri("/visits/reminder/false")
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().is5xxServerError()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("An error occurred while fetching visits with reminder set to false");
+
+        verify(visitService, times(1)).getAllVisitsByReminderIsFalse();
+    }
+
+    @Test
+    void getAllVisitsByReminderIsTrue_shouldReturnVisits() {
+        VisitResponseDTO visitResponseDTO = buildVisitResponseDto();
+
+        when(visitService.getAllVisitsByReminderIsTrue()).thenReturn(Flux.just(visitResponseDTO));
+
+        webTestClient.get()
+                .uri("/visits/reminder/true")
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM + ";charset=UTF-8")
+                .expectBodyList(VisitResponseDTO.class)
+                .hasSize(1)
+                .contains(visitResponseDTO);
+
+        verify(visitService, times(1)).getAllVisitsByReminderIsTrue();
+    }
+
+    @Test
+    void getAllVisitsByReminderIsTrue_shouldReturnError() {
+        when(visitService.getAllVisitsByReminderIsTrue()).thenReturn(Flux.error(new RuntimeException("Error")));
+
+        webTestClient.get()
+                .uri("/visits/reminder/true")
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().is5xxServerError()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("An error occurred while fetching visits with reminder set to true");
+
+        verify(visitService, times(1)).getAllVisitsByReminderIsTrue();
+    }
 }
 

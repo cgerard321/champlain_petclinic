@@ -174,4 +174,41 @@ public class EmailController : Controller
         }
         return Ok();
     }
+
+    /*
+    [HttpPost("send-reminder-email")]
+    public IActionResult SendReminderEmail([FromBody] ReminderEmailModel model)
+    {
+        if (model == null)
+        {
+            return BadRequest("Model is null");
+        }
+
+        try
+        {
+            var result = _emailService.SendReminderEmail(model);
+            if (result.IsSuccess)
+            {
+                return Ok(result.Message);
+            }
+            else
+            {
+                return StatusCode(500, result.Message);
+            }
+        }
+        catch (BadEmailModel ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
+    }
+    
+}*/
 }
