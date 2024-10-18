@@ -12,12 +12,16 @@ import com.petclinic.visits.visitsservicenew.PresentationLayer.Emergency.Emergen
 import com.petclinic.visits.visitsservicenew.PresentationLayer.Review.ReviewRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.Review.ReviewResponseDTO;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.io.ByteArrayInputStream;
 
 /**
  * Application Endpoint for Visit
@@ -327,5 +331,14 @@ public class VisitController {
         return reviewService.deleteReview(ownerId, reviewId)
                 .then(Mono.just(ResponseEntity.noContent().build()));
     }
+    @GetMapping(value = "/export", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    public Mono<ResponseEntity<InputStreamResource>> exportVisitsToCSV() {
+        return visitService.exportVisitsToCSV()
+                .map(csvData -> ResponseEntity.ok()
+                        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=visits.csv")
+                        .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                        .body(csvData));
+    }
+
 
 }
