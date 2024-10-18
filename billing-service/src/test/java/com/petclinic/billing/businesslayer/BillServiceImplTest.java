@@ -1,23 +1,18 @@
 package com.petclinic.billing.businesslayer;
 
 import com.petclinic.billing.datalayer.*;
-import com.petclinic.billing.exceptions.InvalidInputException;
-import com.petclinic.billing.exceptions.NotFoundException;
-import org.assertj.core.api.AssertionsForClassTypes;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-import org.springframework.beans.BeanUtils;
+
 import static org.mockito.ArgumentMatchers.*;
 
 import java.time.LocalDate;
@@ -29,8 +24,6 @@ import java.util.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-
-import java.util.Date;
 
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
@@ -249,7 +242,7 @@ public class BillServiceImplTest {
                 .verifyComplete();
     }
     @Test
-    public void test_GetBillByCustomerId(){
+    public void test_getBillByCustomerId(){
 
         Bill billEntity = buildBill();
 
@@ -269,7 +262,7 @@ public class BillServiceImplTest {
     }
 
     @Test
-    public void test_GetBillByVetId(){
+    public void test_getBillByVetId(){
 
         Bill billEntity = buildBill();
 
@@ -289,7 +282,7 @@ public class BillServiceImplTest {
     }
 
     @Test
-    public void test_UpdateBill() {
+    public void test_updateBill() {
 
         Bill originalBill = buildBill();
 
@@ -384,7 +377,7 @@ public class BillServiceImplTest {
 
 
     @Test
-    public void test_GetBillByNonExistentCustomerId() {
+    public void test_getBillByNonExistentCustomerId() {
         String nonExistentCustomerId = "nonExistentId";
 
 
@@ -562,7 +555,7 @@ public class BillServiceImplTest {
         // Arrange
         Bill bill1 = buildBill();
         Bill bill2 = buildBill();
-        bill2.setBillId("BillUUID2"); // Different ID for distinct objects
+        bill2.setBillId("BillUUID2");
         Pageable pageable = PageRequest.of(0, 1);
 
         when(repo.findAll()).thenReturn(Flux.just(bill1, bill2));
@@ -592,7 +585,7 @@ public class BillServiceImplTest {
 
         // Assert
         StepVerifier.create(result)
-                .expectNextCount(0) // Expect no bills
+                .expectNextCount(0)
                 .verifyComplete();
     }
 

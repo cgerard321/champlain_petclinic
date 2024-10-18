@@ -40,7 +40,7 @@ public class BillController {
     }
 
     @GetMapping(value = "/bills", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<BillResponseDTO> findAllBills() {
+    public Flux<BillResponseDTO> getAllBills() {
         return billService.getAllBills();
     }
 

@@ -2,8 +2,6 @@ package com.petclinic.billing.businesslayer;
 
 import com.itextpdf.text.DocumentException;
 import com.petclinic.billing.datalayer.*;
-//import com.petclinic.billing.domainclientlayer.OwnerClient;
-//import com.petclinic.billing.domainclientlayer.VetClient;
 import com.petclinic.billing.domainclientlayer.OwnerClient;
 import com.petclinic.billing.domainclientlayer.VetClient;
 import com.petclinic.billing.util.EntityDtoUtil;
@@ -240,7 +238,7 @@ public class BillServiceImpl implements BillService{
 
     // Fetch a specific bill for a customer
     @Override
-    public Mono<BillResponseDTO> GetBillByCustomerIdAndBillId(String customerId, String billId) {
+    public Mono<BillResponseDTO> getBillByCustomerIdAndBillId(String customerId, String billId) {
         return billRepository.findByBillId(billId)
                 .filter(bill -> bill.getCustomerId().equals(customerId))
                 .map(EntityDtoUtil::toBillResponseDto);
@@ -248,7 +246,7 @@ public class BillServiceImpl implements BillService{
 
     // Fetch filtered bills by status for a customer
     @Override
-    public Flux<BillResponseDTO> GetBillsByCustomerIdAndStatus(String customerId, BillStatus status) {
+    public Flux<BillResponseDTO> getBillsByCustomerIdAndStatus(String customerId, BillStatus status) {
         return billRepository.findByCustomerIdAndBillStatus(customerId, status)
                 .map(EntityDtoUtil::toBillResponseDto);
     }
