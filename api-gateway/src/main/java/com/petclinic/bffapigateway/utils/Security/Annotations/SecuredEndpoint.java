@@ -31,5 +31,5 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface SecuredEndpoint {
-    Roles[] allowedRoles() default {};
+    Roles[] allowedRoles() default {Roles.ALL};
 }
