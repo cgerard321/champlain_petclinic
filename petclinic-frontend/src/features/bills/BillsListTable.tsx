@@ -150,6 +150,7 @@ export default function BillsListTable(): JSX.Element {
                 <th>Taxed Amount</th>
                 <th>Status</th>
                 <th>Due Date</th>
+                <th>Time Remaining</th>
                 <th>Download PDF</th>
               </tr>
             </thead>
@@ -167,8 +168,27 @@ export default function BillsListTable(): JSX.Element {
                   <td>{bill.date}</td>
                   <td>{bill.amount}</td>
                   <td>{bill.taxedAmount}</td>
-                  <td>{bill.billStatus}</td>
+                  <td>
+                    {bill.billStatus === 'PAID' ? (
+                      <span>Bill is paid</span>
+                    ) : bill.billStatus === 'OVERDUE' ? (
+                      <span style={{ color: 'red' }}>Overdue</span>
+                    ) : (
+                      bill.billStatus
+                    )}
+                  </td>
                   <td>{bill.dueDate}</td>
+                  <td>
+                    {bill.billStatus === 'PAID' ? (
+                      <span>This bill is paid</span>
+                    ) : bill.timeRemaining === 0 ? (
+                      <span style={{ color: 'red' }}>
+                        0 days remaining to pay bill
+                      </span>
+                    ) : (
+                      `${bill.timeRemaining} days remaining to pay bill`
+                    )}
+                  </td>
                   <td>
                     <button
                       onClick={() =>

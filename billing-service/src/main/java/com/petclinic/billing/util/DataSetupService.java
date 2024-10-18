@@ -31,7 +31,7 @@ public class DataSetupService implements CommandLineRunner {
 
         Bill b1 = Bill.builder()
                 .billId(UUID.randomUUID().toString())
-                .customerId("470653d-05c5-4c45-b7a0-7d70f003d2ac")
+                .customerId("f470653d-05c5-4c45-b7a0-7d70f003d2ac")
                 .ownerFirstName("George")
                 .ownerLastName("Doe")
                 .visitType("Regular")
@@ -47,7 +47,7 @@ public class DataSetupService implements CommandLineRunner {
 
         Bill b2 = Bill.builder()
                 .billId(UUID.randomUUID().toString())
-                .customerId("470653d-05c5-4c45-b7a0-7d70f003d2ac")
+                .customerId("f470653d-05c5-4c45-b7a0-7d70f003d2ac")
                 .ownerFirstName("George")
                 .ownerLastName("Doe")
                 .visitType("Regular")
@@ -63,7 +63,7 @@ public class DataSetupService implements CommandLineRunner {
 
         Bill b3 = Bill.builder()
                 .billId(UUID.randomUUID().toString())
-                .customerId("470653d-05c5-4c45-b7a0-7d70f003d2ac")
+                .customerId("f470653d-05c5-4c45-b7a0-7d70f003d2ac")
                 .ownerFirstName("George")
                 .ownerLastName("Doe")
                 .visitType("Regular")
@@ -79,7 +79,7 @@ public class DataSetupService implements CommandLineRunner {
 
         Bill b4 = Bill.builder()
                 .billId(UUID.randomUUID().toString())
-                .customerId("470653d-05c5-4c45-b7a0-7d70f003d2ac")
+                .customerId("f470653d-05c5-4c45-b7a0-7d70f003d2ac")
                 .ownerFirstName("George")
                 .ownerLastName("Doe")
                 .visitType("Regular")
