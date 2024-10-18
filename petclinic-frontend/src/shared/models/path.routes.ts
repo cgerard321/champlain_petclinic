@@ -60,4 +60,5 @@ export enum AppRoutePaths {
   AllUsers = '/users',
   UserDetailsPage = '/users/:userId',
   UpdateUserPage = '/users/:userId/edit',
+  AllRoles = '/roles',
 }
