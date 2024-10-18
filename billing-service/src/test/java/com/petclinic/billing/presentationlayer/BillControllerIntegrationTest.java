@@ -58,7 +58,7 @@ class BillControllerIntegrationTest {
     }
 
     @Test
-    void findAllBills() {
+    void getAllBills() {
 
         Bill billEntity = buildBill();
 

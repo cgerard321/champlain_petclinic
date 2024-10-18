@@ -113,22 +113,22 @@ public class BillController {
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping(value = "/admin/paid", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<BillResponseDTO> getAllPaidBilling()
+    public Flux<BillResponseDTO> getAllPaidBills()
     {
-        return billService.getAllPaidBilling();
+        return billService.getAllPaidBills();
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping(value = "/admin/unpaid", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<BillResponseDTO> getAllUnpaidBilling()
+    public Flux<BillResponseDTO> getAllUnpaidBills()
     {
-        return billService.getAllUnpaidBilling();
+        return billService.getAllUnpaidBills();
     }
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping(value = "/admin/overdue", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<BillResponseDTO> getAllOverdueBilling()
+    public Flux<BillResponseDTO> getAllOverdueBills()
     {
-        return billService.getAllOverdueBilling();
+        return billService.getAllOverdueBills();
     }
 
 }

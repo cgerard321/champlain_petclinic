@@ -70,7 +70,7 @@ class BillControllerUnitTest {
     }
 
     @Test
-    void findAllBills() {
+    void getAllBills() {
 
         when(billService.getAllBills()).thenReturn(Flux.just(responseDTO));
 
