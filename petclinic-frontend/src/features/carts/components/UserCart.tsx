@@ -1,13 +1,14 @@
+// UserCart.tsx
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import CartItem from './CartItem';
 import { ProductModel } from '../models/ProductModel';
 import './UserCart.css';
 import { NavBar } from '@/layouts/AppNavBar';
-import { FaShoppingCart } from 'react-icons/fa'; // Importing the shopping cart iconS
+import { FaShoppingCart } from 'react-icons/fa'; // Importing the shopping cart icon
 
 interface ProductAPIResponse {
-  productId: number;
+  productId: string; // Changed to string to match ProductModel
   productName: string;
   productDescription: string;
   productSalePrice: number;
@@ -47,6 +48,9 @@ const UserCart = (): JSX.Element => {
   const [invoice, setInvoice] = useState<Invoice | null>(null);
   const [cartItemCount, setCartItemCount] = useState<number>(0); // State for cart item count
   const [wishlistUpdated, setWishlistUpdated] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState<string | null>(
+    null
+  ); // New state for notifications
 
   const subtotal = cartItems.reduce(
     (acc, item) => acc + item.productSalePrice * (item.quantity || 1),
@@ -109,10 +113,12 @@ const UserCart = (): JSX.Element => {
         setCartItems(products);
         setWishlistItems(data.wishListProducts || []);
       } catch (err: unknown) {
+        // Changed from any to unknown
         if (err instanceof Error) {
           console.error(err.message);
           setError('Failed to fetch cart items');
         } else {
+          console.error('An unexpected error occurred');
           setError('An unexpected error occurred');
         }
       } finally {
@@ -166,12 +172,23 @@ const UserCart = (): JSX.Element => {
           }
         );
 
+        const data = await response.json();
+
         if (!response.ok) {
-          const errorData = await response.json();
           setErrorMessages(prevErrors => ({
             ...prevErrors,
-            [index]: errorData.message || 'Failed to update quantity',
+            [index]: data.message || 'Failed to update quantity',
           }));
+          // Check if the product has been moved to wishlist
+          if (data.message && data.message.includes('moved to your wishlist')) {
+            // Remove the item from cart
+            setCartItems(prevItems =>
+              prevItems.filter((_, idx) => idx !== index)
+            );
+            // Add to wishlist
+            setWishlistItems(prevItems => [...prevItems, item]);
+            setNotificationMessage(data.message);
+          }
         } else {
           // Update local state
           setCartItems(prevItems => {
@@ -179,13 +196,24 @@ const UserCart = (): JSX.Element => {
             newItems[index].quantity = newQuantity;
             return newItems;
           });
+          // Optionally, display success message
+          setNotificationMessage('Item quantity updated successfully.');
         }
-      } catch (err) {
+      } catch (err: unknown) {
+        // Changed from any to unknown
         console.error('Error updating quantity:', err);
-        setErrorMessages(prevErrors => ({
-          ...prevErrors,
-          [index]: 'Failed to update quantity',
-        }));
+        if (err instanceof Error) {
+          const errorMessage = err.message || 'Failed to update quantity';
+          setErrorMessages(prevErrors => ({
+            ...prevErrors,
+            [index]: errorMessage,
+          }));
+        } else {
+          setErrorMessages(prevErrors => ({
+            ...prevErrors,
+            [index]: 'Failed to update quantity',
+          }));
+        }
       }
     },
     [cartItems, cartId]
@@ -217,9 +245,14 @@ const UserCart = (): JSX.Element => {
           prevItems.filter((_, index) => index !== indexToDelete)
         );
         alert('Item successfully removed!');
-      } catch (error) {
+      } catch (error: unknown) {
+        // Changed from any to unknown
         console.error('Error deleting item: ', error);
-        alert('Failed to delete item');
+        if (error instanceof Error) {
+          alert(`Failed to delete item: ${error.message}`);
+        } else {
+          alert('Failed to delete item');
+        }
       }
     },
     [cartId]
@@ -231,7 +264,7 @@ const UserCart = (): JSX.Element => {
       return;
     }
 
-    if (!window.confirm('Are you sure you want to clear the cart?')) {
+    if (window.confirm('Are you sure you want to clear the cart?')) {
       try {
         const response = await fetch(
           `http://localhost:8080/api/v2/gateway/carts/${cartId}/clear`,
@@ -246,15 +279,21 @@ const UserCart = (): JSX.Element => {
           setCartItemCount(0);
           alert('Cart has been successfully cleared!');
         } else {
+          throw new Error('Failed to clear cart');
+        }
+      } catch (error: unknown) {
+        // Changed from any to unknown
+        console.error('Error clearing cart:', error);
+        if (error instanceof Error) {
+          alert(`Failed to clear cart: ${error.message}`);
+        } else {
           alert('Failed to clear cart');
         }
-      } catch (error) {
-        console.error('Error clearing cart:', error);
-        alert('Failed to clear cart');
       }
     }
   };
-  //TODO: Remove the Item that has been moved
+
+  // Add to Wishlist Function
   const addToWishlist = async (item: ProductModel): Promise<void> => {
     try {
       const productId = item.productId;
@@ -275,23 +314,37 @@ const UserCart = (): JSX.Element => {
         }
       );
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to add to wishlist');
+        throw new Error(data.message || 'Failed to add to wishlist');
       }
 
-      // Optionally, you can update the wishlistItems state
+      // Update wishlist state
       setWishlistItems(prevItems => [...prevItems, item]);
-      alert(`${item.productName} has been added to your wishlist!`);
+
+      // Display notification message from backend
+      if (data.message) {
+        setNotificationMessage(data.message);
+      } else {
+        alert(`${item.productName} has been added to your wishlist!`);
+      }
+
       // Trigger the useEffect by updating the wishlistUpdated state
       setWishlistUpdated(true);
-    } catch (error) {
+    } catch (error: unknown) {
+      // Changed from any to unknown
       console.error('Error adding to wishlist:', error);
-      alert('Failed to add item to wishlist.');
+      if (error instanceof Error) {
+        alert(error.message || 'Failed to add item to wishlist.');
+      } else {
+        alert('Failed to add item to wishlist.');
+      }
     }
   };
 
-  const addToCart = async (item: ProductModel): Promise<void> => {
+  // Add to Cart Function (from Wishlist)
+  const addToCartFunction = async (item: ProductModel): Promise<void> => {
     try {
       const productId = item.productId;
       const response = await fetch(
@@ -311,19 +364,37 @@ const UserCart = (): JSX.Element => {
         }
       );
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to add to cart');
+        throw new Error(data.message || 'Failed to add to cart');
       }
 
-      // Optionally, you can update the wishlistItems state
-      setWishlistItems(prevItems => [...prevItems, item]);
-      alert(`${item.productName} has been added to your cart!`);
+      // Update cart items state
+      setCartItems(prevItems => [...prevItems, item]);
+
+      // Remove from wishlist
+      setWishlistItems(prevItems =>
+        prevItems.filter(product => product.productId !== item.productId)
+      );
+
+      // Display notification message from backend
+      if (data.message) {
+        setNotificationMessage(data.message);
+      } else {
+        alert(`${item.productName} has been added to your cart!`);
+      }
+
       // Trigger the useEffect by updating the wishlistUpdated state
       setWishlistUpdated(true);
-    } catch (error) {
+    } catch (error: unknown) {
+      // Changed from any to unknown
       console.error('Error adding to cart:', error);
-      alert('Failed to add item to cart.');
+      if (error instanceof Error) {
+        alert(error.message || 'Failed to add item to cart.');
+      } else {
+        alert('Failed to add item to cart.');
+      }
     }
   };
 
@@ -366,12 +437,19 @@ const UserCart = (): JSX.Element => {
         setCheckoutMessage('Checkout successful!'); // Notify the user
         setCartItems([]); // Clear cart after checkout
         setCartItemCount(0);
+        setNotificationMessage('Checkout was successful.');
+      } else {
+        const data = await response.json();
+        throw new Error(data.message || 'Checkout failed.');
+      }
+    } catch (error: unknown) {
+      // Changed from any to unknown
+      console.error('Error during checkout:', error);
+      if (error instanceof Error) {
+        setCheckoutMessage(error.message || 'Checkout failed.');
       } else {
         setCheckoutMessage('Checkout failed.');
       }
-    } catch (error) {
-      console.error('Error during checkout:', error);
-      setCheckoutMessage('Checkout failed.');
     }
   };
 
@@ -388,6 +466,20 @@ const UserCart = (): JSX.Element => {
       <NavBar />
 
       <h1 className="cart-title">User Cart</h1>
+
+      {/* Notification Message */}
+      {notificationMessage && (
+        <div className="notification-message">
+          {notificationMessage}
+          <button
+            className="close-notification"
+            onClick={() => setNotificationMessage(null)}
+            aria-label="Close notification"
+          >
+            &times;
+          </button>
+        </div>
+      )}
 
       {/* Main Content Container */}
       <div className="content-container">
@@ -422,8 +514,9 @@ const UserCart = (): JSX.Element => {
                     deleteItem={deleteItem}
                     errorMessage={errorMessages[index]}
                     addToWishlist={addToWishlist}
-                    addToCart={() => {}}
+                    addToCart={() => {}} // Not needed in cart items
                     isInWishlist={false}
+                    showNotification={setNotificationMessage} // Pass the notification handler
                   />
                 ))
               ) : (
@@ -506,8 +599,9 @@ const UserCart = (): JSX.Element => {
                     changeItemQuantity={() => {}}
                     deleteItem={() => {}}
                     addToWishlist={() => {}}
-                    addToCart={addToCart}
+                    addToCart={addToCartFunction} // Use the updated addToCart function
                     isInWishlist={true}
+                    showNotification={setNotificationMessage} // Pass the notification handler
                   />
                 ))
               ) : (
