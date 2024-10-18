@@ -236,6 +236,7 @@ public class CartServiceImpl implements CartService {
                                 // If product is not in the cart, create a new entry
                                 CartProduct cartProduct = CartProduct.builder()
                                         .productId(product.getProductId())
+                                        .imageId(product.getImageId())
                                         .productName(product.getProductName())
                                         .productDescription(product.getProductDescription())
                                         .productSalePrice(product.getProductSalePrice())

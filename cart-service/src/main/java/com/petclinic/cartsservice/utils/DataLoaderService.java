@@ -24,6 +24,7 @@ public class DataLoaderService implements CommandLineRunner {
 
         CartProduct product1 = CartProduct.builder()
                 .productId("06a7d573-bcab-4db3-956f-773324b92a80")
+                .imageId("08a5af6b-3501-4157-9a99-1aa82387b9e4")
                 .productName("Dog Food")
                 .productDescription("Premium dry food for adult dogs")
                 .productSalePrice(45.99)
@@ -33,6 +34,7 @@ public class DataLoaderService implements CommandLineRunner {
 
         CartProduct product2 = CartProduct.builder()
                 .productId("98f7b33a-d62a-420a-a84a-05a27c85fc91")
+                .imageId("36b06c01-10f3-4645-9c45-900afc5a8b8a")
                 .productName("Cat Litter")
                 .productDescription("Clumping cat litter with odor control")
                 .productSalePrice(12.99)
@@ -42,6 +44,7 @@ public class DataLoaderService implements CommandLineRunner {
 
         CartProduct product3 = CartProduct.builder()
                 .productId("baee7cd2-b67a-449f-b262-91f45dde8a6d")
+                .imageId("be4e60a4-2369-46e8-abee-20c1a8dce3e5")
                 .productName("Flea Collar")
                 .productDescription("Flea and tick prevention for small dogs")
                 .productSalePrice(9.99)
@@ -51,6 +54,7 @@ public class DataLoaderService implements CommandLineRunner {
 
         CartProduct product4 = CartProduct.builder()
                 .productId("ae2d3af7-f2a2-407f-ad31-ca7d8220cb7a")
+                .imageId("7074e0ef-d041-452f-8a0f-cb9ab20d1fed")
                 .productName("Bird Cage")
                 .productDescription("Spacious cage for small birds like parakeets")
                 .productSalePrice(29.99)
@@ -60,6 +64,7 @@ public class DataLoaderService implements CommandLineRunner {
 
         CartProduct wishListProduct1 = CartProduct.builder()
                 .productId("4d508fb7-f1f2-4952-829d-10dd7254cf26")
+                .imageId("392c42d9-9505-4c27-b82e-20351b25d33f")
                 .productName("Aquarium Filter")
                 .productDescription("Filter system for small to medium-sized aquariums")
                 .productSalePrice(19.99)
@@ -69,6 +74,7 @@ public class DataLoaderService implements CommandLineRunner {
 
         CartProduct wishlistProduct2 = CartProduct.builder()
                 .productId("a6a27433-e7a9-4e78-8ae3-0cb57d756863")
+                .imageId("664aa14b-db66-4b25-9d05-f3a9164eb401")
                 .productName("Horse Saddle")
                 .productDescription("Lightweight saddle for riding horses")
                 .productSalePrice(199.99)
