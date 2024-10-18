@@ -116,8 +116,6 @@ export default function BillsListTable(): JSX.Element {
 
   return (
     <div>
-      <h2>Bills</h2>
-
       {/* Dropdown to filter bills by status */}
       <div>
         <label htmlFor="statusFilter">Filter by Status:</label>

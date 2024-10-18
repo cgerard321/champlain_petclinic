@@ -75,16 +75,14 @@ public class CustomerBillsControllerIntegrationTest {
     }
 
     private Bill buildBill() {
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(2022, Calendar.SEPTEMBER, 25);
-        LocalDate date = calendar.getTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
         return Bill.builder()
                 .billId("1")
                 .customerId("custId")
                 .vetId("vetId")
                 .visitType("surgery")
-                .date(date)
+                .date(LocalDate.now().minusDays(10))
                 .amount(150.0)
+                .dueDate(LocalDate.now().plusDays(20))
                 .build();
     }
 
