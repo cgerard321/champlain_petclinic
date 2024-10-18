@@ -16,7 +16,7 @@ export const UserContext = createContext<UserContextType | undefined>(
 
 export const UserProvider = ({
   children,
-  }: {
+}: {
   children: ReactNode;
 }): JSX.Element => {
   const [user, setUserState] = useState<UserResponseModel>(() => {
