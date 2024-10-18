@@ -1234,6 +1234,87 @@ class InventoryControllerIntegrationTest {
                 .jsonPath("$.message").isEqualTo("Invalid Inventory Id");
     }
 
+    @Test
+    void restockLowStockProduct_WithValidInputs_ShouldSucceed() {
+        // Arrange
+        int restockQuantity = 5;
+        String inventoryId = "1"; // Using the existing inventory setup
+        String productId = "123F567C9"; // Using the existing product setup
+
+        // Step 1: Retrieve the initial product details
+        webTestClient.get()
+                .uri("/inventory/{inventoryId}/products/{productId}", inventoryId, productId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(ProductResponseDTO.class)
+                .value(initialProductResponse -> {
+                    assertNotNull(initialProductResponse, "The initial product should not be null");
+
+                    // Get the initial quantity of the product
+                    int initialQuantity = initialProductResponse.getProductQuantity();
+                    System.out.println("Initial Quantity: " + initialQuantity);
+
+                    // Step 2: Perform the restock operation
+                    webTestClient.put()
+                            .uri(uriBuilder -> uriBuilder
+                                    .path("/inventory/{inventoryId}/products/{productId}/restockProduct")
+                                    .queryParam("productQuantity", restockQuantity)
+                                    .build(inventoryId, productId))
+                            .accept(MediaType.APPLICATION_JSON)
+                            .exchange()
+                            .expectStatus().isOk()
+                            .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                            .expectBody(ProductResponseDTO.class)
+                            .value(restockedProductResponse -> {
+                                assertNotNull(restockedProductResponse, "The restocked product should not be null");
+                                assertEquals(productId, restockedProductResponse.getProductId());
+                                assertEquals(inventoryId, restockedProductResponse.getInventoryId());
+
+                                int actualQuantity = restockedProductResponse.getProductQuantity();
+                                System.out.println("Restocked Product Quantity: " + actualQuantity);
+
+                                // Assert that the product quantity increased by the restock amount
+                                int expectedQuantity = initialQuantity + restockQuantity;
+                                assertEquals(expectedQuantity, actualQuantity,
+                                        "The product quantity should be the initial quantity plus the restock amount");
+                            });
+                });
+    }
+
+
+    @Test
+    void restockLowStockProduct_WithInvalidQuantity_ShouldReturnBadRequest() {
+        // Arrange
+        String inventoryId = "1";
+        String productId = "123F567C9";
+        int invalidQuantity = -5; // Invalid quantity
+
+        // Act & Assert
+        webTestClient.put()
+                .uri("/inventory/{inventoryId}/products/{productId}/restockProduct?productQuantity={quantity}",
+                        inventoryId, productId, invalidQuantity)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isBadRequest();
+    }
+
+    @Test
+    void restockLowStockProduct_WithZeroQuantity_ShouldReturnBadRequest() {
+        // Arrange
+        String inventoryId = "1";
+        String productId = "123F567C9";
+        int zeroQuantity = 0; // Zero quantity
+
+        // Act & Assert
+        webTestClient.put()
+                .uri("/inventory/{inventoryId}/products/{productId}/restockProduct?productQuantity={quantity}",
+                        inventoryId, productId, zeroQuantity)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isBadRequest();
+    }
+
 
 
 }
