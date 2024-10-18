@@ -11,25 +11,25 @@ interface UserContextType {
 }
 
 export const UserContext = createContext<UserContextType | undefined>(
-  undefined
+ undefined
 );
 
 export const UserProvider = ({
-  children,
-}: {
+                               children,
+                             }: {
   children: ReactNode;
 }): JSX.Element => {
   const [user, setUserState] = useState<UserResponseModel>(() => {
     // Load the initial user from localStorage, if available
     const storedUser = localStorage.getItem('user');
     return storedUser
-      ? JSON.parse(storedUser)
-      : {
-          email: '',
-          roles: new Set<Role>(),
-          userId: '',
-          username: '',
-        };
+     ? JSON.parse(storedUser)
+     : {
+       email: '',
+       roles: new Set<Role>(),
+       userId: '',
+       username: '',
+     };
   });
 
   const setUser = (newUser: UserResponseModel): void => {
@@ -38,9 +38,9 @@ export const UserProvider = ({
     localStorage.setItem('user', JSON.stringify(newUser));
   };
   return (
-    <UserContext.Provider value={{ user, setUser }}>
-      {children}
-    </UserContext.Provider>
+   <UserContext.Provider value={{ user, setUser }}>
+     {children}
+   </UserContext.Provider>
   );
 };
 
@@ -72,41 +72,43 @@ export const useSetUser = (): ((user: UserResponseModel) => void) => {
 export const IsAdmin = (): boolean => {
   const context = useUser();
   return (
-    context.user?.roles !== undefined &&
-    Array.from(context.user.roles).some((role: Role) => role.name === 'ADMIN')
+   context.user?.roles !== undefined &&
+   Array.from(context.user.roles).some((role: Role) => role.name === 'ADMIN')
   );
 };
 
 export const IsReceptionist = (): boolean => {
   const context = useUser();
   return (
-    context.user?.roles !== undefined &&
-    Array.from(context.user.roles).some((role: Role) => role.name === 'RECEPTIONIST')
+   context.user?.roles !== undefined &&
+   Array.from(context.user.roles).some(
+    (role: Role) => role.name === 'RECEPTIONIST'
+   )
   );
 };
 
 export const IsOwner = (): boolean => {
   const context = useUser();
   return (
-    context.user?.roles !== undefined &&
-    Array.from(context.user.roles).some((role: Role) => role.name === 'OWNER')
+   context.user?.roles !== undefined &&
+   Array.from(context.user.roles).some((role: Role) => role.name === 'OWNER')
   );
 };
 
 export const IsVet = (): boolean => {
   const context = useUser();
   return (
-    context.user?.roles !== undefined &&
-    Array.from(context.user.roles).some((role: Role) => role.name === 'VET')
+   context.user?.roles !== undefined &&
+   Array.from(context.user.roles).some((role: Role) => role.name === 'VET')
   );
 };
 
 export const IsInventoryManager = (): boolean => {
   const context = useUser();
   return (
-    context.user?.roles !== undefined &&
-    Array.from(context.user.roles).some(
-      (role: Role) => role.name === 'INVENTORY_MANAGER'
-    )
+   context.user?.roles !== undefined &&
+   Array.from(context.user.roles).some(
+    (role: Role) => role.name === 'INVENTORY_MANAGER'
+   )
   );
 };
