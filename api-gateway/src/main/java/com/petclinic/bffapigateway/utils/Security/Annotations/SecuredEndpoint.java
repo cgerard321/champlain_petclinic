@@ -1,8 +1,6 @@
 package com.petclinic.bffapigateway.utils.Security.Annotations;
 
-
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
-import org.springframework.web.bind.annotation.*;
 
 import java.lang.annotation.*;
 
@@ -33,5 +31,5 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface SecuredEndpoint {
-    Roles[] allowedRoles() default {Roles.ALL};
+    Roles[] allowedRoles() default {};
 }
