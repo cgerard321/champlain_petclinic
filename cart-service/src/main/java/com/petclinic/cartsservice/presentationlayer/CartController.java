@@ -155,15 +155,21 @@ public class CartController {
                 )
                 .map(ResponseEntity::ok)
                 .onErrorResume(e -> {
-                    if (e instanceof NotFoundException || e instanceof InvalidInputException) {
+                    if (e instanceof InvalidInputException) {
                         CartResponseModel errorResponse = new CartResponseModel();
                         errorResponse.setMessage(e.getMessage());
                         return Mono.just(ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(errorResponse));
+                    } else if (e instanceof NotFoundException) {
+                        CartResponseModel errorResponse = new CartResponseModel();
+                        errorResponse.setMessage(e.getMessage());
+                        return Mono.just(ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse));
                     } else {
-                        return Mono.error(e);
+                        return Mono.error(e); // Let other exceptions propagate
                     }
                 });
     }
+
+
 
     /**
      * Move product from wishlist to cart.
@@ -181,12 +187,16 @@ public class CartController {
                 )
                 .map(ResponseEntity::ok)
                 .onErrorResume(e -> {
-                    if (e instanceof NotFoundException || e instanceof InvalidInputException) {
+                    if (e instanceof InvalidInputException) {
                         CartResponseModel errorResponse = new CartResponseModel();
                         errorResponse.setMessage(e.getMessage());
                         return Mono.just(ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(errorResponse));
+                    } else if (e instanceof NotFoundException) {
+                        CartResponseModel errorResponse = new CartResponseModel();
+                        errorResponse.setMessage(e.getMessage());
+                        return Mono.just(ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse));
                     } else {
-                        return Mono.error(e);
+                        return Mono.error(e); // Let other exceptions propagate
                     }
                 });
     }
