@@ -2,7 +2,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import {
   IsAdmin,
   IsInventoryManager,
-  IsOwner, IsReceptionist,
+  IsOwner,
+  IsReceptionist,
   IsVet,
   useUser,
 } from '@/context/UserContext';
