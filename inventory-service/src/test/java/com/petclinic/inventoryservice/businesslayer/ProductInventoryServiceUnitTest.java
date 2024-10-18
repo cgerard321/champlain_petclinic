@@ -43,7 +43,6 @@ class ProductInventoryServiceUnitTest {
     @MockBean
     InventoryTypeRepository inventoryTypeRepository;
 
-
 //    ProductResponseDTO productResponseDTO = ProductResponseDTO.builder()
 //            .inventoryId("1")
 //            .productId(UUID.randomUUID().toString())
@@ -1789,6 +1788,114 @@ class ProductInventoryServiceUnitTest {
         StepVerifier.create(result)
                 .expectNextMatches(responseDTO -> responseDTO.getInventoryId().equals(inventoryResponseDTO.getInventoryId()))
                 .verifyComplete();
+    }
+
+    @Test
+    void restockLowStockProduct_WithValidInputs_ShouldSucceed() {
+        // Arrange
+        String inventoryId = "1";
+        String productId = "12345";
+        int restockQuantity = 5;
+
+        Product product = Product.builder()
+                .id(UUID.randomUUID().toString())
+                .productId(productId)
+                .inventoryId(inventoryId)
+                .productName("Test Product")
+                .productDescription("Test Description")
+                .productPrice(50.00)
+                .productQuantity(10)
+                .productSalePrice(20.00)
+                .build();
+
+        Product updatedProduct = Product.builder()
+                .id(product.getId())
+                .productId(productId)
+                .inventoryId(inventoryId)
+                .productName("Test Product")
+                .productDescription("Test Description")
+                .productPrice(50.00)
+                .productQuantity(15) // Updated quantity after restock
+                .productSalePrice(20.00)
+                .build();
+
+        when(productRepository.findProductByInventoryIdAndProductId(inventoryId, productId))
+                .thenReturn(Mono.just(product));
+        when(productRepository.save(any(Product.class)))
+                .thenReturn(Mono.just(updatedProduct));
+
+        // Act
+        Mono<ProductResponseDTO> result = productInventoryService.restockLowStockProduct(inventoryId, productId, restockQuantity);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNextMatches(responseDTO -> {
+                    assertNotNull(responseDTO);
+                    assertEquals(productId, responseDTO.getProductId());
+                    assertEquals(15, responseDTO.getProductQuantity()); // Check the updated quantity
+                    return true;
+                })
+                .verifyComplete();
+
+        verify(productRepository).findProductByInventoryIdAndProductId(inventoryId, productId);
+        verify(productRepository).save(any(Product.class));
+    }
+
+    @Test
+    void restockLowStockProduct_WithNonExistentProduct_ShouldThrowNotFoundException() {
+        // Arrange
+        String inventoryId = "1";
+        String productId = "nonExistentProduct";
+        int restockQuantity = 5;
+
+        when(productRepository.findProductByInventoryIdAndProductId(inventoryId, productId))
+                .thenReturn(Mono.empty());
+
+        // Act
+        Mono<ProductResponseDTO> result = productInventoryService.restockLowStockProduct(inventoryId, productId, restockQuantity);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof NotFoundException &&
+                        throwable.getMessage().equals("Product with id: " + productId + "not found in inventory " + inventoryId))
+                .verify();
+
+        verify(productRepository).findProductByInventoryIdAndProductId(inventoryId, productId);
+        verify(productRepository, never()).save(any(Product.class));
+    }
+
+    @Test
+    void restockLowStockProduct_WithInvalidQuantity_ShouldThrowInvalidInputException() {
+        // Arrange
+        String inventoryId = "1";
+        String productId = "12345";
+        int restockQuantity = -5; // Invalid quantity
+
+        Product product = Product.builder()
+                .id(UUID.randomUUID().toString())
+                .productId(productId)
+                .inventoryId(inventoryId)
+                .productName("Test Product")
+                .productDescription("Test Description")
+                .productPrice(50.00)
+                .productQuantity(10)
+                .productSalePrice(20.00)
+                .build();
+
+        when(productRepository.findProductByInventoryIdAndProductId(inventoryId, productId))
+                .thenReturn(Mono.just(product));
+
+        // Act
+        Mono<ProductResponseDTO> result = productInventoryService.restockLowStockProduct(inventoryId, productId, restockQuantity);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof InvalidInputException &&
+                        throwable.getMessage().equals("The restock quantity must be greater than 0."))
+                .verify();
+
+        verify(productRepository).findProductByInventoryIdAndProductId(inventoryId, productId);
+        verify(productRepository, never()).save(any(Product.class));
     }
 
 

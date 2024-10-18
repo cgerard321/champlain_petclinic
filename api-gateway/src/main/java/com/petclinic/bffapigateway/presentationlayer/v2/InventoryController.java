@@ -251,8 +251,17 @@ public class InventoryController {
                     headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"inventory_report.pdf\"");
                     return new ResponseEntity<>(pdfContent, headers, HttpStatus.OK);
                 });
+    }
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
+    @PutMapping("/{inventoryId}/products/{productId}/restockProduct")
+    public Mono<ResponseEntity<ProductResponseDTO>> restockLowStockProduct (@PathVariable String inventoryId, @PathVariable String productId, @RequestParam Integer productQuantity){
+        if (productQuantity == null || productQuantity <= 0) {
+            return Mono.just(ResponseEntity.badRequest().body(null));
+        }
 
-
+        return inventoryServiceClient.restockLowStockProduct(inventoryId, productId, productQuantity)
+                .map(updatedProduct -> ResponseEntity.status(HttpStatus.OK).body(updatedProduct))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
@@ -277,6 +286,4 @@ public class InventoryController {
     public Flux<InventoryResponseDTO> getAllInventories() {
         return inventoryServiceClient.getAllInventories();
     }
-
-
 }

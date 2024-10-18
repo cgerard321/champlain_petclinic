@@ -274,6 +274,13 @@ class RatingControllerIntegrationTest {
 
     @Test
     public void whenAddRatingForProduct_thenRecalculateAverage(){
+
+        productRepository.deleteAll().block();
+        ratingRepository.deleteAll().block();
+
+        productRepository.save(product1).block();
+        ratingRepository.saveAll(Flux.just(rating1Prod1, rating2Prod1)).blockLast();
+
         RatingRequestModel ratingRequestModel = RatingRequestModel.builder()
                 .rating((byte) 5)
                 .build();
@@ -311,7 +318,7 @@ class RatingControllerIntegrationTest {
                 });
 
         StepVerifier.create(ratingRepository.findAll())
-                .expectNextCount(5)
+                .expectNextCount(3)
                 .verifyComplete();
     }
 
