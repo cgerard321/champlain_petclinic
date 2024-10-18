@@ -33,6 +33,20 @@ export default function ProductList(): JSX.Element {
   const [ratingSort, setRatingSort] = useState<string>('default');
   const [minStars, setMinStars] = useState<number>(0);
   const [maxStars, setMaxStars] = useState<number>(5);
+  const [validationMessage, setValidationMessage] = useState<string>('');
+
+  const validationStars = async (
+    minStars: number,
+    maxStars: number
+  ): Promise<void> => {
+    if (minStars >= maxStars) {
+      setValidationMessage(
+        'Minimum stars cannot be greater than or equal to maximum stars.'
+      );
+    } else {
+      setValidationMessage('');
+    }
+  };
 
   function FilterByPriceErrorHandling(): void {
     // Validate inputs for filter by price
@@ -134,6 +148,7 @@ export default function ProductList(): JSX.Element {
     setRatingSort('');
     setMaxStars(5);
     setMinStars(0);
+    setValidationMessage('');
     const list = await getAllProducts(minPrice, maxPrice, minStars, maxStars);
     setProductList(list);
   };
@@ -223,7 +238,10 @@ export default function ProductList(): JSX.Element {
               <StarRating
                 currentRating={minStars}
                 viewOnly={false}
-                updateRating={setMinStars}
+                updateRating={rating => {
+                  setMinStars(rating);
+                  validationStars(rating, maxStars);
+                }}
               />
             </div>
             <div className="star-row">
@@ -231,9 +249,15 @@ export default function ProductList(): JSX.Element {
               <StarRating
                 currentRating={maxStars}
                 viewOnly={false}
-                updateRating={setMaxStars}
+                updateRating={rating => {
+                  setMaxStars(rating);
+                  validationStars(minStars, rating);
+                }}
               />
             </div>
+            {validationMessage && (
+              <div style={{ color: 'red' }}>{validationMessage}</div>
+            )}
           </div>
           <select
             name="rating"
@@ -244,7 +268,11 @@ export default function ProductList(): JSX.Element {
             <option value="asc">Low to High</option>
             <option value="desc">High to Low</option>
           </select>
-          <button className="apply-filter-button" onClick={fetchProducts}>
+          <button
+            className="apply-filter-button"
+            disabled={validationMessage !== ''}
+            onClick={fetchProducts}
+          >
             Apply
           </button>
           <button className="clear-filter-button" onClick={clearFilters}>
