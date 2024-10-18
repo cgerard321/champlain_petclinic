@@ -34,17 +34,18 @@ jobs:
         id: zipreports
         if: success() || failure()
         run: |
+          DELIM=$(dd if=/dev/urandom bs=32 count=1 status=none | base64)
           mkdir -p .qodana/code-coverage
-          echo 'JACOCO_SUMMARY<<EOF' > $GITHUB_OUTPUT
+          echo "JACOCO_SUMMARY<<$DELIM" >> $GITHUB_OUTPUT
           for service in $(find -maxdepth 1 -type d -name '*service*' -o -name '*gateway*' | sed 's/.\///'); do
             if [[ -d "$service/build" && -d "$service/build/reports" ]]; then
               cp -R "$service/build/reports" ".qodana/code-coverage/$service"
               if [[ -d "$service/build/reports/jacoco" ]]; then
-                cat "$service/build/reports/jacoco/test/html/index.html" >> $GITHUB_OUTPUT
+                cut -c 148- "$service/build/reports/jacoco/test/html/index.html" >> $GITHUB_OUTPUT
               fi
             fi
           done
-          echo 'EOF' >> $GITHUB_OUTPUT
+          echo "$DELIM" >> $GITHUB_OUTPUT
 
       - name: Archive coverage data
         if: success() || failure()
