@@ -16,21 +16,11 @@ interface ProductAPIResponse {
   productQuantity: number;
 }
 
-interface InvoiceItem {
-  productId: string;
+interface Invoice {
+  productId: number;
   productName: string;
   productSalePrice: number;
   quantity: number;
-}
-
-interface Invoice {
-  invoiceId: string;
-  cartId: string;
-  items: InvoiceItem[];
-  subtotal: number;
-  tax: number;
-  total: number;
-  issueDate: string;
 }
 
 const UserCart = (): JSX.Element => {
@@ -43,9 +33,12 @@ const UserCart = (): JSX.Element => {
   const [errorMessages, setErrorMessages] = useState<{ [key: number]: string }>(
     {}
   );
+  const [invoices, setInvoices] = useState<Invoice[]>([]); // State to hold invoice details
+
   const [checkoutMessage, setCheckoutMessage] = useState<string | null>(null);
-  const [invoice, setInvoice] = useState<Invoice | null>(null);
-  const [cartItemCount, setCartItemCount] = useState<number>(0); // State for cart item count
+  const [cartItemCount, setCartItemCount] = useState<number>(0);
+  const [isCheckoutModalOpen, setIsCheckoutModalOpen] =
+    useState<boolean>(false); // Modal state
 
   const subtotal = cartItems.reduce(
     (acc, item) => acc + item.productSalePrice * (item.quantity || 1),
@@ -54,7 +47,6 @@ const UserCart = (): JSX.Element => {
   const tvq = subtotal * 0.09975; // Quebec tax rate
   const tvc = subtotal * 0.05; // Canadian tax rate
   const total = subtotal + tvq + tvc;
-
   // Function to update the cart item count
   const updateCartItemCount = useCallback(() => {
     const count = cartItems.reduce(
@@ -229,9 +221,24 @@ const UserCart = (): JSX.Element => {
     }
   };
 
+  useEffect(() => {
+    const savedInvoices = localStorage.getItem('invoices');
+    if (savedInvoices) {
+      setInvoices(JSON.parse(savedInvoices));
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('invoices', JSON.stringify(invoices));
+  }, [invoices]);
+
+  const handleCheckoutConfirmation = (): void => {
+    setIsCheckoutModalOpen(true);
+  };
+
   const handleCheckout = async (): Promise<void> => {
     if (!cartId) {
-      setCheckoutMessage('Invalid cart ID');
+      setCheckoutMessage('Cart ID is missing or invalid');
       return;
     }
 
@@ -248,32 +255,29 @@ const UserCart = (): JSX.Element => {
       );
 
       if (response.ok) {
-        // Generate the invoice
-        const newInvoice: Invoice = {
-          invoiceId: 'INV-' + new Date().getTime(), // Generate a simple invoice ID
-          cartId,
-          items: cartItems.map(item => ({
-            productId: item.productId,
-            productName: item.productName,
-            productSalePrice: item.productSalePrice,
-            quantity: item.quantity || 1,
-          })),
-          subtotal,
-          tax: tvq + tvc,
-          total,
-          issueDate: new Date().toISOString(), // Current date
-        };
+        const invoiceItems: Invoice[] = cartItems.map(item => ({
+          productId: Number(item.productId), // Ensure productId is a number
+          productName: item.productName,
+          productSalePrice: item.productSalePrice,
+          quantity: item.quantity || 1,
+        }));
 
-        setInvoice(newInvoice); // Set the new invoice state
-        setCheckoutMessage('Checkout successful!'); // Notify the user
-        setCartItems([]); // Clear cart after checkout
+        // Set the invoices state
+        setInvoices(invoiceItems);
+
+        setCheckoutMessage('Checkout successful!');
+        setCartItems([]); // Clear the cart after successful checkout
         setCartItemCount(0);
+        setIsCheckoutModalOpen(false);
       } else {
-        setCheckoutMessage('Checkout failed.');
+        const errorData = await response.json();
+        setCheckoutMessage(
+          `Checkout failed: ${errorData.message || response.statusText}`
+        );
       }
     } catch (error) {
       console.error('Error during checkout:', error);
-      setCheckoutMessage('Checkout failed.');
+      setCheckoutMessage('Checkout failed due to an unexpected error.');
     }
   };
 
@@ -303,6 +307,7 @@ const UserCart = (): JSX.Element => {
           )}
         </div>
       </div>
+
       <div className="UserCart-buttons">
         <button className="go-back-btn" onClick={() => navigate(-1)}>
           Go Back
@@ -339,53 +344,78 @@ const UserCart = (): JSX.Element => {
           <p>TVC (5%): ${tvc.toFixed(2)}</p>
           <p className="total-price">Total: ${total.toFixed(2)}</p>
         </div>
-        <button className="checkout-btn" onClick={handleCheckout}>
+
+        {/* Checkout Button */}
+        <button
+          className="checkout-btn"
+          onClick={handleCheckoutConfirmation}
+          disabled={cartItems.length === 0} // Disable if cart is empty
+        >
           Checkout
         </button>
+
+        {/* Checkout Confirmation Modal */}
+        {isCheckoutModalOpen && (
+          <div className="checkout-modal">
+            <h3>Confirm Checkout</h3>
+            <p>Are you sure you want to checkout?</p>
+            <button onClick={handleCheckout}>Yes</button>
+            <button onClick={() => setIsCheckoutModalOpen(false)}>No</button>
+          </div>
+        )}
         {checkoutMessage && (
           <div className="checkout-message">{checkoutMessage}</div>
         )}
 
-        {/* Invoice Section */}
-        {invoice && ( // Render the invoice if available
-          <div className="Invoice">
-            <h2>Invoice Details</h2>
-            <p>Invoice ID: {invoice.invoiceId}</p>
-            <p>Cart ID: {invoice.cartId}</p>
-            <p>Subtotal: ${invoice.subtotal.toFixed(2)}</p>
-            <p>Tax: ${invoice.tax.toFixed(2)}</p>
-            <p>Total: ${invoice.total.toFixed(2)}</p>
-            <p>Issue Date: {new Date(invoice.issueDate).toLocaleString()}</p>
-            <h3>Items:</h3>
-            <ul>
-              {invoice.items.map((item, index) => (
-                <li key={index}>
-                  {item.productName} - Quantity: {item.quantity} - Price: $
-                  {item.productSalePrice.toFixed(2)}
-                </li>
+        {/* Invoice Section - Display a single invoice with a list of items */}
+        {invoices.length > 0 && (
+          <div className="invoices-section">
+            <h2>Invoice</h2>
+            <div className="invoice-summary">
+              <h3>Items</h3>
+              {invoices.map(invoice => (
+                <div key={invoice.productId} className="invoice-card">
+                  <h4>{invoice.productName}</h4>
+                  <p>Price: ${invoice.productSalePrice.toFixed(2)}</p>
+                  <p>Quantity: {invoice.quantity}</p>
+                  <p>
+                    Total: $
+                    {(invoice.productSalePrice * invoice.quantity).toFixed(2)}
+                  </p>
+                </div>
               ))}
-            </ul>
+              <h3>
+                Total: $
+                {invoices
+                  .reduce(
+                    (total, invoice) =>
+                      total + invoice.productSalePrice * invoice.quantity,
+                    0
+                  )
+                  .toFixed(2)}
+              </h3>
+            </div>
           </div>
         )}
-      </div>
 
-      {/* Wishlist Section */}
-      <div className="Wishlist-section">
-        <h2 className="Wishlist-title">Your Wishlist</h2>
-        <div className="UserCart-items">
-          {wishlistItems.length > 0 ? (
-            wishlistItems.map(item => (
-              <CartItem
-                key={item.productId}
-                item={item}
-                index={-1} // Mark as wishlist item
-                changeItemQuantity={() => {}} // Disable changing quantity for wishlist
-                deleteItem={() => {}} // Disable removing from wishlist
-              />
-            ))
-          ) : (
-            <p>No products in the wishlist.</p>
-          )}
+        {/* Wishlist Section */}
+        <div className="Wishlist-section">
+          <h2 className="Wishlist-title">Your Wishlist</h2>
+          <div className="UserCart-items">
+            {wishlistItems.length > 0 ? (
+              wishlistItems.map(item => (
+                <CartItem
+                  key={item.productId}
+                  item={item}
+                  index={-1} // Mark as wishlist item
+                  changeItemQuantity={() => {}} // Disable changing quantity for wishlist
+                  deleteItem={() => {}} // Disable removing from wishlist
+                />
+              ))
+            ) : (
+              <p>No products in the wishlist.</p>
+            )}
+          </div>
         </div>
       </div>
     </div>

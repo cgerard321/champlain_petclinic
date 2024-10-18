@@ -148,6 +148,64 @@ public class CartServiceClientTest {
     }
 
     @Test
+    void testCheckoutCart_Success() {
+        String cartId = "98f7b33a-d62a-420a-a84a-05a27c85fc91";
+        String responseBody = """
+                {
+                    "cartId": "98f7b33a-d62a-420a-a84a-05a27c85fc91",
+                    "customerId": "customer1",
+                    "products": [
+                        {
+                            "productId": "9a29fff7-564a-4cc9-8fe1-36f6ca9bc223",
+                            "quantityInCart": 1
+                        }
+                    ]
+                }
+                """;
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody(responseBody));
+
+        Mono<CartResponseDTO> result = mockCartServiceClient.checkoutCart(cartId);
+
+        StepVerifier.create(result)
+                .assertNext(cartResponseDTO -> {
+                    assertEquals("98f7b33a-d62a-420a-a84a-05a27c85fc91", cartResponseDTO.getCartId());
+                    assertEquals("customer1", cartResponseDTO.getCustomerId());
+                    assertEquals(1, cartResponseDTO.getProducts().size());
+                    assertEquals("9a29fff7-564a-4cc9-8fe1-36f6ca9bc223", cartResponseDTO.getProducts().get(0).getProductId());
+                    assertEquals(1, cartResponseDTO.getProducts().get(0).getQuantityInCart());
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void testCheckoutCart_NotFound() {
+        String cartId = "non-existent-cart-id";
+        String responseBody = """
+            {
+                "message": "Cart for customer id was not found: non-existent-cart-id"
+            }
+            """;
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(404)
+                .setBody(responseBody));
+
+        Mono<CartResponseDTO> result = mockCartServiceClient.checkoutCart(cartId);
+
+        StepVerifier.create(result)
+                .expectErrorSatisfies(throwable -> {
+                    assert throwable instanceof WebClientResponseException;
+                    WebClientResponseException exception = (WebClientResponseException) throwable;
+                    assertEquals(404, exception.getRawStatusCode());
+                    assert exception.getResponseBodyAsString().contains("Cart for customer id was not found");
+                })
+                .verify();
+    }
+    @Test
     void testAddProductToCart_OutOfStock_ThrowsException() {
         String cartId = "98f7b33a-d62a-420a-a84a-05a27c85fc91";
         AddProductRequestDTO requestDTO = new AddProductRequestDTO("9a29fff7-564a-4cc9-8fe1-36f6ca9bc223", 15);

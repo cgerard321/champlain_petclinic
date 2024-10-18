@@ -3,9 +3,8 @@ package com.petclinic.cartsservice.businesslayer;
 import com.petclinic.cartsservice.dataaccesslayer.Cart;
 import com.petclinic.cartsservice.dataaccesslayer.CartRepository;
 import com.petclinic.cartsservice.dataaccesslayer.cartproduct.CartProduct;
+
 import com.petclinic.cartsservice.domainclientlayer.ProductClient;
-import com.petclinic.cartsservice.domainclientlayer.ProductResponseModel;
-import com.petclinic.cartsservice.presentationlayer.CartRequestModel;
 import com.petclinic.cartsservice.presentationlayer.CartResponseModel;
 import com.petclinic.cartsservice.utils.EntityModelUtil;
 import com.petclinic.cartsservice.utils.exceptions.InvalidInputException;
@@ -13,6 +12,7 @@ import com.petclinic.cartsservice.utils.exceptions.NotFoundException;
 import com.petclinic.cartsservice.utils.exceptions.OutOfStockException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -21,17 +21,21 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 public class CartServiceImpl implements CartService {
     private final CartRepository cartRepository;
     private final ProductClient productClient;
+    private final WebClient.Builder webClientBuilder;
 
-    public CartServiceImpl(CartRepository cartRepository, ProductClient productClient) {
+
+
+    public CartServiceImpl(CartRepository cartRepository, ProductClient productClient, WebClient.Builder webClientBuilder) {
         this.cartRepository = cartRepository;
         this.productClient = productClient;
+        this.webClientBuilder = webClientBuilder;
+
     }
     @Override
     public Flux<CartResponseModel> getAllCarts() {
@@ -134,42 +138,36 @@ public class CartServiceImpl implements CartService {
 
 
     @Override
-    public Mono<CartResponseModel> checkoutCart(String cartId) {
+    public Mono<CartResponseModel> checkoutCart(final String cartId) {
         return cartRepository.findCartByCartId(cartId)
+                .switchIfEmpty(Mono.error(new NotFoundException("Cart not found: " + cartId)))
                 .flatMap(cart -> {
+                    if (cart.getProducts().isEmpty()) {
+                        return Mono.error(new InvalidInputException("Cart is empty"));
+                    }
 
-                    double subtotal = cart.getProducts().stream()
-                            .mapToDouble(product -> product.getProductSalePrice() * product.getQuantityInCart())
-                            .sum();
+                    // Create the invoice directly without a separate class
+                    String invoiceId = UUID.randomUUID().toString();
+                    List<CartProduct> products = cart.getProducts();
+                    double total = calculateTotal(products);
 
+                    // Log the invoice data (optional)
+                    log.info("Generated Invoice: ID: {}, Cart ID: {}, Total: {}", invoiceId, cartId, total);
 
-                    double tvq = subtotal * 0.09975;
-                    double tvc = subtotal * 0.05;
-                    double total = subtotal + tvq + tvc;
-
-                    // Update the cart model
-                    cart.setSubtotal(subtotal);
-                    cart.setTvq(tvq);
-                    cart.setTvc(tvc);
-                    cart.setTotal(total);
-
-                    // Clear the products list
-                    cart.setProducts(new ArrayList<>());
-
+                    // Clear the cart after checkout
+                    cart.setProducts(Collections.emptyList());
                     return cartRepository.save(cart)
-                            .map(savedCart -> {
-                                // Create a response model to send back to the client
-                                CartResponseModel responseModel = new CartResponseModel();
-                                responseModel.setCartId(savedCart.getCartId());
-                                responseModel.setSubtotal(subtotal);
-                                responseModel.setTvq(tvq);
-                                responseModel.setTvc(tvc);
-                                responseModel.setTotal(total);
-                                responseModel.setPaymentStatus("Payment Processed");  // Simulated payment status
-                                return responseModel;
-                            });
+                            .then(Mono.just(new CartResponseModel(invoiceId, cartId, products, total)));
                 });
     }
+
+    private double calculateTotal(List<CartProduct> products) {
+        return products.stream()
+                .mapToDouble(product -> product.getProductSalePrice() * product.getQuantityInCart())
+                .sum();
+    }
+
+
 
     @Override
     public Mono<Integer> getCartItemCount(String cartId) {

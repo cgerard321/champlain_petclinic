@@ -12,7 +12,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Collections;
-import java.util.Map;
+import java.util.List;
 
 @Component
 @Slf4j
@@ -20,6 +20,7 @@ public class CartServiceClient {
 
     private final WebClient.Builder webClientBuilder;
     private final String CartServiceUrl;
+
 
     public CartServiceClient(WebClient.Builder webClientBuilder,
                                  @Value("${app.cart-service.host}") String CartServiceHost,
@@ -124,6 +125,8 @@ public class CartServiceClient {
                 .retrieve()
                 .bodyToMono(CartResponseDTO.class);
     }
+
+
 
     public Mono<CartResponseDTO> getCartByCustomerId(final String customerId) {
         return webClientBuilder.build()

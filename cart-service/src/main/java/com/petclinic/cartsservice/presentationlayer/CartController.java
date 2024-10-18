@@ -127,8 +127,9 @@ public class CartController {
     @PostMapping("/{cartId}/checkout")
     public Mono<ResponseEntity<CartResponseModel>> checkoutCart(@PathVariable String cartId) {
         return cartService.checkoutCart(cartId)
-                .map(cart -> new ResponseEntity<>(cart, HttpStatus.OK))
-                .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+                .map(cartResponse -> ResponseEntity.ok(cartResponse))
+                .onErrorResume(NotFoundException.class, e -> Mono.just(ResponseEntity.notFound().build()))
+                .onErrorResume(InvalidInputException.class, e -> Mono.just(ResponseEntity.badRequest().body(null)));
     }
 
     @GetMapping(value = "/customer/{customerId}", produces = MediaType.APPLICATION_JSON_VALUE)

@@ -314,3 +314,22 @@
   border-bottom: 2px solid #ccc; /* Optional: underline for the title */
   padding-bottom: 5px; /* Space below the border */
 }
+
+.invoices-section {
+  margin-top: 20px;
+}
+
+.invoice-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px; /* Space between invoice cards */
+}
+
+.invoice-card {
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 15px;
+  width: 200px; /* Set width for the invoice card */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+

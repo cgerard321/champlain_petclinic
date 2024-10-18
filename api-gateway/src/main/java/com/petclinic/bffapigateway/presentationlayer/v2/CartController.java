@@ -2,10 +2,8 @@ package com.petclinic.bffapigateway.presentationlayer.v2;
 
 
 import com.petclinic.bffapigateway.domainclientlayer.CartServiceClient;
-import com.petclinic.bffapigateway.dtos.Cart.AddProductRequestDTO;
-import com.petclinic.bffapigateway.dtos.Cart.CartRequestDTO;
-import com.petclinic.bffapigateway.dtos.Cart.CartResponseDTO;
-import com.petclinic.bffapigateway.dtos.Cart.UpdateProductQuantityRequestDTO;
+import com.petclinic.bffapigateway.dtos.Cart.*;
+import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +15,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -101,9 +100,13 @@ public class CartController {
     @PostMapping("/{cartId}/checkout")
     public Mono<ResponseEntity<CartResponseDTO>> checkoutCart(@PathVariable String cartId) {
         return cartServiceClient.checkoutCart(cartId)
-                .map(cart -> new ResponseEntity<>(cart, HttpStatus.OK))
-                .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+                .map(ResponseEntity::ok)
+                .onErrorResume(error -> {
+                    log.error("Checkout error: {}", error.getMessage());
+                    return Mono.just(ResponseEntity.badRequest().build());
+                });
     }
+
 
     @GetMapping("/customer/{customerId}")
     public Mono<ResponseEntity<CartResponseDTO>> getCartByCustomerId(@PathVariable String customerId) {

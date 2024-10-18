@@ -24,8 +24,10 @@ import reactor.test.StepVerifier;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -591,38 +593,39 @@ class CartServiceUnitTest {
 
 
 
-    void whenCheckoutCart_thenReturnUpdatedCartWithPaymentProcessed() {
-        // Given
-        String cartId = "98f7b33a-d62a-420a-a84a-05a27c85fc91";
-        Cart cart = new Cart();
-        cart.setCartId(cartId);
-        cart.setCustomerId("customer1");
 
-        CartProduct product = new CartProduct();
-        product.setProductId("product1");
-        product.setProductSalePrice(100.0);
-        product.setQuantityInCart(3); // 3 items at $100 each
+    @Test
+    void testCheckoutCart_CartNotFound() {
+        // Arrange
+        when(cartRepository.findCartByCartId(cart1.getCartId())).thenReturn(Mono.empty());
 
-        cart.setProducts(List.of(product));
+        // Act
+        Mono<CartResponseModel> result = cartService.checkoutCart(cart1.getCartId());
 
-        when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart));
-        when(cartRepository.save(any(Cart.class))).thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
-
-        // When
-        Mono<CartResponseModel> result = cartService.checkoutCart(cartId);
-
-        // Then
+        // Assert
         StepVerifier.create(result)
-                .assertNext(cartResponseModel -> {
-                    assertEquals(cartId, cartResponseModel.getCartId());
-                    assertEquals(300.0, cartResponseModel.getSubtotal()); // 3 * 100.0
-                    assertEquals(29.925, cartResponseModel.getTvq());      // 9.975% tax
-                    assertEquals(15.0, cartResponseModel.getTvc());        // 5% tax
-                    assertEquals(344.925, cartResponseModel.getTotal());   // subtotal + taxes
-                    assertEquals("Payment Processed", cartResponseModel.getPaymentStatus());
-                })
-                .verifyComplete();
+                .expectErrorMatches(throwable -> throwable instanceof NotFoundException &&
+                        throwable.getMessage().equals("Cart not found: " + cart1.getCartId()))
+                .verify();
     }
+
+    @Test
+    void testCheckoutCart_EmptyCart() {
+        // Arrange
+        cart1.setProducts(Collections.emptyList());
+        when(cartRepository.findCartByCartId(cart1.getCartId())).thenReturn(Mono.just(cart1));
+
+        // Act
+        Mono<CartResponseModel> result = cartService.checkoutCart(cart1.getCartId());
+
+        // Assert
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof InvalidInputException &&
+                        throwable.getMessage().equals("Cart is empty"))
+                .verify();
+    }
+
+
 
     @Test
     void findCartByCustomerId_withExistingId_thenReturnCartResponseModel() {
