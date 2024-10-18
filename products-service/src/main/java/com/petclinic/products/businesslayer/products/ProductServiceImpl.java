@@ -43,6 +43,7 @@ public class ProductServiceImpl implements ProductService {
                 .collectList()
                 .flatMap(ratings -> {
                     if(ratings.isEmpty()){
+                        product.setAverageRating(0.0);
                         return Mono.just(product);
                     }
 

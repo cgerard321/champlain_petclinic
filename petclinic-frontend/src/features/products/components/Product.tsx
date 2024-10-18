@@ -137,8 +137,6 @@ export default function Product({
         +
       </span>
 
-  
-
       <h2
         onClick={handleProductTitleClick}
         style={{
@@ -159,13 +157,13 @@ export default function Product({
         currentRating={currentProduct.averageRating}
         viewOnly={true}
       />
-       {currentProduct.productStatus === 'PRE_ORDER' && (
+      {currentProduct.productStatus === 'PRE_ORDER' && (
         <div
           style={{
             position: 'absolute',
             top: '10px',
             right: '10px',
-            backgroundColor: '#FFD700',  
+            backgroundColor: '#FFD700',
             padding: '5px 10px',
             borderRadius: '5px',
             fontWeight: 'bold',
@@ -177,7 +175,6 @@ export default function Product({
           PRE-ORDER
         </div>
       )}
-
     </div>
   );
 }

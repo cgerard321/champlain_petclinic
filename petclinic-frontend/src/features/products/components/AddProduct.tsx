@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Button, Form, Modal } from 'react-bootstrap';
 import { ProductModel } from '../models/ProductModels/ProductModel';
 import { ImageModel } from '../models/ProductModels/ImageModel';
@@ -48,7 +48,7 @@ export default function AddProduct({
     event: React.FormEvent<HTMLFormElement>
   ): Promise<void> => {
     event.preventDefault();
-    
+
     if (!validateDates()) {
       return;
     }
@@ -56,7 +56,8 @@ export default function AddProduct({
     const form = event.currentTarget;
     let createdImage = null;
 
-    const fileInput = form.querySelector<HTMLInputElement>('input[type="file"]');
+    const fileInput =
+      form.querySelector<HTMLInputElement>('input[type="file"]');
 
     if (fileInput && fileInput.files && fileInput.files.length > 0) {
       const file = fileInput.files[0];
@@ -79,13 +80,22 @@ export default function AddProduct({
     }
 
     const imageId = createdImage.imageId;
-    const productName = (form.elements.namedItem('productName') as HTMLInputElement).value;
-    const productDescription = (form.elements.namedItem('productDescription') as HTMLInputElement).value;
-    const productSalePrice = parseFloat((form.elements.namedItem('productSalePrice') as HTMLInputElement).value);
-    const productQuantity = parseInt((form.elements.namedItem('productQuantity') as HTMLInputElement).value, 10);
+    const productName = (
+      form.elements.namedItem('productName') as HTMLInputElement
+    ).value;
+    const productDescription = (
+      form.elements.namedItem('productDescription') as HTMLInputElement
+    ).value;
+    const productSalePrice = parseFloat(
+      (form.elements.namedItem('productSalePrice') as HTMLInputElement).value
+    );
+    const productQuantity = parseInt(
+      (form.elements.namedItem('productQuantity') as HTMLInputElement).value,
+      10
+    );
     const requestCount = 0;
     const averageRating = 0;
-    const productId = ''; 
+    const productId = '';
 
     const dateAddedObj = new Date(dateAdded);
     const releaseDateObj = releaseDate ? new Date(releaseDate) : undefined;
@@ -96,7 +106,7 @@ export default function AddProduct({
     } else if (productQuantity > 0) {
       productStatus = 'AVAILABLE';
     } else {
-      error
+      error;
       productStatus = 'OUT_OF_STOCK';
     }
 
@@ -122,7 +132,7 @@ export default function AddProduct({
       console.error('Error adding product:', error);
     }
   };
-  
+
   return (
     <div>
       <Button variant="secondary" onClick={handleShow}>
@@ -192,7 +202,7 @@ export default function AddProduct({
                 type="date"
                 name="dateAdded"
                 value={dateAdded}
-                onChange={(e) => setDateAdded(e.target.value)}
+                onChange={e => setDateAdded(e.target.value)}
                 max={new Date().toISOString().split('T')[0]}
                 required
               />
@@ -203,7 +213,7 @@ export default function AddProduct({
                 type="date"
                 name="releaseDate"
                 value={releaseDate}
-                onChange={(e) => setReleaseDate(e.target.value)}
+                onChange={e => setReleaseDate(e.target.value)}
                 min={dateAdded}
               />
             </Form.Group>
@@ -225,5 +235,3 @@ export default function AddProduct({
     </div>
   );
 }
-
-
