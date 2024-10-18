@@ -58,6 +58,8 @@ import MoveInventoryProducts from '@/features/inventories/MoveInventoryProducts.
 import ReviewsCustomer from '@/pages/Review/CustomerReviews.tsx';
 import AddReviewsCustomer from '@/pages/Review/CustomerAddReviewForm.tsx';
 import EmergencyDetails from './features/visits/EmergencyByEmergencyId';
+import UserDetailsPage from './pages/Users/UserDetailsPage';
+import UpdateUserPage from './pages/Users/UpdateUserPage';
 
 const router = createBrowserRouter([
   {
@@ -395,6 +397,22 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute roles={['ADMIN']}>
             <AllUsers />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.UserDetailsPage,
+        element: (
+          <ProtectedRoute roles={['ADMIN']}>
+            <UserDetailsPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.UpdateUserPage,
+        element: (
+          <ProtectedRoute roles={['ADMIN']}>
+            <UpdateUserPage />
           </ProtectedRoute>
         ),
       },
