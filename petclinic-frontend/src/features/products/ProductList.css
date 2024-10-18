@@ -141,3 +141,19 @@
   display: flex;
   justify-content: center;
 }
+.close-button {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  padding: 0px;
+  margin: 0px;
+  top: 20px;
+  right: 20px;
+  cursor: pointer;
+  font-size: 2rem;
+  color: black;
+}
+.close-button:hover {
+  color: white;
+  background-color: #ca2020;
+}
