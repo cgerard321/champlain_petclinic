@@ -2,6 +2,7 @@ package com.petclinic.authservice.presentationlayer.Role;
 
 import com.petclinic.authservice.datalayer.roles.Role;
 import com.petclinic.authservice.businesslayer.RoleService;
+import com.petclinic.authservice.datalayer.roles.RoleRequestModel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -18,9 +19,9 @@ public class RoleController {
     private final RoleService roleService;
 
     @PostMapping
-    public ResponseEntity<Role> createRole(@RequestBody String roleName) {
-        log.info("Received request to create role with name: {}", roleName);
-        Role role = roleService.createRole(roleName);
+    public ResponseEntity<Role> createRole(@RequestBody RoleRequestModel roleRequestModel) {
+        log.info("Received request to create role with name: {}", roleRequestModel.getName());
+        Role role = roleService.createRole(roleRequestModel);
         log.info("Role created with ID: {}", role.getId());
         return ResponseEntity.ok(role);
     }

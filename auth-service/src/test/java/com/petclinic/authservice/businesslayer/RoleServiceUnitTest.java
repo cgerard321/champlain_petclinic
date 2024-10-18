@@ -2,6 +2,7 @@ package com.petclinic.authservice.businesslayer;
 
 import com.petclinic.authservice.datalayer.roles.Role;
 import com.petclinic.authservice.datalayer.roles.RoleRepo;
+import com.petclinic.authservice.datalayer.roles.RoleRequestModel;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -23,12 +24,12 @@ public class RoleServiceUnitTest {
 
     @Test
     void whenCreateRole_thenReturnRoleResponseModel() {
-        String roleName = "SUPPORT";
-        Role savedRole = Role.builder().id(7L).name(roleName).build();
+        RoleRequestModel roleRequestModel = new RoleRequestModel("SUPPORT");
+        Role savedRole = Role.builder().id(7L).name(roleRequestModel.getName()).build();
 
         when(roleRepo.save(any(Role.class))).thenReturn(savedRole);
 
-        Role result = roleService.createRole(roleName);
+        Role result = roleService.createRole(roleRequestModel);
 
         assertEquals(savedRole.getId(), result.getId());
         assertEquals(savedRole.getName(), result.getName());
