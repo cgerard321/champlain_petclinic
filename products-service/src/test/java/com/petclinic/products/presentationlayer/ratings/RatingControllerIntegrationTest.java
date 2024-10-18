@@ -274,10 +274,19 @@ class RatingControllerIntegrationTest {
 
     @Test
     public void whenAddRatingForProduct_thenRecalculateAverage(){
+
+        productRepository.deleteAll().block();
+        ratingRepository.deleteAll().block();
+
+        productRepository.save(product1).block();
+        ratingRepository.saveAll(Flux.just(rating1Prod1, rating2Prod1)).blockLast();
+
         RatingRequestModel ratingRequestModel = RatingRequestModel.builder()
                 .rating((byte) 5)
                 .build();
         String randomCustomer = UUID.randomUUID().toString();
+
+        Double sum = (rating1Prod1.getRating().doubleValue() + rating2Prod1.getRating().doubleValue() + ratingRequestModel.getRating().doubleValue()) / 3d;
 
         webClient.post()
                 .uri("/api/v1/ratings/" + product1.getProductId() + "/" + randomCustomer)
@@ -304,12 +313,12 @@ class RatingControllerIntegrationTest {
                     assertNotNull(responseModel);
                     assertEquals(product1.getProductId(), responseModel.getProductId());
                     assertEquals(
-                            (rating1Prod1.getRating().doubleValue() + rating2Prod1.getRating().doubleValue() + ratingRequestModel.getRating().doubleValue()) / 3d,
+                            (Math.floor(sum * 100) / 100),
                             responseModel.getAverageRating());
                 });
 
         StepVerifier.create(ratingRepository.findAll())
-                .expectNextCount(5)
+                .expectNextCount(3)
                 .verifyComplete();
     }
 

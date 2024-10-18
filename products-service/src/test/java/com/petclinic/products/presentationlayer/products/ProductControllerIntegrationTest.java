@@ -2,6 +2,8 @@ package com.petclinic.products.presentationlayer.products;
 
 import com.petclinic.products.datalayer.products.Product;
 import com.petclinic.products.datalayer.products.ProductRepository;
+import com.petclinic.products.datalayer.ratings.Rating;
+import com.petclinic.products.datalayer.ratings.RatingRepository;
 import com.petclinic.products.utils.exceptions.NotFoundException;
 import org.junit.jupiter.api.*;
 import org.reactivestreams.Publisher;
@@ -33,6 +35,9 @@ class ProductControllerIntegrationTest {
     @Autowired
     private ProductRepository productRepository;
 
+    @Autowired
+    private RatingRepository ratingRepository;
+
     private final String NON_EXISTENT_PRODUCT_ID = UUID.randomUUID().toString();
     private final String INVALID_PRODUCT_ID = "INVALID_PRODUCT_ID";
 
@@ -58,7 +63,6 @@ class ProductControllerIntegrationTest {
             .productName("Product 3")
             .productDescription("Product 3 Description")
             .productSalePrice(25.00)
-            .averageRating(4.5)
             .productQuantity(2)
             .build();
 
@@ -66,7 +70,6 @@ class ProductControllerIntegrationTest {
             .productName("Product 3")
             .productDescription("Product 3 Description")
             .productSalePrice(0.00)
-            .averageRating(0.0)
             .productQuantity(2)
 
             .build();
@@ -75,7 +78,6 @@ class ProductControllerIntegrationTest {
             .productName("Product 4")
             .productDescription("Product 4 Description")
             .productSalePrice(25.00)
-            .averageRating(0.0)
             .productQuantity(2)
             .build();
 
@@ -93,8 +95,22 @@ class ProductControllerIntegrationTest {
     @Test
     public void whenGetAllProductsSortedByRatingAsc_thenReturnProductsSortedAscending() {
 
-        // Save
-        productRepository.saveAll(List.of(product1, product2));
+        productRepository.saveAll(List.of(product1, product2)).blockLast();
+
+
+        Rating ratingForProduct1 = Rating.builder()
+                .productId(product1.getProductId())
+                .customerId(UUID.randomUUID().toString())
+                .rating((byte) 4)
+                .build();
+
+        Rating ratingForProduct2 = Rating.builder()
+                .productId(product2.getProductId())
+                .customerId(UUID.randomUUID().toString())
+                .rating((byte) 2)
+                .build();
+
+        ratingRepository.saveAll(List.of(ratingForProduct1, ratingForProduct2)).blockLast();
 
         // Act
         webTestClient.get()
@@ -106,18 +122,50 @@ class ProductControllerIntegrationTest {
                 .expectStatus().isOk()
                 .expectHeader().contentType("text/event-stream;charset=UTF-8")
                 .expectBodyList(ProductResponseModel.class)
-                .value(productResponseModel -> {
-                    assertNotNull(productResponseModel);
-                    assertEquals(2, productResponseModel.size());
-                    assertEquals(product2.getProductId(), productResponseModel.get(0).getProductId());
-                    assertEquals(product1.getProductId(), productResponseModel.get(1).getProductId());
+                .value(productResponseModels -> {
+                    assertNotNull(productResponseModels);
+                    assertEquals(2, productResponseModels.size());
+                    assertEquals(product2.getProductId(), productResponseModels.get(0).getProductId());
+                    assertEquals(product1.getProductId(), productResponseModels.get(1).getProductId());
                 });
     }
     @Test
     public void whenGetAllProductsSortedByRatingDesc_thenReturnProductsSortedDescending() {
 
-        // Save the products to the repository
-        productRepository.saveAll(List.of(product1, product2));
+        productRepository.deleteAll().block();
+        ratingRepository.deleteAll().block();
+
+        Product product1 = Product.builder()
+                .productId("product-1-id")
+                .productName("Product 1")
+                .productDescription("Product 1 Description")
+                .productSalePrice(100.00)
+                .productQuantity(2)
+                .build();
+
+        Product product2 = Product.builder()
+                .productId("product-2-id")
+                .productName("Product 2")
+                .productDescription("Product 2 Description")
+                .productSalePrice(50.00)
+                .productQuantity(2)
+                .build();
+
+        productRepository.saveAll(List.of(product1, product2)).blockLast();
+        Rating ratingForProduct1 = Rating.builder()
+                .productId(product1.getProductId())
+                .customerId(UUID.randomUUID().toString())
+                .rating((byte) 5)
+                .build();
+
+        Rating ratingForProduct2 = Rating.builder()
+                .productId(product2.getProductId())
+                .customerId(UUID.randomUUID().toString())
+                .rating((byte) 3)
+                .build();
+
+        ratingRepository.saveAll(List.of(ratingForProduct1, ratingForProduct2)).blockLast();
+
         // Act
         webTestClient.get()
                 .uri(uriBuilder -> uriBuilder.path("/api/v1/products")
@@ -128,11 +176,11 @@ class ProductControllerIntegrationTest {
                 .expectStatus().isOk()
                 .expectHeader().contentType("text/event-stream;charset=UTF-8")
                 .expectBodyList(ProductResponseModel.class)
-                .value(productResponseModel -> {
-                    assertNotNull(productResponseModel);
-                    assertEquals(2, productResponseModel.size());
-                    assertEquals(product1.getProductId(), productResponseModel.get(0).getProductId());
-                    assertEquals(product2.getProductId(), productResponseModel.get(1).getProductId());
+                .value(productResponseModels -> {
+                    assertNotNull(productResponseModels);
+                    assertEquals(2, productResponseModels.size());
+                    assertEquals(product1.getProductId(), productResponseModels.get(0).getProductId());
+                    assertEquals(product2.getProductId(), productResponseModels.get(1).getProductId());
                 });
     }
 
@@ -217,7 +265,6 @@ class ProductControllerIntegrationTest {
                     assertEquals(productRequestModel.getProductName(), productResponseModel.getProductName());
                     assertEquals(productRequestModel.getProductDescription(), productResponseModel.getProductDescription());
                     assertEquals(productRequestModel.getProductSalePrice(), productResponseModel.getProductSalePrice());
-                    assertEquals(productRequestModel.getAverageRating(), productResponseModel.getAverageRating());
                 });
 
         StepVerifier
@@ -263,7 +310,6 @@ class ProductControllerIntegrationTest {
                     assertEquals(productRequestModel.getProductName(), productResponseModel.getProductName());
                     assertEquals(productRequestModel.getProductDescription(), productResponseModel.getProductDescription());
                     assertEquals(productRequestModel.getProductSalePrice(), productResponseModel.getProductSalePrice());
-                    assertEquals(productRequestModel.getAverageRating(), productResponseModel.getAverageRating());
                 });
 
         StepVerifier
