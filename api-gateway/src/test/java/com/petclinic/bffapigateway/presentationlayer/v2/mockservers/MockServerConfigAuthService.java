@@ -117,6 +117,35 @@ public class MockServerConfigAuthService {
                 );
     }
 
+    public void registerGetAllRolesEndpoint() {
+        mockServerClient_AuthService
+                .when(
+                        request()
+                                .withMethod("GET")
+                                .withPath("/roles")
+                )
+                .respond(
+                        response()
+                                .withStatusCode(200)
+                                .withBody(json("[{\"id\":\"1\", \"name\":\"ADMIN\"}, {\"id\":\"2\", \"name\":\"OWNER\"}]"))
+                );
+    }
+
+    public void registerCreateRoleEndpoint() {
+        mockServerClient_AuthService
+                .when(
+                        request()
+                                .withMethod("POST")
+                                .withPath("/roles")
+                                .withBody(json("{\"name\":\"SUPPORT\"}"))
+                )
+                .respond(
+                        response()
+                                .withStatusCode(201)
+                                .withBody(json("{\"id\":\"6\", \"name\":\"SUPPORT\"}"))
+                );
+    }
+
     public void stopMockServer() {
         if(clientAndServer != null)
             this.clientAndServer.stop();
