@@ -702,7 +702,7 @@ class VetControllerUnitTest {
 
 
     @Test
-    void addEducationWithVetId_ValidValues_ShouldSucceed(){
+    void addEducationWithVetId_ValidValues_ShouldSucceed() {
         EducationRequestDTO educationRequestDTO = EducationRequestDTO.builder()
                 .vetId(VET_ID)
                 .degree("Doctor of Veterinary Medicine")
@@ -722,19 +722,27 @@ class VetControllerUnitTest {
                 .endDate("2014")
                 .build();
 
-        when(educationService.addEducationToVet(VET_ID, Mono.just(educationRequestDTO))).thenReturn(Mono.just(educationResponseDTO));
+        when(educationService.addEducationToVet(eq(VET_ID), any(Mono.class)))
+                .thenReturn(Mono.just(educationResponseDTO));
 
         client.post()
                 .uri("/vets/{vetId}/educations", VET_ID)
                 .bodyValue(educationRequestDTO)
                 .accept(APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk()
+                .expectStatus().isCreated()
                 .expectHeader().contentType(APPLICATION_JSON)
-                .expectBody();
+                .expectBody(EducationResponseDTO.class)
+                .consumeWith(response -> {
+                    EducationResponseDTO responseBody = response.getResponseBody();
+                    assert responseBody != null; 
+                    assertEquals("3", responseBody.getEducationId());
+                    assertEquals(VET_ID, responseBody.getVetId());
+                });
 
-        Mockito.verify(educationService, times(1)).addEducationToVet(anyString(), any(Mono.class));
+        Mockito.verify(educationService, times(1)).addEducationToVet(eq(VET_ID), any(Mono.class));
     }
+
 
     @Test
     void getPhotoByVetId() {
