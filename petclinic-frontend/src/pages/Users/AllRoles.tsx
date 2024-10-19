@@ -15,7 +15,9 @@ const AllRoles: FC = (): JSX.Element => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [newRoleName, setNewRoleName] = useState('');
-  const [roleToUpdate, setRoleToUpdate] = useState<RoleResponseModel | null>(null);
+  const [roleToUpdate, setRoleToUpdate] = useState<RoleResponseModel | null>(
+    null
+  );
 
   useEffect(() => {
     const fetchRoles = async (): Promise<void> => {
@@ -59,7 +61,7 @@ const AllRoles: FC = (): JSX.Element => {
     }
   };
 
-  return (
+   return (
    <div>
      <NavBar />
 
