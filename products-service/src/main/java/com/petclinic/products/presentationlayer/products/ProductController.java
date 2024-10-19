@@ -2,6 +2,8 @@ package com.petclinic.products.presentationlayer.products;
 
 import com.petclinic.products.businesslayer.products.ProductBundleService;
 import com.petclinic.products.businesslayer.products.ProductService;
+import com.petclinic.products.datalayer.products.Product;
+import com.petclinic.products.datalayer.products.ProductType;
 import com.petclinic.products.utils.EntityModelUtil;
 import com.petclinic.products.utils.exceptions.InvalidInputException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/products")
@@ -100,6 +104,14 @@ public class ProductController {
         return productRequestModel
                 .flatMap(request -> productService.changeProductQuantity(productId, request.getProductQuantity()))
                 .then(Mono.just(ResponseEntity.noContent().build()));
+    }
+    @GetMapping("/filter")
+    public List<ProductResponseModel> getProductsByType(@RequestParam ProductType productType) {
+        List<Product> products = productService.getProductsByType(productType);
+        // Convert the entities to response models (if needed)
+        return products.stream()
+                .map(EntityModelUtil::toProductResponseModel)
+                .toList();
     }
 
     // New endpoints for product bundles

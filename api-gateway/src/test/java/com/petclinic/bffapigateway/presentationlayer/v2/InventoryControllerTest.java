@@ -3,6 +3,7 @@ package com.petclinic.bffapigateway.presentationlayer.v2;
 import com.petclinic.bffapigateway.domainclientlayer.InventoryServiceClient;
 import com.petclinic.bffapigateway.dtos.Inventory.*;
 import com.petclinic.bffapigateway.exceptions.InventoryNotFoundException;
+import com.petclinic.bffapigateway.utils.InventoryUtils.ImageUtil;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -23,6 +24,8 @@ import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
@@ -44,6 +47,12 @@ public class InventoryControllerTest {
     private InventoryServiceClient inventoryServiceClient;
     private final String baseInventoryURL = "/api/v2/gateway/inventories";
 
+    InputStream inputStream = getClass().getResourceAsStream("/images/DiagnosticKitImage.jpg");
+    byte[] diagnosticKitImage = ImageUtil.readImage(inputStream);
+
+    public InventoryControllerTest() throws IOException {
+    }
+
     private InventoryResponseDTO buildInventoryDTO(){
         return InventoryResponseDTO.builder()
                 .inventoryId("1")
@@ -52,6 +61,7 @@ public class InventoryControllerTest {
                 .inventoryDescription("invtone")
                 .inventoryImage("https://www.fda.gov/files/iStock-157317886.jpg")
                 .inventoryBackupImage("https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14")
+                .imageUploaded(diagnosticKitImage)
                 .build();
     }
     private List<InventoryTypeResponseDTO> buildInventoryTypeResponseDTOList(){
@@ -280,6 +290,7 @@ public class InventoryControllerTest {
                 .inventoryDescription("updatedDescription")
                 .inventoryImage("https://www.fda.gov/files/iStock-157317886.jpg")
                 .inventoryBackupImage("https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14")
+                .imageUploaded(diagnosticKitImage)
                 .build();
         InventoryResponseDTO updatedInventory = InventoryResponseDTO.builder()
                 .inventoryId(inventoryId)
@@ -288,6 +299,7 @@ public class InventoryControllerTest {
                 .inventoryDescription("updatedDescription")
                 .inventoryImage("https://www.fda.gov/files/iStock-157317886.jpg")
                 .inventoryBackupImage("https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14")
+                .imageUploaded(diagnosticKitImage)
                 .build();
 
         when(inventoryServiceClient.updateInventory(eq(updateRequest), eq(inventoryId)))
@@ -318,6 +330,7 @@ public class InventoryControllerTest {
                 .inventoryDescription("updatedDescription")
                 .inventoryImage("https://www.fda.gov/files/iStock-157317886.jpg")
                 .inventoryBackupImage("https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14")
+                .imageUploaded(diagnosticKitImage)
                 .build();
 
         when(inventoryServiceClient.updateInventory(eq(updateRequest), eq(validInventoryId)))
@@ -345,6 +358,7 @@ public class InventoryControllerTest {
                 .inventoryDescription("invtone")
                 .inventoryImage("https://www.fda.gov/files/iStock-157317886.jpg")
                 .inventoryBackupImage("https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14")
+                .imageUploaded(diagnosticKitImage)
                 .build();
         InventoryResponseDTO createdInventory = buildInventoryDTO();
 
@@ -375,6 +389,7 @@ public class InventoryControllerTest {
                 .inventoryDescription("invtone")
                 .inventoryImage("https://www.fda.gov/files/iStock-157317886.jpg")
                 .inventoryBackupImage("https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14")
+                .imageUploaded(diagnosticKitImage)
                 .build();
 
         when(inventoryServiceClient.addInventory(eq(invalidInventoryRequest)))
