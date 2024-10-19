@@ -15,6 +15,10 @@ import { Navbar, Nav, NavDropdown, Container } from 'react-bootstrap';
 import { FaShoppingCart } from 'react-icons/fa'; // Importing the shopping cart icon
 import './AppNavBar.css';
 
+interface NavBarProps {
+  onCartIdChange: (cartId: string | null) => void; // Prop for setting cartId in parent
+}
+
 interface ProductAPIResponse {
   productId: number;
   productName: string;
@@ -25,7 +29,7 @@ interface ProductAPIResponse {
   productQuantity: number;
 }
 
-export function NavBar(): JSX.Element {
+export function NavBar({ onCartIdChange }: NavBarProps): JSX.Element {
   const { user } = useUser();
   const navigate = useNavigate();
   const [navbarOpen, setNavbarOpen] = useState(false);
@@ -60,6 +64,7 @@ export function NavBar(): JSX.Element {
         try {
           const id = await fetchCartIdByCustomerId(user.userId);
           setCartId(id);
+          onCartIdChange(id);
         } catch (error) {
           console.error('Error fetching cart ID:', error);
         }
@@ -67,7 +72,7 @@ export function NavBar(): JSX.Element {
     };
 
     fetchCartId();
-  }, [user.userId]);
+  }, [user.userId, onCartIdChange]);
 
   // Fetch cart item count
   useEffect(() => {

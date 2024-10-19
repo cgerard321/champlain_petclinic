@@ -7,12 +7,17 @@ import { generatePath, useNavigate } from 'react-router-dom';
 import { AppRoutePaths } from '@/shared/models/path.routes';
 import StarRating from './StarRating';
 import './Product.css';
+import { addToWishlist } from './addToWishlist';
+
+interface ProductProps {
+  product: ProductModel;
+  cartId: string | null; // Add cartId prop
+}
 
 export default function Product({
   product,
-}: {
-  product: ProductModel;
-}): JSX.Element {
+  cartId, // Destructure cartId prop
+}: ProductProps): JSX.Element {
   const [currentProduct, setCurrentProduct] = useState<ProductModel>(product);
   const [selectedProduct, setSelectedProduct] = useState<ProductModel | null>(
     null
@@ -20,6 +25,7 @@ export default function Product({
   const [selectedProductForQuantity, setSelectedProductForQuantity] =
     useState<ProductModel | null>(null);
   const [quantity, setQuantity] = useState<number>(0);
+  const [wishlistQuantity, setWishlistQuantity] = useState<number>(1); // State for wishlist quantity
   const [tooLong, setTooLong] = useState<boolean>(false);
 
   const navigate = useNavigate();
@@ -39,15 +45,6 @@ export default function Product({
       setTooLong(false);
     }
   }, [product.productDescription]);
-
-  // const handleProductClick = async (productId: string): Promise<void> => {
-  //   try {
-  //     const product = await getProductByProductId(productId);
-  //     setSelectedProduct(product);
-  //   } catch (error) {
-  //     console.error('Failed to fetch product details:', error);
-  //   }
-  // };
 
   const handleProductClickForProductQuantity = async (
     productId: string
@@ -83,6 +80,17 @@ export default function Product({
   const handleBackToList = (): void => {
     setSelectedProduct(null);
     setSelectedProductForQuantity(null);
+  };
+
+  const handleAddToWishlist = async (): Promise<void> => {
+    try {
+      await addToWishlist(currentProduct.productId, cartId, wishlistQuantity); // Pass wishlistQuantity
+      alert(
+        `${wishlistQuantity} of ${currentProduct.productName} has been added to your wishlist!`
+      );
+    } catch (error) {
+      console.error('Failed to add product to wishlist:', error);
+    }
   };
 
   if (selectedProduct) {
@@ -156,6 +164,21 @@ export default function Product({
         currentRating={currentProduct.averageRating}
         viewOnly={true}
       />
+
+      {/* Wishlist Quantity Input */}
+      <input
+        type="number"
+        value={wishlistQuantity}
+        onChange={e =>
+          setWishlistQuantity(Math.max(1, parseInt(e.target.value)))
+        }
+        min="1"
+        max={currentProduct.productQuantity}
+        style={{ width: '50px', marginLeft: '10px' }}
+      />
+
+      {/* Add to Wishlist Button */}
+      <button onClick={handleAddToWishlist}>Add to Wishlist</button>
     </div>
   );
 }

@@ -14,7 +14,12 @@ import { ImageModel } from './models/ProductModels/ImageModel';
 import StarRating from '@/features/products/components/StarRating.tsx';
 import './components/StarRating.css';
 
-export default function ProductList(): JSX.Element {
+// Accept cartId as a prop
+interface ProductListProps {
+  cartId: string | null;
+}
+
+export default function ProductList({ cartId }: ProductListProps): JSX.Element {
   const [productList, setProductList] = useState<ProductModel[]>([]);
   const [minPrice, setMinPrice] = useState<number | undefined>(undefined);
   const [maxPrice, setMaxPrice] = useState<number | undefined>(undefined);
@@ -150,8 +155,6 @@ export default function ProductList(): JSX.Element {
     });
   };
 
-  //Mehod to add a product to the user cart wish list
-  // const addProductToWishList
   return (
     <div className="product-list-container">
       {isSidebarOpen && (
@@ -270,7 +273,11 @@ export default function ProductList(): JSX.Element {
                 key={product.productId}
                 onClick={() => handleProductClick(product)}
               >
-                <Product key={product.productId} product={product} />
+                <Product
+                  key={product.productId}
+                  product={product}
+                  cartId={cartId}
+                />
               </div>
             ))
           ) : (
@@ -284,7 +291,11 @@ export default function ProductList(): JSX.Element {
           <h2>Recently Clicked Products</h2>
           <div className="grid">
             {recentlyClickedProducts.map(product => (
-              <Product key={product.productId} product={product} />
+              <Product
+                key={product.productId}
+                product={product}
+                cartId={cartId}
+              />
             ))}
           </div>
         </div>
