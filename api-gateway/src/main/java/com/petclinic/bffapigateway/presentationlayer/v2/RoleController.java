@@ -31,13 +31,14 @@ public class RoleController {
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @PostMapping(value = "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+
     public Mono<ResponseEntity<Role>> createRole(@CookieValue("Bearer") String jwtToken, @RequestBody RoleRequestModel roleRequestModel) {
         return authServiceClient.createRole(jwtToken, roleRequestModel)
                 .map(role -> ResponseEntity.status(HttpStatus.CREATED).body(role))
                 .defaultIfEmpty(ResponseEntity.status(HttpStatus.BAD_REQUEST).build());
     }
 
-    //controller unit tests for these 2
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @PatchMapping(value = "/{roleId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<Role>> updateRole(@CookieValue("Bearer") String jwtToken, @PathVariable Long roleId, @RequestBody RoleRequestModel roleRequestModel) {

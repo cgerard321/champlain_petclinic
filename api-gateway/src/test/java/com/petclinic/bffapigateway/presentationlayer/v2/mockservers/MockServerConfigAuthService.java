@@ -128,6 +128,8 @@ public class MockServerConfigAuthService {
                         response()
                                 .withStatusCode(200)
                                 .withBody(json("[{\"name\":\"OWNER\"}, {\"name\":\"ADMIN\"}]"))
+          
+                                .withBody(json("[{\"id\":\"1\", \"name\":\"ADMIN\"}, {\"id\":\"2\", \"name\":\"OWNER\"}]"))
                 );
     }
 
@@ -143,6 +145,8 @@ public class MockServerConfigAuthService {
                         response()
                                 .withStatusCode(201)
                                 .withBody(json("{\"name\":\"SUPPORT\"}"))
+
+                                .withBody(json("{\"id\":\"6\", \"name\":\"SUPPORT\"}"))
                 );
     }
 

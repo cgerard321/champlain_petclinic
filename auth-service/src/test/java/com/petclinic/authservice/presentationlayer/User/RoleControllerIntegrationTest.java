@@ -80,7 +80,7 @@ public class RoleControllerIntegrationTest {
         assertTrue(savedRole.isPresent());
         assertEquals("SUPPORT", savedRole.get().getName());
     }
-
+  
     @Test
     void whenUpdateRole_thenReturnUpdatedRole() {
         String token = jwtTokenUtil.generateToken(userRepo.findAll().get(0));

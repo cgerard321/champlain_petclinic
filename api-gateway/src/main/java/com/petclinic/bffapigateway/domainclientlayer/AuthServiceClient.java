@@ -537,6 +537,4 @@ public class AuthServiceClient {
                 .retrieve()
                 .bodyToMono(Role.class);
     }
-
 }
-

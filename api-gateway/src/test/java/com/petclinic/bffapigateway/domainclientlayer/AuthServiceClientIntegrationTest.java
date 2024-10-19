@@ -679,6 +679,9 @@ public class AuthServiceClientIntegrationTest {
     void shouldGetAllRoles() throws Exception {
         Role role1 = Role.builder().name("ROLE_USER").build();
         Role role2 = Role.builder().name("ROLE_ADMIN").build();
+        Role role1 = Role.builder().name("OWNER").build();
+        Role role2 = Role.builder().name("ADMIN").build();
+
 
         String rolesJson = new ObjectMapper().writeValueAsString(List.of(role1, role2));
 
@@ -703,6 +706,8 @@ public class AuthServiceClientIntegrationTest {
     void shouldCreateRole() throws Exception {
         RoleRequestModel roleRequestModel = RoleRequestModel.builder().name("ROLE_USER").build();
         Role role = Role.builder().name("ROLE_USER").build();
+        RoleRequestModel roleRequestModel = RoleRequestModel.builder().name("SUPPORT").build();
+        Role role = Role.builder().name("SUPPORT").build();
 
         String roleJson = new ObjectMapper().writeValueAsString(role);
 

@@ -19,6 +19,7 @@ public class RoleController {
     private final RoleService roleService;
 
     @PostMapping
+    @PostMapping()
     public ResponseEntity<Role> createRole(@RequestBody RoleRequestModel roleRequestModel) {
         log.info("Received request to create role with name: {}", roleRequestModel.getName());
         Role role = roleService.createRole(roleRequestModel);
@@ -27,12 +28,13 @@ public class RoleController {
     }
 
     @GetMapping
+    @GetMapping()
     public ResponseEntity<List<Role>> getAllRoles() {
         log.info("Received request to fetch all roles");
         List<Role> roles = roleService.getAllRoles();
         return ResponseEntity.ok(roles);
     }
-
+  
     @PatchMapping("/{roleId}")
     public ResponseEntity<Role> updateRole(@PathVariable Long roleId, @RequestBody RoleRequestModel roleRequestModel) {
         log.info("Received request to update role with ID: {}", roleId);
