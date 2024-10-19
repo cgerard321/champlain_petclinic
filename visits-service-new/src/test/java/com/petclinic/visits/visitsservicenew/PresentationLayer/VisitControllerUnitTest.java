@@ -21,17 +21,24 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+
+import static org.junit.Assert.assertArrayEquals;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -1049,6 +1056,69 @@ class VisitControllerUnitTest {
                 .expectStatus().isNotFound();
 
         verify(visitService, times(1)).archiveCompletedVisit(eq(invalidVisitId), any(Mono.class));
+    }
+
+    @Test
+    void exportVisitsToCSV_ShouldReturnCSVFile() throws IOException {
+        // Define the expected CSV content as a byte array with a predefined visit
+        String expectedCsv = "VisitId,Description,VisitDate,PetId,PractitionerId,Status\n" +
+                "1,\"Test Visit\",2024-10-17,123,456,ACTIVE\n";
+        byte[] expectedContent = expectedCsv.getBytes(StandardCharsets.UTF_8);
+
+        // Create a ByteArrayInputStream with the expected content
+        ByteArrayInputStream csvData = new ByteArrayInputStream(expectedContent);
+
+        when(visitService.exportVisitsToCSV()).thenReturn(Mono.just(new InputStreamResource(csvData)));
+
+        webTestClient.get()
+                .uri("/visits/export")
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().valueEquals(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=visits.csv")
+                .expectHeader().contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .expectBody(byte[].class)
+                .value(responseBody -> {
+                    // Assert that the response body matches the expected content
+                    assertArrayEquals(expectedContent, responseBody);
+                });
+        verify(visitService, times(1)).exportVisitsToCSV();
+    }
+
+
+
+    @Test
+    void exportVisitsToCSV_ShouldReturnEmptyFile_WhenNoVisits() throws IOException {
+        // Define the expected CSV content as a byte array with no  predefined visit
+        String expectedCsv = "VisitId,Description,VisitDate,PetId,PractitionerId,Status\n";
+        byte[] expectedContent = expectedCsv.getBytes(StandardCharsets.UTF_8);
+
+        ByteArrayInputStream csvData = new ByteArrayInputStream(expectedContent);
+
+        // Mock the service to return the InputStreamResource wrapped in a Mono
+        when(visitService.exportVisitsToCSV()).thenReturn(Mono.just(new InputStreamResource(csvData)));
+
+        webTestClient.get()
+                .uri("/visits/export")
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().valueEquals(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=visits.csv")
+                .expectHeader().contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .expectBody(byte[].class)
+                .value(responseBody -> {
+                    assertArrayEquals(expectedContent, responseBody);
+                });
+        verify(visitService, times(1)).exportVisitsToCSV();
+    }
+
+
+    @Test
+    void exportVisitsToCSV_ShouldReturnServerError_WhenServiceFails() {
+        when(visitService.exportVisitsToCSV()).thenReturn(Mono.error(new RuntimeException("Service failed")));
+
+        webTestClient.get()
+                .uri("/visits/export")
+                .exchange()
+                .expectStatus().is5xxServerError();
     }
 }
 
