@@ -31,4 +31,5 @@ public class Cart {
     private double tvq;
     private double tvc;
     private double total;
+    private String invoiceId;
 }
