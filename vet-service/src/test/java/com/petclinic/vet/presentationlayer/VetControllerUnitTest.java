@@ -735,7 +735,7 @@ class VetControllerUnitTest {
                 .expectBody(EducationResponseDTO.class)
                 .consumeWith(response -> {
                     EducationResponseDTO responseBody = response.getResponseBody();
-                    assert responseBody != null; 
+                    assert responseBody != null;
                     assertEquals("3", responseBody.getEducationId());
                     assertEquals(VET_ID, responseBody.getVetId());
                 });
