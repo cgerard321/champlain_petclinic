@@ -25,6 +25,9 @@ public class Inventory {
     private String inventoryImage;
     private String inventoryBackupImage;
 
+    private byte[] imageUploaded;
+
+
 
     @Builder.Default
     private List<Product> products = new ArrayList<>();

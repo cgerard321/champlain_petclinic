@@ -19,10 +19,14 @@ import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitResponseDTO;
 import com.petclinic.visits.visitsservicenew.Utils.EntityDtoUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintWriter;
 import java.time.LocalDateTime;
 
 import static java.lang.String.format;
@@ -60,10 +64,9 @@ public class VisitServiceImpl implements VisitService {
     public Flux<VisitResponseDTO> getAllVisits(String descritpion) {
         Flux<Visit> visits;
 
-        if(descritpion != null && !descritpion.isBlank()){
+        if (descritpion != null && !descritpion.isBlank()) {
             visits = repo.findVisitsByDescriptionContainingIgnoreCase(descritpion);
-        }
-        else {
+        } else {
             visits = repo.findAll();
         }
         return visits.flatMap(entityDtoUtil::toVisitResponseDTO);
@@ -257,6 +260,38 @@ public class VisitServiceImpl implements VisitService {
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("No archived visits were found"))))
                 .flatMap(entityDtoUtil::toVisitResponseDTO);
     }
+
+    @Override
+    public Mono<InputStreamResource> exportVisitsToCSV() {
+            return repo.findAll()
+                    .collectList()
+                    .map(visits -> {
+                        // Create a ByteArrayOutputStream to store CSV data
+                        ByteArrayOutputStream out = new ByteArrayOutputStream();
+                        PrintWriter writer = new PrintWriter(out);
+
+                        // Write CSV header
+                        writer.println("VisitId,Description,VisitDate,PetId,PractitionerId,Status");
+
+                        // Write rows for each visit
+                        visits.forEach(visit -> {
+                            writer.println(String.join(",",
+                                    visit.getVisitId(),
+                                    "\"" + visit.getDescription().replace("\"", "\"\"") + "\"", // Escape quotes for CSV
+                                    visit.getVisitDate().toString(),
+                                    visit.getPetId(),
+                                    visit.getPractitionerId(),
+                                    visit.getStatus().toString()
+                            ));
+                        });
+
+                        writer.flush(); // Ensure all data is written
+                        writer.close(); // Close writer to release resources
+
+                        // Convert ByteArrayOutputStream to InputStreamResource
+                        return new InputStreamResource(new ByteArrayInputStream(out.toByteArray()));
+                    });
+        }
 
 
 //    @Override

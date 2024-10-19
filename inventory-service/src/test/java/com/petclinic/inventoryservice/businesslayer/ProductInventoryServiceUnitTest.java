@@ -7,6 +7,7 @@ import com.petclinic.inventoryservice.datalayer.Product.Product;
 import com.petclinic.inventoryservice.datalayer.Product.ProductRepository;
 import com.petclinic.inventoryservice.presentationlayer.*;
 import com.petclinic.inventoryservice.utils.EntityDTOUtil;
+import com.petclinic.inventoryservice.utils.ImageUtil;
 import com.petclinic.inventoryservice.utils.exceptions.InvalidInputException;
 import com.petclinic.inventoryservice.utils.exceptions.NotFoundException;
 import org.junit.jupiter.api.Test;
@@ -22,6 +23,8 @@ import reactor.test.StepVerifier;
 
 import java.util.Arrays;
 import java.util.List;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -86,6 +89,9 @@ class ProductInventoryServiceUnitTest {
             .type("Internal")
             .build();
 
+    InputStream inputStream = getClass().getResourceAsStream("/images/DiagnosticKitImage.jpg");
+    byte[] diagnosticKitImage = ImageUtil.readImage(inputStream);
+
     Inventory inventory = Inventory.builder()
             .id("1")
             .inventoryId("1")
@@ -93,6 +99,7 @@ class ProductInventoryServiceUnitTest {
             .inventoryDescription("Medication for procedures")
             .inventoryImage("https://www.fda.gov/files/iStock-157317886.jpg")
             .inventoryBackupImage("https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14")
+            .imageUploaded(diagnosticKitImage)
             .build();
     ProductRequestDTO productRequestDTO = ProductRequestDTO.builder()
             .productName("Benzodiazepines")
@@ -111,6 +118,9 @@ class ProductInventoryServiceUnitTest {
             .productQuantity(3) // low stock
             .productSalePrice(8.99)
             .build();
+
+    ProductInventoryServiceUnitTest() throws IOException {
+    }
 
     @Test
     void getProductsInInventoryByInventoryIdAndProductFieldPagination_ShouldSucceed(){

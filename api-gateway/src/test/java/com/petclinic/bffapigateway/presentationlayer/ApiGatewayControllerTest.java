@@ -22,6 +22,7 @@ import com.petclinic.bffapigateway.dtos.Visits.VisitRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.VisitResponseDTO;
 import com.petclinic.bffapigateway.exceptions.ExistingVetNotFoundException;
 import com.petclinic.bffapigateway.exceptions.GenericHttpException;
+import com.petclinic.bffapigateway.utils.InventoryUtils.ImageUtil;
 import com.petclinic.bffapigateway.utils.Security.Filters.JwtTokenFilter;
 import com.petclinic.bffapigateway.utils.Security.Filters.RoleFilter;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
@@ -62,7 +63,9 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -1894,10 +1897,32 @@ class ApiGatewayControllerTest {
 
     @Test
     void shouldGetAllBills() {
-        BillResponseDTO billResponseDTO = new BillResponseDTO("BillUUID","1","Test type","1",null,25.00, 28.75,BillStatus.PAID,null);
+        BillResponseDTO billResponseDTO =  BillResponseDTO.builder()
+                .billId("BillUUID")
+                .customerId("1")
+                .visitType("Test type")
+                .vetId("1")
+                .date(LocalDate.of(2024,10,1))
+                .dueDate(LocalDate.of(2024,10,30))
+                .billStatus(BillStatus.UNPAID)
+                .amount(25.00)
+                .taxedAmount(0)
+                .timeRemaining(13L)
+                .build();
 
 
-        BillResponseDTO billResponseDTO2 = new BillResponseDTO("BillUUID2","2","Test type","2",null,27.00, 31.05,BillStatus.UNPAID,null);
+        BillResponseDTO billResponseDTO2 = BillResponseDTO.builder()
+                .billId("BillUUID2")
+                .customerId("2")
+                .visitType("Test type")
+                .vetId("2")
+                .date(LocalDate.of(2024,10,1))
+                .dueDate(LocalDate.of(2024,10,30))
+                .billStatus(BillStatus.UNPAID)
+                .amount(27.00)
+                .taxedAmount(0)
+                .timeRemaining(13L)
+                .build();
         when(billServiceClient.getAllBilling()).thenReturn(Flux.just(billResponseDTO,billResponseDTO2));
 
         client.get()
@@ -1913,9 +1938,31 @@ class ApiGatewayControllerTest {
 
     @Test
     void shouldGetAllPaidBills() {
-        BillResponseDTO billResponseDTO = new BillResponseDTO("BillUUID","1","Test type","1",null,25.00, 28.75,BillStatus.PAID,null);
+        BillResponseDTO billResponseDTO = BillResponseDTO.builder()
+                .billId("BillUUID")
+                .customerId("1")
+                .visitType("Test type")
+                .vetId("1")
+                .date(LocalDate.of(2024,10,1))
+                .dueDate(LocalDate.of(2024,10,30))
+                .billStatus(BillStatus.PAID)
+                .amount(25.00)
+                .taxedAmount(0)
+                .timeRemaining(0L)
+                .build();
 
-        BillResponseDTO billResponseDTO2 = new BillResponseDTO("BillUUID2","2","Test type","2",null,27.00, 31.05, BillStatus.PAID,null);
+        BillResponseDTO billResponseDTO2 = BillResponseDTO.builder()
+                .billId("BillUUID2")
+                .customerId("2")
+                .visitType("Test type")
+                .vetId("2")
+                .date(LocalDate.of(2024,10,1))
+                .dueDate(LocalDate.of(2024,10,30))
+                .billStatus(BillStatus.PAID)
+                .amount(27.00)
+                .taxedAmount(0)
+                .timeRemaining(0L)
+                .build();
         when(billServiceClient.getAllPaidBilling()).thenReturn(Flux.just(billResponseDTO,billResponseDTO2));
 
         client.get()
@@ -1931,9 +1978,31 @@ class ApiGatewayControllerTest {
 
     @Test
     void shouldGetAllUnpaidBills() {
-        BillResponseDTO billResponseDTO = new BillResponseDTO("BillUUID","1","Test type","1",null,25.00, 28.75, BillStatus.UNPAID, null);
+        BillResponseDTO billResponseDTO = BillResponseDTO.builder()
+                .billId("BillUUID")
+                .customerId("1")
+                .visitType("Test type")
+                .vetId("1")
+                .date(LocalDate.of(2024,10,1))
+                .dueDate(LocalDate.of(2024,10,30))
+                .billStatus(BillStatus.UNPAID)
+                .amount(25.00)
+                .taxedAmount(0)
+                .timeRemaining(13L)
+                .build();
 
-        BillResponseDTO billResponseDTO2 = new BillResponseDTO("BillUUID2","2","Test type","2",null,27.00, 31.05,BillStatus.UNPAID,null);
+        BillResponseDTO billResponseDTO2 = BillResponseDTO.builder()
+                .billId("BillUUID2")
+                .customerId("2")
+                .visitType("Test type")
+                .vetId("2")
+                .date(LocalDate.of(2024,10,1))
+                .dueDate(LocalDate.of(2024,10,30))
+                .billStatus(BillStatus.UNPAID)
+                .amount(27.00)
+                .taxedAmount(0)
+                .timeRemaining(13L)
+                .build();
         when(billServiceClient.getAllUnpaidBilling()).thenReturn(Flux.just(billResponseDTO,billResponseDTO2));
 
         client.get()
@@ -1949,9 +2018,31 @@ class ApiGatewayControllerTest {
 
     @Test
     void shouldGetAllOverdueBills() {
-        BillResponseDTO billResponseDTO = new BillResponseDTO("BillUUID","1","Test type","1",null,25.00, 28.75, BillStatus.OVERDUE,null);
+        BillResponseDTO billResponseDTO = BillResponseDTO.builder()
+                .billId("BillUUID")
+                .customerId("1")
+                .visitType("Test type")
+                .vetId("1")
+                .date(LocalDate.of(2024,10,1))
+                .dueDate(LocalDate.of(2024,10,8))
+                .billStatus(BillStatus.OVERDUE)
+                .amount(25.00)
+                .taxedAmount(0)
+                .timeRemaining(0L)
+                .build();
 
-        BillResponseDTO billResponseDTO2 = new BillResponseDTO("BillUUID2","2","Test type","2",null,27.00, 31.05, BillStatus.OVERDUE, null);
+        BillResponseDTO billResponseDTO2 = BillResponseDTO.builder()
+                .billId("BillUUID2")
+                .customerId("2")
+                .visitType("Test type")
+                .vetId("2")
+                .date(LocalDate.of(2024,10,1))
+                .dueDate(LocalDate.of(2024,10,8))
+                .billStatus(BillStatus.OVERDUE)
+                .amount(27.00)
+                .taxedAmount(0)
+                .timeRemaining(0L)
+                .build();
         when(billServiceClient.getAllOverdueBilling()).thenReturn(Flux.just(billResponseDTO,billResponseDTO2));
 
         client.get()

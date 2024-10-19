@@ -72,6 +72,7 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                     existingInventory.setInventoryDescription(requestDTO.getInventoryDescription());
                     existingInventory.setInventoryImage(requestDTO.getInventoryImage());
                     existingInventory.setInventoryBackupImage(requestDTO.getInventoryBackupImage());
+                    existingInventory.setImageUploaded(requestDTO.getImageUploaded());
                     return existingInventory;
 
                 }))

@@ -12,7 +12,7 @@
 .product-bundle-products {
   display: flex;
   flex-wrap: wrap;
-  height: 250px; 
+  height: 250px;
   overflow-y: auto;
   border: 1px solid black;
   border-radius: 15px;
@@ -50,9 +50,18 @@
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   z-index: 1;
   clip-path: polygon(
-    5% 0%, 95% 0%, 100% 5%, 100% 95%, 95% 100%, 5% 100%, 0% 95%, 0% 5%
+    5% 0%,
+    95% 0%,
+    100% 5%,
+    100% 95%,
+    95% 100%,
+    5% 100%,
+    0% 95%,
+    0% 5%
   );
-  transition: transform 0.3s ease, background-color 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    background-color 0.3s ease;
   animation: pulse 2s infinite;
 }
 
@@ -61,7 +70,6 @@
   height: auto;
   margin-bottom: 8px;
 }
-
 
 .original-price {
   text-decoration: line-through;
@@ -91,7 +99,7 @@
   0% {
     transform: rotate(-45deg) scale(1);
   }
-  25%{
+  25% {
     transform: rotate(-45deg) scale(1.25);
   }
   50% {
