@@ -1,4 +1,4 @@
-import {DeliverType} from "@/features/products/models/ProductModels/DeliverType.ts";
+import { DeliverType } from '@/features/products/models/ProductModels/DeliverType.ts';
 
 export interface ProductModel {
   productId: string;
@@ -11,7 +11,11 @@ export interface ProductModel {
   status: 'RE_ORDER' | 'OUT_OF_STOCK' | 'AVAILABLE';
   requestCount: number;
   productType: string;
-  deliveryType: 'DELIVERY'|'PICKUP'|'DELIVERY_AND_PICKUP'|'NO_DELIVERY_OPTION';
+  deliveryType:
+    | 'DELIVERY'
+    | 'PICKUP'
+    | 'DELIVERY_AND_PICKUP'
+    | 'NO_DELIVERY_OPTION';
 }
 
 export const emptyProductModel: ProductModel = {
@@ -25,6 +29,6 @@ export const emptyProductModel: ProductModel = {
   status: 'OUT_OF_STOCK',
   requestCount: 0,
   productType: '',
-  deliveryType: DeliverType.NO_DELIVERY_OPTION
+  deliveryType: DeliverType.NO_DELIVERY_OPTION,
   // deliveryType: 'NO_DELIVERY_OPTION'
 };
