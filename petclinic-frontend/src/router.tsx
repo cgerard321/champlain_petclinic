@@ -141,16 +141,6 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
-      /*
-      {
-        path: AppRoutePaths.EditEmergency,
-        element: (
-          <ProtectedRoute>
-            <EditEmergency />
-          </ProtectedRoute>
-        ),
-      },*/
-
       {
         path: AppRoutePaths.EmergencyList,
         element: (
