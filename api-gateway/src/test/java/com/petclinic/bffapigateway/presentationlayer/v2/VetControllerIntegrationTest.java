@@ -64,6 +64,7 @@ class VetControllerIntegrationTest {
         mockServerConfigAuthService.registerValidateTokenForVetEndpoint();
         mockServerConfigVetService.registerGetVetByIdEndpoint();
         mockServerConfigVetService.registerGetVetByInvalidIdEndpoint();
+        mockServerConfigVetService.registerAddEducationAsUnauthorizedUser("2e26e7a2-8c6e-4e2d-8d60-ad0882e295eb");
 
         mockServerConfigVetService.registerGetPhotoByVetIdEndpoint("ac9adeb8-625b-11ee-8c99-0242ac120002", "mockPhotoData".getBytes());
         mockServerConfigVetService.registerGetPhotoByVetIdEndpointNotFound("invalid-vet-id");
@@ -562,6 +563,30 @@ class VetControllerIntegrationTest {
                 .exchange()
                 .expectStatus().isNotFound();
     }
+
+    @Test
+    public void whenAddEducationAsUnauthorizedUser_thenReturnUnauthorized() {
+        EducationRequestDTO educationRequestDTO = EducationRequestDTO.builder()
+                .vetId("2e26e7a2-8c6e-4e2d-8d60-ad0882e295eb")
+                .schoolName("Harvard University")
+                .degree("Doctor of Veterinary Medicine")
+                .fieldOfStudy("Veterinary Science")
+                .startDate("2015-08-01")
+                .endDate("2019-05-30")
+                .build();
+
+        mockServerConfigVetService.registerAddEducationAsUnauthorizedUser(educationRequestDTO.getVetId());
+
+        webTestClient.post()
+                .uri(VET_ENDPOINT + "/" + educationRequestDTO.getVetId() + "/educations")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Mono.just(educationRequestDTO), EducationRequestDTO.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isUnauthorized();
+    }
+
+
 
 
     @Test

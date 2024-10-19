@@ -1,3 +1,4 @@
+// CartItem.tsx
 import './CartItem.css';
 import { ProductModel } from '../models/ProductModel';
 import ImageContainer from './ImageContainer';
@@ -14,6 +15,7 @@ interface CartItemProps {
   addToWishlist: (item: ProductModel) => void;
   addToCart: (item: ProductModel) => void;
   isInWishlist: boolean;
+  showNotification?: (message: string) => void; // New prop for notifications
 }
 
 const formatPrice = (price: number): string => {
@@ -25,27 +27,28 @@ const CartItem = ({
   index,
   changeItemQuantity,
   deleteItem,
+  errorMessage, // Destructure the new prop
   addToWishlist,
   addToCart,
   isInWishlist,
+  showNotification, // Destructure the new prop
 }: CartItemProps): JSX.Element => {
-  // const handleDeleteItem = async (cartId: string, productId: string) => {
-  //   try {
-  //     const response = await fetch(
-  //       `localhost:8080/api/v2/gateway/carts/${cartId}/${productId}`,
-  //     {
-  //       method: 'DELETE',
-  //       headers:{
-  //         Accept: 'application/json',
-  //       },
-  //       credentials: 'include',
-  //     }
-  //     );
-  //   } catch(err){
-  //     console.log("Error deleting item in cart: ", err)
-  //   }
-  // }
   const remainingStock = item.productQuantity - (item.quantity ?? 0);
+
+  // Handler for "Add to Cart" button click
+  const handleAddToCart = (): void => {
+    // Added return type `void`
+    if (item.productQuantity > 0) {
+      addToCart(item);
+    } else {
+      if (showNotification) {
+        showNotification(`${item.productName} is out of stock.`);
+      } else {
+        alert(`${item.productName} is out of stock.`);
+      }
+    }
+  };
+
   return (
     <div className="CartItem">
       <ImageContainer imageId={item.imageId} />
@@ -54,42 +57,47 @@ const CartItem = ({
         <p className="info-description">{item.productDescription}</p>
       </div>
       <div className="CartItem-details">
-        <div className="item-quantity">
-          <input
-            type="number"
-            min="1"
-            max={item.productQuantity}
-            value={item.quantity || 1}
-            onChange={e => changeItemQuantity(e, index)}
-            onBlur={e => changeItemQuantity(e, index)}
-            aria-label={`Quantity of ${item.productName}`}
-          />
-        </div>
-        <span className="CartItem-price">
-          {formatPrice(item.productSalePrice)}
-        </span>
-        <button
-          className="delete-button"
-          onClick={() => deleteItem(item.productId, index)}
-          aria-label={`Remove ${item.productName} from cart`}
-        >
-          Remove
-        </button>
         {!isInWishlist && (
-          <button
-            className="wishlist-button"
-            onClick={() => addToWishlist(item)}
-            aria-label={`Add ${item.productName} to wishlist`}
-          >
-            Add to Wishlist
-          </button>
+          <>
+            <div className="item-quantity">
+              <input
+                type="number"
+                min="1"
+                max={item.productQuantity}
+                value={item.quantity || 1}
+                onChange={e => changeItemQuantity(e, index)}
+                onBlur={e => changeItemQuantity(e, index)}
+                aria-label={`Quantity of ${item.productName}`}
+              />
+            </div>
+            <span className="CartItem-price">
+              {formatPrice(item.productSalePrice)}
+            </span>
+            <button
+              className="delete-button"
+              onClick={() => deleteItem(item.productId, index)}
+              aria-label={`Remove ${item.productName} from cart`}
+            >
+              Remove
+            </button>
+            {!isInWishlist && (
+              <button
+                className="wishlist-button"
+                onClick={() => addToWishlist(item)}
+                aria-label={`Add ${item.productName} to wishlist`}
+              >
+                Add to Wishlist
+              </button>
+            )}
+          </>
         )}
 
+        {/* "Add to Cart" button for Wishlist Items */}
         {isInWishlist && (
           <button
             className="addToCart-button"
-            onClick={() => addToCart(item)}
-            aria-label={`Add ${item.productName} to wishlist`}
+            onClick={handleAddToCart} // Use the new handler
+            aria-label={`Add ${item.productName} to cart`}
           >
             Add to Cart
           </button>
@@ -105,6 +113,9 @@ const CartItem = ({
           <div className="stock-message out-of-stock">Out of stock</div>
         ) : null}
       </div>
+
+      {/* Display per-item error message if exists */}
+      {errorMessage && <div className="item-error-message">{errorMessage}</div>}
     </div>
   );
 };
