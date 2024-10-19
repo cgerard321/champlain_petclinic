@@ -167,9 +167,7 @@ export default function BillsListTable(): JSX.Element {
                   <td>{bill.amount}</td>
                   <td>{bill.taxedAmount}</td>
                   <td>
-                    {bill.billStatus === 'PAID' ? (
-                      <span>Bill is paid</span>
-                    ) : bill.billStatus === 'OVERDUE' ? (
+                    {bill.billStatus === 'OVERDUE' ? (
                       <span style={{ color: 'red' }}>Overdue</span>
                     ) : (
                       bill.billStatus
