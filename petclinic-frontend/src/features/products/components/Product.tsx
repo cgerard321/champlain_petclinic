@@ -33,11 +33,11 @@ export default function Product({
   };
   const getDeliveryTypeLabel = (deliveryType: string): string => {
     if (deliveryType === 'DELIVERY') {
-      return 'Standard Delivery';
+      return 'Delivery';
     } else if (deliveryType === 'PICKUP') {
       return 'Pickup';
     } else if (deliveryType === 'DELIVERY_AND_PICKUP') {
-      return 'Delivery and Pickup';
+      return 'Delivery & Pickup';
     }else if(deliveryType === 'NO_DELIVERY_OPTION') {
       return 'No delivery option';
     }
