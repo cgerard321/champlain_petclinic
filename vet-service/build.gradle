@@ -1,7 +1,7 @@
 plugins {
-    id 'java'
     id 'org.springframework.boot' version '3.3.3'
     id 'io.spring.dependency-management' version '1.1.6'
+    id 'java'
     id 'io.freefair.lombok' version '6.6.1'
     id 'jacoco'
 }
@@ -20,34 +20,27 @@ configurations {
         extendsFrom annotationProcessor
     }
 }
-
-ext{
+repositories {
+    mavenCentral()
+}
+ext {
     mapstructVersion = "1.5.3.Final"
     lombokVersion = "1.18.26"
     lombokMapstructBindingVersion = "0.2.0"
 }
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb-reactive'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
-    implementation "org.mapstruct:mapstruct:${mapstructVersion}"
-    implementation 'org.springframework.boot:spring-boot-starter-actuator'
-
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0'
     implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
+    implementation "org.mapstruct:mapstruct:${mapstructVersion}"
 
     //need it for both runtime and compilation
     implementation 'org.postgresql:postgresql'
 
     runtimeOnly 'org.postgresql:r2dbc-postgresql'
-    compileOnly 'org.projectlombok:lombok'
-    compileOnly "org.mapstruct:mapstruct-processor:${mapstructVersion}"
-
-
+    compileOnly 'org.projectlombok:lombok', 'org.mapstruct:mapstruct-processor:${mapstructVersion}'
     annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}", "org.projectlombok:lombok:${lombokVersion}", "org.projectlombok:lombok-mapstruct-binding:${lombokMapstructBindingVersion}"
     testAnnotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
 
@@ -62,9 +55,6 @@ dependencies {
 
 tasks.named('test') {
     useJUnitPlatform()
-    testLogging {
-        events "passed", "skipped", "failed"
-    }
 }
 jacoco {
     toolVersion = "0.8.8"
