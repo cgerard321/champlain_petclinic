@@ -680,6 +680,7 @@ public class AuthServiceClientIntegrationTest {
         Role role1 = Role.builder().name("OWNER").build();
         Role role2 = Role.builder().name("ADMIN").build();
 
+
         String rolesJson = new ObjectMapper().writeValueAsString(List.of(role1, role2));
 
         final MockResponse mockResponse = new MockResponse();
@@ -701,6 +702,7 @@ public class AuthServiceClientIntegrationTest {
     @Test
     @DisplayName("Should create a role")
     void shouldCreateRole() throws Exception {
+
         RoleRequestModel roleRequestModel = RoleRequestModel.builder().name("SUPPORT").build();
         Role role = Role.builder().name("SUPPORT").build();
 
@@ -718,6 +720,50 @@ public class AuthServiceClientIntegrationTest {
 
         StepVerifier.create(roleMono)
                 .expectNext(role)
+                .verifyComplete();
+    }
+
+    @Test
+    @DisplayName("Should update a role")
+    void shouldUpdateRole() throws Exception {
+        Integer roleId = 1;
+        RoleRequestModel roleRequestModel = RoleRequestModel.builder().name("ROLE_MANAGER").build();
+        Role updatedRole = Role.builder().id(roleId).name("ROLE_MANAGER").build();
+
+        String roleJson = new ObjectMapper().writeValueAsString(updatedRole);
+
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setBody(roleJson);
+
+        server.enqueue(mockResponse);
+        Mono<Role> roleMono = authServiceClient.updateRole("jwtToken", Long.valueOf(roleId), roleRequestModel);
+
+        StepVerifier.create(roleMono)
+                .expectNextMatches(role -> role.getName().equals("ROLE_MANAGER"))
+                .verifyComplete();
+    }
+
+    @Test
+    @DisplayName("Should get a role by ID")
+    void shouldGetRoleById() throws Exception {
+        Integer roleId = 1;
+        Role role = Role.builder().id(roleId).name("ROLE_ADMIN").build();
+
+        String roleJson = new ObjectMapper().writeValueAsString(role);
+
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setBody(roleJson);
+
+        server.enqueue(mockResponse);
+
+        Mono<Role> roleMono = authServiceClient.getRoleById("jwtToken", Long.valueOf(roleId));
+
+        StepVerifier.create(roleMono)
+                .expectNextMatches(r -> r.getName().equals("ROLE_ADMIN"))
                 .verifyComplete();
     }
 }

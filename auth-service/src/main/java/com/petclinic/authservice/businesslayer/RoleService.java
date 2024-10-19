@@ -8,4 +8,6 @@ import java.util.List;
 public interface RoleService {
     List<Role> getAllRoles();
     Role createRole(RoleRequestModel roleRequestModel);
+    Role getRoleById(Long roleId);
+    Role updateRole(Long roleId, RoleRequestModel roleRequestModel);
 }
