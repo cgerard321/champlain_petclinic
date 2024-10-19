@@ -18,7 +18,6 @@ public class RoleController {
 
     private final RoleService roleService;
 
-    @PostMapping
     @PostMapping()
     public ResponseEntity<Role> createRole(@RequestBody RoleRequestModel roleRequestModel) {
         log.info("Received request to create role with name: {}", roleRequestModel.getName());
@@ -27,7 +26,6 @@ public class RoleController {
         return ResponseEntity.ok(role);
     }
 
-    @GetMapping
     @GetMapping()
     public ResponseEntity<List<Role>> getAllRoles() {
         log.info("Received request to fetch all roles");
