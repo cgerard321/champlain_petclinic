@@ -48,6 +48,10 @@ jacocoTestReport {
 			])
 		}))
 	}
+
+	reports {
+		xml.required = true
+	}
 }
 
 jacocoTestCoverageVerification {
