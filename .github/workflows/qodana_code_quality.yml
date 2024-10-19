@@ -48,103 +48,14 @@ jobs:
           name: gradle-coverage-data
           path: .qodana/code-coverage
 
-      - name: PR comment - Project
+      - name: Jacoco PR Comment
         uses: madrapps/jacoco-report@v1.7.1
         with:
           paths: ${{ github.workspace }}/**/build/reports/jacoco/test/jacocoTestReport.xml
           token: ${{ secrets.GITHUB_TOKEN }}
           min-coverage-overall: '90'
-          title: 'JaCoCo Coverage Report - champlain_petclinic project'
-          update-comment: 'true'
-          continue-on-error: 'true'
-        
-      - name: PR Comment - API Gateway
-        uses: madrapps/jacoco-report@v1.7.1
-        with:
-          paths: ${{ github.workspace }}/api-gateway/reports/jacoco/test/jacocoTestReport.xml
-          token: ${{ secrets.GITHUB_TOKEN }}
-          min-coverage-overall: 90
-          title: 'JaCoCo Coverage Report - api-gateway'
-          update-comment: 'true'
-          continue-on-error: 'true'
-      
-      - name: PR Comment - Auth
-        uses: madrapps/jacoco-report@v1.7.1
-        with:
-          paths: ${{ github.workspace }}/auth-service/reports/jacoco/test/jacocoTestReport.xml
-          token: ${{ secrets.GITHUB_TOKEN }}
-          min-coverage-overall: 90
-          title: 'JaCoCo Coverage Report - auth-service'
-          update-comment: 'true'
-          continue-on-error: 'true'
-
-      - name: PR Comment - Billing
-        uses: madrapps/jacoco-report@v1.7.1
-        with:
-          paths: ${{ github.workspace }}/billing-service/reports/jacoco/test/jacocoTestReport.xml
-          token: ${{ secrets.GITHUB_TOKEN }}
-          min-coverage-overall: 90
-          title: 'JaCoCo Coverage Report - billing-service'
-          update-comment: 'true'
-          continue-on-error: 'true'
-
-      - name: PR Comment - Cart
-        uses: madrapps/jacoco-report@v1.7.1
-        with:
-          paths: ${{ github.workspace }}/cart-service/reports/jacoco/test/jacocoTestReport.xml
-          token: ${{ secrets.GITHUB_TOKEN }}
-          min-coverage-overall: 90
-          title: 'JaCoCo Coverage Report - cart-service'
-          update-comment: 'true'
-          continue-on-error: 'true'
-
-      - name: PR Comment - Customers
-        uses: madrapps/jacoco-report@v1.7.1
-        with:
-          paths: ${{ github.workspace }}/customers-service-reactive/reports/jacoco/test/jacocoTestReport.xml
-          token: ${{ secrets.GITHUB_TOKEN }}
-          min-coverage-overall: 90
-          title: 'JaCoCo Coverage Report - customers-service-reactive'
-          update-comment: 'true'
-          continue-on-error: 'true'
-
-      - name: PR Comment - Inventory
-        uses: madrapps/jacoco-report@v1.7.1
-        with:
-          paths: ${{ github.workspace }}/inventory-service/reports/jacoco/test/jacocoTestReport.xml
-          token: ${{ secrets.GITHUB_TOKEN }}
-          min-coverage-overall: 90
-          title: 'JaCoCo Coverage Report - inventory-service'
-          update-comment: 'true'
-          continue-on-error: 'true'
-
-      - name: PR Comment - Products
-        uses: madrapps/jacoco-report@v1.7.1
-        with:
-          paths: ${{ github.workspace }}/products-service/reports/jacoco/test/jacocoTestReport.xml
-          token: ${{ secrets.GITHUB_TOKEN }}
-          min-coverage-overall: 90
-          title: 'JaCoCo Coverage Report - products-service'
-          update-comment: 'true'
-          continue-on-error: 'true'
-
-      - name: PR Comment - Visits
-        uses: madrapps/jacoco-report@v1.7.1
-        with:
-          paths: ${{ github.workspace }}/visits-service/reports/jacoco/test/jacocoTestReport.xml
-          token: ${{ secrets.GITHUB_TOKEN }}
-          min-coverage-overall: 90
-          title: 'JaCoCo Coverage Report - visits-service'
-          update-comment: 'true'
-          continue-on-error: 'true'
-
-      - name: PR Comment - Vet
-        uses: madrapps/jacoco-report@v1.7.1
-        with:
-          paths: ${{ github.workspace }}/vet-service/reports/jacoco/test/jacocoTestReport.xml
-          token: ${{ secrets.GITHUB_TOKEN }}
-          min-coverage-overall: 90
-          title: 'JaCoCo Coverage Report - vet-service'
+          min-coverage-changed-files: '90'
+          title: 'Jacoco Coverage Report'
           update-comment: 'true'
           continue-on-error: 'true'
 
