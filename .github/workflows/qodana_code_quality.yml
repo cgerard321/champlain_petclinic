@@ -57,7 +57,6 @@ jobs:
           min-coverage-changed-files: 90
           title: Jacoco Coverage Report
           update-comment: true
-          continue-on-error: true
 
 #      - name: 'Qodana Scan'
 #        uses: JetBrains/qodana-action@v2023.2
