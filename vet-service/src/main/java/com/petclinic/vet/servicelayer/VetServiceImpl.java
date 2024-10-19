@@ -229,5 +229,9 @@ public class VetServiceImpl implements VetService {
                 .map(tuple -> tuple.getT2());
     }
 
+    @Override
+    public Mono<String> testQodana(){
+        return Mono.just("Qodana test passed");
+    }
 
 }

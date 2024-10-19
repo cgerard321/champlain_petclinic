@@ -62,6 +62,14 @@ public class PetServiceUnitTest {
                 .verify();
     }
 
+    @Test
+    public void testQodana() {
+        Mono<String> result = petService.testQodana();
+        StepVerifier.create(result)
+                .expectNext("Qodana test passed")
+                .verifyComplete();
+    }
+
     private Pet buildPet() {
         return Pet.builder()
                 .petId("a-very-valid-pet-id")

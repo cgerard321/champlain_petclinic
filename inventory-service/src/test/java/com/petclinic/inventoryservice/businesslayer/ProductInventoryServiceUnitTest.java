@@ -1898,6 +1898,13 @@ class ProductInventoryServiceUnitTest {
         verify(productRepository, never()).save(any(Product.class));
     }
 
+    @Test
+    void testQodanaInv(){
+        StepVerifier.create(productInventoryService.testQodana())
+                .expectNext("Qodana test passed")
+                .verifyComplete();
+    }
+
 
 }
 

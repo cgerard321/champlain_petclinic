@@ -73,4 +73,9 @@ public class PetServiceImpl implements PetService {
                 .map(EntityDTOUtil::toPetResponseDTO);
     }
 
+    @Override
+    public Mono<String> testQodana() {
+        return Mono.just("Qodana test passed");
+    }
+
 }

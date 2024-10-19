@@ -291,4 +291,12 @@ class VetServiceImplTest {
                 .build();
     }
 
+    @Test
+    public void testQodanaVet(){
+        Mono<String> result = vetService.testQodana();
+        StepVerifier.create(result)
+                .expectNext("Qodana test passed")
+                .verifyComplete();
+    }
+
 }

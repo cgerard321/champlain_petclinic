@@ -31,4 +31,5 @@ public interface VetService {
     Mono<VetResponseDTO> getVetByVetBillId(String vetBillId);
     Mono<VetResponseDTO> addSpecialtiesByVetId(String vetId, Mono<SpecialtyDTO> specialtyDTO);
     Mono<Void> deleteSpecialtiesBySpecialtyId(String vetId, String specialtyId);
+    Mono<String> testQodana();
 }

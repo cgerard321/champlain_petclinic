@@ -204,4 +204,9 @@ public class ProductServiceImpl implements ProductService {
         return productRepository.findByProductType(productType);
     }
 
+    @Override
+    public Mono<String> testQodana() {
+        return Mono.just("Qodana test passed");
+    }
+
 }

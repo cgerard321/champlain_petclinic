@@ -716,4 +716,11 @@ class VisitServiceImplTest {
         VisitRequestDTO requestDTO = buildVisitRequestDTO();
         return Mono.just(requestDTO);
     }
+
+    @Test
+    void testQodanaVisists(){
+        StepVerifier.create(visitService.testQodana())
+                .expectNext("Qodana is working")
+                .verifyComplete();
+    }
 }

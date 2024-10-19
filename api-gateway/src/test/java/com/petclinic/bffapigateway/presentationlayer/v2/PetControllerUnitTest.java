@@ -171,4 +171,11 @@ class PetControllerUnitTest {
                 .verifyComplete();
     }
 
+    @Test
+    void testQodana(){
+        StepVerifier.create(petController.test())
+                .expectNext("Hello from PetController")
+                .verifyComplete();
+    }
+
 }

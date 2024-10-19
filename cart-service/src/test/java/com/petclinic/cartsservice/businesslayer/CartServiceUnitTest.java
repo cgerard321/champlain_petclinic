@@ -1000,6 +1000,11 @@ class CartServiceUnitTest {
         verify(cartRepository, times(1)).save(any(Cart.class)); // Ensure the cleared cart was saved
     }
 
-
+    @Test
+    public void testQodana(){
+        StepVerifier.create(cartService.testQodana())
+                .expectNext("Qodana test passed")
+                .verifyComplete();
+    }
 
 }

@@ -21,5 +21,5 @@ public interface ProductService {
     Mono<Void> changeProductQuantity(String productId, Integer productQuantity);
     Flux<ProductResponseModel> getProductsByType(String productType);
     List<Product> getProductsByType(ProductType productType);
-
+    Mono<String> testQodana();
 }

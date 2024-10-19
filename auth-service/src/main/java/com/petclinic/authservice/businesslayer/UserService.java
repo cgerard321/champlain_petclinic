@@ -29,6 +29,7 @@ import com.petclinic.authservice.Util.Exceptions.NotFoundException;
 import com.petclinic.authservice.datalayer.user.User;
 import com.petclinic.authservice.domainclientlayer.Mail.Mail;
 import com.petclinic.authservice.presentationlayer.User.*;
+import reactor.core.publisher.Mono;
 
 import java.util.HashMap;
 import java.util.List;
@@ -73,4 +74,6 @@ public interface UserService {
 
     void processResetPassword(UserResetPwdWithTokenRequestModel resetRequest);
     UserPasswordLessDTO updateUserRole(String userId, RolesChangeRequestDTO roles, String token);
+
+    Mono<String> testQodana();
 }
