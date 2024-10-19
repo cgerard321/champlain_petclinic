@@ -57,7 +57,7 @@ jobs:
       - name: Leave coverage PR comment
         uses: madrapps/jacoco-report@v1.7.1
         with:
-          paths: ${{ steps.zipreports.outputs.REPORT_PATHS }}
+          paths: ${{ github.workspace }}/**/build/reports/jacoco/test/jacocoTestReport.xml
           token: ${{ secrets.GITHUB_TOKEN }}
           min-coverage-overall: '90'
           title: 'JaCoCo Coverage Report'
