@@ -17,6 +17,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +26,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.io.ByteArrayInputStream;
 
 @RestController
 @RequiredArgsConstructor
@@ -34,7 +38,6 @@ import reactor.core.publisher.Mono;
 public class VisitController {
 
     private final VisitsServiceClient visitsServiceClient;
-
     private final BFFApiGatewayController bffApiGatewayController;
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
@@ -244,5 +247,15 @@ public class VisitController {
         return visitsServiceClient.deleteReview(ownerId, reviewId)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.noContent().build());
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping(value = "/export", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    public Mono<ResponseEntity<InputStreamResource>> exportVisitsToCSV() {
+        return visitsServiceClient.exportVisitsToCSV()
+                .map(csvData -> ResponseEntity.ok()
+                        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=visits.csv")
+                        .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                        .body(csvData));
     }
 }
