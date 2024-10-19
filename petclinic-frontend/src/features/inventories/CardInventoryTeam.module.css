@@ -134,6 +134,6 @@
 }
 
 .highlightedCard {
-  border: 2px solid #5DE2E7; /* Highlight border color */
+  border: 2px solid #5de2e7; /* Highlight border color */
   box-shadow: 0 0 10px rgba(255, 204, 0, 0.7); /* Optional shadow for effect */
 }

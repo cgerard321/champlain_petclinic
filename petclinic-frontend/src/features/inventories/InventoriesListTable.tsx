@@ -208,7 +208,8 @@ export default function InventoriesListTable(): JSX.Element {
   };
 
   const location = useLocation();
-  const lastConsultedInventoryId = location.state?.lastConsultedInventoryId || null;
+  const lastConsultedInventoryId =
+    location.state?.lastConsultedInventoryId || null;
 
   const handleCardClick = (inventoryId: string) => {
     navigate(`/inventory/${inventoryId}/products`, {
@@ -352,9 +353,7 @@ export default function InventoriesListTable(): JSX.Element {
                   : ''
               }`}
               key={inventory.inventoryName}
-              onClick={() =>
-                handleCardClick(inventory.inventoryId)
-              }
+              onClick={() => handleCardClick(inventory.inventoryId)}
               onMouseLeave={() => setOpenMenuId(null)}
               style={{ cursor: 'pointer' }}
             >

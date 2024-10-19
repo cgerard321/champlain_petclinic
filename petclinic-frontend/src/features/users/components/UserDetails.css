@@ -69,10 +69,12 @@
   font-size: 1.2em;
   line-height: 1.5;
   cursor: pointer;
-  transition: background-color 0.3s, transform 0.3s;
+  transition:
+    background-color 0.3s,
+    transform 0.3s;
 }
 
-.user-details-button:hover{
+.user-details-button:hover {
   background-color: #218838;
 }
 
