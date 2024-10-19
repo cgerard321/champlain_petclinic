@@ -176,7 +176,8 @@ public class VetController {
     public Flux<EducationResponseDTO> getEducationsByVetId(@PathVariable String vetId) {
         return vetsServiceClient.getEducationsByVetId(vetId);
     }
-    
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
     @PostMapping("{vetId}/educations")
     public Mono<ResponseEntity<EducationResponseDTO>> addEducationToVet(
             @PathVariable String vetId,
