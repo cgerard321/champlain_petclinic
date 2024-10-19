@@ -299,7 +299,6 @@ const EditInventory: React.FC = (): JSX.Element => {
                   accept="image/*"
                   onChange={handleFileChange}
                   ref={fileInputRef}
-                  required
                 />
                 {error.uploadedImage && (
                   <span className="error">{error.uploadedImage}</span>
