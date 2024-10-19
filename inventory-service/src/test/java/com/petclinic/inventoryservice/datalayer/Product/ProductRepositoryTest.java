@@ -296,6 +296,58 @@ class ProductRepositoryTest {
                 .verifyComplete();
     }
 
+    @Test
+    public void shouldFindProductsByInventoryIdAndProductDescriptionAndStatus() {
+        // Arrange
+        Product product = buildProduct("inventoryId_1", "productId_1", "name", "description", 100.00, 10, 15.99);
+        productRepository.save(product).block();
+
+        // Act & Assert
+        StepVerifier
+                .create(productRepository.findAllProductsByInventoryIdAndProductDescriptionAndStatus("inventoryId_1", "description", Status.AVAILABLE))
+                .expectNextMatches(result -> result.getProductId().equals("productId_1"))
+                .verifyComplete();
+    }
+
+    @Test
+    public void shouldFindProductsByInventoryIdAndProductNameAndStatus() {
+        // Arrange
+        Product product = buildProduct("inventoryId_1", "productId_1", "name", "description", 100.00, 10, 15.99);
+        productRepository.save(product).block();
+
+        // Act & Assert
+        StepVerifier
+                .create(productRepository.findAllProductsByInventoryIdAndProductNameAndStatus("inventoryId_1", "name", Status.AVAILABLE))
+                .expectNextMatches(result -> result.getProductId().equals("productId_1"))
+                .verifyComplete();
+    }
+
+    @Test
+    public void shouldFindProductsByInventoryIdAndProductNameAndProductDescriptionAndStatus() {
+        // Arrange
+        Product product = buildProduct("inventoryId_1", "productId_1", "name", "description", 100.00, 10, 15.99);
+        productRepository.save(product).block();
+
+        // Act & Assert
+        StepVerifier
+                .create(productRepository.findAllProductsByInventoryIdAndProductNameAndProductDescriptionAndStatus("inventoryId_1", "name", "description", Status.AVAILABLE))
+                .expectNextMatches(result -> result.getProductId().equals("productId_1"))
+                .verifyComplete();
+    }
+
+    @Test
+    public void shouldFindProductsByInventoryIdAndStatus() {
+        // Arrange
+        Product product = buildProduct("inventoryId_1", "productId_1", "name", "description", 100.00, 10, 15.99);
+        productRepository.save(product).block();
+
+        // Act & Assert
+        StepVerifier
+                .create(productRepository.findAllProductsByInventoryIdAndStatus("inventoryId_1", Status.AVAILABLE))
+                .expectNextMatches(result -> result.getProductId().equals("productId_1"))
+                .verifyComplete();
+    }
+
     private Product buildProduct(String inventoryId, String productId, String productName, String productDescription, Double productPrice, Integer productQuantity, Double productSalePrice) {
         return Product.builder()
                 .inventoryId(inventoryId)
