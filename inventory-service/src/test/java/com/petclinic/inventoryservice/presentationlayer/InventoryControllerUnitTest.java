@@ -87,14 +87,14 @@ class InventoryControllerUnitTest {
             .type("Medications")
             .build();
 
-    Inventory inventory4 = Inventory.builder()
-            .inventoryId(UUID.randomUUID().toString())
-            .inventoryName("Medications")
-            .inventoryType(inventoryType4.getType())
-            .inventoryDescription("Antibiotics for pet infections")
-            .inventoryImage("https://www.fda.gov/files/iStock-157317886.jpg")
-            .inventoryBackupImage("https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14")
-            .build();
+//    Inventory inventory4 = Inventory.builder()
+//            .inventoryId(UUID.randomUUID().toString())
+//            .inventoryName("Medications")
+//            .inventoryType(inventoryType4.getType())
+//            .inventoryDescription("Antibiotics for pet infections")
+//            .inventoryImage("https://www.fda.gov/files/iStock-157317886.jpg")
+//            .inventoryBackupImage("https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14")
+//            .build();
 
 
       ProductResponseDTO lowStockProduct = ProductResponseDTO.builder()
