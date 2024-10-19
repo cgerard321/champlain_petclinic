@@ -208,5 +208,4 @@ class VetControllerUnitTest {
         verify(vetsServiceClient, Mockito.times(1)).addEducationToAVet(anyString(), any(Mono.class));
     }
 
-
 }
