@@ -150,6 +150,8 @@ export default function ProductList(): JSX.Element {
     });
   };
 
+  //Mehod to add a product to the user cart wish list
+  // const addProductToWishList
   return (
     <div className="product-list-container">
       {isSidebarOpen && (

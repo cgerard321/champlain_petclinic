@@ -254,7 +254,6 @@ const UserCart = (): JSX.Element => {
       }
     }
   };
-  //TODO: Remove the Item that has been moved
   const addToWishlist = async (item: ProductModel): Promise<void> => {
     try {
       const productId = item.productId;
