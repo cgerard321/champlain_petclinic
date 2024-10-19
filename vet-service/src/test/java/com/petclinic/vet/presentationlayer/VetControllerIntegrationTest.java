@@ -28,6 +28,7 @@ import org.springframework.http.MediaType;
 import org.springframework.r2dbc.connection.init.ConnectionFactoryInitializer;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.util.StreamUtils;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -1569,7 +1570,10 @@ class VetControllerIntegrationTest {
     }
 
     @Test
-    void addEducationToAVet_WithValidValues_shouldSucceed(){
+    void addEducationToAVet_WithValidValues_shouldSucceed() {
+        vet.setVetId("db0c8f13-89d2-4ef7-bcd5-3776a3734150");
+        vetRepository.save(vet).block();
+
         Publisher<Education> setup = educationRepository.deleteAll()
                 .thenMany(educationRepository.save(education1));
 
@@ -1584,7 +1588,7 @@ class VetControllerIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(education2)
                 .exchange()
-                .expectStatus().isOk()
+                .expectStatus().isCreated()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody(EducationResponseDTO.class)
                 .value(dto -> {
@@ -1598,6 +1602,8 @@ class VetControllerIntegrationTest {
                     assertThat(dto.getEndDate()).isEqualTo(education2.getEndDate());
                 });
     }
+
+
 
     //Spring Boot version incompatibility issue with postgresql r2dbc
     /*@Test
