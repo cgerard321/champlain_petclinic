@@ -25,7 +25,7 @@ export default function Products(): JSX.Element {
             </div>
             <div className="trending-list-container-gold">
 
-                <h2>Trending Items</h2>
+                <h2>Trending Products</h2>
                 <TrendingList/>
             </div>
 
