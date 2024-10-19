@@ -178,7 +178,6 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
               id="imageUpload"
               accept="image/*"
               onChange={handleImageUpload}
-              required
             />
           </div>
 
