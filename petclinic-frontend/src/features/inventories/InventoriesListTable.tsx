@@ -1,5 +1,5 @@
 import { useState, useEffect, JSX, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Inventory } from '@/features/inventories/models/Inventory.ts';
 import { InventoryType } from '@/features/inventories/models/InventoryType.ts';
 import useSearchInventories from '@/features/inventories/hooks/useSearchInventories.ts';
@@ -11,7 +11,6 @@ import AddInventoryType from '@/features/inventories/AddInventoryType.tsx';
 import { ProductModel } from '@/features/inventories/models/ProductModels/ProductModel.ts';
 import inventoryStyles from './InventoriesListTable.module.css';
 import cardStylesInventory from './CardInventoryTeam.module.css';
-import { useLocation } from 'react-router-dom';
 
 export default function InventoriesListTable(): JSX.Element {
   const [selectedInventories, setSelectedInventories] = useState<Inventory[]>(
@@ -211,7 +210,7 @@ export default function InventoriesListTable(): JSX.Element {
   const lastConsultedInventoryId =
     location.state?.lastConsultedInventoryId || null;
 
-  const handleCardClick = (inventoryId: string) => {
+  const handleCardClick = (inventoryId: string): void => {
     navigate(`/inventory/${inventoryId}/products`, {
       state: { lastConsultedInventoryId: inventoryId },
     });
