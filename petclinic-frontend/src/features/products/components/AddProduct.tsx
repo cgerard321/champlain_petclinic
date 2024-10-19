@@ -67,6 +67,7 @@ export default function AddProduct({
     const averageRating = 0;
     const status = 'AVAILABLE';
     const productId = '';
+    const isUnlisted = false;
 
     const newProduct: ProductModel = {
       productId,
@@ -79,6 +80,7 @@ export default function AddProduct({
       requestCount,
       status,
       productType,
+      isUnlisted,
     };
 
     try {

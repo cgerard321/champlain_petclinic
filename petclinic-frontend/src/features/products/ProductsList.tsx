@@ -8,7 +8,6 @@ import { addProduct } from '@/features/products/api/addProduct';
 import { useUser } from '@/context/UserContext';
 import './components/Sidebar.css';
 import { getProductsByType } from '@/features/products/api/getProductsByType.ts';
-// import AddImage from './components/AddImage';
 import { addImage } from './api/addImage';
 import { ImageModel } from './models/ProductModels/ImageModel';
 import StarRating from '@/features/products/components/StarRating.tsx';
@@ -71,7 +70,8 @@ export default function ProductList(): JSX.Element {
           maxStars,
           ratingSort
         );
-        setProductList(list);
+        const filteredList = list.filter(product => !product.isUnlisted);
+        setProductList(filteredList);
       } else {
         const filteredList = await getProductsByType(filterType);
         setProductList(filteredList);
@@ -97,6 +97,10 @@ export default function ProductList(): JSX.Element {
     if (savedProducts) {
       setRecentlyClickedProducts(JSON.parse(savedProducts));
     }
+    const filteredList = recentlyClickedProducts.filter(
+      product => !product.isUnlisted
+    );
+    setRecentlyClickedProducts(filteredList);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

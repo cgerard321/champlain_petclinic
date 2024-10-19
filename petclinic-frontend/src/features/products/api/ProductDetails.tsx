@@ -19,6 +19,7 @@ import { AxiosError } from 'axios';
 import ImageContainer from '../components/ImageContainer';
 import { Button } from 'react-bootstrap';
 import { IsAdmin } from '@/context/UserContext';
+import PatchListingStatusButton from '../components/PatchListingStatusButton';
 
 export default function ProductDetails(): JSX.Element {
   const isAdmin = IsAdmin();
@@ -148,6 +149,7 @@ export default function ProductDetails(): JSX.Element {
               <Button variant="warning" onClick={navigateToEditProduct}>
                 Edit
               </Button>
+              {productId && <PatchListingStatusButton productId={productId} />}
               <Button
                 variant="danger"
                 onClick={() =>

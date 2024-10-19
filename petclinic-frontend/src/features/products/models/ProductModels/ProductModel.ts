@@ -9,6 +9,7 @@ export interface ProductModel {
   status: 'RE_ORDER' | 'OUT_OF_STOCK' | 'AVAILABLE';
   requestCount: number;
   productType: string;
+  isUnlisted: boolean;
 }
 
 export const emptyProductModel: ProductModel = {
@@ -22,4 +23,5 @@ export const emptyProductModel: ProductModel = {
   status: 'OUT_OF_STOCK',
   requestCount: 0,
   productType: '',
+  isUnlisted: false,
 };
