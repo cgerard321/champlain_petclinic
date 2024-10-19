@@ -57,7 +57,7 @@ h2 {
 .popup-content {
   background-color: white;
   width: 70%;
-  max-width: 1000px;
+  max-width: 60%;
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
