@@ -11,7 +11,7 @@ import AddInventoryType from '@/features/inventories/AddInventoryType.tsx';
 import { ProductModel } from '@/features/inventories/models/ProductModels/ProductModel.ts';
 import inventoryStyles from './InventoriesListTable.module.css';
 import cardStylesInventory from './CardInventoryTeam.module.css';
-import DefaultInventoryImage from '@/assets/Inventory/DefaultInventoryImage.jpg';
+// import DefaultInventoryImage from '@/assets/Inventory/DefaultInventoryImage.jpg';
 
 export default function InventoriesListTable(): JSX.Element {
   const [selectedInventories, setSelectedInventories] = useState<Inventory[]>(
@@ -207,6 +207,16 @@ export default function InventoriesListTable(): JSX.Element {
     setSelectedInventories([]);
   };
 
+  const arrayBufferToBase64 = (buffer: Uint8Array): string => {
+    let binary = '';
+    const bytes = new Uint8Array(buffer);
+    const len = bytes.byteLength;
+    for (let i = 0; i < len; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    return window.btoa(binary);
+  };
+
   return (
     <>
       <div>
@@ -334,23 +344,13 @@ export default function InventoriesListTable(): JSX.Element {
             >
               <div className={cardStylesInventory.imageContainer}>
                 <img
-                  src={inventory.inventoryImage}
+                  src={
+                    inventory.imageUploaded instanceof Uint8Array
+                      ? `data:image/jpeg;base64,${arrayBufferToBase64(inventory.imageUploaded)}`
+                      : `data:image/jpeg;base64,${inventory.imageUploaded}`
+                  }
                   alt={inventory.inventoryName}
                   className={cardStylesInventory.cardImage}
-                  onError={(
-                    e: React.SyntheticEvent<HTMLImageElement, Event>
-                  ) => {
-                    const target = e.target as HTMLImageElement;
-                    if (inventory.inventoryBackupImage) {
-                      target.src = inventory.inventoryBackupImage;
-                      target.onerror = () => {
-                        target.onerror = null;
-                        target.src = DefaultInventoryImage;
-                      };
-                    } else {
-                      target.src = DefaultInventoryImage;
-                    }
-                  }}
                 />
               </div>
               <div className={cardStylesInventory.inventoryNameSection}>
