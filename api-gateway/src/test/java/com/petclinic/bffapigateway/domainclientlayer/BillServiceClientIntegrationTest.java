@@ -98,7 +98,7 @@ class BillServiceClientIntegrationTest {
         server.enqueue(new MockResponse().setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .setBody(mapper.writeValueAsString(billResponseDTO)).addHeader("Content-Type", "application/json"));
 
-        Mono<BillResponseDTO> billResponseDTOMono = billServiceClient.getBilling("1");
+        Mono<BillResponseDTO> billResponseDTOMono = billServiceClient.getBillById("1");
         StepVerifier.create(billResponseDTOMono)
                 .expectNextMatches(returnedBillResponseDTO1 -> returnedBillResponseDTO1.getBillId().equals("1"))
                 .verifyComplete();
@@ -249,7 +249,7 @@ class BillServiceClientIntegrationTest {
                 .setHeader("Content-Type", "application/json")
                 .setBody(body));
 
-        Flux<BillResponseDTO> billResponseFlux = billServiceClient.getAllBilling();
+        Flux<BillResponseDTO> billResponseFlux = billServiceClient.getAllBills();
 
         StepVerifier.create(billResponseFlux.collectList())
                 .expectNextMatches(returnedBillList -> {
@@ -275,7 +275,7 @@ class BillServiceClientIntegrationTest {
                 .setHeader("Content-Type", "application/json")
                 .setBody(body));
 
-        Flux<BillResponseDTO> billResponseFlux = billServiceClient.getAllPaidBilling();
+        Flux<BillResponseDTO> billResponseFlux = billServiceClient.getAllPaidBills();
 
         StepVerifier.create(billResponseFlux.collectList())
                 .expectNextMatches(returnedBillList -> {
@@ -299,7 +299,7 @@ class BillServiceClientIntegrationTest {
                 .setHeader("Content-Type", "application/json")
                 .setBody(body));
 
-        Flux<BillResponseDTO> billResponseFlux = billServiceClient.getAllUnpaidBilling();
+        Flux<BillResponseDTO> billResponseFlux = billServiceClient.getAllUnpaidBills();
 
         StepVerifier.create(billResponseFlux.collectList())
                 .expectNextMatches(returnedBillList -> {
@@ -320,7 +320,7 @@ class BillServiceClientIntegrationTest {
                 .setHeader("Content-Type", "application/json")
                 .setBody(body));
 
-        Flux<BillResponseDTO> billResponseFlux = billServiceClient.getAllOverdueBilling();
+        Flux<BillResponseDTO> billResponseFlux = billServiceClient.getAllOverdueBills();
 
         StepVerifier.create(billResponseFlux.collectList())
                 .expectNextMatches(returnedBillList -> {
@@ -403,7 +403,7 @@ class BillServiceClientIntegrationTest {
     void getNonExistentBillById() {
         server.enqueue(new MockResponse().setResponseCode(404));
 
-        Mono<BillResponseDTO> billResponseDTOMono = billServiceClient.getBilling("nonexistentId");
+        Mono<BillResponseDTO> billResponseDTOMono = billServiceClient.getBillById("nonexistentId");
 
         StepVerifier.create(billResponseDTOMono)
                 .expectError(WebClientResponseException.NotFound.class)
