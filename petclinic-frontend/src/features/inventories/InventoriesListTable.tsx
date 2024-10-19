@@ -216,7 +216,6 @@ export default function InventoriesListTable(): JSX.Element {
     });
   };
 
-
   const arrayBufferToBase64 = (buffer: Uint8Array): string => {
     let binary = '';
     const bytes = new Uint8Array(buffer);
