@@ -4,7 +4,6 @@ import { AxiosResponse } from 'axios';
 
 export const getRoleById = async (
   id: number
-): Promise<AxiosResponse<RoleResponseModel>
-> => {
+): Promise<AxiosResponse<RoleResponseModel>> => {
   return await axiosInstance.get<RoleResponseModel>(`/roles/${id}`);
 };

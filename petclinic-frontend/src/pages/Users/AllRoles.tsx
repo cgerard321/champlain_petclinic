@@ -16,7 +16,6 @@ const AllRoles: FC = (): JSX.Element => {
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [newRoleName, setNewRoleName] = useState('');
   const [roleToUpdate, setRoleToUpdate] = useState<RoleResponseModel | null>(null);
-  const [newRoleName, setNewRoleName] = useState('');
 
   useEffect(() => {
     const fetchRoles = async (): Promise<void> => {
@@ -37,10 +36,7 @@ const AllRoles: FC = (): JSX.Element => {
       await addRole({ name: formattedRoleName });
       setIsModalOpen(false);
       setNewRoleName('');
-      await addRole({ name: newRoleName.toUpperCase() });
-      setIsModalOpen(false);
-      setNewRoleName('');
-      
+
       const response = await getAllRoles();
       setRoles(response.data);
     } catch (error) {
@@ -142,56 +138,6 @@ const AllRoles: FC = (): JSX.Element => {
       </div>
      )}
    </div>
-    
-  return (
-    <div>
-      <NavBar />
-
-      <div className="roles-container">
-        <h1>Roles</h1>
-        <button
-          className="create-role-button"
-          onClick={() => setIsModalOpen(true)}
-        >
-          Create Role
-        </button>
-
-        <table>
-          <thead>
-            <tr>
-              <th>Role Id</th>
-              <th>Role Name</th>
-            </tr>
-          </thead>
-          <tbody>
-            {roles.map(role => (
-              <tr key={role.id}>
-                <td>{role.id}</td>
-                <td>{role.name}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {isModalOpen && (
-        <div className="modal">
-          <div className="modal-content">
-            <h2>Create New Role</h2>
-            <input
-              type="text"
-              value={newRoleName}
-              onChange={e => setNewRoleName(e.target.value)}
-              placeholder="Role Name"
-            />
-            <div className="modal-buttons">
-              <button onClick={handleCreateRole}>Confirm</button>
-              <button onClick={() => setIsModalOpen(false)}>Cancel</button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
   );
 };
 
