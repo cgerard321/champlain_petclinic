@@ -178,15 +178,15 @@ export default function ProductList(): JSX.Element {
     <div className="recently-viewed-container">
       <h2>Recently Seen Products</h2>
       <div className="grid">
-          {recentlyClickedProducts.length > 0 ? (
-              recentlyClickedProducts.map(product => (
-                  <Product key={product.productId} product={product} />
-              ))
-          ) : (
-              <p>No recently clicked products.</p>
-          )}
-        </div>
+        {recentlyClickedProducts.length > 0 ? (
+          recentlyClickedProducts.map(product => (
+            <Product key={product.productId} product={product} />
+          ))
+        ) : (
+          <p>No recently clicked products.</p>
+        )}
       </div>
+    </div>
   );
 
   return (
@@ -310,50 +310,50 @@ export default function ProductList(): JSX.Element {
           <h2>Product Bundles</h2>
           <div className="grid product-bundles-grid">
             {bundleList.length > 0 ? (
-                bundleList.map((bundle: ProductBundleModel) => (
-                    <ProductBundle key={bundle.bundleId} bundle={bundle}/>
-                ))
+              bundleList.map((bundle: ProductBundleModel) => (
+                <ProductBundle key={bundle.bundleId} bundle={bundle} />
+              ))
             ) : (
-                <p>No product bundles available.</p>
+              <p>No product bundles available.</p>
             )}
           </div>
         </div>
         <div>
-          <hr/>
+          <hr />
         </div>
         <div className="list-container">
           <h2>List Products</h2>
           {!isSidebarOpen && (
-              <button
-                  className="toggle-sidebar-button"
-                  onClick={toggleSidebar}
-                  aria-expanded={isSidebarOpen}
-                  aria-controls="sidebar"
-              >
-                &#9776; Filters
-              </button>
+            <button
+              className="toggle-sidebar-button"
+              onClick={toggleSidebar}
+              aria-expanded={isSidebarOpen}
+              aria-controls="sidebar"
+            >
+              &#9776; Filters
+            </button>
           )}
           <div className="grid">
             {isLoading ? (
-                <p>Loading products...</p>
+              <p>Loading products...</p>
             ) : productList.length > 0 ? (
-                productList.map((product: ProductModel) => (
-                    <div
-                        key={product.productId}
-                        onClick={() => handleProductClick(product)}
-                    >
-                      <Product key={product.productId} product={product}/>
-                    </div>
-                ))
+              productList.map((product: ProductModel) => (
+                <div
+                  key={product.productId}
+                  onClick={() => handleProductClick(product)}
+                >
+                  <Product key={product.productId} product={product} />
+                </div>
+              ))
             ) : (
-                <p>No products found.</p>
+              <p>No products found.</p>
             )}
           </div>
         </div>
         <div>
-          <hr/>
+          <hr />
         </div>
-        <RecentlyViewedProducts/>
+        <RecentlyViewedProducts />
       </div>
     </div>
   );
