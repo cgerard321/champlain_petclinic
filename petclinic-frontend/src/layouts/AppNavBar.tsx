@@ -154,6 +154,9 @@ export function NavBar(): JSX.Element {
                     <NavDropdown.Item as={Link} to={AppRoutePaths.AllUsers}>
                       Users List
                     </NavDropdown.Item>
+                    <NavDropdown.Item as={Link} to={AppRoutePaths.AllRoles}>
+                      Roles List
+                    </NavDropdown.Item>
                   </NavDropdown>
                 )}
                 {!IsAdmin() && (
