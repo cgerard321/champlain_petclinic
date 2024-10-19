@@ -34,7 +34,6 @@ import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.server.resource.InvalidBearerTokenException;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Mono;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -548,11 +547,6 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<UserDetails> getUsersByUsernameContaining(String username) {
         return userMapper.modelToDetailsList(userRepo.findByUsernameContaining(username));
-    }
-
-    @Override
-    public Mono<String> testQodana(){
-        return Mono.just("Hello from AuthService");
     }
 
 }

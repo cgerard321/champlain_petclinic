@@ -578,11 +578,6 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                 });
     }
 
-    @Override
-    public Mono<String> testQodana() {
-        return Mono.just("Qodana test passed");
-    }
-
 }
 
 

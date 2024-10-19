@@ -95,9 +95,4 @@ public class PetController {
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
-    @GetMapping("/test")
-    public Mono<String> test() {
-        return Mono.just("Hello from PetController");
-    }
-
 }

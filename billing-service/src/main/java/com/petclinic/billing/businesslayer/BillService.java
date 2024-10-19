@@ -66,5 +66,5 @@ public interface BillService {
 
     // Method to generate the bill PDF
     Mono<byte[]> generateBillPdf(String customerId, String billId);
-    Mono<String> testQodana();
+
 }

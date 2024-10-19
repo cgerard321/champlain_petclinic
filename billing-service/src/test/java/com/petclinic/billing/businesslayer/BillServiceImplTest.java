@@ -594,11 +594,5 @@ public class BillServiceImplTest {
                 .verifyComplete();
     }
 
-    @Test
-    void testQodanaBill(){
-        StepVerifier.create(billService.testQodana())
-                .expectNext("Qodana test")
-                .verifyComplete();
-    }
 
 }

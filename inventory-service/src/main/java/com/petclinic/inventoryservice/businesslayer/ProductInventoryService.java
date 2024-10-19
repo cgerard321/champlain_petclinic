@@ -46,5 +46,4 @@ public interface ProductInventoryService {
     Mono<ProductResponseDTO> updateProductInventoryId(String currentInventoryId, String productId, String newInventoryId);
 
     Flux<InventoryResponseDTO> getAllInventories();
-    Mono<String> testQodana();
 }

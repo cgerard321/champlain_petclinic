@@ -16,5 +16,4 @@ public interface PetService {
     Mono<PetResponseDTO> deletePetByPetIdV2(String petID);
     Mono<Pet> updatePetIsActive(String petId, String isActive);
     Flux<Pet> getAllPets();
-    Mono<String> testQodana();
 }

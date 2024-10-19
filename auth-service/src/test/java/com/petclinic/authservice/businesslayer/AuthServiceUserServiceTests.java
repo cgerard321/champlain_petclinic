@@ -22,7 +22,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
 
 import java.util.*;
 
@@ -347,13 +346,6 @@ public class AuthServiceUserServiceTests {
         // Assert
         verify(emailingServiceClient, times(1))
                 .sendEmail(any(DirectEmailModelRequestDTO.class));
-    }
-
-    @Test
-    public void TestQodanaAuth(){
-        StepVerifier.create(userService.testQodana())
-                .expectNext("Hello from AuthService")
-                .verifyComplete();
     }
 
 

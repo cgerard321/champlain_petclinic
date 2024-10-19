@@ -386,10 +386,7 @@ public class CartServiceImpl implements CartService {
                 });
     }
 
-    @Override
-    public Mono<String> testQodana() {
-        return Mono.just("Qodana test passed");
-    }
+
 
 
 }

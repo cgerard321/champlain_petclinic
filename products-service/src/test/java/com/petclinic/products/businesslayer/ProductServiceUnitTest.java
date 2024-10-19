@@ -218,12 +218,4 @@ class ProductServiceUnitTest {
                 .verify();
     }
 
-    @Test
-    public void testQodana(){
-        Mono<String> result = productService.testQodana();
-        StepVerifier.create(result)
-                .expectNext("Qodana test passed")
-                .verifyComplete();
-    }
-
 }

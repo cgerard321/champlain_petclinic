@@ -502,9 +502,4 @@ public class VisitServiceImpl implements VisitService {
                 .flatMap(entityDtoUtil::toVisitResponseDTO);
     }
 
-    @Override
-    public Mono<String> testQodana() {
-        return Mono.just("Qodana is working");
-    }
-
 }

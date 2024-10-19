@@ -271,10 +271,7 @@ public class BillServiceImpl implements BillService{
 
 
 
-    @Override
-    public Mono<String> testQodana() {
-        return Mono.just("Qodana test");
-    }
+
 
 
 }
