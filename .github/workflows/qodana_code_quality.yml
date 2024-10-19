@@ -34,18 +34,12 @@ jobs:
         id: zipreports
         if: success() || failure()
         run: |
-          DELIM=$(dd if=/dev/urandom bs=32 count=1 status=none | base64)
-          echo "REPORT_PATHS<<$DELIM" >> $GITHUB_OUTPUT
           mkdir -p .qodana/code-coverage
           for service in $(find -maxdepth 1 -type d -name '*service*' -o -name '*gateway*' | sed 's/.\///'); do
             if [[ -d "$service/build" && -d "$service/build/reports" ]]; then
               cp -R "$service/build/reports" ".qodana/code-coverage/$service"
-              if [[ -d "$service/build/reports/jacoco" && -d "$service/build/reports/jacoco/test" && -f "$service/build/reports/jacoco/test/jacocoTestReport.xml" ]]; then
-                echo ".qodana/code-coverage/$service/jacoco/test/jacocoTestReport.xml," >> $GITHUB_OUTPUT
-              fi
             fi
           done
-          echo "$DELIM" >> $GITHUB_OUTPUT
 
       - name: Archive coverage data
         if: success() || failure()
