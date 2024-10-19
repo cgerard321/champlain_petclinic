@@ -15,11 +15,13 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.test.StepVerifier;
 import static reactor.core.publisher.Mono.just;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.List;
+import java.util.UUID;
 
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
@@ -415,7 +417,6 @@ class BillResourceIntegrationTest {
 
         return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(13.37).billStatus(BillStatus.OVERDUE).dueDate(dueDate).build();
     }
-
     @Test
     void whenValidPageAndSizeProvided_thenReturnsCorrectBillsPage() {
         repo.deleteAll().block();
@@ -473,5 +474,96 @@ class BillResourceIntegrationTest {
                 .expectBodyList(BillResponseDTO.class)
                 .hasSize(0);
     }
+    @Test
+    void getBillWithTimeRemaining() {
 
+        Bill billEntity = buildBillWithTimeRemaining();
+
+        Publisher<Bill> setup = repo.deleteAll().thenMany(repo.save(billEntity));
+
+        StepVerifier
+                .create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        client.get()
+                .uri("/bills/" + billEntity.getBillId())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.visitType").isEqualTo(billEntity.getVisitType())
+                .jsonPath("$.customerId").isEqualTo(billEntity.getCustomerId())
+                .jsonPath("$.amount").isEqualTo(billEntity.getAmount())
+                .jsonPath("$.timeRemaining").isEqualTo(expectedTimeRemaining(billEntity));
+    }
+
+    @Test
+    void getBillWithNegativeTimeRemaining() {
+
+        Bill billEntity = buildBillWithPastDueDate();
+
+        Publisher<Bill> setup = repo.deleteAll().thenMany(repo.save(billEntity));
+
+        StepVerifier
+                .create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        client.get()
+                .uri("/bills/" + billEntity.getBillId())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.visitType").isEqualTo(billEntity.getVisitType())
+                .jsonPath("$.customerId").isEqualTo(billEntity.getCustomerId())
+                .jsonPath("$.amount").isEqualTo(billEntity.getAmount())
+                .jsonPath("$.timeRemaining").isEqualTo(0);
+    }
+
+    private Bill buildBillWithPastDueDate() {
+
+        LocalDate date = LocalDate.of(2024, 1, 1);
+        LocalDate dueDate = LocalDate.now().minusDays(15);
+
+        return Bill.builder()
+                .id("Id")
+                .billId(UUID.randomUUID().toString())
+                .customerId("1")
+                .vetId("1")
+                .visitType("Test Type")
+                .date(date)
+                .amount(100.0)
+                .billStatus(BillStatus.OVERDUE)
+                .dueDate(dueDate)
+                .build();
+    }
+
+    private Bill buildBillWithTimeRemaining() {
+
+        LocalDate date = LocalDate.of(2024, 1, 1);
+        LocalDate dueDate = LocalDate.now().plusDays(15);
+
+        return Bill.builder()
+                .id("Id")
+                .billId(UUID.randomUUID().toString())
+                .customerId("1")
+                .vetId("1")
+                .visitType("Test Type")
+                .date(date)
+                .amount(100.0)
+                .billStatus(BillStatus.UNPAID)
+                .dueDate(dueDate)
+                .build();
+    }
+
+    private long expectedTimeRemaining(Bill billEntity) {
+        if (billEntity.getDueDate().isBefore(LocalDate.now())) {
+            return 0L;
+        }
+        return Duration.between(LocalDate.now().atStartOfDay(), billEntity.getDueDate().atStartOfDay()).toDays();
+    }
 }
