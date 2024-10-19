@@ -61,85 +61,87 @@ const AllRoles: FC = (): JSX.Element => {
     }
   };
 
-   return (
-   <div>
-     <NavBar />
+  return (
+    <div>
+      <NavBar />
 
-     <div className="roles-container">
-       <h1>Roles</h1>
-       <button
-        className="create-role-button"
-        onClick={() => setIsModalOpen(true)}
-       >
-         Create Role
-       </button>
+      <div className="roles-container">
+        <h1>Roles</h1>
+        <button
+          className="create-role-button"
+          onClick={() => setIsModalOpen(true)}
+        >
+          Create Role
+        </button>
 
-       <table>
-         <thead>
-         <tr>
-           <th>Role Id</th>
-           <th>Role Name</th>
-           <th>Actions</th>
-         </tr>
-         </thead>
-         <tbody>
-         {roles.map(role => (
-          <tr key={role.id}>
-            <td>{role.id}</td>
-            <td>{role.name}</td>
-            <td>
-              <button
-               onClick={() => {
-                 setRoleToUpdate(role);
-                 setNewRoleName(role.name);
-                 setIsUpdateModalOpen(true);
-               }}
-              >
-                Update
+        <table>
+          <thead>
+            <tr>
+              <th>Role Id</th>
+              <th>Role Name</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {roles.map(role => (
+              <tr key={role.id}>
+                <td>{role.id}</td>
+                <td>{role.name}</td>
+                <td>
+                  <button
+                    onClick={() => {
+                      setRoleToUpdate(role);
+                      setNewRoleName(role.name);
+                      setIsUpdateModalOpen(true);
+                    }}
+                  >
+                    Update
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {isModalOpen && (
+        <div className="modal">
+          <div className="modal-content">
+            <h2>Create New Role</h2>
+            <input
+              type="text"
+              value={newRoleName}
+              onChange={e => setNewRoleName(e.target.value)}
+              placeholder="Role Name"
+            />
+            <div className="modal-buttons">
+              <button onClick={handleCreateRole}>Confirm</button>
+              <button onClick={() => setIsModalOpen(false)}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isUpdateModalOpen && (
+        <div className="modal">
+          <div className="modal-content">
+            <h2>Update Role</h2>
+            <input
+              type="text"
+              value={newRoleName}
+              onChange={e => setNewRoleName(e.target.value)}
+              placeholder="Role Name"
+            />
+            <div className="modal-buttons">
+              <button onClick={handleUpdateRole}>Confirm</button>
+              <button onClick={() => setIsUpdateModalOpen(false)}>
+                Cancel
               </button>
-            </td>
-          </tr>
-         ))}
-         </tbody>
-       </table>
-     </div>
-
-     {isModalOpen && (
-      <div className="modal">
-        <div className="modal-content">
-          <h2>Create New Role</h2>
-          <input
-           type="text"
-           value={newRoleName}
-           onChange={e => setNewRoleName(e.target.value)}
-           placeholder="Role Name"
-          />
-          <div className="modal-buttons">
-            <button onClick={handleCreateRole}>Confirm</button>
-            <button onClick={() => setIsModalOpen(false)}>Cancel</button>
+            </div>
           </div>
         </div>
-      </div>
-     )}
-
-     {isUpdateModalOpen && (
-      <div className="modal">
-        <div className="modal-content">
-          <h2>Update Role</h2>
-          <input
-           type="text"
-           value={newRoleName}
-           onChange={e => setNewRoleName(e.target.value)}
-           placeholder="Role Name"
-          />
-          <div className="modal-buttons">
-            <button onClick={handleUpdateRole}>Confirm</button>
-            <button onClick={() => setIsUpdateModalOpen(false)}>Cancel</button>
-          </div>
-        </div>
-      </div>
-     )}
-   </div>
+      )}
+    </div>
   );
 };
 
