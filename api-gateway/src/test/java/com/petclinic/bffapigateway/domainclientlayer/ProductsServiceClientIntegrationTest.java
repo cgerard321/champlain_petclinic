@@ -141,10 +141,9 @@ class ProductsServiceClientIntegrationTest {
                 10.00,
                 0.00,
                 0,
-                "type",
                 6,
                 false,
-                6
+                ProductType.FOOD
         );
 
         mockWebServer.enqueue(new MockResponse()
@@ -170,10 +169,8 @@ class ProductsServiceClientIntegrationTest {
                 10.00,
                 0.00,
                 0,
-                "type",
                 6,
                 false,
-                6,
                 ProductType.FOOD
         );
 
@@ -200,9 +197,9 @@ class ProductsServiceClientIntegrationTest {
                 10.00,
                 0.00,
                 0,
-                "type",
                 6,
-                true
+                true,
+                ProductType.FOOD
         );
 
         mockWebServer.enqueue(new MockResponse()
@@ -212,7 +209,7 @@ class ProductsServiceClientIntegrationTest {
 
         Mono<ProductResponseDTO> productResponseDTOMono = productsServiceClient
                 .patchListingStatus(productResponseDTO.getProductId(), new ProductRequestDTO(
-                        null, null, null, null, null, null, null, false));
+                        null, null, null, null, null, null, false, ProductType.FOOD));
 
         StepVerifier.create(productResponseDTOMono)
                 .expectNextMatches(product -> product.getProductId().equals("productId"))
@@ -229,7 +226,7 @@ class ProductsServiceClientIntegrationTest {
         Mono<ProductResponseDTO> productResponseDTOMono = productsServiceClient
                 .patchListingStatus("691e6945-0d4a-4b20-85cc-afd251faccfd", new ProductRequestDTO(
                         null, null, null, null, null,
-                        null, null, false));
+                        null, false, ProductType.FOOD));
 
         StepVerifier.create(productResponseDTOMono)
                 .expectErrorMatches(throwable -> throwable != null &&
@@ -246,7 +243,7 @@ class ProductsServiceClientIntegrationTest {
 
         Mono<ProductResponseDTO> productResponseDTOMono = productsServiceClient
                 .patchListingStatus("invalid-product-id", new ProductRequestDTO(
-                        null, null, null, null, null, null, null, false));
+                        null, null, null, null, null, null, false, ProductType.FOOD));
 
         StepVerifier.create(productResponseDTOMono)
                 .expectErrorMatches(throwable -> throwable != null &&
@@ -263,7 +260,7 @@ class ProductsServiceClientIntegrationTest {
 
         Mono<ProductResponseDTO> productResponseDTOMono = productsServiceClient
                 .patchListingStatus("productId", new ProductRequestDTO(
-                        null, null, null, null, null, null, null, false));
+                        null, null, null, null, null, null, false, ProductType.FOOD));
 
         StepVerifier.create(productResponseDTOMono)
                 .expectErrorMatches(throwable -> throwable != null &&
@@ -280,7 +277,7 @@ class ProductsServiceClientIntegrationTest {
 
         Mono<ProductResponseDTO> productResponseDTOMono = productsServiceClient
                 .patchListingStatus("productId", new ProductRequestDTO(
-                        null, null, null, null, null, null, null, false));
+                        null, null, null, null, null, null, false, ProductType.FOOD));
 
         StepVerifier.create(productResponseDTOMono)
                 .expectErrorMatches(throwable -> throwable != null &&
@@ -298,10 +295,8 @@ class ProductsServiceClientIntegrationTest {
                 10.00,
                 0.00,
                 0,
-                "type",
                 6,
                 false,
-                6,
                 ProductType.FOOD
         );
 
