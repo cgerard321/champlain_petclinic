@@ -3,6 +3,7 @@ import {
   IsAdmin,
   IsInventoryManager,
   IsOwner,
+  IsReceptionist,
   IsVet,
   useUser,
 } from '@/context/UserContext';
@@ -148,6 +149,16 @@ export function NavBar(): JSX.Element {
                     )}
                   </NavDropdown>
                 )}
+                {IsAdmin() && (
+                  <NavDropdown title="Users" id="users-dropdown">
+                    <NavDropdown.Item as={Link} to={AppRoutePaths.AllUsers}>
+                      Users List
+                    </NavDropdown.Item>
+                    <NavDropdown.Item as={Link} to={AppRoutePaths.AllRoles}>
+                      Roles List
+                    </NavDropdown.Item>
+                  </NavDropdown>
+                )}
                 {!IsAdmin() && (
                   <Nav.Link as={Link} to={AppRoutePaths.CustomerBills}>
                     Bills
@@ -239,6 +250,11 @@ export function NavBar(): JSX.Element {
                 {IsAdmin() && (
                   <NavDropdown.Item as={Link} to={AppRoutePaths.Home}>
                     Admin Panel
+                  </NavDropdown.Item>
+                )}
+                {IsReceptionist() && (
+                  <NavDropdown.Item as={Link} to={AppRoutePaths.AddingCustomer}>
+                    Receptionist Panel
                   </NavDropdown.Item>
                 )}
                 <NavDropdown.Item

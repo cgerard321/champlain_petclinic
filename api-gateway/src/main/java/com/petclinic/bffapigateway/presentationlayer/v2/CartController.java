@@ -6,6 +6,7 @@ import com.petclinic.bffapigateway.dtos.Cart.AddProductRequestDTO;
 import com.petclinic.bffapigateway.dtos.Cart.CartResponseDTO;
 import com.petclinic.bffapigateway.dtos.Cart.UpdateProductQuantityRequestDTO;
 import com.petclinic.bffapigateway.dtos.Cart.PromoCodeResponseDTO;
+import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -70,21 +72,27 @@ public class CartController {
 }
 
     @PostMapping("/{cartId}/products")
-    public Mono<ResponseEntity<CartResponseDTO>> addProductToCart(@PathVariable String cartId, @RequestBody AddProductRequestDTO requestDTO) {
+    public Mono<ResponseEntity<CartResponseDTO>> addProductToCart(
+            @PathVariable String cartId,
+            @RequestBody AddProductRequestDTO requestDTO) {
         return cartServiceClient.addProductToCart(cartId, requestDTO)
                 .map(ResponseEntity::ok)
                 .onErrorResume(e -> {
-                    if (e instanceof WebClientResponseException.UnprocessableEntity) {
-                        return Mono.just(ResponseEntity.unprocessableEntity().build());
-                    }
-                    else if (e instanceof WebClientResponseException.NotFound) {
+                    if (e instanceof InvalidInputException || e instanceof WebClientResponseException.BadRequest) {
+                        CartResponseDTO errorResponse = new CartResponseDTO();
+                        errorResponse.setMessage(e.getMessage());
+                        return Mono.just(ResponseEntity.badRequest().body(errorResponse));
+                    } else if (e instanceof NotFoundException) {
                         return Mono.just(ResponseEntity.notFound().build());
-                    }
-                    else {
+                    } else if (e instanceof WebClientResponseException) {
+                        WebClientResponseException ex = (WebClientResponseException) e;
+                        return Mono.just(ResponseEntity.status(ex.getStatusCode()).build());
+                    } else {
                         return Mono.error(e);
                     }
                 });
     }
+
 
     @PutMapping("/{cartId}/products/{productId}")
     public Mono<ResponseEntity<CartResponseDTO>> updateProductQuantityInCart(@PathVariable String cartId, @PathVariable String productId, @RequestBody UpdateProductQuantityRequestDTO requestDTO) {
@@ -110,6 +118,7 @@ public class CartController {
                 .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
+
     @GetMapping("/customer/{customerId}")
     public Mono<ResponseEntity<CartResponseDTO>> getCartByCustomerId(@PathVariable String customerId) {
         return cartServiceClient.getCartByCustomerId(customerId)
@@ -118,31 +127,51 @@ public class CartController {
     }
 
 
+    /*
+    --------------------------------------------------------------------------------------------------------------------
+        from here it's related to the wishlist
+    */
 
 
-
-    @PostMapping("/{cartId}/products/{productId}/toCart")
+    @PutMapping("/{cartId}/wishlist/{productId}/toCart")
     public Mono<ResponseEntity<CartResponseDTO>> moveProductFromWishListToCart(@PathVariable String cartId, @PathVariable String productId) {
         return cartServiceClient.moveProductFromWishListToCart(cartId, productId)
-                .map(ResponseEntity::ok)
+                .map(cartResponseDTO -> ResponseEntity.ok(cartResponseDTO)) // Map directly to ResponseEntity
+                .defaultIfEmpty(ResponseEntity.notFound().build())
                 .onErrorResume(e -> {
                     if (e instanceof WebClientResponseException.UnprocessableEntity) {
+                        log.error("Invalid input for cartId: {} or productId: {} - {}", cartId, productId, e.getMessage());
                         return Mono.just(ResponseEntity.unprocessableEntity().build());
-                    } else if ( e instanceof WebClientResponseException.NotFound) {
+                    } else if (e instanceof WebClientResponseException.NotFound) {
+                        log.error("Cart or product not found for cartId: {} and productId: {} - {}", cartId, productId, e.getMessage());
                         return Mono.just(ResponseEntity.notFound().build());
                     } else {
+                        log.error("An unexpected error occurred: {}", e.getMessage());
                         return Mono.error(e);
                     }
                 });
     }
 
-    @PostMapping("/{cartId}/products/{productId}/toWishList")
+
+    @PutMapping("/{cartId}/wishlist/{productId}/toWishList")
     public Mono<ResponseEntity<CartResponseDTO>> moveProductFromCartToWishlist(@PathVariable String cartId, @PathVariable String productId) {
         return cartServiceClient.moveProductFromCartToWishlist(cartId, productId)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build());
-
+                .map(cartResponseDTO -> ResponseEntity.ok(cartResponseDTO))
+                .defaultIfEmpty(ResponseEntity.notFound().build())
+                .onErrorResume(e -> {
+                    if (e instanceof WebClientResponseException.UnprocessableEntity) {
+                        log.error("Invalid input for cartId: {} or productId: {} - {}", cartId, productId, e.getMessage());
+                        return Mono.just(ResponseEntity.unprocessableEntity().build());
+                    } else if (e instanceof WebClientResponseException.NotFound) {
+                        log.error("Cart or product not found for cartId: {} and productId: {} - {}", cartId, productId, e.getMessage());
+                        return Mono.just(ResponseEntity.notFound().build());
+                    } else {
+                        log.error("An unexpected error occurred: {}", e.getMessage());
+                        return Mono.error(e);
+                    }
+                });
     }
+
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping(value = "promos", produces= MediaType.APPLICATION_JSON_VALUE)

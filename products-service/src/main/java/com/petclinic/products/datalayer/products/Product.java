@@ -23,8 +23,8 @@ public class Product {
     private Double productSalePrice;
     private Double averageRating;
     private Integer requestCount;
-    private String productType;
     private Integer productQuantity;
+    private ProductType productType;
     private DeliveryType deliveryType;
 }
 

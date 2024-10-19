@@ -23,6 +23,7 @@ public class CartResponseDTO {
     private double tvc;
     private double total;
     private String message;  
-    private String paymentStatus;  
+    private String paymentStatus;
+    private String invoiceId;
 
 }

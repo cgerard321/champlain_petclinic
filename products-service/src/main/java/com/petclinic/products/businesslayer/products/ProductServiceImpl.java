@@ -1,5 +1,6 @@
 package com.petclinic.products.businesslayer.products;
 
+import com.petclinic.products.datalayer.products.ProductType;
 import com.petclinic.products.utils.exceptions.InvalidInputException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -40,6 +42,7 @@ public class ProductServiceImpl implements ProductService {
                 .collectList()
                 .flatMap(ratings -> {
                     if(ratings.isEmpty()){
+                        product.setAverageRating(0.0);
                         return Mono.just(product);
                     }
 
@@ -47,7 +50,9 @@ public class ProductServiceImpl implements ProductService {
                             .stream()
                             .mapToDouble(Byte::doubleValue)
                             .sum();
-                    product.setAverageRating(sumOfRatings / ratings.size());
+                    Double ratio = sumOfRatings / ratings.size();
+                    // This sets truncates to 2 decimal places without converting data types
+                    product.setAverageRating(Math.floor(ratio * 100) / 100);
                     return Mono.just(product);
                 });
     }
@@ -109,38 +114,18 @@ public class ProductServiceImpl implements ProductService {
                 .map(EntityModelUtil::toProductResponseModel);
     }
 
-//    @Override
-//    public Mono<ProductResponseModel> updateProductByProductId(String productId, Mono<ProductRequestModel> productRequestModel) {
-//        return productRepository.findProductByProductId(productId)
-//                .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Product id was not found: " + productId))))
-//                .flatMap(found -> productRequestModel
-//                        .map(EntityModelUtil::toProductEntity)
-//                        .doOnNext(entity -> entity.setId(found.getId()))
-//                        .doOnNext(entity -> entity.setProductId(found.getProductId())))
-//                .flatMap(this::getAverageRating)
-//                .flatMap(productRepository::save)
-//                .map(EntityModelUtil::toProductResponseModel);
-//    }
     @Override
     public Mono<ProductResponseModel> updateProductByProductId(String productId, Mono<ProductRequestModel> productRequestModel) {
         return productRepository.findProductByProductId(productId)
-                .switchIfEmpty(Mono.error(new NotFoundException("Product id was not found: " + productId)))
-                .flatMap(existingProduct -> productRequestModel
-                        .map(request -> {
-                            existingProduct.setProductName(request.getProductName());
-                            existingProduct.setProductDescription(request.getProductDescription());
-                            existingProduct.setProductSalePrice(request.getProductSalePrice());
-                            existingProduct.setProductType(request.getProductType());
-                            existingProduct.setProductQuantity(request.getProductQuantity());
-                            //existingProduct.setDeliveryType(request.getDeliveryType()); // Added update
-                            // Update any other necessary fields
-                            return existingProduct;
-                        })
-                )
+                .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Product id was not found: " + productId))))
+                .flatMap(found -> productRequestModel
+                        .map(EntityModelUtil::toProductEntity)
+                        .doOnNext(entity -> entity.setId(found.getId()))
+                        .doOnNext(entity -> entity.setProductId(found.getProductId())))
+                .flatMap(this::getAverageRating)
                 .flatMap(productRepository::save)
                 .map(EntityModelUtil::toProductResponseModel);
     }
-
 
     @Override
     public Mono<ProductResponseModel> deleteProductByProductId(String productId) {
@@ -210,13 +195,13 @@ public class ProductServiceImpl implements ProductService {
         return productRepository.findProductByProductId(productId)
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Product id was not found: " + productId))))
                 .flatMap(product -> {
-                    if (productQuantity > product.getProductQuantity()) {
-                        product.setProductQuantity(product.getProductQuantity() + productQuantity);
-                    }else {
-                        product.setProductQuantity(product.getProductQuantity() - productQuantity);
-                    }
+                        product.setProductQuantity(productQuantity);
                     return productRepository.save(product).then();
                 });
+    }
+    @Override
+    public List<Product> getProductsByType(ProductType productType) {
+        return productRepository.findByProductType(productType);
     }
 
 }

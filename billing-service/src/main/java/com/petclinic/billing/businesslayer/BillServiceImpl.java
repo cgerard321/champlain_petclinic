@@ -1,12 +1,16 @@
 package com.petclinic.billing.businesslayer;
 
+import com.itextpdf.text.DocumentException;
 import com.petclinic.billing.datalayer.*;
 //import com.petclinic.billing.domainclientlayer.OwnerClient;
 //import com.petclinic.billing.domainclientlayer.VetClient;
 import com.petclinic.billing.domainclientlayer.OwnerClient;
 import com.petclinic.billing.domainclientlayer.VetClient;
 import com.petclinic.billing.util.EntityDtoUtil;
+import com.petclinic.billing.util.PdfGenerator;
+
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -15,12 +19,14 @@ import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.util.function.Predicate;
 
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class BillServiceImpl implements BillService{
 
     private final BillRepository billRepository;
@@ -30,14 +36,24 @@ public class BillServiceImpl implements BillService{
     @Override
     public Mono<BillResponseDTO> getBillByBillId(String billUUID) {
 
-        return billRepository.findByBillId(billUUID).map(EntityDtoUtil::toBillResponseDto)
+        return billRepository.findByBillId(billUUID)
+                .doOnNext(bill -> {
+                    log.info("Retrieved Bill: {}", bill);
+                })
+                .map(EntityDtoUtil::toBillResponseDto)
                 .doOnNext(t -> t.setTaxedAmount(((t.getAmount() * 15)/100)+ t.getAmount()))
                 .doOnNext(t -> t.setTaxedAmount(Math.round(t.getTaxedAmount() * 100.0) / 100.0));
+               // .doOnNext(t -> t.setTimeRemaining(timeRemaining(t)));
     }
 
     @Override
     public Flux<BillResponseDTO> GetAllBillsByStatus(BillStatus status) {
         return billRepository.findAllBillsByBillStatus(status).map(EntityDtoUtil::toBillResponseDto);
+    }
+
+    @Override
+    public Mono<Bill> CreateBillForDB(Mono<Bill> bill) {
+        return bill.flatMap(billRepository::insert);
     }
 
     @Override
@@ -195,6 +211,18 @@ public class BillServiceImpl implements BillService{
         return billRepository.deleteBillsByCustomerId(customerId);
 
     }
+/*
+    private long timeRemaining(BillResponseDTO bill){
+        if (bill.getDueDate().isBefore(LocalDate.now())) {
+            return 0;
+        }
+
+        return Duration.between(LocalDate.now().atStartOfDay(), bill.getDueDate().atStartOfDay()).toDays();
+    }
+
+ */
+
+
 
 //    private Mono<RequestContextAdd> vetRequestResponse(RequestContextAdd rc) {
 //        return
@@ -208,6 +236,39 @@ public class BillServiceImpl implements BillService{
 //                        .doOnNext(rc::setOwnerResponseDTO)
 //                        .thenReturn(rc);
 //    }
+
+
+    // Fetch a specific bill for a customer
+    @Override
+    public Mono<BillResponseDTO> GetBillByCustomerIdAndBillId(String customerId, String billId) {
+        return billRepository.findByBillId(billId)
+                .filter(bill -> bill.getCustomerId().equals(customerId))
+                .map(EntityDtoUtil::toBillResponseDto);
+    }
+
+    // Fetch filtered bills by status for a customer
+    @Override
+    public Flux<BillResponseDTO> GetBillsByCustomerIdAndStatus(String customerId, BillStatus status) {
+        return billRepository.findByCustomerIdAndBillStatus(customerId, status)
+                .map(EntityDtoUtil::toBillResponseDto);
+    }
+
+    @Override
+    public Mono<byte[]> generateBillPdf(String customerId, String billId) {
+        return billRepository.findByBillId(billId)
+                .filter(bill -> bill.getCustomerId().equals(customerId))
+                .switchIfEmpty(Mono.error(new RuntimeException("Bill not found for given customer")))
+                .map(EntityDtoUtil::toBillResponseDto)
+                .flatMap(bill -> {
+                    try {
+                        byte[] pdfBytes = PdfGenerator.generateBillPdf(bill);
+                        return Mono.just(pdfBytes);
+                    } catch (DocumentException e) {
+                        return Mono.error(new RuntimeException("Error generating PDF", e));
+                    }
+                });
+    }
+
 
 
 

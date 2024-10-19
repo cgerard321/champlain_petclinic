@@ -251,7 +251,39 @@ public class InventoryController {
                     headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"inventory_report.pdf\"");
                     return new ResponseEntity<>(pdfContent, headers, HttpStatus.OK);
                 });
+    }
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
+    @PutMapping("/{inventoryId}/products/{productId}/restockProduct")
+    public Mono<ResponseEntity<ProductResponseDTO>> restockLowStockProduct (@PathVariable String inventoryId, @PathVariable String productId, @RequestParam Integer productQuantity){
+        if (productQuantity == null || productQuantity <= 0) {
+            return Mono.just(ResponseEntity.badRequest().body(null));
+        }
 
+        return inventoryServiceClient.restockLowStockProduct(inventoryId, productId, productQuantity)
+                .map(updatedProduct -> ResponseEntity.status(HttpStatus.OK).body(updatedProduct))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
+    @PutMapping("/{currentInventoryId}/products/{productId}/updateInventoryId/{newInventoryId}")
+    @Operation(summary = "Update product's inventory ID in the inventory system")
+    @ApiResponses(value = {
+            @ApiResponse(description = "Inventory ID updated successfully", responseCode = "200"),
+            @ApiResponse(description = "Product not found", responseCode = "404"),
+            @ApiResponse(description = "Invalid inputs", responseCode = "400")
+    })
+    public Mono<ResponseEntity<ProductResponseDTO>> updateProductInventoryId(
+            @PathVariable String currentInventoryId,
+            @PathVariable String productId,
+            @PathVariable String newInventoryId) {
+
+        return inventoryServiceClient.updateProductInventoryId(currentInventoryId, productId, newInventoryId)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/all")
+    public Flux<InventoryResponseDTO> getAllInventories() {
+        return inventoryServiceClient.getAllInventories();
     }
 }

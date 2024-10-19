@@ -1,6 +1,7 @@
 package com.petclinic.billing.businesslayer;
 
 
+import com.petclinic.billing.datalayer.Bill;
 import com.petclinic.billing.datalayer.BillRequestDTO;
 import com.petclinic.billing.datalayer.BillResponseDTO;
 import com.petclinic.billing.datalayer.BillStatus;
@@ -17,6 +18,7 @@ public interface BillService {
 
     Flux<BillResponseDTO> GetAllBillsByStatus(BillStatus status);
 
+    Mono<Bill>CreateBillForDB(Mono<Bill> bill);
 
     Flux<BillResponseDTO> GetAllBills();
 
@@ -55,5 +57,14 @@ public interface BillService {
     Mono<BillResponseDTO> updateBill(String billId, Mono<BillRequestDTO> billRequestDTO);
 
     Mono<Void> DeleteAllBills();
+
+    // Fetch a specific bill for a customer
+    Mono<BillResponseDTO> GetBillByCustomerIdAndBillId(String customerId, String billId);
+
+    // Fetch filtered bills by status
+    Flux<BillResponseDTO> GetBillsByCustomerIdAndStatus(String customerId, BillStatus status);
+
+    // Method to generate the bill PDF
+    Mono<byte[]> generateBillPdf(String customerId, String billId);
 
 }
