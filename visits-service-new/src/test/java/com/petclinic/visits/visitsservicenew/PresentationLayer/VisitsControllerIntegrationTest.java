@@ -534,9 +534,9 @@ class VisitsControllerIntegrationTest {
 //                });
 
 
-    //    @Test
+    @Test
     void updateVisitStatus_ShouldSucceed_WhenStatusUpdatedToCancelled() {
-        String visitId = "visitId9";
+        String visitId = "visitId";
         String status = "CANCELLED";
 
         VisitResponseDTO cancelledVisitResponse = VisitResponseDTO.builder()

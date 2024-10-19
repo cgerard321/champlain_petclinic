@@ -14,9 +14,10 @@ import java.util.List;
 public class InventoryResponseDTO {
     private String inventoryId;
     private String inventoryType;
-   private String  inventoryName;
+    private String inventoryName;
     private String inventoryDescription;
     private String inventoryImage;
     private String inventoryBackupImage;
+    private byte[] imageUploaded;
     private List<ProductResponseDTO> products;
 }
