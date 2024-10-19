@@ -30,4 +30,20 @@ public class RoleServiceImpl implements RoleService {
         log.info("Fetching all roles");
         return roleRepo.findAll();
     }
+
+    @Override
+    public Role updateRole(Long roleId, RoleRequestModel roleRequestModel) {
+        Role role = roleRepo.findById(roleId).orElseThrow(() -> new RuntimeException("Role not found"));
+        role.setName(roleRequestModel.getName());
+        Role updatedRole = roleRepo.save(role);
+        log.info("Updated role with ID: {} and name: {}", updatedRole.getId(), updatedRole.getName());
+        return updatedRole;
+    }
+
+    @Override
+    public Role getRoleById(Long roleId) {
+        Role role = roleRepo.findById(roleId).orElseThrow(() -> new RuntimeException("Role not found"));
+        log.info("Fetched role with ID: {} and name: {}", role.getId(), role.getName());
+        return role;
+    }
 }

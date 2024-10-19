@@ -29,7 +29,7 @@ public class CustomerBillsControllerUnitTest {
     void getBillsByCustomerId_shouldSucceed() {
         BillResponseDTO billResponse = buildBillResponseDTO();
 
-        when(billService.GetBillsByCustomerId(anyString())).thenReturn(Flux.just(billResponse));
+        when(billService.getBillsByCustomerId(anyString())).thenReturn(Flux.just(billResponse));
 
         client.get()
                 .uri("/bills/customer/{customerId}/bills", billResponse.getCustomerId())
@@ -43,12 +43,12 @@ public class CustomerBillsControllerUnitTest {
                     assert response.getResponseBody().get(0).getCustomerId().equals(billResponse.getCustomerId());
                 });
 
-        Mockito.verify(billService, times(1)).GetBillsByCustomerId(billResponse.getCustomerId());
+        Mockito.verify(billService, times(1)).getBillsByCustomerId(billResponse.getCustomerId());
     }
 
     @Test
     void getBillsByNonExistentCustomerId_shouldFail() {
-        when(billService.GetBillsByCustomerId(anyString())).thenReturn(Flux.empty());
+        when(billService.getBillsByCustomerId(anyString())).thenReturn(Flux.empty());
 
         client.get()
                 .uri("/bills/customer/nonExistentCustomer/bills")
@@ -58,7 +58,7 @@ public class CustomerBillsControllerUnitTest {
                 .expectBodyList(BillResponseDTO.class)
                 .hasSize(0);
 
-        Mockito.verify(billService, times(1)).GetBillsByCustomerId("nonExistentCustomer");
+        Mockito.verify(billService, times(1)).getBillsByCustomerId("nonExistentCustomer");
     }
 
     private BillResponseDTO buildBillResponseDTO() {

@@ -1,5 +1,6 @@
 package com.petclinic.inventoryservice.datalayer.Inventory;
 
+import com.petclinic.inventoryservice.utils.ImageUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
@@ -8,6 +9,8 @@ import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -17,10 +20,20 @@ class InventoryRepositoryTest {
     @Autowired
     InventoryRepository inventoryRepository;
 
+    InputStream inputStream = getClass().getResourceAsStream("/images/DiagnosticKitImage.jpg");
+    byte[] diagnosticKitImage = ImageUtil.readImage(inputStream);
 
+
+    InventoryRepositoryTest() throws IOException {
+    }
 
     @Test
-    public void shouldSaveSingleInventory(){
+    public void shouldSaveSingleInventory()  {
+
+
+
+
+
         //arrange
         Inventory newInventory = buildInventory(
                 "inventoryId_3",
@@ -28,7 +41,10 @@ class InventoryRepositoryTest {
                 "Internal",
                 "inventoryDescription_3",
                 "https://www.fda.gov/files/iStock-157317886.jpg",
-                "https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14"
+                "https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14",
+                diagnosticKitImage
+
+
 
         );
         Publisher<Inventory> setup = inventoryRepository.save(newInventory);
@@ -50,7 +66,8 @@ class InventoryRepositoryTest {
                 "Internal" ,
                 "inventoryDescription_3",
                 "https://www.fda.gov/files/iStock-157317886.jpg",
-                "https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14"
+                "https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14",
+                diagnosticKitImage
 
         );
 
@@ -72,7 +89,8 @@ class InventoryRepositoryTest {
                 "Internal" ,
                 "inventoryDescription_4",
                 "https://www.fda.gov/files/iStock-157317886.jpg",
-                "https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14"
+                "https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14",
+                diagnosticKitImage
 
         );
         inventoryRepository.save(inventoryToBeDeleted).block();
@@ -96,7 +114,8 @@ class InventoryRepositoryTest {
                 "Internal",
                 "SampleDescription",
                 "https://www.fda.gov/files/iStock-157317886.jpg",
-                "https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14"
+                "https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14",
+                diagnosticKitImage
 
         );
         inventoryRepository.save(inventory).block();
@@ -120,7 +139,8 @@ class InventoryRepositoryTest {
                 "Internal",
                 "SampleDescription",
                 "https://www.fda.gov/files/iStock-157317886.jpg",
-                "https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14"
+                "https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14",
+                diagnosticKitImage
 
         );
         inventoryRepository.save(inventory).block();
@@ -142,7 +162,8 @@ class InventoryRepositoryTest {
                 "Internal",
                 "OtherDescription",
                 "https://www.fda.gov/files/iStock-157317886.jpg",
-                "https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14"
+                "https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14",
+                diagnosticKitImage
 
         );
         inventoryRepository.save(inventory).block();
@@ -165,7 +186,8 @@ class InventoryRepositoryTest {
                 "Internal",
                 "SomeDescription",
                 "https://www.fda.gov/files/iStock-157317886.jpg",
-                "https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14"
+                "https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14",
+                diagnosticKitImage
 
         );
         inventoryRepository.save(inventory).block();
@@ -188,7 +210,8 @@ class InventoryRepositoryTest {
                 "Internal",
                 "Medication",
                 "https://www.fda.gov/files/iStock-157317886.jpg",
-                "https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14"
+                "https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14",
+                diagnosticKitImage
 
         );
         inventoryRepository.save(inventory).block();
@@ -202,7 +225,7 @@ class InventoryRepositoryTest {
                 .verifyComplete();
     }
 
-    private Inventory buildInventory(String inventoryId, String inventoryName, String inventoryType, String inventoryDescription, String inventoryImage, String inventoryBackupImage) {
+    private Inventory buildInventory(String inventoryId, String inventoryName, String inventoryType, String inventoryDescription, String inventoryImage, String inventoryBackupImage, byte[] diagnosticKitImage) {
         return Inventory.builder()
                 .inventoryName(inventoryName)
                 .inventoryId(inventoryId)
@@ -210,6 +233,7 @@ class InventoryRepositoryTest {
                 .inventoryDescription(inventoryDescription)
                 .inventoryImage(inventoryImage)
                 .inventoryBackupImage(inventoryBackupImage)
+                .imageUploaded(diagnosticKitImage)
                 .build();
     }
 

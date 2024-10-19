@@ -22,6 +22,7 @@ import com.petclinic.bffapigateway.dtos.Visits.VisitRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.VisitResponseDTO;
 import com.petclinic.bffapigateway.exceptions.ExistingVetNotFoundException;
 import com.petclinic.bffapigateway.exceptions.GenericHttpException;
+import com.petclinic.bffapigateway.utils.InventoryUtils.ImageUtil;
 import com.petclinic.bffapigateway.utils.Security.Filters.JwtTokenFilter;
 import com.petclinic.bffapigateway.utils.Security.Filters.RoleFilter;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
@@ -62,6 +63,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -1921,7 +1923,7 @@ class ApiGatewayControllerTest {
                 .taxedAmount(0)
                 .timeRemaining(13L)
                 .build();
-        when(billServiceClient.getAllBilling()).thenReturn(Flux.just(billResponseDTO,billResponseDTO2));
+        when(billServiceClient.getAllBills()).thenReturn(Flux.just(billResponseDTO,billResponseDTO2));
 
         client.get()
                 .uri("/api/gateway/bills")
@@ -1931,7 +1933,7 @@ class ApiGatewayControllerTest {
                 .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE+";charset=UTF-8")
                 .expectBodyList(BillResponseDTO.class)
                 .value((list)->assertEquals(list.size(),2));
-        Mockito.verify(billServiceClient,times(1)).getAllBilling();
+        Mockito.verify(billServiceClient,times(1)).getAllBills();
     }
 
     @Test
@@ -1961,7 +1963,7 @@ class ApiGatewayControllerTest {
                 .taxedAmount(0)
                 .timeRemaining(0L)
                 .build();
-        when(billServiceClient.getAllPaidBilling()).thenReturn(Flux.just(billResponseDTO,billResponseDTO2));
+        when(billServiceClient.getAllPaidBills()).thenReturn(Flux.just(billResponseDTO,billResponseDTO2));
 
         client.get()
                 .uri("/api/gateway/bills/paid")
@@ -1971,7 +1973,7 @@ class ApiGatewayControllerTest {
                 .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE+";charset=UTF-8")
                 .expectBodyList(BillResponseDTO.class)
                 .value((list)->assertEquals(list.size(),2));
-        Mockito.verify(billServiceClient,times(1)).getAllPaidBilling();
+        Mockito.verify(billServiceClient,times(1)).getAllPaidBills();
     }
 
     @Test
@@ -2001,7 +2003,7 @@ class ApiGatewayControllerTest {
                 .taxedAmount(0)
                 .timeRemaining(13L)
                 .build();
-        when(billServiceClient.getAllUnpaidBilling()).thenReturn(Flux.just(billResponseDTO,billResponseDTO2));
+        when(billServiceClient.getAllUnpaidBills()).thenReturn(Flux.just(billResponseDTO,billResponseDTO2));
 
         client.get()
                 .uri("/api/gateway/bills/unpaid")
@@ -2011,7 +2013,7 @@ class ApiGatewayControllerTest {
                 .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE+";charset=UTF-8")
                 .expectBodyList(BillResponseDTO.class)
                 .value((list)->assertEquals(list.size(),2));
-        Mockito.verify(billServiceClient,times(1)).getAllUnpaidBilling();
+        Mockito.verify(billServiceClient,times(1)).getAllUnpaidBills();
     }
 
     @Test
@@ -2041,7 +2043,7 @@ class ApiGatewayControllerTest {
                 .taxedAmount(0)
                 .timeRemaining(0L)
                 .build();
-        when(billServiceClient.getAllOverdueBilling()).thenReturn(Flux.just(billResponseDTO,billResponseDTO2));
+        when(billServiceClient.getAllOverdueBills()).thenReturn(Flux.just(billResponseDTO,billResponseDTO2));
 
         client.get()
                 .uri("/api/gateway/bills/overdue")
@@ -2051,31 +2053,36 @@ class ApiGatewayControllerTest {
                 .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE+";charset=UTF-8")
                 .expectBodyList(BillResponseDTO.class)
                 .value((list)->assertEquals(list.size(),2));
-        Mockito.verify(billServiceClient,times(1)).getAllOverdueBilling();
+        Mockito.verify(billServiceClient,times(1)).getAllOverdueBills();
     }
 
     @Test
-    public void shouldGetBillById(){
+    void shouldGetBillById() {
+        // Arrange
+        String billId = UUID.randomUUID().toString();
         BillResponseDTO bill = new BillResponseDTO();
-        bill.setBillId(UUID.randomUUID().toString());
+        bill.setBillId(billId);
         bill.setCustomerId("1");
         bill.setAmount(499);
         bill.setVisitType("Test");
 
-        when(billServiceClient.getBilling(bill.getBillId()))
+        when(billServiceClient.getBillById(billId))
                 .thenReturn(Mono.just(bill));
 
+        // Act & Assert
         client.get()
-                .uri("/api/gateway/bills/{billId}", bill.getBillId())
+                .uri("/api/gateway/bills/{billId}", billId)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody(BillResponseDTO.class)
-                .value(billResponseDTO -> {
-                    assertNotNull(billResponseDTO);
-                    assertEquals(billResponseDTO.getBillId(),bill.getBillId());
-                });
+                .expectBody()
+                .jsonPath("$.billId").isEqualTo(billId)
+                .jsonPath("$.customerId").isEqualTo(bill.getCustomerId())
+                .jsonPath("$.visitType").isEqualTo(bill.getVisitType())
+                .jsonPath("$.amount").isEqualTo(bill.getAmount());
+
+        Mockito.verify(billServiceClient, times(1)).getBillById(billId);
     }
 
 
@@ -2128,7 +2135,7 @@ class ApiGatewayControllerTest {
 
     }
     @Test
-    void getBillingByRequestMissingPath(){
+    void getBillUsingMissingPath(){
         client.get()
                 .uri("/bills")
                 .accept(MediaType.APPLICATION_JSON)
@@ -2206,7 +2213,7 @@ class ApiGatewayControllerTest {
     }
 
     @Test
-    void getPutBillingRequestNotFound(){
+    void putBillRequestNotFound(){
         client.put()
                 .uri("/bills/{billId}", 100)
                 .accept(MediaType.APPLICATION_JSON)
@@ -2218,7 +2225,7 @@ class ApiGatewayControllerTest {
     }
 
     @Test
-    void getPutBillingMissingPath(){
+    void putBillWithMissingPath(){
         client.put()
                 .uri("/bills")
                 .accept(MediaType.APPLICATION_JSON)
@@ -3404,6 +3411,29 @@ void deleteAllInventory_shouldSucceed() {
     verify(inventoryServiceClient, times(1))
             .deleteAllInventories();
 }
+
+//    @Test
+//    void deleteAllProductInventory_shouldSucceed() {
+//        // Assuming you want to test for a specific inventoryId
+//        String inventoryId = "someInventoryId";
+//
+//        // Mock the service call to simulate the successful deletion of all product inventories for a specific inventoryId.
+//        // Adjust the method name if `deleteAllProductInventoriesForInventory` is not the correct name.
+//        when(inventoryServiceClient.deleteAllProductForInventory(eq(inventoryId)))
+//                .thenReturn(Mono.empty());  // Using Mono.empty() to simulate a void return (successful deletion without a return value).
+//
+//        // Make the DELETE request to the API for a specific inventoryId.
+//        client.delete()
+//                .uri("/api/gateway/inventory/{inventoryId}/products", inventoryId)
+//                .exchange()
+//                .expectStatus().isNoContent()
+//                .expectBody().isEmpty();
+//
+//        // Verify that the deleteAllProductInventoriesForInventory method on the service client was called exactly once with the specific inventoryId.
+//        verify(inventoryServiceClient, times(1))
+//                .deleteAllProductForInventory(eq(inventoryId));
+//    }
+    //inventory tests
 
 
     @Test

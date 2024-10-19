@@ -1,5 +1,6 @@
 package com.petclinic.products.businesslayer.products;
 
+import com.petclinic.products.datalayer.products.ProductStatus;
 import com.petclinic.products.datalayer.products.ProductType;
 import com.petclinic.products.utils.exceptions.InvalidInputException;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -20,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 
@@ -108,7 +110,20 @@ public class ProductServiceImpl implements ProductService {
         return productRequestModel
                 .filter(product -> product.getProductSalePrice() > 0)
                 .switchIfEmpty(Mono.error(new InvalidAmountException("Product sale price must be greater than 0")))
-                .map(EntityModelUtil::toProductEntity)
+                .map(request -> {
+
+                    Product product = EntityModelUtil.toProductEntity(request);
+
+
+                    LocalDate today = LocalDate.now();
+                    if (product.getReleaseDate() != null && product.getReleaseDate().isAfter(today)) {
+                        product.setProductStatus(ProductStatus.PRE_ORDER);
+                    } else {
+                        product.setProductStatus(ProductStatus.AVAILABLE);
+                    }
+
+                    return product;
+                })
                 .flatMap(this::getAverageRating)
                 .flatMap(productRepository::save)
                 .map(EntityModelUtil::toProductResponseModel);
@@ -204,4 +219,25 @@ public class ProductServiceImpl implements ProductService {
         return productRepository.findByProductType(productType);
     }
 
-}
+
+
+    @Scheduled(cron = "0 0 0 * * ?") // Runs daily at midnight
+    public Mono<Void> patchProductStatus() {
+        return productRepository.findAll()
+                .flatMap(existingProduct -> {
+                    LocalDate today = LocalDate.now();
+
+                    if (existingProduct.getReleaseDate() != null && existingProduct.getReleaseDate().isAfter(today)) {
+                        existingProduct.setProductStatus(ProductStatus.PRE_ORDER);
+                    } else {
+                        existingProduct.setProductStatus(ProductStatus.AVAILABLE);
+                    }
+
+                    return productRepository.save(existingProduct);
+                })
+                .then();
+    }
+
+
+
+    }

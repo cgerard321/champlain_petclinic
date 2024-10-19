@@ -5,7 +5,6 @@ import com.petclinic.bffapigateway.domainclientlayer.BillServiceClient;
 import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillStatus;
-import com.petclinic.bffapigateway.dtos.Products.ProductResponseDTO;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Test;
@@ -102,7 +101,7 @@ private final String baseBillURL = "/api/v2/gateway/bills";
 
     @Test
     public void whenGetAllBills_thenReturnAllBills(){
-       when(billServiceClient.getAllBilling())
+       when(billServiceClient.getAllBills())
                .thenReturn(Flux.just(billresponse, billresponse2));
 
        webTestClient
@@ -117,12 +116,12 @@ private final String baseBillURL = "/api/v2/gateway/bills";
                .contains(billresponse, billresponse2);
 
        verify(billServiceClient, times(1))
-               .getAllBilling();
+               .getAllBills();
     }
 
     @Test
     public void whenGetBillById_thenReturnBill(){
-        when(billServiceClient.getBilling("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a"))
+        when(billServiceClient.getBillById("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a"))
                 .thenReturn(Mono.just(billresponse));
 
         webTestClient
@@ -136,12 +135,12 @@ private final String baseBillURL = "/api/v2/gateway/bills";
                 .contains(billresponse);
 
         verify(billServiceClient, times(1))
-                .getBilling("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a");
+                .getBillById("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a");
     }
 
     @Test
     public void whenGetAllPaidBills_thenReturnAllPaidBills(){
-        when(billServiceClient.getAllPaidBilling())
+        when(billServiceClient.getAllPaidBills())
                 .thenReturn(Flux.just(billresponse, billresponse2));
 
         webTestClient
@@ -156,12 +155,12 @@ private final String baseBillURL = "/api/v2/gateway/bills";
                 .contains(billresponse, billresponse2);
 
         verify(billServiceClient, times(1))
-                .getAllPaidBilling();
+                .getAllPaidBills();
     }
 
     @Test
     public void whenGetAllUnpaidBills_thenReturnAllUnpaidBills(){
-        when(billServiceClient.getAllUnpaidBilling())
+        when(billServiceClient.getAllUnpaidBills())
                 .thenReturn(Flux.just(billresponse, billresponse2));
 
         webTestClient
@@ -176,12 +175,12 @@ private final String baseBillURL = "/api/v2/gateway/bills";
                 .contains(billresponse, billresponse2);
 
         verify(billServiceClient, times(1))
-                .getAllUnpaidBilling();
+                .getAllUnpaidBills();
     }
 
     @Test
     public void whenGetAllOverdueBills_thenReturnAllOverdueBills() {
-        when(billServiceClient.getAllOverdueBilling())
+        when(billServiceClient.getAllOverdueBills())
                 .thenReturn(Flux.just(billresponse, billresponse2));
 
         webTestClient
@@ -196,7 +195,7 @@ private final String baseBillURL = "/api/v2/gateway/bills";
                 .contains(billresponse, billresponse2);
 
         verify(billServiceClient, times(1))
-                .getAllOverdueBilling();
+                .getAllOverdueBills();
     }
     public void AddBill_thenReturnBill(){
         when(billServiceClient.createBill(billRequestDTO)).thenReturn(Mono.just(billresponse));

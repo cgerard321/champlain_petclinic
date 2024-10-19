@@ -36,6 +36,8 @@ public class EntityModelUtil {
                 .productSalePrice(productRequestModel.getProductSalePrice())
                 .productType(productRequestModel.getProductType())
                 .productQuantity(productRequestModel.getProductQuantity())
+                .releaseDate(productRequestModel.getReleaseDate())
+                .productStatus(productRequestModel.getProductStatus())
                 .build();
     }
 
