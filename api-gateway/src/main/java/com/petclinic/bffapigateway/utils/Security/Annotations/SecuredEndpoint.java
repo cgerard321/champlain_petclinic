@@ -1,8 +1,6 @@
 package com.petclinic.bffapigateway.utils.Security.Annotations;
 
-
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
-import org.springframework.web.bind.annotation.*;
 
 import java.lang.annotation.*;
 

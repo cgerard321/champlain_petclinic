@@ -7,6 +7,7 @@ import { getAllEmergency } from './Emergency/Api/getAllEmergency';
 import { EmergencyResponseDTO } from './Emergency/Model/EmergencyResponseDTO';
 import { deleteEmergency } from './Emergency/Api/deleteEmergency';
 import './Emergency.css';
+import { exportVisitsCSV } from './api/exportVisitsCSV';
 
 export default function VisitListTable(): JSX.Element {
   const [visitsList, setVisitsList] = useState<Visit[]>([]);
@@ -486,13 +487,13 @@ export default function VisitListTable(): JSX.Element {
         >
           View Reviews
         </button>
-        <button
-          className="btn btn-dark"
-          onClick={() => navigate('/visits/emergency')}
-          title="Create emergency visit"
-        >
-          Create Emergency visit
-        </button>
+        {/*<button*/}
+        {/*  className="btn btn-dark"*/}
+        {/*  onClick={() => navigate('/visits/emergency')}*/}
+        {/*  title="Create emergency visit"*/}
+        {/*>*/}
+        {/*  Create Emergency visit*/}
+        {/*</button>*/}
         <button
           className="btn btn-warning"
           onClick={() => navigate(AppRoutePaths.AddVisit)}
@@ -501,20 +502,26 @@ export default function VisitListTable(): JSX.Element {
           Make a Visit
         </button>
 
-        {/* Search bar for filtering visits */}
-        <div className="search-bar">
-          <input
-            type="text"
-            placeholder="Search by visit description"
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)} // Update the search term when input changes
-          />
-        </div>
+        <button
+          className="btn btn-primary"
+          onClick={exportVisitsCSV}
+          title="Download Visits CSV"
+        >
+          Download Visits CSV
+        </button>
       </div>
 
       {/* Emergency Table below buttons, but above visit tables */}
       {renderEmergencyTable('Emergency Visits', emergencyList)}
-
+      {/* Search bar for filtering visits */}
+      <div className="search-bar">
+        <input
+          type="text"
+          placeholder="Search by visit description"
+          value={searchTerm}
+          onChange={e => setSearchTerm(e.target.value)} // Update the search term when input changes
+        />
+      </div>
       {renderTable(
         'Confirmed Visits',
         confirmedVisits,
