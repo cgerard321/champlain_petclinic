@@ -28,5 +28,8 @@ public class CartResponseModel {
     private List<CartProduct> wishListProducts;
     private String message;
     private String paymentStatus;
+    private String invoiceId;
 
+    public CartResponseModel(String invoiceId, String cartId, List<CartProduct> products, double total) {
+    }
 }

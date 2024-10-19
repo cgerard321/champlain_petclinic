@@ -177,6 +177,17 @@ public class VetController {
         return vetsServiceClient.getEducationsByVetId(vetId);
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
+    @PostMapping("{vetId}/educations")
+    public Mono<ResponseEntity<EducationResponseDTO>> addEducationToVet(
+            @PathVariable String vetId,
+            @RequestBody Mono<EducationRequestDTO> educationRequestDTOMono) {
+
+        return vetsServiceClient.addEducationToAVet(vetId, educationRequestDTOMono)
+                .map(education -> ResponseEntity.status(HttpStatus.CREATED).body(education))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @PutMapping(value = "/{vetId}/educations/{educationId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<EducationResponseDTO>> updateEducationByVetIdAndEducationId(
@@ -188,4 +199,11 @@ public class VetController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
+    @GetMapping(value = "{vetId}/ratings", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Flux<RatingResponseDTO> getRatingsByVetId(@PathVariable String vetId) {
+        return vetsServiceClient.getRatingsByVetId(vetId)
+                .doOnError(error -> log.error("Error fetching ratings for vet {}", vetId, error));
+    }
 }
+

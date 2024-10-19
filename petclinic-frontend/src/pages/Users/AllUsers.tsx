@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import './AllUsers.css';
 import { NavBar } from '@/layouts/AppNavBar.tsx';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 
 const AllUsers: React.FC = (): JSX.Element => {
   interface UserResponseModel {
@@ -71,7 +72,9 @@ const AllUsers: React.FC = (): JSX.Element => {
           <tbody>
             {users.map(user => (
               <tr key={user.userId}>
-                <td>{user.userId}</td>
+                <td>
+                  <Link to={`/users/${user.userId}`}>{user.userId}</Link>
+                </td>
                 <td>{user.roles.map(role => role.name).join(', ')}</td>
                 <td>{user.username}</td>
                 <td>{user.email}</td>

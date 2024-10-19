@@ -5,6 +5,7 @@ import './VetDetails.css';
 import axios from 'axios';
 import DeleteVetPhoto from '@/pages/Vet/DeleteVetPhoto.tsx';
 import UpdateVetEducation from '@/pages/Vet/UpdateVetEducation';
+import AddEducation from '@/pages/Vet/AddEducation.tsx';
 
 interface VetResponseType {
   vetId: string;
@@ -35,6 +36,15 @@ interface EducationResponseType {
   endDate: string;
 }
 
+interface RatingResponseType {
+  ratingId: string;
+  rateScore: number;
+  rateDescription: string;
+  predefinedDescription: string;
+  rateDate: string;
+  customerName: string;
+}
+
 export default function VetDetails(): JSX.Element {
   const { vetId } = useParams<{ vetId: string }>();
   const [vet, setVet] = useState<VetResponseType | null>(null);
@@ -50,9 +60,28 @@ export default function VetDetails(): JSX.Element {
   const [specialtyId, setSpecialtyId] = useState('');
   const [specialtyName, setSpecialtyName] = useState('');
   const [enlargedPhoto, setEnlargedPhoto] = useState<string | null>(null);
+  const [formVisible, setFormVisible] = useState<boolean>(false);
 
   const [selectedEducation, setSelectedEducation] =
     useState<EducationResponseType | null>(null);
+  const [ratings, setRatings] = useState<RatingResponseType[] | null>(null);
+  useEffect(() => {
+    const fetchVetRatings = async (): Promise<void> => {
+      try {
+        const response = await fetch(
+          `http://localhost:8080/api/v2/gateway/vets/${vetId}/ratings`
+        );
+        if (!response.ok) {
+          throw new Error(`Error: ${response.statusText}`);
+        }
+        const data: RatingResponseType[] = await response.json();
+        setRatings(data);
+      } catch (error) {
+        setError('Failed to fetch vet ratings');
+      }
+    };
+    fetchVetRatings();
+  }, [vetId]);
 
   const fetchVetPhoto = useCallback(async (): Promise<void> => {
     try {
@@ -391,6 +420,36 @@ export default function VetDetails(): JSX.Element {
           </section>
         )}
 
+        <section className="vet-ratings-info">
+          <h2>Ratings</h2>
+          {ratings && ratings.length > 0 ? (
+            ratings.map((rating, index) => (
+              <div key={index} className="rating-card">
+                <p>
+                  <strong>Customer:</strong>{' '}
+                  {rating.customerName || 'Anonymous'}
+                </p>
+                <p>
+                  <strong>Rating:</strong> {rating.rateScore} / 5
+                </p>
+                <p>
+                  <strong>Experience:</strong> {rating.predefinedDescription}
+                </p>
+                <p>
+                  <strong>Description:</strong> {rating.rateDescription}
+                </p>
+                <p>
+                  <strong>Rate Date:</strong>{' '}
+                  {rating.rateDate || 'No date available'}
+                </p>
+                <hr />
+              </div>
+            ))
+          ) : (
+            <p>No ratings available</p>
+          )}
+        </section>
+
         {vet && (
           <>
             <section className="vet-info">
@@ -523,6 +582,23 @@ export default function VetDetails(): JSX.Element {
                     <p>
                       <strong>End Date:</strong> {edu.endDate}
                     </p>
+                    <div style={{ marginBottom: '20px', textAlign: 'right' }}>
+                      <button
+                        onClick={() => setFormVisible(prev => !prev)}
+                        style={{
+                          backgroundColor: formVisible ? '#ff6347' : '#4CAF50',
+                        }}
+                      >
+                        {formVisible ? 'Cancel' : 'Add Education'}
+                      </button>
+                      {formVisible && (
+                        <AddEducation
+                          vetId={vetId}
+                          onClose={() => setFormVisible(false)}
+                        />
+                      )}
+                    </div>
+
                     <button
                       className="btn btn-primary"
                       onClick={event => {

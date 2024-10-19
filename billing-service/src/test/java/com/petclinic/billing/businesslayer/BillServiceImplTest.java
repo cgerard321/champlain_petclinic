@@ -87,6 +87,8 @@ public class BillServiceImplTest {
                 .vetId("vetId1")
                 .vetFirstName("vetFirstName1")
                 .vetLastName("vetLastName1")
+                .date(LocalDate.of(2024,10,1))
+                .dueDate(LocalDate.of(2024,10,30))
                 .build();
         Bill bill2 = Bill.builder()
                 .billId("billId-2")
@@ -97,6 +99,8 @@ public class BillServiceImplTest {
                 .vetId("vetId2")
                 .vetFirstName("vetFirstName2")
                 .vetLastName("vetLastName2")
+                .date(LocalDate.of(2024,10,1))
+                .dueDate(LocalDate.of(2024,10,30))
                 .build();
         Bill bill3 = Bill.builder()
                 .billId("billId-3")
@@ -107,6 +111,8 @@ public class BillServiceImplTest {
                 .vetId("vetId3")
                 .vetFirstName("vetFirstName3")
                 .vetLastName("vetLastName3")
+                .date(LocalDate.of(2024,10,1))
+                .dueDate(LocalDate.of(2024,10,30))
                 .build();
 
         Pageable pageable = PageRequest.of(0, 2);

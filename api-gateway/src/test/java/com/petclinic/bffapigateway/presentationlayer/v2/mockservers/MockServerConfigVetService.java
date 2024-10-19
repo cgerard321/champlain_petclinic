@@ -457,6 +457,31 @@ public class MockServerConfigVetService {
                 );
     }
 
+    public void registerAddEducationAsUnauthorizedUser(String vetId) {
+        mockServerClient_VetService
+                .when(
+                        request()
+                                .withMethod("POST")
+                                .withPath("/vets/" + vetId + "/educations")
+                                .withHeader("Authorization", "Bearer invalid-token")
+                                .withBody(json("{"
+                                        + "\"vetId\":\"2e26e7a2-8c6e-4e2d-8d60-ad0882e295eb\","
+                                        + "\"degree\":\"Doctor of Veterinary Medicine\","
+                                        + "\"schoolName\":\"Harvard University\","
+                                        + "\"fieldOfStudy\":\"Veterinary Science\","
+                                        + "\"startDate\":\"2015-08-01\","
+                                        + "\"endDate\":\"2019-05-30\""
+                                        + "}"))
+                )
+                .respond(
+                        response()
+                                .withStatusCode(403)
+                                .withBody("{\"status\":403,\"message\":\"Unauthorized access: User is not admin or vet.\"}")
+                );
+    }
+
+
+
     public void registerUpdateEducationByVetIdAndEducationIdEndpointNotFound(String vetId, String educationId, EducationRequestDTO education) {
         mockServerClient_VetService.when(
                         request()
@@ -470,4 +495,34 @@ public class MockServerConfigVetService {
                                 .withBody("{\"message\":\"Education not found for vetId: " + vetId + " and educationId: " + educationId + "\"}")
                 );
     }
+
+    public void registerGetRatingsByVetIdEndpoint(String vetId, String ratingsJson) {
+        mockServerClient_VetService
+                .when(
+                        request()
+                                .withMethod("GET")
+                                .withPath("/vets/" + vetId + "/ratings")
+                )
+                .respond(
+                        response()
+                                .withStatusCode(200)
+                                .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                                .withBody(ratingsJson)
+                );
+    }
+
+    public void registerGetRatingsByVetIdEndpointNotFound(String vetId) {
+        mockServerClient_VetService
+                .when(
+                        request()
+                                .withMethod("GET")
+                                .withPath("/vets/" + vetId + "/ratings")
+                )
+                .respond(
+                        response()
+                                .withStatusCode(404)
+                                .withBody("{\"message\":\"No ratings found for vetId: " + vetId + "\"}")
+                );
+    }
+
 }

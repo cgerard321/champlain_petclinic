@@ -104,6 +104,10 @@ public class UserController {
         return ResponseEntity.ok().body(userService.updateUserRole(userId, roleChanged, token));
     }
 
+    @PutMapping("/{userId}")
+    public ResponseEntity<User> updateUser (@PathVariable String userId, @RequestBody UserPasswordLessDTO userPasswordLessDTO) {
+        return ResponseEntity.ok().body(userService.updateUser(userId, userPasswordLessDTO));
+    }
 
 //    @DeleteMapping("/{userId}")
 //    public void deleteUser(@PathVariable long userId) {

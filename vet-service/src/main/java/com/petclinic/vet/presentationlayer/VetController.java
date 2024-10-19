@@ -61,9 +61,11 @@ public class VetController {
     //Ratings
     @GetMapping("{vetId}/ratings")
     public Flux<RatingResponseDTO> getAllRatingsByVetId(@PathVariable String vetId) {
-        return ratingService.getAllRatingsByVetId(EntityDtoUtil.verifyId(vetId));
-
-
+        return ratingService.getAllRatingsByVetId(EntityDtoUtil.verifyId(vetId))
+                .doOnNext(rating -> log.info("Rating ID: {}, Vet ID: {}, Rating: {}, Customer Name: {}, Experience: {}",
+                        rating.getRatingId(), rating.getVetId(), rating.getRateScore(), rating.getCustomerName(), rating.getPredefinedDescription()))
+                .doOnComplete(() -> log.info("Successfully fetched all ratings for vetId: {}", vetId))
+                .doOnError(error -> log.error("Error fetching ratings for vet {}", vetId, error));
     }
 
 
@@ -242,9 +244,13 @@ public class VetController {
 
 
     @PostMapping("{vetId}/educations")
-    public Mono<EducationResponseDTO> addEducationToVet(@PathVariable String vetId, @RequestBody Mono<EducationRequestDTO> educationRequestDTOMono){
-        return educationService.addEducationToVet(vetId, educationRequestDTOMono);
+    public Mono<ResponseEntity<EducationResponseDTO>> addEducationToVet(@PathVariable String vetId,
+                                                                        @RequestBody Mono<EducationRequestDTO> educationRequestDTOMono) {
+        return educationService.addEducationToVet(vetId, educationRequestDTOMono)
+                .map(education -> ResponseEntity.status(HttpStatus.CREATED).body(education))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
+
 
 
 
