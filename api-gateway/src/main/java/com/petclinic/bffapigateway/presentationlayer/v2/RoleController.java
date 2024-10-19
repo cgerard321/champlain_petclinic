@@ -30,7 +30,7 @@ public class RoleController {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @PostMapping(value = "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<Role>> createRole(@CookieValue("Bearer") String jwtToken, @RequestBody RoleRequestModel roleRequestModel) {
         return authServiceClient.createRole(jwtToken, roleRequestModel)
                 .map(role -> ResponseEntity.status(HttpStatus.CREATED).body(role))

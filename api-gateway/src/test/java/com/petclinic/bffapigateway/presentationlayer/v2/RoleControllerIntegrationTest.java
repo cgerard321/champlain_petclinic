@@ -15,6 +15,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import static com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigAuthService.jwtTokenForValidAdmin;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -51,9 +52,20 @@ class RoleControllerIntegrationTest {
                 .returnResult(Role.class)
                 .getResponseBody();
 
-        StepVerifier.create(result)
-                .expectNextMatches(role -> "OWNER".equals(role.getName()))
-                .expectNextMatches(role -> "ADMIN".equals(role.getName()))
+        StepVerifier
+                .create(result)
+                .expectNextMatches(role -> {
+                    assertNotNull(role);
+                    assertEquals("ADMIN", role.getName());
+                    assertEquals(1, role.getId());
+                    return true;
+                })
+                .expectNextMatches(role -> {
+                    assertNotNull(role);
+                    assertEquals("OWNER", role.getName());
+                    assertEquals(2, role.getId());
+                    return true;
+                })
                 .verifyComplete();
     }
 
@@ -63,17 +75,24 @@ class RoleControllerIntegrationTest {
 
         Mono<Role> result = webTestClient.post()
                 .uri("/api/v2/gateway/roles")
+                .cookie("Bearer", jwtTokenForValidAdmin)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Mono.just(roleRequestModel), RoleRequestModel.class)
-                .cookie("Bearer", jwtTokenForValidAdmin)
+                .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isCreated()
                 .returnResult(Role.class)
                 .getResponseBody()
                 .singleOrEmpty();
 
-        StepVerifier.create(result)
-                .expectNextMatches(role -> "SUPPORT".equals(role.getName()))
+        StepVerifier
+                .create(result)
+                .expectNextMatches(role -> {
+                    assertNotNull(role);
+                    assertEquals("SUPPORT", role.getName());
+                    assertEquals(6, role.getId());
+                    return true;
+                })
                 .verifyComplete();
     }
 }
