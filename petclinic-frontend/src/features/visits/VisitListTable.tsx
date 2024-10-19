@@ -486,13 +486,13 @@ export default function VisitListTable(): JSX.Element {
         >
           View Reviews
         </button>
-        <button
-          className="btn btn-dark"
-          onClick={() => navigate('/visits/emergency')}
-          title="Create emergency visit"
-        >
-          Create Emergency visit
-        </button>
+        {/*<button*/}
+        {/*  className="btn btn-dark"*/}
+        {/*  onClick={() => navigate('/visits/emergency')}*/}
+        {/*  title="Create emergency visit"*/}
+        {/*>*/}
+        {/*  Create Emergency visit*/}
+        {/*</button>*/}
         <button
           className="btn btn-warning"
           onClick={() => navigate(AppRoutePaths.AddVisit)}
