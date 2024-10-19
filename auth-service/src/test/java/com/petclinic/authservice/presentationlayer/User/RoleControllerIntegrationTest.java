@@ -80,4 +80,47 @@ public class RoleControllerIntegrationTest {
         assertTrue(savedRole.isPresent());
         assertEquals("SUPPORT", savedRole.get().getName());
     }
+
+    @Test
+    void whenUpdateRole_thenReturnUpdatedRole() {
+        String token = jwtTokenUtil.generateToken(userRepo.findAll().get(0));
+        Role role = Role.builder().name("SUPPORT").build();
+        roleRepo.save(role);
+        RoleRequestModel roleRequestModel = new RoleRequestModel("MANAGER");
+
+        webTestClient.patch()
+                .uri("/roles/" + role.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(roleRequestModel)
+                .cookie("Bearer", token)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(Role.class)
+                .value(updatedRole -> {
+                    assertEquals("MANAGER", updatedRole.getName());
+                });
+
+        List<Role> roles = roleRepo.findAll();
+        Optional<Role> updatedRole = roles.stream().filter(r -> "MANAGER".equals(r.getName())).findFirst();
+        assertTrue(updatedRole.isPresent());
+        assertEquals("MANAGER", updatedRole.get().getName());
+    }
+
+    @Test
+    void whenGetRoleById_thenReturnRole() {
+        String token = jwtTokenUtil.generateToken(userRepo.findAll().get(0));
+        Role role = Role.builder().name("SUPPORT").build();
+        roleRepo.save(role);
+
+        webTestClient.get()
+                .uri("/roles/" + role.getId())
+                .accept(MediaType.APPLICATION_JSON)
+                .cookie("Bearer", token)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(Role.class)
+                .value(r -> {
+                    assertEquals("SUPPORT", r.getName());
+                });
+    }
 }

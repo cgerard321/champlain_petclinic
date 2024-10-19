@@ -31,7 +31,6 @@ public class RoleServiceImpl implements RoleService {
         return roleRepo.findAll();
     }
 
-    //service unit tests for these 2
     @Override
     public Role updateRole(Long roleId, RoleRequestModel roleRequestModel) {
         Role role = roleRepo.findById(roleId).orElseThrow(() -> new RuntimeException("Role not found"));

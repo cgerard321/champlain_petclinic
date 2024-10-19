@@ -32,10 +32,10 @@ const AllRoles: FC = (): JSX.Element => {
 
   const handleCreateRole = async (): Promise<void> => {
     try {
-      await addRole({ name: newRoleName.toUpperCase() });
+      const formattedRoleName = newRoleName.replace(/\s+/g, '_').toUpperCase();
+      await addRole({ name: formattedRoleName });
       setIsModalOpen(false);
       setNewRoleName('');
-      // Refresh roles list
       const response = await getAllRoles();
       setRoles(response.data);
     } catch (error) {
@@ -46,11 +46,11 @@ const AllRoles: FC = (): JSX.Element => {
   const handleUpdateRole = async (): Promise<void> => {
     if (!roleToUpdate) return;
     try {
-      await updateRole(roleToUpdate.id, newRoleName.toUpperCase());
+      const formattedRoleName = newRoleName.replace(/\s+/g, '_').toUpperCase();
+      await updateRole(roleToUpdate.id, formattedRoleName);
       setIsUpdateModalOpen(false);
       setNewRoleName('');
       setRoleToUpdate(null);
-      // Refresh roles list
       const response = await getAllRoles();
       setRoles(response.data);
     } catch (error) {
