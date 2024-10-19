@@ -88,7 +88,6 @@ const UserCart = (): JSX.Element => {
         }
 
         const data = await response.json();
-        console.log(data)
 
         // Ensure that data.products exists and is an array
         if (!Array.isArray(data.products)) {

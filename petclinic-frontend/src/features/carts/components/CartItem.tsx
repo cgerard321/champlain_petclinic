@@ -46,15 +46,9 @@ const CartItem = ({
   //   }
   // }
   const remainingStock = item.productQuantity - (item.quantity ?? 0);
-  console.log(item)
-  console.log(item.imageId)
-
-
   return (
     <div className="CartItem">
-
-      <ImageContainer imageId={item.imageId}/>
-
+      <ImageContainer imageId={item.imageId} />
       <div className="CartItem-info">
         <h2 className="info-title">{item.productName}</h2>
         <p className="info-description">{item.productDescription}</p>
