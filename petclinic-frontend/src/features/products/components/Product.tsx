@@ -38,13 +38,13 @@ export default function Product({
       return 'Pickup';
     } else if (deliveryType === 'DELIVERY_AND_PICKUP') {
       return 'Delivery & Pickup';
-    }else if(deliveryType === 'NO_DELIVERY_OPTION') {
+    } else if (deliveryType === 'NO_DELIVERY_OPTION') {
       return 'No delivery option';
     }
     return 'Unknown Delivery Type';
   };
 
-useEffect(() => {
+  useEffect(() => {
     if (product.productDescription.length > 100) {
       setTooLong(true);
     } else {
