@@ -60,6 +60,7 @@ import AddReviewsCustomer from '@/pages/Review/CustomerAddReviewForm.tsx';
 import EmergencyDetails from './features/visits/EmergencyByEmergencyId';
 import UserDetailsPage from './pages/Users/UserDetailsPage';
 import UpdateUserPage from './pages/Users/UpdateUserPage';
+import AllRoles from '@/pages/Users/AllRoles.tsx';
 
 const router = createBrowserRouter([
   {
@@ -413,6 +414,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute roles={['ADMIN']}>
             <UpdateUserPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.AllRoles,
+        element: (
+          <ProtectedRoute roles={['ADMIN']}>
+            <AllRoles />
           </ProtectedRoute>
         ),
       },
