@@ -32,4 +32,18 @@ public class RoleController {
         List<Role> roles = roleService.getAllRoles();
         return ResponseEntity.ok(roles);
     }
+
+    @PatchMapping("/{roleId}")
+    public ResponseEntity<Role> updateRole(@PathVariable Long roleId, @RequestBody RoleRequestModel roleRequestModel) {
+        log.info("Received request to update role with ID: {}", roleId);
+        Role role = roleService.updateRole(roleId, roleRequestModel);
+        return ResponseEntity.ok(role);
+    }
+
+    @GetMapping("/{roleId}")
+    public ResponseEntity<Role> getRoleById(@PathVariable Long roleId) {
+        log.info("Received request to fetch role with ID: {}", roleId);
+        Role role = roleService.getRoleById(roleId);
+        return ResponseEntity.ok(role);
+    }
 }

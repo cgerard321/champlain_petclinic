@@ -36,4 +36,20 @@ public class RoleController {
                 .map(role -> ResponseEntity.status(HttpStatus.CREATED).body(role))
                 .defaultIfEmpty(ResponseEntity.status(HttpStatus.BAD_REQUEST).build());
     }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @PatchMapping(value = "/{roleId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<Role>> updateRole(@CookieValue("Bearer") String jwtToken, @PathVariable Long roleId, @RequestBody RoleRequestModel roleRequestModel) {
+        return authServiceClient.updateRole(jwtToken, roleId, roleRequestModel)
+                .map(role -> ResponseEntity.status(HttpStatus.OK).body(role))
+                .defaultIfEmpty(ResponseEntity.status(HttpStatus.BAD_REQUEST).build());
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping(value = "/{roleId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<Role>> getRoleById(@CookieValue("Bearer") String jwtToken, @PathVariable Long roleId) {
+        return authServiceClient.getRoleById(jwtToken, roleId)
+                .map(role -> ResponseEntity.status(HttpStatus.OK).body(role))
+                .defaultIfEmpty(ResponseEntity.status(HttpStatus.BAD_REQUEST).build());
+    }
 }

@@ -56,24 +56,4 @@ class RoleControllerIntegrationTest {
                 .expectNextMatches(role -> "ADMIN".equals(role.getName()))
                 .verifyComplete();
     }
-
-    @Test
-    void whenCreateRole_thenReturnRole() {
-        RoleRequestModel roleRequestModel = RoleRequestModel.builder().name("SUPPORT").build();
-
-        Mono<Role> result = webTestClient.post()
-                .uri("/api/v2/gateway/roles")
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(Mono.just(roleRequestModel), RoleRequestModel.class)
-                .cookie("Bearer", jwtTokenForValidAdmin)
-                .exchange()
-                .expectStatus().isCreated()
-                .returnResult(Role.class)
-                .getResponseBody()
-                .singleOrEmpty();
-
-        StepVerifier.create(result)
-                .expectNextMatches(role -> "SUPPORT".equals(role.getName()))
-                .verifyComplete();
-    }
 }

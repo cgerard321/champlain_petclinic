@@ -519,5 +519,24 @@ public class AuthServiceClient {
                 .bodyToMono(Role.class);
     }
 
+    public Mono<Role> updateRole(String jwtToken, Long roleId, RoleRequestModel roleRequestModel) {
+        return webClientBuilder.build()
+                .patch()
+                .uri(authServiceUrl + "/roles/{roleId}", roleId)
+                .cookie("Bearer", jwtToken)
+                .bodyValue(roleRequestModel)
+                .retrieve()
+                .bodyToMono(Role.class);
+    }
+
+    public Mono<Role> getRoleById(String jwtToken, Long roleId) {
+        return webClientBuilder.build()
+                .get()
+                .uri(authServiceUrl + "/roles/{roleId}", roleId)
+                .cookie("Bearer", jwtToken)
+                .retrieve()
+                .bodyToMono(Role.class);
+    }
+
 }
 
