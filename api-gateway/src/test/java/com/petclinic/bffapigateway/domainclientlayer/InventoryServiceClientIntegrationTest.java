@@ -6,6 +6,7 @@ import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.*;
 import com.petclinic.bffapigateway.dtos.Inventory.Status;
 import com.petclinic.bffapigateway.exceptions.InventoryNotFoundException;
+import com.petclinic.bffapigateway.utils.InventoryUtils.ImageUtil;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterAll;
@@ -20,6 +21,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -36,6 +38,9 @@ class InventoryServiceClientIntegrationTest {
 
     private static MockWebServer mockWebServer;
 
+    InventoryServiceClientIntegrationTest() throws IOException {
+    }
+
     @BeforeAll
     static void setUp() throws IOException {
         mockWebServer = new MockWebServer();
@@ -51,6 +56,9 @@ class InventoryServiceClientIntegrationTest {
     static void tearDown() throws IOException{
         mockWebServer.shutdown();
     }
+
+    InputStream inputStream = getClass().getResourceAsStream("/images/DiagnosticKitImage.jpg");
+    byte[] diagnosticKitImage = ImageUtil.readImage(inputStream);
 
     @Test
     void getProductsInInventoryByInventoryIdAndProductsField() throws JsonProcessingException {
@@ -400,8 +408,8 @@ class InventoryServiceClientIntegrationTest {
         List<ProductResponseDTO> productResponseDTOList1 = new ArrayList<>(Arrays.asList(productResponseDTO1));
         List<ProductResponseDTO> productResponseDTOList2 = new ArrayList<>(Arrays.asList(productResponseDTO2));
 
-        InventoryResponseDTO inventoryResponseDTO1 = new InventoryResponseDTO("inventoryId1", "Medication", "Medications", "desc1", "", "", productResponseDTOList1);
-        InventoryResponseDTO inventoryResponseDTO2 = new InventoryResponseDTO("inventoryId2", "Vaccine", "Vaccines", "desc2", "", "", productResponseDTOList2);
+        InventoryResponseDTO inventoryResponseDTO1 = new InventoryResponseDTO("inventoryId1", "Medication", "Medications", "desc1", "", "", diagnosticKitImage, productResponseDTOList1);
+        InventoryResponseDTO inventoryResponseDTO2 = new InventoryResponseDTO("inventoryId2", "Vaccine", "Vaccines", "desc2", "", "", diagnosticKitImage, productResponseDTOList2);
 
         // Mock the response from the MockWebServer
         mockWebServer.enqueue(new MockResponse()

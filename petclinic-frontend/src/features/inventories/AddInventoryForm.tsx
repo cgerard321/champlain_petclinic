@@ -22,6 +22,7 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
   const [inventoryImage, setInventoryImage] = useState<string>('');
   const [inventoryBackupImage, setInventoryBackupImage] = useState<string>('');
   const [inventoryTypes, setInventoryTypes] = useState<InventoryType[]>([]);
+  const [imageUploaded, setImageUploaded] = useState<Uint8Array | null>(null);
 
   useEffect(() => {
     async function fetchInventoryTypes(): Promise<void> {
@@ -47,12 +48,17 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
       return;
     }
 
+    const base64Image = imageUploaded
+      ? arrayBufferToBase64(imageUploaded)
+      : null;
+
     const newInventory: Omit<Inventory, 'inventoryId'> = {
       inventoryName,
       inventoryType: selectedInventoryType.type,
       inventoryDescription,
       inventoryImage,
       inventoryBackupImage,
+      imageUploaded: base64Image,
     };
 
     try {
@@ -62,6 +68,7 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
       setInventoryType('');
       setInventoryDescription('');
       setInventoryImage('');
+      setImageUploaded(null);
       refreshInventoryTypes(); // Call the function to refresh inventory types
       handleInventoryClose(); // Close the form after adding the inventory
     } catch (error) {
@@ -71,6 +78,32 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
 
   // Conditionally render the form based on the show prop
   if (!showAddInventoryForm) return null; // Do not render if show is false
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 160 * 1024) {
+        alert('Select a smaller image that does not exceed 160kb');
+        setImageUploaded(null);
+        e.target.value = '';
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = event => {
+        if (event.target?.result instanceof ArrayBuffer) {
+          const uint8Array = new Uint8Array(event.target.result as ArrayBuffer);
+          setImageUploaded(uint8Array);
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+  };
+
+  function arrayBufferToBase64(buffer: Uint8Array): string {
+    const binary = String.fromCharCode(...buffer);
+    return window.btoa(binary);
+  }
 
   return (
     <div className="overlay">
@@ -134,6 +167,17 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
               id="inventoryBackupImage"
               value={inventoryBackupImage}
               onChange={e => setInventoryBackupImage(e.target.value)}
+              required
+            />
+          </div>
+
+          <div>
+            <label htmlFor="imageUpload">Upload Image:</label>
+            <input
+              type="file"
+              id="imageUpload"
+              accept="image/*"
+              onChange={handleImageUpload}
               required
             />
           </div>
