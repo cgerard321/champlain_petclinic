@@ -500,6 +500,24 @@ public class AuthServiceClient {
                 .bodyToMono(UserPasswordLessDTO.class);
     }
 
+    public Flux<Role> getAllRoles(String jwtToken) {
+        return webClientBuilder.build()
+                .get()
+                .uri(authServiceUrl + "/roles")
+                .cookie("Bearer", jwtToken)
+                .retrieve()
+                .bodyToFlux(Role.class);
+    }
+
+    public Mono<Role> createRole(String jwtToken, RoleRequestModel roleRequestModel) {
+        return webClientBuilder.build()
+                .post()
+                .uri(authServiceUrl + "/roles")
+                .cookie("Bearer", jwtToken)
+                .bodyValue(roleRequestModel)
+                .retrieve()
+                .bodyToMono(Role.class);
+    }
 
 }
 
