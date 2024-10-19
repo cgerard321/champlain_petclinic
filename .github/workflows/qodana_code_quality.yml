@@ -57,6 +57,7 @@ jobs:
           title: 'JaCoCo Coverage Report'
           update-comment: 'true'
           continue-on-error: 'true'
+          debug-mode: 'true'
 
 #      - name: 'Qodana Scan'
 #        uses: JetBrains/qodana-action@v2023.2
