@@ -48,13 +48,17 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
       return;
     }
 
+    const base64Image = imageUploaded
+      ? arrayBufferToBase64(imageUploaded)
+      : null;
+
     const newInventory: Omit<Inventory, 'inventoryId'> = {
       inventoryName,
       inventoryType: selectedInventoryType.type,
       inventoryDescription,
       inventoryImage,
       inventoryBackupImage,
-      imageUploaded,
+      imageUploaded: base64Image,
     };
 
     try {
@@ -78,6 +82,13 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const file = e.target.files?.[0];
     if (file) {
+      if (file.size > 160 * 1024) {
+        alert('Select a smaller image that does not exceed 160kb');
+        setImageUploaded(null);
+        e.target.value = '';
+        return;
+      }
+
       const reader = new FileReader();
       reader.onload = event => {
         if (event.target?.result instanceof ArrayBuffer) {
@@ -88,6 +99,11 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
       reader.readAsArrayBuffer(file);
     }
   };
+
+  function arrayBufferToBase64(buffer: Uint8Array): string {
+    const binary = String.fromCharCode(...buffer);
+    return window.btoa(binary);
+  }
 
   return (
     <div className="overlay">

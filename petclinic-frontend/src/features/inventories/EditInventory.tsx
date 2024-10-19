@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { FormEvent, useEffect, useState } from 'react';
+import { FormEvent, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   getInventory,
@@ -23,7 +23,7 @@ const EditInventory: React.FC = (): JSX.Element => {
     inventoryDescription: '',
     inventoryImage: '',
     inventoryBackupImage: '',
-    imageUploaded: null,
+    imageUploaded: '',
   });
   const [inventoryTypes, setInventoryTypes] = useState<InventoryType[]>([]);
   const [error, setError] = useState<{ [key: string]: string }>({});
@@ -31,6 +31,7 @@ const EditInventory: React.FC = (): JSX.Element => {
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [showNotification, setShowNotification] = useState<boolean>(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const navigate = useNavigate();
 
@@ -121,13 +122,35 @@ const EditInventory: React.FC = (): JSX.Element => {
     }
   };
 
-  const handleUploadImageClick = (): void => {
-    const fileInput = document.querySelector(
-      'input[name="imageUploaded"]'
-    ) as HTMLInputElement;
-    if (fileInput) {
-      fileInput.click();
+  const handleFileChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ): void => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (file.size > 160 * 1024) {
+        alert('File size must be less than 160KB.');
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+        return;
+      } else {
+        convertToBase64(file);
+      }
     }
+  };
+
+  const convertToBase64 = (file: File): void => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onloadend = () => {
+      if (reader.result) {
+        const base64String = (reader.result as string).split(',')[1];
+        setInventory({
+          ...inventory,
+          imageUploaded: base64String,
+        });
+      }
+    };
   };
 
   return (
@@ -218,19 +241,7 @@ const EditInventory: React.FC = (): JSX.Element => {
               <div className="form-group">
                 <label>
                   <div className={EditInventoryFormStyles.labelContainer}>
-                    Inventory Image{' '}
-                    <svg
-                      onClick={handleUploadImageClick}
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      fill="currentColor"
-                      className={`bi bi-upload ${EditInventoryFormStyles.uploadIcon}`}
-                      viewBox="0 0 16 16"
-                    >
-                      <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5" />
-                      <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708z" />
-                    </svg>
+                    Inventory Image
                   </div>
                 </label>
                 <input
@@ -256,20 +267,6 @@ const EditInventory: React.FC = (): JSX.Element => {
               <div className="form-group">
                 <div className={EditInventoryFormStyles.labelContainer}>
                   <label>Inventory Backup Image</label>
-                  <div>
-                    <svg
-                      onClick={handleUploadImageClick}
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      fill="currentColor"
-                      className={`bi bi-upload ${EditInventoryFormStyles.uploadIcon}`}
-                      viewBox="0 0 16 16"
-                    >
-                      <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5" />
-                      <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708z" />
-                    </svg>
-                  </div>
                 </div>
                 <input
                   type="text"
@@ -293,56 +290,19 @@ const EditInventory: React.FC = (): JSX.Element => {
             <div className="col-4">
               <div className="form-group">
                 <div className={EditInventoryFormStyles.labelContainer}>
-                  <label>Upload Image</label>
-                  <div>
-                    <svg
-                      onClick={handleUploadImageClick}
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      fill="currentColor"
-                      className={`bi bi-upload ${EditInventoryFormStyles.uploadIcon}`}
-                      viewBox="0 0 16 16"
-                    >
-                      <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5" />
-                      <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708z" />
-                    </svg>
-                  </div>
+                  <label>Upload Image:</label>
                 </div>
                 <input
                   type="file"
-                  name="imageUploaded"
+                  name="uploadedImage"
                   className="form-control"
-                  placeholder="Inventory Uploaded Image"
-                  onChange={e => {
-                    const files = e.target.files;
-                    if (files && files.length > 0) {
-                      const file = files[0];
-
-                      const reader = new FileReader();
-                      reader.onload = event => {
-                        if (event.target?.result instanceof ArrayBuffer) {
-                          const uint8Array = new Uint8Array(
-                            event.target.result as ArrayBuffer
-                          );
-                          setInventory({
-                            ...inventory,
-                            imageUploaded: uint8Array,
-                          });
-                        }
-                      };
-                      reader.readAsArrayBuffer(file);
-                    } else {
-                      setInventory({
-                        ...inventory,
-                        imageUploaded: null,
-                      });
-                    }
-                  }}
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  ref={fileInputRef}
                   required
                 />
-                {error.imageUploaded && (
-                  <span className="error">{error.imageUploaded}</span>
+                {error.uploadedImage && (
+                  <span className="error">{error.uploadedImage}</span>
                 )}
               </div>
             </div>

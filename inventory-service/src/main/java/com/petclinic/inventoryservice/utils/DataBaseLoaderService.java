@@ -102,6 +102,9 @@ public class DataBaseLoaderService  implements CommandLineRunner {
                 .imageUploaded(medicalEquipmentImage)
                 .build();
 
+        InputStream inputStream2 = getClass().getResourceAsStream("/images/FirstAidImage.jpg");
+        byte[] firstAidImage = ImageUtil.readImage(inputStream2);
+
         Inventory inventory2 = Inventory.builder()
                 .inventoryId(UUID.randomUUID().toString())
                 .inventoryName("First-Aid")
@@ -109,7 +112,11 @@ public class DataBaseLoaderService  implements CommandLineRunner {
                 .inventoryDescription("First-aid supplies for pet emergencies")
                 .inventoryImage("https://www.lakesidemedical.ca/app/uploads/featuredimage-The-Importance-of-Having-a-First-Aid-Kit-in-Your-Home-or-Place-of-Business.jpg")
                 .inventoryBackupImage("https://insights.ibx.com/wp-content/uploads/2019/06/first-aid-kit-screenshot.png")
+                .imageUploaded(firstAidImage)
                 .build();
+
+        InputStream inputStream3 = getClass().getResourceAsStream("/images/VaccinesImage.jpg");
+        byte[] vaccinesImage = ImageUtil.readImage(inputStream3);
 
         Inventory inventory3 = Inventory.builder()
                 .inventoryId(UUID.randomUUID().toString())
@@ -118,7 +125,11 @@ public class DataBaseLoaderService  implements CommandLineRunner {
                 .inventoryDescription("Supplies for disease prevention")
                 .inventoryImage("https://www.fda.gov/files/iStock-157317886.jpg")
                 .inventoryBackupImage("https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14")
+                .imageUploaded(vaccinesImage)
                 .build();
+
+        InputStream inputStream4 = getClass().getResourceAsStream("/images/MedicationsImage.jpg");
+        byte[] medicationsImage = ImageUtil.readImage(inputStream4);
 
         Inventory inventory4 = Inventory.builder()
                 .inventoryId(UUID.randomUUID().toString())
@@ -127,7 +138,11 @@ public class DataBaseLoaderService  implements CommandLineRunner {
                 .inventoryDescription("Antibiotics for pet infections")
                 .inventoryImage("https://logrx.com/wp-content/uploads/2024/01/colorful-pills-tablets-background.jpg")
                 .inventoryBackupImage("https://firstaidforlife.org.uk/wp-content/uploads/2018/03/poisoning-pill-bottle.jpg")
+                .imageUploaded(medicationsImage)
                 .build();
+
+        InputStream inputStream5 = getClass().getResourceAsStream("/images/PetCarriersImage.jpg");
+        byte[] petCarriersImage = ImageUtil.readImage(inputStream5);
 
         Inventory inventory5 = Inventory.builder()
                 .inventoryId(UUID.randomUUID().toString())
@@ -136,16 +151,24 @@ public class DataBaseLoaderService  implements CommandLineRunner {
                 .inventoryDescription("Carriers for transporting pets")
                 .inventoryImage("https://i5.walmartimages.ca/images/Enlarge/034/128/6000203034128.jpg?odnHeight=2000&odnWidth=2000&odnBg=FFFFFF")
                 .inventoryBackupImage("https://assets.wfcdn.com/im/60682166/compr-r85/1267/126767614/Gainey+Large+Pet+Carrier.jpg")
+                .imageUploaded(petCarriersImage)
                 .build();
+
+        InputStream inputStream6 = getClass().getResourceAsStream("/images/DiagnosticKitImage.jpg");
+        byte[] diagnosticKitImage = ImageUtil.readImage(inputStream6);
 
         Inventory inventory6 = Inventory.builder()
                 .inventoryId(UUID.randomUUID().toString())
                 .inventoryName("Diagnostic Kits")
-                .inventoryType(inventoryType1.getType()) // Assuming medical supplies use the same type
+                .inventoryType(inventoryType1.getType())
                 .inventoryDescription("Kits for diagnosing various pet illnesses and conditions")
                 .inventoryImage("https://cdn.labmanager.com/assets/articleNo/22063/aImg/40819/rt-pcr-covid-19-diagnostic-kit-concept-l.jpg")
                 .inventoryBackupImage("https://image.made-in-china.com/226f3j00UnelmKsMKwuy/Vet-Animal-Pet-Veterinary-Antigen-Rapid-Test-Kit-for-Dog-Cat.webp")
+                .imageUploaded(diagnosticKitImage)
                 .build();
+
+        InputStream inputStream7 = getClass().getResourceAsStream("/images/SurgicalInstrumentsImage.jpg");
+        byte[] surgicalInstrumentsImage = ImageUtil.readImage(inputStream7);
 
         Inventory inventory7 = Inventory.builder()
                 .inventoryId(UUID.randomUUID().toString())
@@ -154,7 +177,11 @@ public class DataBaseLoaderService  implements CommandLineRunner {
                 .inventoryDescription("Tools for performing surgical procedures on pets")
                 .inventoryImage("https://www.amerisurgicalinstruments.com/cdn/shop/articles/3_63803250-d4a1-4a10-8c23-39c34b9fd8cf.jpg?v=1680040619")
                 .inventoryBackupImage("https://censis.com/hubfs/Imported_Blog_Media/Surgical-Instruments-with-Marks-1.jpg")
+                .imageUploaded(surgicalInstrumentsImage)
                 .build();
+
+        InputStream inputStream8 = getClass().getResourceAsStream("/images/AnesthesiaSuppliesImage.jpg");
+        byte[] anesthesiaSuppliesImage = ImageUtil.readImage(inputStream8);
 
         Inventory inventory8 = Inventory.builder()
                 .inventoryId(UUID.randomUUID().toString())
@@ -163,7 +190,11 @@ public class DataBaseLoaderService  implements CommandLineRunner {
                 .inventoryDescription("Supplies for administering anesthesia during surgeries")
                 .inventoryImage("https://s3.amazonaws.com/cdn-origin-etr.akc.org/wp-content/uploads/2017/03/22110255/Labrador-Retriever-laying-on-an-operating-table.jpg")
                 .inventoryBackupImage("https://www.cardinalhealth.com/content/dam/corp/products/professional-products/category-grid-asset/category-featured/CategoryFeatured---AC604P.jpg")
+                .imageUploaded(anesthesiaSuppliesImage)
                 .build();
+
+        InputStream inputStream9 = getClass().getResourceAsStream("/images/WoundCareSuppliesImage.jpg");
+        byte[] woundCareSuppliesImage = ImageUtil.readImage(inputStream9);
 
         Inventory inventory9 = Inventory.builder()
                 .inventoryId(UUID.randomUUID().toString())
@@ -172,7 +203,11 @@ public class DataBaseLoaderService  implements CommandLineRunner {
                 .inventoryDescription("Supplies for treating and dressing wounds")
                 .inventoryImage("https://silverliningshc.ca/wp-content/uploads/2022/09/WoundCare.jpg")
                 .inventoryBackupImage("https://www.allegromedical.com/media/wysiwyg/ALG_Wound-Care-Supplies.jpg")
+                .imageUploaded(woundCareSuppliesImage)
                 .build();
+
+        InputStream inputStream10 = getClass().getResourceAsStream("/images/InfectiousDiseaseImage.jpg");
+        byte[] infectiousDiseaseImage = ImageUtil.readImage(inputStream10);
 
         Inventory inventory10 = Inventory.builder()
                 .inventoryId(UUID.randomUUID().toString())
@@ -181,6 +216,7 @@ public class DataBaseLoaderService  implements CommandLineRunner {
                 .inventoryDescription("Kits for testing infectious diseases in pets")
                 .inventoryImage("https://img.medicalexpo.com/images_me/photo-mg/306028-17870793.webp")
                 .inventoryBackupImage("https://image.made-in-china.com/202f0j00eqLkbtRgJfcC/Ich-AG-The-Infectious-Canine-Hepatitis-Antigen-Rapid-Test-Kit.jpg")
+                .imageUploaded(infectiousDiseaseImage)
                 .build();
 
 
