@@ -281,6 +281,21 @@ class ProductRepositoryIntegrationTest {
                 .verifyComplete();
     }
 
-
+    @Test
+    void forJacocoPRTest(){
+        Product product = Product.builder()
+                .productId(UUID.randomUUID().toString())
+                .productName("Testing Product 1")
+                .productDescription("This is a testing product 1")
+                .productSalePrice(10.00)
+                .averageRating(5.00)
+                .build();
+        StepVerifier.create(productRepository.save(product))
+                .expectNextCount(1)
+                .verifyComplete();
+        StepVerifier.create(productRepository.delete(product))
+                .expectNextCount(0)
+                .verifyComplete();
+    }
 
 }
