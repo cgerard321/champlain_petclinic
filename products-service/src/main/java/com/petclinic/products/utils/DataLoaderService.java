@@ -103,7 +103,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .requestCount(0)
                 .productType(ProductType.ACCESSORY)
                 .productQuantity(14)
-                .isUnlisted(false)
+                .isUnlisted(true)
                 .releaseDate(LocalDate.parse("2025-09-29"))
                 .build();
 
