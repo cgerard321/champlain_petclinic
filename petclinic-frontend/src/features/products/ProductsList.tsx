@@ -8,7 +8,6 @@ import { addProduct } from '@/features/products/api/addProduct';
 import { useUser } from '@/context/UserContext';
 import './components/Sidebar.css';
 import { getProductsByType } from '@/features/products/api/getProductsByType.ts';
-// import AddImage from './components/AddImage';
 import { addImage } from './api/addImage';
 import { ImageModel } from './models/ProductModels/ImageModel';
 import StarRating from '@/features/products/components/StarRating.tsx';
@@ -107,9 +106,7 @@ export default function ProductList(): JSX.Element {
   useEffect(() => {
     const hasRightRole =
       user?.roles !== undefined &&
-      Array.from(user.roles).some(
-        role => role.name === 'ADMIN' || role.name === 'INVENTORY_MANAGER'
-      );
+      Array.from(user.roles).some(role => role.name === 'ADMIN');
     setIsRightRole(hasRightRole);
   }, [user]);
 
@@ -140,7 +137,6 @@ export default function ProductList(): JSX.Element {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  // Handler to close sidebar when clicking outside
   const handleOverlayClick = (): void => {
     setIsSidebarOpen(false);
   };
