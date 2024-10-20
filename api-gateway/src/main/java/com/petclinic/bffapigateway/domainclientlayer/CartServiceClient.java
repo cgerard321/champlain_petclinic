@@ -1,8 +1,6 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.petclinic.bffapigateway.dtos.Cart.*;
-import com.petclinic.bffapigateway.dtos.Cart.CartRequestDTO;
-import com.petclinic.bffapigateway.dtos.Cart.CartResponseDTO;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.exceptions.OutOfStockException;
 import lombok.extern.slf4j.Slf4j;
@@ -10,7 +8,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.webjars.NotFoundException;
@@ -136,6 +133,23 @@ public Mono<CartResponseDTO> deleteCartByCartId(String CardId) {
                 .uri(PromoCodeServiceUrl)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
+                .bodyToFlux(PromoCodeResponseDTO.class);
+    }
+
+    public Flux<PromoCodeResponseDTO> getActivePromos() {
+        return webClientBuilder.build()
+                .get()
+                .uri(PromoCodeServiceUrl + "/actives")
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, error -> {
+                    HttpStatusCode statusCode = error.statusCode();
+                    if (statusCode.equals(HttpStatus.NOT_FOUND)) {
+                        return Mono.error(new NotFoundException("No active promos found"));
+                    }
+                    return Mono.error(new IllegalArgumentException("Client error"));
+                })
+                .onStatus(HttpStatusCode::is5xxServerError, error -> Mono.error(new IllegalArgumentException("Server error")))
                 .bodyToFlux(PromoCodeResponseDTO.class);
     }
 
@@ -278,6 +292,21 @@ public Mono<CartResponseDTO> deleteCartByCartId(String CardId) {
                 .bodyToMono(CartResponseDTO.class);
     }
 
+    public Mono<PromoCodeResponseDTO> validatePromoCode(String promoCode) {
+        return webClientBuilder.build()
+                .get()
+                .uri(PromoCodeServiceUrl + "/validate/{promoCode}", promoCode)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, error -> {
+                    HttpStatusCode statusCode = error.statusCode();
+                    if (statusCode.equals(HttpStatus.BAD_REQUEST)) {
+                        return Mono.error(new InvalidInputException("Promo code is not valid: " + promoCode));
+                    }
+                    return Mono.error(new IllegalArgumentException("Client error during promo code validation"));
+                })
+                .bodyToMono(PromoCodeResponseDTO.class);
+    }
 
 
 }
