@@ -6,6 +6,7 @@ import axios from 'axios';
 import DeleteVetPhoto from '@/pages/Vet/DeleteVetPhoto.tsx';
 import UpdateVetEducation from '@/pages/Vet/UpdateVetEducation';
 import AddEducation from '@/pages/Vet/AddEducation.tsx';
+import DeleteVetEducation from '@/pages/Vet/DeleteVetEducation';
 
 interface VetResponseType {
   vetId: string;
@@ -108,6 +109,14 @@ export default function VetDetails(): JSX.Element {
       setIsDefaultPhoto(true); // This indicates the default photo is being used
     }
   }, [vetId]);
+
+  const handleEducationDeleted = (deletedEducationId: string): void => {
+    setEducation(prevEducation =>
+      prevEducation
+        ? prevEducation.filter(edu => edu.educationId !== deletedEducationId)
+        : null
+    );
+  };
 
   const handlePhotoDeleted = (): void => {
     setIsDefaultPhoto(true);
@@ -608,11 +617,36 @@ export default function VetDetails(): JSX.Element {
                     >
                       Update Education
                     </button>
+                    <DeleteVetEducation
+                      vetId={vetId!}
+                      educationId={edu.educationId}
+                      onEducationDeleted={handleEducationDeleted}
+                    />
                     <hr />
                   </div>
                 ))
               ) : (
-                <p>No education details available</p>
+                // When there are no education entries
+                <div>
+                  <p>No education details available</p>
+
+                  <div style={{ marginBottom: '20px', textAlign: 'right' }}>
+                    <button
+                      onClick={() => setFormVisible(prev => !prev)}
+                      style={{
+                        backgroundColor: formVisible ? '#ff6347' : '#4CAF50',
+                      }}
+                    >
+                      {formVisible ? 'Cancel' : 'Add Education'}
+                    </button>
+                    {formVisible && (
+                      <AddEducation
+                        vetId={vetId}
+                        onClose={() => setFormVisible(false)}
+                      />
+                    )}
+                  </div>
+                </div>
               )}
               {selectedEducation && vetId && (
                 <UpdateVetEducation
