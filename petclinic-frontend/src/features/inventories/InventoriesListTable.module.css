@@ -10,7 +10,6 @@
   position: relative;
   margin-left: auto;
   margin-right: 8%;
-
 }
 
 #menuIcon {
@@ -24,7 +23,7 @@
   border: none;
 }
 
-#actionsMenu{
+#actionsMenu {
   border: 1px solid #ccc;
   position: absolute;
   top: 80px;
