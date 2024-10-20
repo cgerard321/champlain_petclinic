@@ -1,5 +1,5 @@
 .billsListTableContainer {
-  max-width: 1200px;
+  max-width: 80%;
   margin: 0 auto;
   padding: 20px;
   font-family: 'Arial', sans-serif;
@@ -38,4 +38,9 @@
 
 .table tbody tr:hover {
   background-color: #f1f1f1;
+}
+
+.table th:nth-child(11), 
+.table td:nth-child(11) {
+  width: 160px; 
 }

@@ -259,6 +259,8 @@ export default function BillsListTable(): JSX.Element {
                   <td>
                     {bill.billStatus === 'OVERDUE' ? (
                       <span style={{ color: 'red' }}>Overdue</span>
+                    ) : bill.billStatus === 'PAID' ? (
+                      <span style={{ color: 'green' }}>{bill.billStatus}</span>
                     ) : (
                       bill.billStatus
                     )}
@@ -266,7 +268,7 @@ export default function BillsListTable(): JSX.Element {
                   <td>{bill.dueDate}</td>
                   <td>
                     {bill.billStatus === 'PAID' ? (
-                      <span>This bill is paid</span>
+                      <span style={{ color: 'green' }}>This bill is paid</span>
                     ) : bill.timeRemaining === 0 ? (
                       <span style={{ color: 'red' }}>
                         0 days remaining to pay bill
