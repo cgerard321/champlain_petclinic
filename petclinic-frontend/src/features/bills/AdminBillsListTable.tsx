@@ -14,7 +14,7 @@ import { getAllPaidBills } from '@/features/bills/api/getAllPaidBills.tsx';
 import { getAllOverdueBills } from '@/features/bills/api/getAllOverdueBills.tsx';
 import { getAllUnpaidBills } from '@/features/bills/api/getAllUnpaidBills.tsx';
 import { getBillByBillId } from '@/features/bills/api/GetBillByBillId.tsx';
-import {getBillsByMonth} from "@/features/bills/api/getBillByMonth.tsx";
+import { getBillsByMonth } from '@/features/bills/api/getBillByMonth.tsx';
 
 export default function AdminBillsListTable(): JSX.Element {
   const navigate = useNavigate();
@@ -26,8 +26,12 @@ export default function AdminBillsListTable(): JSX.Element {
   const [filter, setFilter] = useState<FilterModel>({
     customerId: '',
   });
-  const [filterYear, setFilterYear] = useState<number>(new Date().getFullYear());
-  const [filterMonth, setFilterMonth] = useState<number>(new Date().getMonth() + 1);
+  const [filterYear, setFilterYear] = useState<number>(
+    new Date().getFullYear()
+  );
+  const [filterMonth, setFilterMonth] = useState<number>(
+    new Date().getMonth() + 1
+  );
 
   interface FilterModel {
     [key: string]: string;
@@ -142,19 +146,19 @@ export default function AdminBillsListTable(): JSX.Element {
   };
 
   const getFilteredBills = (): Bill[] => {
-    let billsToFilter = filteredBills || billsList;
+    const billsToFilter = filteredBills || billsList;
 
     return billsToFilter.filter(bill => {
       const matchesStatus =
-          !selectedFilter || bill.billStatus.toLowerCase() === selectedFilter.toLowerCase();
+        !selectedFilter ||
+        bill.billStatus.toLowerCase() === selectedFilter.toLowerCase();
 
       const matchesCustomerId =
-          !filter.customerId || bill.customerId.includes(filter.customerId);
+        !filter.customerId || bill.customerId.includes(filter.customerId);
 
       return matchesStatus && matchesCustomerId;
     });
   };
-
 
   const handleCreateBill = async (): Promise<void> => {
     const isValid = validateForm();
@@ -378,9 +382,9 @@ export default function AdminBillsListTable(): JSX.Element {
       <div>
         <label htmlFor="billFilter">Filter Bills by Status: </label>
         <select
-            id="billFilter"
-            value={selectedFilter}
-            onChange={handleFilterChange}
+          id="billFilter"
+          value={selectedFilter}
+          onChange={handleFilterChange}
         >
           <option value="">All Bills</option>
           <option value="unpaid">Unpaid Bills</option>
@@ -392,29 +396,28 @@ export default function AdminBillsListTable(): JSX.Element {
       <div>
         <label htmlFor="yearFilter">Year: </label>
         <input
-            type="number"
-            id="yearFilter"
-            value={filterYear}
-            onChange={e => setFilterYear(parseInt(e.target.value))}
+          type="number"
+          id="yearFilter"
+          value={filterYear}
+          onChange={e => setFilterYear(parseInt(e.target.value))}
         />
 
         <label htmlFor="monthFilter">Month: </label>
         <select
-            id="monthFilter"
-            value={filterMonth}
-            onChange={e => setFilterMonth(parseInt(e.target.value))}
+          id="monthFilter"
+          value={filterMonth}
+          onChange={e => setFilterMonth(parseInt(e.target.value))}
         >
           {Array.from({ length: 12 }, (_, i) => (
-              <option key={i + 1} value={i + 1}>
-                {new Date(0, i).toLocaleString('default', { month: 'long' })}
-              </option>
+            <option key={i + 1} value={i + 1}>
+              {new Date(0, i).toLocaleString('default', { month: 'long' })}
+            </option>
           ))}
         </select>
 
         <button onClick={handleMonthFilter}>Filter by Month</button>
         <button onClick={clearMonthFilter}>Clear Date Filter</button>
       </div>
-
 
       {searchedBill ? (
         <div>
