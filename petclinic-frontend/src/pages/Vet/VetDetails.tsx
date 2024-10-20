@@ -626,27 +626,27 @@ export default function VetDetails(): JSX.Element {
                   </div>
                 ))
               ) : (
-                  // When there are no education entries
-                  <div>
-                    <p>No education details available</p>
+                // When there are no education entries
+                <div>
+                  <p>No education details available</p>
 
-                    <div style={{ marginBottom: '20px', textAlign: 'right' }}>
-                      <button
-                          onClick={() => setFormVisible(prev => !prev)}
-                          style={{
-                            backgroundColor: formVisible ? '#ff6347' : '#4CAF50',
-                          }}
-                      >
-                        {formVisible ? 'Cancel' : 'Add Education'}
-                      </button>
-                      {formVisible && (
-                          <AddEducation
-                              vetId={vetId}
-                              onClose={() => setFormVisible(false)}
-                          />
-                      )}
-                    </div>
+                  <div style={{ marginBottom: '20px', textAlign: 'right' }}>
+                    <button
+                      onClick={() => setFormVisible(prev => !prev)}
+                      style={{
+                        backgroundColor: formVisible ? '#ff6347' : '#4CAF50',
+                      }}
+                    >
+                      {formVisible ? 'Cancel' : 'Add Education'}
+                    </button>
+                    {formVisible && (
+                      <AddEducation
+                        vetId={vetId}
+                        onClose={() => setFormVisible(false)}
+                      />
+                    )}
                   </div>
+                </div>
               )}
               {selectedEducation && vetId && (
                 <UpdateVetEducation
