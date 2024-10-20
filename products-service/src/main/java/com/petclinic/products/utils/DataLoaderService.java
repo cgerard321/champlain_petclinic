@@ -21,6 +21,7 @@ import reactor.core.publisher.Mono;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -51,6 +52,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productType(ProductType.FOOD)
                 .productQuantity(44)
                 .isUnlisted(false)
+                .releaseDate(LocalDate.parse("2002-09-26"))
                 .build();
 
         Product product2 = Product.builder()
@@ -63,6 +65,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productType(ProductType.ACCESSORY)
                 .productQuantity(3)
                 .isUnlisted(false)
+                .releaseDate(LocalDate.parse("2020-06-30"))
                 .build();
 
         Product product3 = Product.builder()
@@ -75,6 +78,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productType(ProductType.MEDICATION)
                 .productQuantity(53)
                 .isUnlisted(false)
+                .releaseDate(LocalDate.parse("2019-09-29"))
                 .build();
 
         Product product4 = Product.builder()
@@ -87,6 +91,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productType(ProductType.ACCESSORY)
                 .productQuantity(8)
                 .isUnlisted(false)
+                .releaseDate(LocalDate.parse("2023-05-06"))
                 .build();
 
         Product product5 = Product.builder()
@@ -99,6 +104,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productType(ProductType.ACCESSORY)
                 .productQuantity(14)
                 .isUnlisted(false)
+                .releaseDate(LocalDate.parse("2025-09-29"))
                 .build();
 
         Product product6 = Product.builder()
@@ -111,6 +117,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productType(ProductType.EQUIPMENT)
                 .productQuantity(58)
                 .isUnlisted(false)
+                .releaseDate(LocalDate.parse("1988-09-29"))
                 .build();
 
         Product product7 = Product.builder()
@@ -123,6 +130,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productType(ProductType.ACCESSORY)
                 .productQuantity(66)
                 .isUnlisted(false)
+                .releaseDate(LocalDate.parse("2024-02-22"))
                 .build();
 
         Product product8 = Product.builder()
@@ -135,6 +143,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productType(ProductType.ACCESSORY)
                 .productQuantity(0)
                 .isUnlisted(false)
+                .releaseDate(LocalDate.parse("2022-09-19"))
                 .build();
 
         ProductBundle bundle1 = ProductBundle.builder()

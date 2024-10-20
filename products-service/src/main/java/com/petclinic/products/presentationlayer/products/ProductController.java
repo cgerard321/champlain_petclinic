@@ -114,6 +114,8 @@ public class ProductController {
                 .toList();
     }
 
+
+
     // New endpoints for product bundles
     @GetMapping(value = "/bundles", produces = MediaType.APPLICATION_JSON_VALUE)
     public Flux<ProductBundleResponseModel> getAllProductBundles() {

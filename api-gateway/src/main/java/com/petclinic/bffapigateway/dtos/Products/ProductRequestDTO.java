@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -19,4 +21,6 @@ public class ProductRequestDTO {
     private Integer productQuantity;
     private Boolean isUnlisted;
     private ProductType productType;
+    private LocalDate releaseDate;
+    private ProductStatus productStatus;
 }

@@ -37,6 +37,8 @@ public class EntityModelUtil {
                 .productType(productRequestModel.getProductType())
                 .productQuantity(productRequestModel.getProductQuantity())
                 .isUnlisted(productRequestModel.getIsUnlisted())
+                .releaseDate(productRequestModel.getReleaseDate())
+                .productStatus(productRequestModel.getProductStatus())
                 .build();
     }
 
