@@ -30,6 +30,20 @@ export default function PatchListingStatusButton({
     fetchProduct();
   }, [productId]);
 
+  const updateLocalStorage = (productId: string, isUnlisted: boolean): void => {
+    const savedProducts = localStorage.getItem('recentlyClickedProducts');
+    if (savedProducts) {
+      const productList: ProductModel[] = JSON.parse(savedProducts);
+      const updatedProducts = productList.map(product =>
+        product.productId === productId ? { ...product, isUnlisted } : product
+      );
+      localStorage.setItem(
+        'recentlyClickedProducts',
+        JSON.stringify(updatedProducts)
+      );
+    }
+  };
+
   const handleSubmit = async (
     event: React.FormEvent<HTMLFormElement>
   ): Promise<void> => {
@@ -44,6 +58,7 @@ export default function PatchListingStatusButton({
 
       await patchListingStatus(productId, patchedProduct);
       setProduct({ ...product, isUnlisted });
+      updateLocalStorage(productId, isUnlisted);
     }
     handleClose();
   };
@@ -66,7 +81,9 @@ export default function PatchListingStatusButton({
         keyboard={false}
       >
         <Modal.Header closeButton>
-          <Modal.Title>Unlist Item</Modal.Title>
+          <Modal.Title>
+            {product?.isUnlisted ? 'List Item' : 'Unlist Item'}
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           Do you want to {product?.isUnlisted ? 'list back' : 'unlist'} this

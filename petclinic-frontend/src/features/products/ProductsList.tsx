@@ -98,10 +98,6 @@ export default function ProductList(): JSX.Element {
     if (savedProducts) {
       setRecentlyClickedProducts(JSON.parse(savedProducts));
     }
-    const filteredList = recentlyClickedProducts.filter(
-      product => !product.isUnlisted
-    );
-    setRecentlyClickedProducts(filteredList);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -340,9 +336,11 @@ export default function ProductList(): JSX.Element {
         <div>
           <h2>Recently Clicked Products</h2>
           <div className="grid">
-            {recentlyClickedProducts.map(product => (
-              <Product key={product.productId} product={product} />
-            ))}
+            {recentlyClickedProducts
+              .filter(product => !product.isUnlisted)
+              .map(product => (
+                <Product key={product.productId} product={product} />
+              ))}
           </div>
         </div>
       </div>
