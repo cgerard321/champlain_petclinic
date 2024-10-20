@@ -517,8 +517,22 @@ class BillServiceClientIntegrationTest {
                 .verify();
     }
 
+    @Test
+    void whenGetBillsByMonth_thenReturnsResults() throws Exception {
+        List<BillResponseDTO> billResponses = Arrays.asList(billResponseDTO, billResponseDTO2);
+        String jsonResponse = mapper.writeValueAsString(billResponses);
 
+        prepareResponse(response -> response
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(jsonResponse));
 
+        Flux<BillResponseDTO> resultFlux = billServiceClient.getBillsByMonth(1, 2022);
+
+        StepVerifier.create(resultFlux)
+                .expectNextMatches(bill -> "1".equals(bill.getBillId()) && bill.getAmount() == 100.0)
+                .expectNextMatches(bill -> "2".equals(bill.getBillId()) && bill.getAmount() == 150.0)
+                .verifyComplete();
+    }
 
 
 }
