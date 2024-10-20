@@ -7,6 +7,8 @@ import DeleteVetPhoto from '@/pages/Vet/DeleteVetPhoto.tsx';
 import UpdateVetEducation from '@/pages/Vet/UpdateVetEducation';
 import AddEducation from '@/pages/Vet/AddEducation.tsx';
 import DeleteVetEducation from '@/pages/Vet/DeleteVetEducation';
+import { Workday } from '@/features/veterinarians/models/Workday.ts';
+import UpdateVet from '@/pages/Vet/UpdateVet.tsx';
 
 interface VetResponseType {
   vetId: string;
@@ -21,6 +23,24 @@ interface VetResponseType {
   active: boolean;
   specialties: { specialtyId: string; name: string }[];
 }
+
+interface VetRequestModel {
+  vetId: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+  resume: string;
+  workday: Workday[];
+  workHoursJson: string;
+  active: boolean;
+  specialties: { specialtyId: string; name: string }[];
+  photoDefault: boolean;
+  username: string;
+  password: string;
+  vetBillId: string;
+}
+
 interface AlbumPhotoType {
   id: string;
   data: string;
@@ -66,6 +86,39 @@ export default function VetDetails(): JSX.Element {
   const [selectedEducation, setSelectedEducation] =
     useState<EducationResponseType | null>(null);
   const [ratings, setRatings] = useState<RatingResponseType[] | null>(null);
+  const [selectedVet, setSelectedVet] = useState<VetRequestModel | null>(null);
+
+  const refreshVetDetails = useCallback(async (): Promise<void> => {
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/v2/gateway/vets/${vetId}`
+      );
+      if (!response.ok) {
+        throw new Error(`Error: ${response.statusText}`);
+      }
+      const data: VetResponseType = await response.json();
+      setVet(data);
+    } catch (error) {
+      console.error('Failed to fetch vet details:', error);
+    }
+  }, [vetId]);
+  const mapVetResponseToRequest = (vet: VetResponseType): VetRequestModel => ({
+    vetId: vet.vetId,
+    firstName: vet.firstName,
+    lastName: vet.lastName,
+    email: vet.email,
+    phoneNumber: vet.phoneNumber,
+    resume: vet.resume,
+    workday: vet.workday.map(day => day as Workday),
+    workHoursJson: vet.workHoursJson,
+    active: vet.active,
+    specialties: vet.specialties,
+    photoDefault: true,
+    username: 'defaultUsername',
+    password: 'defaultPassword',
+    vetBillId: vet.vetBillId,
+  });
+
   useEffect(() => {
     const fetchVetRatings = async (): Promise<void> => {
       try {
@@ -424,6 +477,21 @@ export default function VetDetails(): JSX.Element {
               <DeleteVetPhoto
                 vetId={vetId!}
                 onPhotoDeleted={handlePhotoDeleted}
+              />
+            )}
+
+            <button
+              className="btn btn-primary"
+              onClick={() => setSelectedVet(mapVetResponseToRequest(vet!))}
+            >
+              Update Profile
+            </button>
+
+            {selectedVet && (
+              <UpdateVet
+                vet={selectedVet}
+                onClose={() => setSelectedVet(null)}
+                refreshVetDetails={refreshVetDetails}
               />
             )}
           </section>
