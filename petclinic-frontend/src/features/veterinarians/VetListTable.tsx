@@ -1,10 +1,8 @@
-import { useState } from 'react';
 import { VetRequestModel } from '@/features/veterinarians/models/VetRequestModel.ts';
 import { useNavigate } from 'react-router-dom';
 import './VetListTable.css';
 import DeleteVet from '@/pages/Vet/DeleteVet.tsx';
 import { deleteVet } from '@/features/veterinarians/api/deleteVet';
-import UpdateVet from '@/pages/Vet/UpdateVet';
 
 interface VetListTableProps {
   vets: VetRequestModel[];
@@ -16,7 +14,6 @@ export default function VetListTable({
   onDeleteVet,
 }: VetListTableProps): JSX.Element {
   const navigate = useNavigate();
-  const [selectedVet, setSelectedVet] = useState<VetRequestModel | null>(null);
 
   const handleRowClick = (vetId: string): void => {
     navigate(`/vets/${vetId}`);
@@ -63,16 +60,6 @@ export default function VetListTable({
                   {vet.specialties.map(specialty => specialty.name).join(', ')}
                 </td>
                 <td>
-                  <button
-                    className="btn btn-primary"
-                    onClick={event => {
-                      event.stopPropagation();
-                      setSelectedVet(vet);
-                    }}
-                  >
-                    Update
-                  </button>
-
                   <DeleteVet
                     vetId={vet.vetId}
                     onVetDeleted={event => handleVetDelete(event, vet.vetId)}
@@ -82,10 +69,6 @@ export default function VetListTable({
             ))}
           </tbody>
         </table>
-      )}
-
-      {selectedVet && (
-        <UpdateVet vet={selectedVet} onClose={() => setSelectedVet(null)} />
       )}
     </div>
   );

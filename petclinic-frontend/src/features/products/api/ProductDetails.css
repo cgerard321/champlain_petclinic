@@ -125,7 +125,7 @@
   word-wrap: break-word;
   white-space: normal;
 }
-.product-unavailable{
+.product-unavailable {
   margin-bottom: 20px;
   border: 2px solid #b5b5b5;
   border-radius: 8px;
@@ -147,19 +147,18 @@
 
 
 }
-.product-unavailable h2{
+.product-unavailable h2 {
   color: #808080;
   text-align: center;
   margin-bottom: 15px;
   font-weight: bold;
 
 }
-.product-unavailable h3{
+.product-unavailable h3 {
   color: #808080;
   text-align: center;
   margin-bottom: 15px;
   font-weight: bold;
-
 }
 
 /*.list-container{*/

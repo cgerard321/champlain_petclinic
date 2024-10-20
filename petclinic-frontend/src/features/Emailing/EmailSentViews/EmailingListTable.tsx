@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { EmailModelResponseDTO } from '@/features/Emailing/Model/EmailResponse.ts';
 import { getAllEmails } from '@/features/Emailing/Api/GetAllEmails.tsx';
+import './EmailingListTable.css';
 
 export default function EmailListTable(): JSX.Element {
   const [emails, setEmails] = useState<EmailModelResponseDTO[]>([]);
   const [selectedEmailBody, setSelectedEmailBody] = useState<string | null>(
     null
   );
+  const [isPopupOpen, setIsPopupOpen] = useState(false); // To control the popup
 
   const fetchEmails = async (): Promise<void> => {
     try {
@@ -64,14 +66,29 @@ export default function EmailListTable(): JSX.Element {
 
   return (
     <div>
-      {renderTable(emails)}
-      {selectedEmailBody && (
-        <div className="popup">
+      <button className="btn btn-primary" onClick={() => setIsPopupOpen(true)}>
+        Show Email List
+      </button>
+
+      {isPopupOpen && (
+        <div className="popup-overlay">
           <div className="popup-content">
-            <button className="close-btn" onClick={closePopup}>
+            <button className="close-btn" onClick={() => setIsPopupOpen(false)}>
               Close
             </button>
-            <div dangerouslySetInnerHTML={{ __html: selectedEmailBody }} />
+            <h1>Sent Emails</h1>
+            <button className="refresh-button" onClick={() => fetchEmails()}>
+              Refresh
+            </button>
+            {renderTable(emails)}
+            {selectedEmailBody && (
+              <div className="email-body-popup">
+                <button className="close-btn" onClick={closePopup}>
+                  Close Email Body
+                </button>
+                <div dangerouslySetInnerHTML={{ __html: selectedEmailBody }} />
+              </div>
+            )}
           </div>
         </div>
       )}
