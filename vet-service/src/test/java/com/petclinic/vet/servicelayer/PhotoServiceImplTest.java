@@ -15,6 +15,7 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.r2dbc.connection.init.ConnectionFactoryInitializer;
+import org.springframework.test.context.ActiveProfiles;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -30,6 +31,7 @@ import static org.mockito.Mockito.*;
 
 @SpringBootTest
 @AutoConfigureWebTestClient
+@ActiveProfiles("test")
 class PhotoServiceImplTest {
     @Autowired
     PhotoService photoService;

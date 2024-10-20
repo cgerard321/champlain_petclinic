@@ -1,3 +1,42 @@
+#menuSection {
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 50px;
+}
+
+#menuContainer {
+  width: fit-content;
+  height: fit-content;
+  position: relative;
+  margin-left: auto;
+  margin-right: 8%;
+
+}
+
+#menuIcon {
+  width: 55px;
+  height: 55px;
+  cursor: pointer;
+}
+
+#menuIcon:hover {
+  box-shadow: 0 0 10px 3px rgba(0, 196, 255, 0.7);
+  border: none;
+}
+
+#actionsMenu{
+  border: 1px solid #ccc;
+  position: absolute;
+  top: 80px;
+  right: 30px;
+  width: 700px;
+  height: fit-content;
+  background-color: white;
+  padding: 10px;
+  border-radius: 4px;
+  padding-bottom: 30px;
+}
+
 .confirmDialog {
   position: fixed;
   top: 50%;

@@ -11,6 +11,7 @@ import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWeb
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.r2dbc.connection.init.ConnectionFactoryInitializer;
+import org.springframework.test.context.ActiveProfiles;
 import reactor.core.publisher.Flux;
 
 import static org.mockito.ArgumentMatchers.anyString;
@@ -21,6 +22,7 @@ import reactor.test.StepVerifier;
 
 @SpringBootTest
 @AutoConfigureWebTestClient
+@ActiveProfiles("test")
 public class AlbumServiceImplTest {
 
     @Autowired
