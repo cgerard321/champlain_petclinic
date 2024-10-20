@@ -202,4 +202,25 @@ public class CartController {
                 });
     }
 
+    @PostMapping("/{cartId}/{productId}")
+    public Mono<ResponseEntity<CartResponseModel>> addProductToCartFromProducts(
+            @PathVariable String cartId,
+            @PathVariable String productId) {
+
+        return cartService.addProductToCartFromProducts(cartId, productId)
+                .map(ResponseEntity::ok)
+                .onErrorResume(e -> {
+                    if (e instanceof OutOfStockException || e instanceof InvalidInputException) {
+                        CartResponseModel errorResponse = new CartResponseModel();
+                        errorResponse.setMessage(e.getMessage());
+                        return Mono.just(ResponseEntity.badRequest().body(errorResponse));
+                    } else if (e instanceof NotFoundException) {
+                        return Mono.just(ResponseEntity.notFound().build());
+                    } else {
+                        return Mono.error(e);
+                    }
+                });
+    }
+
+
 }

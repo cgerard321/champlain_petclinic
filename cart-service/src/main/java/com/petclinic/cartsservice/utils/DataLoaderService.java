@@ -97,13 +97,68 @@ public class DataLoaderService implements CommandLineRunner {
 
         Cart cart2 = Cart.builder()
                 .cartId("34f7b33a-d62a-420a-a84a-05a27c85fc91")
+                .customerId("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
+                .products(products2)
+                .wishListProducts(wishListProducts)
+                .build();
+
+        Cart cart3 = Cart.builder()
+                .cartId("14f7b33a-d62a-420a-a84a-05a27c85fc91")
+                .customerId("3f59dca2-903e-495c-90c3-7f4d01f3a2aa")
+                .products(products2)
+                .wishListProducts(wishListProducts)
+                .build();
+
+        Cart cart4 = Cart.builder()
+                .cartId("a6e0e5b0-5f60-45f0-8ac7-becd8b330486")
+                .customerId("a6e0e5b0-5f60-45f0-8ac7-becd8b330486")
+                .products(products1)
+                .wishListProducts(wishListProducts)
+                .build();
+
+        Cart cart5 = Cart.builder()
+                .cartId("c6a0fb9d-fc6f-4c21-95fc-4f5e7311d0e2")
                 .customerId("c6a0fb9d-fc6f-4c21-95fc-4f5e7311d0e2")
                 .products(products2)
                 .wishListProducts(wishListProducts)
                 .build();
 
-        // Insert both carts using a single Flux and log success or error
-        Flux.just(cart1, cart2)
+        Cart cart6 = Cart.builder()
+                .cartId("b3d09eab-4085-4b2d-a121-78a0a2f9e501")
+                .customerId("b3d09eab-4085-4b2d-a121-78a0a2f9e501")
+                .products(products1)
+                .wishListProducts(wishListProducts)
+                .build();
+
+        Cart cart7 = Cart.builder()
+                .cartId("5fe81e29-1f1d-4f9d-b249-8d3e0cc0b7dd")
+                .customerId("5fe81e29-1f1d-4f9d-b249-8d3e0cc0b7dd")
+                .products(products2)
+                .wishListProducts(wishListProducts)
+                .build();
+
+        Cart cart8 = Cart.builder()
+                .cartId("48f9945a-4ee0-4b0b-9b44-3da829a0f0f7")
+                .customerId("48f9945a-4ee0-4b0b-9b44-3da829a0f0f7")
+                .products(products1)
+                .wishListProducts(wishListProducts)
+                .build();
+
+        Cart cart9 = Cart.builder()
+                .cartId("9f6accd1-e943-4322-932e-199d93824317")
+                .customerId("9f6accd1-e943-4322-932e-199d93824317")
+                .products(products2)
+                .wishListProducts(wishListProducts)
+                .build();
+
+        Cart cart10 = Cart.builder()
+                .cartId("7c0d42c2-0c2d-41ce-bd9c-6ca67478956f")
+                .customerId("7c0d42c2-0c2d-41ce-bd9c-6ca67478956f")
+                .products(products1)
+                .wishListProducts(wishListProducts)
+                .build();
+
+        Flux.just(cart1, cart2, cart3, cart4, cart5, cart6, cart7, cart8, cart9, cart10)
                 .flatMap(cartRepository::insert)
                 .doOnNext(savedCart -> System.out.println("Inserted cart: " + savedCart.getCartId()))
                 .doOnError(error -> System.err.println("Error inserting cart: " + error.getMessage()))

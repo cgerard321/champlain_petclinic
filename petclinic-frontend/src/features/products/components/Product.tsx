@@ -7,6 +7,7 @@ import { generatePath, useNavigate } from 'react-router-dom';
 import { AppRoutePaths } from '@/shared/models/path.routes';
 import StarRating from './StarRating';
 import './Product.css';
+import { useAddToCart } from '@/features/carts/api/addToCartFromProducts.ts';
 
 export default function Product({
   product,
@@ -23,6 +24,7 @@ export default function Product({
   const [tooLong, setTooLong] = useState<boolean>(false);
 
   const navigate = useNavigate();
+  const { addToCart } = useAddToCart();
 
   const handleProductTitleClick = (): void => {
     navigate(
@@ -97,6 +99,14 @@ export default function Product({
     setSelectedProductForQuantity(null);
   };
 
+  const handleAddToCart = async (): Promise<void> => {
+    try {
+      await addToCart(currentProduct.productId);
+    } catch (error) {
+      console.error('Failed to add product to cart:', error);
+    }
+  };
+
   if (selectedProduct) {
     return (
       <div>
@@ -165,6 +175,14 @@ export default function Product({
           : `${currentProduct.productDescription.substring(0, 100)}...`}
       </p>
       <p>Price: ${currentProduct.productSalePrice.toFixed(2)}</p>
+
+      <button
+        onClick={handleAddToCart}
+        disabled={product.productQuantity === 0}
+      >
+        {product.productQuantity === 0 ? 'Out of Stock' : 'Add to Cart'}
+      </button>
+
       <StarRating
         currentRating={currentProduct.averageRating}
         viewOnly={true}

@@ -1002,6 +1002,19 @@ class CartServiceUnitTest {
         verify(cartRepository, times(1)).save(any(Cart.class)); // Ensure the cleared cart was saved
     }
 
+    @Test
+    void addProductToCart_WhenCartDoesNotExist_ShouldReturnNotFoundException() {
+        String cartId = "non-existent-cart-id";
+        String productId = "9a29fff7-564a-4cc9-8fe1-36f6ca9bc223";
 
+        when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.empty());
+
+        cartService.addProductToCartFromProducts(cartId, productId)
+                .as(StepVerifier::create)
+                .expectErrorMatches(throwable ->
+                        throwable instanceof NotFoundException &&
+                                throwable.getMessage().equals("Cart not found: " + cartId))
+                .verify();
+    }
 
 }
