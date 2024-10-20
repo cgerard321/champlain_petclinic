@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Bill } from '@/features/bills/models/Bill.ts';
 import { useUser } from '@/context/UserContext';
 import { payBill } from '@/features/bills/api/payBill.tsx';
@@ -11,7 +11,7 @@ export default function BillsListTable(): JSX.Element {
   const [error, setError] = useState<string | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
 
-  const fetchBills = async (): Promise<void> => {
+  const fetchBills = useCallback(async (): Promise<void> => {
     if (!user.userId) return;
 
     try {
@@ -63,11 +63,11 @@ export default function BillsListTable(): JSX.Element {
       console.error('Error fetching bills:', err);
       setError('Failed to fetch bills');
     }
-  };
+  }, [user.userId]);
 
   useEffect(() => {
     fetchBills();
-  }, [user.userId]);
+  }, [fetchBills]);
 
   useEffect(() => {
     if (selectedStatus === 'all') {
@@ -206,7 +206,7 @@ export default function BillsListTable(): JSX.Element {
   return (
     <div>
       {/* Dropdown to filter bills by status */}
-      <div>
+      <div className="filterContainer">
         <label htmlFor="statusFilter">Filter by Status:</label>
         <select
           id="statusFilter"
