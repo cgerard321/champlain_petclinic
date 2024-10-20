@@ -181,10 +181,10 @@ export default function ProductList(): JSX.Element {
       <div className="grid">
         {recentlyClickedProducts.length > 0 ? (
           recentlyClickedProducts
-              .filter(product => !product.isUnlisted)
-              .map(product => (
-            <Product key={product.productId} product={product} />
-          ))
+            .filter(product => !product.isUnlisted)
+            .map(product => (
+              <Product key={product.productId} product={product} />
+            ))
         ) : (
           <p>No recently clicked products.</p>
         )}

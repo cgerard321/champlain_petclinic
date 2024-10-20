@@ -26,16 +26,16 @@ export default function RecentlyViewedProducts(): JSX.Element {
       <div className="grid">
         {recentlyClickedProducts.length > 0 ? (
           recentlyClickedProducts
-              .filter(product => !product.isUnlisted)
-              .map(product => (
-            <div
-              key={product.productId}
-              onClick={() => handleProductClick(product.productId)}
-              style={{ cursor: 'pointer' }}
-            >
-              <Product key={product.productId} product={product} />
-            </div>
-          ))
+            .filter(product => !product.isUnlisted)
+            .map(product => (
+              <div
+                key={product.productId}
+                onClick={() => handleProductClick(product.productId)}
+                style={{ cursor: 'pointer' }}
+              >
+                <Product key={product.productId} product={product} />
+              </div>
+            ))
         ) : (
           <p>No recently clicked products.</p>
         )}
