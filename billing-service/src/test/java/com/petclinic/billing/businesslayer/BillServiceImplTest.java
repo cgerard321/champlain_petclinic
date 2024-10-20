@@ -1,23 +1,18 @@
 package com.petclinic.billing.businesslayer;
 
 import com.petclinic.billing.datalayer.*;
-import com.petclinic.billing.exceptions.InvalidInputException;
-import com.petclinic.billing.exceptions.NotFoundException;
-import org.assertj.core.api.AssertionsForClassTypes;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-import org.springframework.beans.BeanUtils;
+
 import static org.mockito.ArgumentMatchers.*;
 
 import java.time.LocalDate;
@@ -58,20 +53,20 @@ public class BillServiceImplTest {
                 .verifyComplete();
     }
 
-    // @Test
-    // public void test_GetAllBills() {
-    // Bill billEntity = buildBill();
-    //
-    // when(repo.findAll()).thenReturn(Flux.just(billEntity));
-    //
-    // Flux<BillResponseDTO> billDTOFlux = billService.GetAllBills();
-    //
-    // StepVerifier.create(billDTOFlux)
-    // .consumeNextWith(foundBill -> {
-    // assertNotNull(foundBill);
-    // })
-    // .verifyComplete();
-    // }
+//    @Test
+//    public void test_GetAllBills() {
+//       Bill billEntity = buildBill();
+//
+//       when(repo.findAll()).thenReturn(Flux.just(billEntity));
+//
+//       Flux<BillResponseDTO> billDTOFlux = billService.getAllBills();
+//
+//       StepVerifier.create(billDTOFlux)
+//               .consumeNextWith(foundBill -> {
+//                   assertNotNull(foundBill);
+//               })
+//               .verifyComplete();
+//    }
 
     @Test
     void getBillsByPage_ShouldSucceed() {
@@ -85,6 +80,8 @@ public class BillServiceImplTest {
                 .vetId("vetId1")
                 .vetFirstName("vetFirstName1")
                 .vetLastName("vetLastName1")
+                .date(LocalDate.of(2024,10,1))
+                .dueDate(LocalDate.of(2024,10,30))
                 .build();
         Bill bill2 = Bill.builder()
                 .billId("billId-2")
@@ -95,6 +92,8 @@ public class BillServiceImplTest {
                 .vetId("vetId2")
                 .vetFirstName("vetFirstName2")
                 .vetLastName("vetLastName2")
+                .date(LocalDate.of(2024,10,1))
+                .dueDate(LocalDate.of(2024,10,30))
                 .build();
         Bill bill3 = Bill.builder()
                 .billId("billId-3")
@@ -105,6 +104,8 @@ public class BillServiceImplTest {
                 .vetId("vetId3")
                 .vetFirstName("vetFirstName3")
                 .vetLastName("vetLastName3")
+                .date(LocalDate.of(2024,10,1))
+                .dueDate(LocalDate.of(2024,10,30))
                 .build();
 
         Pageable pageable = PageRequest.of(0, 2);
@@ -126,13 +127,13 @@ public class BillServiceImplTest {
     }
 
     @Test
-    public void test_GetAllBillsByPaidStatus() {
+    public void test_getAllBillsByPaidStatus() {
         BillStatus status = BillStatus.PAID; // Change this to the desired status
 
         Bill billEntity = buildBill(); // Create a sample bill entity
         when(repo.findAllBillsByBillStatus(status)).thenReturn(Flux.just(billEntity));
 
-        Flux<BillResponseDTO> billDTOFlux = billService.GetAllBillsByStatus(status);
+        Flux<BillResponseDTO> billDTOFlux = billService.getAllBillsByStatus(status);
 
         StepVerifier.create(billDTOFlux)
                 .expectNextCount(1) // Adjust this count according to the number of expected results
@@ -140,13 +141,13 @@ public class BillServiceImplTest {
     }
 
     @Test
-    public void test_GetAllBillsByUnpaidStatus() {
+    public void test_getAllBillsByUnpaidStatus() {
         BillStatus status = BillStatus.UNPAID; // Change this to the desired status
 
         Bill billEntity = buildUnpaidBill(); // Create a sample bill entity
         when(repo.findAllBillsByBillStatus(status)).thenReturn(Flux.just(billEntity));
 
-        Flux<BillResponseDTO> billDTOFlux = billService.GetAllBillsByStatus(status);
+        Flux<BillResponseDTO> billDTOFlux = billService.getAllBillsByStatus(status);
 
         StepVerifier.create(billDTOFlux)
                 .expectNextCount(1) // Adjust this count according to the number of expected results
@@ -154,13 +155,13 @@ public class BillServiceImplTest {
     }
 
     @Test
-    public void test_GetAllBillsByOverdueStatus() {
+    public void test_getAllBillsByOverdueStatus() {
         BillStatus status = BillStatus.OVERDUE; // Change this to the desired status
 
         Bill billEntity = buildOverdueBill(); // Create a sample bill entity
         when(repo.findAllBillsByBillStatus(status)).thenReturn(Flux.just(billEntity));
 
-        Flux<BillResponseDTO> billDTOFlux = billService.GetAllBillsByStatus(status);
+        Flux<BillResponseDTO> billDTOFlux = billService.getAllBillsByStatus(status);
 
         StepVerifier.create(billDTOFlux)
                 .expectNextCount(1) // Adjust this count according to the number of expected results
@@ -168,7 +169,7 @@ public class BillServiceImplTest {
     }
 
     @Test
-    public void test_CreateBill() {
+    public void test_createBill(){
 
         Bill billEntity = buildBill();
 
@@ -177,7 +178,7 @@ public class BillServiceImplTest {
 
         when(repo.insert(any(Bill.class))).thenReturn(billMono);
 
-        Mono<BillResponseDTO> returnedBill = billService.CreateBill(Mono.just(billDTO));
+        Mono<BillResponseDTO> returnedBill = billService.createBill(Mono.just(billDTO));
 
         StepVerifier.create(returnedBill)
                 .consumeNextWith(monoDTO -> {
@@ -189,39 +190,39 @@ public class BillServiceImplTest {
     }
 
     @Test
-    public void test_DeleteAllBills() {
-
+    public void test_deleteAllBills(){
+        
         when(repo.deleteAll()).thenReturn(Mono.empty());
 
-        Mono<Void> deleteObj = billService.DeleteAllBills();
+        Mono<Void> deleteObj = billService.deleteAllBills();
 
         StepVerifier.create(deleteObj)
                 .expectNextCount(0)
                 .verifyComplete();
     }
 
-    // @Test
-    // public void test_DeleteBill(){
-    //
-    // Bill billEntity = buildBill();
-    //
-    // when(repo.deleteBillByBillId(anyString())).thenReturn(Mono.empty());
-    //
-    // Mono<Void> deletedObj = billService.DeleteBill(billEntity.getBillId());
-    //
-    // StepVerifier.create(deletedObj)
-    // .expectNextCount(0)
-    // .verifyComplete();
-    // }
+//    @Test
+//    public void test_DeleteBill(){
+//
+//        Bill billEntity = buildBill();
+//
+//        when(repo.deleteBillByBillId(anyString())).thenReturn(Mono.empty());
+//
+//        Mono<Void> deletedObj = billService.deleteBill(billEntity.getBillId());
+//
+//        StepVerifier.create(deletedObj)
+//                .expectNextCount(0)
+//                .verifyComplete();
+//    }
 
     @Test
-    public void test_DeleteBillByVetId() {
+    public void test_deleteBillByVetId(){
 
         Bill billEntity = buildBill();
 
         when(repo.deleteBillsByVetId(anyString())).thenReturn(Flux.empty());
 
-        Flux<Void> deletedObj = billService.DeleteBillsByVetId(billEntity.getVetId());
+        Flux<Void> deletedObj = billService.deleteBillsByVetId(billEntity.getVetId());
 
         StepVerifier.create(deletedObj)
                 .expectNextCount(0)
@@ -229,10 +230,10 @@ public class BillServiceImplTest {
     }
 
     @Test
-    public void test_DeleteBillsByCustomerId() {
+    public void test_deleteBillsByCustomerId(){
         Bill billEntity = buildBill();
         when(repo.deleteBillsByCustomerId(anyString())).thenReturn(Flux.empty());
-        Flux<Void> deletedObj = billService.DeleteBillsByCustomerId(billEntity.getCustomerId());
+        Flux<Void> deletedObj = billService.deleteBillsByCustomerId(billEntity.getCustomerId());
 
         StepVerifier.create(deletedObj)
                 .expectNextCount(0)
@@ -240,7 +241,7 @@ public class BillServiceImplTest {
     }
 
     @Test
-    public void test_GetBillByCustomerId() {
+    public void test_getBillByCustomerId(){
 
         Bill billEntity = buildBill();
 
@@ -248,7 +249,7 @@ public class BillServiceImplTest {
 
         when(repo.findByCustomerId(anyString())).thenReturn(Flux.just(billEntity));
 
-        Flux<BillResponseDTO> billDTOMono = billService.GetBillsByCustomerId(CUSTOMER_ID);
+        Flux<BillResponseDTO> billDTOMono = billService.getBillsByCustomerId(CUSTOMER_ID);
 
         StepVerifier.create(billDTOMono)
                 .consumeNextWith(foundBill -> {
@@ -260,7 +261,7 @@ public class BillServiceImplTest {
     }
 
     @Test
-    public void test_GetBillByVetId() {
+    public void test_getBillByVetId(){
 
         Bill billEntity = buildBill();
 
@@ -268,7 +269,7 @@ public class BillServiceImplTest {
 
         when(repo.findByVetId(anyString())).thenReturn(Flux.just(billEntity));
 
-        Flux<BillResponseDTO> billDTOMono = billService.GetBillsByVetId(VET_ID);
+        Flux<BillResponseDTO> billDTOMono = billService.getBillsByVetId(VET_ID);
 
         StepVerifier.create(billDTOMono)
                 .consumeNextWith(foundBill -> {
@@ -280,7 +281,7 @@ public class BillServiceImplTest {
     }
 
     @Test
-    public void test_UpdateBill() {
+    public void test_updateBill() {
 
         Bill originalBill = buildBill();
 
@@ -337,18 +338,19 @@ public class BillServiceImplTest {
                 .verifyComplete();
     }
 
-    // @Test
-    // public void test_deleteNonExistentBillId() {
-    // String nonExistentBillId = "nonExistentId";
-    //
-    // when(repo.deleteBillByBillId(nonExistentBillId)).thenReturn(Mono.empty());
-    //
-    // Mono<Void> deletedObj = billService.DeleteBill(nonExistentBillId);
-    //
-    // StepVerifier.create(deletedObj)
-    // .expectNextCount(0)
-    // .verifyComplete();
-    // }
+
+//    @Test
+//    public void test_deleteNonExistentBillId() {
+//        String nonExistentBillId = "nonExistentId";
+//
+//        when(repo.deleteBillByBillId(nonExistentBillId)).thenReturn(Mono.empty());
+//
+//        Mono<Void> deletedObj = billService.deleteBill(nonExistentBillId);
+//
+//        StepVerifier.create(deletedObj)
+//                .expectNextCount(0)
+//                .verifyComplete();
+//    }
 
     @Test
     public void test_updateBillWithInvalidRequest() {
@@ -368,12 +370,12 @@ public class BillServiceImplTest {
     }
 
     @Test
-    public void test_GetBillByNonExistentCustomerId() {
+    public void test_getBillByNonExistentCustomerId() {
         String nonExistentCustomerId = "nonExistentId";
 
         when(repo.findByCustomerId(nonExistentCustomerId)).thenReturn(Flux.empty());
 
-        Flux<BillResponseDTO> billDTOMono = billService.GetBillsByCustomerId(nonExistentCustomerId);
+        Flux<BillResponseDTO> billDTOMono = billService.getBillsByCustomerId(nonExistentCustomerId);
 
         StepVerifier.create(billDTOMono)
                 .expectNextCount(0)
@@ -381,21 +383,21 @@ public class BillServiceImplTest {
     }
 
     @Test
-    public void test_CreateBillWithInvalidData() {
+    public void test_createBillWithInvalidData() {
         BillRequestDTO billDTO = buildInvalidBillRequestDTO();
 
         Mono<BillRequestDTO> billRequestMono = Mono.just(billDTO);
 
         when(repo.insert(any(Bill.class))).thenReturn(Mono.error(new RuntimeException("Invalid data")));
 
-        Mono<BillResponseDTO> returnedBill = billService.CreateBill(billRequestMono);
+        Mono<BillResponseDTO> returnedBill = billService.createBill(billRequestMono);
 
         StepVerifier.create(returnedBill)
                 .expectError()
                 .verify();
     }
 
-    @Test
+        @Test
     public void testGenerateBillPdf() {
         // Step 1: Mocking Bill entity with first and last name
         Bill mockBill = Bill.builder()
@@ -431,8 +433,7 @@ public class BillServiceImplTest {
 
     @Test
     public void testGenerateBillPdf_BillNotFound() {
-        // Step 1: Mocking the repository to return Mono.empty() when a bill is not
-        // found
+        // Step 1: Mocking the repository to return Mono.empty() when a bill is not found
         when(repo.findByBillId(anyString())).thenReturn(Mono.empty());
 
         // Step 2: Calling the method under test
@@ -575,7 +576,7 @@ public class BillServiceImplTest {
         // Arrange
         Bill bill1 = buildBill();
         Bill bill2 = buildBill();
-        bill2.setBillId("BillUUID2"); // Different ID for distinct objects
+        bill2.setBillId("BillUUID2");
         Pageable pageable = PageRequest.of(0, 1);
 
         when(repo.findAll()).thenReturn(Flux.just(bill1, bill2));
@@ -604,8 +605,30 @@ public class BillServiceImplTest {
 
         // Assert
         StepVerifier.create(result)
-                .expectNextCount(0) // Expect no bills
+                .expectNextCount(0)
                 .verifyComplete();
     }
+
+    @Test
+    void getBillsByMonth_ShouldReturnBillsForGivenMonth() {
+        // Arrange
+        Bill bill1 = buildBill();
+        Bill bill2 = buildBill();
+        bill2.setBillId("BillUUID2"); // Different ID for distinct objects
+        int year = 2022;
+        int month = 9;
+
+        when(repo.findByDateBetween(any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(Flux.just(bill1, bill2));
+
+        // Act
+        Flux<BillResponseDTO> result = billService.getBillsByMonth(year, month);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNextCount(2) // Expect both bills
+                .verifyComplete();
+    }
+
 
 }

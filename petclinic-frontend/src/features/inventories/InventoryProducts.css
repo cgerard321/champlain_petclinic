@@ -122,3 +122,8 @@ select:focus {
     font-size: 12px;
   }
 }
+#google_translate_element {
+  width: 25%;
+  margin: 20px 0;
+  float: right;
+}

@@ -13,6 +13,7 @@ interface ApiError {
 const AddReviewForm: React.FC = (): JSX.Element => {
   const [review, setReview] = useState<ReviewRequestDTO>({
     rating: 0,
+    ownerId: '',
     reviewerName: '',
     review: '',
     dateSubmitted: new Date(),
@@ -73,6 +74,7 @@ const AddReviewForm: React.FC = (): JSX.Element => {
       navigate('/reviews'); // Navigate to a different page or clear form
       setReview({
         rating: 0,
+        ownerId: '',
         reviewerName: '',
         review: '',
         dateSubmitted: new Date(),

@@ -50,25 +50,23 @@ public class CustomerBillControllerIntegrationTest {
 
     // @Test
     // public void testDownloadBillPdf_ValidToken_ShouldReturnPdf() {
-    // // Arrange: Mocking the service call to return a PDF byte array
-    // byte[] mockPdfContent = "Sample PDF Content".getBytes();
+    //     // Arrange: Mocking the service call to return a PDF byte array
+    //     byte[] mockPdfContent = "Sample PDF Content".getBytes();
 
-    // // Act & Assert: Mocking a request as a valid customer with a token in a
-    // cookie
-    // webTestClient.get()
-    // .uri("/api/v2/gateway/customers/1/bills/1234/pdf")
-    // .cookie("Bearer", MockServerConfigAuthService.jwtTokenForValidOwnerId) //
-    // Using JWT token in cookie
-    // .accept(MediaType.APPLICATION_PDF)
-    // .exchange()
-    // .expectStatus().isOk()
-    // .expectHeader().contentType(MediaType.APPLICATION_PDF)
-    // .expectBody(byte[].class)
-    // .consumeWith(response -> {
-    // byte[] pdf = response.getResponseBody();
-    // assertNotNull(pdf);
-    // assert pdf.length > 0;
-    // });
+    //     // Act & Assert: Mocking a request as a valid customer with a token in a cookie
+    //     webTestClient.get()
+    //         .uri("/api/v2/gateway/customers/1/bills/1234/pdf")
+    //         .cookie("Bearer", MockServerConfigAuthService.jwtTokenForValidOwnerId)  // Using JWT token in cookie
+    //         .accept(MediaType.APPLICATION_PDF)
+    //         .exchange()
+    //         .expectStatus().isOk()
+    //         .expectHeader().contentType(MediaType.APPLICATION_PDF)
+    //         .expectBody(byte[].class)
+    //         .consumeWith(response -> {
+    //             byte[] pdf = response.getResponseBody();
+    //             assertNotNull(pdf);
+    //             assert pdf.length > 0;
+    //         });
     // }
 
     @Test

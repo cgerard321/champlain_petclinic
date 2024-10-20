@@ -5,14 +5,13 @@ import com.petclinic.bffapigateway.domainclientlayer.*;
 import com.petclinic.bffapigateway.dtos.Auth.*;
 import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
-import com.petclinic.bffapigateway.dtos.Bills.BillStatus;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.*;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.*;
 import com.petclinic.bffapigateway.dtos.Vets.*;
+import com.petclinic.bffapigateway.dtos.Visits.Emergency.EmergencyResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.VisitRequestDTO;
-import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewResponseDTO;
 import com.petclinic.bffapigateway.utils.Security.Annotations.IsUserSpecific;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
@@ -23,7 +22,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import nonapi.io.github.classgraph.json.Id;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -33,10 +31,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.time.LocalDate;
-import java.util.List;
 import java.util.Map;
-import java.awt.print.Pageable;
 import java.util.Optional;
 
 /**
@@ -71,9 +66,9 @@ public class BFFApiGatewayController {
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET})
     @GetMapping(value = "bills/{billId}")
-    public Mono<ResponseEntity<BillResponseDTO>> getBillingInfo(final @PathVariable String billId)
+    public Mono<ResponseEntity<BillResponseDTO>> getBillById(final @PathVariable String billId)
     {
-        return billServiceClient.getBilling(billId)
+        return billServiceClient.getBillById(billId)
                 .map(updated -> ResponseEntity.status(HttpStatus.OK).body(updated))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
@@ -89,14 +84,14 @@ public class BFFApiGatewayController {
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping(value = "bills", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<BillResponseDTO> getAllBilling() {
-        return billServiceClient.getAllBilling();
+    public Flux<BillResponseDTO> getAllBills() {
+        return billServiceClient.getAllBills();
     }
 
     //to be changed
 //    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
 //    @GetMapping(value = "bills/bills-pagination", produces = MediaType.APPLICATION_JSON_VALUE)
-//    public Flux<BillResponseDTO> getAllBillingByPage(@RequestParam Optional<Integer> page, @RequestParam Optional<Integer> size,
+//    public Flux<BillResponseDTO> getAllBillsByPage(@RequestParam Optional<Integer> page, @RequestParam Optional<Integer> size,
 //                                                     @RequestParam(required = false) String billId,
 //                                                     @RequestParam(required = false) String customerId,
 //                                                     @RequestParam(required = false) String ownerFirstName,
@@ -119,7 +114,7 @@ public class BFFApiGatewayController {
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping(value = "bills", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Flux<BillResponseDTO> getAllBillingByPage(
+    public Flux<BillResponseDTO> getAllBillsByPage(
             @RequestParam Optional<Integer> page,
             @RequestParam Optional<Integer> size,
             @RequestParam(required = false) String billId,
@@ -170,21 +165,21 @@ public class BFFApiGatewayController {
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping(value = "bills/paid", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<BillResponseDTO> getAllPaidBilling() {
-        return billServiceClient.getAllPaidBilling();
+    public Flux<BillResponseDTO> getAllPaidBills() {
+        return billServiceClient.getAllPaidBills();
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping(value = "bills/unpaid", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<BillResponseDTO> getAllUnpaidBilling() {
-        return billServiceClient.getAllUnpaidBilling();
+    public Flux<BillResponseDTO> getAllUnpaidBills() {
+        return billServiceClient.getAllUnpaidBills();
     }
 
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping(value = "bills/overdue", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<BillResponseDTO> getAllOverdueBilling() {
-        return billServiceClient.getAllOverdueBilling();
+    public Flux<BillResponseDTO> getAllOverdueBills() {
+        return billServiceClient.getAllOverdueBills();
     }
 
 
@@ -345,6 +340,15 @@ public class BFFApiGatewayController {
 //not ideal since returns complete pet dto
         return getPetsByOwnerId(ownerId).flatMap(petResponseDTO -> getVisitsForPet(petResponseDTO.getPetId()));
     }
+
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET,Roles.OWNER})
+    @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN,Roles.VET})
+    @GetMapping(value = "visits/emergency/owners/{ownerId}", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<EmergencyResponseDTO> getEmergencyVisitsByOwnerId(@PathVariable String ownerId){
+//not ideal since returns complete pet dto
+        return getPetsByOwnerId(ownerId).flatMap(petResponseDTO -> getEmergencyVisitsForPet(petResponseDTO.getPetId()));
+    }
     @GetMapping(value = "visits/vets/{practitionerId}", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<VisitResponseDTO> getVisitByPractitionerId(@PathVariable String practitionerId){
         return visitsServiceClient.getVisitByPractitionerId(practitionerId);
@@ -353,6 +357,11 @@ public class BFFApiGatewayController {
     @GetMapping(value = "visits/pets/{petId}", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<VisitResponseDTO> getVisitsForPet(@PathVariable String petId){
         return visitsServiceClient.getVisitsForPet(petId);
+    }
+
+    @GetMapping(value = "visits/emergency/pets/{petId}", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<EmergencyResponseDTO> getEmergencyVisitsForPet(@PathVariable String petId){
+        return visitsServiceClient.getEmergencyVisitForPet(petId);
     }
 
     @GetMapping(value = "visits/status/{status}", produces= MediaType.TEXT_EVENT_STREAM_VALUE)

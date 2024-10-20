@@ -7,6 +7,7 @@ import { getAllEmergency } from './Emergency/Api/getAllEmergency';
 import { EmergencyResponseDTO } from './Emergency/Model/EmergencyResponseDTO';
 import { deleteEmergency } from './Emergency/Api/deleteEmergency';
 import './Emergency.css';
+import { exportVisitsCSV } from './api/exportVisitsCSV';
 
 export default function VisitListTable(): JSX.Element {
   const [visitsList, setVisitsList] = useState<Visit[]>([]);
@@ -306,9 +307,14 @@ export default function VisitListTable(): JSX.Element {
             <th>Visit Emergency Id</th>
             <th>Visit Date</th>
             <th>Description</th>
+            <th> PetId</th>
+            <th>Pet Birthdate </th>
             <th>Pet Name</th>
-            <th>Urgency Level</th>
-            <th>Emergency Type</th>
+            <th> PractitionnerId</th>
+            <th>vetFirstName</th>
+            <th>vetLastName</th>
+            <th>Email</th>
+            <th>Phone Number</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -318,9 +324,14 @@ export default function VisitListTable(): JSX.Element {
               <td>{emergency.visitEmergencyId}</td>
               <td>{new Date(emergency.visitDate).toLocaleString()}</td>
               <td>{emergency.description}</td>
+              <td> {emergency.petId}</td>
+              <td> {new Date(emergency.vetBirthDate).toLocaleString()}</td>
               <td>{emergency.petName}</td>
-              <td>{emergency.urgencyLevel}</td>
-              <td>{emergency.emergencyType}</td>
+              <td>{emergency.practitionerId}</td>
+              <td>{emergency.vetFirstName}</td>
+              <td>{emergency.vetLastName}</td>
+              <td>{emergency.vetEmail}</td>
+              <td>{emergency.vetPhoneNumber}</td>
               <td>
                 <button
                   className="btn btn-warning"
@@ -339,6 +350,15 @@ export default function VisitListTable(): JSX.Element {
                   title="Delete"
                 >
                   Delete
+                </button>
+                <button
+                  className="btn btn-dark"
+                  onClick={() =>
+                    navigate(`/visits/emergency/${emergency.visitEmergencyId}`)
+                  }
+                  title="View"
+                >
+                  View
                 </button>
               </td>
             </tr>
@@ -467,13 +487,13 @@ export default function VisitListTable(): JSX.Element {
         >
           View Reviews
         </button>
-        <button
-          className="btn btn-dark"
-          onClick={() => navigate('/visits/emergency')}
-          title="Create emergency visit"
-        >
-          Create Emergency visit
-        </button>
+        {/*<button*/}
+        {/*  className="btn btn-dark"*/}
+        {/*  onClick={() => navigate('/visits/emergency')}*/}
+        {/*  title="Create emergency visit"*/}
+        {/*>*/}
+        {/*  Create Emergency visit*/}
+        {/*</button>*/}
         <button
           className="btn btn-warning"
           onClick={() => navigate(AppRoutePaths.AddVisit)}
@@ -482,20 +502,26 @@ export default function VisitListTable(): JSX.Element {
           Make a Visit
         </button>
 
-        {/* Search bar for filtering visits */}
-        <div className="search-bar">
-          <input
-            type="text"
-            placeholder="Search by visit description"
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)} // Update the search term when input changes
-          />
-        </div>
+        <button
+          className="btn btn-primary"
+          onClick={exportVisitsCSV}
+          title="Download Visits CSV"
+        >
+          Download Visits CSV
+        </button>
       </div>
 
       {/* Emergency Table below buttons, but above visit tables */}
       {renderEmergencyTable('Emergency Visits', emergencyList)}
-
+      {/* Search bar for filtering visits */}
+      <div className="search-bar">
+        <input
+          type="text"
+          placeholder="Search by visit description"
+          value={searchTerm}
+          onChange={e => setSearchTerm(e.target.value)} // Update the search term when input changes
+        />
+      </div>
       {renderTable(
         'Confirmed Visits',
         confirmedVisits,

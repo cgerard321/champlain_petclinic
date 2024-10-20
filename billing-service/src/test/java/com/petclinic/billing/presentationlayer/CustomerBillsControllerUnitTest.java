@@ -17,6 +17,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
@@ -34,7 +35,7 @@ public class CustomerBillsControllerUnitTest {
     void getBillsByCustomerId_shouldSucceed() {
         BillResponseDTO billResponse = buildBillResponseDTO();
 
-        when(billService.GetBillsByCustomerId(anyString())).thenReturn(Flux.just(billResponse));
+        when(billService.getBillsByCustomerId(anyString())).thenReturn(Flux.just(billResponse));
 
         client.get()
                 .uri("/bills/customer/{customerId}/bills", billResponse.getCustomerId())
@@ -43,16 +44,18 @@ public class CustomerBillsControllerUnitTest {
                 .expectStatus().isOk()
                 .expectBodyList(BillResponseDTO.class)
                 .consumeWith(response -> {
-                    assertEquals(1, response.getResponseBody().size());
-                    assertEquals(billResponse.getCustomerId(), response.getResponseBody().get(0).getCustomerId());
+                    assert response.getResponseBody() != null;
+                    assert response.getResponseBody().size() == 1;
+                    assert response.getResponseBody().get(0).getCustomerId().equals(billResponse.getCustomerId());
                 });
 
-        Mockito.verify(billService, times(1)).GetBillsByCustomerId(billResponse.getCustomerId());
+        Mockito.verify(billService, times(1)).getBillsByCustomerId(billResponse.getCustomerId());
     }
 
     @Test
     void getBillsByNonExistentCustomerId_shouldFail() {
-        when(billService.GetBillsByCustomerId(anyString())).thenReturn(Flux.empty());
+
+        when(billService.getBillsByCustomerId(anyString())).thenReturn(Flux.empty());
 
         client.get()
                 .uri("/bills/customer/nonExistentCustomer/bills")
@@ -62,7 +65,7 @@ public class CustomerBillsControllerUnitTest {
                 .expectBodyList(BillResponseDTO.class)
                 .hasSize(0);
 
-        Mockito.verify(billService, times(1)).GetBillsByCustomerId("nonExistentCustomer");
+        Mockito.verify(billService, times(1)).getBillsByCustomerId("nonExistentCustomer");
     }
 
     @Test

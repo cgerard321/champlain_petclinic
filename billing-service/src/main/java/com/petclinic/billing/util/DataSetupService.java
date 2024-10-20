@@ -2,19 +2,24 @@ package com.petclinic.billing.util;
 
 
 import com.petclinic.billing.businesslayer.BillService;
+import com.petclinic.billing.datalayer.Bill;
+import com.petclinic.billing.datalayer.BillRepository;
 import com.petclinic.billing.datalayer.BillRequestDTO;
 import com.petclinic.billing.datalayer.BillStatus;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
 import java.time.LocalDate;
+import java.util.UUID;
 
 
 @Service
 public class DataSetupService implements CommandLineRunner {
-    private final BillService billService;
+    @Autowired
+    BillService billService;
+
     public DataSetupService(BillService billService) {
         this.billService = billService;
     }
@@ -24,44 +29,248 @@ public class DataSetupService implements CommandLineRunner {
     public void run(String... args) throws Exception {
 
 
-        BillRequestDTO b1 = new BillRequestDTO( "f470653d-05c5-4c45-b7a0-7d70f003d2ac", "general", "1", LocalDate.of(2023,9,19),59.99, BillStatus.PAID, LocalDate.of(2023, 10,3));
-        BillRequestDTO b3 = new BillRequestDTO( "f470653d-05c5-4c45-b7a0-7d70f003d2ac", "operation", "1", LocalDate.of(2023,9,27), 199.99,BillStatus.PAID,LocalDate.of(2023, 10,11));
-        BillRequestDTO b4 = new BillRequestDTO( "f470653d-05c5-4c45-b7a0-7d70f003d2ac", "injury", "1",  LocalDate.of(2023,10,11), 199.99,BillStatus.UNPAID,LocalDate.of(2023, 10,25));
-        BillRequestDTO b2 = new BillRequestDTO( "f470653d-05c5-4c45-b7a0-7d70f003d2ac", "operation", "2", LocalDate.of(2023,10,6), 199.99,BillStatus.OVERDUE,LocalDate.of(2023, 10,20));
-        BillRequestDTO b5 = new BillRequestDTO( "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a", "chronic", "3",  LocalDate.of(2023,10,13), 199.99,BillStatus.UNPAID,LocalDate.of(2023, 10,27));
-        BillRequestDTO b6 = new BillRequestDTO("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a", "general", "2", LocalDate.of(2023, 10, 5), 59.99, BillStatus.PAID, LocalDate.of(2023, 10, 10));
-        BillRequestDTO b7 = new BillRequestDTO("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a", "operation", "3", LocalDate.of(2023, 10, 8), 199.99, BillStatus.PAID, LocalDate.of(2023, 10, 14));
-        BillRequestDTO b8 = new BillRequestDTO("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a", "injury", "2", LocalDate.of(2023, 10, 15), 199.99, BillStatus.OVERDUE, LocalDate.of(2023, 10, 30));
-        BillRequestDTO b9 = new BillRequestDTO("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a", "chronic", "1", LocalDate.of(2023, 10, 18), 199.99, BillStatus.UNPAID, LocalDate.of(2023, 11, 2));
-        BillRequestDTO b10 = new BillRequestDTO("3f59dca2-903e-495c-90c3-7f4d01f3a2aa", "general", "3", LocalDate.of(2023, 10, 21), 59.99, BillStatus.UNPAID, LocalDate.of(2023, 11, 6));
-        BillRequestDTO b11 = new BillRequestDTO("3f59dca2-903e-495c-90c3-7f4d01f3a2aa", "operation", "1", LocalDate.of(2023, 10, 24), 199.99, BillStatus.PAID, LocalDate.of(2023, 11, 10));
-        BillRequestDTO b12 = new BillRequestDTO("a6e0e5b0-5f60-45f0-8ac7-becd8b330486", "injury", "3", LocalDate.of(2023, 10, 27), 199.99, BillStatus.OVERDUE, LocalDate.of(2023, 11, 14));
-        BillRequestDTO b13 = new BillRequestDTO("a6e0e5b0-5f60-45f0-8ac7-becd8b330486", "chronic", "2", LocalDate.of(2023, 10, 30), 199.99, BillStatus.UNPAID, LocalDate.of(2023, 11, 18));
-        BillRequestDTO b14 = new BillRequestDTO("a6e0e5b0-5f60-45f0-8ac7-becd8b330486", "general", "1", LocalDate.of(2023, 11, 2), 59.99, BillStatus.PAID, LocalDate.of(2023, 11, 22));
-        BillRequestDTO b15 = new BillRequestDTO("c6a0fb9d-fc6f-4c21-95fc-4f5e7311d0e2", "operation", "2", LocalDate.of(2023, 11, 5), 199.99, BillStatus.UNPAID, LocalDate.of(2023, 11, 26));
-        BillRequestDTO b16 = new BillRequestDTO("c6a0fb9d-fc6f-4c21-95fc-4f5e7311d0e2", "injury", "1", LocalDate.of(2023, 11, 8), 199.99, BillStatus.PAID, LocalDate.of(2023, 12, 2));
-        BillRequestDTO b17 = new BillRequestDTO("b3d09eab-4085-4b2d-a121-78a0a2f9e501", "chronic", "3", LocalDate.of(2023, 11, 11), 199.99, BillStatus.OVERDUE, LocalDate.of(2023, 12, 6));
-        BillRequestDTO b18 = new BillRequestDTO("b3d09eab-4085-4b2d-a121-78a0a2f9e501", "general", "2", LocalDate.of(2023, 11, 14), 59.99, BillStatus.PAID, LocalDate.of(2023, 12, 10));
-        BillRequestDTO b19 = new BillRequestDTO("b3d09eab-4085-4b2d-a121-78a0a2f9e501", "operation", "3", LocalDate.of(2023, 11, 17), 199.99, BillStatus.UNPAID, LocalDate.of(2023, 12, 14));
-        BillRequestDTO b20 = new BillRequestDTO("b3d09eab-4085-4b2d-a121-78a0a2f9e501", "injury", "1", LocalDate.of(2023, 11, 20), 199.99, BillStatus.PAID, LocalDate.of(2023, 12, 18));
-        BillRequestDTO b21 = new BillRequestDTO("b3d09eab-4085-4b2d-a121-78a0a2f9e501", "chronic", "2", LocalDate.of(2023, 11, 23), 199.99, BillStatus.OVERDUE, LocalDate.of(2023, 12, 22));
-        BillRequestDTO b22 = new BillRequestDTO("5fe81e29-1f1d-4f9d-b249-8d3e0cc0b7dd", "general", "3", LocalDate.of(2023, 11, 26), 59.99, BillStatus.PAID, LocalDate.of(2023, 12, 26));
-        BillRequestDTO b23 = new BillRequestDTO("48f9945a-4ee0-4b0b-9b44-3da829a0f0f7", "operation", "2", LocalDate.of(2023, 11, 29), 199.99, BillStatus.UNPAID, LocalDate.of(2023, 12, 30));
-        BillRequestDTO b24 = new BillRequestDTO("48f9945a-4ee0-4b0b-9b44-3da829a0f0f7", "injury", "1", LocalDate.of(2023, 12, 2), 199.99, BillStatus.PAID, LocalDate.of(2024, 1, 2));
-        BillRequestDTO b25 = new BillRequestDTO("48f9945a-4ee0-4b0b-9b44-3da829a0f0f7", "chronic", "3", LocalDate.of(2023, 12, 5), 199.99, BillStatus.OVERDUE, LocalDate.of(2024, 1, 6));
-        BillRequestDTO b26 = new BillRequestDTO("48f9945a-4ee0-4b0b-9b44-3da829a0f0f7", "general", "2", LocalDate.of(2023, 12, 8), 59.99, BillStatus.UNPAID, LocalDate.of(2024, 1, 10));
-        BillRequestDTO b27 = new BillRequestDTO("48f9945a-4ee0-4b0b-9b44-3da829a0f0f7", "operation", "3", LocalDate.of(2023, 12, 11), 199.99, BillStatus.PAID, LocalDate.of(2024, 1, 14));
-        BillRequestDTO b28 = new BillRequestDTO("9f6accd1-e943-4322-932e-199d93824317", "injury", "1", LocalDate.of(2023, 12, 14), 199.99, BillStatus.PAID, LocalDate.of(2024, 1, 18));
-        BillRequestDTO b29 = new BillRequestDTO("9f6accd1-e943-4322-932e-199d93824317", "chronic", "2", LocalDate.of(2023, 12, 17), 199.99, BillStatus.OVERDUE, LocalDate.of(2024, 1, 22));
-        BillRequestDTO b30 = new BillRequestDTO("7c0d42c2-0c2d-41ce-bd9c-6ca67478956f", "general", "3", LocalDate.of(2023, 12, 20), 59.99, BillStatus.UNPAID, LocalDate.of(2024, 1, 26));
+        Bill b1 = Bill.builder()
+                .billId(UUID.randomUUID().toString())
+                .customerId("f470653d-05c5-4c45-b7a0-7d70f003d2ac")
+                .ownerFirstName("George")
+                .ownerLastName("Doe")
+                .visitType("Regular")
+                .vetId("1")
+                .vetFirstName("Jane")
+                .vetLastName("Doe")
+                .date(LocalDate.of(2024, 3, 1))
+                .amount(300.0)
+                .taxedAmount(0.0)
+                .billStatus(BillStatus.OVERDUE)
+                .dueDate(LocalDate.of(2024, 3, 31))
+                .build();
 
-        Flux.just(b6, b7, b8, b9, b10, b11, b12, b13, b14, b15, b16, b17, b18, b19, b20, b21, b22, b23, b24, b25, b26, b27, b28, b29, b30)
-                .flatMap(b -> billService.CreateBill(Mono.just(b))
-                        .log(b.toString()))
-                .subscribe();
+        Bill b2 = Bill.builder()
+                .billId(UUID.randomUUID().toString())
+                .customerId("f470653d-05c5-4c45-b7a0-7d70f003d2ac")
+                .ownerFirstName("George")
+                .ownerLastName("Doe")
+                .visitType("Regular")
+                .vetId("1")
+                .vetFirstName("Jane")
+                .vetLastName("Doe")
+                .date(LocalDate.of(2024, 4, 1))
+                .amount(167.0)
+                .taxedAmount(0.0)
+                .billStatus(BillStatus.PAID)
+                .dueDate(LocalDate.of(2024, 4, 30))
+                .build();
 
-        Flux.just(b1,b2,b3,b4,b5)
-                .flatMap(b -> billService.CreateBill(Mono.just(b))
+        Bill b3 = Bill.builder()
+                .billId(UUID.randomUUID().toString())
+                .customerId("f470653d-05c5-4c45-b7a0-7d70f003d2ac")
+                .ownerFirstName("George")
+                .ownerLastName("Doe")
+                .visitType("Regular")
+                .vetId("1")
+                .vetFirstName("Jane")
+                .vetLastName("Doe")
+                .date(LocalDate.of(2024, 5, 1))
+                .amount(150.0)
+                .taxedAmount(0.0)
+                .billStatus(BillStatus.PAID)
+                .dueDate(LocalDate.of(2024, 5, 31))
+                .build();
+
+        Bill b4 = Bill.builder()
+                .billId(UUID.randomUUID().toString())
+                .customerId("f470653d-05c5-4c45-b7a0-7d70f003d2ac")
+                .ownerFirstName("George")
+                .ownerLastName("Doe")
+                .visitType("Regular")
+                .vetId("2")
+                .vetFirstName("James")
+                .vetLastName("Patterson")
+                .date(LocalDate.of(2024, 6, 1))
+                .amount(200.0)
+                .taxedAmount(0.0)
+                .billStatus(BillStatus.PAID)
+                .dueDate(LocalDate.of(2024, 6, 30))
+                .build();
+
+        Bill b5 = Bill.builder()
+                .billId(UUID.randomUUID().toString())
+                .customerId("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
+                .ownerFirstName("Betty")
+                .ownerLastName("Doe")
+                .visitType("Regular")
+                .vetId("2")
+                .vetFirstName("James")
+                .vetLastName("Patterson")
+                .date(LocalDate.of(2024, 10, 1))
+                .amount(130.0)
+                .taxedAmount(0.0)
+                .billStatus(BillStatus.UNPAID)
+                .dueDate(LocalDate.of(2024, 11, 30))
+                .build();
+
+        Bill b6 = Bill.builder()
+                .billId(UUID.randomUUID().toString())
+                .customerId("3f59dca2-903e-495c-90c3-7f4d01f3a2aa")
+                .ownerFirstName("Jane")
+                .ownerLastName("Doe")
+                .visitType("Regular")
+                .vetId("3")
+                .vetFirstName("John")
+                .vetLastName("Doe")
+                .date(LocalDate.of(2024, 8, 1))
+                .amount(100.0)
+                .taxedAmount(0.0)
+                .billStatus(BillStatus.UNPAID)
+                .dueDate(LocalDate.of(2024, 8, 30))
+                .build();
+
+        Bill b7 = Bill.builder()
+                .billId(UUID.randomUUID().toString())
+                .customerId("3f59dca2-903e-495c-90c3-7f4d01f3a2aa")
+                .ownerFirstName("Edurado")
+                .ownerLastName("Doe")
+                .visitType("Regular")
+                .vetId("4")
+                .vetFirstName("Max")
+                .vetLastName("Lincoln")
+                .date(LocalDate.of(2024, 9, 1))
+                .amount(200.0)
+                .taxedAmount(0.0)
+                .billStatus(BillStatus.PAID)
+                .dueDate(LocalDate.of(2024, 9, 30))
+                .build();
+
+        Bill b8 = Bill.builder()
+                .billId(UUID.randomUUID().toString())
+                .customerId("a6e0e5b0-5f60-45f0-8ac7-becd8b330486")
+                .ownerFirstName("Harold")
+                .ownerLastName("Doe")
+                .visitType("Regular")
+                .vetId("5")
+                .vetFirstName("Kim")
+                .vetLastName("Zimmerman")
+                .date(LocalDate.of(2024, 3, 1))
+                .amount(150.0)
+                .taxedAmount(0.0)
+                .billStatus(BillStatus.PAID)
+                .dueDate(LocalDate.of(2024, 4, 30))
+                .build();
+
+        Bill b9 = Bill.builder()
+                .billId(UUID.randomUUID().toString())
+                .customerId("a6e0e5b0-5f60-45f0-8ac7-becd8b330486")
+                .ownerFirstName("Harold")
+                .ownerLastName("Doe")
+                .visitType("Emergency")
+                .vetId("5")
+                .vetFirstName("Kim")
+                .vetLastName("Zimmerman")
+                .date(LocalDate.of(2024, 5, 1))
+                .amount(400.0)
+                .taxedAmount(0.0)
+                .billStatus(BillStatus.PAID)
+                .dueDate(LocalDate.of(2024, 5, 31))
+                .build();
+
+        Bill b10 = Bill.builder()
+                .billId(UUID.randomUUID().toString())
+                .customerId("c6a0fb9d-fc6f-4c21-95fc-4f5e7311d0e2")
+                .ownerFirstName("Peter")
+                .ownerLastName("Doe")
+                .visitType("Regular")
+                .vetId("5")
+                .vetFirstName("Kim")
+                .vetLastName("Zimmerman")
+                .date(LocalDate.of(2024, 6, 1))
+                .amount(150.0)
+                .taxedAmount(0.0)
+                .billStatus(BillStatus.PAID)
+                .dueDate(LocalDate.of(2024, 6, 30))
+                .build();
+
+        Bill b11 = Bill.builder()
+                .billId(UUID.randomUUID().toString())
+                .customerId("b3d09eab-4085-4b2d-a121-78a0a2f9e501")
+                .ownerFirstName("Jean")
+                .ownerLastName("LeBlanc")
+                .visitType("Emergency")
+                .vetId("5")
+                .vetFirstName("Kim")
+                .vetLastName("Zimmerman")
+                .date(LocalDate.of(2024, 7, 1))
+                .amount(500.0)
+                .taxedAmount(0.0)
+                .billStatus(BillStatus.PAID)
+                .dueDate(LocalDate.of(2024, 8, 30))
+                .build();
+
+        Bill b12 = Bill.builder()
+                .billId(UUID.randomUUID().toString())
+                .customerId("5fe81e29-1f1d-4f9d-b249-8d3e0cc0b7dd")
+                .ownerFirstName("Jeff")
+                .ownerLastName("Patterson")
+                .visitType("Regular")
+                .vetId("2")
+                .vetFirstName("James")
+                .vetLastName("Patterson")
+                .date(LocalDate.of(2024, 8, 1))
+                .amount(150.0)
+                .taxedAmount(0.0)
+                .billStatus(BillStatus.PAID)
+                .dueDate(LocalDate.of(2024, 8, 30))
+                .build();
+
+        Bill b13 = Bill.builder()
+                .billId(UUID.randomUUID().toString())
+                .customerId("48f9945a-4ee0-4b0b-9b44-3da829a0f0f7")
+                .ownerFirstName("Maria")
+                .ownerLastName("Doe")
+                .visitType("Regular")
+                .vetId("2")
+                .vetFirstName("James")
+                .vetLastName("Patterson")
+                .date(LocalDate.of(2024, 10, 1))
+                .amount(200.0)
+                .taxedAmount(0.0)
+                .billStatus(BillStatus.UNPAID)
+                .dueDate(LocalDate.of(2024, 11, 30))
+                .build();
+
+        Bill b14 = Bill.builder()
+                .billId(UUID.randomUUID().toString())
+                .customerId("9f6accd1-e943-4322-932e-199d93824317")
+                .ownerFirstName("David")
+                .ownerLastName("Doe")
+                .visitType("Regular")
+                .vetId("2")
+                .vetFirstName("James")
+                .vetLastName("Patterson")
+                .date(LocalDate.of(2024, 4, 1))
+                .amount(150.0)
+                .taxedAmount(0.0)
+                .billStatus(BillStatus.PAID)
+                .dueDate(LocalDate.of(2024, 4, 30))
+                .build();
+
+        Bill b15 = Bill.builder()
+                .billId(UUID.randomUUID().toString())
+                .customerId("7c0d42c2-0c2d-41ce-bd9c-6ca67478956f")
+                .ownerFirstName("Carlos")
+                .ownerLastName("Doe")
+                .visitType("Regular")
+                .vetId("2")
+                .vetFirstName("James")
+                .vetLastName("Patterson")
+                .date(LocalDate.of(2024, 10, 1))
+                .amount(150.0)
+                .taxedAmount(0.0)
+                .billStatus(BillStatus.UNPAID)
+                .dueDate(LocalDate.of(2024, 11, 30))
+                .build();
+
+        Flux.just(b1,b2,b3,b4,b5, b6, b7, b8, b9, b10, b11, b12, b13, b14, b15)
+                .flatMap(b -> billService.CreateBillForDB(Mono.just(b))
                         .log(b.toString()))
                 .subscribe();
     }

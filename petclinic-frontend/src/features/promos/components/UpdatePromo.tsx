@@ -1,16 +1,12 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
+
 import { useEffect, useState } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { useNavigate, useParams } from 'react-router-dom';
 import './FormPromo.css';
-
-interface PromoCodeRequestModel {
-  name: string;
-  code: string;
-  discount: number;
-  expirationDate: string;
-}
+import { PromoApi } from '@/features/promos/api/PromoApi.tsx';
+import { PromoCodeRequestModel } from '@/features/promos/models/PromoCodeRequestModel.tsx';
 
 export default function UpdatePromo(): JSX.Element {
   const [name, setName] = useState<string>('');
@@ -26,21 +22,7 @@ export default function UpdatePromo(): JSX.Element {
   useEffect(() => {
     const fetchPromo = async () => {
       try {
-        const response = await fetch(
-          `http://localhost:8080/api/v2/gateway/promos/${promoId}`,
-          {
-            method: 'GET',
-            headers: {
-              Accept: 'application/json',
-            },
-            credentials: 'include',
-          }
-        );
-        if (!response.ok) {
-          throw new Error(`Error: ${response.status} ${response.statusText}`);
-        }
-
-        const promo = await response.json();
+        const promo = await PromoApi.fetchPromoById(promoId!); // Usar el método de la clase API
         setName(promo.name);
         setCode(promo.code);
         setDiscount(promo.discount.toString());
@@ -85,25 +67,7 @@ export default function UpdatePromo(): JSX.Element {
     };
 
     try {
-      const response = await fetch(
-        `http://localhost:8080/api/v2/gateway/promos/${promoId}`,
-        {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-          },
-          body: JSON.stringify(updatedPromo),
-          credentials: 'include',
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(
-          `Failed to update promo: ${response.status} ${response.statusText}`
-        );
-      }
-
+      await PromoApi.updatePromo(promoId!, updatedPromo);
       setSuccessMessage('Promo updated successfully!');
       setError(null);
     } catch (err) {

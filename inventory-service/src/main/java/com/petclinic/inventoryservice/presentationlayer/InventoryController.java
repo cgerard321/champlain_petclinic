@@ -206,9 +206,30 @@ public Flux<InventoryResponseDTO> searchInventories(
                             .body(resource);
 
                 });
+    }
 
+    @PutMapping("/{inventoryId}/products/{productId}/restockProduct")
+    public Mono<ResponseEntity<ProductResponseDTO>> restockLowStockProduct(@PathVariable String inventoryId,@PathVariable String productId, @RequestParam Integer productQuantity){
+        if (productQuantity == null || productQuantity <= 0) {
+            return Mono.just(ResponseEntity.badRequest().body(null));
+        }
+        return productInventoryService.restockLowStockProduct(inventoryId, productId, productQuantity)
+                .map(updatedProduct -> ResponseEntity.ok().body(updatedProduct))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
 
+    @PutMapping("/{currentInventoryId}/products/{productId}/updateInventoryId/{newInventoryId}")
+    public Mono<ResponseEntity<ProductResponseDTO>> updateProductInventoryId(@PathVariable String currentInventoryId,
+                                                                             @PathVariable String productId,
+                                                                             @PathVariable String newInventoryId){
+        return productInventoryService.updateProductInventoryId(currentInventoryId, productId, newInventoryId)
+                .map(productResponseDTO -> ResponseEntity.ok().body(productResponseDTO))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
 
+    @GetMapping("/all")
+    public Flux<InventoryResponseDTO> getAllInventories() {
+        return productInventoryService.getAllInventories();
     }
 
 }

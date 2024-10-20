@@ -26,8 +26,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static com.petclinic.inventoryservice.datalayer.Product.Status.AVAILABLE;
-import static com.petclinic.inventoryservice.datalayer.Product.Status.RE_ORDER;
+import static com.petclinic.inventoryservice.datalayer.Product.Status.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -87,14 +86,14 @@ class InventoryControllerUnitTest {
             .type("Medications")
             .build();
 
-    Inventory inventory4 = Inventory.builder()
-            .inventoryId(UUID.randomUUID().toString())
-            .inventoryName("Medications")
-            .inventoryType(inventoryType4.getType())
-            .inventoryDescription("Antibiotics for pet infections")
-            .inventoryImage("https://www.fda.gov/files/iStock-157317886.jpg")
-            .inventoryBackupImage("https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14")
-            .build();
+//    Inventory inventory4 = Inventory.builder()
+//            .inventoryId(UUID.randomUUID().toString())
+//            .inventoryName("Medications")
+//            .inventoryType(inventoryType4.getType())
+//            .inventoryDescription("Antibiotics for pet infections")
+//            .inventoryImage("https://www.fda.gov/files/iStock-157317886.jpg")
+//            .inventoryBackupImage("https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14")
+//            .build();
 
 
       ProductResponseDTO lowStockProduct = ProductResponseDTO.builder()
@@ -1680,7 +1679,128 @@ class InventoryControllerUnitTest {
                     assertArrayEquals(pdfContent, content); // Check if the returned content matches the mocked content
                 });
 
-}
+    }
+
+    @Test
+    public void testUpdateProductInventoryId_Success() {
+        // Mock response DTO
+        ProductResponseDTO mockResponse = new ProductResponseDTO();
+        mockResponse.setProductId("prod123");
+        mockResponse.setInventoryId("newInventory123");
+
+        // Mock the service method
+        when(productInventoryService.updateProductInventoryId(anyString(), anyString(), anyString()))
+                .thenReturn(Mono.just(mockResponse));
+
+        // Perform the PUT request
+        webTestClient.put()
+                .uri("/inventory/currentInventory123/products/prod123/updateInventoryId/newInventory123")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(ProductResponseDTO.class)
+                .value(response -> {
+                    // Assert that the returned DTO has the expected values
+                    assert response.getProductId().equals("prod123");
+                    assert response.getInventoryId().equals("newInventory123");
+                });
+    }
+
+    @Test
+    void testUpdateProductInventoryId_NotFound() {
+        // Given
+        String currentInventoryId = "invalidInventoryId";
+        String productId = "invalidProductId";
+        String newInventoryId = "invalidNewInventoryId";
+
+        // Mocking the service to return empty Mono
+        when(productInventoryService.updateProductInventoryId(currentInventoryId, productId, newInventoryId))
+                .thenReturn(Mono.empty());
+
+        // When and Then
+        webTestClient.put()
+                .uri("/inventory/{currentInventoryId}/products/{productId}/updateInventoryId/{newInventoryId}",
+                        currentInventoryId, productId, newInventoryId)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    void restockLowStockProduct_ValidRequest_ShouldSucceed() {
+        // Arrange
+        String inventoryId = "inventoryId_1";
+        String productId = "productId_1";
+        Integer productQuantity = 10;
+
+        ProductResponseDTO updatedProductResponseDTO = ProductResponseDTO.builder()
+                .inventoryId(inventoryId)
+                .productId(productId)
+                .productName("Restocked Product")
+                .productDescription("Restocked product description")
+                .productPrice(100.00)
+                .productQuantity(productQuantity)
+                .build();
+
+        when(productInventoryService.restockLowStockProduct(inventoryId, productId, productQuantity))
+                .thenReturn(Mono.just(updatedProductResponseDTO));
+
+        // Act and Assert
+        webTestClient
+                .put()
+                .uri("/inventory/{inventoryId}/products/{productId}/restockProduct?productQuantity={productQuantity}", inventoryId, productId, productQuantity)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(ProductResponseDTO.class)
+                .value(responseDTO -> {
+                    assertNotNull(responseDTO);
+                    assertEquals(updatedProductResponseDTO.getInventoryId(), responseDTO.getInventoryId());
+                    assertEquals(updatedProductResponseDTO.getProductId(), responseDTO.getProductId());
+                    assertEquals(updatedProductResponseDTO.getProductQuantity(), responseDTO.getProductQuantity());
+                });
+
+        // Verify that the service method was called with the correct arguments
+        verify(productInventoryService, times(1)).restockLowStockProduct(inventoryId, productId, productQuantity);
+    }
+
+    @Test
+    void restockLowStockProduct_InvalidQuantity_ShouldReturnBadRequest() {
+        // Arrange
+        String inventoryId = "inventoryId_1";
+        String productId = "productId_1";
+        Integer invalidQuantity = 0;
+
+        // Act and Assert
+        webTestClient
+                .put()
+                .uri("/inventory/{inventoryId}/products/{productId}/restockProduct?productQuantity={productQuantity}", inventoryId, productId, invalidQuantity)
+                .exchange()
+                .expectStatus().isBadRequest();
+
+        // Verify that the service method was not called
+        verify(productInventoryService, times(0)).restockLowStockProduct(any(), any(), any());
+    }
+
+    @Test
+    void restockLowStockProduct_ProductNotFound_ShouldReturnNotFound() {
+        // Arrange
+        String inventoryId = "inventoryId_1";
+        String productId = "nonExistentProductId";
+        Integer productQuantity = 10;
+
+        when(productInventoryService.restockLowStockProduct(inventoryId, productId, productQuantity))
+                .thenReturn(Mono.empty());
+
+        // Act and Assert
+        webTestClient
+                .put()
+                .uri("/inventory/{inventoryId}/products/{productId}/restockProduct?productQuantity={productQuantity}", inventoryId, productId, productQuantity)
+                .exchange()
+                .expectStatus().isNotFound();
+
+        // Verify that the service method was called with the correct arguments
+        verify(productInventoryService, times(1)).restockLowStockProduct(inventoryId, productId, productQuantity);
+    }
+
 
 
 }

@@ -1,16 +1,16 @@
-.shown {
-  fill: yellow;
+.star-shown {
+  fill: #fecf0a;
 }
 
-.star {
+.star-hover:hover {
+  fill: #fecf0a;
+}
+
+.star-pointer {
   cursor: pointer;
 }
 
-.star:hover {
-  fill: yellow;
-}
-
-.delete-button {
+.delete-button-rating {
   cursor: pointer;
   width: 20px;
   height: 20px;
@@ -19,4 +19,24 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.partial-star {
+  overflow: hidden;
+  position: absolute;
+  top: 0;
+}
+
+.empty-star {
+  display: inline-block;
+  fill: #c5cad4;
+}
+
+.star-container {
+  display: flex;
+  flex-direction: row;
+}
+
+.star-inner-container {
+  position: relative;
 }

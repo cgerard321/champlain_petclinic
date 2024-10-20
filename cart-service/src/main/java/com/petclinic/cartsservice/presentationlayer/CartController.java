@@ -125,8 +125,9 @@ public class CartController {
     @PostMapping("/{cartId}/checkout")
     public Mono<ResponseEntity<CartResponseModel>> checkoutCart(@PathVariable String cartId) {
         return cartService.checkoutCart(cartId)
-                .map(cart -> new ResponseEntity<>(cart, HttpStatus.OK))
-                .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+                .map(cartResponse -> ResponseEntity.ok(cartResponse))
+                .onErrorResume(NotFoundException.class, e -> Mono.just(ResponseEntity.notFound().build()))
+                .onErrorResume(InvalidInputException.class, e -> Mono.just(ResponseEntity.badRequest().body(null)));
     }
 
     @GetMapping(value = "/customer/{customerId}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -155,15 +156,21 @@ public class CartController {
                 )
                 .map(ResponseEntity::ok)
                 .onErrorResume(e -> {
-                    if (e instanceof NotFoundException || e instanceof InvalidInputException) {
+                    if (e instanceof InvalidInputException) {
                         CartResponseModel errorResponse = new CartResponseModel();
                         errorResponse.setMessage(e.getMessage());
                         return Mono.just(ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(errorResponse));
+                    } else if (e instanceof NotFoundException) {
+                        CartResponseModel errorResponse = new CartResponseModel();
+                        errorResponse.setMessage(e.getMessage());
+                        return Mono.just(ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse));
                     } else {
-                        return Mono.error(e);
+                        return Mono.error(e); // Let other exceptions propagate
                     }
                 });
     }
+
+
 
     /**
      * Move product from wishlist to cart.
@@ -181,12 +188,16 @@ public class CartController {
                 )
                 .map(ResponseEntity::ok)
                 .onErrorResume(e -> {
-                    if (e instanceof NotFoundException || e instanceof InvalidInputException) {
+                    if (e instanceof InvalidInputException) {
                         CartResponseModel errorResponse = new CartResponseModel();
                         errorResponse.setMessage(e.getMessage());
                         return Mono.just(ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(errorResponse));
+                    } else if (e instanceof NotFoundException) {
+                        CartResponseModel errorResponse = new CartResponseModel();
+                        errorResponse.setMessage(e.getMessage());
+                        return Mono.just(ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse));
                     } else {
-                        return Mono.error(e);
+                        return Mono.error(e); // Let other exceptions propagate
                     }
                 });
     }

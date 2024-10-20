@@ -3,10 +3,8 @@ package com.petclinic.bffapigateway.domainclientlayer;
 import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillStatus;
-import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -17,8 +15,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.awt.print.Pageable;
-import java.time.LocalDate;
 import java.util.Optional;
 
 
@@ -41,7 +37,7 @@ public class BillServiceClient {
 
     }
 
-    public Mono<BillResponseDTO> getBilling(final String billId) {
+    public Mono<BillResponseDTO> getBillById(final String billId) {
         return webClientBuilder.build().get()
                 .uri(billServiceUrl + "/{billId}", billId)
                 .retrieve()
@@ -61,7 +57,7 @@ public class BillServiceClient {
                 .retrieve()
                 .bodyToFlux(BillResponseDTO.class);
     }
-    public Flux<BillResponseDTO> getAllBilling() {
+    public Flux<BillResponseDTO> getAllBills() {
         return webClientBuilder.build().get()
                 .uri(billServiceUrl)
                 .retrieve()
@@ -165,21 +161,21 @@ public class BillServiceClient {
                 .bodyToMono(Long.class);
     }
 
-    public Flux<BillResponseDTO> getAllPaidBilling() {
+    public Flux<BillResponseDTO> getAllPaidBills() {
         return webClientBuilder.build().get()
                 .uri(billServiceUrl + "/paid")
                 .retrieve()
                 .bodyToFlux(BillResponseDTO.class);
     }
 
-    public Flux<BillResponseDTO> getAllUnpaidBilling() {
+    public Flux<BillResponseDTO> getAllUnpaidBills() {
         return webClientBuilder.build().get()
                 .uri(billServiceUrl + "/unpaid")
                 .retrieve()
                 .bodyToFlux(BillResponseDTO.class);
     }
 
-    public Flux<BillResponseDTO> getAllOverdueBilling() {
+    public Flux<BillResponseDTO> getAllOverdueBills() {
         return webClientBuilder.build().get()
                 .uri(billServiceUrl + "/overdue")
                 .retrieve()
@@ -214,7 +210,7 @@ public class BillServiceClient {
     }
 
     public Mono<Void> deleteBill(final String billId) {
-        return getBilling(billId)
+        return getBillById(billId)
                 .flatMap(bill -> {
                     if (bill.getBillStatus() == BillStatus.UNPAID || bill.getBillStatus() == BillStatus.OVERDUE) {
                         return Mono.error(new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Cannot delete a bill that is unpaid or overdue."));
@@ -317,6 +313,18 @@ public class BillServiceClient {
                 .uri(billServiceUrl + "/customer/{customerId}/bills/current-balance", customerId)
                 .retrieve()
                 .bodyToMono(Double.class);
+
+    public Flux<BillResponseDTO> getBillsByMonth(int year, int month) {
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(billServiceUrl + "/month")
+                .queryParam("year", year)
+                .queryParam("month", month);
+
+        return webClientBuilder.build()
+                .get()
+                .uri(builder.build().toUri())
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToFlux(BillResponseDTO.class);
     }
 
 }

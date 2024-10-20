@@ -1,11 +1,17 @@
 package com.petclinic.inventoryservice.businesslayer;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.pdf.PdfWriter;
 import com.petclinic.inventoryservice.datalayer.Inventory.Inventory;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryRepository;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryType;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryTypeRepository;
 import com.petclinic.inventoryservice.datalayer.Product.Product;
 import com.petclinic.inventoryservice.datalayer.Product.ProductRepository;
+import com.petclinic.inventoryservice.datalayer.Product.Status;
 import com.petclinic.inventoryservice.presentationlayer.*;
+import com.petclinic.inventoryservice.utils.EntityDTOUtil;
+import com.petclinic.inventoryservice.utils.ImageUtil;
 import com.petclinic.inventoryservice.utils.exceptions.InvalidInputException;
 import com.petclinic.inventoryservice.utils.exceptions.NotFoundException;
 import org.junit.jupiter.api.Test;
@@ -19,10 +25,10 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.io.ByteArrayOutputStream;
+import java.util.*;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -85,6 +91,9 @@ class ProductInventoryServiceUnitTest {
             .type("Internal")
             .build();
 
+    InputStream inputStream = getClass().getResourceAsStream("/images/DiagnosticKitImage.jpg");
+    byte[] diagnosticKitImage = ImageUtil.readImage(inputStream);
+
     Inventory inventory = Inventory.builder()
             .id("1")
             .inventoryId("1")
@@ -92,6 +101,7 @@ class ProductInventoryServiceUnitTest {
             .inventoryDescription("Medication for procedures")
             .inventoryImage("https://www.fda.gov/files/iStock-157317886.jpg")
             .inventoryBackupImage("https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14")
+            .imageUploaded(diagnosticKitImage)
             .build();
     ProductRequestDTO productRequestDTO = ProductRequestDTO.builder()
             .productName("Benzodiazepines")
@@ -110,6 +120,9 @@ class ProductInventoryServiceUnitTest {
             .productQuantity(3) // low stock
             .productSalePrice(8.99)
             .build();
+
+    ProductInventoryServiceUnitTest() throws IOException {
+    }
 
     @Test
     void getProductsInInventoryByInventoryIdAndProductFieldPagination_ShouldSucceed(){
@@ -1669,6 +1682,36 @@ class ProductInventoryServiceUnitTest {
     }
 
     @Test
+    public void CreateSupplyPdfThrowsDocumentException() throws DocumentException {
+        String inventoryId = "valid-id";
+
+        // Create mock Product objects with correct parameters for Product constructor
+        Product product1 = new Product("1", "P001", inventoryId, "Product1", "Description1", 10, 5.99, 7.99, Status.AVAILABLE);
+        Product product2 = new Product("2", "P002", inventoryId, "Product2", "Description2", 20, 10.99, 12.99, Status.RE_ORDER);
+
+        // Mock the repository to return a Flux of products
+        when(productRepository.findAllProductsByInventoryId(inventoryId))
+                .thenReturn(Flux.just(product1, product2));
+
+        // Mock PdfWriter.getInstance to throw DocumentException
+        mockStatic(PdfWriter.class);
+        when(PdfWriter.getInstance(any(Document.class), any(ByteArrayOutputStream.class)))
+                .thenThrow(new DocumentException("PDF generation error"));
+
+        // Call the method and expect an error
+        Mono<byte[]> result = productInventoryService.createSupplyPdf(inventoryId);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof RuntimeException &&
+                        throwable.getMessage().equals("Error generating PDF"))
+                .verify();
+
+        // Verify the interaction with the repository
+        verify(productRepository, times(1)).findAllProductsByInventoryId(inventoryId);
+    }
+
+
+    @Test
     void createSupplyPdf_SuccessfullyGeneratesPdf() {
         // Arrange
         String inventoryId = "valid-id";
@@ -1701,6 +1744,201 @@ class ProductInventoryServiceUnitTest {
                 .verifyComplete();
     }
 
+    @Test
+    void updateProductInventoryId_withValidProduct_shouldUpdateAndReturnProduct() {
+        // Arrange
+        String currentInventoryId = "1";
+        String productId = "101";
+        String newInventoryId = "2";
+
+        Product product = Product.builder()
+                .id("1")
+                .inventoryId(currentInventoryId)
+                .productId(productId)
+                .productName("Product Name")
+                .productPrice(50.0)
+                .productQuantity(10)
+                .productSalePrice(10.10)
+                .build();
+
+        // Mocking behavior
+        when(productRepository.findProductByInventoryIdAndProductId(currentInventoryId, productId))
+                .thenReturn(Mono.just(product));
+
+        // Update the inventory ID on the product before saving
+        product.setInventoryId(newInventoryId);
+
+        when(productRepository.save(any(Product.class)))
+                .thenReturn(Mono.just(product));
+
+        // Act
+        Mono<ProductResponseDTO> result = productInventoryService.updateProductInventoryId(currentInventoryId, productId, newInventoryId);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNextMatches(updatedProduct -> {
+                    assertNotNull(updatedProduct);
+                    assertEquals(newInventoryId, updatedProduct.getInventoryId());
+                    return true; // This indicates that the assertion has passed
+                })
+                .verifyComplete();
+
+        // Verify that the methods were called
+        verify(productRepository, times(1)).findProductByInventoryIdAndProductId(currentInventoryId, productId);
+        verify(productRepository, times(1)).save(any());
+    }
+
+
+    @Test
+    void updateProductInventoryId_withInvalidProductId_shouldThrowNotFoundException() {
+        // Arrange
+        String currentInventoryId = "1";
+        String invalidProductId = "999";
+        String newInventoryId = "2";
+
+        // Mocking behavior
+        when(productRepository.findProductByInventoryIdAndProductId(currentInventoryId, invalidProductId))
+                .thenReturn(Mono.empty());
+
+        // Act & Assert
+        NotFoundException exception = assertThrows(NotFoundException.class,
+                () -> productInventoryService.updateProductInventoryId(currentInventoryId, invalidProductId, newInventoryId).block());
+
+        assertEquals("Product not found with id: " + invalidProductId, exception.getMessage());
+        verify(productRepository, times(1)).findProductByInventoryIdAndProductId(currentInventoryId, invalidProductId);
+        verify(productRepository, times(0)).save(any());
+    }
+
+    @Test
+    void getAllInventories_shouldReturnAllInventories() {
+        // Arrange
+        Inventory inventory = new Inventory();
+        inventory.setInventoryId("1");
+        inventory.setInventoryName("Sample Inventory");
+        inventory.setInventoryType("Type A");
+        inventory.setInventoryDescription("This is a sample inventory.");
+
+        InventoryResponseDTO inventoryResponseDTO = EntityDTOUtil.toInventoryResponseDTO(inventory); // Convert to DTO
+
+        // Mock repository behavior
+        when(inventoryRepository.findAll()).thenReturn(Flux.just(inventory));
+
+        // Act
+        Flux<InventoryResponseDTO> result = productInventoryService.getAllInventories();
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNextMatches(responseDTO -> responseDTO.getInventoryId().equals(inventoryResponseDTO.getInventoryId()))
+                .verifyComplete();
+    }
+
+    @Test
+    void restockLowStockProduct_WithValidInputs_ShouldSucceed() {
+        // Arrange
+        String inventoryId = "1";
+        String productId = "12345";
+        int restockQuantity = 5;
+
+        Product product = Product.builder()
+                .id(UUID.randomUUID().toString())
+                .productId(productId)
+                .inventoryId(inventoryId)
+                .productName("Test Product")
+                .productDescription("Test Description")
+                .productPrice(50.00)
+                .productQuantity(10)
+                .productSalePrice(20.00)
+                .build();
+
+        Product updatedProduct = Product.builder()
+                .id(product.getId())
+                .productId(productId)
+                .inventoryId(inventoryId)
+                .productName("Test Product")
+                .productDescription("Test Description")
+                .productPrice(50.00)
+                .productQuantity(15) // Updated quantity after restock
+                .productSalePrice(20.00)
+                .build();
+
+        when(productRepository.findProductByInventoryIdAndProductId(inventoryId, productId))
+                .thenReturn(Mono.just(product));
+        when(productRepository.save(any(Product.class)))
+                .thenReturn(Mono.just(updatedProduct));
+
+        // Act
+        Mono<ProductResponseDTO> result = productInventoryService.restockLowStockProduct(inventoryId, productId, restockQuantity);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNextMatches(responseDTO -> {
+                    assertNotNull(responseDTO);
+                    assertEquals(productId, responseDTO.getProductId());
+                    assertEquals(15, responseDTO.getProductQuantity()); // Check the updated quantity
+                    return true;
+                })
+                .verifyComplete();
+
+        verify(productRepository).findProductByInventoryIdAndProductId(inventoryId, productId);
+        verify(productRepository).save(any(Product.class));
+    }
+
+    @Test
+    void restockLowStockProduct_WithNonExistentProduct_ShouldThrowNotFoundException() {
+        // Arrange
+        String inventoryId = "1";
+        String productId = "nonExistentProduct";
+        int restockQuantity = 5;
+
+        when(productRepository.findProductByInventoryIdAndProductId(inventoryId, productId))
+                .thenReturn(Mono.empty());
+
+        // Act
+        Mono<ProductResponseDTO> result = productInventoryService.restockLowStockProduct(inventoryId, productId, restockQuantity);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof NotFoundException &&
+                        throwable.getMessage().equals("Product with id: " + productId + "not found in inventory " + inventoryId))
+                .verify();
+
+        verify(productRepository).findProductByInventoryIdAndProductId(inventoryId, productId);
+        verify(productRepository, never()).save(any(Product.class));
+    }
+
+    @Test
+    void restockLowStockProduct_WithInvalidQuantity_ShouldThrowInvalidInputException() {
+        // Arrange
+        String inventoryId = "1";
+        String productId = "12345";
+        int restockQuantity = -5; // Invalid quantity
+
+        Product product = Product.builder()
+                .id(UUID.randomUUID().toString())
+                .productId(productId)
+                .inventoryId(inventoryId)
+                .productName("Test Product")
+                .productDescription("Test Description")
+                .productPrice(50.00)
+                .productQuantity(10)
+                .productSalePrice(20.00)
+                .build();
+
+        when(productRepository.findProductByInventoryIdAndProductId(inventoryId, productId))
+                .thenReturn(Mono.just(product));
+
+        // Act
+        Mono<ProductResponseDTO> result = productInventoryService.restockLowStockProduct(inventoryId, productId, restockQuantity);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof InvalidInputException &&
+                        throwable.getMessage().equals("The restock quantity must be greater than 0."))
+                .verify();
+
+        verify(productRepository).findProductByInventoryIdAndProductId(inventoryId, productId);
+        verify(productRepository, never()).save(any(Product.class));
+    }
 
 
 }

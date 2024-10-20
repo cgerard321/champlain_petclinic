@@ -41,4 +41,9 @@ public interface ProductInventoryService {
 
     Mono<byte[]> createSupplyPdf(String inventoryId);
 
+    Mono<ProductResponseDTO> restockLowStockProduct(String inventoryId, String productId, Integer productQuantity);
+
+    Mono<ProductResponseDTO> updateProductInventoryId(String currentInventoryId, String productId, String newInventoryId);
+
+    Flux<InventoryResponseDTO> getAllInventories();
 }

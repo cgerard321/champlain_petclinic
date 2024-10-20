@@ -11,6 +11,7 @@ import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewResponseDTO;
 import com.petclinic.bffapigateway.presentationlayer.BFFApiGatewayController;
 import com.petclinic.bffapigateway.presentationlayer.v2.VisitController;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -18,6 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +31,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.io.ByteArrayInputStream;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -100,16 +104,24 @@ public class VisitControllerUnitTest {
     EmergencyRequestDTO emergencyRequestDTO = EmergencyRequestDTO.builder()
             .visitDate(LocalDateTime.now())
             .description("Updated Emergency")
-            .petName("Oscar")
+            .petId("Oscar")
+            .practitionerId("2332222232323234hhh232")
             .urgencyLevel(UrgencyLevel.MEDIUM)
             .emergencyType("Accident")
             .build();
 
-    EmergencyResponseDTO emergencyResponseDTO = EmergencyResponseDTO.builder()
+     EmergencyResponseDTO emergencyResponseDTO = EmergencyResponseDTO.builder()
             .visitEmergencyId(UUID.randomUUID().toString())
             .visitDate(emergencyRequestDTO.getVisitDate())
             .description(emergencyRequestDTO.getDescription())
-            .petName(emergencyRequestDTO.getPetName())
+            .petId(emergencyRequestDTO.getPetId())
+             .petName("hamid")
+             .petBirthDate(new Date())
+             .practitionerId(emergencyRequestDTO.getPractitionerId())
+             .vetFirstName("carlos")
+             .vetLastName("ambock")
+             .vetEmail("carlos@gmail.com")
+             .vetPhoneNumber("540-233-2323")
             .urgencyLevel(emergencyRequestDTO.getUrgencyLevel())
             .emergencyType(emergencyRequestDTO.getEmergencyType())
             .build();
@@ -469,8 +481,87 @@ public class VisitControllerUnitTest {
         verify(visitsServiceClient, times(1)).getAllEmergency();
     }
 
+    @Test
+    void postEmergency_whenValidRequest_thenReturnCreatedResponse() {
+        // Arrange
+        when(visitsServiceClient.createEmergency(any(Mono.class)))
+                .thenReturn(Mono.just(emergencyResponseDTO));
+
+        // Act
+        webTestClient.post()
+                .uri(EMERGENCY_URL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(emergencyRequestDTO)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody(EmergencyResponseDTO.class)
+                .isEqualTo(emergencyResponseDTO);
+
+        // Assert
+        verify(visitsServiceClient, times(1)).createEmergency(any(Mono.class));
+    }
 
     @Test
+    void getEmergencyVisitsByOwnerId_whenOwnerExists_thenReturnFluxVisitResponseDTO() {
+        // Arrange
+        String ownerId = "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a";
+        when(bffApiGatewayController.getEmergencyVisitsByOwnerId(ownerId))
+                .thenReturn(Flux.just(emergencyResponseDTO));
+
+
+        // Act
+        webTestClient.get()
+                .uri(BASE_VISIT_URL + "/emergency/owners/{ownerId}", ownerId)
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(EmergencyResponseDTO.class)
+                .hasSize(1);
+
+        // Assert
+        verify(bffApiGatewayController, times(1)).getEmergencyVisitsByOwnerId(ownerId);
+    }
+
+    @Test
+    void getEmergencyVisitsByOwnerId_whenOwnerDoesNotExist_thenReturnEmptyFlux() {
+        // Arrange
+        String ownerId = "e6c7398e-8ac4-4e10-9ee0-03ef33f03610";
+        when(bffApiGatewayController.getEmergencyVisitsByOwnerId(ownerId))
+                .thenReturn(Flux.empty());
+
+        // Act
+        webTestClient.get()
+                .uri(BASE_VISIT_URL + "/emergency/owners/{ownerId}", ownerId)
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(EmergencyResponseDTO.class)
+                .hasSize(0);
+
+        // Assert
+        verify(bffApiGatewayController, times(1)).getEmergencyVisitsByOwnerId(ownerId);
+    }
+
+    @Test
+    void getEmergencyByEmergencyId_whenValidEmergencyId_thenReturnEmergencyResponseDTO() {
+        // Arrange
+        when(visitsServiceClient.getEmergencyByEmergencyId(emergencyResponseDTO.getVisitEmergencyId()))
+                .thenReturn(Mono.just(emergencyResponseDTO));
+
+        // Act
+        webTestClient.get()
+                .uri(EMERGENCY_URL + "/{emergencyId}", emergencyResponseDTO.getVisitEmergencyId())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(EmergencyResponseDTO.class)
+                .isEqualTo(emergencyResponseDTO);
+
+        // Assert
+        verify(visitsServiceClient, times(1)).getEmergencyByEmergencyId(emergencyResponseDTO.getVisitEmergencyId());
+    }
+
+  /*  @Test
     void postEmergency_whenValidRequest_thenReturnCreatedResponse() {
         // Arrange
         when(visitsServiceClient.createEmergency(any(Mono.class)))
@@ -566,6 +657,8 @@ public class VisitControllerUnitTest {
         // Verify the deleteEmergency method is invoked, not getEmergencyByEmergencyId
         verify(visitsServiceClient, times(1)).deleteEmergency(emergencyResponseDTO.getVisitEmergencyId());
     }
+
+   */
 
     @Test
     void getVisitsByOwnerId_whenOwnerDoesNotExist_thenReturnEmptyFlux() {
@@ -754,5 +847,180 @@ public class VisitControllerUnitTest {
         // Assert
         verify(visitsServiceClient, times(1)).deleteReview(eq("INVALID_ID"));  // Ensure the service method was called once
     }
+
+    @Test
+    void getReviewsByOwnerId_whenOwnerExists_thenReturnFluxReviewResponseDTO() {
+        // Arrange
+        String ownerId = "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a";
+        when(visitsServiceClient.getReviewsByOwnerId(ownerId))
+                .thenReturn(Flux.just(reviewResponseDTO));
+
+        // Act
+        webTestClient.get()
+                .uri(BASE_VISIT_URL + "/owners/{ownerId}/reviews", ownerId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(ReviewResponseDTO.class)
+                .hasSize(1)
+                .contains(reviewResponseDTO);
+
+        // Assert
+        verify(visitsServiceClient, times(1)).getReviewsByOwnerId(ownerId);
+    }
+
+    @Test
+    void getReviewsByOwnerId_whenOwnerDoesNotExist_thenReturnEmptyFlux() {
+        // Arrange
+        String ownerId = "e6c7398e-8ac4-4e10-9ee0-03ef33f0361e";
+        when(visitsServiceClient.getReviewsByOwnerId(ownerId))
+                .thenReturn(Flux.empty());
+
+        // Act
+        webTestClient.get()
+                .uri(BASE_VISIT_URL + "/owners/{ownerId}/reviews", ownerId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(ReviewResponseDTO.class)
+                .hasSize(0);
+
+        // Assert
+        verify(visitsServiceClient, times(1)).getReviewsByOwnerId(ownerId);
+    }
+
+    @Test
+    void addReviewCustomer_whenValidRequest_thenReturnCreatedResponse() {
+        String ownerId = "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a";
+        ReviewRequestDTO reviewRequestDTO = ReviewRequestDTO.builder()
+                .review("Great service")
+                .reviewerName("Jane Doe")
+                .rating(5)
+                .dateSubmitted(LocalDateTime.now())
+                .build();
+        ReviewResponseDTO reviewResponseDTO = ReviewResponseDTO.builder()
+                .reviewId("R001")
+                .review("Great service")
+                .reviewerName("Jane Doe")
+                .rating(5)
+                .dateSubmitted(LocalDateTime.now())
+                .build();
+
+        when(visitsServiceClient.addCustomerReview(eq(ownerId), any(ReviewRequestDTO.class)))
+                .thenReturn(Mono.just(reviewResponseDTO));
+
+        webTestClient.post()
+                .uri(BASE_VISIT_URL + "/owners/{ownerId}/reviews", ownerId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(reviewRequestDTO)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody(ReviewResponseDTO.class)
+                .isEqualTo(reviewResponseDTO);
+
+        verify(visitsServiceClient, times(1)).addCustomerReview(eq(ownerId), any(ReviewRequestDTO.class));
+    }
+
+    @Test
+    void addReviewCustomer_whenInvalidRequest_thenReturnBadRequest() {
+        String ownerId = "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a";
+        ReviewRequestDTO reviewRequestDTO = ReviewRequestDTO.builder()
+                .review("")
+                .reviewerName("")
+                .rating(0)
+                .dateSubmitted(LocalDateTime.now())
+                .build();
+
+        when(visitsServiceClient.addCustomerReview(eq(ownerId), any(ReviewRequestDTO.class)))
+                .thenReturn(Mono.empty());
+
+        webTestClient.post()
+                .uri(BASE_VISIT_URL + "/owners/{ownerId}/reviews", ownerId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(reviewRequestDTO)
+                .exchange()
+                .expectStatus().isBadRequest();
+
+        verify(visitsServiceClient, times(1)).addCustomerReview(eq(ownerId), any(ReviewRequestDTO.class));
+    }
+
+    @Test
+    void deleteCustomerReview_whenValidOwnerIdAndReviewId_thenReturnOkResponse() {
+        String ownerId = "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a";
+        String reviewId = UUID.randomUUID().toString();
+
+        when(visitsServiceClient.deleteReview(ownerId, reviewId))
+                .thenReturn(Mono.empty());
+
+        webTestClient.delete()
+                .uri(BASE_VISIT_URL + "/owners/{ownerId}/reviews/{reviewId}", ownerId, reviewId)
+                .exchange()
+                .expectStatus().isNoContent();
+
+        verify(visitsServiceClient, times(1)).deleteReview(ownerId, reviewId);
+    }
+
+    @Test
+    void deleteCustomerReview_whenInvalidOwnerId_thenReturnNoContent() {
+        String ownerId = "invalidOwnerId";
+        String reviewId = UUID.randomUUID().toString();
+
+        when(visitsServiceClient.deleteReview(ownerId, reviewId))
+                .thenReturn(Mono.empty());
+
+        webTestClient.delete()
+                .uri(BASE_VISIT_URL + "/owners/{ownerId}/reviews/{reviewId}", ownerId, reviewId)
+                .exchange()
+                .expectStatus().isNoContent();
+
+        verify(visitsServiceClient, times(1)).deleteReview(ownerId, reviewId);
+    }
+
+    @Test
+    void deleteCustomerReview_whenInvalidReviewId_thenReturnNoContent() {
+        String ownerId = "validOwnerId";
+        String reviewId = UUID.randomUUID().toString();
+
+        when(visitsServiceClient.deleteReview(ownerId, reviewId))
+                .thenReturn(Mono.empty());
+
+        webTestClient.delete()
+                .uri(BASE_VISIT_URL + "/owners/{ownerId}/reviews/{reviewId}", ownerId, reviewId)
+                .exchange()
+                .expectStatus().isNoContent();
+
+        verify(visitsServiceClient, times(1)).deleteReview(ownerId, reviewId);
+    }
+    @Test
+    void exportVisitsToCSV_ShouldReturnCSVFile() {
+        // Sample data to return
+        String csvContent = "VisitId,Description\n1,Checkup";
+        InputStreamResource csvData = new InputStreamResource(new ByteArrayInputStream(csvContent.getBytes()));
+        when(visitsServiceClient.exportVisitsToCSV()).thenReturn(Mono.just(csvData));
+
+        webTestClient.get()
+                .uri("/api/v2/gateway/visits/export")
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().valueEquals(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=visits.csv")
+                .expectHeader().contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .expectBody(String.class)
+                .consumeWith(response -> {
+                    // Check the response content
+                    Assertions.assertEquals(csvContent, new String(response.getResponseBody()));
+                });
+    }
+
+
+    @Test
+    void exportVisitsToCSV_ShouldReturnServerError_WhenServiceFails() {
+        when(visitsServiceClient.exportVisitsToCSV()).thenReturn(Mono.error(new RuntimeException("Service failed")));
+
+        webTestClient.get()
+                .uri("/api/v2/gateway/visits/export")
+                .exchange()
+                .expectStatus().is5xxServerError();
+    }
+
 
 }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.vet.dataaccesslayer.education.Education;
 import com.petclinic.vet.dataaccesslayer.education.EducationRepository;
 import com.petclinic.vet.dataaccesslayer.PhotoRepository;
+import com.petclinic.vet.exceptions.NotFoundException;
 import com.petclinic.vet.servicelayer.education.EducationRequestDTO;
 import com.petclinic.vet.servicelayer.education.EducationResponseDTO;
 import com.petclinic.vet.servicelayer.education.EducationService;
@@ -16,6 +17,7 @@ import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWeb
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.r2dbc.connection.init.ConnectionFactoryInitializer;
+import org.springframework.test.context.ActiveProfiles;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -28,6 +30,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
+@ActiveProfiles("test")
 @AutoConfigureWebTestClient
 class EducationServiceImplTest {
 
@@ -109,20 +112,42 @@ class EducationServiceImplTest {
 
     @Test
     void addEducationToVet() {
-        EducationRequestDTO educationRequestDTO = buildEducationRequestDTO();
+        // Arrange
+        when(vetRepository.findVetByVetId(anyString())).thenReturn(Mono.just(existingVet));
+        when(educationRepository.insert((Education) any())).thenReturn(Mono.just(education));
 
-        educationService.addEducationToVet(education.getVetId(), Mono.just(educationRequestDTO))
-                .map(educationResponseDTO -> {
-                    assertEquals(educationResponseDTO.getVetId(), educationRequestDTO.getVetId());
-                    assertEquals(educationResponseDTO.getSchoolName(), educationRequestDTO.getSchoolName());
-                    assertEquals(educationResponseDTO.getDegree(), educationRequestDTO.getDegree());
-                    assertEquals(educationResponseDTO.getFieldOfStudy(), educationRequestDTO.getFieldOfStudy());
-                    assertEquals(educationResponseDTO.getStartDate(), educationRequestDTO.getStartDate());
-                    assertEquals(educationResponseDTO.getEndDate(), educationRequestDTO.getEndDate());
-                    assertNotNull(educationResponseDTO.getEducationId());
-                    return educationResponseDTO;
-                });
+        // Act
+        Mono<EducationResponseDTO> educationResponseDTO = educationService.addEducationToVet(Vet_Id, Mono.just(educationRequestDTO));
+
+        // Assert
+        StepVerifier.create(educationResponseDTO)
+                .consumeNextWith(found -> {
+                    assertEquals(education.getEducationId(), found.getEducationId());
+                    assertEquals(education.getVetId(), found.getVetId());
+                    assertEquals(education.getSchoolName(), found.getSchoolName());
+                    assertEquals(education.getDegree(), found.getDegree());
+                    assertEquals(education.getFieldOfStudy(), found.getFieldOfStudy());
+                    assertEquals(education.getStartDate(), found.getStartDate());
+                    assertEquals(education.getEndDate(), found.getEndDate());
+                })
+                .verifyComplete();
     }
+
+    @Test
+    void addEducationToVet_VetNotFound() {
+        // Arrange
+        when(vetRepository.findVetByVetId(anyString())).thenReturn(Mono.empty());
+
+        // Act
+        Mono<EducationResponseDTO> educationResponseDTO = educationService.addEducationToVet(Vet_Id, Mono.just(educationRequestDTO));
+
+        // Assert
+        StepVerifier.create(educationResponseDTO)
+                .expectError(NotFoundException.class)
+                .verify();
+    }
+
+
 
     private EducationRequestDTO buildEducationRequestDTO() {
         return EducationRequestDTO.builder()

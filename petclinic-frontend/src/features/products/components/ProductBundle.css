@@ -1,0 +1,114 @@
+.product-bundle-card {
+  position: relative;
+  border: 3px outset #4caf50;
+  background-image: linear-gradient(to bottom right, white, #f1f1f1);
+  padding: 16px;
+  margin: 16px;
+  width: 320px;
+  border-radius: 5px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.product-bundle-products {
+  display: flex;
+  flex-wrap: wrap;
+  height: 250px;
+  overflow-y: auto;
+  border: 1px solid black;
+  border-radius: 15px;
+  scrollbar-width: none;
+  margin: 20px 0;
+  background-color: white;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.product-bundle-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin: 8px;
+  width: 100%;
+}
+
+.product-details {
+  display: flex;
+  flex-direction: column;
+  margin-left: 10px;
+}
+
+.deal-stamp {
+  position: absolute;
+  rotate: 40deg;
+  top: 0px;
+  right: -20px;
+  background-color: #ff0000;
+  color: #ffffff;
+  padding: 5px 20px;
+  font-size: 1em;
+  font-weight: bold;
+  transform: rotate(45deg);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1;
+  clip-path: polygon(
+    5% 0%,
+    95% 0%,
+    100% 5%,
+    100% 95%,
+    95% 100%,
+    5% 100%,
+    0% 95%,
+    0% 5%
+  );
+  transition:
+    transform 0.3s ease,
+    background-color 0.3s ease;
+  animation: pulse 2s infinite;
+}
+
+.product-bundle-item img {
+  max-width: 100px;
+  height: auto;
+  margin-bottom: 8px;
+}
+
+.original-price {
+  text-decoration: line-through;
+  color: #ff0000;
+}
+
+.bundle-price {
+  font-size: 1.5em;
+  color: #4caf50;
+}
+
+.bundle-title {
+  font-size: 1.5em;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .product-bundle-card {
+    width: auto;
+    margin: 16px 8px;
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: rotate(-45deg) scale(1);
+  }
+  25% {
+    transform: rotate(-45deg) scale(1.25);
+  }
+  50% {
+    transform: rotate(-45deg) scale(1.5);
+  }
+  75% {
+    transform: rotate(-45deg) scale(1.25);
+  }
+  100% {
+    transform: rotate(-45deg) scale(1);
+  }
+}

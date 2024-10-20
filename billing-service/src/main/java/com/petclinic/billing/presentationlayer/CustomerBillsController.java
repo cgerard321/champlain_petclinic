@@ -16,7 +16,7 @@ import reactor.core.publisher.Mono;
 @Slf4j
 @RequestMapping("/bills/customer/{customerId}/bills")
 public class CustomerBillsController {
-    
+
     private final BillService billService;
 
     public CustomerBillsController(BillService billService) {
@@ -25,24 +25,24 @@ public class CustomerBillsController {
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public Flux<BillResponseDTO> getBillsByCustomerId(@PathVariable("customerId") String customerId) {
-        return billService.GetBillsByCustomerId(customerId);
+        return billService.getBillsByCustomerId(customerId);
     }
 
     @GetMapping(value = "/status", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<BillResponseDTO> getBillsByStatus(@PathVariable("customerId") String customerId,
-            @RequestParam("status") BillStatus status) {
-        return billService.GetBillsByCustomerIdAndStatus(customerId, status);
+                                                  @RequestParam("status") BillStatus status) {
+        return billService.getBillsByCustomerIdAndStatus(customerId, status);
     }
 
     @GetMapping(value = "/{billId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<BillResponseDTO> getBillDetails(@PathVariable("customerId") String customerId,
-            @PathVariable("billId") String billId) {
-        return billService.GetBillByCustomerIdAndBillId(customerId, billId);
+                                                @PathVariable("billId") String billId) {
+        return billService.getBillByCustomerIdAndBillId(customerId, billId);
     }
 
     @GetMapping(value = "/{billId}/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
     public Mono<ResponseEntity<byte[]>> downloadBillPdf(@PathVariable String customerId,
-            @PathVariable String billId) {
+                                                        @PathVariable String billId) {
         return billService.generateBillPdf(customerId, billId)
                 .map(pdf -> {
                     HttpHeaders headers = new HttpHeaders();

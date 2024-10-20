@@ -3,12 +3,15 @@ package com.petclinic.billing.datalayer;
 //import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.mongodb.repository.Query;
 import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 //import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.time.LocalDate;
 
 @Repository
 public interface BillRepository extends ReactiveMongoRepository<Bill, String> {
@@ -34,4 +37,6 @@ public interface BillRepository extends ReactiveMongoRepository<Bill, String> {
 
     Flux<Bill> findByCustomerIdAndBillStatus(String customerId, BillStatus status);
 
+    @Query("{ 'date' : { $gte: ?0, $lt: ?1 } }")
+    Flux<Bill> findByDateBetween(LocalDate start, LocalDate end);
 }

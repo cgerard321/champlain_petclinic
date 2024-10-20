@@ -72,6 +72,12 @@ public class UserServiceImpl implements UserService {
         return userMapper.modelToDetailsList(userRepo.findAll());
     }
 
+@Override
+    public List<UserDetails> getAllUsers() {
+        List<User> users = userRepo.findAll();
+        return userMapper.modelToDetailsList(users);
+    }
+
     @Override
     public User createUser(@Valid UserIDLessRoleLessDTO userIDLessDTO) {
 
@@ -123,6 +129,19 @@ public class UserServiceImpl implements UserService {
             ////////////////////////////////////////
 
             return userRepo.save(user);
+    }
+
+    @Override
+    public User updateUser(String userId, UserPasswordLessDTO userPasswordLessDTO) {
+        User existingUser = userRepo.findUserByUserIdentifier_UserId(userId);
+        if (existingUser != null) {
+            existingUser.setUserIdentifier(new UserIdentifier(userId));
+            existingUser.setUsername(userPasswordLessDTO.getUsername());
+            existingUser.setEmail(userPasswordLessDTO.getEmail());
+            return userRepo.save(existingUser);
+        } else {
+            throw new NotFoundException("User not found for ID: " + userId);
+        }
     }
 
 //    @Override

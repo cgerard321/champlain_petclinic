@@ -4,6 +4,8 @@ import { NavBar } from '@/layouts/AppNavBar.tsx';
 import './VetDetails.css';
 import axios from 'axios';
 import DeleteVetPhoto from '@/pages/Vet/DeleteVetPhoto.tsx';
+import UpdateVetEducation from '@/pages/Vet/UpdateVetEducation';
+import AddEducation from '@/pages/Vet/AddEducation.tsx';
 
 interface VetResponseType {
   vetId: string;
@@ -34,6 +36,15 @@ interface EducationResponseType {
   endDate: string;
 }
 
+interface RatingResponseType {
+  ratingId: string;
+  rateScore: number;
+  rateDescription: string;
+  predefinedDescription: string;
+  rateDate: string;
+  customerName: string;
+}
+
 export default function VetDetails(): JSX.Element {
   const { vetId } = useParams<{ vetId: string }>();
   const [vet, setVet] = useState<VetResponseType | null>(null);
@@ -49,6 +60,28 @@ export default function VetDetails(): JSX.Element {
   const [specialtyId, setSpecialtyId] = useState('');
   const [specialtyName, setSpecialtyName] = useState('');
   const [enlargedPhoto, setEnlargedPhoto] = useState<string | null>(null);
+  const [formVisible, setFormVisible] = useState<boolean>(false);
+
+  const [selectedEducation, setSelectedEducation] =
+    useState<EducationResponseType | null>(null);
+  const [ratings, setRatings] = useState<RatingResponseType[] | null>(null);
+  useEffect(() => {
+    const fetchVetRatings = async (): Promise<void> => {
+      try {
+        const response = await fetch(
+          `http://localhost:8080/api/v2/gateway/vets/${vetId}/ratings`
+        );
+        if (!response.ok) {
+          throw new Error(`Error: ${response.statusText}`);
+        }
+        const data: RatingResponseType[] = await response.json();
+        setRatings(data);
+      } catch (error) {
+        setError('Failed to fetch vet ratings');
+      }
+    };
+    fetchVetRatings();
+  }, [vetId]);
 
   const fetchVetPhoto = useCallback(async (): Promise<void> => {
     try {
@@ -210,18 +243,80 @@ export default function VetDetails(): JSX.Element {
   const renderWorkHours = (workHoursJson: string): JSX.Element => {
     try {
       const workHours: Record<string, string[]> = JSON.parse(workHoursJson);
+      const daysOfWeek = [
+        'Monday',
+        'Tuesday',
+        'Wednesday',
+        'Thursday',
+        'Friday',
+        'Saturday',
+        'Sunday',
+      ];
+
+      const mergeHours = (hours: string[]): string => {
+        if (hours.length === 0) return '';
+
+        // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+        const formatHour = (hour: number) => {
+          const isPM = hour >= 12;
+          const adjustedHour = hour > 12 ? hour - 12 : hour;
+          return `${adjustedHour} ${isPM ? 'PM' : 'AM'}`;
+        };
+
+        // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+        const extractHour = (hourString: string) =>
+          parseInt(hourString.split('_')[1], 10);
+
+        const hourRanges: [number, number][] = hours.map(hour => {
+          const start = extractHour(hour);
+          const end = start + 1;
+          return [start, end];
+        });
+
+        const mergedRanges: string[] = [];
+        let currentRange = hourRanges[0];
+
+        for (let i = 1; i < hourRanges.length; i++) {
+          if (hourRanges[i][0] === currentRange[1]) {
+            currentRange[1] = hourRanges[i][1];
+          } else {
+            mergedRanges.push(
+              `${formatHour(currentRange[0])} - ${formatHour(currentRange[1])}`
+            );
+            currentRange = hourRanges[i];
+          }
+        }
+        mergedRanges.push(
+          `${formatHour(currentRange[0])} - ${formatHour(currentRange[1])}`
+        );
+
+        return mergedRanges.join(', ');
+      };
+
       return (
-        <div>
-          {Object.entries(workHours).map(([day, hours], index) => (
-            <div key={index}>
-              <strong>{day}:</strong>
-              <ul>
-                {hours.map((hour, idx) => (
-                  <li key={idx}>{hour}</li>
-                ))}
-              </ul>
-            </div>
-          ))}
+        <div className="work-hours-calendar">
+          <table>
+            <thead>
+              <tr>
+                <th>Day</th>
+                <th>Hours</th>
+              </tr>
+            </thead>
+            <tbody>
+              {daysOfWeek.map(day => (
+                <tr key={day}>
+                  <td>
+                    <strong>{day}</strong>
+                  </td>
+                  <td>
+                    {workHours[day]?.length
+                      ? mergeHours(workHours[day])
+                      : 'No hours available'}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       );
     } catch (error) {
@@ -324,6 +419,36 @@ export default function VetDetails(): JSX.Element {
             )}
           </section>
         )}
+
+        <section className="vet-ratings-info">
+          <h2>Ratings</h2>
+          {ratings && ratings.length > 0 ? (
+            ratings.map((rating, index) => (
+              <div key={index} className="rating-card">
+                <p>
+                  <strong>Customer:</strong>{' '}
+                  {rating.customerName || 'Anonymous'}
+                </p>
+                <p>
+                  <strong>Rating:</strong> {rating.rateScore} / 5
+                </p>
+                <p>
+                  <strong>Experience:</strong> {rating.predefinedDescription}
+                </p>
+                <p>
+                  <strong>Description:</strong> {rating.rateDescription}
+                </p>
+                <p>
+                  <strong>Rate Date:</strong>{' '}
+                  {rating.rateDate || 'No date available'}
+                </p>
+                <hr />
+              </div>
+            ))
+          ) : (
+            <p>No ratings available</p>
+          )}
+        </section>
 
         {vet && (
           <>
@@ -457,11 +582,45 @@ export default function VetDetails(): JSX.Element {
                     <p>
                       <strong>End Date:</strong> {edu.endDate}
                     </p>
+                    <div style={{ marginBottom: '20px', textAlign: 'right' }}>
+                      <button
+                        onClick={() => setFormVisible(prev => !prev)}
+                        style={{
+                          backgroundColor: formVisible ? '#ff6347' : '#4CAF50',
+                        }}
+                      >
+                        {formVisible ? 'Cancel' : 'Add Education'}
+                      </button>
+                      {formVisible && (
+                        <AddEducation
+                          vetId={vetId}
+                          onClose={() => setFormVisible(false)}
+                        />
+                      )}
+                    </div>
+
+                    <button
+                      className="btn btn-primary"
+                      onClick={event => {
+                        event.stopPropagation();
+                        setSelectedEducation(edu);
+                      }}
+                    >
+                      Update Education
+                    </button>
                     <hr />
                   </div>
                 ))
               ) : (
                 <p>No education details available</p>
+              )}
+              {selectedEducation && vetId && (
+                <UpdateVetEducation
+                  vetId={vetId}
+                  education={selectedEducation}
+                  educationId={selectedEducation.educationId}
+                  onClose={() => setSelectedEducation(null)}
+                />
               )}
             </section>
 

@@ -6,6 +6,7 @@ import com.petclinic.inventoryservice.datalayer.Inventory.InventoryType;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryTypeRepository;
 import com.petclinic.inventoryservice.datalayer.Product.Product;
 import com.petclinic.inventoryservice.datalayer.Product.ProductRepository;
+import com.petclinic.inventoryservice.utils.ImageUtil;
 import com.petclinic.inventoryservice.utils.exceptions.InvalidInputException;
 import com.petclinic.inventoryservice.utils.exceptions.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,6 +22,8 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 import static com.mongodb.assertions.Assertions.assertTrue;
@@ -68,6 +71,8 @@ class InventoryControllerIntegrationTest {
             .build();
 
 
+    InputStream inputStream = getClass().getResourceAsStream("/images/DiagnosticKitImage.jpg");
+    byte[] diagnosticKitImage = ImageUtil.readImage(inputStream);
 
     Inventory inventory1 = buildInventory(
             "inventoryId_3",
@@ -76,6 +81,7 @@ class InventoryControllerIntegrationTest {
             "inventoryDescription_3",
             "https://www.fda.gov/files/iStock-157317886.jpg",
             "https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14",
+            diagnosticKitImage,
             products
     );
 
@@ -88,13 +94,17 @@ class InventoryControllerIntegrationTest {
             "inventoryDescription_4",
             "https://www.fda.gov/files/iStock-157317886.jpg",
             "https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14",
+            diagnosticKitImage,
             products2
 
     );
 
+    InventoryControllerIntegrationTest() throws IOException {
+    }
+
 
     @BeforeEach
-    public void dbSetup() {
+    public void dbSetup()  {
 
 
         Publisher<Inventory> inventoryPublisher = inventoryRepository.deleteAll()
@@ -388,6 +398,19 @@ class InventoryControllerIntegrationTest {
                 });
     }
 
+    @Test
+    void getAllInventory_shouldSucceed2() {
+        webTestClient.get()
+                .uri("/inventory/all")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBodyList(InventoryResponseDTO.class)
+                .value((list) -> {
+                    assertNotNull(list);
+                });
+    }
 
     @Test
     public void getInventoryByInventoryId_withValidInventoryId_Should_Succeed(){
@@ -605,7 +628,7 @@ class InventoryControllerIntegrationTest {
                 .exchange()
                 .expectStatus().isNotFound();
     }
-    private Inventory buildInventory(String inventoryId, String name, String inventoryType, String inventoryDescription, String inventoryImage, String inventoryBackupImage, List<Product> products) {
+    private Inventory buildInventory(String inventoryId, String name, String inventoryType, String inventoryDescription, String inventoryImage, String inventoryBackupImage, byte[] diagnosticKitImage, List<Product> products) {
         return Inventory.builder()
                 .inventoryId(inventoryId)
                 .inventoryName(name)
@@ -613,6 +636,7 @@ class InventoryControllerIntegrationTest {
                 .inventoryDescription(inventoryDescription)
                 .inventoryImage(inventoryImage)
                 .inventoryBackupImage(inventoryBackupImage)
+                .imageUploaded(diagnosticKitImage)
                 .products(products)
                 .build();
     }
@@ -1219,6 +1243,87 @@ class InventoryControllerIntegrationTest {
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$.message").isEqualTo("Invalid Inventory Id");
+    }
+
+    @Test
+    void restockLowStockProduct_WithValidInputs_ShouldSucceed() {
+        // Arrange
+        int restockQuantity = 5;
+        String inventoryId = "1"; // Using the existing inventory setup
+        String productId = "123F567C9"; // Using the existing product setup
+
+        // Step 1: Retrieve the initial product details
+        webTestClient.get()
+                .uri("/inventory/{inventoryId}/products/{productId}", inventoryId, productId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(ProductResponseDTO.class)
+                .value(initialProductResponse -> {
+                    assertNotNull(initialProductResponse, "The initial product should not be null");
+
+                    // Get the initial quantity of the product
+                    int initialQuantity = initialProductResponse.getProductQuantity();
+                    System.out.println("Initial Quantity: " + initialQuantity);
+
+                    // Step 2: Perform the restock operation
+                    webTestClient.put()
+                            .uri(uriBuilder -> uriBuilder
+                                    .path("/inventory/{inventoryId}/products/{productId}/restockProduct")
+                                    .queryParam("productQuantity", restockQuantity)
+                                    .build(inventoryId, productId))
+                            .accept(MediaType.APPLICATION_JSON)
+                            .exchange()
+                            .expectStatus().isOk()
+                            .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                            .expectBody(ProductResponseDTO.class)
+                            .value(restockedProductResponse -> {
+                                assertNotNull(restockedProductResponse, "The restocked product should not be null");
+                                assertEquals(productId, restockedProductResponse.getProductId());
+                                assertEquals(inventoryId, restockedProductResponse.getInventoryId());
+
+                                int actualQuantity = restockedProductResponse.getProductQuantity();
+                                System.out.println("Restocked Product Quantity: " + actualQuantity);
+
+                                // Assert that the product quantity increased by the restock amount
+                                int expectedQuantity = initialQuantity + restockQuantity;
+                                assertEquals(expectedQuantity, actualQuantity,
+                                        "The product quantity should be the initial quantity plus the restock amount");
+                            });
+                });
+    }
+
+
+    @Test
+    void restockLowStockProduct_WithInvalidQuantity_ShouldReturnBadRequest() {
+        // Arrange
+        String inventoryId = "1";
+        String productId = "123F567C9";
+        int invalidQuantity = -5; // Invalid quantity
+
+        // Act & Assert
+        webTestClient.put()
+                .uri("/inventory/{inventoryId}/products/{productId}/restockProduct?productQuantity={quantity}",
+                        inventoryId, productId, invalidQuantity)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isBadRequest();
+    }
+
+    @Test
+    void restockLowStockProduct_WithZeroQuantity_ShouldReturnBadRequest() {
+        // Arrange
+        String inventoryId = "1";
+        String productId = "123F567C9";
+        int zeroQuantity = 0; // Zero quantity
+
+        // Act & Assert
+        webTestClient.put()
+                .uri("/inventory/{inventoryId}/products/{productId}/restockProduct?productQuantity={quantity}",
+                        inventoryId, productId, zeroQuantity)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isBadRequest();
     }
 
 

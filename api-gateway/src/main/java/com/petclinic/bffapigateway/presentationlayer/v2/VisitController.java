@@ -17,6 +17,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +26,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.io.ByteArrayInputStream;
 
 @RestController
 @RequiredArgsConstructor
@@ -34,7 +38,6 @@ import reactor.core.publisher.Mono;
 public class VisitController {
 
     private final VisitsServiceClient visitsServiceClient;
-
     private final BFFApiGatewayController bffApiGatewayController;
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
@@ -128,7 +131,30 @@ public class VisitController {
         return visitsServiceClient.getAllEmergency();
     }
 
-    @GetMapping(value="/emergency/{emergencyId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN})
+    @GetMapping(value = "/emergency/owners/{ownerId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<EmergencyResponseDTO> getEmergencyVisitsByOwnerId(final @PathVariable String ownerId) {
+        return bffApiGatewayController.getEmergencyVisitsByOwnerId(ownerId);
+    }
+
+    @PostMapping(value = "/emergency")
+    public Mono<ResponseEntity<EmergencyResponseDTO>> PostEmergency(@RequestBody Mono<EmergencyRequestDTO> emergencyRequestDTOMono){
+        return visitsServiceClient.createEmergency(emergencyRequestDTOMono)
+                .map(c->ResponseEntity.status(HttpStatus.CREATED).body(c))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
+    @GetMapping(value="/emergency/{visitEmergencyId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<EmergencyResponseDTO>> getEmergencyByEmergencyId(@PathVariable String visitEmergencyId){
+        return Mono.just(visitEmergencyId)
+                //.filter(id -> id.length() == 36)
+                //.switchIfEmpty(Mono.error(new InvalidInputException("the provided emergency id is invalid: " + emergencyId)))
+                .flatMap(visitsServiceClient::getEmergencyByEmergencyId)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
+    /*@GetMapping(value="/emergency/{emergencyId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<EmergencyResponseDTO>> getEmergencyByEmergencyId(@PathVariable String emergencyId){
         return Mono.just(emergencyId)
                 //.filter(id -> id.length() == 36)
@@ -164,6 +190,7 @@ public class VisitController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
+     */
 
     @SecuredEndpoint(allowedRoles = Roles.ADMIN)
     @IsUserSpecific(idToMatch = {"visitId"})
@@ -198,5 +225,37 @@ public class VisitController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
+    //reviews for user
+    @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN})
+    @GetMapping(value = "/owners/{ownerId}/reviews", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Flux<ReviewResponseDTO> getReviewsByOwnerId(final @PathVariable String ownerId) {
+        return visitsServiceClient.getReviewsByOwnerId(ownerId);
+    }
 
+    @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN})
+    @PostMapping(value = "/owners/{ownerId}/reviews", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<ReviewResponseDTO>> addReviewCustomer(@PathVariable String ownerId, @RequestBody Mono<ReviewRequestDTO> reviewRequestDTOMono) {
+        return reviewRequestDTOMono
+                .flatMap(reviewRequestDTO -> visitsServiceClient.addCustomerReview(ownerId, reviewRequestDTO))
+                .map(c -> ResponseEntity.status(HttpStatus.CREATED).body(c))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
+    @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN})
+    @DeleteMapping(value="/owners/{ownerId}/reviews/{reviewId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<Void>> deleteCustomerReview(@PathVariable String ownerId, @PathVariable String reviewId) {
+        return visitsServiceClient.deleteReview(ownerId, reviewId)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.noContent().build());
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping(value = "/export", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    public Mono<ResponseEntity<InputStreamResource>> exportVisitsToCSV() {
+        return visitsServiceClient.exportVisitsToCSV()
+                .map(csvData -> ResponseEntity.ok()
+                        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=visits.csv")
+                        .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                        .body(csvData));
+    }
 }
