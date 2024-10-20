@@ -308,11 +308,11 @@ public Mono<CartResponseDTO> deleteCartByCartId(String CardId) {
                 .bodyToMono(PromoCodeResponseDTO.class);
     }
 
-    public Mono<CartResponseDTO> addProductToCartFromProducts(String cartId, String requestDTO) {
+    public Mono<CartResponseDTO> addProductToCartFromProducts(String cartId, String productId) {
         return webClientBuilder.build()
                 .post()
                 .uri(CartServiceUrl + "/" + cartId + "/products")
-                .body(Mono.just(requestDTO), AddProductRequestDTO.class)
+                .body(Mono.just(new AddProductRequestDTO(productId, 1)), AddProductRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> {
@@ -328,6 +328,5 @@ public Mono<CartResponseDTO> deleteCartByCartId(String CardId) {
                 .onStatus(HttpStatusCode::is5xxServerError, error -> Mono.error(new IllegalArgumentException("Server error")))
                 .bodyToMono(CartResponseDTO.class);
     }
-
 
 }

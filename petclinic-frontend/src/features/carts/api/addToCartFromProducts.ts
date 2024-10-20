@@ -31,7 +31,7 @@ export class addToCartFromProducts {
             }
 
             //post request
-            const endpoint = `/api/cart/${cartId}/add`;
+            const endpoint = `http://localhost:8080/api/v2/gateway/carts/${cartId}/${user.userId}`;
             await axiosInstance.post(endpoint, { productId });
 
             console.log('Product added to cart:', productId);
