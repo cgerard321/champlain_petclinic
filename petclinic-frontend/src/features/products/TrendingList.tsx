@@ -8,7 +8,8 @@ export default function TrendingList(): JSX.Element {
 
   const fetchProducts = async (): Promise<void> => {
     const list = await getAllProducts();
-    setTrendingList(list);
+    const filteredList = list.filter(product => !product.isUnlisted);
+    setTrendingList(filteredList);
   };
 
   useEffect(() => {

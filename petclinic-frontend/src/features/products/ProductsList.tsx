@@ -72,7 +72,8 @@ export default function ProductList(): JSX.Element {
           maxStars,
           ratingSort
         );
-        setProductList(list);
+        const filteredList = list.filter(product => !product.isUnlisted);
+        setProductList(filteredList);
       } else {
         const filteredList = await getProductsByType(filterType);
         setProductList(filteredList);
@@ -179,7 +180,9 @@ export default function ProductList(): JSX.Element {
       <h2>Recently Seen Products</h2>
       <div className="grid">
         {recentlyClickedProducts.length > 0 ? (
-          recentlyClickedProducts.map(product => (
+          recentlyClickedProducts
+              .filter(product => !product.isUnlisted)
+              .map(product => (
             <Product key={product.productId} product={product} />
           ))
         ) : (
