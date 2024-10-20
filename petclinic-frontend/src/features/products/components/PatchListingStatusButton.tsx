@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button, Modal } from 'react-bootstrap';
 import { ProductModel } from '../models/ProductModels/ProductModel';
 import { getProduct } from '../api/getProduct';
@@ -6,48 +6,58 @@ import { patchListingStatus } from '../api/patchListingStatus';
 
 interface PatchListingStatus {
   productId: string;
-  // getProduct: (productId: string) => Promise<ProductModel>;
-  // patchListingStatus: (
-  //   productId: string
-  //   productRequestModel: Partial<ProductModel>
-  // ) => Promise<ProductModel>;
 }
 
 export default function PatchListingStatusButton({
   productId,
-  // getProduct,
-  // patchListingStatus,
 }: PatchListingStatus): JSX.Element {
   const [show, setShow] = useState(false);
+  const [product, setProduct] = useState<ProductModel | null>(null);
 
   const handleClose = (): void => setShow(false);
   const handleShow = (): void => setShow(true);
+
+  useEffect(() => {
+    const fetchProduct = async (): Promise<void> => {
+      try {
+        const fetchedProduct = await getProduct(productId);
+        setProduct(fetchedProduct);
+      } catch (err) {
+        console.error('Failed to fetch product', err);
+      }
+    };
+
+    fetchProduct();
+  }, [productId]);
 
   const handleSubmit = async (
     event: React.FormEvent<HTMLFormElement>
   ): Promise<void> => {
     event.preventDefault();
 
-    const product = await getProduct(productId);
-
-    if (product.isUnlisted === false) {
-      const isUnlisted = true;
+    if (product) {
+      const isUnlisted = !product.isUnlisted;
 
       const patchedProduct: Partial<ProductModel> = {
         isUnlisted,
       };
 
-      patchListingStatus(productId, patchedProduct);
-      // } else {
-      //   const isUnlisted = false;
+      await patchListingStatus(productId, patchedProduct);
+      setProduct({ ...product, isUnlisted });
     }
     handleClose();
   };
   return (
     <>
-      <Button variant="primary" onClick={handleShow}>
-        Unlist Item
-      </Button>
+      {!product?.isUnlisted ? (
+        <Button variant="primary" onClick={handleShow}>
+          Unlist Item
+        </Button>
+      ) : (
+        <Button variant="primary" onClick={handleShow}>
+          List Item
+        </Button>
+      )}
 
       <Modal
         show={show}
@@ -59,8 +69,11 @@ export default function PatchListingStatusButton({
           <Modal.Title>Unlist Item</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          Do you want to unlist this item? Customers will not be able to see
-          this item anymore until you relist it back.
+          Do you want to {product?.isUnlisted ? 'list back' : 'unlist'} this
+          item? Customers will{' '}
+          {product?.isUnlisted
+            ? 'be able to see item again.'
+            : 'not be able to see this item anymore until you relist it back.'}
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleClose}>

@@ -22,7 +22,7 @@ const ProductBundle: React.FC<ProductBundleProps> = ({ bundle }) => {
       setProducts(productList);
 
       const hasUnlistedProduct = productList.some(
-        product => !product.isUnlisted
+        product => product.isUnlisted
       );
       if (hasUnlistedProduct) {
         setShouldRender(false);
