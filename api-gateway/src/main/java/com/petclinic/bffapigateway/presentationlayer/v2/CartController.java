@@ -32,7 +32,7 @@ public class CartController {
 
     private final CartServiceClient cartServiceClient;
 
-    //later we will need to check if the user that is logged in isnt getting someone else's carts, but thats for sprint 3
+    //later we will need to check if the user that is logged in isn't getting someone else's carts, but that's for sprint 3
     //@SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping("/{cartId}")
     public Mono<ResponseEntity<CartResponseDTO>> getCartById(@PathVariable String cartId) {
@@ -186,6 +186,30 @@ public class CartController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
+
+    @PostMapping("/{cartId}/{productId}")
+    public Mono<ResponseEntity<CartResponseDTO>> addProductToCartFromProducts(
+            @PathVariable String cartId,
+            @PathVariable String productId) {
+
+        return cartServiceClient.addProductToCartFromProducts(cartId, productId)
+                .map(ResponseEntity::ok)
+                .onErrorResume(e -> {
+                    if (e instanceof InvalidInputException || e instanceof WebClientResponseException.BadRequest) {
+                        CartResponseDTO errorResponse = new CartResponseDTO();
+                        errorResponse.setMessage(e.getMessage());
+                        return Mono.just(ResponseEntity.badRequest().body(errorResponse));
+                    } else if (e instanceof NotFoundException) {
+                        return Mono.just(ResponseEntity.notFound().build());
+                    } else if (e instanceof WebClientResponseException) {
+                        WebClientResponseException ex = (WebClientResponseException) e;
+                        return Mono.just(ResponseEntity.status(ex.getStatusCode()).build());
+                    } else {
+                        return Mono.error(e);
+                    }
+                });
+    }
+
 }
 
 
