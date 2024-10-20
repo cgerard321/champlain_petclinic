@@ -101,7 +101,14 @@ public class EntityModelUtil {
         responseModel.setCode(promoCode.getCode());
         responseModel.setDiscount(promoCode.getDiscount());
         responseModel.setExpirationDate(promoCode.getExpirationDate());
-        responseModel.setActive(promoCode.isActive());
+        responseModel.setActive(isPromoActive(promoCode.getExpirationDate()));
         return responseModel;
     }
+
+    public static boolean isPromoActive(LocalDateTime expirationDate) {
+        return expirationDate != null && expirationDate.isAfter(LocalDateTime.now());
+    }
+
+
+
 }

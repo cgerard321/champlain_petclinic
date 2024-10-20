@@ -1,6 +1,7 @@
 package com.petclinic.products.presentationlayer.products;
 
 import com.petclinic.products.datalayer.products.ProductType;
+import com.petclinic.products.datalayer.products.ProductStatus;
 import com.petclinic.products.datalayer.products.DeliveryType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,6 +22,8 @@ public class ProductResponseModel {
     private Double averageRating;
     private Integer requestCount;
     private Integer productQuantity;
+    private Boolean isUnlisted;
     private ProductType productType;
+    private ProductStatus productStatus;
     private DeliveryType deliveryType;
 }

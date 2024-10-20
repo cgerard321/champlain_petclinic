@@ -54,4 +54,36 @@ public class RoleServiceUnitTest {
         assertEquals("USER", result.get(1).getName());
         verify(roleRepo, times(1)).findAll();
     }
+
+    @Test
+    void whenUpdateRole_thenReturnUpdatedRole() {
+        Long roleId = 1L;
+        RoleRequestModel roleRequestModel = new RoleRequestModel("MANAGER");
+        Role existingRole = Role.builder().id(roleId).name("USER").build();
+        Role updatedRole = Role.builder().id(roleId).name(roleRequestModel.getName()).build();
+
+        when(roleRepo.findById(roleId)).thenReturn(java.util.Optional.of(existingRole));
+        when(roleRepo.save(any(Role.class))).thenReturn(updatedRole);
+
+        Role result = roleService.updateRole(roleId, roleRequestModel);
+
+        assertEquals(updatedRole.getId(), result.getId());
+        assertEquals(updatedRole.getName(), result.getName());
+        verify(roleRepo, times(1)).findById(roleId);
+        verify(roleRepo, times(1)).save(any(Role.class));
+    }
+
+    @Test
+    void whenGetRoleById_thenReturnRole() {
+        Long roleId = 1L;
+        Role role = Role.builder().id(roleId).name("ADMIN").build();
+
+        when(roleRepo.findById(roleId)).thenReturn(java.util.Optional.of(role));
+
+        Role result = roleService.getRoleById(roleId);
+
+        assertEquals(role.getId(), result.getId());
+        assertEquals(role.getName(), result.getName());
+        verify(roleRepo, times(1)).findById(roleId);
+    }
 }

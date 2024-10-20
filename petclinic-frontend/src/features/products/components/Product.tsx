@@ -148,6 +148,7 @@ export default function Product({
       >
         +
       </span>
+
       <h2
         onClick={handleProductTitleClick}
         style={{
@@ -168,6 +169,24 @@ export default function Product({
         currentRating={currentProduct.averageRating}
         viewOnly={true}
       />
+      {currentProduct.productStatus === 'PRE_ORDER' && (
+        <div
+          style={{
+            position: 'absolute',
+            top: '10px',
+            right: '10px',
+            backgroundColor: '#FFD700',
+            padding: '5px 10px',
+            borderRadius: '5px',
+            fontWeight: 'bold',
+            color: '#333',
+            zIndex: 1,
+            boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+          }}
+        >
+          PRE-ORDER
+        </div>
+      )}
       <div className="deliveryType-container">
         <p>{getDeliveryTypeLabel(currentProduct.deliveryType)}</p>
       </div>

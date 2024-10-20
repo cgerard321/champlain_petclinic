@@ -25,8 +25,8 @@ import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.List;
 
-@WebFluxTest(controllers = BillResource.class)
-class BillResourceUnitTest {
+@WebFluxTest(controllers = BillController.class)
+class BillControllerUnitTest {
 
     private BillResponseDTO responseDTO = buildBillResponseDTO();
 
@@ -70,9 +70,9 @@ class BillResourceUnitTest {
     }
 
     @Test
-    void findAllBills() {
+    void getAllBills() {
 
-        when(billService.GetAllBills()).thenReturn(Flux.just(responseDTO));
+        when(billService.getAllBills()).thenReturn(Flux.just(responseDTO));
 
         client.get()
                 .uri("/bills")
@@ -85,13 +85,13 @@ class BillResourceUnitTest {
                     List<BillResponseDTO> billResponseDTOS = response.getResponseBody();
                     Assertions.assertNotNull(billResponseDTOS);
                 });
-        Mockito.verify(billService, times(1)).GetAllBills();
+        Mockito.verify(billService, times(1)).getAllBills();
 
     }
 
     @Test
-    void findAllPaidBills() {
-        when(billService.GetAllBillsByStatus(BillStatus.PAID)).thenReturn(Flux.just(responseDTO));
+    void getAllPaidBills() {
+        when(billService.getAllBillsByStatus(BillStatus.PAID)).thenReturn(Flux.just(responseDTO));
 
         client.get()
                 .uri("/bills/paid")
@@ -105,12 +105,12 @@ class BillResourceUnitTest {
                     Assertions.assertNotNull(billResponseDTOS);
                 });
 
-        Mockito.verify(billService, times(1)).GetAllBillsByStatus(BillStatus.PAID);
+        Mockito.verify(billService, times(1)).getAllBillsByStatus(BillStatus.PAID);
     }
 
     @Test
-    void findAllUnpaidBills() {
-        when(billService.GetAllBillsByStatus(BillStatus.UNPAID)).thenReturn(Flux.just(unpaidResponseDTO));
+    void getAllUnpaidBills() {
+        when(billService.getAllBillsByStatus(BillStatus.UNPAID)).thenReturn(Flux.just(unpaidResponseDTO));
 
         client.get()
                 .uri("/bills/unpaid")
@@ -124,12 +124,12 @@ class BillResourceUnitTest {
                     Assertions.assertNotNull(billResponseDTOS);
                 });
 
-        Mockito.verify(billService, times(1)).GetAllBillsByStatus(BillStatus.UNPAID);
+        Mockito.verify(billService, times(1)).getAllBillsByStatus(BillStatus.UNPAID);
     }
 
     @Test
-    void findAllOverdueBills() {
-        when(billService.GetAllBillsByStatus(BillStatus.OVERDUE)).thenReturn(Flux.just(overdueResponseDTO));
+    void getAllOverdueBills() {
+        when(billService.getAllBillsByStatus(BillStatus.OVERDUE)).thenReturn(Flux.just(overdueResponseDTO));
 
         client.get()
                 .uri("/bills/overdue")
@@ -143,13 +143,13 @@ class BillResourceUnitTest {
                     Assertions.assertNotNull(billResponseDTOS);
                 });
 
-        Mockito.verify(billService, times(1)).GetAllBillsByStatus(BillStatus.OVERDUE);
+        Mockito.verify(billService, times(1)).getAllBillsByStatus(BillStatus.OVERDUE);
     }
 
     @Test
     void getBillByCustomerId() {
 
-        when(billService.GetBillsByCustomerId(anyString())).thenReturn(Flux.just(responseDTO));
+        when(billService.getBillsByCustomerId(anyString())).thenReturn(Flux.just(responseDTO));
 
         client.get()
                 .uri("/bills/customer/" + responseDTO.getCustomerId())
@@ -162,14 +162,14 @@ class BillResourceUnitTest {
                     List<BillResponseDTO> billResponseDTOS = response.getResponseBody();
                     Assertions.assertNotNull(billResponseDTOS);
                 });
-        Mockito.verify(billService, times(1)).GetBillsByCustomerId(CUSTOMER_ID_OK);
+        Mockito.verify(billService, times(1)).getBillsByCustomerId(CUSTOMER_ID_OK);
 
 
     }
     @Test
     void getBillByVetId() {
 
-        when(billService.GetBillsByVetId(anyString())).thenReturn(Flux.just(responseDTO));
+        when(billService.getBillsByVetId(anyString())).thenReturn(Flux.just(responseDTO));
 
         client.get()
                 .uri("/bills/vet/" + responseDTO.getVetId())
@@ -183,14 +183,14 @@ class BillResourceUnitTest {
                     Assertions.assertNotNull(billResponseDTOS);
                 });
 
-        Mockito.verify(billService, times(1)).GetBillsByVetId(VET_ID_OK);
+        Mockito.verify(billService, times(1)).getBillsByVetId(VET_ID_OK);
 
 
     }
 
     @Test
     void deleteAllBills() {
-        when(billService.DeleteAllBills()).thenReturn(Mono.empty());
+        when(billService.deleteAllBills()).thenReturn(Mono.empty());
 
         client.delete()
                 .uri("/bills")
@@ -199,13 +199,13 @@ class BillResourceUnitTest {
                 .expectStatus().isNoContent()
                 .expectBody();
 
-        Mockito.verify(billService, times(1)).DeleteAllBills();
+        Mockito.verify(billService, times(1)).deleteAllBills();
     }
 
     @Test
     void deleteBill() {
 
-        when(billService.DeleteBill(anyString())).thenReturn(Mono.empty());
+        when(billService.deleteBill(anyString())).thenReturn(Mono.empty());
 
         client.delete()
                 .uri("/bills/" + responseDTO.getBillId())
@@ -214,13 +214,13 @@ class BillResourceUnitTest {
                 .expectStatus().isNoContent()
                 .expectBody();
 
-        Mockito.verify(billService, times(1)).DeleteBill(BILL_ID_OK);
+        Mockito.verify(billService, times(1)).deleteBill(BILL_ID_OK);
     }
 
     @Test
     void deleteBillByVetId() {
 
-        when(billService.DeleteBillsByVetId(anyString())).thenReturn(Flux.empty());
+        when(billService.deleteBillsByVetId(anyString())).thenReturn(Flux.empty());
 
         client.delete()
                 .uri("/bills/vet/" + responseDTO.getVetId())
@@ -229,13 +229,13 @@ class BillResourceUnitTest {
                 .expectStatus().isNoContent()
                 .expectBody();
 
-        Mockito.verify(billService, times(1)).DeleteBillsByVetId(VET_ID_OK);
+        Mockito.verify(billService, times(1)).deleteBillsByVetId(VET_ID_OK);
     }
 
     @Test
     void deleteBillsByCustomerId() {
 
-        when(billService.DeleteBillsByCustomerId(anyString())).thenReturn(Flux.empty());
+        when(billService.deleteBillsByCustomerId(anyString())).thenReturn(Flux.empty());
 
         client.delete()
                 .uri("/bills/customer/" + responseDTO.getCustomerId())
@@ -244,7 +244,7 @@ class BillResourceUnitTest {
                 .expectStatus().isNoContent()//.isEqualTo(HttpStatus.METHOD_NOT_ALLOWED)
                 .expectBody();
 
-        Mockito.verify(billService, times(1)).DeleteBillsByCustomerId(CUSTOMER_ID_OK);
+        Mockito.verify(billService, times(1)).deleteBillsByCustomerId(CUSTOMER_ID_OK);
     }
 
 
@@ -311,6 +311,39 @@ class BillResourceUnitTest {
     }
 
 
+    @Test
+    void whenGetBillsByMonthCalled_thenShouldCallServiceWithCorrectParams() {
+        // Mocking the service layer response
+        when(billService.getBillsByMonth(anyInt(), anyInt()))
+                .thenReturn(Flux.just(responseDTO));
+
+        // Triggering the controller endpoint
+        client.get()
+                .uri(uriBuilder -> uriBuilder.path("/bills/month")
+                        .queryParam("month", 1)
+                        .queryParam("year", 2022)
+                        .build())
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(BillResponseDTO.class)
+                .hasSize(1);  // Checking that the response body has exactly 1 element
+
+        // Verifying the correct method calls with correct argument order
+        Mockito.verify(billService, times(1))
+                .getBillsByMonth(2022, 1);  // year first, then month
+    }
+
+    @Test
+    void whenGetBillsByMonthCalledWithInvalidParams_thenShouldBadRequest() {
+        // Triggering the controller endpoint with invalid parameters
+        client.get()
+                .uri(uriBuilder -> uriBuilder.path("/bills/month")
+                        .queryParam("month", 13)
+                        .queryParam("year", -1)
+                        .build())
+                .exchange()
+                .expectStatus().isBadRequest();
+    }
 
 
 }

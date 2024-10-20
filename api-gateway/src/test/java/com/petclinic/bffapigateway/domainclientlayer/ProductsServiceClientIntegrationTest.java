@@ -3,9 +3,11 @@ package com.petclinic.bffapigateway.domainclientlayer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.dtos.Products.DeliveryType;
+import com.petclinic.bffapigateway.dtos.Products.DeliveryType;
 import com.petclinic.bffapigateway.dtos.Products.ProductRequestDTO;
 
 import com.petclinic.bffapigateway.dtos.Products.ProductResponseDTO;
+import com.petclinic.bffapigateway.dtos.Products.ProductStatus;
 import com.petclinic.bffapigateway.dtos.Products.ProductType;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -22,6 +24,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.io.IOException;
+
 
 class ProductsServiceClientIntegrationTest {
 
@@ -143,7 +146,9 @@ class ProductsServiceClientIntegrationTest {
                 0.00,
                 0,
                 6,
+                false,
                 ProductType.FOOD,
+                ProductStatus.AVAILABLE,
                 DeliveryType.DELIVERY
         );
 
@@ -171,7 +176,9 @@ class ProductsServiceClientIntegrationTest {
                 0.00,
                 0,
                 6,
+                false,
                 ProductType.FOOD,
+                ProductStatus.AVAILABLE,
                 DeliveryType.PICKUP
         );
 
@@ -189,6 +196,106 @@ class ProductsServiceClientIntegrationTest {
     }
 
     @Test
+    void whenPatchListingStatus_thenReturnUpdatedProduct() throws JsonProcessingException {
+        ProductResponseDTO productResponseDTO = new ProductResponseDTO(
+                "productId",
+                "imageId",
+                "Product 1",
+                "desc",
+                10.00,
+                0.00,
+                0,
+                6,
+                true,
+                ProductType.FOOD,
+                ProductStatus.AVAILABLE,
+                DeliveryType.DELIVERY_AND_PICKUP
+        );
+
+        mockWebServer.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(objectMapper.writeValueAsString(productResponseDTO))
+                .addHeader("Content-Type", "application/json"));
+
+        Mono<ProductResponseDTO> productResponseDTOMono = productsServiceClient
+                .patchListingStatus(productResponseDTO.getProductId(), new ProductRequestDTO(
+                        null, null, null, null, null, null, false, null, null, null,null));
+
+        StepVerifier.create(productResponseDTOMono)
+                .expectNextMatches(product -> product.getProductId().equals("productId"))
+                .verifyComplete();
+    }
+
+    @Test
+    void whenPatchListingStatusWithNonExistingProductId_thenThrowNotFoundException() {
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(404)
+                .setBody("Product not found for ProductId: 691e6945-0d4a-4b20-85cc-afd251faccfd")
+                .addHeader("Content-Type", "application/json"));
+
+        Mono<ProductResponseDTO> productResponseDTOMono = productsServiceClient
+                .patchListingStatus("691e6945-0d4a-4b20-85cc-afd251faccfd", new ProductRequestDTO(
+                        null, null, null, null, null,
+                        null, false, null, null, null,null));
+
+        StepVerifier.create(productResponseDTOMono)
+                .expectErrorMatches(throwable -> throwable != null &&
+                        throwable.getMessage().equals("Product not found for ProductId: 691e6945-0d4a-4b20-85cc-afd251faccfd"))
+                .verify();
+    }
+
+    @Test
+    void whenPatchListingStatusWithInvalidProductId_thenThrowInvalidInputException() {
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(422)
+                .setBody("Invalid input for ProductId: invalid-product-id")
+                .addHeader("Content-Type", "application/json"));
+
+        Mono<ProductResponseDTO> productResponseDTOMono = productsServiceClient
+                .patchListingStatus("invalid-product-id", new ProductRequestDTO(
+                        null, null, null, null, null, null, false, null, null, null,null));
+
+        StepVerifier.create(productResponseDTOMono)
+                .expectErrorMatches(throwable -> throwable != null &&
+                        throwable.getMessage().equals("Invalid input for ProductId: invalid-product-id"))
+                .verify();
+    }
+
+    @Test
+    void whenPatchListingStatus_andCauseServerFailure_thenThrowIllegalArgumentException() {
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(500)
+                .setBody("Invalid input for ProductId: productId")
+                .addHeader("Content-Type", "application/json"));
+
+        Mono<ProductResponseDTO> productResponseDTOMono = productsServiceClient
+                .patchListingStatus("productId", new ProductRequestDTO(
+                        null, null, null, null, null, null, false, null, null, null,null));
+
+        StepVerifier.create(productResponseDTOMono)
+                .expectErrorMatches(throwable -> throwable != null &&
+                        throwable.getMessage().equals("Something went wrong with the server"))
+                .verify();
+    }
+
+    @Test
+    void whenPatchListingStatus_andCauseClientFailure_thenThrowIllegalArgumentException() {
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(400)
+                .setBody("Invalid input for ProductId: productId")
+                .addHeader("Content-Type", "application/json"));
+
+        Mono<ProductResponseDTO> productResponseDTOMono = productsServiceClient
+                .patchListingStatus("productId", new ProductRequestDTO(
+                        null, null, null, null, null, null, false, null, null, null,null));
+
+        StepVerifier.create(productResponseDTOMono)
+                .expectErrorMatches(throwable -> throwable != null &&
+                        throwable.getMessage().equals("Client error"))
+                .verify();
+    }
+
+    @Test
     void whenDeleteProduct_thenDeleteProduct() throws JsonProcessingException {
         ProductResponseDTO productResponseDTO = new ProductResponseDTO(
                 "productId",
@@ -199,7 +306,9 @@ class ProductsServiceClientIntegrationTest {
                 0.00,
                 0,
                 6,
+                false,
                 ProductType.FOOD,
+                ProductStatus.AVAILABLE,
                 DeliveryType.DELIVERY_AND_PICKUP
         );
 

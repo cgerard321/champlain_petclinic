@@ -27,7 +27,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 
 @SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"spring.data.mongodb.port: 0"})
 @AutoConfigureWebTestClient
-class BillResourceIntegrationTest {
+class BillControllerIntegrationTest {
 
     @Autowired
     private WebTestClient client;
@@ -60,7 +60,7 @@ class BillResourceIntegrationTest {
     }
 
     @Test
-    void findAllBills() {
+    void getAllBills() {
 
         Bill billEntity = buildBill();
 
@@ -85,7 +85,7 @@ class BillResourceIntegrationTest {
     }
 
     @Test
-    void findAllPaidBills() {
+    void getAllPaidBills() {
 
         Bill billEntity = buildBill();
 
@@ -110,7 +110,7 @@ class BillResourceIntegrationTest {
     }
 
     @Test
-    void findAllUnpaidBills() {
+    void getAllUnpaidBills() {
         // Send a GET request to /bills/unpaid and expect a JSON response
         Bill billEntity = buildUnpaidBill();
 
@@ -135,7 +135,7 @@ class BillResourceIntegrationTest {
     }
 
     @Test
-    void findAllOverdueBills() {
+    void getAllOverdueBills() {
         // Send a GET request to /bills/overdue and expect a JSON response
         Bill billEntity = buildOverdueBill();
 
@@ -522,6 +522,35 @@ class BillResourceIntegrationTest {
                 .jsonPath("$.customerId").isEqualTo(billEntity.getCustomerId())
                 .jsonPath("$.amount").isEqualTo(billEntity.getAmount())
                 .jsonPath("$.timeRemaining").isEqualTo(0);
+    }
+
+    @Test
+    void getBillsByMonth() {
+        repo.deleteAll().block();
+        for (int i = 1; i <= 5; i++) {
+            repo.save(Bill.builder()
+                    .billId("BillUUID" + i)
+                    .customerId("Cust" + i)
+                    .vetId("1")
+                    .visitType("Routine Check")
+                    .date(LocalDate.of(2022, 9, i))
+                    .amount(100.0)
+                    .billStatus(BillStatus.PAID)
+                    .dueDate(LocalDate.of(2022, 9, i).plusDays(30))
+                    .build()).block();
+        }
+
+        client.get()
+                .uri(uriBuilder -> uriBuilder.path("/bills/month")
+                        .queryParam("year", 2022)
+                        .queryParam("month", 9)
+                        .build())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBodyList(BillResponseDTO.class)
+                .hasSize(5);
     }
 
     private Bill buildBillWithPastDueDate() {

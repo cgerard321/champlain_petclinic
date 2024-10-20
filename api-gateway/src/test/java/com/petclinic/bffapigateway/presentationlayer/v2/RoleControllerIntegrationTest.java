@@ -51,6 +51,10 @@ class RoleControllerIntegrationTest {
                 .expectStatus().isOk()
                 .returnResult(Role.class)
                 .getResponseBody();
+      
+        StepVerifier.create(result)
+                .expectNextMatches(role -> "OWNER".equals(role.getName()))
+                .expectNextMatches(role -> "ADMIN".equals(role.getName()));
 
         StepVerifier
                 .create(result)

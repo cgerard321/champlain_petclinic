@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getAllProducts } from '@/features/products/api/getAllProducts';
-import { ProductModel } from '@/features/inventories/models/ProductModels/ProductModel';
+import { ProductModel } from '@/features/products/models/ProductModels/ProductModel';
 import './ProductSearch.css';
 
 export default function ProductSearch(): JSX.Element {
@@ -13,7 +13,8 @@ export default function ProductSearch(): JSX.Element {
 
   const fetchProducts = async (): Promise<void> => {
     const allProducts = await getAllProducts();
-    setProducts(allProducts);
+    const listedProducts = allProducts.filter(product => !product.isUnlisted);
+    setProducts(listedProducts);
   };
 
   useEffect(() => {
@@ -101,7 +102,7 @@ export default function ProductSearch(): JSX.Element {
                 <strong>Quantity:</strong> {selectedProduct.productQuantity}
               </p>
               <p>
-                <strong>Status:</strong> {selectedProduct.status}
+                <strong>Status:</strong> {selectedProduct.productStatus}
               </p>
             </div>
             <button className="close-btn" onClick={handleCloseModal}>

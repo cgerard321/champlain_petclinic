@@ -1,140 +1,140 @@
 .roles-container {
-    max-width: 1400px;
-    margin: 50px auto;
-    padding: 20px 20px 80px;
-    border: 1px solid #ccc;
-    border-radius: 10px;
-    background-color: #ffffff;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    position: relative;
+  max-width: 1400px;
+  margin: 50px auto;
+  padding: 20px 20px 80px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background-color: #ffffff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  position: relative;
 }
 
 .roles-container h1 {
-    text-align: center;
-    margin-bottom: 20px;
-    color: #333;
-    font-family: 'Arial', sans-serif;
+  text-align: center;
+  margin-bottom: 20px;
+  color: #333;
+  font-family: 'Arial', sans-serif;
 }
 
 .roles-container table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 20px;
-    font-family: 'Arial', sans-serif;
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+  font-family: 'Arial', sans-serif;
 }
 
 .roles-container th,
 .roles-container td {
-    padding: 12px 15px;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
-    font-size: 16px;
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+  font-size: 16px;
 }
 
 .roles-container th {
-    background-color: #f4f4f4;
-    color: #555;
+  background-color: #f4f4f4;
+  color: #555;
 }
 
 .roles-container tr:hover {
-    background-color: #f9f9f9;
+  background-color: #f9f9f9;
 }
 
 .roles-container tbody tr:nth-child(even) {
-    background-color: #f2f2f2;
+  background-color: #f2f2f2;
 }
 
 @media screen and (max-width: 768px) {
-    .roles-container table {
-        width: 100%;
-        font-size: 14px;
-    }
+  .roles-container table {
+    width: 100%;
+    font-size: 14px;
+  }
 
-    .roles-container th,
-    .roles-container td {
-        padding: 10px;
-    }
+  .roles-container th,
+  .roles-container td {
+    padding: 10px;
+  }
 }
 
 .create-role-button {
-    position: absolute;
-    bottom: 20px;
-    left: 20px;
-    padding: 10px 20px;
-    font-size: 16px;
-    color: #fff;
-    background-color: #007bff;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  padding: 10px 20px;
+  font-size: 16px;
+  color: #fff;
+  background-color: #007bff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
 }
 
 .create-role-button:hover {
-    background-color: #0056b3;
+  background-color: #0056b3;
 }
 
 .modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .modal-content {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .modal-content input {
-    width: 80%;
-    padding: 10px;
-    margin-bottom: 20px;
-    font-size: 16px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    text-align: center;
+  width: 80%;
+  padding: 10px;
+  margin-bottom: 20px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  text-align: center;
 }
 
 .modal-buttons {
-    display: flex;
-    justify-content: space-around;
-    width: 100%;
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
 }
 
 .modal-buttons button {
-    padding: 10px 20px;
-    font-size: 16px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    margin: 0 10px;
+  padding: 10px 20px;
+  font-size: 16px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin: 0 10px;
 }
 
 .modal-buttons button:first-child {
-    background-color: #28a745;
-    color: #fff;
+  background-color: #28a745;
+  color: #fff;
 }
 
 .modal-buttons button:first-child:hover {
-    background-color: #218838;
+  background-color: #218838;
 }
 
 .modal-buttons button:last-child {
-    background-color: #dc3545;
-    color: #fff;
+  background-color: #dc3545;
+  color: #fff;
 }
 
 .modal-buttons button:last-child:hover {
-    background-color: #c82333;
+  background-color: #c82333;
 }

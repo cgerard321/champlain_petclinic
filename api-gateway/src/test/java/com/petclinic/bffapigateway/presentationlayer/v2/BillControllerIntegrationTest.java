@@ -247,6 +247,24 @@ public class BillControllerIntegrationTest {
                 .expectHeader().contentType(MediaType.APPLICATION_JSON);
     }
 
+    @Test
+    void whenGetBillsByMonthAsAdmin_thenReturnBills() {
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder.path("/api/v2/gateway/bills")
+                        .queryParam("month", "10")
+                        .queryParam("year", "2024")
+                        .build())
+                .cookie("Bearer", jwtTokenForValidAdmin)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBodyList(BillResponseDTO.class)
+                .consumeWith(response -> {
+                    assert response.getResponseBody().size() == 2;
+                });
+    }
+
 }
 
 

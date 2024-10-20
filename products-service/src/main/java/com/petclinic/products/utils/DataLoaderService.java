@@ -22,6 +22,7 @@ import reactor.core.publisher.Mono;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -47,10 +48,12 @@ public class DataLoaderService implements CommandLineRunner {
                 .imageId("08a5af6b-3501-4157-9a99-1aa82387b9e4")
                 .productName("Dog Food")
                 .productDescription("Premium dry food for adult dogs")
-                .productSalePrice(46.99)
+                .productSalePrice(45.99)
                 .requestCount(0)
                 .productType(ProductType.FOOD)
                 .productQuantity(44)
+                .isUnlisted(false)
+                .releaseDate(LocalDate.parse("2002-09-26"))
                 .deliveryType(DeliveryType.DELIVERY)
                 .build();
 
@@ -59,10 +62,12 @@ public class DataLoaderService implements CommandLineRunner {
                 .imageId("36b06c01-10f3-4645-9c45-900afc5a8b8a")
                 .productName("Cat Litter")
                 .productDescription("Clumping cat litter with odor control")
-                .productSalePrice(13.99)
+                .productSalePrice(12.99)
                 .requestCount(0)
                 .productType(ProductType.ACCESSORY)
                 .productQuantity(3)
+                .isUnlisted(false)
+                .releaseDate(LocalDate.parse("2020-06-30"))
                 .deliveryType(DeliveryType.PICKUP)
                 .build();
 
@@ -71,10 +76,12 @@ public class DataLoaderService implements CommandLineRunner {
                 .imageId("be4e60a4-2369-46e8-abee-20c1a8dce3e5")
                 .productName("Flea Collar")
                 .productDescription("Flea and tick prevention for small dogs")
-                .productSalePrice(8.99)
+                .productSalePrice(9.99)
                 .requestCount(0)
                 .productType(ProductType.MEDICATION)
                 .productQuantity(53)
+                .isUnlisted(false)
+                .releaseDate(LocalDate.parse("2019-09-29"))
                 .deliveryType(DeliveryType.DELIVERY)
                 .build();
 
@@ -83,10 +90,12 @@ public class DataLoaderService implements CommandLineRunner {
                 .imageId("7074e0ef-d041-452f-8a0f-cb9ab20d1fed")
                 .productName("Bird Cage")
                 .productDescription("Spacious cage for small birds like parakeets")
-                .productSalePrice(28.99)
+                .productSalePrice(29.99)
                 .requestCount(0)
                 .productType(ProductType.ACCESSORY)
                 .productQuantity(8)
+                .isUnlisted(false)
+                .releaseDate(LocalDate.parse("2023-05-06"))
                 .deliveryType(DeliveryType.PICKUP)
                 .build();
 
@@ -95,10 +104,12 @@ public class DataLoaderService implements CommandLineRunner {
                 .imageId("392c42d9-9505-4c27-b82e-20351b25d33f")
                 .productName("Aquarium Filter")
                 .productDescription("Filter system for small to medium-sized aquariums")
-                .productSalePrice(18.99)
+                .productSalePrice(19.99)
                 .requestCount(0)
                 .productType(ProductType.ACCESSORY)
                 .productQuantity(14)
+                .isUnlisted(false)
+                .releaseDate(LocalDate.parse("2025-09-29"))
                 .deliveryType(DeliveryType.DELIVERY_AND_PICKUP)
                 .build();
 
@@ -107,10 +118,12 @@ public class DataLoaderService implements CommandLineRunner {
                 .imageId("664aa14b-db66-4b25-9d05-f3a9164eb401")
                 .productName("Horse Saddle")
                 .productDescription("Lightweight saddle for riding horses")
-                .productSalePrice(198.99)
+                .productSalePrice(199.99)
                 .requestCount(0)
                 .productType(ProductType.EQUIPMENT)
                 .productQuantity(58)
+                .isUnlisted(false)
+                .releaseDate(LocalDate.parse("1988-09-29"))
                 .deliveryType(DeliveryType.DELIVERY)
                 .build();
 
@@ -119,10 +132,12 @@ public class DataLoaderService implements CommandLineRunner {
                 .imageId("3377a03f-8105-47d7-8d8a-d89fd170c7e6")
                 .productName("Rabbit Hutch")
                 .productDescription("Outdoor wooden hutch for rabbits")
-                .productSalePrice(78.99)
+                .productSalePrice(79.99)
                 .requestCount(0)
                 .productType(ProductType.ACCESSORY)
                 .productQuantity(66)
+                .isUnlisted(false)
+                .releaseDate(LocalDate.parse("2024-02-22"))
                 .deliveryType(DeliveryType.DELIVERY_AND_PICKUP)
                 .build();
 
@@ -131,10 +146,12 @@ public class DataLoaderService implements CommandLineRunner {
                 .imageId("c76ed4c1-fc5d-4868-8b39-1bca6b0be368")
                 .productName("Fish Tank Heater")
                 .productDescription("Submersible heater for tropical fish tanks")
-                .productSalePrice(13.99)
+                .productSalePrice(14.99)
                 .requestCount(0)
                 .productType(ProductType.ACCESSORY)
                 .productQuantity(0)
+                .isUnlisted(false)
+                .releaseDate(LocalDate.parse("2022-09-19"))
                 .deliveryType(DeliveryType.PICKUP)
                 .build();
 
