@@ -6,6 +6,7 @@ import com.petclinic.inventoryservice.datalayer.Inventory.InventoryType;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryTypeRepository;
 import com.petclinic.inventoryservice.datalayer.Product.Product;
 import com.petclinic.inventoryservice.datalayer.Product.ProductRepository;
+import com.petclinic.inventoryservice.utils.ImageUtil;
 import com.petclinic.inventoryservice.utils.exceptions.InvalidInputException;
 import com.petclinic.inventoryservice.utils.exceptions.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,6 +22,8 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 import static com.mongodb.assertions.Assertions.assertTrue;
@@ -68,6 +71,8 @@ class InventoryControllerIntegrationTest {
             .build();
 
 
+    InputStream inputStream = getClass().getResourceAsStream("/images/DiagnosticKitImage.jpg");
+    byte[] diagnosticKitImage = ImageUtil.readImage(inputStream);
 
     Inventory inventory1 = buildInventory(
             "inventoryId_3",
@@ -76,6 +81,7 @@ class InventoryControllerIntegrationTest {
             "inventoryDescription_3",
             "https://www.fda.gov/files/iStock-157317886.jpg",
             "https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14",
+            diagnosticKitImage,
             products
     );
 
@@ -88,13 +94,17 @@ class InventoryControllerIntegrationTest {
             "inventoryDescription_4",
             "https://www.fda.gov/files/iStock-157317886.jpg",
             "https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14",
+            diagnosticKitImage,
             products2
 
     );
 
+    InventoryControllerIntegrationTest() throws IOException {
+    }
+
 
     @BeforeEach
-    public void dbSetup() {
+    public void dbSetup()  {
 
 
         Publisher<Inventory> inventoryPublisher = inventoryRepository.deleteAll()
@@ -618,7 +628,7 @@ class InventoryControllerIntegrationTest {
                 .exchange()
                 .expectStatus().isNotFound();
     }
-    private Inventory buildInventory(String inventoryId, String name, String inventoryType, String inventoryDescription, String inventoryImage, String inventoryBackupImage, List<Product> products) {
+    private Inventory buildInventory(String inventoryId, String name, String inventoryType, String inventoryDescription, String inventoryImage, String inventoryBackupImage, byte[] diagnosticKitImage, List<Product> products) {
         return Inventory.builder()
                 .inventoryId(inventoryId)
                 .inventoryName(name)
@@ -626,6 +636,7 @@ class InventoryControllerIntegrationTest {
                 .inventoryDescription(inventoryDescription)
                 .inventoryImage(inventoryImage)
                 .inventoryBackupImage(inventoryBackupImage)
+                .imageUploaded(diagnosticKitImage)
                 .products(products)
                 .build();
     }

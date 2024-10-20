@@ -11,6 +11,7 @@ import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewResponseDTO;
 import com.petclinic.bffapigateway.presentationlayer.BFFApiGatewayController;
 import com.petclinic.bffapigateway.presentationlayer.v2.VisitController;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -18,6 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +31,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.io.ByteArrayInputStream;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -987,7 +991,36 @@ public class VisitControllerUnitTest {
 
         verify(visitsServiceClient, times(1)).deleteReview(ownerId, reviewId);
     }
+    @Test
+    void exportVisitsToCSV_ShouldReturnCSVFile() {
+        // Sample data to return
+        String csvContent = "VisitId,Description\n1,Checkup";
+        InputStreamResource csvData = new InputStreamResource(new ByteArrayInputStream(csvContent.getBytes()));
+        when(visitsServiceClient.exportVisitsToCSV()).thenReturn(Mono.just(csvData));
 
+        webTestClient.get()
+                .uri("/api/v2/gateway/visits/export")
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().valueEquals(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=visits.csv")
+                .expectHeader().contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .expectBody(String.class)
+                .consumeWith(response -> {
+                    // Check the response content
+                    Assertions.assertEquals(csvContent, new String(response.getResponseBody()));
+                });
+    }
+
+
+    @Test
+    void exportVisitsToCSV_ShouldReturnServerError_WhenServiceFails() {
+        when(visitsServiceClient.exportVisitsToCSV()).thenReturn(Mono.error(new RuntimeException("Service failed")));
+
+        webTestClient.get()
+                .uri("/api/v2/gateway/visits/export")
+                .exchange()
+                .expectStatus().is5xxServerError();
+    }
 
 
 }

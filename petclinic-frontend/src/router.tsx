@@ -59,6 +59,9 @@ import ReviewsCustomer from '@/pages/Review/CustomerReviews.tsx';
 import AddReviewsCustomer from '@/pages/Review/CustomerAddReviewForm.tsx';
 import EmergencyDetails from './features/visits/EmergencyByEmergencyId';
 import CustomerPromoPage from '@/pages/Promos/CustomerPromoPage.tsx';
+import UserDetailsPage from './pages/Users/UserDetailsPage';
+import UpdateUserPage from './pages/Users/UpdateUserPage';
+import AllRoles from '@/pages/Users/AllRoles.tsx';
 
 const router = createBrowserRouter([
   {
@@ -139,16 +142,6 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
-      /*
-      {
-        path: AppRoutePaths.EditEmergency,
-        element: (
-          <ProtectedRoute>
-            <EditEmergency />
-          </ProtectedRoute>
-        ),
-      },*/
-
       {
         path: AppRoutePaths.EmergencyList,
         element: (
@@ -226,7 +219,7 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.AddingCustomer,
         element: (
-          <ProtectedRoute roles={['ADMIN']}>
+          <ProtectedRoute roles={['ADMIN', 'RECEPTIONIST']}>
             <AddingCustomer />
           </ProtectedRoute>
         ),
@@ -404,6 +397,30 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute roles={['ADMIN']}>
             <AllUsers />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.UserDetailsPage,
+        element: (
+          <ProtectedRoute roles={['ADMIN']}>
+            <UserDetailsPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.UpdateUserPage,
+        element: (
+          <ProtectedRoute roles={['ADMIN']}>
+            <UpdateUserPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.AllRoles,
+        element: (
+          <ProtectedRoute roles={['ADMIN']}>
+            <AllRoles />
           </ProtectedRoute>
         ),
       },

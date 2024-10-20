@@ -115,25 +115,47 @@ class VetControllerUnitTest {
     private static final String PHOTO_NAME = "test.jpg";
 
     @Test
-    void getAllRatingForVetByVetId_ShouldSucceed() {
-        when(ratingService.getAllRatingsByVetId(anyString()))
-                .thenReturn(Flux.just(ratingDTO));
+    void getAllRatingsForVet_WithValidVetId_ShouldReturnRatings() {
 
-        client
-                .get()
+        RatingResponseDTO rating1 = RatingResponseDTO.builder()
+                .ratingId("1")
+                .vetId(VET_ID)
+                .rateScore(5.0)
+                .customerName("John Doe")
+                .predefinedDescription(PredefinedDescription.EXCELLENT)
+                .rateDate("2023-09-16")
+                .build();
+
+        RatingResponseDTO rating2 = RatingResponseDTO.builder()
+                .ratingId("2")
+                .vetId(VET_ID)
+                .rateScore(4.0)
+                .customerName("Jane Doe")
+                .predefinedDescription(PredefinedDescription.GOOD)
+                .rateDate("2022-09-16")
+                .build();
+
+        when(ratingService.getAllRatingsByVetId(anyString()))
+                .thenReturn(Flux.just(rating1, rating2));
+
+        client.get()
                 .uri("/vets/" + VET_ID + "/ratings")
-                .accept(APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$[0].ratingId").isEqualTo(ratingDTO.getRatingId())
-                .jsonPath("$[0].vetId").isEqualTo(ratingDTO.getVetId())
-                .jsonPath("$[0].rateScore").isEqualTo(ratingDTO.getRateScore());
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBodyList(RatingResponseDTO.class)
+                .value(ratingList -> {
+                    assertEquals(2, ratingList.size());
+                    assertEquals(rating1.getRatingId(), ratingList.get(0).getRatingId());
+                    assertEquals(rating1.getRateDate(), ratingList.get(0).getRateDate());
+                    assertEquals(rating2.getRatingId(), ratingList.get(1).getRatingId());
+                    assertEquals(rating2.getRateDate(), ratingList.get(1).getRateDate());
+                });
 
-        Mockito.verify(ratingService, times(1))
-                .getAllRatingsByVetId(VET_ID);
+        Mockito.verify(ratingService, times(1)).getAllRatingsByVetId(VET_ID);
     }
+
     @Test
     void deleteRatingForVetByRatingId_ShouldSucceed() {
         String ratingId = "794ac37f-1e07-43c2-93bc-61839e61d989";
@@ -680,7 +702,7 @@ class VetControllerUnitTest {
 
 
     @Test
-    void addEducationWithVetId_ValidValues_ShouldSucceed(){
+    void addEducationWithVetId_ValidValues_ShouldSucceed() {
         EducationRequestDTO educationRequestDTO = EducationRequestDTO.builder()
                 .vetId(VET_ID)
                 .degree("Doctor of Veterinary Medicine")
@@ -700,19 +722,27 @@ class VetControllerUnitTest {
                 .endDate("2014")
                 .build();
 
-        when(educationService.addEducationToVet(VET_ID, Mono.just(educationRequestDTO))).thenReturn(Mono.just(educationResponseDTO));
+        when(educationService.addEducationToVet(eq(VET_ID), any(Mono.class)))
+                .thenReturn(Mono.just(educationResponseDTO));
 
         client.post()
                 .uri("/vets/{vetId}/educations", VET_ID)
                 .bodyValue(educationRequestDTO)
                 .accept(APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk()
+                .expectStatus().isCreated()
                 .expectHeader().contentType(APPLICATION_JSON)
-                .expectBody();
+                .expectBody(EducationResponseDTO.class)
+                .consumeWith(response -> {
+                    EducationResponseDTO responseBody = response.getResponseBody();
+                    assert responseBody != null; 
+                    assertEquals("3", responseBody.getEducationId());
+                    assertEquals(VET_ID, responseBody.getVetId());
+                });
 
-        Mockito.verify(educationService, times(1)).addEducationToVet(anyString(), any(Mono.class));
+        Mockito.verify(educationService, times(1)).addEducationToVet(eq(VET_ID), any(Mono.class));
     }
+
 
     @Test
     void getPhotoByVetId() {

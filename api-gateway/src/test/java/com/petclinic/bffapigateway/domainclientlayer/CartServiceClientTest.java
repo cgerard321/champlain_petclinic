@@ -153,32 +153,6 @@ public class CartServiceClientTest {
                 .verifyComplete();
     }
 
-    @Test
-    void testAddProductToCart_OutOfStock_ThrowsException() {
-        String cartId = "98f7b33a-d62a-420a-a84a-05a27c85fc91";
-        AddProductRequestDTO requestDTO = new AddProductRequestDTO("9a29fff7-564a-4cc9-8fe1-36f6ca9bc223", 15);
-        String responseBody = """
-            {
-                "message": "You cannot add more than 10 items. Only 10 items left in stock."
-            }
-            """;
-
-        prepareResponse(response -> response
-                .setHeader("Content-Type", "application/json")
-                .setResponseCode(400)
-                .setBody(responseBody));
-
-        Mono<CartResponseDTO> result = mockCartServiceClient.addProductToCart(cartId, requestDTO);
-
-        StepVerifier.create(result)
-                .expectErrorSatisfies(throwable -> {
-                    assert throwable instanceof WebClientResponseException;
-                    WebClientResponseException exception = (WebClientResponseException) throwable;
-                    assertEquals(400, exception.getRawStatusCode());
-                    assert exception.getResponseBodyAsString().contains("Only 10 items left in stock");
-                })
-                .verify();
-    }
 
 
     @Test
@@ -670,5 +644,94 @@ public class CartServiceClientTest {
                 )
                 .verify();
     }
+
+    @Test
+    void testAddProductToCart_InvalidInput_ErrorFromResponse() {
+        String cartId = "98f7b33a-d62a-420a-a84a-05a27c85fc91";
+        AddProductRequestDTO requestDTO = new AddProductRequestDTO("9a29fff7-564a-4cc9-8fe1-36f6ca9bc223", 3);
+        String responseBody = """
+            {
+                "message": "Invalid product quantity."
+            }
+            """;
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(400) // Simulate a 400 Bad Request
+                .setBody(responseBody));
+
+        Mono<CartResponseDTO> result = mockCartServiceClient.addProductToCart(cartId, requestDTO);
+
+        StepVerifier.create(result)
+                .expectErrorSatisfies(throwable -> {
+                    assertThat(throwable).isInstanceOf(InvalidInputException.class);
+                    assertThat(throwable.getMessage()).isEqualTo("Invalid product quantity.");
+                })
+                .verify();
+    }
+
+    @Test
+    void testAddProductToCart_GenericErrorHandling() {
+        String cartId = "98f7b33a-d62a-420a-a84a-05a27c85fc91";
+        AddProductRequestDTO requestDTO = new AddProductRequestDTO("9a29fff7-564a-4cc9-8fe1-36f6ca9bc223", 3);
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(500) // Simulate a 500 Internal Server Error
+        );
+
+        Mono<CartResponseDTO> result = mockCartServiceClient.addProductToCart(cartId, requestDTO);
+
+        StepVerifier.create(result)
+                .expectErrorSatisfies(throwable -> {
+                    assertThat(throwable).isInstanceOf(Exception.class);
+                    assertThat(throwable.getMessage()).isEqualTo("An error occurred while adding product to cart");
+                })
+                .verify();
+    }
+
+    @Test
+    void testClearCart_InvalidCartId() {
+        String cartId = "invalid-cart-id";
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(422) // Simulate a 422 Unprocessable Entity
+                .setBody("""
+                {
+                    "message": "Cart id is invalid: invalid-cart-id"
+                }
+                """)
+        );
+
+        Mono<Void> clearCartResponse = mockCartServiceClient.clearCart(cartId);
+
+        StepVerifier.create(clearCartResponse)
+                .expectErrorSatisfies(throwable -> {
+                    assertThat(throwable).isInstanceOf(InvalidInputException.class);
+                    assertThat(throwable.getMessage()).isEqualTo("Cart id is invalid: " + cartId);
+                })
+                .verify();
+    }
+
+    @Test
+    void testClearCart_GenericClientError() {
+        String cartId = "98f7b33a-d62a-420a-a84a-05a27c85fc91";
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(400) // Simulate a generic 400 Bad Request
+        );
+
+        Mono<Void> clearCartResponse = mockCartServiceClient.clearCart(cartId);
+
+        StepVerifier.create(clearCartResponse)
+                .expectErrorSatisfies(throwable -> {
+                    assertThat(throwable).isInstanceOf(IllegalArgumentException.class);
+                    assertThat(throwable.getMessage()).isEqualTo("Client error");
+                })
+                .verify();
+    }
+
 
 }

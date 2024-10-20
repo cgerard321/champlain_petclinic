@@ -18,6 +18,7 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -308,7 +309,7 @@ public class AuthServiceClient {
 //                        )
 //                .bodyToMono(UserDetails.class);
 //    }
-//
+
     public Mono<ResponseEntity<UserDetails>> verifyUser(final String token) {
 
         return webClientBuilder.build()
@@ -486,5 +487,54 @@ public class AuthServiceClient {
                 .bodyToMono(Void.class);
     }
 
-}
+    public Mono<UserPasswordLessDTO> updateUser(String userId, UserPasswordLessDTO userPasswordLessDTO, String jwToken) {
+        return webClientBuilder.build()
+                .put()
+                .uri(authServiceUrl + "/users/{userId}", userId)
+                .bodyValue(userPasswordLessDTO)
+                .cookie("Bearer", jwToken)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, n -> rethrower.rethrow(n,
+                        x -> new GenericHttpException(x.get("message").toString(), (HttpStatus) n.statusCode())))
+                .bodyToMono(UserPasswordLessDTO.class);
+    }
 
+    public Flux<Role> getAllRoles(String jwtToken) {
+        return webClientBuilder.build()
+                .get()
+                .uri(authServiceUrl + "/roles")
+                .cookie("Bearer", jwtToken)
+                .retrieve()
+                .bodyToFlux(Role.class);
+    }
+
+    public Mono<Role> createRole(String jwtToken, RoleRequestModel roleRequestModel) {
+        return webClientBuilder.build()
+                .post()
+                .uri(authServiceUrl + "/roles")
+                .cookie("Bearer", jwtToken)
+                .bodyValue(roleRequestModel)
+                .retrieve()
+                .bodyToMono(Role.class);
+    }
+
+    public Mono<Role> updateRole(String jwtToken, Long roleId, RoleRequestModel roleRequestModel) {
+        return webClientBuilder.build()
+                .patch()
+                .uri(authServiceUrl + "/roles/{roleId}", roleId)
+                .cookie("Bearer", jwtToken)
+                .bodyValue(roleRequestModel)
+                .retrieve()
+                .bodyToMono(Role.class);
+    }
+
+    public Mono<Role> getRoleById(String jwtToken, Long roleId) {
+        return webClientBuilder.build()
+                .get()
+                .uri(authServiceUrl + "/roles/{roleId}", roleId)
+                .cookie("Bearer", jwtToken)
+                .retrieve()
+                .bodyToMono(Role.class);
+    }
+}

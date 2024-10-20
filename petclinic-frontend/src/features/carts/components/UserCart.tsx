@@ -1,3 +1,4 @@
+// UserCart.tsx
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import CartItem from './CartItem';
@@ -5,9 +6,11 @@ import { ProductModel } from '../models/ProductModel';
 import './UserCart.css';
 import { NavBar } from '@/layouts/AppNavBar';
 import { FaShoppingCart } from 'react-icons/fa';
+import { FaShoppingCart } from 'react-icons/fa'; // Importing the shopping cart icon
 
 interface ProductAPIResponse {
   productId: number;
+
   productName: string;
   productDescription: string;
   productSalePrice: number;
@@ -16,21 +19,11 @@ interface ProductAPIResponse {
   productQuantity: number;
 }
 
-interface InvoiceItem {
-  productId: string;
+interface Invoice {
+  productId: number;
   productName: string;
   productSalePrice: number;
   quantity: number;
-}
-
-interface Invoice {
-  invoiceId: string;
-  cartId: string;
-  items: InvoiceItem[];
-  subtotal: number;
-  tax: number;
-  total: number;
-  issueDate: string;
 }
 
 const UserCart = (): JSX.Element => {
@@ -46,10 +39,17 @@ const UserCart = (): JSX.Element => {
   const [checkoutMessage, setCheckoutMessage] = useState<string | null>(null);
   const [invoice, setInvoice] = useState<Invoice | null>(null);
   const [cartItemCount, setCartItemCount] = useState<number>(0);
+  const [invoices, setInvoices] = useState<Invoice[]>([]); // State to hold invoice details
+  const [cartItemCount, setCartItemCount] = useState<number>(0);
+  const [isCheckoutModalOpen, setIsCheckoutModalOpen] =
+    useState<boolean>(false); // Modal state
   const [wishlistUpdated, setWishlistUpdated] = useState(false);
   const [voucherCode, setVoucherCode] = useState<string>('');
   const [discount, setDiscount] = useState<number>(0);
   const [voucherError, setVoucherError] = useState<string | null>(null);
+  const [notificationMessage, setNotificationMessage] = useState<string | null>(
+    null
+  ); // New state for notifications
 
   const subtotal = cartItems.reduce(
     (acc, item) => acc + item.productSalePrice * (item.quantity || 1),
@@ -111,10 +111,12 @@ const UserCart = (): JSX.Element => {
         setCartItems(products);
         setWishlistItems(data.wishListProducts || []);
       } catch (err: unknown) {
+        // Changed from any to unknown
         if (err instanceof Error) {
           console.error(err.message);
           setError('Failed to fetch cart items');
         } else {
+          console.error('An unexpected error occurred');
           setError('An unexpected error occurred');
         }
       } finally {
@@ -198,25 +200,47 @@ const UserCart = (): JSX.Element => {
           }
         );
 
+        const data = await response.json();
+
         if (!response.ok) {
-          const errorData = await response.json();
           setErrorMessages(prevErrors => ({
             ...prevErrors,
-            [index]: errorData.message || 'Failed to update quantity',
+            [index]: data.message || 'Failed to update quantity',
           }));
+          // Check if the product has been moved to wishlist
+          if (data.message && data.message.includes('moved to your wishlist')) {
+            // Remove the item from cart
+            setCartItems(prevItems =>
+              prevItems.filter((_, idx) => idx !== index)
+            );
+            // Add to wishlist
+            setWishlistItems(prevItems => [...prevItems, item]);
+            setNotificationMessage(data.message);
+          }
         } else {
           setCartItems(prevItems => {
             const newItems = [...prevItems];
             newItems[index].quantity = newQuantity;
             return newItems;
           });
+          // Optionally, display success message
+          setNotificationMessage('Item quantity updated successfully.');
         }
-      } catch (err) {
+      } catch (err: unknown) {
+        // Changed from any to unknown
         console.error('Error updating quantity:', err);
-        setErrorMessages(prevErrors => ({
-          ...prevErrors,
-          [index]: 'Failed to update quantity',
-        }));
+        if (err instanceof Error) {
+          const errorMessage = err.message || 'Failed to update quantity';
+          setErrorMessages(prevErrors => ({
+            ...prevErrors,
+            [index]: errorMessage,
+          }));
+        } else {
+          setErrorMessages(prevErrors => ({
+            ...prevErrors,
+            [index]: 'Failed to update quantity',
+          }));
+        }
       }
     },
     [cartItems, cartId]
@@ -248,9 +272,14 @@ const UserCart = (): JSX.Element => {
           prevItems.filter((_, index) => index !== indexToDelete)
         );
         alert('Item successfully removed!');
-      } catch (error) {
+      } catch (error: unknown) {
+        // Changed from any to unknown
         console.error('Error deleting item: ', error);
-        alert('Failed to delete item');
+        if (error instanceof Error) {
+          alert(`Failed to delete item: ${error.message}`);
+        } else {
+          alert('Failed to delete item');
+        }
       }
     },
     [cartId]
@@ -277,15 +306,22 @@ const UserCart = (): JSX.Element => {
           setCartItemCount(0);
           alert('Cart has been successfully cleared!');
         } else {
+          throw new Error('Failed to clear cart');
+        }
+      } catch (error: unknown) {
+        // Changed from any to unknown
+        console.error('Error clearing cart:', error);
+        if (error instanceof Error) {
+          alert(`Failed to clear cart: ${error.message}`);
+        } else {
           alert('Failed to clear cart');
         }
-      } catch (error) {
-        console.error('Error clearing cart:', error);
-        alert('Failed to clear cart');
       }
     }
   };
 
+
+  // Add to Wishlist Function
   const addToWishlist = async (item: ProductModel): Promise<void> => {
     try {
       const productId = item.productId;
@@ -306,21 +342,38 @@ const UserCart = (): JSX.Element => {
         }
       );
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to add to wishlist');
+        throw new Error(data.message || 'Failed to add to wishlist');
       }
 
+      // Update wishlist state
       setWishlistItems(prevItems => [...prevItems, item]);
       alert(`${item.productName} has been added to your wishlist!`);
+
+      // Display notification message from backend
+      if (data.message) {
+        setNotificationMessage(data.message);
+      } else {
+        alert(`${item.productName} has been added to your wishlist!`);
+      }
+
+      // Trigger the useEffect by updating the wishlistUpdated state
       setWishlistUpdated(true);
-    } catch (error) {
+    } catch (error: unknown) {
+      // Changed from any to unknown
       console.error('Error adding to wishlist:', error);
-      alert('Failed to add item to wishlist.');
+      if (error instanceof Error) {
+        alert(error.message || 'Failed to add item to wishlist.');
+      } else {
+        alert('Failed to add item to wishlist.');
+      }
     }
   };
 
-  const addToCart = async (item: ProductModel): Promise<void> => {
+  // Add to Cart Function (from Wishlist)
+  const addToCartFunction = async (item: ProductModel): Promise<void> => {
     try {
       const productId = item.productId;
       const response = await fetch(
@@ -340,18 +393,55 @@ const UserCart = (): JSX.Element => {
         }
       );
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to add to cart');
+        throw new Error(data.message || 'Failed to add to cart');
       }
 
       setWishlistItems(prevItems => [...prevItems, item]);
       alert(`${item.productName} has been added to your cart!`);
+      // Update cart items state
+      setCartItems(prevItems => [...prevItems, item]);
+
+      // Remove from wishlist
+      setWishlistItems(prevItems =>
+        prevItems.filter(product => product.productId !== item.productId)
+      );
+
+      // Display notification message from backend
+      if (data.message) {
+        setNotificationMessage(data.message);
+      } else {
+        alert(`${item.productName} has been added to your cart!`);
+      }
+
+      // Trigger the useEffect by updating the wishlistUpdated state
       setWishlistUpdated(true);
-    } catch (error) {
+    } catch (error: unknown) {
+      // Changed from any to unknown
       console.error('Error adding to cart:', error);
-      alert('Failed to add item to cart.');
+      if (error instanceof Error) {
+        alert(error.message || 'Failed to add item to cart.');
+      } else {
+        alert('Failed to add item to cart.');
+      }
     }
+  };
+
+  useEffect(() => {
+    const savedInvoices = localStorage.getItem('invoices');
+    if (savedInvoices) {
+      setInvoices(JSON.parse(savedInvoices));
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('invoices', JSON.stringify(invoices));
+  }, [invoices]);
+
+  const handleCheckoutConfirmation = (): void => {
+    setIsCheckoutModalOpen(true);
   };
 
   const handleCheckout = async (): Promise<void> => {
@@ -387,17 +477,32 @@ const UserCart = (): JSX.Element => {
           total,
           issueDate: new Date().toISOString(),
         };
+        const invoiceItems: Invoice[] = cartItems.map(item => ({
+          productId: Number(item.productId), // Ensure productId is a number
+          productName: item.productName,
+          productSalePrice: item.productSalePrice,
+          quantity: item.quantity || 1,
+        }));
 
         setInvoice(newInvoice);
         setCheckoutMessage('Checkout successful!');
         setCartItems([]);
+        // Set the invoices state
+        setInvoices(invoiceItems);
+
+        setCheckoutMessage('Checkout successful!');
+        setCartItems([]); // Clear the cart after successful checkout
         setCartItemCount(0);
+        setIsCheckoutModalOpen(false);
       } else {
-        setCheckoutMessage('Checkout failed.');
+        const errorData = await response.json();
+        setCheckoutMessage(
+          `Checkout failed: ${errorData.message || response.statusText}`
+        );
       }
     } catch (error) {
       console.error('Error during checkout:', error);
-      setCheckoutMessage('Checkout failed.');
+      setCheckoutMessage('Checkout failed due to an unexpected error.');
     }
   };
 
@@ -415,6 +520,21 @@ const UserCart = (): JSX.Element => {
 
       <h1 className="cart-title">User Cart</h1>
 
+      {/* Notification Message */}
+      {notificationMessage && (
+        <div className="notification-message">
+          {notificationMessage}
+          <button
+            className="close-notification"
+            onClick={() => setNotificationMessage(null)}
+            aria-label="Close notification"
+          >
+            &times;
+          </button>
+        </div>
+      )}
+
+      {/* Main Content Container */}
       <div className="content-container">
         <div className="UserCart-checkout-flex">
           <div className="UserCart">
@@ -444,8 +564,9 @@ const UserCart = (): JSX.Element => {
                     deleteItem={deleteItem}
                     errorMessage={errorMessages[index]}
                     addToWishlist={addToWishlist}
-                    addToCart={() => {}}
+                    addToCart={() => {}} // Not needed in cart items
                     isInWishlist={false}
+                    showNotification={setNotificationMessage} // Pass the notification handler
                   />
                 ))
               ) : (
@@ -528,10 +649,27 @@ const UserCart = (): JSX.Element => {
               </p>
             </div>
 
+            {/* Checkout Button */}
+            <button
+              className="checkout-btn"
+              onClick={handleCheckoutConfirmation}
+              disabled={cartItems.length === 0} // Disable if cart is empty
+            >
             <h3>Checkout</h3>
             <button className="btn checkout-btn" onClick={handleCheckout}>
               Checkout
             </button>
+            {/* Checkout Confirmation Modal */}
+            {isCheckoutModalOpen && (
+              <div className="checkout-modal">
+                <h3>Confirm Checkout</h3>
+                <p>Are you sure you want to checkout?</p>
+                <button onClick={handleCheckout}>Yes</button>
+                <button onClick={() => setIsCheckoutModalOpen(false)}>
+                  No
+                </button>
+              </div>
+            )}
             {checkoutMessage && (
               <div className="checkout-message">{checkoutMessage}</div>
             )}
@@ -559,13 +697,40 @@ const UserCart = (): JSX.Element => {
                       {item.productName} - Quantity: {item.quantity} - Price: $
                       {item.productSalePrice.toFixed(2)}
                     </li>
+            {/* Invoice Section - Display a single invoice with a list of items */}
+            {invoices.length > 0 && (
+              <div className="invoices-section">
+                <h2>Invoice</h2>
+                <div className="invoice-summary">
+                  <h3>Items</h3>
+                  {invoices.map(invoice => (
+                    <div key={invoice.productId} className="invoice-card">
+                      <h4>{invoice.productName}</h4>
+                      <p>Price: ${invoice.productSalePrice.toFixed(2)}</p>
+                      <p>Quantity: {invoice.quantity}</p>
+                      <p>
+                        Total: $
+                        {(invoice.productSalePrice * invoice.quantity).toFixed(
+                          2
+                        )}
+                      </p>
+                    </div>
                   ))}
-                </ul>
+                  <h3>
+                    Total: $
+                    {invoices
+                      .reduce(
+                        (total, invoice) =>
+                          total + invoice.productSalePrice * invoice.quantity,
+                        0
+                      )
+                      .toFixed(2)}
+                  </h3>
+                </div>
               </div>
             )}
-          </div>
 
-          <div className="wishlist-section">
+            <div className="wishlist-section">
             <h2 className="wishlist-title">Your Wishlist</h2>
             <div className="wishlist-items-container">
               {wishlistItems.length > 0 ? (
@@ -577,15 +742,17 @@ const UserCart = (): JSX.Element => {
                     changeItemQuantity={() => {}}
                     deleteItem={() => {}}
                     addToWishlist={() => {}}
-                    addToCart={addToCart}
-                    isInWishlist={true}
-                  />
-                ))
-              ) : (
-                <p className="empty-wishlist-message">
-                  No products in the wishlist.
-                </p>
-              )}
+                    addToCart={addToCartFunction} // Use the updated addToCart function
+                      isInWishlist={true}
+                      showNotification={setNotificationMessage} // Pass the notification handler
+                    />
+                  ))
+                ) : (
+                  <p className="empty-wishlist-message">
+                    No products in the wishlist.
+                  </p>
+                )}
+              </div>
             </div>
           </div>
         </div>

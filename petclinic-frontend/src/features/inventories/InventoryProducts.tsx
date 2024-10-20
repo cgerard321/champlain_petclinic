@@ -7,6 +7,7 @@ import './InventoryProducts.css';
 import useSearchProducts from '@/features/inventories/hooks/useSearchProducts.ts';
 import deleteAllProductsFromInventory from './api/deleteAllProductsFromInventory';
 import createPdf from './api/createPdf';
+import ConfirmationModal from '@/features/inventories/ConfirmationModal.tsx';
 
 const InventoryProducts: React.FC = () => {
   const { inventoryId } = useParams<{ inventoryId: string }>();
@@ -20,6 +21,8 @@ const InventoryProducts: React.FC = () => {
   const [filteredProducts, setFilteredProducts] = useState<ProductModel[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
+  const [productToDelete, setProductToDelete] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const handleCreatePdf = async (): Promise<void> => {
@@ -65,8 +68,6 @@ const InventoryProducts: React.FC = () => {
         setProducts(response.data);
         setProductList(response.data); // Set productList as well
         setFilteredProducts(response.data); // Initialize filtered products with all products
-      } catch (err) {
-        setError('Failed to fetch products.');
       } finally {
         setLoading(false);
       }
@@ -78,18 +79,23 @@ const InventoryProducts: React.FC = () => {
   }, [inventoryId, setProductList]);
 
   // Delete product by productId
-  const deleteProduct = async (productId: string): Promise<void> => {
-    try {
-      await axios.delete(
-        `http://localhost:8080/api/v2/gateway/inventories/${inventoryId}/products/${productId}`
-      );
-      const updatedProducts = products.filter(
-        product => product.productId !== productId
-      );
-      setProducts(updatedProducts);
-      setFilteredProducts(updatedProducts);
-    } catch (err) {
-      setError('Failed to delete product.');
+  const deleteProduct = async (): Promise<void> => {
+    if (productToDelete) {
+      try {
+        await axios.delete(
+          `http://localhost:8080/api/v2/gateway/inventories/${inventoryId}/products/${productToDelete}`
+        );
+        const updatedProducts = products.filter(
+          product => product.productId !== productToDelete
+        );
+        setProducts(updatedProducts);
+        setFilteredProducts(updatedProducts);
+      } catch (err) {
+        setError('Failed to delete product.');
+      } finally {
+        setShowConfirmation(false);
+        setProductToDelete(null);
+      }
     }
   };
 
@@ -122,6 +128,16 @@ const InventoryProducts: React.FC = () => {
     setFilteredProducts(filtered);
   };
 
+  const handleDeleteClick = (productId: string): void => {
+    setProductToDelete(productId);
+    setShowConfirmation(true);
+  };
+
+  const cancelDelete = (): void => {
+    setShowConfirmation(false);
+    setProductToDelete(null);
+  };
+
   const reduceQuantity = async (
     productId: string,
     currentQuantity: number
@@ -136,6 +152,7 @@ const InventoryProducts: React.FC = () => {
           }
         );
 
+        // Determine the new status based on the updated quantity
         let updatedStatus: 'RE_ORDER' | 'OUT_OF_STOCK' | 'AVAILABLE' =
           'AVAILABLE';
         if (updatedQuantity === 0) {
@@ -182,9 +199,13 @@ const InventoryProducts: React.FC = () => {
       </h2>
       <button
         className="btn btn-secondary"
-        onClick={() => navigate('/inventories')}
+        onClick={() =>
+          navigate('/inventories', {
+            state: { lastConsultedInventoryId: inventoryId },
+          })
+        }
       >
-        Back
+        Go Back
       </button>
       <div id="google_translate_element"></div> {/* Translate element */}
       <button className="btn btn-primary" onClick={handleCreatePdf}>
@@ -226,22 +247,22 @@ const InventoryProducts: React.FC = () => {
           </select>
         </div>
       </div>
-      {/* Product Table */}
-      {filteredProducts.length > 0 ? (
-        <table className="table table-striped">
-          <thead>
-            <tr>
-              <th>SupplyId</th>
-              <th>SupplyName</th>
-              <th>Description</th>
-              <th>Price</th>
-              <th>Quantity</th>
-              <th>Status</th>
-              <th colSpan={4}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredProducts.map((product: ProductModel) => (
+      {/* Always render the table structure */}
+      <table className="table table-striped">
+        <thead>
+          <tr>
+            <th>SupplyId</th>
+            <th>SupplyName</th>
+            <th>Description</th>
+            <th>Price</th>
+            <th>Quantity</th>
+            <th>Status</th>
+            <th colSpan={4}>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {filteredProducts.length > 0 ? (
+            filteredProducts.map((product: ProductModel) => (
               <tr key={product.productId}>
                 <td>{product.productId}</td>
                 <td>{product.productName}</td>
@@ -276,7 +297,7 @@ const InventoryProducts: React.FC = () => {
                 <td>
                   <button
                     className="btn btn-danger"
-                    onClick={() => deleteProduct(product.productId)}
+                    onClick={() => handleDeleteClick(product.productId)}
                   >
                     Delete
                   </button>
@@ -303,12 +324,16 @@ const InventoryProducts: React.FC = () => {
                   </button>
                 </td>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      ) : (
-        <p>No products found.</p>
-      )}
+            ))
+          ) : (
+            <tr>
+              <td colSpan={10} style={{ textAlign: 'center' }}>
+                No products available.
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
       <button
         className="btn btn-add"
         onClick={() => navigate(`/inventory/${inventoryId}/products/add`)}
@@ -318,6 +343,12 @@ const InventoryProducts: React.FC = () => {
       <button className="btn btn-danger" onClick={handleDeleteAllProducts}>
         Delete All Products
       </button>
+      <ConfirmationModal
+        show={showConfirmation}
+        message="Are you sure you want to delete this product?"
+        onConfirm={deleteProduct}
+        onCancel={cancelDelete}
+      />
     </div>
   );
 };

@@ -1,5 +1,4 @@
-
-.owners-container {
+.users-container {
   max-width: 1400px;
   margin: 50px auto;
   padding: 20px;
@@ -9,56 +8,52 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.owners-container h1 {
+.users-container h1 {
   text-align: center;
   margin-bottom: 20px;
   color: #333;
   font-family: 'Arial', sans-serif;
 }
 
-
-.owners-container table {
+.users-container table {
   width: 100%;
   border-collapse: collapse;
   margin-bottom: 20px;
   font-family: 'Arial', sans-serif;
 }
 
-.owners-container th,
-.owners-container td {
+.users-container th,
+.users-container td {
   padding: 12px 15px;
   text-align: left;
   border-bottom: 1px solid #ddd;
   font-size: 16px;
 }
 
-.owners-container th {
+.users-container th {
   background-color: #f4f4f4;
   color: #555;
 }
 
-.owners-container tr:hover {
+.users-container tr:hover {
   background-color: #f9f9f9;
 }
 
-
-.owners-container tbody tr:nth-child(even) {
+.users-container tbody tr:nth-child(even) {
   background-color: #f2f2f2;
 }
 
-
 @media screen and (max-width: 768px) {
-  .owners-container table {
+  .users-container table {
     width: 100%;
     font-size: 14px;
   }
 
-  .owners-container th,
-  .owners-container td {
+  .users-container th,
+  .users-container td {
     padding: 10px;
   }
 }
-
 
 .error {
   color: red;
@@ -67,8 +62,7 @@
   font-family: 'Arial', sans-serif;
 }
 
-
-.owners-container input[type='text'] {
+.users-container input[type='text'] {
   padding: 2px;
   margin: 2px 0;
   border: 1px solid #ccc;
