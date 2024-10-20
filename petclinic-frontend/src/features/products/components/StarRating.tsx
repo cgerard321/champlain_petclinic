@@ -82,7 +82,7 @@ function StarRating({
         );
       })}
       {currentRating != 0 && !viewOnly && (
-        <div className="delete-button" onClick={() => starClick(0)}>
+        <div className="delete-button-rating" onClick={() => starClick(0)}>
           <span>-</span>
         </div>
       )}

@@ -3,9 +3,11 @@ package com.petclinic.bffapigateway.presentationlayer.v2;
 import com.petclinic.bffapigateway.domainclientlayer.CartServiceClient;
 import com.petclinic.bffapigateway.dtos.Cart.PromoCodeRequestDTO;
 import com.petclinic.bffapigateway.dtos.Cart.PromoCodeResponseDTO;
+import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("api/v2/gateway/promos")
@@ -63,5 +66,20 @@ public class PromoCodeController {
 
     }
 
+    @GetMapping(value = "/actives", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Flux<PromoCodeResponseDTO> getActivePromos() {
+        return cartServiceClient.getActivePromos();
+    }
+
+
+    @GetMapping(value = "/validate/{promoCode}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<PromoCodeResponseDTO>> validatePromoCode(@PathVariable String promoCode) {
+        return cartServiceClient.validatePromoCode(promoCode)
+                .map(ResponseEntity::ok)
+                .onErrorResume(InvalidInputException.class, e -> {
+                    log.error("Invalid promo code validation attempt: {}", promoCode);
+                    return Mono.just(ResponseEntity.badRequest().body(null));
+                });
+    }
 
 }

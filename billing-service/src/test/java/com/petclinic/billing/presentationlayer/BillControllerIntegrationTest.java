@@ -524,6 +524,35 @@ class BillControllerIntegrationTest {
                 .jsonPath("$.timeRemaining").isEqualTo(0);
     }
 
+    @Test
+    void getBillsByMonth() {
+        repo.deleteAll().block();
+        for (int i = 1; i <= 5; i++) {
+            repo.save(Bill.builder()
+                    .billId("BillUUID" + i)
+                    .customerId("Cust" + i)
+                    .vetId("1")
+                    .visitType("Routine Check")
+                    .date(LocalDate.of(2022, 9, i))
+                    .amount(100.0)
+                    .billStatus(BillStatus.PAID)
+                    .dueDate(LocalDate.of(2022, 9, i).plusDays(30))
+                    .build()).block();
+        }
+
+        client.get()
+                .uri(uriBuilder -> uriBuilder.path("/bills/month")
+                        .queryParam("year", 2022)
+                        .queryParam("month", 9)
+                        .build())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBodyList(BillResponseDTO.class)
+                .hasSize(5);
+    }
+
     private Bill buildBillWithPastDueDate() {
 
         LocalDate date = LocalDate.of(2024, 1, 1);

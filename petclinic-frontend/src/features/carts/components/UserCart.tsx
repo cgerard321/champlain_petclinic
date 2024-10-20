@@ -44,6 +44,9 @@ const UserCart = (): JSX.Element => {
   const [notificationMessage, setNotificationMessage] = useState<string | null>(
     null
   ); // New state for notifications
+  const [voucherCode, setVoucherCode] = useState<string>('');
+  const [discount, setDiscount] = useState<number>(0);
+  const [voucherError, setVoucherError] = useState<string | null>(null);
 
   const subtotal = cartItems.reduce(
     (acc, item) => acc + item.productSalePrice * (item.quantity || 1),
@@ -51,7 +54,7 @@ const UserCart = (): JSX.Element => {
   );
   const tvq = subtotal * 0.09975; // Quebec tax rate
   const tvc = subtotal * 0.05; // Canadian tax rate
-  const total = subtotal + tvq + tvc;
+  const total = subtotal - discount + tvq + tvc;
 
   // Function to update the cart item count
   const updateCartItemCount = useCallback(() => {
@@ -125,6 +128,32 @@ const UserCart = (): JSX.Element => {
     // Recalculate cart item count after setting cart items
     updateCartItemCount();
   }, [cartId, updateCartItemCount, wishlistUpdated]);
+
+  const applyVoucherCode = async (): Promise<void> => {
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/v2/gateway/promos/validate/${voucherCode}`,
+        {
+          method: 'GET',
+          headers: {
+            Accept: 'application/json',
+          },
+          credentials: 'include',
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        setDiscount((subtotal * data.discount) / 100);
+        setVoucherError(null);
+      } else {
+        setVoucherError('Promo Code Invalid');
+      }
+    } catch (err: unknown) {
+      console.error('Error validating voucher code:', err);
+      setVoucherError('Error validating voucher code.');
+    }
+  };
 
   const changeItemQuantity = useCallback(
     async (
@@ -531,14 +560,67 @@ const UserCart = (): JSX.Element => {
                 Clear Cart
               </button>
             </div>
+            <div
+              className="voucher-code-section"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                marginTop: '20px',
+                flexDirection: 'column',
+                width: '100%',
+              }}
+            >
+              <div
+                style={{ display: 'flex', alignItems: 'center', width: '100%' }}
+              >
+                <input
+                  type="text"
+                  placeholder="Enter voucher code"
+                  value={voucherCode}
+                  onChange={e => {
+                    setVoucherCode(e.target.value);
+                    setVoucherError(null);
+                  }}
+                  className="voucher-input"
+                  style={{
+                    width: '150px',
+                    padding: '8px 12px',
+                    border: '1px solid #ccc',
+                    borderRadius: '4px',
+                    marginRight: '10px',
+                    fontSize: '14px',
+                  }}
+                />
+                <button
+                  onClick={applyVoucherCode}
+                  className="apply-voucher-button"
+                  style={{
+                    padding: '8px 16px',
+                    backgroundColor: '#28a745',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                  }}
+                >
+                  Apply Voucher
+                </button>
+              </div>
+              {voucherError && (
+                <div className="voucher-error" role="alert">
+                  {voucherError}
+                </div>
+              )}
+            </div>
             <hr />
-
             {/* Cart Summary */}
             <div className="CartSummary">
               <h3>Cart Summary</h3>
               <p className="summary-item">Subtotal: ${subtotal.toFixed(2)}</p>
               <p className="summary-item">TVQ (9.975%): ${tvq.toFixed(2)}</p>
               <p className="summary-item">TVC (5%): ${tvc.toFixed(2)}</p>
+              <p className="summary-item">Discount: ${discount.toFixed(2)}</p>
               <p className="total-price summary-item">
                 Total: ${total.toFixed(2)}
               </p>
