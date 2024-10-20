@@ -14,6 +14,7 @@ interface CartItemProps {
   addToWishlist: (item: ProductModel) => void;
   addToCart: (item: ProductModel) => void;
   isInWishlist: boolean;
+  showNotification?: (message: string) => void; // New prop for notifications
 }
 
 const formatPrice = (price: number): string => {
