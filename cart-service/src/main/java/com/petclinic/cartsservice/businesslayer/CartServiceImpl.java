@@ -390,16 +390,17 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public Mono<CartResponseModel> addProductToCartFromProducts(String cartId, String productId) {
-        // Fetch the latest cart and product information
+        //fetch the latest cart and product information
         return cartRepository.findCartByCartId(cartId)
                 .switchIfEmpty(Mono.error(new NotFoundException("Cart not found: " + cartId)))
                 .flatMap(cart -> productClient.getProductByProductId(productId)
                         .flatMap(product -> {
-                            // Validate if the product is out of stock
+                            //validate if the product is out of stock
                             if (product.getProductQuantity() == 0) {
-                                // The product is out of stock, move it to wishlist
+                                //the product is out of stock, move it to wishlist
                                 CartProduct wishListProduct = CartProduct.builder()
                                         .productId(product.getProductId())
+                                        .imageId(product.getImageId())
                                         .productName(product.getProductName())
                                         .productDescription(product.getProductDescription())
                                         .productSalePrice(product.getProductSalePrice())
@@ -412,7 +413,7 @@ public class CartServiceImpl implements CartService {
                                     cart.setWishListProducts(new ArrayList<>());
                                 }
 
-                                // Check if the product already exists in the wishlist
+                                //check if the product already exists in the wishlist
                                 Optional<CartProduct> existingWishlistProductOpt = cart.getWishListProducts().stream()
                                         .filter(p -> p.getProductId().equals(productId))
                                         .findFirst();
@@ -428,13 +429,13 @@ public class CartServiceImpl implements CartService {
                                             return responseModel;
                                         });
                             } else {
-                                // If product is available in stock
+                                //if product is available in stock
                                 Optional<CartProduct> existingProductOpt = cart.getProducts().stream()
                                         .filter(p -> p.getProductId().equals(productId))
                                         .findFirst();
 
                                 if (existingProductOpt.isPresent()) {
-                                    // If product already exists in cart, increment quantity by 1
+                                    //if product already exists in cart, increment quantity by 1
                                     CartProduct existingProduct = existingProductOpt.get();
                                     int newQuantity = existingProduct.getQuantityInCart() + 1;
 
@@ -445,17 +446,18 @@ public class CartServiceImpl implements CartService {
                                     }
 
                                     existingProduct.setQuantityInCart(newQuantity);
-                                    existingProduct.setProductQuantity(product.getProductQuantity()); // Update stock info
+                                    existingProduct.setProductQuantity(product.getProductQuantity());
                                 } else {
-                                    // Add new product to the cart
+                                    //add new product to the cart
                                     CartProduct cartProduct = CartProduct.builder()
                                             .productId(product.getProductId())
+                                            .imageId(product.getImageId())
                                             .productName(product.getProductName())
                                             .productDescription(product.getProductDescription())
                                             .productSalePrice(product.getProductSalePrice())
                                             .averageRating(product.getAverageRating())
-                                            .quantityInCart(1) // Add 1 item by default
-                                            .productQuantity(product.getProductQuantity()) // Set stock info
+                                            .quantityInCart(1)
+                                            .productQuantity(product.getProductQuantity())
                                             .build();
 
                                     cart.getProducts().add(cartProduct);
