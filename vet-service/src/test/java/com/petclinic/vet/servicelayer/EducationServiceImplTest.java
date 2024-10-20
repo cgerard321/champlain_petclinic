@@ -61,6 +61,20 @@ class EducationServiceImplTest {
     Education education = buildEducation();
     EducationRequestDTO educationRequestDTO = buildEducationRequestDTO();
 
+    @Test
+    void getAllEducationsByVetId() {
+        when(educationRepository.findAllByVetId(anyString())).thenReturn(Flux.just(education));
+
+        Flux<EducationResponseDTO> educationResponseDTO = educationService.getAllEducationsByVetId("1");
+
+        StepVerifier
+                .create(educationResponseDTO)
+                .consumeNextWith(found -> {
+                    assertEquals(education.getEducationId(), found.getEducationId());
+                    assertEquals(education.getVetId(), found.getVetId());
+                })
+                .verifyComplete();
+    }
 
     @Test
     void deleteEducationByEducationId_Success() {
