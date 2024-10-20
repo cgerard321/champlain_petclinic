@@ -25,7 +25,9 @@ export default function RecentlyViewedProducts(): JSX.Element {
       <h2>Recently Seen Products</h2>
       <div className="grid">
         {recentlyClickedProducts.length > 0 ? (
-          recentlyClickedProducts.map(product => (
+          recentlyClickedProducts
+              .filter(product => !product.isUnlisted)
+              .map(product => (
             <div
               key={product.productId}
               onClick={() => handleProductClick(product.productId)}
