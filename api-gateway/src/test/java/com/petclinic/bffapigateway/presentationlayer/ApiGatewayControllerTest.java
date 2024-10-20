@@ -6,6 +6,7 @@ import com.petclinic.bffapigateway.dtos.Auth.*;
 import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillStatus;
+import com.petclinic.bffapigateway.dtos.Bills.PaymentRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.InventoryRequestDTO;
@@ -2261,6 +2262,136 @@ class ApiGatewayControllerTest {
                 .expectStatus().isNoContent()
                 .expectBody().isEmpty();
     }
+
+    @Test
+    void payBill_Success() {
+        String successMessage = "Payment successful";
+        when(billServiceClient.payBill(anyString(), anyString(), any(PaymentRequestDTO.class)))
+                .thenReturn(Mono.just(successMessage));
+
+        PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("1234567812345678", "123", "12/23");
+
+        client.post()
+                .uri("/api/gateway/bills/customer/1/bills/1/pay")
+                .body(BodyInserters.fromValue(paymentRequestDTO))
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(String.class)
+                .value(response -> {
+                    assertEquals("Payment successful", response);
+                });
+    }
+
+    @Test
+    void payBill_Failure() {
+        when(billServiceClient.payBill(anyString(), anyString(), any(PaymentRequestDTO.class)))
+                .thenReturn(Mono.error(new RuntimeException("Invalid payment details")));
+
+        PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("1234567812345678", "123", "12/23");
+
+        client.post()
+                .uri("/api/gateway/bills/customer/1/bills/1/pay")
+                .body(BodyInserters.fromValue(paymentRequestDTO))
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody(String.class)
+                .value(response -> {
+                    assertTrue(response.contains("Payment failed"));
+                });
+    }
+
+
+    @Test
+    void payBill_Failure_InvalidCustomerId() {
+        when(billServiceClient.payBill(anyString(), anyString(), any(PaymentRequestDTO.class)))
+                .thenReturn(Mono.error(new RuntimeException("Invalid customer ID")));
+
+        PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("1234567812345678", "123", "12/23");
+
+        client.post()
+                .uri("/api/gateway/bills/customer/invalid-customer-id/bills/1/pay")
+                .body(BodyInserters.fromValue(paymentRequestDTO))
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody(String.class)
+                .value(response -> {
+                    assertTrue(response.contains("Payment failed: Invalid customer ID"));
+                });
+    }
+
+    @Test
+    void payBill_Failure_InvalidBillId() {
+        when(billServiceClient.payBill(anyString(), anyString(), any(PaymentRequestDTO.class)))
+                .thenReturn(Mono.error(new RuntimeException("Invalid bill ID")));
+
+        PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("1234567812345678", "123", "12/23");
+
+        client.post()
+                .uri("/api/gateway/bills/customer/1/bills/invalid-bill-id/pay")
+                .body(BodyInserters.fromValue(paymentRequestDTO))
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody(String.class)
+                .value(response -> {
+                    assertTrue(response.contains("Payment failed: Invalid bill ID"));
+                });
+    }
+
+    @Test
+    void payBill_Failure_ExpiredCard() {
+        when(billServiceClient.payBill(anyString(), anyString(), any(PaymentRequestDTO.class)))
+                .thenReturn(Mono.error(new RuntimeException("Card expired")));
+
+        PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("1234567812345678", "123", "01/20");
+
+        client.post()
+                .uri("/api/gateway/bills/customer/1/bills/1/pay")
+                .body(BodyInserters.fromValue(paymentRequestDTO))
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody(String.class)
+                .value(response -> {
+                    assertTrue(response.contains("Payment failed: Card expired"));
+                });
+    }
+
+
+    @Test
+    void payBill_MissingPaymentDetails_Failure() {
+        PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO(null, null, null);
+
+        client.post()
+                .uri("/api/gateway/bills/customer/1/bills/1/pay")
+                .body(BodyInserters.fromValue(paymentRequestDTO))
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody(String.class)
+                .value(response -> assertTrue(response.contains("Card number is required")));
+    }
+
+    @Test
+    void payBill_InvalidCVV_Failure() {
+        PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("1234567812345678", "12", "12/23");
+
+        client.post()
+                .uri("/api/gateway/bills/customer/1/bills/1/pay")
+                .body(BodyInserters.fromValue(paymentRequestDTO))
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody(String.class)
+                .value(response -> {
+                    assertTrue(response.contains("CVV must be 3 digits"));
+                });
+    }
+
+
 
 
     /**
