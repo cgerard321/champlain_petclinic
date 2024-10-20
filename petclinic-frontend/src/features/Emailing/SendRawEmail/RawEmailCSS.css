@@ -15,7 +15,7 @@
 .popup-content {
   background-color: white;
   width: 50%; /* Limit to half the screen */
-  max-width: 600px;
+  max-width: 1000px;
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
@@ -62,7 +62,7 @@
 
 /* Close button styling */
 .popup-content .close-btn {
-  background-color: #6c757d;
+  background-color: #e81f1f;
   margin-left: 10px;
 }
 
