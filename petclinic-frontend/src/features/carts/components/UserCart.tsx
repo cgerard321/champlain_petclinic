@@ -1,4 +1,5 @@
 // UserCart.tsx
+
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import CartItem from './CartItem';
@@ -6,29 +7,28 @@ import { ProductModel } from '../models/ProductModel';
 import './UserCart.css';
 import { NavBar } from '@/layouts/AppNavBar';
 import { FaShoppingCart } from 'react-icons/fa';
-import { FaShoppingCart } from 'react-icons/fa'; // Importing the shopping cart icon
 
-interface ProductAPIResponse {
-  productId: number;
-
-  productName: string;
-  productDescription: string;
-  productSalePrice: number;
-  averageRating: number;
-  quantityInCart: number;
-  productQuantity: number;
-}
-
-interface Invoice {
+interface InvoiceItem {
   productId: number;
   productName: string;
   productSalePrice: number;
   quantity: number;
 }
 
+interface Invoice {
+  invoiceId: string;
+  cartId: string;
+  items: InvoiceItem[];
+  subtotal: number;
+  tax: number;
+  total: number;
+  issueDate: string;
+}
+
 const UserCart = (): JSX.Element => {
   const { cartId } = useParams<{ cartId: string }>();
   const navigate = useNavigate();
+
   const [cartItems, setCartItems] = useState<ProductModel[]>([]);
   const [wishlistItems, setWishlistItems] = useState<ProductModel[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -38,18 +38,17 @@ const UserCart = (): JSX.Element => {
   );
   const [checkoutMessage, setCheckoutMessage] = useState<string | null>(null);
   const [invoice, setInvoice] = useState<Invoice | null>(null);
-  const [cartItemCount, setCartItemCount] = useState<number>(0);
-  const [invoices, setInvoices] = useState<Invoice[]>([]); // State to hold invoice details
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [cartItemCount, setCartItemCount] = useState<number>(0);
   const [isCheckoutModalOpen, setIsCheckoutModalOpen] =
-    useState<boolean>(false); // Modal state
+    useState<boolean>(false);
   const [wishlistUpdated, setWishlistUpdated] = useState(false);
   const [voucherCode, setVoucherCode] = useState<string>('');
   const [discount, setDiscount] = useState<number>(0);
   const [voucherError, setVoucherError] = useState<string | null>(null);
   const [notificationMessage, setNotificationMessage] = useState<string | null>(
     null
-  ); // New state for notifications
+  );
 
   const subtotal = cartItems.reduce(
     (acc, item) => acc + item.productSalePrice * (item.quantity || 1),
@@ -60,7 +59,6 @@ const UserCart = (): JSX.Element => {
   const tvc = subtotal * 0.05;
   const total = subtotal - discount + tvq + tvc;
 
-  // Function to update the cart item count
   const updateCartItemCount = useCallback(() => {
     const count = cartItems.reduce(
       (acc, item) => acc + (item.quantity || 0),
@@ -111,7 +109,6 @@ const UserCart = (): JSX.Element => {
         setCartItems(products);
         setWishlistItems(data.wishListProducts || []);
       } catch (err: unknown) {
-        // Changed from any to unknown
         if (err instanceof Error) {
           console.error(err.message);
           setError('Failed to fetch cart items');
@@ -126,17 +123,11 @@ const UserCart = (): JSX.Element => {
 
     fetchCartItems();
     setWishlistUpdated(false);
-    // Recalculate cart item count after setting cart items
-    updateCartItemCount();
-  }, [cartId, updateCartItemCount, wishlistUpdated]);
+  }, [cartId, wishlistUpdated]);
 
   useEffect(() => {
-    const count = cartItems.reduce(
-      (acc, item) => acc + (item.quantity || 0),
-      0
-    );
-    setCartItemCount(count);
-  }, [cartItems]);
+    updateCartItemCount();
+  }, [cartItems, updateCartItemCount]);
 
   const applyVoucherCode = async (): Promise<void> => {
     try {
@@ -158,9 +149,9 @@ const UserCart = (): JSX.Element => {
       } else {
         setVoucherError('Promo Code Invalid');
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error validating voucher code:', err);
-      setVoucherError('Error validating voucher code:');
+      setVoucherError('Error validating voucher code.');
     }
   };
 
@@ -207,13 +198,10 @@ const UserCart = (): JSX.Element => {
             ...prevErrors,
             [index]: data.message || 'Failed to update quantity',
           }));
-          // Check if the product has been moved to wishlist
           if (data.message && data.message.includes('moved to your wishlist')) {
-            // Remove the item from cart
             setCartItems(prevItems =>
               prevItems.filter((_, idx) => idx !== index)
             );
-            // Add to wishlist
             setWishlistItems(prevItems => [...prevItems, item]);
             setNotificationMessage(data.message);
           }
@@ -223,11 +211,9 @@ const UserCart = (): JSX.Element => {
             newItems[index].quantity = newQuantity;
             return newItems;
           });
-          // Optionally, display success message
           setNotificationMessage('Item quantity updated successfully.');
         }
       } catch (err: unknown) {
-        // Changed from any to unknown
         console.error('Error updating quantity:', err);
         if (err instanceof Error) {
           const errorMessage = err.message || 'Failed to update quantity';
@@ -273,7 +259,6 @@ const UserCart = (): JSX.Element => {
         );
         alert('Item successfully removed!');
       } catch (error: unknown) {
-        // Changed from any to unknown
         console.error('Error deleting item: ', error);
         if (error instanceof Error) {
           alert(`Failed to delete item: ${error.message}`);
@@ -309,7 +294,6 @@ const UserCart = (): JSX.Element => {
           throw new Error('Failed to clear cart');
         }
       } catch (error: unknown) {
-        // Changed from any to unknown
         console.error('Error clearing cart:', error);
         if (error instanceof Error) {
           alert(`Failed to clear cart: ${error.message}`);
@@ -320,8 +304,6 @@ const UserCart = (): JSX.Element => {
     }
   };
 
-
-  // Add to Wishlist Function
   const addToWishlist = async (item: ProductModel): Promise<void> => {
     try {
       const productId = item.productId;
@@ -348,21 +330,13 @@ const UserCart = (): JSX.Element => {
         throw new Error(data.message || 'Failed to add to wishlist');
       }
 
-      // Update wishlist state
       setWishlistItems(prevItems => [...prevItems, item]);
       alert(`${item.productName} has been added to your wishlist!`);
-
-      // Display notification message from backend
-      if (data.message) {
-        setNotificationMessage(data.message);
-      } else {
-        alert(`${item.productName} has been added to your wishlist!`);
-      }
-
-      // Trigger the useEffect by updating the wishlistUpdated state
+      setNotificationMessage(
+        data.message || `${item.productName} has been added to your wishlist!`
+      );
       setWishlistUpdated(true);
     } catch (error: unknown) {
-      // Changed from any to unknown
       console.error('Error adding to wishlist:', error);
       if (error instanceof Error) {
         alert(error.message || 'Failed to add item to wishlist.');
@@ -372,7 +346,6 @@ const UserCart = (): JSX.Element => {
     }
   };
 
-  // Add to Cart Function (from Wishlist)
   const addToCartFunction = async (item: ProductModel): Promise<void> => {
     try {
       const productId = item.productId;
@@ -399,27 +372,16 @@ const UserCart = (): JSX.Element => {
         throw new Error(data.message || 'Failed to add to cart');
       }
 
-      setWishlistItems(prevItems => [...prevItems, item]);
-      alert(`${item.productName} has been added to your cart!`);
-      // Update cart items state
       setCartItems(prevItems => [...prevItems, item]);
-
-      // Remove from wishlist
       setWishlistItems(prevItems =>
         prevItems.filter(product => product.productId !== item.productId)
       );
-
-      // Display notification message from backend
-      if (data.message) {
-        setNotificationMessage(data.message);
-      } else {
-        alert(`${item.productName} has been added to your cart!`);
-      }
-
-      // Trigger the useEffect by updating the wishlistUpdated state
+      alert(`${item.productName} has been added to your cart!`);
+      setNotificationMessage(
+        data.message || `${item.productName} has been added to your cart!`
+      );
       setWishlistUpdated(true);
     } catch (error: unknown) {
-      // Changed from any to unknown
       console.error('Error adding to cart:', error);
       if (error instanceof Error) {
         alert(error.message || 'Failed to add item to cart.');
@@ -444,7 +406,7 @@ const UserCart = (): JSX.Element => {
     setIsCheckoutModalOpen(true);
   };
 
-  const handleCheckout = async (): Promise<void> => {
+  const handleCheckoutProcess = async (): Promise<void> => {
     if (!cartId) {
       setCheckoutMessage('Invalid cart ID');
       return;
@@ -477,21 +439,11 @@ const UserCart = (): JSX.Element => {
           total,
           issueDate: new Date().toISOString(),
         };
-        const invoiceItems: Invoice[] = cartItems.map(item => ({
-          productId: Number(item.productId), // Ensure productId is a number
-          productName: item.productName,
-          productSalePrice: item.productSalePrice,
-          quantity: item.quantity || 1,
-        }));
 
         setInvoice(newInvoice);
+        setInvoices(prevInvoices => [...prevInvoices, newInvoice]);
         setCheckoutMessage('Checkout successful!');
         setCartItems([]);
-        // Set the invoices state
-        setInvoices(invoiceItems);
-
-        setCheckoutMessage('Checkout successful!');
-        setCartItems([]); // Clear the cart after successful checkout
         setCartItemCount(0);
         setIsCheckoutModalOpen(false);
       } else {
@@ -500,9 +452,13 @@ const UserCart = (): JSX.Element => {
           `Checkout failed: ${errorData.message || response.statusText}`
         );
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error during checkout:', error);
-      setCheckoutMessage('Checkout failed due to an unexpected error.');
+      if (error instanceof Error) {
+        setCheckoutMessage(`Checkout failed: ${error.message}`);
+      } else {
+        setCheckoutMessage('Checkout failed due to an unexpected error.');
+      }
     }
   };
 
@@ -520,7 +476,6 @@ const UserCart = (): JSX.Element => {
 
       <h1 className="cart-title">User Cart</h1>
 
-      {/* Notification Message */}
       {notificationMessage && (
         <div className="notification-message">
           {notificationMessage}
@@ -534,7 +489,6 @@ const UserCart = (): JSX.Element => {
         </div>
       )}
 
-      {/* Main Content Container */}
       <div className="content-container">
         <div className="UserCart-checkout-flex">
           <div className="UserCart">
@@ -564,9 +518,9 @@ const UserCart = (): JSX.Element => {
                     deleteItem={deleteItem}
                     errorMessage={errorMessages[index]}
                     addToWishlist={addToWishlist}
-                    addToCart={() => {}} // Not needed in cart items
+                    addToCart={() => {}}
                     isInWishlist={false}
-                    showNotification={setNotificationMessage} // Pass the notification handler
+                    showNotification={setNotificationMessage}
                   />
                 ))
               ) : (
@@ -590,6 +544,7 @@ const UserCart = (): JSX.Element => {
                 alignItems: 'center',
                 marginTop: '20px',
                 flexDirection: 'column',
+                width: '100%',
               }}
             >
               <div
@@ -649,27 +604,26 @@ const UserCart = (): JSX.Element => {
               </p>
             </div>
 
-            {/* Checkout Button */}
-            <button
-              className="checkout-btn"
-              onClick={handleCheckoutConfirmation}
-              disabled={cartItems.length === 0} // Disable if cart is empty
-            >
             <h3>Checkout</h3>
-            <button className="btn checkout-btn" onClick={handleCheckout}>
+            <button
+              className="btn checkout-btn"
+              onClick={handleCheckoutConfirmation}
+              disabled={cartItems.length === 0}
+            >
               Checkout
             </button>
-            {/* Checkout Confirmation Modal */}
+
             {isCheckoutModalOpen && (
               <div className="checkout-modal">
                 <h3>Confirm Checkout</h3>
                 <p>Are you sure you want to checkout?</p>
-                <button onClick={handleCheckout}>Yes</button>
+                <button onClick={handleCheckoutProcess}>Yes</button>
                 <button onClick={() => setIsCheckoutModalOpen(false)}>
                   No
                 </button>
               </div>
             )}
+
             {checkoutMessage && (
               <div className="checkout-message">{checkoutMessage}</div>
             )}
@@ -697,63 +651,64 @@ const UserCart = (): JSX.Element => {
                       {item.productName} - Quantity: {item.quantity} - Price: $
                       {item.productSalePrice.toFixed(2)}
                     </li>
-            {/* Invoice Section - Display a single invoice with a list of items */}
-            {invoices.length > 0 && (
-              <div className="invoices-section">
-                <h2>Invoice</h2>
-                <div className="invoice-summary">
-                  <h3>Items</h3>
-                  {invoices.map(invoice => (
-                    <div key={invoice.productId} className="invoice-card">
-                      <h4>{invoice.productName}</h4>
-                      <p>Price: ${invoice.productSalePrice.toFixed(2)}</p>
-                      <p>Quantity: {invoice.quantity}</p>
-                      <p>
-                        Total: $
-                        {(invoice.productSalePrice * invoice.quantity).toFixed(
-                          2
-                        )}
-                      </p>
-                    </div>
                   ))}
-                  <h3>
-                    Total: $
-                    {invoices
-                      .reduce(
-                        (total, invoice) =>
-                          total + invoice.productSalePrice * invoice.quantity,
-                        0
-                      )
-                      .toFixed(2)}
-                  </h3>
-                </div>
+                </ul>
               </div>
             )}
 
-            <div className="wishlist-section">
-            <h2 className="wishlist-title">Your Wishlist</h2>
-            <div className="wishlist-items-container">
-              {wishlistItems.length > 0 ? (
-                wishlistItems.map(item => (
-                  <CartItem
-                    key={item.productId}
-                    item={item}
-                    index={-1}
-                    changeItemQuantity={() => {}}
-                    deleteItem={() => {}}
-                    addToWishlist={() => {}}
-                    addToCart={addToCartFunction} // Use the updated addToCart function
-                      isInWishlist={true}
-                      showNotification={setNotificationMessage} // Pass the notification handler
-                    />
-                  ))
-                ) : (
-                  <p className="empty-wishlist-message">
-                    No products in the wishlist.
-                  </p>
-                )}
+            {invoices.length > 0 && (
+              <div className="invoices-section">
+                <h2>Invoice History</h2>
+                <div className="invoice-summary">
+                  {invoices.map(inv => (
+                    <div key={inv.invoiceId} className="invoice-card">
+                      <h4>Invoice ID: {inv.invoiceId}</h4>
+                      <p>Cart ID: {inv.cartId}</p>
+                      <p>Subtotal: ${inv.subtotal.toFixed(2)}</p>
+                      <p>Tax: ${inv.tax.toFixed(2)}</p>
+                      <p>Total: ${inv.total.toFixed(2)}</p>
+                      <p>
+                        Issue Date: {new Date(inv.issueDate).toLocaleString()}
+                      </p>
+                      <h5>Items:</h5>
+                      <ul>
+                        {inv.items.map((item, idx) => (
+                          <li key={idx}>
+                            {item.productName} - Quantity: {item.quantity} -
+                            Price: ${item.productSalePrice.toFixed(2)}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
+          </div>
+        </div>
+
+        <div className="wishlist-section">
+          <h2 className="wishlist-title">Your Wishlist</h2>
+          <div className="wishlist-items-container">
+            {wishlistItems.length > 0 ? (
+              wishlistItems.map(item => (
+                <CartItem
+                  key={item.productId}
+                  item={item}
+                  index={-1}
+                  changeItemQuantity={() => {}}
+                  deleteItem={() => {}}
+                  addToWishlist={() => {}}
+                  addToCart={addToCartFunction}
+                  isInWishlist={true}
+                  showNotification={setNotificationMessage}
+                />
+              ))
+            ) : (
+              <p className="empty-wishlist-message">
+                No products in the wishlist.
+              </p>
+            )}
           </div>
         </div>
       </div>
