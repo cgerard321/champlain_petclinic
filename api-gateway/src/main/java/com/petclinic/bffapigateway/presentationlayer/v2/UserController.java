@@ -127,4 +127,14 @@ public class UserController {
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @PatchMapping(value = "/users/{userID}", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<UserPasswordLessDTO>> updateUserRoles(@PathVariable final String userID,
+                                                                     @RequestBody final UserPasswordLessDTO userPasswordLessDTO,
+                                                                     @CookieValue("Bearer") String jwtToken) {
+        return authServiceClient.updateUser(userID, userPasswordLessDTO, jwtToken)
+                .map(userPasswordLessDTO1 -> ResponseEntity.ok().body(userPasswordLessDTO1))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
 }
