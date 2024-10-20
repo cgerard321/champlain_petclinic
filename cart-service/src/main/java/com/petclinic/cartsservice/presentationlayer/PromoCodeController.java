@@ -14,7 +14,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
-
 @CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 @RequestMapping("/api/v1/promos")
 @Slf4j
@@ -72,6 +71,14 @@ public class PromoCodeController {
                 .defaultIfEmpty(ResponseEntity.badRequest().build());  // Handle case where no promo code is found
     }
 
+
+    @GetMapping(value = "/validate/{promoCode}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<PromoCodeResponseModel>> validatePromoCode(@PathVariable String promoCode) {
+        return promoCodeService.getPromoCodeByCode(promoCode)
+                .filter(PromoCodeResponseModel::isActive)
+                .map(ResponseEntity::ok)
+                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Promo code is not valid")));
+    }
 
     @GetMapping(value = "/actives", produces = MediaType.APPLICATION_JSON_VALUE)
     public Flux<PromoCodeResponseModel> getActivePromos() {

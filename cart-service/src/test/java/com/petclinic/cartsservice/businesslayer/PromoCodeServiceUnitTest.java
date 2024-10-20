@@ -207,6 +207,47 @@ public class PromoCodeServiceUnitTest {
         verify(promoRepository, times(1)).findAllByExpirationDateGreaterThanEqual(any());
     }
 
+
+    @Test
+    void getPromoCodeByCode_shouldReturnPromoCode_whenCodeExists() {
+        // Arrange
+        String promoCodeString = "SUMMER2024";
+        when(promoRepository.findPromoCodeByCode(eq(promoCodeString))).thenReturn(Mono.just(promoCode));
+
+        // Act
+        Mono<PromoCodeResponseModel> promoCodeMono = promoCodeService.getPromoCodeByCode(promoCodeString);
+
+        // Assert
+        StepVerifier.create(promoCodeMono)
+                .assertNext(responseModel -> {
+                    assertNotNull(responseModel);
+                    assertEquals(promoCode.getCode(), responseModel.getCode());
+                    assertEquals(promoCode.getName(), responseModel.getName());
+                    assertEquals(promoCode.getExpirationDate(), responseModel.getExpirationDate());
+                    assertEquals(promoCode.isActive(), responseModel.isActive());
+                })
+                .verifyComplete();
+
+        verify(promoRepository, times(1)).findPromoCodeByCode(promoCodeString);
+    }
+    @Test
+    void getPromoCodeByCode_shouldReturnEmpty_whenCodeDoesNotExist() {
+        // Arrange
+        String promoCodeString = "INVALIDCODE";
+        when(promoRepository.findPromoCodeByCode(eq(promoCodeString))).thenReturn(Mono.empty());
+
+        // Act
+        Mono<PromoCodeResponseModel> promoCodeMono = promoCodeService.getPromoCodeByCode(promoCodeString);
+
+        // Assert
+        StepVerifier.create(promoCodeMono)
+                .expectNextCount(0)
+                .verifyComplete();
+
+        verify(promoRepository, times(1)).findPromoCodeByCode(promoCodeString);
+    }
+
+
 }
 
 

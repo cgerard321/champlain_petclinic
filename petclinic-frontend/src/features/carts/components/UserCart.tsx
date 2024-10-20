@@ -4,7 +4,7 @@ import CartItem from './CartItem';
 import { ProductModel } from '../models/ProductModel';
 import './UserCart.css';
 import { NavBar } from '@/layouts/AppNavBar';
-import { FaShoppingCart } from 'react-icons/fa'; // Importing the shopping cart iconS
+import { FaShoppingCart } from 'react-icons/fa';
 
 interface ProductAPIResponse {
   productId: number;
@@ -45,16 +45,20 @@ const UserCart = (): JSX.Element => {
   );
   const [checkoutMessage, setCheckoutMessage] = useState<string | null>(null);
   const [invoice, setInvoice] = useState<Invoice | null>(null);
-  const [cartItemCount, setCartItemCount] = useState<number>(0); // State for cart item count
+  const [cartItemCount, setCartItemCount] = useState<number>(0);
   const [wishlistUpdated, setWishlistUpdated] = useState(false);
+  const [voucherCode, setVoucherCode] = useState<string>('');
+  const [discount, setDiscount] = useState<number>(0);
+  const [voucherError, setVoucherError] = useState<string | null>(null);
 
   const subtotal = cartItems.reduce(
     (acc, item) => acc + item.productSalePrice * (item.quantity || 1),
     0
   );
-  const tvq = subtotal * 0.09975; // Quebec tax rate
-  const tvc = subtotal * 0.05; // Canadian tax rate
-  const total = subtotal + tvq + tvc;
+
+  const tvq = subtotal * 0.09975;
+  const tvc = subtotal * 0.05;
+  const total = subtotal - discount + tvq + tvc;
 
   // Function to update the cart item count
   const updateCartItemCount = useCallback(() => {
@@ -88,12 +92,10 @@ const UserCart = (): JSX.Element => {
 
         const data = await response.json();
 
-        // Ensure that data.products exists and is an array
         if (!Array.isArray(data.products)) {
           throw new Error('Invalid data format: products should be an array');
         }
 
-        // Map data.products to the appropriate ProductModel format
         const products: ProductModel[] = data.products.map(
           (product: ProductAPIResponse) => ({
             productId: product.productId,
@@ -121,29 +123,60 @@ const UserCart = (): JSX.Element => {
     };
 
     fetchCartItems();
-    // Reset wishlistUpdated to avoid unnecessary fetches
     setWishlistUpdated(false);
     // Recalculate cart item count after setting cart items
     updateCartItemCount();
   }, [cartId, updateCartItemCount, wishlistUpdated]);
+
+  useEffect(() => {
+    const count = cartItems.reduce(
+      (acc, item) => acc + (item.quantity || 0),
+      0
+    );
+    setCartItemCount(count);
+  }, [cartItems]);
+
+  const applyVoucherCode = async (): Promise<void> => {
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/v2/gateway/promos/validate/${voucherCode}`,
+        {
+          method: 'GET',
+          headers: {
+            Accept: 'application/json',
+          },
+          credentials: 'include',
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        setDiscount((subtotal * data.discount) / 100);
+        setVoucherError(null);
+      } else {
+        setVoucherError('Promo Code Invalid');
+      }
+    } catch (err) {
+      console.error('Error validating voucher code:', err);
+      setVoucherError('Error validating voucher code:');
+    }
+  };
 
   const changeItemQuantity = useCallback(
     async (
       event: React.ChangeEvent<HTMLInputElement>,
       index: number
     ): Promise<void> => {
-      const newQuantity = Math.max(1, Number(event.target.value)); // Ensure quantity is at least 1
+      const newQuantity = Math.max(1, Number(event.target.value));
       const item = cartItems[index];
 
       if (newQuantity > item.productQuantity) {
-        // Display error message
         setErrorMessages(prevErrors => ({
           ...prevErrors,
           [index]: `You cannot add more than ${item.productQuantity} items. Only ${item.productQuantity} items left in stock.`,
         }));
         return;
       } else {
-        // Clear error message
         setErrorMessages(prevErrors => {
           const rest = { ...prevErrors };
           delete rest[index];
@@ -151,7 +184,6 @@ const UserCart = (): JSX.Element => {
         });
       }
 
-      // Update quantity in backend
       try {
         const response = await fetch(
           `http://localhost:8080/api/v2/gateway/carts/${cartId}/products/${item.productId}`,
@@ -173,7 +205,6 @@ const UserCart = (): JSX.Element => {
             [index]: errorData.message || 'Failed to update quantity',
           }));
         } else {
-          // Update local state
           setCartItems(prevItems => {
             const newItems = [...prevItems];
             newItems[index].quantity = newQuantity;
@@ -231,7 +262,7 @@ const UserCart = (): JSX.Element => {
       return;
     }
 
-    if (!window.confirm('Are you sure you want to clear the cart?')) {
+    if (window.confirm('Are you sure you want to clear the cart?')) {
       try {
         const response = await fetch(
           `http://localhost:8080/api/v2/gateway/carts/${cartId}/clear`,
@@ -254,7 +285,7 @@ const UserCart = (): JSX.Element => {
       }
     }
   };
-  //TODO: Remove the Item that has been moved
+
   const addToWishlist = async (item: ProductModel): Promise<void> => {
     try {
       const productId = item.productId;
@@ -280,10 +311,8 @@ const UserCart = (): JSX.Element => {
         throw new Error(errorData.message || 'Failed to add to wishlist');
       }
 
-      // Optionally, you can update the wishlistItems state
       setWishlistItems(prevItems => [...prevItems, item]);
       alert(`${item.productName} has been added to your wishlist!`);
-      // Trigger the useEffect by updating the wishlistUpdated state
       setWishlistUpdated(true);
     } catch (error) {
       console.error('Error adding to wishlist:', error);
@@ -316,10 +345,8 @@ const UserCart = (): JSX.Element => {
         throw new Error(errorData.message || 'Failed to add to cart');
       }
 
-      // Optionally, you can update the wishlistItems state
       setWishlistItems(prevItems => [...prevItems, item]);
       alert(`${item.productName} has been added to your cart!`);
-      // Trigger the useEffect by updating the wishlistUpdated state
       setWishlistUpdated(true);
     } catch (error) {
       console.error('Error adding to cart:', error);
@@ -346,9 +373,8 @@ const UserCart = (): JSX.Element => {
       );
 
       if (response.ok) {
-        // Generate the invoice
         const newInvoice: Invoice = {
-          invoiceId: 'INV-' + new Date().getTime(), // Generate a simple invoice ID
+          invoiceId: 'INV-' + new Date().getTime(),
           cartId,
           items: cartItems.map(item => ({
             productId: item.productId,
@@ -359,12 +385,12 @@ const UserCart = (): JSX.Element => {
           subtotal,
           tax: tvq + tvc,
           total,
-          issueDate: new Date().toISOString(), // Current date
+          issueDate: new Date().toISOString(),
         };
 
-        setInvoice(newInvoice); // Set the new invoice state
-        setCheckoutMessage('Checkout successful!'); // Notify the user
-        setCartItems([]); // Clear cart after checkout
+        setInvoice(newInvoice);
+        setCheckoutMessage('Checkout successful!');
+        setCartItems([]);
         setCartItemCount(0);
       } else {
         setCheckoutMessage('Checkout failed.');
@@ -389,12 +415,9 @@ const UserCart = (): JSX.Element => {
 
       <h1 className="cart-title">User Cart</h1>
 
-      {/* Main Content Container */}
       <div className="content-container">
         <div className="UserCart-checkout-flex">
-          {/* Main Cart Section */}
           <div className="UserCart">
-            {/* Cart Header with Badge */}
             <div className="cart-header">
               <h2 className="cart-header-title">Your Cart</h2>
               <div className="cart-badge-container">
@@ -410,7 +433,6 @@ const UserCart = (): JSX.Element => {
               </div>
             </div>
 
-            {/* Cart Items */}
             <div className="cart-items-container">
               {cartItems.length > 0 ? (
                 cartItems.map((item, index) => (
@@ -431,7 +453,6 @@ const UserCart = (): JSX.Element => {
               )}
             </div>
 
-            {/* Cart Control Buttons */}
             <div className="cart-control-buttons">
               <button className="btn go-back-btn" onClick={() => navigate(-1)}>
                 Go Back
@@ -440,20 +461,73 @@ const UserCart = (): JSX.Element => {
                 Clear Cart
               </button>
             </div>
+
+            <div
+              className="voucher-code-section"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                marginTop: '20px',
+                flexDirection: 'column',
+              }}
+            >
+              <div
+                style={{ display: 'flex', alignItems: 'center', width: '100%' }}
+              >
+                <input
+                  type="text"
+                  placeholder="Enter voucher code"
+                  value={voucherCode}
+                  onChange={e => {
+                    setVoucherCode(e.target.value);
+                    setVoucherError(null);
+                  }}
+                  className="voucher-input"
+                  style={{
+                    width: '150px',
+                    padding: '8px 12px',
+                    border: '1px solid #ccc',
+                    borderRadius: '4px',
+                    marginRight: '10px',
+                    fontSize: '14px',
+                  }}
+                />
+                <button
+                  onClick={applyVoucherCode}
+                  className="apply-voucher-button"
+                  style={{
+                    padding: '8px 16px',
+                    backgroundColor: '#28a745',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                  }}
+                >
+                  Apply Voucher
+                </button>
+              </div>
+              {voucherError && (
+                <div className="voucher-error" role="alert">
+                  {voucherError}
+                </div>
+              )}
+            </div>
+
             <hr />
 
-            {/* Cart Summary */}
             <div className="CartSummary">
               <h3>Cart Summary</h3>
               <p className="summary-item">Subtotal: ${subtotal.toFixed(2)}</p>
               <p className="summary-item">TVQ (9.975%): ${tvq.toFixed(2)}</p>
               <p className="summary-item">TVC (5%): ${tvc.toFixed(2)}</p>
+              <p className="summary-item">Discount: ${discount.toFixed(2)}</p>
               <p className="total-price summary-item">
                 Total: ${total.toFixed(2)}
               </p>
             </div>
 
-            {/* Checkout Section */}
             <h3>Checkout</h3>
             <button className="btn checkout-btn" onClick={handleCheckout}>
               Checkout
@@ -462,7 +536,6 @@ const UserCart = (): JSX.Element => {
               <div className="checkout-message">{checkoutMessage}</div>
             )}
 
-            {/* Invoice Section */}
             {invoice && (
               <div className="invoice-section">
                 <h2 className="invoice-title">Invoice Details</h2>
@@ -479,7 +552,6 @@ const UserCart = (): JSX.Element => {
                   Issue Date: {new Date(invoice.issueDate).toLocaleString()}
                 </p>
 
-                {/* Invoice Items */}
                 <h3 className="invoice-items-title">Items:</h3>
                 <ul className="invoice-items-list">
                   {invoice.items.map((item, index) => (
@@ -493,7 +565,6 @@ const UserCart = (): JSX.Element => {
             )}
           </div>
 
-          {/* Wishlist Section */}
           <div className="wishlist-section">
             <h2 className="wishlist-title">Your Wishlist</h2>
             <div className="wishlist-items-container">

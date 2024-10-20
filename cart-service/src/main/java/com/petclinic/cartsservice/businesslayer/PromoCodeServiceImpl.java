@@ -40,6 +40,13 @@ public class PromoCodeServiceImpl implements PromoCodeService {
     }
 
     @Override
+    public Mono<PromoCodeResponseModel> getPromoCodeByCode(String promoCode) {
+        return promoRepository.findPromoCodeByCode(promoCode)
+                .map(EntityModelUtil::toPromoCodeResponseModel)
+                .doOnNext(promo -> log.debug("Promo: " + promo));
+    }
+
+    @Override
     public Mono<PromoCodeResponseModel> getPromoCodeById(String promoCodeId) {
         return promoRepository.findById(promoCodeId)
                 .map(EntityModelUtil::toPromoCodeResponseModel)

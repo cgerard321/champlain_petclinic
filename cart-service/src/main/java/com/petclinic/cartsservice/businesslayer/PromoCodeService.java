@@ -16,4 +16,5 @@ public interface PromoCodeService {
     Mono<PromoCodeResponseModel> deletePromoCode(String promoCodeId);
 
     Flux<PromoCodeResponseModel> getActivePromos();
+    Mono<PromoCodeResponseModel> getPromoCodeByCode(String promoCode);
 }

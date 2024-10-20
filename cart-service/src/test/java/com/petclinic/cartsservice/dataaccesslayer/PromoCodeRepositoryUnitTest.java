@@ -4,13 +4,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.test.context.ActiveProfiles;
 import reactor.test.StepVerifier;
 
 import java.time.LocalDateTime;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 @DataMongoTest
 @ActiveProfiles("test")
@@ -154,6 +154,79 @@ class PromoCodeRepositoryUnitTest {
                 .expectNextMatches(promo -> promo.getExpirationDate().isBefore(currentDate) && promo.isActive())
                 .verifyComplete();
     }
+
+
+    @Test
+    void findPromoCodeByCode_withExistingCode_thenReturnPromoCode() {
+        // Arrange: Save promoCode1 in the repository
+        StepVerifier.create(promoRepository.save(promoCode1))
+                .consumeNextWith(savedPromoCode -> {
+                    assertNotNull(savedPromoCode);
+                    assertEquals(promoCode1.getCode(), savedPromoCode.getCode());
+                })
+                .verifyComplete();
+
+        // Act: Retrieve the promoCode by its code
+        StepVerifier.create(promoRepository.findPromoCodeByCode(promoCode1.getCode()))
+                .assertNext(foundPromoCode -> {
+                    assertNotNull(foundPromoCode);
+                    assertEquals(promoCode1.getId(), foundPromoCode.getId());
+                    assertEquals(promoCode1.getCode(), foundPromoCode.getCode());
+                    assertEquals(promoCode1.getName(), foundPromoCode.getName());
+                    assertEquals(promoCode1.getExpirationDate(), foundPromoCode.getExpirationDate());
+                    assertTrue(foundPromoCode.isActive());
+                })
+                .verifyComplete();
+    }
+
+
+    @Test
+    void findPromoCodeByCode_withNonExistentCode_thenReturnEmpty() {
+        // Act: Try to find a promo code by a non-existent code
+        StepVerifier.create(promoRepository.findPromoCodeByCode("NONEXISTENTCODE"))
+                .expectNextCount(0)
+                .verifyComplete();
+    }
+
+    @Test
+    void updatePromoCode_whenValid_thenUpdateSuccessfully() {
+        // Arrange: Save promoCode1 in the repository
+        StepVerifier.create(promoRepository.save(promoCode1))
+                .expectNextCount(1)
+                .verifyComplete();
+
+        // Modify promoCode1
+        PromoCode updatedPromo = PromoCode.builder()
+                .id("promo123")
+                .code("SUMMER2024UPDATED")
+                .Name("Summer Promo Updated")
+                .expirationDate(LocalDateTime.now().plusDays(60))
+                .isActive(true)
+                .build();
+
+        // Act: Update the promo code
+        StepVerifier.create(promoRepository.save(updatedPromo))
+                .assertNext(savedPromo -> {
+                    assertNotNull(savedPromo);
+                    assertEquals("SUMMER2024UPDATED", savedPromo.getCode());
+                    assertEquals("Summer Promo Updated", savedPromo.getName());
+                    // Note: Due to potential slight differences in time, use a range for date assertion
+                    assertTrue(savedPromo.getExpirationDate().isAfter(LocalDateTime.now().plusDays(59)));
+                })
+                .verifyComplete();
+
+        // Assert: Retrieve the updated promo code
+        StepVerifier.create(promoRepository.findPromoCodeById("promo123"))
+                .assertNext(foundPromo -> {
+                    assertEquals("SUMMER2024UPDATED", foundPromo.getCode());
+                    assertEquals("Summer Promo Updated", foundPromo.getName());
+                })
+                .verifyComplete();
+    }
+
+
+
+
 
 
 

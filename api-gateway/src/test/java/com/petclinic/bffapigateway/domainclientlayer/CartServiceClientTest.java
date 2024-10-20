@@ -615,12 +615,60 @@ public class CartServiceClientTest {
         assertEquals(true, promos.get(1).isActive());
     }
 
+    @Test
+    void testValidatePromoCode_Success() {
+        String promoCode = "SUMMER2024";
+        String responseBody = """
+            {
+                "id": "promo1",
+                "name": "Summer Sale",
+                "code": "SUMMER2024",
+                "discount": 15.0,
+                "expirationDate": "2024-12-31T23:59:59"
+            }
+            """;
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody(responseBody)
+                .setResponseCode(200));
+
+        Mono<PromoCodeResponseDTO> result = mockCartServiceClient.validatePromoCode(promoCode);
+
+        StepVerifier.create(result)
+                .assertNext(promo -> {
+                    assertEquals("promo1", promo.getId());
+                    assertEquals("Summer Sale", promo.getName());
+                    assertEquals("SUMMER2024", promo.getCode());
+                    assertEquals(15.0, promo.getDiscount());
+                    assertEquals(LocalDateTime.of(2024, 12, 31, 23, 59, 59), promo.getExpirationDate());
+                })
+                .verifyComplete();
+    }
 
 
+    @Test
+    void testValidatePromoCode_InvalidInput() {
+        String promoCode = "INVALIDCODE";
+        String responseBody = """
+        {
+            "message": "Invalid promo code provided."
+        }
+        """;
 
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody(responseBody)
+                .setResponseCode(400));
 
+        Mono<PromoCodeResponseDTO> result = mockCartServiceClient.validatePromoCode(promoCode);
 
-
-
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable ->
+                        throwable instanceof InvalidInputException &&
+                                throwable.getMessage().contains("Promo code is not valid: INVALIDCODE")
+                )
+                .verify();
+    }
 
 }

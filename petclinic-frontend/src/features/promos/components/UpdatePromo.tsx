@@ -26,7 +26,9 @@ export default function UpdatePromo(): JSX.Element {
         setName(promo.name);
         setCode(promo.code);
         setDiscount(promo.discount.toString());
-        const promoExpirationDate = new Date(promo.expirationDate.split('T')[0]);
+        const promoExpirationDate = new Date(
+          promo.expirationDate.split('T')[0]
+        );
         setExpirationDate(promoExpirationDate);
       } catch (err) {
         setError('Failed to fetch promo data.');
@@ -54,8 +56,8 @@ export default function UpdatePromo(): JSX.Element {
     const formattedExpirationDate = new Date(expirationDate);
     formattedExpirationDate.setHours(23, 59, 59, 999);
     const formattedExpirationDateString = formattedExpirationDate
-        .toISOString()
-        .replace('.999Z', '');
+      .toISOString()
+      .replace('.999Z', '');
 
     const updatedPromo: PromoCodeRequestModel = {
       name,
@@ -80,62 +82,62 @@ export default function UpdatePromo(): JSX.Element {
   };
 
   return (
-      <div className="promo-form">
-        <h3>Update Promo</h3>
-        {error && <p style={{ color: 'red' }}>{error}</p>}
-        {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
+    <div className="promo-form">
+      <h3>Update Promo</h3>
+      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
 
-        <div className="form-group">
-          <label htmlFor="promo-name">Name:</label>
-          <input
-              type="text"
-              id="promo-name"
-              value={name}
-              onChange={e => setName(e.target.value)}
-              placeholder="Promo Name"
-          />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="promo-code">Code:</label>
-          <input
-              type="text"
-              id="promo-code"
-              value={code}
-              onChange={e => setCode(e.target.value)}
-              placeholder="Promo Code"
-          />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="promo-discount">Discount (%):</label>
-          <input
-              type="text"
-              id="promo-discount"
-              value={discount}
-              onChange={e => setDiscount(e.target.value)}
-              placeholder="Discount Percentage"
-          />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="expiration-date">Expiration Date:</label>
-          <DatePicker
-              selected={expirationDate}
-              onChange={(date: Date | null) => setExpirationDate(date)}
-              dateFormat="yyyy-MM-dd"
-              placeholderText="Select Expiration Date"
-          />
-        </div>
-
-        <div className="form-actions">
-          <button className="update-button" onClick={handleUpdatePromo}>
-            Update Promo
-          </button>
-          <button className="cancel-button" onClick={handleCancel}>
-            Cancel
-          </button>
-        </div>
+      <div className="form-group">
+        <label htmlFor="promo-name">Name:</label>
+        <input
+          type="text"
+          id="promo-name"
+          value={name}
+          onChange={e => setName(e.target.value)}
+          placeholder="Promo Name"
+        />
       </div>
+
+      <div className="form-group">
+        <label htmlFor="promo-code">Code:</label>
+        <input
+          type="text"
+          id="promo-code"
+          value={code}
+          onChange={e => setCode(e.target.value)}
+          placeholder="Promo Code"
+        />
+      </div>
+
+      <div className="form-group">
+        <label htmlFor="promo-discount">Discount (%):</label>
+        <input
+          type="text"
+          id="promo-discount"
+          value={discount}
+          onChange={e => setDiscount(e.target.value)}
+          placeholder="Discount Percentage"
+        />
+      </div>
+
+      <div className="form-group">
+        <label htmlFor="expiration-date">Expiration Date:</label>
+        <DatePicker
+          selected={expirationDate}
+          onChange={(date: Date | null) => setExpirationDate(date)}
+          dateFormat="yyyy-MM-dd"
+          placeholderText="Select Expiration Date"
+        />
+      </div>
+
+      <div className="form-actions">
+        <button className="update-button" onClick={handleUpdatePromo}>
+          Update Promo
+        </button>
+        <button className="cancel-button" onClick={handleCancel}>
+          Cancel
+        </button>
+      </div>
+    </div>
   );
 }

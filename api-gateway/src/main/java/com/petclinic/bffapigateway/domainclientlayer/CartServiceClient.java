@@ -1,15 +1,12 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.petclinic.bffapigateway.dtos.Cart.*;
-import com.petclinic.bffapigateway.dtos.Cart.CartRequestDTO;
-import com.petclinic.bffapigateway.dtos.Cart.CartResponseDTO;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.webjars.NotFoundException;
@@ -279,5 +276,20 @@ public Mono<CartResponseDTO> deleteCartByCartId(String CardId) {
                 .doOnError(e -> log.error("Error moving product {} from wishlist to cart {}: {}", productId, cartId, e.getMessage()));
     }
 
+    public Mono<PromoCodeResponseDTO> validatePromoCode(String promoCode) {
+        return webClientBuilder.build()
+                .get()
+                .uri(PromoCodeServiceUrl + "/validate/{promoCode}", promoCode)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, error -> {
+                    HttpStatusCode statusCode = error.statusCode();
+                    if (statusCode.equals(HttpStatus.BAD_REQUEST)) {
+                        return Mono.error(new InvalidInputException("Promo code is not valid: " + promoCode));
+                    }
+                    return Mono.error(new IllegalArgumentException("Client error during promo code validation"));
+                })
+                .bodyToMono(PromoCodeResponseDTO.class);
+    }
 
 }
