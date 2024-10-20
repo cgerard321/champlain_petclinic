@@ -1522,22 +1522,25 @@ class VetControllerIntegrationTest {
     }
     @Test
     void deleteAnEducationForVet_WithValidId_ShouldSucceed() {
-        Publisher<Education> setup = educationRepository.deleteAll().
-                thenMany(educationRepository.save(education1));
+        // Setup: Clear repository and save a new education
+        Publisher<Education> setup = educationRepository.deleteAll()
+                .thenMany(educationRepository.save(education1));
 
         StepVerifier
                 .create(setup)
                 .expectNextCount(1)
                 .verifyComplete();
 
+        // Execute: Send DELETE request
         client
                 .delete()
                 .uri("/vets/" + vet.getVetId() + "/educations/{educationId}", education1.getEducationId())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk()
-                .expectBody();
+                .expectStatus().isNoContent() // Expect 204 No Content
+                .expectBody().isEmpty(); // Expect empty body
     }
+
     @Test
     void updateEducation_withValidVetIdAndValidEducationId_shouldSucceed() {
         Publisher<Education> setup = educationRepository.deleteAll()
