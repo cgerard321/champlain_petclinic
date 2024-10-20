@@ -4,6 +4,7 @@ import axios from 'axios';
 import { Inventory } from '@/features/inventories/models/Inventory';
 import { ProductResponseModel } from '@/features/inventories/models/InventoryModels/ProductResponseModel.ts';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { Status } from '@/features/inventories/models/ProductModels/Status.ts';
 
 const LowStockPage: React.FC = () => {
   const [lowStockProductsByInventory, setLowStockProductsByInventory] =
@@ -133,11 +134,13 @@ const LowStockPage: React.FC = () => {
                         <td
                           style={{
                             color:
-                              product.status === 'RE_ORDER'
+                              product.status === Status.RE_ORDER
                                 ? '#f4a460'
-                                : product.status === 'OUT_OF_STOCK'
+                                : product.status === Status.OUT_OF_STOCK
                                   ? 'red'
-                                  : 'green',
+                                  : product.status === Status.AVAILABLE
+                                    ? 'green'
+                                    : 'inherit',
                           }}
                         >
                           {product.status.replace('_', ' ')}
