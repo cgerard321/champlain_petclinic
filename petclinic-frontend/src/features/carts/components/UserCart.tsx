@@ -559,6 +559,12 @@ const UserCart = (): JSX.Element => {
               <button className="btn go-back-btn" onClick={() => navigate(-1)}>
                 Go Back
               </button>
+              <button
+                className="btn continue-shopping-btn"
+                onClick={() => navigate('/products')}
+              >
+                Continue Shopping
+              </button>
               <button className="btn clear-cart-btn" onClick={clearCart}>
                 Clear Cart
               </button>
