@@ -311,7 +311,7 @@ public Mono<CartResponseDTO> deleteCartByCartId(String CardId) {
     public Mono<CartResponseDTO> addProductToCartFromProducts(String cartId, String productId) {
         return webClientBuilder.build()
                 .post()
-                .uri(CartServiceUrl + "/" + cartId + "/products")
+                .uri(CartServiceUrl + "/" + cartId + "/" + productId)
                 .body(Mono.just(new AddProductRequestDTO(productId, 1)), AddProductRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
