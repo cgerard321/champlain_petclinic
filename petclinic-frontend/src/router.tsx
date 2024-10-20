@@ -44,6 +44,7 @@ import AllUsers from '@/pages/Users/AllUsers.tsx';
 //import EditEmergency from './features/visits/Emergency/EditEmergency';
 import EmergencyList from './features/visits/Emergency/EmergencyList';
 import ProductDetails from '@/features/products/api/ProductDetails.tsx';
+// import ProductsList from '@/features/products/ProductsList.tsx';
 import AddPetPage from '@/pages/Customer/AddPetPage.tsx';
 import EditProduct from './features/products/components/EditProduct';
 import ForgotPassword from '@/pages/User/ForgotPassword.tsx';

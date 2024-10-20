@@ -18,6 +18,7 @@ import { AppRoutePaths } from '@/shared/models/path.routes';
 import { AxiosError } from 'axios';
 import ImageContainer from '../components/ImageContainer';
 import { Button } from 'react-bootstrap';
+import { deleteProduct } from '@/features/products/api/deleteProduct';
 import { IsAdmin, IsInventoryManager } from '@/context/UserContext';
 import PatchListingStatusButton from '../components/PatchListingStatusButton';
 import RecentlyViewedProducts from '@/features/products/components/RecentlyViewedProducts.tsx';
@@ -100,6 +101,16 @@ export default function ProductDetails(): JSX.Element {
     }
   };
 
+  const handleDeleteProduct = async (): Promise<void> => {
+    if (!productId) return;
+    try {
+      await deleteProduct(productId);
+      navigate(AppRoutePaths.Products);
+    } catch (error) {
+      console.error('Failed to delete product:', error);
+    }
+  };
+
   const updateRating = async (
     newRating: number,
     newReview: string | null
@@ -169,12 +180,7 @@ export default function ProductDetails(): JSX.Element {
                     {productId && (
                       <PatchListingStatusButton productId={productId} />
                     )}
-                    <Button
-                      variant="danger"
-                      onClick={() =>
-                        alert('This feature has not yet been implemented')
-                      }
-                    >
+                    <Button variant="danger" onClick={handleDeleteProduct}>
                       Delete
                     </Button>
                   </div>
