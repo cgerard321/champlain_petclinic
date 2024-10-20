@@ -1109,8 +1109,9 @@ public class BFFApiGatewayController {
     @GetMapping(value = "inventory/{inventoryId}/products/search")//, produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ProductResponseDTO> searchProducts(@PathVariable String inventoryId,
                                                    @RequestParam(required = false) String productName,
-                                                   @RequestParam(required = false) String productDescription) {
-        return inventoryServiceClient.searchProducts(inventoryId, productName, productDescription);
+                                                   @RequestParam(required = false) String productDescription,
+                                                   @RequestParam(required = false) Status status) {
+        return inventoryServiceClient.searchProducts(inventoryId, productName, productDescription, status);
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ALL})

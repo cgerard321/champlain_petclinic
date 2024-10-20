@@ -31,4 +31,12 @@ public interface ProductRepository extends ReactiveMongoRepository<Product, Stri
 
     Mono<Integer> countByInventoryId(String inventoryId);
 
+    Flux<Product> findAllProductsByInventoryIdAndStatus(String inventoryId, Status status);
+
+    Flux<Product> findAllProductsByInventoryIdAndProductNameAndStatus(String inventoryId, String productName, Status status);
+
+    Flux<Product> findAllProductsByInventoryIdAndProductDescriptionAndStatus(String inventoryId, String productDescription, Status status);
+
+    Flux<Product> findAllProductsByInventoryIdAndProductNameAndProductDescriptionAndStatus(String inventoryId, String productName, String productDescription, Status status);
+
 }

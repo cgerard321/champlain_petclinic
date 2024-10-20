@@ -165,14 +165,13 @@
   background-color: #ca2020;
 }
 
-.product-bundle-container h2{
+.product-bundle-container h2 {
   color: #000000;
   text-align: center;
   margin-bottom: 15px;
   font-weight: bold;
-
 }
-.recently-viewed-container{
+.recently-viewed-container {
   margin-bottom: 20px;
   border: 2px solid #b5b5b5;
   border-radius: 8px;
@@ -181,13 +180,13 @@
   max-width: 1600px;
   margin: 0 auto;
 }
-.recently-viewed-container h2{
+.recently-viewed-container h2 {
   color: #808080;
   text-align: center;
   margin-bottom: 15px;
   font-weight: bold;
 }
-.list-container{
+.list-container {
   margin-bottom: 20px;
   border: 2px solid #b5b5b5;
   border-radius: 8px;
