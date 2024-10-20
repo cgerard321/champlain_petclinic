@@ -1,6 +1,5 @@
 package com.petclinic.cartsservice;
 
-import com.petclinic.cartsservice.domainclientlayer.ProductResponseModel;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.integration.ClientAndServer;
 
@@ -10,37 +9,30 @@ import static org.mockserver.model.HttpResponse.response;
 public class MockServerConfigProductService {
     private final ClientAndServer clientAndServer;
 
-    private static final Integer MOCK_SERVER_PORT = 8080;
-
     public static final String NON_EXISTING_PRODUCT_ID = "06a7d573-bcab-4db3-956f-773324b92a89";
 
-    private final MockServerClient mockServerClient = new MockServerClient("localhost", MOCK_SERVER_PORT);
+    // You still need to connect to the MockServer running on localhost with a specific port
+    private final MockServerClient mockServerClient;
 
     public MockServerConfigProductService() {
-        this.clientAndServer = ClientAndServer.startClientAndServer(MOCK_SERVER_PORT);
+        this.clientAndServer = ClientAndServer.startClientAndServer(8080); // Start on a specific port (e.g., 8080)
+        this.mockServerClient = new MockServerClient("localhost", 8080);  // Connect to the same localhost and port
     }
 
     public void registerGetProduct1ByProductIdEndpoint() {
-        ProductResponseModel productResponseModel = ProductResponseModel.builder()
-                .productId("06a7d573-bcab-4db3-956f-773324b92a80")
-                .productName("Dog Food")
-                .productDescription("Dog Food")
-                .productSalePrice(45.99)
-                .productQuantity(5)
-                .build();
-
         mockServerClient
                 .when(
                         request()
                                 .withMethod("GET")
-                                .withPath("/api/v1/products/" + "06a7d573-bcab-4db3-956f-773324b92a88")
+                                .withPath("/api/v1/products/06a7d573-bcab-4db3-956f-773324b92a88")
                 )
                 .respond(
                         response()
                                 .withStatusCode(200)
                                 .withHeader("Content-Type", "application/json")
-                                .withBody("{\"productId\":\"06a7d573-bcab-4db3-956f-773324b92a88\",\"productName\":" +
-                                        "\"Dog Food\",\"productDescription\":\"Premium dry food for adult dogs\",\"productSalePrice\":10.0}"));
+                                .withBody("{\"productId\":\"06a7d573-bcab-4db3-956f-773324b92a88\",\"productName\":\"Dog Food\"," +
+                                        "\"productDescription\":\"Premium dry food for adult dogs\",\"productSalePrice\":10.0}")
+                );
     }
 
     public void registerGetProduct_NonExisting_ByProductIdEndpoint() {
@@ -56,7 +48,7 @@ public class MockServerConfigProductService {
                 );
     }
 
-    public void stopServer(){
+    public void stopServer() {
         if (this.clientAndServer != null) {
             this.clientAndServer.stop();
         }
