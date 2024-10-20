@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -20,4 +22,6 @@ public class ProductResponseDTO {
     private Integer requestCount;
     private Integer productQuantity;
     private ProductType productType;
+    private ProductStatus productStatus;
+
 }
