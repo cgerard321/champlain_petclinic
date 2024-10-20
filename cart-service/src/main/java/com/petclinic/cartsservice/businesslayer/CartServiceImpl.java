@@ -196,44 +196,8 @@ public class CartServiceImpl implements CartService {
                 .switchIfEmpty(Mono.error(new NotFoundException("Cart not found: " + cartId)))
                 .flatMap(cart -> productClient.getProductByProductId(productId)
                         .flatMap(product -> {
-                            // Validate if the requested quantity is greater than zero
-                            if (quantity <= 0) {
-                                return Mono.error(new InvalidInputException("Quantity must be greater than zero."));
-                            }
-                            // Check if the product is out of stock
-                            if (product.getProductQuantity() == 0) {
-                                // The product is out of stock, move it to wishlist
-                                // Create a CartProduct for the wishlist
-                                CartProduct wishListProduct = CartProduct.builder()
-                                        .productId(product.getProductId())
-                                        .productName(product.getProductName())
-                                        .productDescription(product.getProductDescription())
-                                        .productSalePrice(product.getProductSalePrice())
-                                        .averageRating(product.getAverageRating())
-                                        .quantityInCart(0)
-                                        .productQuantity(product.getProductQuantity())
-                                        .build();
-                                // Add the product to the wishlist
-                                if (cart.getWishListProducts() == null) {
-                                    cart.setWishListProducts(new ArrayList<>());
-                                }
-                                // Check if the product already exists in the wishlist
-                                Optional<CartProduct> existingWishlistProductOpt = cart.getWishListProducts().stream()
-                                        .filter(p -> p.getProductId().equals(productId))
-                                        .findFirst();
-                                if (existingWishlistProductOpt.isEmpty()) {
-                                    cart.getWishListProducts().add(wishListProduct);
-                                }
-                                // Save the cart
-                                return cartRepository.save(cart)
-                                        .map(savedCart -> {
-                                            CartResponseModel responseModel = EntityModelUtil.toCartResponseModel(savedCart, savedCart.getProducts());
-                                            responseModel.setMessage("Product is out of stock and has been moved to your wishlist.");
-                                            return responseModel;
-                                        });
-                            }
                             // Check if the available stock is sufficient
-                            else if (product.getProductQuantity() < quantity) {
+                            if (product.getProductQuantity() < quantity) {
                                 return Mono.error(new OutOfStockException("You cannot add more than "
                                         + product.getProductQuantity() + " items. Only "
                                         + product.getProductQuantity() + " items left in stock."));
@@ -386,6 +350,85 @@ public class CartServiceImpl implements CartService {
                 });
     }
 
+    @Override
+    public Mono<CartResponseModel> addProductToCartFromProducts(String cartId, String productId) {
+        // Fetch the latest cart and product information
+        return cartRepository.findCartByCartId(cartId)
+                .switchIfEmpty(Mono.error(new NotFoundException("Cart not found: " + cartId)))
+                .flatMap(cart -> productClient.getProductByProductId(productId)
+                        .flatMap(product -> {
+                            // Validate if the product is out of stock
+                            if (product.getProductQuantity() == 0) {
+                                // The product is out of stock, move it to wishlist
+                                CartProduct wishListProduct = CartProduct.builder()
+                                        .productId(product.getProductId())
+                                        .productName(product.getProductName())
+                                        .productDescription(product.getProductDescription())
+                                        .productSalePrice(product.getProductSalePrice())
+                                        .averageRating(product.getAverageRating())
+                                        .quantityInCart(0)
+                                        .productQuantity(product.getProductQuantity())
+                                        .build();
+
+                                if (cart.getWishListProducts() == null) {
+                                    cart.setWishListProducts(new ArrayList<>());
+                                }
+
+                                // Check if the product already exists in the wishlist
+                                Optional<CartProduct> existingWishlistProductOpt = cart.getWishListProducts().stream()
+                                        .filter(p -> p.getProductId().equals(productId))
+                                        .findFirst();
+
+                                if (existingWishlistProductOpt.isEmpty()) {
+                                    cart.getWishListProducts().add(wishListProduct);
+                                }
+
+                                return cartRepository.save(cart)
+                                        .map(savedCart -> {
+                                            CartResponseModel responseModel = EntityModelUtil.toCartResponseModel(savedCart, savedCart.getProducts());
+                                            responseModel.setMessage("Product is out of stock and has been moved to your wishlist.");
+                                            return responseModel;
+                                        });
+                            } else {
+                                // If product is available in stock
+                                Optional<CartProduct> existingProductOpt = cart.getProducts().stream()
+                                        .filter(p -> p.getProductId().equals(productId))
+                                        .findFirst();
+
+                                if (existingProductOpt.isPresent()) {
+                                    // If product already exists in cart, increment quantity by 1
+                                    CartProduct existingProduct = existingProductOpt.get();
+                                    int newQuantity = existingProduct.getQuantityInCart() + 1;
+
+                                    if (newQuantity > product.getProductQuantity()) {
+                                        return Mono.error(new OutOfStockException("Cannot add more than "
+                                                + product.getProductQuantity() + " items. Only "
+                                                + product.getProductQuantity() + " items left in stock."));
+                                    }
+
+                                    existingProduct.setQuantityInCart(newQuantity);
+                                    existingProduct.setProductQuantity(product.getProductQuantity()); // Update stock info
+                                } else {
+                                    // Add new product to the cart
+                                    CartProduct cartProduct = CartProduct.builder()
+                                            .productId(product.getProductId())
+                                            .productName(product.getProductName())
+                                            .productDescription(product.getProductDescription())
+                                            .productSalePrice(product.getProductSalePrice())
+                                            .averageRating(product.getAverageRating())
+                                            .quantityInCart(1) // Add 1 item by default
+                                            .productQuantity(product.getProductQuantity()) // Set stock info
+                                            .build();
+
+                                    cart.getProducts().add(cartProduct);
+                                }
+
+                                return cartRepository.save(cart)
+                                        .map(savedCart -> EntityModelUtil.toCartResponseModel(savedCart, savedCart.getProducts()));
+                            }
+                        })
+                );
+    }
 
 
 

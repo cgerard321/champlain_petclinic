@@ -152,7 +152,6 @@ public class DataLoaderService implements CommandLineRunner {
                 .wishListProducts(wishListProducts)
                 .build();
 
-        // Insert both carts using a single Flux and log success or error
         Flux.just(cart1, cart2, cart3, cart4, cart5, cart6, cart7, cart8, cart9, cart10)
                 .flatMap(cartRepository::insert)
                 .doOnNext(savedCart -> System.out.println("Inserted cart: " + savedCart.getCartId()))

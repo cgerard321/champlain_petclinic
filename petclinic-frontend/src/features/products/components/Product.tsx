@@ -7,6 +7,7 @@ import { generatePath, useNavigate } from 'react-router-dom';
 import { AppRoutePaths } from '@/shared/models/path.routes';
 import StarRating from './StarRating';
 import './Product.css';
+import {addToCartFromProducts} from "@/features/carts/api/addToCartFromProducts.ts";
 
 export default function Product({
   product,
@@ -85,6 +86,16 @@ export default function Product({
     setSelectedProductForQuantity(null);
   };
 
+  const handleAddToCart = async (): Promise<void> => {
+    try {
+      await addToCartFromProducts.addToCart(currentProduct.productId);
+      console.log('Added to cart:', currentProduct.productId);
+    } catch (error) {
+      console.error('Failed to add product to cart:', error);
+    }
+  };
+
+
   if (selectedProduct) {
     return (
       <div>
@@ -119,62 +130,67 @@ export default function Product({
   }
 
   return (
-    <div
-      className={`card ${
-        product.productQuantity === 0
-          ? 'out-of-stock'
-          : product.productQuantity < 10
-            ? 'low-quantity'
-            : ''
-      }`}
-      key={product.productId}
-    >
-      <ImageContainer imageId={product.imageId} />
-      <span
-        onClick={() => handleProductClickForProductQuantity(product.productId)}
-        style={{ cursor: 'pointer', color: 'blue', fontWeight: 'bold' }}
+      <div
+          className={`card ${
+              product.productQuantity === 0
+                  ? 'out-of-stock'
+                  : product.productQuantity < 10
+                      ? 'low-quantity'
+                      : ''
+          }`}
+          key={product.productId}
       >
+        <ImageContainer imageId={product.imageId}/>
+        <span
+            onClick={() => handleProductClickForProductQuantity(product.productId)}
+            style={{cursor: 'pointer', color: 'blue', fontWeight: 'bold'}}
+        >
         +
       </span>
 
-      <h2
-        onClick={handleProductTitleClick}
-        style={{
-          cursor: 'pointer',
-          color: 'blue',
-          textDecoration: 'underline',
-        }}
-      >
-        {currentProduct.productName}
-      </h2>
-      <p>
-        {!tooLong
-          ? currentProduct.productDescription
-          : `${currentProduct.productDescription.substring(0, 100)}...`}
-      </p>
-      <p>Price: ${currentProduct.productSalePrice.toFixed(2)}</p>
-      <StarRating
-        currentRating={currentProduct.averageRating}
-        viewOnly={true}
-      />
-      {currentProduct.productStatus === 'PRE_ORDER' && (
-        <div
-          style={{
-            position: 'absolute',
-            top: '10px',
-            right: '10px',
-            backgroundColor: '#FFD700',
-            padding: '5px 10px',
-            borderRadius: '5px',
-            fontWeight: 'bold',
-            color: '#333',
-            zIndex: 1,
-            boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-          }}
+        <h2
+            onClick={handleProductTitleClick}
+            style={{
+              cursor: 'pointer',
+              color: 'blue',
+              textDecoration: 'underline',
+            }}
         >
-          PRE-ORDER
-        </div>
-      )}
-    </div>
+          {currentProduct.productName}
+        </h2>
+        <p>
+          {!tooLong
+              ? currentProduct.productDescription
+              : `${currentProduct.productDescription.substring(0, 100)}...`}
+        </p>
+        <p>Price: ${currentProduct.productSalePrice.toFixed(2)}</p>
+
+        <button onClick={handleAddToCart} disabled={product.productQuantity === 0}>
+          {product.productQuantity === 0 ? 'Out of Stock' : 'Add to Cart'}
+        </button>
+
+        <StarRating
+            currentRating={currentProduct.averageRating}
+            viewOnly={true}
+        />
+        {currentProduct.productStatus === 'PRE_ORDER' && (
+            <div
+                style={{
+                  position: 'absolute',
+                  top: '10px',
+                  right: '10px',
+                  backgroundColor: '#FFD700',
+                  padding: '5px 10px',
+                  borderRadius: '5px',
+                  fontWeight: 'bold',
+                  color: '#333',
+                  zIndex: 1,
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                }}
+            >
+              PRE-ORDER
+            </div>
+        )}
+      </div>
   );
 }
