@@ -1,11 +1,15 @@
 package com.petclinic.products.presentationlayer.products;
 
+import com.petclinic.products.businesslayer.products.ProductService;
 import com.petclinic.products.datalayer.products.Product;
 import com.petclinic.products.datalayer.products.ProductRepository;
+import com.petclinic.products.datalayer.products.ProductType;
+import com.petclinic.products.datalayer.products.ProductStatus;
 import com.petclinic.products.datalayer.ratings.Rating;
 import com.petclinic.products.datalayer.ratings.RatingRepository;
 import com.petclinic.products.utils.exceptions.NotFoundException;
 import org.junit.jupiter.api.*;
+import org.mockito.Mockito;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
@@ -18,9 +22,12 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.util.Arrays;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
@@ -530,5 +537,104 @@ class ProductControllerIntegrationTest {
                 .body(Mono.just(requestModel), ProductRequestModel.class)
                 .exchange()
                 .expectStatus().isNotFound();
+
     }
-}
+    @Test
+        void addProduct_FutureReleaseDate_SetsStatusToPreOrder() {
+            // Arrange
+            LocalDate futureDate = LocalDate.now().plusDays(1);
+            ProductRequestModel requestModel = new ProductRequestModel();
+            requestModel.setProductName("Future Product");
+            requestModel.setProductSalePrice(10.0);
+            requestModel.setReleaseDate(futureDate);
+
+            // Act & Assert
+            webTestClient.post()
+                    .uri("/api/v1/products")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(Mono.just(requestModel), ProductRequestModel.class)
+                    .exchange()
+                    .expectStatus().isCreated()
+                    .expectBody(ProductResponseModel.class)
+                    .value(response -> {
+                        assertNotNull(response.getProductId());
+                        assertEquals("Future Product", response.getProductName());
+                        assertEquals(ProductStatus.PRE_ORDER, response.getProductStatus());
+                        assertEquals(futureDate, requestModel.getReleaseDate());
+                    });
+        }
+
+        @Test
+        void addProduct_PastReleaseDate_SetsStatusToAvailable() {
+            // Arrange
+            LocalDate pastDate = LocalDate.now().minusDays(1);
+            ProductRequestModel requestModel = new ProductRequestModel();
+            requestModel.setProductName("Past Product");
+            requestModel.setProductSalePrice(10.0);
+            requestModel.setReleaseDate(pastDate);
+
+            // Act & Assert
+            webTestClient.post()
+                    .uri("/api/v1/products")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(Mono.just(requestModel), ProductRequestModel.class)
+                    .exchange()
+                    .expectStatus().isCreated()
+                    .expectBody(ProductResponseModel.class)
+                    .value(response -> {
+                        assertNotNull(response.getProductId());
+                        assertEquals("Past Product", response.getProductName());
+                        assertEquals(ProductStatus.AVAILABLE, response.getProductStatus());
+                        assertEquals(pastDate, requestModel.getReleaseDate());
+                    });
+        }
+
+        @Test
+        void addProduct_TodayReleaseDate_SetsStatusToAvailable() {
+            // Arrange
+            LocalDate today = LocalDate.now();
+            ProductRequestModel requestModel = new ProductRequestModel();
+            requestModel.setProductName("Today Product");
+            requestModel.setProductSalePrice(10.0);
+            requestModel.setReleaseDate(today);
+
+            // Act & Assert
+            webTestClient.post()
+                    .uri("/api/v1/products")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(Mono.just(requestModel), ProductRequestModel.class)
+                    .exchange()
+                    .expectStatus().isCreated()
+                    .expectBody(ProductResponseModel.class)
+                    .value(response -> {
+                        assertNotNull(response.getProductId());
+                        assertEquals("Today Product", response.getProductName());
+                        assertEquals(ProductStatus.AVAILABLE, response.getProductStatus());
+                        assertEquals(today, requestModel.getReleaseDate());
+                    });
+        }
+
+        @Test
+        void addProduct_NullReleaseDate_SetsStatusToAvailable() {
+            // Arrange
+            ProductRequestModel requestModel = new ProductRequestModel();
+            requestModel.setProductName("No Release Date Product");
+            requestModel.setProductSalePrice(10.0);
+            requestModel.setReleaseDate(null);
+
+            // Act & Assert
+            webTestClient.post()
+                    .uri("/api/v1/products")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(Mono.just(requestModel), ProductRequestModel.class)
+                    .exchange()
+                    .expectStatus().isCreated()
+                    .expectBody(ProductResponseModel.class)
+                    .value(response -> {
+                        assertNotNull(response.getProductId());
+                        assertEquals("No Release Date Product", response.getProductName());
+                        assertEquals(ProductStatus.AVAILABLE, response.getProductStatus());
+                        assertEquals(null, requestModel.getReleaseDate());
+                    });
+        }
+    }

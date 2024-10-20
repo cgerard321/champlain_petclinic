@@ -3,6 +3,7 @@ import {
   IsAdmin,
   IsInventoryManager,
   IsOwner,
+  IsReceptionist,
   IsVet,
   useUser,
 } from '@/context/UserContext';
@@ -153,6 +154,9 @@ export function NavBar(): JSX.Element {
                     <NavDropdown.Item as={Link} to={AppRoutePaths.AllUsers}>
                       Users List
                     </NavDropdown.Item>
+                    <NavDropdown.Item as={Link} to={AppRoutePaths.AllRoles}>
+                      Roles List
+                    </NavDropdown.Item>
                   </NavDropdown>
                 )}
                 {!IsAdmin() && (
@@ -190,14 +194,22 @@ export function NavBar(): JSX.Element {
                     Emails
                   </Nav.Link>
                 )}
-                <Nav.Link as={Link} to={AppRoutePaths.Products}>
-                  Shop
-                </Nav.Link>
                 {IsAdmin() && (
                   <Nav.Link as={Link} to={AppRoutePaths.Promos}>
                     Promos
                   </Nav.Link>
                 )}
+                {!IsAdmin() && (
+                  <Nav.Link as={Link} to={AppRoutePaths.CustomerPromos}>
+                    Promos
+                  </Nav.Link>
+                )}
+                {
+                  <Nav.Link as={Link} to={AppRoutePaths.Products}>
+                    Shop
+                  </Nav.Link>
+                }
+
                 {IsAdmin() && (
                   <Nav.Link as={Link} to={AppRoutePaths.Carts}>
                     Carts
@@ -246,6 +258,11 @@ export function NavBar(): JSX.Element {
                 {IsAdmin() && (
                   <NavDropdown.Item as={Link} to={AppRoutePaths.Home}>
                     Admin Panel
+                  </NavDropdown.Item>
+                )}
+                {IsReceptionist() && (
+                  <NavDropdown.Item as={Link} to={AppRoutePaths.AddingCustomer}>
+                    Receptionist Panel
                   </NavDropdown.Item>
                 )}
                 <NavDropdown.Item

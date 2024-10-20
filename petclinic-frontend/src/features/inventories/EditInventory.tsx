@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { FormEvent, useEffect, useState } from 'react';
+import { FormEvent, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   getInventory,
@@ -9,6 +9,7 @@ import { InventoryResponseModel } from '@/features/inventories/models/InventoryM
 import { InventoryRequestModel } from '@/features/inventories/models/InventoryModels/InventoryRequestModel.ts';
 import { InventoryType } from '@/features/inventories/models/InventoryType.ts';
 import { getAllInventoryTypes } from '@/features/inventories/api/getAllInventoryTypes.ts';
+import EditInventoryFormStyles from './EditInventoryForm.module.css';
 
 interface ApiError {
   message: string;
@@ -22,6 +23,7 @@ const EditInventory: React.FC = (): JSX.Element => {
     inventoryDescription: '',
     inventoryImage: '',
     inventoryBackupImage: '',
+    imageUploaded: '',
   });
   const [inventoryTypes, setInventoryTypes] = useState<InventoryType[]>([]);
   const [error, setError] = useState<{ [key: string]: string }>({});
@@ -29,6 +31,7 @@ const EditInventory: React.FC = (): JSX.Element => {
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [showNotification, setShowNotification] = useState<boolean>(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const navigate = useNavigate();
 
@@ -44,6 +47,7 @@ const EditInventory: React.FC = (): JSX.Element => {
             inventoryDescription: response.inventoryDescription,
             inventoryImage: response.inventoryImage,
             inventoryBackupImage: response.inventoryBackupImage,
+            imageUploaded: response.imageUploaded,
           });
         } catch (error) {
           console.error(
@@ -116,6 +120,37 @@ const EditInventory: React.FC = (): JSX.Element => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleFileChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ): void => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (file.size > 160 * 1024) {
+        alert('File size must be less than 160KB.');
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+        return;
+      } else {
+        convertToBase64(file);
+      }
+    }
+  };
+
+  const convertToBase64 = (file: File): void => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onloadend = () => {
+      if (reader.result) {
+        const base64String = (reader.result as string).split(',')[1];
+        setInventory({
+          ...inventory,
+          imageUploaded: base64String,
+        });
+      }
+    };
   };
 
   return (
@@ -204,7 +239,11 @@ const EditInventory: React.FC = (): JSX.Element => {
             </div>
             <div className="col-4">
               <div className="form-group">
-                <label>Inventory Image</label>
+                <label>
+                  <div className={EditInventoryFormStyles.labelContainer}>
+                    Inventory Image
+                  </div>
+                </label>
                 <input
                   type="text"
                   name="inventoryImage"
@@ -226,7 +265,9 @@ const EditInventory: React.FC = (): JSX.Element => {
             </div>
             <div className="col-4">
               <div className="form-group">
-                <label>Inventory Backup Image</label>
+                <div className={EditInventoryFormStyles.labelContainer}>
+                  <label>Inventory Backup Image</label>
+                </div>
                 <input
                   type="text"
                   name="inventoryBackupImage"
@@ -243,6 +284,24 @@ const EditInventory: React.FC = (): JSX.Element => {
                 />
                 {error.inventoryBackupImage && (
                   <span className="error">{error.inventoryBackupImage}</span>
+                )}
+              </div>
+            </div>
+            <div className="col-4">
+              <div className="form-group">
+                <div className={EditInventoryFormStyles.labelContainer}>
+                  <label>Upload Image:</label>
+                </div>
+                <input
+                  type="file"
+                  name="uploadedImage"
+                  className="form-control"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  ref={fileInputRef}
+                />
+                {error.uploadedImage && (
+                  <span className="error">{error.uploadedImage}</span>
                 )}
               </div>
             </div>
