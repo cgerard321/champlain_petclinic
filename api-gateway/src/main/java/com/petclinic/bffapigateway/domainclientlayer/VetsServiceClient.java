@@ -518,12 +518,12 @@ public class VetsServiceClient {
         return webClientBuilder
                 .build()
                 .delete()
-                .uri(vetsServiceUrl + "/" + vetId + "/educations" + "/" + educationId)
+                .uri(vetsServiceUrl + "/" + vetId + "/educations/" + educationId)
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, error -> {
                     HttpStatusCode statusCode = error.statusCode();
                     if (statusCode.equals(HttpStatus.NOT_FOUND))
-                        return Mono.error(new NotFoundException("vetId not found "+vetId+" or educationId not found: " + educationId));
+                        return Mono.error(new NotFoundException("Education not found: " + educationId));
                     return Mono.error(new IllegalArgumentException("Something went wrong with the client"));
                 })
                 .onStatus(HttpStatusCode::is5xxServerError, error ->
@@ -531,6 +531,7 @@ public class VetsServiceClient {
                 )
                 .bodyToMono(Void.class);
     }
+
     public Mono<EducationResponseDTO> updateEducationByVetIdAndByEducationId(String vetId, String educationId, Mono<EducationRequestDTO> educationRequestDTOMono){
         Mono<EducationResponseDTO> educationResponseDTOMono =
                 webClientBuilder
