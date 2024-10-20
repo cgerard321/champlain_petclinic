@@ -1,14 +1,14 @@
-import {useEffect, useState} from 'react';
-import {useNavigate, useParams} from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
-import {ProductModel} from './models/ProductModels/ProductModel';
+import { ProductModel } from './models/ProductModels/ProductModel';
 import './InventoriesListTable.module.css';
 import './InventoryProducts.css';
 import useSearchProducts from '@/features/inventories/hooks/useSearchProducts.ts';
 import deleteAllProductsFromInventory from './api/deleteAllProductsFromInventory';
 import createPdf from './api/createPdf';
 import ConfirmationModal from '@/features/inventories/ConfirmationModal.tsx';
-import {Status} from "@/features/inventories/models/ProductModels/Status.ts";
+import { Status } from '@/features/inventories/models/ProductModels/Status.ts';
 
 const InventoryProducts: React.FC = () => {
   const { inventoryId } = useParams<{ inventoryId: string }>();
@@ -115,31 +115,32 @@ const InventoryProducts: React.FC = () => {
     // Ensure that `productList` is populated with products matching the criteria
     if (productName || productDescription || productStatus) {
       await getProductList(
-          inventoryId!,
-          productName || undefined,
-          productDescription || undefined,
-          productStatus || undefined
+        inventoryId!,
+        productName || undefined,
+        productDescription || undefined,
+        productStatus || undefined
       );
     }
 
     // Apply additional client-side filtering if necessary
     const filtered = products.filter(product => {
       const matchesName = productName
-          ? product.productName.toLowerCase().includes(productName.toLowerCase())
-          : true;
+        ? product.productName.toLowerCase().includes(productName.toLowerCase())
+        : true;
       const matchesDescription = productDescription
-          ? product.productDescription.toLowerCase().includes(productDescription.toLowerCase())
-          : true;
+        ? product.productDescription
+            .toLowerCase()
+            .includes(productDescription.toLowerCase())
+        : true;
       const matchesStatus = productStatus
-          ? product.status === productStatus
-          : true;
+        ? product.status === productStatus
+        : true;
 
       return matchesName && matchesDescription && matchesStatus;
     });
 
     setFilteredProducts(filtered);
   };
-
 
   const handleDeleteClick = (productId: string): void => {
     setProductToDelete(productId);
@@ -248,17 +249,18 @@ const InventoryProducts: React.FC = () => {
         <div className="filter-by-status">
           <label htmlFor="product-status">Filter by Status:</label>
           <select
-              id="product-status"
-              onChange={e => setProductStatus(e.target.value as Status)}
+            id="product-status"
+            onChange={e => setProductStatus(e.target.value as Status)}
           >
             <option value="">All</option>
-            {
-              Object.values(Status).map(status => (
-                  <option key={status} value={status}>
-                    {status.replace('_', ' ').toLowerCase().replace(/\b\w/g, c => c.toUpperCase())}
-                  </option>
-              ))
-            }
+            {Object.values(Status).map(status => (
+              <option key={status} value={status}>
+                {status
+                  .replace('_', ' ')
+                  .toLowerCase()
+                  .replace(/\b\w/g, c => c.toUpperCase())}
+              </option>
+            ))}
           </select>
         </div>
       </div>

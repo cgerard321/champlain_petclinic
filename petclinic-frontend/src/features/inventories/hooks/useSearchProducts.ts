@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ProductModel } from '@/features/inventories/models/ProductModels/ProductModel.ts';
 import { searchProducts } from '@/features/inventories/api/searchProducts.ts';
-import {Status} from "@/features/inventories/models/ProductModels/Status.ts";
+import { Status } from '@/features/inventories/models/ProductModels/Status.ts';
 
 interface useSearchProductsResponseModel {
   productList: ProductModel[];

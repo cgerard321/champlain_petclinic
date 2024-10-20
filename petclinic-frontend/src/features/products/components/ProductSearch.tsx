@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getAllProducts } from '@/features/products/api/getAllProducts';
 import './ProductSearch.css';
-import {ProductModel} from "@/features/products/models/ProductModels/ProductModel.ts";
+import { ProductModel } from '@/features/products/models/ProductModels/ProductModel.ts';
 
 export default function ProductSearch(): JSX.Element {
   const [searchQuery, setSearchQuery] = useState('');

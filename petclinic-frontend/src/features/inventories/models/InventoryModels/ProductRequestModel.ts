@@ -1,4 +1,4 @@
-import {Status} from "@/features/inventories/models/ProductModels/Status.ts";
+import { Status } from '@/features/inventories/models/ProductModels/Status.ts';
 
 export interface ProductRequestModel {
   productName: string;

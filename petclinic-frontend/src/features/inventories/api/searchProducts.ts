@@ -1,6 +1,6 @@
 import { ProductModel } from '@/features/inventories/models/ProductModels/ProductModel.ts';
 import axiosInstance from '@/shared/api/axiosInstance.ts';
-import {Status} from "@/features/inventories/models/ProductModels/Status.ts";
+import { Status } from '@/features/inventories/models/ProductModels/Status.ts';
 
 export async function searchProducts(
   inventoryId: string,
