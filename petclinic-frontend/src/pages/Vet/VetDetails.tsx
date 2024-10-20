@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { NavBar } from '@/layouts/AppNavBar.tsx';
 import './VetDetails.css';
@@ -7,8 +7,8 @@ import DeleteVetPhoto from '@/pages/Vet/DeleteVetPhoto.tsx';
 import UpdateVetEducation from '@/pages/Vet/UpdateVetEducation';
 import AddEducation from '@/pages/Vet/AddEducation.tsx';
 import DeleteVetEducation from '@/pages/Vet/DeleteVetEducation';
-import {Workday} from "@/features/veterinarians/models/Workday.ts";
-import UpdateVet from "@/pages/Vet/UpdateVet.tsx";
+import { Workday } from '@/features/veterinarians/models/Workday.ts';
+import UpdateVet from '@/pages/Vet/UpdateVet.tsx';
 
 interface VetResponseType {
   vetId: string;
@@ -90,7 +90,9 @@ export default function VetDetails(): JSX.Element {
 
   const refreshVetDetails = useCallback(async (): Promise<void> => {
     try {
-      const response = await fetch(`http://localhost:8080/api/v2/gateway/vets/${vetId}`);
+      const response = await fetch(
+        `http://localhost:8080/api/v2/gateway/vets/${vetId}`
+      );
       if (!response.ok) {
         throw new Error(`Error: ${response.statusText}`);
       }
@@ -116,7 +118,6 @@ export default function VetDetails(): JSX.Element {
     password: 'defaultPassword',
     vetBillId: vet.vetBillId,
   });
-
 
   useEffect(() => {
     const fetchVetRatings = async (): Promise<void> => {
@@ -480,20 +481,19 @@ export default function VetDetails(): JSX.Element {
             )}
 
             <button
-                className="btn btn-primary"
-                onClick={() => setSelectedVet(mapVetResponseToRequest(vet!))}
+              className="btn btn-primary"
+              onClick={() => setSelectedVet(mapVetResponseToRequest(vet!))}
             >
               Update Profile
             </button>
 
             {selectedVet && (
-                <UpdateVet
-                    vet={selectedVet}
-                    onClose={() => setSelectedVet(null)}
-                    refreshVetDetails={refreshVetDetails}
-                />
+              <UpdateVet
+                vet={selectedVet}
+                onClose={() => setSelectedVet(null)}
+                refreshVetDetails={refreshVetDetails}
+              />
             )}
-
           </section>
         )}
 

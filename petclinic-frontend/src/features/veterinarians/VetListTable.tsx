@@ -1,4 +1,3 @@
-
 import { VetRequestModel } from '@/features/veterinarians/models/VetRequestModel.ts';
 import { useNavigate } from 'react-router-dom';
 import './VetListTable.css';
