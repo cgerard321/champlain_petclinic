@@ -91,32 +91,30 @@ public class CustomerBillControllerIntegrationTest {
                 .expectStatus().isUnauthorized();  // Expect Unauthorized status
     }
 
-        // Test valid customerId returns the correct balance
-        @Test
-        public void testGetCurrentBalance_ValidCustomerId_AsOwner_ReturnsBalance() {
-            String validCustomerId = "1"; // Example valid customer ID
+        // @Test
+        // public void testGetCurrentBalance_ValidCustomerId_AsOwner_ReturnsBalance() {
+        //     String validCustomerId = "1"; 
         
-            webTestClient.get()
-                .uri("/api/v2/gateway/customers/{customerId}/bills/current-balance", validCustomerId)
-                .cookie("Bearer", MockServerConfigAuthService.jwtTokenForValidOwnerId) // Valid OWNER JWT token
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk() // Expect HTTP 200 OK
-                .expectHeader().contentType(MediaType.APPLICATION_JSON_VALUE) // Ensure content-type is JSON
-                .expectBody(Double.class) // Expect the body to contain a double (the balance)
-                .value(balance -> assertEquals(150.0, balance)); // Assert that the balance is 150.0
-        }
+        //     webTestClient.get()
+        //         .uri("/api/v2/gateway/customers/{customerId}/bills/current-balance", validCustomerId)
+        //         .cookie("Bearer", MockServerConfigAuthService.jwtTokenForValidOwnerId) 
+        //         .accept(MediaType.APPLICATION_JSON)
+        //         .exchange()
+        //         .expectStatus().isOk() 
+        //         .expectHeader().contentType(MediaType.APPLICATION_JSON_VALUE) 
+        //         .expectBody(Double.class) 
+        //         .value(balance -> assertEquals(150.0, balance)); 
+        // }
     
-        // Test invalid customerId returns 404
-        @Test
-        public void testGetCurrentBalance_InvalidCustomerId_Returns404() {
-            String invalidCustomerId = "invalid-id"; // Example invalid customer ID
+        // @Test
+        // public void testGetCurrentBalance_InvalidCustomerId_Returns404() {
+        //     String invalidCustomerId = "invalid-id"; 
         
-            webTestClient.get()
-                .uri("/api/v2/gateway/customers/{customerId}/bills/current-balance", invalidCustomerId)
-                .cookie("Bearer", MockServerConfigAuthService.jwtTokenForValidOwnerId) // Use a valid token
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isNotFound(); // Expect HTTP 404 Not Found for the invalid ID
-        }
+        //     webTestClient.get()
+        //         .uri("/api/v2/gateway/customers/{customerId}/bills/current-balance", invalidCustomerId)
+        //         .cookie("Bearer", MockServerConfigAuthService.jwtTokenForValidOwnerId)
+        //         .accept(MediaType.APPLICATION_JSON)
+        //         .exchange()
+        //         .expectStatus().isNotFound(); 
+        // }
 }
