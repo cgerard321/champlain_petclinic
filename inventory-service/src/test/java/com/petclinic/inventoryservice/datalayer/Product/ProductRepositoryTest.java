@@ -20,8 +20,8 @@ class ProductRepositoryTest {
 
     @BeforeEach
     public void setupDB() {
-        product1 = buildProduct("inventoryId_4", "productId_1", "Desc", "name", 100.00, 10, 15.99);
-        product2 = buildProduct("inventoryId_4", "productId_2", "Desc", "name", 100.00, 10, 15.99);
+        product1 = buildProduct("inventoryId_4", "productId_1", "Desc", "name", 100.00, 10, 15.99, Status.RE_ORDER);
+        product2 = buildProduct("inventoryId_4", "productId_2", "Desc", "name", 100.00, 10, 15.99, Status.RE_ORDER);
 
         Publisher<Product> setup1 = productRepository.deleteAll()
                 .then(productRepository.save(product1));
@@ -41,7 +41,7 @@ class ProductRepositoryTest {
     @Test
     public void ShouldSaveSingleProduct(){
         //arrange
-        Product newProduct = buildProduct("inventoryId_1", "sku_1", "product_1", "product_1", 10.0, 10, 15.99);
+        Product newProduct = buildProduct("inventoryId_1", "sku_1", "product_1", "product_1", 10.0, 10, 15.99, Status.RE_ORDER);
         Publisher<Product> setup = productRepository.save(newProduct);
         //Act and Assert
         StepVerifier
@@ -53,7 +53,7 @@ class ProductRepositoryTest {
     @Test
     public void ShouldDeleteSingleProduct_byProductId(){
         //arrange
-        Product product1 = buildProduct("inventoryId_1", "sku_1", "product_1", "product_1", 10.0, 10, 15.99);
+        Product product1 = buildProduct("inventoryId_1", "sku_1", "product_1", "product_1", 10.0, 10, 15.99, Status.RE_ORDER);
         Publisher<Void> setup = productRepository.deleteByProductId(product1.getProductId());
         //act and assert
         StepVerifier
@@ -150,8 +150,8 @@ class ProductRepositoryTest {
     @Test
     public void ShouldDeleteAllProducts() {
         // Arrange
-        Product product1 = buildProduct("inventoryId_1", "sku_1", "product_1", "product_1_desc", 10.0, 10, 15.99);
-        Product product2 = buildProduct("inventoryId_2", "sku_2", "product_2", "product_2_desc", 15.0, 5, 15.99);
+        Product product1 = buildProduct("inventoryId_1", "sku_1", "product_1", "product_1_desc", 10.0, 10, 15.99, Status.RE_ORDER);
+        Product product2 = buildProduct("inventoryId_2", "sku_2", "product_2", "product_2_desc", 15.0, 5, 15.99, Status.RE_ORDER);
 
         productRepository.save(product1).block();
         productRepository.save(product2).block();
@@ -176,7 +176,7 @@ class ProductRepositoryTest {
     public void testFindProductByProductId() {
         // Arrange
         String productIdToFind = "productId";
-        Product newProduct = buildProduct("inventoryId_1", productIdToFind, "product_1", "product_1", 10.0, 10, 15.99);
+        Product newProduct = buildProduct("inventoryId_1", productIdToFind, "product_1", "product_1", 10.0, 10, 15.99, Status.RE_ORDER);
 
         productRepository.save(newProduct).block();
 
@@ -196,7 +196,7 @@ class ProductRepositoryTest {
     public void shouldFindProductByInventoryIdAndOneCharNameRegex() {
 
         String regexPattern = "(?i)^n.*";
-        Product product = buildProduct("inventoryId_1", "productId_1", "name", "Desc", 100.00, 10, 15.99);
+        Product product = buildProduct("inventoryId_1", "productId_1", "name", "Desc", 100.00, 10, 15.99, Status.RE_ORDER);
         productRepository.save(product).block();
 
         // Act & Assert
@@ -209,7 +209,7 @@ class ProductRepositoryTest {
     public void shouldFindProductByInventoryIdAndFullNameRegex() {
 
         String regexPattern = "(?i)^name.*";
-        Product product = buildProduct("inventoryId_2", "productId_2", "name", "Desc", 100.00, 10, 15.99);
+        Product product = buildProduct("inventoryId_2", "productId_2", "name", "Desc", 100.00, 10, 15.99, Status.RE_ORDER);
         productRepository.save(product).block();
 
 
@@ -221,7 +221,7 @@ class ProductRepositoryTest {
     @Test
     public void shouldFindProductByInventoryId() {
         // Arrange
-        Product product = buildProduct("inventoryId_3", "productId_3", "AnotherName", "Desc", 100.00, 10, 15.99);
+        Product product = buildProduct("inventoryId_3", "productId_3", "AnotherName", "Desc", 100.00, 10, 15.99, Status.RE_ORDER);
         productRepository.save(product).block();
 
         // Act & Assert
@@ -260,7 +260,7 @@ class ProductRepositoryTest {
     @Test
     public void shouldFindProductsByInventoryIdAndProductNameAndProductDescription() {
         // Arrange
-        Product product = buildProduct("inventoryId_1", "productId_1", "name", "description", 100.00, 10, 15.99);
+        Product product = buildProduct("inventoryId_1", "productId_1", "name", "description", 100.00, 10, 15.99, Status.RE_ORDER);
         productRepository.save(product).block();
 
         // Act & Assert
@@ -273,7 +273,7 @@ class ProductRepositoryTest {
     @Test
     public void shouldFindProductsByInventoryIdAndProductDescription() {
         // Arrange
-        Product product = buildProduct("inventoryId_1", "productId_1", "name", "description", 100.00, 10, 15.99);
+        Product product = buildProduct("inventoryId_1", "productId_1", "name", "description", 100.00, 10, 15.99, Status.RE_ORDER);
         productRepository.save(product).block();
 
         // Act & Assert
@@ -286,7 +286,7 @@ class ProductRepositoryTest {
     @Test
     public void shouldFindProductsByInventoryIdAndProductName() {
         // Arrange
-        Product product = buildProduct("inventoryId_1", "productId_1", "name", "description", 100.00, 10, 15.99);
+        Product product = buildProduct("inventoryId_1", "productId_1", "name", "description", 100.00, 10, 15.99, Status.RE_ORDER);
         productRepository.save(product).block();
 
         // Act & Assert
@@ -299,12 +299,12 @@ class ProductRepositoryTest {
     @Test
     public void shouldFindProductsByInventoryIdAndProductDescriptionAndStatus() {
         // Arrange
-        Product product = buildProduct("inventoryId_1", "productId_1", "name", "description", 100.00, 10, 15.99);
+        Product product = buildProduct("inventoryId_1", "productId_1", "name", "description", 100.00, 10, 15.99, Status.RE_ORDER);
         productRepository.save(product).block();
 
         // Act & Assert
         StepVerifier
-                .create(productRepository.findAllProductsByInventoryIdAndProductDescriptionAndStatus("inventoryId_1", "description", Status.AVAILABLE))
+                .create(productRepository.findAllProductsByInventoryIdAndProductDescriptionAndStatus("inventoryId_1", "description", Status.RE_ORDER))
                 .expectNextMatches(result -> result.getProductId().equals("productId_1"))
                 .verifyComplete();
     }
@@ -312,12 +312,12 @@ class ProductRepositoryTest {
     @Test
     public void shouldFindProductsByInventoryIdAndProductNameAndStatus() {
         // Arrange
-        Product product = buildProduct("inventoryId_1", "productId_1", "name", "description", 100.00, 10, 15.99);
+        Product product = buildProduct("inventoryId_1", "productId_1", "name", "description", 100.00, 10, 15.99, Status.RE_ORDER);
         productRepository.save(product).block();
 
         // Act & Assert
         StepVerifier
-                .create(productRepository.findAllProductsByInventoryIdAndProductNameAndStatus("inventoryId_1", "name", Status.AVAILABLE))
+                .create(productRepository.findAllProductsByInventoryIdAndProductNameAndStatus("inventoryId_1", "name", Status.RE_ORDER))
                 .expectNextMatches(result -> result.getProductId().equals("productId_1"))
                 .verifyComplete();
     }
@@ -325,12 +325,12 @@ class ProductRepositoryTest {
     @Test
     public void shouldFindProductsByInventoryIdAndProductNameAndProductDescriptionAndStatus() {
         // Arrange
-        Product product = buildProduct("inventoryId_1", "productId_1", "name", "description", 100.00, 10, 15.99);
+        Product product = buildProduct("inventoryId_1", "productId_1", "name", "description", 100.00, 10, 15.99, Status.RE_ORDER);
         productRepository.save(product).block();
 
         // Act & Assert
         StepVerifier
-                .create(productRepository.findAllProductsByInventoryIdAndProductNameAndProductDescriptionAndStatus("inventoryId_1", "name", "description", Status.AVAILABLE))
+                .create(productRepository.findAllProductsByInventoryIdAndProductNameAndProductDescriptionAndStatus("inventoryId_1", "name", "description", Status.RE_ORDER))
                 .expectNextMatches(result -> result.getProductId().equals("productId_1"))
                 .verifyComplete();
     }
@@ -338,17 +338,17 @@ class ProductRepositoryTest {
     @Test
     public void shouldFindProductsByInventoryIdAndStatus() {
         // Arrange
-        Product product = buildProduct("inventoryId_1", "productId_1", "name", "description", 100.00, 10, 15.99);
+        Product product = buildProduct("inventoryId_1", "productId_1", "name", "description", 100.00, 10, 15.99, Status.RE_ORDER);
         productRepository.save(product).block();
 
         // Act & Assert
         StepVerifier
-                .create(productRepository.findAllProductsByInventoryIdAndStatus("inventoryId_1", Status.AVAILABLE))
+                .create(productRepository.findAllProductsByInventoryIdAndStatus("inventoryId_1", Status.RE_ORDER))
                 .expectNextMatches(result -> result.getProductId().equals("productId_1"))
                 .verifyComplete();
     }
 
-    private Product buildProduct(String inventoryId, String productId, String productName, String productDescription, Double productPrice, Integer productQuantity, Double productSalePrice) {
+    private Product buildProduct(String inventoryId, String productId, String productName, String productDescription, Double productPrice, Integer productQuantity, Double productSalePrice, Status status) {
         return Product.builder()
                 .inventoryId(inventoryId)
                 .productId(productId)
@@ -357,6 +357,7 @@ class ProductRepositoryTest {
                 .productPrice(productPrice)
                 .productQuantity(productQuantity)
                 .productSalePrice(productSalePrice)
+                .status(status)
                 .build();
     }
 }

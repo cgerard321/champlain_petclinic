@@ -1910,7 +1910,7 @@ class InventoryControllerUnitTest {
     }
 
     @Test
-    void searchProductsByInventoryIdAndProductNameAndProductDescription_withNoResult_shouldReturnAllProducts() {
+    void searchProductsByInventoryIdAndProductNameAndProductDescription_withNoResult_shouldReturnEmpty() {
         String inventoryId = "1";
         String productName = "C";
         String productDescription = "Sedative";
@@ -1926,16 +1926,14 @@ class InventoryControllerUnitTest {
                         .build(inventoryId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk()
-                .expectBodyList(ProductResponseDTO.class)
-                .hasSize(2);
+                .expectStatus().isNoContent();
 
         verify(productInventoryService, times(1))
                 .searchProducts(inventoryId, productName, productDescription, null);
     }
 
     @Test
-    void searchProductsByInventoryIdAndProductNameAndProductDescription_withInvalidInventoryId_shouldReturnNotFound() {
+    void searchProductsByInventoryIdAndProductNameAndProductDescription_withInvalidInventoryId_shouldReturnNoContent() {
         String invalidInventoryId = "invalidInventoryId";
         String productName = "B";
         String productDescription = "Sedative";
@@ -1951,13 +1949,13 @@ class InventoryControllerUnitTest {
                         .build(invalidInventoryId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isNotFound();
+                .expectStatus().isNoContent();
         verify(productInventoryService, times(1))
                 .searchProducts(invalidInventoryId, productName, productDescription, null);
     }
 
     @Test
-    void searchProductsByInventoryIdAndProductNameAndProductDescriptionAndStatus_withNoResult_shouldReturnAllProducts() {
+    void searchProductsByInventoryIdAndProductNameAndProductDescriptionAndStatus_withNoResult_shouldReturnEmpty() {
         String inventoryId = "1";
         String productName = "C";
         String productDescription = "Sedative";
@@ -1975,16 +1973,14 @@ class InventoryControllerUnitTest {
                         .build(inventoryId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk()
-                .expectBodyList(ProductResponseDTO.class)
-                .hasSize(2);
+                .expectStatus().isNoContent();
 
         verify(productInventoryService, times(1))
                 .searchProducts(inventoryId, productName, productDescription, status);
     }
 
     @Test
-    void searchProductsByInventoryIdAndProductNameAndProductDescriptionAndStatus_withInvalidInventoryId_shouldReturnNotFound() {
+    void searchProductsByInventoryIdAndProductNameAndProductDescriptionAndStatus_withInvalidInventoryId_shouldReturnNoContent() {
         String invalidInventoryId = "invalidInventoryId";
         String productName = "B";
         String productDescription = "Sedative";
@@ -2002,13 +1998,13 @@ class InventoryControllerUnitTest {
                         .build(invalidInventoryId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isNotFound();
+                .expectStatus().isNoContent();
         verify(productInventoryService, times(1))
                 .searchProducts(invalidInventoryId, productName, productDescription, status);
     }
 
     @Test
-    void searchProductsByInventoryIdAndProductNameAndStatus_withNoResult_shouldReturnAllProducts() {
+    void searchProductsByInventoryIdAndProductNameAndStatus_withNoResult_shouldReturnEmpty() {
         String inventoryId = "1";
         String productName = "C";
         Status status = Status.AVAILABLE;
@@ -2024,16 +2020,14 @@ class InventoryControllerUnitTest {
                         .build(inventoryId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk()
-                .expectBodyList(ProductResponseDTO.class)
-                .hasSize(2);
+                .expectStatus().isNoContent();
 
         verify(productInventoryService, times(1))
                 .searchProducts(inventoryId, productName, null, status);
     }
 
     @Test
-    void searchProductsByInventoryIdAndProductNameAndStatus_withInvalidInventoryId_shouldReturnNotFound() {
+    void searchProductsByInventoryIdAndProductNameAndStatus_withInvalidInventoryId_shouldReturnNoContent() {
         String invalidInventoryId = "invalidInventoryId";
         String productName = "B";
         Status status = Status.AVAILABLE;
@@ -2049,13 +2043,13 @@ class InventoryControllerUnitTest {
                         .build(invalidInventoryId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isNotFound();
+                .expectStatus().isNoContent();
         verify(productInventoryService, times(1))
                 .searchProducts(invalidInventoryId, productName, null, status);
     }
 
     @Test
-    void searchProductsByInventoryIdAndProductDescriptionAndStatus_withNoResult_shouldReturnAllProducts() {
+    void searchProductsByInventoryIdAndProductDescriptionAndStatus_withNoResult_shouldReturnEmpty() {
         String inventoryId = "1";
         String productDescription = "Sedative";
         Status status = Status.AVAILABLE;
@@ -2071,16 +2065,14 @@ class InventoryControllerUnitTest {
                         .build(inventoryId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk()
-                .expectBodyList(ProductResponseDTO.class)
-                .hasSize(2);
+                .expectStatus().isNoContent();
 
         verify(productInventoryService, times(1))
                 .searchProducts(inventoryId, null, productDescription, status);
     }
 
     @Test
-    void searchProductsByInventoryIdAndProductDescriptionAndStatus_withInvalidInventoryId_shouldReturnNotFound() {
+    void searchProductsByInventoryIdAndProductDescriptionAndStatus_withInvalidInventoryId_shouldReturnNoContent() {
         String invalidInventoryId = "invalidInventoryId";
         String productDescription = "Sedative";
         Status status = Status.AVAILABLE;
@@ -2096,13 +2088,13 @@ class InventoryControllerUnitTest {
                         .build(invalidInventoryId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isNotFound();
+                .expectStatus().isNoContent();
         verify(productInventoryService, times(1))
                 .searchProducts(invalidInventoryId, null, productDescription, status);
     }
 
     @Test
-    void searchProductsByInventoryIdAndStatus_withNoResult_shouldReturnAllProducts() {
+    void searchProductsByInventoryIdAndStatus_withNoResult_shouldReturnEmpty() {
         String inventoryId = "1";
         Status status = Status.AVAILABLE;
 
@@ -2116,16 +2108,14 @@ class InventoryControllerUnitTest {
                         .build(inventoryId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk()
-                .expectBodyList(ProductResponseDTO.class)
-                .hasSize(2);
+                .expectStatus().isNoContent();
 
         verify(productInventoryService, times(1))
                 .searchProducts(inventoryId, null, null, status);
     }
 
     @Test
-    void searchProductsByInventoryIdAndStatus_withInvalidInventoryId_shouldReturnNotFound() {
+    void searchProductsByInventoryIdAndStatus_withInvalidInventoryId_shouldReturnNoContent() {
         String invalidInventoryId = "invalidInventoryId";
         Status status = Status.AVAILABLE;
 
@@ -2139,13 +2129,13 @@ class InventoryControllerUnitTest {
                         .build(invalidInventoryId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isNotFound();
+                .expectStatus().isNoContent();
         verify(productInventoryService, times(1))
                 .searchProducts(invalidInventoryId, null, null, status);
     }
 
     @Test
-    void searchProductsByInventoryId_withInvalidInventoryId_shouldReturnNotFound() {
+    void searchProductsByInventoryId_withInvalidInventoryId_shouldReturnNoContent() {
         String invalidInventoryId = "invalidInventoryId";
 
         when(productInventoryService.searchProducts(invalidInventoryId, null, null, null))
@@ -2157,13 +2147,13 @@ class InventoryControllerUnitTest {
                         .build(invalidInventoryId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isNotFound();
+                .expectStatus().isNoContent();
         verify(productInventoryService, times(1))
                 .searchProducts(invalidInventoryId, null, null, null);
     }
 
     @Test
-    void searchProductsByInventoryIdAndProductName_withInvalidInventoryId_shouldReturnNotFound() {
+    void searchProductsByInventoryIdAndProductName_withInvalidInventoryId_shouldReturnNoContent() {
         String invalidInventoryId = "invalidInventoryId";
         String productName = "B";
 
@@ -2177,13 +2167,13 @@ class InventoryControllerUnitTest {
                         .build(invalidInventoryId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isNotFound();
+                .expectStatus().isNoContent();
         verify(productInventoryService, times(1))
                 .searchProducts(invalidInventoryId, productName, null, null);
     }
 
     @Test
-    void searchProductsByInventoryIdAndProductDescription_withInvalidInventoryId_shouldReturnNotFound() {
+    void searchProductsByInventoryIdAndProductDescription_withInvalidInventoryId_shouldReturnNoContent() {
         String invalidInventoryId = "invalidInventoryId";
         String productDescription = "Sedative";
 
@@ -2197,13 +2187,13 @@ class InventoryControllerUnitTest {
                         .build(invalidInventoryId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isNotFound();
+                .expectStatus().isNoContent();
         verify(productInventoryService, times(1))
                 .searchProducts(invalidInventoryId, null, productDescription, null);
     }
 
     @Test
-    void searchProductsByInventoryIdAndProductName_withNoResult_shouldReturnAllProducts() {
+    void searchProductsByInventoryIdAndProductName_withNoResult_shouldReturnEmpty() {
         String inventoryId = "1";
         String productName = "C";
 
@@ -2217,16 +2207,14 @@ class InventoryControllerUnitTest {
                         .build(inventoryId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk()
-                .expectBodyList(ProductResponseDTO.class)
-                .hasSize(2);
+                .expectStatus().isNoContent();
 
         verify(productInventoryService, times(1))
                 .searchProducts(inventoryId, productName, null, null);
     }
 
     @Test
-    void searchProductsByInventoryIdAndProductDescription_withNoResult_shouldReturnAllProducts() {
+    void searchProductsByInventoryIdAndProductDescription_withNoResult_shouldReturnEmpty() {
         String inventoryId = "1";
         String productDescription = "Sedative";
 
@@ -2240,9 +2228,7 @@ class InventoryControllerUnitTest {
                         .build(inventoryId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk()
-                .expectBodyList(ProductResponseDTO.class)
-                .hasSize(2);
+                .expectStatus().isNoContent();
 
         verify(productInventoryService, times(1))
                 .searchProducts(inventoryId, null, productDescription, null);
