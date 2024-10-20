@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import './VetListCard.css';
 import DeleteVet from '@/pages/Vet/DeleteVet.tsx';
 import { deleteVet } from '@/features/veterinarians/api/deleteVet';
-import UpdateVet from '@/pages/Vet/UpdateVet';
 import { fetchVetPhoto } from './api/fetchPhoto';
 
 interface VetCardTableProps {
@@ -17,7 +16,6 @@ export default function VetCardTable({
   onDeleteVet,
 }: VetCardTableProps): JSX.Element {
   const navigate = useNavigate();
-  const [selectedVet, setSelectedVet] = useState<VetRequestModel | null>(null);
   const [vetPhotos, setVetPhotos] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
@@ -82,15 +80,6 @@ export default function VetCardTable({
                 {vet.specialties.map(specialty => specialty.name).join(', ')}
               </p>
               <div className="card-actions">
-                <button
-                  className="btn btn-primary"
-                  onClick={event => {
-                    event.stopPropagation();
-                    setSelectedVet(vet);
-                  }}
-                >
-                  Update
-                </button>
                 <DeleteVet
                   vetId={vet.vetId}
                   onVetDeleted={event => handleVetDelete(event, vet.vetId)}
@@ -99,9 +88,6 @@ export default function VetCardTable({
             </div>
           </div>
         ))
-      )}
-      {selectedVet && (
-        <UpdateVet vet={selectedVet} onClose={() => setSelectedVet(null)} />
       )}
     </div>
   );
