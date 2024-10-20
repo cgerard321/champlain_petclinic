@@ -1,6 +1,6 @@
 import './CartItem.css';
 import { ProductModel } from '../models/ProductModel';
-import ImageContainer from './ImageContainer';
+import ImageContainer from '@/features/products/components/ImageContainer';
 
 interface CartItemProps {
   item: ProductModel;
