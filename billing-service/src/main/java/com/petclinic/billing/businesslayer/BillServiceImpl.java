@@ -234,14 +234,6 @@ public class BillServiceImpl implements BillService{
 
     // Fetch a specific bill for a customer
     @Override
-    public Mono<BillResponseDTO> GetBillByCustomerIdAndBillId(String customerId, String billId) {
-        return billRepository.findByBillId(billId)
-                .filter(bill -> bill.getCustomerId().equals(customerId))
-                .map(EntityDtoUtil::toBillResponseDto);
-    }
-
-    // Fetch a specific bill for a customer
-    @Override
     public Mono<BillResponseDTO> getBillByCustomerIdAndBillId(String customerId, String billId) {
         return billRepository.findByBillId(billId)
                 .filter(bill -> bill.getCustomerId().equals(customerId))

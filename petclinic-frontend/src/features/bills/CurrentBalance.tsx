@@ -38,14 +38,30 @@ export default function CurrentBalance(): JSX.Element {
   }, [user.userId]);
 
   return (
-    <div style={{ padding: '20px', borderRadius: '8px', boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)', maxWidth: '300px', margin: 'auto', textAlign: 'center', backgroundColor: '#f7f7f7' }}>
+    <div
+      style={{
+        padding: '20px',
+        borderRadius: '8px',
+        boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+        maxWidth: '300px',
+        margin: 'auto',
+        textAlign: 'center',
+        backgroundColor: '#f7f7f7',
+      }}
+    >
       <h3>Current Balance</h3>
       {error ? (
         <p>{error}</p>
       ) : (
         <h1 style={{ fontSize: '2rem', color: '#4caf50' }}>
           {currentBalance !== null ? (
-            <CountUp start={0} end={currentBalance} duration={2} prefix="$" decimals={2} />
+            <CountUp
+              start={0}
+              end={currentBalance}
+              duration={2}
+              prefix="$"
+              decimals={2}
+            />
           ) : (
             '$0.00'
           )}
