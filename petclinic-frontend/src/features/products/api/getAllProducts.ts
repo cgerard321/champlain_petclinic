@@ -17,8 +17,8 @@ export async function getAllProducts(
   if (maxRating !== undefined && maxRating !== null)
     params.maxRating = maxRating;
   if (sort) params.sort = sort;
-  if (deliveryType && deliveryType !== 'default') params.deliveryType = deliveryType;
-
+  if (deliveryType && deliveryType !== 'default')
+    params.deliveryType = deliveryType;
 
   const res = await axiosInstance.get('/products', {
     responseType: 'stream',

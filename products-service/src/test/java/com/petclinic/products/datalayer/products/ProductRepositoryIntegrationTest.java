@@ -263,7 +263,7 @@ class ProductRepositoryIntegrationTest {
         assertEquals(DeliveryType.DELIVERY, savedProduct.getDeliveryType());
 
 
-        savedProduct.setDeliveryType(DeliveryType.NO_DELIVERY_OPTION);
+        savedProduct.setDeliveryType(DeliveryType.DELIVERY_AND_PICKUP);
         Product updatedProduct = productRepository.save(savedProduct).block();
         assertNotNull(updatedProduct);
         assertEquals(DeliveryType.DELIVERY_AND_PICKUP, updatedProduct.getDeliveryType());

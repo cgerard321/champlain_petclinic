@@ -152,7 +152,7 @@ class ProductsServiceClientIntegrationTest {
 
         StepVerifier.create(productsFlux)
                 .expectNextMatches(product -> product.getProductId().equals("1") && product.getDeliveryType() == DeliveryType.DELIVERY)
-                .expectNextMatches(product -> product.getProductId().equals("3") && product.getDeliveryType() == DeliveryType.DELIVERY)
+                .expectNextMatches(product -> product.getProductId().equals("2") && product.getDeliveryType() == DeliveryType.DELIVERY)
                 .verifyComplete();
     }
 
