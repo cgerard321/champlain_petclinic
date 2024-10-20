@@ -9,7 +9,7 @@ import { FaShoppingCart } from 'react-icons/fa'; // Importing the shopping cart 
 
 interface ProductAPIResponse {
   productId: number;
-
+  imageId: string;
   productName: string;
   productDescription: string;
   productSalePrice: number;
@@ -97,6 +97,7 @@ const UserCart = (): JSX.Element => {
         const products: ProductModel[] = data.products.map(
           (product: ProductAPIResponse) => ({
             productId: product.productId,
+            imageId: product.imageId,
             productName: product.productName,
             productDescription: product.productDescription,
             productSalePrice: product.productSalePrice,
@@ -330,6 +331,7 @@ const UserCart = (): JSX.Element => {
           credentials: 'include',
           body: JSON.stringify({
             productId: item.productId,
+            imageId: item.imageId,
             productName: item.productName,
             productSalePrice: item.productSalePrice,
           }),
@@ -380,6 +382,7 @@ const UserCart = (): JSX.Element => {
           credentials: 'include',
           body: JSON.stringify({
             productId: item.productId,
+            imageId: item.imageId,
             productName: item.productName,
             productSalePrice: item.productSalePrice,
           }),

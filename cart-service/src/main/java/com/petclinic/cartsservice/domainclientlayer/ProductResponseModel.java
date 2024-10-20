@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 public class ProductResponseModel {
 
     private String productId;
+    private String imageId;
     private String productName;
     private String productDescription;
     private Double productSalePrice;
@@ -22,8 +23,9 @@ public class ProductResponseModel {
 
 
 
-    public ProductResponseModel(String productId, String productName, String productDescription, Double productSalePrice) {
+    public ProductResponseModel(String productId, String imageId, String productName, String productDescription, Double productSalePrice) {
         this.productId = productId;
+        this.imageId = imageId;
         this.productName = productName;
         this.productDescription = productDescription;
         this.productSalePrice = productSalePrice;
