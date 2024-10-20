@@ -29,6 +29,7 @@ import reactor.test.StepVerifier;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.*;
 
@@ -651,5 +652,42 @@ class VetControllerIntegrationTest {
                     assertTrue(responseBody.contains("vetId not found: " + invalidVetId));
                 });
     }
+
+
+    @Test
+    void whenDeleteEducation_thenReturnNoContent() {
+        String vetId = "ac9adeb8-625b-11ee-8c99-0242ac120002";
+        String educationId = "123e4567-e89b-12d3-a456-426614174000";
+
+        mockServerConfigVetService.registerDeleteEducationEndpoint(vetId, educationId);
+
+        webTestClient.delete()
+                .uri(VET_ENDPOINT + "/" + vetId + "/educations/" + educationId)
+                .cookie("Bearer", BEARER_TOKEN)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNoContent()
+                .expectBody().isEmpty();
+    }
+
+    @Test
+    void whenDeleteEducation_EducationNotFound_thenReturnNotFound() {
+        String vetId = "ac9adeb8-625b-11ee-8c99-0242ac120002";
+        String educationId = "non-existent-education-id";
+
+        mockServerConfigVetService.registerDeleteEducationByVetIdEndpointNotFound(vetId, educationId);
+
+        webTestClient.delete()
+                .uri(VET_ENDPOINT + "/" + vetId + "/educations/" + educationId)
+                .cookie("Bearer", BEARER_TOKEN)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Education not found: " + educationId);
+    }
+
+
+
 }
 

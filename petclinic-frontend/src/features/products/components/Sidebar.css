@@ -97,14 +97,12 @@
   background-color: #888888;
 }
 
-
 @media (max-width: 768px) {
   .toggle-sidebar-button {
     width: 100%;
     text-align: center;
   }
 }
-
 
 .clear-filter-button {
   padding: 10px;

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { ProductModel } from './models/ProductModels/ProductModel';
@@ -8,6 +8,7 @@ import useSearchProducts from '@/features/inventories/hooks/useSearchProducts.ts
 import deleteAllProductsFromInventory from './api/deleteAllProductsFromInventory';
 import createPdf from './api/createPdf';
 import ConfirmationModal from '@/features/inventories/ConfirmationModal.tsx';
+import { Status } from '@/features/inventories/models/ProductModels/Status.ts';
 
 const InventoryProducts: React.FC = () => {
   const { inventoryId } = useParams<{ inventoryId: string }>();
@@ -16,7 +17,7 @@ const InventoryProducts: React.FC = () => {
   // Declare state
   const [productName, setProductName] = useState<string>('');
   const [productDescription, setProductDescription] = useState<string>('');
-  const [productStatus, setProductStatus] = useState<string>('');
+  const [productStatus, setProductStatus] = useState<Status>(Status.AVAILABLE);
   const [products, setProducts] = useState<ProductModel[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<ProductModel[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -111,19 +112,32 @@ const InventoryProducts: React.FC = () => {
   };
 
   const handleFilter = async (): Promise<void> => {
-    let filtered = products;
-
-    if (productStatus) {
-      filtered = filtered.filter(product => product.status === productStatus);
-    }
-
-    if (productName || productDescription) {
+    // Ensure that `productList` is populated with products matching the criteria
+    if (productName || productDescription || productStatus) {
       await getProductList(
         inventoryId!,
         productName || undefined,
-        productDescription || undefined
+        productDescription || undefined,
+        productStatus || undefined
       );
     }
+
+    // Apply additional client-side filtering if necessary
+    const filtered = products.filter(product => {
+      const matchesName = productName
+        ? product.productName.toLowerCase().includes(productName.toLowerCase())
+        : true;
+      const matchesDescription = productDescription
+        ? product.productDescription
+            .toLowerCase()
+            .includes(productDescription.toLowerCase())
+        : true;
+      const matchesStatus = productStatus
+        ? product.status === productStatus
+        : true;
+
+      return matchesName && matchesDescription && matchesStatus;
+    });
 
     setFilteredProducts(filtered);
   };
@@ -152,13 +166,11 @@ const InventoryProducts: React.FC = () => {
           }
         );
 
-        // Determine the new status based on the updated quantity
-        let updatedStatus: 'RE_ORDER' | 'OUT_OF_STOCK' | 'AVAILABLE' =
-          'AVAILABLE';
+        let updatedStatus: Status = Status.AVAILABLE;
         if (updatedQuantity === 0) {
-          updatedStatus = 'OUT_OF_STOCK';
+          updatedStatus = Status.OUT_OF_STOCK;
         } else if (updatedQuantity <= 20) {
-          updatedStatus = 'RE_ORDER';
+          updatedStatus = Status.RE_ORDER;
         }
 
         const updatedProducts = filteredProducts.map(product =>
@@ -238,12 +250,17 @@ const InventoryProducts: React.FC = () => {
           <label htmlFor="product-status">Filter by Status:</label>
           <select
             id="product-status"
-            onChange={e => setProductStatus(e.target.value)}
+            onChange={e => setProductStatus(e.target.value as Status)}
           >
             <option value="">All</option>
-            <option value="AVAILABLE">Available</option>
-            <option value="OUT_OF_STOCK">Out of Stock</option>
-            <option value="RE_ORDER">Re-Order</option>
+            {Object.values(Status).map(status => (
+              <option key={status} value={status}>
+                {status
+                  .replace('_', ' ')
+                  .toLowerCase()
+                  .replace(/\b\w/g, c => c.toUpperCase())}
+              </option>
+            ))}
           </select>
         </div>
       </div>
@@ -272,11 +289,11 @@ const InventoryProducts: React.FC = () => {
                 <td
                   style={{
                     color:
-                      product.status === 'RE_ORDER'
+                      product.status === Status.RE_ORDER
                         ? '#f4a460'
-                        : product.status === 'OUT_OF_STOCK'
+                        : product.status === Status.OUT_OF_STOCK
                           ? 'red'
-                          : product.status === 'AVAILABLE'
+                          : product.status === Status.AVAILABLE
                             ? 'green'
                             : 'inherit',
                   }}

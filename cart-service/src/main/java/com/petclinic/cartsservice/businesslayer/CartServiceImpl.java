@@ -196,8 +196,45 @@ public class CartServiceImpl implements CartService {
                 .switchIfEmpty(Mono.error(new NotFoundException("Cart not found: " + cartId)))
                 .flatMap(cart -> productClient.getProductByProductId(productId)
                         .flatMap(product -> {
+                            // Validate if the requested quantity is greater than zero
+                            if (quantity <= 0) {
+                                return Mono.error(new InvalidInputException("Quantity must be greater than zero."));
+                            }
+                            // Check if the product is out of stock
+                            if (product.getProductQuantity() == 0) {
+                                // The product is out of stock, move it to wishlist
+                                // Create a CartProduct for the wishlist
+                                CartProduct wishListProduct = CartProduct.builder()
+                                        .productId(product.getProductId())
+                                        .imageId(product.getImageId())
+                                        .productName(product.getProductName())
+                                        .productDescription(product.getProductDescription())
+                                        .productSalePrice(product.getProductSalePrice())
+                                        .averageRating(product.getAverageRating())
+                                        .quantityInCart(0)
+                                        .productQuantity(product.getProductQuantity())
+                                        .build();
+                                // Add the product to the wishlist
+                                if (cart.getWishListProducts() == null) {
+                                    cart.setWishListProducts(new ArrayList<>());
+                                }
+                                // Check if the product already exists in the wishlist
+                                Optional<CartProduct> existingWishlistProductOpt = cart.getWishListProducts().stream()
+                                        .filter(p -> p.getProductId().equals(productId))
+                                        .findFirst();
+                                if (existingWishlistProductOpt.isEmpty()) {
+                                    cart.getWishListProducts().add(wishListProduct);
+                                }
+                                // Save the cart
+                                return cartRepository.save(cart)
+                                        .map(savedCart -> {
+                                            CartResponseModel responseModel = EntityModelUtil.toCartResponseModel(savedCart, savedCart.getProducts());
+                                            responseModel.setMessage("Product is out of stock and has been moved to your wishlist.");
+                                            return responseModel;
+                                        });
+                            }
                             // Check if the available stock is sufficient
-                            if (product.getProductQuantity() < quantity) {
+                            else if (product.getProductQuantity() < quantity) {
                                 return Mono.error(new OutOfStockException("You cannot add more than "
                                         + product.getProductQuantity() + " items. Only "
                                         + product.getProductQuantity() + " items left in stock."));
@@ -223,6 +260,7 @@ public class CartServiceImpl implements CartService {
                                     // If product is not in the cart, create a new entry
                                     CartProduct cartProduct = CartProduct.builder()
                                             .productId(product.getProductId())
+                                            .imageId(product.getImageId())
                                             .productName(product.getProductName())
                                             .productDescription(product.getProductDescription())
                                             .productSalePrice(product.getProductSalePrice())
