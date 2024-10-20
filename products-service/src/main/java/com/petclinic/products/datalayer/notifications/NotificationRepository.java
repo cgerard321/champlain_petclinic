@@ -6,5 +6,7 @@ import reactor.core.publisher.Mono;
 
 public interface NotificationRepository extends ReactiveMongoRepository<Notification, String> {
     Flux<Notification> findNotificationsByCustomerId(String customerId);
+    Flux<Notification> findNotificationsByProductIdAndNotificationTypeContains(String productId, NotificationType notificationType);
     Mono<Notification> findNotificationSubscriptionByProductIdAndCustomerId(String productId, String customerId);
+    Flux<Notification> deleteNotificationsByProductId(String productId);
 }

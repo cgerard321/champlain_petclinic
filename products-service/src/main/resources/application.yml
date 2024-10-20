@@ -9,6 +9,14 @@ logging:
     root: INFO
     com.petclinic: DEBUG
 
+app:
+  auth-service:
+    host: localhost
+    port: 7005
+  emailing-service:
+    host: localhost
+    port: 5115
+
 ---
 # for test
 
@@ -50,5 +58,13 @@ spring:
       username: root
       password: password
       authentication-database: admin
+
+app:
+  auth-service:
+    host: auth-service
+    port: 8080
+  emailing-service:
+    host: mailer-service
+    port: 8080
 
 server.port: 8080

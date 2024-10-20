@@ -1,5 +1,12 @@
 package com.petclinic.products.businesslayer.products;
 
+import com.petclinic.products.datalayer.notifications.NotificationRepository;
+import com.petclinic.products.datalayer.notifications.NotificationType;
+import com.petclinic.products.domainclientlayer.EmailRequestModel;
+import com.petclinic.products.domainclientlayer.EmailingServiceClient;
+import com.petclinic.products.domainclientlayer.UserDetails;
+import com.petclinic.products.domainclientlayer.UserServiceClient;
+import com.petclinic.products.presentationlayer.notifications.NotificationRequestModel;
 import com.petclinic.products.datalayer.products.ProductStatus;
 import com.petclinic.products.datalayer.products.ProductType;
 import com.petclinic.products.utils.exceptions.InvalidInputException;
@@ -31,12 +38,19 @@ import java.util.List;
 public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
-
     private final RatingRepository ratingRepository;
+    private final NotificationRepository notificationRepository;
 
-    public ProductServiceImpl(ProductRepository productRepository, RatingRepository ratingRepository) {
+    private final UserServiceClient userClient;
+    private final EmailingServiceClient emailClient;
+
+    public ProductServiceImpl(ProductRepository productRepository, RatingRepository ratingRepository, NotificationRepository notificationRepository, UserServiceClient userClient, EmailingServiceClient emailClient) {
         this.productRepository = productRepository;
         this.ratingRepository = ratingRepository;
+        this.notificationRepository = notificationRepository;
+
+        this.userClient = userClient;
+        this.emailClient = emailClient;
     }
 
     private Mono<Product> getAverageRating(Product product) {
@@ -57,6 +71,42 @@ public class ProductServiceImpl implements ProductService {
                     // This sets truncates to 2 decimal places without converting data types
                     product.setAverageRating(Math.floor(ratio * 100) / 100);
                     return Mono.just(product);
+                });
+    }
+
+    private void onQuantityChange(Product product, Integer newQuantity){
+        notificationRepository.findNotificationsByProductIdAndNotificationTypeContains(product.getProductId(), NotificationType.QUANTITY)
+                .doOnEach(notification -> {
+                    userClient.getUserByUserId(notification.get().getCustomerId())
+                            .flatMap(user ->
+                                emailClient.sendEmail(EmailRequestModel.builder()
+                                        .EmailToSendTo(user.getEmail())
+                                        .EmailTitle("PetClinic - Product \"" + product.getProductName() + "\" Restocked")
+                                        .TemplateName("Default")
+                                        .Header("PetClinic - Product Restocked")
+                                        .SenderName("PetClinicBackInStock")
+                                        .Body("Hi!\n" + product.getProductName() + " has been restocked!\n" + "New quantity: " + newQuantity + "\n\n")
+                                        .Footer("Thank you for shopping with PetClinic!")
+                                        .build())
+                            );
+                });
+    }
+
+    private void onPriceChange(Product product, Double newPrice){
+        notificationRepository.findNotificationsByProductIdAndNotificationTypeContains(product.getProductId(), NotificationType.PRICE)
+                .doOnEach(notification -> {
+                    userClient.getUserByUserId(notification.get().getCustomerId())
+                            .flatMap(user ->
+                                    emailClient.sendEmail(EmailRequestModel.builder()
+                                            .EmailToSendTo(user.getEmail())
+                                            .EmailTitle("PetClinic - Product \"" + product.getProductName() + "\" Price Change")
+                                            .TemplateName("Default")
+                                            .Header("PetClinic - Price Change")
+                                            .SenderName("PetClinicPriceChange")
+                                            .Body("Hi!\n" + product.getProductName() + " has had a price change!\n" + "New price: " + newPrice + "\n\n")
+                                            .Footer("Thank you for shopping with PetClinic!")
+                                            .build())
+                            );
                 });
     }
 
@@ -143,6 +193,14 @@ public class ProductServiceImpl implements ProductService {
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Product id was not found: " + productId))))
                 .flatMap(found -> productRequestModel
                         .map(EntityModelUtil::toProductEntity)
+                        .doOnNext(entity -> {
+                            if(entity.getProductSalePrice() < found.getProductSalePrice()){
+                                onPriceChange(found, entity.getProductSalePrice());
+                            }
+                            if(entity.getProductQuantity() > found.getProductQuantity()){
+                                onQuantityChange(found, entity.getProductQuantity());
+                            }
+                        })
                         .doOnNext(entity -> entity.setId(found.getId()))
                         .doOnNext(entity -> entity.setProductId(found.getProductId())))
                 .flatMap(this::getAverageRating)
@@ -169,10 +227,11 @@ public class ProductServiceImpl implements ProductService {
         return productRepository.findProductByProductId(productId)
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Product id was not found: " + productId))))
                 .flatMap(found -> {
-                            ratingRepository.deleteRatingsByProductId(found.getProductId());
-                            return productRepository.delete(found)
-                                    .then(Mono.just(found));
-                        }
+                    notificationRepository.deleteNotificationsByProductId(found.getProductId());
+                    ratingRepository.deleteRatingsByProductId(found.getProductId());
+                    return productRepository.delete(found)
+                            .then(Mono.just(found));
+                    }
                 )
                 .map(EntityModelUtil::toProductResponseModel);
     }
@@ -230,6 +289,12 @@ public class ProductServiceImpl implements ProductService {
     public Mono<Void> changeProductQuantity(String productId, Integer productQuantity) {
         return productRepository.findProductByProductId(productId)
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Product id was not found: " + productId))))
+                .doOnNext(product -> {
+                    if (productQuantity > product.getProductQuantity()){
+                        // TODO: Send notification to subscribed users
+                        onQuantityChange(product, productQuantity);
+                    }
+                })
                 .flatMap(product -> {
                     product.setProductQuantity(productQuantity);
                     return productRepository.save(product).then();
