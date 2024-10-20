@@ -4,6 +4,7 @@ package com.petclinic.products.businesslayer;
 import com.petclinic.products.businesslayer.products.ProductServiceImpl;
 import com.petclinic.products.datalayer.products.Product;
 import com.petclinic.products.datalayer.products.ProductRepository;
+import com.petclinic.products.datalayer.products.ProductStatus;
 import com.petclinic.products.datalayer.products.ProductType;
 import com.petclinic.products.presentationlayer.products.ProductResponseModel;
 import com.petclinic.products.utils.exceptions.NotFoundException;
@@ -16,9 +17,11 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
+
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -254,6 +257,84 @@ class ProductServiceImplUnitTest {
 
         verify(productRepository).findProductByProductId(productId);
         verify(productRepository, never()).save(any(Product.class));
+    }
+
+    @Test
+    void patchProductStatus_UpdatesStatusesCorrectly() {
+        // Arrange
+        LocalDate today = LocalDate.now();
+        LocalDate yesterday = today.minusDays(1);
+        LocalDate tomorrow = today.plusDays(1);
+
+        List<Product> products = Arrays.asList(
+                createProduct("1", yesterday, ProductStatus.PRE_ORDER),
+                createProduct("2", today, ProductStatus.PRE_ORDER),
+                createProduct("3", tomorrow, ProductStatus.AVAILABLE),
+                createProduct("4", null, ProductStatus.PRE_ORDER)
+        );
+
+        when(productRepository.findAll()).thenReturn(Flux.fromIterable(products));
+        when(productRepository.save(any(Product.class))).thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
+
+        // Act
+        Mono<Void> result = productService.patchProductStatus();
+
+        // Assert
+        StepVerifier.create(result)
+                .verifyComplete();
+
+        verify(productRepository, times(4)).save(any(Product.class));
+        verify(productRepository).save(argThat(product ->
+                product.getProductId().equals("1") && product.getProductStatus() == ProductStatus.AVAILABLE
+        ));
+        verify(productRepository).save(argThat(product ->
+                product.getProductId().equals("2") && product.getProductStatus() == ProductStatus.AVAILABLE
+        ));
+        verify(productRepository).save(argThat(product ->
+                product.getProductId().equals("3") && product.getProductStatus() == ProductStatus.PRE_ORDER
+        ));
+        verify(productRepository).save(argThat(product ->
+                product.getProductId().equals("4") && product.getProductStatus() == ProductStatus.AVAILABLE
+        ));
+    }
+
+    @Test
+    void patchProductStatus_NoProducts_CompletesSuccessfully() {
+        // Arrange
+        when(productRepository.findAll()).thenReturn(Flux.empty());
+
+        // Act
+        Mono<Void> result = productService.patchProductStatus();
+
+        // Assert
+        StepVerifier.create(result)
+                .verifyComplete();
+
+        verify(productRepository, never()).save(any(Product.class));
+    }
+
+    @Test
+    void patchProductStatus_RepositoryError_PropagatesError() {
+        // Arrange
+        when(productRepository.findAll()).thenReturn(Flux.error(new RuntimeException("Database error")));
+
+        // Act
+        Mono<Void> result = productService.patchProductStatus();
+
+        // Assert
+        StepVerifier.create(result)
+                .expectError(RuntimeException.class)
+                .verify();
+
+        verify(productRepository, never()).save(any(Product.class));
+    }
+
+    private Product createProduct(String id, LocalDate releaseDate, ProductStatus currentStatus) {
+        Product product = new Product();
+        product.setProductId(id);
+        product.setReleaseDate(releaseDate);
+        product.setProductStatus(currentStatus);
+        return product;
     }
 
 

@@ -1,10 +1,14 @@
 package com.petclinic.inventoryservice.businesslayer;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.pdf.PdfWriter;
 import com.petclinic.inventoryservice.datalayer.Inventory.Inventory;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryRepository;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryType;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryTypeRepository;
 import com.petclinic.inventoryservice.datalayer.Product.Product;
 import com.petclinic.inventoryservice.datalayer.Product.ProductRepository;
+import com.petclinic.inventoryservice.datalayer.Product.Status;
 import com.petclinic.inventoryservice.presentationlayer.*;
 import com.petclinic.inventoryservice.utils.EntityDTOUtil;
 import com.petclinic.inventoryservice.utils.ImageUtil;
@@ -21,12 +25,10 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import java.util.Arrays;
-import java.util.List;
+import java.io.ByteArrayOutputStream;
+import java.util.*;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Optional;
-import java.util.UUID;
 import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -1678,6 +1680,36 @@ class ProductInventoryServiceUnitTest {
                         throwable.getMessage().contains("No products found for inventory ID"))
                 .verify();
     }
+
+    @Test
+    public void CreateSupplyPdfThrowsDocumentException() throws DocumentException {
+        String inventoryId = "valid-id";
+
+        // Create mock Product objects with correct parameters for Product constructor
+        Product product1 = new Product("1", "P001", inventoryId, "Product1", "Description1", 10, 5.99, 7.99, Status.AVAILABLE);
+        Product product2 = new Product("2", "P002", inventoryId, "Product2", "Description2", 20, 10.99, 12.99, Status.RE_ORDER);
+
+        // Mock the repository to return a Flux of products
+        when(productRepository.findAllProductsByInventoryId(inventoryId))
+                .thenReturn(Flux.just(product1, product2));
+
+        // Mock PdfWriter.getInstance to throw DocumentException
+        mockStatic(PdfWriter.class);
+        when(PdfWriter.getInstance(any(Document.class), any(ByteArrayOutputStream.class)))
+                .thenThrow(new DocumentException("PDF generation error"));
+
+        // Call the method and expect an error
+        Mono<byte[]> result = productInventoryService.createSupplyPdf(inventoryId);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof RuntimeException &&
+                        throwable.getMessage().equals("Error generating PDF"))
+                .verify();
+
+        // Verify the interaction with the repository
+        verify(productRepository, times(1)).findAllProductsByInventoryId(inventoryId);
+    }
+
 
     @Test
     void createSupplyPdf_SuccessfullyGeneratesPdf() {
