@@ -34,6 +34,7 @@ export default function InventoriesListTable(): JSX.Element {
     [key: string]: number;
   }>({});
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [isActionsMenuVisible, setActionsMenu] = useState(false);
 
   const handleMenuClick = (
     e: React.MouseEvent<SVGElement>,
@@ -226,8 +227,93 @@ export default function InventoriesListTable(): JSX.Element {
     return window.btoa(binary);
   };
 
+  const toggleActionsMenu = (): void => {
+    setActionsMenu(prevState => !prevState);
+  };
+
   return (
     <>
+      <div id={inventoryStyles.menuSection}>
+        <div id={inventoryStyles.menuContainer}>
+          <svg
+            onClick={toggleActionsMenu}
+            id={inventoryStyles.menuIcon}
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            fill="currentColor"
+            className="bi bi-list"
+            viewBox="0 0 16 16"
+          >
+            <path
+              fillRule="evenodd"
+              d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"
+            />
+          </svg>
+
+          {isActionsMenuVisible && (
+            <div id={inventoryStyles.actionsMenu}>
+              <button
+                className="btn btn-danger"
+                onClick={deleteSelectedInventories}
+                disabled={selectedInventories.length === 0}
+              >
+                Delete Selected Inventories
+              </button>
+              <button
+                className="delete-bundle-button btn btn-success mx-1"
+                onClick={() => {
+                  handleDeleteAllInventories(false);
+                }}
+              >
+                Delete All Inventories
+              </button>
+              <button
+                className="add-inventory-button btn btn-success"
+                onClick={() => setShowAddInventoryForm(true)}
+              >
+                Add Inventory
+              </button>
+              <button
+                className="low-stock-button btn btn-warning mx-1"
+                onClick={async () => {
+                  if (inventoryList.length > 0) {
+                    lowStockProductsByInventory.current = {}; // Clear the current ref value
+                    try {
+                      // Collect all low stock products for each inventory
+                      for (const inventory of inventoryList) {
+                        await getAllLowStockProducts(inventory);
+                      }
+
+                      // Navigate to the other page and pass the collected data
+                      navigate('/products/lowstock', {
+                        state: {
+                          lowStockProducts: lowStockProductsByInventory.current,
+                        },
+                      });
+                    } catch (error) {
+                      console.error(
+                        'Error fetching low stock products:',
+                        error
+                      );
+                    }
+                  } else {
+                    console.error('No inventories found');
+                  }
+                }}
+              >
+                Check Low Stock for All Inventories
+              </button>
+              <button
+                className="add-inventorytype-button btn btn-primary"
+                onClick={() => setShowAddTypeForm(true)}
+              >
+                Add InventoryType
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
       <div>
         <table className="table table-striped">
           <thead>
@@ -514,28 +600,6 @@ export default function InventoriesListTable(): JSX.Element {
         >
           Notification Text Here
         </div>
-        <button
-          className="btn btn-danger"
-          onClick={deleteSelectedInventories}
-          disabled={selectedInventories.length === 0}
-        >
-          Delete Selected Inventories
-        </button>
-        <button
-          className="delete-bundle-button btn btn-success mx-1"
-          onClick={() => {
-            handleDeleteAllInventories(false);
-          }}
-        >
-          Delete All Inventories
-        </button>
-
-        <button
-          className="add-inventory-button btn btn-success"
-          onClick={() => setShowAddInventoryForm(true)}
-        >
-          Add Inventory
-        </button>
 
         {showAddInventoryForm && (
           <AddInventory
@@ -545,40 +609,6 @@ export default function InventoriesListTable(): JSX.Element {
           />
         )}
 
-        <button
-          className="low-stock-button btn btn-warning mx-1"
-          onClick={async () => {
-            if (inventoryList.length > 0) {
-              lowStockProductsByInventory.current = {}; // Clear the current ref value
-              try {
-                // Collect all low stock products for each inventory
-                for (const inventory of inventoryList) {
-                  await getAllLowStockProducts(inventory);
-                }
-
-                // Navigate to the other page and pass the collected data
-                navigate('/products/lowstock', {
-                  state: {
-                    lowStockProducts: lowStockProductsByInventory.current,
-                  },
-                });
-              } catch (error) {
-                console.error('Error fetching low stock products:', error);
-              }
-            } else {
-              console.error('No inventories found');
-            }
-          }}
-        >
-          Check Low Stock for All Inventories
-        </button>
-
-        <button
-          className="add-inventorytype-button btn btn-primary"
-          onClick={() => setShowAddTypeForm(true)}
-        >
-          Add InventoryType
-        </button>
         {showAddTypeForm && (
           <AddInventoryType
             show={showAddTypeForm}
