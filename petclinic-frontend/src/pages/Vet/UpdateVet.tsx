@@ -3,17 +3,17 @@ import { VetRequestModel } from '@/features/veterinarians/models/VetRequestModel
 import { updateVet } from '@/features/veterinarians/api/updateVet';
 import { Button, Modal, Form } from 'react-bootstrap';
 import { Workday } from '@/features/veterinarians/models/Workday';
-import { useNavigate } from 'react-router-dom';
-import { AppRoutePaths } from '@/shared/models/path.routes';
+
 
 interface UpdateVetProps {
   vet: VetRequestModel;
   onClose: () => void;
+  refreshVetDetails: () => void;
 }
 
 export default function UpdateVet({
   vet,
-  onClose,
+  onClose,refreshVetDetails
 }: UpdateVetProps): JSX.Element {
   const [formData, setFormData] = useState<VetRequestModel>(vet);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -76,7 +76,6 @@ export default function UpdateVet({
     return Object.keys(newErrors).length === 0;
   };
 
-  const navigate = useNavigate();
 
   const handleSubmit = async (e: FormEvent): Promise<void> => {
     e.preventDefault();
@@ -85,10 +84,9 @@ export default function UpdateVet({
     try {
       await updateVet(vet.vetId, formData);
       alert('Vet updated successfully!');
+      refreshVetDetails();
       onClose();
 
-      navigate(AppRoutePaths.Vet);
-      window.location.reload();
     } catch (error) {
       console.error('Error updating vet:', error);
     }
