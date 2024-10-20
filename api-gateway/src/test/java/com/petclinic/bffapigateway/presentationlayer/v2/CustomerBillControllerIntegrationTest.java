@@ -34,6 +34,9 @@ public class CustomerBillControllerIntegrationTest {
         mockServerConfigBillService = new MockServerConfigBillService();
         mockServerConfigBillService.registerDownloadBillPdfEndpoint();
 
+        mockServerConfigBillService.registerGetCurrentBalanceEndpoint(); // Register valid customerId endpoint
+        mockServerConfigBillService.registerGetCurrentBalanceInvalidCustomerIdEndpoint(); // Register invalid customerId endpoint
+
         mockServerConfigAuthService = new MockServerConfigAuthService();
         mockServerConfigAuthService.registerValidateTokenForOwnerEndpoint();
     }
@@ -89,4 +92,33 @@ public class CustomerBillControllerIntegrationTest {
                 .exchange()
                 .expectStatus().isUnauthorized();  // Expect Unauthorized status
     }
+
+        // Test valid customerId returns the correct balance
+        @Test
+        public void testGetCurrentBalance_ValidCustomerId_AsOwner_ReturnsBalance() {
+            String validCustomerId = "1"; // Example valid customer ID
+        
+            webTestClient.get()
+                .uri("/api/v2/gateway/customers/{customerId}/bills/current-balance", validCustomerId)
+                .cookie("Bearer", MockServerConfigAuthService.jwtTokenForValidOwnerId) // Valid OWNER JWT token
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk() // Expect HTTP 200 OK
+                .expectHeader().contentType(MediaType.APPLICATION_JSON_VALUE) // Ensure content-type is JSON
+                .expectBody(Double.class) // Expect the body to contain a double (the balance)
+                .value(balance -> assertEquals(150.0, balance)); // Assert that the balance is 150.0
+        }
+    
+        // Test invalid customerId returns 404
+        @Test
+        public void testGetCurrentBalance_InvalidCustomerId_Returns404() {
+            String invalidCustomerId = "invalid-id"; // Example invalid customer ID
+        
+            webTestClient.get()
+                .uri("/api/v2/gateway/customers/{customerId}/bills/current-balance", invalidCustomerId)
+                .cookie("Bearer", MockServerConfigAuthService.jwtTokenForValidOwnerId) // Use a valid token
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound(); // Expect HTTP 404 Not Found for the invalid ID
+        }
 }

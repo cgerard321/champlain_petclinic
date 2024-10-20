@@ -97,36 +97,71 @@ public class MockServerConfigBillService {
                 );
     }
 
-    public void registerGetCurrentBalanceEndpoint() {
-        String response = "150.0"; 
+//     public void registerGetCurrentBalanceEndpoint() {
+//         String response = "150.0"; 
     
-        // mockServerClient_BillService
-        //     .when(
-        //         request()
-        //             .withMethod("GET")
-        //             .withPath("/bills/customer/{customerId}/bills/current-balance")
-        //             .withPathParameter("customerId", "[a-zA-Z0-9\\-]+")
-        //     )
-        //     .respond(
-        //         response()
-        //             .withStatusCode(200)
-        //             .withBody(response)
-        //             .withHeader("Content-Type", "application/json")
-        //     );
-        mockServerClient_BillService
-    .when(
-        request()
-            .withMethod("GET")
-            .withPath("/api/v2/gateway/customers/{customerId}/bills/current-balance")
-            .withPathParameter("customerId", "[a-zA-Z0-9\\-]+")
-    )
-    .respond(
-        response()
-            .withStatusCode(200)
-            .withBody(response)
-            .withHeader("Content-Type", "application/json")
-    );
+//         // mockServerClient_BillService
+//         //     .when(
+//         //         request()
+//         //             .withMethod("GET")
+//         //             .withPath("/bills/customer/{customerId}/bills/current-balance")
+//         //             .withPathParameter("customerId", "[a-zA-Z0-9\\-]+")
+//         //     )
+//         //     .respond(
+//         //         response()
+//         //             .withStatusCode(200)
+//         //             .withBody(response)
+//         //             .withHeader("Content-Type", "application/json")
+//         //     );
+//         mockServerClient_BillService
+//     .when(
+//         request()
+//             .withMethod("GET")
+//             .withPath("/api/v2/gateway/customers/{customerId}/bills/current-balance")
+//             .withPathParameter("customerId", "[a-zA-Z0-9\\-]+")
+//     )
+//     .respond(
+//         response()
+//             .withStatusCode(200)
+//             .withBody(response)
+//             .withHeader("Content-Type", "application/json")
+//     );
 
+//     }
+
+        // Register the endpoint for a valid customerId
+    public void registerGetCurrentBalanceEndpoint() {
+        String response = "150.0"; // Mock balance response
+
+        mockServerClient_BillService
+            .when(
+                request()
+                    .withMethod("GET")
+                    .withPath("/api/v2/gateway/customers/{customerId}/bills/current-balance")
+                    .withPathParameter("customerId", "1") // Example valid customerId
+            )
+            .respond(
+                response()
+                    .withStatusCode(200) // Return 200 OK
+                    .withBody(response)  // Return the balance as the response body
+                    .withHeader("Content-Type", "application/json")
+            );
+    }
+
+    // Register the endpoint for an invalid customerId
+    public void registerGetCurrentBalanceInvalidCustomerIdEndpoint() {
+        mockServerClient_BillService
+            .when(
+                request()
+                    .withMethod("GET")
+                    .withPath("/api/v2/gateway/customers/{customerId}/bills/current-balance")
+                    .withPathParameter("customerId", "invalid-id") // Example invalid customerId
+            )
+            .respond(
+                response()
+                    .withStatusCode(404) // Return 404 Not Found
+                    .withHeader("Content-Type", "application/json")
+            );
     }
     
 
