@@ -21,6 +21,7 @@ public class ProductRequestModel {
     private String productDescription;
     private Double productSalePrice;
     private Integer productQuantity;
+    private Boolean isUnlisted;
     private ProductType productType;
     private LocalDate releaseDate;
     private ProductStatus productStatus;

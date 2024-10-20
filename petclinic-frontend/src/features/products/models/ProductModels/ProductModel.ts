@@ -9,6 +9,7 @@ export interface ProductModel {
   productStatus: 'PRE_ORDER' | 'AVAILABLE' | 'OUT_OF_STOCK';
   requestCount: number;
   productType: string;
+  isUnlisted: boolean;
   dateAdded: Date;
   releaseDate?: Date;
 }
@@ -24,6 +25,7 @@ export const emptyProductModel: ProductModel = {
   productStatus: 'OUT_OF_STOCK',
   requestCount: 0,
   productType: '',
+  isUnlisted: false,
   dateAdded: new Date(),
   releaseDate: undefined,
 };

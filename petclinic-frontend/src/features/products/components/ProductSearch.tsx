@@ -13,7 +13,8 @@ export default function ProductSearch(): JSX.Element {
 
   const fetchProducts = async (): Promise<void> => {
     const allProducts = await getAllProducts();
-    setProducts(allProducts);
+    const listedProducts = allProducts.filter(product => !product.isUnlisted);
+    setProducts(listedProducts);
   };
 
   useEffect(() => {
