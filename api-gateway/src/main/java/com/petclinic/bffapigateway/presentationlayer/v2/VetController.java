@@ -212,8 +212,7 @@ public class VetController {
             @PathVariable String vetId,
             @PathVariable String educationId) {
         return vetsServiceClient.deleteEducation(vetId, educationId)
-                .then(Mono.just(ResponseEntity.noContent().<Void>build()))
-                .onErrorResume(NotFoundException.class, e -> Mono.just(ResponseEntity.notFound().build()));
+                .then(Mono.just(ResponseEntity.noContent().<Void>build()));
     }
 }
 
