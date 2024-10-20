@@ -19,11 +19,12 @@ table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 10px;
+  font-size: 18px; /* Larger font size */
 }
 
 table th,
 table td {
-  padding: 12px;
+  padding: 16px; /* Increased padding */
   text-align: left;
   border-bottom: 1px solid #ddd;
 }
@@ -38,14 +39,15 @@ table tr:hover {
 
 h1,
 h2 {
-  font-size: 24px;
-  margin-bottom: 15px;
+  font-size: 28px; /* Increased font size */
+  margin-bottom: 20px;
 }
+
 .popup-overlay {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
+  width: 100%; /* Set to 100% for full width */
   height: 100%;
   background-color: rgba(0, 0, 0, 0.7);
   display: flex;
@@ -56,25 +58,27 @@ h2 {
 
 .popup-content {
   background-color: white;
-  width: 70%;
-  max-width: 60%;
-  padding: 20px;
+  width: 80%; /* Increased width */
+  max-width: 80%; /* Increased max width */
+  padding: 30px; /* Increased padding */
   border-radius: 8px;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
   position: relative;
-  max-height: 90vh; /* Confine the popup height to 80% of viewport height */
-  overflow-y: auto; /* Enable vertical scroll if content overflows */
-  overflow-x: hidden; /* Prevent horizontal overflow */
+  max-height: 90vh; /* Confine the popup height to 90% of viewport height */
+  overflow-y: auto;
+  overflow-x: hidden;
+  font-size: 18px; /* Larger font size */
 }
 
 .popup-content table {
   width: 100%;
   border-collapse: collapse;
+  font-size: 18px; /* Larger font size */
 }
 
 .popup-content th,
 .popup-content td {
-  padding: 10px;
+  padding: 16px; /* Increased padding */
   border: 1px solid #ddd;
 }
 
@@ -109,14 +113,14 @@ h2 {
 }
 
 tbody {
-  display: block; /* Make tbody scrollable */
-  max-height: 40vh; /* Limit the height of the table's content to fit within the popup */
-  overflow-y: auto; /* Enable vertical scroll for table rows */
+  display: block;
+  max-height: 50vh; /* Increased max height */
+  overflow-y: auto;
 }
 
 thead,
 tr {
-  display: table; /* Ensure thead and tr behave like a table */
-  width: 100%; /* Stretch to full width */
-  table-layout: fixed; /* Fix the layout so columns align */
+  display: table;
+  width: 100%;
+  table-layout: fixed;
 }
