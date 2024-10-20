@@ -1,7 +1,15 @@
 package com.petclinic.vet;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
-class VetServiceApplicationTest {
+@SpringBootTest
+@ActiveProfiles("test")
+class ProductsServiceApplicationTests {
+
+    @Test
+    void contextLoads() {
+    }
 
 }
