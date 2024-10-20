@@ -1,34 +1,33 @@
 // UserCart.tsx
-
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import CartItem from './CartItem';
 import { ProductModel } from '../models/ProductModel';
 import './UserCart.css';
 import { NavBar } from '@/layouts/AppNavBar';
-import { FaShoppingCart } from 'react-icons/fa';
+import { FaShoppingCart } from 'react-icons/fa'; // Importing the shopping cart icon
 
-interface InvoiceItem {
+interface ProductAPIResponse {
+  productId: number;
+
+  productName: string;
+  productDescription: string;
+  productSalePrice: number;
+  averageRating: number;
+  quantityInCart: number;
+  productQuantity: number;
+}
+
+interface Invoice {
   productId: number;
   productName: string;
   productSalePrice: number;
   quantity: number;
 }
 
-interface Invoice {
-  invoiceId: string;
-  cartId: string;
-  items: InvoiceItem[];
-  subtotal: number;
-  tax: number;
-  total: number;
-  issueDate: string;
-}
-
 const UserCart = (): JSX.Element => {
   const { cartId } = useParams<{ cartId: string }>();
   const navigate = useNavigate();
-
   const [cartItems, setCartItems] = useState<ProductModel[]>([]);
   const [wishlistItems, setWishlistItems] = useState<ProductModel[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -37,28 +36,27 @@ const UserCart = (): JSX.Element => {
     {}
   );
   const [checkoutMessage, setCheckoutMessage] = useState<string | null>(null);
-  const [invoice, setInvoice] = useState<Invoice | null>(null);
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [invoices, setInvoices] = useState<Invoice[]>([]); // State to hold invoice details
   const [cartItemCount, setCartItemCount] = useState<number>(0);
   const [isCheckoutModalOpen, setIsCheckoutModalOpen] =
-    useState<boolean>(false);
+    useState<boolean>(false); // Modal state
   const [wishlistUpdated, setWishlistUpdated] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState<string | null>(
+    null
+  ); // New state for notifications
   const [voucherCode, setVoucherCode] = useState<string>('');
   const [discount, setDiscount] = useState<number>(0);
   const [voucherError, setVoucherError] = useState<string | null>(null);
-  const [notificationMessage, setNotificationMessage] = useState<string | null>(
-    null
-  );
 
   const subtotal = cartItems.reduce(
     (acc, item) => acc + item.productSalePrice * (item.quantity || 1),
     0
   );
-
-  const tvq = subtotal * 0.09975;
-  const tvc = subtotal * 0.05;
+  const tvq = subtotal * 0.09975; // Quebec tax rate
+  const tvc = subtotal * 0.05; // Canadian tax rate
   const total = subtotal - discount + tvq + tvc;
 
+  // Function to update the cart item count
   const updateCartItemCount = useCallback(() => {
     const count = cartItems.reduce(
       (acc, item) => acc + (item.quantity || 0),
@@ -90,10 +88,12 @@ const UserCart = (): JSX.Element => {
 
         const data = await response.json();
 
+        // Ensure that data.products exists and is an array
         if (!Array.isArray(data.products)) {
           throw new Error('Invalid data format: products should be an array');
         }
 
+        // Map data.products to the appropriate ProductModel format
         const products: ProductModel[] = data.products.map(
           (product: ProductAPIResponse) => ({
             productId: product.productId,
@@ -109,6 +109,7 @@ const UserCart = (): JSX.Element => {
         setCartItems(products);
         setWishlistItems(data.wishListProducts || []);
       } catch (err: unknown) {
+        // Changed from any to unknown
         if (err instanceof Error) {
           console.error(err.message);
           setError('Failed to fetch cart items');
@@ -122,12 +123,11 @@ const UserCart = (): JSX.Element => {
     };
 
     fetchCartItems();
+    // Reset wishlistUpdated to avoid unnecessary fetches
     setWishlistUpdated(false);
-  }, [cartId, wishlistUpdated]);
-
-  useEffect(() => {
+    // Recalculate cart item count after setting cart items
     updateCartItemCount();
-  }, [cartItems, updateCartItemCount]);
+  }, [cartId, updateCartItemCount, wishlistUpdated]);
 
   const applyVoucherCode = async (): Promise<void> => {
     try {
@@ -160,16 +160,18 @@ const UserCart = (): JSX.Element => {
       event: React.ChangeEvent<HTMLInputElement>,
       index: number
     ): Promise<void> => {
-      const newQuantity = Math.max(1, Number(event.target.value));
+      const newQuantity = Math.max(1, Number(event.target.value)); // Ensure quantity is at least 1
       const item = cartItems[index];
 
       if (newQuantity > item.productQuantity) {
+        // Display error message
         setErrorMessages(prevErrors => ({
           ...prevErrors,
           [index]: `You cannot add more than ${item.productQuantity} items. Only ${item.productQuantity} items left in stock.`,
         }));
         return;
       } else {
+        // Clear error message
         setErrorMessages(prevErrors => {
           const rest = { ...prevErrors };
           delete rest[index];
@@ -177,6 +179,7 @@ const UserCart = (): JSX.Element => {
         });
       }
 
+      // Update quantity in backend
       try {
         const response = await fetch(
           `http://localhost:8080/api/v2/gateway/carts/${cartId}/products/${item.productId}`,
@@ -198,22 +201,28 @@ const UserCart = (): JSX.Element => {
             ...prevErrors,
             [index]: data.message || 'Failed to update quantity',
           }));
+          // Check if the product has been moved to wishlist
           if (data.message && data.message.includes('moved to your wishlist')) {
+            // Remove the item from cart
             setCartItems(prevItems =>
               prevItems.filter((_, idx) => idx !== index)
             );
+            // Add to wishlist
             setWishlistItems(prevItems => [...prevItems, item]);
             setNotificationMessage(data.message);
           }
         } else {
+          // Update local state
           setCartItems(prevItems => {
             const newItems = [...prevItems];
             newItems[index].quantity = newQuantity;
             return newItems;
           });
+          // Optionally, display success message
           setNotificationMessage('Item quantity updated successfully.');
         }
       } catch (err: unknown) {
+        // Changed from any to unknown
         console.error('Error updating quantity:', err);
         if (err instanceof Error) {
           const errorMessage = err.message || 'Failed to update quantity';
@@ -259,6 +268,7 @@ const UserCart = (): JSX.Element => {
         );
         alert('Item successfully removed!');
       } catch (error: unknown) {
+        // Changed from any to unknown
         console.error('Error deleting item: ', error);
         if (error instanceof Error) {
           alert(`Failed to delete item: ${error.message}`);
@@ -294,6 +304,7 @@ const UserCart = (): JSX.Element => {
           throw new Error('Failed to clear cart');
         }
       } catch (error: unknown) {
+        // Changed from any to unknown
         console.error('Error clearing cart:', error);
         if (error instanceof Error) {
           alert(`Failed to clear cart: ${error.message}`);
@@ -304,6 +315,7 @@ const UserCart = (): JSX.Element => {
     }
   };
 
+  // Add to Wishlist Function
   const addToWishlist = async (item: ProductModel): Promise<void> => {
     try {
       const productId = item.productId;
@@ -330,13 +342,20 @@ const UserCart = (): JSX.Element => {
         throw new Error(data.message || 'Failed to add to wishlist');
       }
 
+      // Update wishlist state
       setWishlistItems(prevItems => [...prevItems, item]);
-      alert(`${item.productName} has been added to your wishlist!`);
-      setNotificationMessage(
-        data.message || `${item.productName} has been added to your wishlist!`
-      );
+
+      // Display notification message from backend
+      if (data.message) {
+        setNotificationMessage(data.message);
+      } else {
+        alert(`${item.productName} has been added to your wishlist!`);
+      }
+
+      // Trigger the useEffect by updating the wishlistUpdated state
       setWishlistUpdated(true);
     } catch (error: unknown) {
+      // Changed from any to unknown
       console.error('Error adding to wishlist:', error);
       if (error instanceof Error) {
         alert(error.message || 'Failed to add item to wishlist.');
@@ -346,6 +365,7 @@ const UserCart = (): JSX.Element => {
     }
   };
 
+  // Add to Cart Function (from Wishlist)
   const addToCartFunction = async (item: ProductModel): Promise<void> => {
     try {
       const productId = item.productId;
@@ -372,16 +392,25 @@ const UserCart = (): JSX.Element => {
         throw new Error(data.message || 'Failed to add to cart');
       }
 
+      // Update cart items state
       setCartItems(prevItems => [...prevItems, item]);
+
+      // Remove from wishlist
       setWishlistItems(prevItems =>
         prevItems.filter(product => product.productId !== item.productId)
       );
-      alert(`${item.productName} has been added to your cart!`);
-      setNotificationMessage(
-        data.message || `${item.productName} has been added to your cart!`
-      );
+
+      // Display notification message from backend
+      if (data.message) {
+        setNotificationMessage(data.message);
+      } else {
+        alert(`${item.productName} has been added to your cart!`);
+      }
+
+      // Trigger the useEffect by updating the wishlistUpdated state
       setWishlistUpdated(true);
     } catch (error: unknown) {
+      // Changed from any to unknown
       console.error('Error adding to cart:', error);
       if (error instanceof Error) {
         alert(error.message || 'Failed to add item to cart.');
@@ -406,7 +435,7 @@ const UserCart = (): JSX.Element => {
     setIsCheckoutModalOpen(true);
   };
 
-  const handleCheckoutProcess = async (): Promise<void> => {
+  const handleCheckout = async (): Promise<void> => {
     if (!cartId) {
       setCheckoutMessage('Invalid cart ID');
       return;
@@ -425,25 +454,18 @@ const UserCart = (): JSX.Element => {
       );
 
       if (response.ok) {
-        const newInvoice: Invoice = {
-          invoiceId: 'INV-' + new Date().getTime(),
-          cartId,
-          items: cartItems.map(item => ({
-            productId: item.productId,
-            productName: item.productName,
-            productSalePrice: item.productSalePrice,
-            quantity: item.quantity || 1,
-          })),
-          subtotal,
-          tax: tvq + tvc,
-          total,
-          issueDate: new Date().toISOString(),
-        };
+        const invoiceItems: Invoice[] = cartItems.map(item => ({
+          productId: Number(item.productId), // Ensure productId is a number
+          productName: item.productName,
+          productSalePrice: item.productSalePrice,
+          quantity: item.quantity || 1,
+        }));
 
-        setInvoice(newInvoice);
-        setInvoices(prevInvoices => [...prevInvoices, newInvoice]);
+        // Set the invoices state
+        setInvoices(invoiceItems);
+
         setCheckoutMessage('Checkout successful!');
-        setCartItems([]);
+        setCartItems([]); // Clear the cart after successful checkout
         setCartItemCount(0);
         setIsCheckoutModalOpen(false);
       } else {
@@ -452,13 +474,9 @@ const UserCart = (): JSX.Element => {
           `Checkout failed: ${errorData.message || response.statusText}`
         );
       }
-    } catch (error: unknown) {
+    } catch (error) {
       console.error('Error during checkout:', error);
-      if (error instanceof Error) {
-        setCheckoutMessage(`Checkout failed: ${error.message}`);
-      } else {
-        setCheckoutMessage('Checkout failed due to an unexpected error.');
-      }
+      setCheckoutMessage('Checkout failed due to an unexpected error.');
     }
   };
 
@@ -476,6 +494,7 @@ const UserCart = (): JSX.Element => {
 
       <h1 className="cart-title">User Cart</h1>
 
+      {/* Notification Message */}
       {notificationMessage && (
         <div className="notification-message">
           {notificationMessage}
@@ -489,9 +508,12 @@ const UserCart = (): JSX.Element => {
         </div>
       )}
 
+      {/* Main Content Container */}
       <div className="content-container">
         <div className="UserCart-checkout-flex">
+          {/* Main Cart Section */}
           <div className="UserCart">
+            {/* Cart Header with Badge */}
             <div className="cart-header">
               <h2 className="cart-header-title">Your Cart</h2>
               <div className="cart-badge-container">
@@ -507,6 +529,7 @@ const UserCart = (): JSX.Element => {
               </div>
             </div>
 
+            {/* Cart Items */}
             <div className="cart-items-container">
               {cartItems.length > 0 ? (
                 cartItems.map((item, index) => (
@@ -518,9 +541,9 @@ const UserCart = (): JSX.Element => {
                     deleteItem={deleteItem}
                     errorMessage={errorMessages[index]}
                     addToWishlist={addToWishlist}
-                    addToCart={() => {}}
+                    addToCart={() => {}} // Not needed in cart items
                     isInWishlist={false}
-                    showNotification={setNotificationMessage}
+                    showNotification={setNotificationMessage} // Pass the notification handler
                   />
                 ))
               ) : (
@@ -528,6 +551,7 @@ const UserCart = (): JSX.Element => {
               )}
             </div>
 
+            {/* Cart Control Buttons */}
             <div className="cart-control-buttons">
               <button className="btn go-back-btn" onClick={() => navigate(-1)}>
                 Go Back
@@ -536,7 +560,6 @@ const UserCart = (): JSX.Element => {
                 Clear Cart
               </button>
             </div>
-
             <div
               className="voucher-code-section"
               style={{
@@ -590,9 +613,8 @@ const UserCart = (): JSX.Element => {
                 </div>
               )}
             </div>
-
             <hr />
-
+            {/* Cart Summary */}
             <div className="CartSummary">
               <h3>Cart Summary</h3>
               <p className="summary-item">Subtotal: ${subtotal.toFixed(2)}</p>
@@ -604,111 +626,87 @@ const UserCart = (): JSX.Element => {
               </p>
             </div>
 
-            <h3>Checkout</h3>
+            {/* Checkout Button */}
             <button
-              className="btn checkout-btn"
+              className="checkout-btn"
               onClick={handleCheckoutConfirmation}
-              disabled={cartItems.length === 0}
+              disabled={cartItems.length === 0} // Disable if cart is empty
             >
               Checkout
             </button>
-
+            {/* Checkout Confirmation Modal */}
             {isCheckoutModalOpen && (
               <div className="checkout-modal">
                 <h3>Confirm Checkout</h3>
                 <p>Are you sure you want to checkout?</p>
-                <button onClick={handleCheckoutProcess}>Yes</button>
+                <button onClick={handleCheckout}>Yes</button>
                 <button onClick={() => setIsCheckoutModalOpen(false)}>
                   No
                 </button>
               </div>
             )}
-
             {checkoutMessage && (
               <div className="checkout-message">{checkoutMessage}</div>
             )}
 
-            {invoice && (
-              <div className="invoice-section">
-                <h2 className="invoice-title">Invoice Details</h2>
-                <p className="invoice-id">Invoice ID: {invoice.invoiceId}</p>
-                <p className="cart-id">Cart ID: {invoice.cartId}</p>
-                <p className="invoice-subtotal">
-                  Subtotal: ${invoice.subtotal.toFixed(2)}
-                </p>
-                <p className="invoice-tax">Tax: ${invoice.tax.toFixed(2)}</p>
-                <p className="invoice-total">
-                  Total: ${invoice.total.toFixed(2)}
-                </p>
-                <p className="invoice-date">
-                  Issue Date: {new Date(invoice.issueDate).toLocaleString()}
-                </p>
-
-                <h3 className="invoice-items-title">Items:</h3>
-                <ul className="invoice-items-list">
-                  {invoice.items.map((item, index) => (
-                    <li key={index} className="invoice-item">
-                      {item.productName} - Quantity: {item.quantity} - Price: $
-                      {item.productSalePrice.toFixed(2)}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
+            {/* Invoice Section - Display a single invoice with a list of items */}
             {invoices.length > 0 && (
               <div className="invoices-section">
-                <h2>Invoice History</h2>
+                <h2>Invoice</h2>
                 <div className="invoice-summary">
-                  {invoices.map(inv => (
-                    <div key={inv.invoiceId} className="invoice-card">
-                      <h4>Invoice ID: {inv.invoiceId}</h4>
-                      <p>Cart ID: {inv.cartId}</p>
-                      <p>Subtotal: ${inv.subtotal.toFixed(2)}</p>
-                      <p>Tax: ${inv.tax.toFixed(2)}</p>
-                      <p>Total: ${inv.total.toFixed(2)}</p>
+                  <h3>Items</h3>
+                  {invoices.map(invoice => (
+                    <div key={invoice.productId} className="invoice-card">
+                      <h4>{invoice.productName}</h4>
+                      <p>Price: ${invoice.productSalePrice.toFixed(2)}</p>
+                      <p>Quantity: {invoice.quantity}</p>
                       <p>
-                        Issue Date: {new Date(inv.issueDate).toLocaleString()}
+                        Total: $
+                        {(invoice.productSalePrice * invoice.quantity).toFixed(
+                          2
+                        )}
                       </p>
-                      <h5>Items:</h5>
-                      <ul>
-                        {inv.items.map((item, idx) => (
-                          <li key={idx}>
-                            {item.productName} - Quantity: {item.quantity} -
-                            Price: ${item.productSalePrice.toFixed(2)}
-                          </li>
-                        ))}
-                      </ul>
                     </div>
                   ))}
+                  <h3>
+                    Total: $
+                    {invoices
+                      .reduce(
+                        (total, invoice) =>
+                          total + invoice.productSalePrice * invoice.quantity,
+                        0
+                      )
+                      .toFixed(2)}
+                  </h3>
                 </div>
               </div>
             )}
-          </div>
-        </div>
 
-        <div className="wishlist-section">
-          <h2 className="wishlist-title">Your Wishlist</h2>
-          <div className="wishlist-items-container">
-            {wishlistItems.length > 0 ? (
-              wishlistItems.map(item => (
-                <CartItem
-                  key={item.productId}
-                  item={item}
-                  index={-1}
-                  changeItemQuantity={() => {}}
-                  deleteItem={() => {}}
-                  addToWishlist={() => {}}
-                  addToCart={addToCartFunction}
-                  isInWishlist={true}
-                  showNotification={setNotificationMessage}
-                />
-              ))
-            ) : (
-              <p className="empty-wishlist-message">
-                No products in the wishlist.
-              </p>
-            )}
+            {/* Wishlist Section */}
+            <div className="wishlist-section">
+              <h2 className="wishlist-title">Your Wishlist</h2>
+              <div className="wishlist-items-container">
+                {wishlistItems.length > 0 ? (
+                  wishlistItems.map(item => (
+                    <CartItem
+                      key={item.productId}
+                      item={item}
+                      index={-1}
+                      changeItemQuantity={() => {}}
+                      deleteItem={() => {}}
+                      addToWishlist={() => {}}
+                      addToCart={addToCartFunction} // Use the updated addToCart function
+                      isInWishlist={true}
+                      showNotification={setNotificationMessage} // Pass the notification handler
+                    />
+                  ))
+                ) : (
+                  <p className="empty-wishlist-message">
+                    No products in the wishlist.
+                  </p>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>
