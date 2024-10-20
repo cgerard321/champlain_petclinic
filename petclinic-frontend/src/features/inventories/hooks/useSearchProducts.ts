@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ProductModel } from '@/features/inventories/models/ProductModels/ProductModel.ts';
 import { searchProducts } from '@/features/inventories/api/searchProducts.ts';
+import {Status} from "@/features/inventories/models/ProductModels/Status.ts";
 
 interface useSearchProductsResponseModel {
   productList: ProductModel[];
@@ -8,7 +9,8 @@ interface useSearchProductsResponseModel {
   getProductList: (
     inventoryId: string,
     productName?: string,
-    productDescription?: string
+    productDescription?: string,
+    status?: Status
   ) => void;
 }
 
@@ -18,12 +20,14 @@ export default function useSearchProducts(): useSearchProductsResponseModel {
   const getProductList = async (
     inventoryId: string,
     productName?: string,
-    productDescription?: string
+    productDescription?: string,
+    status?: Status
   ): Promise<void> => {
     const data = await searchProducts(
       inventoryId,
       productName,
-      productDescription
+      productDescription,
+      status
     );
     setProductList(data);
   };
