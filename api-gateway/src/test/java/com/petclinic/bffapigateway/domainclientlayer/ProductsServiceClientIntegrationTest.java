@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.dtos.Products.ProductRequestDTO;
 
 import com.petclinic.bffapigateway.dtos.Products.ProductResponseDTO;
-import com.petclinic.bffapigateway.dtos.Products.ProductType;
 import com.petclinic.bffapigateway.dtos.Products.ProductStatus;
+import com.petclinic.bffapigateway.dtos.Products.ProductType;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterAll;
@@ -145,7 +145,6 @@ class ProductsServiceClientIntegrationTest {
                 0,
                 6,
                 false,
-                ProductType.FOOD
                 ProductType.FOOD,
                 ProductStatus.AVAILABLE
         );
@@ -175,7 +174,6 @@ class ProductsServiceClientIntegrationTest {
                 0,
                 6,
                 false,
-                ProductType.FOOD
                 ProductType.FOOD,
                 ProductStatus.AVAILABLE
         );
@@ -205,7 +203,8 @@ class ProductsServiceClientIntegrationTest {
                 0,
                 6,
                 true,
-                ProductType.FOOD
+                ProductType.FOOD,
+                ProductStatus.AVAILABLE
         );
 
         mockWebServer.enqueue(new MockResponse()
@@ -215,7 +214,7 @@ class ProductsServiceClientIntegrationTest {
 
         Mono<ProductResponseDTO> productResponseDTOMono = productsServiceClient
                 .patchListingStatus(productResponseDTO.getProductId(), new ProductRequestDTO(
-                        null, null, null, null, null, null, false, ProductType.FOOD));
+                        null, null, null, null, null, null, false, null, null, null));
 
         StepVerifier.create(productResponseDTOMono)
                 .expectNextMatches(product -> product.getProductId().equals("productId"))
@@ -232,7 +231,7 @@ class ProductsServiceClientIntegrationTest {
         Mono<ProductResponseDTO> productResponseDTOMono = productsServiceClient
                 .patchListingStatus("691e6945-0d4a-4b20-85cc-afd251faccfd", new ProductRequestDTO(
                         null, null, null, null, null,
-                        null, false, ProductType.FOOD));
+                        null, false, null, null, null));
 
         StepVerifier.create(productResponseDTOMono)
                 .expectErrorMatches(throwable -> throwable != null &&
@@ -249,7 +248,7 @@ class ProductsServiceClientIntegrationTest {
 
         Mono<ProductResponseDTO> productResponseDTOMono = productsServiceClient
                 .patchListingStatus("invalid-product-id", new ProductRequestDTO(
-                        null, null, null, null, null, null, false, ProductType.FOOD));
+                        null, null, null, null, null, null, false, null, null, null));
 
         StepVerifier.create(productResponseDTOMono)
                 .expectErrorMatches(throwable -> throwable != null &&
@@ -266,7 +265,7 @@ class ProductsServiceClientIntegrationTest {
 
         Mono<ProductResponseDTO> productResponseDTOMono = productsServiceClient
                 .patchListingStatus("productId", new ProductRequestDTO(
-                        null, null, null, null, null, null, false, ProductType.FOOD));
+                        null, null, null, null, null, null, false, null, null, null));
 
         StepVerifier.create(productResponseDTOMono)
                 .expectErrorMatches(throwable -> throwable != null &&
@@ -283,7 +282,7 @@ class ProductsServiceClientIntegrationTest {
 
         Mono<ProductResponseDTO> productResponseDTOMono = productsServiceClient
                 .patchListingStatus("productId", new ProductRequestDTO(
-                        null, null, null, null, null, null, false, ProductType.FOOD));
+                        null, null, null, null, null, null, false, null, null, null));
 
         StepVerifier.create(productResponseDTOMono)
                 .expectErrorMatches(throwable -> throwable != null &&
@@ -303,7 +302,6 @@ class ProductsServiceClientIntegrationTest {
                 0,
                 6,
                 false,
-                ProductType.FOOD
                 ProductType.FOOD,
                 ProductStatus.AVAILABLE
         );
