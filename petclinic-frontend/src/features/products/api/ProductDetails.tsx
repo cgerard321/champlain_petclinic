@@ -102,10 +102,9 @@ export default function ProductDetails(): JSX.Element {
     if (!productId) return;
     try {
       await deleteProduct(productId);
-      navigate(AppRoutePaths.ProductsList); 
+      navigate(AppRoutePaths.Products);
     } catch (error) {
       console.error('Failed to delete product:', error);
-     
     }
   };
 
@@ -160,12 +159,9 @@ export default function ProductDetails(): JSX.Element {
               <Button variant="warning" onClick={navigateToEditProduct}>
                 Edit
               </Button>
-              <Button
-  variant="danger"
-  onClick={handleDeleteProduct}
->
-  Delete
-</Button>
+              <Button variant="danger" onClick={handleDeleteProduct}>
+                Delete
+              </Button>
             </div>
             <h2>{currentProduct.productName}</h2>
             <h3>{currentProduct.productSalePrice}$</h3>

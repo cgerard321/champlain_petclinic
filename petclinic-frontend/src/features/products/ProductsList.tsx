@@ -27,7 +27,9 @@ export default function ProductList(): JSX.Element {
   const [isRightRole, setIsRightRole] = useState<boolean>(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
   const [filterType, setFilterType] = useState<string>('');
-  const [recentlyClickedProducts, setRecentlyClickedProducts] = useState<ProductModel[]>([]);
+  const [recentlyClickedProducts, setRecentlyClickedProducts] = useState<
+    ProductModel[]
+  >([]);
   const [ratingSort, setRatingSort] = useState<string>('default');
   const [minStars, setMinStars] = useState<number>(0);
   const [maxStars, setMaxStars] = useState<number>(5);
@@ -47,7 +49,11 @@ export default function ProductList(): JSX.Element {
   };
 
   function FilterByPriceErrorHandling(): void {
-    if (minPrice !== undefined && maxPrice !== undefined && minPrice > maxPrice) {
+    if (
+      minPrice !== undefined &&
+      maxPrice !== undefined &&
+      minPrice > maxPrice
+    ) {
       alert('Min Price cannot be greater than Max Price');
     }
   }
@@ -57,7 +63,13 @@ export default function ProductList(): JSX.Element {
     setIsLoading(true);
     try {
       if (filterType.trim() === '') {
-        const list = await getAllProducts(minPrice, maxPrice, minStars, maxStars, ratingSort);
+        const list = await getAllProducts(
+          minPrice,
+          maxPrice,
+          minStars,
+          maxStars,
+          ratingSort
+        );
         setProductList(list);
       } else {
         const filteredList = await getProductsByType(filterType);
@@ -90,9 +102,7 @@ export default function ProductList(): JSX.Element {
   useEffect(() => {
     const hasRightRole =
       user?.roles !== undefined &&
-      Array.from(user.roles).some(
-        role => role.name === 'ADMIN' 
-      );
+      Array.from(user.roles).some(role => role.name === 'ADMIN');
     setIsRightRole(hasRightRole);
   }, [user]);
 
@@ -107,7 +117,9 @@ export default function ProductList(): JSX.Element {
     }
   };
 
-  const handleAddProduct = async (product: ProductModel): Promise<ProductModel> => {
+  const handleAddProduct = async (
+    product: ProductModel
+  ): Promise<ProductModel> => {
     try {
       const savedProduct = await addProduct(product);
       await fetchProducts();
@@ -149,7 +161,10 @@ export default function ProductList(): JSX.Element {
         updatedProducts.pop();
       }
 
-      localStorage.setItem('recentlyClickedProducts', JSON.stringify(updatedProducts));
+      localStorage.setItem(
+        'recentlyClickedProducts',
+        JSON.stringify(updatedProducts)
+      );
 
       return updatedProducts;
     });
@@ -157,10 +172,20 @@ export default function ProductList(): JSX.Element {
 
   return (
     <div className="product-list-container">
-      {isSidebarOpen && <div className="overlay" onClick={handleOverlayClick}></div>}
+      {isSidebarOpen && (
+        <div className="overlay" onClick={handleOverlayClick}></div>
+      )}
 
-      <div className={`sidebar ${isSidebarOpen ? 'open' : ''}`} id="sidebar" aria-hidden={!isSidebarOpen}>
-        <button className="close-button" onClick={toggleSidebar} aria-label="Close Filters">
+      <div
+        className={`sidebar ${isSidebarOpen ? 'open' : ''}`}
+        id="sidebar"
+        aria-hidden={!isSidebarOpen}
+      >
+        <button
+          className="close-button"
+          onClick={toggleSidebar}
+          aria-label="Close Filters"
+        >
           &times;
         </button>
         <div className="filter-container">
@@ -170,7 +195,11 @@ export default function ProductList(): JSX.Element {
             <input
               type="number"
               value={minPrice ?? typeof 'number'}
-              onChange={e => setMinPrice(e.target.value ? parseFloat(e.target.value) : undefined)}
+              onChange={e =>
+                setMinPrice(
+                  e.target.value ? parseFloat(e.target.value) : undefined
+                )
+              }
               min="0"
               placeholder="e.g., 10"
             />
@@ -180,7 +209,11 @@ export default function ProductList(): JSX.Element {
             <input
               type="number"
               value={maxPrice ?? typeof 'number'}
-              onChange={e => setMaxPrice(e.target.value ? parseFloat(e.target.value) : undefined)}
+              onChange={e =>
+                setMaxPrice(
+                  e.target.value ? parseFloat(e.target.value) : undefined
+                )
+              }
               min="0"
               placeholder="e.g., 100"
             />
@@ -228,7 +261,11 @@ export default function ProductList(): JSX.Element {
               <div style={{ color: 'red' }}>{validationMessage}</div>
             )}
           </div>
-          <select name="rating" value={ratingSort} onChange={e => setRatingSort(e.target.value)}>
+          <select
+            name="rating"
+            value={ratingSort}
+            onChange={e => setRatingSort(e.target.value)}
+          >
             <option value="default">Sort by Rating</option>
             <option value="asc">Low to High</option>
             <option value="desc">High to Low</option>
@@ -247,7 +284,12 @@ export default function ProductList(): JSX.Element {
       </div>
 
       {!isSidebarOpen && (
-        <button className="toggle-sidebar-button" onClick={toggleSidebar} aria-expanded={isSidebarOpen} aria-controls="sidebar">
+        <button
+          className="toggle-sidebar-button"
+          onClick={toggleSidebar}
+          aria-expanded={isSidebarOpen}
+          aria-controls="sidebar"
+        >
           &#9776; Filters
         </button>
       )}
@@ -284,17 +326,16 @@ export default function ProductList(): JSX.Element {
             <p>No products found.</p>
           )}
         </div>
-          <hr />
-        </div>
-        <div>
-          <h2>Recently Clicked Products</h2>
-          <div className="grid">
-            {recentlyClickedProducts.map(product => (
-              <Product key={product.productId} product={product} />
-            ))}
-          </div>
+        <hr />
+      </div>
+      <div>
+        <h2>Recently Clicked Products</h2>
+        <div className="grid">
+          {recentlyClickedProducts.map(product => (
+            <Product key={product.productId} product={product} />
+          ))}
         </div>
       </div>
-
+    </div>
   );
 }

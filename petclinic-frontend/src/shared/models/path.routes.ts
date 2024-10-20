@@ -53,7 +53,6 @@ export enum AppRoutePaths {
   CustomerVisits = '/customer/visits',
   UpdatePet = '/pets/:petId/edit',
   ProductDetails = '/products/:productId',
-  ProductsList = '/products',
   EditProduct = '/products/edit/:productId',
   ForgotPassword = '/users/forgot-password',
   ResetPassword = '/users/reset-password/:token',
