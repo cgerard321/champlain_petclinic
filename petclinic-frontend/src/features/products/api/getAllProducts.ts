@@ -7,7 +7,7 @@ export async function getAllProducts(
   minRating?: number,
   maxRating?: number,
   sort?: string,
-  deliveryType?: string,
+  deliveryType?: string
 ): Promise<ProductModel[]> {
   const params: Record<string, unknown> = {};
   if (minPrice !== undefined && minPrice !== null) params.minPrice = minPrice;
