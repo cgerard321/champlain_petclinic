@@ -206,6 +206,7 @@ public class CartServiceImpl implements CartService {
                                 // Create a CartProduct for the wishlist
                                 CartProduct wishListProduct = CartProduct.builder()
                                         .productId(product.getProductId())
+                                        .imageId(product.getImageId())
                                         .productName(product.getProductName())
                                         .productDescription(product.getProductDescription())
                                         .productSalePrice(product.getProductSalePrice())
