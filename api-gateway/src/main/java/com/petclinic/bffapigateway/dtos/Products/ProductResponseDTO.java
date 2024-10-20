@@ -21,6 +21,7 @@ public class ProductResponseDTO {
     private Double averageRating;
     private Integer requestCount;
     private Integer productQuantity;
+    private Boolean isUnlisted;
     private ProductType productType;
     private ProductStatus productStatus;
 

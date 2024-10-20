@@ -311,6 +311,39 @@ class BillControllerUnitTest {
     }
 
 
+    @Test
+    void whenGetBillsByMonthCalled_thenShouldCallServiceWithCorrectParams() {
+        // Mocking the service layer response
+        when(billService.getBillsByMonth(anyInt(), anyInt()))
+                .thenReturn(Flux.just(responseDTO));
+
+        // Triggering the controller endpoint
+        client.get()
+                .uri(uriBuilder -> uriBuilder.path("/bills/month")
+                        .queryParam("month", 1)
+                        .queryParam("year", 2022)
+                        .build())
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(BillResponseDTO.class)
+                .hasSize(1);  // Checking that the response body has exactly 1 element
+
+        // Verifying the correct method calls with correct argument order
+        Mockito.verify(billService, times(1))
+                .getBillsByMonth(2022, 1);  // year first, then month
+    }
+
+    @Test
+    void whenGetBillsByMonthCalledWithInvalidParams_thenShouldBadRequest() {
+        // Triggering the controller endpoint with invalid parameters
+        client.get()
+                .uri(uriBuilder -> uriBuilder.path("/bills/month")
+                        .queryParam("month", 13)
+                        .queryParam("year", -1)
+                        .build())
+                .exchange()
+                .expectStatus().isBadRequest();
+    }
 
 
 }

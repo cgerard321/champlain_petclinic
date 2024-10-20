@@ -49,6 +49,7 @@ export default function ProductList(): JSX.Element {
   };
 
   function FilterByPriceErrorHandling(): void {
+    // Validate inputs for filter by price
     if (
       minPrice !== undefined &&
       maxPrice !== undefined &&
@@ -70,7 +71,8 @@ export default function ProductList(): JSX.Element {
           maxStars,
           ratingSort
         );
-        setProductList(list);
+        const filteredList = list.filter(product => !product.isUnlisted);
+        setProductList(filteredList);
       } else {
         const filteredList = await getProductsByType(filterType);
         setProductList(filteredList);
@@ -169,6 +171,22 @@ export default function ProductList(): JSX.Element {
       return updatedProducts;
     });
   };
+  const RecentlyViewedProducts = (): JSX.Element => (
+    <div className="recently-viewed-container">
+      <h2>Recently Seen Products</h2>
+      <div className="grid">
+        {recentlyClickedProducts.length > 0 ? (
+          recentlyClickedProducts
+            .filter(product => !product.isUnlisted)
+            .map(product => (
+              <Product key={product.productId} product={product} />
+            ))
+        ) : (
+          <p>No recently clicked products.</p>
+        )}
+      </div>
+    </div>
+  );
 
   return (
     <div className="product-list-container">
@@ -283,58 +301,58 @@ export default function ProductList(): JSX.Element {
         </div>
       </div>
 
-      {!isSidebarOpen && (
-        <button
-          className="toggle-sidebar-button"
-          onClick={toggleSidebar}
-          aria-expanded={isSidebarOpen}
-          aria-controls="sidebar"
-        >
-          &#9776; Filters
-        </button>
-      )}
-
       {isRightRole && (
         <AddProduct addProduct={handleAddProduct} addImage={handleAddImage} />
       )}
-
       <div className="main-content">
-        <h2>Product Bundles</h2>
-        <div className="grid product-bundles-grid">
-          {bundleList.length > 0 ? (
-            bundleList.map((bundle: ProductBundleModel) => (
-              <ProductBundle key={bundle.bundleId} bundle={bundle} />
-            ))
-          ) : (
-            <p>No product bundles available.</p>
+        <div className="product-bundle-container">
+          <h2>Product Bundles</h2>
+          <div className="grid product-bundles-grid">
+            {bundleList.length > 0 ? (
+              bundleList.map((bundle: ProductBundleModel) => (
+                <ProductBundle key={bundle.bundleId} bundle={bundle} />
+              ))
+            ) : (
+              <p>No product bundles available.</p>
+            )}
+          </div>
+        </div>
+        <div>
+          <hr />
+        </div>
+        <div className="list-container">
+          <h2>List Products</h2>
+          {!isSidebarOpen && (
+            <button
+              className="toggle-sidebar-button"
+              onClick={toggleSidebar}
+              aria-expanded={isSidebarOpen}
+              aria-controls="sidebar"
+            >
+              &#9776; Filters
+            </button>
           )}
+          <div className="grid">
+            {isLoading ? (
+              <p>Loading products...</p>
+            ) : productList.length > 0 ? (
+              productList.map((product: ProductModel) => (
+                <div
+                  key={product.productId}
+                  onClick={() => handleProductClick(product)}
+                >
+                  <Product key={product.productId} product={product} />
+                </div>
+              ))
+            ) : (
+              <p>No products found.</p>
+            )}
+          </div>
         </div>
-        <h2>Products</h2>
-        <div className="grid">
-          {isLoading ? (
-            <p>Loading products...</p>
-          ) : productList.length > 0 ? (
-            productList.map((product: ProductModel) => (
-              <div
-                key={product.productId}
-                onClick={() => handleProductClick(product)}
-              >
-                <Product key={product.productId} product={product} />
-              </div>
-            ))
-          ) : (
-            <p>No products found.</p>
-          )}
+        <div>
+          <hr />
         </div>
-        <hr />
-      </div>
-      <div>
-        <h2>Recently Clicked Products</h2>
-        <div className="grid">
-          {recentlyClickedProducts.map(product => (
-            <Product key={product.productId} product={product} />
-          ))}
-        </div>
+        <RecentlyViewedProducts />
       </div>
     </div>
   );

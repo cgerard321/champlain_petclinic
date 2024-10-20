@@ -96,6 +96,7 @@ export default function AddProduct({
     const requestCount = 0;
     const averageRating = 0;
     const productId = '';
+    const isUnlisted = false;
 
     const dateAddedObj = new Date(dateAdded);
     const releaseDateObj = releaseDate ? new Date(releaseDate) : undefined;
@@ -121,6 +122,7 @@ export default function AddProduct({
       productStatus,
       requestCount,
       productType,
+      isUnlisted,
       dateAdded: dateAddedObj,
       releaseDate: releaseDateObj,
     };

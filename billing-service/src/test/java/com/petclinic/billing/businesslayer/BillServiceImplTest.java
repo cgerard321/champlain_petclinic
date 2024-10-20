@@ -589,5 +589,26 @@ public class BillServiceImplTest {
                 .verifyComplete();
     }
 
+    @Test
+    void getBillsByMonth_ShouldReturnBillsForGivenMonth() {
+        // Arrange
+        Bill bill1 = buildBill();
+        Bill bill2 = buildBill();
+        bill2.setBillId("BillUUID2"); // Different ID for distinct objects
+        int year = 2022;
+        int month = 9;
+
+        when(repo.findByDateBetween(any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(Flux.just(bill1, bill2));
+
+        // Act
+        Flux<BillResponseDTO> result = billService.getBillsByMonth(year, month);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNextCount(2) // Expect both bills
+                .verifyComplete();
+    }
+
 
 }

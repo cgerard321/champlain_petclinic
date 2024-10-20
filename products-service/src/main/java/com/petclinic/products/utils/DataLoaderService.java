@@ -51,6 +51,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .requestCount(0)
                 .productType(ProductType.FOOD)
                 .productQuantity(44)
+                .isUnlisted(false)
                 .releaseDate(LocalDate.parse("2002-09-26"))
                 .build();
 
@@ -63,6 +64,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .requestCount(0)
                 .productType(ProductType.ACCESSORY)
                 .productQuantity(3)
+                .isUnlisted(false)
                 .releaseDate(LocalDate.parse("2020-06-30"))
                 .build();
 
@@ -75,6 +77,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .requestCount(0)
                 .productType(ProductType.MEDICATION)
                 .productQuantity(53)
+                .isUnlisted(false)
                 .releaseDate(LocalDate.parse("2019-09-29"))
                 .build();
 
@@ -87,6 +90,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .requestCount(0)
                 .productType(ProductType.ACCESSORY)
                 .productQuantity(8)
+                .isUnlisted(false)
                 .releaseDate(LocalDate.parse("2023-05-06"))
                 .build();
 
@@ -99,6 +103,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .requestCount(0)
                 .productType(ProductType.ACCESSORY)
                 .productQuantity(14)
+                .isUnlisted(false)
                 .releaseDate(LocalDate.parse("2025-09-29"))
                 .build();
 
@@ -111,6 +116,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .requestCount(0)
                 .productType(ProductType.EQUIPMENT)
                 .productQuantity(58)
+                .isUnlisted(false)
                 .releaseDate(LocalDate.parse("1988-09-29"))
                 .build();
 
@@ -123,6 +129,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .requestCount(0)
                 .productType(ProductType.ACCESSORY)
                 .productQuantity(66)
+                .isUnlisted(false)
                 .releaseDate(LocalDate.parse("2024-02-22"))
                 .build();
 
@@ -135,6 +142,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .requestCount(0)
                 .productType(ProductType.ACCESSORY)
                 .productQuantity(0)
+                .isUnlisted(false)
                 .releaseDate(LocalDate.parse("2022-09-19"))
                 .build();
 
