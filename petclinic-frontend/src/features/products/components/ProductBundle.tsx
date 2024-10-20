@@ -12,6 +12,7 @@ interface ProductBundleProps {
 
 const ProductBundle: React.FC<ProductBundleProps> = ({ bundle }) => {
   const [products, setProducts] = useState<ProductModel[]>([]);
+  const [shouldRender, setShouldRender] = useState<boolean>(true);
   useEffect(() => {
     const fetchProducts = async (): Promise<void> => {
       const productPromises = bundle.productIds.map(id =>
@@ -19,9 +20,21 @@ const ProductBundle: React.FC<ProductBundleProps> = ({ bundle }) => {
       );
       const productList = await Promise.all(productPromises);
       setProducts(productList);
+
+      const hasUnlistedProduct = productList.some(
+        product => product.isUnlisted
+      );
+      if (hasUnlistedProduct) {
+        setShouldRender(false);
+      }
     };
     fetchProducts();
   }, [bundle.productIds]);
+
+  if (!shouldRender) {
+    return null;
+  }
+
   return (
     <div className="product-bundle-card">
       <div className="deal-stamp">DEAL</div>

@@ -8,7 +8,6 @@ import { addProduct } from '@/features/products/api/addProduct';
 import { useUser } from '@/context/UserContext';
 import './components/Sidebar.css';
 import { getProductsByType } from '@/features/products/api/getProductsByType.ts';
-// import AddImage from './components/AddImage';
 import { addImage } from './api/addImage';
 import { ImageModel } from './models/ProductModels/ImageModel';
 import StarRating from '@/features/products/components/StarRating.tsx';
@@ -72,7 +71,8 @@ export default function ProductList(): JSX.Element {
           maxStars,
           ratingSort
         );
-        setProductList(list);
+        const filteredList = list.filter(product => !product.isUnlisted);
+        setProductList(filteredList);
       } else {
         const filteredList = await getProductsByType(filterType);
         setProductList(filteredList);
@@ -336,9 +336,11 @@ export default function ProductList(): JSX.Element {
         <div>
           <h2>Recently Clicked Products</h2>
           <div className="grid">
-            {recentlyClickedProducts.map(product => (
-              <Product key={product.productId} product={product} />
-            ))}
+            {recentlyClickedProducts
+              .filter(product => !product.isUnlisted)
+              .map(product => (
+                <Product key={product.productId} product={product} />
+              ))}
           </div>
         </div>
       </div>
