@@ -14,5 +14,6 @@ import java.util.Set;
 public class NotificationResponseModel {
     String productId;
     String productName;
+    String email;
     Set<String> notificationType;
 }
