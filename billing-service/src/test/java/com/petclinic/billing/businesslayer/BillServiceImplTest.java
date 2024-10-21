@@ -610,5 +610,40 @@ public class BillServiceImplTest {
                 .verifyComplete();
     }
 
+    @Test
+    void calculateCurrentBalance_ShouldReturnCorrectBalance() {
+
+        String customerId = "valid-customer-id";
+        Bill unpaidBill = Bill.builder().amount(100.0).billStatus(BillStatus.UNPAID).customerId(customerId).build();
+        Bill overdueBill = Bill.builder().amount(50.0).billStatus(BillStatus.OVERDUE).customerId(customerId).build();
+
+        when(repo.findByCustomerIdAndBillStatus(customerId, BillStatus.UNPAID))
+                .thenReturn(Flux.just(unpaidBill));
+        when(repo.findByCustomerIdAndBillStatus(customerId, BillStatus.OVERDUE))
+                .thenReturn(Flux.just(overdueBill));
+
+        Mono<Double> result = billService.calculateCurrentBalance(customerId);
+
+        StepVerifier.create(result)
+                .expectNext(150.0) 
+                .verifyComplete();
+    }
+
+    @Test
+    void calculateCurrentBalance_InvalidCustomer_ShouldReturnNotFound() {
+
+        String invalidCustomerId = "non-existent-id";
+        when(repo.findByCustomerIdAndBillStatus(invalidCustomerId, BillStatus.UNPAID))
+                .thenReturn(Flux.empty());
+        when(repo.findByCustomerIdAndBillStatus(invalidCustomerId, BillStatus.OVERDUE))
+                .thenReturn(Flux.empty());
+
+        Mono<Double> result = billService.calculateCurrentBalance(invalidCustomerId);
+
+        StepVerifier.create(result)
+                .expectNext(0.0) 
+                .verifyComplete();
+    }
+
 
 }

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useUser } from '@/context/UserContext';
+import CountUp from 'react-countup';
 
 export default function CurrentBalance(): JSX.Element {
   const { user } = useUser();
@@ -12,7 +13,6 @@ export default function CurrentBalance(): JSX.Element {
     const fetchCurrentBalance = async (): Promise<void> => {
       try {
         const response = await fetch(
-          // `http://localhost:8080/api/v2/gateway/customers/${user.userId}/current-balance`,
           `http://localhost:8080/api/v2/gateway/customers/${user.userId}/bills/current-balance`,
           {
             headers: {
@@ -38,9 +38,35 @@ export default function CurrentBalance(): JSX.Element {
   }, [user.userId]);
 
   return (
-    <div className="balance-container">
+    <div
+      style={{
+        padding: '20px',
+        borderRadius: '8px',
+        boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+        maxWidth: '300px',
+        margin: 'auto',
+        textAlign: 'center',
+        backgroundColor: '#f7f7f7',
+      }}
+    >
       <h3>Current Balance</h3>
-      {error ? <p>{error}</p> : <p>${currentBalance?.toFixed(2) || '0.00'}</p>}
+      {error ? (
+        <p>{error}</p>
+      ) : (
+        <h1 style={{ fontSize: '2rem', color: '#4caf50' }}>
+          {currentBalance !== null ? (
+            <CountUp
+              start={0}
+              end={currentBalance}
+              duration={2}
+              prefix="$"
+              decimals={2}
+            />
+          ) : (
+            '$0.00'
+          )}
+        </h1>
+      )}
     </div>
   );
 }

@@ -68,6 +68,6 @@ public interface BillService {
     // Method to fetch bills by month
     Flux<BillResponseDTO> getBillsByMonth(int year, int month);
 
-
+    Mono<Double> calculateCurrentBalance(String customerId);
 
 }

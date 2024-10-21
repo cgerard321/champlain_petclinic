@@ -50,4 +50,10 @@ public class CustomerBillController {
                     return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
                 });
     }
+
+    @IsUserSpecific(idToMatch = { "customerId" })
+    @GetMapping(value = "/current-balance", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<Double> getCurrentBalance(@PathVariable String customerId) {
+        return billService.getCurrentBalance(customerId);
+    }
 }
