@@ -54,6 +54,10 @@ jacocoTestReport {
 			fileTree(dir: it)
 		}))
 	}
+
+	reports {
+		xml.required = true
+	}
 }
 
 jacocoTestCoverageVerification {
