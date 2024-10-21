@@ -23,6 +23,7 @@ export default function VisitListTable(): JSX.Element {
   const [completedCollapsed, setCompletedCollapsed] = useState(false);
   const [cancelledCollapsed, setCancelledCollapsed] = useState(false);
   const [archivedCollapsed, setArchivedCollapsed] = useState(false);
+  const [waitingCollapsed, setWaitingCollapsed] = useState(false);
 
   const navigate = useNavigate();
 
@@ -198,6 +199,9 @@ export default function VisitListTable(): JSX.Element {
   );
   const cancelledVisits = visitsList.filter(
     visit => visit.status === 'CANCELLED'
+  );
+  const waitingVisits = visitsList.filter(
+    visit => visit.status === 'WAITING_FOR_CONFIRMATION'
   );
 
   const handleArchive = async (visitId: string): Promise<void> => {
@@ -420,7 +424,9 @@ export default function VisitListTable(): JSX.Element {
                               ? 'blue'
                               : visit.status === 'ARCHIVED'
                                 ? 'gray'
-                                : 'inherit',
+                                : visit.status === 'WAITING_FOR_CONFIRMATION'
+                                  ? 'black'
+                                  : 'inherit',
                     fontWeight: 'bold',
                   }}
                 >
@@ -545,6 +551,12 @@ export default function VisitListTable(): JSX.Element {
         archivedVisits,
         archivedCollapsed,
         setArchivedCollapsed
+      )}
+      {renderTable(
+        'Visits Waiting for Confirmation',
+        waitingVisits,
+        waitingCollapsed,
+        setWaitingCollapsed
       )}
     </div>
   );
