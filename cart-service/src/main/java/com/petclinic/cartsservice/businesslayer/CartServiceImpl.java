@@ -388,6 +388,8 @@ public class CartServiceImpl implements CartService {
                 });
     }
 
+
+
     @Override
     public Mono<CartResponseModel> addProductToCartFromProducts(String cartId, String productId) {
         //fetch the latest cart and product information
@@ -470,6 +472,55 @@ public class CartServiceImpl implements CartService {
                 );
     }
 
+    @Override
+    public Mono<CartResponseModel> addProductToWishList(String cartId, String productId, int quantity) {
+        return cartRepository.findCartByCartId(cartId)
+                .switchIfEmpty(Mono.error(new NotFoundException("Cart not found: " + cartId)))
+                .flatMap(cart -> productClient.getProductByProductId(productId)
+                        .switchIfEmpty(Mono.error(new NotFoundException("Product not found: " + productId)))
+                        .flatMap(product -> {
+                            if (quantity <= 0) {
+                                return Mono.error(new InvalidInputException("Quantity must be greater than zero"));
+                            }
+                            if (product.getProductQuantity() < quantity) {
+                                return Mono.error(new OutOfStockException("Only "  + product.getProductQuantity() + " items left in stock. You added: " + quantity));
+                            }
+
+                            // Create a mutable copy of the wishlist
+                            List<CartProduct> wishListProducts = cart.getWishListProducts() != null
+                                    ? new ArrayList<>(cart.getWishListProducts())
+                                    : new ArrayList<>();
+
+                            Optional<CartProduct> existingProductOpt = wishListProducts.stream()
+                                    .filter(p -> p.getProductId().equals(productId))
+                                    .findFirst();
+
+                            if (existingProductOpt.isPresent()) {
+                                CartProduct existingProduct = existingProductOpt.get();
+                                existingProduct.setQuantityInCart(existingProduct.getQuantityInCart() + quantity);
+                                existingProduct.setProductQuantity(product.getProductQuantity());
+                            } else {
+                                CartProduct cartProduct = CartProduct.builder()
+                                        .productId(product.getProductId())
+                                        .productName(product.getProductName())
+                                        .imageId(product.getImageId())
+                                        .productDescription(product.getProductDescription())
+                                        .productSalePrice(product.getProductSalePrice())
+                                        .averageRating(product.getAverageRating())
+                                        .quantityInCart(quantity)
+                                        .productQuantity(product.getProductQuantity())
+                                        .build();
+                                wishListProducts.add(cartProduct);
+                            }
+
+                            // Update the cart with the modified wishlist
+                            cart.setWishListProducts(wishListProducts);
+
+                            return cartRepository.save(cart)
+                                    .map(savedCart -> EntityModelUtil.toCartResponseModel(savedCart, savedCart.getWishListProducts()));
+                        })
+                );
+    }
 
 
 }

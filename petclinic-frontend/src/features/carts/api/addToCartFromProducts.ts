@@ -3,7 +3,7 @@ import { fetchCartIdByCustomerId } from './getCart';
 import { useUser } from '@/context/UserContext';
 
 type UseAddToCartReturnType = {
-  addToCart: (productId: string) => Promise<void>;
+  addToCart: (productId: string) => Promise<boolean>;
 };
 
 export function useAddToCart(): UseAddToCartReturnType {
@@ -18,9 +18,10 @@ export function useAddToCart(): UseAddToCartReturnType {
     }
   };
 
-  const addToCart = async (productId: string): Promise<void> => {
+  const addToCart = async (productId: string): Promise<boolean> => {
     if (!user?.userId) {
-      throw new Error('User is not authenticated');
+      console.error('User is not authenticated');
+      return false;
     }
 
     try {
@@ -31,8 +32,10 @@ export function useAddToCart(): UseAddToCartReturnType {
 
       const endpoint = `http://localhost:8080/api/v2/gateway/carts/${cartId}/${productId}`;
       await axiosInstance.post(endpoint);
+      return true; // Return true if successful
     } catch (error) {
       console.error('Error adding product to cart:', error);
+      return false; // Return false if an error occurs
     }
   };
 
