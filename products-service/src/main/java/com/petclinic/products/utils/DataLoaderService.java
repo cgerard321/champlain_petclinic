@@ -2,6 +2,7 @@ package com.petclinic.products.utils;
 
 import com.petclinic.products.datalayer.images.Image;
 import com.petclinic.products.datalayer.images.ImageRepository;
+import com.petclinic.products.datalayer.products.DeliveryType;
 import com.petclinic.products.datalayer.products.Product;
 import com.petclinic.products.datalayer.products.ProductBundle;
 import com.petclinic.products.datalayer.products.ProductBundleRepository;
@@ -53,6 +54,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productQuantity(44)
                 .isUnlisted(false)
                 .releaseDate(LocalDate.parse("2002-09-26"))
+                .deliveryType(DeliveryType.DELIVERY)
                 .build();
 
         Product product2 = Product.builder()
@@ -66,6 +68,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productQuantity(3)
                 .isUnlisted(false)
                 .releaseDate(LocalDate.parse("2020-06-30"))
+                .deliveryType(DeliveryType.PICKUP)
                 .build();
 
         Product product3 = Product.builder()
@@ -79,6 +82,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productQuantity(53)
                 .isUnlisted(false)
                 .releaseDate(LocalDate.parse("2019-09-29"))
+                .deliveryType(DeliveryType.DELIVERY)
                 .build();
 
         Product product4 = Product.builder()
@@ -92,6 +96,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productQuantity(8)
                 .isUnlisted(false)
                 .releaseDate(LocalDate.parse("2023-05-06"))
+                .deliveryType(DeliveryType.PICKUP)
                 .build();
 
         Product product5 = Product.builder()
@@ -105,6 +110,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productQuantity(14)
                 .isUnlisted(false)
                 .releaseDate(LocalDate.parse("2025-09-29"))
+                .deliveryType(DeliveryType.DELIVERY_AND_PICKUP)
                 .build();
 
         Product product6 = Product.builder()
@@ -118,6 +124,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productQuantity(58)
                 .isUnlisted(false)
                 .releaseDate(LocalDate.parse("1988-09-29"))
+                .deliveryType(DeliveryType.DELIVERY)
                 .build();
 
         Product product7 = Product.builder()
@@ -131,6 +138,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productQuantity(66)
                 .isUnlisted(false)
                 .releaseDate(LocalDate.parse("2024-02-22"))
+                .deliveryType(DeliveryType.DELIVERY_AND_PICKUP)
                 .build();
 
         Product product8 = Product.builder()
@@ -144,6 +152,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productQuantity(0)
                 .isUnlisted(false)
                 .releaseDate(LocalDate.parse("2022-09-19"))
+                .deliveryType(DeliveryType.PICKUP)
                 .build();
 
         ProductBundle bundle1 = ProductBundle.builder()
