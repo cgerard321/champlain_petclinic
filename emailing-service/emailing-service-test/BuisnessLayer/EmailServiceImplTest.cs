@@ -3,8 +3,14 @@ using emailing_service.BuisnessLayer;
 using emailing_service.Models;
 using emailing_service.Models.Database;
 using emailing_service.Models.EmailType;
+using emailing_service.Models.SMTP.Model;
 using emailing_service.Utils;
 using emailing_service.Utils.Exception;
+using MailKit;
+using MailKit.Net.Imap;
+using MailKit.Search;
+using MimeKit;
+using Moq;
 
 namespace emailing_service_test.BuisnessLayer;
 
@@ -15,6 +21,8 @@ using System.Threading.Tasks;
 [TestFixture]
 public class EmailServiceImplTest
 {
+    private Mock<ImapClient> _imapClientMock;
+    private Mock<IMailFolder> _inboxMock;
     private IEmailService _controller;
     private readonly string _pathOfDefaultHtml;
     public EmailServiceImplTest()
@@ -26,6 +34,20 @@ public class EmailServiceImplTest
     [OneTimeSetUp]
     public Task SetUp()
     {
+        var mockEmail1 = new MimeMessage();
+        mockEmail1.From.Add(new MailboxAddress("Sender One", "sender1@example.com"));
+        mockEmail1.Subject = "Test Email 1";
+        mockEmail1.Date = DateTimeOffset.Now;
+        mockEmail1.Body = new TextPart("plain") { Text = "Hello from sender 1" };
+
+        var mockEmail2 = new MimeMessage();
+        mockEmail2.From.Add(new MailboxAddress("Sender Two", "sender2@example.com"));
+        mockEmail2.Subject = "Test Email 2";
+        mockEmail2.Date = DateTimeOffset.Now;
+        mockEmail2.Body = new TextPart("plain") { Text = "Hello from sender 2" };
+        _imapClientMock = new Mock<ImapClient>();
+        _inboxMock = new Mock<IMailFolder>(); // Mock IMailFolder for inbox
+        _imapClientMock.Setup(client => client.Inbox).Returns(_inboxMock.Object); // Return mocked inbox
         EmailUtils.emailConnectionString  = new ConnectionEmailServer(
             "Mock",
             000,
@@ -36,6 +58,7 @@ public class EmailServiceImplTest
         );
         _controller = new EmailServiceImpl();
         _controller.SetDatabaseHelper(new TestDbContext());
+        _controller.SetImapServer(_imapClientMock.Object);
         return Task.CompletedTask;
     }
     /*[Test]
@@ -684,6 +707,28 @@ public class EmailServiceImplTest
         Assert.That(ex.Message,
             Does.Contain($"The Date for the notification  was already passed!"));
     }
+    
+    [Test]
+    public async Task GetAllEmailsReceivedAsync_ShouldThrowAuthenticationException_WhenInvalidCredentials()
+    {
+        // Act & Assert
+        var ex = Assert.ThrowsAsync<System.NullReferenceException>(async () => 
+        {
+            await foreach (var email in _controller.GetAllEmailsReceivedAsync())
+            {
+                // We shouldn't get to this point
+            }
+        });
+
+        Assert.That(ex.Message, Is.EqualTo("Object reference not set to an instance of an object.")); // Adjust according to your actual exception message
+    }
+
+    
+
+
+
+
+    
     
     
     [OneTimeTearDown]

@@ -1,11 +1,8 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
 
-import com.petclinic.bffapigateway.dtos.Emailing.DirectEmailModelRequestDTO;
-import com.petclinic.bffapigateway.dtos.Emailing.EmailModelResponseDTO;
+import com.petclinic.bffapigateway.dtos.Emailing.*;
 
-import com.petclinic.bffapigateway.dtos.Emailing.NotificationEmailModelRequestDTO;
-import com.petclinic.bffapigateway.dtos.Emailing.RawEmailModelRequestDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -76,5 +73,13 @@ public class EmailingServiceClient {
                     // Return the status code directly
                     return Mono.just((HttpStatus) response.statusCode());
                 });
+    }
+    public Flux<ReceivedEmailResponseDTO> getAllReceivedEmails() {
+        return webClientBuilder.build()
+                .get()
+                .uri(emailingServiceUrl + "/received/all") // Adjust the URI to match your endpoint
+                .retrieve()
+                .bodyToFlux(ReceivedEmailResponseDTO.class)
+                .doOnError(error -> log.error("Error fetching emails: {}", error.getMessage()));
     }
 }

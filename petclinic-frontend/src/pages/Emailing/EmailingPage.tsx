@@ -2,6 +2,7 @@ import { NavBar } from '@/layouts/AppNavBar.tsx';
 import EmailingListTable from '@/features/Emailing/EmailSentViews/EmailingListTable.tsx';
 import EmailingOptions from '@/features/Emailing/SendRawEmail/RawEmailPopUp.tsx';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import ShowReceivedEmails from '@/features/Emailing/ShowReceivedEmail/ShowReceivedEmails.tsx';
 
 export default function EmailingPage(): JSX.Element {
   return (
@@ -15,7 +16,9 @@ export default function EmailingPage(): JSX.Element {
             <br />
             <EmailingListTable />
           </div>
-          <div className="col-sm-7"></div>
+          <div className="col-sm-7">
+            <ShowReceivedEmails />
+          </div>
         </div>
       </div>
     </div>
