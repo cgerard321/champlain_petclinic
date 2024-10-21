@@ -1389,4 +1389,69 @@ class VisitsServiceClientIntegrationTest {
     }
 
 
+    @Test
+    void addVisitByOwner_Valid() throws JsonProcessingException {
+        // Arrange
+        VisitRequestDTO visitRequestDTO = new VisitRequestDTO(
+                LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
+                "Routine Check-up",
+                "1", // Pet ID
+                "practitionerId", // Practitioner ID
+                "jwtToken", // JWT Token
+                "ownerId",
+                "73b5c112-5703-4fb7-b7bc-ac8186811ae1"
+        );
+
+        VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
+                .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
+                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .description("Routine Check-up")
+                .petId("1")
+                .practitionerId("practitionerId")
+                .vetFirstName("John")
+                .vetLastName("Doe")
+                .status(Status.UPCOMING)
+                .visitEndDate(LocalDateTime.parse("2024-11-25 14:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .build();
+
+        // Mock the server response
+        MockResponse mockResponse = new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(objectMapper.writeValueAsString(visitResponseDTO));
+
+        server.enqueue(mockResponse);  // Enqueue the mocked response to the server
+
+        // Act
+        Mono<VisitRequestDTO> requestMono = Mono.just(visitRequestDTO);
+        Mono<VisitResponseDTO> resultMono = visitsServiceClient.addVisitByOwner("ownerId", requestMono);
+
+        // Assert
+        StepVerifier.create(resultMono)
+                .expectNextMatches(visitResponse -> visitResponse.getVisitId().equals(visitResponseDTO.getVisitId())
+                        && visitResponse.getStatus() == Status.UPCOMING)
+                .verifyComplete();
+    }
+
+
+    @Test
+    void addVisitByOwner_Invalid_NoVisitDate() {
+        // Arrange
+        VisitRequestDTO invalidVisitRequest = new VisitRequestDTO(
+                null,  // Visit date is null (invalid)
+                "Routine Check-up",
+                "1", // Pet ID
+                "practitionerId", // Practitioner ID
+                "jwtToken", // JWT Token
+                "ownerId",
+                "73b5c112-5703-4fb7-b7bc-ac8186811ae1"
+        );
+
+        Mono<VisitRequestDTO> requestMono = Mono.just(invalidVisitRequest);
+
+        // Act & Assert - Expect BadRequestException
+        StepVerifier.create(visitsServiceClient.addVisitByOwner("ownerId", requestMono))
+                .expectError(BadRequestException.class)
+                .verify();
+    }
+
 }

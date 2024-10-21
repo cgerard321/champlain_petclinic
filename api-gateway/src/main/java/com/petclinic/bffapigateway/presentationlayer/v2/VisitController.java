@@ -267,6 +267,6 @@ public class VisitController {
             @RequestBody Mono<VisitRequestDTO> visitRequestDTO) {
         return visitsServiceClient.addVisitByOwner(ownerId, visitRequestDTO)
                 .map(visitResponseDTO -> ResponseEntity.status(HttpStatus.CREATED).body(visitResponseDTO))
-                .defaultIfEmpty(ResponseEntity.badRequest().build());
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 }
