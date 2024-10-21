@@ -1,5 +1,19 @@
 .card {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  padding-bottom: 90px;
+}
+
+.deliveryType-container {
+  display: flex;
+  justify-content: center;
+  background-color: #93d2fb;
+  border-radius: 5px;
+  color: #2375d9;
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  padding: 5px 10px;
 }

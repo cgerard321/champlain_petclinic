@@ -61,7 +61,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Flux<ProductResponseModel> getAllProducts(Double minPrice, Double maxPrice, Double minRating, Double maxRating, String sort) {
+    public Flux<ProductResponseModel> getAllProducts(Double minPrice, Double maxPrice, Double minRating, Double maxRating, String sort,String deliveryType) {
         if (sort != null && !Arrays.asList("asc", "desc", "default").contains(sort.toLowerCase())) {
             throw new InvalidInputException("Invalid sort parameter: " + sort);
         }
@@ -84,6 +84,13 @@ public class ProductServiceImpl implements ProductService {
                     boolean meetsMinRating = (minRating == null || avgRating >= minRating);
                     boolean meetsMaxRating = (maxRating == null || avgRating <= maxRating);
                     return meetsMinRating && meetsMaxRating;
+                })
+                .filter(product -> {
+                    if (deliveryType == null || deliveryType.trim().isEmpty()) {
+                        return true;
+                    } else {
+                        return product.getDeliveryType().toString().equalsIgnoreCase(deliveryType);
+                    }
                 })
                 .collectList()
                 .flatMapMany(productList -> {

@@ -9,9 +9,18 @@ export default function EditProduct(): JSX.Element {
   const location = useLocation();
   const { product } = location.state as { product: ProductModel };
 
+  const deliveryTypes = [
+    'DELIVERY',
+    'PICKUP',
+    'DELIVERY_AND_PICKUP',
+    'NO_DELIVERY_OPTION',
+  ];
+
   const [productData, setProductData] = useState<ProductModel>(product);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ): void => {
     setProductData({ ...productData, [e.target.name]: e.target.value });
   };
 
@@ -89,6 +98,25 @@ export default function EditProduct(): JSX.Element {
             onChange={handleInputChange}
             required
           />
+        </div>
+        <div className="form-group">
+          <label htmlFor="deliveryType" className="form-label">
+            Delivery Type:
+          </label>
+          <select
+            id="deliveryType"
+            name="deliveryType"
+            className="form-input"
+            value={productData.deliveryType}
+            onChange={handleInputChange}
+            required
+          >
+            {deliveryTypes.map(type => (
+              <option key={type} value={type}>
+                {type}
+              </option>
+            ))}
+          </select>
         </div>
 
         <button type="submit" className="submit-button">
