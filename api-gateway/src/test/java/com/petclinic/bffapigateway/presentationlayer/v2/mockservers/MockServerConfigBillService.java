@@ -97,6 +97,39 @@ public class MockServerConfigBillService {
                 );
     }
 
+    public void registerGetCurrentBalanceEndpoint() {
+        String response = "150.0"; 
+        
+        mockServerClient_BillService
+                .when(
+                        request()
+                                .withMethod("GET")
+                                .withPath("/api/v2/gateway/customers/{customerId}/bills/current-balance")
+                                .withPathParameter("customerId", "1") 
+                )
+                .respond(
+                        response()
+                                .withStatusCode(200) 
+                                .withBody(response)  
+                                .withHeader("Content-Type", "application/json")
+                );
+    }
+        
+    public void registerGetCurrentBalanceInvalidCustomerIdEndpoint() {
+        mockServerClient_BillService
+                .when(
+                        request()
+                                .withMethod("GET")
+                                .withPath("/api/v2/gateway/customers/{customerId}/bills/current-balance")
+                                .withPathParameter("customerId", "invalid-id") 
+                )
+                .respond(
+                        response()
+                                .withStatusCode(404) 
+                                .withHeader("Content-Type", "application/json")
+                );
+    }
+
     public void registerPayBillEndpoint() {
         mockServerClient_BillService
                 .when(

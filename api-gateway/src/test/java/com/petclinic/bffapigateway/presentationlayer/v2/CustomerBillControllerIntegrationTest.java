@@ -32,10 +32,13 @@ public class CustomerBillControllerIntegrationTest {
         // Start the mock servers for bills and authentication services
         mockServerConfigBillService = new MockServerConfigBillService();
         mockServerConfigBillService.registerDownloadBillPdfEndpoint();
-        mockServerConfigBillService.registerPayBillEndpoint();;
+
+        mockServerConfigBillService.registerGetCurrentBalanceEndpoint(); 
+        mockServerConfigBillService.registerGetCurrentBalanceInvalidCustomerIdEndpoint(); 
+        mockServerConfigBillService.registerPayBillEndpoint();
 
         mockServerConfigAuthService = new MockServerConfigAuthService();
-        mockServerConfigAuthService.registerValidateTokenForOwnerEndpoint(); 
+        mockServerConfigAuthService.registerValidateTokenForOwnerEndpoint();
     }
 
     @AfterAll
@@ -70,11 +73,50 @@ public class CustomerBillControllerIntegrationTest {
     public void testDownloadBillPdf_InvalidToken_ShouldReturnUnauthorized() {
         // Act & Assert: Mocking a request with an invalid token
         webTestClient.get()
-            .uri("/api/v2/gateway/customers/1/bills/1234/pdf")
-            .cookie("Bearer", "invalid-token")  // Using an invalid JWT token
-            .accept(MediaType.APPLICATION_PDF)
-            .exchange()
-            .expectStatus().isUnauthorized();  // Expect Unauthorized status
+                .uri("/api/v2/gateway/customers/1/bills/1234/pdf")
+                .cookie("Bearer", "invalid-token") // Using an invalid JWT token
+                .accept(MediaType.APPLICATION_PDF)
+                .exchange()
+                .expectStatus().isUnauthorized(); // Expect Unauthorized status
     }
 
+    @Test
+    public void testGetCurrentBalance_InvalidToken_ShouldReturnUnauthorized() {
+
+        webTestClient.get()
+                .uri("/api/v2/gateway/customers/1/bills/current-balance")
+                .cookie("Bearer", "invalid-token")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isUnauthorized();
+    }
+
+    // @Test
+    // public void testGetCurrentBalance_ValidCustomerId_AsOwner_ReturnsBalance() {
+    // String validCustomerId = "1";
+
+    // webTestClient.get()
+    // .uri("/api/v2/gateway/customers/{customerId}/bills/current-balance",
+    // validCustomerId)
+    // .cookie("Bearer", MockServerConfigAuthService.jwtTokenForValidOwnerId)
+    // .accept(MediaType.APPLICATION_JSON)
+    // .exchange()
+    // .expectStatus().isOk()
+    // .expectHeader().contentType(MediaType.APPLICATION_JSON_VALUE)
+    // .expectBody(Double.class)
+    // .value(balance -> assertEquals(150.0, balance));
+    // }
+
+    // @Test
+    // public void testGetCurrentBalance_InvalidCustomerId_Returns404() {
+    // String invalidCustomerId = "invalid-id";
+
+    // webTestClient.get()
+    // .uri("/api/v2/gateway/customers/{customerId}/bills/current-balance",
+    // invalidCustomerId)
+    // .cookie("Bearer", MockServerConfigAuthService.jwtTokenForValidOwnerId)
+    // .accept(MediaType.APPLICATION_JSON)
+    // .exchange()
+    // .expectStatus().isNotFound();
+    // }
 }

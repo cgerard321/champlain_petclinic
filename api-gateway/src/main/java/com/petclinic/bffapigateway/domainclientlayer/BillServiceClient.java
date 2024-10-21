@@ -326,6 +326,14 @@ public class BillServiceClient {
                 .bodyToFlux(BillResponseDTO.class);
     }
 
+    public Mono<Double> getCurrentBalance(String customerId) {
+        return webClientBuilder.build()
+                .get()
+                .uri(billServiceUrl + "/customer/{customerId}/bills/current-balance", customerId)
+                .retrieve()
+                .bodyToMono(Double.class);
+    }
+  
     public Mono<String> payBill(String customerId, String billId, PaymentRequestDTO paymentRequestDTO) {
         return webClientBuilder.build()
                 .post()
