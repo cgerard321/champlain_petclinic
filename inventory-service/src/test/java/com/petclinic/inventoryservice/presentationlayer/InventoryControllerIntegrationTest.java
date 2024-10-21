@@ -1326,6 +1326,59 @@ class InventoryControllerIntegrationTest {
                 .expectStatus().isBadRequest();
     }
 
+    @Test
+    void consumeProduct_WithValidInputs_ShouldSucceed() {
+        // Arrange
+        String inventoryId = "1";
+        String productId = "123F567C9";
+        webTestClient.patch()
+                .uri("/inventory/{inventoryId}/products/{productId}/consume", inventoryId, productId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(ProductResponseDTO.class)
+                .value(productResponseDTO -> {
+                    assertNotNull(productResponseDTO);
+                    assertEquals(productId, productResponseDTO.getProductId());
+                    assertEquals(inventoryId, productResponseDTO.getInventoryId());
+                    assertEquals(9, productResponseDTO.getProductQuantity());
+                });
+    }
 
+    @Test
+    void consumeProduct_WithInvalidProductId_ShouldReturnNotFound() {
+        // Arrange
+        String inventoryId = "1";
+        String invalidProductId = "invalidProductId";
+        webTestClient.patch()
+                .uri("/inventory/{inventoryId}/products/{productId}/consume", inventoryId, invalidProductId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    void consumeProduct_WithInvalidInventoryId_ShouldReturnNotFound() {
+        // Arrange
+        String invalidInventoryId = "invalidInventoryId";
+        String productId = "123F567C9";
+        webTestClient.patch()
+                .uri("/inventory/{inventoryId}/products/{productId}/consume", invalidInventoryId, productId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    void consumeProduct_WithInvalidInventoryIdAndInvalidProductId_ShouldReturnNotFound() {
+        // Arrange
+        String invalidInventoryId = "invalidInventoryId";
+        String invalidProductId = "invalidProductId";
+        webTestClient.patch()
+                .uri("/inventory/{inventoryId}/products/{productId}/consume", invalidInventoryId, invalidProductId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
 
 }
