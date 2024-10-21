@@ -176,7 +176,7 @@ export default function ProductList(): JSX.Element {
   };
   const RecentlyViewedProducts = (): JSX.Element => (
     <div className="recently-viewed-container">
-      <h2>Recently Seen Products</h2>
+      <h2>Recently Seen</h2>
       <div className="grid">
         {recentlyClickedProducts.length > 0 ? (
           recentlyClickedProducts
@@ -185,7 +185,7 @@ export default function ProductList(): JSX.Element {
               <Product key={product.productId} product={product} />
             ))
         ) : (
-          <p>No recently clicked products.</p>
+          <p>No Recently Seen Items.</p>
         )}
       </div>
     </div>
@@ -240,12 +240,12 @@ export default function ProductList(): JSX.Element {
             />
           </label>
           <label>
-            Product Type:
+            Item Type:
             <select
               value={filterType}
               onChange={e => setFilterType(e.target.value)}
             >
-              <option value="">Select Product Type</option>
+              <option value="">Select Item Type</option>
               {Object.values(ProductType).map(type => (
                 <option key={type} value={type}>
                   {type.charAt(0).toUpperCase() + type.slice(1).toLowerCase()}
@@ -321,14 +321,14 @@ export default function ProductList(): JSX.Element {
       )}
       <div className="main-content">
         <div className="product-bundle-container">
-          <h2>Product Bundles</h2>
+          <h2>Bundles</h2>
           <div className="grid product-bundles-grid">
             {bundleList.length > 0 ? (
               bundleList.map((bundle: ProductBundleModel) => (
                 <ProductBundle key={bundle.bundleId} bundle={bundle} />
               ))
             ) : (
-              <p>No product bundles available.</p>
+              <p>No Bundles Available.</p>
             )}
           </div>
         </div>
@@ -336,7 +336,7 @@ export default function ProductList(): JSX.Element {
           <hr />
         </div>
         <div className="list-container">
-          <h2>List Products</h2>
+          <h2>Catalog</h2>
           {!isSidebarOpen && (
             <button
               className="toggle-sidebar-button"
@@ -349,7 +349,7 @@ export default function ProductList(): JSX.Element {
           )}
           <div className="grid">
             {isLoading ? (
-              <p>Loading products...</p>
+              <p>Loading items...</p>
             ) : productList.length > 0 ? (
               productList.map((product: ProductModel) => (
                 <div
@@ -360,7 +360,7 @@ export default function ProductList(): JSX.Element {
                 </div>
               ))
             ) : (
-              <p>No products found.</p>
+              <p>No items found.</p>
             )}
           </div>
         </div>

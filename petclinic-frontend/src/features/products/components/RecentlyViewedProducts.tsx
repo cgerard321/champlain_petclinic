@@ -22,7 +22,7 @@ export default function RecentlyViewedProducts(): JSX.Element {
 
   return (
     <div className="recently-viewed-container">
-      <h2>Recently Seen Products</h2>
+      <h2>Recently Seen</h2>
       <div className="grid">
         {recentlyClickedProducts.length > 0 ? (
           recentlyClickedProducts
@@ -37,7 +37,7 @@ export default function RecentlyViewedProducts(): JSX.Element {
               </div>
             ))
         ) : (
-          <p>No recently clicked products.</p>
+          <p>No Recently Seen Items.</p>
         )}
       </div>
     </div>
