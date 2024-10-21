@@ -33,7 +33,8 @@ public class ProductController {
             @RequestParam(required = false) Double maxPrice,
             @RequestParam(required = false) Double minRating,
             @RequestParam(required = false) Double maxRating,
-            @RequestParam(required = false) String sort) {
+            @RequestParam(required = false) String sort,
+            @RequestParam(required = false) String productTypeId) {
         // Validate negative prices
         if ((minPrice != null && minPrice < 0) || (maxPrice != null && maxPrice < 0) ||
                 (minRating != null && minRating < 0) || (maxRating != null && maxRating < 0)) {
@@ -48,7 +49,7 @@ public class ProductController {
             return Flux.error(new IllegalArgumentException("minRating cannot be greater than maxRating"));
         }
 
-        return productsServiceClient.getAllProducts(minPrice, maxPrice, minRating, maxRating, sort);
+        return productsServiceClient.getAllProducts(minPrice, maxPrice, minRating, maxRating, sort, productTypeId);
     }
 
 
@@ -178,5 +179,17 @@ public class ProductController {
                 .then(Mono.just(ResponseEntity.noContent().build()));
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
+    @GetMapping(value = "/types", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Flux<ProductTypeResponseDTO> getAllProductTypes() {
+        return productsServiceClient.getAllProductTypes();
+    }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
+    @PostMapping(value = "/types", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<ProductTypeResponseDTO>> addProductType(@RequestBody ProductTypeRequestDTO productTypeRequestDTO) {
+        return productsServiceClient.createProductType(productTypeRequestDTO)
+                .map(productType -> ResponseEntity.status(HttpStatus.CREATED).body(productType))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
 }

@@ -2,10 +2,9 @@ package com.petclinic.products.presentationlayer.products;
 
 import com.petclinic.products.businesslayer.products.ProductBundleService;
 import com.petclinic.products.businesslayer.products.ProductService;
-import com.petclinic.products.datalayer.products.Product;
-import com.petclinic.products.datalayer.products.ProductType;
-import com.petclinic.products.utils.EntityModelUtil;
+import com.petclinic.products.businesslayer.products.ProductTypeService;
 import com.petclinic.products.utils.exceptions.InvalidInputException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -14,19 +13,20 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.List;
-
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/products")
 public class ProductController {
 
     private final ProductBundleService bundleService;
     private final ProductService productService;
+    private final ProductTypeService productTypeService;
 
     @Autowired
-    public ProductController(ProductBundleService productBundleService, ProductService productService) {
+    public ProductController(ProductBundleService productBundleService, ProductService productService, ProductTypeService productTypeService) {
         this.productService = productService;
         this.bundleService = productBundleService;
+        this.productTypeService = productTypeService;
     }
 
     @GetMapping(value = "", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
@@ -35,8 +35,9 @@ public class ProductController {
             @RequestParam(required = false) Double maxPrice,
             @RequestParam(required = false) Double minRating,
             @RequestParam(required = false) Double maxRating,
-            @RequestParam(required = false) String sort) {
-        return productService.getAllProducts(minPrice, maxPrice, minRating, maxRating, sort);
+            @RequestParam(required = false) String sort,
+            @RequestParam(required = false) String productTypeId) {
+        return productService.getAllProducts(minPrice, maxPrice, minRating, maxRating, sort, productTypeId);
     }
 
     @GetMapping(value = "/{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -91,10 +92,7 @@ public class ProductController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
-    @GetMapping(value = "/filter/{productType}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Flux<ProductResponseModel> getProductsByType(@PathVariable String productType) {
-        return productService.getProductsByType(productType);
-    }
+
     @PatchMapping(value = "/{productId}/decrease")
     public Mono<ResponseEntity<Void>> decreaseProductQuantity(@PathVariable String productId) {
         return productService.DecreaseProductCount(productId).then(Mono.just(ResponseEntity.noContent().build()));
@@ -104,14 +102,6 @@ public class ProductController {
         return productRequestModel
                 .flatMap(request -> productService.changeProductQuantity(productId, request.getProductQuantity()))
                 .then(Mono.just(ResponseEntity.noContent().build()));
-    }
-    @GetMapping("/filter")
-    public List<ProductResponseModel> getProductsByType(@RequestParam ProductType productType) {
-        List<Product> products = productService.getProductsByType(productType);
-        // Convert the entities to response models (if needed)
-        return products.stream()
-                .map(EntityModelUtil::toProductResponseModel)
-                .toList();
     }
 
 
@@ -145,4 +135,16 @@ public class ProductController {
     }
 
 
+
+    @GetMapping(value = "/types", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Flux<ProductTypeResponseModel> getAllProductTypes() {
+        return productTypeService.getAllProductTypes();
+    }
+
+    @PostMapping(value = "/types", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<ProductTypeResponseModel>> addProductType(@RequestBody Mono<ProductTypeRequestModel> productTypeRequestModel) {
+        return productTypeService.addProductType(productTypeRequestModel)
+                .map(c -> ResponseEntity.status(HttpStatus.CREATED).body(c))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
 }

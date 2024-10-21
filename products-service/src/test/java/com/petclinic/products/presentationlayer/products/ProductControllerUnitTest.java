@@ -3,7 +3,6 @@ package com.petclinic.products.presentationlayer.products;
 import com.petclinic.products.businesslayer.products.ProductBundleService;
 import com.petclinic.products.businesslayer.products.ProductService;
 import com.petclinic.products.utils.exceptions.InvalidInputException;
-import com.petclinic.products.utils.exceptions.NotFoundException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +47,7 @@ public class ProductControllerUnitTest {
                 .productSalePrice(9.99)
                 .averageRating(0.0)
                 .build();
-        when(productService.getAllProducts(null,null,null,null,null)).thenReturn(Flux.just(productResponseModel1, productResponseModel2));
+        when(productService.getAllProducts(null,null,null,null,null, null)).thenReturn(Flux.just(productResponseModel1, productResponseModel2));
 
         webClient.get().uri("/api/v1/products")
                 .accept(MediaType.TEXT_EVENT_STREAM)
@@ -57,12 +56,12 @@ public class ProductControllerUnitTest {
                 .expectHeader().valueEquals("Content-Type", "text/event-stream;charset=UTF-8")
                 .expectBodyList(ProductResponseModel.class);
 
-        verify(productService).getAllProducts(null,null,null,null,null);
+        verify(productService).getAllProducts(null,null,null,null,null, null);
     }
     @Test
     public void whenNoProductsExist_thenReturnEmptyList() {
 
-        when(productService.getAllProducts(null,null,null,null,null)).thenReturn(Flux.empty());
+        when(productService.getAllProducts(null,null,null,null,null, null)).thenReturn(Flux.empty());
 
         webClient.get().uri("/api/v1/products")
                 .accept(MediaType.TEXT_EVENT_STREAM)
@@ -75,7 +74,7 @@ public class ProductControllerUnitTest {
                     assertEquals(0, productResponseModel.size());
                 });
 
-        verify(productService).getAllProducts(null,null,null,null,null);
+        verify(productService).getAllProducts(null,null,null,null,null, null);
     }
 
     @Test

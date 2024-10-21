@@ -3,7 +3,7 @@ package com.petclinic.products.businesslayer;
 import com.petclinic.products.businesslayer.products.ProductServiceImpl;
 import com.petclinic.products.datalayer.products.Product;
 import com.petclinic.products.datalayer.products.ProductRepository;
-import com.petclinic.products.datalayer.products.ProductType;
+import com.petclinic.products.datalayer.products.Type;
 import com.petclinic.products.datalayer.ratings.Rating;
 import com.petclinic.products.datalayer.ratings.RatingRepository;
 import com.petclinic.products.presentationlayer.products.ProductResponseModel;
@@ -42,7 +42,6 @@ class ProductServiceUnitTest {
             .productDescription("Premium dry food for adult dogs")
             .productSalePrice(45.99)
             .averageRating(0.0)
-            .productType(ProductType.FOOD)
             .build();
 
     Product product2 = Product.builder()
@@ -51,7 +50,6 @@ class ProductServiceUnitTest {
             .productDescription("Clumping cat litter with odor control")
             .productSalePrice(12.99)
             .averageRating(0.0)
-            .productType(ProductType.ACCESSORY)
             .build();
 
 
@@ -81,6 +79,7 @@ class ProductServiceUnitTest {
         Double minPrice = null;
         Double maxPrice = null;
         String sort = null;
+        String productTypeId = null;
 
         Product product1 = createProduct("1", 50.0,3.5);
         Product product2 = createProduct("2", 60.0,3.7);
@@ -108,7 +107,7 @@ class ProductServiceUnitTest {
         );
 
         // When
-        Flux<ProductResponseModel> result = productService.getAllProducts(minPrice, maxPrice, minRating, maxRating, sort);
+        Flux<ProductResponseModel> result = productService.getAllProducts(minPrice, maxPrice, minRating, maxRating, sort, productTypeId);
 
         // Then
         StepVerifier.create(result)
@@ -128,10 +127,11 @@ class ProductServiceUnitTest {
         Double minRating = null;
         Double maxRating = null;
         String invalidSort = "invalidSort";
+        String productTypeId = null;
 
         // When & Then
         try {
-            productService.getAllProducts(minPrice, maxPrice, minRating, maxRating, invalidSort);
+            productService.getAllProducts(minPrice, maxPrice, minRating, maxRating, invalidSort, productTypeId);
         } catch (InvalidInputException e) {
             assertNotNull(e);
             assertEquals("Invalid sort parameter: " + invalidSort, e.getMessage());
@@ -153,7 +153,7 @@ class ProductServiceUnitTest {
                 .thenReturn(Flux.just(rating2));
 
 
-        Flux<ProductResponseModel> result = productService.getAllProducts(null,null,null,null,null);
+        Flux<ProductResponseModel> result = productService.getAllProducts(null,null,null,null,null, null);
 
 
         StepVerifier.create(result)
@@ -172,32 +172,7 @@ class ProductServiceUnitTest {
         when(productRepository.findAll())
                 .thenReturn(Flux.empty());
 
-        Flux<ProductResponseModel> result = productService.getAllProducts(null,null,null,null,null);
-
-        StepVerifier.create(result)
-                .expectNextCount(0)
-                .verifyComplete();
-    }
-    @Test
-    public void whenGetProductsByType_thenReturnFilteredProducts() {
-        when(productRepository.findProductsByProductType("Food"))
-                .thenReturn(Flux.just(product1));
-
-        Flux<ProductResponseModel> result = productService.getProductsByType("Food");
-
-        StepVerifier.create(result)
-                .expectNextMatches(product ->
-                        product.getProductId().equals(product1.getProductId()) &&
-                                product.getProductType().equals(ProductType.FOOD))
-                .verifyComplete();
-    }
-
-    @Test
-    public void whenNoProductsOfTypeFound_thenReturnEmptyFlux() {
-        when(productRepository.findProductsByProductType("Toys"))
-                .thenReturn(Flux.empty());
-
-        Flux<ProductResponseModel> result = productService.getProductsByType("Toys");
+        Flux<ProductResponseModel> result = productService.getAllProducts(null,null,null,null,null, null);
 
         StepVerifier.create(result)
                 .expectNextCount(0)

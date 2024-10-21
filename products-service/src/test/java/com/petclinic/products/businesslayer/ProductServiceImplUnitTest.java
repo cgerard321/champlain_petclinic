@@ -1,12 +1,9 @@
 package com.petclinic.products.businesslayer;
 
-
 import com.petclinic.products.businesslayer.products.ProductServiceImpl;
 import com.petclinic.products.datalayer.products.Product;
 import com.petclinic.products.datalayer.products.ProductRepository;
 import com.petclinic.products.datalayer.products.ProductStatus;
-import com.petclinic.products.datalayer.products.ProductType;
-import com.petclinic.products.presentationlayer.products.ProductResponseModel;
 import com.petclinic.products.utils.exceptions.NotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,11 +17,7 @@ import reactor.test.StepVerifier;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Arrays;
-import java.util.Collections;
 
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -131,46 +124,6 @@ class ProductServiceImplUnitTest {
         verify(productRepository).findProductByProductId(productId);
         verify(productRepository, never()).save(any(Product.class));
     }
-    @Test
-    void shouldReturnProductsWhenProductTypeIsValid() {
-        // Arrange
-        Product foodProduct1 = new Product();
-        foodProduct1.setProductId("1");
-        foodProduct1.setProductName("Dog Food");
-        foodProduct1.setProductType(ProductType.FOOD);
-
-        Product foodProduct2 = new Product();
-        foodProduct2.setProductId("2");
-        foodProduct2.setProductName("Cat Food");
-        foodProduct2.setProductType(ProductType.FOOD);
-
-        List<Product> foodProducts = Arrays.asList(foodProduct1, foodProduct2);
-
-        when(productRepository.findByProductType(ProductType.FOOD)).thenReturn(foodProducts);
-
-        // Act
-        List<Product> result = productService.getProductsByType(ProductType.FOOD);
-
-        // Assert
-        assertEquals(2, result.size());
-        assertEquals(ProductType.FOOD, result.get(0).getProductType());
-        verify(productRepository, times(1)).findByProductType(ProductType.FOOD);
-    }
-
-
-    @Test
-    void shouldReturnEmptyListWhenProductTypeIsInvalid() {
-        // Arrange
-        when(productRepository.findByProductType(ProductType.ACCESSORY)).thenReturn(Collections.emptyList());
-
-        // Act
-        List<Product> result = productService.getProductsByType(ProductType.ACCESSORY);
-
-        // Assert
-        assertTrue(result.isEmpty());
-        verify(productRepository, times(1)).findByProductType(ProductType.ACCESSORY);
-    }
-
 
     @Test
     public void testDecreaseProductCount() {
@@ -336,8 +289,6 @@ class ProductServiceImplUnitTest {
         product.setProductStatus(currentStatus);
         return product;
     }
-
-
 
 }
 

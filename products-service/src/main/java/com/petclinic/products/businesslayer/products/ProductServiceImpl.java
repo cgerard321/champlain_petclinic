@@ -1,7 +1,6 @@
 package com.petclinic.products.businesslayer.products;
 
 import com.petclinic.products.datalayer.products.ProductStatus;
-import com.petclinic.products.datalayer.products.ProductType;
 import com.petclinic.products.utils.exceptions.InvalidInputException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -14,17 +13,13 @@ import com.petclinic.products.presentationlayer.products.ProductRequestModel;
 import com.petclinic.products.presentationlayer.products.ProductResponseModel;
 import com.petclinic.products.utils.EntityModelUtil;
 import com.petclinic.products.utils.exceptions.InvalidAmountException;
-import com.petclinic.products.utils.exceptions.InvalidInputException;
 import com.petclinic.products.utils.exceptions.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
 import java.util.Arrays;
-import java.util.List;
 
 @Service
 @Slf4j
@@ -61,7 +56,8 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Flux<ProductResponseModel> getAllProducts(Double minPrice, Double maxPrice, Double minRating, Double maxRating, String sort) {
+    public Flux<ProductResponseModel> getAllProducts(Double minPrice, Double maxPrice, Double minRating,
+                                                     Double maxRating, String sort, String productTypeId) {
         if (sort != null && !Arrays.asList("asc", "desc", "default").contains(sort.toLowerCase())) {
             throw new InvalidInputException("Invalid sort parameter: " + sort);
         }
@@ -75,6 +71,10 @@ public class ProductServiceImpl implements ProductService {
             products = productRepository.findByProductSalePriceLessThanEqual(maxPrice);
         } else {
             products = productRepository.findAll();
+        }
+
+        if (productTypeId != null) {
+            products = products.filter(product -> product.getProductTypeId().equals(productTypeId));
         }
 
         return products
@@ -96,7 +96,6 @@ public class ProductServiceImpl implements ProductService {
                 })
                 .map(EntityModelUtil::toProductResponseModel);
     }
-
 
     @Override
     public Mono<ProductResponseModel> getProductByProductId(String productId) {
@@ -193,21 +192,6 @@ public class ProductServiceImpl implements ProductService {
                 .then();
     }
 
-    @Override
-    public Flux<ProductResponseModel> getProductsByType(String productType) {
-        return productRepository.findProductsByProductType(productType)
-                .map(product -> {
-                    ProductResponseModel responseModel = new ProductResponseModel();
-                    responseModel.setProductId(product.getProductId());
-                    responseModel.setProductName(product.getProductName());
-                    responseModel.setProductDescription(product.getProductDescription());
-                    responseModel.setProductSalePrice(product.getProductSalePrice());
-                    responseModel.setProductType(product.getProductType());
-                    responseModel.setImageId(product.getImageId());
-                    return responseModel;
-                });
-    }
-
 
     @Override
     public Mono<Void> DecreaseProductCount(String productId) {
@@ -228,12 +212,6 @@ public class ProductServiceImpl implements ProductService {
                     return productRepository.save(product).then();
                 });
     }
-    @Override
-    public List<Product> getProductsByType(ProductType productType) {
-        return productRepository.findByProductType(productType);
-    }
-
-
 
     @Scheduled(cron = "0 0 0 * * ?") // Runs daily at midnight
     public Mono<Void> patchProductStatus() {
@@ -251,7 +229,4 @@ public class ProductServiceImpl implements ProductService {
                 })
                 .then();
     }
-
-
-
-    }
+}

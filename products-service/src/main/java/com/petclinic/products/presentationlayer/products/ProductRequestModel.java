@@ -22,7 +22,7 @@ public class ProductRequestModel {
     private Double productSalePrice;
     private Integer productQuantity;
     private Boolean isUnlisted;
-    private ProductType productType;
+//    private ProductType Type;
     private LocalDate releaseDate;
     private ProductStatus productStatus;
 }

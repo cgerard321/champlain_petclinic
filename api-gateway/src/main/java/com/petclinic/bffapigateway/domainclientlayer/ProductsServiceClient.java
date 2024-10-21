@@ -13,8 +13,6 @@ import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.Collections;
-
 @Component
 @Slf4j
 public class ProductsServiceClient {
@@ -34,7 +32,8 @@ public class ProductsServiceClient {
 
     }
 
-    public Flux<ProductResponseDTO> getAllProducts(Double minPrice, Double maxPrice,Double minRating, Double maxRating, String sort) {
+    public Flux<ProductResponseDTO> getAllProducts(Double minPrice, Double maxPrice,Double minRating, Double maxRating,
+                                                   String sort, String productTypeId) {
         return webClient.get()
                 .uri(uriBuilder -> {
                     if (minPrice != null) {
@@ -51,6 +50,9 @@ public class ProductsServiceClient {
                     }
                     if (sort != null) {
                         uriBuilder.queryParam("sort", sort);
+                    }
+                    if (productTypeId != null) {
+                        uriBuilder.queryParam("productTypeId", productTypeId);
                     }
                     return uriBuilder.build();
                 })
@@ -191,12 +193,19 @@ public class ProductsServiceClient {
     }
 
 
+    public Flux<ProductTypeResponseDTO> getAllProductTypes() {
+        return webClient.get()
+                .uri("/types")
+                .retrieve()
+                .bodyToFlux(ProductTypeResponseDTO.class);
+    }
 
-
-
-
-
-
-
-
+    public Mono<ProductTypeResponseDTO> createProductType(final ProductTypeRequestDTO productTypeRequestDTO) {
+        return webClient.post()
+                .uri("/types")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Mono.just(productTypeRequestDTO), ProductTypeRequestDTO.class)
+                .retrieve()
+                .bodyToMono(ProductTypeResponseDTO.class);
+    }
 }

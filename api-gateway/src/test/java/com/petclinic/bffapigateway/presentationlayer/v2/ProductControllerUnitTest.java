@@ -4,6 +4,8 @@ import com.petclinic.bffapigateway.config.GlobalExceptionHandler;
 import com.petclinic.bffapigateway.domainclientlayer.ProductsServiceClient;
 import com.petclinic.bffapigateway.dtos.Products.ProductRequestDTO;
 import com.petclinic.bffapigateway.dtos.Products.ProductResponseDTO;
+import com.petclinic.bffapigateway.dtos.Products.ProductTypeRequestDTO;
+import com.petclinic.bffapigateway.dtos.Products.ProductTypeResponseDTO;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,8 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.UUID;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -74,7 +78,7 @@ class ProductControllerUnitTest {
 
     @Test
     void whenGetAllProductsWithValidMinAndMaxRating_thenReturnFluxProductResponseDTO() {
-        when(productsServiceClient.getAllProducts(null, null, 3.0, 5.0, null))
+        when(productsServiceClient.getAllProducts(null, null, 3.0, 5.0, null, null))
                 .thenReturn(Flux.just(productResponseDTO1, productResponseDTO2));
 
         webTestClient.get()
@@ -93,7 +97,7 @@ class ProductControllerUnitTest {
                     assertEquals(productResponseDTO2.getProductId(), productResponseDTOS.get(1).getProductId());
                 });
 
-        verify(productsServiceClient, times(1)).getAllProducts(null, null, 3.0, 5.0, null);
+        verify(productsServiceClient, times(1)).getAllProducts(null, null, 3.0, 5.0, null, null);
     }
 
     @Test
@@ -118,7 +122,7 @@ class ProductControllerUnitTest {
     @Test
     void getAllProducts_whenProductsExist_thenReturnFluxProductResponseDTO() {
 
-        when(productsServiceClient.getAllProducts(null, null,null,null,null))
+        when(productsServiceClient.getAllProducts(null, null,null,null,null, null))
                 .thenReturn(Flux.just(productResponseDTO1,productResponseDTO2));
 
         webTestClient.get()
@@ -133,13 +137,13 @@ class ProductControllerUnitTest {
                     assertEquals(productResponseDTO1.getProductId(), productResponseDTOS.get(0).getProductId());
                     assertEquals(productResponseDTO2.getProductId(), productResponseDTOS.get(1).getProductId());
                 });
-        verify(productsServiceClient, times(1)).getAllProducts(null, null,null,null,null);
+        verify(productsServiceClient, times(1)).getAllProducts(null, null,null,null,null, null);
     }
 
     @Test
     void getAllProducts_whenNoProductsExist_thenReturnEmptyFlux() {
 
-        when(productsServiceClient.getAllProducts(null, null,null,null,null))
+        when(productsServiceClient.getAllProducts(null, null,null,null,null, null))
                 .thenReturn(Flux.empty());
 
         webTestClient.get()
@@ -152,7 +156,7 @@ class ProductControllerUnitTest {
                     assertNotNull(productResponseDTOS);
                     assertEquals(0, productResponseDTOS.size());
                 });
-        verify(productsServiceClient, times(1)).getAllProducts(null, null,null,null,null);
+        verify(productsServiceClient, times(1)).getAllProducts(null, null,null,null,null, null);
     }
 
     @Test
@@ -301,6 +305,7 @@ class ProductControllerUnitTest {
         verify(productsServiceClient, times(1)).patchListingStatus(anyString(), eq(patchProductRequest));
     }
 
+
     @Test
     public void whenPatchListingStatusServiceThrowsException_thenReturnInternalServerError() {
         ProductRequestDTO patchProductRequest = ProductRequestDTO.builder()
@@ -367,4 +372,44 @@ class ProductControllerUnitTest {
                 });
     }
 
+    @Test
+    public void whenGetAllProductTypes_thenReturnAllProductTypes() {
+        ProductTypeResponseDTO productTypeResponseDTO1 = new ProductTypeResponseDTO(UUID.randomUUID().toString(), "Type1");
+        ProductTypeResponseDTO productTypeResponseDTO2 = new ProductTypeResponseDTO(UUID.randomUUID().toString(), "Type2");
+        ProductTypeResponseDTO productTypeResponseDTO3 = new ProductTypeResponseDTO(UUID.randomUUID().toString(), "Type3");
+
+        when(productsServiceClient.getAllProductTypes())
+                .thenReturn(Flux.just(productTypeResponseDTO1, productTypeResponseDTO2, productTypeResponseDTO3));
+
+        webTestClient.get()
+                .uri("/api/v2/gateway/products/types")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(ProductTypeResponseDTO.class)
+                .value(productTypes -> {
+                    assertNotNull(productTypes);
+                    assertEquals(3, productTypes.size());
+                });
+
+        verify(productsServiceClient, times(1)).getAllProductTypes();
+    }
+
+    @Test
+    public void whenAddProductType_thenReturnProductType() {
+        ProductTypeRequestDTO productTypeRequestDTO = new ProductTypeRequestDTO("Type4");
+        ProductTypeResponseDTO productTypeResponseDTO = new ProductTypeResponseDTO(UUID.randomUUID().toString(), "Type4");
+
+        when(productsServiceClient.createProductType(productTypeRequestDTO))
+                .thenReturn(Mono.just(productTypeResponseDTO));
+
+        webTestClient.post()
+                .uri("/api/v2/gateway/products/types")
+                .bodyValue(productTypeRequestDTO)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody(ProductTypeResponseDTO.class)
+                .isEqualTo(productTypeResponseDTO);
+
+        verify(productsServiceClient, times(1)).createProductType(productTypeRequestDTO);
+    }
 }

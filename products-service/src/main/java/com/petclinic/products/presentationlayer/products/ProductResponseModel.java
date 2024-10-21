@@ -22,6 +22,6 @@ public class ProductResponseModel {
     private Integer requestCount;
     private Integer productQuantity;
     private Boolean isUnlisted;
-    private ProductType productType;
+//    private ProductType Type;
     private ProductStatus productStatus;
 }

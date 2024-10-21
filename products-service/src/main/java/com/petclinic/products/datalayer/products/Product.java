@@ -9,7 +9,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
 
-
 @Document(collection = "products")
 @Data
 @Builder
@@ -21,6 +20,7 @@ public class Product {
     private String id;
     private String productId;
     private String imageId;
+    private String productTypeId;
     private String productName;
     private String productDescription;
     private Double productSalePrice;
@@ -28,7 +28,6 @@ public class Product {
     private Integer requestCount;
     private Integer productQuantity;
     private Boolean isUnlisted;
-    private ProductType productType;
     private LocalDate releaseDate;
     private ProductStatus productStatus;
 }

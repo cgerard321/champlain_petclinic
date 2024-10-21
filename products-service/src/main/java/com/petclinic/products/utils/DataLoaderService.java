@@ -2,16 +2,11 @@ package com.petclinic.products.utils;
 
 import com.petclinic.products.datalayer.images.Image;
 import com.petclinic.products.datalayer.images.ImageRepository;
-import com.petclinic.products.datalayer.products.Product;
-import com.petclinic.products.datalayer.products.ProductBundle;
-import com.petclinic.products.datalayer.products.ProductBundleRepository;
-import com.petclinic.products.datalayer.products.ProductRepository;
+import com.petclinic.products.datalayer.products.*;
 import com.petclinic.products.datalayer.ratings.Rating;
 import com.petclinic.products.datalayer.ratings.RatingRepository;
-import com.petclinic.products.datalayer.products.ProductType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
@@ -19,8 +14,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -40,16 +33,19 @@ public class DataLoaderService implements CommandLineRunner {
     @Autowired
     RatingRepository ratingRepository;
 
+    @Autowired
+    ProductTypeRepository productTypeRepository;
+
     @Override
     public void run(String... args) throws Exception {
         Product product1 = Product.builder()
                 .productId("06a7d573-bcab-4db3-956f-773324b92a80")
                 .imageId("08a5af6b-3501-4157-9a99-1aa82387b9e4")
+                .productTypeId("a4df7523-56a4-4e01-a52f-1388a9b33ec4")
                 .productName("Dog Food")
                 .productDescription("Premium dry food for adult dogs")
                 .productSalePrice(45.99)
                 .requestCount(0)
-                .productType(ProductType.FOOD)
                 .productQuantity(44)
                 .isUnlisted(false)
                 .releaseDate(LocalDate.parse("2002-09-26"))
@@ -58,11 +54,11 @@ public class DataLoaderService implements CommandLineRunner {
         Product product2 = Product.builder()
                 .productId("98f7b33a-d62a-420a-a84a-05a27c85fc91")
                 .imageId("36b06c01-10f3-4645-9c45-900afc5a8b8a")
+                .productTypeId("8be96003-bb92-43a0-85a9-9dbc768b41fa")
                 .productName("Cat Litter")
                 .productDescription("Clumping cat litter with odor control")
                 .productSalePrice(12.99)
                 .requestCount(0)
-                .productType(ProductType.ACCESSORY)
                 .productQuantity(3)
                 .isUnlisted(false)
                 .releaseDate(LocalDate.parse("2020-06-30"))
@@ -71,11 +67,11 @@ public class DataLoaderService implements CommandLineRunner {
         Product product3 = Product.builder()
                 .productId("baee7cd2-b67a-449f-b262-91f45dde8a6d")
                 .imageId("be4e60a4-2369-46e8-abee-20c1a8dce3e5")
+                .productTypeId("7155078b-3e8d-45b6-a182-da9c1b3c355a")
                 .productName("Flea Collar")
                 .productDescription("Flea and tick prevention for small dogs")
                 .productSalePrice(9.99)
                 .requestCount(0)
-                .productType(ProductType.MEDICATION)
                 .productQuantity(53)
                 .isUnlisted(false)
                 .releaseDate(LocalDate.parse("2019-09-29"))
@@ -84,11 +80,11 @@ public class DataLoaderService implements CommandLineRunner {
         Product product4 = Product.builder()
                 .productId("ae2d3af7-f2a2-407f-ad31-ca7d8220cb7a")
                 .imageId("7074e0ef-d041-452f-8a0f-cb9ab20d1fed")
+                .productTypeId("8be96003-bb92-43a0-85a9-9dbc768b41fa")
                 .productName("Bird Cage")
                 .productDescription("Spacious cage for small birds like parakeets")
                 .productSalePrice(29.99)
                 .requestCount(0)
-                .productType(ProductType.ACCESSORY)
                 .productQuantity(8)
                 .isUnlisted(false)
                 .releaseDate(LocalDate.parse("2023-05-06"))
@@ -97,11 +93,11 @@ public class DataLoaderService implements CommandLineRunner {
         Product product5 = Product.builder()
                 .productId("4d508fb7-f1f2-4952-829d-10dd7254cf26")
                 .imageId("392c42d9-9505-4c27-b82e-20351b25d33f")
+                .productTypeId("8be96003-bb92-43a0-85a9-9dbc768b41fa")
                 .productName("Aquarium Filter")
                 .productDescription("Filter system for small to medium-sized aquariums")
                 .productSalePrice(19.99)
                 .requestCount(0)
-                .productType(ProductType.ACCESSORY)
                 .productQuantity(14)
                 .isUnlisted(false)
                 .releaseDate(LocalDate.parse("2025-09-29"))
@@ -110,11 +106,11 @@ public class DataLoaderService implements CommandLineRunner {
         Product product6 = Product.builder()
                 .productId("a6a27433-e7a9-4e78-8ae3-0cb57d756863")
                 .imageId("664aa14b-db66-4b25-9d05-f3a9164eb401")
+                .productTypeId("8be96003-bb92-43a0-85a9-9dbc768b41fa")
                 .productName("Horse Saddle")
                 .productDescription("Lightweight saddle for riding horses")
                 .productSalePrice(199.99)
                 .requestCount(0)
-                .productType(ProductType.EQUIPMENT)
                 .productQuantity(58)
                 .isUnlisted(false)
                 .releaseDate(LocalDate.parse("1988-09-29"))
@@ -123,11 +119,11 @@ public class DataLoaderService implements CommandLineRunner {
         Product product7 = Product.builder()
                 .productId("4affcab7-3ab1-4917-a114-2b6301aa5565")
                 .imageId("3377a03f-8105-47d7-8d8a-d89fd170c7e6")
+                .productTypeId("8be96003-bb92-43a0-85a9-9dbc768b41fa")
                 .productName("Rabbit Hutch")
                 .productDescription("Outdoor wooden hutch for rabbits")
                 .productSalePrice(79.99)
                 .requestCount(0)
-                .productType(ProductType.ACCESSORY)
                 .productQuantity(66)
                 .isUnlisted(false)
                 .releaseDate(LocalDate.parse("2024-02-22"))
@@ -136,11 +132,11 @@ public class DataLoaderService implements CommandLineRunner {
         Product product8 = Product.builder()
                 .productId("1501f30e-1db1-44b2-a555-bca6f64450e4")
                 .imageId("c76ed4c1-fc5d-4868-8b39-1bca6b0be368")
+                .productTypeId("8be96003-bb92-43a0-85a9-9dbc768b41fa")
                 .productName("Fish Tank Heater")
                 .productDescription("Submersible heater for tropical fish tanks")
                 .productSalePrice(14.99)
                 .requestCount(0)
-                .productType(ProductType.ACCESSORY)
                 .productQuantity(0)
                 .isUnlisted(false)
                 .releaseDate(LocalDate.parse("2022-09-19"))
@@ -370,6 +366,21 @@ public class DataLoaderService implements CommandLineRunner {
                 .imageData(imageBytes8)
                 .build();
 
+        ProductType productType1 = ProductType.builder()
+                .typeId("a4df7523-56a4-4e01-a52f-1388a9b33ec4")
+                .typeName("Food")
+                .build();
+
+        ProductType productType2 = ProductType.builder()
+                .typeId("7155078b-3e8d-45b6-a182-da9c1b3c355a")
+                .typeName("Medication")
+                .build();
+
+        ProductType productType3 = ProductType.builder()
+                .typeId("8be96003-bb92-43a0-85a9-9dbc768b41fa")
+                .typeName("Equipment")
+                .build();
+
         Flux.just(bundle1, bundle2, bundle3)
                 .flatMap(s -> productBundleRepository.insert(Mono.just(s))
                         .log(s.toString()))
@@ -396,6 +407,11 @@ public class DataLoaderService implements CommandLineRunner {
 
         Flux.just(image1, image2, image3, image4, image5, image6, image7, image8)
                 .flatMap(s -> imageRepository.insert(Mono.just(s))
+                        .log(s.toString()))
+                .subscribe();
+
+        Flux.just(productType1, productType2, productType3)
+                .flatMap(s -> productTypeRepository.insert(Mono.just(s))
                         .log(s.toString()))
                 .subscribe();
     }

@@ -2,11 +2,8 @@ package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.petclinic.bffapigateway.dtos.Products.ProductRequestDTO;
+import com.petclinic.bffapigateway.dtos.Products.*;
 
-import com.petclinic.bffapigateway.dtos.Products.ProductResponseDTO;
-import com.petclinic.bffapigateway.dtos.Products.ProductStatus;
-import com.petclinic.bffapigateway.dtos.Products.ProductType;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterAll;
@@ -60,7 +57,7 @@ class ProductsServiceClientIntegrationTest {
         );
 
 
-        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(null,null,null,null,null);
+        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(null,null,null,null,null, null);
 
         StepVerifier.create(productsFlux)
                 .expectNextMatches(product -> product.getProductId().equals("4affcab7-3ab1-4917-a114-2b6301aa5565") && product.getProductName().equals("Rabbit Hutch"))
@@ -81,7 +78,7 @@ class ProductsServiceClientIntegrationTest {
         Double maxRating = 5.0;
 
 
-        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(null, null, minRating, maxRating, null);
+        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(null, null, minRating, maxRating, null, null);
 
         // Verify the results
         StepVerifier.create(productsFlux)
@@ -102,7 +99,7 @@ class ProductsServiceClientIntegrationTest {
                 .setHeader("Content-Type", "text/event-stream")
         );
 
-        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(null,null,null,null,null);
+        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(null,null,null,null,null, null);
 
         StepVerifier.create(productsFlux)
                 .expectNextCount(0)
@@ -123,13 +120,32 @@ class ProductsServiceClientIntegrationTest {
         Double maxPrice = 80.00;
 
         // Call the method with price filters
-        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(minPrice, maxPrice,null,null,null);
+        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(minPrice, maxPrice,null,null,null, null);
 
 
             // Verify the results using StepVerifier
         StepVerifier.create(productsFlux)
                 .expectNextMatches(product -> product.getProductId().equals("4affcab7-3ab1-4917-a114-2b6301aa5565") && product.getProductSalePrice() >= minPrice && product.getProductSalePrice() <= maxPrice)
                 .expectNextMatches(product -> product.getProductId().equals("baee7cd2-b67a-449f-b262-91f45dde8a6d") && product.getProductSalePrice() >= minPrice && product.getProductSalePrice() <= maxPrice)
+                .verifyComplete();
+    }
+
+    @Test
+    void getAllProducts_WithProductTypeFiltering_ThenReturnFilteredProductList() {
+
+        mockWebServer.enqueue(new MockResponse()
+                .setBody("data:{\"productId\":\"4affcab7-3ab1-4917-a114-2b6301aa5565\",\"productName\":\"Rabbit Hutch\",\"productDescription\":\"Outdoor wooden hutch for rabbits\",\"productSalePrice\":79.99,\"averageRating\":0.0}\n\n" +
+                        "data:{\"productId\":\"baee7cd2-b67a-449f-b262-91f45dde8a6d\",\"productName\":\"Flea Collar\",\"productDescription\":\"Flea and tick prevention for small dogs\",\"productSalePrice\":9.99,\"averageRating\":0.0}\n\n"
+                ).setHeader("Content-Type", "text/event-stream")
+        );
+
+        String productTypeId = "1";
+
+        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(null, null, null, null, null, productTypeId);
+
+        StepVerifier.create(productsFlux)
+                .expectNextMatches(product -> product.getProductId().equals("4affcab7-3ab1-4917-a114-2b6301aa5565"))
+                .expectNextMatches(product -> product.getProductId().equals("baee7cd2-b67a-449f-b262-91f45dde8a6d"))
                 .verifyComplete();
     }
 
@@ -319,4 +335,40 @@ class ProductsServiceClientIntegrationTest {
                 .verifyComplete();
     }
 
+    @Test
+    void whenGetAllProductTypes_thenReturnProductTypes() {
+        mockWebServer.enqueue(new MockResponse()
+                .setBody("[{\"typeId\":\"1\",\"typeName\":\"Food\"}, " +
+                        "{\"typeId\":\"2\",\"typeName\":\"Toys\"}]")
+                .setHeader("Content-Type", "application/json")
+        );
+
+
+        Flux<ProductTypeResponseDTO> productTypesFlux = productsServiceClient.getAllProductTypes();
+
+        StepVerifier.create(productTypesFlux)
+                .expectNextMatches(productType -> productType.getTypeId().equals("1") && productType.getTypeName().equals("Food"))
+                .expectNextMatches(productType -> productType.getTypeId().equals("2") && productType.getTypeName().equals("Toys"))
+                .verifyComplete();
+    }
+
+    @Test
+    void whenAddProductType_thenReturnProductType() throws JsonProcessingException {
+        ProductTypeResponseDTO productTypeResponseDTO = new ProductTypeResponseDTO(
+                "typeId",
+                "typeName"
+        );
+
+        mockWebServer.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(objectMapper.writeValueAsString(productTypeResponseDTO))
+                .addHeader("Content-Type", "application/json"));
+
+        Mono<ProductTypeResponseDTO> productTypeResponseDTOMono = productsServiceClient
+                .createProductType(new ProductTypeRequestDTO());
+
+        StepVerifier.create(productTypeResponseDTOMono)
+                .expectNextMatches(productType -> productType.getTypeId().equals("typeId"))
+                .verifyComplete();
+    }
 }
