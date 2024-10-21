@@ -74,7 +74,7 @@ const CartItem = ({
               {formatPrice(item.productSalePrice)}
             </span>
             <button
-              className="delete-button"
+              className="wishlist-button"
               onClick={() => deleteItem(item.productId, index)}
               aria-label={`Remove ${item.productName} from cart`}
             >
