@@ -33,6 +33,18 @@ export default function Product({
       })
     );
   };
+  const getDeliveryTypeLabel = (deliveryType: string): string => {
+    if (deliveryType === 'DELIVERY') {
+      return 'Delivery';
+    } else if (deliveryType === 'PICKUP') {
+      return 'Pickup';
+    } else if (deliveryType === 'DELIVERY_AND_PICKUP') {
+      return 'Delivery & Pickup';
+    } else if (deliveryType === 'NO_DELIVERY_OPTION') {
+      return 'No delivery option';
+    }
+    return 'Unknown Delivery Type';
+  };
 
   useEffect(() => {
     if (product.productDescription.length > 100) {
@@ -193,6 +205,9 @@ export default function Product({
           PRE-ORDER
         </div>
       )}
+      <div className="deliveryType-container">
+        <p>{getDeliveryTypeLabel(currentProduct.deliveryType)}</p>
+      </div>
     </div>
   );
 }

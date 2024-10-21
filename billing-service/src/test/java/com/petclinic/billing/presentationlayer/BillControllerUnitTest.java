@@ -1,8 +1,12 @@
 package com.petclinic.billing.presentationlayer;
 
 import com.petclinic.billing.businesslayer.BillService;
+import com.petclinic.billing.datalayer.Bill;
 import com.petclinic.billing.datalayer.BillResponseDTO;
 import com.petclinic.billing.datalayer.BillStatus;
+import com.petclinic.billing.datalayer.PaymentRequestDTO;
+import com.petclinic.billing.exceptions.InvalidPaymentException;
+import com.petclinic.billing.exceptions.NotFoundException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -343,6 +347,77 @@ class BillControllerUnitTest {
                         .build())
                 .exchange()
                 .expectStatus().isBadRequest();
+    }
+    @Test
+    void payBill_Success() {
+        PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("1234567812345678", "123", "12/25");
+
+        when(billService.processPayment(anyString(), anyString(), any(PaymentRequestDTO.class)))
+                .thenReturn(Mono.just(new Bill()));
+
+        client.post()
+                .uri("/bills/customer/" + CUSTOMER_ID_OK + "/bills/" + BILL_ID_OK + "/pay")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(paymentRequestDTO)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(String.class)
+                .consumeWith(response -> {
+                    String responseBody = response.getResponseBody();
+                    Assertions.assertNotNull(responseBody);
+                    Assertions.assertTrue(responseBody.contains("Payment successful!"));
+                });
+
+        verify(billService, times(1))
+                .processPayment(CUSTOMER_ID_OK, BILL_ID_OK, paymentRequestDTO);
+    }
+
+    @Test
+    void payBill_InvalidPaymentDetails() {
+        PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("1234", "12", "1223");
+
+        when(billService.processPayment(anyString(), anyString(), any(PaymentRequestDTO.class)))
+                .thenReturn(Mono.error(new InvalidPaymentException("Invalid payment details"))); // Proper Mono.error for exception
+
+        client.post()
+                .uri("/bills/customer/" + CUSTOMER_ID_OK + "/bills/" + BILL_ID_OK + "/pay")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(paymentRequestDTO)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody(String.class)
+                .consumeWith(response -> {
+                    String responseBody = response.getResponseBody();
+                    Assertions.assertNotNull(responseBody);
+                    Assertions.assertTrue(responseBody.contains("Invalid payment details"));
+                });
+
+        verify(billService, times(1))
+                .processPayment(CUSTOMER_ID_OK, BILL_ID_OK, paymentRequestDTO);
+    }
+
+    @Test
+    void payBill_BillNotFound() {
+        PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("1234567812345678", "123", "12/23");
+
+        when(billService.processPayment(anyString(), anyString(), any(PaymentRequestDTO.class)))
+                .thenReturn(Mono.error(new NotFoundException("Bill not found"))); // Proper Mono.error for exception
+
+        client.post()
+                .uri("/bills/customer/" + CUSTOMER_ID_OK + "/bills/" + BILL_ID_OK + "/pay")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(paymentRequestDTO)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody(String.class)
+                .consumeWith(response -> {
+                    String responseBody = response.getResponseBody();
+                    Assertions.assertNotNull(responseBody);
+                    Assertions.assertTrue(responseBody.contains("Bill not found"));
+                });
+
+        verify(billService, times(1))
+                .processPayment(CUSTOMER_ID_OK, BILL_ID_OK, paymentRequestDTO);
     }
 
 

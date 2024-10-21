@@ -23,4 +23,5 @@ public class ProductRequestDTO {
     private ProductType productType;
     private LocalDate releaseDate;
     private ProductStatus productStatus;
+    private DeliveryType deliveryType;
 }

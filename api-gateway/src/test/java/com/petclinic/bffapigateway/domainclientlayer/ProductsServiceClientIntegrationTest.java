@@ -2,6 +2,8 @@ package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.petclinic.bffapigateway.dtos.Products.DeliveryType;
+import com.petclinic.bffapigateway.dtos.Products.DeliveryType;
 import com.petclinic.bffapigateway.dtos.Products.ProductRequestDTO;
 
 import com.petclinic.bffapigateway.dtos.Products.ProductResponseDTO;
@@ -60,7 +62,7 @@ class ProductsServiceClientIntegrationTest {
         );
 
 
-        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(null,null,null,null,null);
+        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(null,null,null,null,null,null);
 
         StepVerifier.create(productsFlux)
                 .expectNextMatches(product -> product.getProductId().equals("4affcab7-3ab1-4917-a114-2b6301aa5565") && product.getProductName().equals("Rabbit Hutch"))
@@ -81,7 +83,7 @@ class ProductsServiceClientIntegrationTest {
         Double maxRating = 5.0;
 
 
-        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(null, null, minRating, maxRating, null);
+        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(null, null, minRating, maxRating, null,null);
 
         // Verify the results
         StepVerifier.create(productsFlux)
@@ -102,7 +104,7 @@ class ProductsServiceClientIntegrationTest {
                 .setHeader("Content-Type", "text/event-stream")
         );
 
-        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(null,null,null,null,null);
+        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(null,null,null,null,null,null);
 
         StepVerifier.create(productsFlux)
                 .expectNextCount(0)
@@ -123,7 +125,7 @@ class ProductsServiceClientIntegrationTest {
         Double maxPrice = 80.00;
 
         // Call the method with price filters
-        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(minPrice, maxPrice,null,null,null);
+        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(minPrice, maxPrice,null,null,null,null);
 
 
             // Verify the results using StepVerifier
@@ -132,6 +134,51 @@ class ProductsServiceClientIntegrationTest {
                 .expectNextMatches(product -> product.getProductId().equals("baee7cd2-b67a-449f-b262-91f45dde8a6d") && product.getProductSalePrice() >= minPrice && product.getProductSalePrice() <= maxPrice)
                 .verifyComplete();
     }
+    @Test
+    void getAllProducts_WithDeliveryTypeFiltering_ThenReturnFilteredProductList() {
+
+        mockWebServer.enqueue(new MockResponse()
+                .setBody(
+                        "data:{\"productId\":\"1\",\"productName\":\"Product A\",\"productDescription\":\"Description A\",\"productSalePrice\":29.99,\"averageRating\":4.0,\"deliveryType\":\"DELIVERY\"}\n\n" +
+                                "data:{\"productId\":\"2\",\"productName\":\"Product B\",\"productDescription\":\"Description B\",\"productSalePrice\":49.99,\"averageRating\":4.5,\"deliveryType\":\"DELIVERY\"}\n\n"
+                )
+                .setHeader("Content-Type", "text/event-stream")
+        );
+
+        String deliveryType = "DELIVERY";
+
+
+        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(null, null, null, null, null, deliveryType);
+
+        StepVerifier.create(productsFlux)
+                .expectNextMatches(product -> product.getProductId().equals("1") && product.getDeliveryType() == DeliveryType.DELIVERY)
+                .expectNextMatches(product -> product.getProductId().equals("2") && product.getDeliveryType() == DeliveryType.DELIVERY)
+                .verifyComplete();
+    }
+
+    @Test
+    void getAllProducts_WithSortAscending_ThenReturnProductsInAscendingOrder() {
+
+        mockWebServer.enqueue(new MockResponse()
+                .setBody(
+                        "data:{\"productId\":\"1\",\"productName\":\"Alpha\",\"productDescription\":\"Description A\",\"productSalePrice\":19.99,\"averageRating\":4.0}\n\n" +
+                                "data:{\"productId\":\"2\",\"productName\":\"Bravo\",\"productDescription\":\"Description B\",\"productSalePrice\":29.99,\"averageRating\":3.5}\n\n" +
+                                "data:{\"productId\":\"3\",\"productName\":\"Charlie\",\"productDescription\":\"Description C\",\"productSalePrice\":39.99,\"averageRating\":4.5}\n\n"
+                )
+                .setHeader("Content-Type", "text/event-stream")
+        );
+        String sort = "asc";
+
+        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(null, null, null, null, sort, null);
+
+        StepVerifier.create(productsFlux)
+                .expectNextMatches(product -> product.getProductId().equals("1") && product.getProductName().equals("Alpha"))
+                .expectNextMatches(product -> product.getProductId().equals("2") && product.getProductName().equals("Bravo"))
+                .expectNextMatches(product -> product.getProductId().equals("3") && product.getProductName().equals("Charlie"))
+                .verifyComplete();
+    }
+
+
 
     @Test
     void whenAddProduct_thenReturnProduct() throws JsonProcessingException {
@@ -146,7 +193,8 @@ class ProductsServiceClientIntegrationTest {
                 6,
                 false,
                 ProductType.FOOD,
-                ProductStatus.AVAILABLE
+                ProductStatus.AVAILABLE,
+                DeliveryType.DELIVERY
         );
 
         mockWebServer.enqueue(new MockResponse()
@@ -175,7 +223,8 @@ class ProductsServiceClientIntegrationTest {
                 6,
                 false,
                 ProductType.FOOD,
-                ProductStatus.AVAILABLE
+                ProductStatus.AVAILABLE,
+                DeliveryType.PICKUP
         );
 
         mockWebServer.enqueue(new MockResponse()
@@ -204,7 +253,8 @@ class ProductsServiceClientIntegrationTest {
                 6,
                 true,
                 ProductType.FOOD,
-                ProductStatus.AVAILABLE
+                ProductStatus.AVAILABLE,
+                DeliveryType.DELIVERY_AND_PICKUP
         );
 
         mockWebServer.enqueue(new MockResponse()
@@ -214,7 +264,7 @@ class ProductsServiceClientIntegrationTest {
 
         Mono<ProductResponseDTO> productResponseDTOMono = productsServiceClient
                 .patchListingStatus(productResponseDTO.getProductId(), new ProductRequestDTO(
-                        null, null, null, null, null, null, false, null, null, null));
+                        null, null, null, null, null, null, false, null, null, null,null));
 
         StepVerifier.create(productResponseDTOMono)
                 .expectNextMatches(product -> product.getProductId().equals("productId"))
@@ -231,7 +281,7 @@ class ProductsServiceClientIntegrationTest {
         Mono<ProductResponseDTO> productResponseDTOMono = productsServiceClient
                 .patchListingStatus("691e6945-0d4a-4b20-85cc-afd251faccfd", new ProductRequestDTO(
                         null, null, null, null, null,
-                        null, false, null, null, null));
+                        null, false, null, null, null,null));
 
         StepVerifier.create(productResponseDTOMono)
                 .expectErrorMatches(throwable -> throwable != null &&
@@ -248,7 +298,7 @@ class ProductsServiceClientIntegrationTest {
 
         Mono<ProductResponseDTO> productResponseDTOMono = productsServiceClient
                 .patchListingStatus("invalid-product-id", new ProductRequestDTO(
-                        null, null, null, null, null, null, false, null, null, null));
+                        null, null, null, null, null, null, false, null, null, null,null));
 
         StepVerifier.create(productResponseDTOMono)
                 .expectErrorMatches(throwable -> throwable != null &&
@@ -265,7 +315,7 @@ class ProductsServiceClientIntegrationTest {
 
         Mono<ProductResponseDTO> productResponseDTOMono = productsServiceClient
                 .patchListingStatus("productId", new ProductRequestDTO(
-                        null, null, null, null, null, null, false, null, null, null));
+                        null, null, null, null, null, null, false, null, null, null,null));
 
         StepVerifier.create(productResponseDTOMono)
                 .expectErrorMatches(throwable -> throwable != null &&
@@ -282,7 +332,7 @@ class ProductsServiceClientIntegrationTest {
 
         Mono<ProductResponseDTO> productResponseDTOMono = productsServiceClient
                 .patchListingStatus("productId", new ProductRequestDTO(
-                        null, null, null, null, null, null, false, null, null, null));
+                        null, null, null, null, null, null, false, null, null, null,null));
 
         StepVerifier.create(productResponseDTOMono)
                 .expectErrorMatches(throwable -> throwable != null &&
@@ -303,7 +353,8 @@ class ProductsServiceClientIntegrationTest {
                 6,
                 false,
                 ProductType.FOOD,
-                ProductStatus.AVAILABLE
+                ProductStatus.AVAILABLE,
+                DeliveryType.DELIVERY_AND_PICKUP
         );
 
         mockWebServer.enqueue(new MockResponse()

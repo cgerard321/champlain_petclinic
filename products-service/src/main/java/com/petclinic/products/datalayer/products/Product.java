@@ -31,5 +31,6 @@ public class Product {
     private ProductType productType;
     private LocalDate releaseDate;
     private ProductStatus productStatus;
+    private DeliveryType deliveryType;
 }
 

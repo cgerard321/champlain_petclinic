@@ -34,6 +34,7 @@ export default function ProductList(): JSX.Element {
   const [minStars, setMinStars] = useState<number>(0);
   const [maxStars, setMaxStars] = useState<number>(5);
   const [validationMessage, setValidationMessage] = useState<string>('');
+  const [deliveryType, setDeliveryType] = useState<string>('');
 
   const validationStars = async (
     minStars: number,
@@ -69,7 +70,8 @@ export default function ProductList(): JSX.Element {
           maxPrice,
           minStars,
           maxStars,
-          ratingSort
+          ratingSort,
+          deliveryType
         );
         const filteredList = list.filter(product => !product.isUnlisted);
         setProductList(filteredList);
@@ -147,6 +149,7 @@ export default function ProductList(): JSX.Element {
     setMaxStars(5);
     setMinStars(0);
     setValidationMessage('');
+    setDeliveryType('');
     const list = await getAllProducts(minPrice, maxPrice, minStars, maxStars);
     setProductList(list);
   };
@@ -250,7 +253,19 @@ export default function ProductList(): JSX.Element {
               ))}
             </select>
           </label>
-
+          <label>
+            Delivery Type:
+            <select
+              value={deliveryType}
+              onChange={e => setDeliveryType(e.target.value)}
+            >
+              <option value="">Sort by Delivery Type</option>
+              <option value="DELIVERY">Delivery</option>
+              <option value="PICKUP">Pickup</option>
+              <option value="DELIVERY_AND_PICKUP">Delivery & Pickup</option>
+              <option value="NO_DELIVERY_OPTION">No Delivery Option</option>
+            </select>
+          </label>
           <div className="star-rating-container">
             <h2>Filter by Star Rating</h2>
             <div className="star-row">
