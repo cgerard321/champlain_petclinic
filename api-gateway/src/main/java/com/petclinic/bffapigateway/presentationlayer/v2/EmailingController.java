@@ -3,10 +3,7 @@ package com.petclinic.bffapigateway.presentationlayer.v2;
 
 
 import com.petclinic.bffapigateway.domainclientlayer.EmailingServiceClient;
-import com.petclinic.bffapigateway.dtos.Emailing.DirectEmailModelRequestDTO;
-import com.petclinic.bffapigateway.dtos.Emailing.EmailModelResponseDTO;
-import com.petclinic.bffapigateway.dtos.Emailing.NotificationEmailModelRequestDTO;
-import com.petclinic.bffapigateway.dtos.Emailing.RawEmailModelRequestDTO;
+import com.petclinic.bffapigateway.dtos.Emailing.*;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
 import lombok.RequiredArgsConstructor;
@@ -100,6 +97,13 @@ public class EmailingController {
                     log.error("Error sending email notification", e);
                     return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()); // Handle errors
                 });
+    }
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping(value = "/received/all", produces = MediaType.APPLICATION_JSON_VALUE) // Endpoint to retrieve all emails
+    public Flux<ReceivedEmailResponseDTO> getAllEmailsReceived() {
+        return emailingService.getAllReceivedEmails()
+                .doOnError(e -> log.error("Error retrieving emails", e)) // Log any errors that occur
+                .onErrorResume(e -> Flux.empty()); // Return an empty Flux in case of error
     }
 
 }

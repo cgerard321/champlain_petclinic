@@ -1,6 +1,7 @@
 using emailing_service.BuisnessLayer;
 using emailing_service.Models.Database;
 using emailing_service.Models.EmailType;
+using emailing_service.Models.SMTP.Model;
 using emailing_service.Utils.Exception;
 using Microsoft.AspNetCore.Mvc;
 
@@ -173,5 +174,13 @@ public class EmailController : Controller
             return BadRequest(new { message = e.Message });
         }
         return Ok();
+    }
+    [HttpGet("received/all")]
+    public async IAsyncEnumerable<EmailReceived> GetAllEmailsReceived()
+    {
+        await foreach (var email in _emailService.GetAllEmailsReceivedAsync())
+        {
+            yield return email;
+        }
     }
 }

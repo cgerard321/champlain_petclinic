@@ -1,20 +1,28 @@
 using emailing_service.Models;
 using emailing_service.Models.Database;
 using emailing_service.Models.EmailType;
+using emailing_service.Models.SMTP.Model;
 using emailing_service.Utils;
 using emailing_service.Utils.Exception;
+using MailKit;
+using MailKit.Net.Imap;
+using MailKit.Search;
 
 namespace emailing_service.BuisnessLayer;
 
 public class EmailServiceImpl : IEmailService
 {
     private IDatabaseHelper _databaseHelper = new DatabaseHelper();
-    
-    
+    private ImapClient _imapClient = new ImapClient();
     
     public void SetDatabaseHelper(IDatabaseHelper databaseHelper)
     {
         _databaseHelper = databaseHelper;
+    }
+
+    public void SetImapServer(ImapClient imapClient)
+    {
+        _imapClient = imapClient;
     }
     public List<EmailModel> GetAllEmails()
     {
@@ -300,5 +308,57 @@ public class EmailServiceImpl : IEmailService
             IsSuccess = true,
             Message = $"Successfully sent an email!"
         };
+    }
+
+    public async IAsyncEnumerable<EmailReceived> GetAllEmailsReceivedAsync()
+    {
+
+        try
+        {
+            await _imapClient.ConnectAsync("imap.gmail.com", 993, true);
+            await _imapClient.AuthenticateAsync(EmailUtils.emailConnectionString.Email, EmailUtils.emailConnectionString.Password);
+        }
+        catch (MailKit.Security.AuthenticationException authEx)
+        {
+            Console.WriteLine("Authentication failed: " + authEx.Message);
+        }
+        catch (MailKit.Security.SslHandshakeException sslEx)
+        {
+            Console.WriteLine("SSL/TLS handshake failed: " + sslEx.Message);
+        }
+        catch (Exception ex)
+        {
+            // Handle connection, authentication, or email retrieval errors
+            Console.WriteLine($"Error: {ex.Message}");
+        }
+        
+        // Select the inbox
+        var inbox = _imapClient.Inbox;
+        await inbox.OpenAsync(FolderAccess.ReadOnly);
+
+        // Search for all emails
+        var uids = await inbox.SearchAsync(SearchQuery.All);
+
+        foreach (var uid in uids)
+        {
+            // Fetch the email by UID
+            var message = await inbox.GetMessageAsync(uid);
+
+            // Create the EmailReceived object
+            var emailReceived = new EmailReceived(
+                message.From.ToString(),
+                message.Subject,
+                message.Date.DateTime,
+                message.TextBody
+            );
+            Console.WriteLine(" yeah so" + emailReceived.Subject + emailReceived.From.ToString() + emailReceived.DateReceived + emailReceived.PlainTextBody);
+
+            // Yield the email object
+            yield return emailReceived;
+        }
+        // Always make sure to disconnect
+        await _imapClient.DisconnectAsync(true);
+            
+        
     }
 }
