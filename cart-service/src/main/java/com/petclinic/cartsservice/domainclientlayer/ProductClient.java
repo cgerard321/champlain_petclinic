@@ -13,7 +13,12 @@ public class ProductClient {
 
     private final WebClient webClient;
 
-    public ProductClient(@Value("${products-service.base-url}") String productsBaseURL) {
+    private final String productsBaseURL;
+
+    public ProductClient(@Value("products-service") String productsServiceHost,
+                         @Value("8080") String productsServicePort) {
+        this.productsBaseURL = "http://" + productsServiceHost + ":" + productsServicePort + "/api/v1/products";
+
         this.webClient = WebClient.builder()
                 .baseUrl(productsBaseURL)
                 .build();

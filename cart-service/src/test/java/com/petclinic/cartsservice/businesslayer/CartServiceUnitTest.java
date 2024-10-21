@@ -715,6 +715,14 @@ class CartServiceUnitTest {
                 ? new ArrayList<>(cart1.getWishListProducts())
                 : new ArrayList<>();
 
+        // Move the product from wishlist to cart
+        CartProduct productToMove = updatedWishListProducts.stream()
+                .filter(p -> p.getProductId().equals(productId))
+                .findFirst()
+                .orElseThrow(() -> new NotFoundException("Product not found in wishlist: " + productId));
+        updatedWishListProducts.remove(productToMove);
+        updatedProducts.add(productToMove);
+
         // The cart after the operation
         Cart updatedCart = Cart.builder()
                 .cartId(cartId)

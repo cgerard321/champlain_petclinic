@@ -227,6 +227,8 @@ public class CartController {
                         CartResponseModel errorResponse = new CartResponseModel();
                         errorResponse.setMessage(e.getMessage());
                         return Mono.just(ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse));
+                    }
+                    return Mono.error(e);
                 });
     }
 

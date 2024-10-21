@@ -130,7 +130,6 @@ const UserCart = (): JSX.Element => {
     updateCartItemCount();
   }, [cartId, updateCartItemCount, wishlistUpdated]);
 
-
   const applyVoucherCode = async (): Promise<void> => {
     try {
       const response = await fetch(
@@ -316,41 +315,6 @@ const UserCart = (): JSX.Element => {
       }
     }
   };
-  const addToWishlist = async (item: ProductModel): Promise<void> => {
-    try {
-      const productId = item.productId;
-      const response = await fetch(
-        `http://localhost:8080/api/v2/gateway/carts/${cartId}/wishlist/${productId}/toWishList`,
-        {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-          },
-          credentials: 'include',
-          body: JSON.stringify({
-            productId: item.productId,
-            productName: item.productName,
-            productSalePrice: item.productSalePrice,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to add to wishlist');
-      }
-
-      // Optionally, you can update the wishlistItems state
-      setWishlistItems(prevItems => [...prevItems, item]);
-      alert(`${item.productName} has been added to your wishlist!`);
-      // Trigger the useEffect by updating the wishlistUpdated state
-      setWishlistUpdated(true);
-    } catch (error) {
-      console.error('Error adding to wishlist:', error);
-      alert('Failed to add item to wishlist.');
-    }
-  };
 
   // Add to Wishlist Function
   const addToWishlist = async (item: ProductModel): Promise<void> => {
@@ -358,7 +322,6 @@ const UserCart = (): JSX.Element => {
       const productId = item.productId;
       const response = await fetch(
         `http://localhost:8080/api/v2/gateway/carts/${cartId}/wishlist/${productId}/toWishList`,
-
         {
           method: 'PUT',
           headers: {
@@ -727,6 +690,7 @@ const UserCart = (): JSX.Element => {
                 </div>
               </div>
             )}
+
             {/* Wishlist Section */}
             <div className="wishlist-section">
               <h2 className="wishlist-title">Your Wishlist</h2>

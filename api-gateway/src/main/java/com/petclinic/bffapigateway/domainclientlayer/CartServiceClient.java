@@ -288,7 +288,7 @@ public Mono<CartResponseDTO> deleteCartByCartId(String CardId) {
                 .uri(CartServiceUrl + "/" + cartId + "/products/" + productId + "/quantity/" + quantity)
                 .retrieve()
                 .bodyToMono(CartResponseDTO.class)
-                .doOnSuccess(cartResponseDTO -> log.info("Added product {} from product view to wishlist in cart {}", productId, cartId));
+                .doOnSuccess(cartResponseDTO -> log.info("Added product {} from product view to wishlist in cart {}", productId, cartId))
                 .doOnError(e -> log.error("Error moving product {} to wishlist from cart {}: {}", productId, cartId, e.getMessage()));
     }
 

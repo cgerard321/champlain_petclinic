@@ -503,6 +503,7 @@ public class CartServiceImpl implements CartService {
                                 CartProduct cartProduct = CartProduct.builder()
                                         .productId(product.getProductId())
                                         .productName(product.getProductName())
+                                        .imageId(product.getImageId())
                                         .productDescription(product.getProductDescription())
                                         .productSalePrice(product.getProductSalePrice())
                                         .averageRating(product.getAverageRating())

@@ -29,7 +29,7 @@ public class ProductClientTest {
         mockServer = ClientAndServer.startClientAndServer(8080);
 
         // Initialize the ProductClient with mock base URL
-        productClient = new ProductClient("http://localhost:8080/api/v1/products");
+        productClient = new ProductClient("localhost", "8080");
     }
 
     @AfterEach

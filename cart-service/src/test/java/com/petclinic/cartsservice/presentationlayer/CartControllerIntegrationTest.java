@@ -149,54 +149,6 @@ class CartControllerIntegrationTest {
                 });
     }
 
-    @Test
-    public void testMoveProductFromWishListToCart_NonExistentProduct_ReturnsNotFound() {
-        // Given
-        String cartId = cart1.getCartId();
-        String productId = NON_EXISTING_PRODUCT_ID;
-
-        // When
-        webTestClient.put()
-                .uri("/api/v1/carts/{cartId}/wishlist/{productId}/toCart", cartId, productId)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                // Then
-                .expectStatus().isNotFound()
-                .expectBody(CartResponseModel.class)  // Expect the error response model
-                .consumeWith(response -> {
-                    CartResponseModel errorResponse = response.getResponseBody();
-                    assertNotNull(errorResponse);  // Ensure the response is not null
-                });
-    }
-
-    @Test
-    public void testMoveProductFromWishListToCart_ValidProduct_MovesProduct() {
-        // Given
-        String cartId = cart1.getCartId();
-        String productId = wishListProduct1.getProductId();
-
-        // When
-        webTestClient.put()
-                .uri("/api/v1/carts/{cartId}/wishlist/{productId}/toCart", cartId, productId)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                // Then
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody(CartResponseModel.class)
-                .consumeWith(response -> {
-                    CartResponseModel cartResponse = response.getResponseBody();
-                    assertNotNull(cartResponse);
-                    // Verify the product has been added to the cart
-                    assertTrue(cartResponse.getProducts().stream()
-                            .anyMatch(product -> product.getProductId().equals(productId)));
-                    // Verify the product is no longer in the wishlist
-                    assertFalse(cartResponse.getWishListProducts().stream()
-                            .anyMatch(product -> product.getProductId().equals(productId)));
-                    // Verify the size of the cart products
-                    assertEquals(cart1.getProducts().size() + 1, cartResponse.getProducts().size());
-                });
-    }
 
     @Test
     public void testMoveProductFromWishListToCart_NonExistentProduct_ReturnsNotFound() {
@@ -383,60 +335,6 @@ class CartControllerIntegrationTest {
                 .consumeWith(response -> {
                     String errorMessage = response.getResponseBody();
                     assertNotNull(errorMessage);
-                });
-    }
-  
-    @Test
-    void whenAddProductToWishList_thenProductIsNotAlreadyInWishList_thenSuccess(){
-        // Given
-        String cartId = cart1.getCartId();
-        String productId = product1.getProductId();
-        int quantity = 1;
-
-        // When
-        webTestClient.post()
-                .uri("/api/v1/carts/{cartId}/products/{productId}/quantity/{quantity}", cartId, productId, quantity)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                // Then
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody(CartResponseModel.class)
-                .consumeWith(response -> {
-                    CartResponseModel cartResponse = response.getResponseBody();
-                    assertNotNull(cartResponse);
-                    // Verify the product has been added to the wishlist
-                    assertTrue(cartResponse.getWishListProducts().stream()
-                            .anyMatch(product -> product.getProductId().equals(productId)));
-                    // Verify the size of the wishlist products
-                    assertEquals(cart1.getWishListProducts().size() + 1, cartResponse.getWishListProducts().size());
-                });
-    }
-
-    @Test
-    void whenAddToWishlist_thenProductIsAlreadyInWishlist_thenSuccess(){
-        // Given
-        String cartId = cart2.getCartId();
-        String productId = product1.getProductId();
-        int quantity = 1;
-
-        // When
-        webTestClient.post()
-                .uri("/api/v1/carts/{cartId}/products/{productId}/quantity/{quantity}", cartId, productId, quantity)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                // Then
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody(CartResponseModel.class)
-                .consumeWith(response -> {
-                    CartResponseModel cartResponse = response.getResponseBody();
-                    assertNotNull(cartResponse);
-                    // Verify the product has been added to the wishlist
-                    assertTrue(cartResponse.getWishListProducts().stream()
-                            .anyMatch(product -> product.getProductId().equals(productId)));
-                    // Verify the size of the wishlist products
-                    assertEquals(cart1.getWishListProducts().size(), cartResponse.getWishListProducts().size());
                 });
     }
 
