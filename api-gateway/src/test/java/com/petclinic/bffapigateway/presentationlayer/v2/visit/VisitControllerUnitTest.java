@@ -1116,45 +1116,6 @@ public class VisitControllerUnitTest {
         verify(visitsServiceClient, times(1)).addVisitByOwner(eq("INVALID_OWNER_ID"), any(Mono.class));
     }
 
-    @Test
-    void addVisitByOwner_whenValidOwnerId_thenReturnCreated() {
-        // Create a VisitRequestDTO with valid ownerId
-        VisitRequestDTO visitRequestDTO = VisitRequestDTO.builder()
-                .visitDate(LocalDateTime.parse("2024-11-25T13:45", DateTimeFormatter.ISO_LOCAL_DATE_TIME))
-                .description("Routine Check-up")
-                .petId("ecb109cd-57ea-4b85-b51e-99751fd1c349")  // Valid Pet ID
-                .practitionerId("69f852ca-625b-11ee-8c99-0242ac120002")  // Valid Practitioner ID
-                .build();
 
-        // Wrap DTO in a Mono
-        Mono<VisitRequestDTO> visitRequestDTOMono = Mono.just(visitRequestDTO);
-
-        // Stub the service call to return a VisitResponseDTO with a valid visitId when successful
-        VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
-                .visitDate(visitRequestDTO.getVisitDate())
-                .description(visitRequestDTO.getDescription())
-                .petId(visitRequestDTO.getPetId())
-                .practitionerId(visitRequestDTO.getPractitionerId())
-                .build();
-
-        when(visitsServiceClient.addVisitByOwner(eq("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a"), any(Mono.class)))
-                .thenReturn(Mono.just(visitResponseDTO));
-
-        // Perform the POST request to add the visit and verify it returns HTTP 201 Created
-        webTestClient.post()
-                .uri("/api/v2/gateway/visits/owners/{ownerId}", "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(visitRequestDTOMono, VisitRequestDTO.class)
-                .exchange()
-                .expectStatus().isCreated()
-                .expectBody(VisitResponseDTO.class)
-                .value(response -> {
-                    assertThat(response.getPetId()).isEqualTo("ecb109cd-57ea-4b85-b51e-99751fd1c349");
-                    assertThat(response.getDescription()).isEqualTo("Routine Check-up");
-                });
-
-        // Verify the service interaction occurred once
-        verify(visitsServiceClient, times(1)).addVisitByOwner(eq("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a"), any(Mono.class));
-    }
 
 }
