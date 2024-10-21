@@ -9,11 +9,11 @@ import StarRating from './StarRating';
 import './Product.css';
 import { useAddToCart } from '@/features/carts/api/addToCartFromProducts.ts';
 
-
 export default function Product({
   product,
-  cartId, // Destructure cartId prop
-}: ProductProps): JSX.Element {
+}: {
+  product: ProductModel;
+}): JSX.Element {
   const [currentProduct, setCurrentProduct] = useState<ProductModel>(product);
   const [selectedProduct, setSelectedProduct] = useState<ProductModel | null>(
     null
@@ -21,7 +21,6 @@ export default function Product({
   const [selectedProductForQuantity, setSelectedProductForQuantity] =
     useState<ProductModel | null>(null);
   const [quantity, setQuantity] = useState<number>(0);
-  const [wishlistQuantity, setWishlistQuantity] = useState<number>(1); // State for wishlist quantity
   const [tooLong, setTooLong] = useState<boolean>(false);
 
   const navigate = useNavigate();
@@ -34,6 +33,18 @@ export default function Product({
       })
     );
   };
+  const getDeliveryTypeLabel = (deliveryType: string): string => {
+    if (deliveryType === 'DELIVERY') {
+      return 'Delivery';
+    } else if (deliveryType === 'PICKUP') {
+      return 'Pickup';
+    } else if (deliveryType === 'DELIVERY_AND_PICKUP') {
+      return 'Delivery & Pickup';
+    } else if (deliveryType === 'NO_DELIVERY_OPTION') {
+      return 'No delivery option';
+    }
+    return 'Unknown Delivery Type';
+  };
 
   useEffect(() => {
     if (product.productDescription.length > 100) {
@@ -42,6 +53,15 @@ export default function Product({
       setTooLong(false);
     }
   }, [product.productDescription]);
+
+  // const handleProductClick = async (productId: string): Promise<void> => {
+  //   try {
+  //     const product = await getProductByProductId(productId);
+  //     setSelectedProduct(product);
+  //   } catch (error) {
+  //     console.error('Failed to fetch product details:', error);
+  //   }
+  // };
 
   const handleProductClickForProductQuantity = async (
     productId: string
@@ -78,7 +98,7 @@ export default function Product({
     setSelectedProduct(null);
     setSelectedProductForQuantity(null);
   };
-  
+
   const handleAddToCart = async (): Promise<void> => {
     try {
       await addToCart(currentProduct.productId);
@@ -185,6 +205,9 @@ export default function Product({
           PRE-ORDER
         </div>
       )}
+      <div className="deliveryType-container">
+        <p>{getDeliveryTypeLabel(currentProduct.deliveryType)}</p>
+      </div>
     </div>
   );
 }

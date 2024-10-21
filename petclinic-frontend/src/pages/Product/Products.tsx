@@ -3,10 +3,8 @@ import ProductsList from '@/features/products/ProductsList.tsx';
 import ProductSearch from '@/features/products/components/ProductSearch';
 import './Products.css';
 import TrendingList from '@/features/products/TrendingList';
-import { useState } from 'react';
 
 export default function Products(): JSX.Element {
-  const [cartId, setCartId] = useState<string | null>(null);
   return (
     <div>
       <NavBar />

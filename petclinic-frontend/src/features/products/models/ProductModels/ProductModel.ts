@@ -1,3 +1,5 @@
+import { DeliverType } from '@/features/products/models/ProductModels/DeliverType.ts';
+
 export interface ProductModel {
   productId: string;
   imageId: string;
@@ -12,6 +14,11 @@ export interface ProductModel {
   isUnlisted: boolean;
   dateAdded: Date;
   releaseDate?: Date;
+  deliveryType:
+    | 'DELIVERY'
+    | 'PICKUP'
+    | 'DELIVERY_AND_PICKUP'
+    | 'NO_DELIVERY_OPTION';
 }
 
 export const emptyProductModel: ProductModel = {
@@ -28,4 +35,5 @@ export const emptyProductModel: ProductModel = {
   isUnlisted: false,
   dateAdded: new Date(),
   releaseDate: undefined,
+  deliveryType: DeliverType.NO_DELIVERY_OPTION,
 };
