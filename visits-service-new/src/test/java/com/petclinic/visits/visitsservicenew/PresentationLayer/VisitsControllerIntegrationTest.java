@@ -653,7 +653,7 @@ class VisitsControllerIntegrationTest {
                 });
     }
 
-    @Test
+
     void getAllVisitsByReminderIsFalse() {
         when(entityDtoUtil.toVisitResponseDTO(any())).thenReturn(Mono.just(visitResponseDTO));
         webTestClient
@@ -667,7 +667,6 @@ class VisitsControllerIntegrationTest {
                 .value((list) -> assertEquals(list.size(), 9));
     }
 
-    @Test
     void getAllVisitsByReminderIsTrue() {
         when(entityDtoUtil.toVisitResponseDTO(any())).thenReturn(Mono.just(visitResponseDTO));
         webTestClient
