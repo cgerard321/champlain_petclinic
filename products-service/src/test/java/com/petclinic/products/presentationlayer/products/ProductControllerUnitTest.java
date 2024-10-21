@@ -2,6 +2,7 @@ package com.petclinic.products.presentationlayer.products;
 
 import com.petclinic.products.businesslayer.products.ProductBundleService;
 import com.petclinic.products.businesslayer.products.ProductService;
+import com.petclinic.products.businesslayer.products.ProductTypeService;
 import com.petclinic.products.utils.exceptions.InvalidInputException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -26,6 +27,9 @@ public class ProductControllerUnitTest {
 
     @MockBean
     private ProductBundleService productBundleService;
+
+    @MockBean
+    private ProductTypeService productTypeService;
 
     @Autowired
     private WebTestClient webClient;
