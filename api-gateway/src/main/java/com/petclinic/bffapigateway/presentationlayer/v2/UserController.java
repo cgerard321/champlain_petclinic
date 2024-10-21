@@ -128,12 +128,12 @@ public class UserController {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @PatchMapping(value = "/users/{userID}", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<UserPasswordLessDTO>> updateUserRoles(@PathVariable final String userID,
-                                                                     @RequestBody final UserPasswordLessDTO userPasswordLessDTO,
-                                                                     @CookieValue("Bearer") String jwtToken) {
-        return authServiceClient.updateUser(userID, userPasswordLessDTO, jwtToken)
-                .map(userPasswordLessDTO1 -> ResponseEntity.ok().body(userPasswordLessDTO1))
+    @PatchMapping(value = "/users/{userId}", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<UserResponseDTO>> updateUserRoles(@PathVariable final String userId,
+                                                                 @RequestBody final RolesChangeRequestDTO rolesChangeRequestDTO,
+                                                                 @CookieValue("Bearer") String jwtToken) {
+        return authServiceClient.updateUsersRoles(userId, rolesChangeRequestDTO, jwtToken)
+                .map(userResponseDTO -> ResponseEntity.ok().body(userResponseDTO))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
