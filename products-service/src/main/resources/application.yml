@@ -61,7 +61,7 @@ spring:
 
 app:
   auth-service:
-    host: auth-service
+    host: auth
     port: 8080
   emailing-service:
     host: mailer-service

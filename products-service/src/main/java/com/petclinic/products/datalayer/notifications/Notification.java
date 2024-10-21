@@ -19,6 +19,7 @@ public class Notification {
     private String id;
     private String productId;
     private String customerId;
+    private String email;
     private Double previousPrice;
     private Integer previousQuantity;
     private EnumSet<NotificationType> notificationType;
