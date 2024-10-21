@@ -41,12 +41,10 @@ class CartControllerIntegrationTest {
     public static final String NON_EXISTING_CART_ID = "3ee10bc4-2957-42dc-8d2b-2ecb76301a3c";
     public static final String NON_EXISTING_PRODUCT_ID = "3ee10bc4-2957-42dc-8d2b-2ecb76301a3c";
 
-
-
-    private MockServerConfigProductService mockServerConfigProductService;
+    private static MockServerConfigProductService mockServerConfigProductService;
 
     CartProduct product1 = CartProduct.builder()
-            .productId("06a7d573-bcab-4db3-956f-773324b92a80")
+            .productId("06a7d573-bcab-4db3-956f-773324b92a88")
             .productName("Dog Food")
             .productDescription("Premium dry food for adult dogs")
             .productSalePrice(45.99)
@@ -83,10 +81,8 @@ class CartControllerIntegrationTest {
             .averageRating(0.0)
             .build();
 
-
     List<CartProduct> products = new ArrayList<>(Arrays.asList(product1, product2));
     List<CartProduct> wishListProducts = new ArrayList<>(Arrays.asList(wishListProduct1, wishlistProduct2));
-
 
     Cart cart1 = Cart.builder()
             .cartId("98f7b33a-d62a-420a-a84a-05a27c85fc91")
@@ -96,90 +92,33 @@ class CartControllerIntegrationTest {
             .build();
 
     Cart cart2 = Cart.builder()
-            .cartId("34f7b33a-d62a-420a-a84a-05a27c85fc91")
-            .customerId("c6a0fb9d-fc6f-4c21-95fc-4f5e7311d0e2")
-            .products(products)
-            .wishListProducts(wishListProducts)
-            .build();
-
-
-    CartResponseModel cartResponseModel = CartResponseModel.builder()
-            .cartId("98f7b33a-d62a-420a-a84a-05a27c85fc91")
-            .products(products)
-            .customerId("1")
-            .build();
-
-    CartRequestModel cartRequestModel = CartRequestModel.builder()
-            .customerId("1")
+            .cartId("4d508fb7-f1f2-4952-829d-10dd7254cf26")
+            .customerId("f470653d-05c5-4c45-b7a0-7d70f003d2ac")
+            .products(new ArrayList<>())
+            .wishListProducts(products)
             .build();
 
     @BeforeAll
-    public void startServer(){
+    public static void startServer(){
         mockServerConfigProductService = new MockServerConfigProductService();
         mockServerConfigProductService.registerGetProduct1ByProductIdEndpoint();
-    }
+        mockServerConfigProductService.registerGetProduct_NonExisting_ByProductIdEndpoint();}
 
     @AfterAll
-    public void stopServer(){
+    public static void stopServer(){
         mockServerConfigProductService.stopServer();
     }
 
     @BeforeEach
     public void setup() {
         Publisher<Cart> initializeCartData = cartRepository.deleteAll()
-                .thenMany(Flux.just(cart1))
+                .thenMany(Flux.just(cart1, cart2))
                 .flatMap(cartRepository::save);
 
         StepVerifier.create(initializeCartData)
-                .expectNextCount(1)
+                .expectNextCount(2)
                 .verifyComplete();
     }
-
-
-//    @Test
-//    public void testGetAllCarts_CartsExist_ReturnsCarts() {
-//        // Given: Add a few carts to the database
-//        Publisher<Cart> initializeCartData = cartRepository.deleteAll()
-//                .thenMany(Flux.just(cart1, cart2))
-//                .flatMap(cartRepository::save);
-//
-//        StepVerifier.create(initializeCartData)
-//                .expectNextCount(2)
-//                .verifyComplete();
-//
-//        // When: Send a request to get all carts
-//        webTestClient.get()
-//                .uri("/api/v1/carts")
-//                .exchange()
-//                // Then: Verify the response status and body
-//                .expectStatus().isOk()
-//                .expectBodyList(CartResponseModel.class)
-//                .consumeWith(response -> {
-//                    List<CartResponseModel> carts = response.getResponseBody();
-//                    assertNotNull(carts);
-//                    assertEquals(2, carts.size());
-//                });
-//    }
-
-//    @Test
-//    public void testGetCartById_ValidCartId_ReturnsCart() {
-//        // When: Send a request to get the cart by its ID
-//        webTestClient.get()
-//                .uri("/api/v1/carts/{cartId}", cart1.getCartId())
-//                .exchange()
-//                // Then: Verify the response status and body
-//                .expectStatus().isOk()
-//                .expectBody(CartResponseModel.class)
-//                .consumeWith(response -> {
-//                    CartResponseModel retrievedCart = response.getResponseBody();
-//                    assertNotNull(retrievedCart);
-//                    assertEquals(cart1.getCartId(), retrievedCart.getCartId());
-//                    assertEquals(cart1.getProducts().size(), retrievedCart.getProducts().size());
-//                    // Optionally check details of the products
-//                    assertEquals(cart1.getProducts().get(0).getProductId(), retrievedCart.getProducts().get(0).getProductId());
-//                });
-//    }
-
 
     @Test
     public void testMoveProductFromWishListToCart_ValidProduct_MovesProduct() {
@@ -210,6 +149,7 @@ class CartControllerIntegrationTest {
                 });
     }
 
+
     @Test
     public void testMoveProductFromWishListToCart_NonExistentProduct_ReturnsNotFound() {
         // Given
@@ -229,7 +169,6 @@ class CartControllerIntegrationTest {
                     assertNotNull(errorResponse);  // Ensure the response is not null
                 });
     }
-
 
     @Test
     public void testMoveProductFromWishListToCart_NonExistentCart_ReturnsNotFound() {
@@ -398,4 +337,5 @@ class CartControllerIntegrationTest {
                     assertNotNull(errorMessage);
                 });
     }
+
 }

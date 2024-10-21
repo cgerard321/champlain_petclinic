@@ -492,33 +492,31 @@ const UserCart = (): JSX.Element => {
   }
 
   return (
-    <div className="user-cart-container">
+    <div>
       <NavBar />
+      <h2 className="cart-header-title">Your Cart</h2>
 
-      <h1 className="cart-title">User Cart</h1>
+      <div className="UserCart-container">
+        {/* Notification Message */}
+        {notificationMessage && (
+          <div className="notification-message">
+            {notificationMessage}
+            <button
+              className="close-notification"
+              onClick={() => setNotificationMessage(null)}
+              aria-label="Close notification"
+            >
+              &times;
+            </button>
+          </div>
+        )}
 
-      {/* Notification Message */}
-      {notificationMessage && (
-        <div className="notification-message">
-          {notificationMessage}
-          <button
-            className="close-notification"
-            onClick={() => setNotificationMessage(null)}
-            aria-label="Close notification"
-          >
-            &times;
-          </button>
-        </div>
-      )}
-
-      {/* Main Content Container */}
-      <div className="content-container">
+        {/* Main Flex Container for Cart and Checkout */}
         <div className="UserCart-checkout-flex">
-          {/* Main Cart Section */}
+          {/* Cart Section */}
           <div className="UserCart">
             {/* Cart Header with Badge */}
             <div className="cart-header">
-              <h2 className="cart-header-title">Your Cart</h2>
               <div className="cart-badge-container">
                 <FaShoppingCart aria-label="Shopping Cart" />
                 {cartItemCount > 0 && (
@@ -544,9 +542,9 @@ const UserCart = (): JSX.Element => {
                     deleteItem={deleteItem}
                     errorMessage={errorMessages[index]}
                     addToWishlist={addToWishlist}
-                    addToCart={() => {}} // Not needed in cart items
+                    addToCart={() => {}}
                     isInWishlist={false}
-                    showNotification={setNotificationMessage} // Pass the notification handler
+                    showNotification={setNotificationMessage}
                   />
                 ))
               ) : (
@@ -555,75 +553,44 @@ const UserCart = (): JSX.Element => {
             </div>
 
             {/* Cart Control Buttons */}
-            <div className="cart-control-buttons">
-              <button className="btn go-back-btn" onClick={() => navigate(-1)}>
-                Go Back
-              </button>
+            <div className="UserCart-buttons">
               <button
-                className="btn continue-shopping-btn"
+                className="continue-shopping-btn"
                 onClick={() => navigate('/products')}
               >
                 Continue Shopping
               </button>
-              <button className="btn clear-cart-btn" onClick={clearCart}>
+              <button className="clear-cart-btn" onClick={clearCart}>
                 Clear Cart
               </button>
             </div>
-            <div
-              className="voucher-code-section"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                marginTop: '20px',
-                flexDirection: 'column',
-                width: '100%',
-              }}
-            >
-              <div
-                style={{ display: 'flex', alignItems: 'center', width: '100%' }}
+          </div>
+
+          {/* Checkout Section */}
+          <div className="Checkout-section">
+            {/* Voucher Code Section */}
+            <div className="voucher-code-section">
+              <input
+                type="text"
+                placeholder="Enter voucher code"
+                value={voucherCode}
+                onChange={e => {
+                  setVoucherCode(e.target.value);
+                  setVoucherError(null);
+                }}
+                className="voucher-input"
+              />
+              <button
+                onClick={applyVoucherCode}
+                className="apply-voucher-button"
               >
-                <input
-                  type="text"
-                  placeholder="Enter voucher code"
-                  value={voucherCode}
-                  onChange={e => {
-                    setVoucherCode(e.target.value);
-                    setVoucherError(null);
-                  }}
-                  className="voucher-input"
-                  style={{
-                    width: '150px',
-                    padding: '8px 12px',
-                    border: '1px solid #ccc',
-                    borderRadius: '4px',
-                    marginRight: '10px',
-                    fontSize: '14px',
-                  }}
-                />
-                <button
-                  onClick={applyVoucherCode}
-                  className="apply-voucher-button"
-                  style={{
-                    padding: '8px 16px',
-                    backgroundColor: '#28a745',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    fontSize: '14px',
-                  }}
-                >
-                  Apply Voucher
-                </button>
-              </div>
+                Apply
+              </button>
               {voucherError && (
-                <div className="voucher-error" role="alert">
-                  {voucherError}
-                </div>
+                <div className="voucher-error">{voucherError}</div>
               )}
             </div>
-            <hr />
-            {/* Cart Summary */}
+
             <div className="CartSummary">
               <h3>Cart Summary</h3>
               <p className="summary-item">Subtotal: ${subtotal.toFixed(2)}</p>
@@ -635,14 +602,14 @@ const UserCart = (): JSX.Element => {
               </p>
             </div>
 
-            {/* Checkout Button */}
             <button
               className="checkout-btn"
               onClick={handleCheckoutConfirmation}
-              disabled={cartItems.length === 0} // Disable if cart is empty
+              disabled={cartItems.length === 0}
             >
               Checkout
             </button>
+
             {/* Checkout Confirmation Modal */}
             {isCheckoutModalOpen && (
               <div className="checkout-modal">
@@ -658,7 +625,7 @@ const UserCart = (): JSX.Element => {
               <div className="checkout-message">{checkoutMessage}</div>
             )}
 
-            {/* Invoice Section - Display a single invoice with a list of items */}
+            {/* Invoice Section */}
             {invoices.length > 0 && (
               <div className="invoices-section">
                 <h2>Invoice</h2>
@@ -690,32 +657,30 @@ const UserCart = (): JSX.Element => {
                 </div>
               </div>
             )}
+          </div>
+        </div>
 
-            {/* Wishlist Section */}
-            <div className="wishlist-section">
-              <h2 className="wishlist-title">Your Wishlist</h2>
-              <div className="wishlist-items-container">
-                {wishlistItems.length > 0 ? (
-                  wishlistItems.map(item => (
-                    <CartItem
-                      key={item.productId}
-                      item={item}
-                      index={-1}
-                      changeItemQuantity={() => {}}
-                      deleteItem={() => {}}
-                      addToWishlist={() => {}}
-                      addToCart={addToCartFunction} // Use the updated addToCart function
-                      isInWishlist={true}
-                      showNotification={setNotificationMessage} // Pass the notification handler
-                    />
-                  ))
-                ) : (
-                  <p className="empty-wishlist-message">
-                    No products in the wishlist.
-                  </p>
-                )}
-              </div>
-            </div>
+        {/* Wishlist Section */}
+        <div className="wishlist-section">
+          <h2>Your Wishlist</h2>
+          <div className="Wishlist-items">
+            {wishlistItems.length > 0 ? (
+              wishlistItems.map(item => (
+                <CartItem
+                  key={item.productId}
+                  item={item}
+                  index={-1}
+                  changeItemQuantity={() => {}}
+                  deleteItem={() => {}}
+                  addToWishlist={() => {}}
+                  addToCart={addToCartFunction} // Use the updated addToCart function
+                  isInWishlist={true}
+                  showNotification={setNotificationMessage} // Pass the notification handler
+                />
+              ))
+            ) : (
+              <p>No products in the wishlist.</p>
+            )}
           </div>
         </div>
       </div>

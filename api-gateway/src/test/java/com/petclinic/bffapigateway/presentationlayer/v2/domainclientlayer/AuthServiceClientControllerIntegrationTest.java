@@ -19,6 +19,7 @@ import org.junit.jupiter.api.*;
 import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -118,6 +119,62 @@ public class AuthServiceClientControllerIntegrationTest {
     void shutdown() throws IOException {
         server.shutdown();
     }
+    @Test
+    @DisplayName("Should fetch all users successfully")
+    void getAllUsers_ShouldReturnUserList() throws Exception {
+
+        String responseBody = "[{\"userId\":\"1\", \"username\":\"user1\", \"email\":\"user1@example.com\"}," +
+                "{\"userId\":\"2\", \"username\":\"user2\", \"email\":\"user2@example.com\"}]";
+        MockResponse mockResponse = new MockResponse()
+                .setResponseCode(200)
+                .setHeader("Content-Type", "application/json")
+                .setBody(responseBody);
+
+        server.enqueue(mockResponse);
+
+        Flux<UserDetails> usersFlux = authServiceClient.getAllUsers("valid-jwt-token");
+
+        StepVerifier.create(usersFlux)
+                .expectNextMatches(user -> user.getUserId().equals("1") && user.getUsername().equals("user1"))
+                .expectNextMatches(user -> user.getUserId().equals("2") && user.getUsername().equals("user2"))
+                .verifyComplete();
+    }
+
+    @Test
+    @DisplayName("Should return empty list when no users are found")
+    void getAllUsers_ShouldReturnEmptyList() {
+
+        MockResponse mockResponse = new MockResponse()
+                .setResponseCode(200)
+                .setHeader("Content-Type", "application/json")
+                .setBody("[]");
+
+        server.enqueue(mockResponse);
+
+        Flux<UserDetails> usersFlux = authServiceClient.getAllUsers("valid-jwt-token");
+
+        StepVerifier.create(usersFlux)
+                .expectNextCount(0)
+                .verifyComplete();
+    }
+
+    @Test
+    @DisplayName("Should handle error when fetching users fails")
+    void getAllUsers_ShouldReturnError() {
+
+        MockResponse mockResponse = new MockResponse()
+                .setResponseCode(500)
+                .setHeader("Content-Type", "application/json");
+
+        server.enqueue(mockResponse);
+
+        Flux<UserDetails> usersFlux = authServiceClient.getAllUsers("valid-jwt-token");
+
+        StepVerifier.create(usersFlux)
+                .expectError()
+                .verify();
+    }
+
 
     @Test
     @DisplayName("Should try to validate a token and fail")

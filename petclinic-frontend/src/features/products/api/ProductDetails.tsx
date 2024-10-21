@@ -171,8 +171,8 @@ export default function ProductDetails(): JSX.Element {
           <div className="product-container">
             {isUnlisted && !isAdmin && !isInventoryManager ? (
               <div className="product-unavailable">
-                <h2>Product Unavailable</h2>
-                <h3>This product has been unlisted. Check back later! 😊</h3>
+                <h2>Item Unavailable</h2>
+                <h3>This item has been unlisted. Check back later! 😊</h3>
               </div>
             ) : (
               <>
@@ -217,7 +217,7 @@ export default function ProductDetails(): JSX.Element {
                   <p>Type: {currentProduct.productType}</p>
                   <div className="deliveryTypeEdit-container">
                     <p>
-                      Delivery Type:{''}
+                      Delivery Type:{' '}
                       {getDeliveryTypeLabel(currentProduct.deliveryType)}
                     </p>
                   </div>
@@ -273,7 +273,7 @@ export default function ProductDetails(): JSX.Element {
                         )
                       )
                     ) : (
-                      <p>This product does not have any reviews yet!</p>
+                      <p>This item does not have any reviews yet!</p>
                     )}
                   </div>
                 </div>

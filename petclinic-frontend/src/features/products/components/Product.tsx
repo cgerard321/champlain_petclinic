@@ -8,6 +8,7 @@ import { AppRoutePaths } from '@/shared/models/path.routes';
 import StarRating from './StarRating';
 import './Product.css';
 import { useAddToCart } from '@/features/carts/api/addToCartFromProducts.ts';
+import { useAddToWishlist } from '@/features/carts/api/addToWishlistFromProducts';
 
 export default function Product({
   product,
@@ -25,6 +26,13 @@ export default function Product({
 
   const navigate = useNavigate();
   const { addToCart } = useAddToCart();
+  const { addToWishlist } = useAddToWishlist();
+  const [successMessageCart, setSuccessMessageCart] = useState<string | null>(
+    null
+  );
+  const [successMessageWishlist, setSuccessMessageWishlist] = useState<
+    string | null
+  >(null);
 
   const handleProductTitleClick = (): void => {
     navigate(
@@ -100,10 +108,22 @@ export default function Product({
   };
 
   const handleAddToCart = async (): Promise<void> => {
-    try {
-      await addToCart(currentProduct.productId);
-    } catch (error) {
-      console.error('Failed to add product to cart:', error);
+    const isSuccess = await addToCart(currentProduct.productId);
+    if (isSuccess) {
+      setSuccessMessageCart('Product added to cart successfully!');
+
+      // Clear the message after 3 seconds
+      setTimeout(() => setSuccessMessageCart(null), 3000);
+    }
+  };
+
+  const handleAddToWishlist = async (): Promise<void> => {
+    const isSuccess = await addToWishlist(currentProduct.productId, 1);
+    if (isSuccess) {
+      setSuccessMessageWishlist('Product added to wishlist successfully!');
+
+      // Clear the message after 3 seconds
+      setTimeout(() => setSuccessMessageWishlist(null), 3000);
     }
   };
 
@@ -113,7 +133,7 @@ export default function Product({
         <h1>{selectedProduct.productName}</h1>
         <p>{selectedProduct.productDescription}</p>
         <p>Price: ${selectedProduct.productSalePrice.toFixed(2)}</p>
-        <button onClick={handleBackToList}>Back to Products</button>
+        <button onClick={handleBackToList}>Back to Catalog</button>
       </div>
     );
   }
@@ -121,7 +141,7 @@ export default function Product({
   if (selectedProductForQuantity) {
     return (
       <div>
-        <h3>Change Product Quantity</h3>
+        <h3>Change Item Quantity</h3>
         <h2>{selectedProductForQuantity.productName}</h2>
         <form onSubmit={handleQuantitySubmit}>
           <label>
@@ -135,7 +155,7 @@ export default function Product({
           </label>
           <button type="submit">Update Quantity</button>
         </form>
-        <button onClick={handleBackToList}>Back to Products</button>
+        <button onClick={handleBackToList}>Back to Items</button>
       </div>
     );
   }
@@ -143,17 +163,19 @@ export default function Product({
   return (
     <div
       className={`card ${
-        product.productQuantity === 0
+        currentProduct.productQuantity === 0
           ? 'out-of-stock'
-          : product.productQuantity < 10
+          : currentProduct.productQuantity < 10
             ? 'low-quantity'
             : ''
       }`}
-      key={product.productId}
+      key={currentProduct.productId}
     >
-      <ImageContainer imageId={product.imageId} />
+      <ImageContainer imageId={currentProduct.imageId} />
       <span
-        onClick={() => handleProductClickForProductQuantity(product.productId)}
+        onClick={() =>
+          handleProductClickForProductQuantity(currentProduct.productId)
+        }
         style={{ cursor: 'pointer', color: 'blue', fontWeight: 'bold' }}
       >
         +
@@ -178,10 +200,21 @@ export default function Product({
 
       <button
         onClick={handleAddToCart}
-        disabled={product.productQuantity === 0}
+        disabled={currentProduct.productQuantity === 0}
       >
-        {product.productQuantity === 0 ? 'Out of Stock' : 'Add to Cart'}
+        {currentProduct.productQuantity === 0 ? 'Out of Stock' : 'Add to Cart'}
       </button>
+      {successMessageCart && (
+        <p className="success-message">{successMessageCart}</p>
+      )}
+
+      <button onClick={handleAddToWishlist} style={{ marginLeft: '10px' }}>
+        Add to Wishlist
+      </button>
+
+      {successMessageWishlist && (
+        <p className="success-message">{successMessageWishlist}</p>
+      )}
 
       <StarRating
         currentRating={currentProduct.averageRating}
