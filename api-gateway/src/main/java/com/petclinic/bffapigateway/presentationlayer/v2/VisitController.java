@@ -222,5 +222,16 @@ public class VisitController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
+    @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.OWNER})
+    @PostMapping(value = "/owners/{ownerId}",
+            consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<VisitResponseDTO>> addVisitByOwner(
+            @PathVariable String ownerId,
+            @RequestBody Mono<VisitRequestDTO> visitRequestDTO) {
+        return visitsServiceClient.addVisitByOwner(ownerId, visitRequestDTO)
+                .map(visitResponseDTO -> ResponseEntity.status(HttpStatus.CREATED).body(visitResponseDTO))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
 
 }

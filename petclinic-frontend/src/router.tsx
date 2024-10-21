@@ -54,6 +54,7 @@ import CustomerEmergency from './pages/Visit/CustomerEmergency';
 import AddEmergencyForm from './features/visits/Emergency/AddEmergencyForm';
 import LowStockProducts from '@/features/inventories/LowStockProducts.tsx';
 import EmergencyDetails from './features/visits/EmergencyByEmergencyId';
+import AddVisitOwner from './features/visits/models/AddVisitOwner';
 
 const router = createBrowserRouter([
   {
@@ -415,6 +416,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <ProductDetails />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.AddVisitForOwner,
+        element: (
+          <ProtectedRoute>
+            <AddVisitOwner />
           </ProtectedRoute>
         ),
       },

@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { useUser } from '@/context/UserContext';
 import { Visit } from '@/features/visits/models/Visit.ts';
 import { getAllOwnerVisits } from './api/getAllOwnerVisits';
+import { AppRoutePaths } from '@/shared/models/path.routes';
+import { useNavigate } from 'react-router-dom';
 
 export default function CustomerVisitListTable(): JSX.Element {
   const { user } = useUser();
@@ -31,8 +33,16 @@ export default function CustomerVisitListTable(): JSX.Element {
     fetchVisits();
   }, [user.userId]);
 
+  const navigate = useNavigate();
+
   return (
     <div>
+      <button
+        className="btn btn-primary mb-3"
+        onClick={() => navigate(AppRoutePaths.AddVisitForOwner)}
+      >
+        Book Appointment
+      </button>
       {error ? (
         <p>{error}</p>
       ) : (
