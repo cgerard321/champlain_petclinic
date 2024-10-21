@@ -133,7 +133,7 @@ public class CustomerBillsControllerIntegrationTest {
                                 .visitType("surgery")
                                 .date(date)
                                 .amount(150.0)
-                                .billStatus(BillStatus.PAID)
+                                .billStatus(BillStatus.UNPAID)
                                 .build();
         }
 }
