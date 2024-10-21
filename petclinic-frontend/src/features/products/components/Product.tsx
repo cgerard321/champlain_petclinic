@@ -133,7 +133,7 @@ export default function Product({
         <h1>{selectedProduct.productName}</h1>
         <p>{selectedProduct.productDescription}</p>
         <p>Price: ${selectedProduct.productSalePrice.toFixed(2)}</p>
-        <button onClick={handleBackToList}>Back to Products</button>
+        <button onClick={handleBackToList}>Back to Catalog</button>
       </div>
     );
   }
@@ -141,7 +141,7 @@ export default function Product({
   if (selectedProductForQuantity) {
     return (
       <div>
-        <h3>Change Product Quantity</h3>
+        <h3>Change Item Quantity</h3>
         <h2>{selectedProductForQuantity.productName}</h2>
         <form onSubmit={handleQuantitySubmit}>
           <label>
@@ -155,7 +155,7 @@ export default function Product({
           </label>
           <button type="submit">Update Quantity</button>
         </form>
-        <button onClick={handleBackToList}>Back to Products</button>
+        <button onClick={handleBackToList}>Back to Items</button>
       </div>
     );
   }
