@@ -474,23 +474,23 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
+      {
+        path: AppRoutePaths.CustomerReviews,
+         element: (
+          <ProtectedRoute>
+            <ReviewsCustomer />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.CustomerAddReview,
+        element: (
+          <ProtectedRoute>
+            <AddReviewsCustomer />
+          </ProtectedRoute>
+        ),
+      },
     ],
-  },
-  {
-    path: AppRoutePaths.CustomerReviews,
-    element: (
-      <ProtectedRoute>
-        <ReviewsCustomer />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: AppRoutePaths.CustomerAddReview,
-    element: (
-      <ProtectedRoute>
-        <AddReviewsCustomer />
-      </ProtectedRoute>
-    ),
   },
   {
     path: AppRoutePaths.Default,

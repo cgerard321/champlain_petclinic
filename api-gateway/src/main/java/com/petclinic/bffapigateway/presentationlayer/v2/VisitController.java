@@ -258,7 +258,6 @@ public class VisitController {
                         .contentType(MediaType.APPLICATION_OCTET_STREAM)
                         .body(csvData));
     }
-
     @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.OWNER})
     @PostMapping(value = "/owners/{ownerId}",
             consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)

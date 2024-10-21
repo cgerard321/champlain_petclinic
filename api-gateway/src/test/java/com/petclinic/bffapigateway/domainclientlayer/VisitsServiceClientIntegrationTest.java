@@ -1388,8 +1388,7 @@ class VisitsServiceClientIntegrationTest {
                 .verify();
     }
 
-
-    @Test
+     @Test
     void addVisitByOwner_Valid() throws JsonProcessingException {
         // Arrange
         VisitRequestDTO visitRequestDTO = new VisitRequestDTO(
@@ -1453,5 +1452,4 @@ class VisitsServiceClientIntegrationTest {
                 .expectError(BadRequestException.class)
                 .verify();
     }
-
 }

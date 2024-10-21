@@ -37,6 +37,12 @@ export default function CustomerVisitListTable(): JSX.Element {
 
   return (
     <div>
+      <button
+        className="btn btn-primary mb-3"
+        onClick={() => navigate(AppRoutePaths.AddVisitForOwner)}
+      >
+        Book Appointment
+      </button>
       <div className="visit-actions">
         <button
           className="btn btn-warning"
@@ -53,12 +59,6 @@ export default function CustomerVisitListTable(): JSX.Element {
           View Reviews
         </button>
       </div>
-      <button
-        className="btn btn-primary mb-3"
-        onClick={() => navigate(AppRoutePaths.AddVisitForOwner)}
-      >
-        Book Appointment
-      </button>
       {error ? (
         <p>{error}</p>
       ) : (

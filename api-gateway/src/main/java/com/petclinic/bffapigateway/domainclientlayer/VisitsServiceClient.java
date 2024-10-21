@@ -474,7 +474,6 @@ public class VisitsServiceClient {
                 .map(InputStreamResource::new);  // Wrap in InputStreamResource
     }
 
-
     public Mono<VisitResponseDTO> addVisitByOwner(String ownerId, Mono<VisitRequestDTO> visitRequestDTO) {
         return visitRequestDTO.flatMap(visit -> {
             if (visit.getVisitDate() != null) {
