@@ -89,6 +89,7 @@ public class EntityModelUtil {
                 .customerId(customerId)
                 .previousPrice(product.getProductSalePrice())
                 .previousQuantity(product.getProductQuantity())
+                .email(requestModel.getEmail())
                 .notificationType(requestModel.getNotificationType())
                 .build();
     }
