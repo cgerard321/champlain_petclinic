@@ -476,7 +476,7 @@ const router = createBrowserRouter([
       },
       {
         path: AppRoutePaths.CustomerReviews,
-         element: (
+        element: (
           <ProtectedRoute>
             <ReviewsCustomer />
           </ProtectedRoute>
