@@ -3,6 +3,7 @@ package com.petclinic.bffapigateway.presentationlayer.v2;
 import com.petclinic.bffapigateway.domainclientlayer.BillServiceClient;
 import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
+import com.petclinic.bffapigateway.dtos.Bills.PaymentRequestDTO;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.utils.Security.Annotations.IsUserSpecific;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
@@ -17,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.awt.print.Pageable;
 import java.util.Optional;
 
 @RestController
@@ -58,19 +58,19 @@ public class BillController {
     @GetMapping(value = "/admin", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<BillResponseDTO> getAllBills()
     {
-        return billService.getAllBilling();
+        return billService.getAllBills();
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping(value = "/admin/{billId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<BillResponseDTO> getBillById(@PathVariable String billId)
     {
-        return billService.getBilling(billId);
+        return billService.getBillById(billId);
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping()
-    public ResponseEntity<Flux<BillResponseDTO>> getAllBillingByPage(
+    public ResponseEntity<Flux<BillResponseDTO>> getAllBillsByPage(
             @RequestParam Optional<Integer> page,
             @RequestParam Optional<Integer> size,
             @RequestParam(required = false) String billId,
@@ -114,22 +114,45 @@ public class BillController {
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping(value = "/admin/paid", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<BillResponseDTO> getAllPaidBilling()
+    public Flux<BillResponseDTO> getAllPaidBills()
     {
-        return billService.getAllPaidBilling();
+        return billService.getAllPaidBills();
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping(value = "/admin/unpaid", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<BillResponseDTO> getAllUnpaidBilling()
+    public Flux<BillResponseDTO> getAllUnpaidBills()
     {
-        return billService.getAllUnpaidBilling();
+        return billService.getAllUnpaidBills();
     }
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping(value = "/admin/overdue", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<BillResponseDTO> getAllOverdueBilling()
+    public Flux<BillResponseDTO> getAllOverdueBills()
     {
-        return billService.getAllOverdueBilling();
+        return billService.getAllOverdueBills();
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping(value = "/admin/month", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<BillResponseDTO> getBillsByMonth(
+            @RequestParam int year,
+            @RequestParam int month) {
+        if (year < 0 || month < 1 || month > 12) {
+            throw new InvalidInputException("Invalid year or month: year=" + year + ", month=" + month);
+        }
+
+        return billService.getBillsByMonth(year, month);
+    }
+
+    @IsUserSpecific(idToMatch = {"customerId"})
+    @PostMapping("/customer/{customerId}/bills/{billId}/pay")
+    public Mono<ResponseEntity<String>> payBill(
+            @PathVariable("customerId") String customerId,
+            @PathVariable("billId") String billId,
+            @RequestBody PaymentRequestDTO paymentRequestDTO) {
+        return billService.payBill(customerId, billId, paymentRequestDTO)
+                .map(response -> ResponseEntity.ok(response))
+                .onErrorResume(e -> Mono.just(ResponseEntity.badRequest().body("Payment failed: " + e.getMessage())));
     }
 
 }

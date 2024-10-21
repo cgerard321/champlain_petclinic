@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useUser } from '@/context/UserContext';
 import { Visit } from '@/features/visits/models/Visit.ts';
+import { useNavigate } from 'react-router-dom';
+import { AppRoutePaths } from '@/shared/models/path.routes.ts';
 import { getAllOwnerVisits } from './api/getAllOwnerVisits';
 import { AppRoutePaths } from '@/shared/models/path.routes';
 import { useNavigate } from 'react-router-dom';
@@ -9,6 +11,8 @@ export default function CustomerVisitListTable(): JSX.Element {
   const { user } = useUser();
   const [visits, setVisits] = useState<Visit[]>([]);
   const [error, setError] = useState<string | null>(null);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!user.userId) return;
@@ -43,6 +47,22 @@ export default function CustomerVisitListTable(): JSX.Element {
       >
         Book Appointment
       </button>
+      <div className="visit-actions">
+        <button
+          className="btn btn-warning"
+          onClick={() => navigate(AppRoutePaths.CustomerAddReview)}
+          title="Leave a Review"
+        >
+          Leave a Review
+        </button>
+        <button
+          className="btn btn-dark"
+          onClick={() => navigate(AppRoutePaths.CustomerReviews)}
+          title="View Reviews"
+        >
+          View Reviews
+        </button>
+      </div>
       {error ? (
         <p>{error}</p>
       ) : (

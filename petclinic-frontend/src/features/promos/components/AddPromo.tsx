@@ -1,16 +1,12 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
+
 import { useState } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { useNavigate } from 'react-router-dom';
 import './FormPromo.css';
-
-interface PromoCodeRequestModel {
-  name: string;
-  code: string;
-  discount: number;
-  expirationDate: string;
-}
+import { PromoApi } from '@/features/promos/api/PromoApi.tsx';
+import { PromoCodeRequestModel } from '@/features/promos/models/PromoCodeRequestModel.tsx';
 
 export default function AddPromo(): JSX.Element {
   const [name, setName] = useState<string>('');
@@ -49,25 +45,7 @@ export default function AddPromo(): JSX.Element {
     };
 
     try {
-      const response = await fetch(
-        `http://localhost:8080/api/v2/gateway/promos`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-          },
-          body: JSON.stringify(newPromo),
-          credentials: 'include',
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(
-          `Failed to add promo: ${response.status} ${response.statusText}`
-        );
-      }
-
+      await PromoApi.addPromo(newPromo); // Usar el método de la clase API
       setSuccessMessage('Promo added successfully!');
       setError(null);
 

@@ -288,18 +288,20 @@ public class InventoryServiceClient {
     public Flux<ProductResponseDTO> searchProducts(
             final String inventoryId,
             final String productName,
-            final String productDescription
+            final String productDescription,
+            final Status status
     ) {
         UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(inventoryServiceUrl + "/{inventoryId}/products/search")
                 .queryParamIfPresent("productName", Optional.ofNullable(productName))
-                .queryParamIfPresent("productDescription", Optional.ofNullable(productDescription));
+                .queryParamIfPresent("productDescription", Optional.ofNullable(productDescription))
+                .queryParamIfPresent("status", Optional.ofNullable(status));
 
         return webClient.get()
                 .uri(uriBuilder.buildAndExpand(inventoryId).toUri())
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError,
-                        resp -> Mono.error(new NotFoundException("No products found in inventory: " + inventoryId)))
+                        resp -> Mono.error(new InventoryNotFoundException("No products found in inventory: " + inventoryId + " that match the search criteria", HttpStatus.NOT_FOUND)))
                 .bodyToFlux(ProductResponseDTO.class);
     }
     public Mono<ProductResponseDTO> addSupplyToInventory(final ProductRequestDTO model, final String inventoryId){
@@ -321,7 +323,7 @@ public class InventoryServiceClient {
                 .uri(uriBuilder.buildAndExpand(inventoryId, productId).toUri())
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError,
-                        resp -> Mono.error(new NotFoundException("Product not found in inventory: " + inventoryId)))
+                        resp -> Mono.error(new InventoryNotFoundException("Product not found in inventory: " + inventoryId, NOT_FOUND)))
                 .bodyToMono(ProductResponseDTO.class);
     }
 
@@ -342,6 +344,37 @@ public class InventoryServiceClient {
                 .accept(MediaType.APPLICATION_PDF) // Expect PDF response
                 .retrieve()
                 .bodyToMono(byte[].class); // Directly read the body as byte[]
+    }
+
+    public Mono<ProductResponseDTO> updateProductInventoryId(String currentInventoryId, String productId, String newInventoryId) {
+        return webClient.put()
+                .uri(inventoryServiceUrl + "/{currentInventoryId}/products/{productId}/updateInventoryId/{newInventoryId}", currentInventoryId, productId, newInventoryId)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError,
+                        resp -> Mono.error(new NotFoundException("Product not found in inventory: " + currentInventoryId)))
+                .bodyToMono(ProductResponseDTO.class);
+    }
+
+    public Flux<InventoryResponseDTO> getAllInventories() {
+        return webClient.get()
+                .uri(inventoryServiceUrl)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToFlux(InventoryResponseDTO.class);
+    }
+
+    public Mono<ProductResponseDTO> restockLowStockProduct(final String inventoryId, final String productId, final Integer productQuantity) {
+        return webClient.put()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/{inventoryId}/products/{productId}/restockProduct")
+                        .queryParam("productQuantity", productQuantity)  // Add the productQuantity as a query param
+                        .build(inventoryId, productId))
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError,
+                        resp -> Mono.error(new NotFoundException("Product: " + productId + " not found in inventory: " + inventoryId)))
+                .bodyToMono(ProductResponseDTO.class);
     }
 
 }

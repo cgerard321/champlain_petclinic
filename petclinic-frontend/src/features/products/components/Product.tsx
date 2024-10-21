@@ -7,6 +7,8 @@ import { generatePath, useNavigate } from 'react-router-dom';
 import { AppRoutePaths } from '@/shared/models/path.routes';
 import StarRating from './StarRating';
 import './Product.css';
+import { useAddToCart } from '@/features/carts/api/addToCartFromProducts.ts';
+import { useAddToWishlist } from '@/features/carts/api/addToWishlistFromProducts';
 
 export default function Product({
   product,
@@ -23,6 +25,14 @@ export default function Product({
   const [tooLong, setTooLong] = useState<boolean>(false);
 
   const navigate = useNavigate();
+  const { addToCart } = useAddToCart();
+  const { addToWishlist } = useAddToWishlist();
+  const [successMessageCart, setSuccessMessageCart] = useState<string | null>(
+    null
+  );
+  const [successMessageWishlist, setSuccessMessageWishlist] = useState<
+    string | null
+  >(null);
 
   const handleProductTitleClick = (): void => {
     navigate(
@@ -30,6 +40,18 @@ export default function Product({
         productId: product.productId,
       })
     );
+  };
+  const getDeliveryTypeLabel = (deliveryType: string): string => {
+    if (deliveryType === 'DELIVERY') {
+      return 'Delivery';
+    } else if (deliveryType === 'PICKUP') {
+      return 'Pickup';
+    } else if (deliveryType === 'DELIVERY_AND_PICKUP') {
+      return 'Delivery & Pickup';
+    } else if (deliveryType === 'NO_DELIVERY_OPTION') {
+      return 'No delivery option';
+    }
+    return 'Unknown Delivery Type';
   };
 
   useEffect(() => {
@@ -85,6 +107,26 @@ export default function Product({
     setSelectedProductForQuantity(null);
   };
 
+  const handleAddToCart = async (): Promise<void> => {
+    const isSuccess = await addToCart(currentProduct.productId);
+    if (isSuccess) {
+      setSuccessMessageCart('Product added to cart successfully!');
+
+      // Clear the message after 3 seconds
+      setTimeout(() => setSuccessMessageCart(null), 3000);
+    }
+  };
+
+  const handleAddToWishlist = async (): Promise<void> => {
+    const isSuccess = await addToWishlist(currentProduct.productId, 1);
+    if (isSuccess) {
+      setSuccessMessageWishlist('Product added to wishlist successfully!');
+
+      // Clear the message after 3 seconds
+      setTimeout(() => setSuccessMessageWishlist(null), 3000);
+    }
+  };
+
   if (selectedProduct) {
     return (
       <div>
@@ -121,21 +163,24 @@ export default function Product({
   return (
     <div
       className={`card ${
-        product.productQuantity === 0
+        currentProduct.productQuantity === 0
           ? 'out-of-stock'
-          : product.productQuantity < 10
+          : currentProduct.productQuantity < 10
             ? 'low-quantity'
             : ''
       }`}
-      key={product.productId}
+      key={currentProduct.productId}
     >
-      <ImageContainer imageId={product.imageId} />
+      <ImageContainer imageId={currentProduct.imageId} />
       <span
-        onClick={() => handleProductClickForProductQuantity(product.productId)}
+        onClick={() =>
+          handleProductClickForProductQuantity(currentProduct.productId)
+        }
         style={{ cursor: 'pointer', color: 'blue', fontWeight: 'bold' }}
       >
         +
       </span>
+
       <h2
         onClick={handleProductTitleClick}
         style={{
@@ -152,10 +197,50 @@ export default function Product({
           : `${currentProduct.productDescription.substring(0, 100)}...`}
       </p>
       <p>Price: ${currentProduct.productSalePrice.toFixed(2)}</p>
+
+      <button
+        onClick={handleAddToCart}
+        disabled={currentProduct.productQuantity === 0}
+      >
+        {currentProduct.productQuantity === 0 ? 'Out of Stock' : 'Add to Cart'}
+      </button>
+      {successMessageCart && (
+        <p className="success-message">{successMessageCart}</p>
+      )}
+
+      <button onClick={handleAddToWishlist} style={{ marginLeft: '10px' }}>
+        Add to Wishlist
+      </button>
+
+      {successMessageWishlist && (
+        <p className="success-message">{successMessageWishlist}</p>
+      )}
+
       <StarRating
         currentRating={currentProduct.averageRating}
         viewOnly={true}
       />
+      {currentProduct.productStatus === 'PRE_ORDER' && (
+        <div
+          style={{
+            position: 'absolute',
+            top: '10px',
+            right: '10px',
+            backgroundColor: '#FFD700',
+            padding: '5px 10px',
+            borderRadius: '5px',
+            fontWeight: 'bold',
+            color: '#333',
+            zIndex: 1,
+            boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+          }}
+        >
+          PRE-ORDER
+        </div>
+      )}
+      <div className="deliveryType-container">
+        <p>{getDeliveryTypeLabel(currentProduct.deliveryType)}</p>
+      </div>
     </div>
   );
 }

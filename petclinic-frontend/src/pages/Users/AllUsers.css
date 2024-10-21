@@ -1,0 +1,91 @@
+.users-container {
+  max-width: 1400px;
+  margin: 50px auto;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background-color: #ffffff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.users-container h1 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #333;
+  font-family: 'Arial', sans-serif;
+}
+
+.users-container table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+  font-family: 'Arial', sans-serif;
+}
+
+.users-container th,
+.users-container td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+  font-size: 16px;
+}
+
+.users-container th {
+  background-color: #f4f4f4;
+  color: #555;
+}
+
+.users-container tr:hover {
+  background-color: #f9f9f9;
+}
+
+.users-container tbody tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+@media screen and (max-width: 768px) {
+  .users-container table {
+    width: 100%;
+    font-size: 14px;
+  }
+
+  .users-container th,
+  .users-container td {
+    padding: 10px;
+  }
+}
+
+.error {
+  color: red;
+  font-size: 0.8em;
+  margin-top: 5px;
+  font-family: 'Arial', sans-serif;
+}
+
+.users-container input[type='text'] {
+  padding: 2px;
+  margin: 2px 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.filter-container {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.filter-container input {
+  padding: 5px;
+  font-size: 14px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  width: 190px;
+}
+
+.filter-toggle {
+  padding: 5px 30px;
+  height: 40px;
+  font-size: 14px;
+}

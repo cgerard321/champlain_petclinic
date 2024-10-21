@@ -1,6 +1,7 @@
 package com.petclinic.bffapigateway.presentationlayer.v2;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Vets.*;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
@@ -28,6 +29,7 @@ import reactor.test.StepVerifier;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.*;
 
@@ -35,6 +37,7 @@ import static com.google.common.net.HttpHeaders.AUTHORIZATION;
 import static com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigAuthService.jwtTokenForInvalidOwnerId;
 import static com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigAuthService.jwtTokenForValidAdmin;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -62,6 +65,7 @@ class VetControllerIntegrationTest {
         mockServerConfigAuthService.registerValidateTokenForVetEndpoint();
         mockServerConfigVetService.registerGetVetByIdEndpoint();
         mockServerConfigVetService.registerGetVetByInvalidIdEndpoint();
+        mockServerConfigVetService.registerAddEducationAsUnauthorizedUser("2e26e7a2-8c6e-4e2d-8d60-ad0882e295eb");
 
         mockServerConfigVetService.registerGetPhotoByVetIdEndpoint("ac9adeb8-625b-11ee-8c99-0242ac120002", "mockPhotoData".getBytes());
         mockServerConfigVetService.registerGetPhotoByVetIdEndpointNotFound("invalid-vet-id");
@@ -491,4 +495,199 @@ class VetControllerIntegrationTest {
                 .expectStatus().isNotFound();
     }
 
+
+    @Test
+    void whenUpdateEducationByVetIdAndEducationId_thenReturnUpdatedEducation() {
+        String vetId = "69f85766-625b-11ee-8c99-0242ac120002";
+        String educationId = "eb859d39-692b-4e9d-9928-f5a67812ce44";
+
+        EducationRequestDTO updatedEducation = new EducationRequestDTO(
+                        vetId,
+                        "school1",
+                        "degree1",
+                        "field1",
+                        "2020-01-01",
+                        "2021-01-01");
+
+        mockServerConfigVetService.registerUpdateEducationByVetIdAndEducationIdEndpoint(vetId, educationId, updatedEducation);
+
+        Mono<EducationRequestDTO> result = webTestClient.put()
+                .uri(VET_ENDPOINT + "/" + vetId + "/educations/" + educationId)
+                .cookie("Bearer", BEARER_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(updatedEducation)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .returnResult(EducationRequestDTO.class)
+                .getResponseBody()
+                .single();
+
+        StepVerifier
+                .create(result)
+                .expectNextMatches(educationResponse -> {
+                    assertNotNull(educationResponse);
+                    assertEquals(updatedEducation.getVetId(), educationResponse.getVetId());
+                    assertEquals(updatedEducation.getSchoolName(), educationResponse.getSchoolName());
+                    assertEquals(updatedEducation.getDegree(), educationResponse.getDegree());
+                    assertEquals(updatedEducation.getFieldOfStudy(), educationResponse.getFieldOfStudy());
+                    assertEquals(updatedEducation.getStartDate(), educationResponse.getStartDate());
+                    assertEquals(updatedEducation.getEndDate(), educationResponse.getEndDate());
+                    return true;
+                })
+                .verifyComplete();
+    }
+
+
+    @Test
+     void whenUpdateEducationByInvalidVetIdAndEducationId_thenReturnNotFound(){
+        String invalidVetId = "ac9adeb8-625b-11ee-8c99-0242ac12000200";
+        String educationId = "eb859d39-692b-4e9d-9928-f5a67812ce44";
+
+        EducationRequestDTO updatedEducation = new EducationRequestDTO(
+                invalidVetId,
+                "school1",
+                "degree1",
+                "field1",
+                "2020-01-01",
+                "2021-01-01");
+
+        mockServerConfigVetService.registerUpdateEducationByVetIdAndEducationIdEndpointNotFound(invalidVetId, educationId, updatedEducation);
+
+        webTestClient.put()
+                .uri(VET_ENDPOINT + "/" + invalidVetId + "/educations/" + educationId)
+                .cookie("Bearer", BEARER_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(updatedEducation)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    public void whenAddEducationAsUnauthorizedUser_thenReturnUnauthorized() {
+        EducationRequestDTO educationRequestDTO = EducationRequestDTO.builder()
+                .vetId("2e26e7a2-8c6e-4e2d-8d60-ad0882e295eb")
+                .schoolName("Harvard University")
+                .degree("Doctor of Veterinary Medicine")
+                .fieldOfStudy("Veterinary Science")
+                .startDate("2015-08-01")
+                .endDate("2019-05-30")
+                .build();
+
+        mockServerConfigVetService.registerAddEducationAsUnauthorizedUser(educationRequestDTO.getVetId());
+
+        webTestClient.post()
+                .uri(VET_ENDPOINT + "/" + educationRequestDTO.getVetId() + "/educations")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Mono.just(educationRequestDTO), EducationRequestDTO.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isUnauthorized();
+    }
+
+
+
+
+    @Test
+    void whenUpdateEducationByVetIdAndInvalidEducationId_thenReturnNotFound(){
+        String vetId = "69f85766-625b-11ee-8c99-0242ac120002";
+        String invalidEducationid = "eb859d39-692b-4e9d-9928-f5a67812ce44322";
+
+        EducationRequestDTO updatedEducation =
+                new EducationRequestDTO(vetId, "school1", "degree1", "field1", "2020-01-01", "2021-01-01");
+
+        mockServerConfigVetService.registerUpdateEducationByVetIdAndEducationIdEndpointNotFound(vetId, invalidEducationid, updatedEducation);
+
+        webTestClient.put()
+                .uri(VET_ENDPOINT + "/" + vetId + "/educations/" + invalidEducationid)
+                .cookie("Bearer", BEARER_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(updatedEducation)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    void getRatingsByVetId_ValidId_ReturnsRatings() throws JsonProcessingException {
+        String validVetId = "c02cbf82-625b-11ee-8c99-0242ac120002";
+        RatingResponseDTO ratingResponseDTO = RatingResponseDTO.builder()
+                .ratingId("123456")
+                .vetId(validVetId)
+                .rateScore(4.5)
+                .rateDescription("Great service!")
+                .predefinedDescription(PredefinedDescription.EXCELLENT)
+                .rateDate("2024-10-12")
+                .customerName("John Doe")
+                .build();
+        String jsonResponse = new ObjectMapper().writeValueAsString(List.of(ratingResponseDTO));
+        mockServerConfigVetService.registerGetRatingsByVetIdEndpoint(validVetId, jsonResponse);
+        webTestClient.get()
+                .uri(VET_ENDPOINT + "/" + validVetId + "/ratings")
+                .cookie("Bearer", jwtTokenForValidAdmin)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                // Then: expect successful response with valid ratings
+                .expectStatus().isOk()
+                .expectBodyList(RatingResponseDTO.class)
+                .hasSize(1)
+                .contains(ratingResponseDTO);
+    }
+    @Test
+    void getRatingsByVetId_InvalidId_ReturnsNotFound() {
+        String invalidVetId = "deb1950c-3c56-45dc-874b-89e352695eb7777";
+        mockServerConfigVetService.registerGetRatingsByVetIdEndpointNotFound(invalidVetId);
+        webTestClient.get()
+                .uri(VET_ENDPOINT + "/" + invalidVetId + "/ratings")
+                .cookie("Bearer", jwtTokenForValidAdmin)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody(String.class)
+                .consumeWith(response -> {
+                    String responseBody = response.getResponseBody();
+                    assertNotNull(responseBody);
+                    assertTrue(responseBody.contains("vetId not found: " + invalidVetId));
+                });
+    }
+
+
+    @Test
+    void whenDeleteEducation_thenReturnNoContent() {
+        String vetId = "ac9adeb8-625b-11ee-8c99-0242ac120002";
+        String educationId = "123e4567-e89b-12d3-a456-426614174000";
+
+        mockServerConfigVetService.registerDeleteEducationEndpoint(vetId, educationId);
+
+        webTestClient.delete()
+                .uri(VET_ENDPOINT + "/" + vetId + "/educations/" + educationId)
+                .cookie("Bearer", BEARER_TOKEN)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNoContent()
+                .expectBody().isEmpty();
+    }
+
+    @Test
+    void whenDeleteEducation_EducationNotFound_thenReturnNotFound() {
+        String vetId = "ac9adeb8-625b-11ee-8c99-0242ac120002";
+        String educationId = "non-existent-education-id";
+
+        mockServerConfigVetService.registerDeleteEducationByVetIdEndpointNotFound(vetId, educationId);
+
+        webTestClient.delete()
+                .uri(VET_ENDPOINT + "/" + vetId + "/educations/" + educationId)
+                .cookie("Bearer", BEARER_TOKEN)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Education not found: " + educationId);
+    }
+
+
+
 }
+

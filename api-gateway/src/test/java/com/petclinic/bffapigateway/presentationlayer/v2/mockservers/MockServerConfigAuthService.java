@@ -117,6 +117,55 @@ public class MockServerConfigAuthService {
                 );
     }
 
+    public void registerGetAllRolesEndpoint() {
+        mockServerClient_AuthService
+                .when(
+                        request()
+                                .withMethod("GET")
+                                .withPath("/roles")
+                )
+                .respond(
+                        response()
+                                .withStatusCode(200)
+                                .withBody(json("[{\"name\":\"OWNER\"}, {\"name\":\"ADMIN\"}]"))
+          
+                                .withBody(json("[{\"id\":\"1\", \"name\":\"ADMIN\"}, {\"id\":\"2\", \"name\":\"OWNER\"}]"))
+                );
+    }
+
+    public void registerCreateRoleEndpoint() {
+        mockServerClient_AuthService
+                .when(
+                        request()
+                                .withMethod("POST")
+                                .withPath("/roles")
+                                .withBody(json("{\"name\":\"SUPPORT\"}"))
+                )
+                .respond(
+                        response()
+                                .withStatusCode(201)
+                                .withBody(json("{\"name\":\"SUPPORT\"}"))
+
+                                .withBody(json("{\"id\":\"6\", \"name\":\"SUPPORT\"}"))
+                );
+    }
+
+    public void registerUpdateUserRolesEndpoint() {
+        mockServerClient_AuthService
+                .when(
+                        request()
+                                .withMethod("PATCH")
+                                .withPath("/users/e6248486-d3df-47a5-b2e0-84d31c47533a")
+                                .withCookie("Bearer", jwtTokenForValidAdmin)
+                                .withBody(json("{\"roles\":[\"OWNER\", \"ADMIN\"]}"))
+                )
+                .respond(
+                        response()
+                                .withStatusCode(200)
+                                .withBody(json("{\"userId\":\"e6248486-d3df-47a5-b2e0-84d31c47533a\",\"username\":\"Admin\",\"email\":\"admin@admin.com\",\"roles\":[{\"id\":1,\"name\":\"ADMIN\"}, {\"id\":2,\"name\":\"OWNER\"}],\"verified\":true,\"disabled\":false}"))
+                );
+    }
+
     public void stopMockServer() {
         if(clientAndServer != null)
             this.clientAndServer.stop();

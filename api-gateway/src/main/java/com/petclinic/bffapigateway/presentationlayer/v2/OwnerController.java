@@ -29,7 +29,7 @@ public class OwnerController {
 
     private final CustomersServiceClient customersServiceClient;
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.RECEPTIONIST})
     @PostMapping(value = "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<OwnerResponseDTO>> addOwner(@RequestBody Mono<OwnerRequestDTO> ownerRequestDTO) {
         return customersServiceClient.addOwner(ownerRequestDTO)
@@ -77,5 +77,4 @@ public class OwnerController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
-
 }

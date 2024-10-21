@@ -2,10 +2,7 @@ package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.petclinic.bffapigateway.dtos.Bills.BillDetails;
-import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
-import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
-import com.petclinic.bffapigateway.dtos.Bills.BillStatus;
+import com.petclinic.bffapigateway.dtos.Bills.*;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.*;
@@ -98,7 +95,7 @@ class BillServiceClientIntegrationTest {
         server.enqueue(new MockResponse().setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .setBody(mapper.writeValueAsString(billResponseDTO)).addHeader("Content-Type", "application/json"));
 
-        Mono<BillResponseDTO> billResponseDTOMono = billServiceClient.getBilling("1");
+        Mono<BillResponseDTO> billResponseDTOMono = billServiceClient.getBillById("1");
         StepVerifier.create(billResponseDTOMono)
                 .expectNextMatches(returnedBillResponseDTO1 -> returnedBillResponseDTO1.getBillId().equals("1"))
                 .verifyComplete();
@@ -249,7 +246,7 @@ class BillServiceClientIntegrationTest {
                 .setHeader("Content-Type", "application/json")
                 .setBody(body));
 
-        Flux<BillResponseDTO> billResponseFlux = billServiceClient.getAllBilling();
+        Flux<BillResponseDTO> billResponseFlux = billServiceClient.getAllBills();
 
         StepVerifier.create(billResponseFlux.collectList())
                 .expectNextMatches(returnedBillList -> {
@@ -275,7 +272,7 @@ class BillServiceClientIntegrationTest {
                 .setHeader("Content-Type", "application/json")
                 .setBody(body));
 
-        Flux<BillResponseDTO> billResponseFlux = billServiceClient.getAllPaidBilling();
+        Flux<BillResponseDTO> billResponseFlux = billServiceClient.getAllPaidBills();
 
         StepVerifier.create(billResponseFlux.collectList())
                 .expectNextMatches(returnedBillList -> {
@@ -299,7 +296,7 @@ class BillServiceClientIntegrationTest {
                 .setHeader("Content-Type", "application/json")
                 .setBody(body));
 
-        Flux<BillResponseDTO> billResponseFlux = billServiceClient.getAllUnpaidBilling();
+        Flux<BillResponseDTO> billResponseFlux = billServiceClient.getAllUnpaidBills();
 
         StepVerifier.create(billResponseFlux.collectList())
                 .expectNextMatches(returnedBillList -> {
@@ -320,7 +317,7 @@ class BillServiceClientIntegrationTest {
                 .setHeader("Content-Type", "application/json")
                 .setBody(body));
 
-        Flux<BillResponseDTO> billResponseFlux = billServiceClient.getAllOverdueBilling();
+        Flux<BillResponseDTO> billResponseFlux = billServiceClient.getAllOverdueBills();
 
         StepVerifier.create(billResponseFlux.collectList())
                 .expectNextMatches(returnedBillList -> {
@@ -403,7 +400,7 @@ class BillServiceClientIntegrationTest {
     void getNonExistentBillById() {
         server.enqueue(new MockResponse().setResponseCode(404));
 
-        Mono<BillResponseDTO> billResponseDTOMono = billServiceClient.getBilling("nonexistentId");
+        Mono<BillResponseDTO> billResponseDTOMono = billServiceClient.getBillById("nonexistentId");
 
         StepVerifier.create(billResponseDTOMono)
                 .expectError(WebClientResponseException.NotFound.class)
@@ -517,8 +514,182 @@ class BillServiceClientIntegrationTest {
                 .verify();
     }
 
+    @Test
+    void whenGetBillsByMonth_thenReturnsResults() throws Exception {
+        List<BillResponseDTO> billResponses = Arrays.asList(billResponseDTO, billResponseDTO2);
+        String jsonResponse = mapper.writeValueAsString(billResponses);
 
+        prepareResponse(response -> response
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(jsonResponse));
 
+        Flux<BillResponseDTO> resultFlux = billServiceClient.getBillsByMonth(1, 2022);
 
+        StepVerifier.create(resultFlux)
+                .expectNextMatches(bill -> "1".equals(bill.getBillId()) && bill.getAmount() == 100.0)
+                .expectNextMatches(bill -> "2".equals(bill.getBillId()) && bill.getAmount() == 150.0)
+                .verifyComplete();
+    }
+
+    @Test
+    void payBill_Success() throws Exception {
+        PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("1234567812345678", "123", "12/23");
+
+        String responseMessage = "Payment successful";
+        prepareResponse(response -> response
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(responseMessage)
+        );
+
+        Mono<String> resultMono = billServiceClient.payBill("1", "1", paymentRequestDTO);
+
+        StepVerifier.create(resultMono)
+                .expectNextMatches(response -> response.equals("Payment successful"))
+                .verifyComplete();
+    }
+
+    @Test
+    void payBill_Failure() throws Exception {
+        PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("1234567812345678", "123", "12/23");
+
+        prepareResponse(response -> response
+                .setResponseCode(400)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("Payment failed")
+        );
+
+        Mono<String> resultMono = billServiceClient.payBill("1", "1", paymentRequestDTO);
+
+        StepVerifier.create(resultMono)
+                .expectErrorMatches(throwable -> throwable instanceof WebClientResponseException &&
+                        ((WebClientResponseException) throwable).getRawStatusCode() == 400)
+                .verify();
+    }
+
+    @Test
+    void payBill_InvalidCardNumber() throws Exception {
+        PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("123", "123", "12/23");
+
+        prepareResponse(response -> response
+                .setResponseCode(400)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("Invalid card number")
+        );
+
+        Mono<String> resultMono = billServiceClient.payBill("1", "1", paymentRequestDTO);
+
+        StepVerifier.create(resultMono)
+                .expectErrorMatches(throwable -> throwable instanceof WebClientResponseException &&
+                        ((WebClientResponseException) throwable).getRawStatusCode() == 400)
+                .verify();
+    }
+
+    @Test
+    void payBill_InvalidExpiryDate() throws Exception {
+        PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("1234567812345678", "123", "01/15");
+
+        prepareResponse(response -> response
+                .setResponseCode(400)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("Invalid expiry date")
+        );
+
+        Mono<String> resultMono = billServiceClient.payBill("1", "1", paymentRequestDTO);
+
+        StepVerifier.create(resultMono)
+                .expectErrorMatches(throwable -> throwable instanceof WebClientResponseException &&
+                        ((WebClientResponseException) throwable).getRawStatusCode() == 400)
+                .verify();
+    }
+
+    @Test
+    void payBill_ExpiredCard() throws Exception {
+        PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("1234567812345678", "123", "01/20");
+
+        prepareResponse(response -> response
+                .setResponseCode(400)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("Card expired")
+        );
+
+        Mono<String> resultMono = billServiceClient.payBill("1", "1", paymentRequestDTO);
+
+        StepVerifier.create(resultMono)
+                .expectErrorMatches(throwable -> throwable instanceof WebClientResponseException &&
+                        ((WebClientResponseException) throwable).getRawStatusCode() == 400)
+                .verify();
+    }
+
+    @Test
+    void payBill_InvalidCVV() throws Exception {
+        PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("1234567812345678", "12", "12/23");
+
+        prepareResponse(response -> response
+                .setResponseCode(400)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("Invalid CVV")
+        );
+
+        Mono<String> resultMono = billServiceClient.payBill("1", "1", paymentRequestDTO);
+
+        StepVerifier.create(resultMono)
+                .expectErrorMatches(throwable -> throwable instanceof WebClientResponseException &&
+                        ((WebClientResponseException) throwable).getRawStatusCode() == 400)
+                .verify();
+    }
+
+    @Test
+    void payBill_NonExistentBill() throws Exception {
+        PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("1234567812345678", "123", "12/23");
+
+        prepareResponse(response -> response
+                .setResponseCode(404)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("Bill not found")
+        );
+
+        Mono<String> resultMono = billServiceClient.payBill("1", "nonexistent-bill-id", paymentRequestDTO);
+
+        StepVerifier.create(resultMono)
+                .expectErrorMatches(throwable -> throwable instanceof WebClientResponseException &&
+                        ((WebClientResponseException) throwable).getRawStatusCode() == 404)
+                .verify();
+    }
+
+    @Test
+    void payBill_NetworkTimeout() throws Exception {
+        PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("1234567812345678", "123", "12/23");
+
+        prepareResponse(response -> response
+                .setResponseCode(504)  // Gateway Timeout
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("Payment service timeout")
+        );
+
+        Mono<String> resultMono = billServiceClient.payBill("1", "1", paymentRequestDTO);
+
+        StepVerifier.create(resultMono)
+                .expectErrorMatches(throwable -> throwable instanceof WebClientResponseException &&
+                        ((WebClientResponseException) throwable).getRawStatusCode() == 504)
+                .verify();
+    }
+
+    @Test
+    void payBill_InvalidCustomerId() throws Exception {
+        PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("1234567812345678", "123", "12/23");
+
+        prepareResponse(response -> response
+                .setResponseCode(400)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("Invalid customer ID")
+        );
+
+        Mono<String> resultMono = billServiceClient.payBill("invalid-customer-id", "1", paymentRequestDTO);
+
+        StepVerifier.create(resultMono)
+                .expectErrorMatches(throwable -> throwable instanceof WebClientResponseException &&
+                        ((WebClientResponseException) throwable).getRawStatusCode() == 400)
+                .verify();
+    }
 
 }

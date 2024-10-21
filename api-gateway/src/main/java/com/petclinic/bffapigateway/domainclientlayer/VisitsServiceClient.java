@@ -18,6 +18,7 @@ import com.petclinic.bffapigateway.utils.Rethrower;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -26,6 +27,7 @@ import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -56,7 +58,7 @@ public class VisitsServiceClient {
                 .build();
     }
 
-    public Flux<VisitResponseDTO> getAllVisits(String description){
+    public Flux<VisitResponseDTO> getAllVisits(String description) {
         return this.webClient
                 .get()
                 .uri(uriBuilder -> {
@@ -199,6 +201,7 @@ public class VisitsServiceClient {
                         .flatMap(errorBody -> Mono.error(new BadRequestException(errorBody))))
                 .bodyToMono(VisitResponseDTO.class);
     }
+
     public Flux<VisitResponseDTO> getAllArchivedVisits() {
         return webClient
                 .get()
@@ -337,7 +340,7 @@ public class VisitsServiceClient {
 
 
     //Emergency
-    public Flux<EmergencyResponseDTO> getAllEmergency(){
+    public Flux<EmergencyResponseDTO> getAllEmergency() {
         return webClient
                 .get()
                 .uri(reviewUrl + "/emergency")
@@ -355,7 +358,7 @@ public class VisitsServiceClient {
     }
 
     public Mono<EmergencyResponseDTO> createEmergency(Mono<EmergencyRequestDTO> model) {
-        String emergencyId= UUID.randomUUID().toString();
+        String emergencyId = UUID.randomUUID().toString();
         return model.flatMap(emergencyRequestDTO -> {
             return webClient
                     .post()
@@ -423,11 +426,52 @@ public class VisitsServiceClient {
                 .bodyToMono(VisitResponseDTO.class); // Parse response into VisitResponseDTO
     }
 
-    public Mono<ReviewResponseDTO> deleteReview(String reviewId){
+    public Mono<ReviewResponseDTO> deleteReview(String reviewId) {
         return webClient.delete()
                 .uri(reviewUrl + "/reviews/" + reviewId)
                 .retrieve()
                 .bodyToMono(ReviewResponseDTO.class);
+    }
+
+    //reviews for owner
+    public Flux<ReviewResponseDTO> getReviewsByOwnerId(String ownerId) {
+        return webClient
+                .get()
+                .uri(reviewUrl + "/owners/" + ownerId + "/reviews")
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToFlux(ReviewResponseDTO.class);
+    }
+
+    public Mono<ReviewResponseDTO> addCustomerReview(String ownerId, ReviewRequestDTO reviewRequestDTO) {
+        return webClient
+                .post()
+                .uri("/owners/{ownerId}/reviews", ownerId)
+                .body(BodyInserters.fromValue(reviewRequestDTO))
+                .retrieve()
+                .bodyToMono(ReviewResponseDTO.class);
+    }
+
+    public Mono<Void> deleteReview(String ownerId, String reviewId) {
+        return webClient
+                .delete()
+                .uri("/owners/{ownerId}/reviews/{reviewId}", ownerId, reviewId)
+                .retrieve()
+                .onStatus(status -> status.is4xxClientError(), clientResponse ->
+                        Mono.error(new NotFoundException("Review not found for owner ID: " + ownerId + " and review ID: " + reviewId)))
+                .onStatus(status -> status.is5xxServerError(), clientResponse ->
+                        Mono.error(new RuntimeException("Server error during review deletion")))
+                .bodyToMono(Void.class);
+    }
+
+    public Mono<InputStreamResource> exportVisitsToCSV() {
+        return webClient
+                .get()
+                .uri("/export")
+                .retrieve()
+                .bodyToMono(byte[].class)   // Retrieve the CSV data as a byte array
+                .map(ByteArrayInputStream::new)  // Convert byte array to ByteArrayInputStream
+                .map(InputStreamResource::new);  // Wrap in InputStreamResource
     }
 
     public Mono<VisitResponseDTO> addVisitByOwner(String ownerId, Mono<VisitRequestDTO> visitRequestDTO) {

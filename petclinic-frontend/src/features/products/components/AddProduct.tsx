@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Button, Form, Modal } from 'react-bootstrap';
 import { ProductModel } from '../models/ProductModels/ProductModel';
 import { ImageModel } from '../models/ProductModels/ImageModel';
+import { DeliverType } from '@/features/products/models/ProductModels/DeliverType.ts';
 
 interface AddProductProps {
   addProduct: (product: ProductModel) => Promise<ProductModel>;
@@ -14,14 +15,47 @@ export default function AddProduct({
 }: AddProductProps): JSX.Element {
   const [show, setShow] = useState(false);
   const [productType, setProductType] = useState('');
+  const [dateAdded, setDateAdded] = useState('');
+  const [releaseDate, setReleaseDate] = useState('');
+  const [error, setError] = useState('');
+  const [deliveryType, setDeliveryType] = useState<DeliverType>(
+    DeliverType.DELIVERY
+  );
 
-  const handleClose = (): void => setShow(false);
+  const handleClose = (): void => {
+    setShow(false);
+    setError('');
+  };
   const handleShow = (): void => setShow(true);
+
+  const validateDates = (): boolean => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const addedDate = new Date(dateAdded);
+    const releaseDateObj = releaseDate ? new Date(releaseDate) : null;
+
+    if (addedDate > today) {
+      setError('Date Added cannot be in the future.');
+      return false;
+    }
+
+    if (releaseDateObj && releaseDateObj < addedDate) {
+      setError('Release Date cannot be before Date Added.');
+      return false;
+    }
+
+    setError('');
+    return true;
+  };
 
   const handleSubmit = async (
     event: React.FormEvent<HTMLFormElement>
   ): Promise<void> => {
     event.preventDefault();
+
+    if (!validateDates()) {
+      return;
+    }
 
     const form = event.currentTarget;
     let createdImage = null;
@@ -65,8 +99,21 @@ export default function AddProduct({
     );
     const requestCount = 0;
     const averageRating = 0;
-    const status = 'AVAILABLE';
     const productId = '';
+    const isUnlisted = false;
+
+    const dateAddedObj = new Date(dateAdded);
+    const releaseDateObj = releaseDate ? new Date(releaseDate) : undefined;
+
+    let productStatus: 'PRE_ORDER' | 'AVAILABLE' | 'OUT_OF_STOCK';
+    if (releaseDateObj && releaseDateObj > new Date()) {
+      productStatus = 'PRE_ORDER';
+    } else if (productQuantity > 0) {
+      productStatus = 'AVAILABLE';
+    } else {
+      error;
+      productStatus = 'OUT_OF_STOCK';
+    }
 
     const newProduct: ProductModel = {
       productId,
@@ -76,9 +123,13 @@ export default function AddProduct({
       productSalePrice,
       averageRating,
       productQuantity,
+      productStatus,
       requestCount,
-      status,
       productType,
+      isUnlisted,
+      dateAdded: dateAddedObj,
+      releaseDate: releaseDateObj,
+      deliveryType,
     };
 
     try {
@@ -148,13 +199,50 @@ export default function AddProduct({
                 name="productType"
                 placeholder="Product Type"
                 value={productType}
-                onChange={e => setProductType(e.target.value)} /////////////////
+                onChange={e => setProductType(e.target.value)}
                 required
+              />
+            </Form.Group>
+            <Form.Group className="mb-3" controlId="formGridDateAdded">
+              <Form.Label>Date Added</Form.Label>
+              <Form.Control
+                type="date"
+                name="dateAdded"
+                value={dateAdded}
+                onChange={e => setDateAdded(e.target.value)}
+                max={new Date().toISOString().split('T')[0]}
+                required
+              />
+            </Form.Group>
+            <Form.Group className="mb-3" controlId="formGridReleaseDate">
+              <Form.Label>Release Date (for pre-orders)</Form.Label>
+              <Form.Control
+                type="date"
+                name="releaseDate"
+                value={releaseDate}
+                onChange={e => setReleaseDate(e.target.value)}
+                min={dateAdded}
               />
             </Form.Group>
             <Form.Group controlId="formFile" className="mb-3">
               <Form.Label>Upload Image</Form.Label>
               <Form.Control type="file" />
+            </Form.Group>
+            <Form.Group className="mb-3" controlId="formGridDeliveryType">
+              <Form.Label>Delivery Type</Form.Label>
+              <Form.Select
+                value={deliveryType}
+                onChange={e => setDeliveryType(e.target.value as DeliverType)}
+              >
+                <option value={DeliverType.DELIVERY}>Delivery</option>
+                <option value={DeliverType.PICKUP}>Pickup</option>
+                <option value={DeliverType.DELIVERY_AND_PICKUP}>
+                  Delivery and Pickup
+                </option>
+                <option value={DeliverType.NO_DELIVERY_OPTION}>
+                  No Delivery Option
+                </option>
+              </Form.Select>
             </Form.Group>
           </Form>
         </Modal.Body>

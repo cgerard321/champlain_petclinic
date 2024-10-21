@@ -11,6 +11,7 @@ import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewResponseDTO;
 import com.petclinic.bffapigateway.presentationlayer.BFFApiGatewayController;
 import com.petclinic.bffapigateway.presentationlayer.v2.VisitController;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -18,6 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +31,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.io.ByteArrayInputStream;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -813,6 +817,7 @@ public class VisitControllerUnitTest {
         verify(visitsServiceClient, times(1)).getAllArchivedVisits();
     }
   
+  @Test
   void deleteReview_whenValidReviewId_thenReturnOkResponse() {
         // Arrange
         when(visitsServiceClient.deleteReview(eq("R001")))
@@ -847,6 +852,180 @@ public class VisitControllerUnitTest {
     }
 
     @Test
+    void getReviewsByOwnerId_whenOwnerExists_thenReturnFluxReviewResponseDTO() {
+        // Arrange
+        String ownerId = "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a";
+        when(visitsServiceClient.getReviewsByOwnerId(ownerId))
+                .thenReturn(Flux.just(reviewResponseDTO));
+
+        // Act
+        webTestClient.get()
+                .uri(BASE_VISIT_URL + "/owners/{ownerId}/reviews", ownerId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(ReviewResponseDTO.class)
+                .hasSize(1)
+                .contains(reviewResponseDTO);
+
+        // Assert
+        verify(visitsServiceClient, times(1)).getReviewsByOwnerId(ownerId);
+    }
+
+    @Test
+    void getReviewsByOwnerId_whenOwnerDoesNotExist_thenReturnEmptyFlux() {
+        // Arrange
+        String ownerId = "e6c7398e-8ac4-4e10-9ee0-03ef33f0361e";
+        when(visitsServiceClient.getReviewsByOwnerId(ownerId))
+                .thenReturn(Flux.empty());
+
+        // Act
+        webTestClient.get()
+                .uri(BASE_VISIT_URL + "/owners/{ownerId}/reviews", ownerId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(ReviewResponseDTO.class)
+                .hasSize(0);
+
+        // Assert
+        verify(visitsServiceClient, times(1)).getReviewsByOwnerId(ownerId);
+    }
+
+    @Test
+    void addReviewCustomer_whenValidRequest_thenReturnCreatedResponse() {
+        String ownerId = "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a";
+        ReviewRequestDTO reviewRequestDTO = ReviewRequestDTO.builder()
+                .review("Great service")
+                .reviewerName("Jane Doe")
+                .rating(5)
+                .dateSubmitted(LocalDateTime.now())
+                .build();
+        ReviewResponseDTO reviewResponseDTO = ReviewResponseDTO.builder()
+                .reviewId("R001")
+                .review("Great service")
+                .reviewerName("Jane Doe")
+                .rating(5)
+                .dateSubmitted(LocalDateTime.now())
+                .build();
+
+        when(visitsServiceClient.addCustomerReview(eq(ownerId), any(ReviewRequestDTO.class)))
+                .thenReturn(Mono.just(reviewResponseDTO));
+
+        webTestClient.post()
+                .uri(BASE_VISIT_URL + "/owners/{ownerId}/reviews", ownerId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(reviewRequestDTO)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody(ReviewResponseDTO.class)
+                .isEqualTo(reviewResponseDTO);
+
+        verify(visitsServiceClient, times(1)).addCustomerReview(eq(ownerId), any(ReviewRequestDTO.class));
+    }
+
+    @Test
+    void addReviewCustomer_whenInvalidRequest_thenReturnBadRequest() {
+        String ownerId = "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a";
+        ReviewRequestDTO reviewRequestDTO = ReviewRequestDTO.builder()
+                .review("")
+                .reviewerName("")
+                .rating(0)
+                .dateSubmitted(LocalDateTime.now())
+                .build();
+
+        when(visitsServiceClient.addCustomerReview(eq(ownerId), any(ReviewRequestDTO.class)))
+                .thenReturn(Mono.empty());
+
+        webTestClient.post()
+                .uri(BASE_VISIT_URL + "/owners/{ownerId}/reviews", ownerId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(reviewRequestDTO)
+                .exchange()
+                .expectStatus().isBadRequest();
+
+        verify(visitsServiceClient, times(1)).addCustomerReview(eq(ownerId), any(ReviewRequestDTO.class));
+    }
+
+    @Test
+    void deleteCustomerReview_whenValidOwnerIdAndReviewId_thenReturnOkResponse() {
+        String ownerId = "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a";
+        String reviewId = UUID.randomUUID().toString();
+
+        when(visitsServiceClient.deleteReview(ownerId, reviewId))
+                .thenReturn(Mono.empty());
+
+        webTestClient.delete()
+                .uri(BASE_VISIT_URL + "/owners/{ownerId}/reviews/{reviewId}", ownerId, reviewId)
+                .exchange()
+                .expectStatus().isNoContent();
+
+        verify(visitsServiceClient, times(1)).deleteReview(ownerId, reviewId);
+    }
+
+    @Test
+    void deleteCustomerReview_whenInvalidOwnerId_thenReturnNoContent() {
+        String ownerId = "invalidOwnerId";
+        String reviewId = UUID.randomUUID().toString();
+
+        when(visitsServiceClient.deleteReview(ownerId, reviewId))
+                .thenReturn(Mono.empty());
+
+        webTestClient.delete()
+                .uri(BASE_VISIT_URL + "/owners/{ownerId}/reviews/{reviewId}", ownerId, reviewId)
+                .exchange()
+                .expectStatus().isNoContent();
+
+        verify(visitsServiceClient, times(1)).deleteReview(ownerId, reviewId);
+    }
+
+    @Test
+    void deleteCustomerReview_whenInvalidReviewId_thenReturnNoContent() {
+        String ownerId = "validOwnerId";
+        String reviewId = UUID.randomUUID().toString();
+
+        when(visitsServiceClient.deleteReview(ownerId, reviewId))
+                .thenReturn(Mono.empty());
+
+        webTestClient.delete()
+                .uri(BASE_VISIT_URL + "/owners/{ownerId}/reviews/{reviewId}", ownerId, reviewId)
+                .exchange()
+                .expectStatus().isNoContent();
+
+        verify(visitsServiceClient, times(1)).deleteReview(ownerId, reviewId);
+    }
+    @Test
+    void exportVisitsToCSV_ShouldReturnCSVFile() {
+        // Sample data to return
+        String csvContent = "VisitId,Description\n1,Checkup";
+        InputStreamResource csvData = new InputStreamResource(new ByteArrayInputStream(csvContent.getBytes()));
+        when(visitsServiceClient.exportVisitsToCSV()).thenReturn(Mono.just(csvData));
+
+        webTestClient.get()
+                .uri("/api/v2/gateway/visits/export")
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().valueEquals(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=visits.csv")
+                .expectHeader().contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .expectBody(String.class)
+                .consumeWith(response -> {
+                    // Check the response content
+                    Assertions.assertEquals(csvContent, new String(response.getResponseBody()));
+                });
+    }
+
+
+    @Test
+    void exportVisitsToCSV_ShouldReturnServerError_WhenServiceFails() {
+        when(visitsServiceClient.exportVisitsToCSV()).thenReturn(Mono.error(new RuntimeException("Service failed")));
+
+        webTestClient.get()
+                .uri("/api/v2/gateway/visits/export")
+                .exchange()
+                .expectStatus().is5xxServerError();
+    }
+  
+  @Test
     void addVisitByOwner_whenInvalidOwnerId_thenReturnNotFound() {
         VisitRequestDTO visitRequestDTO = VisitRequestDTO.builder()
                 .visitDate(LocalDateTime.parse("2024-11-25T13:45", DateTimeFormatter.ISO_LOCAL_DATE_TIME))

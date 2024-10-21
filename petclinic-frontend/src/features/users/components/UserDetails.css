@@ -1,0 +1,163 @@
+.user-details-card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+  padding: 40px;
+  margin: 40px auto;
+  max-width: 900px;
+  text-align: left;
+}
+
+.user-details-card h2 {
+  margin-bottom: 20px;
+  color: #333;
+  font-size: 2em;
+  text-align: center;
+}
+
+.user-details-container {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.section {
+  flex: 1 1 30%;
+  margin: 15px;
+  padding: 20px;
+  border-radius: 8px;
+  background-color: #f8f9fa;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  transition:
+    transform 0.3s,
+    box-shadow 0.3s;
+}
+
+.section:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.section h3 {
+  color: #007bff;
+  margin-bottom: 15px;
+  font-size: 1.5em;
+}
+
+.section p,
+.section ul {
+  color: #555;
+  font-size: 1.1em;
+}
+
+.user-details-buttons {
+  display: flex;
+  justify-content: center;
+  margin-top: 30px;
+  gap: 20px;
+}
+
+.user-details-button,
+.delete-button {
+  flex: 1;
+  min-width: 150px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 15px 20px;
+  font-size: 1.2em;
+  line-height: 1.5;
+  cursor: pointer;
+  transition:
+    background-color 0.3s,
+    transform 0.3s;
+}
+
+.user-details-button:hover {
+  background-color: #218838;
+}
+
+.user-delete-button {
+  background-color: #dc3545;
+}
+
+.user-delete-button:hover {
+  background-color: #c82333;
+}
+
+.centered-message {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  text-align: center;
+}
+
+.update-role-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.update-role-modal-content {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  width: 90%;
+  max-width: 500px;
+}
+
+.update-role-modal-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.update-role-modal-checkbox {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.update-role-modal-checkbox input[type="checkbox"] {
+  width: 20px;
+}
+
+.update-role-modal-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.update-role-modal-save-button,
+.update-role-modal-cancel-button {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 20px;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.3s;
+  flex-grow: 1;
+  margin: 0 10px;
+}
+
+.update-role-modal-save-button:hover {
+  background-color: #218838;
+}
+
+.update-role-modal-cancel-button {
+  background-color: #dc3545;
+}
+
+.update-role-modal-cancel-button:hover {
+  background-color: #c82333;
+}

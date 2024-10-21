@@ -61,6 +61,25 @@ public class MockServerConfigBillService {
                 );
     }
 
+
+    public void registerDownloadBillPdfEndpoint() {
+        byte[] mockPdfContent = "Mock PDF Content".getBytes();  
+        
+        mockServerClient_BillService
+            .when(
+                request()
+                    .withMethod("GET")
+                    .withPath("/api/v2/gateway/customers/1/bills/1234/pdf")  
+            )
+            .respond(
+                response()
+                    .withStatusCode(200)
+                    .withBody(mockPdfContent)  
+                    .withHeader("Content-Type", "application/pdf")  
+            );
+    }
+    
+
     public void registerUpdateBillEndpoint() {
         String response = "{\"billId\":\"e6c7398e-8ac4-4e10-9ee0-03ef33f0361a\",\"customerId\":\"e6c7398e-8ac4-4e10-9ee0-03ef33f0361a\",\"visitType\":\"operation\",\"vetId\":\"3\",\"date\":\"2024-10-11\",\"amount\":100.00, \"taxedAmount\": 0.0, \"billStatus\":\"PAID\", \"dueDate\":\"2024-10-13\"}";
 
@@ -77,6 +96,33 @@ public class MockServerConfigBillService {
                                 .withBody(json(response))
                 );
     }
+
+    public void registerPayBillEndpoint() {
+        mockServerClient_BillService
+                .when(
+                        request()
+                                .withMethod("POST")
+                                .withPath("/bills/customer/e6c7398e-8ac4-4e10-9ee0-03ef33f0361a/bills/1/pay")
+                )
+                .respond(
+                        response()
+                                .withStatusCode(200)
+                                .withBody("Payment successful")
+                );
+
+        mockServerClient_BillService
+                .when(
+                        request()
+                                .withMethod("POST")
+                                .withPath("/bills/customer/invalid-customer-id/bills/1/pay")
+                )
+                .respond(
+                        response()
+                                .withStatusCode(400)
+                                .withBody("Payment failed: Invalid customer ID")
+                );
+    }
+
 
     public void stopMockServer() {
         if(clientAndServer != null)

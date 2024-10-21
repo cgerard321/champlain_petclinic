@@ -7,6 +7,9 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.LocalDate;
+
+
 @Document(collection = "products")
 @Data
 @Builder
@@ -23,7 +26,11 @@ public class Product {
     private Double productSalePrice;
     private Double averageRating;
     private Integer requestCount;
-    private String productType;
     private Integer productQuantity;
+    private Boolean isUnlisted;
+    private ProductType productType;
+    private LocalDate releaseDate;
+    private ProductStatus productStatus;
+    private DeliveryType deliveryType;
 }
 

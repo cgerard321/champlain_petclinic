@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.dtos.Vets.*;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.integration.ClientAndServer;
+import org.mockserver.model.JsonBody;
 import org.springframework.http.MediaType;
 
 import java.util.Collections;
@@ -207,8 +208,8 @@ public class MockServerConfigVetService {
                 );
     }
 
-public void stopMockServer() {
-        if(clientAndServer != null)
+    public void stopMockServer() {
+        if (clientAndServer != null)
             this.clientAndServer.stop();
     }
 
@@ -315,7 +316,8 @@ public void stopMockServer() {
                                 .withBody(photoData)
                 );
     }
-  public void registerUpdatePhotoOfVetEndpointNotFound(String vetId, String photoName) {
+
+    public void registerUpdatePhotoOfVetEndpointNotFound(String vetId, String photoName) {
         mockServerClient_VetService
                 .when(
                         request()
@@ -376,6 +378,7 @@ public void stopMockServer() {
                                 .withBody(json("{\"message\":\"Photo not found for vetId: " + vetId + "\"}"))
                 );
     }
+
     public void registerDeleteAlbumPhotoEndpoint(String vetId, Integer albumId) {
         mockServerClient_VetService
                 .when(
@@ -403,6 +406,7 @@ public void stopMockServer() {
                                 .withBody(json("{\"message\":\"Album photo not found: " + albumId + "\"}"))
                 );
     }
+
     public void registerDeleteAlbumPhotoEndpointWithServerError(String vetId, Integer albumId) {
         mockServerClient_VetService
                 .when(
@@ -417,6 +421,7 @@ public void stopMockServer() {
                                 .withBody(json("{\"message\":\"Server error occurred while deleting album photo with ID: " + albumId + "\"}"))
                 );
     }
+
     public void registerGetEducationByVetIdEndpoint(String vetId, List<EducationRequestDTO> educations) throws JsonProcessingException {
         mockServerClient_VetService.when(
                         request()
@@ -438,5 +443,117 @@ public void stopMockServer() {
                         response()
                                 .withStatusCode(404));
     }
+
+    public void registerUpdateEducationByVetIdAndEducationIdEndpoint(String vetId, String educationId, EducationRequestDTO education) {
+        mockServerClient_VetService.when(
+                        request()
+                                .withMethod("PUT")
+                                .withPath("/vets/" + vetId + "/educations/" + educationId)
+                                .withBody(json(education))
+                )
+                .respond(
+                        response()
+                                .withStatusCode(200)
+                                .withBody(json(education))
+                );
+    }
+
+    public void registerAddEducationAsUnauthorizedUser(String vetId) {
+        mockServerClient_VetService
+                .when(
+                        request()
+                                .withMethod("POST")
+                                .withPath("/vets/" + vetId + "/educations")
+                                .withHeader("Authorization", "Bearer invalid-token")
+                                .withBody(json("{"
+                                        + "\"vetId\":\"2e26e7a2-8c6e-4e2d-8d60-ad0882e295eb\","
+                                        + "\"degree\":\"Doctor of Veterinary Medicine\","
+                                        + "\"schoolName\":\"Harvard University\","
+                                        + "\"fieldOfStudy\":\"Veterinary Science\","
+                                        + "\"startDate\":\"2015-08-01\","
+                                        + "\"endDate\":\"2019-05-30\""
+                                        + "}"))
+                )
+                .respond(
+                        response()
+                                .withStatusCode(403)
+                                .withBody("{\"status\":403,\"message\":\"Unauthorized access: User is not admin or vet.\"}")
+                );
+    }
+
+
+
+    public void registerUpdateEducationByVetIdAndEducationIdEndpointNotFound(String vetId, String educationId, EducationRequestDTO education) {
+        mockServerClient_VetService.when(
+                        request()
+                                .withMethod("PUT")
+                                .withPath("/vets/" + vetId + "/educations/" + educationId)
+                                .withBody(json(education))
+                )
+                .respond(
+                        response()
+                                .withStatusCode(404)
+                                .withBody("{\"message\":\"Education not found for vetId: " + vetId + " and educationId: " + educationId + "\"}")
+                );
+    }
+
+    public void registerGetRatingsByVetIdEndpoint(String vetId, String ratingsJson) {
+        mockServerClient_VetService
+                .when(
+                        request()
+                                .withMethod("GET")
+                                .withPath("/vets/" + vetId + "/ratings")
+                )
+                .respond(
+                        response()
+                                .withStatusCode(200)
+                                .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                                .withBody(ratingsJson)
+                );
+    }
+
+    public void registerGetRatingsByVetIdEndpointNotFound(String vetId) {
+        mockServerClient_VetService
+                .when(
+                        request()
+                                .withMethod("GET")
+                                .withPath("/vets/" + vetId + "/ratings")
+                )
+                .respond(
+                        response()
+                                .withStatusCode(404)
+                                .withBody("{\"message\":\"No ratings found for vetId: " + vetId + "\"}")
+                );
+    }
+
+    public void registerDeleteEducationEndpoint(String vetId, String educationId) {
+        mockServerClient_VetService
+                .when(
+                        request()
+                                .withMethod("DELETE")
+                                .withPath("/vets/" + vetId + "/educations/" + educationId)
+                )
+                .respond(
+                        response()
+                                .withStatusCode(204)
+                );
+    }
+
+    public void registerDeleteEducationByVetIdEndpointNotFound(String vetId, String educationId) {
+        String responseBody = "{\"message\":\"Education not found: " + educationId + "\"}";
+        mockServerClient_VetService
+                .when(
+                        request()
+                                .withMethod("DELETE")
+                                .withPath("/vets/" + vetId + "/educations/" + educationId)
+                )
+                .respond(
+                        response()
+                                .withStatusCode(404)
+                                .withHeader("Content-Type", "application/json")
+                                .withBody(responseBody)
+                );
+    }
+
 
 }
