@@ -61,7 +61,6 @@ class EducationServiceImplTest {
     Education education = buildEducation();
     EducationRequestDTO educationRequestDTO = buildEducationRequestDTO();
 
-
     @Test
     void getAllEducationsByVetId() {
         when(educationRepository.findAllByVetId(anyString())).thenReturn(Flux.just(education));
@@ -76,8 +75,9 @@ class EducationServiceImplTest {
                 })
                 .verifyComplete();
     }
+
     @Test
-    void deleteEducationByEducationId() {
+    void deleteEducationByEducationId_Success() {
         when(educationRepository.findByVetIdAndEducationId(anyString(), anyString())).thenReturn(Mono.just(education));
         when(educationRepository.delete(any())).thenReturn(Mono.empty());
 
@@ -87,6 +87,19 @@ class EducationServiceImplTest {
                 .create(deletedEducation)
                 .verifyComplete();
     }
+
+    @Test
+    void deleteEducationByEducationId_EducationNotFound() {
+        when(educationRepository.findByVetIdAndEducationId(anyString(), anyString())).thenReturn(Mono.empty());
+
+        Mono<Void> deletedEducation = educationService.deleteEducationByEducationId(education.getVetId(), education.getEducationId());
+
+        StepVerifier
+                .create(deletedEducation)
+                .expectError(NotFoundException.class)
+                .verify();
+    }
+
     @Test
     void updateEducationOfVet(){
         when(educationRepository.save(any())).thenReturn(Mono.just(education));

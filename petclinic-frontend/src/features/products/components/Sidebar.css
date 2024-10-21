@@ -19,7 +19,7 @@
 .sidebar {
   position: fixed;
   top: 0;
-  right: -350px;
+  right: -1000px;
   width: 429px;
   height: 100%;
   background-color: #fff;
@@ -67,8 +67,8 @@
 
 .apply-filter-button {
   padding: 10px;
-  background-color: #3e8e41;
-  color: #fff;
+  background-color: #000000;
+  color: #ffffff;
   border: none;
   border-radius: 4px;
   cursor: pointer;
@@ -77,40 +77,44 @@
 }
 
 .apply-filter-button:hover {
-  background-color: #45a049;
+  background-color: #888888;
 }
 
 .toggle-sidebar-button {
-  position: fixed;
-  top: 100px;
-  right: 20px;
-  background-color: #3e8e41;
-  color: #fff;
+  position: relative;
+  margin: 20px auto;
+  background-color: #000000;
+  color: white;
   border: none;
-  padding: 12px 16px;
-  border-radius: 4px;
+  padding: 10px 20px;
+  font-size: 16px;
   cursor: pointer;
-  font-size: 18px;
-  z-index: 1000;
-  transition: background-color 0.3s ease;
+  border-radius: 5px;
+  transition: background-color 0.3s;
 }
 
 .toggle-sidebar-button:hover {
-  background-color: #45a049;
+  background-color: #888888;
+}
+
+@media (max-width: 768px) {
+  .toggle-sidebar-button {
+    width: 100%;
+    text-align: center;
+  }
 }
 
 .clear-filter-button {
   padding: 10px;
-  background-color: #f44336;
+  background-color: #000000;
   color: #fff;
   border: none;
   border-radius: 4px;
   cursor: pointer;
   font-size: 16px;
   transition: background-color 0.3s ease;
-  margin-left: 10px;
 }
 
 .clear-filter-button:hover {
-  background-color: #da190b;
+  background-color: #888888;
 }

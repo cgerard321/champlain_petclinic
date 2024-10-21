@@ -16,7 +16,7 @@ public class RawEmailModel
 
     public string EmailToSendTo { get; set; }
     public string EmailTitle { get; set; }
-
+    
     public string Body { get; set; }
     
     

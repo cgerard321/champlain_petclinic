@@ -14,6 +14,7 @@ import { getAllPaidBills } from '@/features/bills/api/getAllPaidBills.tsx';
 import { getAllOverdueBills } from '@/features/bills/api/getAllOverdueBills.tsx';
 import { getAllUnpaidBills } from '@/features/bills/api/getAllUnpaidBills.tsx';
 import { getBillByBillId } from '@/features/bills/api/GetBillByBillId.tsx';
+import { getBillsByMonth } from '@/features/bills/api/getBillByMonth.tsx';
 
 export default function AdminBillsListTable(): JSX.Element {
   const navigate = useNavigate();
@@ -25,6 +26,12 @@ export default function AdminBillsListTable(): JSX.Element {
   const [filter, setFilter] = useState<FilterModel>({
     customerId: '',
   });
+  const [filterYear, setFilterYear] = useState<number>(
+    new Date().getFullYear()
+  );
+  const [filterMonth, setFilterMonth] = useState<number>(
+    new Date().getMonth() + 1
+  );
 
   interface FilterModel {
     [key: string]: string;
@@ -118,6 +125,26 @@ export default function AdminBillsListTable(): JSX.Element {
     }
   };
 
+  const handleMonthFilter = async (): Promise<void> => {
+    setError(null);
+    setFilteredBills(null);
+
+    try {
+      const billsByMonth = await getBillsByMonth(filterYear, filterMonth);
+      setFilteredBills(billsByMonth);
+    } catch (err) {
+      console.error('Error fetching bills by month:', err);
+      setError('Error fetching bills by month. Please try again.');
+    }
+  };
+
+  const clearMonthFilter = (): void => {
+    setFilterYear(new Date().getFullYear());
+    setFilterMonth(new Date().getMonth() + 1);
+    setFilteredBills(null);
+    getBillsList(currentPage, 10);
+  };
+
   const getFilteredBills = (): Bill[] => {
     const billsToFilter = filteredBills || billsList;
 
@@ -129,7 +156,7 @@ export default function AdminBillsListTable(): JSX.Element {
       const matchesCustomerId =
         !filter.customerId || bill.customerId.includes(filter.customerId);
 
-      return matchesStatus && matchesCustomerId; // Combine filters
+      return matchesStatus && matchesCustomerId;
     });
   };
 
@@ -234,20 +261,6 @@ export default function AdminBillsListTable(): JSX.Element {
         />
         <button onClick={handleSearch}>Search</button>
         {searchedBill && <button onClick={handleGoBack}>Go Back</button>}
-      </div>
-
-      <div>
-        <label htmlFor="billFilter">Filter Bills by Status: </label>
-        <select
-          id="billFilter"
-          value={selectedFilter}
-          onChange={handleFilterChange}
-        >
-          <option value="">All Bills</option>
-          <option value="unpaid">Unpaid Bills</option>
-          <option value="paid">Paid Bills</option>
-          <option value="overdue">Overdue Bills</option>
-        </select>
       </div>
 
       <div>
@@ -365,6 +378,46 @@ export default function AdminBillsListTable(): JSX.Element {
           </form>
         </div>
       )}
+
+      <div>
+        <label htmlFor="billFilter">Filter Bills by Status: </label>
+        <select
+          id="billFilter"
+          value={selectedFilter}
+          onChange={handleFilterChange}
+        >
+          <option value="">All Bills</option>
+          <option value="unpaid">Unpaid Bills</option>
+          <option value="paid">Paid Bills</option>
+          <option value="overdue">Overdue Bills</option>
+        </select>
+      </div>
+
+      <div>
+        <label htmlFor="yearFilter">Year: </label>
+        <input
+          type="number"
+          id="yearFilter"
+          value={filterYear}
+          onChange={e => setFilterYear(parseInt(e.target.value))}
+        />
+
+        <label htmlFor="monthFilter">Month: </label>
+        <select
+          id="monthFilter"
+          value={filterMonth}
+          onChange={e => setFilterMonth(parseInt(e.target.value))}
+        >
+          {Array.from({ length: 12 }, (_, i) => (
+            <option key={i + 1} value={i + 1}>
+              {new Date(0, i).toLocaleString('default', { month: 'long' })}
+            </option>
+          ))}
+        </select>
+
+        <button onClick={handleMonthFilter}>Filter by Month</button>
+        <button onClick={clearMonthFilter}>Clear Date Filter</button>
+      </div>
 
       {searchedBill ? (
         <div>

@@ -131,4 +131,16 @@ public class BillController {
         return billService.getAllOverdueBills();
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping(value = "/admin/month", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<BillResponseDTO> getBillsByMonth(
+            @RequestParam int year,
+            @RequestParam int month) {
+        if (year < 0 || month < 1 || month > 12) {
+            throw new InvalidInputException("Invalid year or month: year=" + year + ", month=" + month);
+        }
+
+        return billService.getBillsByMonth(year, month);
+    }
+
 }

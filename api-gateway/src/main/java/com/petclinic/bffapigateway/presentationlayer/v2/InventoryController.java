@@ -151,18 +151,19 @@ public class InventoryController {
     public Mono<ResponseEntity<Flux<ProductResponseDTO>>> searchProducts(
             @PathVariable String inventoryId,
             @RequestParam(required = false) String productName,
-            @RequestParam(required = false) String productDescription) {
+            @RequestParam(required = false) String productDescription,
+            @RequestParam(required = false) Status status) {
 
         Flux<ProductResponseDTO> products = inventoryServiceClient
-                .searchProducts(inventoryId, productName, productDescription);
+                .searchProducts(inventoryId, productName, productDescription, status);
 
         return products
-                .hasElements() // Check if any elements are present in the flux
+                .hasElements()
                 .flatMap(hasElements -> {
                     if (hasElements) {
                         return Mono.just(ResponseEntity.ok(products));
                     } else {
-                        return Mono.just(ResponseEntity.notFound().build());
+                        return Mono.just(ResponseEntity.noContent().build());
                     }
                 });
     }

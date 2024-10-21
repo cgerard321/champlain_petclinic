@@ -152,8 +152,6 @@ public class DatabaseLoaderService implements CommandLineRunner {
                 .verified(true)
                 .build();
 
-
-
         User owner9 = User.builder()
                 .username("Owner9")
                 .userIdentifier(new UserIdentifier("9f6accd1-e943-4322-932e-199d93824317"))

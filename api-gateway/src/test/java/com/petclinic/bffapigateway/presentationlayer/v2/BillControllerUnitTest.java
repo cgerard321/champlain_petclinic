@@ -241,4 +241,35 @@ private final String baseBillURL = "/api/v2/gateway/bills";
                 .exchange()
                 .expectStatus().isBadRequest();
     }
+
+    @Test
+    public void whenGetBillsByMonthWithValidParameters_ThenReturnBills() {
+        when(billServiceClient.getBillsByMonth(2024, 10))
+                .thenReturn(Flux.just(billresponse, billresponse2));
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder.path(baseBillURL + "/admin/month")
+                        .queryParam("year", 2024)
+                        .queryParam("month", 10)
+                        .build())
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(BillResponseDTO.class)
+                .hasSize(2)
+                .contains(billresponse, billresponse2);
+
+        verify(billServiceClient, times(1)).getBillsByMonth(2024, 10);
+    }
+
+    @Test
+    public void whenGetBillsByMonthWithInvalidParameters_ThenReturnUnprocessableEntity() {
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder.path(baseBillURL + "/admin/month")
+                        .queryParam("year", -1)
+                        .queryParam("month", 13)
+                        .build())
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.SC_UNPROCESSABLE_ENTITY);
+    }
 }

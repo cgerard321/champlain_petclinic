@@ -104,9 +104,7 @@ export default function ProductList(): JSX.Element {
   useEffect(() => {
     const hasRightRole =
       user?.roles !== undefined &&
-      Array.from(user.roles).some(
-        role => role.name === 'ADMIN' || role.name === 'INVENTORY_MANAGER'
-      );
+      Array.from(user.roles).some(role => role.name === 'ADMIN');
     setIsRightRole(hasRightRole);
   }, [user]);
 
@@ -137,7 +135,6 @@ export default function ProductList(): JSX.Element {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  // Handler to close sidebar when clicking outside
   const handleOverlayClick = (): void => {
     setIsSidebarOpen(false);
   };
@@ -174,6 +171,22 @@ export default function ProductList(): JSX.Element {
       return updatedProducts;
     });
   };
+  const RecentlyViewedProducts = (): JSX.Element => (
+    <div className="recently-viewed-container">
+      <h2>Recently Seen Products</h2>
+      <div className="grid">
+        {recentlyClickedProducts.length > 0 ? (
+          recentlyClickedProducts
+            .filter(product => !product.isUnlisted)
+            .map(product => (
+              <Product key={product.productId} product={product} />
+            ))
+        ) : (
+          <p>No recently clicked products.</p>
+        )}
+      </div>
+    </div>
+  );
 
   return (
     <div className="product-list-container">
@@ -288,61 +301,58 @@ export default function ProductList(): JSX.Element {
         </div>
       </div>
 
-      {!isSidebarOpen && (
-        <button
-          className="toggle-sidebar-button"
-          onClick={toggleSidebar}
-          aria-expanded={isSidebarOpen}
-          aria-controls="sidebar"
-        >
-          &#9776; Filters
-        </button>
-      )}
-
       {isRightRole && (
         <AddProduct addProduct={handleAddProduct} addImage={handleAddImage} />
       )}
       <div className="main-content">
-        <h2>Product Bundles</h2>
-        <div className="grid product-bundles-grid">
-          {bundleList.length > 0 ? (
-            bundleList.map((bundle: ProductBundleModel) => (
-              <ProductBundle key={bundle.bundleId} bundle={bundle} />
-            ))
-          ) : (
-            <p>No product bundles available.</p>
-          )}
-        </div>
-        <h2>Products</h2>
-        <div className="grid">
-          {isLoading ? (
-            <p>Loading products...</p>
-          ) : productList.length > 0 ? (
-            productList.map((product: ProductModel) => (
-              <div
-                key={product.productId}
-                onClick={() => handleProductClick(product)}
-              >
-                <Product key={product.productId} product={product} />
-              </div>
-            ))
-          ) : (
-            <p>No products found.</p>
-          )}
+        <div className="product-bundle-container">
+          <h2>Product Bundles</h2>
+          <div className="grid product-bundles-grid">
+            {bundleList.length > 0 ? (
+              bundleList.map((bundle: ProductBundleModel) => (
+                <ProductBundle key={bundle.bundleId} bundle={bundle} />
+              ))
+            ) : (
+              <p>No product bundles available.</p>
+            )}
+          </div>
         </div>
         <div>
           <hr />
         </div>
-        <div>
-          <h2>Recently Clicked Products</h2>
+        <div className="list-container">
+          <h2>List Products</h2>
+          {!isSidebarOpen && (
+            <button
+              className="toggle-sidebar-button"
+              onClick={toggleSidebar}
+              aria-expanded={isSidebarOpen}
+              aria-controls="sidebar"
+            >
+              &#9776; Filters
+            </button>
+          )}
           <div className="grid">
-            {recentlyClickedProducts
-              .filter(product => !product.isUnlisted)
-              .map(product => (
-                <Product key={product.productId} product={product} />
-              ))}
+            {isLoading ? (
+              <p>Loading products...</p>
+            ) : productList.length > 0 ? (
+              productList.map((product: ProductModel) => (
+                <div
+                  key={product.productId}
+                  onClick={() => handleProductClick(product)}
+                >
+                  <Product key={product.productId} product={product} />
+                </div>
+              ))
+            ) : (
+              <p>No products found.</p>
+            )}
           </div>
         </div>
+        <div>
+          <hr />
+        </div>
+        <RecentlyViewedProducts />
       </div>
     </div>
   );

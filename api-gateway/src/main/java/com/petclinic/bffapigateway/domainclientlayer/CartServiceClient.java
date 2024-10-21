@@ -308,5 +308,25 @@ public Mono<CartResponseDTO> deleteCartByCartId(String CardId) {
                 .bodyToMono(PromoCodeResponseDTO.class);
     }
 
+    public Mono<CartResponseDTO> addProductToCartFromProducts(String cartId, String productId) {
+        return webClientBuilder.build()
+                .post()
+                .uri(CartServiceUrl + "/" + cartId + "/" + productId)
+                .body(Mono.just(new AddProductRequestDTO(productId, 1)), AddProductRequestDTO.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> {
+                    return clientResponse.bodyToMono(CartResponseDTO.class)
+                            .flatMap(cartResponseDTO -> {
+                                if (cartResponseDTO.getMessage() != null) {
+                                    return Mono.error(new InvalidInputException(cartResponseDTO.getMessage()));
+                                } else {
+                                    return Mono.error(new InvalidInputException("Invalid input"));
+                                }
+                            });
+                })
+                .onStatus(HttpStatusCode::is5xxServerError, error -> Mono.error(new IllegalArgumentException("Server error")))
+                .bodyToMono(CartResponseDTO.class);
+    }
 
 }

@@ -288,18 +288,20 @@ public class InventoryServiceClient {
     public Flux<ProductResponseDTO> searchProducts(
             final String inventoryId,
             final String productName,
-            final String productDescription
+            final String productDescription,
+            final Status status
     ) {
         UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(inventoryServiceUrl + "/{inventoryId}/products/search")
                 .queryParamIfPresent("productName", Optional.ofNullable(productName))
-                .queryParamIfPresent("productDescription", Optional.ofNullable(productDescription));
+                .queryParamIfPresent("productDescription", Optional.ofNullable(productDescription))
+                .queryParamIfPresent("status", Optional.ofNullable(status));
 
         return webClient.get()
                 .uri(uriBuilder.buildAndExpand(inventoryId).toUri())
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError,
-                        resp -> Mono.error(new NotFoundException("No products found in inventory: " + inventoryId)))
+                        resp -> Mono.error(new InventoryNotFoundException("No products found in inventory: " + inventoryId + " that match the search criteria", HttpStatus.NOT_FOUND)))
                 .bodyToFlux(ProductResponseDTO.class);
     }
     public Mono<ProductResponseDTO> addSupplyToInventory(final ProductRequestDTO model, final String inventoryId){

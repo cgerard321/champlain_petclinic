@@ -19,7 +19,10 @@ import reactor.core.publisher.Mono;
 
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.function.Predicate;
+
+import static reactor.core.publisher.FluxExtensionsKt.switchIfEmpty;
 
 
 @Service
@@ -266,4 +269,16 @@ public class BillServiceImpl implements BillService{
                     }
                 });
     }
+
+    @Override
+    public Flux<BillResponseDTO> getBillsByMonth(int year, int month) {
+        YearMonth yearMonth = YearMonth.of(year, month);
+        LocalDate start = yearMonth.atDay(1);
+        LocalDate end = yearMonth.atEndOfMonth().plusDays(1);
+
+        return billRepository.findByDateBetween(start, end)
+                .map(EntityDtoUtil::toBillResponseDto)
+                .switchIfEmpty(Flux.empty());
+    }
+
 }

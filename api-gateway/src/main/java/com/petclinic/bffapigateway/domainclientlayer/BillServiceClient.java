@@ -311,4 +311,17 @@ public class BillServiceClient {
                 .bodyToMono(byte[].class);
     }
 
+    public Flux<BillResponseDTO> getBillsByMonth(int year, int month) {
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(billServiceUrl + "/month")
+                .queryParam("year", year)
+                .queryParam("month", month);
+
+        return webClientBuilder.build()
+                .get()
+                .uri(builder.build().toUri())
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToFlux(BillResponseDTO.class);
+    }
+
 }
