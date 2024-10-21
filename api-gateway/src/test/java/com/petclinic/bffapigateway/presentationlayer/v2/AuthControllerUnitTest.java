@@ -25,6 +25,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Collections;
@@ -59,6 +60,7 @@ class AuthControllerUnitTest {
         this.client = WebTestClient.bindToController(new UserController(authServiceClient)).build();
     }
 
+
     @Test
     @DisplayName("Given valid JWT, verify user with redirection")
     void verify_user_with_redirection_shouldSucceedForV2(){
@@ -83,7 +85,73 @@ class AuthControllerUnitTest {
                 .expectStatus().isFound()
                 .expectHeader().valueEquals("Location", "http://localhost:3000/users/login");
     }
+    @Test
+    @DisplayName("Should fetch all users successfully")
+    void getAllUsers_ShouldReturnUserList() {
+        String jwtToken = "validJwtToken";
 
+        UserDetails user1 = UserDetails.builder()
+                .userId("userId1")
+                .email("user1@mail.com")
+                .username("user1")
+                .roles(Collections.emptySet())
+                .build();
+
+        UserDetails user2 = UserDetails.builder()
+                .userId("userId2")
+                .email("user2@mail.com")
+                .username("user2")
+                .roles(Collections.emptySet())
+                .build();
+
+        when(authServiceClient.getAllUsers(jwtToken))
+                .thenReturn(Flux.just(user1, user2));
+
+        client.get()
+                .uri("/api/v2/gateway/users")
+                .cookie("Bearer", jwtToken)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$[0].userId").isEqualTo("userId1")
+                .jsonPath("$[0].email").isEqualTo("user1@mail.com")
+                .jsonPath("$[0].username").isEqualTo("user1")
+                .jsonPath("$[1].userId").isEqualTo("userId2")
+                .jsonPath("$[1].email").isEqualTo("user2@mail.com")
+                .jsonPath("$[1].username").isEqualTo("user2");
+    }
+
+    @Test
+    @DisplayName("Should return an empty list when no users are found")
+    void getAllUsers_ShouldReturnEmptyList() {
+        String jwtToken = "validJwtToken";
+
+        when(authServiceClient.getAllUsers(jwtToken))
+                .thenReturn(Flux.empty());
+
+        client.get()
+                .uri("/api/v2/gateway/users")
+                .cookie("Bearer", jwtToken)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.length()").isEqualTo(0);
+    }
+
+    @Test
+    @DisplayName("Should return 500 error when service fails")
+    void getAllUsers_ShouldReturnInternalServerError() {
+        String jwtToken = "validJwtToken";
+
+        when(authServiceClient.getAllUsers(jwtToken))
+                .thenReturn(Flux.error(new RuntimeException("Service error")));
+
+        client.get()
+                .uri("/api/v2/gateway/users")
+                .cookie("Bearer", jwtToken)
+                .exchange()
+                .expectStatus().is5xxServerError();
+    }
     @Test
     @DisplayName("Given valid Register object, create user successfully")
     void createUserUsingV2Endpoint_shouldSucceed() {
