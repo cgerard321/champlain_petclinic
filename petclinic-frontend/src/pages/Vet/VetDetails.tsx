@@ -9,6 +9,7 @@ import AddEducation from '@/pages/Vet/AddEducation.tsx';
 import DeleteVetEducation from '@/pages/Vet/DeleteVetEducation';
 import { Workday } from '@/features/veterinarians/models/Workday.ts';
 import UpdateVet from '@/pages/Vet/UpdateVet.tsx';
+import { fetchVetPhoto } from '@/features/veterinarians/api/fetchPhoto';
 
 interface VetResponseType {
   vetId: string;
@@ -137,30 +138,23 @@ export default function VetDetails(): JSX.Element {
     fetchVetRatings();
   }, [vetId]);
 
-  const fetchVetPhoto = useCallback(async (): Promise<void> => {
-    try {
-      const response = await fetch(
-        `http://localhost:8080/api/v2/gateway/vets/${vetId}/photo`,
-        {
-          method: 'GET',
-          headers: {
-            Accept: 'image/*',
-          },
+  useEffect(() => {
+    const fetchPhoto = async (): Promise<void> => {
+      try {
+        if (vetId) {
+          const imageUrl = await fetchVetPhoto(vetId);
+          setPhoto(imageUrl);
+        } else {
+          setError('Vet ID is undefined');
         }
-      );
-
-      if (!response.ok) {
-        throw new Error(`Error: ${response.statusText}`);
+      } catch (error) {
+        setError('Failed to fetch vet photo');
+        setPhoto('/images/vet_default.jpg');
+        setIsDefaultPhoto(true); // This indicates the default photo is being used
       }
+    };
 
-      const blob = await response.blob();
-      const imageUrl = URL.createObjectURL(blob);
-      setPhoto(imageUrl);
-    } catch (error) {
-      setError('Failed to fetch vet photo');
-      setPhoto('/images/vet_default.jpg');
-      setIsDefaultPhoto(true); // This indicates the default photo is being used
-    }
+    fetchPhoto();
   }, [vetId]);
 
   const handleEducationDeleted = (deletedEducationId: string): void => {
@@ -173,7 +167,6 @@ export default function VetDetails(): JSX.Element {
 
   const handlePhotoDeleted = (): void => {
     setIsDefaultPhoto(true);
-    fetchVetPhoto();
   };
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -238,12 +231,10 @@ export default function VetDetails(): JSX.Element {
     };
 
     fetchVetDetails().then(() => {
-      fetchVetPhoto();
       fetchEducationDetails();
       fetchAlbumPhotos();
       setLoading(false);
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [vetId]);
 
   const handleImageClick = (): void => {

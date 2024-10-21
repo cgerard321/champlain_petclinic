@@ -1,7 +1,14 @@
 .billsListTableContainer {
-  max-width: 1200px;
+  max-width: 85%;
   margin: 0 auto;
   padding: 20px;
+  font-family: 'Arial', sans-serif;
+}
+
+.filterContainer {
+  max-width: 85%;
+  margin: 0 auto;
+  padding-bottom: 10px;
   font-family: 'Arial', sans-serif;
 }
 
@@ -38,4 +45,14 @@
 
 .table tbody tr:hover {
   background-color: #f1f1f1;
+}
+
+.table th:nth-child(11), 
+.table td:nth-child(11) {
+  width: 160px; 
+}
+
+.table th:nth-child(1), 
+.table td:nth-child(1) {
+  width: 125px; 
 }

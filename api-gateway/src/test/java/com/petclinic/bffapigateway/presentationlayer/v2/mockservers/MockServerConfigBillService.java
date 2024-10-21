@@ -130,6 +130,33 @@ public class MockServerConfigBillService {
                 );
     }
 
+    public void registerPayBillEndpoint() {
+        mockServerClient_BillService
+                .when(
+                        request()
+                                .withMethod("POST")
+                                .withPath("/bills/customer/e6c7398e-8ac4-4e10-9ee0-03ef33f0361a/bills/1/pay")
+                )
+                .respond(
+                        response()
+                                .withStatusCode(200)
+                                .withBody("Payment successful")
+                );
+
+        mockServerClient_BillService
+                .when(
+                        request()
+                                .withMethod("POST")
+                                .withPath("/bills/customer/invalid-customer-id/bills/1/pay")
+                )
+                .respond(
+                        response()
+                                .withStatusCode(400)
+                                .withBody("Payment failed: Invalid customer ID")
+                );
+    }
+
+
     public void stopMockServer() {
         if(clientAndServer != null)
             this.clientAndServer.stop();

@@ -622,4 +622,76 @@ class InventoryServiceClientIntegrationTest {
                         && throwable.getMessage().contains("No products found in inventory: " + inventoryId + " that match the search criteria"))
                 .verify();
     }
+
+    @Test
+    void consumeProduct_withValidInventoryIdAndProductId_shouldReturnProduct() throws JsonProcessingException {
+        // Arrange
+        ProductResponseDTO product = new ProductResponseDTO(
+                "productId",
+                "inventoryId",
+                "name",
+                "desc",
+                10.00,
+                2,
+                15.99,
+                Status.OUT_OF_STOCK
+        );
+
+        // Mock the response from the MockWebServer
+        mockWebServer.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+                .setBody(objectMapper.writeValueAsString(product)));
+
+        // Act
+        Mono<ProductResponseDTO> result = inventoryServiceClient.consumeProduct("inventoryId", "productId");
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNext(product)
+                .verifyComplete();
+    }
+
+    @Test
+    void consumeProduct_withInvalidInventoryId_shouldThrowInventoryNotFoundException() {
+        // Arrange
+        String invalidInventoryId = "invalidInventoryId";
+        String productId = "productId";
+
+        // Mock a 404 Not Found response from the MockWebServer
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(404)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("{\"message\": \"Product not found in inventory: " + invalidInventoryId + "\"}"));
+
+        // Act
+        Mono<ProductResponseDTO> result = inventoryServiceClient.consumeProduct(invalidInventoryId, productId);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof InventoryNotFoundException
+                        && throwable.getMessage().contains("Product not found in inventory: " + invalidInventoryId))
+                .verify();
+    }
+
+    @Test
+    void consumeProduct_withInvalidProductId_shouldThrowProductListNotFoundException() {
+        // Arrange
+        String inventoryId = "inventoryId";
+        String invalidProductId = "invalidProductId";
+
+        // Mock a 404 Not Found response from the MockWebServer
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(404)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("{\"message\": \"Product not found in inventory: " + inventoryId + "\"}"));
+
+        // Act
+        Mono<ProductResponseDTO> result = inventoryServiceClient.consumeProduct(inventoryId, invalidProductId);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof InventoryNotFoundException
+                        && throwable.getMessage().contains("Product not found in inventory: " + inventoryId))
+                .verify();
+    }
 }

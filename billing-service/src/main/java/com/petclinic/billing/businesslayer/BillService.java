@@ -1,10 +1,8 @@
 package com.petclinic.billing.businesslayer;
 
 
-import com.petclinic.billing.datalayer.Bill;
-import com.petclinic.billing.datalayer.BillRequestDTO;
-import com.petclinic.billing.datalayer.BillResponseDTO;
-import com.petclinic.billing.datalayer.BillStatus;
+import com.petclinic.billing.datalayer.*;
+import com.petclinic.billing.exceptions.InvalidPaymentException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -69,5 +67,8 @@ public interface BillService {
     Flux<BillResponseDTO> getBillsByMonth(int year, int month);
 
     Mono<Double> calculateCurrentBalance(String customerId);
+
+    Mono<Bill> processPayment(String customerId, String billId, PaymentRequestDTO paymentRequestDTO) throws InvalidPaymentException;
+
 
 }

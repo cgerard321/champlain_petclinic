@@ -4,6 +4,8 @@ import com.itextpdf.text.DocumentException;
 import com.petclinic.billing.datalayer.*;
 import com.petclinic.billing.domainclientlayer.OwnerClient;
 import com.petclinic.billing.domainclientlayer.VetClient;
+import com.petclinic.billing.exceptions.InvalidPaymentException;
+import com.petclinic.billing.exceptions.NotFoundException;
 import com.petclinic.billing.util.EntityDtoUtil;
 import com.petclinic.billing.util.PdfGenerator;
 
@@ -287,6 +289,23 @@ public class BillServiceImpl implements BillService{
                 .map(Bill::getAmount)
                 .reduce(0.0, Double::sum)
                 .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Customer not found")));
+
+    @Override
+    public Mono<Bill> processPayment(String customerId, String billId, PaymentRequestDTO paymentRequestDTO) throws InvalidPaymentException {
+        // Basic card validation outside of reactive pipeline
+        if (paymentRequestDTO.getCardNumber().length() != 16 ||
+                paymentRequestDTO.getCvv().length() != 3 ||
+                paymentRequestDTO.getExpirationDate().length() != 5) {
+            return Mono.error(new InvalidPaymentException("Invalid payment details"));
+        }
+
+        // Continue with reactive processing if validation is successful
+        return billRepository.findByCustomerIdAndBillId(customerId, billId)
+                .switchIfEmpty(Mono.error(new NotFoundException("Bill not found")))
+                .flatMap(bill -> {
+                    bill.setBillStatus(BillStatus.PAID);
+                    return billRepository.save(bill);
+                });
     }
 
 }
