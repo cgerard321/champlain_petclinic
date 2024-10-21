@@ -336,7 +336,7 @@ public class EmailServiceImpl : IEmailService
                 message.Date.DateTime,
                 message.TextBody
             );
-            Console.WriteLine(" yeah so" + emailReceived.Subject + emailReceived.From.ToString() + emailReceived.DateReceived + emailReceived.PlainTextBody);
+            //Console.WriteLine(" yeah so" + emailReceived.Subject + emailReceived.From.ToString() + emailReceived.DateReceived + emailReceived.PlainTextBody);
 
             // Yield the email object
             yield return emailReceived;

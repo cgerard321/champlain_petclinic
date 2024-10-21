@@ -37,6 +37,28 @@ public class MockServerConfigEmailingService {
                                 .withBody(json(emailResponse))
                 );
     }
+    public void registerGetAllReceivedEmailsEndpoint() {
+        String receivedEmailResponse = "[" +
+                "{" +
+                "\"from\": \"\\\"Xilef992\\\" <xilef992@gmail.com>\"," +
+                "\"subject\": \"yeah ok\"," +
+                "\"dateReceived\": \"2024-10-20T21:52:40.000+00:00\"," +
+                "\"plainTextBody\": \"You are done!\\n\"" +
+                "}" +
+                "]";
+
+        mockServerClient_EmailingService
+                .when(
+                        request()
+                                .withMethod("GET")
+                                .withPath("/received/all")
+                )
+                .respond(
+                        response()
+                                .withStatusCode(200)
+                                .withBody(json(receivedEmailResponse))
+                );
+    }
 
     // Mock for addHtmlTemplate endpoint
     public void registerAddHtmlTemplateEndpoint() {
@@ -85,6 +107,7 @@ public class MockServerConfigEmailingService {
                                 .withBody(json("{\"status\":\"OK\"}"))
                 );
     }
+
 
     // Stop the mock server
     public void stopMockServer() {

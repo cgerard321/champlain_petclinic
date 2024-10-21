@@ -1,10 +1,7 @@
 package com.petclinic.bffapigateway.presentationlayer.v2.Emailing;
 
 import com.petclinic.bffapigateway.domainclientlayer.EmailingServiceClient;
-import com.petclinic.bffapigateway.dtos.Emailing.DirectEmailModelRequestDTO;
-import com.petclinic.bffapigateway.dtos.Emailing.EmailModelResponseDTO;
-import com.petclinic.bffapigateway.dtos.Emailing.NotificationEmailModelRequestDTO;
-import com.petclinic.bffapigateway.dtos.Emailing.RawEmailModelRequestDTO;
+import com.petclinic.bffapigateway.dtos.Emailing.*;
 import com.petclinic.bffapigateway.presentationlayer.v2.EmailingController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -134,6 +131,36 @@ class EmailingControllerIntegrationTest {
                 .exchange()
                 .expectStatus().isOk(); // Expect 200 OK
     }
+    @Test
+    void testGetAllEmailsReceived() {
+        // Mock the service response
+        ReceivedEmailResponseDTO receivedEmail1 = new ReceivedEmailResponseDTO(/* initialize fields */);
+        ReceivedEmailResponseDTO receivedEmail2 = new ReceivedEmailResponseDTO(/* initialize fields */);
+        when(emailingService.getAllReceivedEmails()).thenReturn(Flux.just(receivedEmail1, receivedEmail2));
 
-    // Additional tests can be added to test error handling and other scenarios
+        // Execute the test
+        bindToController(emailingController).build()
+                .get()
+                .uri("/api/v2/gateway/emailing/received/all")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()  // Check if the status is 200 OK
+                .expectBodyList(ReceivedEmailResponseDTO.class)
+                .hasSize(2)
+                .contains(receivedEmail1, receivedEmail2);
+    }
+
+    @Test
+    void testGetAllEmailsReceived_NoEmailThenOk() {
+        when(emailingService.getAllReceivedEmails()).thenReturn(Flux.empty());
+
+        // Execute the test
+        bindToController(emailingController).build()
+                .get()
+                .uri("/api/v2/gateway/emailing/received/all")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk(); // Expect 204 No Content
+    }
+
 }
