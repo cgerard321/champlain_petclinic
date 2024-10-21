@@ -81,16 +81,7 @@ public class RecurringJobService : BackgroundService
         _logger.LogInformation("Recurring task executed at: {time}", now);
         
         // Fetch emails scheduled to be sent at the current time
-        List<EmailModelNotification> emailsToSend;
-        try
-        {
-            emailsToSend = await _databaseHelper.GetAllEmailsNotificationAsync();
-        }
-        catch (emailing_service.Utils.Exception.MissingDatabaseException ex)
-        {
-            Console.WriteLine("Database Offline, we could not send the message");             
-            emailsToSend = new List<EmailModelNotification>();
-        }
+        List<EmailModelNotification> emailsToSend = await _databaseHelper.GetAllEmailsNotificationAsync();
 
         
         foreach (var email in emailsToSend)
@@ -123,7 +114,51 @@ public class RecurringJobService : BackgroundService
         }
     }
 
+    /*
+    public async void DoWork(object? state)
+    {
+        DateTime now = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+            TimeZoneInfo.CreateCustomTimeZone("UTC-4", new TimeSpan(-4, 0, 0), "UTC-4", "UTC-4"));
+        
+        DateTime nowWithoutSeconds = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, 0);
+        DateTime OneMinuteFromNow = nowWithoutSeconds.AddMinutes(1);
+        _logger.LogInformation("Recurring task executed at: {time}", now);
+        
+        // Fetch emails scheduled to be sent at the current time
+        List<EmailModelNotification> emailsToSend = await _databaseHelper.
+    GetAllEmailsNotificationAsync();
 
+        
+        foreach (var email in emailsToSend)
+        {
+            if (email.SendTime < OneMinuteFromNow)
+            {
+                if (email.SendTime >= nowWithoutSeconds)
+                { 
+                    var sendEmailResult = await EmailUtils.SendEmailAsync(
+                        email.Email,
+                        email.Subject,
+                        email.Body,
+                        EmailUtils.smtpClient
+                    );
+                    if (sendEmailResult.Status == "Sent")
+                    {
+                        await _databaseHelper.MoveEmailNotificationToEmailsAsync(email.Id, "Sent");
+                    }
+                    else
+                    {
+                        await _databaseHelper.MoveEmailNotificationToEmailsAsync(email.Id, "Failed");
+                    }
+                    
+                }
+                else
+                {
+                    await _databaseHelper.MoveEmailNotificationToEmailsAsync(email.Id,"Failed");
+                }
+            }
+        }
+    }
+    */
 
     /// <summary>
     /// What happens when the task is cancelled. Will only happen when the program will close.

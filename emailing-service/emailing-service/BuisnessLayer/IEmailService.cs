@@ -12,6 +12,6 @@ namespace emailing_service.BuisnessLayer
         OperationResult SendEmail(DirectEmailModel model);
         OperationResult SendEmailNotification(NotificationEmailModel model);
         OperationResult SendRawEmail(RawEmailModel model);
-        //OperationResult SendReminderEmail(ReminderEmailModel model);
+        List<EmailModelNotification> GetAllNotificationEmails();
     }
 }

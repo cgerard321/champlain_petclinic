@@ -81,12 +81,14 @@ public class EmailingController {
             consumes = MediaType.APPLICATION_JSON_VALUE
     )
     public Mono<ResponseEntity<Object>> sendEmailNotification(@RequestBody NotificationEmailModelRequestDTO body) {
+        log.info(body.toString());
         return emailingService.sendEmailNotification(body)
                 .map(result -> ResponseEntity.status(result.value()).build()) // Return 200 OK
                 .onErrorResume(e -> {
                     log.error("Error sending email notification", e);
                     return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()); // Handle errors
                 });
+
     }
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @PostMapping(

@@ -41,7 +41,23 @@ public class EmailController : Controller
          // Replace `_emailService` with your service
         return Ok(emails); // This returns the list as JSON
     }
-    
+
+    [HttpGet("send/notification")]
+    public IActionResult GetAllNotificationEmails()
+    {
+        List<EmailModelNotification> emails;
+        try
+        {
+            emails = _emailService.GetAllNotificationEmails();
+        }
+        catch (MissingDatabaseException)
+        {
+            return StatusCode(503, "Database failure! Make sure you are running MySql Server.");
+        }
+        // Replace `_emailService` with your service
+        return Ok(emails); // This returns the list as JSON
+    }
+
     [HttpPost("templates/add/{templateName}")]
     [Consumes("text/html")] 
     // Specify that this endpoint accepts HTML content

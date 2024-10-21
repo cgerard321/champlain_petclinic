@@ -9,4 +9,6 @@ export interface Visit {
   vetPhoneNumber: string;
   status: string;
   visitEndDate: string;
+  reminder: boolean;
+  ownerEmail: string;
 }
