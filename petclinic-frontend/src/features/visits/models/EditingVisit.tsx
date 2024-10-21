@@ -16,8 +16,9 @@ type VisitType = {
   description: string;
   petId: string;
   practitionerId: string;
-  // ownerId: string;
   status: Status;
+  reminder: boolean; // Added reminder field
+  ownerEmail: string; // Added ownerEmail field
 };
 
 const formatDate = (date: Date): string => {
@@ -33,6 +34,8 @@ const EditingVisit: React.FC = (): JSX.Element => {
     petId: '',
     practitionerId: '',
     status: 'UPCOMING' as Status,
+    reminder: false, // Set default reminder value
+    ownerEmail: '', // Set default ownerEmail value
   });
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -54,6 +57,8 @@ const EditingVisit: React.FC = (): JSX.Element => {
             petId: response.petId,
             visitStartDate: new Date(response.visitDate),
             status: response.status,
+            reminder: response.reminder, // Set reminder value from the backend but keep it non-editable
+            ownerEmail: response.ownerEmail, // Populate ownerEmail from backend
           });
         } catch (error) {
           console.error(`Error fetching visit with ID ${visitId}:`, error);
@@ -85,6 +90,7 @@ const EditingVisit: React.FC = (): JSX.Element => {
     if (!visit.practitionerId)
       newErrors.practitionerId = 'Practitioner ID is required';
     if (!visit.status) newErrors.status = 'Status is required';
+    if (!visit.ownerEmail) newErrors.ownerEmail = 'Owner Email is required'; // Validate ownerEmail
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -116,7 +122,6 @@ const EditingVisit: React.FC = (): JSX.Element => {
         navigate('/visits'); // Navigate to a different page or clear form
       }
     } catch (error) {
-      // Use type assertion or check error type
       const apiError = error as ApiError;
       setErrorMessage(`Error updating visit: ${apiError.message}`);
     } finally {
@@ -179,6 +184,18 @@ const EditingVisit: React.FC = (): JSX.Element => {
         </select>
         {errors.status && <span className="error">{errors.status}</span>}
         <br />
+        <label>Owner Email: </label>
+        <input
+          type="email"
+          name="ownerEmail"
+          value={visit.ownerEmail}
+          onChange={handleChange}
+        />
+        {errors.ownerEmail && (
+          <span className="error">{errors.ownerEmail}</span>
+        )}
+        <br />
+        {/* Reminder field is not editable but will still be sent in the form */}
         <button type="submit" disabled={isLoading}>
           {isLoading ? 'Updating...' : 'Update'}
         </button>

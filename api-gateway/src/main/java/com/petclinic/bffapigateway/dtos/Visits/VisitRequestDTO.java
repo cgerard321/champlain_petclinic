@@ -24,8 +24,10 @@ public class VisitRequestDTO {
     private String practitionerId;
     private Status status;
     private String visitId;
+    private boolean reminder;
+    private String ownerEmail;
 
-    public VisitRequestDTO(LocalDateTime now, String description, String petId, String ownerId, String jwtToken, String practitionerId, String visitId) {
+    public VisitRequestDTO(LocalDateTime now, String description, String petId, String ownerId, String jwtToken, String practitionerId, String visitId, boolean reminder, String ownerEmail) {
         this.visitDate = now;
         this.description = description;
         this.petId =  petId;
@@ -34,5 +36,7 @@ public class VisitRequestDTO {
         this.practitionerId = practitionerId;
         this.status = Status.UPCOMING;
         this.visitId = visitId;
+        this.reminder = reminder;
+        this.ownerEmail = ownerEmail;
     }
 }

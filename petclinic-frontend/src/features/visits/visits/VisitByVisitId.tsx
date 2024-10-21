@@ -20,8 +20,7 @@ export default function VisitDetails(): JSX.Element {
           console.error('Error fetching visit:', error);
         });
     }
-  });
-  [visitId];
+  }, [visitId]); // Corrected the dependency array
 
   if (!visit) {
     return <div>Loading...</div>;
@@ -81,7 +80,23 @@ export default function VisitDetails(): JSX.Element {
           <span className="visit-label">Visit End Date:</span>
           <span className="visit-value">{visit.visitEndDate}</span>
         </div>
-      </div>
+        <div className="visit-field">
+          {' '}
+          {/* Fixed closing tag */}
+          <span className="visit-label">Reminder Sent:</span>
+          <span className="visit-value">
+            {visit.reminder ? 'Yes' : 'No'}
+          </span>{' '}
+          {/* Assuming reminder is boolean */}
+        </div>
+        <div className="visit-field">
+          {' '}
+          {/* Fixed the typo here */}
+          <span className="visit-label">Owner Email:</span>
+          <span className="visit-value">{visit.ownerEmail}</span>
+        </div>
+      </div>{' '}
+      {/* Fixed closing div for visit-info */}
       <button
         className="btn btn-warning"
         onClick={() => navigate('/visits')}

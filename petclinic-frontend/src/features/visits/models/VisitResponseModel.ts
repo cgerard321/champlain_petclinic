@@ -14,4 +14,6 @@ export interface VisitResponseModel {
   status: Status;
   visitId: string;
   visitEndDate: string;
+  reminder: boolean;
+  ownerEmail: string;
 }

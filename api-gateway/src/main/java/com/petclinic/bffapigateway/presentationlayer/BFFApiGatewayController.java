@@ -1168,4 +1168,16 @@ public class BFFApiGatewayController {
         );
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping(value="/visits/reminder/false")
+    public Flux<VisitResponseDTO> getVisitsByReminderIsFalse(){
+        return visitsServiceClient.getAllVisitsByReminderIsFalse();
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping(value="/visits/reminder/true")
+    public Flux<VisitResponseDTO> getVisitsByReminderIsTrue(){
+        return visitsServiceClient.getAllVisitsByReminderIsTrue();
+    }
+
 }

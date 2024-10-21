@@ -38,6 +38,8 @@ import java.util.Date;
 import java.util.Objects;
 import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 @WebFluxTest(value = VisitsServiceClient.class, excludeFilters = @ComponentScan.Filter(type = FilterType.CUSTOM,
         classes = {JwtTokenFilter.class, RoleFilter.class}), useDefaultFilters = false)
@@ -63,10 +65,12 @@ class VisitsServiceClientIntegrationTest {
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
     }
+
     @BeforeEach
     void setUp() {
         visitsServiceClient = new VisitsServiceClient("localhost", "" + server.getPort());
     }
+
     @AfterAll
     static void tearDown() throws IOException {
         server.shutdown();
@@ -113,8 +117,9 @@ class VisitsServiceClientIntegrationTest {
                 .expectNext(visitResponseDTO2)
                 .verifyComplete();
     }
+
     @Test
-    void getAllVisits_400Error()throws IllegalArgumentException{
+    void getAllVisits_400Error() throws IllegalArgumentException {
         String description = "test"; // Add a description here
         server.enqueue(new MockResponse().setResponseCode(400).addHeader("Content-Type", "application/json"));
         Flux<VisitResponseDTO> visitResponseDTOFlux = visitsServiceClient.getAllVisits(description); // Pass the description to the method
@@ -122,14 +127,15 @@ class VisitsServiceClientIntegrationTest {
                 .expectErrorMatches(throwable -> throwable instanceof IllegalArgumentException && Objects.equals(throwable.getMessage(), "Something went wrong and we got a 400 error"))
                 .verify();
     }
+
     @Test
-    void getAllVisits_500Error()throws IllegalArgumentException{
+    void getAllVisits_500Error() throws IllegalArgumentException {
         String description = "test"; // Add a description here
         server.enqueue(new MockResponse().setResponseCode(500).addHeader("Content-Type", "application/json"));
         Flux<VisitResponseDTO> visitResponseDTOFlux = visitsServiceClient.getAllVisits(description);
         StepVerifier.create(visitResponseDTOFlux)
-            .expectErrorMatches(throwable -> throwable instanceof IllegalArgumentException && Objects.equals(throwable.getMessage(), "Something went wrong and we got a 500 error"))
-            .verify();
+                .expectErrorMatches(throwable -> throwable instanceof IllegalArgumentException && Objects.equals(throwable.getMessage(), "Something went wrong and we got a 500 error"))
+                .verify();
     }
 
     @Test
@@ -192,7 +198,9 @@ class VisitsServiceClientIntegrationTest {
                 "f470653d-05c5-4c45-b7a0-7d70f003d2ac",
                 "testJwtToken",
                 "2",
-                "73b5c112-5703-4fb7-b7bc-ac8186811ae1"
+                "73b5c112-5703-4fb7-b7bc-ac8186811ae1",
+                false,
+                "ownerEmail"
         );
 
         // Mock the server response
@@ -210,6 +218,8 @@ class VisitsServiceClientIntegrationTest {
                 .vetPhoneNumber("123-456-7890")
                 .status(Status.UPCOMING)
                 .visitEndDate(LocalDateTime.parse("2024-11-25 14:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .reminder(false)
+                .ownerEmail("ownerEmail")
                 .build();
         server.enqueue(new MockResponse()
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -239,7 +249,9 @@ class VisitsServiceClientIntegrationTest {
                 "f470653d-05c5-4c45-b7a0-7d70f003d2ac",
                 "testJwtToken",
                 "2",
-                "73b5c112-5703-4fb7-b7bc-ac8186811ae1"
+                "73b5c112-5703-4fb7-b7bc-ac8186811ae1",
+                false,
+                "ownerEmail"
         );
 
         String errorMessage = "{\"message\":\"A visit with the same time already exists.\"}";
@@ -269,7 +281,9 @@ class VisitsServiceClientIntegrationTest {
                 "f470653d-05c5-4c45-b7a0-7d70f003d2ac",
                 "testJwtToken",
                 "2",
-                "73b5c112-5703-4fb7-b7bc-ac8186811ae1"
+                "73b5c112-5703-4fb7-b7bc-ac8186811ae1",
+                false,
+                "ownerEmail"
         );
 
         String errorMessage = "{\"message\":\"Visit not found.\"}";
@@ -299,7 +313,9 @@ class VisitsServiceClientIntegrationTest {
                 "f470653d-05c5-4c45-b7a0-7d70f003d2ac",
                 "testJwtToken",
                 "2",
-                "73b5c112-5703-4fb7-b7bc-ac8186811ae1"
+                "73b5c112-5703-4fb7-b7bc-ac8186811ae1",
+                false,
+                "ownerEmail"
         );
 
         String errorMessage = "{\"message\":\"Invalid request.\"}";
@@ -329,7 +345,9 @@ class VisitsServiceClientIntegrationTest {
                 "f470653d-05c5-4c45-b7a0-7d70f003d2ac",
                 "testJwtToken",
                 "2",
-                "73b5c112-5703-4fb7-b7bc-ac8186811ae1"
+                "73b5c112-5703-4fb7-b7bc-ac8186811ae1",
+                false,
+                "ownerEmail"
         );
 
         // Mock the server error response with a bad request status and non-JSON body, which should trigger an IOException during parsing
@@ -373,6 +391,7 @@ class VisitsServiceClientIntegrationTest {
                 .expectNext(visitResponseDTO)
                 .verifyComplete();
     }
+
     @Test
     void getVisitById() throws Exception {
         VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
@@ -412,28 +431,28 @@ class VisitsServiceClientIntegrationTest {
 //    }
 
 
-/*
-    @Test
-    void shouldDeleteVisitsForPet() throws JsonProcessingException {
-        final VisitDetails visit = VisitDetails.builder()
-                .visitId(UUID.randomUUID().toString())
-                .petId("15")
-                .practitionerId(2)
-                .visitDate(LocalDateTime.parse("2022-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
-                .description("Cat is crazy")
-                .status(Status.CANCELLED)
-                .build();
+    /*
+        @Test
+        void shouldDeleteVisitsForPet() throws JsonProcessingException {
+            final VisitDetails visit = VisitDetails.builder()
+                    .visitId(UUID.randomUUID().toString())
+                    .petId("15")
+                    .practitionerId(2)
+                    .visitDate(LocalDateTime.parse("2022-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                    .description("Cat is crazy")
+                    .status(Status.CANCELLED)
+                    .build();
 
-        final String body = objectMapper.writeValueAsString(objectMapper.convertValue(visit, VisitDetails.class));
-        prepareResponse(response -> response
-                .setHeader("Content-Type", "application/json")
-                .setBody(body));
+            final String body = objectMapper.writeValueAsString(objectMapper.convertValue(visit, VisitDetails.class));
+            prepareResponse(response -> response
+                    .setHeader("Content-Type", "application/json")
+                    .setBody(body));
 
-        final Mono<Void> empty = visitsServiceClient.deleteVisitByVisitId(visit.getVisitId());
+            final Mono<Void> empty = visitsServiceClient.deleteVisitByVisitId(visit.getVisitId());
 
-        assertNull(empty.block());
-    }
- */
+            assertNull(empty.block());
+        }
+     */
     @Test
     void shouldCreateVisitForPet() throws JsonProcessingException {
         // Given
@@ -700,9 +719,9 @@ class VisitsServiceClientIntegrationTest {
     }
 
 
-
     //Reviews
     private static final String REVIEW_ID = UUID.randomUUID().toString();
+
     @Test
     void getReviewByReviewId() throws JsonProcessingException {
         ReviewResponseDTO reviewResponse = ReviewResponseDTO.builder()
@@ -734,7 +753,9 @@ class VisitsServiceClientIntegrationTest {
                 "practitionerId", // Practitioner ID
                 "jwtToken", // JWT Token
                 "ownerId",
-                "73b5c112-5703-4fb7-b7bc-ac8186811ae1"
+                "73b5c112-5703-4fb7-b7bc-ac8186811ae1",
+                false,
+                "ownerEmail"
         );
 
         VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
@@ -763,7 +784,6 @@ class VisitsServiceClientIntegrationTest {
                 .expectNextMatches(visitResponse -> visitResponse.getVisitId().equals(visitResponseDTO.getVisitId()))
                 .verifyComplete();
     }
-
 
 
     @Test
@@ -898,7 +918,7 @@ class VisitsServiceClientIntegrationTest {
 
  */
 
-    
+
     @Test
     void testUpdateVisitByVisitId_BadRequest() {
         // Arrange
@@ -1213,11 +1233,11 @@ class VisitsServiceClientIntegrationTest {
     }
 
      */
-  
+
     @Test
-      void updateVisitStatus_ShouldSucceed_WhenStatusUpdatedToCancelled() {
-          String visitId = "12345";
-          String status = "CANCELLED";
+    void updateVisitStatus_ShouldSucceed_WhenStatusUpdatedToCancelled() {
+        String visitId = "12345";
+        String status = "CANCELLED";
 
         VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
                 .visitId(visitId)
@@ -1389,4 +1409,77 @@ class VisitsServiceClientIntegrationTest {
     }
 
 
+    @Test
+    void getAllVisitsByReminderIsFalse_ShouldReturnVisits() throws JsonProcessingException {
+        // Arrange
+        VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
+                .visitId(UUID.randomUUID().toString())
+                .description("Test Visit")
+                .build();
+
+        // Mock the server response
+        server.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(objectMapper.writeValueAsString(new VisitResponseDTO[]{visitResponseDTO})));
+
+        // Act
+        Flux<VisitResponseDTO> resultFlux = visitsServiceClient.getAllVisitsByReminderIsFalse();
+
+        // Assert
+        StepVerifier.create(resultFlux)
+                .expectNextMatches(visitResponse -> visitResponse.getVisitId().equals(visitResponseDTO.getVisitId()))
+                .verifyComplete();
+    }
+
+    @Test
+    void getAllVisitsByReminderIsTrue_ShouldReturnVisits() throws JsonProcessingException {
+        // Arrange
+        VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
+                .visitId(UUID.randomUUID().toString())
+                .description("Test Visit")
+                .build();
+
+        // Mock the server response
+        server.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(objectMapper.writeValueAsString(new VisitResponseDTO[]{visitResponseDTO})));
+
+        // Act
+        Flux<VisitResponseDTO> resultFlux = visitsServiceClient.getAllVisitsByReminderIsTrue();
+
+        // Assert
+        StepVerifier.create(resultFlux)
+                .expectNextMatches(visitResponse -> visitResponse.getVisitId().equals(visitResponseDTO.getVisitId()))
+                .verifyComplete();
+    }
+
+    @Test
+    void getAllVisitsByReminderIsFalse_ShouldHandleServerError() {
+        // Arrange: Mock the server to return an error response
+        server.enqueue(new MockResponse().setResponseCode(500));
+
+        // Act
+        Flux<VisitResponseDTO> resultFlux = visitsServiceClient.getAllVisitsByReminderIsFalse();
+
+        // Assert: Expect an error to be propagated
+        StepVerifier.create(resultFlux)
+                .expectError(WebClientResponseException.class)
+                .verify();
+    }
+
+    @Test
+    void getAllVisitsByReminderIsTrue_ShouldHandleEmptyResponse() {
+        // Arrange: Mock the server to return an empty response
+        server.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("[]"));
+
+        // Act
+        Flux<VisitResponseDTO> resultFlux = visitsServiceClient.getAllVisitsByReminderIsTrue();
+
+        // Assert: Expect no items to be emitted
+        StepVerifier.create(resultFlux)
+                .expectNextCount(0)
+                .verifyComplete();
+    }
 }

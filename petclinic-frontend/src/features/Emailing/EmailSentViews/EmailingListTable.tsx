@@ -1,15 +1,21 @@
+/* eslint-disable import/no-unresolved */
 import { useState, useEffect } from 'react';
 import { EmailModelResponseDTO } from '@/features/Emailing/Model/EmailResponse.ts';
 import { getAllEmails } from '@/features/Emailing/Api/GetAllEmails.tsx';
-import './EmailingListTable.css';
+import { GetAllFalseVisits } from '@/features/visits/api/GetAllFalseVisits.ts';
+import { GetAllTrueVisits } from '@/features/visits/api/GetAllTrueVisits.ts';
+import { VisitResponseModel } from '@/features/visits/models/VisitResponseModel.ts';
 
 export default function EmailListTable(): JSX.Element {
   const [emails, setEmails] = useState<EmailModelResponseDTO[]>([]);
   const [selectedEmailBody, setSelectedEmailBody] = useState<string | null>(
     null
   );
-  const [isPopupOpen, setIsPopupOpen] = useState(false); // To control the popup
+  const [falseVisits, setFalseVisits] = useState<VisitResponseModel[]>([]);
+  const [trueVisits, setTrueVisits] = useState<VisitResponseModel[]>([]);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
 
+  // Fetching Emails
   const fetchEmails = async (): Promise<void> => {
     try {
       const data = await getAllEmails();
@@ -20,8 +26,23 @@ export default function EmailListTable(): JSX.Element {
     }
   };
 
+  // Fetching Visits
+  const fetchVisits = async (): Promise<void> => {
+    try {
+      const fetchedFalseVisits = await GetAllFalseVisits();
+      setFalseVisits(fetchedFalseVisits);
+
+      const fetchedTrueVisits = await GetAllTrueVisits();
+      setTrueVisits(fetchedTrueVisits);
+    } catch (error) {
+      console.error('Error fetching visits:', error);
+    }
+  };
+
+  // useEffect hook to fetch emails and visits when the component mounts
   useEffect(() => {
-    fetchEmails(); // Call the async function to fetch emails
+    fetchEmails();
+    fetchVisits();
   }, []);
 
   const openPopup = (htmlBody: string): void => {
@@ -32,6 +53,35 @@ export default function EmailListTable(): JSX.Element {
     setSelectedEmailBody(null);
   };
 
+  // Rendering Visits
+  const renderVisits = (
+    visits: VisitResponseModel[],
+    title: string
+  ): JSX.Element => (
+    <div>
+      <h3>{title}</h3>
+      <ul>
+        {visits.length > 0 ? (
+          visits.map((visit, index) => (
+            <li key={index}>
+              <strong>Pet Name:</strong> {visit.petName} <br />
+              <strong>Visit Date:</strong> {visit.visitDate} <br />
+              <strong>Veterinarian:</strong> {visit.vetFirstName}{' '}
+              {visit.vetLastName} <br />
+              <strong>Status:</strong> {visit.status} <br />
+              <strong>Reminder:</strong> {visit.reminder ? 'Yes' : 'No'} <br />
+              <strong>Visit End Date:</strong> {visit.visitEndDate} <br />
+              <strong>Description:</strong> {visit.description} <br />
+            </li>
+          ))
+        ) : (
+          <li>No visits to display</li>
+        )}
+      </ul>
+    </div>
+  );
+
+  // Rendering Emails
   const renderTable = (emails: EmailModelResponseDTO[]): JSX.Element => (
     <table>
       <thead>
@@ -92,6 +142,9 @@ export default function EmailListTable(): JSX.Element {
           </div>
         </div>
       )}
+
+      {renderVisits(falseVisits, 'False Visits')}
+      {renderVisits(trueVisits, 'True Visits')}
     </div>
   );
 }

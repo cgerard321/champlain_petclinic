@@ -41,7 +41,23 @@ public class EmailController : Controller
          // Replace `_emailService` with your service
         return Ok(emails); // This returns the list as JSON
     }
-    
+
+    [HttpGet("send/notification")]
+    public IActionResult GetAllNotificationEmails()
+    {
+        List<EmailModelNotification> emails;
+        try
+        {
+            emails = _emailService.GetAllNotificationEmails();
+        }
+        catch (MissingDatabaseException)
+        {
+            return StatusCode(503, "Database failure! Make sure you are running MySql Server.");
+        }
+        // Replace `_emailService` with your service
+        return Ok(emails); // This returns the list as JSON
+    }
+
     [HttpPost("templates/add/{templateName}")]
     [Consumes("text/html")] 
     // Specify that this endpoint accepts HTML content
@@ -174,4 +190,41 @@ public class EmailController : Controller
         }
         return Ok();
     }
+
+    /*
+    [HttpPost("send-reminder-email")]
+    public IActionResult SendReminderEmail([FromBody] ReminderEmailModel model)
+    {
+        if (model == null)
+        {
+            return BadRequest("Model is null");
+        }
+
+        try
+        {
+            var result = _emailService.SendReminderEmail(model);
+            if (result.IsSuccess)
+            {
+                return Ok(result.Message);
+            }
+            else
+            {
+                return StatusCode(500, result.Message);
+            }
+        }
+        catch (BadEmailModel ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
+    }
+    
+}*/
 }

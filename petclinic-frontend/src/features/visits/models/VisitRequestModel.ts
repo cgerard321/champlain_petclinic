@@ -7,4 +7,6 @@ export interface VisitRequestModel {
   practitionerId: string;
   // ownerId: string;
   status: Status;
+  reminder: boolean;
+  ownerEmail: string;
 }

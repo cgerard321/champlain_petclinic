@@ -5,18 +5,21 @@ import './EditVisit.css';
 import { VisitRequestModel } from '@/features/visits/models/VisitRequestModel';
 import { Status } from '@/features/visits/models/Status';
 import { addVisit } from '@/features/visits/api/addVisit';
+import { SendEmailNotification } from '@/features/Emailing/Api/SendEmailNotification.tsx';
+import { EmailNotificationModel } from '@/features/Emailing/Model/EmailNotificationModel';
 
 interface ApiError {
   message: string;
 }
+
 type VisitType = {
   visitStartDate: Date;
   description: string;
   petId: string;
   practitionerId: string;
-  // ownerId: string;
   status: Status;
-  //visitEndDate: Date;
+  reminder: boolean; // Added reminder field but hidden
+  ownerEmail: string; // Added ownerEmail field
 };
 
 const AddingVisit: React.FC = (): JSX.Element => {
@@ -26,7 +29,8 @@ const AddingVisit: React.FC = (): JSX.Element => {
     petId: '',
     practitionerId: '',
     status: 'UPCOMING' as Status,
-    //visitEndDate: new Date(),
+    reminder: false, // Default value for reminder
+    ownerEmail: '', // Default value for ownerEmail
   });
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -52,6 +56,14 @@ const AddingVisit: React.FC = (): JSX.Element => {
     }));
   };
 
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  const addDays = (date: Date, days: number) => {
+    const newDate = new Date(date);
+
+    newDate.setDate(newDate.getDate() + days);
+    return newDate;
+  };
+
   const validate = (): boolean => {
     const newErrors: { [key: string]: string } = {};
     if (!visit.petId) newErrors.petId = 'Pet ID is required';
@@ -60,6 +72,7 @@ const AddingVisit: React.FC = (): JSX.Element => {
     if (!visit.practitionerId)
       newErrors.practitionerId = 'Practitioner ID is required';
     if (!visit.status) newErrors.status = 'Status is required';
+    if (!visit.ownerEmail) newErrors.ownerEmail = 'Owner Email is required'; // Add validation for ownerEmail
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -83,7 +96,7 @@ const AddingVisit: React.FC = (): JSX.Element => {
     };
 
     try {
-      await addVisit(formattedVisit); // Pass the Date object directly
+      await addVisit(formattedVisit);
       setSuccessMessage('Visit added successfully!');
       setShowNotification(true);
       setTimeout(() => setShowNotification(false), 3000);
@@ -94,8 +107,50 @@ const AddingVisit: React.FC = (): JSX.Element => {
         petId: '',
         practitionerId: '',
         status: 'UPCOMING' as Status,
-        //visitEndDate: new Date(),
+        reminder: false, // Reminder is set to false and hidden
+        ownerEmail: '',
       });
+
+      // eslint-disable-next-line prefer-const
+      let reminderDateCalc = new Date(addDays(visit.visitStartDate, -1));
+      if (reminderDateCalc >= new Date()) {
+        // eslint-disable-next-line no-console
+        console.log('Reminder Date is greater than current date');
+        // eslint-disable-next-line prefer-const
+        let reminderDate = new Date(
+          addDays(visit.visitStartDate, -1).setHours(
+            visit.visitStartDate.getHours() - 4
+          )
+        );
+        //reminderDate.setDate(reminderDate.getDate() - 1);
+        //reminderDate = reminderDate.setHours(reminderDate.getHours() - 4);
+        //console.log('Reminder Date:', reminderDate);
+        //let reminderDateFormated = formatDate(reminderDate);
+        //console.log('Reminder Date Formated:', reminderDate);
+
+        // Prepare payload, converting newlines to <br />
+        const payload: EmailNotificationModel = {
+          emailToSendTo: visit.ownerEmail,
+          emailTitle: 'Visit Reminder',
+          templateName: 'Default',
+          header: 'Notice: ',
+          body: 'This is a reminder that you have a visit scheduled for ${visit.visitStartDate.toLocaleString()}.',
+          footer: 'Thank you for reading this message',
+          correspondantName: '{visits.ownerEmail}',
+          senderName: 'Doctor Mike',
+          sentDate: reminderDate.toISOString(),
+        };
+
+        // Call the SendRawEmail function
+        try {
+          const response = await SendEmailNotification(payload);
+          // eslint-disable-next-line no-console
+          console.log('Email sent:', response);
+          //TODO: update the reminder = true
+        } catch (error) {
+          console.error('Failed to send email:', error);
+        }
+      }
     } catch (error) {
       const apiError = error as ApiError;
       setErrorMessage(`Error adding visit: ${apiError.message}`);
@@ -156,6 +211,17 @@ const AddingVisit: React.FC = (): JSX.Element => {
           <option value="UPCOMING">Upcoming</option>
         </select>
         {errors.status && <span className="error">{errors.status}</span>}
+        <br />
+        <label>Owner Email: </label> {/* Owner Email is shown and editable */}
+        <input
+          type="email"
+          name="ownerEmail"
+          value={visit.ownerEmail}
+          onChange={handleChange}
+        />
+        {errors.ownerEmail && (
+          <span className="error">{errors.ownerEmail}</span>
+        )}
         <br />
         <button type="submit" disabled={isLoading}>
           {isLoading ? 'Adding...' : 'Add'}

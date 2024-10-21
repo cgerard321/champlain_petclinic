@@ -31,6 +31,21 @@ public class EmailServiceImpl : IEmailService
         }
     }
 
+    public List<EmailModelNotification> GetAllNotificationEmails()
+    {
+        try
+        {
+            return _databaseHelper.GetAllEmailsNotificationAsync().Result;
+        }
+        //We have no choice but to receive as Aggregate Exception since it is an async service, and it uses a possibly offline database.
+        //What's more, mysql is closed during testing
+        catch (AggregateException e)
+        {
+            Console.WriteLine(e);
+            throw new MissingDatabaseException();
+        }
+    }
+
     public OperationResult ReceiveHtml(string? templateName, string? htmlBody)
     {
         if (string.IsNullOrWhiteSpace(templateName))
@@ -301,4 +316,70 @@ public class EmailServiceImpl : IEmailService
             Message = $"Successfully sent an email!"
         };
     }
+
+    /*
+    public OperationResult SendReminderEmail(ReminderEmailModel model)
+    {
+        ReminderEmailModel reminderEmailModel = model;
+        Console.WriteLine("Found the model!" + reminderEmailModel);
+
+        if (String.IsNullOrWhiteSpace(reminderEmailModel.EmailToSendTo))
+            throw new BadEmailModel("Email To Send To is null or whitespace. EMAIL IS REQUIRED");
+        if (!EmailUtils.CheckIfEmailIsValid(reminderEmailModel.EmailToSendTo))
+            throw new BadEmailModel("Email To Send To Not Valid");
+        if (String.IsNullOrWhiteSpace(reminderEmailModel.EmailTitle))
+            throw new BadEmailModel("Email Title is null or whitespace");
+
+        DateTime sendDate = reminderEmailModel.VisitDate.AddDays(-1);
+        if (sendDate < DateTime.Now)
+            throw new InvalidOperationException("The appointment date is too soon to send a reminder email.");
+
+        Task.Run(async () =>
+        {
+            try
+            {
+                // Wait until the send date
+                TimeSpan delay = sendDate - DateTime.Now;
+                await Task.Delay(delay);
+
+                var sendEmailResult = await EmailUtils.SendEmailAsync(
+                    reminderEmailModel.EmailToSendTo,
+                    reminderEmailModel.EmailTitle,
+                    reminderEmailModel.Body,
+                    EmailUtils.smtpClient
+                );
+
+                var databaseHelper = new DatabaseHelper();
+                if (sendEmailResult.Status == "Sent")
+                {
+                    await databaseHelper.AddEmailAsync(
+                        reminderEmailModel.EmailToSendTo,
+                        reminderEmailModel.EmailTitle,
+                        reminderEmailModel.Body,
+                        "Sent"
+                    );
+                }
+                else
+                {
+                    await databaseHelper.AddEmailAsync(
+                        reminderEmailModel.EmailToSendTo,
+                        reminderEmailModel.EmailTitle,
+                        reminderEmailModel.Body,
+                        "Failed"
+                    );
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+        });
+
+        return new OperationResult
+        {
+            IsSuccess = true,
+            Message = $"Successfully scheduled a reminder email!"
+        };
+    }
+    */
 }

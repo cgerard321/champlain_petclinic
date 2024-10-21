@@ -394,6 +394,8 @@ export default function VisitListTable(): JSX.Element {
               <th>Vet Email</th>
               <th>Visit End Date</th>
               <th>Status</th>
+              <th>Reminder Status</th>
+              <th>Owner Email</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -427,6 +429,9 @@ export default function VisitListTable(): JSX.Element {
                 >
                   {visit.status}
                 </td>
+                <td>{visit.reminder ? 'Yes' : 'No'}</td>{' '}
+                {/* Displaying "Yes" or "No" for the reminder */}
+                <td>{visit.ownerEmail}</td>
                 <td>
                   <button
                     className="btn btn-dark"

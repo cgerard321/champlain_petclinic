@@ -60,6 +60,8 @@ public class EntityDtoUtil {
                             .vetPhoneNumber(vetResponseDTO.getPhoneNumber())
                             .status(visit.getStatus())
                             .visitEndDate(visit.getVisitDate().plusHours(1))
+                            .reminder(visit.isReminder())
+                            .ownerEmail(visit.getOwnerEmail())
                             .build());
                 });
     }

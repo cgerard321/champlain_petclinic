@@ -476,5 +476,23 @@ public class VisitsServiceClient {
 
 
 
+
+    public Flux<VisitResponseDTO> getAllVisitsByReminderIsFalse() {
+        return webClient
+                .get()
+                .uri( "/reminder/false")
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToFlux(VisitResponseDTO.class);
+    }
+
+    public Flux<VisitResponseDTO> getAllVisitsByReminderIsTrue() {
+        return webClient
+                .get()
+                .uri("/reminder/true")
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToFlux(VisitResponseDTO.class);
+    }
 }
 

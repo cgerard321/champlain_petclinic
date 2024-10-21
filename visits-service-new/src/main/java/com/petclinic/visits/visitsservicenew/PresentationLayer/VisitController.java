@@ -18,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -338,6 +339,19 @@ public class VisitController {
                         .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=visits.csv")
                         .contentType(MediaType.APPLICATION_OCTET_STREAM)
                         .body(csvData));
+    }
+
+
+    @GetMapping("/reminder/false")
+    public Flux<VisitResponseDTO> getAllVisitsByReminderIsFalse() {
+        return visitService.getAllVisitsByReminderIsFalse()
+                .onErrorMap(e -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "An error occurred while fetching visits with reminder set to false", e));
+    }
+
+    @GetMapping("/reminder/true")
+    public Flux<VisitResponseDTO> getAllVisitsByReminderIsTrue() {
+        return visitService.getAllVisitsByReminderIsTrue()
+                .onErrorMap(e -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "An error occurred while fetching visits with reminder set to true", e));
     }
 
 
