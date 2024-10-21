@@ -37,7 +37,8 @@ public class NotificationController {
     }
 
     @GetMapping("/{customerId}/{productId}")
-    public Mono<ResponseEntity<NotificationResponseModel>> getNotificationByCustomerIdAndProductId(@PathVariable String customerId, @PathVariable String productId){
+    public Mono<ResponseEntity<NotificationResponseModel>>
+    getNotificationByCustomerIdAndProductId(@PathVariable String customerId, @PathVariable String productId){
         validateId(customerId, "customer");
         validateId(productId, "product");
 

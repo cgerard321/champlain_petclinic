@@ -17,7 +17,7 @@ public class UserServiceClient {
             @Value("${app.auth-service.host}") String userServiceHost,
             @Value("${app.auth-service.port}") String userServicePort
     ){
-        this.baseUserURL = "http://" + userServiceHost + ":" + userServicePort + "/user";
+        this.baseUserURL = "http://" + userServiceHost + ":" + userServicePort + "/users";
         this.client = WebClient.builder().baseUrl(baseUserURL).build();
     }
 
@@ -25,6 +25,9 @@ public class UserServiceClient {
         return client.get()
                 .uri(baseUserURL + "/{userId}", userId)
                 .accept(MediaType.APPLICATION_JSON)
+                // If you want this to work, you'll either need to generate a JWT token or modify the way auth-service works.
+                // Email field in notification is unwanted and we'd rather use the email assigned to user :/
+                .cookie("Bearer", "")
                 .retrieve()
                 .onStatus(HttpStatusCode::isError,
                         error -> switch (error.statusCode().value()){

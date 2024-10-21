@@ -1,5 +1,6 @@
 package com.petclinic.products.businesslayer.products;
 
+import com.petclinic.products.datalayer.notifications.Notification;
 import com.petclinic.products.datalayer.notifications.NotificationRepository;
 import com.petclinic.products.datalayer.notifications.NotificationType;
 import com.petclinic.products.domainclientlayer.EmailRequestModel;
@@ -10,6 +11,7 @@ import com.petclinic.products.presentationlayer.notifications.NotificationReques
 import com.petclinic.products.datalayer.products.ProductStatus;
 import com.petclinic.products.datalayer.products.ProductType;
 import com.petclinic.products.utils.exceptions.InvalidInputException;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -75,9 +77,11 @@ public class ProductServiceImpl implements ProductService {
     }
 
     private void onQuantityChange(Product product, Integer newQuantity){
+        log.debug("Inside quantity");
         notificationRepository.findNotificationsByProductIdAndNotificationTypeContains(product.getProductId(), NotificationType.QUANTITY)
-                .doOnEach(notification -> {
-                    userClient.getUserByUserId(notification.get().getCustomerId())
+                .flatMap(notification ->
+                    userClient.getUserByUserId(notification.getCustomerId())
+                            .switchIfEmpty(Mono.empty())
                             .flatMap(user ->
                                 emailClient.sendEmail(EmailRequestModel.builder()
                                         .EmailToSendTo(user.getEmail())
@@ -88,14 +92,16 @@ public class ProductServiceImpl implements ProductService {
                                         .Body("Hi!\n" + product.getProductName() + " has been restocked!\n" + "New quantity: " + newQuantity + "\n\n")
                                         .Footer("Thank you for shopping with PetClinic!")
                                         .build())
-                            );
-                });
+                            )
+                )
+                .subscribe();
     }
 
     private void onPriceChange(Product product, Double newPrice){
         notificationRepository.findNotificationsByProductIdAndNotificationTypeContains(product.getProductId(), NotificationType.PRICE)
-                .doOnEach(notification -> {
-                    userClient.getUserByUserId(notification.get().getCustomerId())
+                .flatMap(notification ->
+                    userClient.getUserByUserId(notification.getCustomerId())
+                            .switchIfEmpty(Mono.empty())
                             .flatMap(user ->
                                     emailClient.sendEmail(EmailRequestModel.builder()
                                             .EmailToSendTo(user.getEmail())
@@ -106,8 +112,9 @@ public class ProductServiceImpl implements ProductService {
                                             .Body("Hi!\n" + product.getProductName() + " has had a price change!\n" + "New price: " + newPrice + "\n\n")
                                             .Footer("Thank you for shopping with PetClinic!")
                                             .build())
-                            );
-                });
+                            )
+                )
+                .subscribe();
     }
 
     @Override
@@ -195,9 +202,11 @@ public class ProductServiceImpl implements ProductService {
                         .map(EntityModelUtil::toProductEntity)
                         .doOnNext(entity -> {
                             if(entity.getProductSalePrice() < found.getProductSalePrice()){
+                                log.debug("Sending onPriceChange");
                                 onPriceChange(found, entity.getProductSalePrice());
                             }
                             if(entity.getProductQuantity() > found.getProductQuantity()){
+                                log.debug("Sending onQuantityChange");
                                 onQuantityChange(found, entity.getProductQuantity());
                             }
                         })
@@ -291,7 +300,7 @@ public class ProductServiceImpl implements ProductService {
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Product id was not found: " + productId))))
                 .doOnNext(product -> {
                     if (productQuantity > product.getProductQuantity()){
-                        // TODO: Send notification to subscribed users
+                        log.debug("Sending onQuantityChange");
                         onQuantityChange(product, productQuantity);
                     }
                 })
