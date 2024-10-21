@@ -36,6 +36,17 @@ export default function ProductDetails(): JSX.Element {
   });
   const [productReviews, setProductReviews] = useState<RatingModel[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const navigateToEditNotif = (): void => {
+    if (!currentProduct || !productId) return;
+    navigate(
+      generatePath(AppRoutePaths.EditNotification, {
+        productId: productId,
+      }),
+      {
+        state: { product: currentProduct },
+      }
+    );
+  };
   const navigateToEditProduct = (): void => {
     if (!currentProduct || !productId) return;
     navigate(
@@ -180,6 +191,11 @@ export default function ProductDetails(): JSX.Element {
                   <ImageContainer imageId={currentProduct.imageId} />
                 </div>
                 <div className="productdetails-container">
+                  <div className="productnotifs-container">
+                    <Button onClick={navigateToEditNotif}>
+                      Manage Notifications
+                    </Button>
+                  </div>
                   <div
                     className="productadmin-container"
                     style={{
