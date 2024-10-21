@@ -172,6 +172,25 @@ public class CartController {
                 });
     }
 
+    @PostMapping("/{cartId}/products/{productId}/quantity/{quantity}")
+    public Mono<ResponseEntity<CartResponseDTO>> addProductToWishList(@PathVariable String cartId, @PathVariable String productId, @PathVariable int quantity) {
+        return cartServiceClient.addProductToWishList(cartId, productId, quantity)
+                .map(cartResponseDTO -> ResponseEntity.ok(cartResponseDTO))
+                .defaultIfEmpty(ResponseEntity.notFound().build())
+                .onErrorResume(e -> {
+                    if (e instanceof WebClientResponseException.UnprocessableEntity) {
+                        log.error("Invalid input for cartId: {} or productId: {} - {}", cartId, productId, e.getMessage());
+                        return Mono.just(ResponseEntity.unprocessableEntity().build());
+                    } else if (e instanceof WebClientResponseException.NotFound) {
+                        log.error("Cart or product not found for cartId: {} and productId: {} - {}", cartId, productId, e.getMessage());
+                        return Mono.just(ResponseEntity.notFound().build());
+                    } else {
+                        log.error("An unexpected error occurred: {}", e.getMessage());
+                        return Mono.error(e);
+                    }
+                });
+    }
+
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping(value = "promos", produces= MediaType.APPLICATION_JSON_VALUE)

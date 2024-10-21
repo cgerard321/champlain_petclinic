@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.webjars.NotFoundException;
@@ -263,6 +264,7 @@ public Mono<CartResponseDTO> deleteCartByCartId(String CardId) {
         return webClientBuilder.build()
                 .put()
                 .uri(CartServiceUrl + "/" + cartId + "/wishlist/" + productId + "/toWishList")
+
                 .retrieve()
                 .bodyToMono(CartResponseDTO.class)  // Use bodyToMono to return CartResponseDTO directly
                 .doOnSuccess(cartResponseDTO -> log.info("Moved product {} to wishlist from cart {}", productId, cartId))
@@ -275,21 +277,19 @@ public Mono<CartResponseDTO> deleteCartByCartId(String CardId) {
                 .put()
                 .uri(CartServiceUrl + "/" + cartId + "/wishlist/" + productId + "/toCart")
                 .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError, error -> {
-                    return error.bodyToMono(String.class)
-                            .flatMap(errorMessage -> {
-                                if (error.statusCode().equals(HttpStatus.BAD_REQUEST)) {
-                                    return Mono.error(new InvalidInputException(errorMessage));
-                                } else if (error.statusCode().equals(HttpStatus.NOT_FOUND)) {
-                                    return Mono.error(new NotFoundException(errorMessage));
-                                } else if (error.statusCode().equals(HttpStatus.UNPROCESSABLE_ENTITY)) {
-                                    return Mono.error(new OutOfStockException(errorMessage));
-                                }
-                                return Mono.error(new IllegalArgumentException("Client error"));
-                            });
-                })
-                .onStatus(HttpStatusCode::is5xxServerError, error -> Mono.error(new IllegalArgumentException("Server error")))
-                .bodyToMono(CartResponseDTO.class);
+                .bodyToMono(CartResponseDTO.class) // Use bodyToMono to return CartResponseDTO directly
+                .doOnSuccess(cartResponseDTO -> log.info("Moved product {} from wishlist to cart {}", productId, cartId))
+                .doOnError(e -> log.error("Error moving product {} from wishlist to cart {}: {}", productId, cartId, e.getMessage()));
+    }
+
+    public Mono<CartResponseDTO> addProductToWishList(String cartId, String productId, int quantity) {
+        return webClientBuilder.build()
+                .post()
+                .uri(CartServiceUrl + "/" + cartId + "/products/" + productId + "/quantity/" + quantity)
+                .retrieve()
+                .bodyToMono(CartResponseDTO.class)
+                .doOnSuccess(cartResponseDTO -> log.info("Added product {} from product view to wishlist in cart {}", productId, cartId))
+                .doOnError(e -> log.error("Error moving product {} to wishlist from cart {}: {}", productId, cartId, e.getMessage()));
     }
 
     public Mono<PromoCodeResponseDTO> validatePromoCode(String promoCode) {
