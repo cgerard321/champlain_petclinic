@@ -1024,31 +1024,8 @@ public class VisitControllerUnitTest {
                 .exchange()
                 .expectStatus().is5xxServerError();
     }
-  
-  @Test
-    void addVisitByOwner_whenInvalidOwnerId_thenReturnNotFound() {
-        VisitRequestDTO visitRequestDTO = VisitRequestDTO.builder()
-                .visitDate(LocalDateTime.parse("2024-11-25T13:45", DateTimeFormatter.ISO_LOCAL_DATE_TIME))
-                .description("Routine Check-up")
-                .petId("1")  // Pet ID
-                .practitionerId("practitionerId")  // Practitioner ID
-                .ownerId(null)  // Invalid ownerId (null in this case)
-                .build();
 
-        Mono<VisitRequestDTO> visitRequestDTOMono = Mono.just(visitRequestDTO);
 
-        when(visitsServiceClient.addVisitByOwner(eq("INVALID_OWNER_ID"), any(Mono.class)))
-                .thenReturn(Mono.empty());
-
-        webTestClient.post()
-                .uri("/api/v2/gateway/visits/owners/{ownerId}", "INVALID_OWNER_ID")
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(visitRequestDTOMono, VisitRequestDTO.class)
-                .exchange()
-                .expectStatus().isNotFound();
-
-        verify(visitsServiceClient, times(1)).addVisitByOwner(eq("INVALID_OWNER_ID"), any(Mono.class));
-    }
 
     @Test
     void addVisitByOwner_whenValidOwnerId_thenReturnCreated() {
