@@ -63,6 +63,7 @@ import CustomerPromoPage from '@/pages/Promos/CustomerPromoPage.tsx';
 import UserDetailsPage from './pages/Users/UserDetailsPage';
 import UpdateUserPage from './pages/Users/UpdateUserPage';
 import AllRoles from '@/pages/Users/AllRoles.tsx';
+import EditNotification from './features/products/components/EditNotification';
 
 const router = createBrowserRouter([
   {
@@ -310,6 +311,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute roles={['ADMIN', 'INVENTORY_MANAGER']}>
             <EditProduct />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.EditNotification,
+        element: (
+          <ProtectedRoute>
+            <EditNotification />
           </ProtectedRoute>
         ),
       },
