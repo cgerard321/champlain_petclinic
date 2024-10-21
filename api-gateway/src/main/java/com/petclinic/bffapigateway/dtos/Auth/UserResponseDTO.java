@@ -7,7 +7,7 @@ import java.util.Set;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
+@Builder(toBuilder = true)
 public class UserResponseDTO {
     private long id;
     private String username;

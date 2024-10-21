@@ -93,3 +93,71 @@
   height: 100vh;
   text-align: center;
 }
+
+.update-role-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.update-role-modal-content {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  width: 90%;
+  max-width: 500px;
+}
+
+.update-role-modal-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.update-role-modal-checkbox {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.update-role-modal-checkbox input[type="checkbox"] {
+  width: 20px;
+}
+
+.update-role-modal-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.update-role-modal-save-button,
+.update-role-modal-cancel-button {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 20px;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.3s;
+  flex-grow: 1;
+  margin: 0 10px;
+}
+
+.update-role-modal-save-button:hover {
+  background-color: #218838;
+}
+
+.update-role-modal-cancel-button {
+  background-color: #dc3545;
+}
+
+.update-role-modal-cancel-button:hover {
+  background-color: #c82333;
+}
