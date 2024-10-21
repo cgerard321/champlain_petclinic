@@ -43,15 +43,13 @@ public class ProductServiceImpl implements ProductService {
     private final RatingRepository ratingRepository;
     private final NotificationRepository notificationRepository;
 
-    private final UserServiceClient userClient;
     private final EmailingServiceClient emailClient;
 
-    public ProductServiceImpl(ProductRepository productRepository, RatingRepository ratingRepository, NotificationRepository notificationRepository, UserServiceClient userClient, EmailingServiceClient emailClient) {
+    public ProductServiceImpl(ProductRepository productRepository, RatingRepository ratingRepository, NotificationRepository notificationRepository, EmailingServiceClient emailClient) {
         this.productRepository = productRepository;
         this.ratingRepository = ratingRepository;
         this.notificationRepository = notificationRepository;
 
-        this.userClient = userClient;
         this.emailClient = emailClient;
     }
 
@@ -77,22 +75,17 @@ public class ProductServiceImpl implements ProductService {
     }
 
     private void onQuantityChange(Product product, Integer newQuantity){
-        log.debug("Inside quantity");
         notificationRepository.findNotificationsByProductIdAndNotificationTypeContains(product.getProductId(), NotificationType.QUANTITY)
                 .flatMap(notification ->
-                    userClient.getUserByUserId(notification.getCustomerId())
-                            .switchIfEmpty(Mono.empty())
-                            .flatMap(user ->
-                                emailClient.sendEmail(EmailRequestModel.builder()
-                                        .EmailToSendTo(user.getEmail())
-                                        .EmailTitle("PetClinic - Product \"" + product.getProductName() + "\" Restocked")
-                                        .TemplateName("Default")
-                                        .Header("PetClinic - Product Restocked")
-                                        .SenderName("PetClinicBackInStock")
-                                        .Body("Hi!\n" + product.getProductName() + " has been restocked!\n" + "New quantity: " + newQuantity + "\n\n")
-                                        .Footer("Thank you for shopping with PetClinic!")
-                                        .build())
-                            )
+                    emailClient.sendEmail(EmailRequestModel.builder()
+                            .EmailToSendTo(notification.getEmail())
+                            .EmailTitle("PetClinic - Product \"" + product.getProductName() + "\" Restocked")
+                            .TemplateName("Default")
+                            .Header("PetClinic - Product Restocked")
+                            .SenderName("PetClinicBackInStock")
+                            .Body("Hi!\n" + product.getProductName() + " has been restocked!\n" + "New quantity: " + newQuantity + "\n\n")
+                            .Footer("Thank you for shopping with PetClinic!")
+                            .build())
                 )
                 .subscribe();
     }
@@ -100,19 +93,15 @@ public class ProductServiceImpl implements ProductService {
     private void onPriceChange(Product product, Double newPrice){
         notificationRepository.findNotificationsByProductIdAndNotificationTypeContains(product.getProductId(), NotificationType.PRICE)
                 .flatMap(notification ->
-                    userClient.getUserByUserId(notification.getCustomerId())
-                            .switchIfEmpty(Mono.empty())
-                            .flatMap(user ->
-                                    emailClient.sendEmail(EmailRequestModel.builder()
-                                            .EmailToSendTo(user.getEmail())
-                                            .EmailTitle("PetClinic - Product \"" + product.getProductName() + "\" Price Change")
-                                            .TemplateName("Default")
-                                            .Header("PetClinic - Price Change")
-                                            .SenderName("PetClinicPriceChange")
-                                            .Body("Hi!\n" + product.getProductName() + " has had a price change!\n" + "New price: " + newPrice + "\n\n")
-                                            .Footer("Thank you for shopping with PetClinic!")
-                                            .build())
-                            )
+                        emailClient.sendEmail(EmailRequestModel.builder()
+                                .EmailToSendTo(notification.getEmail())
+                                .EmailTitle("PetClinic - Product \"" + product.getProductName() + "\" Price Change")
+                                .TemplateName("Default")
+                                .Header("PetClinic - Price Change")
+                                .SenderName("PetClinicPriceChange")
+                                .Body("Hi!\n" + product.getProductName() + " has had a price change!\n" + "New price: " + newPrice + "\n\n")
+                                .Footer("Thank you for shopping with PetClinic!")
+                                .build())
                 )
                 .subscribe();
     }

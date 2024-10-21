@@ -15,5 +15,6 @@ import java.util.EnumSet;
 public class NotificationResponseModel {
     String productId;
     String productName;
+    String email;
     EnumSet<NotificationType> notificationType;
 }

@@ -14,4 +14,5 @@ import java.util.EnumSet;
 @AllArgsConstructor
 public class NotificationRequestModel {
     EnumSet<NotificationType> notificationType;
+    String email;
 }

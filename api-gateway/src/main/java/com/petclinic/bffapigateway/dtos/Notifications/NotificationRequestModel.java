@@ -13,4 +13,5 @@ import java.util.Set;
 @AllArgsConstructor
 public class NotificationRequestModel {
     Set<String> notificationType;
+    String email;
 }
