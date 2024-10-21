@@ -47,6 +47,18 @@ export default function ProductDetails(): JSX.Element {
       }
     );
   };
+  const getDeliveryTypeLabel = (deliveryType: string): string => {
+    if (deliveryType === 'DELIVERY') {
+      return 'Standard Delivery';
+    } else if (deliveryType === 'PICKUP') {
+      return 'Pickup';
+    } else if (deliveryType === 'DELIVERY_AND_PICKUP') {
+      return 'Delivery and Pickup';
+    } else if (deliveryType === 'NO_DELIVERY_OPTION') {
+      return 'No delivery option';
+    }
+    return 'Unknown Delivery Type';
+  };
 
   const fetchProduct = async (): Promise<void> => {
     if (!productId) return;
@@ -203,6 +215,12 @@ export default function ProductDetails(): JSX.Element {
                     </Button>
                   </div>
                   <p>Type: {currentProduct.productType}</p>
+                  <div className="deliveryTypeEdit-container">
+                    <p>
+                      Delivery Type:{''}
+                      {getDeliveryTypeLabel(currentProduct.deliveryType)}
+                    </p>
+                  </div>
                   <h3>Description</h3>
                   <p>{currentProduct.productDescription}</p>
                 </div>

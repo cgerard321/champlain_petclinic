@@ -2234,4 +2234,113 @@ class InventoryControllerUnitTest {
                 .searchProducts(inventoryId, null, productDescription, null);
     }
 
+    @Test
+    void consumeProduct_withValidFields_shouldSucceed() {
+        // Arrange
+        String inventoryId = "inventoryId_1";
+        String productId = "productId_1";
+
+        // Mock the service to return the updated product
+        when(productInventoryService.consumeProduct(inventoryId, productId))
+                .thenReturn(Mono.just(productResponseDTO));
+
+        // Act and Assert
+        webTestClient.patch()
+                .uri("/inventory/{inventoryId}/products/{productId}/consume", inventoryId, productId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(ProductResponseDTO.class)
+                .value(product -> {
+                    assertNotNull(product);
+                    assertEquals(productResponseDTO, product); // Check if the returned product matches the mocked product
+                });
+
+        // Verify that the service was called with the correct inventoryId and productId
+        verify(productInventoryService, times(1)).consumeProduct(inventoryId, productId);
+    }
+
+    @Test
+    void consumeProduct_withInvalidInventoryIdAndProductId_shouldThrowNotFoundException() {
+        // Arrange
+        String invalidInventoryId = "invalidInventoryId";
+        String invalidProductId = "invalidProductId";
+
+        // Mock the service to return an error
+        when(productInventoryService.consumeProduct(invalidInventoryId, invalidProductId))
+                .thenReturn(Mono.error(new NotFoundException()));
+
+        // Act and Assert
+        webTestClient.patch()
+                .uri("/inventory/{inventoryId}/products/{productId}/consume", invalidInventoryId, invalidProductId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.message", "Inventory not found with InventoryId: " + invalidInventoryId +
+                        "\nOr ProductId: " + invalidProductId);
+    }
+
+    @Test
+    void consumeProduct_withInvalidProductId_shouldThrowNotFoundException() {
+        // Arrange
+        String inventoryId = "inventoryId_1";
+        String invalidProductId = "invalidProductId";
+
+        // Mock the service to return an error
+        when(productInventoryService.consumeProduct(inventoryId, invalidProductId))
+                .thenReturn(Mono.error(new NotFoundException()));
+
+        // Act and Assert
+        webTestClient.patch()
+                .uri("/inventory/{inventoryId}/products/{productId}/consume", inventoryId, invalidProductId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.message", "Inventory not found with InventoryId: " + inventoryId +
+                        "\nOr ProductId: " + invalidProductId);
+    }
+
+    @Test
+    void consumeProduct_withInvalidInventoryId_shouldThrowNotFoundException() {
+        // Arrange
+        String invalidInventoryId = "invalidInventoryId";
+        String productId = "productId_1";
+
+        // Mock the service to return an error
+        when(productInventoryService.consumeProduct(invalidInventoryId, productId))
+                .thenReturn(Mono.error(new NotFoundException()));
+
+        // Act and Assert
+        webTestClient.patch()
+                .uri("/inventory/{inventoryId}/products/{productId}/consume", invalidInventoryId, productId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.message", "Inventory not found with InventoryId: " + invalidInventoryId +
+                        "\nOr ProductId: " + productId);
+    }
+
+    @Test
+    void consumeProduct_withProductQuantityZero_shouldReturnBadRequest() {
+        // Arrange
+        String inventoryId = "inventoryId_1";
+        String productId = "productId_1";
+
+        // Mock the service to return an error
+        when(productInventoryService.consumeProduct(inventoryId, productId))
+                .thenReturn(Mono.error(new InvalidInputException("Product quantity is 0")));
+
+        // Act and Assert
+        webTestClient.patch()
+                .uri("/inventory/{inventoryId}/products/{productId}/consume", inventoryId, productId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.message", "Product quantity is 0");
+    }
+
 }

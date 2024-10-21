@@ -39,4 +39,7 @@ public interface BillRepository extends ReactiveMongoRepository<Bill, String> {
 
     @Query("{ 'date' : { $gte: ?0, $lt: ?1 } }")
     Flux<Bill> findByDateBetween(LocalDate start, LocalDate end);
+
+    Mono<Bill> findByCustomerIdAndBillId(String customerId, String billId);
+
 }

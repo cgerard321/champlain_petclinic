@@ -24,5 +24,5 @@ public class ProductResponseDTO {
     private Boolean isUnlisted;
     private ProductType productType;
     private ProductStatus productStatus;
-
+    private DeliveryType deliveryType;
 }

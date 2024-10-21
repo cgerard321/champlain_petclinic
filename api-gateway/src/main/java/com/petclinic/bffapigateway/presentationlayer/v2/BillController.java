@@ -3,6 +3,7 @@ package com.petclinic.bffapigateway.presentationlayer.v2;
 import com.petclinic.bffapigateway.domainclientlayer.BillServiceClient;
 import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
+import com.petclinic.bffapigateway.dtos.Bills.PaymentRequestDTO;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.utils.Security.Annotations.IsUserSpecific;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
@@ -141,6 +142,17 @@ public class BillController {
         }
 
         return billService.getBillsByMonth(year, month);
+    }
+
+    @IsUserSpecific(idToMatch = {"customerId"})
+    @PostMapping("/customer/{customerId}/bills/{billId}/pay")
+    public Mono<ResponseEntity<String>> payBill(
+            @PathVariable("customerId") String customerId,
+            @PathVariable("billId") String billId,
+            @RequestBody PaymentRequestDTO paymentRequestDTO) {
+        return billService.payBill(customerId, billId, paymentRequestDTO)
+                .map(response -> ResponseEntity.ok(response))
+                .onErrorResume(e -> Mono.just(ResponseEntity.badRequest().body("Payment failed: " + e.getMessage())));
     }
 
 }
