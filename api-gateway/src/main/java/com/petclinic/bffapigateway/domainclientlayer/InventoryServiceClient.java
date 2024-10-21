@@ -323,7 +323,7 @@ public class InventoryServiceClient {
                 .uri(uriBuilder.buildAndExpand(inventoryId, productId).toUri())
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError,
-                        resp -> Mono.error(new NotFoundException("Product not found in inventory: " + inventoryId)))
+                        resp -> Mono.error(new InventoryNotFoundException("Product not found in inventory: " + inventoryId, NOT_FOUND)))
                 .bodyToMono(ProductResponseDTO.class);
     }
 
