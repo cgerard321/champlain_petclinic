@@ -146,6 +146,8 @@
   font-size: 1em;
   cursor: pointer;
   transition: background-color 0.3s, transform 0.3s;
+  flex-grow: 1;
+  margin: 0 10px;
 }
 
 .update-role-modal-save-button:hover {
