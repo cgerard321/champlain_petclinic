@@ -36,6 +36,7 @@ class CartRepositoryUnitTest {
     private final CartProduct product1 = CartProduct.builder()
 
             .productId("9a29fff7-564a-4cc9-8fe1-36f6ca9bc223")
+            .imageId("08a5af6b-3501-4157-9a99-1aa82387b9e4")
             .productName("Product1")
             .productDescription("Description1")
             .productSalePrice(100.0)
@@ -45,6 +46,7 @@ class CartRepositoryUnitTest {
 
     private final CartProduct product2 = CartProduct.builder()
             .productId("d819e4f4-25af-4d33-91e9-2c45f0071606")
+            .imageId("36b06c01-10f3-4645-9c45-900afc5a8b8a")
             .productName("Product2")
             .productDescription("Description2")
             .productSalePrice(200.0)
@@ -54,6 +56,7 @@ class CartRepositoryUnitTest {
 
     private final CartProduct product3 = CartProduct.builder()
             .productId("132d3c5e-dcaa-4a4f-a35e-b8acc37c51c1")
+            .imageId("be4e60a4-2369-46e8-abee-20c1a8dce3e5")
             .productName("Product3")
             .productDescription("Description3")
             .productSalePrice(300.0)

@@ -6,9 +6,12 @@ export interface ProductModel {
   productSalePrice: number;
   averageRating: number;
   productQuantity: number;
-  status: 'RE_ORDER' | 'OUT_OF_STOCK' | 'AVAILABLE';
+  productStatus: 'PRE_ORDER' | 'AVAILABLE' | 'OUT_OF_STOCK';
   requestCount: number;
   productType: string;
+  isUnlisted: boolean;
+  dateAdded: Date;
+  releaseDate?: Date;
 }
 
 export const emptyProductModel: ProductModel = {
@@ -19,7 +22,10 @@ export const emptyProductModel: ProductModel = {
   productSalePrice: 0,
   averageRating: 0,
   productQuantity: 0,
-  status: 'OUT_OF_STOCK',
+  productStatus: 'OUT_OF_STOCK',
   requestCount: 0,
   productType: '',
+  isUnlisted: false,
+  dateAdded: new Date(),
+  releaseDate: undefined,
 };

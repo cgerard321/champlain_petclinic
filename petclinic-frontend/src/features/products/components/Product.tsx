@@ -7,12 +7,8 @@ import { generatePath, useNavigate } from 'react-router-dom';
 import { AppRoutePaths } from '@/shared/models/path.routes';
 import StarRating from './StarRating';
 import './Product.css';
-import { addToWishlist } from './addToWishlist';
+import { useAddToCart } from '@/features/carts/api/addToCartFromProducts.ts';
 
-interface ProductProps {
-  product: ProductModel;
-  cartId: string | null; // Add cartId prop
-}
 
 export default function Product({
   product,
@@ -29,6 +25,7 @@ export default function Product({
   const [tooLong, setTooLong] = useState<boolean>(false);
 
   const navigate = useNavigate();
+  const { addToCart } = useAddToCart();
 
   const handleProductTitleClick = (): void => {
     navigate(
@@ -81,15 +78,12 @@ export default function Product({
     setSelectedProduct(null);
     setSelectedProductForQuantity(null);
   };
-
-  const handleAddToWishlist = async (): Promise<void> => {
+  
+  const handleAddToCart = async (): Promise<void> => {
     try {
-      await addToWishlist(currentProduct.productId, cartId, wishlistQuantity); // Pass wishlistQuantity
-      alert(
-        `${wishlistQuantity} of ${currentProduct.productName} has been added to your wishlist!`
-      );
+      await addToCart(currentProduct.productId);
     } catch (error) {
-      console.error('Failed to add product to wishlist:', error);
+      console.error('Failed to add product to cart:', error);
     }
   };
 
@@ -144,6 +138,7 @@ export default function Product({
       >
         +
       </span>
+
       <h2
         onClick={handleProductTitleClick}
         style={{
@@ -160,25 +155,36 @@ export default function Product({
           : `${currentProduct.productDescription.substring(0, 100)}...`}
       </p>
       <p>Price: ${currentProduct.productSalePrice.toFixed(2)}</p>
+
+      <button
+        onClick={handleAddToCart}
+        disabled={product.productQuantity === 0}
+      >
+        {product.productQuantity === 0 ? 'Out of Stock' : 'Add to Cart'}
+      </button>
+
       <StarRating
         currentRating={currentProduct.averageRating}
         viewOnly={true}
       />
-
-      {/* Wishlist Quantity Input */}
-      <input
-        type="number"
-        value={wishlistQuantity}
-        onChange={e =>
-          setWishlistQuantity(Math.max(1, parseInt(e.target.value)))
-        }
-        min="1"
-        max={currentProduct.productQuantity}
-        style={{ width: '50px', marginLeft: '10px' }}
-      />
-
-      {/* Add to Wishlist Button */}
-      <button onClick={handleAddToWishlist}>Add to Wishlist</button>
+      {currentProduct.productStatus === 'PRE_ORDER' && (
+        <div
+          style={{
+            position: 'absolute',
+            top: '10px',
+            right: '10px',
+            backgroundColor: '#FFD700',
+            padding: '5px 10px',
+            borderRadius: '5px',
+            fontWeight: 'bold',
+            color: '#333',
+            zIndex: 1,
+            boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+          }}
+        >
+          PRE-ORDER
+        </div>
+      )}
     </div>
   );
 }

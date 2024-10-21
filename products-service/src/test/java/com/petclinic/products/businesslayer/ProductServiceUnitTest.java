@@ -3,6 +3,7 @@ package com.petclinic.products.businesslayer;
 import com.petclinic.products.businesslayer.products.ProductServiceImpl;
 import com.petclinic.products.datalayer.products.Product;
 import com.petclinic.products.datalayer.products.ProductRepository;
+import com.petclinic.products.datalayer.products.ProductType;
 import com.petclinic.products.datalayer.ratings.Rating;
 import com.petclinic.products.datalayer.ratings.RatingRepository;
 import com.petclinic.products.presentationlayer.products.ProductResponseModel;
@@ -41,7 +42,7 @@ class ProductServiceUnitTest {
             .productDescription("Premium dry food for adult dogs")
             .productSalePrice(45.99)
             .averageRating(0.0)
-            .productType("Food")
+            .productType(ProductType.FOOD)
             .build();
 
     Product product2 = Product.builder()
@@ -50,7 +51,7 @@ class ProductServiceUnitTest {
             .productDescription("Clumping cat litter with odor control")
             .productSalePrice(12.99)
             .averageRating(0.0)
-            .productType("Accessory")
+            .productType(ProductType.ACCESSORY)
             .build();
 
 
@@ -81,22 +82,38 @@ class ProductServiceUnitTest {
         Double maxPrice = null;
         String sort = null;
 
-        Product product1 = createProduct("1", 50.0, 4.0);
-        Product product2 = createProduct("2", 60.0, 3.0);
-        Product product3 = createProduct("3", 70.0, 5.0);
+        Product product1 = createProduct("1", 50.0,3.5);
+        Product product2 = createProduct("2", 60.0,3.7);
+        Product product3 = createProduct("3", 70.0,5.0);
 
         when(productRepository.findAll()).thenReturn(Flux.just(product1, product2, product3));
 
-        when(ratingRepository.findRatingsByProductId(anyString())).thenReturn(Flux.empty());
-
+        // Mock ratings for each product
+        when(ratingRepository.findRatingsByProductId("1")).thenReturn(
+                Flux.just(
+                        Rating.builder().productId("1").rating((byte) 4).build(),
+                        Rating.builder().productId("1").rating((byte) 4).build()
+                )
+        );
+        when(ratingRepository.findRatingsByProductId("2")).thenReturn(
+                Flux.just(
+                        Rating.builder().productId("2").rating((byte) 3).build()
+                )
+        );
+        when(ratingRepository.findRatingsByProductId("3")).thenReturn(
+                Flux.just(
+                        Rating.builder().productId("3").rating((byte) 5).build(),
+                        Rating.builder().productId("3").rating((byte) 5).build()
+                )
+        );
 
         // When
         Flux<ProductResponseModel> result = productService.getAllProducts(minPrice, maxPrice, minRating, maxRating, sort);
 
         // Then
         StepVerifier.create(result)
-                .expectNextMatches(product -> product.getAverageRating() == 4.0)
-                .expectNextMatches(product -> product.getAverageRating() == 3.0)
+                .expectNextMatches(product -> product.getProductId().equals("1") && product.getAverageRating() == 4.0)
+                .expectNextMatches(product -> product.getProductId().equals("2") && product.getAverageRating() == 3.0)
                 .expectComplete()
                 .verify();
 
@@ -171,7 +188,7 @@ class ProductServiceUnitTest {
         StepVerifier.create(result)
                 .expectNextMatches(product ->
                         product.getProductId().equals(product1.getProductId()) &&
-                                product.getProductType().equals("Food"))
+                                product.getProductType().equals(ProductType.FOOD))
                 .verifyComplete();
     }
 

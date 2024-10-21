@@ -3,8 +3,10 @@ package com.petclinic.vet.servicelayer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.vet.dataaccesslayer.*;
+import com.petclinic.vet.dataaccesslayer.ratings.PredefinedDescription;
 import com.petclinic.vet.dataaccesslayer.ratings.Rating;
 import com.petclinic.vet.dataaccesslayer.ratings.RatingRepository;
+import com.petclinic.vet.exceptions.NotFoundException;
 import com.petclinic.vet.servicelayer.ratings.RatingRequestDTO;
 import com.petclinic.vet.servicelayer.ratings.RatingResponseDTO;
 import com.petclinic.vet.servicelayer.ratings.RatingService;
@@ -15,6 +17,7 @@ import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWeb
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.r2dbc.connection.init.ConnectionFactoryInitializer;
+import org.springframework.test.context.ActiveProfiles;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -30,6 +33,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
+@ActiveProfiles("test")
 @AutoConfigureWebTestClient
 class RatingServiceImplTest {
 
@@ -62,22 +66,58 @@ class RatingServiceImplTest {
 
     VetAverageRatingDTO vetAverageRatingDTO1=buildVetAverageRatingDTO();
     @Test
-    void getAllRatingsByVetId() {
+    void getAllRatingsByVetId_ShouldReturnFormattedRatings() {
+        String expectedVetId = "vetId";
+        String expectedRatingId = "ratingId";
+        Double expectedRateScore = 5.0;
+        String expectedRateDescription = "Great experience!";
+        PredefinedDescription predefinedDescription = PredefinedDescription.EXCELLENT;
+        String expectedCustomerName = "John Doe";
+        String expectedRateDate = "2023-09-01";
+
+        Rating rating = Rating.builder()
+                .ratingId(expectedRatingId)
+                .vetId(expectedVetId)
+                .rateScore(expectedRateScore)
+                .rateDescription(expectedRateDescription)
+                .predefinedDescription(predefinedDescription)
+                .rateDate(expectedRateDate)
+                .customerName(expectedCustomerName)
+                .build();
+
         when(vetRepository.findVetByVetId(anyString())).thenReturn(Mono.just(existingVet));
         when(ratingRepository.findAllByVetId(anyString())).thenReturn(Flux.just(rating));
 
-        Flux<RatingResponseDTO> ratingResponseDTO = ratingService.getAllRatingsByVetId("vetId");
+        Flux<RatingResponseDTO> ratingResponseDTO = ratingService.getAllRatingsByVetId(expectedVetId);
 
-        StepVerifier
-                .create(ratingResponseDTO)
+        StepVerifier.create(ratingResponseDTO)
                 .consumeNextWith(foundRating -> {
-                    assertEquals(rating.getRatingId(), foundRating.getRatingId());
-                    assertEquals(rating.getVetId(), foundRating.getVetId());
-                    assertEquals(rating.getRateScore(), foundRating.getRateScore());
+                    assertEquals(expectedRatingId, foundRating.getRatingId());
+                    assertEquals(expectedVetId, foundRating.getVetId());
+                    assertEquals(expectedRateScore, foundRating.getRateScore());
+                    assertEquals(expectedRateDescription, foundRating.getRateDescription());
+                    assertEquals(predefinedDescription, foundRating.getPredefinedDescription());
+                    assertEquals(expectedRateDate, foundRating.getRateDate());  // Verify the date format matches
+                    assertEquals(expectedCustomerName, foundRating.getCustomerName());
                 })
-
                 .verifyComplete();
     }
+
+    @Test
+    void getAllRatingsByVetId_WithInvalidVetId_ShouldReturnNotFound() {
+
+        String invalidVetId = "invalidVetId";
+
+        when(vetRepository.findVetByVetId(anyString())).thenReturn(Mono.empty());
+
+        Flux<RatingResponseDTO> ratingResponseDTO = ratingService.getAllRatingsByVetId(invalidVetId);
+
+        StepVerifier.create(ratingResponseDTO)
+                .expectErrorMatches(throwable -> throwable instanceof NotFoundException &&
+                        throwable.getMessage().equals("vetId not found: " + invalidVetId))
+                .verify();
+    }
+
 
     @Test
     void deleteRatingByRatingId() {

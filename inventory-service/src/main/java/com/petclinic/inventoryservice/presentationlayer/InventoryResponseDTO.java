@@ -16,6 +16,7 @@ public class InventoryResponseDTO {
     private String inventoryDescription;
     private String inventoryImage;
     private String inventoryBackupImage;
+    private byte[] imageUploaded;
     private List<ProductResponseDTO> products;
 
 }

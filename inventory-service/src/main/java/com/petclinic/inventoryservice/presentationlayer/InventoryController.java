@@ -1,6 +1,7 @@
 package com.petclinic.inventoryservice.presentationlayer;
 
 import com.petclinic.inventoryservice.businesslayer.ProductInventoryService;
+import com.petclinic.inventoryservice.datalayer.Product.Status;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
@@ -166,11 +167,22 @@ public Flux<InventoryResponseDTO> searchInventories(
     }
 
     @GetMapping("/{inventoryId}/products/search")
-    public Flux<ProductResponseDTO> searchProducts(@PathVariable String inventoryId,
-                                                   @RequestParam(required = false) String productName,
-                                                   @RequestParam(required = false) String productDescription) {
-        return productInventoryService.searchProducts(inventoryId, productName, productDescription);
+    public Mono<ResponseEntity<Flux<ProductResponseDTO>>> searchProducts(@PathVariable String inventoryId,
+                                                                         @RequestParam(required = false) String productName,
+                                                                         @RequestParam(required = false) String productDescription,
+                                                                         @RequestParam(required = false) Status status) {
+        Flux<ProductResponseDTO> products = productInventoryService.searchProducts(inventoryId, productName, productDescription, status);
+
+        return products.hasElements()
+                .flatMap(hasProducts -> {
+                    if (hasProducts) {
+                        return Mono.just(ResponseEntity.ok(products));
+                    } else {
+                        return Mono.just(ResponseEntity.noContent().build());
+                    }
+                });
     }
+
     @PostMapping("/{inventoryId}/products")
     public Mono<ResponseEntity<ProductResponseDTO>> addSupplyToInventory(@RequestBody Mono<ProductRequestDTO> newProduct, @PathVariable String inventoryId) {
         return productInventoryService.addSupplyToInventory(newProduct, inventoryId)
@@ -206,9 +218,30 @@ public Flux<InventoryResponseDTO> searchInventories(
                             .body(resource);
 
                 });
+    }
 
+    @PutMapping("/{inventoryId}/products/{productId}/restockProduct")
+    public Mono<ResponseEntity<ProductResponseDTO>> restockLowStockProduct(@PathVariable String inventoryId,@PathVariable String productId, @RequestParam Integer productQuantity){
+        if (productQuantity == null || productQuantity <= 0) {
+            return Mono.just(ResponseEntity.badRequest().body(null));
+        }
+        return productInventoryService.restockLowStockProduct(inventoryId, productId, productQuantity)
+                .map(updatedProduct -> ResponseEntity.ok().body(updatedProduct))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
 
+    @PutMapping("/{currentInventoryId}/products/{productId}/updateInventoryId/{newInventoryId}")
+    public Mono<ResponseEntity<ProductResponseDTO>> updateProductInventoryId(@PathVariable String currentInventoryId,
+                                                                             @PathVariable String productId,
+                                                                             @PathVariable String newInventoryId){
+        return productInventoryService.updateProductInventoryId(currentInventoryId, productId, newInventoryId)
+                .map(productResponseDTO -> ResponseEntity.ok().body(productResponseDTO))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
 
+    @GetMapping("/all")
+    public Flux<InventoryResponseDTO> getAllInventories() {
+        return productInventoryService.getAllInventories();
     }
 
 }

@@ -36,5 +36,6 @@ public interface CartService {
     Mono<CartResponseModel> moveProductFromWishListToCart(String cartId, String productId);
 
     Mono<CartResponseModel> addProductToWishList(String cartId, String productId, int quantity);
+    Mono<CartResponseModel> addProductToCartFromProducts(String cartId, String productId);
 }
 

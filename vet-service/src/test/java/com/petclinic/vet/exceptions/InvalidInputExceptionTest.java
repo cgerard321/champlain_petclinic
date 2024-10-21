@@ -8,12 +8,14 @@ import org.springframework.boot.r2dbc.init.R2dbcScriptDatabaseInitializer;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.r2dbc.connection.init.ConnectionFactoryInitializer;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
+@ActiveProfiles("test")
 class InvalidInputExceptionTest {
     //To counter missing bean error
     @MockBean

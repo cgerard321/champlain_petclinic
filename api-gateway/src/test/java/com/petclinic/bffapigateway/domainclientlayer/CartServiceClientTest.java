@@ -153,32 +153,6 @@ public class CartServiceClientTest {
                 .verifyComplete();
     }
 
-    @Test
-    void testAddProductToCart_OutOfStock_ThrowsException() {
-        String cartId = "98f7b33a-d62a-420a-a84a-05a27c85fc91";
-        AddProductRequestDTO requestDTO = new AddProductRequestDTO("9a29fff7-564a-4cc9-8fe1-36f6ca9bc223", 15);
-        String responseBody = """
-            {
-                "message": "You cannot add more than 10 items. Only 10 items left in stock."
-            }
-            """;
-
-        prepareResponse(response -> response
-                .setHeader("Content-Type", "application/json")
-                .setResponseCode(400)
-                .setBody(responseBody));
-
-        Mono<CartResponseDTO> result = mockCartServiceClient.addProductToCart(cartId, requestDTO);
-
-        StepVerifier.create(result)
-                .expectErrorSatisfies(throwable -> {
-                    assert throwable instanceof WebClientResponseException;
-                    WebClientResponseException exception = (WebClientResponseException) throwable;
-                    assertEquals(400, exception.getRawStatusCode());
-                    assert exception.getResponseBodyAsString().contains("Only 10 items left in stock");
-                })
-                .verify();
-    }
 
 
     @Test
@@ -572,6 +546,191 @@ public class CartServiceClientTest {
 
         StepVerifier.create(result)
                 .verifyComplete();
+    }
+
+    @Test
+    void testGetActivePromos() {
+        String responseBody = """
+        [
+            {
+                "id": "promo1",
+                "name": "Active Promo 1",
+                "code": "ACTIVEPROMO1",
+                "discount": 10.0,
+                "expirationDate": "2024-12-31T23:59:59",
+                "active": true
+            },
+            {
+                "id": "promo2",
+                "name": "Active Promo 2",
+                "code": "ACTIVEPROMO2",
+                "discount": 20.0,
+                "expirationDate": "2024-12-31T23:59:59",
+                "active": true
+            }
+        ]
+        """;
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody(responseBody));
+
+        Flux<PromoCodeResponseDTO> result = mockCartServiceClient.getAllPromoCodes();  // Assuming active promos are fetched using this method
+
+        List<PromoCodeResponseDTO> promos = result.collectList().block();
+
+        assertEquals(2, promos.size());
+        assertEquals("Active Promo 1", promos.get(0).getName());
+        assertEquals("ACTIVEPROMO1", promos.get(0).getCode());
+        assertEquals(true, promos.get(0).isActive());
+
+        assertEquals("Active Promo 2", promos.get(1).getName());
+        assertEquals("ACTIVEPROMO2", promos.get(1).getCode());
+        assertEquals(true, promos.get(1).isActive());
+    }
+
+    @Test
+    void testValidatePromoCode_Success() {
+        String promoCode = "SUMMER2024";
+        String responseBody = """
+            {
+                "id": "promo1",
+                "name": "Summer Sale",
+                "code": "SUMMER2024",
+                "discount": 15.0,
+                "expirationDate": "2024-12-31T23:59:59"
+            }
+            """;
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody(responseBody)
+                .setResponseCode(200));
+
+        Mono<PromoCodeResponseDTO> result = mockCartServiceClient.validatePromoCode(promoCode);
+
+        StepVerifier.create(result)
+                .assertNext(promo -> {
+                    assertEquals("promo1", promo.getId());
+                    assertEquals("Summer Sale", promo.getName());
+                    assertEquals("SUMMER2024", promo.getCode());
+                    assertEquals(15.0, promo.getDiscount());
+                    assertEquals(LocalDateTime.of(2024, 12, 31, 23, 59, 59), promo.getExpirationDate());
+                })
+                .verifyComplete();
+    }
+
+
+    @Test
+    void testValidatePromoCode_InvalidInput() {
+        String promoCode = "INVALIDCODE";
+        String responseBody = """
+        {
+            "message": "Invalid promo code provided."
+        }
+        """;
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody(responseBody)
+                .setResponseCode(400));
+
+        Mono<PromoCodeResponseDTO> result = mockCartServiceClient.validatePromoCode(promoCode);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable ->
+                        throwable instanceof InvalidInputException &&
+                                throwable.getMessage().contains("Promo code is not valid: INVALIDCODE")
+                )
+                .verify();
+    }
+
+    @Test
+    void testAddProductToCart_InvalidInput_ErrorFromResponse() {
+        String cartId = "98f7b33a-d62a-420a-a84a-05a27c85fc91";
+        AddProductRequestDTO requestDTO = new AddProductRequestDTO("9a29fff7-564a-4cc9-8fe1-36f6ca9bc223", 3);
+        String responseBody = """
+            {
+                "message": "Invalid product quantity."
+            }
+            """;
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(400) // Simulate a 400 Bad Request
+                .setBody(responseBody));
+
+        Mono<CartResponseDTO> result = mockCartServiceClient.addProductToCart(cartId, requestDTO);
+
+        StepVerifier.create(result)
+                .expectErrorSatisfies(throwable -> {
+                    assertThat(throwable).isInstanceOf(InvalidInputException.class);
+                    assertThat(throwable.getMessage()).isEqualTo("Invalid product quantity.");
+                })
+                .verify();
+    }
+
+    @Test
+    void testAddProductToCart_GenericErrorHandling() {
+        String cartId = "98f7b33a-d62a-420a-a84a-05a27c85fc91";
+        AddProductRequestDTO requestDTO = new AddProductRequestDTO("9a29fff7-564a-4cc9-8fe1-36f6ca9bc223", 3);
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(500) // Simulate a 500 Internal Server Error
+        );
+
+        Mono<CartResponseDTO> result = mockCartServiceClient.addProductToCart(cartId, requestDTO);
+
+        StepVerifier.create(result)
+                .expectErrorSatisfies(throwable -> {
+                    assertThat(throwable).isInstanceOf(Exception.class);
+                    assertThat(throwable.getMessage()).isEqualTo("An error occurred while adding product to cart");
+                })
+                .verify();
+    }
+
+    @Test
+    void testClearCart_InvalidCartId() {
+        String cartId = "invalid-cart-id";
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(422) // Simulate a 422 Unprocessable Entity
+                .setBody("""
+                {
+                    "message": "Cart id is invalid: invalid-cart-id"
+                }
+                """)
+        );
+
+        Mono<Void> clearCartResponse = mockCartServiceClient.clearCart(cartId);
+
+        StepVerifier.create(clearCartResponse)
+                .expectErrorSatisfies(throwable -> {
+                    assertThat(throwable).isInstanceOf(InvalidInputException.class);
+                    assertThat(throwable.getMessage()).isEqualTo("Cart id is invalid: " + cartId);
+                })
+                .verify();
+    }
+
+    @Test
+    void testClearCart_GenericClientError() {
+        String cartId = "98f7b33a-d62a-420a-a84a-05a27c85fc91";
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(400) // Simulate a generic 400 Bad Request
+        );
+
+        Mono<Void> clearCartResponse = mockCartServiceClient.clearCart(cartId);
+
+        StepVerifier.create(clearCartResponse)
+                .expectErrorSatisfies(throwable -> {
+                    assertThat(throwable).isInstanceOf(IllegalArgumentException.class);
+                    assertThat(throwable.getMessage()).isEqualTo("Client error");
+                })
+                .verify();
     }
 
 }

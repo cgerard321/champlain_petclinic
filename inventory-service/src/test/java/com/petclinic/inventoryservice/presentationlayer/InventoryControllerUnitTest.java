@@ -26,8 +26,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static com.petclinic.inventoryservice.datalayer.Product.Status.AVAILABLE;
-import static com.petclinic.inventoryservice.datalayer.Product.Status.RE_ORDER;
+import static com.petclinic.inventoryservice.datalayer.Product.Status.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -87,14 +86,14 @@ class InventoryControllerUnitTest {
             .type("Medications")
             .build();
 
-    Inventory inventory4 = Inventory.builder()
-            .inventoryId(UUID.randomUUID().toString())
-            .inventoryName("Medications")
-            .inventoryType(inventoryType4.getType())
-            .inventoryDescription("Antibiotics for pet infections")
-            .inventoryImage("https://www.fda.gov/files/iStock-157317886.jpg")
-            .inventoryBackupImage("https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14")
-            .build();
+//    Inventory inventory4 = Inventory.builder()
+//            .inventoryId(UUID.randomUUID().toString())
+//            .inventoryName("Medications")
+//            .inventoryType(inventoryType4.getType())
+//            .inventoryDescription("Antibiotics for pet infections")
+//            .inventoryImage("https://www.fda.gov/files/iStock-157317886.jpg")
+//            .inventoryBackupImage("https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14")
+//            .build();
 
 
       ProductResponseDTO lowStockProduct = ProductResponseDTO.builder()
@@ -1479,7 +1478,7 @@ class InventoryControllerUnitTest {
         String productName = "B";
         String productDescription = "Sedative";
 
-        when(productInventoryService.searchProducts(inventoryId, productName, productDescription))
+        when(productInventoryService.searchProducts(inventoryId, productName, productDescription, null))
                 .thenReturn(Flux.fromIterable(productResponseDTOS));
 
         webTestClient.get()
@@ -1497,7 +1496,7 @@ class InventoryControllerUnitTest {
                     assertEquals(2, products.size());
                 });
         verify(productInventoryService, times(1))
-                .searchProducts(inventoryId, productName, productDescription);
+                .searchProducts(inventoryId, productName, productDescription, null);
     }
 
     @Test
@@ -1505,7 +1504,7 @@ class InventoryControllerUnitTest {
         String inventoryId = "1";
         String productName = "B";
 
-        when(productInventoryService.searchProducts(inventoryId, productName, null))
+        when(productInventoryService.searchProducts(inventoryId, productName, null, null))
                 .thenReturn(Flux.fromIterable(productResponseDTOS));
 
         webTestClient.get()
@@ -1522,7 +1521,7 @@ class InventoryControllerUnitTest {
                     assertEquals(2, products.size());
                 });
         verify(productInventoryService, times(1))
-                .searchProducts(inventoryId, productName, null);
+                .searchProducts(inventoryId, productName, null, null);
     }
 
     @Test
@@ -1530,7 +1529,7 @@ class InventoryControllerUnitTest {
         String inventoryId = "1";
         String productDescription = "Sedative";
 
-        when(productInventoryService.searchProducts(inventoryId, null, productDescription))
+        when(productInventoryService.searchProducts(inventoryId, null, productDescription, null))
                 .thenReturn(Flux.fromIterable(productResponseDTOS));
 
         webTestClient.get()
@@ -1547,14 +1546,14 @@ class InventoryControllerUnitTest {
                     assertEquals(2, products.size());
                 });
         verify(productInventoryService, times(1))
-                .searchProducts(inventoryId, null, productDescription);
+                .searchProducts(inventoryId, null, productDescription, null);
     }
 
     @Test
     void searchProductsByInventoryId_withValidFields_shouldSucceed() {
         String inventoryId = "1";
 
-        when(productInventoryService.searchProducts(inventoryId, null, null))
+        when(productInventoryService.searchProducts(inventoryId, null, null, null))
                 .thenReturn(Flux.fromIterable(productResponseDTOS));
 
         webTestClient.get()
@@ -1570,7 +1569,7 @@ class InventoryControllerUnitTest {
                     assertEquals(2, products.size());
                 });
         verify(productInventoryService, times(1))
-                .searchProducts(inventoryId, null, null);
+                .searchProducts(inventoryId, null, null, null);
     }
 
 //    @Test
@@ -1680,7 +1679,559 @@ class InventoryControllerUnitTest {
                     assertArrayEquals(pdfContent, content); // Check if the returned content matches the mocked content
                 });
 
-}
+    }
 
+    @Test
+    public void testUpdateProductInventoryId_Success() {
+        // Mock response DTO
+        ProductResponseDTO mockResponse = new ProductResponseDTO();
+        mockResponse.setProductId("prod123");
+        mockResponse.setInventoryId("newInventory123");
+
+        // Mock the service method
+        when(productInventoryService.updateProductInventoryId(anyString(), anyString(), anyString()))
+                .thenReturn(Mono.just(mockResponse));
+
+        // Perform the PUT request
+        webTestClient.put()
+                .uri("/inventory/currentInventory123/products/prod123/updateInventoryId/newInventory123")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(ProductResponseDTO.class)
+                .value(response -> {
+                    // Assert that the returned DTO has the expected values
+                    assert response.getProductId().equals("prod123");
+                    assert response.getInventoryId().equals("newInventory123");
+                });
+    }
+
+    @Test
+    void testUpdateProductInventoryId_NotFound() {
+        // Given
+        String currentInventoryId = "invalidInventoryId";
+        String productId = "invalidProductId";
+        String newInventoryId = "invalidNewInventoryId";
+
+        // Mocking the service to return empty Mono
+        when(productInventoryService.updateProductInventoryId(currentInventoryId, productId, newInventoryId))
+                .thenReturn(Mono.empty());
+
+        // When and Then
+        webTestClient.put()
+                .uri("/inventory/{currentInventoryId}/products/{productId}/updateInventoryId/{newInventoryId}",
+                        currentInventoryId, productId, newInventoryId)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    void restockLowStockProduct_ValidRequest_ShouldSucceed() {
+        // Arrange
+        String inventoryId = "inventoryId_1";
+        String productId = "productId_1";
+        Integer productQuantity = 10;
+
+        ProductResponseDTO updatedProductResponseDTO = ProductResponseDTO.builder()
+                .inventoryId(inventoryId)
+                .productId(productId)
+                .productName("Restocked Product")
+                .productDescription("Restocked product description")
+                .productPrice(100.00)
+                .productQuantity(productQuantity)
+                .build();
+
+        when(productInventoryService.restockLowStockProduct(inventoryId, productId, productQuantity))
+                .thenReturn(Mono.just(updatedProductResponseDTO));
+
+        // Act and Assert
+        webTestClient
+                .put()
+                .uri("/inventory/{inventoryId}/products/{productId}/restockProduct?productQuantity={productQuantity}", inventoryId, productId, productQuantity)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(ProductResponseDTO.class)
+                .value(responseDTO -> {
+                    assertNotNull(responseDTO);
+                    assertEquals(updatedProductResponseDTO.getInventoryId(), responseDTO.getInventoryId());
+                    assertEquals(updatedProductResponseDTO.getProductId(), responseDTO.getProductId());
+                    assertEquals(updatedProductResponseDTO.getProductQuantity(), responseDTO.getProductQuantity());
+                });
+
+        // Verify that the service method was called with the correct arguments
+        verify(productInventoryService, times(1)).restockLowStockProduct(inventoryId, productId, productQuantity);
+    }
+
+    @Test
+    void restockLowStockProduct_InvalidQuantity_ShouldReturnBadRequest() {
+        // Arrange
+        String inventoryId = "inventoryId_1";
+        String productId = "productId_1";
+        Integer invalidQuantity = 0;
+
+        // Act and Assert
+        webTestClient
+                .put()
+                .uri("/inventory/{inventoryId}/products/{productId}/restockProduct?productQuantity={productQuantity}", inventoryId, productId, invalidQuantity)
+                .exchange()
+                .expectStatus().isBadRequest();
+
+        // Verify that the service method was not called
+        verify(productInventoryService, times(0)).restockLowStockProduct(any(), any(), any());
+    }
+
+    @Test
+    void restockLowStockProduct_ProductNotFound_ShouldReturnNotFound() {
+        // Arrange
+        String inventoryId = "inventoryId_1";
+        String productId = "nonExistentProductId";
+        Integer productQuantity = 10;
+
+        when(productInventoryService.restockLowStockProduct(inventoryId, productId, productQuantity))
+                .thenReturn(Mono.empty());
+
+        // Act and Assert
+        webTestClient
+                .put()
+                .uri("/inventory/{inventoryId}/products/{productId}/restockProduct?productQuantity={productQuantity}", inventoryId, productId, productQuantity)
+                .exchange()
+                .expectStatus().isNotFound();
+
+        // Verify that the service method was called with the correct arguments
+        verify(productInventoryService, times(1)).restockLowStockProduct(inventoryId, productId, productQuantity);
+    }
+
+    @Test
+    void searchProductsByInventoryIdAndProductNameAndProductDescriptionAndStatus_withValidFields_shouldSucceed() {
+        String inventoryId = "1";
+        String productName = "B";
+        String productDescription = "Sedative";
+        Status status = Status.AVAILABLE;
+
+        when(productInventoryService.searchProducts(inventoryId, productName, productDescription, status))
+                .thenReturn(Flux.fromIterable(productResponseDTOS));
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/inventory/{inventoryId}/products/search")
+                        .queryParam("productName", productName)
+                        .queryParam("productDescription", productDescription)
+                        .queryParam("status", status)
+                        .build(inventoryId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(ProductResponseDTO.class)
+                .value(products -> {
+                    assertNotNull(products);
+                    assertEquals(2, products.size());
+                });
+        verify(productInventoryService, times(1))
+                .searchProducts(inventoryId, productName, productDescription, status);
+    }
+
+    @Test
+    void searchProductsByInventoryIdAndProductNameAndStatus_withValidFields_shouldSucceed() {
+        String inventoryId = "1";
+        String productName = "B";
+        Status status = Status.AVAILABLE;
+
+        when(productInventoryService.searchProducts(inventoryId, productName, null, status))
+                .thenReturn(Flux.fromIterable(productResponseDTOS));
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/inventory/{inventoryId}/products/search")
+                        .queryParam("productName", productName)
+                        .queryParam("status", status)
+                        .build(inventoryId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(ProductResponseDTO.class)
+                .value(products -> {
+                    assertNotNull(products);
+                    assertEquals(2, products.size());
+                });
+        verify(productInventoryService, times(1))
+                .searchProducts(inventoryId, productName, null, status);
+    }
+
+    @Test
+    void searchProductsByInventoryIdAndProductDescriptionAndStatus_withValidFields_shouldSucceed() {
+        String inventoryId = "1";
+        String productDescription = "Sedative";
+        Status status = Status.AVAILABLE;
+
+        when(productInventoryService.searchProducts(inventoryId, null, productDescription, status))
+                .thenReturn(Flux.fromIterable(productResponseDTOS));
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/inventory/{inventoryId}/products/search")
+                        .queryParam("productDescription", productDescription)
+                        .queryParam("status", status)
+                        .build(inventoryId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(ProductResponseDTO.class)
+                .value(products -> {
+                    assertNotNull(products);
+                    assertEquals(2, products.size());
+                });
+        verify(productInventoryService, times(1))
+                .searchProducts(inventoryId, null, productDescription, status);
+    }
+
+    @Test
+    void searchProductsByInventoryIdAndStatus_withValidFields_shouldSucceed() {
+        String inventoryId = "1";
+        Status status = Status.AVAILABLE;
+
+        when(productInventoryService.searchProducts(inventoryId, null, null, status))
+                .thenReturn(Flux.fromIterable(productResponseDTOS));
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/inventory/{inventoryId}/products/search")
+                        .queryParam("status", status)
+                        .build(inventoryId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(ProductResponseDTO.class)
+                .value(products -> {
+                    assertNotNull(products);
+                    assertEquals(2, products.size());
+                });
+        verify(productInventoryService, times(1))
+                .searchProducts(inventoryId, null, null, status);
+    }
+
+    @Test
+    void searchProductsByInventoryIdAndProductNameAndProductDescription_withNoResult_shouldReturnEmpty() {
+        String inventoryId = "1";
+        String productName = "C";
+        String productDescription = "Sedative";
+
+        when(productInventoryService.searchProducts(inventoryId, productName, productDescription, null))
+                .thenReturn(Flux.empty());
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/inventory/{inventoryId}/products/search")
+                        .queryParam("productName", productName)
+                        .queryParam("productDescription", productDescription)
+                        .build(inventoryId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNoContent();
+
+        verify(productInventoryService, times(1))
+                .searchProducts(inventoryId, productName, productDescription, null);
+    }
+
+    @Test
+    void searchProductsByInventoryIdAndProductNameAndProductDescription_withInvalidInventoryId_shouldReturnNoContent() {
+        String invalidInventoryId = "invalidInventoryId";
+        String productName = "B";
+        String productDescription = "Sedative";
+
+        when(productInventoryService.searchProducts(invalidInventoryId, productName, productDescription, null))
+                .thenReturn(Flux.empty());
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/inventory/{inventoryId}/products/search")
+                        .queryParam("productName", productName)
+                        .queryParam("productDescription", productDescription)
+                        .build(invalidInventoryId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNoContent();
+        verify(productInventoryService, times(1))
+                .searchProducts(invalidInventoryId, productName, productDescription, null);
+    }
+
+    @Test
+    void searchProductsByInventoryIdAndProductNameAndProductDescriptionAndStatus_withNoResult_shouldReturnEmpty() {
+        String inventoryId = "1";
+        String productName = "C";
+        String productDescription = "Sedative";
+        Status status = Status.AVAILABLE;
+
+        when(productInventoryService.searchProducts(inventoryId, productName, productDescription, status))
+                .thenReturn(Flux.empty());
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/inventory/{inventoryId}/products/search")
+                        .queryParam("productName", productName)
+                        .queryParam("productDescription", productDescription)
+                        .queryParam("status", status)
+                        .build(inventoryId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNoContent();
+
+        verify(productInventoryService, times(1))
+                .searchProducts(inventoryId, productName, productDescription, status);
+    }
+
+    @Test
+    void searchProductsByInventoryIdAndProductNameAndProductDescriptionAndStatus_withInvalidInventoryId_shouldReturnNoContent() {
+        String invalidInventoryId = "invalidInventoryId";
+        String productName = "B";
+        String productDescription = "Sedative";
+        Status status = Status.AVAILABLE;
+
+        when(productInventoryService.searchProducts(invalidInventoryId, productName, productDescription, status))
+                .thenReturn(Flux.empty());
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/inventory/{inventoryId}/products/search")
+                        .queryParam("productName", productName)
+                        .queryParam("productDescription", productDescription)
+                        .queryParam("status", status)
+                        .build(invalidInventoryId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNoContent();
+        verify(productInventoryService, times(1))
+                .searchProducts(invalidInventoryId, productName, productDescription, status);
+    }
+
+    @Test
+    void searchProductsByInventoryIdAndProductNameAndStatus_withNoResult_shouldReturnEmpty() {
+        String inventoryId = "1";
+        String productName = "C";
+        Status status = Status.AVAILABLE;
+
+        when(productInventoryService.searchProducts(inventoryId, productName, null, status))
+                .thenReturn(Flux.empty());
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/inventory/{inventoryId}/products/search")
+                        .queryParam("productName", productName)
+                        .queryParam("status", status)
+                        .build(inventoryId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNoContent();
+
+        verify(productInventoryService, times(1))
+                .searchProducts(inventoryId, productName, null, status);
+    }
+
+    @Test
+    void searchProductsByInventoryIdAndProductNameAndStatus_withInvalidInventoryId_shouldReturnNoContent() {
+        String invalidInventoryId = "invalidInventoryId";
+        String productName = "B";
+        Status status = Status.AVAILABLE;
+
+        when(productInventoryService.searchProducts(invalidInventoryId, productName, null, status))
+                .thenReturn(Flux.empty());
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/inventory/{inventoryId}/products/search")
+                        .queryParam("productName", productName)
+                        .queryParam("status", status)
+                        .build(invalidInventoryId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNoContent();
+        verify(productInventoryService, times(1))
+                .searchProducts(invalidInventoryId, productName, null, status);
+    }
+
+    @Test
+    void searchProductsByInventoryIdAndProductDescriptionAndStatus_withNoResult_shouldReturnEmpty() {
+        String inventoryId = "1";
+        String productDescription = "Sedative";
+        Status status = Status.AVAILABLE;
+
+        when(productInventoryService.searchProducts(inventoryId, null, productDescription, status))
+                .thenReturn(Flux.empty());
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/inventory/{inventoryId}/products/search")
+                        .queryParam("productDescription", productDescription)
+                        .queryParam("status", status)
+                        .build(inventoryId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNoContent();
+
+        verify(productInventoryService, times(1))
+                .searchProducts(inventoryId, null, productDescription, status);
+    }
+
+    @Test
+    void searchProductsByInventoryIdAndProductDescriptionAndStatus_withInvalidInventoryId_shouldReturnNoContent() {
+        String invalidInventoryId = "invalidInventoryId";
+        String productDescription = "Sedative";
+        Status status = Status.AVAILABLE;
+
+        when(productInventoryService.searchProducts(invalidInventoryId, null, productDescription, status))
+                .thenReturn(Flux.empty());
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/inventory/{inventoryId}/products/search")
+                        .queryParam("productDescription", productDescription)
+                        .queryParam("status", status)
+                        .build(invalidInventoryId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNoContent();
+        verify(productInventoryService, times(1))
+                .searchProducts(invalidInventoryId, null, productDescription, status);
+    }
+
+    @Test
+    void searchProductsByInventoryIdAndStatus_withNoResult_shouldReturnEmpty() {
+        String inventoryId = "1";
+        Status status = Status.AVAILABLE;
+
+        when(productInventoryService.searchProducts(inventoryId, null, null, status))
+                .thenReturn(Flux.empty());
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/inventory/{inventoryId}/products/search")
+                        .queryParam("status", status)
+                        .build(inventoryId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNoContent();
+
+        verify(productInventoryService, times(1))
+                .searchProducts(inventoryId, null, null, status);
+    }
+
+    @Test
+    void searchProductsByInventoryIdAndStatus_withInvalidInventoryId_shouldReturnNoContent() {
+        String invalidInventoryId = "invalidInventoryId";
+        Status status = Status.AVAILABLE;
+
+        when(productInventoryService.searchProducts(invalidInventoryId, null, null, status))
+                .thenReturn(Flux.empty());
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/inventory/{inventoryId}/products/search")
+                        .queryParam("status", status)
+                        .build(invalidInventoryId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNoContent();
+        verify(productInventoryService, times(1))
+                .searchProducts(invalidInventoryId, null, null, status);
+    }
+
+    @Test
+    void searchProductsByInventoryId_withInvalidInventoryId_shouldReturnNoContent() {
+        String invalidInventoryId = "invalidInventoryId";
+
+        when(productInventoryService.searchProducts(invalidInventoryId, null, null, null))
+                .thenReturn(Flux.empty());
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/inventory/{inventoryId}/products/search")
+                        .build(invalidInventoryId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNoContent();
+        verify(productInventoryService, times(1))
+                .searchProducts(invalidInventoryId, null, null, null);
+    }
+
+    @Test
+    void searchProductsByInventoryIdAndProductName_withInvalidInventoryId_shouldReturnNoContent() {
+        String invalidInventoryId = "invalidInventoryId";
+        String productName = "B";
+
+        when(productInventoryService.searchProducts(invalidInventoryId, productName, null, null))
+                .thenReturn(Flux.empty());
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/inventory/{inventoryId}/products/search")
+                        .queryParam("productName", productName)
+                        .build(invalidInventoryId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNoContent();
+        verify(productInventoryService, times(1))
+                .searchProducts(invalidInventoryId, productName, null, null);
+    }
+
+    @Test
+    void searchProductsByInventoryIdAndProductDescription_withInvalidInventoryId_shouldReturnNoContent() {
+        String invalidInventoryId = "invalidInventoryId";
+        String productDescription = "Sedative";
+
+        when(productInventoryService.searchProducts(invalidInventoryId, null, productDescription, null))
+                .thenReturn(Flux.empty());
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/inventory/{inventoryId}/products/search")
+                        .queryParam("productDescription", productDescription)
+                        .build(invalidInventoryId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNoContent();
+        verify(productInventoryService, times(1))
+                .searchProducts(invalidInventoryId, null, productDescription, null);
+    }
+
+    @Test
+    void searchProductsByInventoryIdAndProductName_withNoResult_shouldReturnEmpty() {
+        String inventoryId = "1";
+        String productName = "C";
+
+        when(productInventoryService.searchProducts(inventoryId, productName, null, null))
+                .thenReturn(Flux.empty());
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/inventory/{inventoryId}/products/search")
+                        .queryParam("productName", productName)
+                        .build(inventoryId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNoContent();
+
+        verify(productInventoryService, times(1))
+                .searchProducts(inventoryId, productName, null, null);
+    }
+
+    @Test
+    void searchProductsByInventoryIdAndProductDescription_withNoResult_shouldReturnEmpty() {
+        String inventoryId = "1";
+        String productDescription = "Sedative";
+
+        when(productInventoryService.searchProducts(inventoryId, null, productDescription, null))
+                .thenReturn(Flux.empty());
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/inventory/{inventoryId}/products/search")
+                        .queryParam("productDescription", productDescription)
+                        .build(inventoryId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNoContent();
+
+        verify(productInventoryService, times(1))
+                .searchProducts(inventoryId, null, productDescription, null);
+    }
 
 }

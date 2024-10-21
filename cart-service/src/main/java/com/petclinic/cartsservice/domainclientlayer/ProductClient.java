@@ -33,6 +33,7 @@ public class ProductClient {
                 .map(product -> {
                     // Mock the stock quantity until the real data is available
                     product.setProductQuantity(10); // Arbitrary stock level for testing
+                    product.setImageId(product.getImageId());
                     return product;
                 });
     }

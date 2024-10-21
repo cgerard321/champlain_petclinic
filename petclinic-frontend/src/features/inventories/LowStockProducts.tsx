@@ -2,13 +2,20 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Inventory } from '@/features/inventories/models/Inventory';
-import { ProductModel } from '@/features/inventories/models/ProductModels/ProductModel';
+import { ProductResponseModel } from '@/features/inventories/models/InventoryModels/ProductResponseModel.ts';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import { Status } from '@/features/inventories/models/ProductModels/Status.ts';
 
 const LowStockPage: React.FC = () => {
   const [lowStockProductsByInventory, setLowStockProductsByInventory] =
-    useState<{ [inventoryName: string]: ProductModel[] }>({});
+    useState<{ [inventoryName: string]: ProductResponseModel[] }>({});
   const [inventories, setInventories] = useState<Inventory[]>([]);
+  const [showRestockForm, setShowRestockForm] = useState<boolean>(false);
+  const [selectedProduct, setSelectedProduct] =
+    useState<ProductResponseModel | null>(null);
+  const [restockQuantity, setRestockQuantity] = useState<number>(0);
   const navigate = useNavigate();
+  const [totalPrice, setTotalPrice] = useState<number>(0);
 
   // Fetch inventories from the backend
   useEffect(() => {
@@ -16,9 +23,7 @@ const LowStockPage: React.FC = () => {
       try {
         const response = await axios.get<Inventory[]>(
           'http://localhost:8080/api/v2/gateway/inventories',
-          {
-            withCredentials: true,
-          }
+          { withCredentials: true }
         );
         setInventories(response.data);
       } catch (error) {
@@ -32,10 +37,10 @@ const LowStockPage: React.FC = () => {
   // Fetch low stock products for all inventories
   useEffect(() => {
     const fetchAllLowStockProducts = async (): Promise<void> => {
-      const lowStockData: { [key: string]: ProductModel[] } = {};
+      const lowStockData: { [key: string]: ProductResponseModel[] } = {};
       const promises = inventories.map(async inventory => {
         try {
-          const response = await axios.get<ProductModel[]>(
+          const response = await axios.get<ProductResponseModel[]>(
             `http://localhost:8080/api/gateway/inventory/${inventory.inventoryId}/products/lowstock`,
             {
               withCredentials: true,
@@ -62,6 +67,38 @@ const LowStockPage: React.FC = () => {
     }
   }, [inventories]);
 
+  const restockProduct = async (
+    inventoryId: string,
+    productId: string,
+    quantity: number
+  ): Promise<void> => {
+    try {
+      const response = await axios.put(
+        `http://localhost:8080/api/v2/gateway/inventories/${inventoryId}/products/${productId}/restockProduct`,
+        null,
+        {
+          params: { productQuantity: quantity },
+          withCredentials: true,
+        }
+      );
+
+      // eslint-disable-next-line
+      console.log('Restocked product:', response.data);
+
+      alert(
+        `Successfully restocked ${quantity} units for ${selectedProduct?.productName}.`
+      );
+
+      window.location.reload();
+
+      setShowRestockForm(false);
+      setSelectedProduct(null);
+      setRestockQuantity(0);
+    } catch (error) {
+      console.error(`Error restocking product ${productId}:`, error);
+    }
+  };
+
   return (
     <div className="low-stock-page">
       <button
@@ -70,7 +107,6 @@ const LowStockPage: React.FC = () => {
       >
         Back to Inventories
       </button>
-
       <div className="low-stock-products">
         {Object.keys(lowStockProductsByInventory).length > 0 ? (
           Object.keys(lowStockProductsByInventory).map(inventoryName => (
@@ -84,11 +120,12 @@ const LowStockPage: React.FC = () => {
                     <th>Price</th>
                     <th>Quantity</th>
                     <th>Status</th>
+                    <th>Restock</th>
                   </tr>
                 </thead>
                 <tbody>
                   {lowStockProductsByInventory[inventoryName].map(
-                    (product: ProductModel) => (
+                    (product: ProductResponseModel) => (
                       <tr key={product.productId}>
                         <td>{product.productName}</td>
                         <td>{product.productDescription}</td>
@@ -97,14 +134,27 @@ const LowStockPage: React.FC = () => {
                         <td
                           style={{
                             color:
-                              product.status === 'RE_ORDER'
+                              product.status === Status.RE_ORDER
                                 ? '#f4a460'
-                                : product.status === 'OUT_OF_STOCK'
+                                : product.status === Status.OUT_OF_STOCK
                                   ? 'red'
-                                  : 'green',
+                                  : product.status === Status.AVAILABLE
+                                    ? 'green'
+                                    : 'inherit',
                           }}
                         >
                           {product.status.replace('_', ' ')}
+                        </td>
+                        <td>
+                          <button
+                            className="btn btn-primary"
+                            onClick={() => {
+                              setSelectedProduct(product);
+                              setShowRestockForm(true);
+                            }}
+                          >
+                            Restock
+                          </button>
                         </td>
                       </tr>
                     )
@@ -117,6 +167,83 @@ const LowStockPage: React.FC = () => {
           <p>No low stock supplies found across all inventories.</p>
         )}
       </div>
+
+      {/* Restock Form Modal (Bootstrap) */}
+      {showRestockForm && selectedProduct && (
+        <div className="modal fade show d-block" tabIndex={-1} role="dialog">
+          <div className="modal-dialog" role="document">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">
+                  Restock Supply: {selectedProduct.productName}
+                </h5>
+                <button
+                  type="button"
+                  className="close"
+                  onClick={() => setShowRestockForm(false)}
+                >
+                  <span>&times;</span>
+                </button>
+              </div>
+              <div className="modal-body">
+                <form
+                  onSubmit={e => {
+                    e.preventDefault();
+                    const inventory = inventories.find(
+                      inv => inv.inventoryId === selectedProduct?.inventoryId
+                    );
+
+                    if (inventory) {
+                      restockProduct(
+                        inventory.inventoryId,
+                        selectedProduct.productId,
+                        restockQuantity
+                      );
+                    } else {
+                      console.error('Inventory not found');
+                    }
+                  }}
+                >
+                  <label htmlFor="quantity">Enter Quantity:</label>
+                  <input
+                    type="number"
+                    id="quantity"
+                    value={restockQuantity}
+                    onChange={e => {
+                      const quantity = parseInt(e.target.value, 10);
+                      setRestockQuantity(quantity);
+
+                      if (selectedProduct) {
+                        setTotalPrice(
+                          quantity * selectedProduct.productSalePrice
+                        );
+                      }
+                    }}
+                    min="1"
+                    required
+                  />
+
+                  <div>
+                    <label>Total Price: </label>
+                    <span>${totalPrice.toFixed(2)}</span>
+                  </div>
+
+                  <button type="submit" className="btn btn-primary">
+                    Submit
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => setShowRestockForm(false)}
+                  >
+                    Cancel
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

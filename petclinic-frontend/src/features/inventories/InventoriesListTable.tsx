@@ -1,5 +1,5 @@
 import { useState, useEffect, JSX, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Inventory } from '@/features/inventories/models/Inventory.ts';
 import { InventoryType } from '@/features/inventories/models/InventoryType.ts';
 import useSearchInventories from '@/features/inventories/hooks/useSearchInventories.ts';
@@ -11,7 +11,6 @@ import AddInventoryType from '@/features/inventories/AddInventoryType.tsx';
 import { ProductModel } from '@/features/inventories/models/ProductModels/ProductModel.ts';
 import inventoryStyles from './InventoriesListTable.module.css';
 import cardStylesInventory from './CardInventoryTeam.module.css';
-import DefaultInventoryImage from '@/assets/Inventory/DefaultInventoryImage.jpg';
 
 export default function InventoriesListTable(): JSX.Element {
   const [selectedInventories, setSelectedInventories] = useState<Inventory[]>(
@@ -35,6 +34,7 @@ export default function InventoriesListTable(): JSX.Element {
     [key: string]: number;
   }>({});
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [isActionsMenuVisible, setActionsMenu] = useState(false);
 
   const handleMenuClick = (
     e: React.MouseEvent<SVGElement>,
@@ -207,8 +207,113 @@ export default function InventoriesListTable(): JSX.Element {
     setSelectedInventories([]);
   };
 
+  const location = useLocation();
+  const lastConsultedInventoryId =
+    location.state?.lastConsultedInventoryId || null;
+
+  const handleCardClick = (inventoryId: string): void => {
+    navigate(`/inventory/${inventoryId}/products`, {
+      state: { lastConsultedInventoryId: inventoryId },
+    });
+  };
+
+  const arrayBufferToBase64 = (buffer: Uint8Array): string => {
+    let binary = '';
+    const bytes = new Uint8Array(buffer);
+    const len = bytes.byteLength;
+    for (let i = 0; i < len; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    return window.btoa(binary);
+  };
+
+  const toggleActionsMenu = (): void => {
+    setActionsMenu(prevState => !prevState);
+  };
+
   return (
     <>
+      <div id={inventoryStyles.menuSection}>
+        <div id={inventoryStyles.menuContainer}>
+          <svg
+            onClick={toggleActionsMenu}
+            id={inventoryStyles.menuIcon}
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            fill="currentColor"
+            className="bi bi-list"
+            viewBox="0 0 16 16"
+          >
+            <path
+              fillRule="evenodd"
+              d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"
+            />
+          </svg>
+
+          {isActionsMenuVisible && (
+            <div id={inventoryStyles.actionsMenu}>
+              <button
+                className="btn btn-danger"
+                onClick={deleteSelectedInventories}
+                disabled={selectedInventories.length === 0}
+              >
+                Delete Selected Inventories
+              </button>
+              <button
+                className="delete-bundle-button btn btn-success mx-1"
+                onClick={() => {
+                  handleDeleteAllInventories(false);
+                }}
+              >
+                Delete All Inventories
+              </button>
+              <button
+                className="add-inventory-button btn btn-success"
+                onClick={() => setShowAddInventoryForm(true)}
+              >
+                Add Inventory
+              </button>
+              <button
+                className="low-stock-button btn btn-warning mx-1"
+                onClick={async () => {
+                  if (inventoryList.length > 0) {
+                    lowStockProductsByInventory.current = {}; // Clear the current ref value
+                    try {
+                      // Collect all low stock products for each inventory
+                      for (const inventory of inventoryList) {
+                        await getAllLowStockProducts(inventory);
+                      }
+
+                      // Navigate to the other page and pass the collected data
+                      navigate('/products/lowstock', {
+                        state: {
+                          lowStockProducts: lowStockProductsByInventory.current,
+                        },
+                      });
+                    } catch (error) {
+                      console.error(
+                        'Error fetching low stock products:',
+                        error
+                      );
+                    }
+                  } else {
+                    console.error('No inventories found');
+                  }
+                }}
+              >
+                Check Low Stock for All Inventories
+              </button>
+              <button
+                className="add-inventorytype-button btn btn-primary"
+                onClick={() => setShowAddTypeForm(true)}
+              >
+                Add InventoryType
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
       <div>
         <table className="table table-striped">
           <thead>
@@ -324,33 +429,27 @@ export default function InventoriesListTable(): JSX.Element {
         <div className={cardStylesInventory.cardContainerCustom}>
           {inventoryList.map(inventory => (
             <div
-              className={cardStylesInventory.card}
+              className={`
+              ${cardStylesInventory.card} 
+              ${
+                inventory.inventoryId === lastConsultedInventoryId
+                  ? cardStylesInventory.highlightedCard
+                  : ''
+              }`}
               key={inventory.inventoryName}
-              onClick={() =>
-                navigate(`/inventory/${inventory.inventoryId}/products`)
-              }
+              onClick={() => handleCardClick(inventory.inventoryId)}
               onMouseLeave={() => setOpenMenuId(null)}
               style={{ cursor: 'pointer' }}
             >
               <div className={cardStylesInventory.imageContainer}>
                 <img
-                  src={inventory.inventoryImage}
+                  src={
+                    inventory.imageUploaded instanceof Uint8Array
+                      ? `data:image/jpeg;base64,${arrayBufferToBase64(inventory.imageUploaded)}`
+                      : `data:image/jpeg;base64,${inventory.imageUploaded}`
+                  }
                   alt={inventory.inventoryName}
                   className={cardStylesInventory.cardImage}
-                  onError={(
-                    e: React.SyntheticEvent<HTMLImageElement, Event>
-                  ) => {
-                    const target = e.target as HTMLImageElement;
-                    if (inventory.inventoryBackupImage) {
-                      target.src = inventory.inventoryBackupImage;
-                      target.onerror = () => {
-                        target.onerror = null;
-                        target.src = DefaultInventoryImage;
-                      };
-                    } else {
-                      target.src = DefaultInventoryImage;
-                    }
-                  }}
                 />
               </div>
               <div className={cardStylesInventory.inventoryNameSection}>
@@ -501,28 +600,6 @@ export default function InventoriesListTable(): JSX.Element {
         >
           Notification Text Here
         </div>
-        <button
-          className="btn btn-danger"
-          onClick={deleteSelectedInventories}
-          disabled={selectedInventories.length === 0}
-        >
-          Delete Selected Inventories
-        </button>
-        <button
-          className="delete-bundle-button btn btn-success mx-1"
-          onClick={() => {
-            handleDeleteAllInventories(false);
-          }}
-        >
-          Delete All Inventories
-        </button>
-
-        <button
-          className="add-inventory-button btn btn-success"
-          onClick={() => setShowAddInventoryForm(true)}
-        >
-          Add Inventory
-        </button>
 
         {showAddInventoryForm && (
           <AddInventory
@@ -532,40 +609,6 @@ export default function InventoriesListTable(): JSX.Element {
           />
         )}
 
-        <button
-          className="low-stock-button btn btn-warning mx-1"
-          onClick={async () => {
-            if (inventoryList.length > 0) {
-              lowStockProductsByInventory.current = {}; // Clear the current ref value
-              try {
-                // Collect all low stock products for each inventory
-                for (const inventory of inventoryList) {
-                  await getAllLowStockProducts(inventory);
-                }
-
-                // Navigate to the other page and pass the collected data
-                navigate('/products/lowstock', {
-                  state: {
-                    lowStockProducts: lowStockProductsByInventory.current,
-                  },
-                });
-              } catch (error) {
-                console.error('Error fetching low stock products:', error);
-              }
-            } else {
-              console.error('No inventories found');
-            }
-          }}
-        >
-          Check Low Stock for All Inventories
-        </button>
-
-        <button
-          className="add-inventorytype-button btn btn-primary"
-          onClick={() => setShowAddTypeForm(true)}
-        >
-          Add InventoryType
-        </button>
         {showAddTypeForm && (
           <AddInventoryType
             show={showAddTypeForm}

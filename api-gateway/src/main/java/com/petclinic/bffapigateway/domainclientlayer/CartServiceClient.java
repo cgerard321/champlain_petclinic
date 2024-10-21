@@ -1,9 +1,8 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.petclinic.bffapigateway.dtos.Cart.*;
-import com.petclinic.bffapigateway.dtos.Cart.CartRequestDTO;
-import com.petclinic.bffapigateway.dtos.Cart.CartResponseDTO;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
+import com.petclinic.bffapigateway.exceptions.OutOfStockException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -138,6 +137,23 @@ public Mono<CartResponseDTO> deleteCartByCartId(String CardId) {
                 .bodyToFlux(PromoCodeResponseDTO.class);
     }
 
+    public Flux<PromoCodeResponseDTO> getActivePromos() {
+        return webClientBuilder.build()
+                .get()
+                .uri(PromoCodeServiceUrl + "/actives")
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, error -> {
+                    HttpStatusCode statusCode = error.statusCode();
+                    if (statusCode.equals(HttpStatus.NOT_FOUND)) {
+                        return Mono.error(new NotFoundException("No active promos found"));
+                    }
+                    return Mono.error(new IllegalArgumentException("Client error"));
+                })
+                .onStatus(HttpStatusCode::is5xxServerError, error -> Mono.error(new IllegalArgumentException("Server error")))
+                .bodyToFlux(PromoCodeResponseDTO.class);
+    }
+
     public Mono<PromoCodeResponseDTO> getPromoCodeById(String promoCodeId) {
         return webClientBuilder.build()
                 .get()
@@ -201,6 +217,19 @@ public Mono<CartResponseDTO> deleteCartByCartId(String CardId) {
                 .body(Mono.just(requestDTO), AddProductRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
+                .onStatus(status -> status.value() == 400, clientResponse -> {
+                    return clientResponse.bodyToMono(CartResponseDTO.class)
+                            .flatMap(cartResponseDTO -> {
+                                if (cartResponseDTO.getMessage() != null) {
+                                    return Mono.error(new InvalidInputException(cartResponseDTO.getMessage()));
+                                } else {
+                                    return Mono.error(new InvalidInputException("Invalid input"));
+                                }
+                            });
+                })
+                .onStatus(HttpStatusCode::isError, clientResponse -> {
+                    return Mono.error(new Exception("An error occurred while adding product to cart"));
+                })
                 .bodyToMono(CartResponseDTO.class);
     }
 
@@ -219,19 +248,9 @@ public Mono<CartResponseDTO> deleteCartByCartId(String CardId) {
                 .post()
                 .uri(CartServiceUrl + "/" + cartId + "/checkout")
                 .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError, error -> {
-                    HttpStatusCode statusCode = error.statusCode();
-                    if (statusCode.equals(HttpStatus.NOT_FOUND)) {
-                        return Mono.error(new NotFoundException("Cart not found for cartId: " + cartId));
-                    }
-                    else if (statusCode.equals(HttpStatus.UNPROCESSABLE_ENTITY)) {
-                        return Mono.error(new InvalidInputException("Cart id invalid for cart id: " + cartId));
-                    }
-                    return Mono.error(new IllegalArgumentException("Client error"));
-                })
-                .onStatus(HttpStatusCode::is5xxServerError, error -> Mono.error(new IllegalArgumentException("Server error")))
                 .bodyToMono(CartResponseDTO.class);
     }
+
 
     public Mono<CartResponseDTO> getCartByCustomerId(final String customerId) {
         return webClientBuilder.build()
@@ -245,6 +264,7 @@ public Mono<CartResponseDTO> deleteCartByCartId(String CardId) {
         return webClientBuilder.build()
                 .put()
                 .uri(CartServiceUrl + "/" + cartId + "/wishlist/" + productId + "/toWishList")
+
                 .retrieve()
                 .bodyToMono(CartResponseDTO.class)  // Use bodyToMono to return CartResponseDTO directly
                 .doOnSuccess(cartResponseDTO -> log.info("Moved product {} to wishlist from cart {}", productId, cartId))
@@ -269,7 +289,44 @@ public Mono<CartResponseDTO> deleteCartByCartId(String CardId) {
                 .retrieve()
                 .bodyToMono(CartResponseDTO.class)
                 .doOnSuccess(cartResponseDTO -> log.info("Added product {} from product view to wishlist in cart {}", productId, cartId));
+                .doOnError(e -> log.error("Error moving product {} to wishlist from cart {}: {}", productId, cartId, e.getMessage()));
+    }
 
+    public Mono<PromoCodeResponseDTO> validatePromoCode(String promoCode) {
+        return webClientBuilder.build()
+                .get()
+                .uri(PromoCodeServiceUrl + "/validate/{promoCode}", promoCode)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, error -> {
+                    HttpStatusCode statusCode = error.statusCode();
+                    if (statusCode.equals(HttpStatus.BAD_REQUEST)) {
+                        return Mono.error(new InvalidInputException("Promo code is not valid: " + promoCode));
+                    }
+                    return Mono.error(new IllegalArgumentException("Client error during promo code validation"));
+                })
+                .bodyToMono(PromoCodeResponseDTO.class);
+    }
+
+    public Mono<CartResponseDTO> addProductToCartFromProducts(String cartId, String productId) {
+        return webClientBuilder.build()
+                .post()
+                .uri(CartServiceUrl + "/" + cartId + "/" + productId)
+                .body(Mono.just(new AddProductRequestDTO(productId, 1)), AddProductRequestDTO.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> {
+                    return clientResponse.bodyToMono(CartResponseDTO.class)
+                            .flatMap(cartResponseDTO -> {
+                                if (cartResponseDTO.getMessage() != null) {
+                                    return Mono.error(new InvalidInputException(cartResponseDTO.getMessage()));
+                                } else {
+                                    return Mono.error(new InvalidInputException("Invalid input"));
+                                }
+                            });
+                })
+                .onStatus(HttpStatusCode::is5xxServerError, error -> Mono.error(new IllegalArgumentException("Server error")))
+                .bodyToMono(CartResponseDTO.class);
     }
 
 }

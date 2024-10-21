@@ -1,9 +1,15 @@
 package com.petclinic.products.presentationlayer.products;
 
+import com.petclinic.products.businesslayer.products.ProductService;
 import com.petclinic.products.datalayer.products.Product;
 import com.petclinic.products.datalayer.products.ProductRepository;
+import com.petclinic.products.datalayer.products.ProductType;
+import com.petclinic.products.datalayer.products.ProductStatus;
+import com.petclinic.products.datalayer.ratings.Rating;
+import com.petclinic.products.datalayer.ratings.RatingRepository;
 import com.petclinic.products.utils.exceptions.NotFoundException;
 import org.junit.jupiter.api.*;
+import org.mockito.Mockito;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
@@ -16,9 +22,12 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.util.Arrays;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
@@ -32,6 +41,9 @@ class ProductControllerIntegrationTest {
 
     @Autowired
     private ProductRepository productRepository;
+
+    @Autowired
+    private RatingRepository ratingRepository;
 
     private final String NON_EXISTENT_PRODUCT_ID = UUID.randomUUID().toString();
     private final String INVALID_PRODUCT_ID = "INVALID_PRODUCT_ID";
@@ -58,7 +70,6 @@ class ProductControllerIntegrationTest {
             .productName("Product 3")
             .productDescription("Product 3 Description")
             .productSalePrice(25.00)
-            .averageRating(4.5)
             .productQuantity(2)
             .build();
 
@@ -66,7 +77,6 @@ class ProductControllerIntegrationTest {
             .productName("Product 3")
             .productDescription("Product 3 Description")
             .productSalePrice(0.00)
-            .averageRating(0.0)
             .productQuantity(2)
 
             .build();
@@ -75,7 +85,6 @@ class ProductControllerIntegrationTest {
             .productName("Product 4")
             .productDescription("Product 4 Description")
             .productSalePrice(25.00)
-            .averageRating(0.0)
             .productQuantity(2)
             .build();
 
@@ -93,8 +102,22 @@ class ProductControllerIntegrationTest {
     @Test
     public void whenGetAllProductsSortedByRatingAsc_thenReturnProductsSortedAscending() {
 
-        // Save
-        productRepository.saveAll(List.of(product1, product2));
+        productRepository.saveAll(List.of(product1, product2)).blockLast();
+
+
+        Rating ratingForProduct1 = Rating.builder()
+                .productId(product1.getProductId())
+                .customerId(UUID.randomUUID().toString())
+                .rating((byte) 4)
+                .build();
+
+        Rating ratingForProduct2 = Rating.builder()
+                .productId(product2.getProductId())
+                .customerId(UUID.randomUUID().toString())
+                .rating((byte) 2)
+                .build();
+
+        ratingRepository.saveAll(List.of(ratingForProduct1, ratingForProduct2)).blockLast();
 
         // Act
         webTestClient.get()
@@ -106,18 +129,50 @@ class ProductControllerIntegrationTest {
                 .expectStatus().isOk()
                 .expectHeader().contentType("text/event-stream;charset=UTF-8")
                 .expectBodyList(ProductResponseModel.class)
-                .value(productResponseModel -> {
-                    assertNotNull(productResponseModel);
-                    assertEquals(2, productResponseModel.size());
-                    assertEquals(product2.getProductId(), productResponseModel.get(0).getProductId());
-                    assertEquals(product1.getProductId(), productResponseModel.get(1).getProductId());
+                .value(productResponseModels -> {
+                    assertNotNull(productResponseModels);
+                    assertEquals(2, productResponseModels.size());
+                    assertEquals(product2.getProductId(), productResponseModels.get(0).getProductId());
+                    assertEquals(product1.getProductId(), productResponseModels.get(1).getProductId());
                 });
     }
     @Test
     public void whenGetAllProductsSortedByRatingDesc_thenReturnProductsSortedDescending() {
 
-        // Save the products to the repository
-        productRepository.saveAll(List.of(product1, product2));
+        productRepository.deleteAll().block();
+        ratingRepository.deleteAll().block();
+
+        Product product1 = Product.builder()
+                .productId("product-1-id")
+                .productName("Product 1")
+                .productDescription("Product 1 Description")
+                .productSalePrice(100.00)
+                .productQuantity(2)
+                .build();
+
+        Product product2 = Product.builder()
+                .productId("product-2-id")
+                .productName("Product 2")
+                .productDescription("Product 2 Description")
+                .productSalePrice(50.00)
+                .productQuantity(2)
+                .build();
+
+        productRepository.saveAll(List.of(product1, product2)).blockLast();
+        Rating ratingForProduct1 = Rating.builder()
+                .productId(product1.getProductId())
+                .customerId(UUID.randomUUID().toString())
+                .rating((byte) 5)
+                .build();
+
+        Rating ratingForProduct2 = Rating.builder()
+                .productId(product2.getProductId())
+                .customerId(UUID.randomUUID().toString())
+                .rating((byte) 3)
+                .build();
+
+        ratingRepository.saveAll(List.of(ratingForProduct1, ratingForProduct2)).blockLast();
+
         // Act
         webTestClient.get()
                 .uri(uriBuilder -> uriBuilder.path("/api/v1/products")
@@ -128,11 +183,11 @@ class ProductControllerIntegrationTest {
                 .expectStatus().isOk()
                 .expectHeader().contentType("text/event-stream;charset=UTF-8")
                 .expectBodyList(ProductResponseModel.class)
-                .value(productResponseModel -> {
-                    assertNotNull(productResponseModel);
-                    assertEquals(2, productResponseModel.size());
-                    assertEquals(product1.getProductId(), productResponseModel.get(0).getProductId());
-                    assertEquals(product2.getProductId(), productResponseModel.get(1).getProductId());
+                .value(productResponseModels -> {
+                    assertNotNull(productResponseModels);
+                    assertEquals(2, productResponseModels.size());
+                    assertEquals(product1.getProductId(), productResponseModels.get(0).getProductId());
+                    assertEquals(product2.getProductId(), productResponseModels.get(1).getProductId());
                 });
     }
 
@@ -217,7 +272,6 @@ class ProductControllerIntegrationTest {
                     assertEquals(productRequestModel.getProductName(), productResponseModel.getProductName());
                     assertEquals(productRequestModel.getProductDescription(), productResponseModel.getProductDescription());
                     assertEquals(productRequestModel.getProductSalePrice(), productResponseModel.getProductSalePrice());
-                    assertEquals(productRequestModel.getAverageRating(), productResponseModel.getAverageRating());
                 });
 
         StepVerifier
@@ -263,7 +317,6 @@ class ProductControllerIntegrationTest {
                     assertEquals(productRequestModel.getProductName(), productResponseModel.getProductName());
                     assertEquals(productRequestModel.getProductDescription(), productResponseModel.getProductDescription());
                     assertEquals(productRequestModel.getProductSalePrice(), productResponseModel.getProductSalePrice());
-                    assertEquals(productRequestModel.getAverageRating(), productResponseModel.getAverageRating());
                 });
 
         StepVerifier
@@ -300,6 +353,82 @@ class ProductControllerIntegrationTest {
                 .uri("/api/v1/products/" + INVALID_PRODUCT_ID)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Mono.just(productRequestModel2), ProductRequestModel.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().is4xxClientError()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Provided product id is invalid: " +
+                        INVALID_PRODUCT_ID);
+
+        StepVerifier
+                .create(productRepository.findAll())
+                .expectNextCount(2)
+                .verifyComplete();
+    }
+
+    @Test
+    public void whenPatchListingStatus_thenReturnUpdatedProduct() {
+        ProductRequestModel patchProductRequestModel = ProductRequestModel.builder()
+                .isUnlisted(true)
+                .build();
+
+        webTestClient
+                .patch()
+                .uri("/api/v1/products/" + product1.getProductId() + "/status")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Mono.just(patchProductRequestModel), ProductRequestModel.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(ProductResponseModel.class)
+                .value(productResponseModel -> {
+                    assertEquals(patchProductRequestModel.getIsUnlisted(), productResponseModel.getIsUnlisted());
+                });
+
+        StepVerifier
+                .create(productRepository.findAll())
+                .expectNextCount(2)
+                .verifyComplete();
+    }
+
+    @Test
+    public void whenPatchListingStatusWithNonExistentProductId_thenThrowNotFoundException() {
+        ProductRequestModel patchProductRequestModel = ProductRequestModel.builder()
+                .isUnlisted(true)
+                .build();
+
+        webTestClient
+                .patch()
+                .uri("/api/v1/products/" + NON_EXISTENT_PRODUCT_ID + "/status")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Mono.just(patchProductRequestModel), ProductRequestModel.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Product id was not found: " +
+                        NON_EXISTENT_PRODUCT_ID);
+
+        StepVerifier
+                .create(productRepository.findAll())
+                .expectNextCount(2)
+                .verifyComplete();
+    }
+
+    @Test
+    public void whenPatchListingStatusWithInvalidProductId_thenThrowInvalidInputException() {
+        ProductRequestModel patchProductRequestModel = ProductRequestModel.builder()
+                .isUnlisted(true)
+                .build();
+
+        webTestClient
+                .patch()
+                .uri("/api/v1/products/" + INVALID_PRODUCT_ID + "/status")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Mono.just(patchProductRequestModel), ProductRequestModel.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().is4xxClientError()
@@ -484,5 +613,104 @@ class ProductControllerIntegrationTest {
                 .body(Mono.just(requestModel), ProductRequestModel.class)
                 .exchange()
                 .expectStatus().isNotFound();
+
     }
-}
+    @Test
+        void addProduct_FutureReleaseDate_SetsStatusToPreOrder() {
+            // Arrange
+            LocalDate futureDate = LocalDate.now().plusDays(1);
+            ProductRequestModel requestModel = new ProductRequestModel();
+            requestModel.setProductName("Future Product");
+            requestModel.setProductSalePrice(10.0);
+            requestModel.setReleaseDate(futureDate);
+
+            // Act & Assert
+            webTestClient.post()
+                    .uri("/api/v1/products")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(Mono.just(requestModel), ProductRequestModel.class)
+                    .exchange()
+                    .expectStatus().isCreated()
+                    .expectBody(ProductResponseModel.class)
+                    .value(response -> {
+                        assertNotNull(response.getProductId());
+                        assertEquals("Future Product", response.getProductName());
+                        assertEquals(ProductStatus.PRE_ORDER, response.getProductStatus());
+                        assertEquals(futureDate, requestModel.getReleaseDate());
+                    });
+        }
+
+        @Test
+        void addProduct_PastReleaseDate_SetsStatusToAvailable() {
+            // Arrange
+            LocalDate pastDate = LocalDate.now().minusDays(1);
+            ProductRequestModel requestModel = new ProductRequestModel();
+            requestModel.setProductName("Past Product");
+            requestModel.setProductSalePrice(10.0);
+            requestModel.setReleaseDate(pastDate);
+
+            // Act & Assert
+            webTestClient.post()
+                    .uri("/api/v1/products")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(Mono.just(requestModel), ProductRequestModel.class)
+                    .exchange()
+                    .expectStatus().isCreated()
+                    .expectBody(ProductResponseModel.class)
+                    .value(response -> {
+                        assertNotNull(response.getProductId());
+                        assertEquals("Past Product", response.getProductName());
+                        assertEquals(ProductStatus.AVAILABLE, response.getProductStatus());
+                        assertEquals(pastDate, requestModel.getReleaseDate());
+                    });
+        }
+
+        @Test
+        void addProduct_TodayReleaseDate_SetsStatusToAvailable() {
+            // Arrange
+            LocalDate today = LocalDate.now();
+            ProductRequestModel requestModel = new ProductRequestModel();
+            requestModel.setProductName("Today Product");
+            requestModel.setProductSalePrice(10.0);
+            requestModel.setReleaseDate(today);
+
+            // Act & Assert
+            webTestClient.post()
+                    .uri("/api/v1/products")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(Mono.just(requestModel), ProductRequestModel.class)
+                    .exchange()
+                    .expectStatus().isCreated()
+                    .expectBody(ProductResponseModel.class)
+                    .value(response -> {
+                        assertNotNull(response.getProductId());
+                        assertEquals("Today Product", response.getProductName());
+                        assertEquals(ProductStatus.AVAILABLE, response.getProductStatus());
+                        assertEquals(today, requestModel.getReleaseDate());
+                    });
+        }
+
+        @Test
+        void addProduct_NullReleaseDate_SetsStatusToAvailable() {
+            // Arrange
+            ProductRequestModel requestModel = new ProductRequestModel();
+            requestModel.setProductName("No Release Date Product");
+            requestModel.setProductSalePrice(10.0);
+            requestModel.setReleaseDate(null);
+
+            // Act & Assert
+            webTestClient.post()
+                    .uri("/api/v1/products")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(Mono.just(requestModel), ProductRequestModel.class)
+                    .exchange()
+                    .expectStatus().isCreated()
+                    .expectBody(ProductResponseModel.class)
+                    .value(response -> {
+                        assertNotNull(response.getProductId());
+                        assertEquals("No Release Date Product", response.getProductName());
+                        assertEquals(ProductStatus.AVAILABLE, response.getProductStatus());
+                        assertEquals(null, requestModel.getReleaseDate());
+                    });
+        }
+    }
