@@ -313,25 +313,10 @@ public class EmailServiceImpl : IEmailService
     public async IAsyncEnumerable<EmailReceived> GetAllEmailsReceivedAsync()
     {
 
-        try
-        {
-            await _imapClient.ConnectAsync("imap.gmail.com", 993, true);
-            await _imapClient.AuthenticateAsync(EmailUtils.emailConnectionString.Email, EmailUtils.emailConnectionString.Password);
-        }
-        catch (MailKit.Security.AuthenticationException authEx)
-        {
-            Console.WriteLine("Authentication failed: " + authEx.Message);
-        }
-        catch (MailKit.Security.SslHandshakeException sslEx)
-        {
-            Console.WriteLine("SSL/TLS handshake failed: " + sslEx.Message);
-        }
-        catch (Exception ex)
-        {
-            // Handle connection, authentication, or email retrieval errors
-            Console.WriteLine($"Error: {ex.Message}");
-        }
-        
+
+        await _imapClient.ConnectAsync("imap.gmail.com", 993, true);
+        await _imapClient.AuthenticateAsync(EmailUtils.emailConnectionString.Email, EmailUtils.emailConnectionString.Password);
+
         // Select the inbox
         var inbox = _imapClient.Inbox;
         await inbox.OpenAsync(FolderAccess.ReadOnly);
@@ -358,7 +343,5 @@ public class EmailServiceImpl : IEmailService
         }
         // Always make sure to disconnect
         await _imapClient.DisconnectAsync(true);
-            
-        
     }
 }

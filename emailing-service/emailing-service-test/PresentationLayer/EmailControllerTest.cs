@@ -1261,9 +1261,6 @@ public class EmailControllerTests
         Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
     }
     
-    
-    
-    
     [TearDown]
     public void AllTimeTearDown()
     {
