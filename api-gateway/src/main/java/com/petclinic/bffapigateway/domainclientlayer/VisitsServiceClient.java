@@ -475,6 +475,26 @@ public class VisitsServiceClient {
     }
 
 
+    public Mono<VisitResponseDTO> addVisitByOwner(String ownerId, Mono<VisitRequestDTO> visitRequestDTO) {
+        return visitRequestDTO.flatMap(visit -> {
+            if (visit.getVisitDate() != null) {
+                LocalDateTime originalDate = visit.getVisitDate();
+                LocalDateTime adjustedDate = originalDate.minusHours(4);
+                visit.setVisitDate(adjustedDate);
+            } else {
+                throw new BadRequestException("Visit date is required");
+            }
 
+            visit.setOwnerId(ownerId);
+            visit.setStatus(Status.WAITING_FOR_CONFIRMATION);
+
+            return webClient
+                    .post()
+                    .uri(reviewUrl)
+                    .body(BodyInserters.fromValue(visit))
+                    .retrieve()
+                    .bodyToMono(VisitResponseDTO.class);
+        });
+    }
 }
 
