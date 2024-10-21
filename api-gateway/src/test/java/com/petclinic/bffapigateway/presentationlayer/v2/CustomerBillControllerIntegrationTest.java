@@ -31,7 +31,8 @@ public class CustomerBillControllerIntegrationTest {
     public void startMockServer() {
         // Start the mock servers for bills and authentication services
         mockServerConfigBillService = new MockServerConfigBillService();
-        mockServerConfigBillService.registerDownloadBillPdfEndpoint(); 
+        mockServerConfigBillService.registerDownloadBillPdfEndpoint();
+        mockServerConfigBillService.registerPayBillEndpoint();;
 
         mockServerConfigAuthService = new MockServerConfigAuthService();
         mockServerConfigAuthService.registerValidateTokenForOwnerEndpoint(); 
@@ -43,27 +44,27 @@ public class CustomerBillControllerIntegrationTest {
         mockServerConfigBillService.stopMockServer();
         mockServerConfigAuthService.stopMockServer();
     }
-
-    // @Test
-    // public void testDownloadBillPdf_ValidToken_ShouldReturnPdf() {
-    //     // Arrange: Mocking the service call to return a PDF byte array
-    //     byte[] mockPdfContent = "Sample PDF Content".getBytes();
-
-    //     // Act & Assert: Mocking a request as a valid customer with a token in a cookie
-    //     webTestClient.get()
-    //         .uri("/api/v2/gateway/customers/1/bills/1234/pdf")
-    //         .cookie("Bearer", MockServerConfigAuthService.jwtTokenForValidOwnerId)  // Using JWT token in cookie
-    //         .accept(MediaType.APPLICATION_PDF)
-    //         .exchange()
-    //         .expectStatus().isOk()
-    //         .expectHeader().contentType(MediaType.APPLICATION_PDF)
-    //         .expectBody(byte[].class)
-    //         .consumeWith(response -> {
-    //             byte[] pdf = response.getResponseBody();
-    //             assertNotNull(pdf);
-    //             assert pdf.length > 0;
-    //         });
-    // }
+//
+//     @Test
+//     public void testDownloadBillPdf_ValidToken_ShouldReturnPdf() {
+//         // Arrange: Mocking the service call to return a PDF byte array
+//         byte[] mockPdfContent = "Sample PDF Content".getBytes();
+//
+//         // Act & Assert: Mocking a request as a valid customer with a token in a cookie
+//         webTestClient.get()
+//             .uri("/api/v2/gateway/customers/1/bills/1234/pdf")
+//             .cookie("Bearer", MockServerConfigAuthService.jwtTokenForValidOwnerId)  // Using JWT token in cookie
+//             .accept(MediaType.APPLICATION_PDF)
+//             .exchange()
+//             .expectStatus().isOk()
+//             .expectHeader().contentType(MediaType.APPLICATION_PDF)
+//             .expectBody(byte[].class)
+//             .consumeWith(response -> {
+//                 byte[] pdf = response.getResponseBody();
+//                 assertNotNull(pdf);
+//                 assert pdf.length > 0;
+//             });
+//     }
 
     @Test
     public void testDownloadBillPdf_InvalidToken_ShouldReturnUnauthorized() {
@@ -75,4 +76,5 @@ public class CustomerBillControllerIntegrationTest {
             .exchange()
             .expectStatus().isUnauthorized();  // Expect Unauthorized status
     }
+
 }
