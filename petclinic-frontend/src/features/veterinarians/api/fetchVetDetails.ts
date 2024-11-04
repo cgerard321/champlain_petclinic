@@ -1,3 +1,5 @@
+import axios from 'axios';
+
 interface VetResponseType {
   vetId: string;
   vetBillId: string;
@@ -15,17 +17,15 @@ export const fetchVetDetails = async (
   vetId: string
 ): Promise<VetResponseType> => {
   try {
-    const response = await fetch(
+    const response = await axios.get<VetResponseType>(
       `http://localhost:8080/api/v2/gateway/vets/${vetId}`
     );
-
-    if (!response.ok) {
-      throw new Error(`Error: ${response.statusText}`);
-    }
-
-    const data: VetResponseType = await response.json();
-    return data;
+    return response.data;
   } catch (error) {
-    throw new Error('Failed to fetch vet details');
+    if (axios.isAxiosError(error)) {
+      throw new Error(`Error: ${error.response?.statusText || error.message}`);
+    } else {
+      throw new Error('Failed to fetch vet details');
+    }
   }
 };
