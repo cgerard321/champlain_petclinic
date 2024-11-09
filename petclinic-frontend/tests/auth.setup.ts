@@ -1,7 +1,7 @@
 import { test as setup, expect } from '@playwright/test';
 //import path from 'path';
 
-const adminFile = 'playwright/.auth/admin.json';
+const adminFile = '.auth/admin.json';
 // const adminFile = path.join(
 //   path.dirname(new URL(import.meta.url).pathname),
 //   '../playwright/.auth/admin.json'
@@ -10,7 +10,7 @@ const adminFile = 'playwright/.auth/admin.json';
 setup('authenticate as admin', async ({ page }) => {
   // Perform authentication steps. Replace these actions with your own.
   await page.goto('http://localhost:3000/users/login');
-  await page.getByPlaceholder('Enter your username').fill('admin@admin.com');
+  await page.getByPlaceholder('Enter your email').fill('admin@admin.com');
   await page.getByPlaceholder('Enter your password').fill('pwd');
   await page.getByRole('button', { name: 'Login' }).click();
   // Wait until the page receives the cookies.
@@ -26,12 +26,12 @@ setup('authenticate as admin', async ({ page }) => {
   await page.context().storageState({ path: adminFile });
 });
 
-const owner1File = 'playwright/.auth/user.json';
+const owner1File = '.auth/owner1.json';
 
-setup('authenticate as user', async ({ page }) => {
+setup('authenticate as owner1', async ({ page }) => {
   // Perform authentication steps. Replace these actions with your own.
   await page.goto('http://localhost:3000/users/login');
-  await page.getByPlaceholder('Enter your username').fill('george@email.com');
+  await page.getByPlaceholder('Enter your email').fill('george@email.com');
   await page.getByPlaceholder('Enter your password').fill('pwd');
   await page.getByRole('button', { name: 'Login' }).click();
   // Wait until the page receives the cookies.

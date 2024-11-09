@@ -12,7 +12,7 @@ import { defineConfig, devices } from '@playwright/test';
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-  testDir: 'tests',
+  testDir: './tests',
   testMatch: '**/*.spec.ts',
   /* Run tests in files in parallel */
   fullyParallel: true,
@@ -37,6 +37,10 @@ export default defineConfig({
   projects: [
     // Setup project
     //{ name: 'setup', testMatch: /.*\.setup\.ts/ },
+    // {
+    //   name: 'e2e-tests',
+    //   dependencies: ['setup'],
+    // },
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },

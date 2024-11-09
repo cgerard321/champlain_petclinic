@@ -21,6 +21,6 @@
     "noFallthroughCasesInSwitch": true,
     "types": ["vite/client", "@playwright/test"]
   },
-  "include": ["src", "tests"],
+  "include": ["src/**/*", "tests/**/*"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
