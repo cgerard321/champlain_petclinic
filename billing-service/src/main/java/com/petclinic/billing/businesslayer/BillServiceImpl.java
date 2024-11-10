@@ -283,6 +283,13 @@ public class BillServiceImpl implements BillService{
                 .switchIfEmpty(Flux.empty());
     }
 
+    public Mono<Double> calculateCurrentBalance(String customerId) {
+        return billRepository.findByCustomerIdAndBillStatus(customerId, BillStatus.UNPAID)
+                .concatWith(billRepository.findByCustomerIdAndBillStatus(customerId, BillStatus.OVERDUE))
+                .map(Bill::getAmount)
+                .reduce(0.0, Double::sum)
+                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Customer not found")));
+    }           
 
     @Override
     public Mono<Bill> processPayment(String customerId, String billId, PaymentRequestDTO paymentRequestDTO) throws InvalidPaymentException {
