@@ -79,3 +79,37 @@ test('Get User By Id works and connected customer link works and right info', as
 
   await page.close();
 });
+
+test('Admin Edit Customer', async ({ page }) => {
+  await page.goto('http://localhost:3000/users/login');
+  await page.getByPlaceholder('Enter your email').click();
+  await page.getByPlaceholder('Enter your email').fill('admin@admin.com');
+  await page.getByPlaceholder('Enter your password').click();
+  await page.getByPlaceholder('Enter your password').fill('pwd');
+  await page.getByRole('button', { name: 'Login' }).click();
+  await page.getByRole('button', { name: 'Customers' }).click();
+  await page.getByRole('link', { name: 'Customers List' }).click();
+  await page.getByRole('link', { name: 'e6c7398e-8ac4-4e10-9ee0-' }).click();
+  await page.getByRole('button', { name: 'Edit Customer' }).click();
+  await page.locator('input[name="firstName"]').click();
+  await page.locator('input[name="firstName"]').fill('John');
+  await page.locator('input[name="lastName"]').click();
+  await page.locator('input[name="lastName"]').fill('Doe');
+  await page.locator('input[name="address"]').click();
+  await page.locator('input[name="address"]').fill('Baker Street 123');
+  await page.locator('input[name="city"]').click();
+  await page.locator('input[name="city"]').fill('Montreal');
+  await page.getByRole('combobox').selectOption('Quebec');
+  await page.locator('input[name="telephone"]').click();
+  await page.locator('input[name="telephone"]').fill('5144203239');
+  await page.getByRole('button', { name: 'Update' }).click();
+  await expect(page.locator('h2')).toContainText('Success!');
+  await expect(page.getByRole('paragraph')).toContainText('Customer has been successfully updated.');
+  await page.getByRole('button', { name: 'Close' }).click();
+  await expect(page.locator('#root')).toContainText('First Name: John');
+  await expect(page.locator('#root')).toContainText('Last Name: Doe');
+  await expect(page.locator('#root')).toContainText('City: Montreal');
+  await expect(page.locator('#root')).toContainText('Province: Quebec');
+  await expect(page.locator('#root')).toContainText('Telephone: 5144203239');
+  await page.close();
+});
