@@ -76,9 +76,6 @@ test('Get User By Id works and connected customer link works and right info', as
     page.getByRole('heading', { name: 'Customer Details for Betty' })
   ).toBeVisible();
   await expect(page.getByText('Pet ID: ecb109cd-57ea-4b85-')).toBeVisible();
-  await expect(
-    page.getByText('Pet ID: ecb109cd-57ea-4esfsefsefb85-')
-  ).toBeVisible();
 
   await page.close();
 });
