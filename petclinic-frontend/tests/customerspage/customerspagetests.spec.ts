@@ -83,4 +83,5 @@ test('Admin Edit Customer', async ({ page }) => {
   await expect(page.locator('#root')).toContainText('City: Montreal');
   await expect(page.locator('#root')).toContainText('Province: Quebec');
   await expect(page.locator('#root')).toContainText('Telephone: 5144203239');
+  await page.close();
 });
