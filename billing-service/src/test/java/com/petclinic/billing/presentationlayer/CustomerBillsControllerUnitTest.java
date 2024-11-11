@@ -8,10 +8,15 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import reactor.core.publisher.Flux;
+import org.springframework.web.server.ResponseStatusException;
 
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
@@ -59,6 +64,40 @@ public class CustomerBillsControllerUnitTest {
                 .hasSize(0);
 
         Mockito.verify(billService, times(1)).getBillsByCustomerId("nonExistentCustomer");
+    }
+
+    @Test
+    void getCurrentBalance_ValidCustomer_ShouldReturnBalance() {
+        String customerId = "valid-customer-id";
+        double expectedBalance = 150.0;
+
+        when(billService.calculateCurrentBalance(customerId)).thenReturn(Mono.just(expectedBalance));
+
+        client.get()
+                .uri("/bills/customer/{customerId}/bills/current-balance", customerId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(Double.class)
+                .value(balance -> assertEquals(expectedBalance, balance));
+
+        Mockito.verify(billService, times(1)).calculateCurrentBalance(customerId);
+    }
+
+    @Test
+    void getCurrentBalance_InvalidCustomer_ShouldReturnNotFound() {
+        String invalidCustomerId = "invalid-customer-id";
+
+        when(billService.calculateCurrentBalance(invalidCustomerId))
+                .thenReturn(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Customer not found")));
+
+        client.get()
+                .uri("/bills/customer/{customerId}/bills/current-balance", invalidCustomerId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound();
+
+        Mockito.verify(billService, times(1)).calculateCurrentBalance(invalidCustomerId);
     }
 
     private BillResponseDTO buildBillResponseDTO() {

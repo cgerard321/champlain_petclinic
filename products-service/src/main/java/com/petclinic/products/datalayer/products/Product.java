@@ -27,8 +27,10 @@ public class Product {
     private Double averageRating;
     private Integer requestCount;
     private Integer productQuantity;
+    private Boolean isUnlisted;
     private ProductType productType;
     private LocalDate releaseDate;
     private ProductStatus productStatus;
+    private DeliveryType deliveryType;
 }
 

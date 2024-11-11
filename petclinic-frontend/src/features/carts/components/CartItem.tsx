@@ -1,6 +1,7 @@
 // CartItem.tsx
 import './CartItem.css';
 import { ProductModel } from '../models/ProductModel';
+import ImageContainer from '@/features/products/components/ImageContainer';
 
 interface CartItemProps {
   item: ProductModel;
@@ -50,6 +51,7 @@ const CartItem = ({
 
   return (
     <div className="CartItem">
+      <ImageContainer imageId={item.imageId} />
       <div className="CartItem-info">
         <h2 className="info-title">{item.productName}</h2>
         <p className="info-description">{item.productDescription}</p>
@@ -72,7 +74,7 @@ const CartItem = ({
               {formatPrice(item.productSalePrice)}
             </span>
             <button
-              className="delete-button"
+              className="wishlist-button"
               onClick={() => deleteItem(item.productId, index)}
               aria-label={`Remove ${item.productName} from cart`}
             >

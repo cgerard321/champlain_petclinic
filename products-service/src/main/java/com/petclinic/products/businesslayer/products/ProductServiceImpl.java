@@ -6,18 +6,19 @@ import com.petclinic.products.utils.exceptions.InvalidInputException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-
 import com.petclinic.products.datalayer.products.Product;
+import com.petclinic.products.datalayer.products.ProductRepository;
 import com.petclinic.products.datalayer.ratings.Rating;
 import com.petclinic.products.datalayer.ratings.RatingRepository;
-import com.petclinic.products.utils.EntityModelUtil;
-import com.petclinic.products.datalayer.products.ProductRepository;
 import com.petclinic.products.presentationlayer.products.ProductRequestModel;
 import com.petclinic.products.presentationlayer.products.ProductResponseModel;
+import com.petclinic.products.utils.EntityModelUtil;
 import com.petclinic.products.utils.exceptions.InvalidAmountException;
+import com.petclinic.products.utils.exceptions.InvalidInputException;
 import com.petclinic.products.utils.exceptions.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
-
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -38,7 +39,7 @@ public class ProductServiceImpl implements ProductService {
         this.ratingRepository = ratingRepository;
     }
 
-    private Mono<Product> getAverageRating(Product product){
+    private Mono<Product> getAverageRating(Product product) {
         return ratingRepository.findRatingsByProductId(product.getProductId())
                 .map(Rating::getRating)
                 .collectList()
@@ -60,7 +61,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Flux<ProductResponseModel> getAllProducts(Double minPrice, Double maxPrice,Double minRating, Double maxRating, String sort) {
+    public Flux<ProductResponseModel> getAllProducts(Double minPrice, Double maxPrice, Double minRating, Double maxRating, String sort,String deliveryType) {
         if (sort != null && !Arrays.asList("asc", "desc", "default").contains(sort.toLowerCase())) {
             throw new InvalidInputException("Invalid sort parameter: " + sort);
         }
@@ -83,6 +84,13 @@ public class ProductServiceImpl implements ProductService {
                     boolean meetsMinRating = (minRating == null || avgRating >= minRating);
                     boolean meetsMaxRating = (maxRating == null || avgRating <= maxRating);
                     return meetsMinRating && meetsMaxRating;
+                })
+                .filter(product -> {
+                    if (deliveryType == null || deliveryType.trim().isEmpty()) {
+                        return true;
+                    } else {
+                        return product.getDeliveryType().toString().equalsIgnoreCase(deliveryType);
+                    }
                 })
                 .collectList()
                 .flatMapMany(productList -> {
@@ -143,14 +151,28 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public Mono<ProductResponseModel> patchListingStatus(String productId, Mono<ProductRequestModel> productRequestModel) {
+        return productRepository.findProductByProductId(productId)
+                .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Product id was not found: " + productId))))
+                .flatMap(found -> productRequestModel
+                        .doOnNext(request -> {
+                            found.setIsUnlisted(request.getIsUnlisted());
+                        })
+                        .thenReturn(found)
+                )
+                .flatMap(productRepository::save)
+                .map(EntityModelUtil::toProductResponseModel);
+    }
+
+    @Override
     public Mono<ProductResponseModel> deleteProductByProductId(String productId) {
         return productRepository.findProductByProductId(productId)
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Product id was not found: " + productId))))
                 .flatMap(found -> {
-                    ratingRepository.deleteRatingsByProductId(found.getProductId());
-                    return productRepository.delete(found)
-                            .then(Mono.just(found));
-                    }
+                            ratingRepository.deleteRatingsByProductId(found.getProductId());
+                            return productRepository.delete(found)
+                                    .then(Mono.just(found));
+                        }
                 )
                 .map(EntityModelUtil::toProductResponseModel);
     }
@@ -168,8 +190,6 @@ public class ProductServiceImpl implements ProductService {
     }
 
 
-
-
     @Scheduled(cron = "0 0 0 */30 * *")  // Runs every 30 days at midnight
     public Mono<Void> resetRequestCounts() {
         return productRepository.findAll()
@@ -179,6 +199,7 @@ public class ProductServiceImpl implements ProductService {
                 })
                 .then();
     }
+
     @Override
     public Flux<ProductResponseModel> getProductsByType(String productType) {
         return productRepository.findProductsByProductType(productType)
@@ -210,7 +231,7 @@ public class ProductServiceImpl implements ProductService {
         return productRepository.findProductByProductId(productId)
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Product id was not found: " + productId))))
                 .flatMap(product -> {
-                        product.setProductQuantity(productQuantity);
+                    product.setProductQuantity(productQuantity);
                     return productRepository.save(product).then();
                 });
     }

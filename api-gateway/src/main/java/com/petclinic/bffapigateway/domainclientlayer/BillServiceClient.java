@@ -3,11 +3,13 @@ package com.petclinic.bffapigateway.domainclientlayer;
 import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillStatus;
+import com.petclinic.bffapigateway.dtos.Bills.PaymentRequestDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ResponseStatusException;
@@ -309,6 +311,36 @@ public class BillServiceClient {
                 .accept(MediaType.APPLICATION_PDF)
                 .retrieve()
                 .bodyToMono(byte[].class);
+    }
+
+    public Flux<BillResponseDTO> getBillsByMonth(int year, int month) {
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(billServiceUrl + "/month")
+                .queryParam("year", year)
+                .queryParam("month", month);
+
+        return webClientBuilder.build()
+                .get()
+                .uri(builder.build().toUri())
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToFlux(BillResponseDTO.class);
+    }
+
+    public Mono<Double> getCurrentBalance(String customerId) {
+        return webClientBuilder.build()
+                .get()
+                .uri(billServiceUrl + "/customer/{customerId}/bills/current-balance", customerId)
+                .retrieve()
+                .bodyToMono(Double.class);
+    }
+  
+    public Mono<String> payBill(String customerId, String billId, PaymentRequestDTO paymentRequestDTO) {
+        return webClientBuilder.build()
+                .post()
+                .uri(billServiceUrl + "/customer/{customerId}/bills/{billId}/pay", customerId, billId)
+                .bodyValue(paymentRequestDTO)
+                .retrieve()
+                .bodyToMono(String.class);
     }
 
 }

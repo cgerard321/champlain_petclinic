@@ -368,6 +368,82 @@ class ProductControllerIntegrationTest {
     }
 
     @Test
+    public void whenPatchListingStatus_thenReturnUpdatedProduct() {
+        ProductRequestModel patchProductRequestModel = ProductRequestModel.builder()
+                .isUnlisted(true)
+                .build();
+
+        webTestClient
+                .patch()
+                .uri("/api/v1/products/" + product1.getProductId() + "/status")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Mono.just(patchProductRequestModel), ProductRequestModel.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(ProductResponseModel.class)
+                .value(productResponseModel -> {
+                    assertEquals(patchProductRequestModel.getIsUnlisted(), productResponseModel.getIsUnlisted());
+                });
+
+        StepVerifier
+                .create(productRepository.findAll())
+                .expectNextCount(2)
+                .verifyComplete();
+    }
+
+    @Test
+    public void whenPatchListingStatusWithNonExistentProductId_thenThrowNotFoundException() {
+        ProductRequestModel patchProductRequestModel = ProductRequestModel.builder()
+                .isUnlisted(true)
+                .build();
+
+        webTestClient
+                .patch()
+                .uri("/api/v1/products/" + NON_EXISTENT_PRODUCT_ID + "/status")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Mono.just(patchProductRequestModel), ProductRequestModel.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Product id was not found: " +
+                        NON_EXISTENT_PRODUCT_ID);
+
+        StepVerifier
+                .create(productRepository.findAll())
+                .expectNextCount(2)
+                .verifyComplete();
+    }
+
+    @Test
+    public void whenPatchListingStatusWithInvalidProductId_thenThrowInvalidInputException() {
+        ProductRequestModel patchProductRequestModel = ProductRequestModel.builder()
+                .isUnlisted(true)
+                .build();
+
+        webTestClient
+                .patch()
+                .uri("/api/v1/products/" + INVALID_PRODUCT_ID + "/status")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Mono.just(patchProductRequestModel), ProductRequestModel.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().is4xxClientError()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Provided product id is invalid: " +
+                        INVALID_PRODUCT_ID);
+
+        StepVerifier
+                .create(productRepository.findAll())
+                .expectNextCount(2)
+                .verifyComplete();
+    }
+
+    @Test
     public void whenDeleteProduct_thenDeleteProduct() {
         webTestClient
                 .delete()

@@ -5,6 +5,7 @@ import com.petclinic.bffapigateway.domainclientlayer.*;
 import com.petclinic.bffapigateway.dtos.Auth.*;
 import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
+import com.petclinic.bffapigateway.dtos.Bills.PaymentRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.*;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
@@ -229,6 +230,18 @@ public class BFFApiGatewayController {
     public Mono<ResponseEntity<Void>> deleteBillsByCustomerId(final @PathVariable String customerId){
         return billServiceClient.deleteBillsByCustomerId(customerId).then(Mono.just(ResponseEntity.noContent().<Void>build()))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    @Validated
+    @IsUserSpecific(idToMatch = {"customerId"}, bypassRoles = {Roles.ADMIN})
+    @PostMapping("bills/customer/{customerId}/bills/{billId}/pay")
+    public Mono<ResponseEntity<String>> payBill(
+            @PathVariable("customerId") String customerId,
+            @PathVariable("billId") String billId,
+            @Valid @RequestBody PaymentRequestDTO paymentRequestDTO) {
+        return billServiceClient.payBill(customerId, billId, paymentRequestDTO)
+                .map(response -> ResponseEntity.ok(response))
+                .onErrorResume(e -> Mono.just(ResponseEntity.badRequest().body("Payment failed: " + e.getMessage())));
     }
 
 
@@ -1109,8 +1122,9 @@ public class BFFApiGatewayController {
     @GetMapping(value = "inventory/{inventoryId}/products/search")//, produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ProductResponseDTO> searchProducts(@PathVariable String inventoryId,
                                                    @RequestParam(required = false) String productName,
-                                                   @RequestParam(required = false) String productDescription) {
-        return inventoryServiceClient.searchProducts(inventoryId, productName, productDescription);
+                                                   @RequestParam(required = false) String productDescription,
+                                                   @RequestParam(required = false) Status status) {
+        return inventoryServiceClient.searchProducts(inventoryId, productName, productDescription, status);
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ALL})

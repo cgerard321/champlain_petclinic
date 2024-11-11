@@ -32,7 +32,7 @@ public class CartController {
 
     private final CartServiceClient cartServiceClient;
 
-    //later we will need to check if the user that is logged in isnt getting someone else's carts, but thats for sprint 3
+    //later we will need to check if the user that is logged in isn't getting someone else's carts, but that's for sprint 3
     //@SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping("/{cartId}")
     public Mono<ResponseEntity<CartResponseDTO>> getCartById(@PathVariable String cartId) {
@@ -172,6 +172,25 @@ public class CartController {
                 });
     }
 
+    @PostMapping("/{cartId}/products/{productId}/quantity/{quantity}")
+    public Mono<ResponseEntity<CartResponseDTO>> addProductToWishList(@PathVariable String cartId, @PathVariable String productId, @PathVariable int quantity) {
+        return cartServiceClient.addProductToWishList(cartId, productId, quantity)
+                .map(cartResponseDTO -> ResponseEntity.ok(cartResponseDTO))
+                .defaultIfEmpty(ResponseEntity.notFound().build())
+                .onErrorResume(e -> {
+                    if (e instanceof WebClientResponseException.UnprocessableEntity) {
+                        log.error("Invalid input for cartId: {} or productId: {} - {}", cartId, productId, e.getMessage());
+                        return Mono.just(ResponseEntity.unprocessableEntity().build());
+                    } else if (e instanceof WebClientResponseException.NotFound) {
+                        log.error("Cart or product not found for cartId: {} and productId: {} - {}", cartId, productId, e.getMessage());
+                        return Mono.just(ResponseEntity.notFound().build());
+                    } else {
+                        log.error("An unexpected error occurred: {}", e.getMessage());
+                        return Mono.error(e);
+                    }
+                });
+    }
+
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping(value = "promos", produces= MediaType.APPLICATION_JSON_VALUE)
@@ -186,6 +205,30 @@ public class CartController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
+
+    @PostMapping("/{cartId}/{productId}")
+    public Mono<ResponseEntity<CartResponseDTO>> addProductToCartFromProducts(
+            @PathVariable String cartId,
+            @PathVariable String productId) {
+
+        return cartServiceClient.addProductToCartFromProducts(cartId, productId)
+                .map(ResponseEntity::ok)
+                .onErrorResume(e -> {
+                    if (e instanceof InvalidInputException || e instanceof WebClientResponseException.BadRequest) {
+                        CartResponseDTO errorResponse = new CartResponseDTO();
+                        errorResponse.setMessage(e.getMessage());
+                        return Mono.just(ResponseEntity.badRequest().body(errorResponse));
+                    } else if (e instanceof NotFoundException) {
+                        return Mono.just(ResponseEntity.notFound().build());
+                    } else if (e instanceof WebClientResponseException) {
+                        WebClientResponseException ex = (WebClientResponseException) e;
+                        return Mono.just(ResponseEntity.status(ex.getStatusCode()).build());
+                    } else {
+                        return Mono.error(e);
+                    }
+                });
+    }
+
 }
 
 

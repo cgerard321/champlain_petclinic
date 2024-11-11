@@ -1,6 +1,8 @@
 package com.petclinic.billing.businesslayer;
 
 import com.petclinic.billing.datalayer.*;
+import com.petclinic.billing.exceptions.InvalidPaymentException;
+import com.petclinic.billing.exceptions.NotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -589,5 +591,145 @@ public class BillServiceImplTest {
                 .verifyComplete();
     }
 
+    @Test
+    void getBillsByMonth_ShouldReturnBillsForGivenMonth() {
+        // Arrange
+        Bill bill1 = buildBill();
+        Bill bill2 = buildBill();
+        bill2.setBillId("BillUUID2"); // Different ID for distinct objects
+        int year = 2022;
+        int month = 9;
+
+        when(repo.findByDateBetween(any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(Flux.just(bill1, bill2));
+
+        // Act
+        Flux<BillResponseDTO> result = billService.getBillsByMonth(year, month);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNextCount(2) // Expect both bills
+                .verifyComplete();
+    }
+
+    @Test
+    void calculateCurrentBalance_ShouldReturnCorrectBalance() {
+
+        String customerId = "valid-customer-id";
+        Bill unpaidBill = Bill.builder().amount(100.0).billStatus(BillStatus.UNPAID).customerId(customerId).build();
+        Bill overdueBill = Bill.builder().amount(50.0).billStatus(BillStatus.OVERDUE).customerId(customerId).build();
+
+        when(repo.findByCustomerIdAndBillStatus(customerId, BillStatus.UNPAID))
+                .thenReturn(Flux.just(unpaidBill));
+        when(repo.findByCustomerIdAndBillStatus(customerId, BillStatus.OVERDUE))
+                .thenReturn(Flux.just(overdueBill));
+
+        Mono<Double> result = billService.calculateCurrentBalance(customerId);
+
+        StepVerifier.create(result)
+                .expectNext(150.0) 
+                .verifyComplete();
+    }
+
+    @Test
+    void calculateCurrentBalance_InvalidCustomer_ShouldReturnNotFound() {
+
+        String invalidCustomerId = "non-existent-id";
+        when(repo.findByCustomerIdAndBillStatus(invalidCustomerId, BillStatus.UNPAID))
+                .thenReturn(Flux.empty());
+        when(repo.findByCustomerIdAndBillStatus(invalidCustomerId, BillStatus.OVERDUE))
+                .thenReturn(Flux.empty());
+
+        Mono<Double> result = billService.calculateCurrentBalance(invalidCustomerId);
+
+        StepVerifier.create(result)
+                .expectNext(0.0) 
+                .verifyComplete();
+    }
+
+
+    @Test
+    void processPayment_Success() {
+        // Arrange
+        String customerId = "customerId-1";
+        String billId = "billId-1";
+        Bill bill = buildBill();
+        bill.setBillStatus(BillStatus.UNPAID); // Make sure it's unpaid before payment
+
+        PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "123", "12/23");
+
+        when(repo.findByCustomerIdAndBillId(customerId, billId)).thenReturn(Mono.just(bill));
+        when(repo.save(any(Bill.class))).thenReturn(Mono.just(bill));
+
+        // Act
+        Mono<Bill> result = billService.processPayment(customerId, billId, paymentRequest);
+
+        // Assert
+        StepVerifier.create(result)
+                .consumeNextWith(updatedBill -> {
+                    assertEquals(BillStatus.PAID, updatedBill.getBillStatus());
+                    verify(repo, times(1)).save(any(Bill.class));
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void processPayment_InvalidCardNumber_Failure() {
+        // Arrange
+        String customerId = "customerId-1";
+        String billId = "billId-1";
+        PaymentRequestDTO paymentRequest = new PaymentRequestDTO("12345678", "123", "12/23"); // Invalid card number
+
+        // Act & Assert
+        StepVerifier.create(billService.processPayment(customerId, billId, paymentRequest))
+                .expectErrorMatches(throwable -> throwable instanceof InvalidPaymentException &&
+                        throwable.getMessage().contains("Invalid payment details"))
+                .verify();
+    }
+
+    @Test
+    void processPayment_InvalidCVV_Failure() {
+        // Arrange
+        String customerId = "customerId-1";
+        String billId = "billId-1";
+        PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "12", "12/23"); // Invalid CVV
+
+        // Act & Assert
+        StepVerifier.create(billService.processPayment(customerId, billId, paymentRequest))
+                .expectErrorMatches(throwable -> throwable instanceof InvalidPaymentException &&
+                        throwable.getMessage().contains("Invalid payment details"))
+                .verify();
+    }
+
+    @Test
+    void processPayment_InvalidExpirationDate_Failure() {
+        // Arrange
+        String customerId = "customerId-1";
+        String billId = "billId-1";
+        PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "123", "1223"); // Invalid expiration date
+
+        // Act & Assert
+        StepVerifier.create(billService.processPayment(customerId, billId, paymentRequest))
+                .expectErrorMatches(throwable -> throwable instanceof InvalidPaymentException &&
+                        throwable.getMessage().contains("Invalid payment details"))
+                .verify();
+    }
+
+
+    @Test
+    void processPayment_BillNotFound_Failure() {
+        // Arrange
+        String customerId = "customerId-1";
+        String billId = "billId-1";
+        PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "123", "12/23");
+
+        when(repo.findByCustomerIdAndBillId(customerId, billId)).thenReturn(Mono.empty()); // Bill not found
+
+        // Act & Assert
+        StepVerifier.create(billService.processPayment(customerId, billId, paymentRequest))
+                .expectErrorMatches(throwable -> throwable instanceof NotFoundException &&
+                        throwable.getMessage().contains("Bill not found"))
+                .verify();
+    }
 
 }

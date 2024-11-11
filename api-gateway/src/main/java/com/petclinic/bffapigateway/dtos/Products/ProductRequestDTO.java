@@ -19,7 +19,9 @@ public class ProductRequestDTO {
     private Double productSalePrice;
     private Double averageRating;
     private Integer productQuantity;
+    private Boolean isUnlisted;
     private ProductType productType;
     private LocalDate releaseDate;
     private ProductStatus productStatus;
+    private DeliveryType deliveryType;
 }

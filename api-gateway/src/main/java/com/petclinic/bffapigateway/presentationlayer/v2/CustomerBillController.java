@@ -2,7 +2,9 @@ package com.petclinic.bffapigateway.presentationlayer.v2;
 
 import com.petclinic.bffapigateway.domainclientlayer.BillServiceClient;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
+import com.petclinic.bffapigateway.dtos.Bills.PaymentRequestDTO;
 import com.petclinic.bffapigateway.utils.Security.Annotations.IsUserSpecific;
+import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -49,5 +51,11 @@ public class CustomerBillController {
                     log.error("Error downloading PDF for billId: {}", billId, e);
                     return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
                 });
+    }
+    // Get customer's current billing balance.
+    @IsUserSpecific(idToMatch = { "customerId" })
+    @GetMapping(value = "/current-balance", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<Double> getCurrentBalance(@PathVariable String customerId) {
+        return billService.getCurrentBalance(customerId);
     }
 }

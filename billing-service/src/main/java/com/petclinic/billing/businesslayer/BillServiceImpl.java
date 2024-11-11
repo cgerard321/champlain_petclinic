@@ -4,6 +4,8 @@ import com.itextpdf.text.DocumentException;
 import com.petclinic.billing.datalayer.*;
 import com.petclinic.billing.domainclientlayer.OwnerClient;
 import com.petclinic.billing.domainclientlayer.VetClient;
+import com.petclinic.billing.exceptions.InvalidPaymentException;
+import com.petclinic.billing.exceptions.NotFoundException;
 import com.petclinic.billing.util.EntityDtoUtil;
 import com.petclinic.billing.util.PdfGenerator;
 
@@ -19,7 +21,10 @@ import reactor.core.publisher.Mono;
 
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.function.Predicate;
+
+import static reactor.core.publisher.FluxExtensionsKt.switchIfEmpty;
 
 
 @Service
@@ -266,4 +271,42 @@ public class BillServiceImpl implements BillService{
                     }
                 });
     }
+
+    @Override
+    public Flux<BillResponseDTO> getBillsByMonth(int year, int month) {
+        YearMonth yearMonth = YearMonth.of(year, month);
+        LocalDate start = yearMonth.atDay(1);
+        LocalDate end = yearMonth.atEndOfMonth().plusDays(1);
+
+        return billRepository.findByDateBetween(start, end)
+                .map(EntityDtoUtil::toBillResponseDto)
+                .switchIfEmpty(Flux.empty());
+    }
+
+    public Mono<Double> calculateCurrentBalance(String customerId) {
+        return billRepository.findByCustomerIdAndBillStatus(customerId, BillStatus.UNPAID)
+                .concatWith(billRepository.findByCustomerIdAndBillStatus(customerId, BillStatus.OVERDUE))
+                .map(Bill::getAmount)
+                .reduce(0.0, Double::sum)
+                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Customer not found")));
+    }           
+
+    @Override
+    public Mono<Bill> processPayment(String customerId, String billId, PaymentRequestDTO paymentRequestDTO) throws InvalidPaymentException {
+        // Basic card validation outside of reactive pipeline
+        if (paymentRequestDTO.getCardNumber().length() != 16 ||
+                paymentRequestDTO.getCvv().length() != 3 ||
+                paymentRequestDTO.getExpirationDate().length() != 5) {
+            return Mono.error(new InvalidPaymentException("Invalid payment details"));
+        }
+
+        // Continue with reactive processing if validation is successful
+        return billRepository.findByCustomerIdAndBillId(customerId, billId)
+                .switchIfEmpty(Mono.error(new NotFoundException("Bill not found")))
+                .flatMap(bill -> {
+                    bill.setBillStatus(BillStatus.PAID);
+                    return billRepository.save(bill);
+                });
+    }
+
 }

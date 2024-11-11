@@ -7,12 +7,14 @@ import com.petclinic.vet.dataaccesslayer.VetRepository;
 import com.petclinic.vet.exceptions.InvalidInputException;
 import com.petclinic.vet.exceptions.NotFoundException;
 import com.petclinic.vet.util.EntityDtoUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.UUID;
 
+@Slf4j
 @Service
 public class EducationServiceImpl implements EducationService {
     private final VetRepository vetRepository;
@@ -35,8 +37,11 @@ public class EducationServiceImpl implements EducationService {
     @Override
     public Mono<Void> deleteEducationByEducationId(String vetId, String educationId) {
         return educationRepository.findByVetIdAndEducationId(vetId, educationId)
-                .switchIfEmpty(Mono.error(new Exception("Education with id " + educationId + " not found.")))
-                .flatMap(educationRepository::delete);
+                .switchIfEmpty(Mono.error(new NotFoundException("Education with id " + educationId + " not found for vetId " + vetId)))
+                .flatMap(education -> {
+                    log.info("Deleting education with id {} for vetId {}", educationId, vetId);
+                    return educationRepository.delete(education);
+                });
     }
 
     @Override

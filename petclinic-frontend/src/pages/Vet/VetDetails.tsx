@@ -6,6 +6,10 @@ import axios from 'axios';
 import DeleteVetPhoto from '@/pages/Vet/DeleteVetPhoto.tsx';
 import UpdateVetEducation from '@/pages/Vet/UpdateVetEducation';
 import AddEducation from '@/pages/Vet/AddEducation.tsx';
+import DeleteVetEducation from '@/pages/Vet/DeleteVetEducation';
+import { Workday } from '@/features/veterinarians/models/Workday.ts';
+import UpdateVet from '@/pages/Vet/UpdateVet.tsx';
+import { fetchVetPhoto } from '@/features/veterinarians/api/fetchPhoto';
 
 interface VetResponseType {
   vetId: string;
@@ -20,6 +24,24 @@ interface VetResponseType {
   active: boolean;
   specialties: { specialtyId: string; name: string }[];
 }
+
+interface VetRequestModel {
+  vetId: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+  resume: string;
+  workday: Workday[];
+  workHoursJson: string;
+  active: boolean;
+  specialties: { specialtyId: string; name: string }[];
+  photoDefault: boolean;
+  username: string;
+  password: string;
+  vetBillId: string;
+}
+
 interface AlbumPhotoType {
   id: string;
   data: string;
@@ -65,6 +87,39 @@ export default function VetDetails(): JSX.Element {
   const [selectedEducation, setSelectedEducation] =
     useState<EducationResponseType | null>(null);
   const [ratings, setRatings] = useState<RatingResponseType[] | null>(null);
+  const [selectedVet, setSelectedVet] = useState<VetRequestModel | null>(null);
+
+  const refreshVetDetails = useCallback(async (): Promise<void> => {
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/v2/gateway/vets/${vetId}`
+      );
+      if (!response.ok) {
+        throw new Error(`Error: ${response.statusText}`);
+      }
+      const data: VetResponseType = await response.json();
+      setVet(data);
+    } catch (error) {
+      console.error('Failed to fetch vet details:', error);
+    }
+  }, [vetId]);
+  const mapVetResponseToRequest = (vet: VetResponseType): VetRequestModel => ({
+    vetId: vet.vetId,
+    firstName: vet.firstName,
+    lastName: vet.lastName,
+    email: vet.email,
+    phoneNumber: vet.phoneNumber,
+    resume: vet.resume,
+    workday: vet.workday.map(day => day as Workday),
+    workHoursJson: vet.workHoursJson,
+    active: vet.active,
+    specialties: vet.specialties,
+    photoDefault: true,
+    username: 'defaultUsername',
+    password: 'defaultPassword',
+    vetBillId: vet.vetBillId,
+  });
+
   useEffect(() => {
     const fetchVetRatings = async (): Promise<void> => {
       try {
@@ -83,35 +138,35 @@ export default function VetDetails(): JSX.Element {
     fetchVetRatings();
   }, [vetId]);
 
-  const fetchVetPhoto = useCallback(async (): Promise<void> => {
-    try {
-      const response = await fetch(
-        `http://localhost:8080/api/v2/gateway/vets/${vetId}/photo`,
-        {
-          method: 'GET',
-          headers: {
-            Accept: 'image/*',
-          },
+  useEffect(() => {
+    const fetchPhoto = async (): Promise<void> => {
+      try {
+        if (vetId) {
+          const imageUrl = await fetchVetPhoto(vetId);
+          setPhoto(imageUrl);
+        } else {
+          setError('Vet ID is undefined');
         }
-      );
-
-      if (!response.ok) {
-        throw new Error(`Error: ${response.statusText}`);
+      } catch (error) {
+        setError('Failed to fetch vet photo');
+        setPhoto('/images/vet_default.jpg');
+        setIsDefaultPhoto(true); // This indicates the default photo is being used
       }
+    };
 
-      const blob = await response.blob();
-      const imageUrl = URL.createObjectURL(blob);
-      setPhoto(imageUrl);
-    } catch (error) {
-      setError('Failed to fetch vet photo');
-      setPhoto('/images/vet_default.jpg');
-      setIsDefaultPhoto(true); // This indicates the default photo is being used
-    }
+    fetchPhoto();
   }, [vetId]);
+
+  const handleEducationDeleted = (deletedEducationId: string): void => {
+    setEducation(prevEducation =>
+      prevEducation
+        ? prevEducation.filter(edu => edu.educationId !== deletedEducationId)
+        : null
+    );
+  };
 
   const handlePhotoDeleted = (): void => {
     setIsDefaultPhoto(true);
-    fetchVetPhoto();
   };
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -176,12 +231,10 @@ export default function VetDetails(): JSX.Element {
     };
 
     fetchVetDetails().then(() => {
-      fetchVetPhoto();
       fetchEducationDetails();
       fetchAlbumPhotos();
       setLoading(false);
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [vetId]);
 
   const handleImageClick = (): void => {
@@ -417,6 +470,21 @@ export default function VetDetails(): JSX.Element {
                 onPhotoDeleted={handlePhotoDeleted}
               />
             )}
+
+            <button
+              className="btn btn-primary"
+              onClick={() => setSelectedVet(mapVetResponseToRequest(vet!))}
+            >
+              Update Profile
+            </button>
+
+            {selectedVet && (
+              <UpdateVet
+                vet={selectedVet}
+                onClose={() => setSelectedVet(null)}
+                refreshVetDetails={refreshVetDetails}
+              />
+            )}
           </section>
         )}
 
@@ -608,11 +676,36 @@ export default function VetDetails(): JSX.Element {
                     >
                       Update Education
                     </button>
+                    <DeleteVetEducation
+                      vetId={vetId!}
+                      educationId={edu.educationId}
+                      onEducationDeleted={handleEducationDeleted}
+                    />
                     <hr />
                   </div>
                 ))
               ) : (
-                <p>No education details available</p>
+                // When there are no education entries
+                <div>
+                  <p>No education details available</p>
+
+                  <div style={{ marginBottom: '20px', textAlign: 'right' }}>
+                    <button
+                      onClick={() => setFormVisible(prev => !prev)}
+                      style={{
+                        backgroundColor: formVisible ? '#ff6347' : '#4CAF50',
+                      }}
+                    >
+                      {formVisible ? 'Cancel' : 'Add Education'}
+                    </button>
+                    {formVisible && (
+                      <AddEducation
+                        vetId={vetId}
+                        onClose={() => setFormVisible(false)}
+                      />
+                    )}
+                  </div>
+                </div>
               )}
               {selectedEducation && vetId && (
                 <UpdateVetEducation

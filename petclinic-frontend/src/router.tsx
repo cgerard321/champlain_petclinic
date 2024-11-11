@@ -44,6 +44,7 @@ import AllUsers from '@/pages/Users/AllUsers.tsx';
 //import EditEmergency from './features/visits/Emergency/EditEmergency';
 import EmergencyList from './features/visits/Emergency/EmergencyList';
 import ProductDetails from '@/features/products/api/ProductDetails.tsx';
+// import ProductsList from '@/features/products/ProductsList.tsx';
 import AddPetPage from '@/pages/Customer/AddPetPage.tsx';
 import EditProduct from './features/products/components/EditProduct';
 import ForgotPassword from '@/pages/User/ForgotPassword.tsx';
@@ -58,6 +59,7 @@ import MoveInventoryProducts from '@/features/inventories/MoveInventoryProducts.
 import ReviewsCustomer from '@/pages/Review/CustomerReviews.tsx';
 import AddReviewsCustomer from '@/pages/Review/CustomerAddReviewForm.tsx';
 import EmergencyDetails from './features/visits/EmergencyByEmergencyId';
+import CustomerPromoPage from '@/pages/Promos/CustomerPromoPage.tsx';
 import UserDetailsPage from './pages/Users/UserDetailsPage';
 import UpdateUserPage from './pages/Users/UpdateUserPage';
 import AllRoles from '@/pages/Users/AllRoles.tsx';
@@ -348,6 +350,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute roles={['ADMIN']}>
             <PromoPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.CustomerPromos,
+        element: (
+          <ProtectedRoute>
+            <CustomerPromoPage />
           </ProtectedRoute>
         ),
       },

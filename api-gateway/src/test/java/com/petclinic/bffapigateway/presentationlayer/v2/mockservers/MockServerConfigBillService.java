@@ -97,6 +97,66 @@ public class MockServerConfigBillService {
                 );
     }
 
+    public void registerGetCurrentBalanceEndpoint() {
+        String response = "150.0"; 
+        
+        mockServerClient_BillService
+                .when(
+                        request()
+                                .withMethod("GET")
+                                .withPath("/api/v2/gateway/customers/{customerId}/bills/current-balance")
+                                .withPathParameter("customerId", "1") 
+                )
+                .respond(
+                        response()
+                                .withStatusCode(200) 
+                                .withBody(response)  
+                                .withHeader("Content-Type", "application/json")
+                );
+    }
+        
+    public void registerGetCurrentBalanceInvalidCustomerIdEndpoint() {
+        mockServerClient_BillService
+                .when(
+                        request()
+                                .withMethod("GET")
+                                .withPath("/api/v2/gateway/customers/{customerId}/bills/current-balance")
+                                .withPathParameter("customerId", "invalid-id") 
+                )
+                .respond(
+                        response()
+                                .withStatusCode(404) 
+                                .withHeader("Content-Type", "application/json")
+                );
+    }
+
+    public void registerPayBillEndpoint() {
+        mockServerClient_BillService
+                .when(
+                        request()
+                                .withMethod("POST")
+                                .withPath("/bills/customer/e6c7398e-8ac4-4e10-9ee0-03ef33f0361a/bills/1/pay")
+                )
+                .respond(
+                        response()
+                                .withStatusCode(200)
+                                .withBody("Payment successful")
+                );
+
+        mockServerClient_BillService
+                .when(
+                        request()
+                                .withMethod("POST")
+                                .withPath("/bills/customer/invalid-customer-id/bills/1/pay")
+                )
+                .respond(
+                        response()
+                                .withStatusCode(400)
+                                .withBody("Payment failed: Invalid customer ID")
+                );
+    }
+
+
     public void stopMockServer() {
         if(clientAndServer != null)
             this.clientAndServer.stop();

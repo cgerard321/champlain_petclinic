@@ -9,7 +9,7 @@ import { FaShoppingCart } from 'react-icons/fa'; // Importing the shopping cart 
 
 interface ProductAPIResponse {
   productId: number;
-
+  imageId: string;
   productName: string;
   productDescription: string;
   productSalePrice: number;
@@ -44,6 +44,9 @@ const UserCart = (): JSX.Element => {
   const [notificationMessage, setNotificationMessage] = useState<string | null>(
     null
   ); // New state for notifications
+  const [voucherCode, setVoucherCode] = useState<string>('');
+  const [discount, setDiscount] = useState<number>(0);
+  const [voucherError, setVoucherError] = useState<string | null>(null);
 
   const subtotal = cartItems.reduce(
     (acc, item) => acc + item.productSalePrice * (item.quantity || 1),
@@ -51,7 +54,7 @@ const UserCart = (): JSX.Element => {
   );
   const tvq = subtotal * 0.09975; // Quebec tax rate
   const tvc = subtotal * 0.05; // Canadian tax rate
-  const total = subtotal + tvq + tvc;
+  const total = subtotal - discount + tvq + tvc;
 
   // Function to update the cart item count
   const updateCartItemCount = useCallback(() => {
@@ -94,6 +97,7 @@ const UserCart = (): JSX.Element => {
         const products: ProductModel[] = data.products.map(
           (product: ProductAPIResponse) => ({
             productId: product.productId,
+            imageId: product.imageId,
             productName: product.productName,
             productDescription: product.productDescription,
             productSalePrice: product.productSalePrice,
@@ -125,6 +129,32 @@ const UserCart = (): JSX.Element => {
     // Recalculate cart item count after setting cart items
     updateCartItemCount();
   }, [cartId, updateCartItemCount, wishlistUpdated]);
+
+  const applyVoucherCode = async (): Promise<void> => {
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/v2/gateway/promos/validate/${voucherCode}`,
+        {
+          method: 'GET',
+          headers: {
+            Accept: 'application/json',
+          },
+          credentials: 'include',
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        setDiscount((subtotal * data.discount) / 100);
+        setVoucherError(null);
+      } else {
+        setVoucherError('Promo Code Invalid');
+      }
+    } catch (err: unknown) {
+      console.error('Error validating voucher code:', err);
+      setVoucherError('Error validating voucher code.');
+    }
+  };
 
   const changeItemQuantity = useCallback(
     async (
@@ -301,6 +331,7 @@ const UserCart = (): JSX.Element => {
           credentials: 'include',
           body: JSON.stringify({
             productId: item.productId,
+            imageId: item.imageId,
             productName: item.productName,
             productSalePrice: item.productSalePrice,
           }),
@@ -351,6 +382,7 @@ const UserCart = (): JSX.Element => {
           credentials: 'include',
           body: JSON.stringify({
             productId: item.productId,
+            imageId: item.imageId,
             productName: item.productName,
             productSalePrice: item.productSalePrice,
           }),
@@ -460,33 +492,31 @@ const UserCart = (): JSX.Element => {
   }
 
   return (
-    <div className="user-cart-container">
+    <div>
       <NavBar />
+      <h2 className="cart-header-title">Your Cart</h2>
 
-      <h1 className="cart-title">User Cart</h1>
+      <div className="UserCart-container">
+        {/* Notification Message */}
+        {notificationMessage && (
+          <div className="notification-message">
+            {notificationMessage}
+            <button
+              className="close-notification"
+              onClick={() => setNotificationMessage(null)}
+              aria-label="Close notification"
+            >
+              &times;
+            </button>
+          </div>
+        )}
 
-      {/* Notification Message */}
-      {notificationMessage && (
-        <div className="notification-message">
-          {notificationMessage}
-          <button
-            className="close-notification"
-            onClick={() => setNotificationMessage(null)}
-            aria-label="Close notification"
-          >
-            &times;
-          </button>
-        </div>
-      )}
-
-      {/* Main Content Container */}
-      <div className="content-container">
+        {/* Main Flex Container for Cart and Checkout */}
         <div className="UserCart-checkout-flex">
-          {/* Main Cart Section */}
+          {/* Cart Section */}
           <div className="UserCart">
             {/* Cart Header with Badge */}
             <div className="cart-header">
-              <h2 className="cart-header-title">Your Cart</h2>
               <div className="cart-badge-container">
                 <FaShoppingCart aria-label="Shopping Cart" />
                 {cartItemCount > 0 && (
@@ -512,9 +542,9 @@ const UserCart = (): JSX.Element => {
                     deleteItem={deleteItem}
                     errorMessage={errorMessages[index]}
                     addToWishlist={addToWishlist}
-                    addToCart={() => {}} // Not needed in cart items
+                    addToCart={() => {}}
                     isInWishlist={false}
-                    showNotification={setNotificationMessage} // Pass the notification handler
+                    showNotification={setNotificationMessage}
                   />
                 ))
               ) : (
@@ -523,35 +553,63 @@ const UserCart = (): JSX.Element => {
             </div>
 
             {/* Cart Control Buttons */}
-            <div className="cart-control-buttons">
-              <button className="btn go-back-btn" onClick={() => navigate(-1)}>
-                Go Back
+            <div className="UserCart-buttons">
+              <button
+                className="continue-shopping-btn"
+                onClick={() => navigate('/products')}
+              >
+                Continue Shopping
               </button>
-              <button className="btn clear-cart-btn" onClick={clearCart}>
+              <button className="clear-cart-btn" onClick={clearCart}>
                 Clear Cart
               </button>
             </div>
-            <hr />
+          </div>
 
-            {/* Cart Summary */}
+          {/* Checkout Section */}
+          <div className="Checkout-section">
+            {/* Voucher Code Section */}
+            <div className="voucher-code-section">
+              <input
+                type="text"
+                placeholder="Enter voucher code"
+                value={voucherCode}
+                onChange={e => {
+                  setVoucherCode(e.target.value);
+                  setVoucherError(null);
+                }}
+                className="voucher-input"
+              />
+              <button
+                onClick={applyVoucherCode}
+                className="apply-voucher-button"
+              >
+                Apply
+              </button>
+              {voucherError && (
+                <div className="voucher-error">{voucherError}</div>
+              )}
+            </div>
+
             <div className="CartSummary">
               <h3>Cart Summary</h3>
               <p className="summary-item">Subtotal: ${subtotal.toFixed(2)}</p>
               <p className="summary-item">TVQ (9.975%): ${tvq.toFixed(2)}</p>
               <p className="summary-item">TVC (5%): ${tvc.toFixed(2)}</p>
+              <p className="summary-item">Discount: ${discount.toFixed(2)}</p>
               <p className="total-price summary-item">
                 Total: ${total.toFixed(2)}
               </p>
             </div>
 
-            {/* Checkout Button */}
             <button
               className="checkout-btn"
               onClick={handleCheckoutConfirmation}
-              disabled={cartItems.length === 0} // Disable if cart is empty
+              disabled={cartItems.length === 0}
             >
               Checkout
             </button>
+
             {/* Checkout Confirmation Modal */}
             {isCheckoutModalOpen && (
               <div className="checkout-modal">
@@ -567,7 +625,7 @@ const UserCart = (): JSX.Element => {
               <div className="checkout-message">{checkoutMessage}</div>
             )}
 
-            {/* Invoice Section - Display a single invoice with a list of items */}
+            {/* Invoice Section */}
             {invoices.length > 0 && (
               <div className="invoices-section">
                 <h2>Invoice</h2>
@@ -599,32 +657,30 @@ const UserCart = (): JSX.Element => {
                 </div>
               </div>
             )}
+          </div>
+        </div>
 
-            {/* Wishlist Section */}
-            <div className="wishlist-section">
-              <h2 className="wishlist-title">Your Wishlist</h2>
-              <div className="wishlist-items-container">
-                {wishlistItems.length > 0 ? (
-                  wishlistItems.map(item => (
-                    <CartItem
-                      key={item.productId}
-                      item={item}
-                      index={-1}
-                      changeItemQuantity={() => {}}
-                      deleteItem={() => {}}
-                      addToWishlist={() => {}}
-                      addToCart={addToCartFunction} // Use the updated addToCart function
-                      isInWishlist={true}
-                      showNotification={setNotificationMessage} // Pass the notification handler
-                    />
-                  ))
-                ) : (
-                  <p className="empty-wishlist-message">
-                    No products in the wishlist.
-                  </p>
-                )}
-              </div>
-            </div>
+        {/* Wishlist Section */}
+        <div className="wishlist-section">
+          <h2>Your Wishlist</h2>
+          <div className="Wishlist-items">
+            {wishlistItems.length > 0 ? (
+              wishlistItems.map(item => (
+                <CartItem
+                  key={item.productId}
+                  item={item}
+                  index={-1}
+                  changeItemQuantity={() => {}}
+                  deleteItem={() => {}}
+                  addToWishlist={() => {}}
+                  addToCart={addToCartFunction} // Use the updated addToCart function
+                  isInWishlist={true}
+                  showNotification={setNotificationMessage} // Pass the notification handler
+                />
+              ))
+            ) : (
+              <p>No products in the wishlist.</p>
+            )}
           </div>
         </div>
       </div>

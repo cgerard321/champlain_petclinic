@@ -1,9 +1,6 @@
 package com.petclinic.billing.presentationlayer;
 
-import com.petclinic.billing.datalayer.Bill;
-import com.petclinic.billing.datalayer.BillRepository;
-import com.petclinic.billing.datalayer.BillResponseDTO;
-import com.petclinic.billing.datalayer.BillStatus;
+import com.petclinic.billing.datalayer.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
@@ -524,6 +521,35 @@ class BillControllerIntegrationTest {
                 .jsonPath("$.timeRemaining").isEqualTo(0);
     }
 
+    @Test
+    void getBillsByMonth() {
+        repo.deleteAll().block();
+        for (int i = 1; i <= 5; i++) {
+            repo.save(Bill.builder()
+                    .billId("BillUUID" + i)
+                    .customerId("Cust" + i)
+                    .vetId("1")
+                    .visitType("Routine Check")
+                    .date(LocalDate.of(2022, 9, i))
+                    .amount(100.0)
+                    .billStatus(BillStatus.PAID)
+                    .dueDate(LocalDate.of(2022, 9, i).plusDays(30))
+                    .build()).block();
+        }
+
+        client.get()
+                .uri(uriBuilder -> uriBuilder.path("/bills/month")
+                        .queryParam("year", 2022)
+                        .queryParam("month", 9)
+                        .build())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBodyList(BillResponseDTO.class)
+                .hasSize(5);
+    }
+
     private Bill buildBillWithPastDueDate() {
 
         LocalDate date = LocalDate.of(2024, 1, 1);
@@ -565,5 +591,118 @@ class BillControllerIntegrationTest {
             return 0L;
         }
         return Duration.between(LocalDate.now().atStartOfDay(), billEntity.getDueDate().atStartOfDay()).toDays();
+    }
+
+    @Test
+    void payBill_SuccessfulPayment() {
+
+        Bill billEntity = buildUnpaidBillForPayment();
+        PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("1234567812345678", "123", "12/23");
+
+        // Setup: Save an unpaid bill
+        Publisher<Bill> setup = repo.deleteAll().thenMany(repo.save(billEntity));
+
+        StepVerifier
+                .create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        // Perform payment request
+        client.post()
+                .uri("/bills/customer/" + billEntity.getCustomerId() + "/bills/" + billEntity.getBillId() + "/pay")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(just(paymentRequestDTO), PaymentRequestDTO.class)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(String.class)
+                .consumeWith(response -> {
+                    String responseBody = response.getResponseBody();
+                    Assertions.assertNotNull(responseBody);
+                    Assertions.assertTrue(responseBody.contains("Payment successful!"));
+                });
+
+        // Verify the bill status is updated to PAID
+        client.get()
+                .uri("/bills/" + billEntity.getBillId())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.billStatus").isEqualTo(BillStatus.PAID.toString());
+    }
+
+    @Test
+    void payBill_InvalidPaymentDetails() {
+
+        Bill billEntity = buildUnpaidBillForPayment();
+        PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("1234", "12", "1223"); // Invalid card number and CVV
+
+        // Setup: Save an unpaid bill
+        Publisher<Bill> setup = repo.deleteAll().thenMany(repo.save(billEntity));
+
+        StepVerifier
+                .create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        // Perform payment request with invalid payment details
+        client.post()
+                .uri("/bills/customer/" + billEntity.getCustomerId() + "/bills/" + billEntity.getBillId() + "/pay")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(just(paymentRequestDTO), PaymentRequestDTO.class)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody(String.class)
+                .consumeWith(response -> {
+                    String responseBody = response.getResponseBody();
+                    Assertions.assertNotNull(responseBody);
+                    Assertions.assertTrue(responseBody.contains("Invalid payment details"));
+                });
+
+        // Verify the bill status is still UNPAID
+        client.get()
+                .uri("/bills/" + billEntity.getBillId())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.billStatus").isEqualTo(BillStatus.UNPAID.toString());
+    }
+
+    @Test
+    void payBill_BillNotFound() {
+        PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("1234567812345678", "123", "12/23");
+
+        // Attempt to pay a non-existing bill
+        client.post()
+                .uri("/bills/customer/customerId/bills/nonExistingBillId/pay")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(just(paymentRequestDTO), PaymentRequestDTO.class)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody(String.class)
+                .consumeWith(response -> {
+                    String responseBody = response.getResponseBody();
+                    Assertions.assertNotNull(responseBody);
+                    Assertions.assertTrue(responseBody.contains("Bill not found"));
+                });
+    }
+
+    // Helper methods to build a Bill entity for testing payment
+    private Bill buildUnpaidBillForPayment() {
+        LocalDate date = LocalDate.of(2024, Month.JANUARY, 1);
+        LocalDate dueDate = LocalDate.of(2024, Month.JANUARY, 30);
+
+        return Bill.builder()
+                .id(UUID.randomUUID().toString())
+                .billId(UUID.randomUUID().toString())
+                .customerId("1")
+                .vetId("1")
+                .visitType("Routine Check")
+                .date(date)
+                .amount(150.0)
+                .billStatus(BillStatus.UNPAID)
+                .dueDate(dueDate)
+                .build();
     }
 }

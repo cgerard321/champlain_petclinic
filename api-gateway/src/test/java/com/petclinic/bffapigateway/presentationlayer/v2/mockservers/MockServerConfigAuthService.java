@@ -150,6 +150,22 @@ public class MockServerConfigAuthService {
                 );
     }
 
+    public void registerUpdateUserRolesEndpoint() {
+        mockServerClient_AuthService
+                .when(
+                        request()
+                                .withMethod("PATCH")
+                                .withPath("/users/e6248486-d3df-47a5-b2e0-84d31c47533a")
+                                .withCookie("Bearer", jwtTokenForValidAdmin)
+                                .withBody(json("{\"roles\":[\"OWNER\", \"ADMIN\"]}"))
+                )
+                .respond(
+                        response()
+                                .withStatusCode(200)
+                                .withBody(json("{\"userId\":\"e6248486-d3df-47a5-b2e0-84d31c47533a\",\"username\":\"Admin\",\"email\":\"admin@admin.com\",\"roles\":[{\"id\":1,\"name\":\"ADMIN\"}, {\"id\":2,\"name\":\"OWNER\"}],\"verified\":true,\"disabled\":false}"))
+                );
+    }
+
     public void stopMockServer() {
         if(clientAndServer != null)
             this.clientAndServer.stop();

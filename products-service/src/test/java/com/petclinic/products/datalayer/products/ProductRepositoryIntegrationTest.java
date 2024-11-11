@@ -202,6 +202,78 @@ class ProductRepositoryIntegrationTest {
                 })
                 .verifyComplete();
     }
+    @Test
+    public void testUpdateDeliveryType() {
+        String id = UUID.randomUUID().toString();
+        Product product = Product.builder()
+                .productId(id)
+                .productName("Test Product")
+                .deliveryType(DeliveryType.NO_DELIVERY_OPTION)
+                .build();
+
+        productRepository.save(product).block();
+
+        product.setDeliveryType(DeliveryType.PICKUP);
+        productRepository.save(product).block();
+
+
+        Product foundProduct = productRepository.findProductByProductId(id).block();
+        assertNotNull(foundProduct);
+        assertEquals(DeliveryType.PICKUP, foundProduct.getDeliveryType());
+    }
+
+
+    @Test
+    void whenDeliveryTypeNotFound_thenEmptyMono() {
+        // Arrange
+        String productId = UUID.randomUUID().toString();
+        Product product = Product.builder()
+                .productId(productId)
+                .productName("Test Product")
+                .deliveryType(null)
+                .build();
+
+        productRepository.save(product).block();
+
+        StepVerifier
+                .create(productRepository.findProductByProductId(productId))
+                .consumeNextWith(foundProduct -> {
+                    assertNotNull(foundProduct);
+                    assertNull(foundProduct.getDeliveryType());
+                })
+                .verifyComplete();
+    }
+
+
+    @Test
+    public void whenDeliveryTypeUpdated_thenReturnUpdatedDeliveryType() {
+        String id = UUID.randomUUID().toString();
+        Product product = Product.builder()
+                .productId(id)
+                .productName("Changing Product")
+                .productDescription("Sample Description")
+                .productSalePrice(20.00)
+                .averageRating(5.00)
+                .deliveryType(DeliveryType.DELIVERY)
+                .build();
+
+
+        Product savedProduct = productRepository.save(product).block();
+        assertNotNull(savedProduct);
+        assertEquals(DeliveryType.DELIVERY, savedProduct.getDeliveryType());
+
+
+        savedProduct.setDeliveryType(DeliveryType.DELIVERY_AND_PICKUP);
+        Product updatedProduct = productRepository.save(savedProduct).block();
+        assertNotNull(updatedProduct);
+        assertEquals(DeliveryType.DELIVERY_AND_PICKUP, updatedProduct.getDeliveryType());
+
+
+        Product foundProduct = productRepository.findProductByProductId(id).block();
+        assertNotNull(foundProduct);
+        assertEquals(DeliveryType.DELIVERY_AND_PICKUP, foundProduct.getDeliveryType());
+    }
+
 
     @Test
     void whenProductDeleted_thenMonoVoid(){

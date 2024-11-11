@@ -11,6 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -32,7 +33,8 @@ public class ProductController {
             @RequestParam(required = false) Double maxPrice,
             @RequestParam(required = false) Double minRating,
             @RequestParam(required = false) Double maxRating,
-            @RequestParam(required = false) String sort) {
+            @RequestParam(required = false) String sort,
+            @RequestParam(required = false) String deliveryType) {
         // Validate negative prices
         if ((minPrice != null && minPrice < 0) || (maxPrice != null && maxPrice < 0) ||
                 (minRating != null && minRating < 0) || (maxRating != null && maxRating < 0)) {
@@ -47,7 +49,7 @@ public class ProductController {
             return Flux.error(new IllegalArgumentException("minRating cannot be greater than maxRating"));
         }
 
-        return productsServiceClient.getAllProducts(minPrice, maxPrice, minRating, maxRating, sort);
+        return productsServiceClient.getAllProducts(minPrice, maxPrice, minRating, maxRating, sort, deliveryType);
     }
 
 
@@ -81,6 +83,26 @@ public class ProductController {
         return productsServiceClient.updateProduct(productId, productRequestDTO)
                 .map(product -> ResponseEntity.status(HttpStatus.OK).body(product))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
+    @PatchMapping(value = "{productId}/status", consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<ProductResponseDTO>> patchListingStatus(@PathVariable String productId,
+                                                          @RequestBody ProductRequestDTO productRequestDTO) {
+        return productsServiceClient.patchListingStatus(productId, productRequestDTO)
+                .map(product -> ResponseEntity.status(HttpStatus.OK).body(product))
+                .onErrorResume(e -> {
+                    if (e instanceof WebClientResponseException.UnprocessableEntity) {
+                        return Mono.just(ResponseEntity.unprocessableEntity().build());
+                    }
+                    else if (e instanceof WebClientResponseException.NotFound) {
+                        return Mono.just(ResponseEntity.notFound().build());
+                    }
+                    else {
+                        return Mono.error(e);
+                    }
+                });
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})

@@ -211,6 +211,25 @@ public class BillServicePersistenceTests {
     }
 
 
+    @Test
+    void shouldFindAllBillsByDateBetween(){
+
+        Bill bill = buildBill();
+
+        Publisher<Bill> setup = repo.deleteAll().thenMany(repo.save(buildBill()));
+        Publisher<Bill> find = repo.findByDateBetween(bill.getDate().minusDays(1), bill.getDate().plusDays(1));
+
+        StepVerifier
+                .create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        StepVerifier
+                .create(find)
+                .expectNextCount(1)
+                .verifyComplete();
+
+    }
 
 
 }

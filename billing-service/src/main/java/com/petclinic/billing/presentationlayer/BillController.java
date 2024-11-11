@@ -1,9 +1,9 @@
 package com.petclinic.billing.presentationlayer;
 
 import com.petclinic.billing.businesslayer.BillService;
-import com.petclinic.billing.datalayer.BillRequestDTO;
-import com.petclinic.billing.datalayer.BillResponseDTO;
-import com.petclinic.billing.datalayer.BillStatus;
+import com.petclinic.billing.datalayer.*;
+import com.petclinic.billing.exceptions.InvalidPaymentException;
+import com.petclinic.billing.exceptions.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
@@ -176,6 +176,29 @@ public class BillController {
     @ResponseStatus (HttpStatus.NO_CONTENT)
     public Flux<Void> deleteBillsByCustomerId (@PathVariable("customerId") String customerId){
         return billService.deleteBillsByCustomerId(customerId);
+    }
+
+    @GetMapping("/bills/month")
+    public Flux<BillResponseDTO> getBillsByMonth(
+            @RequestParam int year,
+            @RequestParam int month) {
+        if (year < 0 || month < 1 || month > 12) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid year or month");
+        }
+
+        return billService.getBillsByMonth(year, month);
+    }
+
+
+    @PostMapping("/bills/customer/{customerId}/bills/{billId}/pay")
+    public Mono<ResponseEntity<String>> payBill(
+            @PathVariable("customerId") String customerId,
+            @PathVariable("billId") String billId,
+            @RequestBody PaymentRequestDTO paymentRequestDTO) {
+        return billService.processPayment(customerId, billId, paymentRequestDTO)
+                .map(bill -> ResponseEntity.ok("Payment successful! Bill status updated to PAID."))
+                .onErrorResume(InvalidPaymentException.class, e -> Mono.just(ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid payment details: " + e.getMessage())))
+                .onErrorResume(NotFoundException.class, e -> Mono.just(ResponseEntity.status(HttpStatus.NOT_FOUND).body("Bill not found.")));
     }
 
 }

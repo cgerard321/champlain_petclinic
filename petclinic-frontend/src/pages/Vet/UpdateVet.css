@@ -1,0 +1,102 @@
+
+.modal-container {
+    background-color: #f9f9f9 !important;
+    padding: 30px !important;
+    border-radius: 10px !important;
+    max-width: 600px !important;
+    margin: 0 auto !important;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1) !important;
+}
+
+.modal-title {
+    font-size: 1.8rem !important;
+    text-align: center !important;
+    margin-bottom: 25px !important;
+    color: #333 !important;
+}
+
+.custom-form-control {
+    width: 100% !important;
+    background-color: #fff !important;
+    border: 1px solid #ccc !important;
+    border-radius: 8px !important;
+    padding: 12px 15px !important;
+    margin-bottom: 20px !important;
+    font-size: 1.2rem !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+    transition: border-color 0.3s ease !important;
+}
+
+.custom-form-control:focus {
+    border-color: #4caf50 !important;
+    outline: none !important;
+}
+
+.custom-btn-primary, .custom-btn-secondary {
+    width: 48% !important;
+    font-size: 16px !important;
+    padding: 12px 20px !important;
+    border-radius: 8px !important;
+    cursor: pointer !important;
+    margin-top: 10px !important;
+}
+
+.custom-btn-primary {
+    background-color: #4caf50 !important;
+    border: none !important;
+    color: white !important;
+    font-size: 18px !important;
+    padding: 14px 24px !important;
+}
+
+.custom-btn-primary:hover {
+    background-color: #45a049 !important;
+}
+
+.custom-btn-secondary {
+    background-color: #666 !important;
+    border: none !important;
+    color: white !important;
+}
+
+.custom-btn-secondary:hover {
+    background-color: #555 !important;
+}
+
+.custom-checkbox-inline-group {
+    display: flex !important;
+    align-items: center !important;
+    margin-bottom: 10px !important;
+    width: 100%;
+}
+
+.custom-checkbox-label {
+    flex: 1;
+    font-size: 1.2rem !important;
+    color: #333 !important;
+    font-weight: bold;
+}
+
+.custom-form-check-input {
+    margin-left: 10px !important;
+    transform: scale(1.2);
+}
+
+.custom-btn-primary-full {
+    width: 100% !important;
+    font-size: 18px !important;
+    padding: 14px 24px !important;
+    margin-top: 15px !important;
+}
+
+.form-group {
+    margin-bottom: 20px !important;
+}
+
+.custom-checkbox-aligned {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 15px;
+}

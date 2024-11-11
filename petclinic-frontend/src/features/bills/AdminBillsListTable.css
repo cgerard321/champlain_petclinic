@@ -1,8 +1,103 @@
 .admin-bills-list-table-container {
-  max-width: 1200px;
+  max-width: 85%;
   margin: 0 auto;
   padding: 20px;
   font-family: 'Arial', sans-serif;
+  overflow: visible; /* Allow the table to expand based on content */
+}
+
+.filter-search-container {
+  display: flex;
+  flex-direction: column;
+  max-width: 1200px;
+  margin: 20px auto;
+  padding: 10px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.filter-section, .search-section {
+  margin-bottom: 20px;
+}
+
+.filter-section input, 
+.filter-section select, 
+.search-section input, 
+.create-bill-form input, 
+.create-bill-form select {
+  width: 100%;
+  padding: 12px 15px;
+  font-size: 16px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.filter-section button, 
+.search-section button, 
+.create-bill-form button {
+  padding: 10px 20px;
+  font-size: 16px;
+  border: none;
+  border-radius: 4px;
+  background-color: #009879;
+  color: white;
+  cursor: pointer;
+  width: 150px;
+  margin-top: 10px;
+}
+
+.filter-section button:hover, 
+.search-section button:hover, 
+.create-bill-form button:hover {
+  background-color: #007f6a;
+}
+
+/* Add spacing between filter and clear buttons */
+.filter-section button + button, 
+.create-bill-form button + button {
+  margin-left: 10px;
+}
+
+/* New section for filter buttons to align them next to each other */
+.filter-buttons {
+  display: flex;
+  justify-content: flex-start;
+  gap: 10px; /* Adds spacing between the filter and clear buttons */
+  margin-top: 10px;
+}
+
+.create-bill-form {
+  display: flex;
+  flex-direction: column;
+  max-width: 1200px;
+  margin: 20px auto;
+  padding: 10px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.create-bill-button-container {
+  max-width: 1200px;
+  margin: 0 auto 20px;
+  padding: 0 20px;
+}
+
+.create-bill-button {
+  padding: 10px 20px;
+  font-size: 16px;
+  border: none;
+  border-radius: 5px;
+  background-color: #009879;
+  color: white;
+  cursor: pointer;
+  margin-top: 20px;
+}
+
+.create-bill-button:hover {
+  background-color: #007f6a;
 }
 
 .table {
@@ -34,10 +129,6 @@
 
 .table tbody tr:last-of-type {
   border-bottom: 2px solid #009879;
-}
-
-.table tbody tr:hover {
-  background-color: #f1f1f1;
 }
 
 .btn {
@@ -103,10 +194,16 @@
 }
 
 .pagination-button {
-  visibility: visible; /* Default visibility */
-  margin: 0 10px; /* Adds horizontal space between buttons and text */
+  visibility: visible;
+  margin: 0 10px;
 }
 
 .pagination-button.hidden {
-  visibility: hidden; /* Makes button invisible but still takes up space */
+  visibility: hidden;
+}
+
+.button-container {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 20px;
 }

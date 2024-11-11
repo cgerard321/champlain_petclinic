@@ -14,6 +14,7 @@ import { getAllPaidBills } from '@/features/bills/api/getAllPaidBills.tsx';
 import { getAllOverdueBills } from '@/features/bills/api/getAllOverdueBills.tsx';
 import { getAllUnpaidBills } from '@/features/bills/api/getAllUnpaidBills.tsx';
 import { getBillByBillId } from '@/features/bills/api/GetBillByBillId.tsx';
+import { getBillsByMonth } from '@/features/bills/api/getBillByMonth.tsx';
 
 export default function AdminBillsListTable(): JSX.Element {
   const navigate = useNavigate();
@@ -25,6 +26,12 @@ export default function AdminBillsListTable(): JSX.Element {
   const [filter, setFilter] = useState<FilterModel>({
     customerId: '',
   });
+  const [filterYear, setFilterYear] = useState<number>(
+    new Date().getFullYear()
+  );
+  const [filterMonth, setFilterMonth] = useState<number>(
+    new Date().getMonth() + 1
+  );
 
   interface FilterModel {
     [key: string]: string;
@@ -33,8 +40,8 @@ export default function AdminBillsListTable(): JSX.Element {
 
   const [selectedFilter, setSelectedFilter] = useState<string>('');
   const [filteredBills, setFilteredBills] = useState<Bill[] | null>(null);
+  const [activeSection, setActiveSection] = useState<string | null>(null);
 
-  const [showCreateForm, setCreateForm] = useState<boolean>(false);
   const [newBill, setNewBill] = useState<BillRequestModel>({
     customerId: '',
     vetId: '',
@@ -118,6 +125,26 @@ export default function AdminBillsListTable(): JSX.Element {
     }
   };
 
+  const handleMonthFilter = async (): Promise<void> => {
+    setError(null);
+    setFilteredBills(null);
+
+    try {
+      const billsByMonth = await getBillsByMonth(filterYear, filterMonth);
+      setFilteredBills(billsByMonth);
+    } catch (err) {
+      console.error('Error fetching bills by month:', err);
+      setError('Error fetching bills by month. Please try again.');
+    }
+  };
+
+  const clearMonthFilter = (): void => {
+    setFilterYear(new Date().getFullYear());
+    setFilterMonth(new Date().getMonth() + 1);
+    setFilteredBills(null);
+    getBillsList(currentPage, 10);
+  };
+
   const getFilteredBills = (): Bill[] => {
     const billsToFilter = filteredBills || billsList;
 
@@ -129,7 +156,7 @@ export default function AdminBillsListTable(): JSX.Element {
       const matchesCustomerId =
         !filter.customerId || bill.customerId.includes(filter.customerId);
 
-      return matchesStatus && matchesCustomerId; // Combine filters
+      return matchesStatus && matchesCustomerId;
     });
   };
 
@@ -146,7 +173,7 @@ export default function AdminBillsListTable(): JSX.Element {
 
     try {
       await addBill(formattedBill);
-      setCreateForm(false);
+      setActiveSection(null);
       getBillsList(currentPage, 10);
     } catch (err) {
       console.error('Error creating bill:', err);
@@ -222,50 +249,90 @@ export default function AdminBillsListTable(): JSX.Element {
     }
   };
 
+  const toggleSection = (section: string): void => {
+    setActiveSection(activeSection === section ? null : section);
+  };
+
   return (
     <div>
-      <div>
-        {error && <p style={{ color: 'red' }}>{error}</p>}
-        <input
-          type="text"
-          placeholder="Enter Bill ID"
-          value={searchId}
-          onChange={e => setSearchId(e.target.value)}
-        />
-        <button onClick={handleSearch}>Search</button>
-        {searchedBill && <button onClick={handleGoBack}>Go Back</button>}
+      <div className="button-container">
+        <button onClick={() => toggleSection('search')}>
+          {activeSection === 'search' ? 'Close Search' : 'Search'}
+        </button>
+
+        <button onClick={() => toggleSection('filter')}>
+          {activeSection === 'filter' ? 'Close Filter' : 'Filter'}
+        </button>
+
+        <button onClick={() => toggleSection('create')}>
+          {activeSection === 'create' ? 'Close Create' : 'Create'}
+        </button>
       </div>
 
-      <div>
-        <label htmlFor="billFilter">Filter Bills by Status: </label>
-        <select
-          id="billFilter"
-          value={selectedFilter}
-          onChange={handleFilterChange}
-        >
-          <option value="">All Bills</option>
-          <option value="unpaid">Unpaid Bills</option>
-          <option value="paid">Paid Bills</option>
-          <option value="overdue">Overdue Bills</option>
-        </select>
-      </div>
+      {activeSection === 'search' && (
+        <div className="create-bill-form">
+          <input
+            type="text"
+            placeholder="Customer ID"
+            value={filter.customerId}
+            onChange={e => setFilter({ ...filter, customerId: e.target.value })}
+          />
 
-      <div>
-        <h1> Search by Customer ID </h1>
-        <input
-          type="text"
-          placeholder="Customer ID"
-          value={filter.customerId}
-          onChange={e => setFilter({ ...filter, customerId: e.target.value })}
-        ></input>
-      </div>
+          <input
+            type="text"
+            placeholder="Enter Bill ID"
+            value={searchId}
+            onChange={e => setSearchId(e.target.value)}
+          />
+          <button onClick={handleSearch}>Search</button>
+          {searchedBill && <button onClick={handleGoBack}>Go Back</button>}
+        </div>
+      )}
 
-      <button onClick={() => setCreateForm(!showCreateForm)}>
-        {showCreateForm ? 'Cancel' : 'Create New Bill'}
-      </button>
+      {activeSection === 'filter' && (
+        <div className="create-bill-form">
+          <label htmlFor="billFilter">Status: </label>
+          <select
+            id="billFilter"
+            value={selectedFilter}
+            onChange={handleFilterChange}
+          >
+            <option value="">All Bills</option>
+            <option value="unpaid">Unpaid</option>
+            <option value="paid">Paid</option>
+            <option value="overdue">Overdue</option>
+          </select>
 
-      {showCreateForm && (
-        <div>
+          <label htmlFor="yearFilter">Year: </label>
+          <input
+            type="number"
+            id="yearFilter"
+            value={filterYear}
+            onChange={e => setFilterYear(parseInt(e.target.value))}
+          />
+
+          <label htmlFor="monthFilter">Month: </label>
+          <select
+            id="monthFilter"
+            value={filterMonth}
+            onChange={e => setFilterMonth(parseInt(e.target.value))}
+          >
+            {Array.from({ length: 12 }, (_, i) => (
+              <option key={i + 1} value={i + 1}>
+                {new Date(0, i).toLocaleString('default', { month: 'long' })}
+              </option>
+            ))}
+          </select>
+
+          <div className="filter-buttons">
+            <button onClick={handleMonthFilter}>Filter</button>
+            <button onClick={clearMonthFilter}>Clear</button>
+          </div>
+        </div>
+      )}
+
+      {activeSection === 'create' && (
+        <div className="create-bill-form">
           <h3>Create New Bill</h3>
           {error && <p style={{ color: 'red' }}>{error}</p>}
           <form

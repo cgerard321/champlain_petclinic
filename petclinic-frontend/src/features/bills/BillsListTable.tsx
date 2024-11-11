@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Bill } from '@/features/bills/models/Bill.ts';
 import { useUser } from '@/context/UserContext';
+import { payBill } from '@/features/bills/api/payBill.tsx';
 import './BillsListTable.css';
 
 export default function BillsListTable(): JSX.Element {
@@ -8,66 +9,66 @@ export default function BillsListTable(): JSX.Element {
   const [bills, setBills] = useState<Bill[]>([]);
   const [filteredBills, setFilteredBills] = useState<Bill[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [selectedStatus, setSelectedStatus] = useState<string>('all'); // Default filter status
+  const [selectedStatus, setSelectedStatus] = useState<string>('all');
 
-  useEffect(() => {
+  const fetchBills = useCallback(async (): Promise<void> => {
     if (!user.userId) return;
 
-    const fetchBills = async (): Promise<void> => {
-      try {
-        const response = await fetch(
-          `http://localhost:8080/api/v2/gateway/customers/${user.userId}/bills`,
-          {
-            headers: {
-              Accept: 'text/event-stream',
-            },
-            credentials: 'include',
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error(`Error: ${response.status} ${response.statusText}`);
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/v2/gateway/customers/${user.userId}/bills`,
+        {
+          headers: {
+            Accept: 'text/event-stream',
+          },
+          credentials: 'include',
         }
+      );
 
-        const reader = response.body?.getReader();
-        const decoder = new TextDecoder('utf-8');
-
-        let done = false;
-        const billsArray: Bill[] = [];
-
-        while (!done) {
-          const { value, done: streamDone } = (await reader?.read()) || {};
-          done = streamDone || true;
-
-          if (value) {
-            const chunk = decoder.decode(value, { stream: true });
-            const formattedChunks = chunk.trim().split(/\n\n/);
-
-            formattedChunks.forEach(formattedChunk => {
-              const cleanChunk = formattedChunk.trim().replace(/^data:\s*/, '');
-
-              if (cleanChunk) {
-                try {
-                  const newBill: Bill = JSON.parse(cleanChunk);
-                  billsArray.push(newBill);
-                  setBills([...billsArray]);
-                } catch (e) {
-                  console.error('Error parsing chunk:', e);
-                }
-              }
-            });
-          }
-        }
-      } catch (err) {
-        console.error('Error fetching bills:', err);
-        setError('Failed to fetch bills');
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status} ${response.statusText}`);
       }
-    };
 
-    fetchBills();
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder('utf-8');
+
+      let done = false;
+      const billsArray: Bill[] = [];
+
+      while (!done) {
+        const { value, done: streamDone } = (await reader?.read()) || {};
+        done = streamDone ?? true;
+
+        if (value) {
+          const chunk = decoder.decode(value, { stream: true });
+          const formattedChunks = chunk.trim().split(/\n\n/);
+
+          formattedChunks.forEach(formattedChunk => {
+            const cleanChunk = formattedChunk.trim().replace(/^data:\s*/, '');
+
+            if (cleanChunk) {
+              try {
+                const newBill: Bill = JSON.parse(cleanChunk);
+                billsArray.push(newBill);
+              } catch (e) {
+                console.error('Error parsing chunk:', e);
+              }
+            }
+          });
+        }
+      }
+
+      setBills(billsArray);
+    } catch (err) {
+      console.error('Error fetching bills:', err);
+      setError('Failed to fetch bills');
+    }
   }, [user.userId]);
 
-  // Filtering bills by selected status
+  useEffect(() => {
+    fetchBills();
+  }, [fetchBills]);
+
   useEffect(() => {
     if (selectedStatus === 'all') {
       setFilteredBills(bills);
@@ -114,10 +115,98 @@ export default function BillsListTable(): JSX.Element {
     }
   };
 
+  const handlePayBillClick = async (billId: string): Promise<void> => {
+    let cardNumber: string = '';
+    let cvv: string = '';
+    let expirationDate: string = '';
+    let isExpired = true;
+
+    while (isExpired) {
+      while (
+        !cardNumber ||
+        cardNumber.length !== 16 ||
+        isNaN(Number(cardNumber))
+      ) {
+        const inputCardNumber = window.prompt(
+          'Enter your card number (16 digits):'
+        );
+        if (!inputCardNumber) {
+          alert('Payment cancelled.');
+          return;
+        }
+        if (inputCardNumber.length !== 16 || isNaN(Number(inputCardNumber))) {
+          alert(
+            'Invalid card number. Please enter a valid 16-digit card number.'
+          );
+        } else {
+          cardNumber = inputCardNumber;
+        }
+      }
+
+      while (!cvv || cvv.length !== 3 || isNaN(Number(cvv))) {
+        const inputCvv = window.prompt('Enter your CVV (3 digits):');
+        if (!inputCvv) {
+          alert('Payment cancelled.');
+          return;
+        }
+        if (inputCvv.length !== 3 || isNaN(Number(inputCvv))) {
+          alert('Invalid CVV. Please enter a valid 3-digit CVV.');
+        } else {
+          cvv = inputCvv;
+        }
+      }
+
+      const expirationDatePattern = /^(0[1-9]|1[0-2])\/\d{2}$/;
+      while (!expirationDate || !expirationDatePattern.test(expirationDate)) {
+        const inputExpirationDate = window.prompt(
+          'Enter your expiration date (MM/YY):'
+        );
+        if (!inputExpirationDate) {
+          alert('Payment cancelled.');
+          return;
+        }
+        if (!expirationDatePattern.test(inputExpirationDate)) {
+          alert(
+            'Invalid expiration date. Please enter a valid date in MM/YY format.'
+          );
+        } else {
+          expirationDate = inputExpirationDate;
+        }
+      }
+
+      const [expMonth, expYear] = expirationDate.split('/');
+      const currentDate = new Date();
+      const expiryYearFull = `20${expYear}`;
+      const expiryDate = new Date(Number(expiryYearFull), Number(expMonth) - 1);
+
+      if (expiryDate < currentDate) {
+        alert('Your card is expired. Please enter a new card.');
+        cardNumber = '';
+        cvv = '';
+        expirationDate = '';
+      } else {
+        isExpired = false;
+      }
+    }
+
+    try {
+      await payBill(user.userId, billId, {
+        cardNumber,
+        cvv,
+        expirationDate,
+      });
+      alert('Payment successful!');
+      fetchBills();
+    } catch (error) {
+      alert('Payment failed');
+      console.error('Payment error:', error);
+    }
+  };
+
   return (
     <div>
       {/* Dropdown to filter bills by status */}
-      <div>
+      <div className="filterContainer">
         <label htmlFor="statusFilter">Filter by Status:</label>
         <select
           id="statusFilter"
@@ -150,6 +239,7 @@ export default function BillsListTable(): JSX.Element {
                 <th>Due Date</th>
                 <th>Time Remaining</th>
                 <th>Download PDF</th>
+                <th>Pay Bill</th>
               </tr>
             </thead>
             <tbody>
@@ -169,6 +259,8 @@ export default function BillsListTable(): JSX.Element {
                   <td>
                     {bill.billStatus === 'OVERDUE' ? (
                       <span style={{ color: 'red' }}>Overdue</span>
+                    ) : bill.billStatus === 'PAID' ? (
+                      <span style={{ color: 'green' }}>{bill.billStatus}</span>
                     ) : (
                       bill.billStatus
                     )}
@@ -176,7 +268,7 @@ export default function BillsListTable(): JSX.Element {
                   <td>{bill.dueDate}</td>
                   <td>
                     {bill.billStatus === 'PAID' ? (
-                      <span>This bill is paid</span>
+                      <span style={{ color: 'green' }}>This bill is paid</span>
                     ) : bill.timeRemaining === 0 ? (
                       <span style={{ color: 'red' }}>
                         0 days remaining to pay bill
@@ -193,6 +285,13 @@ export default function BillsListTable(): JSX.Element {
                     >
                       Download PDF
                     </button>
+                  </td>
+                  <td>
+                    {bill.billStatus !== 'PAID' && (
+                      <button onClick={() => handlePayBillClick(bill.billId)}>
+                        Pay Bill
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}

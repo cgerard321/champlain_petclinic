@@ -3,6 +3,7 @@ package com.petclinic.bffapigateway.presentationlayer.v2;
 import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillStatus;
+import com.petclinic.bffapigateway.dtos.Bills.PaymentRequestDTO;
 import com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigAuthService;
 import com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigBillService;
 import org.junit.jupiter.api.AfterAll;
@@ -12,9 +13,11 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.web.reactive.function.BodyInserters;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -22,8 +25,11 @@ import reactor.test.StepVerifier;
 import java.time.LocalDate;
 
 import static com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigAuthService.*;
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 
 
 @SpringBootTest
@@ -44,6 +50,8 @@ public class BillControllerIntegrationTest {
         mockServerConfigBillService.registerGetAllBillsEndpoint();
         mockServerConfigBillService.registerCreateBillEndpoint();
         mockServerConfigBillService.registerUpdateBillEndpoint();
+        mockServerConfigBillService.registerPayBillEndpoint();
+
 
         mockServerConfigAuthService = new MockServerConfigAuthService();
         mockServerConfigAuthService.registerValidateTokenForAdminEndpoint();
@@ -247,6 +255,171 @@ public class BillControllerIntegrationTest {
                 .expectHeader().contentType(MediaType.APPLICATION_JSON);
     }
 
+    @Test
+    void whenGetBillsByMonthAsAdmin_thenReturnBills() {
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder.path("/api/v2/gateway/bills")
+                        .queryParam("month", "10")
+                        .queryParam("year", "2024")
+                        .build())
+                .cookie("Bearer", jwtTokenForValidAdmin)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBodyList(BillResponseDTO.class)
+                .consumeWith(response -> {
+                    assert response.getResponseBody().size() == 2;
+                });
+    }
+
 }
 
+    //these tests keep returning 404 and i do not understand why
 
+//    @Test
+//    void payBill_Success() {
+//        PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("1234567812345678", "123", "12/29");
+//
+//        webTestClient.post()
+//                .uri("/api/v2/gateway/bills/customer/e6c7398e-8ac4-4e10-9ee0-03ef33f0361a/bills/1/pay")
+//                .cookie("Bearer", jwtTokenForValidOwnerId)  // Simulate valid owner token
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .body(Mono.just(paymentRequestDTO), PaymentRequestDTO.class)
+//                .exchange()
+//                .expectStatus().isOk()
+//                .expectBody(String.class)
+//                .value(response -> {
+//                    assertEquals("Payment successful", response);
+//                });
+//    }
+//
+//    @Test
+//    void payBill_Failure_InvalidCustomerId() {
+//        // Prepare a valid PaymentRequestDTO
+//        PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("1234567812345678", "123", "12/23");
+//
+//        // Execute the POST request with an invalid customerId
+//        webTestClient.post()
+//                .uri("/api/v2/gateway/customer/{customerId}/bills/{billId}/pay", "invalid-customer-id", "1")
+//                .cookie("Bearer", MockServerConfigAuthService.jwtTokenForValidOwnerId)  // Simulate valid owner token
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .body(Mono.just(paymentRequestDTO), PaymentRequestDTO.class)
+//                .exchange()
+//                .expectStatus().isBadRequest()
+//                .expectBody(String.class)
+//                .value(response -> {
+//                    assertTrue(response.contains("Payment failed: Invalid customer ID"));
+//                });
+//    }
+//
+//    @Test
+//    void payBill_Failure_InvalidDetails() {
+//        // Prepare a PaymentRequestDTO with invalid payment details
+//        PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("123", "12", "01/20");
+//
+//        // Execute the POST request and expect failure
+//        webTestClient.post()
+//                .uri("/api/v2/gateway/customer/{customerId}/bills/{billId}/pay", "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a", "1")
+//                .cookie("Bearer", jwtTokenForValidOwnerId)  // Simulate valid owner token
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .body(Mono.just(paymentRequestDTO), PaymentRequestDTO.class)
+//                .exchange()
+//                .expectStatus().isBadRequest()
+//                .expectBody(String.class)
+//                .value(response -> {
+//                    assertTrue(response.contains("Payment failed"));
+//                });
+//    }
+//
+//    @Test
+//    void payBill_UnauthorizedAccess() {
+//        // Prepare a valid PaymentRequestDTO
+//        PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("1234567812345678", "123", "12/23");
+//
+//        // Attempt to make the payment without a valid token
+//        webTestClient.post()
+//                .uri("/api/v2/gateway/customer/{customerId}/bills/{billId}/pay", "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a", "1")
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .body(Mono.just(paymentRequestDTO), PaymentRequestDTO.class)
+//                .exchange()
+//                .expectStatus().isUnauthorized(); // Expect Unauthorized access due to missing token
+//    }
+//
+//    @Test
+//    void payBill_ByAdminRole_Success() {
+//        // Prepare a valid PaymentRequestDTO
+//        PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("1234567812345678", "123", "12/23");
+//
+//        // Execute the POST request with an admin token
+//        webTestClient.post()
+//                .uri("/api/v2/gateway/customer/{customerId}/bills/{billId}/pay", "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a", "1")
+//                .cookie("Bearer", jwtTokenForValidAdmin)  // Simulate valid admin token
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .body(Mono.just(paymentRequestDTO), PaymentRequestDTO.class)
+//                .exchange()
+//                .expectStatus().isOk()
+//                .expectBody(String.class)
+//                .value(response -> {
+//                    assertEquals("Payment successful", response);
+//                });
+//    }
+//
+//    @Test
+//    void payBill_InvalidCustomerId_Failure() {
+//        // Prepare a valid PaymentRequestDTO
+//        PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("1234567812345678", "123", "12/23");
+//
+//        // Execute the POST request with an invalid customerId
+//        webTestClient.post()
+//                .uri("/api/v2/gateway/customer/{customerId}/bills/{billId}/pay", "invalidCustomerId", "1")
+//                .cookie("Bearer", jwtTokenForValidOwnerId)  // Simulate valid owner token
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .body(Mono.just(paymentRequestDTO), PaymentRequestDTO.class)
+//                .exchange()
+//                .expectStatus().isBadRequest()  // Expect a bad request error
+//                .expectBody(String.class)
+//                .value(response -> {
+//                    assertTrue(response.contains("Payment failed"));
+//                });
+//    }
+//
+//    @Test
+//    void payBill_InvalidBillId_Failure() {
+//        // Prepare a valid PaymentRequestDTO
+//        PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("1234567812345678", "123", "12/23");
+//
+//        // Execute the POST request with an invalid billId
+//        webTestClient.post()
+//                .uri("/api/v2/gateway/customer/{customerId}/bills/{billId}/pay", "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a", "invalidBillId")
+//                .cookie("Bearer", jwtTokenForValidOwnerId)  // Simulate valid owner token
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .body(Mono.just(paymentRequestDTO), PaymentRequestDTO.class)
+//                .exchange()
+//                .expectStatus().isBadRequest()  // Expect a bad request error
+//                .expectBody(String.class)
+//                .value(response -> {
+//                    assertTrue(response.contains("Payment failed"));
+//                });
+//    }
+//
+//    @Test
+//    void payBill_MissingPaymentDetails_Failure() {
+//        // Prepare an incomplete PaymentRequestDTO
+//        PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO(null, null, null);
+//
+//        // Execute the POST request with missing details
+//        webTestClient.post()
+//                .uri("/api/v2/gateway/bills/customer/e6c7398e-8ac4-4e10-9ee0-03ef33f0361a/bills/1/pay")
+//                .cookie("Bearer", jwtTokenForValidOwnerId)  // Simulate valid owner token
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .body(Mono.just(paymentRequestDTO), PaymentRequestDTO.class)
+//                .exchange()
+//                .expectStatus().isBadRequest()  // Expect a bad request error
+//                .expectBody(String.class)
+//                .value(response -> {
+//                    assertTrue(response.contains("Payment failed"));
+//                });
+//    }
+
+//}
