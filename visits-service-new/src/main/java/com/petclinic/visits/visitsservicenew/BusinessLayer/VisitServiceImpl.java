@@ -502,5 +502,4 @@ public class VisitServiceImpl implements VisitService {
                 .flatMap(entityDtoUtil::toVisitResponseDTO);
     }
 
-
 }
