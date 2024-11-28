@@ -10,6 +10,7 @@ import DeleteVetEducation from '@/pages/Vet/DeleteVetEducation';
 import { Workday } from '@/features/veterinarians/models/Workday.ts';
 import UpdateVet from '@/pages/Vet/UpdateVet.tsx';
 import { fetchVetPhoto } from '@/features/veterinarians/api/fetchPhoto';
+import { fetchVetDetails } from '@/features/veterinarians/api/fetchVetDetails';
 
 interface VetResponseType {
   vetId: string;
@@ -89,20 +90,19 @@ export default function VetDetails(): JSX.Element {
   const [ratings, setRatings] = useState<RatingResponseType[] | null>(null);
   const [selectedVet, setSelectedVet] = useState<VetRequestModel | null>(null);
 
-  const refreshVetDetails = useCallback(async (): Promise<void> => {
+  const getVetDetails = useCallback(async (): Promise<void> => {
     try {
-      const response = await fetch(
-        `http://localhost:8080/api/v2/gateway/vets/${vetId}`
-      );
-      if (!response.ok) {
-        throw new Error(`Error: ${response.statusText}`);
+      if (vetId) {
+        const data = await fetchVetDetails(vetId);
+        setVet(data);
+      } else {
+        setError('No vet ID provided');
       }
-      const data: VetResponseType = await response.json();
-      setVet(data);
     } catch (error) {
       console.error('Failed to fetch vet details:', error);
     }
   }, [vetId]);
+
   const mapVetResponseToRequest = (vet: VetResponseType): VetRequestModel => ({
     vetId: vet.vetId,
     firstName: vet.firstName,
@@ -171,22 +171,6 @@ export default function VetDetails(): JSX.Element {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const fetchVetDetails = async (): Promise<void> => {
-      try {
-        const response = await fetch(
-          `http://localhost:8080/api/v2/gateway/vets/${vetId}`
-        );
-
-        if (!response.ok) {
-          throw new Error(`Error: ${response.statusText}`);
-        }
-        const data: VetResponseType = await response.json();
-        setVet(data);
-      } catch (error) {
-        setError('Failed to fetch vet details');
-      }
-    };
-
     const fetchEducationDetails = async (): Promise<void> => {
       try {
         const response = await fetch(
@@ -230,12 +214,12 @@ export default function VetDetails(): JSX.Element {
       }
     };
 
-    fetchVetDetails().then(() => {
+    getVetDetails().then(() => {
       fetchEducationDetails();
       fetchAlbumPhotos();
       setLoading(false);
     });
-  }, [vetId]);
+  }, [vetId, getVetDetails]);
 
   const handleImageClick = (): void => {
     if (fileInputRef.current) {
@@ -482,7 +466,7 @@ export default function VetDetails(): JSX.Element {
               <UpdateVet
                 vet={selectedVet}
                 onClose={() => setSelectedVet(null)}
-                refreshVetDetails={refreshVetDetails}
+                refreshVetDetails={getVetDetails}
               />
             )}
           </section>
