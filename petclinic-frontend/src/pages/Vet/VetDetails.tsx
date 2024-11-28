@@ -350,24 +350,24 @@ export default function VetDetails(): JSX.Element {
         <div className="work-hours-calendar">
           <table>
             <thead>
-              <tr>
-                <th>Day</th>
-                <th>Hours</th>
-              </tr>
+            <tr>
+              <th>Day</th>
+              <th>Hours</th>
+            </tr>
             </thead>
             <tbody>
-              {daysOfWeek.map(day => (
-                <tr key={day}>
-                  <td>
-                    <strong>{day}</strong>
-                  </td>
-                  <td>
-                    {workHours[day]?.length
-                      ? mergeHours(workHours[day])
-                      : 'No hours available'}
-                  </td>
-                </tr>
-              ))}
+            {daysOfWeek.map(day => (
+              <tr key={day}>
+                <td>
+                  <strong>{day}</strong>
+                </td>
+                <td>
+                  {workHours[day]?.length
+                    ? mergeHours(workHours[day])
+                    : 'No hours available'}
+                </td>
+              </tr>
+            ))}
             </tbody>
           </table>
         </div>
@@ -407,9 +407,9 @@ export default function VetDetails(): JSX.Element {
       setVet(prevVet =>
         prevVet
           ? {
-              ...prevVet,
-              specialties: [...prevVet.specialties, specialtyDTO], // Update specialties locally
-            }
+            ...prevVet,
+            specialties: [...prevVet.specialties, specialtyDTO], // Update specialties locally
+          }
           : null
       );
     } catch (error) {
@@ -428,11 +428,11 @@ export default function VetDetails(): JSX.Element {
       setVet(prevVet =>
         prevVet
           ? {
-              ...prevVet,
-              specialties: prevVet.specialties.filter(
-                specialty => specialty.specialtyId !== specialtyId
-              ), // Remove the deleted specialty from the local state
-            }
+            ...prevVet,
+            specialties: prevVet.specialties.filter(
+              specialty => specialty.specialtyId !== specialtyId
+            ), // Remove the deleted specialty from the local state
+          }
           : null
       );
     } catch (error) {
