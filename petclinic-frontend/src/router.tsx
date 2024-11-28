@@ -63,6 +63,7 @@ import CustomerPromoPage from '@/pages/Promos/CustomerPromoPage.tsx';
 import UserDetailsPage from './pages/Users/UserDetailsPage';
 import UpdateUserPage from './pages/Users/UpdateUserPage';
 import AllRoles from '@/pages/Users/AllRoles.tsx';
+import AddVisitOwner from './features/visits/models/AddVisitOwner';
 
 const router = createBrowserRouter([
   {
@@ -465,23 +466,31 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
+      {
+        path: AppRoutePaths.AddVisitForOwner,
+        element: (
+          <ProtectedRoute>
+            <AddVisitOwner />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.CustomerReviews,
+        element: (
+          <ProtectedRoute>
+            <ReviewsCustomer />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.CustomerAddReview,
+        element: (
+          <ProtectedRoute>
+            <AddReviewsCustomer />
+          </ProtectedRoute>
+        ),
+      },
     ],
-  },
-  {
-    path: AppRoutePaths.CustomerReviews,
-    element: (
-      <ProtectedRoute>
-        <ReviewsCustomer />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: AppRoutePaths.CustomerAddReview,
-    element: (
-      <ProtectedRoute>
-        <AddReviewsCustomer />
-      </ProtectedRoute>
-    ),
   },
   {
     path: AppRoutePaths.Default,
