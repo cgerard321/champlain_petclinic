@@ -6,9 +6,11 @@
     "react-router-dom": "^6.26.2"
   },
   "devDependencies": {
+    "@playwright/test": "^1.48.2",
     "@testing-library/jest-dom": "^6.5.0",
     "@testing-library/react": "^16.0.1",
     "@types/jest": "^29.5.13",
+    "@types/node": "^22.9.0",
     "@types/react": "^18.3.11",
     "@types/react-bootstrap": "^0.32.37",
     "@types/react-router-dom": "^5.3.3",
@@ -17,5 +19,6 @@
     "eslint-plugin-react": "^7.37.1",
     "jest": "^29.7.0",
     "react-bootstrap": "^2.10.4"
-  }
+  },
+  "scripts": {}
 }
