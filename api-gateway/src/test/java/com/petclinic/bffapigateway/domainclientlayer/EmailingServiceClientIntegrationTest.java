@@ -1,11 +1,8 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.petclinic.bffapigateway.domainclientlayer.EmailingServiceClient;
-import com.petclinic.bffapigateway.dtos.Emailing.DirectEmailModelRequestDTO;
-import com.petclinic.bffapigateway.dtos.Emailing.EmailModelResponseDTO;
-import com.petclinic.bffapigateway.dtos.Emailing.NotificationEmailModelRequestDTO;
-import com.petclinic.bffapigateway.dtos.Emailing.RawEmailModelRequestDTO;
+
+import com.petclinic.bffapigateway.dtos.Emailing.*;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterAll;
@@ -18,11 +15,15 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-import reactor.test.StepVerifier;
+
 
 import java.io.IOException;
+
 import java.time.Instant;
+
 import java.time.ZoneOffset;
+import java.util.Date;
+import java.util.List;
 
 public class EmailingServiceClientIntegrationTest {
 
@@ -145,6 +146,27 @@ public class EmailingServiceClientIntegrationTest {
 
         StepVerifier.create(result)
                 .expectNext(HttpStatus.OK)
+                .verifyComplete();
+    }
+    @Test
+    void getAllReceivedEmails() throws Exception {
+        // Create a sample ReceivedEmailResponseDTO object
+        ReceivedEmailResponseDTO receivedEmailResponseDTO = new ReceivedEmailResponseDTO(
+                "xilef992@gmail.com", "Subject", new Date(), "a body"
+        );
+
+        // Enqueue a mock response from the server
+        mockWebServer.enqueue(new MockResponse()
+                .setHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(objectMapper.writeValueAsString(List.of(receivedEmailResponseDTO))) // Wrap in a list for the Flux response
+        );
+
+        // Call the method to test
+        Flux<ReceivedEmailResponseDTO> emailFlux = emailingServiceClient.getAllReceivedEmails();
+
+        // Verify the response using StepVerifier
+        StepVerifier.create(emailFlux)
+                .expectNext(receivedEmailResponseDTO) // Expect the received email response DTO
                 .verifyComplete();
     }
 }
