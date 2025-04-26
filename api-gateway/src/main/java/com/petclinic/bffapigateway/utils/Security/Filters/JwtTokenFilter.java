@@ -7,6 +7,7 @@ import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
 import com.petclinic.bffapigateway.utils.Utility;
 import lombok.Generated;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -41,6 +42,10 @@ public class JwtTokenFilter implements WebFilter {
     private final HashMap<String, String> AUTH_WHITELIST = new HashMap<>();
     // fill up the hashmap with the endpoints that are whitelisted
 
+    @Value("${frontend.url}")
+    private String frontendOrigin;
+
+
     public JwtTokenFilter(AuthServiceClient authValidationService, JwtTokenUtil jwtTokenUtil, Utility utility) {
         this.authValidationService = authValidationService;
         this.jwtTokenUtil = jwtTokenUtil;
@@ -70,10 +75,7 @@ public class JwtTokenFilter implements WebFilter {
 
         String path = exchange.getRequest().getURI().getPath();
 
-        // TODO ADD use environment variables for the allowed origins depending build
-        // profile
-        // exchange.getResponse().getHeaders().add("Access-Control-Allow-Origin",
-        // "http://localhost:3000");
+         exchange.getResponse().getHeaders().add("Access-Control-Allow-Origin", frontendOrigin);
 
         exchange.getResponse().getHeaders().add("Access-Control-Allow-Credentials", "true");
 
