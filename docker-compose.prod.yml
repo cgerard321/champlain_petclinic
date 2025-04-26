@@ -6,7 +6,7 @@ services:
       context: ./petclinic-frontend
       dockerfile: Dockerfile
       args:
-        - BUILD_MODE=development
+        - BUILD_MODE=production
     ports:
       - "3000:3000"
     volumes:
