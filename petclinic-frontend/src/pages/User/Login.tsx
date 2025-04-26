@@ -37,7 +37,7 @@ export default function Login(): JSX.Element {
 
     try {
       const response = await axios.post<UserResponseModel>(
-        'https://petclinic.backend.benmusicgeek.synology.me/api/gateway/users/login',
+        'https://petclinic-backend.benmusicgeek.synology.me/api/gateway/users/login',
         {
           email: formElements.emailInput.value,
           password: formElements.passwordInput.value,
