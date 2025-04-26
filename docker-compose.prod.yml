@@ -252,16 +252,16 @@ services:
       timeout: 5s
       retries: 10
 
-  phpmyadmin:
-    image: phpmyadmin:5.2.0
-    container_name: PhpMyAdmin
-    links:
-      - mysql4
-    restart: unless-stopped
-    ports:
-      - 5013:80
-    environment:
-      - PMA_ARBITRARY=1
+  # phpmyadmin:
+  #   image: phpmyadmin:5.2.0
+  #   container_name: PhpMyAdmin
+  #   links:
+  #     - mysql4
+  #   restart: unless-stopped
+  #   ports:
+  #     - 5013:80
+  #   environment:
+  #     - PMA_ARBITRARY=1
 
   # vet mongo container
   mongo:
@@ -279,19 +279,19 @@ services:
   #        interval: 15s
   #        start_period: 30s
 
-  mongo-express:
-    image: mongo-express
-    restart: unless-stopped
-    environment:
-      - ME_CONFIG_MONGODB_ADMINUSERNAME=root
-      - ME_CONFIG_MONGODB_ADMINPASSWORD=password
-      - ME_CONFIG_MONGODB_SERVER=mongo
-      - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
-    ports:
-      - 9000:8081
-    depends_on:
-      - mongo
-      - vet-service
+  # mongo-express:
+  #   image: mongo-express
+  #   restart: unless-stopped
+  #   environment:
+  #     - ME_CONFIG_MONGODB_ADMINUSERNAME=root
+  #     - ME_CONFIG_MONGODB_ADMINPASSWORD=password
+  #     - ME_CONFIG_MONGODB_SERVER=mongo
+  #     - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
+  #   ports:
+  #     - 9000:8081
+  #   depends_on:
+  #     - mongo
+  #     - vet-service
 
   #Vet Images Postgres container
   postgres:
@@ -332,19 +332,19 @@ services:
   #        interval: 15s
   #        start_period: 30s
 
-  mongo-express1:
-    image: mongo-express
-    restart: unless-stopped
-    environment:
-      - ME_CONFIG_MONGODB_ADMINUSERNAME=root
-      - ME_CONFIG_MONGODB_ADMINPASSWORD=password
-      - ME_CONFIG_MONGODB_SERVER=mongo1
-      - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
-    ports:
-      - 8081:8081
-    depends_on:
-      - mongo1
-      - billing-service
+  # mongo-express1:
+  #   image: mongo-express
+  #   restart: unless-stopped
+  #   environment:
+  #     - ME_CONFIG_MONGODB_ADMINUSERNAME=root
+  #     - ME_CONFIG_MONGODB_ADMINPASSWORD=password
+  #     - ME_CONFIG_MONGODB_SERVER=mongo1
+  #     - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
+  #   ports:
+  #     - 8081:8081
+  #   depends_on:
+  #     - mongo1
+  #     - billing-service
 
   mongo2:
     image: mongo
@@ -361,19 +361,19 @@ services:
       interval: 15s
       start_period: 30s
 
-  mongo-express2:
-    image: mongo-express
-    restart: unless-stopped
-    environment:
-      - ME_CONFIG_MONGODB_ADMINUSERNAME=root
-      - ME_CONFIG_MONGODB_ADMINPASSWORD=password
-      - ME_CONFIG_MONGODB_SERVER=mongo2
-      - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
-    ports:
-      - 9001:8081
-    depends_on:
-      - mongo2
-      - visits-service-new
+  # mongo-express2:
+  #   image: mongo-express
+  #   restart: unless-stopped
+  #   environment:
+  #     - ME_CONFIG_MONGODB_ADMINUSERNAME=root
+  #     - ME_CONFIG_MONGODB_ADMINPASSWORD=password
+  #     - ME_CONFIG_MONGODB_SERVER=mongo2
+  #     - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
+  #   ports:
+  #     - 9001:8081
+  #   depends_on:
+  #     - mongo2
+  #     - visits-service-new
 
   mongo-customers:
     image: mongo
