@@ -8,7 +8,7 @@
     "dev": "vite --port 3000 --host --mode dev",
     "build": "tsc && vite build",
     "build:development": "tsc && vite build --mode dev",
-    "build:production": "tsc && vite build --mode production",
+    "build:production": "tsc && vite build --mode prod",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "npm run lint -- --fix",
     "preview": "vite preview"
