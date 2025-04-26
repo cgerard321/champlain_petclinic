@@ -112,7 +112,8 @@ services:
       - SMTP_USER=champlain.petclinic@gmail.com
       - SMTP_SERVER=smtp.gmail.com
     env_file:
-      - mailer.env
+      # - mailer.env
+      - stack.env
 
   emailing-service:
     image: emailing-service
@@ -132,8 +133,8 @@ services:
     env_file:
       # This is for the environment vairables on the portainer deployment server,
       #if you do not have a stack.env in the root of the project while running locally it will not work
-      # - stack.env
-      - mailer.env
+      - stack.env
+      # - mailer.env
 
   products-service:
     build: products-service
