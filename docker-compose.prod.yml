@@ -13,9 +13,9 @@ services:
       - .petclinic-frontend/src:/app/src
     restart: unless-stopped
     labels:
-      - homepage.group=Media
+      - homepage.group=Development
       - homepage.name=Petclinic Frontend
-      - homepage.icon=https://github.com/homarr-labs/dashboard-icons
+      - homepage.icon=https://github.com/homarr-labs/dashboard-icons/blob/main/png/chrome.png
       - homepage.href=https://petclinic.benmusicgeek.synology.me/
       - homepage.description=Petclinic Microservice Cluster
       - homepage.siteMonitor=https://petclinic.benmusicgeek.synology.me/
