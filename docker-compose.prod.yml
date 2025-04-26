@@ -15,7 +15,7 @@ services:
     labels:
       - homepage.group=Development
       - homepage.name=Petclinic Frontend
-      - homepage.icon=https://github.com/homarr-labs/dashboard-icons/blob/main/png/chrome.png
+      - homepage.icon=https://github.com/homarr-labs/dashboard-icons/blob/main/png/chrome.png?raw=true
       - homepage.href=https://petclinic.benmusicgeek.synology.me/
       - homepage.description=Petclinic Microservice Cluster
       - homepage.siteMonitor=https://petclinic.benmusicgeek.synology.me/
