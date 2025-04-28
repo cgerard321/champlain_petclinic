@@ -172,7 +172,7 @@ public class BFFApiGatewayController {
 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @GetMapping(value = "fake/paid", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<BillResponseDTO> getAllPaidBills() {
+    public Flux<BillResponseDTO> fake() {
         return billServiceClient.getAllPaidBills();
     }
     
