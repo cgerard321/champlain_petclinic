@@ -169,12 +169,6 @@ public class BFFApiGatewayController {
     public Flux<BillResponseDTO> getAllPaidBills() {
         return billServiceClient.getAllPaidBills();
     }
-
-    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
-    @GetMapping(value = "fake/paid", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<BillResponseDTO> fake() {
-        return billServiceClient.getTotalNumberOfBills();
-    }
     
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping(value = "bills/unpaid", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
@@ -316,6 +310,12 @@ public class BFFApiGatewayController {
 
     @GetMapping(value = "owners/petTypes", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<PetType> getPetTypes(){
+        return customersServiceClient.getPetTypes();
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
+    @GetMapping(value = "fake/petTypes", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<PetType> fake(){
         return customersServiceClient.getPetTypes();
     }
 
