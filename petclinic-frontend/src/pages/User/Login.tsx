@@ -91,7 +91,7 @@ export default function Login(): JSX.Element {
         Back
       </Link>
       <div className="login-container">
-        <h1>Login</h1>
+        <h1>User Login</h1>
         {errorMessage && <Alert variant="danger">{errorMessage}</Alert>}
         <form onSubmit={login}>
           <label htmlFor="emailInput"></label>
