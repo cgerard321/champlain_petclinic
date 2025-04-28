@@ -84,7 +84,7 @@ services:
       - homepage.icon=https://github.com/homarr-labs/dashboard-icons/blob/main/png/kodi.png?raw=true
       - homepage.href=https://petclinic-backend.benmusicgeek.synology.me/
       - homepage.description=Petclinic Api Gateway
-      - homepage.siteMonitor=https://petclinic-backend.benmusicgeek.synology.me/
+      - homepage.siteMonitor=https://petclinic-backend.benmusicgeek.synology.me/api/v2/gateway/vets
 
   auth-service:
     build: auth-service
