@@ -34,6 +34,7 @@ public class IsUserFilter implements WebFilter {
 
     private final Utility utility;
 
+    // Probabbly a better way
     @SuppressWarnings("NullableProblems")
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
