@@ -2,6 +2,7 @@ services:
   petclinicFrontend:
     image: petclinic-frontend
     container_name: petclinic-frontend
+    pull_policy: never
     build:
       context: ./petclinic-frontend
       dockerfile: Dockerfile
@@ -121,6 +122,7 @@ services:
 
   emailing-service:
     image: emailing-service
+    pull_policy: never
     container_name: emailing-service-container
     restart: unless-stopped
     build:
