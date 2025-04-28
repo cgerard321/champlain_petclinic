@@ -88,7 +88,7 @@ export default function Login(): JSX.Element {
   return (
     <div className="login-page">
       <Link to="/home" className="back-button">
-        Back
+        This was poorly coded
       </Link>
       <div className="login-container">
         <h1>User Login</h1>
