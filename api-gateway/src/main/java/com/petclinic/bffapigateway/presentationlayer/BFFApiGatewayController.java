@@ -170,6 +170,12 @@ public class BFFApiGatewayController {
         return billServiceClient.getAllPaidBills();
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
+    @GetMapping(value = "fake/paid", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<BillResponseDTO> getAllPaidBills() {
+        return billServiceClient.getAllPaidBills();
+    }
+    
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping(value = "bills/unpaid", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<BillResponseDTO> getAllUnpaidBills() {
