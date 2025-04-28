@@ -312,13 +312,7 @@ public class BFFApiGatewayController {
     public Flux<PetType> getPetTypes(){
         return customersServiceClient.getPetTypes();
     }
-
-    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
-    @GetMapping(value = "fake/petTypes", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<PetType> fake(){
-        return customersServiceClient.getPetTypes();
-    }
-
+    
     /*
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET})
     @PutMapping("pets/{petId}")
