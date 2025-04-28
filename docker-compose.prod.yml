@@ -18,7 +18,7 @@ services:
       - homepage.icon=https://github.com/homarr-labs/dashboard-icons/blob/main/png/firefox-developer-edition.png?raw=true
       - homepage.href=https://petclinic.benmusicgeek.synology.me/
       - homepage.description=Petclinic Frontend Container
-      - homepage.siteMonitor=https://petclinic.benmusicgeek.synology.me/api/v2/gateway/vets
+      - homepage.siteMonitor=https://petclinic.benmusicgeek.synology.me/
 
   # janus:
   #   image: nginx
