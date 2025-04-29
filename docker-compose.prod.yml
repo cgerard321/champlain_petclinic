@@ -1,3 +1,5 @@
+version: '3.9'
+
 services:
   petclinicFrontend:
     image: petclinic-frontend
@@ -120,8 +122,6 @@ services:
     depends_on:
       - emailing-service-mysql-db
     env_file:
-      # This is for the environment vairables on the portainer deployment server,
-      #if you do not have a stack.env in the root of the project while running locally it will not work
       - stack.env
 
   products-service:
@@ -162,7 +162,6 @@ services:
       timeout: 5s
       retries: 10
 
-  # vet mongo container
   mongo:
     image: mongo
     container_name: mongo
@@ -172,8 +171,9 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: password
-      
-  #Vet Images Postgres container
+    volumes:
+      - mongo-data:/data/db
+
   postgres:
     image: postgres
     container_name: postgres
@@ -184,6 +184,8 @@ services:
       - POSTGRES_DB=images
     ports:
       - 5432:5432
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
 
   pgadmin:
     image: dpage/pgadmin4:latest
@@ -197,7 +199,6 @@ services:
     depends_on:
       - postgres
 
-  # billing mongo container
   mongo1:
     image: mongo
     container_name: mongo1
@@ -253,7 +254,6 @@ services:
       - mongo-customers
       - customers-service-reactive
 
-    # billing mongo container
   mongo-inventory:
     image: mongo
     container_name: mongo-inventory
@@ -324,7 +324,7 @@ services:
     environment:
       - ME_CONFIG_MONGODB_ADMINUSERNAME=root
       - ME_CONFIG_MONGODB_ADMINPASSWORD=password
-      - ME_CONFIG_MONGODB_SERVER=mongo-products
+      - ME_CONFIG_MONGODB_SERVER=mongo-carts
       - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
     ports:
       - 8087:8081
@@ -355,4 +355,5 @@ volumes:
   mongo-inventory-data:
   mongo-products-data:
   mongo-carts-data:
+  postgres-data:
   emailing-service-mysql-db-data:
