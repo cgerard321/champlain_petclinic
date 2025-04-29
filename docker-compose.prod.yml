@@ -199,18 +199,6 @@ services:
       - postgres-data:/var/lib/postgresql/data
     restart: unless-stopped
 
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    container_name: pgadmin
-    environment:
-      - PGADMIN_DEFAULT_EMAIL=admin@vets.com
-      - PGADMIN_DEFAULT_PASSWORD=admin
-    ports:
-      - "9003:80"
-    restart: unless-stopped
-    depends_on:
-      - postgres
-
   # -------------------
   # MONGODB DATABASES
   # -------------------
