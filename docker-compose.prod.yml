@@ -174,7 +174,6 @@ services:
 
   emailing-service-mysql-db:
     image: mysql:8.0
-    platform: linux/amd64
     container_name: emailing-service-mysql-db
     platform: linux/amd64
     environment:
