@@ -119,7 +119,6 @@ services:
     image: emailing-service
     pull_policy: never
     container_name: emailing-service-container
-    restart: unless-stopped
     build:
       context: ./emailing-service
       dockerfile: emailing-service/Dockerfile
