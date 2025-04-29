@@ -177,7 +177,6 @@ services:
     image: mysql:8.0
     platform: linux/amd64
     container_name: emailing-service-mysql-db
-    restart: unless-stopped
     platform: linux/amd64
     environment:
       - MYSQL_ROOT_PASSWORD=Your_password123
