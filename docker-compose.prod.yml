@@ -116,11 +116,13 @@ services:
     restart: unless-stopped
 
   emailing-service:
+    image: emailing-service
+    pull_policy: never
+    container_name: emailing-service-container
+    restart: unless-stopped
     build:
       context: ./emailing-service
       dockerfile: emailing-service/Dockerfile
-    image: emailing-service
-    container_name: emailing-service-container
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - DEFAULT_CONNECTION=Server=emailing-service-mysql-db;Port=3306;Database=MyAppDb;User=root;Password=Your_password123;
@@ -175,6 +177,8 @@ services:
     image: mysql:8.0
     platform: linux/amd64
     container_name: emailing-service-mysql-db
+    restart: unless-stopped
+    platform: linux/amd64
     environment:
       - MYSQL_ROOT_PASSWORD=Your_password123
       - MYSQL_DATABASE=MyAppDb
