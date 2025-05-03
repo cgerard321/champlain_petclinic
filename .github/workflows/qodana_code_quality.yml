@@ -26,6 +26,11 @@ jobs:
           java-version: '17'
           distribution: 'adopt'
           cache: 'gradle'
+          cache-dependency-path: |
+            **/build.gradle
+            **/build.gradle.kts
+            **/settings.gradle
+            **/settings.gradle.kts
 
       - name: Run Build
         run: ./gradlew build
