@@ -15,7 +15,7 @@ on:
 
 jobs:
   api_gateway_test:
-    runs-on: ubuntu-latest
+    runs-on: "ubuntu-22.04"
     steps:
     - uses: actions/checkout@v4
     - name: Set up JDK 17
@@ -33,7 +33,7 @@ jobs:
       working-directory: ./api-gateway
 
   visits_service_test:
-    runs-on: ubuntu-latest
+    runs-on: "ubuntu-22.04"
     steps:
     - name: Checkout sources
       uses: actions/checkout@v4
@@ -52,7 +52,7 @@ jobs:
       working-directory: ./visits-service-new
 
   vet_service_test:
-    runs-on: ubuntu-latest
+    runs-on: "ubuntu-22.04"
     steps:
     - name: Checkout sources
       uses: actions/checkout@v4
@@ -70,7 +70,7 @@ jobs:
 
 
   customers_service_reactive_test:
-    runs-on: ubuntu-latest
+    runs-on: "ubuntu-22.04"
     steps:
     - name: Checkout sources
       uses: actions/checkout@v4
@@ -89,7 +89,7 @@ jobs:
       working-directory: ./customers-service-reactive
 
   billing_service_test:
-    runs-on: ubuntu-latest
+    runs-on: "ubuntu-22.04"
     steps:
     - name: Checkout sources
       uses: actions/checkout@v4
@@ -108,7 +108,7 @@ jobs:
       working-directory: ./billing-service
 
   auth_service_test:
-    runs-on: ubuntu-latest
+    runs-on: "ubuntu-22.04"
     steps:
     - name: Checkout sources
       uses: actions/checkout@v4
@@ -127,7 +127,7 @@ jobs:
       working-directory: ./auth-service
 
   inventory_service_test:
-    runs-on: ubuntu-latest
+    runs-on: "ubuntu-22.04"
     steps:
     - name: Checkout sources
       uses: actions/checkout@v4
@@ -146,7 +146,7 @@ jobs:
       working-directory: ./inventory-service
 
   products_service_test:
-    runs-on: ubuntu-latest
+    runs-on: "ubuntu-22.04"
     steps:
       - name: Checkout sources
         uses: actions/checkout@v4
@@ -186,8 +186,7 @@ jobs:
 
     
   dependency-submission:
-
-    runs-on: ubuntu-latest
+    runs-on: "ubuntu-22.04"
     permissions:
       contents: write
 
