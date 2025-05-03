@@ -166,7 +166,7 @@ jobs:
 
 
   cart_service_test:
-    runs-on: ubuntu-latest
+    runs-on: "22.04"
     steps:
       - name: Checkout sources
         uses: actions/checkout@v4
