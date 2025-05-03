@@ -29,6 +29,31 @@ services:
   # -------------------
   # BACKEND MICROSERVICES
   # -------------------
+
+  api-gateway:
+    build: api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+    restart: unless-stopped
+    depends_on:
+      - customers-service-reactive
+      - vet-service
+      - visits-service-new
+      - products-service
+      - cart-service
+      - inventory-service
+      - billing-service
+      - auth-service
+    labels:
+      - homepage.group=Development
+      - homepage.name=Petclinic Api Gateway
+      - homepage.icon=https://github.com/homarr-labs/dashboard-icons/blob/main/png/kodi.png?raw=true
+      - homepage.href=https://petclinic-backend.benmusicgeek.synology.me/
+      - homepage.description=Petclinic Api Gateway
+      - homepage.siteMonitor=https://petclinic-backend.benmusicgeek.synology.me/api/v2/gateway/vets
+
   visits-service-new:
     build: visits-service-new
     environment:
@@ -63,27 +88,6 @@ services:
     restart: unless-stopped
     depends_on:
       - mongo-customers
-
-  api-gateway:
-    build: api-gateway
-    ports:
-      - "8080:8080"
-    environment:
-      - SPRING_PROFILES_ACTIVE=prod
-    restart: unless-stopped
-    depends_on:
-      - customers-service-reactive
-      - vet-service
-      - visits-service-new
-      - products-service
-      - cart-service
-    labels:
-      - homepage.group=Development
-      - homepage.name=Petclinic Api Gateway
-      - homepage.icon=https://github.com/homarr-labs/dashboard-icons/blob/main/png/kodi.png?raw=true
-      - homepage.href=https://petclinic-backend.benmusicgeek.synology.me/
-      - homepage.description=Petclinic Api Gateway
-      - homepage.siteMonitor=https://petclinic-backend.benmusicgeek.synology.me/api/v2/gateway/vets
 
   auth-service:
     build: auth-service
