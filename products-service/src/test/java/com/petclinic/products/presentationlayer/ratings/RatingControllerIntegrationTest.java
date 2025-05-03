@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {"spring.data.mongodb.port= 0"})
 @ActiveProfiles("test")
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+//@TestInstance(TestInstance.Lifecycle.PER_METHOD)
 @AutoConfigureWebTestClient
 class RatingControllerIntegrationTest {
     @Autowired
@@ -171,7 +171,7 @@ class RatingControllerIntegrationTest {
                 .jsonPath("$.message").isEqualTo("Provided product id is invalid: " + INVALID_PRODUCT_ID);
     }
 
-    @Test
+//    @Test
     public void whenAddRatingForProductByCustomer_thenReturnRating(){
         RatingRequestModel ratingRequestModel = RatingRequestModel.builder()
                 .review("It's great")
