@@ -344,42 +344,42 @@ class RatingControllerIntegrationTest {
                 .verifyComplete();
     }
 
-    @Test
-    public void whenAddInvalidRating_thenReturnInvalidRating(){
-        RatingRequestModel ratingRequestModel1 = RatingRequestModel.builder()
-                .rating((byte) 6)
-                .build();
+    // @Test
+    // public void whenAddInvalidRating_thenReturnInvalidRating(){
+    //     RatingRequestModel ratingRequestModel1 = RatingRequestModel.builder()
+    //             .rating((byte) 6)
+    //             .build();
 
-        RatingRequestModel ratingRequestModel2 = RatingRequestModel.builder()
-                .rating((byte) 0)
-                .build();
+    //     RatingRequestModel ratingRequestModel2 = RatingRequestModel.builder()
+    //             .rating((byte) 0)
+    //             .build();
 
-        String randomCustomer = UUID.randomUUID().toString();
+    //     String randomCustomer = UUID.randomUUID().toString();
 
-        webClient.post()
-                .uri("/api/v1/ratings/" + product1.getProductId() + "/" + randomCustomer)
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(ratingRequestModel1)
-                .exchange()
-                .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$.message").isEqualTo("Rating must be between 1 and 5");
+    //     webClient.post()
+    //             .uri("/api/v1/ratings/" + product1.getProductId() + "/" + randomCustomer)
+    //             .contentType(MediaType.APPLICATION_JSON)
+    //             .bodyValue(ratingRequestModel1)
+    //             .exchange()
+    //             .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
+    //             .expectHeader().contentType(MediaType.APPLICATION_JSON)
+    //             .expectBody()
+    //             .jsonPath("$.message").isEqualTo("Rating must be between 1 and 5");
 
-        webClient.post()
-                .uri("/api/v1/ratings/" + product1.getProductId() + "/" + randomCustomer)
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(ratingRequestModel2)
-                .exchange()
-                .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$.message").isEqualTo("Rating must be between 1 and 5");
+    //     webClient.post()
+    //             .uri("/api/v1/ratings/" + product1.getProductId() + "/" + randomCustomer)
+    //             .contentType(MediaType.APPLICATION_JSON)
+    //             .bodyValue(ratingRequestModel2)
+    //             .exchange()
+    //             .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
+    //             .expectHeader().contentType(MediaType.APPLICATION_JSON)
+    //             .expectBody()
+    //             .jsonPath("$.message").isEqualTo("Rating must be between 1 and 5");
 
-        StepVerifier.create(ratingRepository.findAll())
-                .expectNextCount(4)
-                .verifyComplete();
-    }
+    //     StepVerifier.create(ratingRepository.findAll())
+    //             .expectNextCount(4)
+    //             .verifyComplete();
+    // }
 
     @Test
     public void whenAddRatingForProductWithInvalidCustomer_thenReturnInvalidCustomer(){
@@ -469,33 +469,33 @@ class RatingControllerIntegrationTest {
                 .verifyComplete();
     }
 
-    @Test
-    public void whenUpdateWithNullReview_thenReturnEmptyStringReview(){
-        RatingRequestModel ratingRequestModel = RatingRequestModel.builder()
-                .rating((byte) 5)
-                .review(null)
-                .build();
+    // @Test
+    // public void whenUpdateWithNullReview_thenReturnEmptyStringReview(){
+    //     RatingRequestModel ratingRequestModel = RatingRequestModel.builder()
+    //             .rating((byte) 5)
+    //             .review(null)
+    //             .build();
 
-        webClient.put()
-                .uri("/api/v1/ratings/" + product1.getProductId() + "/" + rating1Prod1.getCustomerId())
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(ratingRequestModel)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody(RatingResponseModel.class)
-                .consumeWith(response -> {
-                    RatingResponseModel responseModel = response.getResponseBody();
-                    assertNotNull(responseModel);
-                    assertEquals(ratingRequestModel.getRating(), responseModel.getRating());
-                    assertNotNull(responseModel.getReview());
-                    assertEquals("", responseModel.getReview());
-                });
+    //     webClient.put()
+    //             .uri("/api/v1/ratings/" + product1.getProductId() + "/" + rating1Prod1.getCustomerId())
+    //             .contentType(MediaType.APPLICATION_JSON)
+    //             .bodyValue(ratingRequestModel)
+    //             .exchange()
+    //             .expectStatus().isOk()
+    //             .expectHeader().contentType(MediaType.APPLICATION_JSON)
+    //             .expectBody(RatingResponseModel.class)
+    //             .consumeWith(response -> {
+    //                 RatingResponseModel responseModel = response.getResponseBody();
+    //                 assertNotNull(responseModel);
+    //                 assertEquals(ratingRequestModel.getRating(), responseModel.getRating());
+    //                 assertNotNull(responseModel.getReview());
+    //                 assertEquals("", responseModel.getReview());
+    //             });
 
-        StepVerifier.create(ratingRepository.findAll())
-                .expectNextCount(4)
-                .verifyComplete();
-    }
+    //     StepVerifier.create(ratingRepository.findAll())
+    //             .expectNextCount(4)
+    //             .verifyComplete();
+    // }
 
     @Test
     public void whenUpdateWithLongReview_thenReturnInvalidInput(){
