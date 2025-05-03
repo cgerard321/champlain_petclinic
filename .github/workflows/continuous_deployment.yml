@@ -19,8 +19,5 @@ jobs:
           if [ -z "$WEBHOOK_URL" ]; then
             echo "WEBHOOK_URL secret not set. Skipping webhook call."
             exit 1
-          fi
-          curl -X POST \
-          -H "Content-Type: application/json" \
-          -d "{\"message\": \"PR merged to main\", \"commit_sha\": \"$SHA\"}" \
-          "$WEBHOOK_URL"
+          fi        
+          curl --location --request POST "$WEBHOOK_URL"
