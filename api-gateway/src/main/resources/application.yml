@@ -146,5 +146,5 @@ logging:
     com.petclinic: DEBUG
 
 frontend:
-  url: https://petclinic.benmusicgeek.synology.me/
+  url: https://petclinic.benmusicgeek.synology.me
 
