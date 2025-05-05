@@ -21,7 +21,7 @@ import reactor.core.publisher.Mono;
 @Slf4j
 @RequestMapping("/api/v2/gateway/customers/{customerId}/bills")
 @Validated
-@CrossOrigin(origins = "http://localhost:3000, http://localhost:80, https://petclinic.benmusicgeek.synology.me"")
+@CrossOrigin(origins = "http://localhost:3000, http://localhost:80, https://petclinic.benmusicgeek.synology.me")
 public class CustomerBillController {
     
     private final BillServiceClient billService;

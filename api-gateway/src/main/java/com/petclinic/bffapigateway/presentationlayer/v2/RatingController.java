@@ -26,7 +26,7 @@ import java.util.HashMap;
 @RequiredArgsConstructor
 @RequestMapping("api/v2/gateway/ratings")
 @Validated
-@CrossOrigin(origins = "http://localhost:3000, http://localhost:80, https://petclinic.benmusicgeek.synology.me"")
+@CrossOrigin(origins = "http://localhost:3000, http://localhost:80, https://petclinic.benmusicgeek.synology.me")
 @Slf4j
 public class RatingController {
     private final RatingsServiceClient ratingsServiceClient;

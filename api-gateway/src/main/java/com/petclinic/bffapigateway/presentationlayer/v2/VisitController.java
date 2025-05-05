@@ -34,7 +34,7 @@ import java.io.ByteArrayInputStream;
 @RequestMapping("api/v2/gateway/visits")
 @Validated
 @Slf4j
-@CrossOrigin(origins = "http://localhost:3000, http://localhost:80, https://petclinic.benmusicgeek.synology.me"")
+@CrossOrigin(origins = "http://localhost:3000, http://localhost:80, https://petclinic.benmusicgeek.synology.me")
 public class VisitController {
 
     private final VisitsServiceClient visitsServiceClient;

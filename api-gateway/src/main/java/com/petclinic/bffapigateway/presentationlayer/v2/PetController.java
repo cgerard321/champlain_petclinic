@@ -25,7 +25,7 @@ import static reactor.core.publisher.Mono.just;
 @Slf4j
 @RequestMapping("/api/v2/gateway/pets")
 @Validated
-@CrossOrigin(origins = "http://localhost:3000, http://localhost:80, https://petclinic.benmusicgeek.synology.me"")
+@CrossOrigin(origins = "http://localhost:3000, http://localhost:80, https://petclinic.benmusicgeek.synology.me")
 public class PetController {
     private final CustomersServiceClient customersServiceClient;
 

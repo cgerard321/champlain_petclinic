@@ -24,7 +24,7 @@ import java.util.List;
 @Slf4j
 @RequestMapping("/api/v2/gateway")
 @Validated
-@CrossOrigin(origins = "http://localhost:3000, http://localhost:80, http://localhost:8080, https://petclinic.benmusicgeek.synology.me"")
+@CrossOrigin(origins = "http://localhost:3000, http://localhost:80, http://localhost:8080, https://petclinic.benmusicgeek.synology.me")
 public class UserController {
 
     private final AuthServiceClient authServiceClient;

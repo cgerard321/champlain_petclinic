@@ -24,7 +24,7 @@ import reactor.core.publisher.Mono;
 @Slf4j
 @RequestMapping("/api/v2/gateway/owners")
 @Validated
-@CrossOrigin(origins = "http://localhost:3000, http://localhost:80, https://petclinic.benmusicgeek.synology.me"")
+@CrossOrigin(origins = "http://localhost:3000, http://localhost:80, https://petclinic.benmusicgeek.synology.me")
 public class OwnerController {
 
     private final CustomersServiceClient customersServiceClient;
