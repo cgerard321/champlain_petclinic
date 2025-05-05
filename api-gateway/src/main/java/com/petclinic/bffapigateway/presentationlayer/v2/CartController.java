@@ -26,7 +26,7 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 @RequestMapping("api/v2/gateway/carts")
 @Validated
-@CrossOrigin(origins = "http://localhost:3000, http://localhost:80")
+@CrossOrigin(origins = "http://localhost:3000, http://localhost:80, https://petclinic.benmusicgeek.synology.me"")
 @Slf4j
 public class CartController {
 
