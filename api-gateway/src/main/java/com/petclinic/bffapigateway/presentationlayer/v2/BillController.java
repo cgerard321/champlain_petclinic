@@ -25,7 +25,7 @@ import java.util.Optional;
 @Slf4j
 @RequestMapping("/api/v2/gateway/bills")
 @Validated
-@CrossOrigin(origins = "http://localhost:3000, http://localhost:80")
+@CrossOrigin(origins = "http://localhost:3000, http://localhost:80, https://petclinic.benmusicgeek.synology.me"")
 public class BillController {
     private final BillServiceClient billService;
 
