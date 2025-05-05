@@ -18,7 +18,7 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 @Slf4j
 @RequestMapping("/api/v2/gateway/roles")
-@CrossOrigin(origins = "http://localhost:3000, http://localhost:80, http://localhost:8080")
+@CrossOrigin(origins = "http://localhost:3000, http://localhost:80, http://localhost:8080, https://petclinic.benmusicgeek.synology.me"")
 public class RoleController {
 
     private final AuthServiceClient authServiceClient;
