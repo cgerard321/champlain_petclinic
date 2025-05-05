@@ -47,7 +47,7 @@ import java.util.Optional;
 @Slf4j
 @RequestMapping("/api/gateway")
 @Validated
-@CrossOrigin(origins = "http://localhost:3000, http://localhost:80, http://localhost:8080")
+@CrossOrigin(origins = "http://localhost:3000, http://localhost:80, http://localhost:8080", "https://petclinic.benmusicgeek.synology.me")
 public class BFFApiGatewayController {
 
     private final CustomersServiceClient customersServiceClient;
