@@ -3,6 +3,7 @@ import { Bill } from '@/features/bills/models/Bill.ts';
 import { useUser } from '@/context/UserContext';
 import { payBill } from '@/features/bills/api/payBill.tsx';
 import './BillsListTable.css';
+import axiosInstance from '@/shared/api/axiosInstance';
 
 export default function BillsListTable(): JSX.Element {
   const { user } = useUser();
@@ -15,17 +16,26 @@ export default function BillsListTable(): JSX.Element {
     if (!user.userId) return;
 
     try {
-      const response = await fetch(
-        `http://localhost:8080/api/v2/gateway/customers/${user.userId}/bills`,
-        {
-          headers: {
-            Accept: 'text/event-stream',
-          },
-          credentials: 'include',
+      const response = await axiosInstance.get(
+        `/v2/gateway/customers/${user.userId}/bills`,
+      {
+        Headers: {
+          Accept: 'text/event-stream',
         }
-      );
+      });
 
-      if (!response.ok) {
+        //TODO: delete once sure is working
+      // const response = await fetch(
+      //   `http://localhost:8080/api/v2/gateway/customers/${user.userId}/bills`,
+      //   {
+      //     headers: {
+      //       Accept: 'text/event-stream',
+      //     },
+      //     credentials: 'include',
+      //   }
+      // );
+
+      if (response.status != 200) {
         throw new Error(`Error: ${response.status} ${response.statusText}`);
       }
 
@@ -87,18 +97,26 @@ export default function BillsListTable(): JSX.Element {
     billId: string
   ): Promise<void> => {
     try {
-      const response = await fetch(
-        `http://localhost:8080/api/v2/gateway/customers/${customerId}/bills/${billId}/pdf`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/pdf',
-          },
-          credentials: 'include',
-        }
-      );
 
-      if (!response.ok) {
+      const response = await axiosInstance.get(
+        `/v2/gateway/customers/${customerId}/bills/${billId}/pdf`,
+      {
+        Headers: {
+          'Content-Type': 'application/pdf',
+        }
+      });
+      // const response = await fetch(
+      //   `http://localhost:8080/api/v2/gateway/customers/${customerId}/bills/${billId}/pdf`,
+      //   {
+      //     method: 'GET',
+      //     headers: {
+      //       'Content-Type': 'application/pdf',
+      //     },
+      //     credentials: 'include',
+      //   }
+      // );
+
+      if (response.status != 200) {
         throw new Error('Failed to download PDF');
       }
 

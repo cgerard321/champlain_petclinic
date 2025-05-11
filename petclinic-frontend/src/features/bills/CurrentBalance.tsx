@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useUser } from '@/context/UserContext';
 import CountUp from 'react-countup';
+import axiosInstance from '@/shared/api/axiosInstance';
 
 export default function CurrentBalance(): JSX.Element {
   const { user } = useUser();
@@ -12,17 +13,19 @@ export default function CurrentBalance(): JSX.Element {
 
     const fetchCurrentBalance = async (): Promise<void> => {
       try {
-        const response = await fetch(
-          `http://localhost:8080/api/v2/gateway/customers/${user.userId}/bills/current-balance`,
-          {
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            credentials: 'include',
-          }
-        );
+        const response = await axiosInstance.get(
+          `/api/v2/gateway/customers/${user.userId}/bills/current-balance`);
+        // const response = await fetch(
+        //   `http://localhost:8080/api/v2/gateway/customers/${user.userId}/bills/current-balance`,
+        //   {
+        //     headers: {
+        //       'Content-Type': 'application/json',
+        //     },
+        //     credentials: 'include',
+        //   }
+        // );
 
-        if (!response.ok) {
+        if (response.status != 200) {
           throw new Error(`Error: ${response.status} ${response.statusText}`);
         }
 
