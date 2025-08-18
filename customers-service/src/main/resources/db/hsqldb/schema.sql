@@ -1,42 +1,83 @@
-DROP TABLE pets IF EXISTS;
-DROP TABLE types IF EXISTS;
-DROP TABLE owners IF EXISTS;
-DROP TABLE photos IF EXISTS;
+-- DROP TABLE pets IF EXISTS;
+-- DROP TABLE types IF EXISTS;
+-- DROP TABLE owners IF EXISTS;
+-- DROP TABLE photos IF EXISTS;
 
-CREATE TABLE types (
-                       id   INTEGER IDENTITY PRIMARY KEY,
-                       name VARCHAR(80)
-);
-CREATE INDEX types_name ON types (name);
+-- CREATE TABLE types (
+--                        id   INTEGER IDENTITY PRIMARY KEY,
+--                        name VARCHAR(80)
+-- );
+-- CREATE INDEX types_name ON types (name);
 
-CREATE TABLE photos (
-                        id  INTEGER IDENTITY PRIMARY KEY,
-                        name VARCHAR(80),
-                        type VARCHAR(80),
-                        image LONGTEXT
-);
-CREATE INDEX name ON photos (name);
+-- CREATE TABLE photos (
+--                         id  INTEGER IDENTITY PRIMARY KEY,
+--                         name VARCHAR(80),
+--                         type VARCHAR(80),
+--                         image LONGTEXT
+-- );
+-- CREATE INDEX name ON photos (name);
 
-CREATE TABLE owners (
-                        id         INTEGER IDENTITY PRIMARY KEY,
-                        first_name VARCHAR(30),
-                        last_name  VARCHAR(30),
-                        address    VARCHAR(255),
-                        city       VARCHAR(80),
-                        telephone  VARCHAR(20),
-                        image_id   INTEGER(4)
+-- CREATE TABLE owners (
+--                         id         INTEGER IDENTITY PRIMARY KEY,
+--                         first_name VARCHAR(30),
+--                         last_name  VARCHAR(30),
+--                         address    VARCHAR(255),
+--                         city       VARCHAR(80),
+--                         telephone  VARCHAR(20),
+--                         image_id   INTEGER(4)
 
-);
-CREATE INDEX owners_last_name ON owners (last_name);
+-- );
+-- CREATE INDEX owners_last_name ON owners (last_name);
 
-CREATE TABLE pets (
-                      id         INTEGER IDENTITY PRIMARY KEY,
-                      name       VARCHAR(30),
-                      birth_date DATE,
-                      type_id    INTEGER NOT NULL,
-                      owner_id   INTEGER NOT NULL,
-                      image_id   INTEGER(4)
-);
-ALTER TABLE pets ADD CONSTRAINT fk_pets_owners FOREIGN KEY (owner_id) REFERENCES owners (id);
-ALTER TABLE pets ADD CONSTRAINT fk_pets_types FOREIGN KEY (type_id) REFERENCES types (id);
-CREATE INDEX pets_name ON pets (name);
+-- CREATE TABLE pets (
+--                       id         INTEGER IDENTITY PRIMARY KEY,
+--                       name       VARCHAR(30),
+--                       birth_date DATE,
+--                       type_id    INTEGER NOT NULL,
+--                       owner_id   INTEGER NOT NULL,
+--                       image_id   INTEGER(4)
+-- );
+-- ALTER TABLE pets ADD CONSTRAINT fk_pets_owners FOREIGN KEY (owner_id) REFERENCES owners (id);
+-- ALTER TABLE pets ADD CONSTRAINT fk_pets_types FOREIGN KEY (type_id) REFERENCES types (id);
+-- CREATE INDEX pets_name ON pets (name);
+
+CREATE DATABASE IF NOT EXISTS petclinic;
+GRANT ALL PRIVILEGES ON petclinic.* TO user@localhost IDENTIFIED BY 'pwd';
+
+USE petclinic;
+
+CREATE TABLE IF NOT EXISTS photos (
+    id INT(4) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(80),
+    type VARCHAR(80),
+    image LONGTEXT,
+    INDEX(name)
+    ) engine=InnoDB;
+
+CREATE TABLE IF NOT EXISTS types (
+    id INT(4) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(80),
+    INDEX(name)
+    ) engine=InnoDB;
+CREATE TABLE IF NOT EXISTS owners (
+    id INT(4) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    first_name VARCHAR(30),
+    last_name VARCHAR(30),
+    address VARCHAR(255),
+    city VARCHAR(80),
+    telephone VARCHAR(20),
+    image_id INT(4),
+    INDEX(last_name)
+    ) engine=InnoDB;
+
+CREATE TABLE IF NOT EXISTS pets (
+    id INT(4) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(30),
+    birth_date DATE,
+    type_id INT(4) UNSIGNED NOT NULL,
+    owner_id INT(4) UNSIGNED NOT NULL,
+    image_id INT(4),
+    INDEX(name),
+    FOREIGN KEY (owner_id) REFERENCES owners(id),
+    FOREIGN KEY (type_id) REFERENCES types(id)
+    ) engine=InnoDB;

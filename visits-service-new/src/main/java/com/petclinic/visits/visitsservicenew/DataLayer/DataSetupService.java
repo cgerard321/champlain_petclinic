@@ -10,6 +10,7 @@ import com.petclinic.visits.visitsservicenew.DataLayer.Status;
 import com.petclinic.visits.visitsservicenew.DataLayer.Visit;
 import com.petclinic.visits.visitsservicenew.DataLayer.VisitRepo;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -20,6 +21,7 @@ import java.time.format.DateTimeFormatter;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class DataSetupService implements CommandLineRunner {
     private final VisitRepo visitRepo;
     private final ReviewRepository reviewRepository;
@@ -27,12 +29,23 @@ public class DataSetupService implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
+        // Check if visits already exist - if they do, assume all data has been initialized
+        Long visitCount = visitRepo.count().block();
+        
+        if (visitCount != null && visitCount > 0) {
+            log.info("Visits already exist in database (count: {}). Skipping all data initialization.", visitCount);
+            return;
+        }
+        
+        log.info("No visits found in database. Initializing with sample data.");
+        
         setupVisits();
         setupReviews();
         setupEmergencies();
     }
 
     private void setupVisits() {
+        log.info("Initializing sample visits data...");
         Visit visit1 = buildVisit("visitId1", "2022-11-24 13:00", "this is a dummy description", "ecb109cd-57ea-4b85-b51e-99751fd1c349", "69f852ca-625b-11ee-8c99-0242ac120002", Status.UPCOMING, LocalDateTime.parse("2024-11-24 13:00", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")).plusHours(1));
         Visit visit2 = buildVisit("visitId2", "2022-03-01 13:00", "Dog Needs Meds", "0e4d8481-b611-4e52-baed-af16caa8bf8a", "69f85766-625b-11ee-8c99-0242ac120002", Status.COMPLETED, LocalDateTime.parse("2022-03-01 13:00", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")).plusHours(1));
         Visit visit3 = buildVisit("visitId3", "2020-07-19 13:00", "Dog Needs Surgery After Meds", "0e4d8481-b611-4e52-baed-af16caa8bf8a", "69f85bda-625b-11ee-8c99-0242ac120002", Status.COMPLETED, LocalDateTime.parse("2020-07-19 13:00", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")).plusHours(1));
@@ -52,10 +65,13 @@ public class DataSetupService implements CommandLineRunner {
 
         Flux.just(visit1, visit2, visit3, visit4, visit5, visit6, visit7, visit8, visit9, visit10, visit11, visit12, visit13, visit14, visit15, visit16)
                 .flatMap(visitRepo::insert)
+                .doOnNext(visit -> log.debug("Inserted visit: {}", visit.getVisitId()))
+                .doOnComplete(() -> log.info("Completed inserting {} visits", 16))
                 .subscribe();
     }
 
     private void setupReviews() {
+        log.info("Initializing sample reviews data...");
         Review review1 = buildReview("reviewId1", 5, "zako", "very good", "2022-11-24 13:00");
         Review review2 = buildReview("reviewId2", 5, "Regine", "very good", "2022-11-24 13:00");
         Review review3 = buildReview("reviewId3", 5, "zako2", "very good", "2022-11-24 13:00");
@@ -64,16 +80,21 @@ public class DataSetupService implements CommandLineRunner {
         // Add more reviews...
         Flux.just(review1, review2, review3, review4, review5)
                 .flatMap(reviewRepository::insert)
+                .doOnNext(review -> log.debug("Inserted review: {}", review.getReviewId()))
+                .doOnComplete(() -> log.info("Completed inserting {} reviews", 5))
                 .subscribe();
     }
 
     private void setupEmergencies() {
+        log.info("Initializing sample emergencies data...");
         Emergency emergency1 = buildEmergency("emergencyId1", "2022-12-01 10:00", "Severe bleeding", "ecb109cd-57ea-4b85-b51e-99751fd1c349", "69f852ca-625b-11ee-8c99-0242ac120002", UrgencyLevel.HIGH, "Accident");
         Emergency emergency2 = buildEmergency("emergencyId2", "2023-01-15 15:00", "Broken leg", "0e4d8481-b611-4e52-baed-af16caa8bf8a", "69f85766-625b-11ee-8c99-0242ac120002", UrgencyLevel.MEDIUM, "Injury");
         Emergency emergency3 = buildEmergency("emergencyId3", "2023-06-05 09:30", "Breathing issues", "0e4d8481-b611-4e52-baed-af16caa8bf8a","69f85bda-625b-11ee-8c99-0242ac120002", UrgencyLevel.HIGH, "Respiratory");
 
         Flux.just(emergency1, emergency2, emergency3)
                 .flatMap(emergencyRepository::insert)
+                .doOnNext(emergency -> log.debug("Inserted emergency: {}", emergency.getVisitEmergencyId()))
+                .doOnComplete(() -> log.info("Completed inserting {} emergencies", 3))
                 .subscribe();
     }
 

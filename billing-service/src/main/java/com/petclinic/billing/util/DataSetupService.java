@@ -28,6 +28,12 @@ public class DataSetupService implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
 
+        Boolean hasBills = false;
+        billService.getAllBills().count().flatMap(count -> {
+                hasBills = count > 0;
+        });
+
+        if (hasBills) return;
 
         Bill b1 = Bill.builder()
                 .billId(UUID.randomUUID().toString())

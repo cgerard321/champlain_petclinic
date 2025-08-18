@@ -19,6 +19,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StreamUtils;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.*;
 import javax.sql.DataSource;
@@ -53,6 +54,18 @@ public class DataSetupService implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
+        // Check if any data already exists before inserting
+        Long vetCount = vetRepository.count().block();
+        Long ratingCount = ratingRepository.count().block();
+        Long educationCount = educationRepository.count().block();
+        Long albumCount = albumRepository.count().block();
+        
+        if (vetCount != null && vetCount > 0) {
+            log.info("Vets already exist in database (count: {}). Skipping all data initialization.", vetCount);
+            return;
+        }
+        
+        log.info("No vets found in database. Initializing with sample data.");
         Specialty s1 = new Specialty("100001", "radiology");
         Specialty s2 = new Specialty("100002", "surgery");
         Specialty s3 = new Specialty("100003", "dentistry");

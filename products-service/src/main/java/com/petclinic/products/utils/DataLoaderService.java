@@ -379,33 +379,53 @@ public class DataLoaderService implements CommandLineRunner {
                 .imageData(imageBytes8)
                 .build();
 
-        Flux.just(bundle1, bundle2, bundle3)
-                .flatMap(s -> productBundleRepository.insert(Mono.just(s))
-                        .log(s.toString()))
-                .subscribe();
+        // Insert ProductBundles only if none exist
+        productBundleRepository.findAll().hasElements().flatMap(hasElements -> {
+            if(!hasElements) {
+                return Flux.just(bundle1, bundle2, bundle3)
+                        .flatMap(s -> productBundleRepository.insert(Mono.just(s))
+                                .log(s.toString()));
+            }
+            return Flux.empty();
+        }).subscribe();
 
-        Flux.just(product1, product2, product3, product4, product5, product6, product7, product8)
-                .flatMap(s -> productRepository.insert(Mono.just(s))
-                        .log(s.toString()))
-                .subscribe();
+        // Insert Products only if none exist
+        productRepository.findAll().hasElements().flatMap(hasElements -> {
+            if(!hasElements) {
+                return Flux.just(product1, product2, product3, product4, product5, product6, product7, product8)
+                        .flatMap(s -> productRepository.insert(Mono.just(s))
+                                .log(s.toString()));
+            }
+            return Flux.empty();
+        }).subscribe();
 
-        Flux.just(
-                rating1prod1, rating2prod1,
-                rating1prod2, rating2prod2,
-                rating1prod3, rating2prod3,
-                rating1prod4, rating2prod4,
-                rating1prod5, rating2prod5,
-                rating1prod6, rating2prod6,
-                rating1prod7, rating2prod7,
-                rating1prod8, rating2prod8
-        )
-                .flatMap(s -> ratingRepository.insert(Mono.just(s))
-                        .log(s.toString()))
-                .subscribe();
+        // Insert Ratings only if none exist
+        ratingRepository.findAll().hasElements().flatMap(hasElements -> {
+            if(!hasElements) {
+                return Flux.just(
+                                rating1prod1, rating2prod1,
+                                rating1prod2, rating2prod2,
+                                rating1prod3, rating2prod3,
+                                rating1prod4, rating2prod4,
+                                rating1prod5, rating2prod5,
+                                rating1prod6, rating2prod6,
+                                rating1prod7, rating2prod7,
+                                rating1prod8, rating2prod8
+                        )
+                        .flatMap(s -> ratingRepository.insert(Mono.just(s))
+                                .log(s.toString()));
+            }
+            return Flux.empty();
+        }).subscribe();
 
-        Flux.just(image1, image2, image3, image4, image5, image6, image7, image8)
-                .flatMap(s -> imageRepository.insert(Mono.just(s))
-                        .log(s.toString()))
-                .subscribe();
+        // Insert Images only if none exist
+        imageRepository.findAll().hasElements().flatMap(hasElements -> {
+            if(!hasElements) {
+                return Flux.just(image1, image2, image3, image4, image5, image6, image7, image8)
+                        .flatMap(s -> imageRepository.insert(Mono.just(s))
+                                .log(s.toString()));
+            }
+            return Flux.empty();
+        }).subscribe();
     }
 }

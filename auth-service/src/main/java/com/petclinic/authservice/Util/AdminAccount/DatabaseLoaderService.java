@@ -27,11 +27,21 @@ public class DatabaseLoaderService implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        roleRepo.save(Role.builder().name("ADMIN").build());
-        roleRepo.save(Role.builder().name("VET").build());
-        roleRepo.save(Role.builder().name("OWNER").build());
-        roleRepo.save(Role.builder().name("INVENTORY_MANAGER").build());
-        roleRepo.save(Role.builder().name("RECEPTIONIST").build());
+        if (!roleRepo.findRoleByName("ADMIN")) {
+            roleRepo.save(Role.builder().name("ADMIN").build());
+        }
+        if (!roleRepo.findRoleByName("VET")) {
+            roleRepo.save(Role.builder().name("VET").build());
+        }
+        if (!roleRepo.findRoleByName("OWNER")) {
+            roleRepo.save(Role.builder().name("OWNER").build());
+        }
+        if (!roleRepo.findRoleByName("INVENTORY_MANAGER")) {
+            roleRepo.save(Role.builder().name("INVENTORY_MANAGER").build());
+        }
+        if (!roleRepo.findRoleByName("RECEPTIONIST")) {
+            roleRepo.save(Role.builder().name("RECEPTIONIST").build());
+        }
 
 
         Set<Role> manager = new HashSet<>();
@@ -45,7 +55,9 @@ public class DatabaseLoaderService implements CommandLineRunner {
                 .verified(true)
                 .build();
 
-        userRepo.save(inventoryManager);
+        if (!userRepo.findByEmail("inventory@email.com")) {
+            userRepo.save(inventoryManager);
+        }
 
         Set<Role> roles = new HashSet<>();
         roles.add(roleRepo.findById(1L).get());
@@ -58,7 +70,9 @@ public class DatabaseLoaderService implements CommandLineRunner {
                 .verified(true)
                 .build();
 
-        userRepo.save(admin);
+        if (!userRepo.findByEmail("admin@admin.com")) {
+            userRepo.save(admin);
+        }
 
         Set <Role> receptionist = new HashSet<>();
         receptionist.add(roleRepo.findById(5L).get());
@@ -71,8 +85,9 @@ public class DatabaseLoaderService implements CommandLineRunner {
                 .verified(true)
                 .build();
 
-        userRepo.save(receptionist1);
-
+        if (!userRepo.findByEmail("reception@reception.com")) {
+            userRepo.save(receptionist1);
+        }
 
         Set<Role> roles2 = new HashSet<>();
         roles2.add(roleRepo.findById(2L).get());
@@ -234,9 +249,12 @@ public class DatabaseLoaderService implements CommandLineRunner {
                 .build();
 
 
+        if (!userRepo.findByUsernameContaining("Vet")) {
+            userRepo.saveAll(List.of(vet1, vet2, vet3, vet4, vet5, vet6, vet7));
+        }
 
-        userRepo.saveAll(List.of(vet1, vet2, vet3, vet4, vet5, vet6, vet7));
-
-        userRepo.saveAll(List.of(owner1, owner2, owner3, owner4, owner5, owner6, owner7, owner8, owner9, owner10));
+        if (!userRepo.findByUsernameContaining("Owner")){
+            userRepo.saveAll(List.of(owner1, owner2, owner3, owner4, owner5, owner6, owner7, owner8, owner9, owner10));
+        }
     }
 }

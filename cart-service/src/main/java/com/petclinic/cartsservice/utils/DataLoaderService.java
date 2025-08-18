@@ -22,6 +22,11 @@ public class DataLoaderService implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
 
+        //checks first cart that is added manually, if it is there then the others will be too
+        if (cartRepository.findCartByCartId("98f7b33a-d62a-420a-a84a-05a27c85fc91").hasElement()) {
+                return;
+        }
+
         CartProduct product1 = CartProduct.builder()
                 .productId("06a7d573-bcab-4db3-956f-773324b92a80")
                 .imageId("08a5af6b-3501-4157-9a99-1aa82387b9e4")
