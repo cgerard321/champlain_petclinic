@@ -21,7 +21,7 @@ const createAxiosInstance = (): AxiosInstance => {
     (config: CustomAxiosRequestConfig) => {
       // Default to v2 if useV2 is not specified
       const useV2 = config.useV2 !== undefined ? config.useV2 : true;
-      const versionPath = useV2 ? '/v2/gateway/' : '/v1/gateway/';
+      const versionPath = useV2 ? '/v2/gateway' : '/v1/gateway';
 
       // Modify the URL to include the version path
       if (
