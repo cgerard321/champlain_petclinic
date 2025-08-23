@@ -3,6 +3,13 @@ import axiosErrorResponseHandler from '@/shared/api/axiosErrorResponseHandler.ts
 
 axios.defaults.withCredentials = true;
 
+// Extend AxiosRequestConfig to include our custom useV2 property
+declare module 'axios' {
+  export interface AxiosRequestConfig {
+    useV2?: boolean;
+  }
+}
+
 // Extend InternalAxiosRequestConfig to include our custom useV2 property
 interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
   useV2?: boolean;
@@ -21,7 +28,7 @@ const createAxiosInstance = (): AxiosInstance => {
     (config: CustomAxiosRequestConfig) => {
       // Default to v2 if useV2 is not specified
       const useV2 = config.useV2 !== undefined ? config.useV2 : true;
-      const versionPath = useV2 ? '/v2/gateway' : '/v1/gateway';
+      const versionPath = useV2 ? '/v2/gateway' : '/gateway';
 
       // Modify the URL to include the version path
       if (
