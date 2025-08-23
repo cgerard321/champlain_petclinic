@@ -1,17 +1,53 @@
-import axios, { AxiosInstance } from 'axios';
+import axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import axiosErrorResponseHandler from '@/shared/api/axiosErrorResponseHandler.ts';
 
 axios.defaults.withCredentials = true;
 
+// Helper to determine API version from environment
+export const shouldUseV2Api = (): boolean => {
+  return import.meta.env.VITE_USE_V2_API !== 'false'; // Default to v2
+};
+
+// Extend InternalAxiosRequestConfig to include our custom useV2 property
+interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
+  useV2?: boolean;
+}
+
 const createAxiosInstance = (): AxiosInstance => {
   const instance = axios.create({
-    baseURL: import.meta.env.VITE_BACKEND_URL,
+    baseURL: import.meta.env.VITE_BACKEND_URL, // Base URL without version
     headers: {
       'Content-Type': 'application/json',
     },
   });
 
-  // response interceptor to handle errors globally
+  // Request interceptor to modify URL based on useV2 flag
+  instance.interceptors.request.use(
+    (config: CustomAxiosRequestConfig) => {
+      const useV2 =
+        config.useV2 !== undefined ? config.useV2 : shouldUseV2Api();
+      const versionPath = useV2 ? '/v2/gateway' : '/v1/gateway';
+
+      // Modify the URL to include the version path
+      if (
+        config.url &&
+        !config.url.startsWith('http://') &&
+        !config.url.startsWith('https://')
+      ) {
+        config.url = versionPath + config.url;
+      }
+
+      // Remove the custom property from config
+      delete config.useV2;
+
+      return config;
+    },
+    error => {
+      return Promise.reject(error);
+    }
+  );
+
+  // Response interceptor to handle errors globally
   instance.interceptors.response.use(
     response => response,
     error => {
@@ -38,5 +74,11 @@ const handleAxiosError = (error: unknown): void => {
   }
 };
 
+// Default instance using environment flag
 const axiosInstance = createAxiosInstance();
+
+// Helper functions for specific versions
+export const withV1 = (config: any = {}) => ({ ...config, useV2: false });
+export const withV2 = (config: any = {}) => ({ ...config, useV2: true });
+
 export default axiosInstance;
