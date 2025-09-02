@@ -19,7 +19,7 @@ const AllUsers: React.FC = (): JSX.Element => {
     const fetchUsers = async (): Promise<void> => {
       try {
         const response = await axios.get(
-          'http://localhost:8080/api/v2/gateway/users',
+          import.meta.env.VITE_BACKEND_URL + 'v2/gateway/users',
           { withCredentials: true }
         );
         setUsers(response.data);
