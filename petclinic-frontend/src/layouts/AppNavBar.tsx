@@ -35,7 +35,7 @@ export function NavBar(): JSX.Element {
 
   const logoutUser = (): void => {
     axiosInstance
-      .post('users/logout')
+      .post('users/logout', {}, { useV2: false })
       .then(() => {
         navigate(AppRoutePaths.Login);
         localStorage.removeItem('user');
