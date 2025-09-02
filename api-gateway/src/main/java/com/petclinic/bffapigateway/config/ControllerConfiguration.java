@@ -12,6 +12,7 @@ public class ControllerConfiguration implements WebFluxConfigurer {
     public void addCorsMappings(org.springframework.web.reactive.config.CorsRegistry registry) {
         registry.addMapping("/**")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH")
+                // Remove last slash if present
                 .allowedOrigins(frontendOrigin)
                 .allowedHeaders("*")
                 .allowCredentials(true)

@@ -12,6 +12,7 @@ import sadDoggy from '@/assets/Login/sad-doggy.jpg';
 import './Login.css';
 import Slideshow from './Slideshow';
 import { Alert } from 'react-bootstrap';
+import axiosInstance from "@/shared/api/axiosInstance.ts";
 
 const images = [
   doctorAndDoggy,
@@ -36,8 +37,13 @@ export default function Login(): JSX.Element {
     };
 
     try {
+<<<<<<< Updated upstream
       const response = await axios.post<UserResponseModel>(
         import.meta.env.VITE_BACKEND_URL + 'gateway/users/login',
+=======
+      const response = await axiosInstance.post<UserResponseModel>(
+        'users/login',
+>>>>>>> Stashed changes
         {
           email: formElements.emailInput.value,
           password: formElements.passwordInput.value,

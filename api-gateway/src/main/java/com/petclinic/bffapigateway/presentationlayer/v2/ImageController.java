@@ -17,7 +17,6 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 @RequestMapping("/api/v2/gateway/images")
 @Validated
-@CrossOrigin(origins = "http://localhost:3000, http://localhost:80, https://petclinic.benmusicgeek.synology.me",  methods = { RequestMethod.GET, RequestMethod.POST})
 public class ImageController {
 
     private final ImageServiceClient imageServiceClient;
