@@ -37,7 +37,7 @@ export default function Login(): JSX.Element {
 
     try {
       const response = await axios.post<UserResponseModel>(
-        'http://localhost:8080/api/gateway/users/login',
+        import.meta.env.VITE_BACKEND_URL + 'gateway/users/login',
         {
           email: formElements.emailInput.value,
           password: formElements.passwordInput.value,

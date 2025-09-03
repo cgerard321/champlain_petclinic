@@ -37,7 +37,7 @@ export default function Home(): JSX.Element {
   const fetchVetPhoto = async (vetId: string): Promise<void> => {
     try {
       const response = await fetch(
-        `http://localhost:8080/api/v2/gateway/vets/${vetId}/photo`,
+        import.meta.env.VITE_BACKEND_URL + `v2/gateway/vets/${vetId}/photo`,
         {
           method: 'GET',
           headers: {

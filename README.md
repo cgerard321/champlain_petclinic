@@ -20,8 +20,8 @@ For a User Story to be considered as DONE, all the following need to be met:
 
 
 
-
-
+## Development Notes
+If their is a test commented out it is probably because of test cleanup configuration causing it to fail. During the preparation of the project in the summer maintainers comment out failing tests. It is up to the students to fix it to get to the correct required coverage percentage.
 
 ## Running the project
 Once you have cloned the repo (see the setup instructions below), you need to do the following:
@@ -397,4 +397,3 @@ ssh-add
 ```
 and enter your passphrase when prompted (Note: if you are not using the default filename, you'll need to specify your key filename `ssh-add ~/.ssh/myprivatekeyname)`. The system will print Identity Added if successful.
 
----

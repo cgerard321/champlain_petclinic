@@ -1,0 +1,325 @@
+version: '3.9'
+
+services:
+  # -------------------
+  # FRONTEND SERVICES
+  # -------------------
+  petclinicFrontend:
+    image: petclinic-frontend
+    container_name: petclinic-frontend
+    pull_policy: never
+    build:
+      context: ./petclinic-frontend
+      dockerfile: Dockerfile
+      args:
+        - BUILD_MODE=production
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./petclinic-frontend/src:/app/src
+    restart: unless-stopped
+    labels:
+      - homepage.group=Development
+      - homepage.name=Petclinic Frontend
+      - homepage.icon=https://github.com/homarr-labs/dashboard-icons/blob/main/png/firefox-developer-edition.png?raw=true
+      - homepage.href=https://petclinic.benmusicgeek.synology.me/
+      - homepage.description=Petclinic Frontend Container
+      - homepage.siteMonitor=https://petclinic.benmusicgeek.synology.me/
+
+  # -------------------
+  # BACKEND MICROSERVICES
+  # -------------------
+
+  api-gateway:
+    build: api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+    restart: unless-stopped
+    depends_on:
+      - customers-service-reactive
+      - vet-service
+      - visits-service-new
+      - products-service
+      - cart-service
+      - inventory-service
+      - billing-service
+      - auth-service
+    labels:
+      - homepage.group=Development
+      - homepage.name=Petclinic Api Gateway
+      - homepage.icon=https://github.com/homarr-labs/dashboard-icons/blob/main/png/kodi.png?raw=true
+      - homepage.href=https://petclinic-backend.benmusicgeek.synology.me/
+      - homepage.description=Petclinic Api Gateway
+      - homepage.siteMonitor=https://petclinic-backend.benmusicgeek.synology.me/api/v2/gateway/vets
+
+  visits-service-new:
+    build: visits-service-new
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    restart: unless-stopped
+    depends_on:
+      - mongo2
+      - mailer-service
+
+  inventory-service:
+    build: inventory-service
+    hostname: inventory
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    restart: unless-stopped
+    depends_on:
+      - mongo-inventory
+
+  vet-service:
+    build: vet-service
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    restart: unless-stopped
+    depends_on:
+      - mongo
+      - postgres
+
+  customers-service-reactive:
+    build: customers-service-reactive
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    restart: unless-stopped
+    depends_on:
+      - mongo-customers
+
+  auth-service:
+    build: auth-service
+    hostname: auth
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    restart: unless-stopped
+    depends_on:
+      mysql4:
+        condition: service_healthy
+      mailer-service:
+        condition: service_started
+
+  billing-service:
+    build: billing-service
+    hostname: billing
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    restart: unless-stopped
+    depends_on:
+      - mongo1
+
+  mailer-service:
+    build: mailer-service
+    environment:
+      - SMTP_USER=champlain.petclinic@gmail.com
+      - SMTP_SERVER=smtp.gmail.com
+    env_file:
+      - stack.env
+    restart: unless-stopped
+
+  emailing-service:
+    image: emailing-service
+    pull_policy: never
+    container_name: emailing-service-container
+    build:
+      context: ./emailing-service
+      dockerfile: emailing-service/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - DEFAULT_CONNECTION=Server=emailing-service-mysql-db;Port=3306;Database=MyAppDb;User=root;Password=Your_password123;
+    env_file:
+      - stack.env
+    restart: unless-stopped
+    depends_on:
+      - emailing-service-mysql-db
+
+  products-service:
+    build: products-service
+    hostname: products-service
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    restart: unless-stopped
+    depends_on:
+      - mongo-products
+
+  cart-service:
+    build: cart-service
+    hostname: cart
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    restart: unless-stopped
+    depends_on:
+      - mongo-carts
+
+  # -------------------
+  # DATABASES
+  # -------------------
+  mysql4:
+    image: mysql:5.7
+    platform: linux/amd64
+    ports:
+      - "3310:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpwd
+      - MYSQL_DATABASE=auth-db
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=pwd
+    volumes:
+      - mysql4-data:/var/lib/mysql
+      - ./data/init.d:/docker-entrypoint-initdb.d
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-uuser", "-ppwd", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  emailing-service-mysql-db:
+    image: mysql:8.0
+    container_name: emailing-service-mysql-db
+    platform: linux/amd64
+    environment:
+      - MYSQL_ROOT_PASSWORD=Your_password123
+      - MYSQL_DATABASE=MyAppDb
+      - SPRING_PROFILES_ACTIVE=docker
+    ports:
+      - "3308:3306"
+    volumes:
+      - emailing-service-mysql-db-data:/var/lib/mysql
+    restart: unless-stopped
+
+  postgres:
+    image: postgres
+    container_name: postgres
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=pwd
+      - POSTGRES_DB=images
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  # -------------------
+  # MONGODB DATABASES
+  # -------------------
+  mongo:
+    image: mongo
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=password
+    volumes:
+      - mongo-data:/data/db
+      - mongo-config:/data/configdb
+    restart: unless-stopped
+
+  mongo1:
+    image: mongo
+    container_name: mongo1
+    ports:
+      - "27018:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=password
+    volumes:
+      - mongo1-data:/data/db
+      - mongo1-config:/data/configdb
+    restart: unless-stopped
+
+  mongo2:
+    image: mongo
+    container_name: mongo2
+    ports:
+      - "27015:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=password
+    volumes:
+      - mongo2-data:/data/db
+      - mongo2-config:/data/configdb
+    restart: unless-stopped
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongo localhost:27017/test --quiet
+      interval: 15s
+      retries: 5
+      start_period: 30s
+
+  mongo-customers:
+    image: mongo
+    container_name: mongo-customers
+    ports:
+      - "27019:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=password
+    volumes:
+      - mongo-customers-data:/data/db
+      - mongo-customers-config:/data/configdb
+    restart: unless-stopped
+
+  mongo-inventory:
+    image: mongo
+    container_name: mongo-inventory
+    ports:
+      - "27020:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=password
+    volumes:
+      - mongo-inventory-data:/data/db
+      - mongo-inventory-config:/data/configdb
+    restart: unless-stopped
+
+  mongo-products:
+    image: mongo
+    container_name: mongo-products
+    ports:
+      - "27021:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=password
+    volumes:
+      - mongo-products-data:/data/db
+      - mongo-products-config:/data/configdb
+    restart: unless-stopped
+
+  mongo-carts:
+    image: mongo
+    container_name: mongo-carts
+    ports:
+      - "27022:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=password
+    volumes:
+      - mongo-carts-data:/data/db
+      - mongo-carts-config:/data/configdb
+    restart: unless-stopped
+
+# -------------------
+# VOLUMES
+# -------------------
+volumes:
+  mysql4-data:
+  mongo-data:
+  mongo-config:
+  mongo1-data:
+  mongo1-config:
+  mongo2-data:
+  mongo2-config:
+  mongo-customers-data:
+  mongo-customers-config:
+  mongo-inventory-data:
+  mongo-inventory-config:
+  mongo-products-data:
+  mongo-products-config:
+  mongo-carts-data:
+  mongo-carts-config:
+  postgres-data:
+  emailing-service-mysql-db-data:

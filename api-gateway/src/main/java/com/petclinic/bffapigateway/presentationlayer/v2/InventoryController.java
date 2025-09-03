@@ -24,7 +24,6 @@ import java.util.Optional;
 @Slf4j
 @RequestMapping("/api/v2/gateway/inventories")
 @Validated
-@CrossOrigin(origins = "http://localhost:3000, http://localhost:80")
 public class InventoryController {
     private final InventoryServiceClient inventoryServiceClient;
 

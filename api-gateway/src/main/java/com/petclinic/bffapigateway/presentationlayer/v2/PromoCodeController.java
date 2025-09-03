@@ -20,7 +20,6 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 @RequestMapping("api/v2/gateway/promos")
 @Validated
-@CrossOrigin(origins = "http://localhost:3000, http://localhost:80")
 public class PromoCodeController {
 
     private final CartServiceClient cartServiceClient;

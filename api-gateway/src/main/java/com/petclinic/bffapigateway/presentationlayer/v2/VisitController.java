@@ -34,7 +34,6 @@ import java.io.ByteArrayInputStream;
 @RequestMapping("api/v2/gateway/visits")
 @Validated
 @Slf4j
-@CrossOrigin(origins = "http://localhost:3000, http://localhost:80")
 public class VisitController {
 
     private final VisitsServiceClient visitsServiceClient;

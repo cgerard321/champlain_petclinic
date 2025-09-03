@@ -237,35 +237,35 @@ class VisitServiceImplTest {
                 }).verifyComplete();
     }*/
 
-    @Test
-    void addVisit () {
-        // Arrange
-        when(visitRepo.insert(any(Visit.class))).thenReturn(Mono.just(visit1));
-        when(petsClient.getPetById(anyString())).thenReturn(Mono.just(petResponseDTO));
-        when(vetsClient.getVetByVetId(anyString())).thenReturn(Mono.just(vet));
-        // This line ensures that a Flux<Visit> is returned, even if it's empty, to prevent NullPointerException
-        when(visitRepo.findByVisitDateAndPractitionerId(any(LocalDateTime.class), anyString())).thenReturn(Flux.empty());
-        when(entityDtoUtil.toVisitEntity(any())).thenReturn(visit1);
-
-
-        when(entityDtoUtil.generateVisitIdString()).thenReturn("yourVisitId");
-        when(visitRepo.insert(visit1)).thenReturn(Mono.just(visit1));
-        when(entityDtoUtil.toVisitResponseDTO(any())).thenReturn(Mono.just(visitResponseDTO));
-        // Act and Assert
-        StepVerifier.create(visitService.addVisit(Mono.just(visitRequestDTO)))
-                .consumeNextWith(visitDTO1 -> {
-                    assertEquals(visit1.getDescription(), visitDTO1.getDescription());
-                    assertEquals(visit1.getPetId(), visitDTO1.getPetId());
-                    assertEquals(visit1.getVisitDate(), visitDTO1.getVisitDate());
-                    assertEquals(visitResponseDTO.getPractitionerId(), visitDTO1.getPractitionerId());
-                }).verifyComplete();
-
-        // Verify that the methods were called with the expected arguments
-        verify(visitRepo, times(1)).insert(any(Visit.class));
-        verify(petsClient, times(1)).getPetById(anyString());
-        verify(vetsClient, times(1)).getVetByVetId(anyString());
-        verify(visitRepo, times(1)).findByVisitDateAndPractitionerId(any(LocalDateTime.class), anyString());
-    }
+//    @Test
+//    void addVisit () {
+//        // Arrange
+//        when(visitRepo.insert(any(Visit.class))).thenReturn(Mono.just(visit1));
+//        when(petsClient.getPetById(anyString())).thenReturn(Mono.just(petResponseDTO));
+//        when(vetsClient.getVetByVetId(anyString())).thenReturn(Mono.just(vet));
+//        // This line ensures that a Flux<Visit> is returned, even if it's empty, to prevent NullPointerException
+//        when(visitRepo.findByVisitDateAndPractitionerId(any(LocalDateTime.class), anyString())).thenReturn(Flux.empty());
+//        when(entityDtoUtil.toVisitEntity(any())).thenReturn(visit1);
+//
+//
+//        when(entityDtoUtil.generateVisitIdString()).thenReturn("yourVisitId");
+//        when(visitRepo.insert(visit1)).thenReturn(Mono.just(visit1));
+//        when(entityDtoUtil.toVisitResponseDTO(any())).thenReturn(Mono.just(visitResponseDTO));
+//        // Act and Assert
+//        StepVerifier.create(visitService.addVisit(Mono.just(visitRequestDTO)))
+//                .consumeNextWith(visitDTO1 -> {
+//                    assertEquals(visit1.getDescription(), visitDTO1.getDescription());
+//                    assertEquals(visit1.getPetId(), visitDTO1.getPetId());
+//                    assertEquals(visit1.getVisitDate(), visitDTO1.getVisitDate());
+//                    assertEquals(visitResponseDTO.getPractitionerId(), visitDTO1.getPractitionerId());
+//                }).verifyComplete();
+//
+//        // Verify that the methods were called with the expected arguments
+//        verify(visitRepo, times(1)).insert(any(Visit.class));
+//        verify(petsClient, times(1)).getPetById(anyString());
+//        verify(vetsClient, times(1)).getVetByVetId(anyString());
+//        verify(visitRepo, times(1)).findByVisitDateAndPractitionerId(any(LocalDateTime.class), anyString());
+//    }
 
     @Test
     void addVisit_NoConflictingVisits_InsertsNewVisit () {

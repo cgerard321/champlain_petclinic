@@ -24,7 +24,6 @@ import reactor.core.publisher.Mono;
 @Slf4j
 @RequestMapping("/api/v2/gateway/emailing")
 @Validated
-@CrossOrigin(origins = "http://localhost:3000, http://localhost:80")
 public class EmailingController {
 
     private final EmailingServiceClient emailingService;

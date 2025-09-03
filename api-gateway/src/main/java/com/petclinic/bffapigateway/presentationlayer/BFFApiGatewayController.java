@@ -47,7 +47,6 @@ import java.util.Optional;
 @Slf4j
 @RequestMapping("/api/gateway")
 @Validated
-@CrossOrigin(origins = "http://localhost:3000, http://localhost:80, http://localhost:8080")
 public class BFFApiGatewayController {
 
     private final CustomersServiceClient customersServiceClient;
@@ -169,7 +168,7 @@ public class BFFApiGatewayController {
     public Flux<BillResponseDTO> getAllPaidBills() {
         return billServiceClient.getAllPaidBills();
     }
-
+    
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping(value = "bills/unpaid", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<BillResponseDTO> getAllUnpaidBills() {
@@ -312,7 +311,7 @@ public class BFFApiGatewayController {
     public Flux<PetType> getPetTypes(){
         return customersServiceClient.getPetTypes();
     }
-
+    
     /*
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET})
     @PutMapping("pets/{petId}")

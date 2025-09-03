@@ -39,6 +39,8 @@ logging:
     root: INFO
     com.petclinic: DEBUG
 
+frontend:
+  url: http://localhost:3000
 
 ---
 spring:
@@ -89,4 +91,60 @@ logging:
   level:
     root: INFO
     com.petclinic: DEBUG
+
+frontend:
+  url: http://localhost:3000
+
+---
+spring:
+  codec:
+    max-in-memory-size: 16MB
+  config:
+    activate:
+      on-profile: prod
+
+
+server.port: 8080
+
+server:
+  error:
+    include-binding-errors: always
+    include-message: always
+
+app:
+  visits-service-new:
+    host: visits-service-new
+    port: 8080
+  vet-service:
+    host: vet-service
+    port: 8080
+  customers-service:
+    host: customers-service-reactive
+    port: 8080
+  billing-service:
+    host: billing-service
+    port: 8080
+  auth-service:
+    host: auth
+    port: 8080
+  inventory-service:
+    host: inventory
+    port: 8080
+  products-service:
+    host: products-service
+    port: 8080
+  cart-service:
+    host: cart-service
+    port: 8080
+  emailing-service:
+    host: emailing-service
+    port: 5115
+
+logging:
+  level:
+    root: INFO
+    com.petclinic: DEBUG
+
+frontend:
+  url: https://petclinic.benmusicgeek.synology.me
 

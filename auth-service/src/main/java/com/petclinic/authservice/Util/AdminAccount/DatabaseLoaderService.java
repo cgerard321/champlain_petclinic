@@ -27,6 +27,11 @@ public class DatabaseLoaderService implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
+        
+       // if items in the database, do not run this
+        if (userRepo.count() > 0 || roleRepo.count() > 0)
+            return;
+        
         roleRepo.save(Role.builder().name("ADMIN").build());
         roleRepo.save(Role.builder().name("VET").build());
         roleRepo.save(Role.builder().name("OWNER").build());

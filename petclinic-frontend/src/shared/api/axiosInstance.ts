@@ -1,15 +1,53 @@
-import axios, { AxiosInstance } from 'axios';
+import axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import axiosErrorResponseHandler from '@/shared/api/axiosErrorResponseHandler.ts';
 
 axios.defaults.withCredentials = true;
 
+// Extend AxiosRequestConfig to include our custom useV2 property
+declare module 'axios' {
+  export interface AxiosRequestConfig {
+    useV2?: boolean;
+  }
+}
+
+// Extend InternalAxiosRequestConfig to include our custom useV2 property
+interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
+  useV2?: boolean;
+}
+
 const createAxiosInstance = (): AxiosInstance => {
   const instance = axios.create({
-    baseURL: import.meta.env.VITE_BACKEND_URL,
+    baseURL: import.meta.env.VITE_BACKEND_URL, // Base URL without version
     headers: {
       'Content-Type': 'application/json',
     },
   });
+
+  // Request interceptor to modify URL based on useV2 flag
+  instance.interceptors.request.use(
+    (config: CustomAxiosRequestConfig) => {
+      // Default to v2 if useV2 is not specified
+      const useV2 = config.useV2 !== undefined ? config.useV2 : true;
+      const versionPath = useV2 ? '/v2/gateway' : '/gateway';
+
+      // Modify the URL to include the version path
+      if (
+        config.url &&
+        !config.url.startsWith('http://') &&
+        !config.url.startsWith('https://')
+      ) {
+        config.url = versionPath + config.url;
+      }
+
+      // Remove the custom property from config
+      delete config.useV2;
+
+      return config;
+    },
+    error => {
+      return Promise.reject(error);
+    }
+  );
 
   // response interceptor to handle errors globally
   instance.interceptors.response.use(
@@ -39,4 +77,5 @@ const handleAxiosError = (error: unknown): void => {
 };
 
 const axiosInstance = createAxiosInstance();
+
 export default axiosInstance;

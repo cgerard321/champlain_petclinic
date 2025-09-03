@@ -21,7 +21,6 @@ import reactor.core.publisher.Mono;
 @Slf4j
 @RequestMapping("/api/v2/gateway/products")
 @Validated
-@CrossOrigin(origins = "http://localhost:3000, http://localhost:80",  methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PATCH, RequestMethod.PUT, RequestMethod.DELETE})
 public class ProductController {
 
     private final ProductsServiceClient productsServiceClient;

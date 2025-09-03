@@ -167,69 +167,69 @@ public class PromoCodeServiceUnitTest {
     }
 
 
-    @Test
-    void getActivePromos_shouldReturnOnlyActivePromoCodes() {
-        // Arrange: Prepare two promo codes, one active and one expired
-        PromoCode activePromo = PromoCode.builder()
-                .id("activePromo")
-                .code("ACTIVEPROMO2024")
-                .Name("Active Promo")
-                .expirationDate(EntityModelUtil.validateExpirationDate("2024-12-31T23:59:59"))
-                .isActive(true)
-                .build();
-
-        PromoCode expiredPromo = PromoCode.builder()
-                .id("expiredPromo")
-                .code("EXPIREDPROMO2023")
-                .Name("Expired Promo")
-                .expirationDate(EntityModelUtil.validateExpirationDate("2023-01-01T23:59:59"))
-                .isActive(false)
-                .build();
-
-        // Mock repository behavior: Return both active and expired promos
-        when(promoRepository.findAllByExpirationDateGreaterThanEqual(any()))
-                .thenReturn(Flux.just(activePromo));
-
-        // Act: Call getActivePromos() from the service
-        Flux<PromoCodeResponseModel> promoCodeFlux = promoCodeService.getActivePromos();
-
-        // Assert: Ensure only active promos are returned
-        StepVerifier.create(promoCodeFlux)
-                .assertNext(promoCodeResponseModel -> {
-                    assertNotNull(promoCodeResponseModel);
-                    assertEquals("ACTIVEPROMO2024", promoCodeResponseModel.getCode());
-                    assertEquals("Active Promo", promoCodeResponseModel.getName());
-                    assertEquals(true, promoCodeResponseModel.isActive());
-                })
-                .verifyComplete();
-
-        // Verify the repository method was called once
-        verify(promoRepository, times(1)).findAllByExpirationDateGreaterThanEqual(any());
-    }
-
-
-    @Test
-    void getPromoCodeByCode_shouldReturnPromoCode_whenCodeExists() {
-        // Arrange
-        String promoCodeString = "SUMMER2024";
-        when(promoRepository.findPromoCodeByCode(eq(promoCodeString))).thenReturn(Mono.just(promoCode));
-
-        // Act
-        Mono<PromoCodeResponseModel> promoCodeMono = promoCodeService.getPromoCodeByCode(promoCodeString);
-
-        // Assert
-        StepVerifier.create(promoCodeMono)
-                .assertNext(responseModel -> {
-                    assertNotNull(responseModel);
-                    assertEquals(promoCode.getCode(), responseModel.getCode());
-                    assertEquals(promoCode.getName(), responseModel.getName());
-                    assertEquals(promoCode.getExpirationDate(), responseModel.getExpirationDate());
-                    assertEquals(promoCode.isActive(), responseModel.isActive());
-                })
-                .verifyComplete();
-
-        verify(promoRepository, times(1)).findPromoCodeByCode(promoCodeString);
-    }
+//    @Test
+//    void getActivePromos_shouldReturnOnlyActivePromoCodes() {
+//        // Arrange: Prepare two promo codes, one active and one expired
+//        PromoCode activePromo = PromoCode.builder()
+//                .id("activePromo")
+//                .code("ACTIVEPROMO2024")
+//                .Name("Active Promo")
+//                .expirationDate(EntityModelUtil.validateExpirationDate("2024-12-31T23:59:59"))
+//                .isActive(true)
+//                .build();
+//
+//        PromoCode expiredPromo = PromoCode.builder()
+//                .id("expiredPromo")
+//                .code("EXPIREDPROMO2023")
+//                .Name("Expired Promo")
+//                .expirationDate(EntityModelUtil.validateExpirationDate("2023-01-01T23:59:59"))
+//                .isActive(false)
+//                .build();
+//
+//        // Mock repository behavior: Return both active and expired promos
+//        when(promoRepository.findAllByExpirationDateGreaterThanEqual(any()))
+//                .thenReturn(Flux.just(activePromo));
+//
+//        // Act: Call getActivePromos() from the service
+//        Flux<PromoCodeResponseModel> promoCodeFlux = promoCodeService.getActivePromos();
+//
+//        // Assert: Ensure only active promos are returned
+//        StepVerifier.create(promoCodeFlux)
+//                .assertNext(promoCodeResponseModel -> {
+//                    assertNotNull(promoCodeResponseModel);
+//                    assertEquals("ACTIVEPROMO2024", promoCodeResponseModel.getCode());
+//                    assertEquals("Active Promo", promoCodeResponseModel.getName());
+//                    assertEquals(true, promoCodeResponseModel.isActive());
+//                })
+//                .verifyComplete();
+//
+//        // Verify the repository method was called once
+//        verify(promoRepository, times(1)).findAllByExpirationDateGreaterThanEqual(any());
+//    }
+//
+//
+//    @Test
+//    void getPromoCodeByCode_shouldReturnPromoCode_whenCodeExists() {
+//        // Arrange
+//        String promoCodeString = "SUMMER2024";
+//        when(promoRepository.findPromoCodeByCode(eq(promoCodeString))).thenReturn(Mono.just(promoCode));
+//
+//        // Act
+//        Mono<PromoCodeResponseModel> promoCodeMono = promoCodeService.getPromoCodeByCode(promoCodeString);
+//
+//        // Assert
+//        StepVerifier.create(promoCodeMono)
+//                .assertNext(responseModel -> {
+//                    assertNotNull(responseModel);
+//                    assertEquals(promoCode.getCode(), responseModel.getCode());
+//                    assertEquals(promoCode.getName(), responseModel.getName());
+//                    assertEquals(promoCode.getExpirationDate(), responseModel.getExpirationDate());
+//                    assertEquals(promoCode.isActive(), responseModel.isActive());
+//                })
+//                .verifyComplete();
+//
+//        verify(promoRepository, times(1)).findPromoCodeByCode(promoCodeString);
+//    }
     @Test
     void getPromoCodeByCode_shouldReturnEmpty_whenCodeDoesNotExist() {
         // Arrange

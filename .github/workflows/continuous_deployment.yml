@@ -1,0 +1,23 @@
+name: CD Webhook Trigger
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - main 
+
+jobs:
+  call_webhook:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call webhook
+        env:
+          WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }} 
+          SHA: ${{ github.event.pull_request.merge_commit_sha }} 
+        run: |
+          if [ -z "$WEBHOOK_URL" ]; then
+            echo "WEBHOOK_URL secret not set. Skipping webhook call."
+            exit 1
+          fi        
+          curl --location --request POST "$WEBHOOK_URL"

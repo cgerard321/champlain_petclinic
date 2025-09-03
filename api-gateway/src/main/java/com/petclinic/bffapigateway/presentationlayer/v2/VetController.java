@@ -36,7 +36,6 @@ import java.util.List;
 @Slf4j
 @RequestMapping("/api/v2/gateway/vets")
 @Validated
-@CrossOrigin(origins = "http://localhost:3000, http://localhost:80")
 public class VetController {
 
 
