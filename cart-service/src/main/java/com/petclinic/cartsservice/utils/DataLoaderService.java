@@ -22,6 +22,12 @@ public class DataLoaderService implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
 
+        // If the db is not empty, then return
+        if (Boolean.TRUE.equals(cartRepository.findAll().hasElements().block())) {
+            return;
+        }
+
+
         CartProduct product1 = CartProduct.builder()
                 .productId("06a7d573-bcab-4db3-956f-773324b92a80")
                 .imageId("08a5af6b-3501-4157-9a99-1aa82387b9e4")

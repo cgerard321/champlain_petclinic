@@ -11,6 +11,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
 import java.time.LocalDate;
 import java.util.UUID;
 
@@ -27,6 +28,12 @@ public class DataSetupService implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
+
+        // If the db is not empty, then return
+        if (Boolean.TRUE.equals(billService.getAllBills().hasElements().block())) {
+            return;
+        }
+
 
 
         Bill b1 = Bill.builder()
@@ -269,7 +276,7 @@ public class DataSetupService implements CommandLineRunner {
                 .dueDate(LocalDate.of(2024, 11, 30))
                 .build();
 
-        Flux.just(b1,b2,b3,b4,b5, b6, b7, b8, b9, b10, b11, b12, b13, b14, b15)
+        Flux.just(b1, b2, b3, b4, b5, b6, b7, b8, b9, b10, b11, b12, b13, b14, b15)
                 .flatMap(b -> billService.CreateBillForDB(Mono.just(b))
                         .log(b.toString()))
                 .subscribe();
