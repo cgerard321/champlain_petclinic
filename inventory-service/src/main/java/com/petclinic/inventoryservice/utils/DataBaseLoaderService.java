@@ -26,17 +26,6 @@ public class DataBaseLoaderService implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
 
-        // If the db is not empty, then return
-        try {
-            if (Boolean.TRUE.equals(inventoryRepository.findAll().hasElements().block())) return;
-            if (Boolean.TRUE.equals(productRepository.findAll().hasElements().block())) return;
-            if (Boolean.TRUE.equals(inventoryTypeRepository.findAll().hasElements().block())) return;
-            if (Boolean.TRUE.equals(inventoryNameRepository.findAll().hasElements().block())) return;
-        } catch (Exception e) {
-            System.out.println("Exception occurred while checking if the database is empty: " + e.getMessage());
-            return;
-        }
-
         InventoryType inventoryType1 = InventoryType.builder()
                 .typeId(UUID.randomUUID().toString())
                 .type("Equipment")
@@ -551,6 +540,11 @@ public class DataBaseLoaderService implements CommandLineRunner {
                 .productSalePrice(60.00)
                 .build();
 
+        // If the db is not empty, then return
+        if (Boolean.TRUE.equals(inventoryRepository.findAll().hasElements().block())) return;
+        if (Boolean.TRUE.equals(productRepository.findAll().hasElements().block())) return;
+        if (Boolean.TRUE.equals(inventoryTypeRepository.findAll().hasElements().block())) return;
+        if (Boolean.TRUE.equals(inventoryNameRepository.findAll().hasElements().block())) return;
 
         //Inventory1 ---------------------------------------------------
         inventory1.addProduct(supply7);
