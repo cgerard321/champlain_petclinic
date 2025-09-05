@@ -21,6 +21,9 @@ public class DataSetupService implements CommandLineRunner {
     @Autowired
     BillService billService;
 
+    @Autowired
+    BillRepository billRepository;
+
     public DataSetupService(BillService billService) {
         this.billService = billService;
     }
