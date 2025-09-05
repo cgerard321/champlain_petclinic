@@ -27,9 +27,27 @@ public class DataBaseLoaderService implements CommandLineRunner {
     public void run(String... args) throws Exception {
 
         // If the db is not empty, then return
-        if (inventoryRepository.count().block() != 0) {
+        try {
+            if (Boolean.TRUE.equals(inventoryRepository.findAll().hasElements().block())) {
+                return;
+            }
+
+            if (Boolean.TRUE.equals(productRepository.findAll().hasElements().block())) {
+                return;
+            }
+
+            if (Boolean.TRUE.equals(inventoryTypeRepository.findAll().hasElements().block())) {
+                return;
+            }
+
+            if (Boolean.TRUE.equals(inventoryNameRepository.findAll().hasElements().block())) {
+                return;
+            }
+        } catch (Exception e) {
+            System.out.println("Database connection error: " + e.getMessage());
             return;
         }
+
 
         InventoryType inventoryType1 = InventoryType.builder()
                 .typeId(UUID.randomUUID().toString())
