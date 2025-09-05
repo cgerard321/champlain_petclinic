@@ -10,7 +10,6 @@ import com.petclinic.visits.visitsservicenew.DataLayer.Status;
 import com.petclinic.visits.visitsservicenew.DataLayer.Visit;
 import com.petclinic.visits.visitsservicenew.DataLayer.VisitRepo;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -20,19 +19,15 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 @Service
+@RequiredArgsConstructor
 public class DataSetupService implements CommandLineRunner {
-
-    @Autowired
-    VisitRepo visitRepo;
-
-    @Autowired
-    ReviewRepository reviewRepository;
-
-    @Autowired
-    EmergencyRepository emergencyRepository;
+    private final VisitRepo visitRepo;
+    private final ReviewRepository reviewRepository;
+    private final EmergencyRepository emergencyRepository;
 
     @Override
     public void run(String... args) throws Exception {
+
         // If db contains anything, skip.
         if (Boolean.TRUE.equals(visitRepo.findAll().hasElements().block())) {
             return;
