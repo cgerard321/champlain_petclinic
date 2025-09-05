@@ -27,12 +27,21 @@ public class DataBaseLoaderService implements CommandLineRunner {
     public void run(String... args) throws Exception {
 
         // If the db is not empty, then return
-        if (Boolean.TRUE.equals(inventoryRepository.findAll().hasElements().block())) return;
-        if (Boolean.TRUE.equals(productRepository.findAll().hasElements().block())) return;
-        if (Boolean.TRUE.equals(inventoryTypeRepository.findAll().hasElements().block())) return;
-        if (Boolean.TRUE.equals(inventoryNameRepository.findAll().hasElements().block())) return;
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        } // Wait for 2 seconds to let the db start
 
-
+        try {
+            if (Boolean.TRUE.equals(inventoryRepository.findAll().hasElements().block())) return;
+            if (Boolean.TRUE.equals(productRepository.findAll().hasElements().block())) return;
+            if (Boolean.TRUE.equals(inventoryTypeRepository.findAll().hasElements().block())) return;
+            if (Boolean.TRUE.equals(inventoryNameRepository.findAll().hasElements().block())) return;
+        } catch (Exception e) {
+            System.out.println("Exception occurred while checking if the database is empty: " + e.getMessage());
+            return;
+        }
 
         InventoryType inventoryType1 = InventoryType.builder()
                 .typeId(UUID.randomUUID().toString())
