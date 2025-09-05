@@ -79,7 +79,7 @@ services:
     restart: unless-stopped
     depends_on:
       - mongo-vets
-      - pos
+      - postgres-vets
 
   customers-service:
     build: customers-service-reactive
