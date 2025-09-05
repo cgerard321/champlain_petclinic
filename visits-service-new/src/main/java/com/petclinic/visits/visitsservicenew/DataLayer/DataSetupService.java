@@ -32,14 +32,6 @@ public class DataSetupService implements CommandLineRunner {
             return;
         }
 
-        if (Boolean.TRUE.equals(reviewRepository.findAll().hasElements().block())) {
-            return;
-        }
-
-        if (Boolean.TRUE.equals(emergencyRepository.findAll().hasElements().block())) {
-            return;
-        }
-        
         setupVisits();
         setupReviews();
         setupEmergencies();

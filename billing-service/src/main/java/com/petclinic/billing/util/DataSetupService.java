@@ -33,12 +33,15 @@ public class DataSetupService implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
 
+        try {
+
         // If the db is not empty, then return
         if (Boolean.TRUE.equals(billRepository.findAll().hasElements().block())) {
             return;
         }
-
-
+        } catch (NullPointerException e) {
+            System.out.println("Database not connected, skipping data setup.");
+        }
 
         Bill b1 = Bill.builder()
                 .billId(UUID.randomUUID().toString())
