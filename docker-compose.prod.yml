@@ -122,7 +122,7 @@ services:
   emailing-service:
     image: emailing-service
     pull_policy: never
-    container_name: emailing-service-container
+    container_name: emailing-service
     build:
       context: ./emailing-service
       dockerfile: emailing-service/Dockerfile
@@ -133,7 +133,8 @@ services:
       - stack.env
     restart: unless-stopped
     depends_on:
-      - emailing-service-mysql-db
+        mysql-emailing:
+            condition: service_healthy
 
   products-service:
     build: products-service
