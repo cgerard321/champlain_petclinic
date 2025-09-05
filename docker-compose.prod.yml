@@ -40,7 +40,7 @@ services:
     depends_on:
       - customers-service
       - vet-service
-      - visits-service-new
+      - visits-service
       - products-service
       - cart-service
       - inventory-service
