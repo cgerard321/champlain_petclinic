@@ -27,19 +27,9 @@ public class DataBaseLoaderService implements CommandLineRunner {
     public void run(String... args) throws Exception {
 
         // If the db is not empty, then return
-        boolean anyPresent = Boolean.TRUE.equals(
-                Flux.mergeDelayError(1,
-                                inventoryRepository.findAll().take(1),
-                                productRepository.findAll().take(1),
-                                inventoryTypeRepository.findAll().take(1),
-                                inventoryNameRepository.findAll().take(1))
-                        .hasElements()
-                        .onErrorReturn(true) // fail-closed: if check fails, don’t seed
-                        .block()
-        );
-
-        if (anyPresent) return;
-
+        if (inventoryRepository.count().block() != 0) {
+            return;
+        }
 
         InventoryType inventoryType1 = InventoryType.builder()
                 .typeId(UUID.randomUUID().toString())
