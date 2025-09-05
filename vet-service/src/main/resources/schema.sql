@@ -1,4 +1,3 @@
-DROP TABLE IF EXISTS images;
 
 CREATE TABLE IF NOT EXISTS images(
      id SERIAL PRIMARY KEY,
@@ -7,7 +6,7 @@ CREATE TABLE IF NOT EXISTS images(
     img_type VARCHAR(50),
     img_data BYTEA
 );
-DROP TABLE IF EXISTS albums;
+
 CREATE TABLE albums (
      id SERIAL PRIMARY KEY,
      vet_id VARCHAR(255) NOT NULL,
@@ -16,8 +15,6 @@ CREATE TABLE albums (
      img_data BYTEA
 );
 
-
-DROP TABLE IF EXISTS badges;
 CREATE TABLE IF NOT EXISTS badges (
     id SERIAL,
     vet_id varchar(255),
