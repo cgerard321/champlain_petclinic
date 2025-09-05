@@ -27,6 +27,10 @@ public class DataBaseLoaderService implements CommandLineRunner {
     public void run(String... args) throws Exception {
 
         // If the db is not empty, then return
+        Mono<Long> inventoryCount = inventoryRepository.count();
+        if (inventoryCount.block() != 0) {
+            return;
+        }
 
         InventoryType inventoryType1 = InventoryType.builder()
                 .typeId(UUID.randomUUID().toString())
