@@ -176,9 +176,9 @@ services:
       timeout: 5s
       retries: 10
 
-  emailing-service-mysql-db:
+  mysql-emailing:
     image: mysql:8.0
-    container_name: emailing-service-mysql-db
+    container_name: mysql-emailing
     platform: linux/amd64
     environment:
       - MYSQL_ROOT_PASSWORD=Your_password123
@@ -187,7 +187,7 @@ services:
     ports:
       - "3308:3306"
     volumes:
-      - emailing-service-mysql-db-data:/var/lib/mysql
+      - mysql-emailing-data:/var/lib/mysql
     restart: unless-stopped
 
   postgres-vets:
@@ -322,4 +322,4 @@ volumes:
   mongo-carts-data:
   mongo-carts-config:
   postgres-vets-data:
-  emailing-service-mysql-db-data:
+  mysql-emailing-data:
