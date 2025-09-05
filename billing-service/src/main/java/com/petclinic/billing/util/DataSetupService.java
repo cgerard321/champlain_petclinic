@@ -21,13 +21,8 @@ public class DataSetupService implements CommandLineRunner {
     @Autowired
     BillService billService;
 
-    @Autowired
-    BillRepository billRepository;
-
-    public DataSetupService(BillService billService, BillRepository billRepository) {
+    public DataSetupService(BillService billService) {
         this.billService = billService;
-        this.billRepository = billRepository;
-
     }
 
 
@@ -37,7 +32,7 @@ public class DataSetupService implements CommandLineRunner {
         // If the db is not empty, then return
         try {
 
-            if (Boolean.TRUE.equals(billRepository.findAll().hasElements().block())) {
+            if (Boolean.TRUE.equals(billService.getAllBills().hasElements().block())) {
                 return;
             }
 
