@@ -79,7 +79,7 @@ services:
     restart: unless-stopped
     depends_on:
       - mongo-vets
-      - vets-postgres
+      - pos
 
   customers-service:
     build: customers-service-reactive
@@ -190,9 +190,9 @@ services:
       - emailing-service-mysql-db-data:/var/lib/mysql
     restart: unless-stopped
 
-  vets-postgres:
+  postgres-vets:
     image: postgres
-    container_name: vets-postgres
+    container_name: postgres-vets
     environment:
       - POSTGRES_USER=user
       - POSTGRES_PASSWORD=pwd
@@ -200,7 +200,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - postgres-vets-data:/var/lib/postgresql/data
     restart: unless-stopped
 
   # -------------------
@@ -232,9 +232,9 @@ services:
       - mongo-billing-config:/data/configdb
     restart: unless-stopped
 
-  mongo-:
+  mongo-visits:
     image: mongo
-    container_name: mongo-
+    container_name: mongo-visits
     ports:
       - "27015:27017"
     environment:
@@ -321,5 +321,5 @@ volumes:
   mongo-products-config:
   mongo-carts-data:
   mongo-carts-config:
-  vets-postgres-data:
+  postgres-vets-data:
   emailing-service-mysql-db-data:
