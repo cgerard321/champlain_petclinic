@@ -133,8 +133,7 @@ services:
       - stack.env
     restart: unless-stopped
     depends_on:
-        mysql-emailing:
-            condition: service_healthy
+        - mysql-emailing
 
   products-service:
     build: products-service
