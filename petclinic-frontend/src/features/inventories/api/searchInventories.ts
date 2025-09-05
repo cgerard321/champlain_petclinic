@@ -20,7 +20,7 @@ export async function searchInventories(
     : `inventories?page=${currentPage}&size=${listSize}`;
 
   const response = await axiosInstance.get<Inventory[]>(
-    axiosInstance.defaults.baseURL + 'v2/gateway' + url
+    axiosInstance.defaults.baseURL + 'v2/gateway/' + url
   );
   return response.data;
 }
