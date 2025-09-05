@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS images(
     img_data BYTEA
 );
 
-CREATE TABLE albums (
+CREATE TABLE IF NOT EXISTS albums (
      id SERIAL PRIMARY KEY,
      vet_id VARCHAR(255) NOT NULL,
      filename VARCHAR(255),
