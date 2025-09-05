@@ -38,7 +38,7 @@ services:
       - SPRING_PROFILES_ACTIVE=prod
     restart: unless-stopped
     depends_on:
-      - customers-service-reactive
+      - customers-service
       - vet-service
       - visits-service-new
       - products-service
