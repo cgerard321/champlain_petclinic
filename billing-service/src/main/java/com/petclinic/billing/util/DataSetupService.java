@@ -34,7 +34,7 @@ public class DataSetupService implements CommandLineRunner {
     public void run(String... args) throws Exception {
 
         // If the db is not empty, then return
-        if (Boolean.TRUE.equals(billService.getAllBills().hasElements().block())) {
+        if (Boolean.TRUE.equals(billRepository.findAll().hasElements().block())) {
             return;
         }
 
