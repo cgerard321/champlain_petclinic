@@ -23,10 +23,16 @@ public class DataLoaderService implements CommandLineRunner {
     public void run(String... args) throws Exception {
 
         // If the db is not empty, then return
-        if (Boolean.TRUE.equals(cartRepository.findAll().hasElements().block())) {
+        try {
+
+            if (Boolean.TRUE.equals(cartRepository.findAll().hasElements().block())) {
+                return;
+            }
+
+        } catch (Exception e) {
+            System.out.println("Error checking if carts exist: " + e.getMessage());
             return;
         }
-
 
         CartProduct product1 = CartProduct.builder()
                 .productId("06a7d573-bcab-4db3-956f-773324b92a80")

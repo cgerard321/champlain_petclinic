@@ -29,15 +29,21 @@ public class DataSetupService implements CommandLineRunner {
     public void run(String... args) throws Exception {
 
         // If db contains anything, skip.
-        if (Boolean.TRUE.equals(visitRepo.findAll().hasElements().block())) {
-            return;
-        }
+        try {
+            if (Boolean.TRUE.equals(visitRepo.findAll().hasElements().block())) {
+                return;
+            }
 
-        if (Boolean.TRUE.equals(reviewRepository.findAll().hasElements().block())) {
-            return;
-        }
+            if (Boolean.TRUE.equals(reviewRepository.findAll().hasElements().block())) {
+                return;
+            }
 
-        if (Boolean.TRUE.equals(emergencyRepository.findAll().hasElements().block())) {
+            if (Boolean.TRUE.equals(emergencyRepository.findAll().hasElements().block())) {
+                return;
+            }
+
+        } catch (Exception e) {
+            System.out.println("Error checking if visits/reviews/emergencies exist: " + e.getMessage());
             return;
         }
 

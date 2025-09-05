@@ -35,7 +35,14 @@ public class DataSetupService implements CommandLineRunner {
     public void run(String... args) throws Exception {
 
         // If the db is not empty, then return
-        if (Boolean.TRUE.equals(billRepository.findAll().hasElements().block())) {
+        try {
+
+            if (Boolean.TRUE.equals(billRepository.findAll().hasElements().block())) {
+                return;
+            }
+
+        } catch (Exception e) {
+            System.out.println("Exception occurred while checking if the database is empty: " + e.getMessage());
             return;
         }
 

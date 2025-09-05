@@ -36,10 +36,16 @@ public class DataSetupService implements CommandLineRunner {
     public void run(String... args) throws Exception {
 
         // If the db is not empty, then skip the data setup
-        if (Boolean.TRUE.equals(petTypeService.getAllPetTypes().hasElements().block())) return;
-        if (Boolean.TRUE.equals(petService.getAllPets().hasElements().block())) return;
-        if (Boolean.TRUE.equals(ownerService.getAllOwners().hasElements().block())) return;
+        try {
 
+            if (Boolean.TRUE.equals(petTypeService.getAllPetTypes().hasElements().block())) return;
+            if (Boolean.TRUE.equals(petService.getAllPets().hasElements().block())) return;
+            if (Boolean.TRUE.equals(ownerService.getAllOwners().hasElements().block())) return;
+
+        } catch (Exception e) {
+            System.out.println("Error checking if data exists: " + e.getMessage());
+            return;
+        }
 
 
         PetType pt1 = new PetType("1", "4283c9b8-4ffd-4866-a5ed-287117c60a40", "Cat", "Mammal");

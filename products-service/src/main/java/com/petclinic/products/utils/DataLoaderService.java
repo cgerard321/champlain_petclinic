@@ -45,22 +45,28 @@ public class DataLoaderService implements CommandLineRunner {
     public void run(String... args) throws Exception {
 
         // If the database is not empty, do not load data
-        if (Boolean.TRUE.equals(productRepository.findAll().hasElements().block())) {
+        try {
+
+            if (Boolean.TRUE.equals(productRepository.findAll().hasElements().block())) {
+                return;
+            }
+
+            if (Boolean.TRUE.equals(productBundleRepository.findAll().hasElements().block())) {
+                return;
+            }
+
+            if (Boolean.TRUE.equals(imageRepository.findAll().hasElements().block())) {
+                return;
+            }
+
+            if (Boolean.TRUE.equals(ratingRepository.findAll().hasElements().block())) {
+                return;
+            }
+
+        } catch (Exception e) {
+            System.out.println("Error checking if products exist: " + e.getMessage());
             return;
         }
-
-        if (Boolean.TRUE.equals(productBundleRepository.findAll().hasElements().block())) {
-            return;
-        }
-
-        if (Boolean.TRUE.equals(imageRepository.findAll().hasElements().block())) {
-            return;
-        }
-
-        if (Boolean.TRUE.equals(ratingRepository.findAll().hasElements().block())) {
-            return;
-        }
-
 
         Product product1 = Product.builder()
                 .productId("06a7d573-bcab-4db3-956f-773324b92a80")
