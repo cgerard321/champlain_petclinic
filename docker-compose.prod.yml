@@ -54,13 +54,13 @@ services:
       - homepage.description=Petclinic Api Gateway
       - homepage.siteMonitor=https://petclinic-backend.benmusicgeek.synology.me/api/v2/gateway/vets
 
-  visits-service-new:
+  visits-service:
     build: visits-service-new
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     restart: unless-stopped
     depends_on:
-      - mongo2
+      - mongo-visits
       - mailer-service
 
   inventory-service:
@@ -78,10 +78,10 @@ services:
       - SPRING_PROFILES_ACTIVE=docker
     restart: unless-stopped
     depends_on:
-      - mongo
-      - postgres
+      - mongo-vets
+      -
 
-  customers-service-reactive:
+  customers-service:
     build: customers-service-reactive
     environment:
       - SPRING_PROFILES_ACTIVE=docker
@@ -96,7 +96,7 @@ services:
       - SPRING_PROFILES_ACTIVE=docker
     restart: unless-stopped
     depends_on:
-      mysql4:
+      mysql-auth:
         condition: service_healthy
       mailer-service:
         condition: service_started
@@ -108,7 +108,7 @@ services:
       - SPRING_PROFILES_ACTIVE=docker
     restart: unless-stopped
     depends_on:
-      - mongo1
+      - mongo-billing
 
   mailer-service:
     build: mailer-service
@@ -156,7 +156,7 @@ services:
   # -------------------
   # DATABASES
   # -------------------
-  mysql4:
+  mysql-auth:
     image: mysql:5.7
     platform: linux/amd64
     ports:
@@ -167,7 +167,7 @@ services:
       - MYSQL_USER=user
       - MYSQL_PASSWORD=pwd
     volumes:
-      - mysql4-data:/var/lib/mysql
+      - auth-db-data:/var/lib/mysql
       - ./data/init.d:/docker-entrypoint-initdb.d
     restart: unless-stopped
     healthcheck:
@@ -190,9 +190,9 @@ services:
       - emailing-service-mysql-db-data:/var/lib/mysql
     restart: unless-stopped
 
-  postgres:
+  vets-postgres:
     image: postgres
-    container_name: postgres
+    container_name: vets-postgres
     environment:
       - POSTGRES_USER=user
       - POSTGRES_PASSWORD=pwd
@@ -206,43 +206,43 @@ services:
   # -------------------
   # MONGODB DATABASES
   # -------------------
-  mongo:
+  mongo-vets:
     image: mongo
-    container_name: mongo
+    container_name: mongo-vets
     ports:
       - "27017:27017"
     environment:
       - MONGO_INITDB_ROOT_USERNAME=root
       - MONGO_INITDB_ROOT_PASSWORD=password
     volumes:
-      - mongo-data:/data/db
-      - mongo-config:/data/configdb
+      - mongo-vets-data:/data/db
+      - mongo-vets-config:/data/configdb
     restart: unless-stopped
 
-  mongo1:
+  mongo-billing:
     image: mongo
-    container_name: mongo1
+    container_name: mongo-billing
     ports:
       - "27018:27017"
     environment:
       - MONGO_INITDB_ROOT_USERNAME=root
       - MONGO_INITDB_ROOT_PASSWORD=password
     volumes:
-      - mongo1-data:/data/db
-      - mongo1-config:/data/configdb
+      - mongo-billing-data:/data/db
+      - mongo-billing-config:/data/configdb
     restart: unless-stopped
 
-  mongo2:
+  mongo-:
     image: mongo
-    container_name: mongo2
+    container_name: mongo-
     ports:
       - "27015:27017"
     environment:
       - MONGO_INITDB_ROOT_USERNAME=root
       - MONGO_INITDB_ROOT_PASSWORD=password
     volumes:
-      - mongo2-data:/data/db
-      - mongo2-config:/data/configdb
+      - mongo-visits-data:/data/db
+      - mongo-visits-config:/data/configdb
     restart: unless-stopped
     healthcheck:
       test: echo 'db.runCommand("ping").ok' | mongo localhost:27017/test --quiet
@@ -306,13 +306,13 @@ services:
 # VOLUMES
 # -------------------
 volumes:
-  mysql4-data:
-  mongo-data:
-  mongo-config:
-  mongo1-data:
-  mongo1-config:
-  mongo2-data:
-  mongo2-config:
+  auth-db-data:
+  mongo-vets-data:
+  mongo-vets-config:
+  mongo-billing-data:
+  mongo-billing-config:
+  mongo-visits-data:
+  mongo-visits-config:
   mongo-customers-data:
   mongo-customers-config:
   mongo-inventory-data:
@@ -321,5 +321,5 @@ volumes:
   mongo-products-config:
   mongo-carts-data:
   mongo-carts-config:
-  postgres-data:
+  vets-postgres-data:
   emailing-service-mysql-db-data:
