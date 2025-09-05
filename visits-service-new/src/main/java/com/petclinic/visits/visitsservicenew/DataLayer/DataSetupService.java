@@ -27,6 +27,26 @@ public class DataSetupService implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
+
+        // If db contains anything, skip.
+        try {
+            if (Boolean.TRUE.equals(visitRepo.findAll().hasElements().block())) {
+                return;
+            }
+
+            if (Boolean.TRUE.equals(reviewRepository.findAll().hasElements().block())) {
+                return;
+            }
+
+            if (Boolean.TRUE.equals(emergencyRepository.findAll().hasElements().block())) {
+                return;
+            }
+
+        } catch (Exception e) {
+            System.out.println("Error checking if visits/reviews/emergencies exist: " + e.getMessage());
+            return;
+        }
+
         setupVisits();
         setupReviews();
         setupEmergencies();
@@ -70,7 +90,7 @@ public class DataSetupService implements CommandLineRunner {
     private void setupEmergencies() {
         Emergency emergency1 = buildEmergency("emergencyId1", "2022-12-01 10:00", "Severe bleeding", "ecb109cd-57ea-4b85-b51e-99751fd1c349", "69f852ca-625b-11ee-8c99-0242ac120002", UrgencyLevel.HIGH, "Accident");
         Emergency emergency2 = buildEmergency("emergencyId2", "2023-01-15 15:00", "Broken leg", "0e4d8481-b611-4e52-baed-af16caa8bf8a", "69f85766-625b-11ee-8c99-0242ac120002", UrgencyLevel.MEDIUM, "Injury");
-        Emergency emergency3 = buildEmergency("emergencyId3", "2023-06-05 09:30", "Breathing issues", "0e4d8481-b611-4e52-baed-af16caa8bf8a","69f85bda-625b-11ee-8c99-0242ac120002", UrgencyLevel.HIGH, "Respiratory");
+        Emergency emergency3 = buildEmergency("emergencyId3", "2023-06-05 09:30", "Breathing issues", "0e4d8481-b611-4e52-baed-af16caa8bf8a", "69f85bda-625b-11ee-8c99-0242ac120002", UrgencyLevel.HIGH, "Respiratory");
 
         Flux.just(emergency1, emergency2, emergency3)
                 .flatMap(emergencyRepository::insert)

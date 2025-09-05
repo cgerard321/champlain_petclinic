@@ -43,6 +43,31 @@ public class DataLoaderService implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
+
+        // If the database is not empty, do not load data
+        try {
+
+            if (Boolean.TRUE.equals(productRepository.findAll().hasElements().block())) {
+                return;
+            }
+
+            if (Boolean.TRUE.equals(productBundleRepository.findAll().hasElements().block())) {
+                return;
+            }
+
+            if (Boolean.TRUE.equals(imageRepository.findAll().hasElements().block())) {
+                return;
+            }
+
+            if (Boolean.TRUE.equals(ratingRepository.findAll().hasElements().block())) {
+                return;
+            }
+
+        } catch (Exception e) {
+            System.out.println("Error checking if products exist: " + e.getMessage());
+            return;
+        }
+
         Product product1 = Product.builder()
                 .productId("06a7d573-bcab-4db3-956f-773324b92a80")
                 .imageId("08a5af6b-3501-4157-9a99-1aa82387b9e4")
@@ -390,15 +415,15 @@ public class DataLoaderService implements CommandLineRunner {
                 .subscribe();
 
         Flux.just(
-                rating1prod1, rating2prod1,
-                rating1prod2, rating2prod2,
-                rating1prod3, rating2prod3,
-                rating1prod4, rating2prod4,
-                rating1prod5, rating2prod5,
-                rating1prod6, rating2prod6,
-                rating1prod7, rating2prod7,
-                rating1prod8, rating2prod8
-        )
+                        rating1prod1, rating2prod1,
+                        rating1prod2, rating2prod2,
+                        rating1prod3, rating2prod3,
+                        rating1prod4, rating2prod4,
+                        rating1prod5, rating2prod5,
+                        rating1prod6, rating2prod6,
+                        rating1prod7, rating2prod7,
+                        rating1prod8, rating2prod8
+                )
                 .flatMap(s -> ratingRepository.insert(Mono.just(s))
                         .log(s.toString()))
                 .subscribe();

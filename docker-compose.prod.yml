@@ -244,11 +244,6 @@ services:
       - mongo2-data:/data/db
       - mongo2-config:/data/configdb
     restart: unless-stopped
-    healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongo localhost:27017/test --quiet
-      interval: 15s
-      retries: 5
-      start_period: 30s
 
   mongo-customers:
     image: mongo

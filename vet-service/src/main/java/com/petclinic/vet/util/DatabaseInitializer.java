@@ -29,7 +29,7 @@ public class DatabaseInitializer {
                     String createImagesTableSql = "CREATE TABLE IF NOT EXISTS images (" +
                             "id SERIAL PRIMARY KEY, " +// New foreign key to the albums table
                             "vet_id VARCHAR(255) NOT NULL, " +
-                            "filename VARCHAR(255) UNIQUE, " +
+                            "filename VARCHAR(255), " +
                             "img_type VARCHAR(20), " +
                             "img_data BYTEA " +
                             ")";

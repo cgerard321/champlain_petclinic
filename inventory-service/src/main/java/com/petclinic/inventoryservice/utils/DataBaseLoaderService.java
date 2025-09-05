@@ -7,12 +7,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.io.InputStream;
 import java.util.UUID;
 
 @Service
-public class DataBaseLoaderService  implements CommandLineRunner {
+public class DataBaseLoaderService implements CommandLineRunner {
     @Autowired
     InventoryRepository inventoryRepository;
     @Autowired
@@ -24,6 +25,30 @@ public class DataBaseLoaderService  implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
+
+        // If the db is not empty, then return
+        try {
+            if (Boolean.TRUE.equals(inventoryRepository.findAll().hasElements().block())) {
+                return;
+            }
+
+            if (Boolean.TRUE.equals(productRepository.findAll().hasElements().block())) {
+                return;
+            }
+
+            if (Boolean.TRUE.equals(inventoryTypeRepository.findAll().hasElements().block())) {
+                return;
+            }
+
+            if (Boolean.TRUE.equals(inventoryNameRepository.findAll().hasElements().block())) {
+                return;
+            }
+        } catch (Exception e) {
+            System.out.println("Database connection error: " + e.getMessage());
+            return;
+        }
+
+
         InventoryType inventoryType1 = InventoryType.builder()
                 .typeId(UUID.randomUUID().toString())
                 .type("Equipment")
@@ -44,7 +69,6 @@ public class DataBaseLoaderService  implements CommandLineRunner {
                 .typeId(UUID.randomUUID().toString())
                 .type("Diagnostic Kits")
                 .build();
-
 
 
         InventoryName inventoryName1 = InventoryName.builder()
@@ -602,7 +626,6 @@ public class DataBaseLoaderService  implements CommandLineRunner {
         //--------------------------------------------------------------
 
 
-
         Flux.just(supply1, supply2, supply3, supply4, supply5, supply6, supply7, supply8, supply9,
                         supply10, supply11, supply12, supply13, supply14, supply15,
                         supply16, supply17, supply18, supply19, supply20, supply21, supply22,
@@ -618,13 +641,13 @@ public class DataBaseLoaderService  implements CommandLineRunner {
                 .log()
                 .subscribe();
 
-        Flux.just(inventoryType1,inventoryType2,inventoryType3,inventoryType4,inventoryType5)
+        Flux.just(inventoryType1, inventoryType2, inventoryType3, inventoryType4, inventoryType5)
                 .flatMap(inventoryTypeRepository::insert)
                 .log()
                 .subscribe();
 
-        Flux.just(inventoryName1,inventoryName2,inventoryName3,inventoryName4,inventoryName5,
-                inventoryName6, inventoryName7, inventoryName8, inventoryName9, inventoryName10)
+        Flux.just(inventoryName1, inventoryName2, inventoryName3, inventoryName4, inventoryName5,
+                        inventoryName6, inventoryName7, inventoryName8, inventoryName9, inventoryName10)
                 .flatMap(inventoryNameRepository::insert)
                 .log()
                 .subscribe();

@@ -42,17 +42,48 @@ public class DataSetupService implements CommandLineRunner {
     private final PhotoRepository photoRepository;
     private final AlbumRepository albumRepository;
 
-    public DataSetupService(VetRepository vetRepository, RatingRepository ratingRepository, EducationRepository educationRepository, BadgeRepository badgeRepository, PhotoRepository photoRepository, AlbumRepository albumRepository){
+    public DataSetupService(VetRepository vetRepository, RatingRepository ratingRepository, EducationRepository educationRepository, BadgeRepository badgeRepository, PhotoRepository photoRepository, AlbumRepository albumRepository) {
         this.vetRepository = vetRepository;
         this.ratingRepository = ratingRepository;
         this.educationRepository = educationRepository;
-        this.badgeRepository=badgeRepository;
+        this.badgeRepository = badgeRepository;
         this.photoRepository = photoRepository;
         this.albumRepository = albumRepository;
     }
 
     @Override
     public void run(String... args) throws Exception {
+
+        // If data exists, do not insert
+        try {
+            if (Boolean.TRUE.equals(vetRepository.findAll().hasElements().block())) {
+                return;
+            }
+
+            if (Boolean.TRUE.equals(ratingRepository.findAll().hasElements().block())) {
+                return;
+            }
+
+            if (Boolean.TRUE.equals(educationRepository.findAll().hasElements().block())) {
+                return;
+            }
+
+            if (Boolean.TRUE.equals(badgeRepository.findAll().hasElements().block())) {
+                return;
+            }
+
+            if (Boolean.TRUE.equals(photoRepository.findAll().hasElements().block())) {
+                return;
+            }
+
+            if (Boolean.TRUE.equals(albumRepository.findAll().hasElements().block())) {
+                return;
+            }
+        } catch (Exception e) {
+            System.out.println("Error checking if vets exist: " + e.getMessage());
+            return;
+        }
+
         Specialty s1 = new Specialty("100001", "radiology");
         Specialty s2 = new Specialty("100002", "surgery");
         Specialty s3 = new Specialty("100003", "dentistry");
@@ -65,24 +96,24 @@ public class DataSetupService implements CommandLineRunner {
         Set<Workday> workdays5 = EnumSet.of(Workday.Monday, Workday.Tuesday, Workday.Wednesday, Workday.Thursday);
         Set<Workday> workdays6 = EnumSet.of(Workday.Monday, Workday.Tuesday, Workday.Friday);
 
-        List<WorkHour> workHourList1=new ArrayList<>();
+        List<WorkHour> workHourList1 = new ArrayList<>();
         workHourList1.addAll(Arrays.asList(WorkHour.Hour_8_9, WorkHour.Hour_9_10, WorkHour.Hour_10_11, WorkHour.Hour_11_12, WorkHour.Hour_12_13, WorkHour.Hour_13_14, WorkHour.Hour_14_15, WorkHour.Hour_15_16));
-        List<WorkHour> workHourList2=new ArrayList<>();
+        List<WorkHour> workHourList2 = new ArrayList<>();
         workHourList2.addAll(Arrays.asList(WorkHour.Hour_12_13, WorkHour.Hour_13_14, WorkHour.Hour_14_15, WorkHour.Hour_15_16, WorkHour.Hour_16_17, WorkHour.Hour_17_18, WorkHour.Hour_18_19, WorkHour.Hour_19_20));
-        List<WorkHour> workHourList3=new ArrayList<>();
+        List<WorkHour> workHourList3 = new ArrayList<>();
         workHourList3.addAll(Arrays.asList(WorkHour.Hour_10_11, WorkHour.Hour_11_12, WorkHour.Hour_12_13, WorkHour.Hour_13_14, WorkHour.Hour_14_15, WorkHour.Hour_15_16, WorkHour.Hour_16_17, WorkHour.Hour_17_18));
-        List<WorkHour> workHourList4=new ArrayList<>();
+        List<WorkHour> workHourList4 = new ArrayList<>();
         workHourList4.addAll(Arrays.asList(WorkHour.Hour_8_9, WorkHour.Hour_9_10, WorkHour.Hour_10_11, WorkHour.Hour_11_12));
-        List<WorkHour> workHourList5=new ArrayList<>();
+        List<WorkHour> workHourList5 = new ArrayList<>();
         workHourList5.addAll(Arrays.asList(WorkHour.Hour_14_15, WorkHour.Hour_15_16, WorkHour.Hour_16_17, WorkHour.Hour_17_18));
-        List<WorkHour> workHourList6=new ArrayList<>();
+        List<WorkHour> workHourList6 = new ArrayList<>();
         workHourList6.addAll(Arrays.asList(WorkHour.Hour_16_17, WorkHour.Hour_17_18, WorkHour.Hour_18_19, WorkHour.Hour_19_20));
 
         //list of the work hours
-        List<WorkHour>[] workHourLists = new List[] {workHourList1, workHourList2, workHourList3, workHourList4, workHourList5, workHourList6};
+        List<WorkHour>[] workHourLists = new List[]{workHourList1, workHourList2, workHourList3, workHourList4, workHourList5, workHourList6};
 
         //work hours each day for vet 1
-        Map<Workday, List<WorkHour>> workHours1=new HashMap<>();
+        Map<Workday, List<WorkHour>> workHours1 = new HashMap<>();
         List<Workday> workdayList1 = new ArrayList<>(workdays1);
         for (int i = 0; i < workdayList1.size(); i++) {
             Workday workday = workdayList1.get(i);
@@ -91,7 +122,7 @@ public class DataSetupService implements CommandLineRunner {
         }
 
         //work hours each day for vet 2
-        Map<Workday, List<WorkHour>> workHours2=new HashMap<>();
+        Map<Workday, List<WorkHour>> workHours2 = new HashMap<>();
         List<Workday> workdayList2 = new ArrayList<>(workdays2);
         for (int i = 0; i < workdayList2.size(); i++) {
             Workday workday = workdayList2.get(i);
@@ -100,7 +131,7 @@ public class DataSetupService implements CommandLineRunner {
         }
 
         //work hours each day for vet 3
-        Map<Workday, List<WorkHour>> workHours3=new HashMap<>();
+        Map<Workday, List<WorkHour>> workHours3 = new HashMap<>();
         List<Workday> workdayList3 = new ArrayList<>(workdays3);
         for (int i = 0; i < workdayList3.size(); i++) {
             Workday workday = workdayList3.get(i);
@@ -109,7 +140,7 @@ public class DataSetupService implements CommandLineRunner {
         }
 
         //work hours each day for vet 4
-        Map<Workday, List<WorkHour>> workHours4=new HashMap<>();
+        Map<Workday, List<WorkHour>> workHours4 = new HashMap<>();
         List<Workday> workdayList4 = new ArrayList<>(workdays4);
         for (int i = 0; i < workdayList4.size(); i++) {
             Workday workday = workdayList4.get(i);
@@ -118,7 +149,7 @@ public class DataSetupService implements CommandLineRunner {
         }
 
         //work hours each day for vet 5
-        Map<Workday, List<WorkHour>> workHours5=new HashMap<>();
+        Map<Workday, List<WorkHour>> workHours5 = new HashMap<>();
         List<Workday> workdayList5 = new ArrayList<>(workdays5);
         for (int i = 0; i < workdayList5.size(); i++) {
             Workday workday = workdayList5.get(i);
@@ -127,7 +158,7 @@ public class DataSetupService implements CommandLineRunner {
         }
 
         //work hours each day for vet 6
-        Map<Workday, List<WorkHour>> workHours6=new HashMap<>();
+        Map<Workday, List<WorkHour>> workHours6 = new HashMap<>();
         List<Workday> workdayList6 = new ArrayList<>(workdays6);
         for (int i = 0; i < workdayList6.size(); i++) {
             Workday workday = workdayList6.get(i);
@@ -366,7 +397,7 @@ public class DataSetupService implements CommandLineRunner {
                 .predefinedDescription(PredefinedDescription.EXCELLENT)
                 .rateDate("2024-06-30")
                 .build();
-        Flux.just(r1, r2, r3, r4,r5,r6,r7,r8,r9,r10,r11,r12,r13,r14)
+        Flux.just(r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14)
                 .flatMap(ratingRepository::insert)
                 .log()
                 .subscribe();
@@ -420,9 +451,9 @@ public class DataSetupService implements CommandLineRunner {
                 .log()
                 .subscribe();
 
-        ClassPathResource cpr1=new ClassPathResource("images/empty_food_bowl.png");
-        ClassPathResource cpr2=new ClassPathResource("images/half-full_food_bowl.png");
-        ClassPathResource cpr3=new ClassPathResource("images/full_food_bowl.png");
+        ClassPathResource cpr1 = new ClassPathResource("images/empty_food_bowl.png");
+        ClassPathResource cpr2 = new ClassPathResource("images/half-full_food_bowl.png");
+        ClassPathResource cpr3 = new ClassPathResource("images/full_food_bowl.png");
 
         //default photo
         String defaultPhotoName = "vet_default.jpg";
@@ -437,47 +468,47 @@ public class DataSetupService implements CommandLineRunner {
         String rafaelOrtegaPhotoName = "rafael_o.jpg";
         String sharonJenkinsPhotoName = "sharon_jenkins.jpg";
 
-        String JohnPhoto1= "john_photo1.jpg";
-        String JohnPhoto2= "john_photo2.jpg";
-        String JohnPhoto3= "john_photo3.jpg";
-        String JohnPhoto4= "john_photo4.jpg";
-        String JohnPhoto5= "john_photo5.jpg";
+        String JohnPhoto1 = "john_photo1.jpg";
+        String JohnPhoto2 = "john_photo2.jpg";
+        String JohnPhoto3 = "john_photo3.jpg";
+        String JohnPhoto4 = "john_photo4.jpg";
+        String JohnPhoto5 = "john_photo5.jpg";
 
-        String HelenPhoto1= "helen_photo1.jpg";
-        String HelenPhoto2= "helen_photo2.jpg";
-        String HelenPhoto3= "helen_photo3.jpg";
-        String HelenPhoto4= "helen_photo4.jpg";
-        String HelenPhoto5= "helen_photo5.jpg";
+        String HelenPhoto1 = "helen_photo1.jpg";
+        String HelenPhoto2 = "helen_photo2.jpg";
+        String HelenPhoto3 = "helen_photo3.jpg";
+        String HelenPhoto4 = "helen_photo4.jpg";
+        String HelenPhoto5 = "helen_photo5.jpg";
 
-        String HenryPhoto1= "henry_photo1.jpg";
-        String HenryPhoto2= "henry_photo2.jpg";
-        String HenryPhoto3= "henry_photo3.jpg";
-        String HenryPhoto4= "henry_photo4.jpg";
-        String HenryPhoto5= "henry_photo5.jpg";
+        String HenryPhoto1 = "henry_photo1.jpg";
+        String HenryPhoto2 = "henry_photo2.jpg";
+        String HenryPhoto3 = "henry_photo3.jpg";
+        String HenryPhoto4 = "henry_photo4.jpg";
+        String HenryPhoto5 = "henry_photo5.jpg";
 
-        String JamesPhoto1= "james_photo1.jpg";
-        String JamesPhoto2= "james_photo2.jpg";
-        String JamesPhoto3= "james_photo3.jpg";
-        String JamesPhoto4= "james_photo4.jpg";
-        String JamesPhoto5= "james_photo5.jpg";
+        String JamesPhoto1 = "james_photo1.jpg";
+        String JamesPhoto2 = "james_photo2.jpg";
+        String JamesPhoto3 = "james_photo3.jpg";
+        String JamesPhoto4 = "james_photo4.jpg";
+        String JamesPhoto5 = "james_photo5.jpg";
 
-        String LindaPhoto1= "linda_photo1.jpg";
-        String LindaPhoto2= "linda_photo2.jpg";
-        String LindaPhoto3= "linda_photo3.jpg";
-        String LindaPhoto4= "linda_photo4.jpg";
-        String LindaPhoto5= "linda_photo5.jpg";
+        String LindaPhoto1 = "linda_photo1.jpg";
+        String LindaPhoto2 = "linda_photo2.jpg";
+        String LindaPhoto3 = "linda_photo3.jpg";
+        String LindaPhoto4 = "linda_photo4.jpg";
+        String LindaPhoto5 = "linda_photo5.jpg";
 
-        String RafaelPhoto1= "rafael_photo1.jpg";
-        String RafaelPhoto2= "rafael_photo2.jpg";
-        String RafaelPhoto3= "rafael_photo3.jpg";
-        String RafaelPhoto4= "rafael_photo4.jpg";
-        String RafaelPhoto5= "rafael_photo5.jpg";
+        String RafaelPhoto1 = "rafael_photo1.jpg";
+        String RafaelPhoto2 = "rafael_photo2.jpg";
+        String RafaelPhoto3 = "rafael_photo3.jpg";
+        String RafaelPhoto4 = "rafael_photo4.jpg";
+        String RafaelPhoto5 = "rafael_photo5.jpg";
 
-        String SharonPhoto1= "sharon_photo1.jpg";
-        String SharonPhoto2= "sharon_photo2.jpg";
-        String SharonPhoto3= "sharon_photo3.jpg";
-        String SharonPhoto4= "sharon_photo4.jpg";
-        String SharonPhoto5= "sharon_photo5.jpg";
+        String SharonPhoto1 = "sharon_photo1.jpg";
+        String SharonPhoto2 = "sharon_photo2.jpg";
+        String SharonPhoto3 = "sharon_photo3.jpg";
+        String SharonPhoto4 = "sharon_photo4.jpg";
+        String SharonPhoto5 = "sharon_photo5.jpg";
 
 
         ClassPathResource defaultPhoto = new ClassPathResource("images/" + defaultPhotoName);
@@ -933,7 +964,7 @@ public class DataSetupService implements CommandLineRunner {
         log.info("Album created: vetId={}, filename={}, imgType={}, size={} bytes",
                 album35.getVetId(), album35.getFilename(), album35.getImgType(), album35.getData().length);
 
-        Flux.just(album1,album2,album3,album4,album5,album6,album7,album8,album9,album10,album11,album12,album13,album14,album15,album16,album17,album18,album19,album20,album21,album22,album23,album24,album25,album26,album27,album28,album29,album30,album31,album32,album33,album34,album35)
+        Flux.just(album1, album2, album3, album4, album5, album6, album7, album8, album9, album10, album11, album12, album13, album14, album15, album16, album17, album18, album19, album20, album21, album22, album23, album24, album25, album26, album27, album28, album29, album30, album31, album32, album33, album34, album35)
                 .doOnNext(album -> log.info("Album created: vetId={}, filename={}, imgType={}, dataSize={} bytes",
                         album.getVetId(), album.getFilename(), album.getImgType(), album.getData().length))
                 .flatMap(albumRepository::save)
@@ -986,14 +1017,14 @@ public class DataSetupService implements CommandLineRunner {
 
         // Use method defined to create datasource
         DataSource dataSource = EntityDtoUtil.createDataSource();
-        try(
-            // get connection from datasource
-            Connection conn = dataSource.getConnection();
+        try (
+                // get connection from datasource
+                Connection conn = dataSource.getConnection();
 
-            // Prepare INSERT statement
-            PreparedStatement insertStmt = conn.prepareStatement(
-                    "INSERT INTO badges (vet_id, badge_title, badge_date, img_data) " +
-                            "VALUES (?, ?, ?, ?)")
+                // Prepare INSERT statement
+                PreparedStatement insertStmt = conn.prepareStatement(
+                        "INSERT INTO badges (vet_id, badge_title, badge_date, img_data) " +
+                                "VALUES (?, ?, ?, ?)")
         ) {
 
             // Define Badge objects (b1, b2, ..., b7) and set parameters for PreparedStatement
@@ -1016,13 +1047,12 @@ public class DataSetupService implements CommandLineRunner {
 
             // Close PreparedStatement after use
             insertStmt.close();
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             // Handle any SQL exceptions
             e.printStackTrace();
         }
 
-        try(
+        try (
                 // get connection from datasource
                 Connection conn = dataSource.getConnection();
 
@@ -1032,7 +1062,7 @@ public class DataSetupService implements CommandLineRunner {
                                 "VALUES (?, ?, ?, ?)")
         ) {
 
-            Photo[] photos = {photo1,photo2,photo3,photo4,photo5,photo6, photo7};
+            Photo[] photos = {photo1, photo2, photo3, photo4, photo5, photo6, photo7};
 
             for (Photo photo : photos) {
                 insertStmt.setString(1, photo.getVetId());
@@ -1045,8 +1075,7 @@ public class DataSetupService implements CommandLineRunner {
             }
 
             insertStmt.close();
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             // Handle any SQL exceptions
             e.printStackTrace();
         }
