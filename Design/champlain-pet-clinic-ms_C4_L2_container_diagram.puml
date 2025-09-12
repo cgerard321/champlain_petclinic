@@ -1,10 +1,14 @@
 @startuml
 !includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Container.puml
 scale 0.4
-!define DEVICONS https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/devicons
-!define FONTAWESOME https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/font-awesome-5
 
-!include FONTAWESOME/users.puml
+!$ICONURL = "https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/v3.0.0/icons"
+!include $ICONURL/common.puml
+!include $ICONURL/devicons2/spring_original.puml
+!include $ICONURL/devicons2/dotnetcore.puml
+!include $ICONURL/devicons/go.puml
+!include $ICONURL/font-awesome-5/user.puml
+
 
 AddElementTag("microService", $shape=EightSidedShape(), $bgColor="CornflowerBlue", $fontColor="white", $legendText="micro service\neight sided")
 AddElementTag("storage", $shape=RoundedBoxShape(), $bgColor="lightSkyBlue", $fontColor="white")
@@ -34,7 +38,7 @@ System_Boundary(c1, "Champlain Pet Clinic System"){
     Container(react_spa, "React Single-Page Application", "TypeScript, React", "Provides all the Champlain Pet Clinic functionality to clients via their web browser.")
     Container(angular_spa, "Angular Single-Page Application", "JavaScript, Angular", "Provides all the Champlain Pet Clinic functionality to employees via their web browser.")
     Container(api_gateway, "API-Gateway", "Java, Spring Boot", "Provides Champlain Pet Clinic functionality and hosts the Employee Web Application.", $tags = "microService")
-    Container(auth_service, "auth-service", "Java, Spring Boot", "Provides authentication and authorization functionality.", $tags = "microService")
+    Container(auth_service, "auth-service", "Java, Spring Boot", "Provides authentication and authorization functionality.", $sprite="spring_original" , $tags = "microService")
     Container(customers_service, "customers-service", "Java, Spring Boot", "Provides customer functionality which includes owners, pets, and types.", $tags = "microService")
     Container(inventory_service, "inventory-service", "Java, Spring Boot", "Provides medical inventory functionality.", $tags = "microService")
     Container(vets_service, "vets-service", "Java, Spring Boot", "Provides veterinarian functionality.", $tags = "microService")
@@ -42,8 +46,8 @@ System_Boundary(c1, "Champlain Pet Clinic System"){
     Container(billing_service, "billing-service", "Java, Spring Boot", "Provides billing functionality.", $tags = "microService")
     Container(products_service, "products-service", "Java, Spring Boot", "Provides product management functionality for the online store.", $tags = "microService")
     Container(cart_service, "cart-service", "Java, Spring Boot", "Provides cart management functionality for the online store.", $tags = "microService")
-    Container(mailer_service, "mailer-service", "Go", "Provides email functionality for the auth-service.", $tags = "microService")
-    Container(emailing_service, "emailing-service", "C#, ASP.NET Core", "Provides email functionality.", $tags = "microService")
+    Container(mailer_service, "mailer-service", "Go", "Provides email functionality for the auth-service.", $sprite="go" , $tags = "microService")
+    Container(emailing_service, "emailing-service", "C#, ASP.NET Core", "Provides email functionality.", $sprite="dotnetcore", $tags = "microService")
 
     ContainerDb(auth_db, "auth-db", "MySQL 5.7.x", "Stores user information.", $tags = "storage")
     ContainerDb(customers_db, "customers-db", "Mongo", "Stores owner, pet, and type information.", $tags = "storage")
