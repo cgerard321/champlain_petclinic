@@ -1,0 +1,115 @@
+@startuml
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Container.puml
+scale 0.4
+
+!$ICONURL = "https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/v3.0.0/icons"
+!include $ICONURL/common.puml
+!include $ICONURL/devicons2/spring_original.puml
+!include $ICONURL/devicons2/dotnetcore.puml
+!include $ICONURL/devicons/go.puml
+!include $ICONURL/font-awesome-5/user.puml
+
+
+AddElementTag("microService", $shape=EightSidedShape(), $bgColor="CornflowerBlue", $fontColor="white", $legendText="micro service\neight sided")
+AddElementTag("storage", $shape=RoundedBoxShape(), $bgColor="lightSkyBlue", $fontColor="white")
+AddRelTag(red-line, $lineColor="red")
+AddRelTag(blue-line, $lineColor="blue")
+AddRelTag(green-line, $lineColor="green")
+AddRelTag(orange-line, $lineColor="orange")
+
+
+LAYOUT_TOP_DOWN()
+'LAYOUT_WITH_LEGEND()
+SHOW_PERSON_OUTLINE()
+'HIDE_STEREOTYPE()
+
+title Container Diagram for Champlain Pet Clinic System
+
+Person(receptionist, "Receptionist", "An employee of the Champlain Pet Clinic who assists clients of the clinic.")
+Person(inventoryManager, "Inventory Manager", "An employee of the  Champlain Pet Clinic who manages the medical inventory.")
+Person(veterinarian, "Veterinarian", "An medical employee of the Champlain Pet Clinic who treats client pets.")
+Person(admin, "Admin", "An employee of the Champlain Pet Clinic responsible for account creation and handling overall system issues.")
+Person(customer, "Customer", "A customer of the Champlain Pet Clinic.")
+
+System_Boundary(c1, "Champlain Pet Clinic System"){
+
+    Container(client_app, "Client Web Application", "HTML, CSS", "Delivers the static Client-focused content and the react single page application.")
+    Container(employee_app, "Employee Web Application", "HTML, CSS", "Delivers the static Employee-focused content and angular single page application.")
+    Container(react_spa, "React Single-Page Application", "TypeScript, React", "Provides all the Champlain Pet Clinic functionality to clients via their web browser.")
+    Container(angular_spa, "Angular Single-Page Application", "JavaScript, Angular", "Provides all the Champlain Pet Clinic functionality to employees via their web browser.")
+    Container(api_gateway, "API-Gateway", "Java, Spring Boot", "Provides Champlain Pet Clinic functionality and hosts the Employee Web Application.", $tags = "microService")
+    Container(auth_service, "auth-service", "Java, Spring Boot", "Provides authentication and authorization functionality.", $sprite="spring_original" , $tags = "microService")
+    Container(customers_service, "customers-service", "Java, Spring Boot", "Provides customer functionality which includes owners, pets, and types.", $tags = "microService")
+    Container(inventory_service, "inventory-service", "Java, Spring Boot", "Provides medical inventory functionality.", $tags = "microService")
+    Container(vets_service, "vets-service", "Java, Spring Boot", "Provides veterinarian functionality.", $tags = "microService")
+    Container(visits_service, "visits-service", "Java, Spring Boot", "Provides appointment booking functionality. Includes its own mail service", $tags = "microService")
+    Container(billing_service, "billing-service", "Java, Spring Boot", "Provides billing functionality.", $tags = "microService")
+    Container(products_service, "products-service", "Java, Spring Boot", "Provides product management functionality for the online store.", $tags = "microService")
+    Container(cart_service, "cart-service", "Java, Spring Boot", "Provides cart management functionality for the online store.", $tags = "microService")
+    Container(mailer_service, "mailer-service", "Go", "Provides email functionality for the auth-service.", $sprite="go" , $tags = "microService")
+    Container(emailing_service, "emailing-service", "C#, ASP.NET Core", "Provides email functionality.", $sprite="dotnetcore", $tags = "microService")
+
+    ContainerDb(auth_db, "auth-db", "MySQL 5.7.x", "Stores user information.", $tags = "storage")
+    ContainerDb(customers_db, "customers-db", "Mongo", "Stores owner, pet, and type information.", $tags = "storage")
+    ContainerDb(inventory_db, "inventory-db", "Mongo", "Stores medical inventory information.", $tags = "storage")
+    ContainerDb(vets_vets_db, "vets-vets-db", "Mongo", "Stores veterinarian information.", $tags = "storage")
+    ContainerDb(vets_images_db, "vets-images-db", "Mongo", "Stores veterinarian image information.", $tags = "storage")
+    ContainerDb(visits_db, "visits-db", "Mongo", "Stores visits information.", $tags = "storage")
+    ContainerDb(billing_db, "billing-db", "Mongo", "Stores billing information.", $tags = "storage")
+    ContainerDb(products_db, "products-db", "Mongo", "Stores product information.", $tags = "storage")
+    ContainerDb(cart_db, "cart-db", "Mongo", "Stores cart information.", $tags = "storage")
+    ContainerDb(emailing_db, "emailing-db", "MySQL 8.0", "Stores email information.", $tags = "storage")
+}
+
+Rel(customer, client_app, "Visits petclinic.benmusicgeek.synology.me/ using", "HTTPS")
+Rel(admin, employee_app, "Visits petclinic-backend.benmusicgeek.synology.me/#!/login using", "HTTPS")
+Rel(receptionist, employee_app, "Visits petclinic-backend.benmusicgeek.synology.me/#!/login using", "HTTPS")
+Rel(inventoryManager, employee_app, "Visits petclinic-backend.benmusicgeek.synology.me/#!/login using", "HTTPS")
+Rel(veterinarian, employee_app, "Visits petclinic-backend.benmusicgeek.synology.me/#!/login using", "HTTPS")
+Rel_R(client_app, react_spa, "Delivers to the customer's web browser")
+Rel_R(employee_app, angular_spa, "Delivers to an employee's web browser")
+Rel(admin, angular_spa, "views admin_panel and employee specific functionality")
+Rel(receptionist, angular_spa, "assists customers with appointment booking")
+Rel(veterinarian, angular_spa, "manages their availability")
+Rel(inventoryManager, angular_spa, "manages medical inventory")
+Rel(customer, react_spa, "views online store, veterinarian and appointment booking functionality")
+Rel(react_spa, api_gateway, "Makes API calls to", "JSON/REST/HTTPS")
+Rel(angular_spa, api_gateway, "Makes API calls to", "JSON/REST/HTTPS")
+
+
+Rel(api_gateway, customers_service, "Makes API calls to", "JSON/REST/HTTPS")
+Rel(customers_service, customers_db, "Reads from and writes to", "Mongo/MQL/TCP")
+Rel(api_gateway, inventory_service, "Makes API calls to", "JSON/REST/HTTPS")
+Rel(inventory_service, inventory_db, "Reads from and writes to", "Mongo/MQL/TCP")
+Rel(api_gateway, vets_service, "Makes API calls to", "JSON/REST/HTTPS")
+Rel(vets_service, vets_vets_db, "Reads from and writes to", "Mongo/MQL/TCP")
+Rel(vets_service, vets_images_db, "Reads from and writes to", "JDCB/SQL/TCP")
+Rel(api_gateway, emailing_service, "Makes API calls to", "JSON/REST/HTTPS")
+Rel(emailing_service, emailing_db, "Makes API calls to", "JSON/REST/HTTPS")
+Rel(api_gateway, visits_service, "Makes API calls to", "JSON/REST/HTTPS")
+Rel(visits_service, visits_db, "Reads from and writes to", "Mongo/MQL/TCP")
+
+Rel(api_gateway, products_service, "Makes API calls to", "JSON/REST/HTTPS")
+Rel(products_service, products_db, "Reads from and writes to", "Mongo/MQL/TCP")
+
+Rel(api_gateway, auth_service, "Makes API calls to", "JSON/REST/HTTPS")
+Rel(auth_service, mailer_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="blue-line")
+Rel(auth_service, cart_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="blue-line")
+Rel(auth_service, emailing_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="blue-line")
+Rel(auth_service, auth_db, "Reads from and writes to", "JDCB/SQL/TCP")
+Rel(api_gateway, billing_service, "Makes API calls to", "JSON/REST/HTTPS")
+Rel(billing_service, customers_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="red-line")
+Rel(billing_service, vets_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="red-line")
+Rel(billing_service, billing_db, "Reads from and writes to", "Mongo/MQL/TCP", $tags="red-line")
+Rel(api_gateway, cart_service, "Makes API calls to", "JSON/REST/HTTPS")
+Rel(cart_service, products_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="green-line")
+Rel(cart_service, cart_db, "Reads from and writes to", "Mongo/MQL/TCP", $tags="green-line")
+Rel(api_gateway, visits_service, "Makes API calls to", "JSON/REST/HTTPS")
+Rel(visits_service, visits_db, "Reads from and writes to", "Mongo/MQL/TCP")
+Rel(visits_service, emailing_service, "Reads from and writes to", "Mongo/MQL/TCP", $tags="orange-line")
+Rel(visits_service, auth_service, "Reads from and writes to", "Mongo/MQL/TCP", $tags="orange-line")
+Rel(visits_service, customers_service, "Reads from and writes to", "Mongo/MQL/TCP", $tags="orange-line")
+Rel(visits_service, vets_service, "Reads from and writes to", "Mongo/MQL/TCP", $tags="orange-line")
+
+
+@enduml
