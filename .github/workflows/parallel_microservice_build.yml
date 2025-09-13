@@ -63,10 +63,12 @@ jobs:
         java-version: 17
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v3
-    - name: Change directory # Built diffrently here because i had weird version issues executing the build the way that the other microservices did it
-      run: cd vet-service
+    - name: Make gradlew executable
+      run: chmod +x ./gradlew
+      working-directory: ./vet-service
     - name: Build with Gradle
       run: ./gradlew clean build
+      working-directory: ./vet-service
 
 
   customers_service_reactive_test:
