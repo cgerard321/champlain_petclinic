@@ -7,16 +7,11 @@ export const updatePet = async (
   petId: string,
   pet: PetRequestModel
 ): Promise<AxiosResponse<void>> => {
-  return await axiosInstance.put<void>(
-    `http://localhost:8080/api/v2/gateway/pets/${petId}`,
-    pet
-  );
+  return await axiosInstance.put<void>(`/pets/${petId}`, pet);
 };
 
 export const getPet = async (
   petId: string
 ): Promise<AxiosResponse<PetResponseModel>> => {
-  return await axiosInstance.get<PetResponseModel>(
-    `http://localhost:8080/api/v2/gateway/pets/${petId}`
-  );
+  return await axiosInstance.get<PetResponseModel>(`/pets/${petId}`);
 };

@@ -1,6 +1,6 @@
 import { FC, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import axiosInstance from '@/shared/api/axiosInstance';
 import { OwnerResponseModel } from '@/features/customers/models/OwnerResponseModel';
 import { PetResponseModel } from '@/features/customers/models/PetResponseModel'; // Import the PetResponseModel
 import { Bill } from '@/features/bills/models/Bill';
@@ -20,27 +20,27 @@ const CustomerDetails: FC = () => {
   useEffect(() => {
     const fetchOwnerDetails = async (): Promise<void> => {
       try {
-        const ownerResponse = await axios.get(
-          `http://localhost:8080/api/v2/gateway/owners/${ownerId}`,
+        const ownerResponse = await axiosInstance.get(
+          `/owners/${ownerId}`,
           { withCredentials: true }
         );
         setOwner(ownerResponse.data);
 
-        const userResponse = await axios.get(
-          `http://localhost:8080/api/v2/gateway/users/${ownerId}`,
+        const userResponse = await axiosInstance.get(
+          `/users/${ownerId}`,
           { withCredentials: true }
         );
         setIsDisabled(userResponse.data.disabled);
 
         // Fetch pets by owner ID
-        const petsResponse = await axios.get(
-          `http://localhost:8080/api/v2/gateway/pets/owner/${ownerId}/pets`,
+        const petsResponse = await axiosInstance.get(
+          `/pets/owner/${ownerId}/pets`,
           { withCredentials: true }
         );
         setPets(petsResponse.data); // Set the pets state
 
-        const billsResponse = await axios.get(
-          `http://localhost:8080/api/v2/gateway/bills/customer/${ownerId}`,
+        const billsResponse = await axiosInstance.get(
+          `/bills/customer/${ownerId}`,
           { withCredentials: true }
         );
 
@@ -96,8 +96,8 @@ const CustomerDetails: FC = () => {
 
     if (confirmDelete) {
       try {
-        await axios.delete(
-          `http://localhost:8080/api/v2/gateway/owners/${ownerId}`,
+        await axiosInstance.delete(
+          `/owners/${ownerId}`,
           {
             withCredentials: true,
           }
@@ -150,23 +150,21 @@ const CustomerDetails: FC = () => {
     if (confirmAction) {
       try {
         if (isDisabled) {
-          await axios.patch(
-            `http://localhost:8080/api/v2/gateway/users/${ownerId}/enable`,
-            {},
+          await axiosInstance.patch(
+            `/users/${ownerId}/enable`,
             { withCredentials: true }
           );
           alert('User account enabled successfully.');
         } else {
-          await axios.patch(
-            `http://localhost:8080/api/v2/gateway/users/${ownerId}/disable`,
-            {},
+          await axiosInstance.patch(
+            `/users/${ownerId}/disable`,
             { withCredentials: true }
           );
           alert('User account disabled successfully.');
         }
 
-        const userResponse = await axios.get(
-          `http://localhost:8080/api/v2/gateway/users/${ownerId}`,
+        const userResponse = await axiosInstance.get(
+          `/users/${ownerId}`,
           { withCredentials: true }
         );
 

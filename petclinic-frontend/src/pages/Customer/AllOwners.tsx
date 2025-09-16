@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { OwnerResponseModel } from '@/features/customers/models/OwnerResponseModel';
 import './AllOwners.css';
 import { NavBar } from '@/layouts/AppNavBar.tsx';
-import axios from 'axios';
+import axiosInstance from '@/shared/api/axiosInstance';
 import { Link } from 'react-router-dom';
 
 const AllOwners: React.FC = (): JSX.Element => {
@@ -28,31 +28,32 @@ const AllOwners: React.FC = (): JSX.Element => {
 
   const [isFilterVisible, setFilterVisible] = useState(true);
 
-  useEffect(() => {
-    const eventSource = new EventSource(
-      'http://localhost:8080/api/v2/gateway/owners',
-      {
-        withCredentials: true,
-      }
-    );
-
-    eventSource.onmessage = event => {
+  const getAllOwners = async (): Promise<void> => {
       try {
-        const parsedData: OwnerResponseModel = JSON.parse(event.data);
-        setOwners(prevOwners => [...prevOwners, parsedData]);
+          const response = await axiosInstance.get(
+              `/users/owners`,
+              { responseType: 'stream', withCredentials: true },
+          );
+
+          const data = response.data.split('data:')
+              .map((payLoad: string) => {
+                  try {
+                      if (payLoad == '') return null;
+                      return JSON.parse(payLoad);
+                  } catch (err) {
+                      console.error("Can't parse JSON: " + err);
+                  }
+              })
+              .filter((data?: JSON) => data !== null);
+
+          setOwners(prevOwners => [...prevOwners, data]);
       } catch (error) {
-        console.error('Error parsing event data:', error);
+          console.error('Error fetching owners:', error);
       }
-    };
+  };
 
-    eventSource.onerror = error => {
-      console.error('EventSource error:', error);
-      eventSource.close();
-    };
-
-    return () => {
-      eventSource.close();
-    };
+  useEffect(() => {
+      getAllOwners(); //calling async function
   }, []);
 
   const handleDelete = async (ownerId: string): Promise<void> => {
@@ -62,8 +63,8 @@ const AllOwners: React.FC = (): JSX.Element => {
 
     if (confirmDelete) {
       try {
-        await axios.delete(
-          `http://localhost:8080/api/v2/gateway/owners/${ownerId}`,
+        await axiosInstance.delete(
+          `/owners/${ownerId}`,
           {
             withCredentials: true,
           }
