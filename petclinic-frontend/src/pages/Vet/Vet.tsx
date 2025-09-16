@@ -86,7 +86,7 @@ export default function Vet(): JSX.Element {
             {formVisible ? 'Cancel' : 'Add Vet'}
           </button>
           {formVisible && <AddVet />}
-          <UploadVetPhoto />
+          <UploadVetPhoto vets={allVets}/>
         </div>
       )}
     </div>
