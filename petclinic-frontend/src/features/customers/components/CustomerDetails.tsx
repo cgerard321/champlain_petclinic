@@ -20,16 +20,14 @@ const CustomerDetails: FC = () => {
   useEffect(() => {
     const fetchOwnerDetails = async (): Promise<void> => {
       try {
-        const ownerResponse = await axiosInstance.get(
-          `/owners/${ownerId}`,
-          { withCredentials: true }
-        );
+        const ownerResponse = await axiosInstance.get(`/owners/${ownerId}`, {
+          withCredentials: true,
+        });
         setOwner(ownerResponse.data);
 
-        const userResponse = await axiosInstance.get(
-          `/users/${ownerId}`,
-          { withCredentials: true }
-        );
+        const userResponse = await axiosInstance.get(`/users/${ownerId}`, {
+          withCredentials: true,
+        });
         setIsDisabled(userResponse.data.disabled);
 
         // Fetch pets by owner ID
@@ -96,12 +94,9 @@ const CustomerDetails: FC = () => {
 
     if (confirmDelete) {
       try {
-        await axiosInstance.delete(
-          `/owners/${ownerId}`,
-          {
-            withCredentials: true,
-          }
-        );
+        await axiosInstance.delete(`/owners/${ownerId}`, {
+          withCredentials: true,
+        });
 
         alert('Owner deleted successfully.');
         navigate('/customers');
@@ -150,23 +145,20 @@ const CustomerDetails: FC = () => {
     if (confirmAction) {
       try {
         if (isDisabled) {
-          await axiosInstance.patch(
-            `/users/${ownerId}/enable`,
-            { withCredentials: true }
-          );
+          await axiosInstance.patch(`/users/${ownerId}/enable`, {
+            withCredentials: true,
+          });
           alert('User account enabled successfully.');
         } else {
-          await axiosInstance.patch(
-            `/users/${ownerId}/disable`,
-            { withCredentials: true }
-          );
+          await axiosInstance.patch(`/users/${ownerId}/disable`, {
+            withCredentials: true,
+          });
           alert('User account disabled successfully.');
         }
 
-        const userResponse = await axiosInstance.get(
-          `/users/${ownerId}`,
-          { withCredentials: true }
-        );
+        const userResponse = await axiosInstance.get(`/users/${ownerId}`, {
+          withCredentials: true,
+        });
 
         setIsDisabled(userResponse.data.disabled);
       } catch (error) {

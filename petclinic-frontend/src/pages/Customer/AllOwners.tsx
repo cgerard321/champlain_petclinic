@@ -29,31 +29,32 @@ const AllOwners: React.FC = (): JSX.Element => {
   const [isFilterVisible, setFilterVisible] = useState(true);
 
   const getAllOwners = async (): Promise<void> => {
-      try {
-          const response = await axiosInstance.get(
-              `/users/owners`,
-              { responseType: 'stream', withCredentials: true },
-          );
+    try {
+      const response = await axiosInstance.get(`/users/owners`, {
+        responseType: 'stream',
+        withCredentials: true,
+      });
 
-          const data = response.data.split('data:')
-              .map((payLoad: string) => {
-                  try {
-                      if (payLoad == '') return null;
-                      return JSON.parse(payLoad);
-                  } catch (err) {
-                      console.error("Can't parse JSON: " + err);
-                  }
-              })
-              .filter((data?: JSON) => data !== null);
+      const data = response.data
+        .split('data:')
+        .map((payLoad: string) => {
+          try {
+            if (payLoad == '') return null;
+            return JSON.parse(payLoad);
+          } catch (err) {
+            console.error("Can't parse JSON: " + err);
+          }
+        })
+        .filter((data?: JSON) => data !== null);
 
-          setOwners(prevOwners => [...prevOwners, data]);
-      } catch (error) {
-          console.error('Error fetching owners:', error);
-      }
+      setOwners(prevOwners => [...prevOwners, data]);
+    } catch (error) {
+      console.error('Error fetching owners:', error);
+    }
   };
 
   useEffect(() => {
-      getAllOwners(); //calling async function
+    getAllOwners(); //calling async function
   }, []);
 
   const handleDelete = async (ownerId: string): Promise<void> => {
@@ -63,12 +64,9 @@ const AllOwners: React.FC = (): JSX.Element => {
 
     if (confirmDelete) {
       try {
-        await axiosInstance.delete(
-          `/owners/${ownerId}`,
-          {
-            withCredentials: true,
-          }
-        );
+        await axiosInstance.delete(`/owners/${ownerId}`, {
+          withCredentials: true,
+        });
         setOwners(owners.filter(owner => owner.ownerId !== ownerId));
         alert('Owner deleted successfully.');
       } catch (error) {
