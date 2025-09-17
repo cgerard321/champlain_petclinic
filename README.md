@@ -15,7 +15,7 @@ Champlain Final Project 1 420-N52-LA Pet Clinic repo
 * [Scrum and Agile Guidelines](docs/scrum-agile.md)
 * [Environment Setup](docs/environment.md)
 * [Running the Application with Docker](docs/running-project.md)
-* [Spring Security Overview](docs/spring-security.md)
+* [Spring Security Overview](docs/Spring%20Security.md)
 
 
 ## Source
