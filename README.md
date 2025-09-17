@@ -36,7 +36,7 @@ Docker setup has been changed.
 If you have questions about these standards or need clarification on any patterns, please:
 
 1. Check existing code examples in the repository
-2. Review this contributing guide
+2. Review the contributing guidelines and documentation
 3. Ask questions in pull request discussions
 4. Reach out to the team leads for architectural decisions
 
