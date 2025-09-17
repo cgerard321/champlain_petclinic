@@ -26,16 +26,14 @@ export function useAddToCart(): UseAddToCartReturnType {
 
     try {
       const cartId = await fetchUserCart(user.userId);
-      if (!cartId) {
-        throw new Error('Cart not found');
-      }
+      if (!cartId) throw new Error('Cart not found');
 
-      const endpoint = `http://localhost:8080/api/v2/gateway/carts/${cartId}/${productId}`;
-      await axiosInstance.post(endpoint);
-      return true; // Return true if successful
+      // was http://localhost:8080/api/v2/gateway/carts/${cartId}/${productId}
+      await axiosInstance.post(`/carts/${cartId}/${productId}`, undefined, { useV2: true });
+      return true;
     } catch (error) {
       console.error('Error adding product to cart:', error);
-      return false; // Return false if an error occurs
+      return false;
     }
   };
 
