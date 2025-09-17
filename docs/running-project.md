@@ -1,6 +1,6 @@
 # Running the project
 
-Back to [Main page](../README.md#table-of-contents)
+Back to [Main page](../README.md)
 
 <!-- TOC -->
 * [Running the project](#running-the-project)

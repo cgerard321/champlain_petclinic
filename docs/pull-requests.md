@@ -1,6 +1,6 @@
 # Pull Request and Code Review Guidelines
 
-Back to [Main page](../README.md#table-of-contents)
+Back to [Main page](../README.md)
 
 <!-- TOC -->
 * [Pull Request and Code Review Guidelines](#pull-request-and-code-review-guidelines)

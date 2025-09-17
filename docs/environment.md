@@ -1,6 +1,6 @@
 # Environment Configuration
 
-Back to [Main page](../README.md#table-of-contents)
+Back to [Main page](../README.md)
 
 <!-- TOC -->
 * [Environment Configuration](#environment-configuration)

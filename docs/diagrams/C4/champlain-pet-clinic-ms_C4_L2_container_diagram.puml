@@ -117,4 +117,5 @@ Rel(visits_service, customers_service, "Reads from and writes to", "Mongo/MQL/TC
 Rel(visits_service, vets_service, "Reads from and writes to", "Mongo/MQL/TCP", $tags="orange-line")
 
 
+
 @enduml

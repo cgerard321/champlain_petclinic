@@ -1,6 +1,6 @@
 # Spring Security
 
-Back to [Main page](../README.md#table-of-contents)
+Back to [Main page](../README.md)
 
 <!-- TOC -->
 * [Spring Security](#spring-security)

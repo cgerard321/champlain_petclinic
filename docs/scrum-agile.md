@@ -1,6 +1,6 @@
 # Scrum and Agile Guidelines
 
-Back to [Main page](../README.md#table-of-contents)
+Back to [Main page](../README.md)
 
 <!-- TOC -->
 * [Scrum and Agile Guidelines](#scrum-and-agile-guidelines)

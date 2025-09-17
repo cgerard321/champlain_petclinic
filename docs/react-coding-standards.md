@@ -1,6 +1,6 @@
 # Frontend Standards (React TypeScript)
 
-Back to [Main page](../README.md#table-of-contents)
+Back to [Main page](../README.md)
 
 <!-- TOC -->
 * [Frontend Standards (React TypeScript)](#frontend-standards-react-typescript)

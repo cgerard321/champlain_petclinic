@@ -1,6 +1,6 @@
 # API Version Management
 
-Back to [Main page](../README.md#table-of-contents)
+Back to [Main page](../README.md)
 
 <!-- TOC -->
 * [API Version Management](#api-version-management)

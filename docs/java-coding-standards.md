@@ -1,6 +1,6 @@
 # Backend Standards (Java Spring Boot 3.x)
 
-Back to [Main page](../README.md#table-of-contents)
+Back to [Main page](../README.md)
 
 <!-- TOC -->
 * [Backend Standards (Java Spring Boot 3.x)](#backend-standards-java-spring-boot-3x)

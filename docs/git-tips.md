@@ -1,6 +1,6 @@
 # General Conventions
 
-Back to [Main page](../README.md#table-of-contents)
+Back to [Main page](../README.md)
 
 <!-- TOC -->
 * [General Conventions](#general-conventions)
