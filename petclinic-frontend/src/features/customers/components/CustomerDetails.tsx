@@ -20,26 +20,20 @@ const CustomerDetails: FC = () => {
   useEffect(() => {
     const fetchOwnerDetails = async (): Promise<void> => {
       try {
-        const ownerResponse = await axiosInstance.get(`/owners/${ownerId}`, {
-          withCredentials: true,
-        });
+        const ownerResponse = await axiosInstance.get(`/owners/${ownerId}`);
         setOwner(ownerResponse.data);
 
-        const userResponse = await axiosInstance.get(`/users/${ownerId}`, {
-          withCredentials: true,
-        });
+        const userResponse = await axiosInstance.get(`/users/${ownerId}`);
         setIsDisabled(userResponse.data.disabled);
 
         // Fetch pets by owner ID
         const petsResponse = await axiosInstance.get(
-          `/pets/owner/${ownerId}/pets`,
-          { withCredentials: true }
+          `/pets/owner/${ownerId}/pets`
         );
         setPets(petsResponse.data); // Set the pets state
 
         const billsResponse = await axiosInstance.get(
-          `/bills/customer/${ownerId}`,
-          { withCredentials: true }
+          `/bills/customer/${ownerId}`
         );
 
         const billsData: Bill[] = [];
@@ -94,9 +88,7 @@ const CustomerDetails: FC = () => {
 
     if (confirmDelete) {
       try {
-        await axiosInstance.delete(`/owners/${ownerId}`, {
-          withCredentials: true,
-        });
+        await axiosInstance.delete(`/owners/${ownerId}`);
 
         alert('Owner deleted successfully.');
         navigate('/customers');
@@ -145,20 +137,14 @@ const CustomerDetails: FC = () => {
     if (confirmAction) {
       try {
         if (isDisabled) {
-          await axiosInstance.patch(`/users/${ownerId}/enable`, {
-            withCredentials: true,
-          });
+          await axiosInstance.patch(`/users/${ownerId}/enable`);
           alert('User account enabled successfully.');
         } else {
-          await axiosInstance.patch(`/users/${ownerId}/disable`, {
-            withCredentials: true,
-          });
+          await axiosInstance.patch(`/users/${ownerId}/disable`);
           alert('User account disabled successfully.');
         }
 
-        const userResponse = await axiosInstance.get(`/users/${ownerId}`, {
-          withCredentials: true,
-        });
+        const userResponse = await axiosInstance.get(`/users/${ownerId}`);
 
         setIsDisabled(userResponse.data.disabled);
       } catch (error) {

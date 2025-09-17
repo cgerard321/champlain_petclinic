@@ -32,7 +32,6 @@ const AllOwners: React.FC = (): JSX.Element => {
     try {
       const response = await axiosInstance.get(`/users/owners`, {
         responseType: 'stream',
-        withCredentials: true,
       });
 
       const data = response.data
@@ -64,9 +63,7 @@ const AllOwners: React.FC = (): JSX.Element => {
 
     if (confirmDelete) {
       try {
-        await axiosInstance.delete(`/owners/${ownerId}`, {
-          withCredentials: true,
-        });
+        await axiosInstance.delete(`/owners/${ownerId}`);
         setOwners(owners.filter(owner => owner.ownerId !== ownerId));
         alert('Owner deleted successfully.');
       } catch (error) {
