@@ -1,12 +1,18 @@
 @startuml
 !includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Container.puml
 scale 0.4
-
 !$ICONURL = "https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/v3.0.0/icons"
 !include $ICONURL/common.puml
 !include $ICONURL/devicons2/spring_original.puml
 !include $ICONURL/devicons2/dotnetcore.puml
 !include $ICONURL/devicons/go.puml
+!include $ICONURL/devicons/mongodb.puml
+!include $ICONURL/devicons/mysql.puml
+!include $ICONURL/devicons/postgresql.puml
+!include $ICONURL/devicons/react.puml
+!include $ICONURL/devicons/angular.puml
+!include $ICONURL/devicons/html5.puml
+!include $ICONURL/font-awesome-5/database.puml
 !include $ICONURL/font-awesome-5/user.puml
 
 
@@ -33,39 +39,39 @@ Person(customer, "Customer", "A customer of the Champlain Pet Clinic.")
 
 System_Boundary(c1, "Champlain Pet Clinic System"){
 
-    Container(client_app, "Client Web Application", "HTML, CSS", "Delivers the static Client-focused content and the react single page application.")
-    Container(employee_app, "Employee Web Application", "HTML, CSS", "Delivers the static Employee-focused content and angular single page application.")
-    Container(react_spa, "React Single-Page Application", "TypeScript, React", "Provides all the Champlain Pet Clinic functionality to clients via their web browser.")
-    Container(angular_spa, "Angular Single-Page Application", "JavaScript, Angular", "Provides all the Champlain Pet Clinic functionality to employees via their web browser.")
-    Container(api_gateway, "API-Gateway", "Java, Spring Boot", "Provides Champlain Pet Clinic functionality and hosts the Employee Web Application.", $tags = "microService")
+    Container(client_app, "Client Web Application", "HTML, CSS", "Delivers the static Client-focused content and the react single page application.", $sprite="html5", $tags = "application")
+    Container(employee_app, "Employee Web Application", "HTML, CSS", "Delivers the static Employee-focused content and angular single page application.", $sprite="html5", $tags = "application")
+    Container(react_spa, "React Single-Page Application", "TypeScript, React", "Provides all the Champlain Pet Clinic functionality to clients via their web browser.", $sprite="react", $tags = "application")
+    Container(angular_spa, "Angular Single-Page Application", "JavaScript, Angular", "Provides all the Champlain Pet Clinic functionality to employees via their web browser.", $sprite="angular", $tags = "application")
+    Container(api_gateway, "API-Gateway", "Java, Spring Boot", "Provides Champlain Pet Clinic functionality and hosts the Employee Web Application.", $sprite="spring_original", $tags = "microService")
     Container(auth_service, "auth-service", "Java, Spring Boot", "Provides authentication and authorization functionality.", $sprite="spring_original" , $tags = "microService")
-    Container(customers_service, "customers-service", "Java, Spring Boot", "Provides customer functionality which includes owners, pets, and types.", $tags = "microService")
-    Container(inventory_service, "inventory-service", "Java, Spring Boot", "Provides medical inventory functionality.", $tags = "microService")
-    Container(vets_service, "vets-service", "Java, Spring Boot", "Provides veterinarian functionality.", $tags = "microService")
-    Container(visits_service, "visits-service", "Java, Spring Boot", "Provides appointment booking functionality. Includes its own mail service", $tags = "microService")
-    Container(billing_service, "billing-service", "Java, Spring Boot", "Provides billing functionality.", $tags = "microService")
-    Container(products_service, "products-service", "Java, Spring Boot", "Provides product management functionality for the online store.", $tags = "microService")
-    Container(cart_service, "cart-service", "Java, Spring Boot", "Provides cart management functionality for the online store.", $tags = "microService")
-    Container(mailer_service, "mailer-service", "Go", "Provides email functionality for the auth-service.", $sprite="go" , $tags = "microService")
+    Container(customers_service, "customers-service", "Java, Spring Boot", "Provides customer functionality which includes owners, pets, and types.", $sprite="spring_original", $tags = "microService")
+    Container(inventory_service, "inventory-service", "Java, Spring Boot", "Provides medical inventory functionality.", $sprite="spring_original", $tags = "microService")
+    Container(vets_service, "vets-service", "Java, Spring Boot", "Provides veterinarian functionality.", $sprite="spring_original", $tags = "microService")
+    Container(visits_service, "visits-service", "Java, Spring Boot", "Provides appointment booking functionality. Includes its own mail service", $sprite="spring_original", $tags = "microService")
+    Container(billing_service, "billing-service", "Java, Spring Boot", "Provides billing functionality.", $sprite="spring_original", $tags = "microService")
+    Container(products_service, "products-service", "Java, Spring Boot", "Provides product management functionality for the online store.", $sprite="spring_original", $tags = "microService")
+    Container(cart_service, "cart-service", "Java, Spring Boot", "Provides cart management functionality for the online store.", $sprite="spring_original", $tags = "microService")
+    Container(mailer_service, "mailer-service", "Go", "Provides email functionality for the auth-service.", $sprite="go", $tags = "microService")
     Container(emailing_service, "emailing-service", "C#, ASP.NET Core", "Provides email functionality.", $sprite="dotnetcore", $tags = "microService")
 
-    ContainerDb(auth_db, "auth-db", "MySQL 5.7.x", "Stores user information.", $tags = "storage")
-    ContainerDb(customers_db, "customers-db", "Mongo", "Stores owner, pet, and type information.", $tags = "storage")
-    ContainerDb(inventory_db, "inventory-db", "Mongo", "Stores medical inventory information.", $tags = "storage")
-    ContainerDb(vets_vets_db, "vets-vets-db", "Mongo", "Stores veterinarian information.", $tags = "storage")
-    ContainerDb(vets_images_db, "vets-images-db", "Mongo", "Stores veterinarian image information.", $tags = "storage")
-    ContainerDb(visits_db, "visits-db", "Mongo", "Stores visits information.", $tags = "storage")
-    ContainerDb(billing_db, "billing-db", "Mongo", "Stores billing information.", $tags = "storage")
-    ContainerDb(products_db, "products-db", "Mongo", "Stores product information.", $tags = "storage")
-    ContainerDb(cart_db, "cart-db", "Mongo", "Stores cart information.", $tags = "storage")
-    ContainerDb(emailing_db, "emailing-db", "MySQL 8.0", "Stores email information.", $tags = "storage")
+    ContainerDb(auth_db, "auth-db", "MySQL 5.7.x", "Stores user information.", $sprite="mysql" , $tags = "storage")
+    ContainerDb(customers_db, "customers-db", "Mongo", "Stores owner, pet, and type information.", $sprite="mongodb", $tags = "storage")
+    ContainerDb(inventory_db, "inventory-db", "Mongo", "Stores medical inventory information.", $sprite="mongodb", $tags = "storage")
+    ContainerDb(vets_vets_db, "vets-vets-db", "Mongo", "Stores veterinarian information.", $sprite="mongodb", $tags = "storage")
+    ContainerDb(vets_images_db, "vets-images-db", "Postgres", "Stores veterinarian image information.", $sprite="postgresql", $tags = "storage")
+    ContainerDb(visits_db, "visits-db", "Mongo", "Stores visits information.", $sprite="mongodb", $tags = "storage")
+    ContainerDb(billing_db, "billing-db", "Mongo", "Stores billing information.", $sprite="mongodb", $tags = "storage")
+    ContainerDb(products_db, "products-db", "Mongo", "Stores product information.", $sprite="mongodb", $tags = "storage")
+    ContainerDb(cart_db, "cart-db", "Mongo", "Stores cart information.", $sprite="mongodb", $tags = "storage")
+    ContainerDb(emailing_db, "emailing-db", "MySQL 8.0", "Stores email information.", $sprite="mysql", $tags = "storage")
 }
 
 Rel(customer, client_app, "Visits petclinic.benmusicgeek.synology.me/ using", "HTTPS")
-Rel(admin, employee_app, "Visits petclinic-backend.benmusicgeek.synology.me/#!/login using", "HTTPS")
-Rel(receptionist, employee_app, "Visits petclinic-backend.benmusicgeek.synology.me/#!/login using", "HTTPS")
-Rel(inventoryManager, employee_app, "Visits petclinic-backend.benmusicgeek.synology.me/#!/login using", "HTTPS")
-Rel(veterinarian, employee_app, "Visits petclinic-backend.benmusicgeek.synology.me/#!/login using", "HTTPS")
+Rel(admin, employee_app, "Visits petclinic-backend.benmusicgeek.synology.me/#! using", "HTTPS")
+Rel(receptionist, employee_app, "Visits petclinic-backend.benmusicgeek.synology.me/#! using", "HTTPS")
+Rel(inventoryManager, employee_app, "Visits petclinic-backend.benmusicgeek.synology.me/#! using", "HTTPS")
+Rel(veterinarian, employee_app, "Visits petclinic-backend.benmusicgeek.synology.me/#! using", "HTTPS")
 Rel_R(client_app, react_spa, "Delivers to the customer's web browser")
 Rel_R(employee_app, angular_spa, "Delivers to an employee's web browser")
 Rel(admin, angular_spa, "views admin_panel and employee specific functionality")
@@ -87,7 +93,6 @@ Rel(vets_service, vets_images_db, "Reads from and writes to", "JDCB/SQL/TCP")
 Rel(api_gateway, emailing_service, "Makes API calls to", "JSON/REST/HTTPS")
 Rel(emailing_service, emailing_db, "Makes API calls to", "JSON/REST/HTTPS")
 Rel(api_gateway, visits_service, "Makes API calls to", "JSON/REST/HTTPS")
-Rel(visits_service, visits_db, "Reads from and writes to", "Mongo/MQL/TCP")
 
 Rel(api_gateway, products_service, "Makes API calls to", "JSON/REST/HTTPS")
 Rel(products_service, products_db, "Reads from and writes to", "Mongo/MQL/TCP")
