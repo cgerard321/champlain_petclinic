@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Button, Form, Modal } from 'react-bootstrap';
 import {VetRequestModel} from "@/features/veterinarians/models/VetRequestModel.ts";
 
+
 interface UploadVetPhotoProps {
   vets: VetRequestModel[];
 }
@@ -81,17 +82,18 @@ const UploadVetPhoto: React.FC<UploadVetPhotoProps> = ({vets}) => {
               {/*  required*/}
               {/*/>*/}
               <Form.Label>Select Vet</Form.Label>
-              { vets.map(vet => (
-                  <Form.Check
-                      key={vet.vetId}
-                      type="radio"
-                      name="vetId"
-                      label={`${vet.firstName} ${vet.lastName}`}
-                      value={vet.vetId}
-                      checked={vetId === String(vet.vetId)}
-                      onChange={e => setVetId(e.target.value)}
-                  />
-              ))}
+              <Form.Select
+                value={vetId}
+                onChange={e => setVetId(e.target.value)}
+                required
+              >
+                <option value="">-- Choose a Vet --</option>
+                {vets.map(vet => (
+                    <option key={vet.vetId} value={vet.vetId}>
+                      {vet.firstName} {vet.lastName}
+                    </option>
+                ))}
+              </Form.Select>
             </Form.Group>
             <Form.Group controlId="photoName">
               <Form.Label>Photo Name</Form.Label>
