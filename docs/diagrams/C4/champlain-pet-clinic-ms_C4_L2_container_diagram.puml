@@ -33,6 +33,7 @@ AddRelTag("red-line", $lineColor="red", $legendText="billing-service\ndependency
 AddRelTag("blue-line", $lineColor="blue", $legendText="auth-service\ndependency")
 AddRelTag("green-line", $lineColor="green", $legendText="cart-service\ndependency")
 AddRelTag("orange-line", $lineColor="orange", $legendText="visits-service\ndependency")
+AddRelTag("purple-line", $lineColor="purple", $legendText="api_gateway\ndependency")
 
 LAYOUT_TOP_DOWN()
 'LAYOUT_WITH_LEGEND()
@@ -49,10 +50,18 @@ Person(customer, "Customer", "A customer of the Champlain Pet Clinic.")
 
 System_Boundary(c1, "Champlain Pet Clinic System"){
 
-    Container(client_app, "Client Web Application", "HTML, CSS", "Delivers the static Client-focused content and the react single page application.", $sprite="html5", $tags = "webApp")
-    Container(employee_app, "Employee Web Application", "HTML, CSS", "Delivers the static Employee-focused content and angular single page application.", $sprite="html5", $tags = "webApp")
-    Container(react_spa, "React Single-Page Application", "TypeScript, React", "Provides all the Champlain Pet Clinic functionality to clients via their web browser.", $sprite="react", $tags = "framework-react")
-    Container(angular_spa, "Angular Single-Page Application", "JavaScript, Angular", "Provides all the Champlain Pet Clinic functionality to employees via their web browser.", $sprite="angular", $tags = "framework-angular")
+together {
+    together {
+        Container(react_spa, "React Single-Page Application", "TypeScript, React", "Provides all the Champlain Pet Clinic functionality to clients via their web browser.", $sprite="react", $tags = "framework-react")
+        Container(client_app, "Client Web Application", "HTML, CSS", "Delivers the static Client-focused content and the react single page application.", $sprite="html5", $tags = "webApp")
+    }
+    together {
+        Container(employee_app, "Employee Web Application", "HTML, CSS", "Delivers the static Employee-focused content and angular single page application.", $sprite="html5", $tags = "webApp")
+        Container(angular_spa, "Angular Single-Page Application", "JavaScript, Angular", "Provides all the Champlain Pet Clinic functionality to employees via their web browser.", $sprite="angular", $tags = "framework-angular")
+    }
+}
+
+together {
     Container(api_gateway, "API-Gateway", "Java, Spring Boot", "Provides Champlain Pet Clinic functionality and hosts the Employee Web Application.", $sprite="spring_original", $tags = "microService-java")
     Container(auth_service, "auth-service", "Java, Spring Boot", "Provides authentication and authorization functionality.", $sprite="spring_original" , $tags = "microService-java")
     Container(customers_service, "customers-service", "Java, Spring Boot", "Provides customer functionality which includes owners, pets, and types.", $sprite="spring_original", $tags = "microService-java")
@@ -64,17 +73,19 @@ System_Boundary(c1, "Champlain Pet Clinic System"){
     Container(cart_service, "cart-service", "Java, Spring Boot", "Provides cart management functionality for the online store.", $sprite="spring_original", $tags = "microService-java")
     Container(mailer_service, "mailer-service", "Go", "Provides email functionality for the auth-service.", $sprite="go", $tags = "microService-go")
     Container(emailing_service, "emailing-service", "C#, ASP.NET Core", "Provides email functionality.", $sprite="dotnetcore", $tags = "microService-c#")
-
-    ContainerDb(auth_db, "auth-db", "MySQL 5.7.x", "Stores user information.", $sprite="mysql" , $tags = "storage-mysql")
-    ContainerDb(customers_db, "customers-db", "Mongo", "Stores owner, pet, and type information.", $sprite="mongodb", $tags = "storage-mongo")
-    ContainerDb(inventory_db, "inventory-db", "Mongo", "Stores medical inventory information.", $sprite="mongodb", $tags = "storage-mongo")
-    ContainerDb(vets_vets_db, "vets-vets-db", "Mongo", "Stores veterinarian information.", $sprite="mongodb", $tags = "storage-mongo")
-    ContainerDb(vets_images_db, "vets-images-db", "Postgres", "Stores veterinarian image information.", $sprite="postgresql", $tags = "storage-postgres")
-    ContainerDb(visits_db, "visits-db", "Mongo", "Stores visits information.", $sprite="mongodb", $tags = "storage-mongo")
-    ContainerDb(billing_db, "billing-db", "Mongo", "Stores billing information.", $sprite="mongodb", $tags = "storage-mongo")
-    ContainerDb(products_db, "products-db", "Mongo", "Stores product information.", $sprite="mongodb", $tags = "storage-mongo")
-    ContainerDb(cart_db, "cart-db", "Mongo", "Stores cart information.", $sprite="mongodb", $tags = "storage-mongo")
-    ContainerDb(emailing_db, "emailing-db", "MySQL 8.0", "Stores email information.", $sprite="mysql", $tags = "storage-mysql")
+}
+    together {
+        ContainerDb(auth_db, "auth-db", "MySQL 5.7.x", "Stores user information.", $sprite="mysql" , $tags = "storage-mysql")
+        ContainerDb(customers_db, "customers-db", "Mongo", "Stores owner, pet, and type information.", $sprite="mongodb", $tags = "storage-mongo")
+        ContainerDb(inventory_db, "inventory-db", "Mongo", "Stores medical inventory information.", $sprite="mongodb", $tags = "storage-mongo")
+        ContainerDb(vets_vets_db, "vets-db", "Mongo", "Stores veterinarian information.", $sprite="mongodb", $tags = "storage-mongo")
+        ContainerDb(vets_images_db, "vets-images-db", "Postgres", "Stores veterinarian image information.", $sprite="postgresql", $tags = "storage-postgres")
+        ContainerDb(visits_db, "visits-db", "Mongo", "Stores visits information.", $sprite="mongodb", $tags = "storage-mongo")
+        ContainerDb(billing_db, "billing-db", "Mongo", "Stores billing information.", $sprite="mongodb", $tags = "storage-mongo")
+        ContainerDb(products_db, "products-db", "Mongo", "Stores product information.", $sprite="mongodb", $tags = "storage-mongo")
+        ContainerDb(cart_db, "cart-db", "Mongo", "Stores cart information.", $sprite="mongodb", $tags = "storage-mongo")
+        ContainerDb(emailing_db, "emailing-db", "MySQL 8.0", "Stores email information.", $sprite="mysql", $tags = "storage-mysql")
+    }
 }
 
 Rel(customer, client_app, "Visits petclinic.benmusicgeek.synology.me/ using", "HTTPS")
@@ -93,38 +104,38 @@ Rel(react_spa, api_gateway, "Makes API calls to", "JSON/REST/HTTPS")
 Rel(angular_spa, api_gateway, "Makes API calls to", "JSON/REST/HTTPS")
 
 
-Rel(api_gateway, customers_service, "Makes API calls to", "JSON/REST/HTTPS")
+Rel(api_gateway, customers_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="purple-line")
 Rel(customers_service, customers_db, "Reads from and writes to", "Mongo/MQL/TCP")
-Rel(api_gateway, inventory_service, "Makes API calls to", "JSON/REST/HTTPS")
+Rel(api_gateway, inventory_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="purple-line")
 Rel(inventory_service, inventory_db, "Reads from and writes to", "Mongo/MQL/TCP")
-Rel(api_gateway, vets_service, "Makes API calls to", "JSON/REST/HTTPS")
+Rel(api_gateway, vets_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="purple-line")
 Rel(vets_service, vets_vets_db, "Reads from and writes to", "Mongo/MQL/TCP")
 Rel(vets_service, vets_images_db, "Reads from and writes to", "JDCB/SQL/TCP")
-Rel(api_gateway, emailing_service, "Makes API calls to", "JSON/REST/HTTPS")
+Rel(api_gateway, emailing_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="purple-line")
 Rel(emailing_service, emailing_db, "Makes API calls to", "JSON/REST/HTTPS")
-Rel(api_gateway, visits_service, "Makes API calls to", "JSON/REST/HTTPS")
+Rel(api_gateway, visits_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="purple-line")
 
-Rel(api_gateway, products_service, "Makes API calls to", "JSON/REST/HTTPS")
+Rel(api_gateway, products_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="purple-line")
 Rel(products_service, products_db, "Reads from and writes to", "Mongo/MQL/TCP")
 
-Rel(api_gateway, auth_service, "Makes API calls to", "JSON/REST/HTTPS")
+Rel(api_gateway, auth_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="purple-line")
 Rel(auth_service, mailer_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="blue-line")
 Rel(auth_service, cart_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="blue-line")
 Rel(auth_service, emailing_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="blue-line")
-Rel(auth_service, auth_db, "Reads from and writes to", "JDCB/SQL/TCP")
-Rel(api_gateway, billing_service, "Makes API calls to", "JSON/REST/HTTPS")
+Rel(auth_service, auth_db, "Reads from and writes to", "JDCB/SQL/TCP", $tags="blue-line")
+Rel(api_gateway, billing_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="purple-line")
 Rel(billing_service, customers_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="red-line")
 Rel(billing_service, vets_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="red-line")
 Rel(billing_service, billing_db, "Reads from and writes to", "Mongo/MQL/TCP", $tags="red-line")
-Rel(api_gateway, cart_service, "Makes API calls to", "JSON/REST/HTTPS")
+Rel(api_gateway, cart_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="purple-line")
 Rel(cart_service, products_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="green-line")
 Rel(cart_service, cart_db, "Reads from and writes to", "Mongo/MQL/TCP", $tags="green-line")
-Rel(api_gateway, visits_service, "Makes API calls to", "JSON/REST/HTTPS")
-Rel(visits_service, visits_db, "Reads from and writes to", "Mongo/MQL/TCP")
+Rel(api_gateway, visits_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="purple-line")
+Rel(visits_service, visits_db, "Reads from and writes to", "Mongo/MQL/TCP", $tags="orange-line")
 Rel(visits_service, emailing_service, "Reads from and writes to", "Mongo/MQL/TCP", $tags="orange-line")
-Rel(visits_service, auth_service, "Reads from and writes to", "Mongo/MQL/TCP", $tags="orange-line")
-Rel(visits_service, customers_service, "Reads from and writes to", "Mongo/MQL/TCP", $tags="orange-line")
-Rel(visits_service, vets_service, "Reads from and writes to", "Mongo/MQL/TCP", $tags="orange-line")
+Rel(visits_service, auth_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="orange-line")
+Rel(visits_service, customers_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="orange-line")
+Rel(visits_service, vets_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="orange-line")
 
 
 SHOW_LEGEND()
