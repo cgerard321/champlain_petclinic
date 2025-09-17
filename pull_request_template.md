@@ -13,6 +13,8 @@ What are the various changes and what other modules do those changes affect.
 This can be bullet point or sentence format.
 ## Does this use the v2 API?:
 If the PR uses the v2 API, explain why
+## Does this add a new communication between services?:
+If the PR adds a new communication between services, make sure to update the C4 L2.
 ## Before and After UI (Required for UI-impacting PRs)
 If this is a change to the UI, include before and after screenshots to show the differences.
 If this is a new UI feature, include screenshots to show reviewers what it looks like. 
