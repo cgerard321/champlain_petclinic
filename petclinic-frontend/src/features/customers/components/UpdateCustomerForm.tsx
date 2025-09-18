@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { FormEvent, useEffect, useState } from 'react';
-import { updateOwner, getOwner } from '@/features/customers/api/updateOwner.ts';
+import { getOwner } from '../api/getOwner';
+import { updateOwner } from '../api/updateOwner';
 import { OwnerRequestModel } from '@/features/customers/models/OwnerRequestModel.ts';
 import { OwnerResponseModel } from '@/features/customers/models/OwnerResponseModel.ts';
 import { useNavigate } from 'react-router-dom';
