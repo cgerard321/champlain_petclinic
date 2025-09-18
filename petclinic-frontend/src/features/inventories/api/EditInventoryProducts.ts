@@ -8,7 +8,7 @@ export const updateProductInInventory = async (
   product: ProductRequestModel
 ): Promise<void> => {
   await axiosInstance.put<void>(
-    `inventories/${inventoryId}/products/${productId}`,
+    `/inventories/${inventoryId}/products/${productId}`,
     product
   );
 };
