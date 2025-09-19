@@ -16,11 +16,11 @@ export async function searchProducts(
 
   const queryString = queryParams.toString();
   const url = queryString
-    ? `products/search?${queryString}`
-    : `products/search`;
+    ? `/inventory/${inventoryId}/products/search?${queryString}`
+    : `/inventory/${inventoryId}/products/search`;
 
-  const response = await axiosInstance.get<ProductModel[]>(
-    `http://localhost:8080/api/v2/gateway/inventories/${inventoryId}/` + url
-  );
+  const response = await axiosInstance.get<ProductModel[]>(url, {
+    useV2: false,
+  });
   return response.data;
 }
