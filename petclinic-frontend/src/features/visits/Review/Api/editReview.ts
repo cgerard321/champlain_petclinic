@@ -15,7 +15,7 @@ export const getReview = async (
   reviewId: string
 ): Promise<ReviewResponseDTO> => {
   const response = await axiosInstance.get<ReviewResponseDTO>(
-    `http://localhost:8080/api/v2/gateway/visits/reviews/${reviewId}`
+    `/visits/reviews/${reviewId}`
   );
   return response.data; // Return only the data
 };
