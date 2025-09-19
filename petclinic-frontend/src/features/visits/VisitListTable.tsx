@@ -8,6 +8,7 @@ import { EmergencyResponseDTO } from './Emergency/Model/EmergencyResponseDTO';
 import { deleteEmergency } from './Emergency/Api/deleteEmergency';
 import './Emergency.css';
 import { exportVisitsCSV } from './api/exportVisitsCSV';
+import axiosInstance from '@/shared/api/axiosInstance';
 
 export default function VisitListTable(): JSX.Element {
   const [visitsList, setVisitsList] = useState<Visit[]>([]);
@@ -28,12 +29,7 @@ export default function VisitListTable(): JSX.Element {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const eventSource = new EventSource(
-      'http://localhost:8080/api/v2/gateway/visits',
-      {
-        withCredentials: true,
-      }
-    );
+    const eventSource = new EventSource('/visits');
 
     eventSource.onmessage = event => {
       try {
@@ -123,12 +119,9 @@ export default function VisitListTable(): JSX.Element {
   };
 
   useEffect(() => {
-    const archivedEventSource = new EventSource(
-      'http://localhost:8080/api/v2/gateway/visits/archived',
-      {
-        withCredentials: true,
-      }
-    );
+    const archivedEventSource = new EventSource('/visits/archived', {
+      withCredentials: true,
+    });
 
     archivedEventSource.onmessage = event => {
       try {
@@ -166,26 +159,16 @@ export default function VisitListTable(): JSX.Element {
   }, []);
 
   useEffect(() => {
-    if (searchTerm) {
-      //async (): Promise<void> => {
-      //  try {
-      //    console.log('searchTerm:', searchTerm);
-      //   const list = await getAllVisits(searchTerm);
-      //  setVisitsList(list);
-      //   console.log('visitsList:', visitsList);
-      //  } catch (error) {
-      //    console.error('Error fetching visits:', error);
-      // }
-      //};
+    if (!searchTerm) {
+      setVisitsList(visitsAll);
+      return
+    }
       setVisitsList(
         visitsAll.filter(visit =>
           visit.description.toLowerCase().includes(searchTerm.toLowerCase())
         )
       );
-    } else {
-      return;
-    }
-  }, [searchTerm, visitsAll, visitsList]);
+    }, [searchTerm, visitsAll]);
 
   // Filter visits based on status
   const confirmedVisits = visitsList.filter(
@@ -205,55 +188,28 @@ export default function VisitListTable(): JSX.Element {
     const confirmArchive = window.confirm(
       `Are you sure you want to archive visit with ID: ${visitId}?`
     );
-    if (confirmArchive) {
-      try {
-        const requestBody = { status: 'ARCHIVED' };
-        const response = await fetch(
-          `http://localhost:8080/api/v2/gateway/visits/completed/${visitId}/archive`,
-          {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            credentials: 'include',
-            body: JSON.stringify(requestBody),
-          }
-        );
+    if (! confirmArchive) return;
 
-        if (response.ok) {
-          // Fetch the updated visit data from the backend
-          const updatedVisitResponse = await fetch(
-            `http://localhost:8080/api/v2/gateway/visits/${visitId}`,
-            {
-              method: 'GET',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              credentials: 'include',
-            }
-          );
+    try {
+      const requestBody = { status: 'ARCHIVED' };
+      await axiosInstance.put(
+        `/visits/completed/${visitId}/archive`,
+        requestBody,
+        { useV2: false }
+      );
 
-          if (updatedVisitResponse.ok) {
-            const updatedVisit = await updatedVisitResponse.json();
-            setArchivedVisits(oldArchived => [...oldArchived, updatedVisit]);
-            setVisitsList(prev =>
-              prev.filter(visit => visit.visitId !== visitId)
-            );
-            alert('Visit archived successfully!');
-          } else {
-            console.error('Failed to fetch the updated visit.');
-            alert('Failed to fetch the updated visit.');
-          }
-        } else {
-          const errorData = await response.json();
-          console.error('Failed to archive the visit:', errorData);
-          alert(`Failed to archive the visit: ${errorData.message}`);
-        }
-      } catch (error) {
+      const updatedVisitResponse = await axiosInstance.get<Visit>(
+        `/visits/${visitId}`,
+        { useV2: false }
+      );
+
+      const updatedVisit = updatedVisitResponse.data;
+      setArchivedVisits(oldArchived => [...oldArchived, updatedVisit]);
+      setVisitsList(prev => prev.filter(visit => visit.visitId !== visitId));
+      alert('Visit archived successfully!');
+    } catch (error) {
         console.error('Error archiving visit:', error);
-        alert('Error archiving visit.');
       }
-    }
   };
 
   // Handle canceling the visit
@@ -262,36 +218,24 @@ export default function VisitListTable(): JSX.Element {
       'Do you confirm you want to cancel the reservation?'
     );
 
-    if (confirmCancel) {
-      try {
-        const response = await fetch(
-          `http://localhost:8080/api/v2/gateway/visits/${visitId}/CANCELLED`,
-          {
-            method: 'PATCH',
-            credentials: 'include',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error('Failed to cancel the visit');
-        }
-
-        // Update the visit list after cancellation
-        setVisitsList(prevVisits =>
+    if (!confirmCancel) return
+    try {
+      await axiosInstance.patch(
+          `/visits/${visitId}/CANCELLED`,
+          {useV2: false}
+      );
+      // Update the visit list after cancellation
+      setVisitsList(prevVisits =>
           prevVisits.map(visit =>
-            visit.visitId === visitId
-              ? { ...visit, status: 'CANCELLED' }
-              : visit
+              visit.visitId === visitId
+                  ? {...visit, status: 'CANCELLED'}
+                  : visit
           )
-        );
-      } catch (error) {
-        console.error('Error canceling visit:', error);
-        alert('Error canceling visit.');
+      );
+    } catch (error) {
+            console.error('Error canceling visit:', error);
+            alert('Error canceling visit.');
       }
-    }
   };
 
   // Render table for emergencies

@@ -1,22 +1,14 @@
+import axiosInstance from "@/shared/api/axiosInstance.ts";
+
 export const exportVisitsCSV = async (): Promise<void> => {
   try {
-    const response = await fetch(
-      'http://localhost:8080/api/v2/gateway/visits/export',
-      {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/octet-stream',
-        },
-        credentials: 'include',
-      }
+    const response = await axiosInstance.get(
+      '/visits/export',
+        { responseType: "blob",
+          useV2 : false }
     );
 
-    if (!response.ok) {
-      throw new Error('Failed to download CSV file');
-    }
-
-    const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
+    const url = window.URL.createObjectURL(new Blob([response.data]));
 
     // Create a temporary anchor element to trigger the download
     const a = document.createElement('a');
