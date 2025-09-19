@@ -19,7 +19,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.Optional;
 
-@RestController
+@RestController()
 @RequiredArgsConstructor
 @Slf4j
 @RequestMapping("/api/v2/gateway/inventories")

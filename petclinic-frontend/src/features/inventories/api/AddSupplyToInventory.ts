@@ -6,8 +6,8 @@ export const addSupplyToInventory = async (
   product: ProductRequestModel
 ): Promise<void> => {
   await axiosInstance.post<void>(
-    `/inventories/${inventoryId}/products`,
+    `/inventory/${inventoryId}/products`,
     product,
-    { useV2: true }
+    { useV2: false }
   );
 };
