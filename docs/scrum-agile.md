@@ -8,7 +8,7 @@ Back to [Main page](../README.md)
   * [Project Structure](#project-structure)
 <!-- TOC -->
 
-## Requirements for a user story to be considered DONE
+## Requirements for a user story to be considered DONE (DoD)
 For a User Story to be considered as DONE, all the following need to be met:
 <ol>
 <li>A pull request has been made, reviewed and merged into Main.</li>
