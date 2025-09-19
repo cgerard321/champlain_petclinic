@@ -992,14 +992,7 @@ public class BFFApiGatewayController {
     }
 
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER})
-    @PostMapping(value = "inventory")
-    public Mono<ResponseEntity<InventoryResponseDTO>> addInventory(@RequestBody InventoryRequestDTO model){
-        return inventoryServiceClient.addInventory(model)
-                .map(s -> ResponseEntity.status(HttpStatus.CREATED).body(s))
-                .defaultIfEmpty(ResponseEntity.badRequest().build());
 
-    }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER,Roles.VET})
 
@@ -1093,20 +1086,9 @@ public class BFFApiGatewayController {
     }
 
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER})
-    @PostMapping(value = "inventory/type")
-    public Mono<ResponseEntity<InventoryTypeResponseDTO>> addInventoryType(@RequestBody InventoryTypeRequestDTO inventoryTypeRequestDTO){
-        return inventoryServiceClient.addInventoryType(inventoryTypeRequestDTO)
-                .map(s -> ResponseEntity.status(HttpStatus.CREATED).body(s))
-                .defaultIfEmpty(ResponseEntity.badRequest().build());
-    }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER})
 
-    @GetMapping(value = "inventory/type")
-    public Flux<InventoryTypeResponseDTO> getAllInventoryTypes(){
-        return inventoryServiceClient.getAllInventoryTypes();
-    }
+
 
     @DeleteMapping(value = "inventory/{inventoryId}")
     public Mono<Void> deleteInventoryByInventoryId(@PathVariable String inventoryId) {
