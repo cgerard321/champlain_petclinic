@@ -2,14 +2,13 @@
 // eslint-disable-next-line import/default
 import React, { useState } from 'react';
 import { Button, Form, Modal } from 'react-bootstrap';
-import {VetRequestModel} from "@/features/veterinarians/models/VetRequestModel.ts";
-
+import { VetRequestModel } from '@/features/veterinarians/models/VetRequestModel.ts';
 
 interface UploadVetPhotoProps {
   vets: VetRequestModel[];
 }
 
-const UploadVetPhoto: React.FC<UploadVetPhotoProps> = ({vets}) => {
+const UploadVetPhoto: React.FC<UploadVetPhotoProps> = ({ vets }) => {
   const [vetId, setVetId] = useState('');
   const [photoName, setPhotoName] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -73,25 +72,19 @@ const UploadVetPhoto: React.FC<UploadVetPhotoProps> = ({vets}) => {
         <Modal.Body>
           <Form>
             <Form.Group controlId="vetId">
-              {/*<Form.Label>Vet ID</Form.Label>*/}
-              {/*<Form.Control*/}
-              {/*  type="text"*/}
-              {/*  value={vetId}*/}
-              {/*  onChange={e => setVetId(e.target.value)}*/}
-              {/*  placeholder="Enter Vet ID"*/}
-              {/*  required*/}
-              {/*/>*/}
               <Form.Label>Select Vet</Form.Label>
               <Form.Select
                 value={vetId}
                 onChange={e => setVetId(e.target.value)}
                 required
               >
-                <option value="">-- Choose a Vet --</option>
+                <option disabled value="">
+                  -- Choose a Vet --
+                </option>
                 {vets.map(vet => (
-                    <option key={vet.vetId} value={vet.vetId}>
-                      {vet.firstName} {vet.lastName}
-                    </option>
+                  <option key={vet.vetId} value={vet.vetId}>
+                    {vet.firstName} {vet.lastName}
+                  </option>
                 ))}
               </Form.Select>
             </Form.Group>
