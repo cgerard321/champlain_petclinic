@@ -5,9 +5,14 @@ export const addSupplyToInventory = async (
   inventoryId: string,
   product: ProductRequestModel
 ): Promise<void> => {
-  await axiosInstance.post<void>(
-    `/inventory/${inventoryId}/products`,
-    product,
-    { useV2: false }
-  );
+  try {
+    await axiosInstance.post<void>(
+      `/inventory/${inventoryId}/products`,
+      product,
+      { useV2: false }
+    );
+  } catch (error) {
+    console.error('Error adding supply to Inventory:', error);
+    throw error;
+  }
 };
