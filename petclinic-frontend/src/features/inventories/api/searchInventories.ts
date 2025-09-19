@@ -25,7 +25,7 @@ export async function searchInventories(
     });
     return response.data;
   } catch (error) {
-    console.error('Error Fetching Inventories:', error);
+    console.error('Error Searching Inventories:', error);
     throw error;
   }
 }
