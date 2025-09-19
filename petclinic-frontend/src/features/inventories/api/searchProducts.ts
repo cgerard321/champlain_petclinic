@@ -8,19 +8,24 @@ export async function searchProducts(
   productDescription?: string,
   status?: Status
 ): Promise<ProductModel[]> {
-  const queryParams = new URLSearchParams();
-  if (productName) queryParams.append('productName', productName);
-  if (productDescription)
-    queryParams.append('productDescription', productDescription);
-  if (status) queryParams.append('status', status);
+  try {
+    const queryParams = new URLSearchParams();
+    if (productName) queryParams.append('productName', productName);
+    if (productDescription)
+      queryParams.append('productDescription', productDescription);
+    if (status) queryParams.append('status', status);
 
-  const queryString = queryParams.toString();
-  const url = queryString
-    ? `/inventory/${inventoryId}/products/search?${queryString}`
-    : `/inventory/${inventoryId}/products/search`;
+    const queryString = queryParams.toString();
+    const url = queryString
+      ? `/inventory/${inventoryId}/products/search?${queryString}`
+      : `/inventory/${inventoryId}/products/search`;
 
-  const response = await axiosInstance.get<ProductModel[]>(url, {
-    useV2: false,
-  });
-  return response.data;
+    const response = await axiosInstance.get<ProductModel[]>(url, {
+      useV2: false,
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error Searching Products:', error);
+    throw error;
+  }
 }
