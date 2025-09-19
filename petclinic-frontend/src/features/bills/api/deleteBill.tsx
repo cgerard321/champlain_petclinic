@@ -1,4 +1,4 @@
-import { Bill } from '@/features/bills/models/Bill.ts';
+import { Bill } from '@/features/bills/models/Bill';
 import axiosInstance from '@/shared/api/axiosInstance.ts';
 import { AxiosResponse, AxiosError } from 'axios';
 

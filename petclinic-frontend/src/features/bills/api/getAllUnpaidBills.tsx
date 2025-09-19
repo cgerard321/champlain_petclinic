@@ -1,4 +1,4 @@
-import axiosInstance from '@/shared/api/axiosInstance.ts';
+import axiosInstance from '@/shared/api/axiosInstance';
 import { Bill } from '@/features/bills/models/Bill.ts';
 
 export async function getAllUnpaidBills(): Promise<Bill[]> {

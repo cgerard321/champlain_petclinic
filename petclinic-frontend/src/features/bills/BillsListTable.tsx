@@ -3,6 +3,7 @@ import { Bill } from '@/features/bills/models/Bill.ts';
 import { useUser } from '@/context/UserContext';
 import { payBill } from '@/features/bills/api/payBill.tsx';
 import './BillsListTable.css';
+import axiosInstance from '@/shared/api/axiosInstance';
 
 export default function BillsListTable(): JSX.Element {
   const { user } = useUser();
@@ -15,7 +16,7 @@ export default function BillsListTable(): JSX.Element {
     if (!user.userId) return;
 
     try {
-      const response = await fetch(
+      /*const response = await fetch(
         `http://localhost:8080/api/v2/gateway/customers/${user.userId}/bills`,
         {
           headers: {
@@ -23,42 +24,30 @@ export default function BillsListTable(): JSX.Element {
           },
           credentials: 'include',
         }
+          */
+
+      const response = await axiosInstance.get(
+        `/customers/${user.userId}/bills`,
+        {
+          headers: {
+            Accept: 'application/json',
+          },
+          withCredentials: true,
+          useV2: true,
+        }
       );
 
-      if (!response.ok) {
+      if (response.status < 200 || response.status >= 300) {
         throw new Error(`Error: ${response.status} ${response.statusText}`);
       }
 
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder('utf-8');
-
-      let done = false;
-      const billsArray: Bill[] = [];
-
-      while (!done) {
-        const { value, done: streamDone } = (await reader?.read()) || {};
-        done = streamDone ?? true;
-
-        if (value) {
-          const chunk = decoder.decode(value, { stream: true });
-          const formattedChunks = chunk.trim().split(/\n\n/);
-
-          formattedChunks.forEach(formattedChunk => {
-            const cleanChunk = formattedChunk.trim().replace(/^data:\s*/, '');
-
-            if (cleanChunk) {
-              try {
-                const newBill: Bill = JSON.parse(cleanChunk);
-                billsArray.push(newBill);
-              } catch (e) {
-                console.error('Error parsing chunk:', e);
-              }
-            }
-          });
-        }
+      let billsData: Bill[] = [];
+      if (Array.isArray(response.data)) {
+        billsData = response.data;
+      } else if (response.data && typeof response.data === 'object') {
+        billsData = [response.data];
       }
-
-      setBills(billsArray);
+      setBills(billsData);
     } catch (err) {
       console.error('Error fetching bills:', err);
       setError('Failed to fetch bills');
@@ -87,7 +76,7 @@ export default function BillsListTable(): JSX.Element {
     billId: string
   ): Promise<void> => {
     try {
-      const response = await fetch(
+      /*const response = await fetch(
         `http://localhost:8080/api/v2/gateway/customers/${customerId}/bills/${billId}/pdf`,
         {
           method: 'GET',
@@ -95,14 +84,24 @@ export default function BillsListTable(): JSX.Element {
             'Content-Type': 'application/pdf',
           },
           credentials: 'include',
+          */
+
+      const response = await axiosInstance.get(
+        `/customers/${customerId}/bills/${billId}/pdf`,
+        {
+          responseType: 'blob',
+          withCredentials: true,
+          headers: {
+            'Content-Type': 'application/pdf',
+          },
         }
       );
 
-      if (!response.ok) {
+      if (!response || response.status !== 200 || !response.data) {
         throw new Error('Failed to download PDF');
       }
 
-      const blob = await response.blob();
+      const blob = new Blob([response.data], { type: 'application/pdf' });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;

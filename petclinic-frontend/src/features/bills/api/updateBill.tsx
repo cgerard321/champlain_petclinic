@@ -10,8 +10,12 @@ export const updateBill = async (
   return await axiosInstance.put<void>(`/bills/admin/${billId}`, bill);
 };
 
+//export const getBill = async (billId: string): Promise<AxiosResponse<Bill>> => {
+//  return await axiosInstance.get<Bill>(
+//    `http://localhost:8080/api/v2/gateway/bills/admin/${billId}`
+//  );
+//};
+
 export const getBill = async (billId: string): Promise<AxiosResponse<Bill>> => {
-  return await axiosInstance.get<Bill>(
-    `http://localhost:8080/api/v2/gateway/bills/admin/${billId}`
-  );
+  return await axiosInstance.get<Bill>(`/bills/admin/${billId}`);
 };

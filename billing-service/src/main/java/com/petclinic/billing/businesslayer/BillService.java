@@ -70,5 +70,13 @@ public interface BillService {
 
     Mono<Bill> processPayment(String customerId, String billId, PaymentRequestDTO paymentRequestDTO) throws InvalidPaymentException;
 
+    Flux<Flux> filterBillsbyFields(String billId,
+                                 String customerId,
+                                 String ownerFirstName,
+                                 String ownerLastName,
+                                 String visitType,
+                                 String vetId,
+                                 String vetFirstName,
+                                 String vetLastName);
 
 }
