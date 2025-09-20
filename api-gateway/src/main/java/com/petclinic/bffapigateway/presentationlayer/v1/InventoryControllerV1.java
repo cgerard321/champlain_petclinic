@@ -315,6 +315,24 @@ public class InventoryControllerV1 {
         return inventoryServiceClient.searchInventory(page, size, inventoryName, inventoryType, inventoryDescription);
     }
 
+        @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
+    @PutMapping("/{currentInventoryId}/products/{productId}/updateInventoryId/{newInventoryId}")
+    @Operation(summary = "Update product's inventory ID in the inventory system")
+    @ApiResponses(value = {
+            @ApiResponse(description = "Inventory ID updated successfully", responseCode = "200"),
+            @ApiResponse(description = "Product not found", responseCode = "404"),
+            @ApiResponse(description = "Invalid inputs", responseCode = "400")
+    })
+    public Mono<ResponseEntity<ProductResponseDTO>> updateProductInventoryId(
+            @PathVariable String currentInventoryId,
+            @PathVariable String productId,
+            @PathVariable String newInventoryId) {
+
+        return inventoryServiceClient.updateProductInventoryId(currentInventoryId, productId, newInventoryId)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
 
 
 
