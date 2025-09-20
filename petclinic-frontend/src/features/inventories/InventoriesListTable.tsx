@@ -53,6 +53,7 @@ export default function InventoriesListTable(): JSX.Element {
     realPage,
     getInventoryList,
     setCurrentPage,
+    updateFilters,
   } = useSearchInventories();
 
   useEffect(() => {
@@ -71,11 +72,38 @@ export default function InventoriesListTable(): JSX.Element {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage]);
 
+  const handleInventoryNameChange = (value: string): void => {
+    setInventoryName(value);
+    updateFilters({
+      inventoryName: value,
+      inventoryType,
+      inventoryDescription
+    });
+  };
+
+  const handleInventoryTypeChange = (value: string): void => {
+    setInventoryType(value);
+    updateFilters({
+      inventoryName,
+      inventoryType: value,
+      inventoryDescription
+    });
+  };
+
+  const handleInventoryDescriptionChange = (value: string): void => {
+    setInventoryDescription(value);
+    updateFilters({
+      inventoryName,
+      inventoryType,
+      inventoryDescription: value
+    });
+  };
+
   const clearQueries = (): void => {
     setInventoryName('');
     setInventoryType('');
     setInventoryDescription('');
-    getInventoryList('', '', '');
+    updateFilters({ inventoryName: '', inventoryType: '', inventoryDescription: '' });
   };
 
   const pageBefore = (): void => {
@@ -313,34 +341,18 @@ export default function InventoriesListTable(): JSX.Element {
                 <input
                   type="text"
                   value={inventoryName}
-                  onChange={e => setInventoryName(e.target.value)}
-                  onKeyUp={e =>
-                    e.key === 'Enter' &&
-                    getInventoryList(
-                      inventoryName,
-                      inventoryType,
-                      inventoryDescription
-                    )
-                  }
+                  onChange={e => handleInventoryNameChange(e.target.value)}
                 />
               </td>
               <td>
                 <select
                   className="form-control col-sm-4"
                   value={inventoryType}
-                  onChange={e => setInventoryType(e.target.value)}
-                  onKeyUp={e =>
-                    e.key === 'Enter' &&
-                    getInventoryList(
-                      inventoryName,
-                      inventoryType,
-                      inventoryDescription
-                    )
-                  }
+                  onChange={e => handleInventoryTypeChange(e.target.value)}
                 >
                   <option value="">None</option>
                   {inventoryTypeList.map(type => (
-                    <option key={type.type}>{type.type}</option>
+                      <option key={type.type} value={type.type}>{type.type}</option>
                   ))}
                 </select>
               </td>
@@ -348,15 +360,7 @@ export default function InventoriesListTable(): JSX.Element {
                 <input
                   type="text"
                   value={inventoryDescription}
-                  onChange={e => setInventoryDescription(e.target.value)}
-                  onKeyUp={e =>
-                    e.key === 'Enter' &&
-                    getInventoryList(
-                      inventoryName,
-                      inventoryType,
-                      inventoryDescription
-                    )
-                  }
+                  onChange={e => handleInventoryDescriptionChange(e.target.value)}
                 />
               </td>
               <td>
@@ -378,34 +382,18 @@ export default function InventoriesListTable(): JSX.Element {
                   </svg>
                 </button>
               </td>
-              <td>
-                <button
-                  className="btn btn-info"
-                  onClick={() =>
-                    getInventoryList(
-                      inventoryName,
-                      inventoryType,
-                      inventoryDescription
-                    )
-                  }
-                  title="Search"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="32"
-                    height="32"
-                    fill="white"
-                    className="bi bi-search"
-                    viewBox="0 0 16 16"
-                  >
-                    <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
-                  </svg>
-                </button>
-              </td>
               <td></td>
             </tr>
           </thead>
         </table>
+        {inventoryList.length === 0 && (inventoryName !== '' || inventoryType !== '' || inventoryDescription !== '') && (
+            <div className="text-center p-4">
+              <div className="alert alert-info">
+                <h5>No inventory found</h5>
+                <p>No inventories match your current search criteria.</p>
+              </div>
+            </div>
+        )}
         {/*//Cards start here*/}
         <div className={cardStylesInventory.cardContainerCustom}>
           {inventoryList.map(inventory => (
