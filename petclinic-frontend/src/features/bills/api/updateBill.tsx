@@ -11,7 +11,7 @@ export const updateBill = async (
 };
 
 export const getBill = async (billId: string): Promise<AxiosResponse<Bill>> => {
-  return await axiosInstance.get<Bill>(
-    `http://localhost:8080/api/v2/gateway/bills/admin/${billId}`
-  );
+  return await axiosInstance.get<Bill>(`/bills/admin/${billId}`, {
+    useV2: true,
+  });
 };
