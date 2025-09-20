@@ -3,6 +3,7 @@ package com.petclinic.bffapigateway.presentationlayer.v2;
 import com.petclinic.bffapigateway.domainclientlayer.InventoryServiceClient;
 import com.petclinic.bffapigateway.dtos.Inventory.*;
 import com.petclinic.bffapigateway.exceptions.InventoryNotFoundException;
+import com.petclinic.bffapigateway.presentationlayer.v1.InventoryControllerV1;
 import com.petclinic.bffapigateway.utils.InventoryUtils.ImageUtil;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
@@ -35,17 +36,17 @@ import static org.mockito.Mockito.*;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = {
-        InventoryController.class,
+        InventoryControllerV1.class,
         InventoryServiceClient.class
 })
-@WebFluxTest(controllers = InventoryController.class)
+@WebFluxTest(controllers = InventoryControllerV1.class)
 @AutoConfigureWebTestClient
 public class InventoryControllerTest {
     @Autowired
     private WebTestClient client;
     @MockBean
     private InventoryServiceClient inventoryServiceClient;
-    private final String baseInventoryURL = "/api/v2/gateway/inventories";
+    private final String baseInventoryURL = "/api/gateway/inventory";
 
     InputStream inputStream = getClass().getResourceAsStream("/images/DiagnosticKitImage.jpg");
     byte[] diagnosticKitImage = ImageUtil.readImage(inputStream);
@@ -79,7 +80,7 @@ public class InventoryControllerTest {
 
         // Act
         client.delete()
-                .uri("/api/v2/gateway/inventories")  // Assuming the endpoint for deleting all inventories is the same without an ID.
+                .uri("/api/gateway/inventory")  // Assuming the endpoint for deleting all inventories is the same without an ID.
                 .exchange()
                 .expectStatus().isNoContent()
                 .expectBody().isEmpty();
@@ -834,7 +835,7 @@ public class InventoryControllerTest {
 
         // Make the DELETE request to the API.
         client.delete()
-                .uri("/api/v2/gateway/inventories/" + inventoryId +"/products")  // Assuming the endpoint for deleting all products in an inventory is the same with the inventory ID.
+                .uri("/api/gateway/inventory/" + inventoryId +"/products")  // Assuming the endpoint for deleting all products in an inventory is the same with the inventory ID.
                 .exchange()
                 .expectStatus().isNoContent()
                 .expectBody().isEmpty();
@@ -975,7 +976,7 @@ public class InventoryControllerTest {
 
         // Act and Assert
         client.put()
-                .uri("/api/v2/gateway/inventories/" + inventoryId + "/products/" + productId + "/restockProduct?productQuantity=" + productQuantity)
+                .uri("/api/gateway/inventory/" + inventoryId + "/products/" + productId + "/restockProduct?productQuantity=" + productQuantity)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(ProductResponseDTO.class)
@@ -996,7 +997,7 @@ public class InventoryControllerTest {
 
         // Act and Assert
         client.put()
-                .uri("/api/v2/gateway/inventories/" + inventoryId + "/products/" + productId + "/restockProduct?productQuantity=" + invalidQuantity)
+                .uri("/api/gateway/inventory/" + inventoryId + "/products/" + productId + "/restockProduct?productQuantity=" + invalidQuantity)
                 .exchange()
                 .expectStatus().isBadRequest();
 
@@ -1014,7 +1015,7 @@ public class InventoryControllerTest {
 
         // Act and Assert
         client.put()
-                .uri("/api/v2/gateway/inventories/" + inventoryId + "/products/" + productId + "/restockProduct")
+                .uri("/api/gateway/inventory/" + inventoryId + "/products/" + productId + "/restockProduct")
                 .exchange()
                 .expectStatus().isBadRequest(); // Expecting 400 Bad Request
 
@@ -1032,7 +1033,7 @@ public class InventoryControllerTest {
 
         // Act and Assert
         client.put()
-                .uri("/api/v2/gateway/inventories/" + inventoryId + "/products/" + productId + "/restockProduct?productQuantity=" + productQuantity)
+                .uri("/api/gateway/inventory/" + inventoryId + "/products/" + productId + "/restockProduct?productQuantity=" + productQuantity)
                 .exchange()
                 .expectStatus().isBadRequest(); // Expecting 400 Bad Request
 
@@ -1050,7 +1051,7 @@ public class InventoryControllerTest {
 
         // Act and Assert
         client.put()
-                .uri("/api/v2/gateway/inventories/" + inventoryId + "/products/" + productId + "/restockProduct?productQuantity=" + productQuantity)
+                .uri("/api/gateway/inventory/" + inventoryId + "/products/" + productId + "/restockProduct?productQuantity=" + productQuantity)
                 .exchange()
                 .expectStatus().isBadRequest(); // Expecting 400 Bad Request
 
