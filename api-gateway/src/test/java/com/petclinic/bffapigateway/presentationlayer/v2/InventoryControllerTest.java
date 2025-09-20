@@ -6,9 +6,11 @@ import com.petclinic.bffapigateway.exceptions.InventoryNotFoundException;
 import com.petclinic.bffapigateway.presentationlayer.v1.InventoryControllerV1;
 import com.petclinic.bffapigateway.utils.InventoryUtils.ImageUtil;
 import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
@@ -30,9 +32,14 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = {
@@ -1058,6 +1065,456 @@ public class InventoryControllerTest {
         // Verify that the service client was never called
         verify(inventoryServiceClient, never())
                 .restockLowStockProduct(eq(inventoryId), eq(productId), eq(productQuantity));
+    }
+
+    @Test
+    void getProductsInInventoryByInventoryIdAndProductFieldPagination(){
+        ProductResponseDTO expectedResponse = ProductResponseDTO.builder()
+                .productId("1234")
+                .inventoryId("1")
+                .productName("testName")
+                .productDescription("testDescription")
+                .productPrice(65.00)
+                .productQuantity(3)
+                .build();
+        Optional<Integer> page = Optional.of(0);
+        Optional<Integer> size = Optional.of(2);
+        Flux<ProductResponseDTO> resp = Flux.just(expectedResponse);
+        when(inventoryServiceClient.getProductsInInventoryByInventoryIdAndProductFieldPagination("1", null,null,null, page, size))
+                .thenReturn(resp);
+        client.get()
+                .uri("/api/gateway/inventory/{inventoryId}/products-pagination?page={page}&size={size}","1", page.get(), size.get())
+                .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
+                .acceptCharset(StandardCharsets.UTF_8)
+                .exchange().expectStatus().isOk()
+                .expectHeader().valueEquals("Content-Type","text/event-stream;charset=UTF-8")
+                .expectBodyList(ProductResponseDTO.class)
+                .value((list)-> {
+                    assertEquals(1,list.size());
+                    assertEquals(list.get(0).getProductId(),expectedResponse.getProductId());
+                    assertEquals(list.get(0).getInventoryId(),expectedResponse.getInventoryId());
+                    assertEquals(list.get(0).getProductName(),expectedResponse.getProductName());
+                    assertEquals(list.get(0).getProductDescription(),expectedResponse.getProductDescription());
+                    assertEquals(list.get(0).getProductPrice(),expectedResponse.getProductPrice());
+                    assertEquals(list.get(0).getProductQuantity(),expectedResponse.getProductQuantity());
+                });
+    }
+
+    @Test
+    void getTotalNumberOfProductsWithRequestParams(){
+        ProductResponseDTO expectedResponse = ProductResponseDTO.builder()
+                .productId("1234")
+                .inventoryId("1")
+                .productName("testName")
+                .productDescription("testDescription")
+                .productPrice(65.00)
+                .productQuantity(3)
+                .build();
+        when(inventoryServiceClient.getTotalNumberOfProductsWithRequestParams("1",null,null,null))
+                .thenReturn(Flux.just(expectedResponse).count());
+        client.get()
+                .uri("/api/gateway/inventory/{inventoryId}/products-count","1")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange().expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(Long.class)
+                .value((count)-> {
+                    assertEquals(1L,count.longValue());
+                });
+    }
+
+    @Test
+    void testUpdateProductInInventory() {
+        // Create a sample ProductRequestDTO
+        ProductRequestDTO requestDTO = new ProductRequestDTO("Sample Product", "Sample Description", 10.0, 100, 15.99);
+
+        // Define the expected response
+        ProductResponseDTO expectedResponse = ProductResponseDTO.builder()
+                .productId("sampleProductId")
+                .inventoryId("sampleInventoryId")
+                .productName(requestDTO.getProductName())
+                .productDescription(requestDTO.getProductDescription())
+                .productPrice(requestDTO.getProductPrice())
+                .productQuantity(requestDTO.getProductQuantity())
+                .build();
+
+        // Mock the behavior of the inventoryServiceClient
+        when(inventoryServiceClient.updateProductInInventory(any(), anyString(), anyString()))
+                .thenReturn(Mono.just(expectedResponse));
+
+        // Perform the PUT request
+        client.put()
+                .uri("/api/gateway/inventory/{inventoryId}/products/{productId}", "sampleInventoryId", "sampleProductId")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestDTO)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(ProductResponseDTO.class)
+                .value(dto ->{
+                    assertNotNull(dto);
+                    assertEquals(requestDTO.getProductName(),dto.getProductName());
+                    assertEquals(requestDTO.getProductDescription(),dto.getProductDescription());
+                    assertEquals(requestDTO.getProductPrice(),dto.getProductPrice());
+                    assertEquals(requestDTO.getProductQuantity(),dto.getProductQuantity());
+                });
+
+        // Verify that the inventoryServiceClient method was called
+        verify(inventoryServiceClient, times(1))
+                .updateProductInInventory(eq(requestDTO), eq("sampleInventoryId"), eq("sampleProductId"));
+    }
+
+    @Test
+    @DisplayName("Given valid inventoryId and valid productRequest Post and return productResponse")
+    void testAddProductToInventory_ShouldSucceed() {
+        // Create a sample ProductRequestDTO
+        ProductRequestDTO requestDTO = new ProductRequestDTO("Sample Product", "Sample Description", 10.0, 100, 15.99);
+
+        // Define the expected response
+        ProductResponseDTO expectedResponse = ProductResponseDTO.builder()
+                .productId("sampleProductId")
+                .inventoryId("sampleInventoryId")
+                .productName(requestDTO.getProductName())
+                .productDescription(requestDTO.getProductDescription())
+                .productPrice(requestDTO.getProductPrice())
+                .productQuantity(requestDTO.getProductQuantity())
+                .productSalePrice(requestDTO.getProductSalePrice())
+                .build();
+
+        // Mock the behavior of the inventoryServiceClient
+        when(inventoryServiceClient.addSupplyToInventory(any(), anyString()))
+                .thenReturn(Mono.just(expectedResponse));
+
+        // Perform the POST request
+        client.post()
+                .uri("/api/gateway/inventory/{inventoryId}/products", "sampleInventoryId")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestDTO)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(ProductResponseDTO.class)
+                .value(dto -> {
+                    assertNotNull(dto);
+                    assertEquals(requestDTO.getProductName(), dto.getProductName());
+                    assertEquals(requestDTO.getProductDescription(), dto.getProductDescription());
+                    assertEquals(requestDTO.getProductPrice(), dto.getProductPrice());
+                    assertEquals(requestDTO.getProductQuantity(), dto.getProductQuantity());
+                });
+
+        // Verify that the inventoryServiceClient method was called
+        verify(inventoryServiceClient, times(1))
+                .addSupplyToInventory(eq(requestDTO), eq("sampleInventoryId"));
+    }
+
+    @Test
+    @DisplayName("Given invalid inventoryId and valid productRequest Post and return NotFoundException")
+    void testAddProductToInventory_InvalidInventoryId_ShouldReturnNotFoundException() {
+        // Create a sample ProductRequestDTO
+        ProductRequestDTO requestDTO = new ProductRequestDTO("Sample Product", "Sample Description", 10.0, 100,15.99);
+
+
+        // Mock the behavior of the inventoryServiceClient
+        when(inventoryServiceClient.addSupplyToInventory(any(), anyString()))
+                .thenReturn(Mono.error(new NotFoundException("Inventory not found")));
+
+        // Perform the POST request
+        client.post()
+                .uri("/api/gateway/inventory/{inventoryId}/products", "invalidInventoryId")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestDTO)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody().isEmpty();
+
+        // Verify that the inventoryServiceClient method was called
+        verify(inventoryServiceClient, times(1))
+                .addSupplyToInventory(eq(requestDTO), eq("invalidInventoryId"));
+    }
+
+
+    @Test
+    void addInventory_withValidValue_shouldSucceed() {
+
+        //InventoryRequestDTO requestDTO = new InventoryRequestDTO("internal", "Internal", "invt1");
+        InventoryRequestDTO requestDTO = new InventoryRequestDTO();
+        requestDTO.setInventoryName("invt1");
+        requestDTO.setInventoryType("Internal");
+        requestDTO.setInventoryDescription("newDescription");
+        requestDTO.setInventoryImage("https://www.fda.gov/files/iStock-157317886.jpg");
+        requestDTO.setInventoryBackupImage("https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14");
+
+
+        InventoryResponseDTO inventoryResponseDTO = buildInventoryDTO();
+
+        when(inventoryServiceClient.addInventory(any()))
+                .thenReturn(Mono.just(inventoryResponseDTO));
+
+        client.post()
+                .uri("/api/gateway/inventory")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestDTO)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.inventoryId").isEqualTo(inventoryResponseDTO.getInventoryId())
+                .jsonPath("$.inventoryName").isEqualTo(inventoryResponseDTO.getInventoryName())
+                .jsonPath("$.inventoryType").isEqualTo("Internal")
+                .jsonPath("$.inventoryDescription").isEqualTo("invtone");
+
+
+        verify(inventoryServiceClient, times(1))
+                .addInventory(any());
+    }
+
+
+
+    @Test
+    void updateInventory_withValidValue_shouldSucceed() {
+        //InventoryRequestDTO requestDTO = new InventoryRequestDTO("internal", "Internal", "newDescription");
+        String validInventoryId = "123e4567-e89b-12d3-a456-426614174000";
+
+        InventoryRequestDTO requestDTO = new InventoryRequestDTO();
+        requestDTO.setInventoryName("invt1");
+        requestDTO.setInventoryType("Internal");
+        requestDTO.setInventoryDescription("newDescription");
+        requestDTO.setInventoryImage("https://www.fda.gov/files/iStock-157317886.jpg");
+        requestDTO.setInventoryBackupImage("https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14");
+
+
+        InventoryResponseDTO expectedResponse = InventoryResponseDTO.builder()
+                .inventoryId(validInventoryId)
+                .inventoryName("newName")
+                .inventoryType("Internal")
+                .inventoryDescription("newDescription")
+                .inventoryImage("https://www.fda.gov/files/iStock-157317886.jpg")
+                .inventoryBackupImage("https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14")
+                .build();
+
+        when(inventoryServiceClient.updateInventory(any(), eq(validInventoryId)))
+                .thenReturn(Mono.just(expectedResponse));
+
+
+        client.put()
+                .uri("/api/gateway/inventory/{inventoryId}", validInventoryId) // Use the appropriate URI
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestDTO)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.inventoryId").isEqualTo(expectedResponse.getInventoryId())
+                .jsonPath("$.inventoryName").isEqualTo(expectedResponse.getInventoryName())
+                .jsonPath("$.inventoryType").isEqualTo("Internal")
+                .jsonPath("$.inventoryDescription").isEqualTo(expectedResponse.getInventoryDescription());
+
+        verify(inventoryServiceClient, times(1))
+                .updateInventory(any(), eq(validInventoryId));
+    }
+
+    private ProductResponseDTO buildProductDTO(){
+        return ProductResponseDTO.builder()
+                .inventoryId("1")
+                .productId(UUID.randomUUID().toString())
+                .productName("Benzodiazepines")
+                .productDescription("Sedative Medication")
+                .productPrice(100.00)
+                .productQuantity(10)
+                .productSalePrice(15.99)
+                .build();
+    }
+
+
+    @Test
+    void GetProductByInventoryIdAndProductId_InsideInventory() {
+        ProductResponseDTO productResponseDTO = buildProductDTO();
+        when(inventoryServiceClient.getProductByProductIdInInventory(productResponseDTO.getInventoryId(), productResponseDTO.getProductId()))
+                .thenReturn(Mono.just(productResponseDTO));
+
+        client.get()
+                .uri("/api/gateway/inventory/{inventoryId}/products/{productId}", productResponseDTO.getInventoryId(), productResponseDTO.getProductId())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(ProductResponseDTO.class)
+                .value(dto -> {
+                    assertNotNull(dto);
+                    assertEquals(productResponseDTO.getInventoryId(), dto.getInventoryId());
+                    assertEquals(productResponseDTO.getProductId(), dto.getProductId());
+                    assertEquals(productResponseDTO.getProductName(), dto.getProductName());
+                    assertEquals(productResponseDTO.getProductDescription(), dto.getProductDescription());
+                    assertEquals(productResponseDTO.getProductPrice(), dto.getProductPrice());
+                    assertEquals(productResponseDTO.getProductQuantity(), dto.getProductQuantity());
+                    assertEquals(productResponseDTO.getProductSalePrice(), dto.getProductSalePrice());
+
+                });
+
+        verify(inventoryServiceClient, times(1))
+                .getProductByProductIdInInventory(productResponseDTO.getInventoryId(), productResponseDTO.getProductId());
+    }
+
+
+    @Test
+    void getInventoryByInventoryId_ValidId_shouldSucceed() {
+        String validInventoryId = "inventoryId_1";
+        InventoryResponseDTO inventoryResponseDTO = InventoryResponseDTO.builder()
+                .inventoryId(validInventoryId)
+                .inventoryName("Pet food")
+                .inventoryType("Internal")
+                .inventoryDescription("pet")
+                .inventoryImage("https://www.fda.gov/files/iStock-157317886.jpg")
+                .inventoryBackupImage("https://www.who.int/images/default-source/wpro/countries/viet-nam/health-topics/vaccines.jpg?sfvrsn=89a81d7f_14")
+                .build();
+
+        when(inventoryServiceClient.getInventoryById(validInventoryId))
+                .thenReturn(Mono.just(inventoryResponseDTO));
+
+
+        client.get()
+                .uri("/api/gateway/inventory/{inventoryId}", validInventoryId)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(APPLICATION_JSON)
+                .expectBody(InventoryResponseDTO.class)
+                .value(dto -> {
+                    assertNotNull(dto);
+                    assertEquals(inventoryResponseDTO.getInventoryId(), dto.getInventoryId());
+                    assertEquals(inventoryResponseDTO.getInventoryName(), dto.getInventoryName());
+                    assertEquals(inventoryResponseDTO.getInventoryType(), dto.getInventoryType());
+                    assertEquals(inventoryResponseDTO.getInventoryDescription(), dto.getInventoryDescription());
+                });
+
+
+        verify(inventoryServiceClient, times(1))
+                .getInventoryById(validInventoryId);
+    }
+
+
+    //delete all product inventory and delete all inventory
+    @Test
+    void deleteAllInventory_shouldSucceed() {
+        // Mock the service call to simulate the successful deletion of all inventories.
+        // Assuming your service client has a method called `deleteAllInventories`.
+        when(inventoryServiceClient.deleteAllInventories())
+                .thenReturn(Mono.empty());  // Using Mono.empty() to simulate a void return (successful deletion without a return value).
+
+        // Make the DELETE request to the API.
+        client.delete()
+                .uri("/api/gateway/inventory")  // Assuming the endpoint for deleting all inventories is the same without an ID.
+                .exchange()
+                .expectStatus().isNoContent()
+                .expectBody().isEmpty();
+
+        // Verify that the deleteAllInventories method on the service client was called exactly once.
+        verify(inventoryServiceClient, times(1))
+                .deleteAllInventories();
+    }
+
+    @Test
+    public void deleteProductById_insideInventory(){
+        ProductResponseDTO productResponseDTO = buildProductDTO();
+        when(inventoryServiceClient.deleteProductInInventory(productResponseDTO.getInventoryId(), productResponseDTO.getProductId()))
+                .thenReturn((Mono.empty()));
+
+        client.delete()
+                .uri("/api/gateway/inventory/{inventoryId}/products/{productId}",productResponseDTO.getInventoryId()  ,productResponseDTO.getProductId())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNoContent();
+
+        Mockito.verify(inventoryServiceClient, times(1))
+                .deleteProductInInventory(productResponseDTO.getInventoryId(), productResponseDTO.getProductId());
+
+    }
+
+    @Test
+    void getProductsByInventoryName_withProducts_shouldReturnsOk(){
+        String inventoryName = "invt1";
+
+        ProductResponseDTO product1 = buildProductDTO();
+        ProductResponseDTO product2 = buildProductDTO();
+
+        List<ProductResponseDTO> products = List.of(product1, product2);
+
+        when(inventoryServiceClient.getProductsByInventoryName(inventoryName))
+                .thenReturn(Flux.fromIterable(products));
+
+        client.get()
+                .uri("/api/gateway/inventory/{inventoryName}/products/by-name", inventoryName)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$[0].productId").isEqualTo(product1.getProductId())
+                .jsonPath("$[1].productId").isEqualTo(product2.getProductId());
+
+        verify(inventoryServiceClient, times(1)).getProductsByInventoryName(inventoryName);
+    }
+
+    @Test
+    void getProductsByInventoryName_withoutProducts_shouldReturnNotFound(){
+        String inventoryName = "nonExistentInventory";
+
+        when(inventoryServiceClient.getProductsByInventoryName(inventoryName))
+                .thenReturn(Flux.empty());
+
+        client.get()
+                .uri("/api/gateway/inventory/{inventoryName}/products/by-name", inventoryName)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound();
+
+        verify(inventoryServiceClient, times(1)).getProductsByInventoryName(inventoryName);
+    }
+
+    @Test
+    void addInventoryType_withValidRequest_shouldReturnCreated() {
+
+        InventoryTypeRequestDTO requestDTO = new InventoryTypeRequestDTO("External");
+
+        requestDTO.setType("Internal");
+
+        InventoryTypeResponseDTO responseDTO = InventoryTypeResponseDTO.builder()
+                .typeId("type123")
+                .type("Internal")
+                .build();
+
+        when(inventoryServiceClient.addInventoryType(any(InventoryTypeRequestDTO.class)))
+                .thenReturn(Mono.just(responseDTO));
+
+        client.post()
+                .uri("/api/gateway/inventory/type")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestDTO)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.typeId").isEqualTo(responseDTO.getTypeId())
+                .jsonPath("$.type").isEqualTo(responseDTO.getType());
+
+        verify(inventoryServiceClient, times(1)).addInventoryType(any(InventoryTypeRequestDTO.class));
+
+
+
+    }
+
+    @Test
+    void addInventoryType_withInvalidRequest_shouldReturnBadRequest() {
+        InventoryTypeRequestDTO requestDTO = new InventoryTypeRequestDTO("");
+        requestDTO.setType("");
+
+        when(inventoryServiceClient.addInventoryType(any(InventoryTypeRequestDTO.class)))
+                .thenReturn(Mono.empty());
+
+        client.post()
+                .uri("/api/gateway/inventory/type")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestDTO)
+                .exchange()
+                .expectStatus().isBadRequest();
+        verify(inventoryServiceClient, times(1)).addInventoryType(any(InventoryTypeRequestDTO.class));
     }
 
 }
