@@ -377,13 +377,18 @@ export default function AdminBillsListTable(): JSX.Element {
 
             <div>
               <label>Visit Type</label>
-              <input
-                type="text"
+              <select
                 value={newBill.visitType}
                 onChange={e =>
                   setNewBill({ ...newBill, visitType: e.target.value })
                 }
-              />
+              >
+                <option value="">Select Visit Type</option>
+                <option value="CHECKUP">Check-Up</option>
+                <option value="VACCINE">Vaccine</option>
+                <option value="SURGERY">Surgery</option>
+                <option value="DENTAL">Dental</option>
+              </select>
             </div>
 
             <div>
@@ -396,9 +401,11 @@ export default function AdminBillsListTable(): JSX.Element {
             </div>
 
             <div>
-              <label>Amount</label>
+              <label>Amount ($)</label>
               <input
                 type="number"
+                min="0"
+                step="0.01"
                 value={newBill.amount}
                 onChange={e =>
                   setNewBill({ ...newBill, amount: parseFloat(e.target.value) })
@@ -408,13 +415,17 @@ export default function AdminBillsListTable(): JSX.Element {
 
             <div>
               <label>Status</label>
-              <input
-                type="text"
-                value={newBill.billStatus.toUpperCase()}
+              <select
+                value={newBill.billStatus}
                 onChange={e =>
                   setNewBill({ ...newBill, billStatus: e.target.value })
                 }
-              />
+              >
+                <option value="">Select Status</option>
+                <option value="PAID">PAID</option>
+                <option value="UNPAID">UNPAID</option>
+                <option value="OVERDUE">OVERDUE</option>
+              </select>
             </div>
 
             <div>
