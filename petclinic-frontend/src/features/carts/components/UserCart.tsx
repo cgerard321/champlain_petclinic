@@ -1,5 +1,6 @@
 // UserCart.tsx
 import { useState, useEffect, useCallback } from 'react';
+import CartBillingForm from './CartBillingForm';
 import { useParams, useNavigate } from 'react-router-dom';
 import CartItem from './CartItem';
 import { ProductModel } from '../models/ProductModel';
@@ -40,6 +41,7 @@ const UserCart = (): JSX.Element => {
   const [cartItemCount, setCartItemCount] = useState<number>(0);
   const [isCheckoutModalOpen, setIsCheckoutModalOpen] =
     useState<boolean>(false); // Modal state
+  const [showBillingForm, setShowBillingForm] = useState<boolean>(false); // Billing form state
   const [wishlistUpdated, setWishlistUpdated] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState<string | null>(
     null
@@ -435,7 +437,8 @@ const UserCart = (): JSX.Element => {
   }, [invoices]);
 
   const handleCheckoutConfirmation = (): void => {
-    setIsCheckoutModalOpen(true);
+    setShowBillingForm(true);
+    setIsCheckoutModalOpen(false);
   };
 
   const handleCheckout = async (): Promise<void> => {
@@ -467,7 +470,9 @@ const UserCart = (): JSX.Element => {
         // Set the invoices state
         setInvoices(invoiceItems);
 
-        setCheckoutMessage('Checkout successful!');
+        setCheckoutMessage(
+          'Checkout successful! Your order is being processed.'
+        );
         setCartItems([]); // Clear the cart after successful checkout
         setCartItemCount(0);
         setIsCheckoutModalOpen(false);
@@ -610,6 +615,21 @@ const UserCart = (): JSX.Element => {
               Checkout
             </button>
 
+            {/* Cart Billing Form Modal */}
+            {showBillingForm && (
+              <div className="checkout-modal">
+                <CartBillingForm
+                  onSubmit={() => {
+                    setShowBillingForm(false);
+                    setIsCheckoutModalOpen(true);
+                  }}
+                />
+                <button onClick={() => setShowBillingForm(false)}>
+                  Cancel
+                </button>
+              </div>
+            )}
+
             {/* Checkout Confirmation Modal */}
             {isCheckoutModalOpen && (
               <div className="checkout-modal">
@@ -621,6 +641,7 @@ const UserCart = (): JSX.Element => {
                 </button>
               </div>
             )}
+
             {checkoutMessage && (
               <div className="checkout-message">{checkoutMessage}</div>
             )}
