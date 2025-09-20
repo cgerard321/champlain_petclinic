@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getOwner } from '@/features/customers/api/updateOwner.ts';
+import { getOwner } from '@/features/customers/api/getOwner';
 import { OwnerResponseModel } from '@/features/customers/models/OwnerResponseModel.ts';
 import { PetResponseModel } from '@/features/customers/models/PetResponseModel.ts';
 import { useUser } from '@/context/UserContext';
