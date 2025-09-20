@@ -5,5 +5,7 @@ import { PetResponseModel } from '@/features/customers/models/PetResponseModel.t
 export const deletePet = async (
   petId: string
 ): Promise<AxiosResponse<PetResponseModel>> => {
-  return await axiosInstance.delete<PetResponseModel>(`/pets/${petId}`);
+  return await axiosInstance.delete<PetResponseModel>(`/pets/${petId}`, {
+    useV2: true,
+  });
 };
