@@ -10,7 +10,10 @@ interface ErrorResponse {
 export async function deleteBill(bill: Bill): Promise<AxiosResponse> {
   try {
     const response: AxiosResponse = await axiosInstance.delete(
-      `bills/${bill.billId}`
+      `bills/${bill.billId}`,
+      {
+        useV2: false,
+      }
     );
     return response;
   } catch (error) {

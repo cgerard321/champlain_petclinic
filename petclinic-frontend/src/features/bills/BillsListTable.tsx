@@ -16,23 +16,12 @@ export default function BillsListTable(): JSX.Element {
     if (!user.userId) return;
 
     try {
-      /*const response = await fetch(
-        `http://localhost:8080/api/v2/gateway/customers/${user.userId}/bills`,
-        {
-          headers: {
-            Accept: 'text/event-stream',
-          },
-          credentials: 'include',
-        }
-          */
-
       const response = await axiosInstance.get(
         `/customers/${user.userId}/bills`,
         {
           headers: {
             Accept: 'application/json',
           },
-          withCredentials: true,
           useV2: true,
         }
       );
@@ -76,24 +65,14 @@ export default function BillsListTable(): JSX.Element {
     billId: string
   ): Promise<void> => {
     try {
-      /*const response = await fetch(
-        `http://localhost:8080/api/v2/gateway/customers/${customerId}/bills/${billId}/pdf`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/pdf',
-          },
-          credentials: 'include',
-          */
-
       const response = await axiosInstance.get(
         `/customers/${customerId}/bills/${billId}/pdf`,
         {
           responseType: 'blob',
-          withCredentials: true,
           headers: {
             'Content-Type': 'application/pdf',
           },
+          useV2: true,
         }
       );
 

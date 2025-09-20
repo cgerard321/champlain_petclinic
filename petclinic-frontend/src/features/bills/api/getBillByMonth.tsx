@@ -8,6 +8,7 @@ export async function getBillsByMonth(
   const response = await axiosInstance.get(`/bills/admin/month`, {
     params: { year, month },
     responseType: 'stream',
+    useV2: false,
   });
 
   return response.data

@@ -4,6 +4,7 @@ import { Bill } from '@/features/bills/models/Bill.ts';
 export async function getAllBills(): Promise<Bill[]> {
   const response = await axiosInstance.get('/bills/admin', {
     responseType: 'stream',
+    useV2: false,
   });
   return response.data
     .split('data:')

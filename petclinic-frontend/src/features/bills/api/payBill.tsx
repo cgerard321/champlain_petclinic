@@ -11,27 +11,8 @@ export async function payBill(
     paymentDetails,
     {
       headers: { 'Content-Type': 'application/json' },
-      withCredentials: true,
       useV2: true,
-      //body: JSON.stringify(paymentDetails),
     }
   );
   return response.data.filter((item: Bill) => item.billStatus === 'PAID');
-
-  /*const response = await fetch(
-    `http://localhost:8080/api/v2/gateway/bills/customer/${customerId}/bills/${billId}/pay`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-      body: JSON.stringify(paymentDetails),
-    }
-  );
-
-  if (!response.ok) {
-    throw new Error('Payment failed');
-  }
-    */
 }

@@ -6,6 +6,7 @@ export async function addBill(newBill: BillRequestModel): Promise<void> {
     await axiosInstance.post('/bills/admin', newBill, {
       headers: {
         'Content-Type': 'application/json',
+        useV2: false,
       },
     });
   } catch (err) {

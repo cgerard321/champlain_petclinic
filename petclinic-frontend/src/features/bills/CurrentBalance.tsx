@@ -13,22 +13,11 @@ export default function CurrentBalance(): JSX.Element {
 
     const fetchCurrentBalance = async (): Promise<void> => {
       try {
-        /*
-        const response = await fetch(
-          `http://localhost:8080/api/v2/gateway/customers/${user.userId}/bills/current-balance`,
-          {
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            credentials: 'include',
-          }
-            */
-
         const response = await axiosInstance.get(
           `/customers/${user.userId}/bills/current-balance`,
           {
-            withCredentials: true,
             headers: { 'Content-Type': 'application/json' },
+            useV2: true,
           }
         );
 
