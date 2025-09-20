@@ -14,11 +14,11 @@ export async function payBill(
       useV2: false,
     }
   );
-    if (Array.isArray(response.data)) {
-       response.data.filter((item: Bill) => item.billStatus === 'PAID');
-    } else if (response.data && typeof response.data === 'object') {
-       [response.data];
-    } else {
-       [];
-    }
+  if (Array.isArray(response.data)) {
+    response.data.filter((item: Bill) => item.billStatus === 'PAID');
+  } else if (response.data && typeof response.data === 'object') {
+    [response.data];
+  } else {
+    [];
+  }
 }
