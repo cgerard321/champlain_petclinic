@@ -316,7 +316,7 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.Visits,
         element: (
-          <ProtectedRoute>
+          <ProtectedRoute roles={['ADMIN']}>
             <Visits />
           </ProtectedRoute>
         ),
@@ -324,7 +324,7 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.AddVisit,
         element: (
-          <ProtectedRoute>
+          <ProtectedRoute roles={['ADMIN', 'VET', 'RECEPTIONIST']}>
             <AddingVisit />
           </ProtectedRoute>
         ),
@@ -428,7 +428,7 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.EditVisit,
         element: (
-          <ProtectedRoute>
+          <ProtectedRoute roles={['ADMIN']}>
             <EditingVisit />
           </ProtectedRoute>
         ),
@@ -452,7 +452,7 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.CustomerVisits,
         element: (
-          <ProtectedRoute>
+          <ProtectedRoute roles={['VET', 'RECEPTIONIST']}>
             <CustomerVisits />
           </ProtectedRoute>
         ),

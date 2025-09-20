@@ -46,6 +46,13 @@ export default function CustomerVisitListTable(): JSX.Element {
           Leave a Review
         </button>
         <button
+          className="btn btn-warning"
+          onClick={() => navigate(AppRoutePaths.AddVisit)}
+          title="Make a Visit"
+        >
+          Make a Visit
+        </button>
+        <button
           className="btn btn-dark"
           onClick={() => navigate(AppRoutePaths.CustomerReviews)}
           title="View Reviews"
