@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { NavBar } from '@/layouts/AppNavBar.tsx';
 import './Home.css';
+import axiosInstance from '@/shared/api/axiosInstance';
 import { getAllVets } from '@/features/veterinarians/api/getAllVets.ts';
 import { VetResponseModel } from '@/features/veterinarians/models/VetResponseModel.ts';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -36,10 +37,11 @@ export default function Home(): JSX.Element {
 
   const fetchVetPhoto = async (vetId: string): Promise<void> => {
     try {
-      const response = await fetch(
-        import.meta.env.VITE_BACKEND_URL + `v2/gateway/vets/${vetId}/photo`,
+      const response = await axiosInstance.get(
+        `/vets/${vetId}/photo`,
         {
-          method: 'GET',
+          useV2: true,
+          responseType: 'blob',
           headers: {
             Accept: 'image/*',
           },

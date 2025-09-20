@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import './AllUsers.css';
+import axiosInstance from '@/shared/api/axiosInstance';
 import { NavBar } from '@/layouts/AppNavBar.tsx';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
@@ -18,10 +19,7 @@ const AllUsers: React.FC = (): JSX.Element => {
   useEffect(() => {
     const fetchUsers = async (): Promise<void> => {
       try {
-        const response = await axios.get(
-          import.meta.env.VITE_BACKEND_URL + 'v2/gateway/users',
-          { withCredentials: true }
-        );
+        const response = await axiosInstance.get<UserResponseModel[]>('/users', { useV2: true });
         setUsers(response.data);
       } catch (error) {
         console.error('Error fetching users:', error);
@@ -40,16 +38,11 @@ const AllUsers: React.FC = (): JSX.Element => {
     }
 
     try {
-      await axios.delete(
-        `http://localhost:8080/api/v2/gateway/users/${userId}`,
-        {
-          withCredentials: true,
-        }
-      );
+      await axiosInstance.delete(`/users/${userId}`, { useV2: true });
       setUsers(users.filter(user => user.userId !== userId));
     } catch (error) {
       console.error('Error deleting user:', error);
-    }
+}
   };
 
   return (

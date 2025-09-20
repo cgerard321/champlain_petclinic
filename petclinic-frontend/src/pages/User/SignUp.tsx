@@ -3,7 +3,8 @@ import { FormEvent, useState } from 'react';
 import { OwnerRequestModel } from '@/shared/models/OwnerRequestModel';
 import { Register } from '@/shared/models/RegisterModel';
 import { NavBar } from '@/layouts/AppNavBar.tsx';
-import axios from 'axios';
+import axiosInstance from '@/shared/api/axiosInstance';
+import { isAxiosError } from 'axios';
 import './SignUp.css';
 
 const SignUp: React.FC = (): JSX.Element => {
@@ -157,17 +158,20 @@ const SignUp: React.FC = (): JSX.Element => {
     const requestData = { ...userData, owner };
 
     try {
-      const response = await axios.post<Register>(
-        'http:///api/v2/gateway/users',
-        requestData
+      //using the axios instance
+      const response = await axiosInstance.post<Register>(
+        '/users',
+        requestData,
+        { useV2: true }
       );
 
       if (response.status === 201) {
         setEmailSent(true);
       }
     } catch (error) {
+      // This error handling logic is component-specific and is perfectly fine.
       setLoading(false);
-      if (axios.isAxiosError(error) && error.response) {
+      if (isAxiosError(error) && error.response) {
         const backendErrors = error.response.data;
         if (error.response.status === 400) {
           const errorMessageString =

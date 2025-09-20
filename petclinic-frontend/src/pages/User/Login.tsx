@@ -1,7 +1,7 @@
 import { useState, FormEvent } from 'react';
-import axios from 'axios';
 import { UserResponseModel } from '@/shared/models/UserResponseModel';
 import { useSetUser } from '@/context/UserContext.tsx';
+import axiosInstance from '@/shared/api/axiosInstance';
 import { Link, useNavigate } from 'react-router-dom';
 import { AppRoutePaths } from '@/shared/models/path.routes.ts';
 import anotherDoctorAndDoggy from '@/assets/Login/another-doctor-and-doggy.jpg';
@@ -12,6 +12,7 @@ import sadDoggy from '@/assets/Login/sad-doggy.jpg';
 import './Login.css';
 import Slideshow from './Slideshow';
 import { Alert } from 'react-bootstrap';
+import { isAxiosError } from 'axios';
 
 const images = [
   doctorAndDoggy,
@@ -35,18 +36,19 @@ export default function Login(): JSX.Element {
       passwordInput: HTMLInputElement;
     };
 
+
+
+
+    // the try catch is being overwritten by the redirect to /unauthorized so exception handling isnt doing shit for now
     try {
-      const response = await axios.post<UserResponseModel>(
-        import.meta.env.VITE_BACKEND_URL + 'gateway/users/login',
+      const response = await axiosInstance.post<UserResponseModel>(
+        '/users/login',
         {
           email: formElements.emailInput.value,
           password: formElements.passwordInput.value,
         },
         {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          withCredentials: true, // Ensure credentials like cookies are passed
+          useV2: false,
         }
       );
 
@@ -55,7 +57,7 @@ export default function Login(): JSX.Element {
         navigate(AppRoutePaths.Home);
       }
     } catch (error) {
-      if (axios.isAxiosError(error)) {
+      if (isAxiosError(error)) {
         if (error.response?.status === 401) {
           const errorMessage = error.response?.data?.message;
           // Check for the custom unverified account error
