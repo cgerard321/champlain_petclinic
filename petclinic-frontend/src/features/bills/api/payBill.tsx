@@ -11,8 +11,14 @@ export async function payBill(
     paymentDetails,
     {
       headers: { 'Content-Type': 'application/json' },
-      useV2: true,
+      useV2: false,
     }
   );
-  return response.data.filter((item: Bill) => item.billStatus === 'PAID');
+    if (Array.isArray(response.data)) {
+       response.data.filter((item: Bill) => item.billStatus === 'PAID');
+    } else if (response.data && typeof response.data === 'object') {
+       [response.data];
+    } else {
+       [];
+    }
 }

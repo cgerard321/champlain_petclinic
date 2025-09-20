@@ -309,9 +309,4 @@ public class BillServiceImpl implements BillService{
                 });
     }
 
-    @Override
-    public Flux<Flux> filterBillsbyFields(String billId, String customerId, String ownerFirstName, String ownerLastName, String visitType, String vetId, String vetFirstName, String vetLastName) {
-        return null;
-    }
-
 }
