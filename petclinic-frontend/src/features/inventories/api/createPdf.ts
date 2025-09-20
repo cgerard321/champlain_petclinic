@@ -8,9 +8,10 @@ const createPdf = async (inventoryId: string): Promise<void> => {
   try {
     // Send a GET request to the backend to get the PDF as a Blob
     const response = await axiosInstance.get(
-      `inventories/${inventoryId}/products/download`,
+      `/inventory/${inventoryId}/products/download`,
       {
         responseType: 'blob', // Ensure the response is treated as a binary file (Blob)
+        useV2: false,
       }
     );
 

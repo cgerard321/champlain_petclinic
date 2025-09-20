@@ -5,8 +5,14 @@ import axiosInstance from '@/shared/api/axiosInstance.ts';
 export default async function deleteAllProductsFromInventory(inventory: {
   inventoryId: string;
 }): Promise<void> {
-  await axiosInstance.delete<void>(
-    axiosInstance.defaults.baseURL +
-      `inventories/${inventory.inventoryId}/products`
-  );
+  try {
+    await axiosInstance.delete<void>(
+      `/inventory/${inventory.inventoryId}/products`,
+      { useV2: false }
+    );
+  } catch (error) {
+    console.error('Error deleting all products fron inventory:', error);
+    throw error;
+  }
 }
+//was missing / before inventory
