@@ -34,12 +34,8 @@ export default function AdminBillsListTable(): JSX.Element {
   );
 
   interface FilterModel {
+    [key: string]: string;
     customerId: string;
-    ownerName?: string;
-    vetName?: string;
-    date?: string;
-    visitType?: string;
-    billStatus?: string;
   }
 
   const [selectedFilter, setSelectedFilter] = useState<string>('');
@@ -154,38 +150,13 @@ export default function AdminBillsListTable(): JSX.Element {
 
     return billsToFilter.filter(bill => {
       const matchesStatus =
-        !filter.billStatus ||
-        bill.billStatus.toLowerCase() === filter.billStatus.toLowerCase();
+        !selectedFilter ||
+        bill.billStatus.toLowerCase() === selectedFilter.toLowerCase();
 
       const matchesCustomerId =
         !filter.customerId || bill.customerId.includes(filter.customerId);
 
-      const matchesOwnerName =
-        !filter.ownerName ||
-        `${bill.ownerFirstName} ${bill.ownerLastName}`
-          .toLowerCase()
-          .includes(filter.ownerName.toLowerCase());
-
-      const matchesVetName =
-        !filter.vetName ||
-        `${bill.vetFirstName} ${bill.vetLastName}`
-          .toLowerCase()
-          .includes(filter.vetName.toLowerCase());
-
-      const matchesDate = !filter.date || bill.date === filter.date;
-
-      const matchesVisitType =
-        !filter.visitType ||
-        bill.visitType.toLowerCase() === filter.visitType.toLowerCase();
-
-      return (
-        matchesStatus &&
-        matchesCustomerId &&
-        matchesOwnerName &&
-        matchesVetName &&
-        matchesDate &&
-        matchesVisitType
-      );
+      return matchesStatus && matchesCustomerId;
     });
   };
 
@@ -300,8 +271,6 @@ export default function AdminBillsListTable(): JSX.Element {
 
       {activeSection === 'search' && (
         <div className="create-bill-form">
-          <h3>Advanced Search</h3>
-
           <input
             type="text"
             placeholder="Customer ID"
@@ -311,53 +280,10 @@ export default function AdminBillsListTable(): JSX.Element {
 
           <input
             type="text"
-            placeholder="Bill ID"
+            placeholder="Enter Bill ID"
             value={searchId}
             onChange={e => setSearchId(e.target.value)}
           />
-
-          <input
-            type="text"
-            placeholder="Owner Name"
-            value={filter.ownerName || ''}
-            onChange={e => setFilter({ ...filter, ownerName: e.target.value })}
-          />
-
-          <input
-            type="text"
-            placeholder="Vet Name"
-            value={filter.vetName || ''}
-            onChange={e => setFilter({ ...filter, vetName: e.target.value })}
-          />
-
-          <input
-            type="date"
-            placeholder="Date"
-            value={filter.date || ''}
-            onChange={e => setFilter({ ...filter, date: e.target.value })}
-          />
-
-          <select
-            value={filter.visitType || ''}
-            onChange={e => setFilter({ ...filter, visitType: e.target.value })}
-          >
-            <option value="">Select Visit Type</option>
-            <option value="CHECKUP">Check-Up</option>
-            <option value="VACCINE">Vaccine</option>
-            <option value="SURGERY">Surgery</option>
-            <option value="DENTAL">Dental</option>
-          </select>
-
-          <select
-            value={filter.billStatus || ''}
-            onChange={e => setFilter({ ...filter, billStatus: e.target.value })}
-          >
-            <option value="">Select Status</option>
-            <option value="PAID">PAID</option>
-            <option value="UNPAID">UNPAID</option>
-            <option value="OVERDUE">OVERDUE</option>
-          </select>
-
           <button onClick={handleSearch}>Search</button>
           {searchedBill && <button onClick={handleGoBack}>Go Back</button>}
         </div>
