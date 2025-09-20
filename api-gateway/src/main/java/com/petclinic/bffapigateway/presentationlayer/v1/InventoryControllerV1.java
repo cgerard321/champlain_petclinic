@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -53,6 +54,7 @@ public class InventoryControllerV1 {
             @PathVariable String inventoryId) {
         return inventoryServiceClient.addSupplyToInventory(productRequestDTO, inventoryId)
                 .map(productResponseDTO -> ResponseEntity.status(HttpStatus.CREATED).body(productResponseDTO))
+                .onErrorResume(NotFoundException.class, e -> Mono.just(ResponseEntity.notFound().build()))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
