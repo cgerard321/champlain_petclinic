@@ -247,7 +247,7 @@ services:
 
   # vet mongo container
   mongo:
-    image: mongo
+    image: mongo:6.0.6
     container_name: mongo
     restart: always
     ports:
@@ -262,7 +262,7 @@ services:
   #        start_period: 30s
 
   mongo-express:
-    image: mongo-express
+    image: mongo-express:latest
     restart: always
     environment:
       - ME_CONFIG_MONGODB_ADMINUSERNAME=root
@@ -299,7 +299,7 @@ services:
 
   # billing mongo container
   mongo1:
-    image: mongo
+    image: mongo:6.0.6
     container_name: mongo1
     restart: always
     ports:
@@ -314,7 +314,7 @@ services:
   #        start_period: 30s
 
   mongo-express1:
-    image: mongo-express
+    image: mongo-express:latest
     restart: always
     environment:
       - ME_CONFIG_MONGODB_ADMINUSERNAME=root
@@ -328,7 +328,7 @@ services:
       - billing-service
 
   mongo2:
-    image: mongo
+    image: mongo:6.0.6
     container_name: mongo2
     restart: always
     ports:
@@ -343,7 +343,7 @@ services:
       start_period: 30s
 
   mongo-express2:
-    image: mongo-express
+    image: mongo-express:latest
     restart: always
     environment:
       - ME_CONFIG_MONGODB_ADMINUSERNAME=root
@@ -357,7 +357,7 @@ services:
       - visits-service-new
 
   mongo-customers:
-    image: mongo
+    image: mongo:6.0.6
     container_name: mongo-customers
     restart: always
     ports:
@@ -367,7 +367,7 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: password
 
   mongo-express-customers:
-    image: mongo-express
+    image: mongo-express:latest
     restart: always
     environment:
       - ME_CONFIG_MONGODB_ADMINUSERNAME=root
@@ -382,7 +382,7 @@ services:
 
     # billing mongo container
   mongo-inventory:
-    image: mongo
+    image: mongo:6.0.6
     container_name: mongo-inventory
     restart: always
     ports:
@@ -397,7 +397,7 @@ services:
   #        start_period: 30s
 
   mongo-express-inventory:
-    image: mongo-express
+    image: mongo-express:latest
     restart: always
     environment:
       - ME_CONFIG_MONGODB_ADMINUSERNAME=root
@@ -411,7 +411,7 @@ services:
       - inventory-service
 
   mongo-products:
-    image: mongo
+    image: mongo:6.0.6
     container_name: mongo-products
     restart: always
     ports:
@@ -421,7 +421,7 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: password
 
   mongo-express-products:
-    image: mongo-express
+    image: mongo-express:latest
     restart: always
     environment:
       - ME_CONFIG_MONGODB_ADMINUSERNAME=root
@@ -435,7 +435,7 @@ services:
       - products-service
 
   mongo-carts:
-    image: mongo
+    image: mongo:6.0.6
     container_name: mongo-carts
     restart: always
     ports:
@@ -445,7 +445,7 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: password
 
   mongo-express-carts:
-    image: mongo-express
+    image: mongo-express:latest
     restart: always
     environment:
       - ME_CONFIG_MONGODB_ADMINUSERNAME=root
