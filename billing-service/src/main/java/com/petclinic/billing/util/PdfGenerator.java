@@ -118,7 +118,9 @@ public class PdfGenerator {
         document.add(totals);
 
         // Footer
-        Paragraph notes = new Paragraph("Notes: All bills are due within 30 days.",
+        Paragraph notes = new Paragraph(
+                "Notes: All bills are due within 30 days. If a bill is not paid on time, " +
+                        "interest charges may be applied to the outstanding balance.",
                 FontFactory.getFont(FontFactory.HELVETICA, 9, BaseColor.GRAY));
         notes.setSpacingBefore(30);
         document.add(notes);
