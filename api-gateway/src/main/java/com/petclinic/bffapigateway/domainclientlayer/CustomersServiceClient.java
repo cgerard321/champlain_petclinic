@@ -4,11 +4,13 @@ import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.*;
 import com.petclinic.bffapigateway.dtos.Vets.PhotoDetails;
+import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -287,11 +289,37 @@ public class CustomersServiceClient {
                 .retrieve().bodyToMono(String.class);
     }
 
-    public Mono<Void> deletePetPhoto(int ownerId, int photoId) {
+    public Mono<String> setOwnerPhoto(PhotoDetails file, String id) {
+        return webClientBuilder.build().post()
+                .uri(customersServiceUrl + "/photo/" + id)
+                .body(just(file), PhotoDetails.class)
+                .retrieve().bodyToMono(String.class);
+    }
+
+    public Mono<Void> deletePetPhoto(String ownerId, String photoId) {
         return webClientBuilder.build().delete()
-                .uri(customersServiceUrl + ownerId + "/pets/photo/" + photoId)
+                .uri(customersServiceUrl + "/owners/" + ownerId + "/pets/photo/" + photoId)
                 .retrieve()
                 .bodyToMono(Void.class);
+    }
+
+    public Mono<PhotoDetails> getPetPhotoByPetId(String petId) {
+        return webClientBuilder.build().get()
+                .uri(customersServiceUrl + "/pet/" + petId + "/photo")
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, error -> {
+                    HttpStatusCode statusCode = error.statusCode();
+                    if (statusCode.equals(HttpStatus.NOT_FOUND)) {
+                        return Mono.error(new RuntimeException("404 Pet not found with id: " + petId));
+                    }
+                    else if (statusCode.equals(HttpStatus.UNPROCESSABLE_ENTITY)) {
+                        return Mono.error(new InvalidInputException("Provided pet id is invalid: " + petId));
+                    }
+                    return Mono.error(new IllegalArgumentException("Client error"));
+                })
+                .onStatus(HttpStatusCode::is5xxServerError, error -> 
+                    Mono.error(new IllegalArgumentException("Server error")))
+                .bodyToMono(PhotoDetails.class);
     }
 
     public Flux<PetTypeResponseDTO> getAllPetTypes() {

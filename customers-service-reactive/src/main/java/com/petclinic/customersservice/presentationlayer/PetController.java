@@ -1,6 +1,7 @@
 package com.petclinic.customersservice.presentationlayer;
 
 import com.petclinic.customersservice.business.PetService;
+import com.petclinic.customersservice.business.PhotoService;
 import com.petclinic.customersservice.data.Pet;
 import com.petclinic.customersservice.util.EntityDTOUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,9 @@ public class PetController {
 
     @Autowired
     private PetService petService;
+
+    @Autowired
+    private PhotoService photoService;
 
     @GetMapping("/{petId}")
     public Mono<PetResponseDTO> getPetDTOByPetId(@PathVariable String petId) {
@@ -67,6 +71,26 @@ public class PetController {
     @GetMapping()
     public Flux<PetResponseDTO> getAllPets() {
         return petService.getAllPets().map(EntityDTOUtil::toPetResponseDTO);
+    }
+
+    @GetMapping("/{petId}/photo")
+    public Mono<ResponseEntity<PhotoResponseModel>> getPetPhotoByPetId(@PathVariable String petId) {
+        if (!isValidUUID(petId)) {
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Invalid pet ID format");
+        }
+        
+        return photoService.getPetPhotoByPetId(petId)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    private boolean isValidUUID(String uuid) {
+        try {
+            java.util.UUID.fromString(uuid);
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
     }
 
 }

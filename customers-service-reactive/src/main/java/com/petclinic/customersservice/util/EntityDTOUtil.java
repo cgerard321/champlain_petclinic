@@ -4,8 +4,10 @@ import com.petclinic.customersservice.data.PetType;
 import com.petclinic.customersservice.presentationlayer.OwnerResponseDTO;
 import com.petclinic.customersservice.data.Owner;
 import com.petclinic.customersservice.data.Pet;
+import com.petclinic.customersservice.data.Photo;
 import com.petclinic.customersservice.presentationlayer.PetResponseDTO;
 import com.petclinic.customersservice.presentationlayer.PetTypeResponseDTO;
+import com.petclinic.customersservice.presentationlayer.PhotoResponseModel;
 import lombok.Generated;
 import org.springframework.beans.BeanUtils;
 
@@ -42,6 +44,12 @@ public class EntityDTOUtil {
         PetTypeResponseDTO petTypeResponseDTO = new PetTypeResponseDTO();
         BeanUtils.copyProperties(petType, petTypeResponseDTO);
         return petTypeResponseDTO;
+    }
+
+    public static PhotoResponseModel toPhotoResponseModel(Photo photo) {
+        PhotoResponseModel photoResponseModel = new PhotoResponseModel();
+        BeanUtils.copyProperties(photo, photoResponseModel);
+        return photoResponseModel;
     }
 
 }

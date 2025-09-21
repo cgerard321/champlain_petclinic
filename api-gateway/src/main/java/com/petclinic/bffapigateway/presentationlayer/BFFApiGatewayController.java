@@ -280,6 +280,14 @@ public class BFFApiGatewayController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET, Roles.OWNER})
+    @GetMapping(value = "/pets/{petId}/photo")
+    public Mono<ResponseEntity<PhotoDetails>> getPetPhotoByPetId(@PathVariable String petId) {
+        return customersServiceClient.getPetPhotoByPetId(petId)
+                .map(photo -> ResponseEntity.status(HttpStatus.OK).body(photo))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
 
     @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN,Roles.VET})
     @GetMapping(value = "owners/{ownerId}/pets/{petId}")
@@ -778,13 +786,13 @@ public class BFFApiGatewayController {
 
     @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN})
     @PostMapping(value = "owners/photo/{ownerId}")
-    public Mono<ResponseEntity<String>> setOwnerPhoto(@RequestBody PhotoDetails photoDetails, @PathVariable int ownerId) {
+    public Mono<ResponseEntity<String>> setOwnerPhoto(@RequestBody PhotoDetails photoDetails, @PathVariable String ownerId) {
         return customersServiceClient.setOwnerPhoto(photoDetails, ownerId).map(s -> ResponseEntity.status(HttpStatus.CREATED).body(s))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
     /*@GetMapping(value = "owners/photo/{ownerId}")
-    public Mono<PhotoDetails> getOwnerPhoto(@PathVariable int ownerId) {
+    public Mono<PhotoDetails> getOwnerPhoto(@PathVariable String ownerId) {
         return customersServiceClient.getOwnerPhoto(ownerId);
     }*/
 
@@ -799,13 +807,13 @@ public class BFFApiGatewayController {
 //    }
 //
 //    @DeleteMapping(value = "owners/photo/{photoId}")
-//    public Mono<Void> deleteOwnerPhoto(@PathVariable int photoId){
+//    public Mono<Void> deleteOwnerPhoto(@PathVariable String photoId){
 //        return customersServiceClient.deleteOwnerPhoto(photoId);
 //    }
-//
-//    @DeleteMapping(value = "owners/{ownerId}/pet/photo/{photoId}")
-//    public Mono<Void> deletePetPhoto(@PathVariable int ownerId, @PathVariable int photoId){
+
+//    public Mono<Void> deletePetPhoto(@PathVariable String ownerId, @PathVariable String photoId){
 //        return customersServiceClient.deletePetPhoto(ownerId, photoId);
+//    }
 //    }
 
 

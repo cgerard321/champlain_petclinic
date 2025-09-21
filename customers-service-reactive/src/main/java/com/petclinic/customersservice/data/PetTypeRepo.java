@@ -8,7 +8,7 @@ import reactor.core.publisher.Mono;
 public interface PetTypeRepo extends ReactiveMongoRepository<PetType, Integer> {
     Mono<PetType> findPetTypeById(Integer Id);
 
-    Mono<PetType> findOPetTypeById(String petTypeId);
+    Mono<PetType> findPetTypeById(String petTypeId);
 
     Mono<Void> deleteById(String petTypeId);
 
