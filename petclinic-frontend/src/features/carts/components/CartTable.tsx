@@ -17,7 +17,9 @@ export default function CartListTable(): JSX.Element {
 
   const getAllCarts = async (): Promise<void> => {
     try {
-      const { data } = await axiosInstance.get<CartModel[]>('/carts', { useV2: true });
+      const { data } = await axiosInstance.get<CartModel[]>('/carts', {
+        useV2: true,
+      });
       setCarts(data);
     } catch (err) {
       console.error('Error fetching carts:', err);
@@ -43,45 +45,45 @@ export default function CartListTable(): JSX.Element {
   };
 
   return (
-      <div className="cart-list-container">
-        {loading && <div className="loading">Loading carts...</div>}
-        {error && <div className="error">{error}</div>}
-        {!loading && carts.length === 0 && (
-            <div className="no-carts">No carts available.</div>
-        )}
-        {!loading && carts.length > 0 && (
-            <table className="cart-table">
-              <thead>
-              <tr>
-                <th>Cart ID</th>
-                <th>Customer ID</th>
-                <th>View Cart</th>
-                <th>Delete Cart</th>
+    <div className="cart-list-container">
+      {loading && <div className="loading">Loading carts...</div>}
+      {error && <div className="error">{error}</div>}
+      {!loading && carts.length === 0 && (
+        <div className="no-carts">No carts available.</div>
+      )}
+      {!loading && carts.length > 0 && (
+        <table className="cart-table">
+          <thead>
+            <tr>
+              <th>Cart ID</th>
+              <th>Customer ID</th>
+              <th>View Cart</th>
+              <th>Delete Cart</th>
+            </tr>
+          </thead>
+          <tbody>
+            {carts.map(cart => (
+              <tr key={cart.cartId}>
+                <td>{cart.cartId}</td>
+                <td>{cart.customerId}</td>
+                <td>
+                  <Link to={`/carts/${cart.cartId}`} className="view-button">
+                    View Cart
+                  </Link>
+                </td>
+                <td>
+                  <button
+                    className="delete-button"
+                    onClick={() => handleDelete(cart.cartId)}
+                  >
+                    Delete
+                  </button>
+                </td>
               </tr>
-              </thead>
-              <tbody>
-              {carts.map(cart => (
-                  <tr key={cart.cartId}>
-                    <td>{cart.cartId}</td>
-                    <td>{cart.customerId}</td>
-                    <td>
-                      <Link to={`/carts/${cart.cartId}`} className="view-button">
-                        View Cart
-                      </Link>
-                    </td>
-                    <td>
-                      <button
-                          className="delete-button"
-                          onClick={() => handleDelete(cart.cartId)}
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-              ))}
-              </tbody>
-            </table>
-        )}
-      </div>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
   );
 }

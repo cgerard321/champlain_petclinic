@@ -34,24 +34,24 @@ const UserCart = (): JSX.Element => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [errorMessages, setErrorMessages] = useState<{ [key: number]: string }>(
-      {}
+    {}
   );
   const [checkoutMessage, setCheckoutMessage] = useState<string | null>(null);
   const [invoices, setInvoices] = useState<Invoice[]>([]); // State to hold invoice details
   const [cartItemCount, setCartItemCount] = useState<number>(0);
   const [isCheckoutModalOpen, setIsCheckoutModalOpen] =
-      useState<boolean>(false); // Modal state
+    useState<boolean>(false); // Modal state
   const [wishlistUpdated, setWishlistUpdated] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState<string | null>(
-      null
+    null
   ); // New state for notifications
   const [voucherCode, setVoucherCode] = useState<string>('');
   const [discount, setDiscount] = useState<number>(0);
   const [voucherError, setVoucherError] = useState<string | null>(null);
 
   const subtotal = cartItems.reduce(
-      (acc, item) => acc + item.productSalePrice * (item.quantity || 1),
-      0
+    (acc, item) => acc + item.productSalePrice * (item.quantity || 1),
+    0
   );
   const tvq = subtotal * 0.09975; // Quebec tax rate
   const tvc = subtotal * 0.05; // Canadian tax rate
@@ -60,8 +60,8 @@ const UserCart = (): JSX.Element => {
   // Function to update the cart item count
   const updateCartItemCount = useCallback(() => {
     const count = cartItems.reduce(
-        (acc, item) => acc + (item.quantity || 0),
-        0
+      (acc, item) => acc + (item.quantity || 0),
+      0
     );
     setCartItemCount(count);
   }, [cartItems]);
@@ -75,10 +75,9 @@ const UserCart = (): JSX.Element => {
       }
 
       try {
-        const { data } = await axiosInstance.get(
-            `/carts/${cartId}`,
-            { useV2: true }
-        );
+        const { data } = await axiosInstance.get(`/carts/${cartId}`, {
+          useV2: true,
+        });
 
         // Ensure that data.products exists and is an array
         if (!Array.isArray(data.products)) {
@@ -87,16 +86,16 @@ const UserCart = (): JSX.Element => {
 
         // Map data.products to the appropriate ProductModel format
         const products: ProductModel[] = data.products.map(
-            (product: ProductAPIResponse) => ({
-              productId: product.productId,
-              imageId: product.imageId,
-              productName: product.productName,
-              productDescription: product.productDescription,
-              productSalePrice: product.productSalePrice,
-              averageRating: product.averageRating,
-              quantity: product.quantityInCart || 1,
-              productQuantity: product.productQuantity,
-            })
+          (product: ProductAPIResponse) => ({
+            productId: product.productId,
+            imageId: product.imageId,
+            productName: product.productName,
+            productDescription: product.productDescription,
+            productSalePrice: product.productSalePrice,
+            averageRating: product.averageRating,
+            quantity: product.quantityInCart || 1,
+            productQuantity: product.productQuantity,
+          })
         );
 
         setCartItems(products);
@@ -125,8 +124,8 @@ const UserCart = (): JSX.Element => {
   const applyVoucherCode = async (): Promise<void> => {
     try {
       const { data } = await axiosInstance.get(
-          `/promos/validate/${voucherCode}`,
-          { useV2: true }
+        `/promos/validate/${voucherCode}`,
+        { useV2: true }
       );
       setDiscount((subtotal * data.discount) / 100);
       setVoucherError(null);
@@ -137,111 +136,113 @@ const UserCart = (): JSX.Element => {
   };
 
   const changeItemQuantity = useCallback(
-      async (
-          event: React.ChangeEvent<HTMLInputElement>,
-          index: number
-      ): Promise<void> => {
-        const newQuantity = Math.max(1, Number(event.target.value)); // Ensure quantity is at least 1
-        const item = cartItems[index];
+    async (
+      event: React.ChangeEvent<HTMLInputElement>,
+      index: number
+    ): Promise<void> => {
+      const newQuantity = Math.max(1, Number(event.target.value)); // Ensure quantity is at least 1
+      const item = cartItems[index];
 
-        if (newQuantity > item.productQuantity) {
-          // Display error message
+      if (newQuantity > item.productQuantity) {
+        // Display error message
+        setErrorMessages(prevErrors => ({
+          ...prevErrors,
+          [index]: `You cannot add more than ${item.productQuantity} items. Only ${item.productQuantity} items left in stock.`,
+        }));
+        return;
+      } else {
+        // Clear error message
+        setErrorMessages(prevErrors => {
+          const rest = { ...prevErrors };
+          delete rest[index];
+          return rest;
+        });
+      }
+
+      // Update quantity in backend
+      try {
+        const { data } = await axiosInstance.put(
+          `/carts/${cartId}/products/${item.productId}`,
+          { quantity: newQuantity },
+          { useV2: true }
+        );
+
+        if (data && data.message) {
           setErrorMessages(prevErrors => ({
             ...prevErrors,
-            [index]: `You cannot add more than ${item.productQuantity} items. Only ${item.productQuantity} items left in stock.`,
+            [index]: data.message || 'Failed to update quantity',
           }));
-          return;
+          // Check if the product has been moved to wishlist
+          if (
+            typeof data.message === 'string' &&
+            data.message.includes('moved to your wishlist')
+          ) {
+            // Remove the item from cart
+            setCartItems(prevItems =>
+              prevItems.filter((_, idx) => idx !== index)
+            );
+            // Add to wishlist
+            setWishlistItems(prevItems => [...prevItems, item]);
+            setNotificationMessage(data.message);
+            return;
+          }
         } else {
-          // Clear error message
-          setErrorMessages(prevErrors => {
-            const rest = { ...prevErrors };
-            delete rest[index];
-            return rest;
+          // Update local state
+          setCartItems(prevItems => {
+            const newItems = [...prevItems];
+            newItems[index].quantity = newQuantity;
+            return newItems;
           });
+          // Optionally, display success message
+          setNotificationMessage('Item quantity updated successfully.');
         }
-
-        // Update quantity in backend
-        try {
-          const { data } = await axiosInstance.put(
-              `/carts/${cartId}/products/${item.productId}`,
-              { quantity: newQuantity },
-              { useV2: true }
-          );
-
-          if (data && data.message) {
-            setErrorMessages(prevErrors => ({
-              ...prevErrors,
-              [index]: data.message || 'Failed to update quantity',
-            }));
-            // Check if the product has been moved to wishlist
-            if (typeof data.message === 'string' && data.message.includes('moved to your wishlist')) {
-              // Remove the item from cart
-              setCartItems(prevItems =>
-                  prevItems.filter((_, idx) => idx !== index)
-              );
-              // Add to wishlist
-              setWishlistItems(prevItems => [...prevItems, item]);
-              setNotificationMessage(data.message);
-              return;
-            }
-          } else {
-            // Update local state
-            setCartItems(prevItems => {
-              const newItems = [...prevItems];
-              newItems[index].quantity = newQuantity;
-              return newItems;
-            });
-            // Optionally, display success message
-            setNotificationMessage('Item quantity updated successfully.');
-          }
-        } catch (err: unknown) {
-          // Changed from any to unknown
-          console.error('Error updating quantity:', err);
-          if (err instanceof Error) {
-            const errorMessage = err.message || 'Failed to update quantity';
-            setErrorMessages(prevErrors => ({
-              ...prevErrors,
-              [index]: errorMessage,
-            }));
-          } else {
-            setErrorMessages(prevErrors => ({
-              ...prevErrors,
-              [index]: 'Failed to update quantity',
-            }));
-          }
+      } catch (err: unknown) {
+        // Changed from any to unknown
+        console.error('Error updating quantity:', err);
+        if (err instanceof Error) {
+          const errorMessage = err.message || 'Failed to update quantity';
+          setErrorMessages(prevErrors => ({
+            ...prevErrors,
+            [index]: errorMessage,
+          }));
+        } else {
+          setErrorMessages(prevErrors => ({
+            ...prevErrors,
+            [index]: 'Failed to update quantity',
+          }));
         }
-      },
-      [cartItems, cartId]
+      }
+    },
+    [cartItems, cartId]
   );
 
   const deleteItem = useCallback(
-      async (productId: string, indexToDelete: number): Promise<void> => {
-        if (!cartId) {
-          console.error('Cart ID is missing');
-          return;
-        }
+    async (productId: string, indexToDelete: number): Promise<void> => {
+      if (!cartId) {
+        console.error('Cart ID is missing');
+        return;
+      }
 
-        try {
-          await axiosInstance.delete(
-              `/carts/${cartId}/${productId}`,
-              { useV2: true }
-          );
+      try {
+        await axiosInstance.delete(`/carts/${cartId}/${productId}`, {
+          useV2: true,
+        });
 
-          setCartItems(prevItems =>
-              prevItems.filter((_, index) => index !== indexToDelete)
-          );
-          alert('Item successfully removed!');
-        } catch (error: unknown) {
-          // Changed from any to unknown
-          console.error('Error deleting item: ', error);
-          if (error instanceof Error) {
-            alert(`Failed to delete item: ${error.message}`);
-          } else {
-            alert('Failed to delete item');
-          }
+        setCartItems(prevItems =>
+          prevItems.filter((_, index) => index !== indexToDelete)
+        );
+        alert('Item successfully removed!');
+      } catch (error: unknown) {
+        // Changed from any to unknown
+        console.error('Error deleting item: ', error);
+        if (error instanceof Error) {
+          alert(`Failed to delete item: ${error.message}`);
+        } else {
+          alert('Failed to delete item');
         }
-      },
-      [cartId]
+      }
+    },
+    [cartId]
   );
 
   const clearCart = async (): Promise<void> => {
@@ -252,10 +253,7 @@ const UserCart = (): JSX.Element => {
 
     if (window.confirm('Are you sure you want to clear the cart?')) {
       try {
-        await axiosInstance.delete(
-            `/carts/${cartId}/clear`,
-            { useV2: true }
-        );
+        await axiosInstance.delete(`/carts/${cartId}/clear`, { useV2: true });
 
         setCartItems([]);
         setCartItemCount(0);
@@ -277,14 +275,14 @@ const UserCart = (): JSX.Element => {
     try {
       const productId = item.productId;
       const { data } = await axiosInstance.put(
-          `/carts/${cartId}/wishlist/${productId}/toWishList`,
-          {
-            productId: item.productId,
-            imageId: item.imageId,
-            productName: item.productName,
-            productSalePrice: item.productSalePrice,
-          },
-          { useV2: true }
+        `/carts/${cartId}/wishlist/${productId}/toWishList`,
+        {
+          productId: item.productId,
+          imageId: item.imageId,
+          productName: item.productName,
+          productSalePrice: item.productSalePrice,
+        },
+        { useV2: true }
       );
 
       if (data && data.message) {
@@ -315,14 +313,14 @@ const UserCart = (): JSX.Element => {
     try {
       const productId = item.productId;
       const { data } = await axiosInstance.put(
-          `/carts/${cartId}/wishlist/${productId}/toCart`,
-          {
-            productId: item.productId,
-            imageId: item.imageId,
-            productName: item.productName,
-            productSalePrice: item.productSalePrice,
-          },
-          { useV2: true }
+        `/carts/${cartId}/wishlist/${productId}/toCart`,
+        {
+          productId: item.productId,
+          imageId: item.imageId,
+          productName: item.productName,
+          productSalePrice: item.productSalePrice,
+        },
+        { useV2: true }
       );
 
       if (data && data.message) {
@@ -336,7 +334,7 @@ const UserCart = (): JSX.Element => {
 
       // Remove from wishlist
       setWishlistItems(prevItems =>
-          prevItems.filter(product => product.productId !== item.productId)
+        prevItems.filter(product => product.productId !== item.productId)
       );
 
       // Trigger the useEffect by updating the wishlistUpdated state
@@ -375,9 +373,9 @@ const UserCart = (): JSX.Element => {
 
     try {
       await axiosInstance.post(
-          `/carts/${cartId}/checkout`,
-          {},
-          { useV2: true }
+        `/carts/${cartId}/checkout`,
+        {},
+        { useV2: true }
       );
 
       const invoiceItems: Invoice[] = cartItems.map(item => ({
@@ -396,9 +394,11 @@ const UserCart = (): JSX.Element => {
       setIsCheckoutModalOpen(false);
     } catch (error: unknown) {
       if (error && typeof error === 'object' && 'response' in error) {
-        const errorData = (error as { response?: { data?: { message?: string } } }).response?.data;
+        const errorData = (
+          error as { response?: { data?: { message?: string } } }
+        ).response?.data;
         setCheckoutMessage(
-            `Checkout failed: ${errorData?.message || 'Unexpected error'}`
+          `Checkout failed: ${errorData?.message || 'Unexpected error'}`
         );
       } else {
         setCheckoutMessage('Checkout failed: Unexpected error');
@@ -415,199 +415,199 @@ const UserCart = (): JSX.Element => {
   }
 
   return (
-      <div>
-        <NavBar />
-        <h2 className="cart-header-title">Your Cart</h2>
+    <div>
+      <NavBar />
+      <h2 className="cart-header-title">Your Cart</h2>
 
-        <div className="UserCart-container">
-          {/* Notification Message */}
-          {notificationMessage && (
-              <div className="notification-message">
-                {notificationMessage}
-                <button
-                    className="close-notification"
-                    onClick={() => setNotificationMessage(null)}
-                    aria-label="Close notification"
-                >
-                  &times;
-                </button>
-              </div>
-          )}
+      <div className="UserCart-container">
+        {/* Notification Message */}
+        {notificationMessage && (
+          <div className="notification-message">
+            {notificationMessage}
+            <button
+              className="close-notification"
+              onClick={() => setNotificationMessage(null)}
+              aria-label="Close notification"
+            >
+              &times;
+            </button>
+          </div>
+        )}
 
-          {/* Main Flex Container for Cart and Checkout */}
-          <div className="UserCart-checkout-flex">
-            {/* Cart Section */}
-            <div className="UserCart">
-              {/* Cart Header with Badge */}
-              <div className="cart-header">
-                <div className="cart-badge-container">
-                  <FaShoppingCart aria-label="Shopping Cart" />
-                  {cartItemCount > 0 && (
-                      <span
-                          className="cart-badge"
-                          aria-label={`Cart has ${cartItemCount} items`}
-                      >
+        {/* Main Flex Container for Cart and Checkout */}
+        <div className="UserCart-checkout-flex">
+          {/* Cart Section */}
+          <div className="UserCart">
+            {/* Cart Header with Badge */}
+            <div className="cart-header">
+              <div className="cart-badge-container">
+                <FaShoppingCart aria-label="Shopping Cart" />
+                {cartItemCount > 0 && (
+                  <span
+                    className="cart-badge"
+                    aria-label={`Cart has ${cartItemCount} items`}
+                  >
                     {cartItemCount}
                   </span>
-                  )}
-                </div>
-              </div>
-
-              {/* Cart Items */}
-              <div className="cart-items-container">
-                {cartItems.length > 0 ? (
-                    cartItems.map((item, index) => (
-                        <CartItem
-                            key={item.productId}
-                            item={item}
-                            index={index}
-                            changeItemQuantity={changeItemQuantity}
-                            deleteItem={deleteItem}
-                            errorMessage={errorMessages[index]}
-                            addToWishlist={addToWishlist}
-                            addToCart={() => {}}
-                            isInWishlist={false}
-                            showNotification={setNotificationMessage}
-                        />
-                    ))
-                ) : (
-                    <p className="empty-cart-message">No products in the cart.</p>
                 )}
-              </div>
-
-              {/* Cart Control Buttons */}
-              <div className="UserCart-buttons">
-                <button
-                    className="continue-shopping-btn"
-                    onClick={() => navigate('/products')}
-                >
-                  Continue Shopping
-                </button>
-                <button className="clear-cart-btn" onClick={clearCart}>
-                  Clear Cart
-                </button>
               </div>
             </div>
 
-            {/* Checkout Section */}
-            <div className="Checkout-section">
-              {/* Voucher Code Section */}
-              <div className="voucher-code-section">
-                <input
-                    type="text"
-                    placeholder="Enter voucher code"
-                    value={voucherCode}
-                    onChange={e => {
-                      setVoucherCode(e.target.value);
-                      setVoucherError(null);
-                    }}
-                    className="voucher-input"
-                />
-                <button
-                    onClick={applyVoucherCode}
-                    className="apply-voucher-button"
-                >
-                  Apply
-                </button>
-                {voucherError && (
-                    <div className="voucher-error">{voucherError}</div>
-                )}
-              </div>
+            {/* Cart Items */}
+            <div className="cart-items-container">
+              {cartItems.length > 0 ? (
+                cartItems.map((item, index) => (
+                  <CartItem
+                    key={item.productId}
+                    item={item}
+                    index={index}
+                    changeItemQuantity={changeItemQuantity}
+                    deleteItem={deleteItem}
+                    errorMessage={errorMessages[index]}
+                    addToWishlist={addToWishlist}
+                    addToCart={() => {}}
+                    isInWishlist={false}
+                    showNotification={setNotificationMessage}
+                  />
+                ))
+              ) : (
+                <p className="empty-cart-message">No products in the cart.</p>
+              )}
+            </div>
 
-              <div className="CartSummary">
-                <h3>Cart Summary</h3>
-                <p className="summary-item">Subtotal: ${subtotal.toFixed(2)}</p>
-                <p className="summary-item">TVQ (9.975%): ${tvq.toFixed(2)}</p>
-                <p className="summary-item">TVC (5%): ${tvc.toFixed(2)}</p>
-                <p className="summary-item">Discount: ${discount.toFixed(2)}</p>
-                <p className="total-price summary-item">
-                  Total: ${total.toFixed(2)}
-                </p>
-              </div>
-
+            {/* Cart Control Buttons */}
+            <div className="UserCart-buttons">
               <button
-                  className="checkout-btn"
-                  onClick={handleCheckoutConfirmation}
-                  disabled={cartItems.length === 0}
+                className="continue-shopping-btn"
+                onClick={() => navigate('/products')}
               >
-                Checkout
+                Continue Shopping
               </button>
-
-              {/* Checkout Confirmation Modal */}
-              {isCheckoutModalOpen && (
-                  <div className="checkout-modal">
-                    <h3>Confirm Checkout</h3>
-                    <p>Are you sure you want to checkout?</p>
-                    <button onClick={handleCheckout}>Yes</button>
-                    <button onClick={() => setIsCheckoutModalOpen(false)}>
-                      No
-                    </button>
-                  </div>
-              )}
-              {checkoutMessage && (
-                  <div className="checkout-message">{checkoutMessage}</div>
-              )}
-
-              {/* Invoice Section */}
-              {invoices.length > 0 && (
-                  <div className="invoices-section">
-                    <h2>Invoice</h2>
-                    <div className="invoice-summary">
-                      <h3>Items</h3>
-                      {invoices.map(invoice => (
-                          <div key={invoice.productId} className="invoice-card">
-                            <h4>{invoice.productName}</h4>
-                            <p>Price: ${invoice.productSalePrice.toFixed(2)}</p>
-                            <p>Quantity: {invoice.quantity}</p>
-                            <p>
-                              Total: $
-                              {(invoice.productSalePrice * invoice.quantity).toFixed(
-                                  2
-                              )}
-                            </p>
-                          </div>
-                      ))}
-                      <h3>
-                        Total: $
-                        {invoices
-                            .reduce(
-                                (total, invoice) =>
-                                    total + invoice.productSalePrice * invoice.quantity,
-                                0
-                            )
-                            .toFixed(2)}
-                      </h3>
-                    </div>
-                  </div>
-              )}
+              <button className="clear-cart-btn" onClick={clearCart}>
+                Clear Cart
+              </button>
             </div>
           </div>
 
-          {/* Wishlist Section */}
-          <div className="wishlist-section">
-            <h2>Your Wishlist</h2>
-            <div className="Wishlist-items">
-              {wishlistItems.length > 0 ? (
-                  wishlistItems.map(item => (
-                      <CartItem
-                          key={item.productId}
-                          item={item}
-                          index={-1}
-                          changeItemQuantity={() => {}}
-                          deleteItem={() => {}}
-                          addToWishlist={() => {}}
-                          addToCart={addToCartFunction} // Use the updated addToCart function
-                          isInWishlist={true}
-                          showNotification={setNotificationMessage} // Pass the notification handler
-                      />
-                  ))
-              ) : (
-                  <p>No products in the wishlist.</p>
+          {/* Checkout Section */}
+          <div className="Checkout-section">
+            {/* Voucher Code Section */}
+            <div className="voucher-code-section">
+              <input
+                type="text"
+                placeholder="Enter voucher code"
+                value={voucherCode}
+                onChange={e => {
+                  setVoucherCode(e.target.value);
+                  setVoucherError(null);
+                }}
+                className="voucher-input"
+              />
+              <button
+                onClick={applyVoucherCode}
+                className="apply-voucher-button"
+              >
+                Apply
+              </button>
+              {voucherError && (
+                <div className="voucher-error">{voucherError}</div>
               )}
             </div>
+
+            <div className="CartSummary">
+              <h3>Cart Summary</h3>
+              <p className="summary-item">Subtotal: ${subtotal.toFixed(2)}</p>
+              <p className="summary-item">TVQ (9.975%): ${tvq.toFixed(2)}</p>
+              <p className="summary-item">TVC (5%): ${tvc.toFixed(2)}</p>
+              <p className="summary-item">Discount: ${discount.toFixed(2)}</p>
+              <p className="total-price summary-item">
+                Total: ${total.toFixed(2)}
+              </p>
+            </div>
+
+            <button
+              className="checkout-btn"
+              onClick={handleCheckoutConfirmation}
+              disabled={cartItems.length === 0}
+            >
+              Checkout
+            </button>
+
+            {/* Checkout Confirmation Modal */}
+            {isCheckoutModalOpen && (
+              <div className="checkout-modal">
+                <h3>Confirm Checkout</h3>
+                <p>Are you sure you want to checkout?</p>
+                <button onClick={handleCheckout}>Yes</button>
+                <button onClick={() => setIsCheckoutModalOpen(false)}>
+                  No
+                </button>
+              </div>
+            )}
+            {checkoutMessage && (
+              <div className="checkout-message">{checkoutMessage}</div>
+            )}
+
+            {/* Invoice Section */}
+            {invoices.length > 0 && (
+              <div className="invoices-section">
+                <h2>Invoice</h2>
+                <div className="invoice-summary">
+                  <h3>Items</h3>
+                  {invoices.map(invoice => (
+                    <div key={invoice.productId} className="invoice-card">
+                      <h4>{invoice.productName}</h4>
+                      <p>Price: ${invoice.productSalePrice.toFixed(2)}</p>
+                      <p>Quantity: {invoice.quantity}</p>
+                      <p>
+                        Total: $
+                        {(invoice.productSalePrice * invoice.quantity).toFixed(
+                          2
+                        )}
+                      </p>
+                    </div>
+                  ))}
+                  <h3>
+                    Total: $
+                    {invoices
+                      .reduce(
+                        (total, invoice) =>
+                          total + invoice.productSalePrice * invoice.quantity,
+                        0
+                      )
+                      .toFixed(2)}
+                  </h3>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Wishlist Section */}
+        <div className="wishlist-section">
+          <h2>Your Wishlist</h2>
+          <div className="Wishlist-items">
+            {wishlistItems.length > 0 ? (
+              wishlistItems.map(item => (
+                <CartItem
+                  key={item.productId}
+                  item={item}
+                  index={-1}
+                  changeItemQuantity={() => {}}
+                  deleteItem={() => {}}
+                  addToWishlist={() => {}}
+                  addToCart={addToCartFunction} // Use the updated addToCart function
+                  isInWishlist={true}
+                  showNotification={setNotificationMessage} // Pass the notification handler
+                />
+              ))
+            ) : (
+              <p>No products in the wishlist.</p>
+            )}
           </div>
         </div>
       </div>
+    </div>
   );
 };
 

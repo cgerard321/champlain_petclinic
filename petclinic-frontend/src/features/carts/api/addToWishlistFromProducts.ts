@@ -18,7 +18,10 @@ export function useAddToWishlist(): UseAddToWishlistReturnType {
     }
   };
 
-  const addToWishlist = async (productId: string, quantity: number): Promise<boolean> => {
+  const addToWishlist = async (
+    productId: string,
+    quantity: number
+  ): Promise<boolean> => {
     if (!user?.userId) {
       console.error('User is not authenticated');
       return false;
@@ -33,9 +36,9 @@ export function useAddToWishlist(): UseAddToWishlistReturnType {
 
       // was http://localhost:8080/api/v2/gateway/carts/${cartId}/products/${productId}/quantity/${quantity}
       await axiosInstance.post(
-          `/carts/${cartId}/products/${productId}/quantity/${quantity}`,
-          undefined,
-          { useV2: true }
+        `/carts/${cartId}/products/${productId}/quantity/${quantity}`,
+        undefined,
+        { useV2: true }
       );
       return true;
     } catch (error) {
