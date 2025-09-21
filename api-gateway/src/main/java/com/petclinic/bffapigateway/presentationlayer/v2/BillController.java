@@ -143,15 +143,16 @@ public class BillController {
         return billService.getBillsByMonth(year, month);
     }
 
-    @IsUserSpecific(idToMatch = {"customerId"})
-    @PostMapping("/customer/{customerId}/bills/{billId}/pay")
-    public Mono<ResponseEntity<String>> payBill(
-            @PathVariable("customerId") String customerId,
-            @PathVariable("billId") String billId,
-            @RequestBody PaymentRequestDTO paymentRequestDTO) {
-        return billService.payBill(customerId, billId, paymentRequestDTO)
-                .map(response -> ResponseEntity.ok(response))
-                .onErrorResume(e -> Mono.just(ResponseEntity.badRequest().body("Payment failed: " + e.getMessage())));
-    }
+    //moved to CustomerBillController
+//    @IsUserSpecific(idToMatch = {"customerId"})
+//    @PostMapping("/customer/{customerId}/bills/{billId}/pay")
+//    public Mono<ResponseEntity<String>> payBill(
+//            @PathVariable("customerId") String customerId,
+//            @PathVariable("billId") String billId,
+//            @RequestBody PaymentRequestDTO paymentRequestDTO) {
+//        return billService.payBill(customerId, billId, paymentRequestDTO)
+//                .map(response -> ResponseEntity.ok(response))
+//                .onErrorResume(e -> Mono.just(ResponseEntity.badRequest().body("Payment failed: " + e.getMessage())));
+//    }
 
 }

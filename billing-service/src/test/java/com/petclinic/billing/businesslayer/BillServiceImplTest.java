@@ -10,7 +10,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -654,7 +656,7 @@ public class BillServiceImplTest {
         String customerId = "customerId-1";
         String billId = "billId-1";
         Bill bill = buildBill();
-        bill.setBillStatus(BillStatus.UNPAID); // Make sure it's unpaid before payment
+        bill.setBillStatus(BillStatus.UNPAID);
 
         PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "123", "12/23");
 
@@ -662,74 +664,77 @@ public class BillServiceImplTest {
         when(repo.save(any(Bill.class))).thenReturn(Mono.just(bill));
 
         // Act
-        Mono<Bill> result = billService.processPayment(customerId, billId, paymentRequest);
+        Mono<BillResponseDTO> result = billService.processPayment(customerId, billId, paymentRequest);
 
         // Assert
         StepVerifier.create(result)
-                .consumeNextWith(updatedBill -> {
-                    assertEquals(BillStatus.PAID, updatedBill.getBillStatus());
+                .consumeNextWith(updatedBillDto -> {
+                    assertEquals(BillStatus.PAID, updatedBillDto.getBillStatus());
                     verify(repo, times(1)).save(any(Bill.class));
                 })
                 .verifyComplete();
     }
 
+
     @Test
     void processPayment_InvalidCardNumber_Failure() {
-        // Arrange
         String customerId = "customerId-1";
         String billId = "billId-1";
-        PaymentRequestDTO paymentRequest = new PaymentRequestDTO("12345678", "123", "12/23"); // Invalid card number
+        PaymentRequestDTO paymentRequest = new PaymentRequestDTO("12345678", "123", "12/23");
 
-        // Act & Assert
         StepVerifier.create(billService.processPayment(customerId, billId, paymentRequest))
                 .expectErrorMatches(throwable -> throwable instanceof InvalidPaymentException &&
                         throwable.getMessage().contains("Invalid payment details"))
                 .verify();
     }
+
 
     @Test
     void processPayment_InvalidCVV_Failure() {
-        // Arrange
         String customerId = "customerId-1";
         String billId = "billId-1";
-        PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "12", "12/23"); // Invalid CVV
+        PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "12", "12/23");
 
-        // Act & Assert
         StepVerifier.create(billService.processPayment(customerId, billId, paymentRequest))
                 .expectErrorMatches(throwable -> throwable instanceof InvalidPaymentException &&
                         throwable.getMessage().contains("Invalid payment details"))
                 .verify();
     }
+
 
     @Test
     void processPayment_InvalidExpirationDate_Failure() {
-        // Arrange
         String customerId = "customerId-1";
         String billId = "billId-1";
-        PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "123", "1223"); // Invalid expiration date
+        PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "123", "1223");
 
-        // Act & Assert
         StepVerifier.create(billService.processPayment(customerId, billId, paymentRequest))
                 .expectErrorMatches(throwable -> throwable instanceof InvalidPaymentException &&
                         throwable.getMessage().contains("Invalid payment details"))
                 .verify();
     }
+
 
 
     @Test
     void processPayment_BillNotFound_Failure() {
-        // Arrange
         String customerId = "customerId-1";
         String billId = "billId-1";
         PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "123", "12/23");
 
-        when(repo.findByCustomerIdAndBillId(customerId, billId)).thenReturn(Mono.empty()); // Bill not found
+        when(repo.findByCustomerIdAndBillId(customerId, billId)).thenReturn(Mono.empty());
 
-        // Act & Assert
         StepVerifier.create(billService.processPayment(customerId, billId, paymentRequest))
-                .expectErrorMatches(throwable -> throwable instanceof NotFoundException &&
-                        throwable.getMessage().contains("Bill not found"))
+                .expectErrorSatisfies(throwable -> {
+                    assertThat(throwable).isInstanceOf(ResponseStatusException.class);
+                    ResponseStatusException ex = (ResponseStatusException) throwable;
+                    assertThat(ex.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
+                    assertThat(ex.getReason()).isEqualTo("Bill not found");
+                })
                 .verify();
     }
+
+
+
 
 }
