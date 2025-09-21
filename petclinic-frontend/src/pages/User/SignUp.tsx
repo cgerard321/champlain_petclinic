@@ -162,14 +162,13 @@ const SignUp: React.FC = (): JSX.Element => {
       const response = await axiosInstance.post<Register>(
         '/users',
         requestData,
-        { useV2: true }
+        { useV2: false }
       );
 
       if (response.status === 201) {
         setEmailSent(true);
       }
     } catch (error) {
-      // This error handling logic is component-specific and is perfectly fine.
       setLoading(false);
       if (isAxiosError(error) && error.response) {
         const backendErrors = error.response.data;
