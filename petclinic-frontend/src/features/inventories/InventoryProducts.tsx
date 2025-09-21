@@ -167,10 +167,11 @@ const addQuantity = async (
   try {
     const delta = 1;
 
-    await axios.put(
-      `http://localhost:8080/api/v2/gateway/inventories/${inventoryId}/products/${productId}/restockProduct`,
+    // Use the same style as other calls in this file: axiosInstance + v1 (useV2:false)
+    await axiosInstance.put(
+      `/inventory/${inventoryId}/products/${productId}/restockProduct`,
       null,
-      { params: { productQuantity: delta } }
+      { params: { productQuantity: delta }, useV2: false }
     );
 
     const updatedQuantity = Math.min(100, currentQuantity + delta);
@@ -179,14 +180,14 @@ const addQuantity = async (
     if (updatedQuantity === 0) updatedStatus = Status.OUT_OF_STOCK;
     else if (updatedQuantity <= 20) updatedStatus = Status.RE_ORDER;
 
-    const updatedProducts = filteredProducts.map(p =>
+    const updated = filteredProducts.map(p =>
       p.productId === productId
         ? { ...p, productQuantity: updatedQuantity, status: updatedStatus }
         : p
     );
 
-    setProducts(updatedProducts);
-    setFilteredProducts(updatedProducts);
+    setProducts(updated);
+    setFilteredProducts(updated);
     setError(null);
   } catch (err: any) {
     const msg = err?.response
@@ -200,6 +201,7 @@ const addQuantity = async (
     setError(`Failed to add product quantity: ${msg}`);
   }
 };
+
 
   const reduceQuantity = async (
     productId: string,
