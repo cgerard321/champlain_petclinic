@@ -7,6 +7,19 @@ import {
 } from '@/features/inventories/api/EditInventoryProducts.ts';
 import { ProductRequestModel } from '@/features/inventories/models/InventoryModels/ProductRequestModel';
 
+const MAX_QTY = 100;
+
+function validateQuantityValue(n: unknown): string | null {
+  if (n === null || n === undefined || Number.isNaN(Number(n))) {
+    return 'Quantity is required';
+  }
+  const num = Number(n);
+  if (!Number.isInteger(num)) return 'Quantity must be a whole number';
+  if (num <= 0) return 'Quantity must be greater than 0';
+  if (num > MAX_QTY) return `Quantity cannot exceed ${MAX_QTY}`;
+  return null;
+}
+
 interface ApiError {
   message: string;
 }
@@ -52,24 +65,26 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
 
   const validate = (): boolean => {
     const newError: { [key: string]: string } = {};
-    if (!product.productName) {
-      newError.productName = 'Product name is required';
-    }
-    if (!product.productDescription) {
-      newError.productDescription = 'Product description is required';
-    }
-    if (!product.productPrice) {
+
+    if (!product.productName) newError.productName = 'Product name is required';
+    if (!product.productDescription) newError.productDescription = 'Product description is required';
+
+    if (product.productPrice === undefined || product.productPrice === null) {
       newError.productPrice = 'Product price is required';
     }
-    if (!product.productQuantity) {
-      newError.productQuantity = 'Product quantity is required';
-    }
-    if (!product.productSalePrice) {
+
+    // Quantity: integer 1..100
+    const qtyMsg = validateQuantityValue(product.productQuantity);
+    if (qtyMsg) newError.productQuantity = qtyMsg;
+
+    if (product.productSalePrice === undefined || product.productSalePrice === null) {
       newError.productSalePrice = 'Product sale price is required';
     }
+
     setError(newError);
     return Object.keys(newError).length === 0;
   };
+
 
   const handleSubmit = async (
     event: FormEvent<HTMLFormElement>
@@ -101,14 +116,27 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
 
   // Handle input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const { name, type, value } = e.target;
+    if (name === 'productQuantity') {
+      const digitsOnly = value.replace(/[^\d]/g, '');
+      const num = digitsOnly === '' ? '' : Number(digitsOnly);
+
+      setProduct(prev => ({
+        ...prev,
+        productQuantity: digitsOnly === '' ? 0 : num,
+      }));
+
+      const msg = digitsOnly === '' ? 'Quantity is required' : validateQuantityValue(num);
+      setError(prev => ({ ...prev, productQuantity: msg ?? '' }));
+      return;
+    }
+
     setProduct({
       ...product,
-      [e.target.name]:
-        e.target.type === 'number'
-          ? parseFloat(e.target.value)
-          : e.target.value,
+      [name]: type === 'number' ? Number(value) : value,
     });
   };
+
 
   return (
     <div
@@ -181,9 +209,22 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
             name="productQuantity"
             value={product.productQuantity}
             onChange={handleChange}
+            inputMode="numeric"
+            pattern="\d*"
+            step={1}
+            min={1}
+            max={MAX_QTY}
+            onKeyDown={(e) => {
+              // prevent '.', '-', 'e', '+'
+              if (['.', '-', 'e', 'E', '+'].includes(e.key)) e.preventDefault();
+            }}
             required
           />
         </div>
+        {error.productQuantity && (
+          <p style={{ color: 'red', marginTop: -8 }}>{error.productQuantity}</p>
+        )}
+
 
         <br></br>
 
