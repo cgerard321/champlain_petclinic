@@ -11,6 +11,17 @@ import ConfirmationModal from '@/features/inventories/ConfirmationModal.tsx';
 import { Status } from '@/features/inventories/models/ProductModels/Status.ts';
 import axiosInstance from '@/shared/api/axiosInstance';
 
+const MAX_QTY = 100;
+
+function parseValidAddAmount(raw: string | null): number | null {
+  if (raw === null) return null;
+  const trimmed = raw.trim();
+  if (!/^\d+$/.test(trimmed)) return null;
+  const n = Number(trimmed);
+  if (!Number.isInteger(n) || n <= 0) return null;
+  return n;
+}
+
 const InventoryProducts: React.FC = () => {
   const { inventoryId } = useParams<{ inventoryId: string }>();
   const { productList, setProductList, getProductList } = useSearchProducts();
@@ -155,26 +166,27 @@ const InventoryProducts: React.FC = () => {
     setShowConfirmation(false);
     setProductToDelete(null);
   };
+
 const addQuantity = async (
   productId: string,
   currentQuantity: number
 ): Promise<void> => {
-  if (currentQuantity >= 100) {
-    setError('Max quantity (100) reached.');
+
+  if (currentQuantity >= MAX_QTY) {
+    setError(`Max quantity (${MAX_QTY}) reached.`);
     return;
   }
 
   try {
     const delta = 1;
 
-    // Use the same style as other calls in this file: axiosInstance + v1 (useV2:false)
     await axiosInstance.put(
       `/inventory/${inventoryId}/products/${productId}/restockProduct`,
       null,
       { params: { productQuantity: delta }, useV2: false }
     );
 
-    const updatedQuantity = Math.min(100, currentQuantity + delta);
+    const updatedQuantity = Math.min(MAX_QTY, currentQuantity + delta);
 
     let updatedStatus: Status = Status.AVAILABLE;
     if (updatedQuantity === 0) updatedStatus = Status.OUT_OF_STOCK;
@@ -203,45 +215,46 @@ const addQuantity = async (
 };
 
 
+
+
   const reduceQuantity = async (
     productId: string,
     currentQuantity: number
   ): Promise<void> => {
-    if (currentQuantity > 0) {
-      try {
-        const updatedQuantity = currentQuantity - 1;
-        await axiosInstance.patch(
-          `/inventory/${inventoryId}/products/${productId}/consume`,
-          {
-            productQuantity: updatedQuantity,
-          },
-          { useV2: false }
-        );
+    if (currentQuantity <= 0) {
+      setError('Quantity cannot go below 0.');
+      return;
+    }
 
-        let updatedStatus: Status = Status.AVAILABLE;
-        if (updatedQuantity === 0) {
-          updatedStatus = Status.OUT_OF_STOCK;
-        } else if (updatedQuantity <= 20) {
-          updatedStatus = Status.RE_ORDER;
-        }
+    try {
+      const updatedQuantity = currentQuantity - 1;
+      await axiosInstance.patch(
+        `/inventory/${inventoryId}/products/${productId}/consume`,
+        { productQuantity: updatedQuantity },
+        { useV2: false }
+      );
 
-        const updatedProducts = filteredProducts.map(product =>
-          product.productId === productId
-            ? {
-                ...product,
-                productQuantity: updatedQuantity,
-                status: updatedStatus,
-              }
-            : product
-        );
-
-        setProducts(updatedProducts);
-        setFilteredProducts(updatedProducts);
-      } catch (err) {
-        setError('Failed to reduce product quantity.');
+      let updatedStatus: Status = Status.AVAILABLE;
+      if (updatedQuantity === 0) {
+        updatedStatus = Status.OUT_OF_STOCK;
+      } else if (updatedQuantity <= 20) {
+        updatedStatus = Status.RE_ORDER;
       }
+
+      const updatedProducts = filteredProducts.map(product =>
+        product.productId === productId
+          ? { ...product, productQuantity: updatedQuantity, status: updatedStatus }
+          : product
+      );
+
+      setProducts(updatedProducts);
+      setFilteredProducts(updatedProducts);
+      setError(null);
+    } catch (err) {
+      setError('Failed to reduce product quantity.');
     }
   };
+
 
   useEffect(() => {
     if (productList) {
