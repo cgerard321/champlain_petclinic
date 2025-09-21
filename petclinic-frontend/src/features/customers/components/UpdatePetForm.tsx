@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { FormEvent, useEffect, useState } from 'react';
-import { updatePet, getPet } from '../api/updatePet';
+import { getPet } from '../api/getPet';
+import { updatePet } from '../api/updatePet';
 import { PetResponseModel } from '../models/PetResponseModel';
 import { PetRequestModel } from '../models/PetRequestModel';
 import { useNavigate, useParams } from 'react-router-dom';

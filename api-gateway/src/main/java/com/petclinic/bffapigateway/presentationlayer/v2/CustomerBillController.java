@@ -26,7 +26,7 @@ public class CustomerBillController {
     private final BillServiceClient billService;
 
     @IsUserSpecific(idToMatch = {"customerId"})
-    @GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public Flux<BillResponseDTO> getBillsByCustomerId(@PathVariable String customerId) {
         return billService.getBillsByOwnerId(customerId);
     }
