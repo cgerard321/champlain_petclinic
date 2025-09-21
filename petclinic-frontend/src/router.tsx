@@ -19,7 +19,7 @@ import UpdateBillPage from '@/pages/Bills/UpdateBill.tsx';
 import UserCart from '@/features/carts/components/UserCart.tsx';
 import AddingCustomer from '@/pages/Customer/AddingCustomer.tsx';
 import AllOwners from '@/pages/Customer/AllOwners.tsx';
-import CustomerBillingPage from '@/pages/Bills/CustomerBills';
+import CustomerBillingPage from '@/pages/Bills/CustomerBills.tsx';
 import AdminBillingPage from '@/pages/Bills/AdminBill.tsx';
 import EditingVisit from './features/visits/models/EditingVisit';
 import AddingVisit from './features/visits/models/AddingVisit';
