@@ -1,6 +1,7 @@
 package com.petclinic.bffapigateway.presentationlayer.v2;
 
 import com.petclinic.bffapigateway.domainclientlayer.BillServiceClient;
+import com.petclinic.bffapigateway.dtos.Bills.PaymentRequestDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -11,6 +12,7 @@ import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -18,6 +20,27 @@ import reactor.core.publisher.Mono;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
+import com.petclinic.bffapigateway.domainclientlayer.BillServiceClient;
+import com.petclinic.bffapigateway.dtos.Bills.*;
+
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import reactor.core.publisher.Mono;
+
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.reactive.server.WebTestClient;
+
+import org.springframework.web.server.ResponseStatusException;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 @WebFluxTest(controllers = CustomerBillController.class)
 @AutoConfigureWebTestClient
@@ -102,4 +125,64 @@ public class CustomerBillControllerUnitTest {
                 .expectBody(Double.class)
                 .value(balance -> assertEquals(-20.0, balance));
     }
+
+    @Test
+    void payBill_Success() {
+        PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("1234567812345678", "123", "12/23");
+
+        BillResponseDTO mockResponse = new BillResponseDTO();
+        mockResponse.setBillId("1");
+        mockResponse.setBillStatus(BillStatus.PAID);
+
+        when(billServiceClient.payBill("cust-1", "1", paymentRequestDTO)).thenReturn(Mono.just(mockResponse));
+
+        webTestClient.post()
+                .uri("/api/v2/gateway/customers/{customerId}/bills/{billId}/pay", "cust-1", "1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(paymentRequestDTO)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(BillResponseDTO.class)
+                .value(bill -> {
+                    assertThat(bill.getBillId()).isEqualTo("1");
+                    assertThat(bill.getBillStatus()).isEqualTo(BillStatus.PAID);
+                });
+
+        verify(billServiceClient, times(1)).payBill("cust-1", "1", paymentRequestDTO);
+    }
+
+    @Test
+    void payBill_InvalidPaymentDetails() {
+        PaymentRequestDTO invalidRequest = new PaymentRequestDTO("123", "12", "99/99");
+
+        when(billServiceClient.payBill("cust-1", "1", invalidRequest))
+                .thenReturn(Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid payment details")));
+
+        webTestClient.post()
+                .uri("/api/v2/gateway/customers/{customerId}/bills/{billId}/pay", "cust-1", "1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(invalidRequest)
+                .exchange()
+                .expectStatus().isBadRequest();
+
+        verify(billServiceClient, times(1)).payBill("cust-1", "1", invalidRequest);
+    }
+
+    @Test
+    void payBill_BillNotFound() {
+        PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("1234567812345678", "123", "12/23");
+
+        when(billServiceClient.payBill("cust-1", "does-not-exist", paymentRequestDTO))
+                .thenReturn(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Bill not found")));
+
+        webTestClient.post()
+                .uri("/api/v2/gateway/customers/{customerId}/bills/{billId}/pay", "cust-1", "does-not-exist")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(paymentRequestDTO)
+                .exchange()
+                .expectStatus().isNotFound();
+
+        verify(billServiceClient, times(1)).payBill("cust-1", "does-not-exist", paymentRequestDTO);
+    }
+
 }
