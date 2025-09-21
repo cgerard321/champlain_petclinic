@@ -234,14 +234,16 @@ public class BFFApiGatewayController {
     @Validated
     @IsUserSpecific(idToMatch = {"customerId"}, bypassRoles = {Roles.ADMIN})
     @PostMapping("bills/customer/{customerId}/bills/{billId}/pay")
-    public Mono<ResponseEntity<String>> payBill(
+    public Mono<ResponseEntity<BillResponseDTO>> payBill(
             @PathVariable("customerId") String customerId,
             @PathVariable("billId") String billId,
             @Valid @RequestBody PaymentRequestDTO paymentRequestDTO) {
         return billServiceClient.payBill(customerId, billId, paymentRequestDTO)
-                .map(response -> ResponseEntity.ok(response))
-                .onErrorResume(e -> Mono.just(ResponseEntity.badRequest().body("Payment failed: " + e.getMessage())));
+                .map(ResponseEntity::ok)
+                .onErrorResume(e -> Mono.just(ResponseEntity.badRequest().build()));
     }
+
+
 
 
 

@@ -24,7 +24,6 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.function.Predicate;
 
-import static reactor.core.publisher.FluxExtensionsKt.switchIfEmpty;
 
 
 @Service
@@ -289,24 +288,38 @@ public class BillServiceImpl implements BillService{
                 .map(Bill::getAmount)
                 .reduce(0.0, Double::sum)
                 .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Customer not found")));
-    }           
+    }
 
     @Override
-    public Mono<Bill> processPayment(String customerId, String billId, PaymentRequestDTO paymentRequestDTO) throws InvalidPaymentException {
-        // Basic card validation outside of reactive pipeline
+    public Mono<BillResponseDTO> processPayment(String customerId, String billId, PaymentRequestDTO paymentRequestDTO)
+    {
+
+        // 1. Validate card details before reactive pipeline.
+        //    If card number, CVV, or expiration date lengths are invalid, throw InvalidPaymentException.
         if (paymentRequestDTO.getCardNumber().length() != 16 ||
                 paymentRequestDTO.getCvv().length() != 3 ||
                 paymentRequestDTO.getExpirationDate().length() != 5) {
             return Mono.error(new InvalidPaymentException("Invalid payment details"));
         }
 
-        // Continue with reactive processing if validation is successful
+        // 2. Try to find the bill by customerId and billId.
+        //    If no bill exists, immediately return a 404 ResponseStatusException.
         return billRepository.findByCustomerIdAndBillId(customerId, billId)
-                .switchIfEmpty(Mono.error(new NotFoundException("Bill not found")))
+                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Bill not found")))
+
+                // 3. If the bill exists, set its status to PAID.
                 .flatMap(bill -> {
                     bill.setBillStatus(BillStatus.PAID);
+
+                    // 4. Save the updated bill back into the repository.
                     return billRepository.save(bill);
-                });
+                })
+
+                // 5. Map the updated Bill entity into a BillResponseDTO before returning.
+                .map(EntityDtoUtil::toBillResponseDto);
     }
+
+
+
 
 }
