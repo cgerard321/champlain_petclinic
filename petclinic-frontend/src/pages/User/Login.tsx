@@ -36,7 +36,7 @@ export default function Login(): JSX.Element {
       passwordInput: HTMLInputElement;
     };
 
-    // the try catch is being overwritten by the redirect to /unauthorized so exception handling isnt doing shit for now
+    // the try catch is being overwritten by the redirect to /unauthorized so exception handling isnt doing anything for now
     try {
       const response = await axiosInstance.post<UserResponseModel>(
         '/users/login',
