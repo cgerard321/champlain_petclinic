@@ -394,11 +394,15 @@ const UserCart = (): JSX.Element => {
       setCartItems([]); // Clear the cart after successful checkout
       setCartItemCount(0);
       setIsCheckoutModalOpen(false);
-    } catch (error: any) {
-      const errorData = error?.response?.data;
-      setCheckoutMessage(
-          `Checkout failed: ${errorData?.message || error?.message || 'Unexpected error'}`
-      );
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'response' in error) {
+        const errorData = (error as { response?: { data?: { message?: string } } }).response?.data;
+        setCheckoutMessage(
+            `Checkout failed: ${errorData?.message || 'Unexpected error'}`
+        );
+      } else {
+        setCheckoutMessage('Checkout failed: Unexpected error');
+      }
     }
   };
 
