@@ -182,7 +182,7 @@ const UserCart = (): JSX.Element => {
               // Add to wishlist
               setWishlistItems(prevItems => [...prevItems, item]);
               setNotificationMessage(data.message);
-              return;
+              // Removed early return to allow local state update logic to run
             }
           } else {
             // Update local state
