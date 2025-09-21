@@ -174,7 +174,7 @@ const UserCart = (): JSX.Element => {
               [index]: data.message || 'Failed to update quantity',
             }));
             // Check if the product has been moved to wishlist
-            if (data.message.includes('moved to your wishlist')) {
+            if (typeof data.message === 'string' && data.message.includes('moved to your wishlist')) {
               // Remove the item from cart
               setCartItems(prevItems =>
                   prevItems.filter((_, idx) => idx !== index)
