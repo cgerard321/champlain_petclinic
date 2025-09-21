@@ -35,24 +35,24 @@ const UserCart = (): JSX.Element => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [errorMessages, setErrorMessages] = useState<{ [key: number]: string }>(
-      {}
+    {}
   );
   const [checkoutMessage, setCheckoutMessage] = useState<string | null>(null);
   const [invoices, setInvoices] = useState<Invoice[]>([]); // State to hold invoice details
   const [cartItemCount, setCartItemCount] = useState<number>(0);
   const [isCheckoutModalOpen, setIsCheckoutModalOpen] =
-      useState<boolean>(false); // Modal state
+    useState<boolean>(false); // Modal state
   const [wishlistUpdated, setWishlistUpdated] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState<string | null>(
-      null
+    null
   ); // New state for notifications
   const [voucherCode, setVoucherCode] = useState<string>('');
   const [discount, setDiscount] = useState<number>(0);
   const [voucherError, setVoucherError] = useState<string | null>(null);
 
   const subtotal = cartItems.reduce(
-      (acc, item) => acc + item.productSalePrice * (item.quantity || 1),
-      0
+    (acc, item) => acc + item.productSalePrice * (item.quantity || 1),
+    0
   );
   const tvq = subtotal * 0.09975; // Quebec tax rate
   const tvc = subtotal * 0.05; // Canadian tax rate
@@ -61,8 +61,8 @@ const UserCart = (): JSX.Element => {
   // Function to update the cart item count
   const updateCartItemCount = useCallback(() => {
     const count = cartItems.reduce(
-        (acc, item) => acc + (item.quantity || 0),
-        0
+      (acc, item) => acc + (item.quantity || 0),
+      0
     );
     setCartItemCount(count);
   }, [cartItems]);
@@ -77,11 +77,11 @@ const UserCart = (): JSX.Element => {
 
       try {
         const response = await fetch(
-            `http://localhost:8080/api/v2/gateway/carts/${cartId}`,
-            {
-              headers: { Accept: 'application/json' },
-              credentials: 'include',
-            }
+          `http://localhost:8080/api/v2/gateway/carts/${cartId}`,
+          {
+            headers: { Accept: 'application/json' },
+            credentials: 'include',
+          }
         );
 
         if (!response.ok) {
@@ -97,16 +97,16 @@ const UserCart = (): JSX.Element => {
 
         // Map data.products to the appropriate ProductModel format
         const products: ProductModel[] = data.products.map(
-            (product: ProductAPIResponse) => ({
-              productId: product.productId,
-              imageId: product.imageId,
-              productName: product.productName,
-              productDescription: product.productDescription,
-              productSalePrice: product.productSalePrice,
-              averageRating: product.averageRating,
-              quantity: product.quantityInCart || 1,
-              productQuantity: product.productQuantity,
-            })
+          (product: ProductAPIResponse) => ({
+            productId: product.productId,
+            imageId: product.imageId,
+            productName: product.productName,
+            productDescription: product.productDescription,
+            productSalePrice: product.productSalePrice,
+            averageRating: product.averageRating,
+            quantity: product.quantityInCart || 1,
+            productQuantity: product.productQuantity,
+          })
         );
 
         setCartItems(products);
@@ -135,14 +135,14 @@ const UserCart = (): JSX.Element => {
   const applyVoucherCode = async (): Promise<void> => {
     try {
       const response = await fetch(
-          `http://localhost:8080/api/v2/gateway/promos/validate/${voucherCode}`,
-          {
-            method: 'GET',
-            headers: {
-              Accept: 'application/json',
-            },
-            credentials: 'include',
-          }
+        `http://localhost:8080/api/v2/gateway/promos/validate/${voucherCode}`,
+        {
+          method: 'GET',
+          headers: {
+            Accept: 'application/json',
+          },
+          credentials: 'include',
+        }
       );
 
       if (response.ok) {
@@ -159,128 +159,128 @@ const UserCart = (): JSX.Element => {
   };
 
   const changeItemQuantity = useCallback(
-      async (
-          event: React.ChangeEvent<HTMLInputElement>,
-          index: number
-      ): Promise<void> => {
-        const newQuantity = Math.max(1, Number(event.target.value)); // Ensure quantity is at least 1
-        const item = cartItems[index];
+    async (
+      event: React.ChangeEvent<HTMLInputElement>,
+      index: number
+    ): Promise<void> => {
+      const newQuantity = Math.max(1, Number(event.target.value)); // Ensure quantity is at least 1
+      const item = cartItems[index];
 
-        if (newQuantity > item.productQuantity) {
-          // Display error message
+      if (newQuantity > item.productQuantity) {
+        // Display error message
+        setErrorMessages(prevErrors => ({
+          ...prevErrors,
+          [index]: `You cannot add more than ${item.productQuantity} items. Only ${item.productQuantity} items left in stock.`,
+        }));
+        return;
+      } else {
+        // Clear error message
+        setErrorMessages(prevErrors => {
+          const rest = { ...prevErrors };
+          delete rest[index];
+          return rest;
+        });
+      }
+
+      // Update quantity in backend
+      try {
+        const response = await fetch(
+          `http://localhost:8080/api/v2/gateway/carts/${cartId}/products/${item.productId}`,
+          {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              Accept: 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify({ quantity: newQuantity }),
+          }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
           setErrorMessages(prevErrors => ({
             ...prevErrors,
-            [index]: `You cannot add more than ${item.productQuantity} items. Only ${item.productQuantity} items left in stock.`,
+            [index]: data.message || 'Failed to update quantity',
           }));
-          return;
+          // Check if the product has been moved to wishlist
+          if (data.message && data.message.includes('moved to your wishlist')) {
+            // Remove the item from cart
+            setCartItems(prevItems =>
+              prevItems.filter((_, idx) => idx !== index)
+            );
+            // Add to wishlist
+            setWishlistItems(prevItems => [...prevItems, item]);
+            setNotificationMessage(data.message);
+          }
         } else {
-          // Clear error message
-          setErrorMessages(prevErrors => {
-            const rest = { ...prevErrors };
-            delete rest[index];
-            return rest;
+          // Update local state
+          setCartItems(prevItems => {
+            const newItems = [...prevItems];
+            newItems[index].quantity = newQuantity;
+            return newItems;
           });
+          // Optionally, display success message
+          setNotificationMessage('Item quantity updated successfully.');
         }
-
-        // Update quantity in backend
-        try {
-          const response = await fetch(
-              `http://localhost:8080/api/v2/gateway/carts/${cartId}/products/${item.productId}`,
-              {
-                method: 'PUT',
-                headers: {
-                  'Content-Type': 'application/json',
-                  Accept: 'application/json',
-                },
-                credentials: 'include',
-                body: JSON.stringify({ quantity: newQuantity }),
-              }
-          );
-
-          const data = await response.json();
-
-          if (!response.ok) {
-            setErrorMessages(prevErrors => ({
-              ...prevErrors,
-              [index]: data.message || 'Failed to update quantity',
-            }));
-            // Check if the product has been moved to wishlist
-            if (data.message && data.message.includes('moved to your wishlist')) {
-              // Remove the item from cart
-              setCartItems(prevItems =>
-                  prevItems.filter((_, idx) => idx !== index)
-              );
-              // Add to wishlist
-              setWishlistItems(prevItems => [...prevItems, item]);
-              setNotificationMessage(data.message);
-            }
-          } else {
-            // Update local state
-            setCartItems(prevItems => {
-              const newItems = [...prevItems];
-              newItems[index].quantity = newQuantity;
-              return newItems;
-            });
-            // Optionally, display success message
-            setNotificationMessage('Item quantity updated successfully.');
-          }
-        } catch (err: unknown) {
-          // Changed from any to unknown
-          console.error('Error updating quantity:', err);
-          if (err instanceof Error) {
-            const errorMessage = err.message || 'Failed to update quantity';
-            setErrorMessages(prevErrors => ({
-              ...prevErrors,
-              [index]: errorMessage,
-            }));
-          } else {
-            setErrorMessages(prevErrors => ({
-              ...prevErrors,
-              [index]: 'Failed to update quantity',
-            }));
-          }
+      } catch (err: unknown) {
+        // Changed from any to unknown
+        console.error('Error updating quantity:', err);
+        if (err instanceof Error) {
+          const errorMessage = err.message || 'Failed to update quantity';
+          setErrorMessages(prevErrors => ({
+            ...prevErrors,
+            [index]: errorMessage,
+          }));
+        } else {
+          setErrorMessages(prevErrors => ({
+            ...prevErrors,
+            [index]: 'Failed to update quantity',
+          }));
         }
-      },
-      [cartItems, cartId]
+      }
+    },
+    [cartItems, cartId]
   );
 
   const deleteItem = useCallback(
-      async (productId: string, indexToDelete: number): Promise<void> => {
-        if (!cartId) {
-          console.error('Cart ID is missing');
-          return;
+    async (productId: string, indexToDelete: number): Promise<void> => {
+      if (!cartId) {
+        console.error('Cart ID is missing');
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `http://localhost:8080/api/v2/gateway/carts/${cartId}/${productId}`,
+          {
+            method: 'DELETE',
+            headers: {
+              Accept: 'application/json',
+            },
+            credentials: 'include',
+          }
+        );
+        if (!response.ok) {
+          throw new Error('Failed to delete item from the cart');
         }
 
-        try {
-          const response = await fetch(
-              `http://localhost:8080/api/v2/gateway/carts/${cartId}/${productId}`,
-              {
-                method: 'DELETE',
-                headers: {
-                  Accept: 'application/json',
-                },
-                credentials: 'include',
-              }
-          );
-          if (!response.ok) {
-            throw new Error('Failed to delete item from the cart');
-          }
-
-          setCartItems(prevItems =>
-              prevItems.filter((_, index) => index !== indexToDelete)
-          );
-          alert('Item successfully removed!');
-        } catch (error: unknown) {
-          // Changed from any to unknown
-          console.error('Error deleting item: ', error);
-          if (error instanceof Error) {
-            alert(`Failed to delete item: ${error.message}`);
-          } else {
-            alert('Failed to delete item');
-          }
+        setCartItems(prevItems =>
+          prevItems.filter((_, index) => index !== indexToDelete)
+        );
+        alert('Item successfully removed!');
+      } catch (error: unknown) {
+        // Changed from any to unknown
+        console.error('Error deleting item: ', error);
+        if (error instanceof Error) {
+          alert(`Failed to delete item: ${error.message}`);
+        } else {
+          alert('Failed to delete item');
         }
-      },
-      [cartId]
+      }
+    },
+    [cartId]
   );
 
   const clearCart = async (): Promise<void> => {
@@ -292,11 +292,11 @@ const UserCart = (): JSX.Element => {
     if (window.confirm('Are you sure you want to clear the cart?')) {
       try {
         const response = await fetch(
-            `http://localhost:8080/api/v2/gateway/carts/${cartId}/clear`,
-            {
-              method: 'DELETE',
-              credentials: 'include',
-            }
+          `http://localhost:8080/api/v2/gateway/carts/${cartId}/clear`,
+          {
+            method: 'DELETE',
+            credentials: 'include',
+          }
         );
 
         if (response.ok) {
@@ -323,21 +323,21 @@ const UserCart = (): JSX.Element => {
     try {
       const productId = item.productId;
       const response = await fetch(
-          `http://localhost:8080/api/v2/gateway/carts/${cartId}/wishlist/${productId}/toWishList`,
-          {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-              Accept: 'application/json',
-            },
-            credentials: 'include',
-            body: JSON.stringify({
-              productId: item.productId,
-              imageId: item.imageId,
-              productName: item.productName,
-              productSalePrice: item.productSalePrice,
-            }),
-          }
+        `http://localhost:8080/api/v2/gateway/carts/${cartId}/wishlist/${productId}/toWishList`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify({
+            productId: item.productId,
+            imageId: item.imageId,
+            productName: item.productName,
+            productSalePrice: item.productSalePrice,
+          }),
+        }
       );
 
       const data = await response.json();
@@ -374,21 +374,21 @@ const UserCart = (): JSX.Element => {
     try {
       const productId = item.productId;
       const response = await fetch(
-          `http://localhost:8080/api/v2/gateway/carts/${cartId}/wishlist/${productId}/toCart`,
-          {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-              Accept: 'application/json',
-            },
-            credentials: 'include',
-            body: JSON.stringify({
-              productId: item.productId,
-              imageId: item.imageId,
-              productName: item.productName,
-              productSalePrice: item.productSalePrice,
-            }),
-          }
+        `http://localhost:8080/api/v2/gateway/carts/${cartId}/wishlist/${productId}/toCart`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify({
+            productId: item.productId,
+            imageId: item.imageId,
+            productName: item.productName,
+            productSalePrice: item.productSalePrice,
+          }),
+        }
       );
 
       const data = await response.json();
@@ -402,7 +402,7 @@ const UserCart = (): JSX.Element => {
 
       // Remove from wishlist
       setWishlistItems(prevItems =>
-          prevItems.filter(product => product.productId !== item.productId)
+        prevItems.filter(product => product.productId !== item.productId)
       );
 
       // Display notification message from backend
@@ -433,12 +433,12 @@ const UserCart = (): JSX.Element => {
 
     try {
       const res = await fetch(
-          `http://localhost:8080/api/v2/gateway/carts/${cartId}/wishlist/${item.productId}`,
-          {
-            method: 'DELETE',
-            headers: { Accept: 'application/json' },
-            credentials: 'include',
-          }
+        `http://localhost:8080/api/v2/gateway/carts/${cartId}/wishlist/${item.productId}`,
+        {
+          method: 'DELETE',
+          headers: { Accept: 'application/json' },
+          credentials: 'include',
+        }
       );
 
       if (!res.ok) {
@@ -447,7 +447,7 @@ const UserCart = (): JSX.Element => {
       }
 
       setWishlistItems(prev =>
-          prev.filter(p => p.productId !== item.productId)
+        prev.filter(p => p.productId !== item.productId)
       );
       setNotificationMessage(`Removed "${item.productName}" from wishlist.`);
     } catch (e) {
@@ -455,7 +455,6 @@ const UserCart = (): JSX.Element => {
       alert('Could not remove item from wishlist.');
     }
   };
-
 
   useEffect(() => {
     const savedInvoices = localStorage.getItem('invoices');
@@ -483,7 +482,6 @@ const UserCart = (): JSX.Element => {
     setIsCheckoutModalOpen(true);
   };
 
-
   const handleCheckout = async (): Promise<void> => {
     if (!cartId) {
       setCheckoutMessage('Invalid cart ID');
@@ -492,14 +490,14 @@ const UserCart = (): JSX.Element => {
 
     try {
       const response = await fetch(
-          `http://localhost:8080/api/v2/gateway/carts/${cartId}/checkout`,
-          {
-            method: 'POST',
-            credentials: 'include',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          }
+        `http://localhost:8080/api/v2/gateway/carts/${cartId}/checkout`,
+        {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
       );
 
       if (response.ok) {
@@ -520,7 +518,7 @@ const UserCart = (): JSX.Element => {
       } else {
         const errorData = await response.json();
         setCheckoutMessage(
-            `Checkout failed: ${errorData.message || response.statusText}`
+          `Checkout failed: ${errorData.message || response.statusText}`
         );
       }
     } catch (error) {
@@ -538,203 +536,202 @@ const UserCart = (): JSX.Element => {
   }
 
   return (
-      <div>
-        <NavBar />
-        <h2 className="cart-header-title">Your Cart</h2>
+    <div>
+      <NavBar />
+      <h2 className="cart-header-title">Your Cart</h2>
 
-        <div className="UserCart-container">
-          {/* Notification Message */}
-          {notificationMessage && (
-              <div className="notification-message">
-                {notificationMessage}
-                <button
-                    className="close-notification"
-                    onClick={() => setNotificationMessage(null)}
-                    aria-label="Close notification"
-                >
-                  &times;
-                </button>
-              </div>
-          )}
+      <div className="UserCart-container">
+        {/* Notification Message */}
+        {notificationMessage && (
+          <div className="notification-message">
+            {notificationMessage}
+            <button
+              className="close-notification"
+              onClick={() => setNotificationMessage(null)}
+              aria-label="Close notification"
+            >
+              &times;
+            </button>
+          </div>
+        )}
 
-          {/* Main Flex Container for Cart and Checkout */}
-          <div className="UserCart-checkout-flex">
-            {/* Cart Section */}
-            <div className="UserCart">
-              {/* Cart Header with Badge */}
-              <div className="cart-header">
-                <div className="cart-badge-container">
-                  <FaShoppingCart aria-label="Shopping Cart" />
-                  {cartItemCount > 0 && (
-                      <span
-                          className="cart-badge"
-                          aria-label={`Cart has ${cartItemCount} items`}
-                      >
+        {/* Main Flex Container for Cart and Checkout */}
+        <div className="UserCart-checkout-flex">
+          {/* Cart Section */}
+          <div className="UserCart">
+            {/* Cart Header with Badge */}
+            <div className="cart-header">
+              <div className="cart-badge-container">
+                <FaShoppingCart aria-label="Shopping Cart" />
+                {cartItemCount > 0 && (
+                  <span
+                    className="cart-badge"
+                    aria-label={`Cart has ${cartItemCount} items`}
+                  >
                     {cartItemCount}
                   </span>
-                  )}
-                </div>
+                )}
               </div>
+            </div>
 
-              {/* Cart Items */}
-              <div className="cart-items-container">
-                {cartItems.length > 0 ? (
-                    cartItems.map((item, index) => (
-                        <CartItem
-                            key={item.productId}
-                            item={item}
-                            index={index}
-                            changeItemQuantity={changeItemQuantity}
-                            deleteItem={deleteItem}
-                            errorMessage={errorMessages[index]}
-                            addToWishlist={addToWishlist}
-                            addToCart={() => {}}
-                            isInWishlist={false}
-                            showNotification={setNotificationMessage}
-                        />
-                    ))
-                ) : (
-                    <p className="empty-cart-message">No products in the cart.</p>
+            {/* Cart Items */}
+            <div className="cart-items-container">
+              {cartItems.length > 0 ? (
+                cartItems.map((item, index) => (
+                  <CartItem
+                    key={item.productId}
+                    item={item}
+                    index={index}
+                    changeItemQuantity={changeItemQuantity}
+                    deleteItem={deleteItem}
+                    errorMessage={errorMessages[index]}
+                    addToWishlist={addToWishlist}
+                    addToCart={() => {}}
+                    isInWishlist={false}
+                    showNotification={setNotificationMessage}
+                  />
+                ))
+              ) : (
+                <p className="empty-cart-message">No products in the cart.</p>
+              )}
+            </div>
+
+            {/* Cart Control Buttons */}
+            <div className="UserCart-buttons">
+              <button
+                className="continue-shopping-btn"
+                onClick={() => navigate('/products')}
+              >
+                Continue Shopping
+              </button>
+              <button className="clear-cart-btn" onClick={clearCart}>
+                Clear Cart
+              </button>
+            </div>
+          </div>
+
+          {/* Checkout Section — hidden for admins */}
+          {!isAdmin && (
+            <div className="Checkout-section">
+              {/* Voucher Code Section */}
+              <div className="voucher-code-section">
+                <input
+                  type="text"
+                  placeholder="Enter voucher code"
+                  value={voucherCode}
+                  onChange={e => {
+                    setVoucherCode(e.target.value);
+                    setVoucherError(null);
+                  }}
+                  className="voucher-input"
+                />
+                <button
+                  onClick={applyVoucherCode}
+                  className="apply-voucher-button"
+                >
+                  Apply
+                </button>
+                {voucherError && (
+                  <div className="voucher-error">{voucherError}</div>
                 )}
               </div>
 
-              {/* Cart Control Buttons */}
-              <div className="UserCart-buttons">
-                <button
-                    className="continue-shopping-btn"
-                    onClick={() => navigate('/products')}
-                >
-                  Continue Shopping
-                </button>
-                <button className="clear-cart-btn" onClick={clearCart}>
-                  Clear Cart
-                </button>
+              <div className="CartSummary">
+                <h3>Cart Summary</h3>
+                <p className="summary-item">Subtotal: ${subtotal.toFixed(2)}</p>
+                <p className="summary-item">TVQ (9.975%): ${tvq.toFixed(2)}</p>
+                <p className="summary-item">TVC (5%): ${tvc.toFixed(2)}</p>
+                <p className="summary-item">Discount: ${discount.toFixed(2)}</p>
+                <p className="total-price summary-item">
+                  Total: ${total.toFixed(2)}
+                </p>
               </div>
-            </div>
 
-            {/* Checkout Section — hidden for admins */}
-            {!isAdmin && (
-                <div className="Checkout-section">
-                  {/* Voucher Code Section */}
-                  <div className="voucher-code-section">
-                    <input
-                        type="text"
-                        placeholder="Enter voucher code"
-                        value={voucherCode}
-                        onChange={e => {
-                          setVoucherCode(e.target.value);
-                          setVoucherError(null);
-                        }}
-                        className="voucher-input"
-                    />
-                    <button
-                        onClick={applyVoucherCode}
-                        className="apply-voucher-button"
-                    >
-                      Apply
-                    </button>
-                    {voucherError && (
-                        <div className="voucher-error">{voucherError}</div>
-                    )}
-                  </div>
+              <button
+                className="checkout-btn"
+                onClick={handleCheckoutConfirmation}
+                disabled={cartItems.length === 0}
+              >
+                Checkout
+              </button>
 
-                  <div className="CartSummary">
-                    <h3>Cart Summary</h3>
-                    <p className="summary-item">Subtotal: ${subtotal.toFixed(2)}</p>
-                    <p className="summary-item">TVQ (9.975%): ${tvq.toFixed(2)}</p>
-                    <p className="summary-item">TVC (5%): ${tvc.toFixed(2)}</p>
-                    <p className="summary-item">Discount: ${discount.toFixed(2)}</p>
-                    <p className="total-price summary-item">
-                      Total: ${total.toFixed(2)}
-                    </p>
-                  </div>
-
-                  <button
-                      className="checkout-btn"
-                      onClick={handleCheckoutConfirmation}
-                      disabled={cartItems.length === 0}
-                  >
-                    Checkout
+              {/* Checkout Confirmation Modal */}
+              {isCheckoutModalOpen && (
+                <div className="checkout-modal">
+                  <h3>Confirm Checkout</h3>
+                  <p>Are you sure you want to checkout?</p>
+                  <button onClick={handleCheckout}>Yes</button>
+                  <button onClick={() => setIsCheckoutModalOpen(false)}>
+                    No
                   </button>
-
-                  {/* Checkout Confirmation Modal */}
-                  {isCheckoutModalOpen && (
-                      <div className="checkout-modal">
-                        <h3>Confirm Checkout</h3>
-                        <p>Are you sure you want to checkout?</p>
-                        <button onClick={handleCheckout}>Yes</button>
-                        <button onClick={() => setIsCheckoutModalOpen(false)}>
-                          No
-                        </button>
-                      </div>
-                  )}
-                  {checkoutMessage && (
-                      <div className="checkout-message">{checkoutMessage}</div>
-                  )}
-
-                  {/* Invoice Section */}
-                  {invoices.length > 0 && (
-                      <div className="invoices-section">
-                        <h2>Invoice</h2>
-                        <div className="invoice-summary">
-                          <h3>Items</h3>
-                          {invoices.map(invoice => (
-                              <div key={invoice.productId} className="invoice-card">
-                                <h4>{invoice.productName}</h4>
-                                <p>Price: ${invoice.productSalePrice.toFixed(2)}</p>
-                                <p>Quantity: {invoice.quantity}</p>
-                                <p>
-                                  Total: $
-                                  {(
-                                      invoice.productSalePrice * invoice.quantity
-                                  ).toFixed(2)}
-                                </p>
-                              </div>
-                          ))}
-                          <h3>
-                            Total: $
-                            {invoices
-                                .reduce(
-                                    (total, invoice) =>
-                                        total +
-                                        invoice.productSalePrice * invoice.quantity,
-                                    0
-                                )
-                                .toFixed(2)}
-                          </h3>
-                        </div>
-                      </div>
-                  )}
                 </div>
-            )}
-          </div>
+              )}
+              {checkoutMessage && (
+                <div className="checkout-message">{checkoutMessage}</div>
+              )}
 
-          {/* Wishlist Section */}
-          <div className="wishlist-section">
-            <h2>Your Wishlist</h2>
-            <div className="Wishlist-items">
-              {wishlistItems.length > 0 ? (
-                  wishlistItems.map(item => (
-                      <CartItem
-                          key={item.productId}
-                          item={item}
-                          index={-1}
-                          changeItemQuantity={() => {}}
-                          deleteItem={() => {}}
-                          addToWishlist={() => {}}
-                          addToCart={addToCartFunction}
-                          isInWishlist={true}
-                          removeFromWishlist={removeFromWishlist}
-                          showNotification={setNotificationMessage}
-                      />
-                  ))
-              ) : (
-                  <p>No products in the wishlist.</p>
+              {/* Invoice Section */}
+              {invoices.length > 0 && (
+                <div className="invoices-section">
+                  <h2>Invoice</h2>
+                  <div className="invoice-summary">
+                    <h3>Items</h3>
+                    {invoices.map(invoice => (
+                      <div key={invoice.productId} className="invoice-card">
+                        <h4>{invoice.productName}</h4>
+                        <p>Price: ${invoice.productSalePrice.toFixed(2)}</p>
+                        <p>Quantity: {invoice.quantity}</p>
+                        <p>
+                          Total: $
+                          {(
+                            invoice.productSalePrice * invoice.quantity
+                          ).toFixed(2)}
+                        </p>
+                      </div>
+                    ))}
+                    <h3>
+                      Total: $
+                      {invoices
+                        .reduce(
+                          (total, invoice) =>
+                            total + invoice.productSalePrice * invoice.quantity,
+                          0
+                        )
+                        .toFixed(2)}
+                    </h3>
+                  </div>
+                </div>
               )}
             </div>
+          )}
+        </div>
+
+        {/* Wishlist Section */}
+        <div className="wishlist-section">
+          <h2>Your Wishlist</h2>
+          <div className="Wishlist-items">
+            {wishlistItems.length > 0 ? (
+              wishlistItems.map(item => (
+                <CartItem
+                  key={item.productId}
+                  item={item}
+                  index={-1}
+                  changeItemQuantity={() => {}}
+                  deleteItem={() => {}}
+                  addToWishlist={() => {}}
+                  addToCart={addToCartFunction}
+                  isInWishlist={true}
+                  removeFromWishlist={removeFromWishlist}
+                  showNotification={setNotificationMessage}
+                />
+              ))
+            ) : (
+              <p>No products in the wishlist.</p>
+            )}
           </div>
         </div>
       </div>
+    </div>
   );
 };
 
