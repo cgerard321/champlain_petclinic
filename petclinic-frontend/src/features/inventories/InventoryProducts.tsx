@@ -155,6 +155,51 @@ const InventoryProducts: React.FC = () => {
     setShowConfirmation(false);
     setProductToDelete(null);
   };
+const addQuantity = async (
+  productId: string,
+  currentQuantity: number
+): Promise<void> => {
+  if (currentQuantity >= 100) {
+    setError('Max quantity (100) reached.');
+    return;
+  }
+
+  try {
+    const delta = 1;
+
+    await axios.put(
+      `http://localhost:8080/api/v2/gateway/inventories/${inventoryId}/products/${productId}/restockProduct`,
+      null,
+      { params: { productQuantity: delta } }
+    );
+
+    const updatedQuantity = Math.min(100, currentQuantity + delta);
+
+    let updatedStatus: Status = Status.AVAILABLE;
+    if (updatedQuantity === 0) updatedStatus = Status.OUT_OF_STOCK;
+    else if (updatedQuantity <= 20) updatedStatus = Status.RE_ORDER;
+
+    const updatedProducts = filteredProducts.map(p =>
+      p.productId === productId
+        ? { ...p, productQuantity: updatedQuantity, status: updatedStatus }
+        : p
+    );
+
+    setProducts(updatedProducts);
+    setFilteredProducts(updatedProducts);
+    setError(null);
+  } catch (err: any) {
+    const msg = err?.response
+      ? `(${err.response.status}) ${err.response.statusText} — ${
+          typeof err.response.data === 'string'
+            ? err.response.data
+            : JSON.stringify(err.response.data)
+        }`
+      : (err?.message || 'Unknown error');
+    console.error('Add quantity failed:', msg);
+    setError(`Failed to add product quantity: ${msg}`);
+  }
+};
 
   const reduceQuantity = async (
     productId: string,
@@ -279,7 +324,7 @@ const InventoryProducts: React.FC = () => {
             <th>Price</th>
             <th>Quantity</th>
             <th>Status</th>
-            <th colSpan={4}>Actions</th>
+            <th colSpan={5}>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -343,6 +388,17 @@ const InventoryProducts: React.FC = () => {
                     className="btn btn-info"
                   >
                     Move
+                  </button>
+                </td>
+                <td>
+                  <button
+                    className="btn btn-success"
+                    onClick={() =>
+                      addQuantity(product.productId, product.productQuantity)
+                    }
+                    disabled={product.productQuantity >= 100}
+                  >
+                    Add Quantity
                   </button>
                 </td>
               </tr>
