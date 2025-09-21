@@ -16,6 +16,7 @@ interface CartItemProps {
   addToCart: (item: ProductModel) => void;
   isInWishlist: boolean;
   showNotification?: (message: string) => void; // New prop for notifications
+  removeFromWishlist?: (item: ProductModel) => void;
 }
 
 const formatPrice = (price: number): string => {
@@ -23,16 +24,17 @@ const formatPrice = (price: number): string => {
 };
 
 const CartItem = ({
-  item,
-  index,
-  changeItemQuantity,
-  deleteItem,
-  errorMessage, // Destructure the new prop
-  addToWishlist,
-  addToCart,
-  isInWishlist,
-  showNotification, // Destructure the new prop
-}: CartItemProps): JSX.Element => {
+                    item,
+                    index,
+                    changeItemQuantity,
+                    deleteItem,
+                    errorMessage, // Destructure the new prop
+                    addToWishlist,
+                    addToCart,
+                    isInWishlist,
+                    showNotification,
+                    removeFromWishlist,
+                  }: CartItemProps): JSX.Element => {
   const remainingStock = item.productQuantity - (item.quantity ?? 0);
 
   // Handler for "Add to Cart" button click
@@ -50,61 +52,73 @@ const CartItem = ({
   };
 
   return (
-    <div className="CartItem">
-      <ImageContainer imageId={item.imageId} />
-      <div className="CartItem-info">
-        <h2 className="info-title">{item.productName}</h2>
-        <p className="info-description">{item.productDescription}</p>
-      </div>
-      <div className="CartItem-details">
-        {!isInWishlist && (
-          <>
-            <div className="item-quantity">
-              <input
-                type="number"
-                min="1"
-                max={item.productQuantity}
-                value={item.quantity || 1}
-                onChange={e => changeItemQuantity(e, index)}
-                onBlur={e => changeItemQuantity(e, index)}
-                aria-label={`Quantity of ${item.productName}`}
-              />
-            </div>
-            <span className="CartItem-price">
+      <div className="CartItem">
+        <ImageContainer imageId={item.imageId} />
+        <div className="CartItem-info">
+          <h2 className="info-title">{item.productName}</h2>
+          <p className="info-description">{item.productDescription}</p>
+        </div>
+
+        <div className="CartItem-details">
+          {/* Normal cart row */}
+          {!isInWishlist && (
+              <>
+                <div className="item-quantity">
+                  <input
+                      type="number"
+                      min="1"
+                      max={item.productQuantity}
+                      value={item.quantity || 1}
+                      onChange={e => changeItemQuantity(e, index)}
+                      onBlur={e => changeItemQuantity(e, index)}
+                      aria-label={`Quantity of ${item.productName}`}
+                  />
+                </div>
+                <span className="CartItem-price">
               {formatPrice(item.productSalePrice)}
             </span>
-            <button
-              className="wishlist-button"
-              onClick={() => deleteItem(item.productId, index)}
-              aria-label={`Remove ${item.productName} from cart`}
-            >
-              Remove
-            </button>
-            {!isInWishlist && (
-              <button
-                className="wishlist-button"
-                onClick={() => addToWishlist(item)}
-                aria-label={`Add ${item.productName} to wishlist`}
-              >
-                Add to Wishlist
-              </button>
-            )}
-          </>
-        )}
+                <button
+                    className="wishlist-button"
+                    onClick={() => deleteItem(item.productId, index)}
+                    aria-label={`Remove ${item.productName} from cart`}
+                >
+                  Remove
+                </button>
+                <button
+                    className="wishlist-button"
+                    onClick={() => addToWishlist(item)}
+                    aria-label={`Add ${item.productName} to wishlist`}
+                >
+                  Add to Wishlist
+                </button>
+              </>
+          )}
 
-        {/* "Add to Cart" button for Wishlist Items */}
-        {isInWishlist && (
-          <button
-            className="addToCart-button"
-            onClick={handleAddToCart} // Use the new handler
-            aria-label={`Add ${item.productName} to cart`}
-          >
-            Add to Cart
-          </button>
-        )}
-      </div>
+          {/* Wishlist row */}
+          {isInWishlist && (
+              <div className="cartitem-actions">
+                <button
+                    className="addToCart-button"
+                    onClick={handleAddToCart}
+                    aria-label={`Add ${item.productName} to cart`}
+                >
+                  Add to Cart
+                </button>
 
-      <div className="stock-message-container">
+                <button
+                    className="wishlist-button danger"
+                    style={{ marginLeft: '0.5rem' }}
+                    onClick={() => removeFromWishlist && removeFromWishlist(item)}
+                    aria-label={`Remove ${item.productName} from wishlist`}
+                >
+                  Remove
+                </button>
+              </div>
+          )}
+        </div>
+
+
+        <div className="stock-message-container">
         {remainingStock <= 5 && remainingStock > 0 ? (
           <div className="stock-message">
             Only {remainingStock} items left in stock.
