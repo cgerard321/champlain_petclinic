@@ -40,7 +40,8 @@ const UserCart = (): JSX.Element => {
   const [checkoutMessage, setCheckoutMessage] = useState<string | null>(null);
   const [invoices, setInvoices] = useState<Invoice[]>([]); // State to hold invoice details
   const [cartItemCount, setCartItemCount] = useState<number>(0);
-  const [isCheckoutModalOpen, setIsCheckoutModalOpen] =useState<boolean>(false); // Modal state
+  const [isCheckoutModalOpen, setIsCheckoutModalOpen] =
+    useState<boolean>(false); // Modal state
   const [wishlistUpdated, setWishlistUpdated] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState<string | null>(
     null
