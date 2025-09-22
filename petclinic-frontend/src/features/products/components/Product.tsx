@@ -8,6 +8,7 @@ import { AppRoutePaths } from '@/shared/models/path.routes';
 import StarRating from './StarRating';
 import './Product.css';
 import { useAddToCart } from '@/features/carts/api/addToCartFromProducts.ts';
+import { IsInventoryManager } from '@/context/UserContext';
 import { useAddToWishlist } from '@/features/carts/api/addToWishlistFromProducts';
 
 export default function Product({
@@ -15,6 +16,7 @@ export default function Product({
 }: {
   product: ProductModel;
 }): JSX.Element {
+  const isInventoryManager = IsInventoryManager();
   const [currentProduct, setCurrentProduct] = useState<ProductModel>(product);
   const [selectedProduct, setSelectedProduct] = useState<ProductModel | null>(
     null
@@ -198,19 +200,23 @@ export default function Product({
       </p>
       <p>Price: ${currentProduct.productSalePrice.toFixed(2)}</p>
 
-      <button
-        onClick={handleAddToCart}
-        disabled={currentProduct.productQuantity === 0}
-      >
-        {currentProduct.productQuantity === 0 ? 'Out of Stock' : 'Add to Cart'}
-      </button>
+      {!isInventoryManager && (
+        <button
+          onClick={handleAddToCart}
+          disabled={currentProduct.productQuantity === 0}
+        >
+          {currentProduct.productQuantity === 0 ? 'Out of Stock' : 'Add to Cart'}
+        </button>
+      )}
       {successMessageCart && (
         <p className="success-message">{successMessageCart}</p>
       )}
 
-      <button onClick={handleAddToWishlist} style={{ marginLeft: '10px' }}>
-        Add to Wishlist
-      </button>
+      {!isInventoryManager && (
+        <button onClick={handleAddToWishlist} style={{ marginLeft: '10px' }}>
+          Add to Wishlist
+        </button>
+      )}
 
       {successMessageWishlist && (
         <p className="success-message">{successMessageWishlist}</p>
