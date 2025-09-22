@@ -137,7 +137,8 @@ export default function VisitListTable(): JSX.Element {
   };
 
   useEffect(() => {
-    // Only create EventSource for ADMIN role, not for VET role
+    //Skip EventSource setup for VET role - backend endpoints are ADMIN-only
+    
     if (isVet) {
       return;
     }
