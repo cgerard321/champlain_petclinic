@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import './AllUsers.css';
 import axiosInstance from '@/shared/api/axiosInstance';
 import { NavBar } from '@/layouts/AppNavBar.tsx';
-import axios from 'axios';
 import { Link } from 'react-router-dom';
 
 const AllUsers: React.FC = (): JSX.Element => {
