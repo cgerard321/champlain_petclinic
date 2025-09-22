@@ -31,6 +31,7 @@ export function NavBar(): JSX.Element {
   const navigate = useNavigate();
   const isInventoryManager = IsInventoryManager();
   const isVet = IsVet();
+  const isReceptionist = IsReceptionist();
   const [navbarOpen, setNavbarOpen] = useState(false);
   const [cartId, setCartId] = useState<string | null>(null);
   const [cartItemCount, setCartItemCount] = useState<number>(0); // State for cart item count
@@ -59,7 +60,7 @@ export function NavBar(): JSX.Element {
   */
   useEffect(() => {
     const fetchCartId = async (): Promise<void> => {
-      if (user.userId && !isInventoryManager && !isVet) {
+      if (user.userId && !isInventoryManager && !isVet && !isReceptionist) {
         try {
           const id = await fetchCartIdByCustomerId(user.userId);
           setCartId(id);
@@ -70,12 +71,12 @@ export function NavBar(): JSX.Element {
     };
 
     fetchCartId();
-  }, [user.userId, isInventoryManager, isVet]);
+  }, [user.userId, isInventoryManager, isVet, isReceptionist]);
 
   // Fetch cart item count
   useEffect(() => {
     const fetchCartItemCount = async (): Promise<void> => {
-      if (cartId && !isInventoryManager && !isVet) {
+      if (cartId && !isInventoryManager && !isVet && !isReceptionist) {
         try {
           const response = await fetch(
             `http://localhost:8080/api/v2/gateway/carts/${cartId}`,
@@ -110,7 +111,7 @@ export function NavBar(): JSX.Element {
     };
 
     fetchCartItemCount();
-  }, [cartId, isInventoryManager, isVet]);
+  }, [cartId, isInventoryManager, isVet, isReceptionist]);
 
   return (
     <Navbar bg="light" expand="lg" className="navbar">
@@ -161,7 +162,7 @@ export function NavBar(): JSX.Element {
                     </NavDropdown.Item>
                   </NavDropdown>
                 )}
-                {!IsAdmin() && !isInventoryManager && !IsVet() && (
+                {!IsAdmin() && !isInventoryManager && !IsVet() && !isReceptionist && (
                   <Nav.Link as={Link} to={AppRoutePaths.CustomerBills}>
                     Bills
                   </Nav.Link>
@@ -218,7 +219,7 @@ export function NavBar(): JSX.Element {
                   </Nav.Link>
                 )}
 
-                {cartId && (
+                {cartId && !isReceptionist && (
                   <Nav.Link
                     as={Link}
                     to={AppRoutePaths.UserCart.replace(':cartId', cartId)}
