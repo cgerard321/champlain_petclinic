@@ -349,7 +349,9 @@ export default function VisitListTable(): JSX.Element {
                   <button
                     className="btn btn-warning"
                     onClick={() => {
-                      navigate(`/visits/emergency/${emergency.visitEmergencyId}`);
+                      navigate(
+                        `/visits/emergency/${emergency.visitEmergencyId}`
+                      );
                     }}
                     title="Edit"
                   >

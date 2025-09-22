@@ -8,7 +8,11 @@ import { AppRoutePaths } from '@/shared/models/path.routes';
 import StarRating from './StarRating';
 import './Product.css';
 import { useAddToCart } from '@/features/carts/api/addToCartFromProducts.ts';
-import { IsInventoryManager, IsVet, IsReceptionist } from '@/context/UserContext';
+import {
+  IsInventoryManager,
+  IsVet,
+  IsReceptionist,
+} from '@/context/UserContext';
 import { useAddToWishlist } from '@/features/carts/api/addToWishlistFromProducts';
 
 export default function Product({
@@ -202,14 +206,16 @@ export default function Product({
       </p>
       <p>Price: ${currentProduct.productSalePrice.toFixed(2)}</p>
 
-            {!isInventoryManager && !isVet && !isReceptionist && (
-              <button
-                onClick={handleAddToCart}
-                disabled={currentProduct.productQuantity === 0}
-              >
-                {currentProduct.productQuantity === 0 ? 'Out of Stock' : 'Add to Cart'}
-              </button>
-            )}
+      {!isInventoryManager && !isVet && !isReceptionist && (
+        <button
+          onClick={handleAddToCart}
+          disabled={currentProduct.productQuantity === 0}
+        >
+          {currentProduct.productQuantity === 0
+            ? 'Out of Stock'
+            : 'Add to Cart'}
+        </button>
+      )}
       {successMessageCart && (
         <p className="success-message">{successMessageCart}</p>
       )}
