@@ -4,6 +4,7 @@ import com.petclinic.customersservice.business.PetService;
 import com.petclinic.customersservice.business.PhotoService;
 import com.petclinic.customersservice.data.Pet;
 import com.petclinic.customersservice.util.EntityDTOUtil;
+import com.petclinic.customersservice.util.ValidationUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -75,22 +76,13 @@ public class PetController {
 
     @GetMapping("/{petId}/photo")
     public Mono<ResponseEntity<PhotoResponseModel>> getPetPhotoByPetId(@PathVariable String petId) {
-        if (!isValidUUID(petId)) {
+        if (!ValidationUtils.isValidUUID(petId)) {
             throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Invalid pet ID format");
         }
         
         return photoService.getPetPhotoByPetId(petId)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
-    }
-
-    private boolean isValidUUID(String uuid) {
-        try {
-            java.util.UUID.fromString(uuid);
-            return true;
-        } catch (IllegalArgumentException e) {
-            return false;
-        }
     }
 
 }

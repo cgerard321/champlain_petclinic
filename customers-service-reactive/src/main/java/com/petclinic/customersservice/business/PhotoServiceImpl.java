@@ -8,7 +8,6 @@ import com.petclinic.customersservice.data.PetTypeRepo;
 import com.petclinic.customersservice.presentationlayer.PhotoResponseModel;
 import com.petclinic.customersservice.util.EntityDTOUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StreamUtils;
@@ -21,14 +20,16 @@ import java.util.Base64;
 @Slf4j
 public class PhotoServiceImpl implements PhotoService {
 
-    @Autowired
-    private PhotoRepo photoRepo;
 
-    @Autowired
-    private PetRepo petRepo;
+    private final PhotoRepo photoRepo;
+    private final PetRepo petRepo;
+    private final PetTypeRepo petTypeRepo;
 
-    @Autowired
-    private PetTypeRepo petTypeRepo;
+    public PhotoServiceImpl(PhotoRepo photoRepo, PetRepo petRepo, PetTypeRepo petTypeRepo) {
+        this.photoRepo = photoRepo;
+        this.petRepo = petRepo;
+        this.petTypeRepo = petTypeRepo;
+    }
 
     @Override
     public Mono<PhotoResponseModel> getPetPhotoByPetId(String petId) {
@@ -100,24 +101,9 @@ public class PhotoServiceImpl implements PhotoService {
 
                     } catch (IOException e) {
                         log.error("Error loading default image for pet type: {}", petType.getName(), e);
-                        Photo errorPhoto = Photo.builder()
-                                .id("0") 
-                                .name("Error loading photo")
-                                .type("image/jpeg")
-                                .photo("")
-                                .build();
-                        return EntityDTOUtil.toPhotoResponseModel(errorPhoto);
+                        throw new RuntimeException("Failed to load default pet image", e);
                     }
                 }))
-                .switchIfEmpty(Mono.fromCallable(() -> {
-                    log.error("Pet type not found with id: {}", petTypeId);
-                    Photo errorPhoto = Photo.builder()
-                            .id("0") 
-                            .name("Pet type not found")
-                            .type("image/jpeg")
-                            .photo("")
-                            .build();
-                    return EntityDTOUtil.toPhotoResponseModel(errorPhoto);
-                }));
+                .switchIfEmpty(Mono.error(new NotFoundException("Pet type not found with id: " + petTypeId)));
     }
 }
