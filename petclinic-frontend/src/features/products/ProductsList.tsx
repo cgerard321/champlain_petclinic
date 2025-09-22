@@ -7,7 +7,7 @@ import AddProduct from './components/AddProduct';
 import { addProduct } from '@/features/products/api/addProduct';
 import { useUser } from '@/context/UserContext';
 import './components/Sidebar.css';
-import { getProductsByType } from '@/features/products/api/getProductsByType.ts';
+//import { getProductsByType } from '@/features/products/api/getProductsByType.ts';
 import { addImage } from './api/addImage';
 import { ImageModel } from './models/ProductModels/ImageModel';
 import StarRating from '@/features/products/components/StarRating.tsx';
