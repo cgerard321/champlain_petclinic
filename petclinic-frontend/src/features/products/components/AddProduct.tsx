@@ -3,6 +3,7 @@ import { Button, Form, Modal } from 'react-bootstrap';
 import { ProductModel } from '../models/ProductModels/ProductModel';
 import { ImageModel } from '../models/ProductModels/ImageModel';
 import { DeliverType } from '@/features/products/models/ProductModels/DeliverType.ts';
+import { ProductType } from '../models/ProductModels/ProductType';
 
 interface AddProductProps {
   addProduct: (product: ProductModel) => Promise<ProductModel>;
@@ -14,7 +15,9 @@ export default function AddProduct({
   addImage,
 }: AddProductProps): JSX.Element {
   const [show, setShow] = useState(false);
-  const [productType, setProductType] = useState('');
+  const [productType, setProductType] = useState<ProductType>(
+    ProductType.FOOD
+  );
   const [dateAdded, setDateAdded] = useState('');
   const [releaseDate, setReleaseDate] = useState('');
   const [error, setError] = useState('');
