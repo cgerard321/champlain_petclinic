@@ -30,7 +30,8 @@ export default function VisitListTable(): JSX.Element {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Only create EventSource for ADMIN role, not for VET role
+    // Skip EventSource setup for VET role - backend endpoints are ADMIN-only
+    // VETs should not reach this component due to route-level restrictions
     if (isVet) {
       return;
     }
@@ -130,8 +131,8 @@ export default function VisitListTable(): JSX.Element {
   };
 
   useEffect(() => {
-    //Skip EventSource setup for VET role - backend endpoints are ADMIN-only
-    
+    // Skip EventSource setup for VET role - backend endpoints are ADMIN-only
+    // VETs should not reach this component due to route-level restrictions
     if (isVet) {
       return;
     }
