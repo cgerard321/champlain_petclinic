@@ -205,15 +205,17 @@ export default function ProductDetails(): JSX.Element {
                     />
                     <h3>{currentProduct.averageRating} / 5</h3>
                   </div>
-                  <div className="cartactions-container">
-                    <Button
-                      onClick={() =>
-                        alert('This feature has not yet been implemented')
-                      }
-                    >
-                      Add to Cart
-                    </Button>
-                  </div>
+                  {!isInventoryManager && (
+                    <div className="cartactions-container">
+                      <Button
+                        onClick={() =>
+                          alert('This feature has not yet been implemented')
+                        }
+                      >
+                        Add to Cart
+                      </Button>
+                    </div>
+                  )}
                   <p>Type: {currentProduct.productType}</p>
                   <div className="deliveryTypeEdit-container">
                     <p>
