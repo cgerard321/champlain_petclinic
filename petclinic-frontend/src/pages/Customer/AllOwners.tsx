@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react';
 import { OwnerResponseModel } from '@/features/customers/models/OwnerResponseModel';
 import './AllOwners.css';
 import { NavBar } from '@/layouts/AppNavBar.tsx';
-import axios from 'axios';
 import { Link } from 'react-router-dom';
+import { getAllOwners } from '@/features/customers/api/getAllOwners.ts';
+import { deleteOwner } from '@/features/customers/api/deleteOwner';
 
 const AllOwners: React.FC = (): JSX.Element => {
   interface FilterModel {
@@ -29,30 +30,12 @@ const AllOwners: React.FC = (): JSX.Element => {
   const [isFilterVisible, setFilterVisible] = useState(true);
 
   useEffect(() => {
-    const eventSource = new EventSource(
-      'http://localhost:8080/api/v2/gateway/owners',
-      {
-        withCredentials: true,
-      }
-    );
-
-    eventSource.onmessage = event => {
-      try {
-        const parsedData: OwnerResponseModel = JSON.parse(event.data);
-        setOwners(prevOwners => [...prevOwners, parsedData]);
-      } catch (error) {
-        console.error('Error parsing event data:', error);
-      }
+    const getOwners = async (): Promise<void> => {
+      const fetchedOwners = await getAllOwners();
+      setOwners(fetchedOwners);
     };
 
-    eventSource.onerror = error => {
-      console.error('EventSource error:', error);
-      eventSource.close();
-    };
-
-    return () => {
-      eventSource.close();
-    };
+    getOwners();
   }, []);
 
   const handleDelete = async (ownerId: string): Promise<void> => {
@@ -61,19 +44,9 @@ const AllOwners: React.FC = (): JSX.Element => {
     );
 
     if (confirmDelete) {
-      try {
-        await axios.delete(
-          `http://localhost:8080/api/v2/gateway/owners/${ownerId}`,
-          {
-            withCredentials: true,
-          }
-        );
-        setOwners(owners.filter(owner => owner.ownerId !== ownerId));
-        alert('Owner deleted successfully.');
-      } catch (error) {
-        console.error('Error deleting owner:', error);
-        alert('Error deleting owner. Please try again.');
-      }
+      await deleteOwner(ownerId);
+      setOwners(owners.filter(owner => owner.ownerId !== ownerId));
+      alert('Owner deleted successfully.');
     } else {
       alert('Owner deletion canceled.');
     }

@@ -36,14 +36,10 @@ public class OwnerController {
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
-
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.OWNER})
     @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN})
     @PutMapping(value= "/{ownerId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<OwnerResponseDTO>> updateOwner(
-            @PathVariable String ownerId,
-            @RequestBody Mono<OwnerRequestDTO> ownerRequestDTO) {
-
+    public Mono<ResponseEntity<OwnerResponseDTO>> updateOwner(@PathVariable String ownerId, @RequestBody Mono<OwnerRequestDTO> ownerRequestDTO) {
         return Mono.just(ownerId)
                 .filter(id -> id.length() == 36)
                 .switchIfEmpty(Mono.error(new InvalidInputException("Provided owner id is invalid: " + ownerId)))
@@ -51,6 +47,7 @@ public class OwnerController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
+
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
     @GetMapping(value = "", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<OwnerResponseDTO> getAllOwners() {
@@ -72,7 +69,7 @@ public class OwnerController {
         return Mono.just(ownerId)
                 .filter(id -> id.length() == 36)
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new InvalidInputException("Provided owner id invalid" + ownerId))))
-                .flatMap(customersServiceClient::deleteOwnerV2)
+                .flatMap(customersServiceClient::deleteOwner)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
