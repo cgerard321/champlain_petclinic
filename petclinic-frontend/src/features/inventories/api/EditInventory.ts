@@ -6,14 +6,27 @@ export const updateInventory = async (
   inventoryId: string,
   inventory: InventoryRequestModel
 ): Promise<void> => {
-  await axiosInstance.put<void>(`inventories/${inventoryId}`, inventory);
+  try {
+    await axiosInstance.put<void>(`/inventory/${inventoryId}`, inventory, {
+      useV2: false,
+    });
+  } catch (error) {
+    console.error('Error updating inventory:', error);
+    throw error;
+  }
 };
 
 export const getInventory = async (
   inventoryId: string
 ): Promise<InventoryResponseModel> => {
-  const response = await axiosInstance.get<InventoryResponseModel>(
-    `http://localhost:8080/api/v2/gateway/inventories/${inventoryId}`
-  );
-  return response.data;
+  try {
+    const response = await axiosInstance.get<InventoryResponseModel>(
+      `/inventory/${inventoryId}`,
+      { useV2: false }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching Inventories:', error);
+    throw error;
+  }
 };

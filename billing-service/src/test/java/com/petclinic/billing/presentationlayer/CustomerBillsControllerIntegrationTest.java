@@ -1,8 +1,6 @@
 package com.petclinic.billing.presentationlayer;
 
-import com.petclinic.billing.datalayer.Bill;
-import com.petclinic.billing.datalayer.BillRepository;
-import com.petclinic.billing.datalayer.BillStatus;
+import com.petclinic.billing.datalayer.*;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -108,7 +106,51 @@ public class CustomerBillsControllerIntegrationTest {
                                 .expectStatus().isNotFound();
         }
 
-        private Bill buildBill() {
+    @Test
+    void payBill_ValidRequest_ShouldUpdateBillStatus() {
+        Bill bill = Bill.builder()
+                .billId("bill-456")
+                .customerId("cust-123")
+                .amount(200.0)
+                .billStatus(BillStatus.UNPAID)
+                .dueDate(LocalDate.now().plusDays(10))
+                .build();
+
+        billRepository.deleteAll().then(billRepository.save(bill)).block();
+
+        PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "123", "12/25");
+
+        client.post()
+                .uri("/bills/customer/{customerId}/bills/{billId}/pay", bill.getCustomerId(), bill.getBillId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(paymentRequest)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(BillResponseDTO.class)
+                .consumeWith(response -> {
+                    assert response.getResponseBody() != null;
+                    assertEquals(BillStatus.PAID, response.getResponseBody().getBillStatus());
+                });
+
+        Bill updatedBill = billRepository.findByCustomerIdAndBillId(bill.getCustomerId(), bill.getBillId()).block();
+        assertEquals(BillStatus.PAID, updatedBill.getBillStatus());
+    }
+
+    @Test
+    void payBill_NonExistentBill_ShouldReturnNotFound() {
+        PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "123", "12/25");
+
+        client.post()
+                .uri("/bills/customer/{customerId}/bills/{billId}/pay", "cust-404", "bill-404")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(paymentRequest)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+
+
+    private Bill buildBill() {
                 return Bill.builder()
                                 .billId("1")
                                 .customerId("custId")

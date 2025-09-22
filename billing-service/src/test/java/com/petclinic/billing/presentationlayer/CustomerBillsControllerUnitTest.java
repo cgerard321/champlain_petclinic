@@ -1,8 +1,13 @@
 package com.petclinic.billing.presentationlayer;
 
+import com.petclinic.billing.exceptions.InvalidPaymentException;
+import com.petclinic.billing.exceptions.NotFoundException;
 import com.petclinic.billing.businesslayer.BillService;
 import com.petclinic.billing.datalayer.BillResponseDTO;
 import com.petclinic.billing.datalayer.BillStatus;
+import com.petclinic.billing.datalayer.PaymentRequestDTO;
+import com.petclinic.billing.exceptions.InvalidPaymentException;
+import com.petclinic.billing.util.EntityDtoUtil;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,8 +23,7 @@ import reactor.core.publisher.Mono;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @WebFluxTest(controllers = CustomerBillsController.class)
 public class CustomerBillsControllerUnitTest {
@@ -48,7 +52,7 @@ public class CustomerBillsControllerUnitTest {
                     assert response.getResponseBody().get(0).getCustomerId().equals(billResponse.getCustomerId());
                 });
 
-        Mockito.verify(billService, times(1)).getBillsByCustomerId(billResponse.getCustomerId());
+        verify(billService, times(1)).getBillsByCustomerId(billResponse.getCustomerId());
     }
 
     @Test
@@ -63,7 +67,7 @@ public class CustomerBillsControllerUnitTest {
                 .expectBodyList(BillResponseDTO.class)
                 .hasSize(0);
 
-        Mockito.verify(billService, times(1)).getBillsByCustomerId("nonExistentCustomer");
+        verify(billService, times(1)).getBillsByCustomerId("nonExistentCustomer");
     }
 
     @Test
@@ -81,7 +85,7 @@ public class CustomerBillsControllerUnitTest {
                 .expectBody(Double.class)
                 .value(balance -> assertEquals(expectedBalance, balance));
 
-        Mockito.verify(billService, times(1)).calculateCurrentBalance(customerId);
+        verify(billService, times(1)).calculateCurrentBalance(customerId);
     }
 
     @Test
@@ -97,7 +101,7 @@ public class CustomerBillsControllerUnitTest {
                 .exchange()
                 .expectStatus().isNotFound();
 
-        Mockito.verify(billService, times(1)).calculateCurrentBalance(invalidCustomerId);
+        verify(billService, times(1)).calculateCurrentBalance(invalidCustomerId);
     }
 
     private BillResponseDTO buildBillResponseDTO() {
@@ -110,4 +114,87 @@ public class CustomerBillsControllerUnitTest {
                 .amount(150.0)
                 .build();
     }
+
+    @Test
+    void payBill_ValidRequest_ShouldReturnUpdatedBill() {
+        String customerId = "cust-123";
+        String billId = "bill-456";
+        PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "123", "12/25");
+
+        BillResponseDTO billResponse = BillResponseDTO.builder()
+                .billId(billId)
+                .customerId(customerId)
+                .billStatus(BillStatus.PAID)
+                .amount(200.0)
+                .build();
+
+        when(billService.processPayment(customerId, billId, paymentRequest))
+                .thenReturn(Mono.just(billResponse));
+
+        client.post()
+                .uri("/bills/customer/{customerId}/bills/{billId}/pay", customerId, billId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(paymentRequest)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(BillResponseDTO.class)
+                .consumeWith(response -> {
+                    assert response.getResponseBody() != null;
+                    assertEquals(BillStatus.PAID, response.getResponseBody().getBillStatus());
+                });
+
+        verify(billService, times(1)).processPayment(customerId, billId, paymentRequest);
+    }
+
+    @Test
+    void payBill_InvalidPayment_ShouldReturnBadRequest() {
+        String customerId = "cust-123";
+        String billId = "bill-456";
+        PaymentRequestDTO invalidPayment = new PaymentRequestDTO("123", "12", "12");
+
+        when(billService.processPayment(customerId, billId, invalidPayment))
+                .thenReturn(Mono.error(new InvalidPaymentException("Invalid payment details")));
+
+        client.post()
+                .uri("/bills/customer/{customerId}/bills/{billId}/pay", customerId, billId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(invalidPayment)
+                .exchange()
+                .expectStatus().isBadRequest();
+
+        verify(billService, times(1)).processPayment(customerId, billId, invalidPayment);
+    }
+
+    @Test
+    void payBill_NonExistentBill_ShouldReturnNotFound() {
+        String customerId = "cust-123";
+        String billId = "bill-404";
+        PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "123", "12/25");
+
+        when(billService.processPayment(customerId, billId, paymentRequest))
+                .thenReturn(Mono.error(new NotFoundException("Bill not found")));
+
+        client.post()
+                .uri("/bills/customer/{customerId}/bills/{billId}/pay", customerId, billId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(paymentRequest)
+                .exchange()
+                .expectStatus().isNotFound();
+
+        verify(billService, times(1)).processPayment(customerId, billId, paymentRequest);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
