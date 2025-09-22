@@ -17,6 +17,7 @@ export default function VisitListTable(): JSX.Element {
   const isVet = IsVet();
   const [visitsList, setVisitsList] = useState<Visit[]>([]);
   const [visitsAll, setVisitsAll] = useState<Visit[]>([]);
+  const [archivedVisits, setArchivedVisits] = useState<Visit[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>(''); // Search term state
   const [emergencyList, setEmergencyList] = useState<EmergencyResponseDTO[]>(
     []
@@ -48,7 +49,8 @@ export default function VisitListTable(): JSX.Element {
   }, [searchTerm]);
 
   useEffect(() => {
-    // Only create EventSource for ADMIN role, not for VET role
+    // Skip EventSource setup for VET role - backend endpoints are ADMIN-only
+    // VETs should not reach this component due to route-level restrictions
     if (isVet) {
       return;
     }
@@ -137,8 +139,8 @@ export default function VisitListTable(): JSX.Element {
   };
 
   useEffect(() => {
-    //Skip EventSource setup for VET role - backend endpoints are ADMIN-only
-    
+    // Skip EventSource setup for VET role - backend endpoints are ADMIN-only
+    // VETs should not reach this component due to route-level restrictions
     if (isVet) {
       return;
     }
@@ -210,9 +212,7 @@ export default function VisitListTable(): JSX.Element {
   const cancelledVisits = visitsList.filter(
     visit => visit.status === 'CANCELLED'
   );
-  const archivedVisits = visitsList.filter(
-    visit => visit.status === 'ARCHIVED'
-  );
+  // Use the archivedVisits state for archived visits
 
   const handleArchive = async (visitId: string): Promise<void> => {
     const confirmArchive = window.confirm(
