@@ -10,7 +10,7 @@ import DeleteVetEducation from '@/pages/Vet/DeleteVetEducation';
 import { Workday } from '@/features/veterinarians/models/Workday.ts';
 import UpdateVet from '@/pages/Vet/UpdateVet.tsx';
 import { fetchVetPhoto } from '@/features/veterinarians/api/fetchPhoto';
-import { IsInventoryManager } from '@/context/UserContext';
+import { IsInventoryManager, IsOwner } from '@/context/UserContext';
 
 interface VetResponseType {
   vetId: string;
@@ -71,6 +71,7 @@ interface RatingResponseType {
 export default function VetDetails(): JSX.Element {
   const { vetId } = useParams<{ vetId: string }>();
   const isInventoryManager = IsInventoryManager();
+  const isOwner = IsOwner();
   const [vet, setVet] = useState<VetResponseType | null>(null);
   const [education, setEducation] = useState<EducationResponseType[] | null>(
     null
@@ -466,7 +467,7 @@ export default function VetDetails(): JSX.Element {
               onChange={handleUpdateVetProfilePhoto}
               accept="image/*"
             />
-            {!isInventoryManager && (
+            {!isInventoryManager && !isOwner && (
               <>
                 {!isDefaultPhoto && (
                   <DeleteVetPhoto
@@ -576,7 +577,7 @@ export default function VetDetails(): JSX.Element {
                   {vet.specialties.map((specialty, index) => (
                     <li key={index}>
                       {specialty.name}
-                      {!isInventoryManager && (
+                      {!isInventoryManager && !isOwner && (
                         <button
                           onClick={() =>
                             handleDeleteSpecialty(specialty.specialtyId)
@@ -593,7 +594,7 @@ export default function VetDetails(): JSX.Element {
               )}
 
               {/* Button to open the form */}
-              {!isInventoryManager && (
+              {!isInventoryManager && !isOwner && (
                 <button onClick={() => setIsFormOpen(true)}>Add Specialty</button>
               )}
 
@@ -660,7 +661,7 @@ export default function VetDetails(): JSX.Element {
                     <p>
                       <strong>End Date:</strong> {edu.endDate}
                     </p>
-                    {!isInventoryManager && (
+                    {!isInventoryManager && !isOwner && (
                       <>
                         <div style={{ marginBottom: '20px', textAlign: 'right' }}>
                           <button
@@ -703,7 +704,7 @@ export default function VetDetails(): JSX.Element {
                 <div>
                   <p>No education details available</p>
 
-                  {!isInventoryManager && (
+                  {!isInventoryManager && !isOwner && (
                     <div style={{ marginBottom: '20px', textAlign: 'right' }}>
                       <button
                         onClick={() => setFormVisible(prev => !prev)}
@@ -723,7 +724,7 @@ export default function VetDetails(): JSX.Element {
                   )}
                 </div>
               )}
-              {!isInventoryManager && selectedEducation && vetId && (
+              {!isInventoryManager && !isOwner && selectedEducation && vetId && (
                 <UpdateVetEducation
                   vetId={vetId}
                   education={selectedEducation}
@@ -752,7 +753,7 @@ export default function VetDetails(): JSX.Element {
                         alt={`Album Photo ${index + 1}`}
                         className="album-photo-thumbnail"
                       />
-                      {!isInventoryManager && (
+                      {!isInventoryManager && !isOwner && (
                         <button
                           className="delete-photo-button"
                           onClick={e => {
