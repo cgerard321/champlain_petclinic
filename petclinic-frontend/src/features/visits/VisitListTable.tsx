@@ -8,8 +8,10 @@ import { EmergencyResponseDTO } from './Emergency/Model/EmergencyResponseDTO';
 import { deleteEmergency } from './Emergency/Api/deleteEmergency';
 import './Emergency.css';
 import { exportVisitsCSV } from './api/exportVisitsCSV';
+import { IsVet } from '@/context/UserContext';
 
 export default function VisitListTable(): JSX.Element {
+  const isVet = IsVet();
   const [visitsList, setVisitsList] = useState<Visit[]>([]);
   const [visitsAll, setVisitsAll] = useState<Visit[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>(''); // Search term state
@@ -28,6 +30,11 @@ export default function VisitListTable(): JSX.Element {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Only create EventSource for ADMIN role, not for VET role
+    if (isVet) {
+      return;
+    }
+
     const eventSource = new EventSource(
       'http://localhost:8080/api/v2/gateway/visits',
       {
@@ -89,7 +96,7 @@ export default function VisitListTable(): JSX.Element {
     return () => {
       eventSource.close();
     };
-  }, []);
+  }, [isVet]);
 
   useEffect(() => {
     // Fetch emergency visits
@@ -123,6 +130,11 @@ export default function VisitListTable(): JSX.Element {
   };
 
   useEffect(() => {
+    // Only create EventSource for ADMIN role, not for VET role
+    if (isVet) {
+      return;
+    }
+
     const archivedEventSource = new EventSource(
       'http://localhost:8080/api/v2/gateway/visits/archived',
       {
@@ -163,7 +175,7 @@ export default function VisitListTable(): JSX.Element {
     return () => {
       archivedEventSource.close();
     };
-  }, []);
+  }, [isVet]);
 
   useEffect(() => {
     if (searchTerm) {
@@ -333,24 +345,28 @@ export default function VisitListTable(): JSX.Element {
               <td>{emergency.vetEmail}</td>
               <td>{emergency.vetPhoneNumber}</td>
               <td>
-                <button
-                  className="btn btn-warning"
-                  onClick={() => {
-                    navigate(`/visits/emergency/${emergency.visitEmergencyId}`);
-                  }}
-                  title="Edit"
-                >
-                  Edit
-                </button>
-                <button
-                  className="btn btn-danger"
-                  onClick={async () => {
-                    await handleDeleteEmergency(emergency.visitEmergencyId);
-                  }}
-                  title="Delete"
-                >
-                  Delete
-                </button>
+                {!isVet && (
+                  <button
+                    className="btn btn-warning"
+                    onClick={() => {
+                      navigate(`/visits/emergency/${emergency.visitEmergencyId}`);
+                    }}
+                    title="Edit"
+                  >
+                    Edit
+                  </button>
+                )}
+                {!isVet && (
+                  <button
+                    className="btn btn-danger"
+                    onClick={async () => {
+                      await handleDeleteEmergency(emergency.visitEmergencyId);
+                    }}
+                    title="Delete"
+                  >
+                    Delete
+                  </button>
+                )}
                 <button
                   className="btn btn-dark"
                   onClick={() =>
@@ -435,14 +451,16 @@ export default function VisitListTable(): JSX.Element {
                   >
                     View
                   </button>
-                  <button
-                    className="btn btn-warning"
-                    onClick={() => navigate(`/visits/${visit.visitId}/edit`)}
-                    title="Edit"
-                  >
-                    Edit
-                  </button>
-                  {allowArchive && (
+                  {!isVet && (
+                    <button
+                      className="btn btn-warning"
+                      onClick={() => navigate(`/visits/${visit.visitId}/edit`)}
+                      title="Edit"
+                    >
+                      Edit
+                    </button>
+                  )}
+                  {allowArchive && !isVet && (
                     <button
                       className="btn btn-secondary"
                       onClick={() => handleArchive(visit.visitId)}
@@ -454,7 +472,8 @@ export default function VisitListTable(): JSX.Element {
 
                   {visit.status !== 'CANCELLED' &&
                     visit.status !== 'ARCHIVED' &&
-                    visit.status !== 'COMPLETED' && (
+                    visit.status !== 'COMPLETED' &&
+                    !isVet && (
                       <button
                         className="btn btn-danger"
                         onClick={() => handleCancel(visit.visitId)}
@@ -494,13 +513,15 @@ export default function VisitListTable(): JSX.Element {
         {/*>*/}
         {/*  Create Emergency visit*/}
         {/*</button>*/}
-        <button
-          className="btn btn-warning"
-          onClick={() => navigate(AppRoutePaths.AddVisit)}
-          title="Make a Visit"
-        >
-          Make a Visit
-        </button>
+        {!isVet && (
+          <button
+            className="btn btn-warning"
+            onClick={() => navigate(AppRoutePaths.AddVisit)}
+            title="Make a Visit"
+          >
+            Make a Visit
+          </button>
+        )}
 
         <button
           className="btn btn-primary"

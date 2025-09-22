@@ -8,7 +8,7 @@ import { AppRoutePaths } from '@/shared/models/path.routes';
 import StarRating from './StarRating';
 import './Product.css';
 import { useAddToCart } from '@/features/carts/api/addToCartFromProducts.ts';
-import { IsInventoryManager } from '@/context/UserContext';
+import { IsInventoryManager, IsVet } from '@/context/UserContext';
 import { useAddToWishlist } from '@/features/carts/api/addToWishlistFromProducts';
 
 export default function Product({
@@ -17,6 +17,7 @@ export default function Product({
   product: ProductModel;
 }): JSX.Element {
   const isInventoryManager = IsInventoryManager();
+  const isVet = IsVet();
   const [currentProduct, setCurrentProduct] = useState<ProductModel>(product);
   const [selectedProduct, setSelectedProduct] = useState<ProductModel | null>(
     null
@@ -200,7 +201,7 @@ export default function Product({
       </p>
       <p>Price: ${currentProduct.productSalePrice.toFixed(2)}</p>
 
-      {!isInventoryManager && (
+      {!isInventoryManager && !isVet && (
         <button
           onClick={handleAddToCart}
           disabled={currentProduct.productQuantity === 0}
@@ -212,7 +213,7 @@ export default function Product({
         <p className="success-message">{successMessageCart}</p>
       )}
 
-      {!isInventoryManager && (
+      {!isInventoryManager && !isVet && (
         <button onClick={handleAddToWishlist} style={{ marginLeft: '10px' }}>
           Add to Wishlist
         </button>

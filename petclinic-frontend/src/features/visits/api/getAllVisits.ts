@@ -5,7 +5,7 @@ export async function getAllVisits(searchTerm: string): Promise<Visit[]> {
   const params: Record<string, string> = {};
   if (searchTerm !== '') params.searchTerm = searchTerm;
   const res = await axiosInstance.get('/visits', {
-    responseType: 'stream',
+    responseType: 'text',
     params,
   });
 
