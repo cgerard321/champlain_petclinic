@@ -1,16 +1,13 @@
-import axios from 'axios';
+import axiosInstance from '@/shared/api/axiosInstance';
 
 export const fetchVetPhoto = async (vetId: string): Promise<string> => {
   try {
-    const response = await axios.get(
-      `http://localhost:8080/api/v2/gateway/vets/${vetId}/photo`,
-      {
-        responseType: 'blob',
-        headers: {
-          Accept: 'image/*',
-        },
-      }
-    );
+    const response = await axiosInstance.get(`vets/${vetId}/photo`, {
+      responseType: 'blob',
+      headers: {
+        Accept: 'image/*',
+      },
+    });
 
     const blob = response.data;
     return URL.createObjectURL(blob);
