@@ -96,7 +96,9 @@ export default function ProductList(): JSX.Element {
 
   useEffect(() => {
     fetchProducts();
-    const savedProducts = localStorage.getItem(`recentlyClickedProducts_${user.userId}`);
+    const savedProducts = localStorage.getItem(
+      `recentlyClickedProducts_${user.userId}`
+    );
     if (savedProducts) {
       setRecentlyClickedProducts(JSON.parse(savedProducts));
     }
@@ -168,10 +170,9 @@ export default function ProductList(): JSX.Element {
       }
 
       localStorage.setItem(
-          `recentlyClickedProducts_${user.userId}`,
-          JSON.stringify(updatedProducts)
+        `recentlyClickedProducts_${user.userId}`,
+        JSON.stringify(updatedProducts)
       );
-
 
       return updatedProducts;
     });

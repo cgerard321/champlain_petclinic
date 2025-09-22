@@ -14,7 +14,9 @@ export default function RecentlyViewedProducts(): JSX.Element {
 
   useEffect(() => {
     if (!user?.userId) return;
-    const savedProducts = localStorage.getItem(`recentlyClickedProducts_${user.userId}`);
+    const savedProducts = localStorage.getItem(
+      `recentlyClickedProducts_${user.userId}`
+    );
     if (savedProducts) {
       setRecentlyClickedProducts(JSON.parse(savedProducts));
     }
