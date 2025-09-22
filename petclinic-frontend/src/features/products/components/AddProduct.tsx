@@ -202,7 +202,7 @@ export default function AddProduct({
                 name="productType"
                 placeholder="Product Type"
                 value={productType}
-                onChange={e => setProductType(e.target.value)}
+                onChange={e => setProductType(e.target.value as ProductType)}
                 required
               />
             </Form.Group>
