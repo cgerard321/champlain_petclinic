@@ -11,6 +11,9 @@ import ConfirmationModal from '@/features/inventories/ConfirmationModal.tsx';
 import { Status } from '@/features/inventories/models/ProductModels/Status.ts';
 import axiosInstance from '@/shared/api/axiosInstance';
 
+let GT_SCRIPT_ADDED = false;
+let GT_WIDGET_INIT = false;
+
 const MAX_QTY = 100;
 
 function parseValidAddAmount(raw: string | null): number | null {
@@ -59,15 +62,40 @@ const InventoryProducts: React.FC = () => {
     );
   };
 
-  useEffect(() => {
-    const addScript = document.createElement('script');
-    addScript.setAttribute(
-      'src',
-      '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit'
-    );
-    document.body.appendChild(addScript);
-    window.googleTranslateElementInit = googleTranslateElementInit;
-  }, []);
+ useEffect(() => {
+   const initWidget = () => {
+     if (GT_WIDGET_INIT) return;
+     const host = document.getElementById('google_translate_element');
+     if (!host) return;
+
+     new window.google.translate.TranslateElement(
+       {
+         pageLanguage: 'en',
+         autoDisplay: false,
+         includedLanguages: 'en,fr,de,es',
+       },
+       'google_translate_element'
+     );
+     GT_WIDGET_INIT = true;
+   };
+
+   if ((window as any).google?.translate?.TranslateElement) {
+     initWidget();
+     return;
+   }
+
+   if (!GT_SCRIPT_ADDED) {
+     (window as any).__gtInit = initWidget;
+     const s = document.createElement('script');
+     s.src = '//translate.google.com/translate_a/element.js?cb=__gtInit';
+     s.async = true;
+     document.body.appendChild(s);
+     GT_SCRIPT_ADDED = true;
+   } else {
+     (window as any).__gtInit = initWidget;
+   }
+ }, []);
+
 
   // Fetch products from the backend
   useEffect(() => {
@@ -284,7 +312,7 @@ const addQuantity = async (
       >
         Go Back
       </button>
-      <div id="google_translate_element"></div> {/* Translate element */}
+      <div id="google_translate_element"></div>
       <button className="btn btn-primary" onClick={handleCreatePdf}>
         Download PDF
       </button>
@@ -329,104 +357,107 @@ const addQuantity = async (
           </select>
         </div>
       </div>
-      {/* Always render the table structure */}
-      <table className="table table-striped">
-        <thead>
-          <tr>
-            <th>SupplyId</th>
-            <th>SupplyName</th>
-            <th>Description</th>
-            <th>Price</th>
-            <th>Quantity</th>
-            <th>Status</th>
-            <th colSpan={5}>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredProducts.length > 0 ? (
-            filteredProducts.map((product: ProductModel) => (
-              <tr key={product.productId}>
-                <td>{product.productId}</td>
-                <td>{product.productName}</td>
-                <td>{product.productDescription}</td>
-                <td>${product.productSalePrice}</td>
-                <td>{product.productQuantity}</td>
-                <td
-                  style={{
-                    color:
+      <div className="table-wrap">
+        <table className="table table-striped inventory-table">
+          <thead>
+            <tr>
+              <th>SupplyId</th>
+              <th>SupplyName</th>
+              <th>Description</th>
+              <th>Price</th>
+              <th>Quantity</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {filteredProducts.length > 0 ? (
+              filteredProducts.map((product: ProductModel) => (
+                <tr key={product.productId}>
+                  <td><span className="truncate">{product.productId}</span></td>
+                  <td><span className="truncate">{product.productName}</span></td>
+                  <td><span className="truncate">{product.productDescription}</span></td>
+                  <td>${product.productSalePrice}</td>
+                  <td>{product.productQuantity}</td>
+                  <td
+                    className={
                       product.status === Status.RE_ORDER
-                        ? '#f4a460'
+                        ? "status-reorder"
                         : product.status === Status.OUT_OF_STOCK
-                          ? 'red'
-                          : product.status === Status.AVAILABLE
-                            ? 'green'
-                            : 'inherit',
-                  }}
-                >
-                  {product.status.replace('_', ' ')}
-                </td>
-                <td>
-                  <button
-                    onClick={e => {
-                      e.stopPropagation();
-                      navigate(`${product.productId}/edit`);
-                    }}
-                    className="btn btn-warning"
-                  >
-                    Edit
-                  </button>
-                </td>
-                <td>
-                  <button
-                    className="btn btn-danger"
-                    onClick={() => handleDeleteClick(product.productId)}
-                  >
-                    Delete
-                  </button>
-                </td>
-                <td>
-                  <button
-                    className="btn btn-info"
-                    onClick={() =>
-                      reduceQuantity(product.productId, product.productQuantity)
+                        ? "status-out-of-stock"
+                        : "status-available"
                     }
                   >
-                    Reduce Quantity
-                  </button>
-                </td>
-                <td>
-                  <button
-                    onClick={e => {
-                      e.stopPropagation();
-                      navigate(`${product.productId}/move`);
-                    }}
-                    className="btn btn-info"
-                  >
-                    Move
-                  </button>
-                </td>
-                <td>
-                  <button
-                    className="btn btn-success"
-                    onClick={() =>
-                      addQuantity(product.productId, product.productQuantity)
-                    }
-                    disabled={product.productQuantity >= 100}
-                  >
-                    Add Quantity
-                  </button>
+                    {product.status.replace("_", " ")}
+                  </td>
+
+                  {/* ONE actions cell per row */}
+                  <td className="actions-cell">
+                    <div className="actions-group">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`${product.productId}/edit`);
+                        }}
+                        className="btn btn-warning"
+                      >
+                        Edit
+                      </button>
+
+                      <button
+                        className="btn btn-danger"
+                        onClick={() => handleDeleteClick(product.productId)}
+                      >
+                        Delete
+                      </button>
+
+                      <button
+                        className="btn btn-info"
+                        onClick={() =>
+                          reduceQuantity(product.productId, product.productQuantity)
+                        }
+                      >
+                        Reduce Quantity
+                      </button>
+
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`${product.productId}/move`);
+                        }}
+                        className="btn btn-info"
+                      >
+                        Move
+                      </button>
+
+                      <button
+                        className="btn btn-success"
+                        onClick={() =>
+                          addQuantity(product.productId, product.productQuantity)
+                        }
+                        disabled={product.productQuantity >= 100}
+                        title={
+                          product.productQuantity >= 100 ? "Max quantity reached" : ""
+                        }
+                      >
+                        Add Quantity
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={7} style={{ textAlign: "center" }}>
+                  No products available.
                 </td>
               </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan={10} style={{ textAlign: 'center' }}>
-                No products available.
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+            )}
+          </tbody>
+        </table>
+      </div>
+
       <button
         className="btn btn-add"
         onClick={() => navigate(`/inventory/${inventoryId}/products/add`)}
