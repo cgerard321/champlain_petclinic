@@ -6,6 +6,6 @@ export const getPetPhoto = async (
   petId: string
 ): Promise<AxiosResponse<PhotoResponseModel>> => {
   return await axiosInstance.get<PhotoResponseModel>(`/pets/${petId}/photo`, {
-    useV2: true,
+    useV2: false,
   });
 };

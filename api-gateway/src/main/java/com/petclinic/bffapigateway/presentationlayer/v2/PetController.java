@@ -4,7 +4,6 @@ import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetRequestDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
-import com.petclinic.bffapigateway.dtos.Vets.PhotoDetails;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
@@ -94,15 +93,5 @@ public class PetController {
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET, Roles.OWNER})
-    @GetMapping(value = "/{petId}/photo")
-    public Mono<ResponseEntity<PhotoDetails>> getPetPhotoByPetId(@PathVariable String petId) {
-        return Mono.just(petId)
-                .filter(id -> id.length() == 36)
-                .switchIfEmpty(Mono.error(new InvalidInputException("Provided pet id is invalid: " + petId)))
-                .flatMap(customersServiceClient::getPetPhotoByPetId)
-                .map(photo -> ResponseEntity.status(HttpStatus.OK).body(photo))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
-    }
 
 }
