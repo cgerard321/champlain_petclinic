@@ -21,7 +21,7 @@ export async function getAllProducts(
     params.deliveryType = deliveryType;
 
   const res = await axiosInstance.get('/products', {
-    responseType: 'stream',
+    responseType: 'text',
     params,
   });
 

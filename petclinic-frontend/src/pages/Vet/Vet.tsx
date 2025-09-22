@@ -5,10 +5,11 @@ import AddVet from '@/pages/Vet/AddVet.tsx';
 import UploadVetPhoto from '@/pages/Vet/UploadVetPhoto.tsx';
 import { VetRequestModel } from '@/features/veterinarians/models/VetRequestModel.ts';
 import VetCardTable from '@/features/veterinarians/VetListCards';
-import { IsInventoryManager } from '@/context/UserContext';
+import { IsInventoryManager, IsVet } from '@/context/UserContext';
 
 export default function Vet(): JSX.Element {
   const isInventoryManager = IsInventoryManager();
+  const isVet = IsVet();
   const [searchQuery, setSearchQuery] = useState('');
   const [results, setResults] = useState<VetRequestModel[]>([]);
   const [allVets, setAllVets] = useState<VetRequestModel[]>([]);
@@ -82,7 +83,7 @@ export default function Vet(): JSX.Element {
         <p>No results found.</p>
       )}
 
-      {!isSearchActive && !isInventoryManager && (
+      {!isSearchActive && !isInventoryManager && !isVet && (
         <div style={{ marginBottom: '20px', textAlign: 'right' }}>
           <button onClick={() => setFormVisible(prev => !prev)}>
             {formVisible ? 'Cancel' : 'Add Vet'}

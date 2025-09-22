@@ -30,6 +30,7 @@ export function NavBar(): JSX.Element {
   const { user } = useUser();
   const navigate = useNavigate();
   const isInventoryManager = IsInventoryManager();
+  const isVet = IsVet();
   const [navbarOpen, setNavbarOpen] = useState(false);
   const [cartId, setCartId] = useState<string | null>(null);
   const [cartItemCount, setCartItemCount] = useState<number>(0); // State for cart item count
@@ -58,7 +59,7 @@ export function NavBar(): JSX.Element {
   */
   useEffect(() => {
     const fetchCartId = async (): Promise<void> => {
-      if (user.userId && !isInventoryManager) {
+      if (user.userId && !isInventoryManager && !isVet) {
         try {
           const id = await fetchCartIdByCustomerId(user.userId);
           setCartId(id);
@@ -69,12 +70,12 @@ export function NavBar(): JSX.Element {
     };
 
     fetchCartId();
-  }, [user.userId, isInventoryManager]);
+  }, [user.userId, isInventoryManager, isVet]);
 
   // Fetch cart item count
   useEffect(() => {
     const fetchCartItemCount = async (): Promise<void> => {
-      if (cartId && !isInventoryManager) {
+      if (cartId && !isInventoryManager && !isVet) {
         try {
           const response = await fetch(
             `http://localhost:8080/api/v2/gateway/carts/${cartId}`,
@@ -109,7 +110,7 @@ export function NavBar(): JSX.Element {
     };
 
     fetchCartItemCount();
-  }, [cartId, isInventoryManager]);
+  }, [cartId, isInventoryManager, isVet]);
 
   return (
     <Navbar bg="light" expand="lg" className="navbar">
@@ -160,7 +161,7 @@ export function NavBar(): JSX.Element {
                     </NavDropdown.Item>
                   </NavDropdown>
                 )}
-                {!IsAdmin() && !isInventoryManager && (
+                {!IsAdmin() && !isInventoryManager && !IsVet() && (
                   <Nav.Link as={Link} to={AppRoutePaths.CustomerBills}>
                     Bills
                   </Nav.Link>

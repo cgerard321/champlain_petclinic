@@ -19,13 +19,14 @@ import { AxiosError } from 'axios';
 import ImageContainer from '../components/ImageContainer';
 import { Button } from 'react-bootstrap';
 import { deleteProduct } from '@/features/products/api/deleteProduct';
-import { IsAdmin, IsInventoryManager } from '@/context/UserContext';
+import { IsAdmin, IsInventoryManager, IsVet } from '@/context/UserContext';
 import PatchListingStatusButton from '../components/PatchListingStatusButton';
 import RecentlyViewedProducts from '@/features/products/components/RecentlyViewedProducts.tsx';
 
 export default function ProductDetails(): JSX.Element {
   const isAdmin = IsAdmin();
   const isInventoryManager = IsInventoryManager();
+  const isVet = IsVet();
   const navigate = useNavigate();
   const { productId } = useParams();
   const [currentProduct, setCurrentProduct] =
@@ -205,7 +206,7 @@ export default function ProductDetails(): JSX.Element {
                     />
                     <h3>{currentProduct.averageRating} / 5</h3>
                   </div>
-                  {!isInventoryManager && (
+                  {!isInventoryManager && !isVet && (
                     <div className="cartactions-container">
                       <Button
                         onClick={() =>
