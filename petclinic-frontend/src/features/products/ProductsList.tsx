@@ -35,6 +35,7 @@ export default function ProductList(): JSX.Element {
   const [maxStars, setMaxStars] = useState<number>(5);
   const [validationMessage, setValidationMessage] = useState<string>('');
   const [deliveryType, setDeliveryType] = useState<string>('');
+  const [productType, setProductType] = useState<string>('');
 
   const validationStars = async (
     minStars: number,
@@ -71,14 +72,16 @@ export default function ProductList(): JSX.Element {
           minStars,
           maxStars,
           ratingSort,
-          deliveryType
+          deliveryType,
+          productType
         );
         const filteredList = list.filter(product => !product.isUnlisted);
         setProductList(filteredList);
-      } else {
-        const filteredList = await getProductsByType(filterType);
-        setProductList(filteredList);
       }
+      // } else {
+      //   const filteredList = await getProductsByType(filterType);
+      //   setProductList(filteredList);
+      // }
     } catch (err) {
       console.error('Error fetching products:', err);
       setProductList([]);
@@ -150,6 +153,7 @@ export default function ProductList(): JSX.Element {
     setMinStars(0);
     setValidationMessage('');
     setDeliveryType('');
+    setProductType('');
     const list = await getAllProducts(minPrice, maxPrice, minStars, maxStars);
     setProductList(list);
   };
@@ -242,8 +246,8 @@ export default function ProductList(): JSX.Element {
           <label>
             Item Type:
             <select
-              value={filterType}
-              onChange={e => setFilterType(e.target.value)}
+              value={productType}
+              onChange={e => setProductType(e.target.value)}
             >
               <option value="">Select Item Type</option>
               {Object.values(ProductType).map(type => (

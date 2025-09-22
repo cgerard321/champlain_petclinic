@@ -7,7 +7,8 @@ export async function getAllProducts(
   minRating?: number,
   maxRating?: number,
   sort?: string,
-  deliveryType?: string
+  deliveryType?: string,
+  productType?: string
 ): Promise<ProductModel[]> {
   const params: Record<string, unknown> = {};
   if (minPrice !== undefined && minPrice !== null) params.minPrice = minPrice;
@@ -19,6 +20,8 @@ export async function getAllProducts(
   if (sort) params.sort = sort;
   if (deliveryType && deliveryType !== 'default')
     params.deliveryType = deliveryType;
+  if (productType && productType !== 'default')
+    params.productType = productType;
 
   const res = await axiosInstance.get('/products', {
     responseType: 'stream',
