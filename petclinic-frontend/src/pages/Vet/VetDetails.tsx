@@ -595,7 +595,9 @@ export default function VetDetails(): JSX.Element {
 
               {/* Button to open the form */}
               {!isInventoryManager && !isOwner && (
-                <button onClick={() => setIsFormOpen(true)}>Add Specialty</button>
+                <button onClick={() => setIsFormOpen(true)}>
+                  Add Specialty
+                </button>
               )}
 
               {/* Conditionally render the form */}
@@ -663,11 +665,15 @@ export default function VetDetails(): JSX.Element {
                     </p>
                     {!isInventoryManager && !isOwner && (
                       <>
-                        <div style={{ marginBottom: '20px', textAlign: 'right' }}>
+                        <div
+                          style={{ marginBottom: '20px', textAlign: 'right' }}
+                        >
                           <button
                             onClick={() => setFormVisible(prev => !prev)}
                             style={{
-                              backgroundColor: formVisible ? '#ff6347' : '#4CAF50',
+                              backgroundColor: formVisible
+                                ? '#ff6347'
+                                : '#4CAF50',
                             }}
                           >
                             {formVisible ? 'Cancel' : 'Add Education'}
@@ -724,14 +730,17 @@ export default function VetDetails(): JSX.Element {
                   )}
                 </div>
               )}
-              {!isInventoryManager && !isOwner && selectedEducation && vetId && (
-                <UpdateVetEducation
-                  vetId={vetId}
-                  education={selectedEducation}
-                  educationId={selectedEducation.educationId}
-                  onClose={() => setSelectedEducation(null)}
-                />
-              )}
+              {!isInventoryManager &&
+                !isOwner &&
+                selectedEducation &&
+                vetId && (
+                  <UpdateVetEducation
+                    vetId={vetId}
+                    education={selectedEducation}
+                    educationId={selectedEducation.educationId}
+                    onClose={() => setSelectedEducation(null)}
+                  />
+                )}
             </section>
 
             <section className="album-photos">
