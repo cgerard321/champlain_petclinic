@@ -278,14 +278,11 @@ const VetList: React.FC = () => {
       setVets(vets);
       setError('');
     } catch (error) {
-      // Handle local errors (404, 400, 422) with user feedback
+      // Handle local errors (404, 400) with user feedback
       if (axios.isAxiosError(error)) {
         switch (error.response?.status) {
           case 404:
             setError('No veterinarians found. Please try again later.');
-            break;
-          case 422:
-            setError('Invalid search criteria. Please check your filters.');
             break;
           default:
             setError('An unexpected error occurred.');
@@ -313,6 +310,9 @@ const VetList: React.FC = () => {
             break;
           case 404:
             setError(`No veterinarians found with specialty: ${specialty}`);
+            break;
+          case 422:
+            setError('Invalid search criteria. Please check your filters.');
             break;
           default:
             setError('Search failed. Please try again.');
