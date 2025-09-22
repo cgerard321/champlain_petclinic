@@ -2265,9 +2265,12 @@ class ApiGatewayControllerTest {
 
     @Test
     void payBill_Success() {
-        String successMessage = "Payment successful";
+        BillResponseDTO successResponse = new BillResponseDTO();
+        successResponse.setBillId("1");
+        successResponse.setBillStatus(BillStatus.PAID);
+
         when(billServiceClient.payBill(anyString(), anyString(), any(PaymentRequestDTO.class)))
-                .thenReturn(Mono.just(successMessage));
+                .thenReturn(Mono.just(successResponse));
 
         PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("1234567812345678", "123", "12/23");
 
@@ -2277,9 +2280,10 @@ class ApiGatewayControllerTest {
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .exchange()
                 .expectStatus().isOk()
-                .expectBody(String.class)
+                .expectBody(BillResponseDTO.class)
                 .value(response -> {
-                    assertEquals("Payment successful", response);
+                    assertEquals("1", response.getBillId());
+                    assertEquals(BillStatus.PAID, response.getBillStatus());
                 });
     }
 
@@ -2296,12 +2300,8 @@ class ApiGatewayControllerTest {
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .exchange()
                 .expectStatus().isBadRequest()
-                .expectBody(String.class)
-                .value(response -> {
-                    assertTrue(response.contains("Payment failed"));
-                });
+                .expectBody().isEmpty(); // <- empty body
     }
-
 
     @Test
     void payBill_Failure_InvalidCustomerId() {
@@ -2316,10 +2316,7 @@ class ApiGatewayControllerTest {
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .exchange()
                 .expectStatus().isBadRequest()
-                .expectBody(String.class)
-                .value(response -> {
-                    assertTrue(response.contains("Payment failed: Invalid customer ID"));
-                });
+                .expectBody().isEmpty(); //  no “Payment failed: ...”
     }
 
     @Test
@@ -2335,10 +2332,7 @@ class ApiGatewayControllerTest {
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .exchange()
                 .expectStatus().isBadRequest()
-                .expectBody(String.class)
-                .value(response -> {
-                    assertTrue(response.contains("Payment failed: Invalid bill ID"));
-                });
+                .expectBody().isEmpty();
     }
 
     @Test
@@ -2354,10 +2348,7 @@ class ApiGatewayControllerTest {
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .exchange()
                 .expectStatus().isBadRequest()
-                .expectBody(String.class)
-                .value(response -> {
-                    assertTrue(response.contains("Payment failed: Card expired"));
-                });
+                .expectBody().isEmpty();
     }
 
 
