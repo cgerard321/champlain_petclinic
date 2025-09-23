@@ -57,14 +57,11 @@ const UserCart = (): JSX.Element => {
   const total = subtotal - discount + tvq + tvc;
 
   // Function to update the cart item count
-  const updateCartItemCount = useCallback(() => {
-    const count = cartItems.reduce(
-      (acc, item) => acc + (item.quantity || 0),
-      0
-    );
-    setCartItemCount(count);
+  const updateCartItemCount = useCallback((): void => {
+    setCartItemCount(cartItems.reduce((acc, item) => acc + (item.quantity || 0), 0));
   }, [cartItems]);
 
+  // Fetch cart items when cartId or wishlistUpdated changes
   useEffect(() => {
     const fetchCartItems = async (): Promise<void> => {
       if (!cartId) {
@@ -88,12 +85,10 @@ const UserCart = (): JSX.Element => {
 
         const data = await response.json();
 
-        // Ensure that data.products exists and is an array
         if (!Array.isArray(data.products)) {
           throw new Error('Invalid data format: products should be an array');
         }
 
-        // Map data.products to the appropriate ProductModel format
         const products: ProductModel[] = data.products.map(
           (product: ProductAPIResponse) => ({
             productId: product.productId,
@@ -110,7 +105,6 @@ const UserCart = (): JSX.Element => {
         setCartItems(products);
         setWishlistItems(data.wishListProducts || []);
       } catch (err: unknown) {
-        // Changed from any to unknown
         if (err instanceof Error) {
           console.error(err.message);
           setError('Failed to fetch cart items');
@@ -120,15 +114,17 @@ const UserCart = (): JSX.Element => {
         }
       } finally {
         setLoading(false);
+        if (wishlistUpdated) setWishlistUpdated(false);
       }
     };
 
     fetchCartItems();
-    // Reset wishlistUpdated to avoid unnecessary fetches
-    setWishlistUpdated(false);
-    // Recalculate cart item count after setting cart items
+  }, [cartId, wishlistUpdated]);
+
+  // Update cart item count whenever cartItems changes
+  useEffect(() => {
     updateCartItemCount();
-  }, [cartId, updateCartItemCount, wishlistUpdated]);
+  }, [cartItems, updateCartItemCount]);
 
   const applyVoucherCode = async (): Promise<void> => {
     try {
