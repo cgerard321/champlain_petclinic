@@ -9,17 +9,19 @@ import { deleteEmergency } from './Emergency/Api/deleteEmergency';
 import './Emergency.css';
 import { exportVisitsCSV } from './api/exportVisitsCSV';
 import axiosInstance from '@/shared/api/axiosInstance';
+import { getAllVisits } from '@/features/visits/api/getAllVisits.ts';
 
 export default function VisitListTable(): JSX.Element {
-  const [visitsList, setVisitsList] = useState<Visit[]>([]);
-  const [visitsAll, setVisitsAll] = useState<Visit[]>([]);
-  const [searchTerm, setSearchTerm] = useState<string>(''); // Search term state
+  const [allVisits, setAllVisits] = useState<Visit[]>([]);
   const [emergencyList, setEmergencyList] = useState<EmergencyResponseDTO[]>(
     []
   );
-  const [archivedVisits, setArchivedVisits] = useState<Visit[]>([]);
+  // const [archivedVisits, setArchivedVisits] = useState<Visit[]>([]);
+  // const [visitsList, setVisitsList] = useState<Visit[]>([]);
+  // const [visitsAll, setVisitsAll] = useState<Visit[]>([]);
 
   //make tables collapsable
+  const [searchTerm, setSearchTerm] = useState<string>(''); // Search term state
   const [confirmedCollapsed, setConfirmedCollapsed] = useState(false);
   const [upcomingCollapsed, setUpcomingCollapsed] = useState(false);
   const [completedCollapsed, setCompletedCollapsed] = useState(false);
@@ -28,49 +30,74 @@ export default function VisitListTable(): JSX.Element {
 
   const navigate = useNavigate();
 
+  const filteredVisits = searchTerm
+    ? allVisits.filter(visit =>
+        visit.description.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : allVisits;
+
+  // Filter visits based on status
+  const confirmedVisits = filteredVisits.filter(
+    visit => visit.status === 'CONFIRMED'
+  );
+  const upcomingVisits = filteredVisits.filter(
+    visit => visit.status === 'UPCOMING'
+  );
+  const completedVisits = filteredVisits.filter(
+    visit => visit.status === 'COMPLETED'
+  );
+  const cancelledVisits = filteredVisits.filter(
+    visit => visit.status === 'CANCELLED'
+  );
+  const archivedVisits = filteredVisits.filter(
+    visit => visit.status === 'ARCHIVED'
+  );
+
+  useEffect(() => {
+    const loadInitialData = async () => {
+      try {
+        const [visits, emergencies] = await Promise.all([
+          getAllVisits(),
+          getAllEmergency(),
+        ]);
+        setAllVisits(visits);
+        setEmergencyList(emergencies);
+      } catch (error) {
+        console.error('Error loading initial data:', error);
+      }
+    };
+    loadInitialData();
+  }, []);
+
+  // useEffect(() => {
+  //   // Fetch emergency visits
+  //   async function loadInitialEmergencyVisits(): Promise<void> {
+  //     try {
+  //       const emergencies = await getAllEmergency();
+  //       setEmergencyList(emergencies); // Set emergency data to state
+  //     } catch (error) {
+  //       console.error('Error fetching emergencies:', error);
+  //     }
+  //   }
+  //   loadInitialEmergencyVisits();
+  // }, []);
+
   useEffect(() => {
     const eventSource = new EventSource('/visits');
 
     eventSource.onmessage = event => {
       try {
-        const newVisit: Visit = JSON.parse(event.data);
+        const updatedVisit: Visit = JSON.parse(event.data);
 
-        if (newVisit.status === 'ARCHIVED') {
-          // Remove from visitsList if present
-          setVisitsList(oldVisits =>
-            oldVisits.filter(visit => visit.visitId !== newVisit.visitId)
+        setAllVisits(prevVisits => {
+          const index = prevVisits.findIndex(
+            v => v.visitId === updatedVisit.visitId
           );
-        } else {
-          setArchivedVisits(oldArchived =>
-            oldArchived.filter(visit => visit.visitId !== newVisit.visitId)
-          );
-
-          setVisitsList(oldVisits => {
-            const index = oldVisits.findIndex(
-              visit => visit.visitId === newVisit.visitId
-            );
-            if (index !== -1) {
-              // Update existing visit
-              const newVisits = [...oldVisits];
-              newVisits[index] = newVisit;
-              return newVisits;
-            } else {
-              // Add new visit
-              return [...oldVisits, newVisit];
-            }
-          });
-        }
-        setVisitsList(oldVisits => {
-          if (!oldVisits.some(visit => visit.visitId === newVisit.visitId)) {
-            return [...oldVisits, newVisit];
+          if (index !== -1) {
+            return prevVisits.map((v, i) => (i === index ? updatedVisit : v));
+          } else {
+            return [...prevVisits, updatedVisit];
           }
-          return oldVisits;
-        });
-        setVisitsAll(oldVisits => {
-          if (!oldVisits.some(visit => visit.visitId === newVisit.visitId)) {
-            return [...oldVisits, newVisit];
-          }
-          return oldVisits;
         });
       } catch (error) {
         console.error('Error parsing SSE data:', error);
@@ -85,19 +112,6 @@ export default function VisitListTable(): JSX.Element {
     return () => {
       eventSource.close();
     };
-  }, []);
-
-  useEffect(() => {
-    // Fetch emergency visits
-    async function fetchEmergencies(): Promise<void> {
-      try {
-        const emergencies = await getAllEmergency();
-        setEmergencyList(emergencies); // Set emergency data to state
-      } catch (error) {
-        console.error('Error fetching emergencies:', error);
-      }
-    }
-    fetchEmergencies();
   }, []);
 
   const handleDeleteEmergency = async (
@@ -118,84 +132,84 @@ export default function VisitListTable(): JSX.Element {
     }
   };
 
-  useEffect(() => {
-    const archivedEventSource = new EventSource('/visits/archived', {
-      withCredentials: true,
-    });
+  // useEffect(() => {
+  //   const archivedEventSource = new EventSource('/visits/archived', {
+  //     withCredentials: true,
+  //   });
 
-    archivedEventSource.onmessage = event => {
-      try {
-        const newArchivedVisit: Visit = JSON.parse(event.data);
+  //   archivedEventSource.onmessage = event => {
+  //     try {
+  //       const newArchivedVisit: Visit = JSON.parse(event.data);
 
-        setArchivedVisits(oldArchived => {
-          if (
-            !oldArchived.some(
-              visit => visit.visitId === newArchivedVisit.visitId
-            )
-          ) {
-            return [...oldArchived, newArchivedVisit];
-          } else {
-            // Update existing archived visit
-            return oldArchived.map(visit =>
-              visit.visitId === newArchivedVisit.visitId
-                ? newArchivedVisit
-                : visit
-            );
-          }
-        });
-      } catch (error) {
-        console.error('Error parsing SSE data for archived visits:', error);
-      }
-    };
+  //       setArchivedVisits(oldArchived => {
+  //         const exists = oldArchived.some(
+  //           visits => visits.visitId === newArchivedVisit.visitId
+  //         );
+  //         if (!exists) {
+  //           return [...oldArchived, newArchivedVisit];
+  //         } else {
+  //           return oldArchived.map(visit =>
+  //             visit.visitId === newArchivedVisit.visitId
+  //               ? newArchivedVisit
+  //               : visit
+  //           );
+  //         }
+  //       });
 
-    archivedEventSource.onerror = error => {
-      console.error('Archived EventSource error:', error);
-      archivedEventSource.close();
-    };
+  //       setVisitsAll(oldVisits => {
+  //         const index = oldVisits.findIndex(
+  //           v => v.visitId === newArchivedVisit.visitId
+  //         );
+  //         if (index !== -1) {
+  //           return oldVisits.map((v, i) =>
+  //             i === index ? newArchivedVisit : v
+  //           );
+  //         } else {
+  //           return [...oldVisits, newArchivedVisit];
+  //         }
+  //       });
+  //     } catch (error) {
+  //       console.error('Error parsing SSE data for archived visits:', error);
+  //     }
+  //   };
 
-    return () => {
-      archivedEventSource.close();
-    };
-  }, []);
+  //   archivedEventSource.onerror = error => {
+  //     console.error('Archived EventSource error:', error);
+  //     archivedEventSource.close();
+  //   };
 
-  useEffect(() => {
-    if (!searchTerm) {
-      setVisitsList(visitsAll);
-      return
-    }
-      setVisitsList(
-        visitsAll.filter(visit =>
-          visit.description.toLowerCase().includes(searchTerm.toLowerCase())
-        )
-      );
-    }, [searchTerm, visitsAll]);
+  //   return () => {
+  //     archivedEventSource.close();
+  //   };
+  // }, []);
 
-  // Filter visits based on status
-  const confirmedVisits = visitsList.filter(
-    visit => visit.status === 'CONFIRMED'
-  );
-  const upcomingVisits = visitsList.filter(
-    visit => visit.status === 'UPCOMING'
-  );
-  const completedVisits = visitsList.filter(
-    visit => visit.status === 'COMPLETED'
-  );
-  const cancelledVisits = visitsList.filter(
-    visit => visit.status === 'CANCELLED'
-  );
+  // useEffect(() => {
+  //   if (!searchTerm) {
+  //     setVisitsList(visitsAll);
+  //     return;
+  //   }
+  //   setVisitsList(
+  //     visitsAll.filter(visit =>
+  //       visit.description.toLowerCase().includes(searchTerm.toLowerCase())
+  //     )
+  //   );
+  // }, [searchTerm, visitsAll]);
+
+
 
   const handleArchive = async (visitId: string): Promise<void> => {
     const confirmArchive = window.confirm(
       `Are you sure you want to archive visit with ID: ${visitId}?`
     );
-    if (! confirmArchive) return;
+    if (!confirmArchive) return;
 
+    // TODO Make this use V1
     try {
       const requestBody = { status: 'ARCHIVED' };
       await axiosInstance.put(
         `/visits/completed/${visitId}/archive`,
         requestBody,
-        { useV2: false }
+        { useV2: true }
       );
 
       const updatedVisitResponse = await axiosInstance.get<Visit>(
@@ -204,12 +218,15 @@ export default function VisitListTable(): JSX.Element {
       );
 
       const updatedVisit = updatedVisitResponse.data;
-      setArchivedVisits(oldArchived => [...oldArchived, updatedVisit]);
-      setVisitsList(prev => prev.filter(visit => visit.visitId !== visitId));
+      setAllVisits(prevVisits =>
+        prevVisits.map(visit =>
+          visit.visitId === visitId ? updatedVisit : visit
+        )
+      );
       alert('Visit archived successfully!');
     } catch (error) {
-        console.error('Error archiving visit:', error);
-      }
+      console.error('Error archiving visit:', error);
+    }
   };
 
   // Handle canceling the visit
@@ -218,24 +235,21 @@ export default function VisitListTable(): JSX.Element {
       'Do you confirm you want to cancel the reservation?'
     );
 
-    if (!confirmCancel) return
+    if (!confirmCancel) return;
     try {
-      await axiosInstance.patch(
-          `/visits/${visitId}/CANCELLED`,
-          {useV2: false}
-      );
+      await axiosInstance.patch(`/visits/${visitId}/CANCELLED`, {
+        useV2: false,
+      });
       // Update the visit list after cancellation
-      setVisitsList(prevVisits =>
-          prevVisits.map(visit =>
-              visit.visitId === visitId
-                  ? {...visit, status: 'CANCELLED'}
-                  : visit
-          )
+      setAllVisits(prevVisits =>
+        prevVisits.map(visit =>
+          visit.visitId === visitId ? { ...visit, status: 'CANCELLED' } : visit
+        )
       );
     } catch (error) {
-            console.error('Error canceling visit:', error);
-            alert('Error canceling visit.');
-      }
+      console.error('Error canceling visit:', error);
+      alert('Error canceling visit.');
+    }
   };
 
   // Render table for emergencies
@@ -251,10 +265,10 @@ export default function VisitListTable(): JSX.Element {
             <th>Visit Emergency Id</th>
             <th>Visit Date</th>
             <th>Description</th>
-            <th> PetId</th>
+            <th>PetId</th>
             <th>Pet Birthdate </th>
             <th>Pet Name</th>
-            <th> PractitionnerId</th>
+            <th>PractitionnerId</th>
             <th>vetFirstName</th>
             <th>vetLastName</th>
             <th>Email</th>
@@ -419,6 +433,7 @@ export default function VisitListTable(): JSX.Element {
       <div className="visit-actions">
         <button
           className="btn btn-warning"
+          //TODO This has to be fixed. We should create a new endpoint like /reviews/add
           onClick={() => navigate('/forms')}
           title="Leave a Review"
         >

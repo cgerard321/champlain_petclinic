@@ -3,7 +3,8 @@ import { ReviewResponseDTO } from '../Model/ReviewResponseDTO';
 
 export const getAllReviews = async (): Promise<ReviewResponseDTO[]> => {
   const response = await axiosInstance.get<ReviewResponseDTO[]>(
-    `/visits/reviews`
+    `/visits/reviews`,
+    { useV2: true }
   );
   return response.data; // Return only the data
 };

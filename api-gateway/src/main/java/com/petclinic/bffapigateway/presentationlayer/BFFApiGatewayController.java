@@ -361,6 +361,11 @@ public class BFFApiGatewayController {
 //not ideal since returns complete pet dto
         return getPetsByOwnerId(ownerId).flatMap(petResponseDTO -> getEmergencyVisitsForPet(petResponseDTO.getPetId()));
     }
+    @GetMapping(value = "visits/emergency", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<EmergencyResponseDTO> getAllEmergency(){
+        return visitsServiceClient.getAllEmergency();
+    }
+
     @GetMapping(value = "visits/vets/{practitionerId}", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<VisitResponseDTO> getVisitByPractitionerId(@PathVariable String practitionerId){
         return visitsServiceClient.getVisitByPractitionerId(practitionerId);

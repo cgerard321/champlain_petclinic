@@ -7,9 +7,6 @@ export async function getAllOwnerVisits(
   try {
     const response = await axiosInstance.get(`/visits/owners/${ownerId}`);
 
-    if (response.status !== 200) {
-      throw new Error(`Error: ${response.status} ${response.statusText}`);
-    }
     return response.data
       .split('data:')
       .map((dataChunk: string) => {

@@ -1,12 +1,11 @@
-import axiosInstance from "@/shared/api/axiosInstance.ts";
+import axiosInstance from '@/shared/api/axiosInstance.ts';
 
 export const exportVisitsCSV = async (): Promise<void> => {
   try {
-    const response = await axiosInstance.get(
-      '/visits/export',
-        { responseType: "blob",
-          useV2 : false }
-    );
+    const response = await axiosInstance.get('/visits/export', {
+      responseType: 'blob',
+      useV2: true,
+    });
 
     const url = window.URL.createObjectURL(new Blob([response.data]));
 
