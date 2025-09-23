@@ -10,7 +10,8 @@ interface useSearchInventoriesResponseModel {
   getInventoryList: (
     inventoryName: string,
     inventoryType: string,
-    inventoryDescription: string
+    inventoryDescription: string,
+    importantOnly?: boolean,
   ) => void;
   setCurrentPage: (currentPage: (prevPage: number) => number) => void;
   isLoading: boolean;
@@ -23,6 +24,7 @@ interface useSearchInventoriesResponseModel {
     inventoryName: string;
     inventoryType: string;
     inventoryDescription: string;
+    currentInventory: boolean;
   };
 }
 
@@ -35,20 +37,23 @@ export default function useSearchInventories(): useSearchInventoriesResponseMode
     inventoryName: '',
     inventoryType: '',
     inventoryDescription: '',
+    importantOnly: false,
   });
   const listSize: number = 10;
 
   const getInventoryList = async (
     inventoryName: string,
     inventoryType: string,
-    inventoryDescription: string
+    inventoryDescription: string,
+    importantOnly: boolean = false,
   ): Promise<void> => {
     const data = await searchInventories(
       currentPage,
       listSize,
       inventoryName,
       inventoryType,
-      inventoryDescription
+      inventoryDescription,
+        importantOnly,
     );
     setInventoryList(data);
     setRealPage(currentPage + 1);
@@ -83,7 +88,8 @@ export default function useSearchInventories(): useSearchInventoriesResponseMode
           listSize,
           filters.inventoryName || undefined,
           filters.inventoryType || undefined,
-          filters.inventoryDescription || undefined
+          filters.inventoryDescription || undefined,
+            filters.importantOnly || undefined,
         );
         setInventoryList(data);
         setRealPage(1);

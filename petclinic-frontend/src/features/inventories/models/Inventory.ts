@@ -6,4 +6,5 @@ export interface Inventory {
   inventoryImage: string;
   inventoryBackupImage: string;
   imageUploaded: Uint8Array | null | string;
+  important?: boolean;
 }
