@@ -22,12 +22,15 @@ import { deleteProduct } from '@/features/products/api/deleteProduct';
 import { IsAdmin, IsInventoryManager } from '@/context/UserContext';
 import PatchListingStatusButton from '../components/PatchListingStatusButton';
 import RecentlyViewedProducts from '@/features/products/components/RecentlyViewedProducts.tsx';
+import { useAddToCart } from '@/features/carts/api/addToCartFromProducts';
 
 export default function ProductDetails(): JSX.Element {
   const isAdmin = IsAdmin();
   const isInventoryManager = IsInventoryManager();
   const navigate = useNavigate();
   const { productId } = useParams();
+  const { addToCart } = useAddToCart();
+
   const [currentProduct, setCurrentProduct] =
     useState<ProductModel>(emptyProductModel);
   const [currentUserRating, setUserRating] = useState<RatingModel>({
@@ -36,27 +39,19 @@ export default function ProductDetails(): JSX.Element {
   });
   const [productReviews, setProductReviews] = useState<RatingModel[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+
   const navigateToEditProduct = (): void => {
     if (!currentProduct || !productId) return;
-    navigate(
-      generatePath(AppRoutePaths.EditProduct, {
-        productId: productId,
-      }),
-      {
-        state: { product: currentProduct },
-      }
-    );
+    navigate(generatePath(AppRoutePaths.EditProduct, { productId }), {
+      state: { product: currentProduct },
+    });
   };
+
   const getDeliveryTypeLabel = (deliveryType: string): string => {
-    if (deliveryType === 'DELIVERY') {
-      return 'Standard Delivery';
-    } else if (deliveryType === 'PICKUP') {
-      return 'Pickup';
-    } else if (deliveryType === 'DELIVERY_AND_PICKUP') {
-      return 'Delivery and Pickup';
-    } else if (deliveryType === 'NO_DELIVERY_OPTION') {
-      return 'No delivery option';
-    }
+    if (deliveryType === 'DELIVERY') return 'Standard Delivery';
+    if (deliveryType === 'PICKUP') return 'Pickup';
+    if (deliveryType === 'DELIVERY_AND_PICKUP') return 'Delivery and Pickup';
+    if (deliveryType === 'NO_DELIVERY_OPTION') return 'No delivery option';
     return 'Unknown Delivery Type';
   };
 
@@ -128,8 +123,9 @@ export default function ProductDetails(): JSX.Element {
     newReview: string | null
   ): Promise<void> => {
     if (!productId) return;
-    if (newRating === 0) await deleteRating();
-    else {
+    if (newRating === 0) {
+      await deleteRating();
+    } else {
       try {
         const resUpdate = await updateUserRating(
           productId,
@@ -155,6 +151,14 @@ export default function ProductDetails(): JSX.Element {
 
   const isUnlisted = currentProduct.isUnlisted;
 
+  const handleAddToCartClick = async (): Promise<void> => {
+    if (!productId) return;
+    const ok = await addToCart(String(productId));
+    alert(
+      ok ? 'Item added to cart' : "Couldn't add to cart. Please try again."
+    );
+  };
+
   return (
     <>
       <NavBar />
@@ -172,7 +176,7 @@ export default function ProductDetails(): JSX.Element {
             {isUnlisted && !isAdmin && !isInventoryManager ? (
               <div className="product-unavailable">
                 <h2>Item Unavailable</h2>
-                <h3>This item has been unlisted. Check back later! 😊</h3>
+                <h3>This item has been unlisted. Check back later! </h3>
               </div>
             ) : (
               <>
@@ -206,13 +210,7 @@ export default function ProductDetails(): JSX.Element {
                     <h3>{currentProduct.averageRating} / 5</h3>
                   </div>
                   <div className="cartactions-container">
-                    <Button
-                      onClick={() =>
-                        alert('This feature has not yet been implemented')
-                      }
-                    >
-                      Add to Cart
-                    </Button>
+                    <Button onClick={handleAddToCartClick}>Add to Cart</Button>
                   </div>
                   <p>Type: {currentProduct.productType}</p>
                   <div className="deliveryTypeEdit-container">
@@ -260,9 +258,7 @@ export default function ProductDetails(): JSX.Element {
                                   strokeLinecap="round"
                                   strokeLinejoin="round"
                                   key={k}
-                                  className={`star-static ${
-                                    k < rating.rating ? 'star-shown' : ''
-                                  }`}
+                                  className={`star-static ${k < rating.rating ? 'star-shown' : ''}`}
                                 >
                                   <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
                                 </svg>
