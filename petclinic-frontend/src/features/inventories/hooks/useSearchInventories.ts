@@ -1,4 +1,4 @@
-import { useState , useEffect, useCallback} from 'react';
+import { useState , useEffect, useCallback, useRef} from 'react';
 import { searchInventories } from '@/features/inventories/api/searchInventories.ts';
 import { Inventory } from '@/features/inventories/models/Inventory.ts';
 
@@ -65,34 +65,39 @@ export default function useSearchInventories(): useSearchInventoriesResponseMode
     }));
   }, []);
 
-  useEffect(() => {
-    setIsLoading(true);
-    searchInventories(
-        0,
-        listSize,
-        undefined,
-        undefined,
-        undefined
-    ).then(data => {
-      const clientFilteredData = data.filter(item => {
-        const nameMatch = !filters.inventoryName ||
-            item.inventoryName.toLowerCase().includes(filters.inventoryName.toLowerCase());
-        const typeMatch = !filters.inventoryType ||
-            item.inventoryType === filters.inventoryType;
-        const descMatch = !filters.inventoryDescription ||
-            (item.inventoryDescription || '').toLowerCase().trim().includes(filters.inventoryDescription.toLowerCase().trim());
-        return nameMatch && typeMatch && descMatch;
-      });
+  const debounceRef = useRef<number>();
 
-      setInventoryList(clientFilteredData);
-      setRealPage(1);
-      setCurrentPage(() => 0);
-    }).catch(error => {
-      console.error('Search failed:', error);
-      setInventoryList([]);
-    }).finally(() => {
-      setIsLoading(false);
-    });
+  useEffect(() => {
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+
+    debounceRef.current = setTimeout(async () => {
+      setIsLoading(true);
+      try {
+        const data = await searchInventories(
+            0,
+            listSize,
+            filters.inventoryName || undefined,
+            filters.inventoryType || undefined,
+            filters.inventoryDescription || undefined
+        );
+        setInventoryList(data);
+        setRealPage(1);
+        setCurrentPage(() => 0);
+      } catch (error) {
+        console.error('Search failed:', error);
+        setInventoryList([]);
+      } finally {
+        setIsLoading(false);
+      }
+    }, 300);
+
+    return () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+    };
   }, [filters]);
 
   return {
