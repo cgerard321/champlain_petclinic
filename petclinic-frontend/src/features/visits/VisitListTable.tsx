@@ -128,44 +128,6 @@ export default function VisitListTable(): JSX.Element {
     }
   };
 
-  // useEffect(() => {
-  //   const archivedEventSource = new EventSource('/visits/archived');
-
-  //   archivedEventSource.onmessage = event => {
-  //     try {
-  //       const newArchivedVisit: Visit = JSON.parse(event.data);
-
-  //       setArchivedVisits(oldArchived => {
-  //         if (
-  //           !oldArchived.some(
-  //             visit => visit.visitId === newArchivedVisit.visitId
-  //           )
-  //         ) {
-  //           return [...oldArchived, newArchivedVisit];
-  //         } else {
-  //           // Update existing archived visit
-  //           return oldArchived.map(visit =>
-  //             visit.visitId === newArchivedVisit.visitId
-  //               ? newArchivedVisit
-  //               : visit
-  //           );
-  //         }
-  //       });
-  //     } catch (error) {
-  //       console.error('Error parsing SSE data for archived visits:', error);
-  //     }
-  //   };
-
-  //   archivedEventSource.onerror = error => {
-  //     console.error('Archived EventSource error:', error);
-  //     archivedEventSource.close();
-  //   };
-
-  //   return () => {
-  //     archivedEventSource.close();
-  //   };
-  // }, []);
-
   useEffect(() => {
     if (searchTerm) {
       setVisitsList(
