@@ -75,8 +75,13 @@ h2 {
   color: #444;
 }
 
-.modal-content button {
-  margin: 5px;
+.modal-buttons {
+  display: flex;
+  justify-content: space-between; 
+  margin-top: 20px;
+}
+
+.modal-buttons button {
   padding: 8px 16px;
   border: none;
   border-radius: 6px;
@@ -85,22 +90,24 @@ h2 {
   transition: background-color 0.2s ease;
 }
 
-.modal-content button:first-of-type {
-  background-color: #d9534f;
-  color: #fff;
+/* Cancel button */
+.modal-buttons button:first-of-type {
+  background-color: #6c757d !important;
+  color: #fff !important;
 }
 
-.modal-content button:first-of-type:hover {
-  background-color: #c9302c;
-}
-
-.modal-content button:last-of-type {
-  background-color: #6c757d;
-  color: #fff;
-}
-
-.modal-content button:last-of-type:hover {
+.modal-buttons button:first-of-type:hover {
   background-color: #5a6268;
+}
+
+/* Confirm button */
+.modal-buttons button:last-of-type {
+  background-color: #0d6efd !important; 
+  color: #fff !important;
+}
+
+.modal-buttons button:last-of-type:hover {
+  background-color: #0b5ed7; 
 }
 
 @keyframes fadeIn {
@@ -113,4 +120,5 @@ h2 {
     transform: scale(1);
   }
 }
+
 
