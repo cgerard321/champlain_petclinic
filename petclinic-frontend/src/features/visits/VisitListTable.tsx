@@ -561,15 +561,17 @@ export default function VisitListTable(): JSX.Element {
             <p>
               Are you sure you want to delete emergency visit {confirmDeleteId}?
             </p>
-            <button
-              onClick={async () => {
-                await handleDeleteEmergency(confirmDeleteId);
-                setConfirmDeleteId(null);
-              }}
-            >
-              Yes, delete
-            </button>
-            <button onClick={() => setConfirmDeleteId(null)}>Cancel</button>
+            <div className="modal-buttons">
+              <button onClick={() => setConfirmDeleteId(null)}>Cancel</button>
+              <button
+                onClick={async () => {
+                  await handleDeleteEmergency(confirmDeleteId);
+                  setConfirmDeleteId(null);
+                }}
+              >
+                Confirm
+              </button>
+            </div>
           </div>
         </div>
       )}
