@@ -58,7 +58,9 @@ const UserCart = (): JSX.Element => {
 
   // Function to update the cart item count
   const updateCartItemCount = useCallback((): void => {
-    setCartItemCount(cartItems.reduce((acc, item) => acc + (item.quantity || 0), 0));
+    setCartItemCount(
+      cartItems.reduce((acc, item) => acc + (item.quantity || 0), 0)
+    );
   }, [cartItems]);
 
   // Fetch cart items when cartId or wishlistUpdated changes
