@@ -19,12 +19,14 @@ interface useSearchInventoriesResponseModel {
     inventoryName?: string;
     inventoryType?: string;
     inventoryDescription?: string;
+    importantOnly?: boolean;
   }) => void;
   currentFilters: {
     inventoryName: string;
     inventoryType: string;
     inventoryDescription: string;
-    currentInventory: boolean;
+    // currentInventory: boolean;
+    importantOnly?: boolean;
   };
 }
 
@@ -64,6 +66,7 @@ export default function useSearchInventories(): useSearchInventoriesResponseMode
       inventoryName?: string;
       inventoryType?: string;
       inventoryDescription?: string;
+      importantOnly?: boolean;
     }) => {
       setFilters((prev: typeof filters) => ({
         ...prev,
