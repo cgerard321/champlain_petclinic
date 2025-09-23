@@ -7,6 +7,9 @@ import './UserCart.css';
 import { NavBar } from '@/layouts/AppNavBar';
 import { FaShoppingCart } from 'react-icons/fa'; // Importing the shopping cart icon
 
+// NEW: cart change notifier (lets the NavBar update automatically)
+import { notifyCartChanged } from '../api/cartEvent';
+
 interface ProductAPIResponse {
   productId: number;
   imageId: string;
@@ -211,6 +214,9 @@ const UserCart = (): JSX.Element => {
             // Add to wishlist
             setWishlistItems(prevItems => [...prevItems, item]);
             setNotificationMessage(data.message);
+
+            //notify navbar (product left cart)
+            notifyCartChanged();
           }
         } else {
           // Update local state
@@ -221,6 +227,9 @@ const UserCart = (): JSX.Element => {
           });
           // Optionally, display success message
           setNotificationMessage('Item quantity updated successfully.');
+
+          // notify navbar (cart quantity changed)
+          notifyCartChanged();
         }
       } catch (err: unknown) {
         // Changed from any to unknown
@@ -268,6 +277,9 @@ const UserCart = (): JSX.Element => {
           prevItems.filter((_, index) => index !== indexToDelete)
         );
         alert('Item successfully removed!');
+
+        // notify navbar (item removed)
+        notifyCartChanged();
       } catch (error: unknown) {
         // Changed from any to unknown
         console.error('Error deleting item: ', error);
@@ -301,6 +313,9 @@ const UserCart = (): JSX.Element => {
           setCartItems([]);
           setCartItemCount(0);
           alert('Cart has been successfully cleared!');
+
+          // notify navbar (cart cleared)
+          notifyCartChanged();
         } else {
           throw new Error('Failed to clear cart');
         }
@@ -356,6 +371,9 @@ const UserCart = (): JSX.Element => {
 
       // Trigger the useEffect by updating the wishlistUpdated state
       setWishlistUpdated(true);
+
+      //notify navbar (item moved out of cart)
+      notifyCartChanged();
     } catch (error: unknown) {
       // Changed from any to unknown
       console.error('Error adding to wishlist:', error);
@@ -412,6 +430,9 @@ const UserCart = (): JSX.Element => {
 
       // Trigger the useEffect by updating the wishlistUpdated state
       setWishlistUpdated(true);
+
+      //notify navbar (item moved into cart)
+      notifyCartChanged();
     } catch (error: unknown) {
       // Changed from any to unknown
       console.error('Error adding to cart:', error);
@@ -471,6 +492,9 @@ const UserCart = (): JSX.Element => {
         setCartItems([]); // Clear the cart after successful checkout
         setCartItemCount(0);
         setIsCheckoutModalOpen(false);
+
+        // notify navbar (cart emptied)
+        notifyCartChanged();
       } else {
         const errorData = await response.json();
         setCheckoutMessage(

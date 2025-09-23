@@ -1,6 +1,7 @@
 import axiosInstance from '@/shared/api/axiosInstance';
 import { fetchCartIdByCustomerId } from './getCart';
 import { useUser } from '@/context/UserContext';
+import { notifyCartChanged } from './cartEvent';
 
 type UseAddToCartReturnType = {
   addToCart: (productId: string) => Promise<boolean>;
@@ -32,10 +33,13 @@ export function useAddToCart(): UseAddToCartReturnType {
 
       const endpoint = `http://localhost:8080/api/v2/gateway/carts/${cartId}/${productId}`;
       await axiosInstance.post(endpoint);
-      return true; // Return true if successful
+
+      notifyCartChanged();
+
+      return true; //returns true
     } catch (error) {
       console.error('Error adding product to cart:', error);
-      return false; // Return false if an error occurs
+      return false; //returns false
     }
   };
 
