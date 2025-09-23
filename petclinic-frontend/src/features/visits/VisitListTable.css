@@ -102,12 +102,12 @@ h2 {
 
 /* Confirm button */
 .modal-buttons button:last-of-type {
-  background-color: #0d6efd !important; 
+  background-color: #0144aa !important; 
   color: #fff !important;
 }
 
 .modal-buttons button:last-of-type:hover {
-  background-color: #0b5ed7; 
+  background-color: #014cbc; 
 }
 
 @keyframes fadeIn {
