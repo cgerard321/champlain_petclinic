@@ -1,4 +1,4 @@
-import { useState , useEffect, useCallback, useRef} from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { searchInventories } from '@/features/inventories/api/searchInventories.ts';
 import { Inventory } from '@/features/inventories/models/Inventory.ts';
 
@@ -32,9 +32,9 @@ export default function useSearchInventories(): useSearchInventoriesResponseMode
   const [realPage, setRealPage] = useState<number>(1);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [filters, setFilters] = useState({
-    inventoryName: "",
-    inventoryType: "",
-    inventoryDescription: ""
+    inventoryName: '',
+    inventoryType: '',
+    inventoryDescription: '',
   });
   const listSize: number = 10;
 
@@ -48,22 +48,25 @@ export default function useSearchInventories(): useSearchInventoriesResponseMode
       listSize,
       inventoryName,
       inventoryType,
-      inventoryDescription,
+      inventoryDescription
     );
     setInventoryList(data);
     setRealPage(currentPage + 1);
   };
 
-  const updateFilters = useCallback((newFilters: {
-    inventoryName?: string;
-    inventoryType?: string;
-    inventoryDescription?: string;
-  }) => {
-    setFilters((prev: typeof filters) => ({
-      ...prev,
-      ...newFilters
-    }));
-  }, []);
+  const updateFilters = useCallback(
+    (newFilters: {
+      inventoryName?: string;
+      inventoryType?: string;
+      inventoryDescription?: string;
+    }) => {
+      setFilters((prev: typeof filters) => ({
+        ...prev,
+        ...newFilters,
+      }));
+    },
+    []
+  );
 
   const debounceRef = useRef<number>();
 
@@ -76,11 +79,11 @@ export default function useSearchInventories(): useSearchInventoriesResponseMode
       setIsLoading(true);
       try {
         const data = await searchInventories(
-            0,
-            listSize,
-            filters.inventoryName || undefined,
-            filters.inventoryType || undefined,
-            filters.inventoryDescription || undefined
+          0,
+          listSize,
+          filters.inventoryName || undefined,
+          filters.inventoryType || undefined,
+          filters.inventoryDescription || undefined
         );
         setInventoryList(data);
         setRealPage(1);

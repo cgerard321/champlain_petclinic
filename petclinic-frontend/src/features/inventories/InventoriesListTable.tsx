@@ -77,7 +77,7 @@ export default function InventoriesListTable(): JSX.Element {
     updateFilters({
       inventoryName: value,
       inventoryType,
-      inventoryDescription
+      inventoryDescription,
     });
   };
 
@@ -86,7 +86,7 @@ export default function InventoriesListTable(): JSX.Element {
     updateFilters({
       inventoryName,
       inventoryType: value,
-      inventoryDescription
+      inventoryDescription,
     });
   };
 
@@ -95,7 +95,7 @@ export default function InventoriesListTable(): JSX.Element {
     updateFilters({
       inventoryName,
       inventoryType,
-      inventoryDescription: value
+      inventoryDescription: value,
     });
   };
 
@@ -103,7 +103,11 @@ export default function InventoriesListTable(): JSX.Element {
     setInventoryName('');
     setInventoryType('');
     setInventoryDescription('');
-    updateFilters({ inventoryName: '', inventoryType: '', inventoryDescription: '' });
+    updateFilters({
+      inventoryName: '',
+      inventoryType: '',
+      inventoryDescription: '',
+    });
   };
 
   const pageBefore = (): void => {
@@ -352,7 +356,9 @@ export default function InventoriesListTable(): JSX.Element {
                 >
                   <option value="">None</option>
                   {inventoryTypeList.map(type => (
-                      <option key={type.type} value={type.type}>{type.type}</option>
+                    <option key={type.type} value={type.type}>
+                      {type.type}
+                    </option>
                   ))}
                 </select>
               </td>
@@ -360,7 +366,9 @@ export default function InventoriesListTable(): JSX.Element {
                 <input
                   type="text"
                   value={inventoryDescription}
-                  onChange={e => handleInventoryDescriptionChange(e.target.value)}
+                  onChange={e =>
+                    handleInventoryDescriptionChange(e.target.value)
+                  }
                 />
               </td>
               <td>
@@ -386,14 +394,17 @@ export default function InventoriesListTable(): JSX.Element {
             </tr>
           </thead>
         </table>
-        {inventoryList.length === 0 && (inventoryName !== '' || inventoryType !== '' || inventoryDescription !== '') && (
+        {inventoryList.length === 0 &&
+          (inventoryName !== '' ||
+            inventoryType !== '' ||
+            inventoryDescription !== '') && (
             <div className="text-center p-4">
               <div className="alert alert-info">
                 <h5>No inventory found</h5>
                 <p>No inventories match your current search criteria.</p>
               </div>
             </div>
-        )}
+          )}
         {/*//Cards start here*/}
         <div className={cardStylesInventory.cardContainerCustom}>
           {inventoryList.map(inventory => (
