@@ -1,12 +1,17 @@
 import * as React from 'react';
 import { FormEvent, useEffect, useState } from 'react';
-import { updateOwner, getOwner } from '@/features/customers/api/updateOwner.ts';
+import {
+  updateOwner,
+  getOwner,
+  updateOwnerUsername,
+} from '@/features/customers/api/updateOwner.ts';
 import { OwnerRequestModel } from '@/features/customers/models/OwnerRequestModel.ts';
 import { OwnerResponseModel } from '@/features/customers/models/OwnerResponseModel.ts';
 import { useNavigate } from 'react-router-dom';
 import { AppRoutePaths } from '@/shared/models/path.routes';
 import { useUser } from '@/context/UserContext';
 import './UpdateCustomerForm.css';
+import { OwnerUsernameRequestModel } from '../models/OwnerUsernameRequestModel';
 
 const UpdateCustomerForm: React.FC = (): JSX.Element => {
   const navigate = useNavigate();
@@ -19,6 +24,10 @@ const UpdateCustomerForm: React.FC = (): JSX.Element => {
     province: '',
     telephone: '',
   });
+  const [UsernameFormData, setUsernameFormData] =
+    useState<OwnerUsernameRequestModel>({
+      username: '',
+    });
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
@@ -78,66 +87,108 @@ const UpdateCustomerForm: React.FC = (): JSX.Element => {
     }
   };
 
+  const handleUsernameChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ): void => {
+    const { value } = e.target;
+    setUsernameFormData({ ...setUsernameFormData, username: value });
+  };
+
+  const handleUsernameSubmit = async (
+    e: React.FormEvent<HTMLFormElement>
+  ): Promise<void> => {
+    e.preventDefault();
+    try {
+      if (!user.userId) {
+        console.error('Owner id is undefined');
+        return;
+      }
+      await updateOwnerUsername(user.userId, UsernameFormData);
+    } catch (error) {
+      console.error('Error updating owners username:', error);
+    }
+  };
+
   return (
-    <div className="update-customer-form">
-      <h1>Edit Profile</h1>
-      <form onSubmit={handleSubmit}>
-        <label>First Name: </label>
-        <input
-          type="text"
-          name="firstName"
-          value={owner.firstName}
-          onChange={handleChange}
-        />
-        {errors.firstName && <span className="error">{errors.firstName}</span>}
-        <br />
-        <label>Last Name: </label>
-        <input
-          type="text"
-          name="lastName"
-          value={owner.lastName}
-          onChange={handleChange}
-        />
-        {errors.lastName && <span className="error">{errors.lastName}</span>}
-        <br />
-        <label>Address: </label>
-        <input
-          type="text"
-          name="address"
-          value={owner.address}
-          onChange={handleChange}
-        />
-        {errors.address && <span className="error">{errors.address}</span>}
-        <br />
-        <label>City: </label>
-        <input
-          type="text"
-          name="city"
-          value={owner.city}
-          onChange={handleChange}
-        />
-        {errors.city && <span className="error">{errors.city}</span>}
-        <br />
-        <label>Province: </label>
-        <input
-          type="text"
-          name="province"
-          value={owner.province}
-          onChange={handleChange}
-        />
-        {errors.province && <span className="error">{errors.province}</span>}
-        <br />
-        <label>Telephone: </label>
-        <input
-          type="text"
-          name="telephone"
-          value={owner.telephone}
-          onChange={handleChange}
-        />
-        {errors.telephone && <span className="error">{errors.telephone}</span>}
-        <br />
-        <button type="submit">Update</button>
-      </form>
+    <div>
+      <div className="update-customer-form">
+        <h1>Edit Username</h1>
+        <form onSubmit={handleUsernameSubmit}>
+          <label>Username: </label>
+          <input
+            type="text"
+            name="username"
+            value={UsernameFormData.username}
+            onChange={handleUsernameChange}
+          />
+          <br />
+          <button type="submit">Update</button>
+        </form>
+      </div>
+      <div className="update-customer-form">
+        <h1>Edit Profile</h1>
+        <form onSubmit={handleSubmit}>
+          <label>First Name: </label>
+          <input
+            type="text"
+            name="firstName"
+            value={owner.firstName}
+            onChange={handleChange}
+          />
+          {errors.firstName && (
+            <span className="error">{errors.firstName}</span>
+          )}
+          <br />
+          <label>Last Name: </label>
+          <input
+            type="text"
+            name="lastName"
+            value={owner.lastName}
+            onChange={handleChange}
+          />
+          {errors.lastName && <span className="error">{errors.lastName}</span>}
+          <br />
+          <label>Address: </label>
+          <input
+            type="text"
+            name="address"
+            value={owner.address}
+            onChange={handleChange}
+          />
+          {errors.address && <span className="error">{errors.address}</span>}
+          <br />
+          <label>City: </label>
+          <input
+            type="text"
+            name="city"
+            value={owner.city}
+            onChange={handleChange}
+          />
+          {errors.city && <span className="error">{errors.city}</span>}
+          <br />
+          <label>Province: </label>
+          <input
+            type="text"
+            name="province"
+            value={owner.province}
+            onChange={handleChange}
+          />
+          {errors.province && <span className="error">{errors.province}</span>}
+          <br />
+          <label>Telephone: </label>
+          <input
+            type="text"
+            name="telephone"
+            value={owner.telephone}
+            onChange={handleChange}
+          />
+          {errors.telephone && (
+            <span className="error">{errors.telephone}</span>
+          )}
+          <br />
+          <button type="submit">Update</button>
+        </form>
+      </div>
     </div>
   );
 };

@@ -27,21 +27,16 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseCookie;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import reactor.core.publisher.Mono;
 
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/users")
@@ -217,5 +212,11 @@ public class UserController {
             return false;
         }
     }
+
+    @PatchMapping("/{userId}/username")
+    public ResponseEntity<String> updateUserUsername (@PathVariable String userId, @RequestBody String username, @CookieValue("Bearer") String token) {
+        return ResponseEntity.ok().body(userService.updateUserUsername(userId, username, token));
+    }
+
 
 }

@@ -3,6 +3,7 @@ package com.petclinic.bffapigateway.presentationlayer.v2;
 import com.petclinic.bffapigateway.domainclientlayer.AuthServiceClient;
 import com.petclinic.bffapigateway.dtos.Auth.*;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
+import com.petclinic.bffapigateway.utils.Security.Annotations.IsUserSpecific;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
 import jakarta.validation.Valid;
@@ -133,6 +134,17 @@ public class UserController {
                                                                  @CookieValue("Bearer") String jwtToken) {
         return authServiceClient.updateUsersRoles(userId, rolesChangeRequestDTO, jwtToken)
                 .map(userResponseDTO -> ResponseEntity.ok().body(userResponseDTO))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    @PatchMapping(value = "/users/{userId}/username", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @IsUserSpecific(idToMatch = {"userId"})
+    public Mono<ResponseEntity<String>> updateUsername(@PathVariable final String userId,
+                                                       @RequestBody final String username,
+                                                       @CookieValue("Bearer") String jwtToken
+    ) {
+        return authServiceClient.updateUsername(userId,username,jwtToken)
+                .map(usernameChangeRequestDTO -> ResponseEntity.ok().body(usernameChangeRequestDTO))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
