@@ -72,6 +72,12 @@ select:focus {
   text-align: left;
   border-bottom: 1px solid #dee2e6;
   color: #495057;
+
+  /* ✅ Added for French text */
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: 200px;
 }
 
 .table th {
@@ -87,6 +93,14 @@ select:focus {
 
 .table td {
   font-size: 14px;
+}
+
+/* ✅ Make buttons flexible for long French text */
+button {
+  white-space: normal;
+  padding: 8px 12px;
+  max-width: 100%;
+  text-align: center;
 }
 
 .status-reorder {
@@ -121,7 +135,20 @@ select:focus {
   .table {
     font-size: 12px;
   }
+
+  /* ✅ Make table cells + buttons shrink better on small screens */
+  .table th,
+  .table td {
+    max-width: 120px;
+    font-size: 12px;
+  }
+
+  button {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
 }
+
 #google_translate_element {
   width: 25%;
   margin: 20px 0;
