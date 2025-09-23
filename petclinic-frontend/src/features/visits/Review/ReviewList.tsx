@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAllReviews } from './Api/getAllReviews';
 import { ReviewResponseDTO } from './Model/ReviewResponseDTO';
+import { deleteReview } from './Api/deleteReview';
 
 const ReviewsList: React.FC = (): JSX.Element => {
   const [reviewList, setReviewList] = useState<ReviewResponseDTO[]>([]);

@@ -16,9 +16,6 @@ export default function VisitListTable(): JSX.Element {
   const [emergencyList, setEmergencyList] = useState<EmergencyResponseDTO[]>(
     []
   );
-  // const [archivedVisits, setArchivedVisits] = useState<Visit[]>([]);
-  // const [visitsList, setVisitsList] = useState<Visit[]>([]);
-  // const [visitsAll, setVisitsAll] = useState<Visit[]>([]);
 
   //make tables collapsable
   const [searchTerm, setSearchTerm] = useState<string>(''); // Search term state
@@ -54,7 +51,7 @@ export default function VisitListTable(): JSX.Element {
   );
 
   useEffect(() => {
-    const loadInitialData = async () => {
+    const loadInitialData = async (): Promise<void> => {
       try {
         const [visits, emergencies] = await Promise.all([
           getAllVisits(),
@@ -68,19 +65,6 @@ export default function VisitListTable(): JSX.Element {
     };
     loadInitialData();
   }, []);
-
-  // useEffect(() => {
-  //   // Fetch emergency visits
-  //   async function loadInitialEmergencyVisits(): Promise<void> {
-  //     try {
-  //       const emergencies = await getAllEmergency();
-  //       setEmergencyList(emergencies); // Set emergency data to state
-  //     } catch (error) {
-  //       console.error('Error fetching emergencies:', error);
-  //     }
-  //   }
-  //   loadInitialEmergencyVisits();
-  // }, []);
 
   useEffect(() => {
     const eventSource = new EventSource('/visits');
@@ -229,7 +213,9 @@ export default function VisitListTable(): JSX.Element {
                 <button
                   className="btn btn-warning"
                   onClick={() => {
-                    navigate(`/visits/emergency/${emergency.visitEmergencyId}`);
+                    navigate(
+                      `/visits/emergency/${emergency.visitEmergencyId}/edit`
+                    );
                   }}
                   title="Edit"
                 >
