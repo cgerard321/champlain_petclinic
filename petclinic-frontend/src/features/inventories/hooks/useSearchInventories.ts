@@ -86,15 +86,15 @@ export default function useSearchInventories(): useSearchInventoriesResponseMode
     debounceRef.current = setTimeout(async () => {
       setIsLoading(true);
       try {
-        const data = await searchInventories(
-          0,
-          listSize,
-          filters.inventoryName || undefined,
-          filters.inventoryType || undefined,
-          filters.inventoryDescription || undefined,
-            filters.importantOnly || undefined,
-        );
-        setInventoryList(data);
+        const data = await searchInventories(0, listSize, undefined, undefined, undefined);
+        const filtered = data.filter(item => {
+          const nameMatch = !filters.inventoryName || item.inventoryName.toLowerCase().includes(filters.inventoryName.toLowerCase());
+          const typeMatch = !filters.inventoryType || item.inventoryType === filters.inventoryType;
+          const descMatch = !filters.inventoryDescription || (item.inventoryDescription || '').toLowerCase().includes(filters.inventoryDescription.toLowerCase());
+          const importantMatch = !filters.importantOnly || (item.important === true);
+          return nameMatch && typeMatch && descMatch && importantMatch;
+        });
+        setInventoryList(filtered);
         setRealPage(1);
         setCurrentPage(() => 0);
       } catch (error) {
