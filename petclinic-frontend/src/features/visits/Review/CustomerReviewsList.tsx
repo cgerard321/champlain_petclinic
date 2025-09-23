@@ -37,7 +37,7 @@ const CustomerReviewsList: React.FC = (): JSX.Element => {
     );
     if (!confirmDelete) return;
     try {
-      await deleteReview(user.userId, reviewId.toString());
+      await deleteReview(reviewId.toString());
       setReviewList(prev =>
         prev.filter(review => review.reviewId !== reviewId)
       );
