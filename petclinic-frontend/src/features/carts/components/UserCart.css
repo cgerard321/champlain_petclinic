@@ -411,3 +411,18 @@
 .cart-header-title {
   margin-top: 20px;
 }
+
+
+/* If the overlay is an actual <img> with matching src or alt for out of stuck*/
+.Wishlist-items img[src*="out-of-stock" i],
+.Wishlist-items img[alt*="out of stock" i],
+.Wishlist-items .oos-overlay {
+  display: none !important;
+}
+
+.Wishlist-items *::before,
+.Wishlist-items *::after {
+  
+  background-image: none !important;
+  content: normal; 
+}
