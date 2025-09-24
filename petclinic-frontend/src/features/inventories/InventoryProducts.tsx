@@ -127,6 +127,12 @@ const InventoryProducts: React.FC = () => {
           { useV2: false }
         );
         const data = Array.isArray(response.data) ? response.data : [];
+        // Calculate profit margin for each product
+        data.forEach(product => {
+          product.productMargin = parseFloat(
+            (product.productSalePrice - product.productPrice).toFixed(2)
+          );
+        });
         setProducts(data);
         setProductList(data);
         setFilteredProducts(data);
@@ -362,10 +368,12 @@ const InventoryProducts: React.FC = () => {
       <table className="table table-striped">
         <thead>
           <tr>
-            <th>SupplyId</th>
-            <th>SupplyName</th>
+            <th>Supply Id</th>
+            <th>Supply Name</th>
             <th>Description</th>
-            <th>Price</th>
+            <th>Sale Price</th>
+            <th>Regular Price</th>
+            <th>Profit Margin</th>
             <th>Quantity</th>
             <th>Status</th>
             <th>Actions</th>
@@ -379,6 +387,8 @@ const InventoryProducts: React.FC = () => {
                 <td>{product.productName}</td>
                 <td>{product.productDescription}</td>
                 <td>${product.productSalePrice}</td>
+                <td>${product.productPrice}</td>
+                <td>${product.productMargin}</td>
                 <td>{product.productQuantity}</td>
                 <td
                   style={{
