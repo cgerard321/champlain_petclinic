@@ -52,7 +52,7 @@ public class VetController {
 
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @PostMapping(value = "/users/vets",consumes = "application/json",produces = "application/json")
+    @PostMapping(consumes = "application/json",produces = "application/json")//had value = "/vets" so the endpoint was /vets/vets therefore the post was not working
     public Mono<ResponseEntity<VetResponseDTO>> addVet(@RequestBody Mono<RegisterVet> registerVetDTO) {
         return authServiceClient.addVetUser(registerVetDTO)
                 .map(v -> ResponseEntity.status(HttpStatus.CREATED).body(v))
@@ -76,7 +76,7 @@ public class VetController {
 
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @DeleteMapping(value = "{vetId}")
+    @DeleteMapping(value = "/{vetId}")
     public Mono<ResponseEntity<Void>> deleteVet(@PathVariable String vetId) {
         return vetsServiceClient.deleteVet(VetsEntityDtoUtil.verifyId(vetId))
                 .then(Mono.just(ResponseEntity.noContent().<Void>build()))
@@ -84,7 +84,7 @@ public class VetController {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
-    @GetMapping("{vetId}/photo")
+    @GetMapping("/{vetId}/photo")
     public Mono<ResponseEntity<Resource>> getPhotoByVetId(@PathVariable String vetId) {
         return vetsServiceClient.getPhotoByVetId(vetId)
                 .map(r -> ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, MediaType.IMAGE_JPEG_VALUE).body(r))
@@ -92,7 +92,7 @@ public class VetController {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
-    @PutMapping("{vetId}/photo/{photoName}")
+    @PutMapping("/{vetId}/photo/{photoName}")
     public Mono<ResponseEntity<Resource>> updatePhotoByVetId(
             @PathVariable String vetId,
             @PathVariable String photoName,
@@ -121,7 +121,7 @@ public class VetController {
 //    }
     
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
-    @GetMapping(value = "{vetId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/{vetId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<VetResponseDTO>> getVetByVetId(@PathVariable String vetId) {
         return vetsServiceClient.getVetByVetId(vetId)
                 .map(vet -> ResponseEntity.status(HttpStatus.OK).body(vet))
@@ -130,14 +130,14 @@ public class VetController {
     }
     //specialty
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET})
-    @PostMapping(value = "{vetId}/specialties")
+    @PostMapping(value = "/{vetId}/specialties")
     public Mono<VetResponseDTO> addSpecialtiesByVetId(
             @PathVariable String vetId,
             @RequestBody Mono<SpecialtyDTO> specialties) {
         return vetsServiceClient.addSpecialtiesByVetId(vetId, specialties);
     }
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET})    
-    @DeleteMapping(value = "{vetId}/specialties/{specialtyId}")
+    @DeleteMapping(value = "/{vetId}/specialties/{specialtyId}")
     public Mono<ResponseEntity<Void>> deleteSpecialtiesByVetId(
             @PathVariable String vetId,
             @PathVariable String specialtyId) {
@@ -147,7 +147,7 @@ public class VetController {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
-    @GetMapping(value = "{vetId}/albums", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/{vetId}/albums", produces = MediaType.APPLICATION_JSON_VALUE)
     public Flux<Album> getAllAlbumsByVetId(@PathVariable String vetId) {
         return vetsServiceClient.getAllAlbumsByVetId(vetId)
                 .doOnError(error -> log.error("Error fetching photos for vet {}", vetId, error));
@@ -155,7 +155,7 @@ public class VetController {
 
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
-    @DeleteMapping("{vetId}/photo")
+    @DeleteMapping("/{vetId}/photo")
     public Mono<ResponseEntity<Void>> deletePhotoByVetId(@PathVariable String vetId) {
         return vetsServiceClient.deletePhotoByVetId(vetId)
                 .then(Mono.just(ResponseEntity.noContent().<Void>build()))
@@ -177,7 +177,7 @@ public class VetController {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
-    @PostMapping("{vetId}/educations")
+    @PostMapping("/{vetId}/educations")
     public Mono<ResponseEntity<EducationResponseDTO>> addEducationToVet(
             @PathVariable String vetId,
             @RequestBody Mono<EducationRequestDTO> educationRequestDTOMono) {
@@ -199,7 +199,7 @@ public class VetController {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
-    @GetMapping(value = "{vetId}/ratings", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/{vetId}/ratings", produces = MediaType.APPLICATION_JSON_VALUE)
     public Flux<RatingResponseDTO> getRatingsByVetId(@PathVariable String vetId) {
         return vetsServiceClient.getRatingsByVetId(vetId)
                 .doOnError(error -> log.error("Error fetching ratings for vet {}", vetId, error));

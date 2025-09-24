@@ -59,7 +59,7 @@ public class VetController {
 
 
     //Ratings
-    @GetMapping("{vetId}/ratings")
+    @GetMapping("/{vetId}/ratings")
     public Flux<RatingResponseDTO> getAllRatingsByVetId(@PathVariable String vetId) {
         return ratingService.getAllRatingsByVetId(EntityDtoUtil.verifyId(vetId))
                 .doOnNext(rating -> log.info("Rating ID: {}, Vet ID: {}, Rating: {}, Customer Name: {}, Experience: {}",
@@ -69,7 +69,7 @@ public class VetController {
     }
 
 
-    @GetMapping("{vetId}/ratings/count")
+    @GetMapping("/{vetId}/ratings/count")
     public Mono<ResponseEntity<Integer>> getNumberOfRatingsByVetId(@PathVariable String vetId){
         return ratingService.getNumberOfRatingsByVetId(vetId)
                 .map(ResponseEntity::ok)
@@ -87,20 +87,20 @@ public class VetController {
     }
 
 
-    @DeleteMapping("{vetId}/ratings/{ratingId}")
+    @DeleteMapping("/{vetId}/ratings/{ratingId}")
     public Mono<ResponseEntity<Void>> deleteRatingByRatingId(@PathVariable String vetId,
                                                              @PathVariable String ratingId){
         return ratingService.deleteRatingByRatingId(vetId, ratingId)
                 .then(Mono.just(ResponseEntity.noContent().<Void>build()))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
-    @GetMapping("{vetId}/ratings/average")
+    @GetMapping("/{vetId}/ratings/average")
     public Mono<ResponseEntity<Double>> getAverageRatingByVetId(@PathVariable String vetId){
         return ratingService.getAverageRatingByVetId(vetId)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
-    @GetMapping("{vetId}/ratings/date")
+    @GetMapping("/{vetId}/ratings/date")
     public Flux<RatingResponseDTO> getRatingsOfAVetBasedOnDate(@PathVariable String vetId, @RequestParam Map<String,String> queryParams) {
         if (queryParams.containsKey("year")) {
             String year = queryParams.get("year");
@@ -118,13 +118,13 @@ public class VetController {
 
 
 
-    @GetMapping("topVets")
+    @GetMapping("/topVets")
     public Flux<VetAverageRatingDTO> getTopThreeVetsWithHighestAverageRating() {
         return ratingService.getTopThreeVetsWithHighestAverageRating();
     }
 
 
-    @PutMapping("{vetId}/ratings/{ratingId}")
+    @PutMapping("/{vetId}/ratings/{ratingId}")
     public Mono<ResponseEntity<RatingResponseDTO>> updateRatingByVetIdAndRatingId(@PathVariable String vetId,
                                                                                   @PathVariable String ratingId,
                                                                                   @RequestBody Mono<RatingRequestDTO> ratingRequestDTOMono){
@@ -140,7 +140,7 @@ public class VetController {
    }*/
 
 
-    @GetMapping("{vetId}/ratings/percentages")
+    @GetMapping("/{vetId}/ratings/percentages")
     public Mono<ResponseEntity<String>> getPercentageOfRatingsByVetId(@PathVariable String vetId){
         return ratingService.getRatingPercentagesByVetId(EntityDtoUtil.verifyId(vetId))
                 .map(ResponseEntity::ok)
@@ -195,7 +195,7 @@ public class VetController {
 
 
     @PostMapping
-    public Mono<ResponseEntity<VetResponseDTO>> insertVet(@RequestBody Mono<VetRequestDTO> vetRequestDTOMono) {
+    public Mono<ResponseEntity<VetResponseDTO>> addVet(@RequestBody Mono<VetRequestDTO> vetRequestDTOMono) {
         return vetService.addVet(vetRequestDTOMono)
                 .map(v->ResponseEntity.status(HttpStatus.CREATED).body(v))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
@@ -203,7 +203,7 @@ public class VetController {
 
 
 
-    @PutMapping("{vetId}")
+    @PutMapping("/{vetId}")
     public Mono<ResponseEntity<VetResponseDTO>> updateVetByVetId(@PathVariable String vetId, @RequestBody Mono<VetRequestDTO> vetRequestDTOMono) {
     return vetService.updateVet(EntityDtoUtil.verifyId(vetId), vetRequestDTOMono)
                 .map(ResponseEntity::ok)
@@ -211,7 +211,7 @@ public class VetController {
     }
 
 
-    @DeleteMapping("{vetId}")
+    @DeleteMapping("/{vetId}")
     public Mono<ResponseEntity<Void>> deleteVet(@PathVariable String vetId) {
         return vetService.deleteVetByVetId(EntityDtoUtil.verifyId(vetId))
                 .then(Mono.just(ResponseEntity.noContent().<Void>build()))
@@ -220,13 +220,13 @@ public class VetController {
 
 
     //Education
-    @GetMapping("{vetId}/educations")
+    @GetMapping("/{vetId}/educations")
     public Flux<EducationResponseDTO> getAllEducationsByVetId(@PathVariable String vetId) {
         return educationService.getAllEducationsByVetId(EntityDtoUtil.verifyId(vetId));
     }
 
 
-    @DeleteMapping("{vetId}/educations/{educationId}")
+    @DeleteMapping("/{vetId}/educations/{educationId}")
     public Mono<ResponseEntity<Void>> deleteEducationByEducationId(@PathVariable String vetId,
                                                                    @PathVariable String educationId){
         return educationService.deleteEducationByEducationId(vetId, educationId)
@@ -234,7 +234,7 @@ public class VetController {
                 .onErrorResume(NotFoundException.class, e -> Mono.just(ResponseEntity.notFound().build()));
     }
 
-    @PutMapping("{vetId}/educations/{educationId}")
+    @PutMapping("/{vetId}/educations/{educationId}")
     public Mono<ResponseEntity<EducationResponseDTO>> updateEducationByVetIdAndEducationId(@PathVariable String vetId,
                                                                                            @PathVariable String educationId,
                                                                                            @RequestBody Mono<EducationRequestDTO> educationRequestDTOMono){
@@ -244,7 +244,7 @@ public class VetController {
     }
 
 
-    @PostMapping("{vetId}/educations")
+    @PostMapping("/{vetId}/educations")
     public Mono<ResponseEntity<EducationResponseDTO>> addEducationToVet(@PathVariable String vetId,
                                                                         @RequestBody Mono<EducationRequestDTO> educationRequestDTOMono) {
         return educationService.addEducationToVet(vetId, educationRequestDTOMono)
@@ -259,13 +259,13 @@ public class VetController {
 
 
     //Photo
-    @GetMapping("{vetId}/photo")
+    @GetMapping("/{vetId}/photo")
     public Mono<ResponseEntity<Resource>> getPhotoByVetId(@PathVariable String vetId){
         return photoService.getPhotoByVetId(vetId)
                 .map(r -> ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, MediaType.IMAGE_JPEG_VALUE).body(r))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
-    @GetMapping("{vetId}/default-photo")
+    @GetMapping("/{vetId}/default-photo")
     public Mono<ResponseEntity<PhotoResponseDTO>> getDefaultPhotoByVetId(@PathVariable String vetId){
         return photoService.getDefaultPhotoByVetId(vetId)
                 .map(r -> ResponseEntity.ok().body(r))
@@ -290,7 +290,7 @@ public class VetController {
     }
 */
 
-    @DeleteMapping("{vetId}/photo")
+    @DeleteMapping("/{vetId}/photo")
     public Mono<ResponseEntity<Void>> deletePhotoByVetId(@PathVariable String vetId) {
         return photoService.deletePhotoByVetId(vetId)
                 .then(Mono.just(ResponseEntity.noContent().<Void>build()))
@@ -299,7 +299,7 @@ public class VetController {
 
     
 
-    @PutMapping("{vetId}/photos/{photoName}")
+    @PutMapping("/{vetId}/photos/{photoName}")
     public Mono<ResponseEntity<Resource>> updatePhotoByVetId(@PathVariable String vetId, @PathVariable String photoName, @RequestBody Mono<Resource> photo){
         return photoService.updatePhotoByVetId(vetId, photoName, photo)
                 .map(p -> ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, MediaType.IMAGE_JPEG_VALUE).body(p))
@@ -308,7 +308,7 @@ public class VetController {
 
 
     //Badge
-    @GetMapping("{vetId}/badge")
+    @GetMapping("/{vetId}/badge")
     public Mono<ResponseEntity<BadgeResponseDTO>> getBadgeByVetId(@PathVariable String vetId){
         return badgeService.getBadgeByVetId(vetId)
                 .map(r->ResponseEntity.status(HttpStatus.OK).body(r))
@@ -316,7 +316,7 @@ public class VetController {
     }
 
     //specialty
-    @PostMapping("{vetId}/specialties")
+    @PostMapping("/{vetId}/specialties")
     public Mono<VetResponseDTO> addSpecialtiesByVetId(
             @PathVariable String vetId,
             @RequestBody Mono<SpecialtyDTO> specialties) {
@@ -324,7 +324,7 @@ public class VetController {
         return vetService.addSpecialtiesByVetId(vetId, specialties);
     }
 
-    @DeleteMapping("{vetId}/specialties/{specialtyId}")
+    @DeleteMapping("/{vetId}/specialties/{specialtyId}")
     public Mono<ResponseEntity<Void>> deleteSpecialtiesBySpecialtyId(
             @PathVariable String vetId,
             @PathVariable String specialtyId) {
@@ -333,7 +333,7 @@ public class VetController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("{vetId}/albums")
+    @GetMapping("/{vetId}/albums")
     public Flux<Album> getAllAlbumsByVetId(@PathVariable String vetId) {
         return albumService.getAllAlbumsByVetId(vetId)
                 .doOnNext(album -> log.info("Album ID: {}, Vet ID: {}, Filename: {}, ImgType: {}",

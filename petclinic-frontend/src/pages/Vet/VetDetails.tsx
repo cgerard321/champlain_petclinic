@@ -3,13 +3,14 @@ import { useParams } from 'react-router-dom';
 import { NavBar } from '@/layouts/AppNavBar.tsx';
 import './VetDetails.css';
 import axios from 'axios';
+import axiosInstance from '@/shared/api/axiosInstance';
 import DeleteVetPhoto from '@/pages/Vet/DeleteVetPhoto.tsx';
 import UpdateVetEducation from '@/pages/Vet/UpdateVetEducation';
 import AddEducation from '@/pages/Vet/AddEducation.tsx';
 import DeleteVetEducation from '@/pages/Vet/DeleteVetEducation';
 import { Workday } from '@/features/veterinarians/models/Workday.ts';
 import UpdateVet from '@/pages/Vet/UpdateVet.tsx';
-import { fetchVetPhoto } from '@/features/veterinarians/api/fetchPhoto';
+//import { fetchVetPhoto } from '@/features/veterinarians/api/fetchPhoto';
 
 interface VetResponseType {
   vetId: string;
@@ -86,21 +87,18 @@ export default function VetDetails(): JSX.Element {
 
   const [selectedEducation, setSelectedEducation] =
     useState<EducationResponseType | null>(null);
-  const [ratings, setRatings] = useState<RatingResponseType[] | null>(null);
+  const [ratings/*, setRatings*/] = useState<RatingResponseType[] | null>(null);
   const [selectedVet, setSelectedVet] = useState<VetRequestModel | null>(null);
 
   const refreshVetDetails = useCallback(async (): Promise<void> => {
     try {
-      const response = await fetch(
-        `http://localhost:8080/api/v2/gateway/vets/${vetId}`
+      const response = await axiosInstance.get<VetResponseType>(
+        `/vets/${vetId}`
       );
-      if (!response.ok) {
-        throw new Error(`Error: ${response.statusText}`);
-      }
-      const data: VetResponseType = await response.json();
-      setVet(data);
+      setVet(response.data);
     } catch (error) {
       console.error('Failed to fetch vet details:', error);
+      setError('Failed to fetch vet details');
     }
   }, [vetId]);
   const mapVetResponseToRequest = (vet: VetResponseType): VetRequestModel => ({
@@ -119,43 +117,38 @@ export default function VetDetails(): JSX.Element {
     password: 'defaultPassword',
     vetBillId: vet.vetBillId,
   });
+  //Ratings and Photos Not working currently
+  //
+  // useEffect(() => {
+  //   const fetchVetRatings = async (): Promise<void> => {
+  //     try {
+  //       const response = await axiosInstance.get<RatingResponseType[]>(
+  //         `vets/${vetId}/ratings`
+  //       );
+  //       setRatings(response.data);
+  //     } catch (error) {
+  //       setError('Failed to fetch vet ratings');
+  //     }
+  //   };
+  //   fetchVetRatings();
+  // }, [vetId]);
 
-  useEffect(() => {
-    const fetchVetRatings = async (): Promise<void> => {
-      try {
-        const response = await fetch(
-          `http://localhost:8080/api/v2/gateway/vets/${vetId}/ratings`
-        );
-        if (!response.ok) {
-          throw new Error(`Error: ${response.statusText}`);
-        }
-        const data: RatingResponseType[] = await response.json();
-        setRatings(data);
-      } catch (error) {
-        setError('Failed to fetch vet ratings');
-      }
-    };
-    fetchVetRatings();
-  }, [vetId]);
+  // useEffect(() => {
+  //   const fetchPhoto = async (): Promise<void> => {
+  //     try {
+  //       if (!vetId) throw new Error('Vet ID undefined');
+  //         const imageUrl = await fetchVetPhoto(vetId);
+  //         setPhoto(imageUrl);
+  //         setIsDefaultPhoto(false);
+  //     } catch (error) {
+  //       setError('Failed to fetch vet photo');
+  //       setPhoto('/images/vet_default.jpg');
+  //       setIsDefaultPhoto(true); // This indicates the default photo is being used
+  //     }
+  //   };
 
-  useEffect(() => {
-    const fetchPhoto = async (): Promise<void> => {
-      try {
-        if (vetId) {
-          const imageUrl = await fetchVetPhoto(vetId);
-          setPhoto(imageUrl);
-        } else {
-          setError('Vet ID is undefined');
-        }
-      } catch (error) {
-        setError('Failed to fetch vet photo');
-        setPhoto('/images/vet_default.jpg');
-        setIsDefaultPhoto(true); // This indicates the default photo is being used
-      }
-    };
-
-    fetchPhoto();
-  }, [vetId]);
+  //   fetchPhoto();
+  // }, [vetId]);
 
   const handleEducationDeleted = (deletedEducationId: string): void => {
     setEducation(prevEducation =>
@@ -442,6 +435,7 @@ export default function VetDetails(): JSX.Element {
 
   if (loading) return <p>Loading vet details...</p>;
   if (error) return <p>{error}</p>;
+  if (!vetId) throw new Error('Vet ID undefined');
 
   return (
     <div>
