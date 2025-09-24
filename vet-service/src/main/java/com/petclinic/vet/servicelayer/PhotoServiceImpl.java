@@ -51,19 +51,27 @@ public class PhotoServiceImpl implements PhotoService {
 
 
     @Override
-    public Mono<Resource> insertPhotoOfVet(String vetId, String photoName, Mono<Resource> photo) {
-        return photo
-                .map(p -> EntityDtoUtil.toPhotoEntity(vetId, photoName, p))
+    public Mono<Resource> insertPhotoOfVet(String vetId, String photoName, MultipartFile file) {
+        return Mono.fromCallable(() -> {
+                    if (file == null || file.getSize() <= 0) {
+                        throw new InvalidInputException("Empty file");
+                    }
+                    String ct = file.getContentType();
+                    if (ct == null || !ct.startsWith("image/")) {
+                        throw new InvalidInputException("Unsupported media type");
+                    }
+                    Photo entity = Photo.builder()
+                            .vetId(vetId)
+                            .filename(photoName)
+                            .imgType(ct)
+                            .data(file.getBytes())
+                            .build();
+                    return entity;
+                })
                 .flatMap(photoRepository::save)
-                .map(img -> {
-                    // Create a Resource from the photo's InputStream
-                    ByteArrayResource resource = new ByteArrayResource(img.getData());
-                    //log.debug("Picture byte array in vet-service toServiceImpl" + resource);
-
-
-                    return resource;
-                });
+                .map(saved -> new ByteArrayResource(saved.getData()));
     }
+
 
 
     @Override

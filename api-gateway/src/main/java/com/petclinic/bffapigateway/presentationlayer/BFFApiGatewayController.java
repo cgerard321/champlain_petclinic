@@ -25,10 +25,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
+import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -498,9 +500,18 @@ public class BFFApiGatewayController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    @PostMapping(value = "vets/{vetId}/photos/{photoName}")
-    public Mono<ResponseEntity<Resource>> addPhoto(@PathVariable String vetId, @PathVariable String photoName, @RequestBody Mono<Resource> image) {
-        return vetsServiceClient.addPhotoToVet(vetId, photoName, image)
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
+    @PostMapping(
+            value = "vets/{vetId}/photos/{photoName}",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    public Mono<ResponseEntity<Resource>> addPhotoByVetId(
+            @PathVariable String vetId,
+            @PathVariable String photoName,
+            @RequestPart("file") Mono<FilePart> file) {
+
+        return file
+                .flatMap(fp -> vetsServiceClient.addPhotoToVet(vetId, photoName, fp))
                 .map(r -> ResponseEntity.status(HttpStatus.CREATED).body(r))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }

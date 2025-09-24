@@ -43,10 +43,14 @@ import org.springframework.context.annotation.FilterType;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.MultipartBodyBuilder;
+import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
@@ -873,27 +877,36 @@ class ApiGatewayControllerTest {
 
 
     @Test
-    void addPhotoToVet() {
-        byte[] photo = {123, 23, 75, 34};
-        Resource resource = new ByteArrayResource(photo);
+    void addPhotoToVet_multipart_ok() {
+        String VET_ID = "some-vet-id";
 
-        when(vetsServiceClient.addPhotoToVet(anyString(), anyString(), any(Mono.class)))
-                .thenReturn(Mono.just(resource));
+        byte[] bytes = new byte[]{123, 23, 75, 34};
+        Resource returnedPhoto = new ByteArrayResource(bytes);
+
+        when(vetsServiceClient.addPhotoToVet(
+                eq(VET_ID), eq("vet_photo.jpg"), any(FilePart.class)))
+                .thenReturn(Mono.just(returnedPhoto));
+
+        DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
+        DataBuffer buffer = factory.wrap(bytes);
+
+        MultipartBodyBuilder mb = new MultipartBodyBuilder();
+        mb.part("file", buffer)
+                .filename("photo.jpg")
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.IMAGE_JPEG_VALUE);
 
         client.post()
                 .uri("/api/gateway/vets/{vetId}/photos/{photoName}", VET_ID, "vet_photo.jpg")
-                .body(Mono.just(resource), Resource.class)
-                .accept(MediaType.APPLICATION_OCTET_STREAM)
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+                .body(BodyInserters.fromMultipartData(mb.build()))
                 .exchange()
                 .expectStatus().isCreated()
                 .expectHeader().contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .expectBody(Resource.class)
-                .consumeWith(response -> {
-                    assertEquals(resource, response.getResponseBody());
-                });
+                .expectBody(byte[].class)
+                .isEqualTo(bytes);
 
-        Mockito.verify(vetsServiceClient, times(1))
-                .addPhotoToVet(anyString(), anyString(), any(Mono.class));
+        verify(vetsServiceClient, times(1))
+                .addPhotoToVet(eq(VET_ID), eq("vet_photo.jpg"), any(FilePart.class));
     }
 
     @Test

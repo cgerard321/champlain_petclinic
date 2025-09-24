@@ -1,56 +1,61 @@
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
-// eslint-disable-next-line import/default
-import React, { useState } from 'react';
-import { Button, Form, Modal } from 'react-bootstrap';
+import { useState, FormEvent, ChangeEvent, FC } from 'react';
+import { Button, Form, Modal, Spinner } from 'react-bootstrap';
+import { addPhotoByVetId } from '@/features/veterinarians/api/addPhotoByVetId';
 
-const UploadVetPhoto: React.FC = () => {
+interface UploadVetPhotoProps {}
+
+const UploadVetPhoto: FC<UploadVetPhotoProps> = () => {
   const [vetId, setVetId] = useState('');
   const [photoName, setPhotoName] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [show, setShow] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  const handleShow = () => setShow(true);
-  const handleClose = () => {
+  const handleShow = (): void => setShow(true);
+  const handleClose = (): void => {
     setShow(false);
     resetForm();
   };
 
-  const resetForm = () => {
+  const resetForm = (): void => {
     setVetId('');
     setPhotoName('');
     setSelectedFile(null);
   };
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>): void => {
     const file = event.target.files?.[0] || null;
     setSelectedFile(file);
+    setErrorMsg(null);
   };
 
-  const handleUpload = async () => {
+  const handleUpload = async (event?: FormEvent): Promise<void> => {
+    event?.preventDefault();
+
+    setErrorMsg(null);
     if (!selectedFile) {
-      console.error('No file selected');
+      setErrorMsg('Please choose a file to upload.');
       return;
     }
 
-    const formData = new FormData();
-    formData.append('file', selectedFile);
-
+    setSubmitting(true);
     try {
-      const response = await fetch(
-        `api/v2/gateway/vets/${vetId}/photos/${photoName}`,
-        {
-          method: 'POST',
-          body: formData,
-        }
+      await addPhotoByVetId(
+        vetId || '',
+        photoName || selectedFile.name,
+        selectedFile
       );
-
-      if (response.ok) {
-        handleClose(); // Close the modal on success
+      handleClose();
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setErrorMsg(err.message);
       } else {
-        console.error('Failed to upload photo', response.statusText);
+        setErrorMsg('An unexpected error occurred. Please try again.');
       }
-    } catch (error) {
-      console.error('Error:', error);
+      console.error('Upload error', err);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -93,16 +98,29 @@ const UploadVetPhoto: React.FC = () => {
                 accept="image/*"
                 onChange={handleFileChange}
                 required
+                disabled={submitting}
               />
             </Form.Group>
+            {errorMsg && <div className="alert alert-danger">{errorMsg}</div>}
           </Form>
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleClose}>
             Close
           </Button>
-          <Button variant="primary" onClick={handleUpload}>
-            Upload
+          <Button
+            variant="primary"
+            onClick={handleUpload}
+            disabled={submitting}
+          >
+            {submitting ? (
+              <>
+                <Spinner animation="border" size="sm" className="me-2" />
+                Uploading...
+              </>
+            ) : (
+              'Upload'
+            )}
           </Button>
         </Modal.Footer>
       </Modal>
