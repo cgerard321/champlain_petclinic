@@ -88,7 +88,6 @@ const InventoryProducts: React.FC = () => {
       if (!host) return;
       const TranslateElement = aw.google?.translate?.TranslateElement;
       if (TranslateElement) {
-        // eslint-disable-next-line no-new
         new TranslateElement(
           {
             pageLanguage: 'en',
