@@ -16,14 +16,14 @@ let GT_WIDGET_INIT = false;
 
 const MAX_QTY = 100;
 
-function parseValidAddAmount(raw: string | null): number | null {
+/*function parseValidAddAmount(raw: string | null): number | null {
   if (raw === null) return null;
   const trimmed = raw.trim();
   if (!/^\d+$/.test(trimmed)) return null;
   const n = Number(trimmed);
   if (!Number.isInteger(n) || n <= 0) return null;
   return n;
-}
+}*/
 
 const InventoryProducts: React.FC = () => {
   const { inventoryId } = useParams<{ inventoryId: string }>();
@@ -51,7 +51,7 @@ const InventoryProducts: React.FC = () => {
     }
   };
 
-  const googleTranslateElementInit = (): void => {
+  /*const googleTranslateElementInit = (): void => {
     new window.google.translate.TranslateElement(
       {
         pageLanguage: 'en',
@@ -60,10 +60,10 @@ const InventoryProducts: React.FC = () => {
       },
       'google_translate_element'
     );
-  };
+  };*/
 
   useEffect(() => {
-    const initWidget = () => {
+    const initWidget: () => void = (): void => {
       if (GT_WIDGET_INIT) return;
       const host = document.getElementById('google_translate_element');
       if (!host) return;
