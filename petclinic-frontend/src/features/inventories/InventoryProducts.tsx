@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-// import axios from 'axios'; wrong axios
 import { ProductModel } from './models/ProductModels/ProductModel';
 import './InventoriesListTable.module.css';
 import './InventoryProducts.css';
@@ -11,25 +10,54 @@ import ConfirmationModal from '@/features/inventories/ConfirmationModal.tsx';
 import { Status } from '@/features/inventories/models/ProductModels/Status.ts';
 import axiosInstance from '@/shared/api/axiosInstance';
 
+// ---- Local types (no global augmentation) ----
+type GoogleNS = {
+  translate?: {
+    TranslateElement?: new (
+      opts: {
+        pageLanguage: string;
+        autoDisplay: boolean;
+        includedLanguages: string;
+      },
+      elementId: string
+    ) => void;
+  };
+};
+
+type WindowWithGoogle = Window & {
+  google?: GoogleNS;
+  __gtInit?: () => void;
+};
+
 let GT_SCRIPT_ADDED = false;
 let GT_WIDGET_INIT = false;
 
 const MAX_QTY = 100;
 
-/*function parseValidAddAmount(raw: string | null): number | null {
-  if (raw === null) return null;
-  const trimmed = raw.trim();
-  if (!/^\d+$/.test(trimmed)) return null;
-  const n = Number(trimmed);
-  if (!Number.isInteger(n) || n <= 0) return null;
-  return n;
-}*/
+// ---- Error helper (no `any`) ----
+type AxiosErrorLike = {
+  response?: { status?: number; statusText?: string; data?: unknown };
+  message?: string;
+};
+
+const getErrorMessage = (err: unknown): string => {
+  if (err && typeof err === 'object') {
+    const e = err as AxiosErrorLike;
+    if (e.response) {
+      const { status = '', statusText = '', data } = e.response;
+      const body = typeof data === 'string' ? data : JSON.stringify(data);
+      return `(${status}) ${statusText} — ${body}`;
+    }
+    if (typeof e.message === 'string') return e.message;
+  }
+  return 'Unknown error';
+};
 
 const InventoryProducts: React.FC = () => {
   const { inventoryId } = useParams<{ inventoryId: string }>();
   const { productList, setProductList, getProductList } = useSearchProducts();
 
-  // Declare state
+  // State
   const [productName, setProductName] = useState<string>('');
   const [productDescription, setProductDescription] = useState<string>('');
   const [productStatus, setProductStatus] = useState<Status>(Status.AVAILABLE);
@@ -42,61 +70,55 @@ const InventoryProducts: React.FC = () => {
   const navigate = useNavigate();
 
   const handleCreatePdf = async (): Promise<void> => {
-    if (inventoryId) {
-      try {
-        await createPdf(inventoryId);
-      } catch (error) {
-        console.error('Failed to create PDF', error);
-      }
+    if (!inventoryId) return;
+    try {
+      await createPdf(inventoryId);
+    } catch (err: unknown) {
+      console.error('Failed to create PDF', getErrorMessage(err));
     }
   };
 
-  /*const googleTranslateElementInit = (): void => {
-    new window.google.translate.TranslateElement(
-      {
-        pageLanguage: 'en',
-        autoDisplay: false,
-        includedLanguages: 'en,fr,de,es', // Specify the languages you want to include
-      },
-      'google_translate_element'
-    );
-  };*/
+  // Google Translate: load once, init once (no global typing)
+  useEffect((): void => {
+    const aw = window as WindowWithGoogle;
 
-  useEffect(() => {
-    const initWidget: () => void = (): void => {
+    const initWidget = (): void => {
       if (GT_WIDGET_INIT) return;
       const host = document.getElementById('google_translate_element');
       if (!host) return;
-
-      new window.google.translate.TranslateElement(
-        {
-          pageLanguage: 'en',
-          autoDisplay: false,
-          includedLanguages: 'en,fr,de,es',
-        },
-        'google_translate_element'
-      );
-      GT_WIDGET_INIT = true;
+      const TranslateElement = aw.google?.translate?.TranslateElement;
+      if (TranslateElement) {
+        // eslint-disable-next-line no-new
+        new TranslateElement(
+          {
+            pageLanguage: 'en',
+            autoDisplay: false,
+            includedLanguages: 'en,fr,de,es',
+          },
+          'google_translate_element'
+        );
+        GT_WIDGET_INIT = true;
+      }
     };
 
-    if ((window as any).google?.translate?.TranslateElement) {
+    if ((window as WindowWithGoogle).google?.translate?.TranslateElement) {
       initWidget();
       return;
     }
 
     if (!GT_SCRIPT_ADDED) {
-      (window as any).__gtInit = initWidget;
+      aw.__gtInit = initWidget;
       const s = document.createElement('script');
       s.src = '//translate.google.com/translate_a/element.js?cb=__gtInit';
       s.async = true;
       document.body.appendChild(s);
       GT_SCRIPT_ADDED = true;
     } else {
-      (window as any).__gtInit = initWidget;
+      aw.__gtInit = initWidget;
     }
   }, []);
 
-  // Fetch products from the backend
+  // Fetch products
   useEffect(() => {
     const fetchProducts = async (): Promise<void> => {
       setLoading(true);
@@ -108,8 +130,8 @@ const InventoryProducts: React.FC = () => {
         );
         const data = Array.isArray(response.data) ? response.data : [];
         setProducts(data);
-        setProductList(data); // Set productList as well
-        setFilteredProducts(data); // Initialize filtered products with all products
+        setProductList(data);
+        setFilteredProducts(data);
       } finally {
         setLoading(false);
       }
@@ -120,25 +142,24 @@ const InventoryProducts: React.FC = () => {
     }
   }, [inventoryId, setProductList]);
 
-  // Delete product by productId
+  // Delete product
   const deleteProduct = async (): Promise<void> => {
-    if (productToDelete) {
-      try {
-        await axiosInstance.delete(
-          `/inventory/${inventoryId}/products/${productToDelete}`,
-          { useV2: false }
-        );
-        const updatedProducts = products.filter(
-          product => product.productId !== productToDelete
-        );
-        setProducts(updatedProducts);
-        setFilteredProducts(updatedProducts);
-      } catch (err) {
-        setError('Failed to delete product.');
-      } finally {
-        setShowConfirmation(false);
-        setProductToDelete(null);
-      }
+    if (!productToDelete) return;
+    try {
+      await axiosInstance.delete(
+        `/inventory/${inventoryId}/products/${productToDelete}`,
+        { useV2: false }
+      );
+      const updatedProducts = products.filter(
+        p => p.productId !== productToDelete
+      );
+      setProducts(updatedProducts);
+      setFilteredProducts(updatedProducts);
+    } catch {
+      setError('Failed to delete product.');
+    } finally {
+      setShowConfirmation(false);
+      setProductToDelete(null);
     }
   };
 
@@ -148,13 +169,12 @@ const InventoryProducts: React.FC = () => {
       setProducts([]);
       setFilteredProducts([]);
       alert('All products deleted successfully.');
-    } catch (err) {
+    } catch {
       setError('Failed to delete all products.');
     }
   };
 
   const handleFilter = async (): Promise<void> => {
-    // Ensure that `productList` is populated with products matching the criteria
     if (productName || productDescription || productStatus) {
       await getProductList(
         inventoryId!,
@@ -164,7 +184,6 @@ const InventoryProducts: React.FC = () => {
       );
     }
 
-    // Apply additional client-side filtering if necessary
     const filtered = products.filter(product => {
       const matchesName = productName
         ? product.productName.toLowerCase().includes(productName.toLowerCase())
@@ -227,14 +246,8 @@ const InventoryProducts: React.FC = () => {
       setProducts(updated);
       setFilteredProducts(updated);
       setError(null);
-    } catch (err: any) {
-      const msg = err?.response
-        ? `(${err.response.status}) ${err.response.statusText} — ${
-            typeof err.response.data === 'string'
-              ? err.response.data
-              : JSON.stringify(err.response.data)
-          }`
-        : err?.message || 'Unknown error';
+    } catch (err: unknown) {
+      const msg = getErrorMessage(err);
       console.error('Add quantity failed:', msg);
       setError(`Failed to add product quantity: ${msg}`);
     }
@@ -258,11 +271,8 @@ const InventoryProducts: React.FC = () => {
       );
 
       let updatedStatus: Status = Status.AVAILABLE;
-      if (updatedQuantity === 0) {
-        updatedStatus = Status.OUT_OF_STOCK;
-      } else if (updatedQuantity <= 20) {
-        updatedStatus = Status.RE_ORDER;
-      }
+      if (updatedQuantity === 0) updatedStatus = Status.OUT_OF_STOCK;
+      else if (updatedQuantity <= 20) updatedStatus = Status.RE_ORDER;
 
       const updatedProducts = filteredProducts.map(product =>
         product.productId === productId
@@ -277,7 +287,9 @@ const InventoryProducts: React.FC = () => {
       setProducts(updatedProducts);
       setFilteredProducts(updatedProducts);
       setError(null);
-    } catch (err) {
+    } catch (err: unknown) {
+      const msg = getErrorMessage(err);
+      console.error('Reduce quantity failed:', msg);
       setError('Failed to reduce product quantity.');
     }
   };
@@ -314,6 +326,7 @@ const InventoryProducts: React.FC = () => {
       <button className="btn btn-primary" onClick={handleCreatePdf}>
         Download PDF
       </button>
+
       <div className="products-filtering">
         <div className="filter-by-name">
           <label htmlFor="product-name">Filter by Name:</label>
@@ -355,6 +368,7 @@ const InventoryProducts: React.FC = () => {
           </select>
         </div>
       </div>
+
       <div className="table-wrap">
         <table className="table table-striped inventory-table">
           <thead>
@@ -398,7 +412,6 @@ const InventoryProducts: React.FC = () => {
                     {product.status.replace('_', ' ')}
                   </td>
 
-                  {/* ONE actions cell per row */}
                   <td className="actions-cell">
                     <div className="actions-group">
                       <button
@@ -417,6 +430,7 @@ const InventoryProducts: React.FC = () => {
                       >
                         Delete
                       </button>
+
                       <button
                         className="btn btn-success"
                         onClick={() =>
@@ -425,15 +439,16 @@ const InventoryProducts: React.FC = () => {
                             product.productQuantity
                           )
                         }
-                        disabled={product.productQuantity >= 100}
+                        disabled={product.productQuantity >= MAX_QTY}
                         title={
-                          product.productQuantity >= 100
+                          product.productQuantity >= MAX_QTY
                             ? 'Max quantity reached'
                             : ''
                         }
                       >
                         Add Quantity
                       </button>
+
                       <button
                         className="btn btn-info"
                         onClick={() =>
