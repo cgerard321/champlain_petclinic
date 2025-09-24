@@ -388,7 +388,14 @@ const InventoryProducts: React.FC = () => {
                 <td>{product.productDescription}</td>
                 <td>${product.productSalePrice}</td>
                 <td>${product.productPrice}</td>
-                <td>${product.productMargin}</td>
+                <td
+                  style={{
+                    color: product.productMargin >= 0 ? 'green' : 'red',
+                    fontWeight: 'bold',
+                  }}
+                >
+                  ${product.productMargin}
+                </td>
                 <td>{product.productQuantity}</td>
                 <td
                   style={{
