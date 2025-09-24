@@ -1914,8 +1914,8 @@ class ProductInventoryServiceUnitTest {
         String inventoryId = "valid-id";
 
         // Create mock Product objects with correct parameters for Product constructor
-        Product product1 = new Product("1", "P001", inventoryId, "Product1", "Description1", 10, 5.99, 7.99, product.getProductProfitMargin(), Status.AVAILABLE);
-        Product product2 = new Product("2", "P002", inventoryId, "Product2", "Description2", 20, 10.99, 12.99, product.getProductProfitMargin(), Status.RE_ORDER);
+        Product product1 = new Product("1", "P001", inventoryId, "Product1", "Description1", 10, 5.99, 7.99, product.getProductProfit(), Status.AVAILABLE);
+        Product product2 = new Product("2", "P002", inventoryId, "Product2", "Description2", 20, 10.99, 12.99, product.getProductProfit(), Status.RE_ORDER);
 
         // Mock the repository to return a Flux of products
         when(productRepository.findAllProductsByInventoryId(inventoryId))

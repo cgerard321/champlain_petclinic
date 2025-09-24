@@ -16,6 +16,6 @@ public class ProductResponseDTO {
     private Double productPrice;
     private Integer productQuantity;
     private Double productSalePrice;
-    private Double productProfitMargin;
+    private Double productProfit;
     private Status status;
 }

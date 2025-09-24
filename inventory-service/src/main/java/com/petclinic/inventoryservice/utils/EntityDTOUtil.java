@@ -60,7 +60,7 @@ public class EntityDTOUtil {
                         product.getProductPrice(),
                         product.getProductQuantity(),
                         product.getProductSalePrice(),
-                        product.getProductProfitMargin(),
+                        product.getProductProfit(),
                         product.getStatus()
                 ))
                 .collect(Collectors.toList());
