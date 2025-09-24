@@ -10,7 +10,7 @@ import './Emergency.css';
 import { exportVisitsCSV } from './api/exportVisitsCSV';
 
 export default function VisitListTable(): JSX.Element {
-  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [visitIdToDelete, setConfirmDeleteId] = useState<string | null>(null);
   const [visitsList, setVisitsList] = useState<Visit[]>([]);
   const [visitsAll, setVisitsAll] = useState<Visit[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>(''); // Search term state
@@ -554,19 +554,19 @@ export default function VisitListTable(): JSX.Element {
         archivedCollapsed,
         setArchivedCollapsed
       )}
-      {confirmDeleteId && (
+      {visitIdToDelete && (
         <div className="modal">
           <div className="modal-content">
             <h3>Confirm Deletion</h3>
             <p>
-              Are you sure you want to delete emergency visit {confirmDeleteId}?
+              Are you sure you want to delete emergency visit {visitIdToDelete}?
             </p>
             <div className="modal-buttons">
               <button onClick={() => setConfirmDeleteId(null)}>Cancel</button>
               <button
                 onClick={async () => {
                   try {
-                    await handleDeleteEmergency(confirmDeleteId);
+                    await handleDeleteEmergency(visitIdToDelete);
                     setConfirmDeleteId(null);
                   } catch (error) {
                     console.error('Error deleting emergency visit:', error);
