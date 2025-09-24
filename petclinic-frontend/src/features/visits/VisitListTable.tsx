@@ -8,15 +8,20 @@ import { EmergencyResponseDTO } from './Emergency/Model/EmergencyResponseDTO';
 import { deleteEmergency } from './Emergency/Api/deleteEmergency';
 import './Emergency.css';
 import { exportVisitsCSV } from './api/exportVisitsCSV';
+import axiosInstance from '@/shared/api/axiosInstance.ts';
+import { getAllVisits } from './api/getAllVisits';
+import { IsVet } from '@/context/UserContext';
 
 export default function VisitListTable(): JSX.Element {
+  const [visitIdToDelete, setConfirmDeleteId] = useState<string | null>(null);
+  const isVet = IsVet();
   const [visitsList, setVisitsList] = useState<Visit[]>([]);
   const [visitsAll, setVisitsAll] = useState<Visit[]>([]);
+  const [archivedVisits, setArchivedVisits] = useState<Visit[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>(''); // Search term state
   const [emergencyList, setEmergencyList] = useState<EmergencyResponseDTO[]>(
     []
   );
-  const [archivedVisits, setArchivedVisits] = useState<Visit[]>([]);
 
   //make tables collapsable
   const [confirmedCollapsed, setConfirmedCollapsed] = useState(false);
@@ -28,42 +33,53 @@ export default function VisitListTable(): JSX.Element {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const eventSource = new EventSource(
-      'http://localhost:8080/api/v2/gateway/visits',
-      {
-        withCredentials: true,
+    const loadInitialData = async (): Promise<void> => {
+      try {
+        const [visits, emergencies] = await Promise.all([
+          getAllVisits(searchTerm),
+          getAllEmergency(),
+        ]);
+        setVisitsList(visits);
+        setEmergencyList(emergencies);
+      } catch (error) {
+        console.error('Error loading initial data:', error);
       }
-    );
+    };
+    loadInitialData();
+  }, [searchTerm]);
+
+  useEffect(() => {
+    // Skip EventSource setup for VET role - backend endpoints are ADMIN-only
+    // VETs should not reach this component due to route-level restrictions
+    if (isVet) {
+      return;
+    }
+
+    const eventSource = new EventSource('/visits');
 
     eventSource.onmessage = event => {
       try {
         const newVisit: Visit = JSON.parse(event.data);
 
-        if (newVisit.status === 'ARCHIVED') {
-          // Remove from visitsList if present
-          setVisitsList(oldVisits =>
-            oldVisits.filter(visit => visit.visitId !== newVisit.visitId)
-          );
-        } else {
-          setArchivedVisits(oldArchived =>
-            oldArchived.filter(visit => visit.visitId !== newVisit.visitId)
-          );
+        setVisitsList(oldVisits =>
+          oldVisits.filter(visit => visit.visitId !== newVisit.visitId)
+        );
 
-          setVisitsList(oldVisits => {
-            const index = oldVisits.findIndex(
-              visit => visit.visitId === newVisit.visitId
-            );
-            if (index !== -1) {
-              // Update existing visit
-              const newVisits = [...oldVisits];
-              newVisits[index] = newVisit;
-              return newVisits;
-            } else {
-              // Add new visit
-              return [...oldVisits, newVisit];
-            }
-          });
-        }
+        setVisitsList(oldVisits => {
+          const index = oldVisits.findIndex(
+            visit => visit.visitId === newVisit.visitId
+          );
+          if (index !== -1) {
+            // Update existing visit
+            const newVisits = [...oldVisits];
+            newVisits[index] = newVisit;
+            return newVisits;
+          } else {
+            // Add new visit
+            return [...oldVisits, newVisit];
+          }
+        });
+
         setVisitsList(oldVisits => {
           if (!oldVisits.some(visit => visit.visitId === newVisit.visitId)) {
             return [...oldVisits, newVisit];
@@ -89,7 +105,7 @@ export default function VisitListTable(): JSX.Element {
     return () => {
       eventSource.close();
     };
-  }, []);
+  }, [isVet]);
 
   useEffect(() => {
     // Fetch emergency visits
@@ -123,6 +139,12 @@ export default function VisitListTable(): JSX.Element {
   };
 
   useEffect(() => {
+    // Skip EventSource setup for VET role - backend endpoints are ADMIN-only
+    // VETs should not reach this component due to route-level restrictions
+    if (isVet) {
+      return;
+    }
+
     const archivedEventSource = new EventSource(
       'http://localhost:8080/api/v2/gateway/visits/archived',
       {
@@ -163,20 +185,10 @@ export default function VisitListTable(): JSX.Element {
     return () => {
       archivedEventSource.close();
     };
-  }, []);
+  }, [isVet]);
 
   useEffect(() => {
     if (searchTerm) {
-      //async (): Promise<void> => {
-      //  try {
-      //    console.log('searchTerm:', searchTerm);
-      //   const list = await getAllVisits(searchTerm);
-      //  setVisitsList(list);
-      //   console.log('visitsList:', visitsList);
-      //  } catch (error) {
-      //    console.error('Error fetching visits:', error);
-      // }
-      //};
       setVisitsList(
         visitsAll.filter(visit =>
           visit.description.toLowerCase().includes(searchTerm.toLowerCase())
@@ -200,6 +212,7 @@ export default function VisitListTable(): JSX.Element {
   const cancelledVisits = visitsList.filter(
     visit => visit.status === 'CANCELLED'
   );
+  // Use the archivedVisits state for archived visits
 
   const handleArchive = async (visitId: string): Promise<void> => {
     const confirmArchive = window.confirm(
@@ -208,47 +221,27 @@ export default function VisitListTable(): JSX.Element {
     if (confirmArchive) {
       try {
         const requestBody = { status: 'ARCHIVED' };
-        const response = await fetch(
-          `http://localhost:8080/api/v2/gateway/visits/completed/${visitId}/archive`,
+        await axiosInstance.put(
+          `/visits/completed/${visitId}/archive`,
+          requestBody,
+          { useV2: true }
+        );
+
+        // Fetch the updated visit data from the backend
+        const updatedVisitResponse = await axiosInstance.get<Visit>(
+          `/visits/${visitId}`,
           {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            credentials: 'include',
-            body: JSON.stringify(requestBody),
+            useV2: false,
           }
         );
 
-        if (response.ok) {
-          // Fetch the updated visit data from the backend
-          const updatedVisitResponse = await fetch(
-            `http://localhost:8080/api/v2/gateway/visits/${visitId}`,
-            {
-              method: 'GET',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              credentials: 'include',
-            }
-          );
-
-          if (updatedVisitResponse.ok) {
-            const updatedVisit = await updatedVisitResponse.json();
-            setArchivedVisits(oldArchived => [...oldArchived, updatedVisit]);
-            setVisitsList(prev =>
-              prev.filter(visit => visit.visitId !== visitId)
-            );
-            alert('Visit archived successfully!');
-          } else {
-            console.error('Failed to fetch the updated visit.');
-            alert('Failed to fetch the updated visit.');
-          }
-        } else {
-          const errorData = await response.json();
-          console.error('Failed to archive the visit:', errorData);
-          alert(`Failed to archive the visit: ${errorData.message}`);
-        }
+        const updatedVisit = await updatedVisitResponse.data;
+        setVisitsList(prev =>
+          prev.filter(visit =>
+            visit.visitId === visitId ? updatedVisit : visit
+          )
+        );
+        alert('Visit archived successfully!');
       } catch (error) {
         console.error('Error archiving visit:', error);
         alert('Error archiving visit.');
@@ -262,35 +255,20 @@ export default function VisitListTable(): JSX.Element {
       'Do you confirm you want to cancel the reservation?'
     );
 
-    if (confirmCancel) {
-      try {
-        const response = await fetch(
-          `http://localhost:8080/api/v2/gateway/visits/${visitId}/CANCELLED`,
-          {
-            method: 'PATCH',
-            credentials: 'include',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error('Failed to cancel the visit');
-        }
-
-        // Update the visit list after cancellation
-        setVisitsList(prevVisits =>
-          prevVisits.map(visit =>
-            visit.visitId === visitId
-              ? { ...visit, status: 'CANCELLED' }
-              : visit
-          )
-        );
-      } catch (error) {
-        console.error('Error canceling visit:', error);
-        alert('Error canceling visit.');
-      }
+    if (!confirmCancel) return;
+    try {
+      await axiosInstance.patch(`/visits/${visitId}/CANCELLED`, {
+        useV2: false,
+      });
+      // Update the visit list after cancellation
+      setVisitsAll(prevVisits =>
+        prevVisits.map(visit =>
+          visit.visitId === visitId ? { ...visit, status: 'CANCELLED' } : visit
+        )
+      );
+    } catch (error) {
+      console.error('Error canceling visit:', error);
+      alert('Error canceling visit.');
     }
   };
 
@@ -333,24 +311,30 @@ export default function VisitListTable(): JSX.Element {
               <td>{emergency.vetEmail}</td>
               <td>{emergency.vetPhoneNumber}</td>
               <td>
-                <button
-                  className="btn btn-warning"
-                  onClick={() => {
-                    navigate(`/visits/emergency/${emergency.visitEmergencyId}`);
-                  }}
-                  title="Edit"
-                >
-                  Edit
-                </button>
-                <button
-                  className="btn btn-danger"
-                  onClick={async () => {
-                    await handleDeleteEmergency(emergency.visitEmergencyId);
-                  }}
-                  title="Delete"
-                >
-                  Delete
-                </button>
+                {!isVet && (
+                  <button
+                    className="btn btn-warning"
+                    onClick={() => {
+                      navigate(
+                        `/visits/emergency/${emergency.visitEmergencyId}`
+                      );
+                    }}
+                    title="Edit"
+                  >
+                    Edit
+                  </button>
+                )}
+                {!isVet && (
+                  <button
+                    className="btn btn-danger"
+                    onClick={async () =>
+                      setConfirmDeleteId(emergency.visitEmergencyId)
+                    }
+                    title="Delete"
+                  >
+                    Delete
+                  </button>
+                )}
                 <button
                   className="btn btn-dark"
                   onClick={() =>
@@ -435,14 +419,16 @@ export default function VisitListTable(): JSX.Element {
                   >
                     View
                   </button>
-                  <button
-                    className="btn btn-warning"
-                    onClick={() => navigate(`/visits/${visit.visitId}/edit`)}
-                    title="Edit"
-                  >
-                    Edit
-                  </button>
-                  {allowArchive && (
+                  {!isVet && (
+                    <button
+                      className="btn btn-warning"
+                      onClick={() => navigate(`/visits/${visit.visitId}/edit`)}
+                      title="Edit"
+                    >
+                      Edit
+                    </button>
+                  )}
+                  {allowArchive && !isVet && (
                     <button
                       className="btn btn-secondary"
                       onClick={() => handleArchive(visit.visitId)}
@@ -454,7 +440,8 @@ export default function VisitListTable(): JSX.Element {
 
                   {visit.status !== 'CANCELLED' &&
                     visit.status !== 'ARCHIVED' &&
-                    visit.status !== 'COMPLETED' && (
+                    visit.status !== 'COMPLETED' &&
+                    !isVet && (
                       <button
                         className="btn btn-danger"
                         onClick={() => handleCancel(visit.visitId)}
@@ -494,13 +481,15 @@ export default function VisitListTable(): JSX.Element {
         {/*>*/}
         {/*  Create Emergency visit*/}
         {/*</button>*/}
-        <button
-          className="btn btn-warning"
-          onClick={() => navigate(AppRoutePaths.AddVisit)}
-          title="Make a Visit"
-        >
-          Make a Visit
-        </button>
+        {!isVet && (
+          <button
+            className="btn btn-warning"
+            onClick={() => navigate(AppRoutePaths.AddVisit)}
+            title="Make a Visit"
+          >
+            Make a Visit
+          </button>
+        )}
 
         <button
           className="btn btn-primary"
@@ -552,6 +541,34 @@ export default function VisitListTable(): JSX.Element {
         archivedVisits,
         archivedCollapsed,
         setArchivedCollapsed
+      )}
+      {visitIdToDelete && (
+        <div className="modal">
+          <div className="modal-content">
+            <h3>Confirm Deletion</h3>
+            <p>
+              Are you sure you want to delete emergency visit {visitIdToDelete}?
+            </p>
+            <div className="modal-buttons">
+              <button onClick={() => setConfirmDeleteId(null)}>Cancel</button>
+              <button
+                onClick={async () => {
+                  try {
+                    await handleDeleteEmergency(visitIdToDelete);
+                    setConfirmDeleteId(null);
+                  } catch (error) {
+                    console.error('Error deleting emergency visit:', error);
+                    alert(
+                      'Failed to delete emergency visit. Please try again.'
+                    );
+                  }
+                }}
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
