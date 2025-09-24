@@ -1,10 +1,10 @@
 // eslint-disable-next-line import/default
 import React, { useState } from 'react';
-import axios from 'axios';
 import { Button, Modal, Form } from 'react-bootstrap';
+import { addVetEducation } from '@/features/veterinarians/api/addVetEducation';
 
 interface AddEducationProps {
-  vetId: string | undefined;
+  vetId: string;
   onClose: () => void;
 }
 
@@ -51,10 +51,7 @@ const AddEducation: React.FC<AddEducationProps> = ({ vetId, onClose }) => {
     };
 
     try {
-      await axios.post(
-        `http://localhost:8080/api/v2/gateway/vets/${vetId}/educations`,
-        educationData
-      );
+      await addVetEducation(educationData);
       handleClose();
       window.location.reload();
     } catch (error) {

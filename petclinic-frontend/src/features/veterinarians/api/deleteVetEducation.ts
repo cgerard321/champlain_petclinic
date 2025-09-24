@@ -4,5 +4,6 @@ export const deleteVetEducation = async (
   vetId: string,
   educationId: string
 ): Promise<EducationResponseModel> => {
-  return await axiosInstance.delete(`/vets/${vetId}/educations/${educationId}`);
+  const response = await axiosInstance.delete(`/vets/${vetId}/educations/${educationId}`);
+  return response.data;
 };
