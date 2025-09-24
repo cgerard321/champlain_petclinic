@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import axios from 'axios';
+// import axios from 'axios'; wrong axios
 import { ProductModel } from './models/ProductModels/ProductModel';
 import './InventoriesListTable.module.css';
 import './InventoryProducts.css';
@@ -9,6 +9,7 @@ import deleteAllProductsFromInventory from './api/deleteAllProductsFromInventory
 import createPdf from './api/createPdf';
 import ConfirmationModal from '@/features/inventories/ConfirmationModal.tsx';
 import { Status } from '@/features/inventories/models/ProductModels/Status.ts';
+import axiosInstance from '@/shared/api/axiosInstance';
 
 const InventoryProducts: React.FC = () => {
   const { inventoryId } = useParams<{ inventoryId: string }>();
@@ -63,12 +64,14 @@ const InventoryProducts: React.FC = () => {
       setLoading(true);
       setError(null);
       try {
-        const response = await axios.get<ProductModel[]>(
-          `http://localhost:8080/api/v2/gateway/inventories/${inventoryId}/products/search`
+        const response = await axiosInstance.get<ProductModel[]>(
+          `/inventory/${inventoryId}/products/search`,
+          { useV2: false }
         );
-        setProducts(response.data);
-        setProductList(response.data); // Set productList as well
-        setFilteredProducts(response.data); // Initialize filtered products with all products
+        const data = Array.isArray(response.data) ? response.data : [];
+        setProducts(data);
+        setProductList(data); // Set productList as well
+        setFilteredProducts(data); // Initialize filtered products with all products
       } finally {
         setLoading(false);
       }
@@ -83,8 +86,9 @@ const InventoryProducts: React.FC = () => {
   const deleteProduct = async (): Promise<void> => {
     if (productToDelete) {
       try {
-        await axios.delete(
-          `http://localhost:8080/api/v2/gateway/inventories/${inventoryId}/products/${productToDelete}`
+        await axiosInstance.delete(
+          `/inventory/${inventoryId}/products/${productToDelete}`,
+          { useV2: false }
         );
         const updatedProducts = products.filter(
           product => product.productId !== productToDelete
@@ -159,11 +163,12 @@ const InventoryProducts: React.FC = () => {
     if (currentQuantity > 0) {
       try {
         const updatedQuantity = currentQuantity - 1;
-        await axios.patch(
-          `http://localhost:8080/api/gateway/inventory/${inventoryId}/products/${productId}/consume`,
+        await axiosInstance.patch(
+          `/inventory/${inventoryId}/products/${productId}/consume`,
           {
             productQuantity: updatedQuantity,
-          }
+          },
+          { useV2: false }
         );
 
         let updatedStatus: Status = Status.AVAILABLE;

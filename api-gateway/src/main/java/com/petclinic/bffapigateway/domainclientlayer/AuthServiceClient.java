@@ -197,7 +197,7 @@ public class AuthServiceClient {
                     });
         }).doOnError(throwable -> {
             log.error("Error creating user: " + throwable.getMessage());
-            customersServiceClient.deleteOwnerV2(uuid);
+            customersServiceClient.deleteOwner(uuid);
         });
     }
 

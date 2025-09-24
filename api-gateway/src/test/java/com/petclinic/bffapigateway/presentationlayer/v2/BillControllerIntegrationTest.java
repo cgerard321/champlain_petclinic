@@ -123,7 +123,7 @@ public class BillControllerIntegrationTest {
 
     @Test
     void whenCreateBill_thenReturnCreatedBill() {
-            Mono<BillResponseDTO> result = webTestClient
+        Mono<BillResponseDTO> result = webTestClient
                 .post()
                 .uri("/api/v2/gateway/bills/admin")
                 .cookie("Bearer", jwtTokenForValidAdmin)
@@ -275,7 +275,7 @@ public class BillControllerIntegrationTest {
 
 }
 
-    //these tests keep returning 404 and i do not understand why
+//these tests keep returning 404 and i do not understand why
 
 //    @Test
 //    void payBill_Success() {

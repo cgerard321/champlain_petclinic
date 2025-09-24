@@ -1,6 +1,7 @@
 import { useEffect, useState, FC } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getOwner, updateOwner } from '@/features/customers/api/updateOwner.ts';
+import { getOwner } from '../api/getOwner';
+import { updateOwner } from '../api/updateOwner';
 import { OwnerRequestModel } from '../models/OwnerRequestModel';
 import { OwnerResponseModel } from '../models/OwnerResponseModel';
 import './UpdateCustomerForm.css';

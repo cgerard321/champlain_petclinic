@@ -1,4 +1,4 @@
-import axiosInstance from '@/shared/api/axiosInstance.ts';
+import axiosInstance from '@/shared/api/axiosInstance';
 import { Bill } from '@/features/bills/models/Bill.ts';
 
 export async function getBillsByMonth(
@@ -8,6 +8,7 @@ export async function getBillsByMonth(
   const response = await axiosInstance.get(`/bills/admin/month`, {
     params: { year, month },
     responseType: 'stream',
+    useV2: false,
   });
 
   return response.data
