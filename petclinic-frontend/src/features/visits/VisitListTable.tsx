@@ -565,8 +565,15 @@ export default function VisitListTable(): JSX.Element {
               <button onClick={() => setConfirmDeleteId(null)}>Cancel</button>
               <button
                 onClick={async () => {
-                  await handleDeleteEmergency(confirmDeleteId);
-                  setConfirmDeleteId(null);
+                  try {
+                    await handleDeleteEmergency(confirmDeleteId);
+                    setConfirmDeleteId(null);
+                  } catch (error) {
+                    console.error('Error deleting emergency visit:', error);
+                    alert(
+                      'Failed to delete emergency visit. Please try again.'
+                    );
+                  }
                 }}
               >
                 Confirm
