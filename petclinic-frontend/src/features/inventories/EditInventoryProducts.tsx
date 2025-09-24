@@ -197,7 +197,7 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
 
         <br />
 
-        <h6>Regular Price</h6>
+        <h6>Cost Price</h6>
         <div className="input-group mb-3">
           <span className="input-group-text">$</span>
           <input

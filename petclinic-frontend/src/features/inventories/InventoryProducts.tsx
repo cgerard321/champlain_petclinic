@@ -372,7 +372,7 @@ const InventoryProducts: React.FC = () => {
             <th>Supply Name</th>
             <th>Description</th>
             <th>Sale Price</th>
-            <th>Regular Price</th>
+            <th>Cost Price</th>
             <th>Profit Margin</th>
             <th>Quantity</th>
             <th>Status</th>
