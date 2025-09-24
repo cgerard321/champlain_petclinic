@@ -247,10 +247,11 @@ public class BFFApiGatewayController {
 
 
 
-    @IsUserSpecific(idToMatch = {"customerId"}, bypassRoles = {Roles.ADMIN,Roles.VET})
+    @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN,Roles.VET})
     @PostMapping(value = "/owners/{ownerId}/pets" , produces = "application/json", consumes = "application/json")
-    public Mono<ResponseEntity<PetResponseDTO>> createPet(@RequestBody PetResponseDTO pet, @PathVariable String ownerId){
-        return customersServiceClient.createPet(pet, ownerId).map(s -> ResponseEntity.status(HttpStatus.CREATED).body(s))
+    public Mono<ResponseEntity<PetResponseDTO>> createPetForOwner(@PathVariable String ownerId, @RequestBody PetRequestDTO petRequest){
+        return customersServiceClient.createPetForOwner(ownerId, petRequest)
+                .map(pet -> ResponseEntity.status(HttpStatus.CREATED).body(pet))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
