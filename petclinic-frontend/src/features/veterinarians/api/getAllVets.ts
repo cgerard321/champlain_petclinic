@@ -4,7 +4,7 @@ import { VetResponseModel } from '@/features/veterinarians/models/VetResponseMod
 export async function getAllVets(): Promise<VetResponseModel[]> {
   const response = await axiosInstance.get('/vets', {
     responseType: 'text',
-    useV2: false,
+    useV2: true,
   });
   return response.data
     .split('data:')

@@ -23,7 +23,7 @@ export async function getAllProducts(
   const res = await axiosInstance.get('/products', {
     responseType: 'text',
     params,
-    useV2: false,
+    useV2: true,
   });
 
   return res.data
