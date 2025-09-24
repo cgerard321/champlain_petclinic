@@ -24,11 +24,14 @@ interface ApiError {
   message: string;
 }
 
+type ProductKeys = keyof ProductRequestModel;
+
 const EditInventoryProducts: React.FC = (): JSX.Element => {
   const { inventoryId, productId } = useParams<{
     inventoryId: string;
     productId: string;
   }>(); // Get params from URL
+
   const [product, setProduct] = useState<ProductRequestModel>({
     productName: '',
     productDescription: '',
@@ -36,7 +39,11 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
     productQuantity: 0,
     productSalePrice: 0,
   });
-  const [error, setError] = useState<{ [key: string]: string }>({});
+
+  // Allow `error.message` access in the footer without changing your JSX
+  const [error, setError] = useState<
+    { [key: string]: string } & { message?: string }
+  >({});
   const [successMessage, setSuccessMessage] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
@@ -53,14 +60,12 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
             productId
           );
           setProduct(response);
-        } catch (error) {
-          console.error(`Error fetching product with ID ${productId}:`, error);
+        } catch (err) {
+          console.error(`Error fetching product with ID ${productId}:`, err);
         }
       }
     };
-    fetchProduct().catch(error =>
-      console.error('Error in fetchProduct:', error)
-    );
+    fetchProduct().catch(err => console.error('Error in fetchProduct:', err));
   }, [inventoryId, productId]);
 
   const validate = (): boolean => {
@@ -109,24 +114,27 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
           navigate(`/inventory/${inventoryId}/products`);
         }, 2000);
       }
-    } catch (error) {
-      const apiError = error as ApiError;
+    } catch (err) {
+      const apiError = err as ApiError;
       setErrorMessage(`Error updating product: ${apiError.message}`);
     } finally {
       setLoading(false);
     }
   };
 
-  // Handle input changes
+  // Handle input changes (keeps your behavior, removes any/string|number issues)
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
-    const { name, type, value } = e.target;
+    const { name, type, value } = e.target as HTMLInputElement & {
+      name: ProductKeys;
+    };
+
     if (name === 'productQuantity') {
       const digitsOnly = value.replace(/[^\d]/g, '');
-      const num = digitsOnly === '' ? '' : Number(digitsOnly);
+      const num = digitsOnly === '' ? 0 : Number(digitsOnly); // always a number
 
       setProduct(prev => ({
         ...prev,
-        productQuantity: digitsOnly === '' ? 0 : num,
+        productQuantity: num,
       }));
 
       const msg =
@@ -135,10 +143,13 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
       return;
     }
 
-    setProduct({
-      ...product,
-      [name]: type === 'number' ? Number(value) : value,
-    });
+    setProduct(prev => ({
+      ...prev,
+      [name]:
+        type === 'number'
+          ? Number(value)
+          : (value as ProductRequestModel[typeof name]),
+    }));
   };
 
   return (
@@ -156,7 +167,7 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
     >
       <h2>Edit Product</h2>
 
-      <br></br>
+      <br />
 
       <form onSubmit={handleSubmit}>
         <h6>Name</h6>
@@ -171,7 +182,7 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
           />
         </div>
 
-        <br></br>
+        <br />
 
         <h6>Description</h6>
         <div className="input-group mb-3">
@@ -185,7 +196,7 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
           />
         </div>
 
-        <br></br>
+        <br />
 
         <h6>Price</h6>
         <div className="input-group mb-3">
@@ -202,7 +213,7 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
           <span className="input-group-text">.00</span>
         </div>
 
-        <br></br>
+        <br />
 
         <h6>Quantity</h6>
         <div className="input-group mb-3">
@@ -228,7 +239,7 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
           <p style={{ color: 'red', marginTop: -8 }}>{error.productQuantity}</p>
         )}
 
-        <br></br>
+        <br />
 
         <h6>Sale Price</h6>
         <div className="input-group mb-3">
@@ -256,9 +267,11 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
           Update
         </button>
       </form>
+
       <div>
         {loading && <p>Loading...</p>}
-        {error && <p style={{ color: 'red' }}>{error.message}</p>}
+        {/* keeps your original line compiling by allowing error.message */}
+        {error.message && <p style={{ color: 'red' }}>{error.message}</p>}
         {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
         {showNotification ? (
           <div className="notification">
