@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -1515,6 +1516,41 @@ public class InventoryControllerTest {
                 .exchange()
                 .expectStatus().isBadRequest();
         verify(inventoryServiceClient, times(1)).addInventoryType(any(InventoryTypeRequestDTO.class));
+    }
+
+    @Test
+    void updateImportantStatus_withValidData_shouldSucceed() {
+        String inventoryId = "dfa0a7e3-5a40-4b86-881e-9549ecda5e4b";
+        Map<String, Boolean> request = Map.of("important", true);
+
+        when(inventoryServiceClient.updateImportantStatus(eq(inventoryId), eq(true)))
+                .thenReturn(Mono.empty());
+
+        client.patch()
+                .uri(baseInventoryURL + "/" + inventoryId + "/important")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(request)
+                .exchange()
+                .expectStatus().isOk();
+
+        verify(inventoryServiceClient, times(1))
+                .updateImportantStatus(eq(inventoryId), eq(true));
+    }
+
+    @Test
+    void updateImportantStatus_withInvalidInventoryId_shouldReturnNotFound() {
+        String invalidId = "invalid-id";
+        Map<String, Boolean> request = Map.of("important", false);
+
+        when(inventoryServiceClient.updateImportantStatus(eq(invalidId), eq(false)))
+                .thenReturn(Mono.error(new RuntimeException("Inventory not found")));
+
+        client.patch()
+                .uri(baseInventoryURL + "/" + invalidId + "/important")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(request)
+                .exchange()
+                .expectStatus().is5xxServerError();
     }
 
 }

@@ -1225,7 +1225,7 @@ class ProductInventoryServiceUnitTest {
         when(inventoryRepository.findByInventoryDescriptionRegex(anyString()))
                 .thenReturn(Flux.empty());  // No inventory found
 
-        Flux<InventoryResponseDTO> result =productInventoryService.searchInventories(page, null, null, description);
+        Flux<InventoryResponseDTO> result =productInventoryService.searchInventories(page, null, null, description, false);
 
         StepVerifier.create(result)
                 .expectError(NotFoundException.class)
@@ -2166,6 +2166,26 @@ class ProductInventoryServiceUnitTest {
 
         verify(productRepository).findProductByInventoryIdAndProductId(inventoryId, productId);
         verify(productRepository, never()).save(any(Product.class));
+    }
+
+    @Test
+    void updateImportantStatus_shouldSucceed() {
+        String inventoryId = "inventoryId_1";
+        Boolean important = true;
+
+        when(inventoryRepository.findInventoryByInventoryId(inventoryId))
+                .thenReturn(Mono.just(inventory));
+        when(inventoryRepository.save(any(Inventory.class)))
+                .thenReturn(Mono.just(inventory));
+
+        Mono<Void> result = productInventoryService.updateImportantStatus(inventoryId, important);
+
+        StepVerifier
+                .create(result)
+                .verifyComplete();
+
+        verify(inventoryRepository).findInventoryByInventoryId(inventoryId);
+        verify(inventoryRepository).save(any(Inventory.class));
     }
 
 
