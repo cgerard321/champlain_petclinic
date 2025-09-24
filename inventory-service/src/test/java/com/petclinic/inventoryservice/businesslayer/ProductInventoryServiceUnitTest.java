@@ -1949,12 +1949,14 @@ class ProductInventoryServiceUnitTest {
         product1.setProductQuantity(10);
         product1.setProductDescription("Description A");
         product1.setProductPrice(100.0);
+        product1.setProductSalePrice(120.00);
 
         Product product2 = new Product();
         product2.setProductName("Product B");
         product2.setProductQuantity(20);
         product2.setProductDescription("Description B");
         product2.setProductPrice(200.0);
+        product2.setProductSalePrice(250.00);
 
         List<Product> productList = Arrays.asList(product1, product2);
         Mockito.when(productRepository.findAllProductsByInventoryId(inventoryId))
