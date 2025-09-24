@@ -10,6 +10,7 @@ import StarRating from '../../products/components/StarRating';
 import { OwnerRequestModel } from '../../customers/models/OwnerRequestModel';
 import { OwnerResponseModel } from '../../customers/models/OwnerResponseModel';
 import { getOwner } from '../../customers/api/getOwner';
+import { useEffect } from 'react';
 
 interface ApiError {
   message: string;
@@ -34,7 +35,7 @@ const AddCustomerReviewForm: React.FC = (): JSX.Element => {
   const navigate = useNavigate();
   const { user } = useUser(); // Assuming this hook provides the user info
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (user?.userId) {
       getOwner(user.userId)
         .then(res => {
@@ -66,10 +67,6 @@ const AddCustomerReviewForm: React.FC = (): JSX.Element => {
 
   const validate = (): boolean => {
     const newErrors: { [key: string]: string } = {};
-    // if (review.rating < 1 || review.rating > 5)
-    //   newErrors.rating = 'Rating must be between 1 and 5';
-    // if (!review.reviewerName)
-    //   newErrors.reviewerName = 'Reviewer name is required';
     if (!review.review) newErrors.review = 'Review text is required';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -154,17 +151,6 @@ const AddCustomerReviewForm: React.FC = (): JSX.Element => {
           />
           {errors.review && <span className="error">{errors.review}</span>}
         </div>
-        {/* <div>
-          <label>Date Submitted:</label>
-          <input
-            type="date"
-            name="dateSubmitted"
-            value={review.dateSubmitted.toISOString().split('T')[0]}
-            // onChange={handleDateChange}
-            readOnly
-            required
-          />
-        </div> */}
         <button type="submit">Submit</button>
       </form>
 
