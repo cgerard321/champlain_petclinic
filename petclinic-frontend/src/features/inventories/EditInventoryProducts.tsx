@@ -67,7 +67,8 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
     const newError: { [key: string]: string } = {};
 
     if (!product.productName) newError.productName = 'Product name is required';
-    if (!product.productDescription) newError.productDescription = 'Product description is required';
+    if (!product.productDescription)
+      newError.productDescription = 'Product description is required';
 
     if (product.productPrice === undefined || product.productPrice === null) {
       newError.productPrice = 'Product price is required';
@@ -77,14 +78,16 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
     const qtyMsg = validateQuantityValue(product.productQuantity);
     if (qtyMsg) newError.productQuantity = qtyMsg;
 
-    if (product.productSalePrice === undefined || product.productSalePrice === null) {
+    if (
+      product.productSalePrice === undefined ||
+      product.productSalePrice === null
+    ) {
       newError.productSalePrice = 'Product sale price is required';
     }
 
     setError(newError);
     return Object.keys(newError).length === 0;
   };
-
 
   const handleSubmit = async (
     event: FormEvent<HTMLFormElement>
@@ -126,7 +129,8 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
         productQuantity: digitsOnly === '' ? 0 : num,
       }));
 
-      const msg = digitsOnly === '' ? 'Quantity is required' : validateQuantityValue(num);
+      const msg =
+        digitsOnly === '' ? 'Quantity is required' : validateQuantityValue(num);
       setError(prev => ({ ...prev, productQuantity: msg ?? '' }));
       return;
     }
@@ -136,7 +140,6 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
       [name]: type === 'number' ? Number(value) : value,
     });
   };
-
 
   return (
     <div
@@ -214,7 +217,7 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
             step={1}
             min={1}
             max={MAX_QTY}
-            onKeyDown={(e) => {
+            onKeyDown={e => {
               // prevent '.', '-', 'e', '+'
               if (['.', '-', 'e', 'E', '+'].includes(e.key)) e.preventDefault();
             }}
@@ -224,7 +227,6 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
         {error.productQuantity && (
           <p style={{ color: 'red', marginTop: -8 }}>{error.productQuantity}</p>
         )}
-
 
         <br></br>
 
