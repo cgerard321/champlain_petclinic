@@ -137,12 +137,14 @@ export function NavBar(): JSX.Element {
                     Veterinarians
                   </Nav.Link>
                 )}
-                {(IsAdmin() || IsVet()) && (
+                {(IsAdmin() || IsVet() || isReceptionist) && (
                   <NavDropdown title="Customers" id="owners-dropdown">
-                    <NavDropdown.Item as={Link} to={AppRoutePaths.AllCustomers}>
-                      Customers List
-                    </NavDropdown.Item>
-                    {IsAdmin() && (
+                    {(IsAdmin() || IsVet()) && (
+                      <NavDropdown.Item as={Link} to={AppRoutePaths.AllCustomers}>
+                        Customers List
+                      </NavDropdown.Item>
+                    )}
+                    {(IsAdmin() || isReceptionist) && (
                       <NavDropdown.Item
                         as={Link}
                         to={AppRoutePaths.AddingCustomer}
@@ -175,7 +177,7 @@ export function NavBar(): JSX.Element {
                     Visits
                   </Nav.Link>
                 )}
-                {!IsAdmin() && !isInventoryManager && (
+                {!isInventoryManager && !isReceptionist && (
                   <Nav.Link as={Link} to={AppRoutePaths.CustomerEmergency}>
                     Emergency
                   </Nav.Link>
