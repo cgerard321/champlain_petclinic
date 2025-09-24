@@ -3,7 +3,7 @@ import { Bill } from '@/features/bills/models/Bill.ts';
 
 export async function getAllOverdueBills(): Promise<Bill[]> {
   const response = await axiosInstance.get('' + '/bills/admin/overdue', {
-    responseType: 'stream',
+    responseType: 'text',
     useV2: false,
   });
   return response.data
