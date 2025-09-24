@@ -10,12 +10,14 @@ import './Emergency.css';
 import { exportVisitsCSV } from './api/exportVisitsCSV';
 import axiosInstance from '@/shared/api/axiosInstance.ts';
 import { getAllVisits } from './api/getAllVisits';
+import { IsOwner } from '@/context/UserContext';
 
 export default function VisitListTable(): JSX.Element {
   const [visitIdToDelete, setConfirmDeleteId] = useState<string | null>(null);
   const [visitsList, setVisitsList] = useState<Visit[]>([]);
   const [visitsAll, setVisitsAll] = useState<Visit[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>(''); // Search term state
+  const canLeaveReview = IsOwner();
   const [emergencyList, setEmergencyList] = useState<EmergencyResponseDTO[]>(
     []
   );
@@ -395,13 +397,15 @@ export default function VisitListTable(): JSX.Element {
   return (
     <div>
       <div className="visit-actions">
-        <button
-          className="btn btn-warning"
-          onClick={() => navigate('/forms')}
-          title="Leave a Review"
-        >
-          Leave a Review
-        </button>
+        {canLeaveReview && (
+          <button
+            className="btn btn-warning"
+            onClick={() => navigate('/forms')}
+            title="Leave a Review"
+          >
+            Leave a Review
+          </button>
+        )}
         <button
           className="btn btn-dark"
           onClick={() => navigate('/reviews')}
