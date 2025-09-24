@@ -9,6 +9,7 @@ public interface PhotoService {
     Mono<Resource> getPhotoByVetId(String vetId);
     Mono<PhotoResponseDTO> getDefaultPhotoByVetId(String vetId);
     Mono<Resource> insertPhotoOfVet(String vetId, String photoName, MultipartFile file);
+    Mono<Resource> insertPhotoOfVet(String vetId, String photoName, byte[] fileData);
     Mono<Resource> updatePhotoByVetId(String vetId, String photoName, Mono<Resource> photo);
     Mono<Void> deletePhotoByVetId(String vetId);
 }

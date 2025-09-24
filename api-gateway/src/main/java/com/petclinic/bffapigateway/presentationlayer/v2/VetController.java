@@ -106,8 +106,24 @@ public class VetController {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
-    @PostMapping(value = "{vetId}/photos/{photoName}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "{vetId}/photos/{photoName}", consumes = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     public Mono<ResponseEntity<Resource>> addPhotoByVetId(
+            @PathVariable String vetId,
+            @PathVariable String photoName,
+            @RequestBody Mono<byte[]> fileData) {
+
+        return fileData.flatMap(bytes -> 
+                vetsServiceClient.addPhotoToVetFromBytes(vetId, photoName, bytes)
+                        .map(res -> ResponseEntity.status(HttpStatus.CREATED)
+                                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                                .body(res))
+                        .defaultIfEmpty(ResponseEntity.badRequest().build())
+        );
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
+    @PostMapping(value = "{vetId}/photos/{photoName}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Mono<ResponseEntity<Resource>> addPhotoByVetIdMultipart(
             @PathVariable String vetId,
             @PathVariable String photoName,
             @RequestPart("file") FilePart file) {

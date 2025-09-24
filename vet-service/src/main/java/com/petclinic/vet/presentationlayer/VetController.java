@@ -274,12 +274,12 @@ public class VetController {
 
 
     @PostMapping(value = "{vetId}/photos/{photoName}",
-            consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+            consumes = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     public Mono<ResponseEntity<Resource>> addPhotoByVetId(
             @PathVariable String vetId,
             @PathVariable String photoName,
-            @RequestPart("file") MultipartFile file) {
-        return photoService.insertPhotoOfVet(vetId, photoName, file)
+            @RequestBody byte[] fileData) {
+        return photoService.insertPhotoOfVet(vetId, photoName, fileData)
                 .map(res -> ResponseEntity.status(HttpStatus.CREATED).body(res))
                 .switchIfEmpty(Mono.just(ResponseEntity.badRequest().build()));
     }

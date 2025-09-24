@@ -48,12 +48,8 @@ const UploadVetPhoto: FC<UploadVetPhotoProps> = () => {
       );
       handleClose();
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        setErrorMsg(err.message);
-      } else {
-        setErrorMsg('An unexpected error occurred. Please try again.');
-      }
       console.error('Upload error', err);
+      setErrorMsg('Upload failed. Please try again.');
     } finally {
       setSubmitting(false);
     }

@@ -503,9 +503,25 @@ public class BFFApiGatewayController {
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
     @PostMapping(
             value = "vets/{vetId}/photos/{photoName}",
-            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+            consumes = MediaType.APPLICATION_OCTET_STREAM_VALUE
     )
     public Mono<ResponseEntity<Resource>> addPhotoByVetId(
+            @PathVariable String vetId,
+            @PathVariable String photoName,
+            @RequestBody Mono<byte[]> fileData) {
+
+        return fileData
+                .flatMap(bytes -> vetsServiceClient.addPhotoToVetFromBytes(vetId, photoName, bytes))
+                .map(r -> ResponseEntity.status(HttpStatus.CREATED).body(r))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
+    @PostMapping(
+            value = "vets/{vetId}/photos/{photoName}",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    public Mono<ResponseEntity<Resource>> addPhotoByVetIdMultipart(
             @PathVariable String vetId,
             @PathVariable String photoName,
             @RequestPart("file") Mono<FilePart> file) {
