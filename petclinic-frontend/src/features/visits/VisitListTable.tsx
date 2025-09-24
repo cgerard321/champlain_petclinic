@@ -8,6 +8,8 @@ import { EmergencyResponseDTO } from './Emergency/Model/EmergencyResponseDTO';
 import { deleteEmergency } from './Emergency/Api/deleteEmergency';
 import './Emergency.css';
 import { exportVisitsCSV } from './api/exportVisitsCSV';
+import axiosInstance from '@/shared/api/axiosInstance.ts';
+import { getAllVisits } from './api/getAllVisits';
 
 export default function VisitListTable(): JSX.Element {
   const [visitsList, setVisitsList] = useState<Visit[]>([]);
@@ -16,7 +18,6 @@ export default function VisitListTable(): JSX.Element {
   const [emergencyList, setEmergencyList] = useState<EmergencyResponseDTO[]>(
     []
   );
-  const [archivedVisits, setArchivedVisits] = useState<Visit[]>([]);
 
   //make tables collapsable
   const [confirmedCollapsed, setConfirmedCollapsed] = useState(false);
@@ -28,42 +29,47 @@ export default function VisitListTable(): JSX.Element {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const eventSource = new EventSource(
-      'http://localhost:8080/api/v2/gateway/visits',
-      {
-        withCredentials: true,
+    const loadInitialData = async (): Promise<void> => {
+      try {
+        const [visits, emergencies] = await Promise.all([
+          getAllVisits(),
+          getAllEmergency(),
+        ]);
+        setVisitsList(visits);
+        setEmergencyList(emergencies);
+      } catch (error) {
+        console.error('Error loading initial data:', error);
       }
-    );
+    };
+    loadInitialData();
+  }, []);
+
+  useEffect(() => {
+    const eventSource = new EventSource('/visits');
 
     eventSource.onmessage = event => {
       try {
         const newVisit: Visit = JSON.parse(event.data);
 
-        if (newVisit.status === 'ARCHIVED') {
-          // Remove from visitsList if present
-          setVisitsList(oldVisits =>
-            oldVisits.filter(visit => visit.visitId !== newVisit.visitId)
-          );
-        } else {
-          setArchivedVisits(oldArchived =>
-            oldArchived.filter(visit => visit.visitId !== newVisit.visitId)
-          );
+        setVisitsList(oldVisits =>
+          oldVisits.filter(visit => visit.visitId !== newVisit.visitId)
+        );
 
-          setVisitsList(oldVisits => {
-            const index = oldVisits.findIndex(
-              visit => visit.visitId === newVisit.visitId
-            );
-            if (index !== -1) {
-              // Update existing visit
-              const newVisits = [...oldVisits];
-              newVisits[index] = newVisit;
-              return newVisits;
-            } else {
-              // Add new visit
-              return [...oldVisits, newVisit];
-            }
-          });
-        }
+        setVisitsList(oldVisits => {
+          const index = oldVisits.findIndex(
+            visit => visit.visitId === newVisit.visitId
+          );
+          if (index !== -1) {
+            // Update existing visit
+            const newVisits = [...oldVisits];
+            newVisits[index] = newVisit;
+            return newVisits;
+          } else {
+            // Add new visit
+            return [...oldVisits, newVisit];
+          }
+        });
+
         setVisitsList(oldVisits => {
           if (!oldVisits.some(visit => visit.visitId === newVisit.visitId)) {
             return [...oldVisits, newVisit];
@@ -123,60 +129,7 @@ export default function VisitListTable(): JSX.Element {
   };
 
   useEffect(() => {
-    const archivedEventSource = new EventSource(
-      'http://localhost:8080/api/v2/gateway/visits/archived',
-      {
-        withCredentials: true,
-      }
-    );
-
-    archivedEventSource.onmessage = event => {
-      try {
-        const newArchivedVisit: Visit = JSON.parse(event.data);
-
-        setArchivedVisits(oldArchived => {
-          if (
-            !oldArchived.some(
-              visit => visit.visitId === newArchivedVisit.visitId
-            )
-          ) {
-            return [...oldArchived, newArchivedVisit];
-          } else {
-            // Update existing archived visit
-            return oldArchived.map(visit =>
-              visit.visitId === newArchivedVisit.visitId
-                ? newArchivedVisit
-                : visit
-            );
-          }
-        });
-      } catch (error) {
-        console.error('Error parsing SSE data for archived visits:', error);
-      }
-    };
-
-    archivedEventSource.onerror = error => {
-      console.error('Archived EventSource error:', error);
-      archivedEventSource.close();
-    };
-
-    return () => {
-      archivedEventSource.close();
-    };
-  }, []);
-
-  useEffect(() => {
     if (searchTerm) {
-      //async (): Promise<void> => {
-      //  try {
-      //    console.log('searchTerm:', searchTerm);
-      //   const list = await getAllVisits(searchTerm);
-      //  setVisitsList(list);
-      //   console.log('visitsList:', visitsList);
-      //  } catch (error) {
-      //    console.error('Error fetching visits:', error);
-      // }
-      //};
       setVisitsList(
         visitsAll.filter(visit =>
           visit.description.toLowerCase().includes(searchTerm.toLowerCase())
@@ -200,6 +153,9 @@ export default function VisitListTable(): JSX.Element {
   const cancelledVisits = visitsList.filter(
     visit => visit.status === 'CANCELLED'
   );
+  const archivedVisits = visitsList.filter(
+    visit => visit.status === 'ARCHIVED'
+  );
 
   const handleArchive = async (visitId: string): Promise<void> => {
     const confirmArchive = window.confirm(
@@ -208,47 +164,27 @@ export default function VisitListTable(): JSX.Element {
     if (confirmArchive) {
       try {
         const requestBody = { status: 'ARCHIVED' };
-        const response = await fetch(
-          `http://localhost:8080/api/v2/gateway/visits/completed/${visitId}/archive`,
+        await axiosInstance.put(
+          `/visits/completed/${visitId}/archive`,
+          requestBody,
+          { useV2: true }
+        );
+
+        // Fetch the updated visit data from the backend
+        const updatedVisitResponse = await axiosInstance.get<Visit>(
+          `/visits/${visitId}`,
           {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            credentials: 'include',
-            body: JSON.stringify(requestBody),
+            useV2: false,
           }
         );
 
-        if (response.ok) {
-          // Fetch the updated visit data from the backend
-          const updatedVisitResponse = await fetch(
-            `http://localhost:8080/api/v2/gateway/visits/${visitId}`,
-            {
-              method: 'GET',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              credentials: 'include',
-            }
-          );
-
-          if (updatedVisitResponse.ok) {
-            const updatedVisit = await updatedVisitResponse.json();
-            setArchivedVisits(oldArchived => [...oldArchived, updatedVisit]);
-            setVisitsList(prev =>
-              prev.filter(visit => visit.visitId !== visitId)
-            );
-            alert('Visit archived successfully!');
-          } else {
-            console.error('Failed to fetch the updated visit.');
-            alert('Failed to fetch the updated visit.');
-          }
-        } else {
-          const errorData = await response.json();
-          console.error('Failed to archive the visit:', errorData);
-          alert(`Failed to archive the visit: ${errorData.message}`);
-        }
+        const updatedVisit = await updatedVisitResponse.data;
+        setVisitsList(prev =>
+          prev.filter(visit =>
+            visit.visitId === visitId ? updatedVisit : visit
+          )
+        );
+        alert('Visit archived successfully!');
       } catch (error) {
         console.error('Error archiving visit:', error);
         alert('Error archiving visit.');
@@ -262,35 +198,20 @@ export default function VisitListTable(): JSX.Element {
       'Do you confirm you want to cancel the reservation?'
     );
 
-    if (confirmCancel) {
-      try {
-        const response = await fetch(
-          `http://localhost:8080/api/v2/gateway/visits/${visitId}/CANCELLED`,
-          {
-            method: 'PATCH',
-            credentials: 'include',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error('Failed to cancel the visit');
-        }
-
-        // Update the visit list after cancellation
-        setVisitsList(prevVisits =>
-          prevVisits.map(visit =>
-            visit.visitId === visitId
-              ? { ...visit, status: 'CANCELLED' }
-              : visit
-          )
-        );
-      } catch (error) {
-        console.error('Error canceling visit:', error);
-        alert('Error canceling visit.');
-      }
+    if (!confirmCancel) return;
+    try {
+      await axiosInstance.patch(`/visits/${visitId}/CANCELLED`, {
+        useV2: false,
+      });
+      // Update the visit list after cancellation
+      setVisitsAll(prevVisits =>
+        prevVisits.map(visit =>
+          visit.visitId === visitId ? { ...visit, status: 'CANCELLED' } : visit
+        )
+      );
+    } catch (error) {
+      console.error('Error canceling visit:', error);
+      alert('Error canceling visit.');
     }
   };
 
