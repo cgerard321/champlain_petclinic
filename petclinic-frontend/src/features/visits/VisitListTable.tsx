@@ -11,11 +11,15 @@ import { exportVisitsCSV } from './api/exportVisitsCSV';
 import axiosInstance from '@/shared/api/axiosInstance.ts';
 import { getAllVisits } from './api/getAllVisits';
 import { IsOwner } from '@/context/UserContext';
+import { IsVet } from '@/context/UserContext';
+
 
 export default function VisitListTable(): JSX.Element {
   const [visitIdToDelete, setConfirmDeleteId] = useState<string | null>(null);
+  const isVet = IsVet();
   const [visitsList, setVisitsList] = useState<Visit[]>([]);
   const [visitsAll, setVisitsAll] = useState<Visit[]>([]);
+  const [archivedVisits, setArchivedVisits] = useState<Visit[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>(''); // Search term state
   const canLeaveReview = IsOwner();
   const [emergencyList, setEmergencyList] = useState<EmergencyResponseDTO[]>(
@@ -35,7 +39,7 @@ export default function VisitListTable(): JSX.Element {
     const loadInitialData = async (): Promise<void> => {
       try {
         const [visits, emergencies] = await Promise.all([
-          getAllVisits(),
+          getAllVisits(searchTerm),
           getAllEmergency(),
         ]);
         setVisitsList(visits);
@@ -45,9 +49,15 @@ export default function VisitListTable(): JSX.Element {
       }
     };
     loadInitialData();
-  }, []);
+  }, [searchTerm]);
 
   useEffect(() => {
+    // Skip EventSource setup for VET role - backend endpoints are ADMIN-only
+    // VETs should not reach this component due to route-level restrictions
+    if (isVet) {
+      return;
+    }
+
     const eventSource = new EventSource('/visits');
 
     eventSource.onmessage = event => {
@@ -98,7 +108,7 @@ export default function VisitListTable(): JSX.Element {
     return () => {
       eventSource.close();
     };
-  }, []);
+  }, [isVet]);
 
   useEffect(() => {
     // Fetch emergency visits
@@ -132,6 +142,55 @@ export default function VisitListTable(): JSX.Element {
   };
 
   useEffect(() => {
+    // Skip EventSource setup for VET role - backend endpoints are ADMIN-only
+    // VETs should not reach this component due to route-level restrictions
+    if (isVet) {
+      return;
+    }
+
+    const archivedEventSource = new EventSource(
+      'http://localhost:8080/api/v2/gateway/visits/archived',
+      {
+        withCredentials: true,
+      }
+    );
+
+    archivedEventSource.onmessage = event => {
+      try {
+        const newArchivedVisit: Visit = JSON.parse(event.data);
+
+        setArchivedVisits(oldArchived => {
+          if (
+            !oldArchived.some(
+              visit => visit.visitId === newArchivedVisit.visitId
+            )
+          ) {
+            return [...oldArchived, newArchivedVisit];
+          } else {
+            // Update existing archived visit
+            return oldArchived.map(visit =>
+              visit.visitId === newArchivedVisit.visitId
+                ? newArchivedVisit
+                : visit
+            );
+          }
+        });
+      } catch (error) {
+        console.error('Error parsing SSE data for archived visits:', error);
+      }
+    };
+
+    archivedEventSource.onerror = error => {
+      console.error('Archived EventSource error:', error);
+      archivedEventSource.close();
+    };
+
+    return () => {
+      archivedEventSource.close();
+    };
+  }, [isVet]);
+
+  useEffect(() => {
     if (searchTerm) {
       setVisitsList(
         visitsAll.filter(visit =>
@@ -156,9 +215,7 @@ export default function VisitListTable(): JSX.Element {
   const cancelledVisits = visitsList.filter(
     visit => visit.status === 'CANCELLED'
   );
-  const archivedVisits = visitsList.filter(
-    visit => visit.status === 'ARCHIVED'
-  );
+  // Use the archivedVisits state for archived visits
 
   const handleArchive = async (visitId: string): Promise<void> => {
     const confirmArchive = window.confirm(
@@ -257,24 +314,30 @@ export default function VisitListTable(): JSX.Element {
               <td>{emergency.vetEmail}</td>
               <td>{emergency.vetPhoneNumber}</td>
               <td>
-                <button
-                  className="btn btn-warning"
-                  onClick={() => {
-                    navigate(`/visits/emergency/${emergency.visitEmergencyId}`);
-                  }}
-                  title="Edit"
-                >
-                  Edit
-                </button>
-                <button
-                  className="btn btn-danger"
-                  onClick={async () =>
-                    setConfirmDeleteId(emergency.visitEmergencyId)
-                  }
-                  title="Delete"
-                >
-                  Delete
-                </button>
+                {!isVet && (
+                  <button
+                    className="btn btn-warning"
+                    onClick={() => {
+                      navigate(
+                        `/visits/emergency/${emergency.visitEmergencyId}`
+                      );
+                    }}
+                    title="Edit"
+                  >
+                    Edit
+                  </button>
+                )}
+                {!isVet && (
+                  <button
+                    className="btn btn-danger"
+                    onClick={async () =>
+                      setConfirmDeleteId(emergency.visitEmergencyId)
+                    }
+                    title="Delete"
+                  >
+                    Delete
+                  </button>
+                )}
                 <button
                   className="btn btn-dark"
                   onClick={() =>
@@ -359,14 +422,16 @@ export default function VisitListTable(): JSX.Element {
                   >
                     View
                   </button>
-                  <button
-                    className="btn btn-warning"
-                    onClick={() => navigate(`/visits/${visit.visitId}/edit`)}
-                    title="Edit"
-                  >
-                    Edit
-                  </button>
-                  {allowArchive && (
+                  {!isVet && (
+                    <button
+                      className="btn btn-warning"
+                      onClick={() => navigate(`/visits/${visit.visitId}/edit`)}
+                      title="Edit"
+                    >
+                      Edit
+                    </button>
+                  )}
+                  {allowArchive && !isVet && (
                     <button
                       className="btn btn-secondary"
                       onClick={() => handleArchive(visit.visitId)}
@@ -378,7 +443,8 @@ export default function VisitListTable(): JSX.Element {
 
                   {visit.status !== 'CANCELLED' &&
                     visit.status !== 'ARCHIVED' &&
-                    visit.status !== 'COMPLETED' && (
+                    visit.status !== 'COMPLETED' &&
+                    !isVet && (
                       <button
                         className="btn btn-danger"
                         onClick={() => handleCancel(visit.visitId)}
@@ -420,13 +486,15 @@ export default function VisitListTable(): JSX.Element {
         {/*>*/}
         {/*  Create Emergency visit*/}
         {/*</button>*/}
-        <button
-          className="btn btn-warning"
-          onClick={() => navigate(AppRoutePaths.AddVisit)}
-          title="Make a Visit"
-        >
-          Make a Visit
-        </button>
+        {!isVet && (
+          <button
+            className="btn btn-warning"
+            onClick={() => navigate(AppRoutePaths.AddVisit)}
+            title="Make a Visit"
+          >
+            Make a Visit
+          </button>
+        )}
 
         <button
           className="btn btn-primary"
