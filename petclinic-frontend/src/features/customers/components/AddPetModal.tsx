@@ -1,4 +1,5 @@
 import { FormEvent, useState } from 'react';
+import * as PropTypes from 'prop-types';
 import { addPetForOwner } from '../api/addPetForOwner';
 import { PetRequestModel } from '../models/PetRequestModel';
 import { PetResponseModel } from '../models/PetResponseModel';
@@ -206,6 +207,13 @@ const AddPetModal: React.FC<AddPetModalProps> = ({
       </div>
     </div>
   );
+};
+
+AddPetModal.propTypes = {
+  ownerId: PropTypes.string.isRequired,
+  isOpen: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  onPetAdded: PropTypes.func.isRequired,
 };
 
 export default AddPetModal;
