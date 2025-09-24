@@ -62,40 +62,39 @@ const InventoryProducts: React.FC = () => {
     );
   };
 
- useEffect(() => {
-   const initWidget = () => {
-     if (GT_WIDGET_INIT) return;
-     const host = document.getElementById('google_translate_element');
-     if (!host) return;
+  useEffect(() => {
+    const initWidget = () => {
+      if (GT_WIDGET_INIT) return;
+      const host = document.getElementById('google_translate_element');
+      if (!host) return;
 
-     new window.google.translate.TranslateElement(
-       {
-         pageLanguage: 'en',
-         autoDisplay: false,
-         includedLanguages: 'en,fr,de,es',
-       },
-       'google_translate_element'
-     );
-     GT_WIDGET_INIT = true;
-   };
+      new window.google.translate.TranslateElement(
+        {
+          pageLanguage: 'en',
+          autoDisplay: false,
+          includedLanguages: 'en,fr,de,es',
+        },
+        'google_translate_element'
+      );
+      GT_WIDGET_INIT = true;
+    };
 
-   if ((window as any).google?.translate?.TranslateElement) {
-     initWidget();
-     return;
-   }
+    if ((window as any).google?.translate?.TranslateElement) {
+      initWidget();
+      return;
+    }
 
-   if (!GT_SCRIPT_ADDED) {
-     (window as any).__gtInit = initWidget;
-     const s = document.createElement('script');
-     s.src = '//translate.google.com/translate_a/element.js?cb=__gtInit';
-     s.async = true;
-     document.body.appendChild(s);
-     GT_SCRIPT_ADDED = true;
-   } else {
-     (window as any).__gtInit = initWidget;
-   }
- }, []);
-
+    if (!GT_SCRIPT_ADDED) {
+      (window as any).__gtInit = initWidget;
+      const s = document.createElement('script');
+      s.src = '//translate.google.com/translate_a/element.js?cb=__gtInit';
+      s.async = true;
+      document.body.appendChild(s);
+      GT_SCRIPT_ADDED = true;
+    } else {
+      (window as any).__gtInit = initWidget;
+    }
+  }, []);
 
   // Fetch products from the backend
   useEffect(() => {
@@ -195,55 +194,51 @@ const InventoryProducts: React.FC = () => {
     setProductToDelete(null);
   };
 
-const addQuantity = async (
-  productId: string,
-  currentQuantity: number
-): Promise<void> => {
+  const addQuantity = async (
+    productId: string,
+    currentQuantity: number
+  ): Promise<void> => {
+    if (currentQuantity >= MAX_QTY) {
+      setError(`Max quantity (${MAX_QTY}) reached.`);
+      return;
+    }
 
-  if (currentQuantity >= MAX_QTY) {
-    setError(`Max quantity (${MAX_QTY}) reached.`);
-    return;
-  }
+    try {
+      const delta = 1;
 
-  try {
-    const delta = 1;
+      await axiosInstance.put(
+        `/inventory/${inventoryId}/products/${productId}/restockProduct`,
+        null,
+        { params: { productQuantity: delta }, useV2: false }
+      );
 
-    await axiosInstance.put(
-      `/inventory/${inventoryId}/products/${productId}/restockProduct`,
-      null,
-      { params: { productQuantity: delta }, useV2: false }
-    );
+      const updatedQuantity = Math.min(MAX_QTY, currentQuantity + delta);
 
-    const updatedQuantity = Math.min(MAX_QTY, currentQuantity + delta);
+      let updatedStatus: Status = Status.AVAILABLE;
+      if (updatedQuantity === 0) updatedStatus = Status.OUT_OF_STOCK;
+      else if (updatedQuantity <= 20) updatedStatus = Status.RE_ORDER;
 
-    let updatedStatus: Status = Status.AVAILABLE;
-    if (updatedQuantity === 0) updatedStatus = Status.OUT_OF_STOCK;
-    else if (updatedQuantity <= 20) updatedStatus = Status.RE_ORDER;
+      const updated = filteredProducts.map(p =>
+        p.productId === productId
+          ? { ...p, productQuantity: updatedQuantity, status: updatedStatus }
+          : p
+      );
 
-    const updated = filteredProducts.map(p =>
-      p.productId === productId
-        ? { ...p, productQuantity: updatedQuantity, status: updatedStatus }
-        : p
-    );
-
-    setProducts(updated);
-    setFilteredProducts(updated);
-    setError(null);
-  } catch (err: any) {
-    const msg = err?.response
-      ? `(${err.response.status}) ${err.response.statusText} — ${
-          typeof err.response.data === 'string'
-            ? err.response.data
-            : JSON.stringify(err.response.data)
-        }`
-      : (err?.message || 'Unknown error');
-    console.error('Add quantity failed:', msg);
-    setError(`Failed to add product quantity: ${msg}`);
-  }
-};
-
-
-
+      setProducts(updated);
+      setFilteredProducts(updated);
+      setError(null);
+    } catch (err: any) {
+      const msg = err?.response
+        ? `(${err.response.status}) ${err.response.statusText} — ${
+            typeof err.response.data === 'string'
+              ? err.response.data
+              : JSON.stringify(err.response.data)
+          }`
+        : err?.message || 'Unknown error';
+      console.error('Add quantity failed:', msg);
+      setError(`Failed to add product quantity: ${msg}`);
+    }
+  };
 
   const reduceQuantity = async (
     productId: string,
@@ -271,7 +266,11 @@ const addQuantity = async (
 
       const updatedProducts = filteredProducts.map(product =>
         product.productId === productId
-          ? { ...product, productQuantity: updatedQuantity, status: updatedStatus }
+          ? {
+              ...product,
+              productQuantity: updatedQuantity,
+              status: updatedStatus,
+            }
           : product
       );
 
@@ -282,7 +281,6 @@ const addQuantity = async (
       setError('Failed to reduce product quantity.');
     }
   };
-
 
   useEffect(() => {
     if (productList) {
@@ -375,28 +373,36 @@ const addQuantity = async (
             {filteredProducts.length > 0 ? (
               filteredProducts.map((product: ProductModel) => (
                 <tr key={product.productId}>
-                  <td><span className="truncate">{product.productId}</span></td>
-                  <td><span className="truncate">{product.productName}</span></td>
-                  <td><span className="truncate">{product.productDescription}</span></td>
+                  <td>
+                    <span className="truncate">{product.productId}</span>
+                  </td>
+                  <td>
+                    <span className="truncate">{product.productName}</span>
+                  </td>
+                  <td>
+                    <span className="truncate">
+                      {product.productDescription}
+                    </span>
+                  </td>
                   <td>${product.productSalePrice}</td>
                   <td>{product.productQuantity}</td>
                   <td
                     className={
                       product.status === Status.RE_ORDER
-                        ? "status-reorder"
+                        ? 'status-reorder'
                         : product.status === Status.OUT_OF_STOCK
-                        ? "status-out-of-stock"
-                        : "status-available"
+                          ? 'status-out-of-stock'
+                          : 'status-available'
                     }
                   >
-                    {product.status.replace("_", " ")}
+                    {product.status.replace('_', ' ')}
                   </td>
 
                   {/* ONE actions cell per row */}
                   <td className="actions-cell">
                     <div className="actions-group">
                       <button
-                        onClick={(e) => {
+                        onClick={e => {
                           e.stopPropagation();
                           navigate(`${product.productId}/edit`);
                         }}
@@ -411,14 +417,19 @@ const addQuantity = async (
                       >
                         Delete
                       </button>
-                        <button
+                      <button
                         className="btn btn-success"
                         onClick={() =>
-                          addQuantity(product.productId, product.productQuantity)
+                          addQuantity(
+                            product.productId,
+                            product.productQuantity
+                          )
                         }
                         disabled={product.productQuantity >= 100}
                         title={
-                          product.productQuantity >= 100 ? "Max quantity reached" : ""
+                          product.productQuantity >= 100
+                            ? 'Max quantity reached'
+                            : ''
                         }
                       >
                         Add Quantity
@@ -426,14 +437,17 @@ const addQuantity = async (
                       <button
                         className="btn btn-info"
                         onClick={() =>
-                          reduceQuantity(product.productId, product.productQuantity)
+                          reduceQuantity(
+                            product.productId,
+                            product.productQuantity
+                          )
                         }
                       >
                         Reduce Quantity
                       </button>
 
                       <button
-                        onClick={(e) => {
+                        onClick={e => {
                           e.stopPropagation();
                           navigate(`${product.productId}/move`);
                         }}
@@ -447,7 +461,7 @@ const addQuantity = async (
               ))
             ) : (
               <tr>
-                <td colSpan={7} style={{ textAlign: "center" }}>
+                <td colSpan={7} style={{ textAlign: 'center' }}>
                   No products available.
                 </td>
               </tr>
