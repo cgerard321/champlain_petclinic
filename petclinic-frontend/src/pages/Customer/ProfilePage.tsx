@@ -4,14 +4,17 @@ import { OwnerResponseModel } from '@/features/customers/models/OwnerResponseMod
 import { PetResponseModel } from '@/features/customers/models/PetResponseModel.ts';
 import { useUser } from '@/context/UserContext';
 import { NavBar } from '@/layouts/AppNavBar.tsx';
+import AddPetModal from '@/features/customers/components/AddPetModal';
 import './ProfilePage.css';
 import { AppRoutePaths } from '@/shared/models/path.routes.ts';
 import { useNavigate } from 'react-router-dom';
+import axiosInstance from '@/shared/api/axiosInstance';
 
 const ProfilePage = (): JSX.Element => {
   const { user } = useUser();
   const [owner, setOwner] = useState<OwnerResponseModel | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isAddPetModalOpen, setIsAddPetModalOpen] = useState<boolean>(false);
   const navigate = useNavigate();
 
   const petTypeMapping: { [key: string]: string } = {
@@ -26,8 +29,47 @@ const ProfilePage = (): JSX.Element => {
   useEffect(() => {
     const fetchOwnerData = async (): Promise<void> => {
       try {
-        const response = await getOwner(user.userId);
-        setOwner(response.data);
+        const ownerResponse = await getOwner(user.userId);
+        const ownerData = ownerResponse.data;
+
+        try {
+          const petsResponse = await axiosInstance.get(
+            `/owners/${user.userId}/pets`,
+            { useV2: false }
+          );
+
+          let petsData: PetResponseModel[] = [];
+          if (typeof petsResponse.data === 'string') {
+            const pieces = petsResponse.data.split('\n').filter(Boolean);
+            for (const piece of pieces) {
+              if (piece.startsWith('data:')) {
+                const petData = piece.slice(5).trim();
+                try {
+                  const pet: PetResponseModel = JSON.parse(petData);
+                  petsData.push(pet);
+                } catch (parseError) {
+                  console.error('Error parsing pet data:', parseError);
+                }
+              }
+            }
+          } else if (Array.isArray(petsResponse.data)) {
+            petsData = petsResponse.data;
+          }
+
+          setOwner({
+            ...ownerData,
+            pets: petsData,
+          });
+        } catch (petsError) {
+          console.warn(
+            'Error fetching pets, setting owner without pets:',
+            petsError
+          );
+          setOwner({
+            ...ownerData,
+            pets: [],
+          });
+        }
       } catch (error) {
         setError('Error fetching owner data');
         console.error('Error fetching owner data:', error);
@@ -46,6 +88,23 @@ const ProfilePage = (): JSX.Element => {
     const ageDiffMs = Date.now() - birth.getTime();
     const ageDate = new Date(ageDiffMs);
     return Math.abs(ageDate.getUTCFullYear() - 1970);
+  };
+
+  const handleAddPet = (): void => {
+    setIsAddPetModalOpen(true);
+  };
+
+  const handleCloseAddPetModal = (): void => {
+    setIsAddPetModalOpen(false);
+  };
+
+  const handlePetAdded = (newPet: PetResponseModel): void => {
+    if (owner) {
+      setOwner({
+        ...owner,
+        pets: [...(owner.pets || []), newPet],
+      });
+    }
   };
 
   if (error) {
@@ -85,20 +144,40 @@ const ProfilePage = (): JSX.Element => {
             </p>
           </div>
           <div className="pets-section">
-            <h3>Owner Pets</h3>
+            <div className="pets-header">
+              <h3>Owner Pets</h3>
+              <button className="add-pet-button" onClick={handleAddPet}>
+                Add Pet
+              </button>
+            </div>
             {owner.pets && owner.pets.length > 0 ? (
-              <ul>
+              <div className="pets-list">
                 {owner.pets.map((pet: PetResponseModel) => (
-                  <li key={pet.petId}>
-                    <strong>Name: </strong> {pet.name},<strong>Type: </strong>{' '}
-                    {petTypeMapping[pet.petTypeId] || 'Unknown'},
-                    <strong>Weight: </strong> {pet.weight}kg,
-                    <strong>Age: </strong> {calculateAge(pet.birthDate)}
-                  </li>
+                  <div key={pet.petId} className="pet-card">
+                    <div className="pet-info">
+                      <h4 className="pet-name">{pet.name}</h4>
+                      <div className="pet-details">
+                        <span className="pet-detail">
+                          <strong>Type:</strong>{' '}
+                          {petTypeMapping[pet.petTypeId] || 'Unknown'}
+                        </span>
+                        <span className="pet-detail">
+                          <strong>Weight:</strong> {pet.weight}kg
+                        </span>
+                        <span className="pet-detail">
+                          <strong>Age:</strong> {calculateAge(pet.birthDate)}{' '}
+                          years
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 ))}
-              </ul>
+              </div>
             ) : (
-              <p>No pets found.</p>
+              <div className="no-pets">
+                <p>No pets found.</p>
+                <p className="no-pets-subtitle">Add your first pet</p>
+              </div>
             )}
           </div>
           <button className="updateButton" onClick={handleUpdateClick}>
@@ -106,6 +185,13 @@ const ProfilePage = (): JSX.Element => {
           </button>
         </div>
       </div>
+
+      <AddPetModal
+        ownerId={user.userId}
+        isOpen={isAddPetModalOpen}
+        onClose={handleCloseAddPetModal}
+        onPetAdded={handlePetAdded}
+      />
     </div>
   );
 };
