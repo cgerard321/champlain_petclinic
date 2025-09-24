@@ -1,10 +1,11 @@
 import * as React from 'react';
 import { FormEvent, useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getReview, updateReview } from './Api/editReview';
 import { ReviewRequestDTO } from './Model/ReviewRequestDTO';
 import { ReviewResponseDTO } from './Model/ReviewResponseDTO';
 import './EditForm.css';
+import { getReview } from './Api/getReview';
+import { updateReview } from './Api/editReview';
 
 // Define an interface for the error if known
 interface ApiError {

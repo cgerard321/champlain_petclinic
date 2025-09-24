@@ -1,9 +1,10 @@
-import axiosInstance from '@/shared/api/axiosInstance.ts';
+import axiosInstance from '@/shared/api/axiosInstance';
 import { Bill } from '@/features/bills/models/Bill.ts';
 
 export async function getAllOverdueBills(): Promise<Bill[]> {
   const response = await axiosInstance.get('' + '/bills/admin/overdue', {
     responseType: 'stream',
+    useV2: false,
   });
   return response.data
     .split('data:')
