@@ -11,6 +11,46 @@ import ConfirmationModal from '@/features/inventories/ConfirmationModal.tsx';
 import { Status } from '@/features/inventories/models/ProductModels/Status.ts';
 import axiosInstance from '@/shared/api/axiosInstance';
 
+const MAX_QTY = 100;
+
+/** ---------- error helper (unchanged) ---------- */
+type AxiosErrorLike = {
+  response?: { status?: number; statusText?: string; data?: unknown };
+  message?: string;
+};
+const getErrorMessage = (err: unknown): string => {
+  if (err && typeof err === 'object') {
+    const e = err as AxiosErrorLike;
+    if (e.response) {
+      const { status = '', statusText = '', data } = e.response;
+      const body = typeof data === 'string' ? data : JSON.stringify(data);
+      return `(${status}) ${statusText} — ${body}`;
+    }
+    if (typeof e.message === 'string') return e.message;
+  }
+  return 'Unknown error';
+};
+
+type GoogleNS = {
+  translate?: {
+    TranslateElement?: new (
+      opts: {
+        pageLanguage: string;
+        autoDisplay: boolean;
+        includedLanguages: string;
+      },
+      elementId: string
+    ) => void;
+  };
+};
+type WindowWithGoogle = Window & {
+  google?: GoogleNS;
+  googleTranslateElementInit?: () => void;
+};
+// module-level flags so we only add & init once across navigations
+let GT_SCRIPT_ADDED = false;
+let GT_WIDGET_INIT = false;
+
 const InventoryProducts: React.FC = () => {
   const { inventoryId } = useParams<{ inventoryId: string }>();
   const { productList, setProductList, getProductList } = useSearchProducts();
@@ -37,28 +77,46 @@ const InventoryProducts: React.FC = () => {
     }
   };
 
-  const googleTranslateElementInit = (): void => {
-    new window.google.translate.TranslateElement(
-      {
-        pageLanguage: 'en',
-        autoDisplay: false,
-        includedLanguages: 'en,fr,de,es', // Specify the languages you want to include
-      },
-      'google_translate_element'
-    );
-  };
-
   useEffect(() => {
-    const addScript = document.createElement('script');
-    addScript.setAttribute(
-      'src',
-      '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit'
-    );
-    document.body.appendChild(addScript);
-    window.googleTranslateElementInit = googleTranslateElementInit;
+    const w = window as WindowWithGoogle;
+
+    const initWidget = (): void => {
+      if (GT_WIDGET_INIT) return;
+      const host = document.getElementById('google_translate_element');
+      if (!host) return;
+
+      const TranslateElement = w.google?.translate?.TranslateElement;
+      if (TranslateElement) {
+        new TranslateElement(
+          {
+            pageLanguage: 'en',
+            autoDisplay: false,
+            includedLanguages: 'en,fr,de,es',
+          },
+          'google_translate_element'
+        );
+        GT_WIDGET_INIT = true;
+      }
+    };
+
+    if ((window as WindowWithGoogle).google?.translate?.TranslateElement) {
+      initWidget();
+      return;
+    }
+
+    if (!GT_SCRIPT_ADDED) {
+      w.googleTranslateElementInit = initWidget;
+      const s = document.createElement('script');
+      s.src =
+        '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+      s.async = true;
+      document.body.appendChild(s);
+      GT_SCRIPT_ADDED = true;
+    } else {
+      w.googleTranslateElementInit = initWidget;
+    }
   }, []);
 
-  // Fetch products from the backend
   useEffect(() => {
     const fetchProducts = async (): Promise<void> => {
       setLoading(true);
@@ -70,8 +128,8 @@ const InventoryProducts: React.FC = () => {
         );
         const data = Array.isArray(response.data) ? response.data : [];
         setProducts(data);
-        setProductList(data); // Set productList as well
-        setFilteredProducts(data); // Initialize filtered products with all products
+        setProductList(data);
+        setFilteredProducts(data);
       } finally {
         setLoading(false);
       }
@@ -82,7 +140,6 @@ const InventoryProducts: React.FC = () => {
     }
   }, [inventoryId, setProductList]);
 
-  // Delete product by productId
   const deleteProduct = async (): Promise<void> => {
     if (productToDelete) {
       try {
@@ -116,7 +173,6 @@ const InventoryProducts: React.FC = () => {
   };
 
   const handleFilter = async (): Promise<void> => {
-    // Ensure that `productList` is populated with products matching the criteria
     if (productName || productDescription || productStatus) {
       await getProductList(
         inventoryId!,
@@ -126,7 +182,6 @@ const InventoryProducts: React.FC = () => {
       );
     }
 
-    // Apply additional client-side filtering if necessary
     const filtered = products.filter(product => {
       const matchesName = productName
         ? product.productName.toLowerCase().includes(productName.toLowerCase())
@@ -156,43 +211,78 @@ const InventoryProducts: React.FC = () => {
     setProductToDelete(null);
   };
 
+  const addQuantity = async (
+    productId: string,
+    currentQuantity: number
+  ): Promise<void> => {
+    if (currentQuantity >= MAX_QTY) {
+      setError(`Max quantity (${MAX_QTY}) reached.`);
+      return;
+    }
+
+    try {
+      const delta = 1;
+
+      await axiosInstance.put(
+        `/inventory/${inventoryId}/products/${productId}/restockProduct`,
+        null,
+        { params: { productQuantity: delta }, useV2: false }
+      );
+
+      const updatedQuantity = Math.min(MAX_QTY, currentQuantity + delta);
+
+      let updatedStatus: Status = Status.AVAILABLE;
+      if (updatedQuantity === 0) updatedStatus = Status.OUT_OF_STOCK;
+      else if (updatedQuantity <= 20) updatedStatus = Status.RE_ORDER;
+
+      const updated = filteredProducts.map(p =>
+        p.productId === productId
+          ? { ...p, productQuantity: updatedQuantity, status: updatedStatus }
+          : p
+      );
+
+      setProducts(updated);
+      setFilteredProducts(updated);
+      setError(null);
+    } catch (err: unknown) {
+      const msg = getErrorMessage(err);
+      console.error('Add quantity failed:', msg);
+      setError(`Failed to add product quantity: ${msg}`);
+    }
+  };
+
   const reduceQuantity = async (
     productId: string,
     currentQuantity: number
   ): Promise<void> => {
-    if (currentQuantity > 0) {
-      try {
-        const updatedQuantity = currentQuantity - 1;
-        await axiosInstance.patch(
-          `/inventory/${inventoryId}/products/${productId}/consume`,
-          {
-            productQuantity: updatedQuantity,
-          },
-          { useV2: false }
-        );
+    if (currentQuantity <= 0) return;
 
-        let updatedStatus: Status = Status.AVAILABLE;
-        if (updatedQuantity === 0) {
-          updatedStatus = Status.OUT_OF_STOCK;
-        } else if (updatedQuantity <= 20) {
-          updatedStatus = Status.RE_ORDER;
-        }
+    try {
+      const updatedQuantity = currentQuantity - 1;
+      await axiosInstance.patch(
+        `/inventory/${inventoryId}/products/${productId}/consume`,
+        { productQuantity: updatedQuantity },
+        { useV2: false }
+      );
 
-        const updatedProducts = filteredProducts.map(product =>
-          product.productId === productId
-            ? {
-                ...product,
-                productQuantity: updatedQuantity,
-                status: updatedStatus,
-              }
-            : product
-        );
+      let updatedStatus: Status = Status.AVAILABLE;
+      if (updatedQuantity === 0) updatedStatus = Status.OUT_OF_STOCK;
+      else if (updatedQuantity <= 20) updatedStatus = Status.RE_ORDER;
 
-        setProducts(updatedProducts);
-        setFilteredProducts(updatedProducts);
-      } catch (err) {
-        setError('Failed to reduce product quantity.');
-      }
+      const updatedProducts = filteredProducts.map(product =>
+        product.productId === productId
+          ? {
+              ...product,
+              productQuantity: updatedQuantity,
+              status: updatedStatus,
+            }
+          : product
+      );
+
+      setProducts(updatedProducts);
+      setFilteredProducts(updatedProducts);
+    } catch {
+      setError('Failed to reduce product quantity.');
     }
   };
 
@@ -224,7 +314,7 @@ const InventoryProducts: React.FC = () => {
       >
         Go Back
       </button>
-      <div id="google_translate_element"></div> {/* Translate element */}
+      <div id="google_translate_element"></div>
       <button className="btn btn-primary" onClick={handleCreatePdf}>
         Download PDF
       </button>
@@ -269,7 +359,6 @@ const InventoryProducts: React.FC = () => {
           </select>
         </div>
       </div>
-      {/* Always render the table structure */}
       <table className="table table-striped">
         <thead>
           <tr>
@@ -279,7 +368,7 @@ const InventoryProducts: React.FC = () => {
             <th>Price</th>
             <th>Quantity</th>
             <th>Status</th>
-            <th colSpan={4}>Actions</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -305,51 +394,73 @@ const InventoryProducts: React.FC = () => {
                 >
                   {product.status.replace('_', ' ')}
                 </td>
-                <td>
-                  <button
-                    onClick={e => {
-                      e.stopPropagation();
-                      navigate(`${product.productId}/edit`);
-                    }}
-                    className="btn btn-warning"
-                  >
-                    Edit
-                  </button>
-                </td>
-                <td>
-                  <button
-                    className="btn btn-danger"
-                    onClick={() => handleDeleteClick(product.productId)}
-                  >
-                    Delete
-                  </button>
-                </td>
-                <td>
-                  <button
-                    className="btn btn-info"
-                    onClick={() =>
-                      reduceQuantity(product.productId, product.productQuantity)
-                    }
-                  >
-                    Reduce Quantity
-                  </button>
-                </td>
-                <td>
-                  <button
-                    onClick={e => {
-                      e.stopPropagation();
-                      navigate(`${product.productId}/move`);
-                    }}
-                    className="btn btn-info"
-                  >
-                    Move
-                  </button>
+
+                <td className="actions-cell">
+                  <div className="actions-group">
+                    <button
+                      onClick={e => {
+                        e.stopPropagation();
+                        navigate(`${product.productId}/edit`);
+                      }}
+                      className="btn btn-warning"
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      className="btn btn-danger"
+                      onClick={() => handleDeleteClick(product.productId)}
+                    >
+                      Delete
+                    </button>
+
+                    <button
+                      className="btn btn-success"
+                      onClick={() =>
+                        addQuantity(product.productId, product.productQuantity)
+                      }
+                      disabled={product.productQuantity >= MAX_QTY}
+                      title={
+                        product.productQuantity >= MAX_QTY
+                          ? 'Max quantity reached'
+                          : ''
+                      }
+                    >
+                      Add Quantity
+                    </button>
+
+                    <button
+                      className="btn btn-info"
+                      onClick={() =>
+                        reduceQuantity(
+                          product.productId,
+                          product.productQuantity
+                        )
+                      }
+                      disabled={product.productQuantity <= 0}
+                      title={
+                        product.productQuantity <= 0 ? 'Quantity already 0' : ''
+                      }
+                    >
+                      Reduce Quantity
+                    </button>
+
+                    <button
+                      onClick={e => {
+                        e.stopPropagation();
+                        navigate(`${product.productId}/move`);
+                      }}
+                      className="btn btn-info"
+                    >
+                      Move
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))
           ) : (
             <tr>
-              <td colSpan={10} style={{ textAlign: 'center' }}>
+              <td colSpan={7} style={{ textAlign: 'center' }}>
                 No products available.
               </td>
             </tr>
