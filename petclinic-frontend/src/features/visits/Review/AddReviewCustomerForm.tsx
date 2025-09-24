@@ -6,6 +6,10 @@ import { ReviewRequestDTO } from './Model/ReviewRequestDTO';
 import './AddForm.css';
 import { useUser } from '@/context/UserContext';
 import { AppRoutePaths } from '@/shared/models/path.routes.ts';
+import StarRating from '../../products/components/StarRating';
+import { OwnerRequestModel } from '../../customers/models/OwnerRequestModel';
+import { OwnerResponseModel } from '../../customers/models/OwnerResponseModel';
+import { getOwner } from '../../customers/api/getOwner';
 
 interface ApiError {
   message: string;
@@ -20,6 +24,7 @@ const AddCustomerReviewForm: React.FC = (): JSX.Element => {
     dateSubmitted: new Date(),
   });
 
+  const [owner, setOwner] = useState<OwnerResponseModel | null>(null);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [successMessage, setSuccessMessage] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string>('');
@@ -28,6 +33,25 @@ const AddCustomerReviewForm: React.FC = (): JSX.Element => {
 
   const navigate = useNavigate();
   const { user } = useUser(); // Assuming this hook provides the user info
+
+  React.useEffect(() => {
+    if (user?.userId) {
+      getOwner(user.userId)
+        .then(res => {
+          const data: OwnerResponseModel = res.data;
+          setOwner(data);
+
+          setReview(prev => ({
+            ...prev,
+            ownerId: data.ownerId,
+            reviewerName: `${data.firstName} ${data.lastName}`,
+          }));
+        })
+        .catch(err => {
+          console.error('Failed to fetch owner:', err);
+        });
+    }
+  }, [user]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -40,19 +64,12 @@ const AddCustomerReviewForm: React.FC = (): JSX.Element => {
     }));
   };
 
-  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
-    setReview(prevReview => ({
-      ...prevReview,
-      dateSubmitted: new Date(e.target.value),
-    }));
-  };
-
   const validate = (): boolean => {
     const newErrors: { [key: string]: string } = {};
-    if (review.rating < 1 || review.rating > 5)
-      newErrors.rating = 'Rating must be between 1 and 5';
-    if (!review.reviewerName)
-      newErrors.reviewerName = 'Reviewer name is required';
+    // if (review.rating < 1 || review.rating > 5)
+    //   newErrors.rating = 'Rating must be between 1 and 5';
+    // if (!review.reviewerName)
+    //   newErrors.reviewerName = 'Reviewer name is required';
     if (!review.review) newErrors.review = 'Review text is required';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -112,31 +129,20 @@ const AddCustomerReviewForm: React.FC = (): JSX.Element => {
       <h2>Add a Customer Review</h2>
       {isLoading && <div className="loader">Loading...</div>}
       <form onSubmit={handleSubmit}>
-        <div>
+        <div className="rating-section">
           <label>Rating:</label>
-          <input
-            type="number"
-            name="rating"
-            value={isNaN(review.rating) ? '' : review.rating}
-            onChange={handleInputChange}
-            min="1"
-            max="5"
-            required
-          />
+          <StarRating
+            currentRating={review.rating}
+            viewOnly={false}
+            updateRating={rating => setReview(prev => ({ ...prev, rating }))}
+          ></StarRating>
           {errors.rating && <span className="error">{errors.rating}</span>}
         </div>
         <div>
           <label>Your Name:</label>
-          <input
-            type="text"
-            name="reviewerName"
-            value={review.reviewerName}
-            onChange={handleInputChange}
-            required
-          />
-          {errors.reviewerName && (
-            <span className="error">{errors.reviewerName}</span>
-          )}
+          <p className="reviewer-name-display">
+            {review.reviewerName || 'Loading...'}
+          </p>
         </div>
         <div>
           <label>Review:</label>
@@ -148,17 +154,18 @@ const AddCustomerReviewForm: React.FC = (): JSX.Element => {
           />
           {errors.review && <span className="error">{errors.review}</span>}
         </div>
-        <div>
+        {/* <div>
           <label>Date Submitted:</label>
           <input
             type="date"
             name="dateSubmitted"
             value={review.dateSubmitted.toISOString().split('T')[0]}
-            onChange={handleDateChange}
+            // onChange={handleDateChange}
+            readOnly
             required
           />
-        </div>
-        <button type="submit">Submit Review</button>
+        </div> */}
+        <button type="submit">Submit</button>
       </form>
 
       {successMessage && <p className="success-message">{successMessage}</p>}

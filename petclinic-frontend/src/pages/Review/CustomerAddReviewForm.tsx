@@ -5,7 +5,7 @@ export default function AddReviewsCustomer(): JSX.Element {
   return (
     <div>
       <NavBar />
-      <h1>Leave a review</h1>
+      <h1></h1>
       <AddCustomerReviewForm />
     </div>
   );
