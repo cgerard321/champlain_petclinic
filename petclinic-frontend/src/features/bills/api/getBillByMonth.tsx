@@ -7,7 +7,7 @@ export async function getBillsByMonth(
 ): Promise<Bill[]> {
   const response = await axiosInstance.get(`/bills/admin/month`, {
     params: { year, month },
-    responseType: 'stream',
+    responseType: 'text',
     useV2: false,
   });
 
