@@ -177,7 +177,8 @@ export default function ProductList(): JSX.Element {
   const RecentlyViewedProducts = (): JSX.Element => (
     <div className="recently-viewed-container">
       <h2>Recently Seen</h2>
-      <div className="grid">
+      <div className="recently-viewed-flex">
+        {' '}
         {recentlyClickedProducts.length > 0 ? (
           recentlyClickedProducts
             .filter(product => !product.isUnlisted)
