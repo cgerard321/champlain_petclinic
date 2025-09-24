@@ -5,11 +5,10 @@ export async function getAllOwnerVisits(
   ownerId: string
 ): Promise<VisitResponseModel[]> {
   try {
-    const response = await axiosInstance.get(`visits/owners/${ownerId}`);
+    const response = await axiosInstance.get(`/visits/owners/${ownerId}`, {
+      useV2: true,
+    });
 
-    if (response.status !== 200) {
-      throw new Error(`Error: ${response.status} ${response.statusText}`);
-    }
     return response.data
       .split('data:')
       .map((dataChunk: string) => {

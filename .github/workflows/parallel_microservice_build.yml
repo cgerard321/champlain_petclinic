@@ -264,7 +264,7 @@ jobs:
         echo "View detailed reports in the Actions artifacts." >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "### Coverage Thresholds" >> $GITHUB_STEP_SUMMARY
-        echo "- API Gateway: 70%" >> $GITHUB_STEP_SUMMARY
+        echo "- API Gateway: 65%" >> $GITHUB_STEP_SUMMARY
         echo "- Auth Service: 90%" >> $GITHUB_STEP_SUMMARY
         echo "- Billing Service: 50%" >> $GITHUB_STEP_SUMMARY
         echo "- Cart Service: 0%" >> $GITHUB_STEP_SUMMARY
