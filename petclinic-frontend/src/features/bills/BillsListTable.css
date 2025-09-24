@@ -47,12 +47,12 @@
   background-color: #f1f1f1;
 }
 
-.table th:nth-child(11), 
+.table th:nth-child(11),
 .table td:nth-child(11) {
-  width: 160px; 
+  width: 160px;
 }
 
-.table th:nth-child(1), 
+.table th:nth-child(1),
 .table td:nth-child(1) {
-  width: 125px; 
+  width: 125px;
 }

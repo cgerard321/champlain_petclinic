@@ -11,7 +11,7 @@ interface useSearchInventoriesResponseModel {
     inventoryName: string,
     inventoryType: string,
     inventoryDescription: string,
-    importantOnly?: boolean,
+    importantOnly?: boolean
   ) => void;
   setCurrentPage: (currentPage: (prevPage: number) => number) => void;
   isLoading: boolean;
@@ -47,7 +47,7 @@ export default function useSearchInventories(): useSearchInventoriesResponseMode
     inventoryName: string,
     inventoryType: string,
     inventoryDescription: string,
-    importantOnly: boolean = false,
+    importantOnly: boolean = false
   ): Promise<void> => {
     const data = await searchInventories(
       currentPage,
@@ -55,7 +55,7 @@ export default function useSearchInventories(): useSearchInventoriesResponseMode
       inventoryName,
       inventoryType,
       inventoryDescription,
-        importantOnly,
+      importantOnly
     );
     setInventoryList(data);
     setRealPage(currentPage + 1);
@@ -86,12 +86,29 @@ export default function useSearchInventories(): useSearchInventoriesResponseMode
     debounceRef.current = setTimeout(async () => {
       setIsLoading(true);
       try {
-        const data = await searchInventories(0, listSize, undefined, undefined, undefined);
+        const data = await searchInventories(
+          0,
+          listSize,
+          undefined,
+          undefined,
+          undefined
+        );
         const filtered = data.filter(item => {
-          const nameMatch = !filters.inventoryName || item.inventoryName.toLowerCase().includes(filters.inventoryName.toLowerCase());
-          const typeMatch = !filters.inventoryType || item.inventoryType === filters.inventoryType;
-          const descMatch = !filters.inventoryDescription || (item.inventoryDescription || '').toLowerCase().includes(filters.inventoryDescription.toLowerCase());
-          const importantMatch = !filters.importantOnly || (item.important === true);
+          const nameMatch =
+            !filters.inventoryName ||
+            item.inventoryName
+              .toLowerCase()
+              .includes(filters.inventoryName.toLowerCase());
+          const typeMatch =
+            !filters.inventoryType ||
+            item.inventoryType === filters.inventoryType;
+          const descMatch =
+            !filters.inventoryDescription ||
+            (item.inventoryDescription || '')
+              .toLowerCase()
+              .includes(filters.inventoryDescription.toLowerCase());
+          const importantMatch =
+            !filters.importantOnly || item.important === true;
           return nameMatch && typeMatch && descMatch && importantMatch;
         });
         setInventoryList(filtered);

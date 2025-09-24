@@ -2,12 +2,12 @@ import axiosInstance from '@/shared/api/axiosInstance.ts';
 import { Inventory } from '@/features/inventories/models/Inventory.ts';
 
 export async function searchInventories(
-    currentPage: number,
-    listSize: number,
-    inventoryName?: string,
-    inventoryType?: string,
-    inventoryDescription?: string,
-    importantOnly?: boolean
+  currentPage: number,
+  listSize: number,
+  inventoryName?: string,
+  inventoryType?: string,
+  inventoryDescription?: string,
+  importantOnly?: boolean
 ): Promise<Inventory[]> {
   try {
     const queryParams = new URLSearchParams();
