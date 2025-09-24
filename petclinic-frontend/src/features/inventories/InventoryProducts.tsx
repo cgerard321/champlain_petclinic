@@ -58,7 +58,7 @@ const InventoryProducts: React.FC = () => {
   // Declare state
   const [productName, setProductName] = useState<string>('');
   const [productDescription, setProductDescription] = useState<string>('');
-  const [productStatus, setProductStatus] = useState<Status>(Status.AVAILABLE);
+  const [productStatus, setProductStatus] = useState<Status | ''>('');
   const [products, setProducts] = useState<ProductModel[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<ProductModel[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -345,7 +345,7 @@ const InventoryProducts: React.FC = () => {
           <label htmlFor="product-status">Filter by Status:</label>
           <select
             id="product-status"
-            onChange={e => setProductStatus(e.target.value as Status)}
+            onChange={e => setProductStatus(e.target.value as Status | '')}
           >
             <option value="">All</option>
             {Object.values(Status).map(status => (
