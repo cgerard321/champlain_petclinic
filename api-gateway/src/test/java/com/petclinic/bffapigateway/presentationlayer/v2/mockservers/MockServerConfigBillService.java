@@ -50,9 +50,9 @@ public class MockServerConfigBillService {
 
         mockServerClient_BillService
                 .when(
-                    request()
-                            .withMethod("POST")
-                            .withPath("/bills")
+                        request()
+                                .withMethod("POST")
+                                .withPath("/bills")
                 )
                 .respond(
                         response()
@@ -63,22 +63,22 @@ public class MockServerConfigBillService {
 
 
     public void registerDownloadBillPdfEndpoint() {
-        byte[] mockPdfContent = "Mock PDF Content".getBytes();  
-        
+        byte[] mockPdfContent = "Mock PDF Content".getBytes();
+
         mockServerClient_BillService
-            .when(
-                request()
-                    .withMethod("GET")
-                    .withPath("/api/v2/gateway/customers/1/bills/1234/pdf")  
-            )
-            .respond(
-                response()
-                    .withStatusCode(200)
-                    .withBody(mockPdfContent)  
-                    .withHeader("Content-Type", "application/pdf")  
-            );
+                .when(
+                        request()
+                                .withMethod("GET")
+                                .withPath("/api/v2/gateway/customers/1/bills/1234/pdf")
+                )
+                .respond(
+                        response()
+                                .withStatusCode(200)
+                                .withBody(mockPdfContent)
+                                .withHeader("Content-Type", "application/pdf")
+                );
     }
-    
+
 
     public void registerUpdateBillEndpoint() {
         String response = "{\"billId\":\"e6c7398e-8ac4-4e10-9ee0-03ef33f0361a\",\"customerId\":\"e6c7398e-8ac4-4e10-9ee0-03ef33f0361a\",\"visitType\":\"operation\",\"vetId\":\"3\",\"date\":\"2024-10-11\",\"amount\":100.00, \"taxedAmount\": 0.0, \"billStatus\":\"PAID\", \"dueDate\":\"2024-10-13\"}";
@@ -98,63 +98,68 @@ public class MockServerConfigBillService {
     }
 
     public void registerGetCurrentBalanceEndpoint() {
-        String response = "150.0"; 
-        
+        String response = "150.0";
+
         mockServerClient_BillService
                 .when(
                         request()
                                 .withMethod("GET")
                                 .withPath("/api/v2/gateway/customers/{customerId}/bills/current-balance")
-                                .withPathParameter("customerId", "1") 
+                                .withPathParameter("customerId", "1")
                 )
                 .respond(
                         response()
-                                .withStatusCode(200) 
-                                .withBody(response)  
+                                .withStatusCode(200)
+                                .withBody(response)
                                 .withHeader("Content-Type", "application/json")
                 );
     }
-        
+
     public void registerGetCurrentBalanceInvalidCustomerIdEndpoint() {
         mockServerClient_BillService
                 .when(
                         request()
                                 .withMethod("GET")
                                 .withPath("/api/v2/gateway/customers/{customerId}/bills/current-balance")
-                                .withPathParameter("customerId", "invalid-id") 
+                                .withPathParameter("customerId", "invalid-id")
                 )
                 .respond(
                         response()
-                                .withStatusCode(404) 
+                                .withStatusCode(404)
                                 .withHeader("Content-Type", "application/json")
                 );
     }
 
     public void registerPayBillEndpoint() {
+        // success case
         mockServerClient_BillService
                 .when(
                         request()
                                 .withMethod("POST")
-                                .withPath("/bills/customer/e6c7398e-8ac4-4e10-9ee0-03ef33f0361a/bills/1/pay")
+                                .withPath("/api/v2/gateway/customers/1/bills/1234/pay")
                 )
                 .respond(
                         response()
                                 .withStatusCode(200)
-                                .withBody("Payment successful")
+                                .withHeader("Content-Type", "application/json")
+                                .withBody("{\"billId\":\"1234\",\"customerId\":\"1\",\"billStatus\":\"PAID\"}")
                 );
 
+        // invalid customer case
         mockServerClient_BillService
                 .when(
                         request()
                                 .withMethod("POST")
-                                .withPath("/bills/customer/invalid-customer-id/bills/1/pay")
+                                .withPath("/api/v2/gateway/customers/invalid-id/bills/1234/pay")
                 )
                 .respond(
                         response()
-                                .withStatusCode(400)
-                                .withBody("Payment failed: Invalid customer ID")
+                                .withStatusCode(404)
+                                .withHeader("Content-Type", "application/json")
+                                .withBody("{\"error\":\"Customer not found\"}")
                 );
     }
+
 
 
     public void stopMockServer() {

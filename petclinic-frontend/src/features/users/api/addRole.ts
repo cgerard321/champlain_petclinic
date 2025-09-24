@@ -6,5 +6,7 @@ import { RoleResponseModel } from '@/features/users/model/RoleResponseModel';
 export const addRole = async (
   role: RoleRequestModel
 ): Promise<AxiosResponse<RoleResponseModel>> => {
-  return await axiosInstance.post<RoleResponseModel>('/roles', role);
+  return await axiosInstance.post<RoleResponseModel>('/roles', role, {
+    useV2: true,
+  });
 };

@@ -1,5 +1,10 @@
 import axiosInstance from '@/shared/api/axiosInstance.ts';
 
 export default async function deleteAllInventories(): Promise<void> {
-  axiosInstance.delete(axiosInstance.defaults.baseURL + 'inventories');
+  try {
+    axiosInstance.delete('/inventory', { useV2: false });
+  } catch (error) {
+    console.error('Error deleting Inventories:', error);
+    throw error;
+  }
 }
