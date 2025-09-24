@@ -2,8 +2,14 @@ import { useState, FormEvent, ChangeEvent, FC } from 'react';
 import { Button, Form, Modal, Spinner } from 'react-bootstrap';
 import { addPhotoByVetId } from '@/features/veterinarians/api/addPhotoByVetId';
 
-interface UploadVetPhotoProps {}
+interface UploadVetPhotoProps {
+  // Add props here if needed in the future
+}
 
+/**
+ * Component for uploading veterinarian photos.
+ * Provides a modal interface for selecting and uploading image files.
+ */
 const UploadVetPhoto: FC<UploadVetPhotoProps> = () => {
   const [vetId, setVetId] = useState('');
   const [photoName, setPhotoName] = useState('');
@@ -22,6 +28,8 @@ const UploadVetPhoto: FC<UploadVetPhotoProps> = () => {
     setVetId('');
     setPhotoName('');
     setSelectedFile(null);
+    setErrorMsg(null);
+    setSubmitting(false);
   };
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>): void => {
