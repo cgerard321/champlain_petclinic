@@ -411,7 +411,18 @@ const addQuantity = async (
                       >
                         Delete
                       </button>
-
+                        <button
+                        className="btn btn-success"
+                        onClick={() =>
+                          addQuantity(product.productId, product.productQuantity)
+                        }
+                        disabled={product.productQuantity >= 100}
+                        title={
+                          product.productQuantity >= 100 ? "Max quantity reached" : ""
+                        }
+                      >
+                        Add Quantity
+                      </button>
                       <button
                         className="btn btn-info"
                         onClick={() =>
@@ -429,19 +440,6 @@ const addQuantity = async (
                         className="btn btn-info"
                       >
                         Move
-                      </button>
-
-                      <button
-                        className="btn btn-success"
-                        onClick={() =>
-                          addQuantity(product.productId, product.productQuantity)
-                        }
-                        disabled={product.productQuantity >= 100}
-                        title={
-                          product.productQuantity >= 100 ? "Max quantity reached" : ""
-                        }
-                      >
-                        Add Quantity
                       </button>
                     </div>
                   </td>
