@@ -12,6 +12,7 @@ import axiosInstance from '@/shared/api/axiosInstance.ts';
 import { getAllVisits } from './api/getAllVisits';
 
 export default function VisitListTable(): JSX.Element {
+  const [visitIdToDelete, setConfirmDeleteId] = useState<string | null>(null);
   const [visitsList, setVisitsList] = useState<Visit[]>([]);
   const [visitsAll, setVisitsAll] = useState<Visit[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>(''); // Search term state
@@ -265,9 +266,9 @@ export default function VisitListTable(): JSX.Element {
                 </button>
                 <button
                   className="btn btn-danger"
-                  onClick={async () => {
-                    await handleDeleteEmergency(emergency.visitEmergencyId);
-                  }}
+                  onClick={async () =>
+                    setConfirmDeleteId(emergency.visitEmergencyId)
+                  }
                   title="Delete"
                 >
                   Delete
@@ -473,6 +474,34 @@ export default function VisitListTable(): JSX.Element {
         archivedVisits,
         archivedCollapsed,
         setArchivedCollapsed
+      )}
+      {visitIdToDelete && (
+        <div className="modal">
+          <div className="modal-content">
+            <h3>Confirm Deletion</h3>
+            <p>
+              Are you sure you want to delete emergency visit {visitIdToDelete}?
+            </p>
+            <div className="modal-buttons">
+              <button onClick={() => setConfirmDeleteId(null)}>Cancel</button>
+              <button
+                onClick={async () => {
+                  try {
+                    await handleDeleteEmergency(visitIdToDelete);
+                    setConfirmDeleteId(null);
+                  } catch (error) {
+                    console.error('Error deleting emergency visit:', error);
+                    alert(
+                      'Failed to delete emergency visit. Please try again.'
+                    );
+                  }
+                }}
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
