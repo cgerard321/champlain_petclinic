@@ -36,8 +36,10 @@ public class ProductController {
             @RequestParam(required = false) Double minRating,
             @RequestParam(required = false) Double maxRating,
             @RequestParam(required = false) String sort,
-            @RequestParam(required = false) String deliveryType) {
-        return productService.getAllProducts(minPrice, maxPrice, minRating, maxRating, sort,deliveryType);
+            @RequestParam(required = false) String deliveryType,
+            @RequestParam(required = false) String productType) {
+
+        return productService.getAllProducts(minPrice, maxPrice, minRating, maxRating, sort,deliveryType,productType);
     }
 
     @GetMapping(value = "/{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
