@@ -30,7 +30,7 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
   const { inventoryId, productId } = useParams<{
     inventoryId: string;
     productId: string;
-  }>(); // Get params from URL
+  }>();
 
   const [product, setProduct] = useState<ProductRequestModel>({
     productName: '',
@@ -40,7 +40,6 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
     productSalePrice: 0,
   });
 
-  // Allow `error.message` access in the footer without changing your JSX
   const [error, setError] = useState<
     { [key: string]: string } & { message?: string }
   >({});
@@ -79,7 +78,6 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
       newError.productPrice = 'Product price is required';
     }
 
-    // Quantity: integer 1..100
     const qtyMsg = validateQuantityValue(product.productQuantity);
     if (qtyMsg) newError.productQuantity = qtyMsg;
 
@@ -122,7 +120,6 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
     }
   };
 
-  // Handle input changes (keeps your behavior, removes any/string|number issues)
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const { name, type, value } = e.target as HTMLInputElement & {
       name: ProductKeys;
@@ -130,15 +127,17 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
 
     if (name === 'productQuantity') {
       const digitsOnly = value.replace(/[^\d]/g, '');
-      const num = digitsOnly === '' ? 0 : Number(digitsOnly); // always a number
 
       setProduct(prev => ({
         ...prev,
-        productQuantity: num,
+        productQuantity:
+          digitsOnly === '' ? ('' as unknown as number) : Number(digitsOnly),
       }));
 
       const msg =
-        digitsOnly === '' ? 'Quantity is required' : validateQuantityValue(num);
+        digitsOnly === ''
+          ? 'Quantity is required'
+          : validateQuantityValue(Number(digitsOnly));
       setError(prev => ({ ...prev, productQuantity: msg ?? '' }));
       return;
     }
@@ -229,7 +228,7 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
             min={1}
             max={MAX_QTY}
             onKeyDown={e => {
-              // prevent '.', '-', 'e', '+'
+              // prevent '.', '-', 'e', 'E', '+'
               if (['.', '-', 'e', 'E', '+'].includes(e.key)) e.preventDefault();
             }}
             required
@@ -270,7 +269,6 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
 
       <div>
         {loading && <p>Loading...</p>}
-        {/* keeps your original line compiling by allowing error.message */}
         {error.message && <p style={{ color: 'red' }}>{error.message}</p>}
         {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
         {showNotification ? (
