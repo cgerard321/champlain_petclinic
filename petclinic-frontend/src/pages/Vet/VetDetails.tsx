@@ -10,7 +10,11 @@ import DeleteVetEducation from '@/pages/Vet/DeleteVetEducation';
 import { Workday } from '@/features/veterinarians/models/Workday.ts';
 import UpdateVet from '@/pages/Vet/UpdateVet.tsx';
 import { fetchVetPhoto } from '@/features/veterinarians/api/fetchPhoto';
-import { IsInventoryManager, IsOwner, IsReceptionist } from '@/context/UserContext';
+import {
+  IsInventoryManager,
+  IsOwner,
+  IsReceptionist,
+} from '@/context/UserContext';
 
 interface VetResponseType {
   vetId: string;

@@ -140,7 +140,10 @@ export function NavBar(): JSX.Element {
                 {(IsAdmin() || IsVet() || isReceptionist) && (
                   <NavDropdown title="Customers" id="owners-dropdown">
                     {(IsAdmin() || IsVet()) && (
-                      <NavDropdown.Item as={Link} to={AppRoutePaths.AllCustomers}>
+                      <NavDropdown.Item
+                        as={Link}
+                        to={AppRoutePaths.AllCustomers}
+                      >
                         Customers List
                       </NavDropdown.Item>
                     )}
