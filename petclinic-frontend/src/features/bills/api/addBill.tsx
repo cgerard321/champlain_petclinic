@@ -7,6 +7,7 @@ export async function addBill(newBill: BillRequestModel): Promise<void> {
       headers: {
         'Content-Type': 'application/json',
       },
+      useV2: false,
     });
   } catch (err) {
     console.error('Error creating bill:', err);

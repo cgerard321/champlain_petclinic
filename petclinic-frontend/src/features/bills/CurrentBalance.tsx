@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useUser } from '@/context/UserContext';
 import CountUp from 'react-countup';
+import axiosInstance from '@/shared/api/axiosInstance';
 
 export default function CurrentBalance(): JSX.Element {
   const { user } = useUser();
@@ -12,21 +13,19 @@ export default function CurrentBalance(): JSX.Element {
 
     const fetchCurrentBalance = async (): Promise<void> => {
       try {
-        const response = await fetch(
-          `http://localhost:8080/api/v2/gateway/customers/${user.userId}/bills/current-balance`,
+        const response = await axiosInstance.get(
+          `/customers/${user.userId}/bills/current-balance`,
           {
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            useV2: true,
           }
         );
 
-        if (!response.ok) {
+        if (!response || response.status !== 200 || !response.data) {
           throw new Error(`Error: ${response.status} ${response.statusText}`);
         }
 
-        const balance = await response.json();
+        const balance = response.data;
         setCurrentBalance(balance);
       } catch (err) {
         console.error('Error fetching current balance:', err);

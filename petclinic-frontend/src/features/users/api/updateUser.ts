@@ -6,11 +6,15 @@ export const updateUser = async (
   userId: string,
   user: UserPasswordLessDTO
 ): Promise<AxiosResponse<void>> => {
-  return await axiosInstance.put<void>(`/users/${userId}`, user);
+  return await axiosInstance.put<void>(`/users/${userId}`, user, {
+    useV2: false,
+  });
 };
 
 export const getUser = async (
   userId: string
 ): Promise<AxiosResponse<UserPasswordLessDTO>> => {
-  return await axiosInstance.get<UserPasswordLessDTO>(`/users/${userId}`);
+  return await axiosInstance.get<UserPasswordLessDTO>(`/users/${userId}`, {
+    useV2: false,
+  });
 };
