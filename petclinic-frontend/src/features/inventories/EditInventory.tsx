@@ -41,6 +41,16 @@ const EditInventory: React.FC = (): JSX.Element => {
   const [showNotification, setShowNotification] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
+  // Undo state
+  const [history, setHistory] = useState<Record<FieldKey, string[]>>({
+    inventoryName: [''],
+    inventoryType: [''],
+    inventoryDescription: [''],
+    inventoryImage: [''],
+    inventoryBackupImage: [''],
+  });
+  const [lastEditedFields, setLastEditedFields] = useState<string[]>([]);
+
   const navigate = useNavigate();
 
   useEffect(() => {
