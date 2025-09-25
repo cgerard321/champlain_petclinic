@@ -150,8 +150,6 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
-
-
       {
         path: AppRoutePaths.Review,
         element: (

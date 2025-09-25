@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { FormEvent, useState } from 'react';
+import { FormEvent, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { addCustomerReview } from './Api/addCustomerReview';
 import { ReviewRequestDTO } from './Model/ReviewRequestDTO';
@@ -9,7 +9,6 @@ import { AppRoutePaths } from '@/shared/models/path.routes.ts';
 import StarRating from '../../products/components/StarRating';
 import { OwnerResponseModel } from '../../customers/models/OwnerResponseModel';
 import { getOwner } from '../../customers/api/getOwner';
-import { useEffect } from 'react';
 
 interface ApiError {
   message: string;
@@ -33,7 +32,7 @@ const AddCustomerReviewForm: React.FC = (): JSX.Element => {
   const navigate = useNavigate();
   const { user } = useUser(); // Assuming this hook provides the user info
 
-    useEffect(() => {
+  useEffect(() => {
     if (user?.userId) {
       getOwner(user.userId)
         .then(res => {
@@ -49,8 +48,7 @@ const AddCustomerReviewForm: React.FC = (): JSX.Element => {
           console.error('Failed to fetch owner:', err);
         });
     }
-    }, [user]);
-
+  }, [user]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
