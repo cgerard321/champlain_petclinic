@@ -15,5 +15,3 @@ export const toggleInventoryImportant = async (
     throw error;
   }
 };
-
-export default toggleInventoryImportant;

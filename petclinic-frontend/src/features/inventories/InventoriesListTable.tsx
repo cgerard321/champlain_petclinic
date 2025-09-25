@@ -8,12 +8,12 @@ import deleteAllInventories from '@/features/inventories/api/deleteAllInventorie
 import deleteInventory from '@/features/inventories/api/deleteInventory.ts';
 import AddInventory from '@/features/inventories/AddInventoryForm.tsx';
 import AddInventoryType from '@/features/inventories/AddInventoryType.tsx';
-import toggleInventoryImportant from '@/features/inventories/api/toggleInventoryImportant.ts';
 import { ProductModel } from '@/features/inventories/models/ProductModels/ProductModel.ts';
 import inventoryStyles from './InventoriesListTable.module.css';
 import cardStylesInventory from './CardInventoryTeam.module.css';
 // import axios from 'axios';
 import axiosInstance from '@/shared/api/axiosInstance';
+import { toggleInventoryImportant } from './api/toggleInventoryImportant';
 
 export default function InventoriesListTable(): JSX.Element {
   const [selectedInventories, setSelectedInventories] = useState<Inventory[]>(
