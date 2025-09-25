@@ -1,8 +1,10 @@
-import { FormEvent, useState } from 'react';
+import { FormEvent, useState, useEffect } from 'react';
 import * as PropTypes from 'prop-types';
 import { addPetForOwner } from '../api/addPetForOwner';
+import { getPetTypes } from '../api/getPetTypes';
 import { PetRequestModel } from '../models/PetRequestModel';
 import { PetResponseModel } from '../models/PetResponseModel';
+import { PetTypeModel } from '../models/PetTypeModel';
 import './AddPetModal.css';
 
 interface AddPetModalProps {
@@ -11,15 +13,6 @@ interface AddPetModalProps {
   onClose: () => void;
   onPetAdded: (pet: PetResponseModel) => void;
 }
-
-const petTypeOptions: { [key: string]: string } = {
-  '1': 'Cat',
-  '2': 'Dog',
-  '3': 'Lizard',
-  '4': 'Snake',
-  '5': 'Bird',
-  '6': 'Hamster',
-};
 
 const AddPetModal: React.FC<AddPetModalProps> = ({
   ownerId,
@@ -37,6 +30,27 @@ const AddPetModal: React.FC<AddPetModalProps> = ({
   });
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [petTypes, setPetTypes] = useState<PetTypeModel[]>([]);
+  const [isLoadingPetTypes, setIsLoadingPetTypes] = useState<boolean>(true);
+
+  useEffect(() => {
+    const fetchPetTypes = async (): Promise<void> => {
+      try {
+        setIsLoadingPetTypes(true);
+        const response = await getPetTypes();
+        setPetTypes(response.data);
+      } catch (error) {
+        console.error('Error fetching pet types:', error);
+        setPetTypes([]);
+      } finally {
+        setIsLoadingPetTypes(false);
+      }
+    };
+
+    if (isOpen) {
+      fetchPetTypes();
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -138,12 +152,16 @@ const AddPetModal: React.FC<AddPetModalProps> = ({
               value={pet.petTypeId}
               onChange={handleChange}
               className={errors.petTypeId ? 'error-input' : ''}
-              disabled={isSubmitting}
+              disabled={isSubmitting || isLoadingPetTypes}
             >
-              <option value="">Select a pet type</option>
-              {Object.entries(petTypeOptions).map(([id, name]) => (
-                <option key={id} value={id}>
-                  {name}
+              <option value="">
+                {isLoadingPetTypes
+                  ? 'Loading pet types...'
+                  : 'Select a pet type'}
+              </option>
+              {petTypes.map(petType => (
+                <option key={petType.petTypeId} value={petType.petTypeId}>
+                  {petType.name}
                 </option>
               ))}
             </select>
