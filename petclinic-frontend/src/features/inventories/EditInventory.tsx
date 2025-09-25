@@ -101,6 +101,77 @@ const EditInventory: React.FC = (): JSX.Element => {
     fetchInventoryTypes();
   }, [inventoryId]);
 
+  // Word-count helper
+  const countWords = (s: string): number => {
+    const trimmed = s.trim();
+    if (trimmed === '') return 0;
+    return trimmed.split(/\s+/).filter(Boolean).length;
+  };
+
+  // Push snapshots at word boundaries
+  const handleFieldChange = (
+      field: FieldKey,
+      value: string
+  ): void => {
+    setHistory(prev => {
+      const fieldHist = prev[field] ?? [''];
+      const lastRecorded = fieldHist[fieldHist.length - 1] ?? '';
+
+      const isWordBoundary =
+          value.endsWith(' ') ||
+          value.trim() === '' ||
+          countWords(value) < countWords(lastRecorded);
+
+      if (isWordBoundary && value !== lastRecorded) {
+        return {
+          ...prev,
+          [field]: [...fieldHist, value],
+        };
+      }
+      return prev;
+    });
+
+    setLastEditedFields(prev => {
+      const updated = prev.filter(f => f !== field);
+      return [...updated, field];
+    });
+
+    setInventory({ ...inventory, [field]: value });
+  };
+
+  // Undo handler
+  const handleUndo = (): void => {
+    const order = [...lastEditedFields];
+
+    while (order.length > 0) {
+      const candidate = order[order.length - 1] as FieldKey;
+      const fieldHist = history[candidate];
+
+      if (fieldHist && fieldHist.length > 1) {
+        const newHist = fieldHist.slice(0, -1);
+        const restoredValue = newHist[newHist.length - 1] ?? '';
+
+        setHistory(prev => ({
+          ...prev,
+          [candidate]: newHist,
+        }));
+
+        setLastEditedFields(prev => {
+          const filtered = prev.filter(f => f !== candidate);
+          if (newHist.length > 1) {
+            return [...filtered, candidate];
+          }
+          return filtered;
+        });
+
+        setInventory({ ...inventory, [candidate]: restoredValue });
+        return;
+      }
+
+      order.pop();
+    }
+  };
+
   const validate = (): boolean => {
     const newError: { [key: string]: string } = {};
     if (!inventory.inventoryName) {
