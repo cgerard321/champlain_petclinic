@@ -553,10 +553,15 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                         document.add(new Paragraph(" ")); // Blank line
 
                         for (Product supply : supplies) {
+                            Double cost = supply.getProductPrice();
+                            Double sell = supply.getProductSalePrice();
+                            Double profit = sell - cost;
                             document.add(new Paragraph("Product Name: " + supply.getProductName()));
                             document.add(new Paragraph("Quantity: " + supply.getProductQuantity()));
                             document.add(new Paragraph("Description: " + supply.getProductDescription()));
-                            document.add(new Paragraph("Price: $" + supply.getProductPrice()));
+                            document.add(new Paragraph("Regular Price: $" + supply.getProductPrice()));
+                            document.add(new Paragraph("Sale Price: $" + supply.getProductSalePrice()));
+                            document.add(new Paragraph("Profit Margin: $" + profit));
                             document.add(new Paragraph(" "));
                         }
 
