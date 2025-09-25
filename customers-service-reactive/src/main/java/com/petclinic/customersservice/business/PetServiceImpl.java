@@ -10,12 +10,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import java.util.UUID;
 
 @Service
 public class PetServiceImpl implements PetService {
 
     @Autowired
     PetRepo petRepo;
+
+    @Autowired
+    OwnerService ownerService;
 
     @Override
     public Mono<Pet> insertPet(Mono<Pet> petMono) {
@@ -70,6 +74,29 @@ public class PetServiceImpl implements PetService {
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Pet id not found: " + petId))))
                 .flatMap(found -> petRepo.delete(found)
                         .then(Mono.just(found)))
+                .map(EntityDTOUtil::toPetResponseDTO);
+    }
+
+    @Override
+    public Mono<PetResponseDTO> createPetForOwner(String ownerId, Mono<PetRequestDTO> petRequestDTO) {
+        return petRequestDTO
+                .flatMap(requestDTO -> {
+                    return ownerService.getOwnerByOwnerId(ownerId)
+                            .switchIfEmpty(Mono.error(new NotFoundException("Owner not found with id: " + ownerId)))
+                            .then(Mono.just(requestDTO));
+                })
+                .map(requestDTO -> {
+                    Pet pet = new Pet();
+                    pet.setPetId(UUID.randomUUID().toString());
+                    pet.setOwnerId(ownerId);
+                    pet.setName(requestDTO.getName());
+                    pet.setBirthDate(requestDTO.getBirthDate());
+                    pet.setPetTypeId(requestDTO.getPetTypeId());
+                    pet.setIsActive("true");
+                    pet.setWeight(requestDTO.getWeight());
+                    return pet;
+                })
+                .flatMap(petRepo::save)
                 .map(EntityDTOUtil::toPetResponseDTO);
     }
 
