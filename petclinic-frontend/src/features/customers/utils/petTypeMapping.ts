@@ -8,6 +8,7 @@ const legacyPetTypeMapping: { [key: string]: string } = {
   '4': 'Snake',
   '5': 'Bird',
   '6': 'Hamster',
+  '7': 'Others',
 };
 
 export const createPetTypeMapping = (
