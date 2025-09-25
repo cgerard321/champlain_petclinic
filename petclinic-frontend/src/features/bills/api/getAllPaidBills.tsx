@@ -3,7 +3,7 @@ import { Bill } from '@/features/bills/models/Bill.ts';
 
 export async function getAllPaidBills(): Promise<Bill[]> {
   const response = await axiosInstance.get('' + '/bills/admin/paid', {
-    responseType: 'stream',
+    responseType: 'text',
     useV2: false,
   });
   return response.data
