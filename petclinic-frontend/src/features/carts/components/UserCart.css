@@ -66,7 +66,7 @@
   transition: transform 0.2s;
 }
 
-.continue-shopping-btn{
+.continue-shopping-btn {
   background-color: gray;
   color: white;
   transition:
@@ -74,8 +74,8 @@
     transform 0.2s;
 }
 
-.continue-shopping-btn:hover{
-  background-color: black; 
+.continue-shopping-btn:hover {
+  background-color: black;
   transform: scale(1.05);
 }
 
