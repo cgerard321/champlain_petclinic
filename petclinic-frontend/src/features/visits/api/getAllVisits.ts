@@ -7,7 +7,6 @@ export async function getAllVisits(): Promise<VisitResponseModel[]> {
       responseType: 'stream',
       useV2: false,
     });
-
     return response.data
       .split('data:')
       .map((payload: string) => {
