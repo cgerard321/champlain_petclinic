@@ -4,8 +4,10 @@ export interface ProductModel {
   productId: string;
   productName: string;
   productDescription: string;
-  productSalePrice: number;
+  productPrice: number; // Cost(Regular) price
+  productSalePrice: number; // Selling price
   productQuantity: number;
+  productMargin: number;
   status: Status;
   requestCount: number;
 }
