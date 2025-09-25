@@ -298,18 +298,23 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
             />
           </div>
 
-          <button type="submit">Add Inventory</button>
-          <button
-            type="button"
-            className="cancel"
-            onClick={handleInventoryClose}
-          >
-            Cancel
-          </button>
-        </form>
-      </div>
-    </div>
-  );
+                    <button type="submit">Add Inventory</button>
+                    <button
+                        type="button"
+                        className="cancel"
+                        onClick={handleInventoryClose}
+                    >
+                        Cancel
+                    </button>
+
+                    {/* Undo button: triggers the word-level undo handler above */}
+                    <button type="button" className="undo" onClick={handleUndo}>
+                        Undo
+                    </button>
+                </form>
+            </div>
+        </div>
+    );
 };
 
 export default AddInventoryForm;
