@@ -8,7 +8,6 @@ export async function getAllOwnerVisits(
     const response = await axiosInstance.get(`/visits/owners/${ownerId}`, {
       useV2: true,
     });
-
     return response.data
       .split('data:')
       .map((dataChunk: string) => {
