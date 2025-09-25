@@ -58,7 +58,7 @@ const InventoryProducts: React.FC = () => {
   // Declare state
   const [productName, setProductName] = useState<string>('');
   const [productDescription, setProductDescription] = useState<string>('');
-  const [productStatus, setProductStatus] = useState<Status>(Status.AVAILABLE);
+  const [productStatus, setProductStatus] = useState<Status | ''>('');
   const [products, setProducts] = useState<ProductModel[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<ProductModel[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -127,6 +127,12 @@ const InventoryProducts: React.FC = () => {
           { useV2: false }
         );
         const data = Array.isArray(response.data) ? response.data : [];
+        // Calculate profit margin for each product
+        data.forEach(product => {
+          product.productMargin = parseFloat(
+            (product.productSalePrice - product.productPrice).toFixed(2)
+          );
+        });
         setProducts(data);
         setProductList(data);
         setFilteredProducts(data);
@@ -345,7 +351,7 @@ const InventoryProducts: React.FC = () => {
           <label htmlFor="product-status">Filter by Status:</label>
           <select
             id="product-status"
-            onChange={e => setProductStatus(e.target.value as Status)}
+            onChange={e => setProductStatus(e.target.value as Status | '')}
           >
             <option value="">All</option>
             {Object.values(Status).map(status => (
@@ -362,10 +368,12 @@ const InventoryProducts: React.FC = () => {
       <table className="table table-striped">
         <thead>
           <tr>
-            <th>SupplyId</th>
-            <th>SupplyName</th>
+            <th>Supply Id</th>
+            <th>Supply Name</th>
             <th>Description</th>
-            <th>Price</th>
+            <th>Sale Price</th>
+            <th>Cost Price</th>
+            <th>Profit Margin</th>
             <th>Quantity</th>
             <th>Status</th>
             <th>Actions</th>
@@ -379,6 +387,15 @@ const InventoryProducts: React.FC = () => {
                 <td>{product.productName}</td>
                 <td>{product.productDescription}</td>
                 <td>${product.productSalePrice}</td>
+                <td>${product.productPrice}</td>
+                <td
+                  style={{
+                    color: product.productMargin >= 0 ? 'green' : 'red',
+                    fontWeight: 'bold',
+                  }}
+                >
+                  ${product.productMargin}
+                </td>
                 <td>{product.productQuantity}</td>
                 <td
                   style={{
