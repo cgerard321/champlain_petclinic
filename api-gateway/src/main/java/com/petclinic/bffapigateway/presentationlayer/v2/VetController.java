@@ -106,10 +106,10 @@ public class VetController {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
-    @PostMapping(value = "{vetId}/photos/{photoName}", consumes = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    @PostMapping(value = "{vetId}/photos", consumes = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     public Mono<ResponseEntity<Resource>> addPhotoByVetId(
             @PathVariable String vetId,
-            @PathVariable String photoName,
+            @RequestHeader("Photo-Name") String photoName,
             @RequestBody Mono<byte[]> fileData) {
 
         return fileData.flatMap(bytes -> 
@@ -122,10 +122,10 @@ public class VetController {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
-    @PostMapping(value = "{vetId}/photos/{photoName}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "{vetId}/photos", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Mono<ResponseEntity<Resource>> addPhotoByVetIdMultipart(
             @PathVariable String vetId,
-            @PathVariable String photoName,
+            @RequestPart("photoName") String photoName,
             @RequestPart("file") FilePart file) {
 
         return vetsServiceClient.addPhotoToVet(vetId, photoName, file)

@@ -1,22 +1,13 @@
-import { useState, FormEvent, ChangeEvent, FC } from 'react';
-import { Button, Form, Modal, Spinner } from 'react-bootstrap';
+import * as React from 'react';
+import { useState } from 'react';
+import { Button, Form, Modal } from 'react-bootstrap';
 import { addPhotoByVetId } from '@/features/veterinarians/api/addPhotoByVetId';
 
-interface UploadVetPhotoProps {
-  // Add props here if needed in the future
-}
-
-/**
- * Component for uploading veterinarian photos.
- * Provides a modal interface for selecting and uploading image files.
- */
-const UploadVetPhoto: FC<UploadVetPhotoProps> = () => {
+const UploadVetPhoto: React.FC = (): JSX.Element => {
   const [vetId, setVetId] = useState('');
   const [photoName, setPhotoName] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [show, setShow] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const handleShow = (): void => setShow(true);
   const handleClose = (): void => {
@@ -28,38 +19,30 @@ const UploadVetPhoto: FC<UploadVetPhotoProps> = () => {
     setVetId('');
     setPhotoName('');
     setSelectedFile(null);
-    setErrorMsg(null);
-    setSubmitting(false);
   };
 
-  const handleFileChange = (event: ChangeEvent<HTMLInputElement>): void => {
+  const handleFileChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ): void => {
     const file = event.target.files?.[0] || null;
     setSelectedFile(file);
-    setErrorMsg(null);
   };
 
-  const handleUpload = async (event?: FormEvent): Promise<void> => {
-    event?.preventDefault();
-
-    setErrorMsg(null);
+  const handleUpload = async (): Promise<void> => {
     if (!selectedFile) {
-      setErrorMsg('Please choose a file to upload.');
+      console.error('No file selected');
       return;
     }
 
-    setSubmitting(true);
     try {
       await addPhotoByVetId(
-        vetId || '',
+        vetId,
         photoName || selectedFile.name,
         selectedFile
       );
       handleClose();
-    } catch (err: unknown) {
-      console.error('Upload error', err);
-      setErrorMsg('Upload failed. Please try again.');
-    } finally {
-      setSubmitting(false);
+    } catch (error) {
+      console.error('Error uploading photo:', error);
     }
   };
 
@@ -102,29 +85,16 @@ const UploadVetPhoto: FC<UploadVetPhotoProps> = () => {
                 accept="image/*"
                 onChange={handleFileChange}
                 required
-                disabled={submitting}
               />
             </Form.Group>
-            {errorMsg && <div className="alert alert-danger">{errorMsg}</div>}
           </Form>
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleClose}>
             Close
           </Button>
-          <Button
-            variant="primary"
-            onClick={handleUpload}
-            disabled={submitting}
-          >
-            {submitting ? (
-              <>
-                <Spinner animation="border" size="sm" className="me-2" />
-                Uploading...
-              </>
-            ) : (
-              'Upload'
-            )}
+          <Button variant="primary" onClick={handleUpload}>
+            Upload
           </Button>
         </Modal.Footer>
       </Modal>

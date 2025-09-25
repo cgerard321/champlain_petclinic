@@ -502,12 +502,12 @@ public class BFFApiGatewayController {
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
     @PostMapping(
-            value = "vets/{vetId}/photos/{photoName}",
+            value = "vets/{vetId}/photos",
             consumes = MediaType.APPLICATION_OCTET_STREAM_VALUE
     )
     public Mono<ResponseEntity<Resource>> addPhotoByVetId(
             @PathVariable String vetId,
-            @PathVariable String photoName,
+            @RequestHeader("Photo-Name") String photoName,
             @RequestBody Mono<byte[]> fileData) {
 
         return fileData
@@ -518,12 +518,12 @@ public class BFFApiGatewayController {
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
     @PostMapping(
-            value = "vets/{vetId}/photos/{photoName}",
+            value = "vets/{vetId}/photos",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE
     )
     public Mono<ResponseEntity<Resource>> addPhotoByVetIdMultipart(
             @PathVariable String vetId,
-            @PathVariable String photoName,
+            @RequestPart("photoName") String photoName,
             @RequestPart("file") Mono<FilePart> file) {
 
         return file
