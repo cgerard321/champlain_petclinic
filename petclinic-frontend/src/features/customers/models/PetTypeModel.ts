@@ -3,5 +3,3 @@ export interface PetTypeModel {
   name: string;
   petTypeDescription: string;
 }
-
-
