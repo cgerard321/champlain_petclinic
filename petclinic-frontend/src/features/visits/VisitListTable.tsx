@@ -10,9 +10,7 @@ import './Emergency.css';
 import { exportVisitsCSV } from './api/exportVisitsCSV';
 import axiosInstance from '@/shared/api/axiosInstance.ts';
 import { getAllVisits } from './api/getAllVisits';
-import { IsOwner } from '@/context/UserContext';
-import { IsVet } from '@/context/UserContext';
-
+import { IsOwner, IsVet } from '@/context/UserContext';
 
 export default function VisitListTable(): JSX.Element {
   const [visitIdToDelete, setConfirmDeleteId] = useState<string | null>(null);
