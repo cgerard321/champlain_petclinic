@@ -15,6 +15,14 @@ interface ApiError {
   message: string;
 }
 
+// Fields that support undo
+type FieldKey =
+    | 'inventoryName'
+    | 'inventoryType'
+    | 'inventoryDescription'
+    | 'inventoryImage'
+    | 'inventoryBackupImage';
+
 const EditInventory: React.FC = (): JSX.Element => {
   const { inventoryId } = useParams<{ inventoryId: string }>();
   const [inventory, setInventory] = useState<InventoryRequestModel>({
