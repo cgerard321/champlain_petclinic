@@ -194,7 +194,9 @@ export default function ProductDetails(): JSX.Element {
                   <div
                     className="productadmin-container"
                     style={{
-                      visibility: `${isAdmin || isInventoryManager ? 'visible' : 'hidden'}`,
+                      visibility: `${
+                        isAdmin || isInventoryManager ? 'visible' : 'hidden'
+                      }`,
                     }}
                   >
                     <Button variant="warning" onClick={navigateToEditProduct}>
@@ -216,6 +218,8 @@ export default function ProductDetails(): JSX.Element {
                     />
                     <h3>{currentProduct.averageRating} / 5</h3>
                   </div>
+
+                  {/* Single, final Add to Cart block */}
                   {!isInventoryManager && !isVet && !isReceptionist && (
                     <div className="cartactions-container">
                       <Button onClick={handleAddToCartClick}>
@@ -270,7 +274,9 @@ export default function ProductDetails(): JSX.Element {
                                   strokeLinecap="round"
                                   strokeLinejoin="round"
                                   key={k}
-                                  className={`star-static ${k < rating.rating ? 'star-shown' : ''}`}
+                                  className={`star-static ${
+                                    k < rating.rating ? 'star-shown' : ''
+                                  }`}
                                 >
                                   <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
                                 </svg>
