@@ -537,4 +537,21 @@ public class AuthServiceClient {
                 .retrieve()
                 .bodyToMono(Role.class);
     }
+
+    public Mono<UserPasswordLessDTO> createReceptionistUser(Mono<RegisterReceptionist> registerReceptionistMono) {
+        String uuid = UUID.randomUUID().toString();
+        return registerReceptionistMono.flatMap(registerReceptionist -> {
+            registerReceptionist.setUserId(uuid);
+            return webClientBuilder.build().post()
+                    .uri(authServiceUrl + "/users")
+                    .body(Mono.just(registerReceptionist), RegisterReceptionist.class)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::is4xxClientError,
+                            n -> rethrower.rethrow(n,
+                                    x -> new GenericHttpException(x.get("message").toString(), BAD_REQUEST))
+                    )
+                    .bodyToMono(UserPasswordLessDTO.class);
+        });
+    }
 }

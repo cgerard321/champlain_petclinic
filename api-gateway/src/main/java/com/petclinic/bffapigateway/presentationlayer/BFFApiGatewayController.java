@@ -956,6 +956,13 @@ public class BFFApiGatewayController {
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @PostMapping(value = "/users/receptionist")
+    public Mono<ResponseEntity<UserPasswordLessDTO>> createReceptionist(@RequestBody @Valid Mono<RegisterReceptionist> model) {
+        return authServiceClient.createReceptionistUser(model).map(s -> ResponseEntity.status(HttpStatus.CREATED).body(s))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
     /**
      * End of Auth Methods
      **/
