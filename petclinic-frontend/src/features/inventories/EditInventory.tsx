@@ -67,6 +67,15 @@ const EditInventory: React.FC = (): JSX.Element => {
             inventoryBackupImage: response.inventoryBackupImage,
             imageUploaded: response.imageUploaded,
           });
+
+          // Initialize undo history with loaded values
+          setHistory({
+            inventoryName: [response.inventoryName],
+            inventoryType: [response.inventoryType],
+            inventoryDescription: [response.inventoryDescription],
+            inventoryImage: [response.inventoryImage],
+            inventoryBackupImage: [response.inventoryBackupImage],
+          });
         } catch (error) {
           console.error(
             `Error fetching inventory with ID ${inventoryId}:`,
