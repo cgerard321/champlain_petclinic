@@ -10,12 +10,13 @@ import './Emergency.css';
 import { exportVisitsCSV } from './api/exportVisitsCSV';
 import axiosInstance from '@/shared/api/axiosInstance.ts';
 import { getAllVisits } from './api/getAllVisits';
+import { IsVet } from '@/context/UserContext';
 
 export default function VisitListTable(): JSX.Element {
   const [visitIdToDelete, setConfirmDeleteId] = useState<string | null>(null);
+  const isVet = IsVet();
   const [visitsList, setVisitsList] = useState<Visit[]>([]);
   const [visitsAll, setVisitsAll] = useState<Visit[]>([]);
-  const [archivedVisits, setArchivedVisits] = useState<Visit[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>(''); // Search term state
   const [emergencyList, setEmergencyList] = useState<EmergencyResponseDTO[]>(
     []
@@ -97,7 +98,7 @@ export default function VisitListTable(): JSX.Element {
     return () => {
       eventSource.close();
     };
-  }, [isVet]);
+  }, []);
 
   useEffect(() => {
     // Fetch emergency visits
