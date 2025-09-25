@@ -199,6 +199,16 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
       const reader = new FileReader();
       reader.onload = event => {
         if (event.target?.result instanceof ArrayBuffer) {
+          // Track image change in undo history as well (push current text field value)
+          setHistory(prev => ({
+            ...prev,
+            inventoryImage: [...(prev.inventoryImage ?? ['']), inventoryImage],
+          }));
+
+          setLastEditedFields(prev => {
+            const updated = prev.filter(f => f !== 'inventoryImage');
+            return [...updated, 'inventoryImage'];
+          });
           const uint8Array = new Uint8Array(event.target.result as ArrayBuffer);
           setImageUploaded(uint8Array);
         }
