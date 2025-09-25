@@ -31,6 +31,18 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
   const [inventoryTypes, setInventoryTypes] = useState<InventoryType[]>([]);
   const [imageUploaded, setImageUploaded] = useState<Uint8Array | null>(null);
 
+  // Per-field history arrays. Initialize with the initial/current value so there is always a baseline.
+  const [history, setHistory] = useState<Record<FieldKey, string[]>>({
+    inventoryName: [''],
+    inventoryType: [''],
+    inventoryDescription: [''],
+    inventoryImage: [''],
+    inventoryBackupImage: [''],
+  });
+
+  // Track edit order. Last element = most recently edited field.
+  const [lastEditedFields, setLastEditedFields] = useState<string[]>([]);
+
   useEffect(() => {
     async function fetchInventoryTypes(): Promise<void> {
       try {
