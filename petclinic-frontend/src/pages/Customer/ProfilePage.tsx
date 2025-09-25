@@ -7,6 +7,7 @@ import { NavBar } from '@/layouts/AppNavBar.tsx';
 import './ProfilePage.css';
 import { AppRoutePaths } from '@/shared/models/path.routes.ts';
 import { useNavigate } from 'react-router-dom';
+import PetPhotoContainer from '@/features/customers/components/PetPhotoContainer.tsx';
 
 const ProfilePage = (): JSX.Element => {
   const { user } = useUser();
@@ -87,16 +88,28 @@ const ProfilePage = (): JSX.Element => {
           <div className="pets-section">
             <h3>Owner Pets</h3>
             {owner.pets && owner.pets.length > 0 ? (
-              <ul>
+              <div className="pets-grid">
                 {owner.pets.map((pet: PetResponseModel) => (
-                  <li key={pet.petId}>
-                    <strong>Name: </strong> {pet.name},<strong>Type: </strong>{' '}
-                    {petTypeMapping[pet.petTypeId] || 'Unknown'},
-                    <strong>Weight: </strong> {pet.weight}kg,
-                    <strong>Age: </strong> {calculateAge(pet.birthDate)}
-                  </li>
+                  <div key={pet.petId} className="pet-card">
+                    <PetPhotoContainer petId={pet.petId} petName={pet.name} />
+                    <div className="pet-info">
+                      <p>
+                        <strong>Name:</strong> {pet.name}
+                      </p>
+                      <p>
+                        <strong>Type:</strong>{' '}
+                        {petTypeMapping[pet.petTypeId] || 'Unknown'}
+                      </p>
+                      <p>
+                        <strong>Weight:</strong> {pet.weight}kg
+                      </p>
+                      <p>
+                        <strong>Age:</strong> {calculateAge(pet.birthDate)}
+                      </p>
+                    </div>
+                  </div>
                 ))}
-              </ul>
+              </div>
             ) : (
               <p>No pets found.</p>
             )}
