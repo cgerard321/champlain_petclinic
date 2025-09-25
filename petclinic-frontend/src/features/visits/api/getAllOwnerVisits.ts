@@ -6,7 +6,7 @@ export async function getAllOwnerVisits(
 ): Promise<VisitResponseModel[]> {
   try {
     const response = await axiosInstance.get(`/visits/owners/${ownerId}`);
-      useV2: true,
+      { useV2: true });
     return response.data
       .split('data:')
       .map((dataChunk: string) => {
