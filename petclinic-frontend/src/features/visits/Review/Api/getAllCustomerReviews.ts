@@ -6,7 +6,8 @@ export const getAllReviews = async (
   userId: string
 ): Promise<ReviewResponseDTO[]> => {
   const response = await axiosInstance.get<ReviewResponseDTO[]>(
-    `http://localhost:8080/api/v2/gateway/visits/owners/${userId}/reviews`
+    `/visits/owners/${userId}/reviews`,
+    { useV2: false }
   );
   return response.data; // Return only the data
 };

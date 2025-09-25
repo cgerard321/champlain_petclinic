@@ -11,6 +11,8 @@ import AddInventoryType from '@/features/inventories/AddInventoryType.tsx';
 import { ProductModel } from '@/features/inventories/models/ProductModels/ProductModel.ts';
 import inventoryStyles from './InventoriesListTable.module.css';
 import cardStylesInventory from './CardInventoryTeam.module.css';
+// import axios from 'axios';
+import axiosInstance from '@/shared/api/axiosInstance';
 
 export default function InventoriesListTable(): JSX.Element {
   const [selectedInventories, setSelectedInventories] = useState<Inventory[]>(
@@ -51,6 +53,7 @@ export default function InventoriesListTable(): JSX.Element {
     realPage,
     getInventoryList,
     setCurrentPage,
+    updateFilters,
   } = useSearchInventories();
 
   useEffect(() => {
@@ -69,11 +72,42 @@ export default function InventoriesListTable(): JSX.Element {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage]);
 
+  const handleInventoryNameChange = (value: string): void => {
+    setInventoryName(value);
+    updateFilters({
+      inventoryName: value,
+      inventoryType,
+      inventoryDescription,
+    });
+  };
+
+  const handleInventoryTypeChange = (value: string): void => {
+    setInventoryType(value);
+    updateFilters({
+      inventoryName,
+      inventoryType: value,
+      inventoryDescription,
+    });
+  };
+
+  const handleInventoryDescriptionChange = (value: string): void => {
+    setInventoryDescription(value);
+    updateFilters({
+      inventoryName,
+      inventoryType,
+      inventoryDescription: value,
+    });
+  };
+
   const clearQueries = (): void => {
     setInventoryName('');
     setInventoryType('');
     setInventoryDescription('');
-    getInventoryList('', '', '');
+    updateFilters({
+      inventoryName: '',
+      inventoryType: '',
+      inventoryDescription: '',
+    });
   };
 
   const pageBefore = (): void => {
@@ -116,24 +150,16 @@ export default function InventoriesListTable(): JSX.Element {
 
   const fetchProductQuantity = async (inventoryId: string): Promise<void> => {
     try {
-      const response = await fetch(
-        `http://localhost:8080/api/v2/gateway/inventories/${inventoryId}/productquantity`,
-        {
-          method: 'GET',
-          credentials: 'include', // <-- Add this line to include cookies or credentials
-          headers: { 'Content-Type': 'application/json' },
-        }
+      const response = await axiosInstance.get<number>(
+        `/inventory/${inventoryId}/productquantity`,
+        { useV2: false }
       );
 
-      if (response.ok) {
-        const quantity = await response.json();
-        setProductQuantities(prevQuantities => ({
-          ...prevQuantities,
-          [inventoryId]: quantity,
-        }));
-      } else {
-        console.error('Failed to fetch product quantity:', response.statusText);
-      }
+      const quantity = await response.data;
+      setProductQuantities(prevQuantities => ({
+        ...prevQuantities,
+        [inventoryId]: quantity,
+      }));
     } catch (error) {
       console.error('Error fetching product quantity:', error);
     }
@@ -143,30 +169,17 @@ export default function InventoriesListTable(): JSX.Element {
     inventory: Inventory
   ): Promise<void> => {
     try {
-      const response = await fetch(
-        `http://localhost:8080/api/gateway/inventory/${inventory.inventoryId}/products/lowstock`,
-        {
-          method: 'GET',
-          credentials: 'include',
-          headers: {
-            Accept: 'application/json',
-          },
-        }
+      const response = await axiosInstance.get<ProductModel[]>(
+        `/inventory/${inventory.inventoryId}/products/lowstock`,
+        { useV2: false }
       );
-
-      if (response.ok) {
-        const data = await response.json();
-        if (data && data.length > 0) {
-          // Update the ref directly
-          lowStockProductsByInventory.current = {
-            ...lowStockProductsByInventory.current,
-            [inventory.inventoryName]: data,
-          };
-        }
-      } else {
-        console.error(
-          `No products below threshold in inventory: ${inventory.inventoryName}`
-        );
+      const data = response.data;
+      if (data && data.length > 0) {
+        // Update the ref directly
+        lowStockProductsByInventory.current = {
+          ...lowStockProductsByInventory.current,
+          [inventory.inventoryName]: data,
+        };
       }
     } catch (error) {
       console.error('Error fetching low stock products:', error);
@@ -332,34 +345,20 @@ export default function InventoriesListTable(): JSX.Element {
                 <input
                   type="text"
                   value={inventoryName}
-                  onChange={e => setInventoryName(e.target.value)}
-                  onKeyUp={e =>
-                    e.key === 'Enter' &&
-                    getInventoryList(
-                      inventoryName,
-                      inventoryType,
-                      inventoryDescription
-                    )
-                  }
+                  onChange={e => handleInventoryNameChange(e.target.value)}
                 />
               </td>
               <td>
                 <select
                   className="form-control col-sm-4"
                   value={inventoryType}
-                  onChange={e => setInventoryType(e.target.value)}
-                  onKeyUp={e =>
-                    e.key === 'Enter' &&
-                    getInventoryList(
-                      inventoryName,
-                      inventoryType,
-                      inventoryDescription
-                    )
-                  }
+                  onChange={e => handleInventoryTypeChange(e.target.value)}
                 >
                   <option value="">None</option>
                   {inventoryTypeList.map(type => (
-                    <option key={type.type}>{type.type}</option>
+                    <option key={type.type} value={type.type}>
+                      {type.type}
+                    </option>
                   ))}
                 </select>
               </td>
@@ -367,14 +366,8 @@ export default function InventoriesListTable(): JSX.Element {
                 <input
                   type="text"
                   value={inventoryDescription}
-                  onChange={e => setInventoryDescription(e.target.value)}
-                  onKeyUp={e =>
-                    e.key === 'Enter' &&
-                    getInventoryList(
-                      inventoryName,
-                      inventoryType,
-                      inventoryDescription
-                    )
+                  onChange={e =>
+                    handleInventoryDescriptionChange(e.target.value)
                   }
                 />
               </td>
@@ -397,34 +390,21 @@ export default function InventoriesListTable(): JSX.Element {
                   </svg>
                 </button>
               </td>
-              <td>
-                <button
-                  className="btn btn-info"
-                  onClick={() =>
-                    getInventoryList(
-                      inventoryName,
-                      inventoryType,
-                      inventoryDescription
-                    )
-                  }
-                  title="Search"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="32"
-                    height="32"
-                    fill="white"
-                    className="bi bi-search"
-                    viewBox="0 0 16 16"
-                  >
-                    <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
-                  </svg>
-                </button>
-              </td>
               <td></td>
             </tr>
           </thead>
         </table>
+        {inventoryList.length === 0 &&
+          (inventoryName !== '' ||
+            inventoryType !== '' ||
+            inventoryDescription !== '') && (
+            <div className="text-center p-4">
+              <div className="alert alert-info">
+                <h5>No inventory found</h5>
+                <p>No inventories match your current search criteria.</p>
+              </div>
+            </div>
+          )}
         {/*//Cards start here*/}
         <div className={cardStylesInventory.cardContainerCustom}>
           {inventoryList.map(inventory => (
