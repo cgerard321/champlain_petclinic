@@ -11,6 +11,13 @@ interface AddInventoryProps {
   refreshInventoryTypes: () => void;
 }
 
+type FieldKey =
+    | 'inventoryName'
+    | 'inventoryType'
+    | 'inventoryDescription'
+    | 'inventoryImage'
+    | 'inventoryBackupImage';
+
 const AddInventoryForm: React.FC<AddInventoryProps> = ({
   showAddInventoryForm,
   handleInventoryClose,
