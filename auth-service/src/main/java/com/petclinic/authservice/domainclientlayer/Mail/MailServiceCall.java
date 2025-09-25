@@ -7,5 +7,5 @@ import retrofit2.http.POST;
 public interface MailServiceCall {
 
     @POST("/mail")
-    Call<String> sendMail(@Body Mail mail);
+    Call<String> sendMail(@Body NewMail mail);
 }

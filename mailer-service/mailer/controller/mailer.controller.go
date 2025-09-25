@@ -44,7 +44,7 @@ func (m MailerControllerImpl) handleMailPOST(context *gin.Context) {
 		return
 	}
 
-	context.IndentedJSON(http.StatusOK, fmt.Sprintf("Message sent to %s", mail.To))
+	context.IndentedJSON(http.StatusOK, fmt.Sprintf("Message sent to %s", mail.EmailSendTo))
 }
 
 func (m MailerControllerImpl) Routes(engine *gin.Engine) error {

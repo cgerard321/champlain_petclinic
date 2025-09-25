@@ -13,7 +13,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var ValidMail = &mailer.Mail{To: "example@test.com", Subject: "Test subject", Message: "Test message"}
+var ValidMail = &mailer.Mail{EmailSendTo: "emailSendTo", TemplateName: "templateName", Header: "header",
+	    Body: "body", Footer: "footer", CorrespondantName: "correspondantName", SenderName: "senderName"}
 
 
 func TestMain(m *testing.M) {
@@ -41,9 +42,13 @@ func TestMailerServiceImpl_SendMailValidMail(t *testing.T) {
 	got, err := get()
 	assert.Nil(t, err)
 	assert.Contains(t, got, "From: " + from)
-	assert.Contains(t, got, "To: " + ValidMail.To)
-	assert.Contains(t, got, "Subject: " + ValidMail.Subject)
-	assert.Contains(t, got, ValidMail.Message)
+	assert.Contains(t, got, "To: " + ValidMail.EmailSendTo)
+	assert.Contains(t, got, "Subject: " + ValidMail.EmailTitle)
+	assert.Contains(t, got, ValidMail.Body)
+	assert.Contains(t, got, ValidMail.Header)
+	assert.Contains(t, got, ValidMail.Footer)
+	assert.Contains(t, got, ValidMail.SenderName)
+	assert.Contains(t, got, ValidMail.CorrespondantName)
 }
 
 // Absolute legend https://titanwolf.org/Network/Articles/Article?AID=5749f0a3-9be8-4add-a1d3-9699e7554251#gsc.tab=0

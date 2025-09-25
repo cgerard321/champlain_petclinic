@@ -16,10 +16,16 @@ type MailerService interface {
 	SendMail(mail *Mail) error
 }
 
+// New mailing struct
 type Mail struct {
-	To string `json:"to" validate:"required,email"`
-	Message string `json:"message" validate:"required"`
-	Subject string `json:"subject"`
+    EmailSendTo string `json:"email_send_to" validate:"required,email"`
+    EmailTitle string `json:"email_title" validate:"required"`
+    TemplateName string `json:"template_name"`
+    Header string `json:"header"`
+    Body string `json:"body"`
+    Footer string `json:"footer"`
+    CorrespondantName string `json:"correspondant_name"`
+    SenderName string `json:"sender_name"`
 }
 
 func CreateDialer(host, email, password string, port... int) *gomail.Dialer {
