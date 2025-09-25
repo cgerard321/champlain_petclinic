@@ -1,17 +1,12 @@
 import axiosInstance from '@/shared/api/axiosInstance.ts';
-import { Visit } from '@/features/visits/models/Visit.ts';
+import { VisitResponseModel } from '@/features/visits/models/VisitResponseModel.ts';
 
-export async function getAllVisits(searchTerm: string): Promise<Visit[]> {
+export async function getAllVisits(): Promise<VisitResponseModel[]> {
   try {
-    const params: Record<string, string> = {};
-    if (searchTerm !== '') params.searchTerm = searchTerm;
-
     const response = await axiosInstance.get('/visits', {
-      responseType: 'text',
-      params,
-      useV2: true,
+      responseType: 'stream',
+      useV2: false,
     });
-
     return response.data
       .split('data:')
       .map((payload: string) => {
