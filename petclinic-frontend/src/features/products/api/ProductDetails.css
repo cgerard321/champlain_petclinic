@@ -135,24 +135,21 @@
   margin: 0 auto;
   display: block;
 
-.deliveryTypeEdit-container {
-  display: flex;
-  justify-content: center;
-  background-color: #93d2fb;
-  border-radius: 5px;
-  color: #2375d9;
-  padding-right: 0;
-  margin-right: 0
-}
-
-
+  .deliveryTypeEdit-container {
+    display: flex;
+    justify-content: center;
+    background-color: #93d2fb;
+    border-radius: 5px;
+    color: #2375d9;
+    padding-right: 0;
+    margin-right: 0;
+  }
 }
 .product-unavailable h2 {
   color: #808080;
   text-align: center;
   margin-bottom: 15px;
   font-weight: bold;
-
 }
 .product-unavailable h3 {
   color: #808080;

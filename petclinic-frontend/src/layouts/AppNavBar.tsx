@@ -29,6 +29,9 @@ interface ProductAPIResponse {
 export function NavBar(): JSX.Element {
   const { user } = useUser();
   const navigate = useNavigate();
+  const isInventoryManager = IsInventoryManager();
+  const isVet = IsVet();
+  const isReceptionist = IsReceptionist();
   const [navbarOpen, setNavbarOpen] = useState(false);
   const [cartId, setCartId] = useState<string | null>(null);
   const [cartItemCount, setCartItemCount] = useState<number>(0); // State for cart item count
@@ -57,7 +60,7 @@ export function NavBar(): JSX.Element {
   */
   useEffect(() => {
     const fetchCartId = async (): Promise<void> => {
-      if (user.userId) {
+      if (user.userId && !isInventoryManager && !isVet && !isReceptionist) {
         try {
           const id = await fetchCartIdByCustomerId(user.userId);
           setCartId(id);
@@ -68,12 +71,12 @@ export function NavBar(): JSX.Element {
     };
 
     fetchCartId();
-  }, [user.userId]);
+  }, [user.userId, isInventoryManager, isVet, isReceptionist]);
 
   // Fetch cart item count
   useEffect(() => {
     const fetchCartItemCount = async (): Promise<void> => {
-      if (cartId) {
+      if (cartId && !isInventoryManager && !isVet && !isReceptionist) {
         try {
           const response = await fetch(
             `http://localhost:8080/api/v2/gateway/carts/${cartId}`,
@@ -108,7 +111,7 @@ export function NavBar(): JSX.Element {
     };
 
     fetchCartItemCount();
-  }, [cartId]);
+  }, [cartId, isInventoryManager, isVet, isReceptionist]);
 
   return (
     <Navbar bg="light" expand="lg" className="navbar">
@@ -134,12 +137,17 @@ export function NavBar(): JSX.Element {
                     Veterinarians
                   </Nav.Link>
                 )}
-                {(IsAdmin() || IsVet()) && (
+                {(IsAdmin() || IsVet() || isReceptionist) && (
                   <NavDropdown title="Customers" id="owners-dropdown">
-                    <NavDropdown.Item as={Link} to={AppRoutePaths.AllCustomers}>
-                      Customers List
-                    </NavDropdown.Item>
-                    {IsAdmin() && (
+                    {(IsAdmin() || IsVet()) && (
+                      <NavDropdown.Item
+                        as={Link}
+                        to={AppRoutePaths.AllCustomers}
+                      >
+                        Customers List
+                      </NavDropdown.Item>
+                    )}
+                    {(IsAdmin() || isReceptionist) && (
                       <NavDropdown.Item
                         as={Link}
                         to={AppRoutePaths.AddingCustomer}
@@ -159,17 +167,20 @@ export function NavBar(): JSX.Element {
                     </NavDropdown.Item>
                   </NavDropdown>
                 )}
-                {!IsAdmin() && (
-                  <Nav.Link as={Link} to={AppRoutePaths.CustomerBills}>
-                    Bills
-                  </Nav.Link>
-                )}
-                {!IsAdmin() && (
+                {!IsAdmin() &&
+                  !isInventoryManager &&
+                  !IsVet() &&
+                  !isReceptionist && (
+                    <Nav.Link as={Link} to={AppRoutePaths.CustomerBills}>
+                      Bills
+                    </Nav.Link>
+                  )}
+                {!IsAdmin() && !isInventoryManager && (
                   <Nav.Link as={Link} to={AppRoutePaths.CustomerVisits}>
                     Visits
                   </Nav.Link>
                 )}
-                {!IsAdmin() && (
+                {!isInventoryManager && !isReceptionist && (
                   <Nav.Link as={Link} to={AppRoutePaths.CustomerEmergency}>
                     Emergency
                   </Nav.Link>
@@ -184,7 +195,7 @@ export function NavBar(): JSX.Element {
                     Visits
                   </Nav.Link>
                 )}
-                {(IsInventoryManager() || IsAdmin()) && (
+                {(isInventoryManager || IsAdmin()) && (
                   <Nav.Link as={Link} to={AppRoutePaths.Inventories}>
                     Inventories
                   </Nav.Link>
@@ -216,7 +227,7 @@ export function NavBar(): JSX.Element {
                   </Nav.Link>
                 )}
 
-                {cartId && (
+                {cartId && !isReceptionist && (
                   <Nav.Link
                     as={Link}
                     to={AppRoutePaths.UserCart.replace(':cartId', cartId)}
