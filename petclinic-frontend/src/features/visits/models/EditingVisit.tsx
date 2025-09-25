@@ -89,7 +89,7 @@ const EditingVisit: React.FC = (): JSX.Element => {
       newErrors.practitionerId = 'Practitioner ID is required';
     if (!visit.status) newErrors.status = 'Status is required';
     setErrors(newErrors);
-     if (!visit.visitType) newErrors.visitType = 'Visit type is required';  // ADD THIS LINE
+    if (!visit.visitType) newErrors.visitType = 'Visit type is required'; // ADD THIS LINE
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -110,7 +110,7 @@ const EditingVisit: React.FC = (): JSX.Element => {
         .toISOString()
         .slice(0, 16)
         .replace('T', ' '),
-        visitType: visit.visitType || 'other',
+      visitType: visit.visitType || 'other',
     };
 
     try {
@@ -166,7 +166,7 @@ const EditingVisit: React.FC = (): JSX.Element => {
           <span className="error">{errors.description}</span>
         )}
         <br />
-         <label>Visit Type: </label>
+        <label>Visit Type: </label>
         <select
           name="visitType"
           value={visit.visitType}
