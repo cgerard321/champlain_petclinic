@@ -55,6 +55,94 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
     fetchInventoryTypes();
   }, []);
 
+  // helper: count words in a string (0 for empty/whitespace-only)
+  const countWords = (s: string): number => {
+    const trimmed = s.trim();
+    if (trimmed === '') return 0;
+    return trimmed.split(/\s+/).filter(Boolean).length;
+  };
+
+
+  // Save snapshot for field only when the *word count* changed compared to the last recorded snapshot.
+  const handleFieldChange = (
+      field: FieldKey,
+      setter: React.Dispatch<React.SetStateAction<string>>,
+      value: string
+  ) => {
+    setHistory(prev => {
+      const fieldHist = prev[field] ?? [''];
+      const lastRecorded = fieldHist[fieldHist.length - 1] ?? '';
+
+      const isWordBoundary =
+          value.endsWith(' ') || value.trim() === '' || countWords(value) < countWords(lastRecorded);
+
+      if (isWordBoundary && value !== lastRecorded) {
+        return {
+          ...prev,
+          [field]: [...fieldHist, value], // push only at word boundary
+        };
+      }
+      return prev;
+    });
+
+    // update edit-order: move this field to the end (most recent)
+    setLastEditedFields(prev => {
+      const updated = prev.filter(f => f !== field);
+      return [...updated, field];
+    });
+
+    setter(value);
+  };
+
+  // Undo handler
+  const handleUndo = (): void => {
+    const order = [...lastEditedFields];
+
+    while (order.length > 0) {
+      const candidate = order[order.length - 1] as FieldKey;
+      const fieldHist = history[candidate];
+
+      if (fieldHist && fieldHist.length > 1) {
+        const newHist = fieldHist.slice(0, -1); // remove last snapshot
+        const restoredValue = newHist[newHist.length - 1] ?? '';
+
+        setHistory(prev => ({
+          ...prev,
+          [candidate]: newHist,
+        }));
+
+        setLastEditedFields(prev => {
+          const filtered = prev.filter(f => f !== candidate);
+          if (newHist.length > 1) {
+            return [...filtered, candidate];
+          }
+          return filtered;
+        });
+
+        switch (candidate) {
+          case 'inventoryName':
+            setInventoryName(restoredValue);
+            break;
+          case 'inventoryType':
+            setInventoryType(restoredValue);
+            break;
+          case 'inventoryDescription':
+            setInventoryDescription(restoredValue);
+            break;
+          case 'inventoryImage':
+            setInventoryImage(restoredValue);
+            break;
+          case 'inventoryBackupImage':
+            setInventoryBackupImage(restoredValue);
+            break;
+        }
+        return;
+      }
+
+      order.pop();
+    }
+  };
+
   // Handling form submission
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
