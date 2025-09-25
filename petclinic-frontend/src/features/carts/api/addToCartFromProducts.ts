@@ -19,7 +19,6 @@ export function useAddToCart(): UseAddToCartReturnType {
 
   const getOrCreateCartId = async (userId: string): Promise<string> => {
     try {
-      // GET /carts/customer/{customerId} (via ton helper)
       const existingCartId = await fetchCartIdByCustomerId(userId);
       if (!existingCartId) throw new Error('Cart not found');
       return existingCartId;
