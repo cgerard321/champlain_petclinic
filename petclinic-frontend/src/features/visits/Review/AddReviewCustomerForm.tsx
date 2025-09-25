@@ -7,7 +7,6 @@ import './AddForm.css';
 import { useUser } from '@/context/UserContext';
 import { AppRoutePaths } from '@/shared/models/path.routes.ts';
 import StarRating from '../../products/components/StarRating';
-import { OwnerRequestModel } from '../../customers/models/OwnerRequestModel';
 import { OwnerResponseModel } from '../../customers/models/OwnerResponseModel';
 import { getOwner } from '../../customers/api/getOwner';
 import { useEffect } from 'react';
@@ -25,7 +24,6 @@ const AddCustomerReviewForm: React.FC = (): JSX.Element => {
     dateSubmitted: new Date(),
   });
 
-  const [owner, setOwner] = useState<OwnerResponseModel | null>(null);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [successMessage, setSuccessMessage] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string>('');
@@ -35,12 +33,11 @@ const AddCustomerReviewForm: React.FC = (): JSX.Element => {
   const navigate = useNavigate();
   const { user } = useUser(); // Assuming this hook provides the user info
 
-  useEffect(() => {
+    useEffect(() => {
     if (user?.userId) {
       getOwner(user.userId)
         .then(res => {
           const data: OwnerResponseModel = res.data;
-          setOwner(data);
 
           setReview(prev => ({
             ...prev,
@@ -52,7 +49,8 @@ const AddCustomerReviewForm: React.FC = (): JSX.Element => {
           console.error('Failed to fetch owner:', err);
         });
     }
-  }, [user]);
+    }, [user]);
+
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
