@@ -1,0 +1,13 @@
+FROM golang:1.23 AS builder
+WORKDIR /app/GoFiles
+COPY . .
+RUN go install github.com/swaggo/swag/cmd/swag@v1.3.2
+RUN swag init
+RUN go get -d -v ./...
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o app . && chmod +x app
+
+FROM scratch
+COPY --from=builder /app/GoFiles/app /
+EXPOSE 8000
+ENV GIN_MODE=release
+ENTRYPOINT ["/app"]
