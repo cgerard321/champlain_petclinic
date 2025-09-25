@@ -62,7 +62,7 @@ class ProductsServiceClientIntegrationTest {
         );
 
 
-        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(null,null,null,null,null,null);
+        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(null,null,null,null,null,null,null);
 
         StepVerifier.create(productsFlux)
                 .expectNextMatches(product -> product.getProductId().equals("4affcab7-3ab1-4917-a114-2b6301aa5565") && product.getProductName().equals("Rabbit Hutch"))
@@ -83,7 +83,7 @@ class ProductsServiceClientIntegrationTest {
         Double maxRating = 5.0;
 
 
-        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(null, null, minRating, maxRating, null,null);
+        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(null, null, minRating, maxRating, null,null,null);
 
         // Verify the results
         StepVerifier.create(productsFlux)
@@ -104,7 +104,7 @@ class ProductsServiceClientIntegrationTest {
                 .setHeader("Content-Type", "text/event-stream")
         );
 
-        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(null,null,null,null,null,null);
+        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(null,null,null,null,null,null,null);
 
         StepVerifier.create(productsFlux)
                 .expectNextCount(0)
@@ -125,7 +125,7 @@ class ProductsServiceClientIntegrationTest {
         Double maxPrice = 80.00;
 
         // Call the method with price filters
-        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(minPrice, maxPrice,null,null,null,null);
+        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(minPrice, maxPrice,null,null,null,null, null);
 
 
             // Verify the results using StepVerifier
@@ -148,7 +148,7 @@ class ProductsServiceClientIntegrationTest {
         String deliveryType = "DELIVERY";
 
 
-        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(null, null, null, null, null, deliveryType);
+        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(null, null, null, null, null, deliveryType,null);
 
         StepVerifier.create(productsFlux)
                 .expectNextMatches(product -> product.getProductId().equals("1") && product.getDeliveryType() == DeliveryType.DELIVERY)
@@ -169,7 +169,7 @@ class ProductsServiceClientIntegrationTest {
         );
         String sort = "asc";
 
-        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(null, null, null, null, sort, null);
+        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(null, null, null, null, sort, null,null);
 
         StepVerifier.create(productsFlux)
                 .expectNextMatches(product -> product.getProductId().equals("1") && product.getProductName().equals("Alpha"))
