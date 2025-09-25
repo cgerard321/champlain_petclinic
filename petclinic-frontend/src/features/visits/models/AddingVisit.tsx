@@ -16,6 +16,7 @@ type VisitType = {
   practitionerId: string;
   // ownerId: string;
   status: Status;
+  visitType: string;
   //visitEndDate: Date;
 };
 
@@ -25,7 +26,8 @@ const AddingVisit: React.FC = (): JSX.Element => {
     description: '',
     petId: '',
     practitionerId: '',
-    status: 'UPCOMING' as Status,
+    status: 'WAITING_FOR_CONFIRMATION' as Status,
+    visitType: '',
     //visitEndDate: new Date(),
   });
 
@@ -61,6 +63,8 @@ const AddingVisit: React.FC = (): JSX.Element => {
       newErrors.practitionerId = 'Practitioner ID is required';
     if (!visit.status) newErrors.status = 'Status is required';
     setErrors(newErrors);
+    if (!visit.visitType) newErrors.visitType = 'Visit type is required';
+    setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
@@ -94,6 +98,7 @@ const AddingVisit: React.FC = (): JSX.Element => {
         petId: '',
         practitionerId: '',
         status: 'UPCOMING' as Status,
+        visitType: '',
         //visitEndDate: new Date(),
       });
     } catch (error) {
@@ -107,6 +112,7 @@ const AddingVisit: React.FC = (): JSX.Element => {
   return (
     <div className="profile-edit">
       <h1>Add Visit</h1>
+      <p className="owner-intro">Schedule an appointment for your pet below.</p>
       <form onSubmit={handleSubmit}>
         <label>Pet ID: </label>
         <input
@@ -129,7 +135,7 @@ const AddingVisit: React.FC = (): JSX.Element => {
           <span className="error">{errors.visitStartDate}</span>
         )}
         <br />
-        <label>Description: </label>
+        <label>Details: </label>
         <input
           type="text"
           name="description"
@@ -139,6 +145,22 @@ const AddingVisit: React.FC = (): JSX.Element => {
         {errors.description && (
           <span className="error">{errors.description}</span>
         )}
+        <br />
+        <label>Appointment Type: </label>
+        <select
+          name="visitType"
+          value={visit.visitType}
+          onChange={handleChange}
+          required
+        >
+          <option value="">Select appointment type</option>
+          <option value="routine-checkup">Routine Check-up</option>
+          <option value="vaccination">Vaccination</option>
+          <option value="emergency">Emergency</option>
+          <option value="surgery">Surgery</option>
+          <option value="other">Other</option>
+        </select>
+        {errors.visitType && <span className="error">{errors.visitType}</span>}
         <br />
         <label>Practitioner ID: </label>
         <input
@@ -154,6 +176,9 @@ const AddingVisit: React.FC = (): JSX.Element => {
         <label>Status: </label>
         <select name="status" value={visit.status} onChange={handleChange}>
           <option value="UPCOMING">Upcoming</option>
+          <option value="WAITING_FOR_CONFIRMATION">
+            Waiting for Confirmation
+          </option>
         </select>
         {errors.status && <span className="error">{errors.status}</span>}
         <br />

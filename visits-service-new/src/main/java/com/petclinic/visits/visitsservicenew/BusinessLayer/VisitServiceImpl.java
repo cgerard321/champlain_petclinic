@@ -114,6 +114,10 @@ public class VisitServiceImpl implements VisitService {
                 status = Status.ARCHIVED;
                 break;
 
+            case ("WAITING_FOR_CONFIRMATION"):
+                status = Status.WAITING_FOR_CONFIRMATION;
+                break;
+
             default:
                 status = Status.COMPLETED;
                 break;
@@ -364,6 +368,10 @@ public class VisitServiceImpl implements VisitService {
                 newStatus1 = Status.ARCHIVED;
                 break;
 
+            case "WAITING_FOR_CONFIRMATION":
+                newStatus1 = Status.WAITING_FOR_CONFIRMATION;
+                break;
+
             default:
                 newStatus1 = Status.CANCELLED;
                 break;
@@ -418,8 +426,10 @@ public class VisitServiceImpl implements VisitService {
             return Mono.error(new BadRequestException("PetId cannot be null or blank"));
         } else if (dto.getPractitionerId() == null || dto.getPractitionerId().isBlank()) {
             return Mono.error(new BadRequestException("VetId cannot be null or blank"));
-        } else if (dto.getStatus() != Status.UPCOMING) {
-            return Mono.error(new BadRequestException("Status is being set wrong!"));
+        } else if (dto.getVisitType() == null || dto.getVisitType().isBlank()) {
+                return Mono.error(new BadRequestException("Visit type must be selected"));
+        } else if (dto.getStatus() != Status.UPCOMING && dto.getStatus() != Status.WAITING_FOR_CONFIRMATION) {
+            return Mono.error(new BadRequestException("Status must be UPCOMING or WAITING_FOR_CONFIRMATION for new visits!"));
         } else {
             return Mono.just(dto);
         }

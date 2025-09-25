@@ -192,7 +192,8 @@ class VisitsServiceClientIntegrationTest {
                 "f470653d-05c5-4c45-b7a0-7d70f003d2ac",
                 "testJwtToken",
                 "2",
-                "73b5c112-5703-4fb7-b7bc-ac8186811ae1"
+                "73b5c112-5703-4fb7-b7bc-ac8186811ae1",
+                "routine-checkup"
         );
 
         // Mock the server response
@@ -239,7 +240,8 @@ class VisitsServiceClientIntegrationTest {
                 "f470653d-05c5-4c45-b7a0-7d70f003d2ac",
                 "testJwtToken",
                 "2",
-                "73b5c112-5703-4fb7-b7bc-ac8186811ae1"
+                "73b5c112-5703-4fb7-b7bc-ac8186811ae1",
+                "routine-checkup"
         );
 
         String errorMessage = "{\"message\":\"A visit with the same time already exists.\"}";
@@ -269,7 +271,8 @@ class VisitsServiceClientIntegrationTest {
                 "f470653d-05c5-4c45-b7a0-7d70f003d2ac",
                 "testJwtToken",
                 "2",
-                "73b5c112-5703-4fb7-b7bc-ac8186811ae1"
+                "73b5c112-5703-4fb7-b7bc-ac8186811ae1",
+                "routine-checkup"
         );
 
         String errorMessage = "{\"message\":\"Visit not found.\"}";
@@ -299,7 +302,8 @@ class VisitsServiceClientIntegrationTest {
                 "f470653d-05c5-4c45-b7a0-7d70f003d2ac",
                 "testJwtToken",
                 "2",
-                "73b5c112-5703-4fb7-b7bc-ac8186811ae1"
+                "73b5c112-5703-4fb7-b7bc-ac8186811ae1",
+                "routine-checkup"
         );
 
         String errorMessage = "{\"message\":\"Invalid request.\"}";
@@ -329,7 +333,8 @@ class VisitsServiceClientIntegrationTest {
                 "f470653d-05c5-4c45-b7a0-7d70f003d2ac",
                 "testJwtToken",
                 "2",
-                "73b5c112-5703-4fb7-b7bc-ac8186811ae1"
+                "73b5c112-5703-4fb7-b7bc-ac8186811ae1",
+                "routine-checkup"
         );
 
         // Mock the server error response with a bad request status and non-JSON body, which should trigger an IOException during parsing
@@ -734,7 +739,8 @@ class VisitsServiceClientIntegrationTest {
                 "practitionerId", // Practitioner ID
                 "jwtToken", // JWT Token
                 "ownerId",
-                "73b5c112-5703-4fb7-b7bc-ac8186811ae1"
+                "73b5c112-5703-4fb7-b7bc-ac8186811ae1",
+                "routine-checkup"
         );
 
         VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()

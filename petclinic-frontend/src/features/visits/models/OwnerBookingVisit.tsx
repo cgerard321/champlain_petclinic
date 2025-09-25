@@ -1,39 +1,32 @@
 import * as React from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { FormEvent, useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { FormEvent, useState } from 'react';
+import { useUser } from '@/context/UserContext';
 import './EditVisit.css';
 import { VisitRequestModel } from '@/features/visits/models/VisitRequestModel';
 import { Status } from '@/features/visits/models/Status';
-import { getVisit, updateVisit } from '@/features/visits/api/updateVisit.ts';
-import { VisitResponseModel } from './VisitResponseModel';
+import { addVisit } from '@/features/visits/api/addVisit';
 
 interface ApiError {
   message: string;
 }
-
-type VisitType = {
+type OwnerVisitType = {
   visitStartDate: Date;
   description: string;
   petId: string;
   practitionerId: string;
-  // ownerId: string;
   status: Status;
   visitType: string;
 };
 
-const formatDate = (date: Date): string => {
-  const pad = (n: number): string => n.toString().padStart(2, '0');
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
-};
-
-const EditingVisit: React.FC = (): JSX.Element => {
-  const { visitId } = useParams<{ visitId: string }>();
-  const [visit, setVisit] = useState<VisitType>({
+const OwnerBookingVisit: React.FC = (): JSX.Element => {
+  const { user } = useUser();
+  const [visit, setVisit] = useState<OwnerVisitType>({
     visitStartDate: new Date(),
     description: '',
     petId: '',
     practitionerId: '',
-    status: 'UPCOMING' as Status,
+    status: 'WAITING_FOR_CONFIRMATION' as Status,
     visitType: '',
   });
 
@@ -45,29 +38,10 @@ const EditingVisit: React.FC = (): JSX.Element => {
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchVisitData = async (): Promise<void> => {
-      if (visitId) {
-        try {
-          const response: VisitResponseModel = await getVisit(visitId);
-          setVisit({
-            practitionerId: response.practitionerId,
-            description: response.description,
-            petId: response.petId,
-            visitStartDate: new Date(response.visitDate),
-            status: response.status,
-            visitType: response.visitType || '',
-          });
-        } catch (error) {
-          console.error(`Error fetching visit with ID ${visitId}:`, error);
-        }
-      }
-    };
-
-    if (visitId) {
-      fetchVisitData();
-    }
-  }, [visitId]);
+  const formatDate = (date: Date): string => {
+    const pad = (n: number): string => n.toString().padStart(2, '0');
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  };
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -75,7 +49,7 @@ const EditingVisit: React.FC = (): JSX.Element => {
     const { name, value } = e.target;
     setVisit(prevVisit => ({
       ...prevVisit,
-      [name]: name === 'visitStartDate' ? new Date(value) : value, // Convert string to Date object for visitDate
+      [name]: name === 'visitStartDate' ? new Date(value) : value,
     }));
   };
 
@@ -84,12 +58,13 @@ const EditingVisit: React.FC = (): JSX.Element => {
     if (!visit.petId) newErrors.petId = 'Pet ID is required';
     if (!visit.visitStartDate)
       newErrors.visitStartDate = 'Visit date is required';
-    if (!visit.description) newErrors.description = 'Description is required';
+    if (!visit.description.trim())
+      newErrors.description = 'Description is required';
     if (!visit.practitionerId)
       newErrors.practitionerId = 'Practitioner ID is required';
     if (!visit.status) newErrors.status = 'Status is required';
     setErrors(newErrors);
-     if (!visit.visitType) newErrors.visitType = 'Visit type is required';  // ADD THIS LINE
+    if (!visit.visitType) newErrors.visitType = 'Visit type is required';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -110,21 +85,22 @@ const EditingVisit: React.FC = (): JSX.Element => {
         .toISOString()
         .slice(0, 16)
         .replace('T', ' '),
-        visitType: visit.visitType || 'other',
+      ownerId: user.userId,
+      jwtToken:
+        localStorage.getItem('authToken') ||
+        localStorage.getItem('token') ||
+        '',
     };
 
     try {
-      if (visitId) {
-        await updateVisit(visitId, formattedVisit);
-        setSuccessMessage('Visit updated successfully!');
-        setShowNotification(true);
-        setTimeout(() => setShowNotification(false), 3000); // Hide notification after 3 seconds
-        navigate('/visits'); // Navigate to a different page or clear form
-      }
+      await addVisit(formattedVisit);
+      setSuccessMessage('Visit added successfully!');
+      setShowNotification(true);
+      setTimeout(() => setShowNotification(false), 5000);
+      navigate('/customer/visits');
     } catch (error) {
-      // Use type assertion or check error type
       const apiError = error as ApiError;
-      setErrorMessage(`Error updating visit: ${apiError.message}`);
+      setErrorMessage(`Error adding visits: ${apiError.message}`);
     } finally {
       setIsLoading(false);
     }
@@ -132,7 +108,8 @@ const EditingVisit: React.FC = (): JSX.Element => {
 
   return (
     <div className="profile-edit">
-      <h1>Edit Visit</h1>
+      <h1>Add Visit</h1>
+      <p className="owner-intro">Schedule an appointment for your pet below.</p>
       <form onSubmit={handleSubmit}>
         <label>Pet ID: </label>
         <input
@@ -155,7 +132,7 @@ const EditingVisit: React.FC = (): JSX.Element => {
           <span className="error">{errors.visitStartDate}</span>
         )}
         <br />
-        <label>Description: </label>
+        <label>Details: </label>
         <input
           type="text"
           name="description"
@@ -166,14 +143,14 @@ const EditingVisit: React.FC = (): JSX.Element => {
           <span className="error">{errors.description}</span>
         )}
         <br />
-         <label>Visit Type: </label>
+        <label>Appointment Type: </label>
         <select
           name="visitType"
           value={visit.visitType}
           onChange={handleChange}
           required
         >
-          <option value="">Select visit type</option>
+          <option value="">Select appointment type</option>
           <option value="routine-checkup">Routine Check-up</option>
           <option value="vaccination">Vaccination</option>
           <option value="emergency">Emergency</option>
@@ -196,13 +173,14 @@ const EditingVisit: React.FC = (): JSX.Element => {
         <label>Status: </label>
         <select name="status" value={visit.status} onChange={handleChange}>
           <option value="UPCOMING">Upcoming</option>
-          <option value="CONFIRMED">Confirmed</option>
-          <option value="COMPLETED">Completed</option>
+          <option value="WAITING_FOR_CONFIRMATION">
+            Waiting for Confirmation
+          </option>
         </select>
         {errors.status && <span className="error">{errors.status}</span>}
         <br />
         <button type="submit" disabled={isLoading}>
-          {isLoading ? 'Updating...' : 'Update'}
+          {isLoading ? 'Adding...' : 'Add'}
         </button>
       </form>
       {showNotification && <div className="notification">{successMessage}</div>}
@@ -211,4 +189,4 @@ const EditingVisit: React.FC = (): JSX.Element => {
   );
 };
 
-export default EditingVisit;
+export default OwnerBookingVisit;

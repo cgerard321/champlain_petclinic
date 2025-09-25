@@ -24,15 +24,17 @@ public class VisitRequestDTO {
     private String practitionerId;
     private Status status;
     private String visitId;
+    private String visitType;
 
-    public VisitRequestDTO(LocalDateTime now, String description, String petId, String ownerId, String jwtToken, String practitionerId, String visitId) {
+    public VisitRequestDTO(LocalDateTime now, String description, String petId, String ownerId, String jwtToken, String practitionerId, String visitId, String visitType) {
         this.visitDate = now;
         this.description = description;
         this.petId =  petId;
         this.ownerId = ownerId;
         this.jwtToken = jwtToken;
         this.practitionerId = practitionerId;
-        this.status = Status.UPCOMING;
         this.visitId = visitId;
+        this.visitType = visitType;
+
     }
 }
