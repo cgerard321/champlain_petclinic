@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { getOwner } from '@/features/customers/api/getOwner';
+import { getPetTypes } from '@/features/customers/api/getPetTypes';
 import { OwnerResponseModel } from '@/features/customers/models/OwnerResponseModel.ts';
 import { PetResponseModel } from '@/features/customers/models/PetResponseModel.ts';
+import { PetTypeModel } from '@/features/customers/models/PetTypeModel';
 import { useUser } from '@/context/UserContext';
 import { NavBar } from '@/layouts/AppNavBar.tsx';
 import AddPetModal from '@/features/customers/components/AddPetModal';
@@ -9,22 +11,29 @@ import './ProfilePage.css';
 import { AppRoutePaths } from '@/shared/models/path.routes.ts';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '@/shared/api/axiosInstance';
+import { getPetTypeName } from '@/features/customers/utils/petTypeMapping';
 
 const ProfilePage = (): JSX.Element => {
   const { user } = useUser();
   const [owner, setOwner] = useState<OwnerResponseModel | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isAddPetModalOpen, setIsAddPetModalOpen] = useState<boolean>(false);
+  const [petTypes, setPetTypes] = useState<PetTypeModel[]>([]);
   const navigate = useNavigate();
 
-  const petTypeMapping: { [key: string]: string } = {
-    '1': 'Cat',
-    '2': 'Dog',
-    '3': 'Lizard',
-    '4': 'Snake',
-    '5': 'Bird',
-    '6': 'Hamster',
-  };
+  useEffect(() => {
+    const fetchPetTypes = async (): Promise<void> => {
+      try {
+        const petTypesData = await getPetTypes();
+        setPetTypes(petTypesData);
+      } catch (error) {
+        console.error('Error fetching pet types:', error);
+        setPetTypes([]);
+      }
+    };
+
+    fetchPetTypes();
+  }, []);
 
   useEffect(() => {
     const fetchOwnerData = async (): Promise<void> => {
@@ -159,7 +168,7 @@ const ProfilePage = (): JSX.Element => {
                       <div className="pet-details">
                         <span className="pet-detail">
                           <strong>Type:</strong>{' '}
-                          {petTypeMapping[pet.petTypeId] || 'Unknown'}
+                          {getPetTypeName(pet.petTypeId, petTypes)}
                         </span>
                         <span className="pet-detail">
                           <strong>Weight:</strong> {pet.weight}kg

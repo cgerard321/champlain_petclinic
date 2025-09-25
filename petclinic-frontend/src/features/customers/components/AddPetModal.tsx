@@ -37,8 +37,8 @@ const AddPetModal: React.FC<AddPetModalProps> = ({
     const fetchPetTypes = async (): Promise<void> => {
       try {
         setIsLoadingPetTypes(true);
-        const response = await getPetTypes();
-        setPetTypes(response.data);
+        const petTypes = await getPetTypes();
+        setPetTypes(petTypes);
       } catch (error) {
         console.error('Error fetching pet types:', error);
         setPetTypes([]);
