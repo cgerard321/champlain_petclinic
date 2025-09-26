@@ -8,7 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -323,6 +322,15 @@ public class CustomersServiceClient {
                         .retrieve()
                         .bodyToMono(PetTypeResponseDTO.class)
         );
+    }
+
+    public Mono<PetResponseDTO> createPetForOwner(String ownerId, PetRequestDTO petRequest) {
+        return webClientBuilder.build()
+                .post()
+                .uri(customersServiceUrl + "/pet/owners/" + ownerId + "/pets")
+                .body(BodyInserters.fromValue(petRequest))
+                .retrieve()
+                .bodyToMono(PetResponseDTO.class);
     }
 
 }

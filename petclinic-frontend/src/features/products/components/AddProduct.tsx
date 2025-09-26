@@ -3,6 +3,7 @@ import { Button, Form, Modal } from 'react-bootstrap';
 import { ProductModel } from '../models/ProductModels/ProductModel';
 import { ImageModel } from '../models/ProductModels/ImageModel';
 import { DeliverType } from '@/features/products/models/ProductModels/DeliverType.ts';
+import { ProductType } from '../models/ProductModels/ProductType';
 
 interface AddProductProps {
   addProduct: (product: ProductModel) => Promise<ProductModel>;
@@ -14,7 +15,7 @@ export default function AddProduct({
   addImage,
 }: AddProductProps): JSX.Element {
   const [show, setShow] = useState(false);
-  const [productType, setProductType] = useState('');
+  const [productType, setProductType] = useState<ProductType>(ProductType.FOOD);
   const [dateAdded, setDateAdded] = useState('');
   const [releaseDate, setReleaseDate] = useState('');
   const [error, setError] = useState('');
@@ -194,14 +195,15 @@ export default function AddProduct({
             </Form.Group>
             <Form.Group className="mb-3" controlId="formGridType">
               <Form.Label>Type</Form.Label>
-              <Form.Control
-                type="text"
-                name="productType"
-                placeholder="Product Type"
+              <Form.Select
                 value={productType}
-                onChange={e => setProductType(e.target.value)}
-                required
-              />
+                onChange={e => setProductType(e.target.value as ProductType)}
+              >
+                <option value={ProductType.ACCESSORY}>Accessory</option>
+                <option value={ProductType.EQUIPMENT}>Equipment</option>
+                <option value={ProductType.FOOD}>Food</option>
+                <option value={ProductType.MEDICATION}>Medication</option>
+              </Form.Select>
             </Form.Group>
             <Form.Group className="mb-3" controlId="formGridDateAdded">
               <Form.Label>Date Added</Form.Label>

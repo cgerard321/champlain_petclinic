@@ -26,7 +26,7 @@ public class Inventory {
     private String inventoryBackupImage;
 
     private byte[] imageUploaded;
-
+    private Boolean important;
 
 
     @Builder.Default
