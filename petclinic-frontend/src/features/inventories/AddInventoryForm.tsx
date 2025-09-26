@@ -12,17 +12,17 @@ interface AddInventoryProps {
 }
 
 type FieldKey =
-    | 'inventoryName'
-    | 'inventoryType'
-    | 'inventoryDescription'
-    | 'inventoryImage'
-    | 'inventoryBackupImage';
+  | 'inventoryName'
+  | 'inventoryType'
+  | 'inventoryDescription'
+  | 'inventoryImage'
+  | 'inventoryBackupImage';
 
 const AddInventoryForm: React.FC<AddInventoryProps> = ({
-                                                         showAddInventoryForm,
-                                                         handleInventoryClose,
-                                                         refreshInventoryTypes,
-                                                       }: AddInventoryProps): React.ReactElement | null => {
+  showAddInventoryForm,
+  handleInventoryClose,
+  refreshInventoryTypes,
+}: AddInventoryProps): React.ReactElement | null => {
   const [inventoryName, setInventoryName] = useState<string>('');
   const [inventoryType, setInventoryType] = useState<string>('');
   const [inventoryDescription, setInventoryDescription] = useState<string>('');
@@ -100,17 +100,17 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
 
   // Save snapshot for field only when the *word count* changed
   const handleFieldChange = (
-      field: FieldKey,
-      setter: React.Dispatch<React.SetStateAction<string>>,
-      value: string
+    field: FieldKey,
+    setter: React.Dispatch<React.SetStateAction<string>>,
+    value: string
   ): void => {
     const fieldHist = history[field] ?? [''];
     const lastRecorded = fieldHist[fieldHist.length - 1] ?? '';
 
     const isWordBoundary =
-        value.endsWith(' ') ||
-        value.trim() === '' ||
-        countWords(value) < countWords(lastRecorded);
+      value.endsWith(' ') ||
+      value.trim() === '' ||
+      countWords(value) < countWords(lastRecorded);
 
     if (isWordBoundary) {
       pushSnapshot(field, value);
@@ -172,7 +172,7 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     const selectedInventoryType = inventoryTypes.find(
-        type => type.type === inventoryType
+      type => type.type === inventoryType
     );
 
     if (!selectedInventoryType) {
@@ -181,8 +181,8 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
     }
 
     const base64Image = imageUploaded
-        ? arrayBufferToBase64(imageUploaded)
-        : null;
+      ? arrayBufferToBase64(imageUploaded)
+      : null;
 
     const newInventory: Omit<Inventory, 'inventoryId'> = {
       inventoryName,
@@ -239,136 +239,136 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
   }
 
   return (
-      <div className="overlay">
-        <div className="form-container">
-          <h2>Add Inventory</h2>
-          <form onSubmit={handleSubmit}>
-            <div>
-              <label htmlFor="inventoryName">Inventory Name:</label>
-              <input
-                  type="text"
-                  id="inventoryName"
-                  value={inventoryName}
-                  onChange={e =>
-                      handleFieldChange(
-                          'inventoryName',
-                          setInventoryName,
-                          e.target.value
-                      )
-                  }
-                  onBlur={() => pushSnapshot('inventoryName', inventoryName)}
-                  required
-              />
-            </div>
+    <div className="overlay">
+      <div className="form-container">
+        <h2>Add Inventory</h2>
+        <form onSubmit={handleSubmit}>
+          <div>
+            <label htmlFor="inventoryName">Inventory Name:</label>
+            <input
+              type="text"
+              id="inventoryName"
+              value={inventoryName}
+              onChange={e =>
+                handleFieldChange(
+                  'inventoryName',
+                  setInventoryName,
+                  e.target.value
+                )
+              }
+              onBlur={() => pushSnapshot('inventoryName', inventoryName)}
+              required
+            />
+          </div>
 
-            <div>
-              <label htmlFor="inventoryType">Inventory Type:</label>
-              <select
-                  id="inventoryType"
-                  value={inventoryType}
-                  onChange={e =>
-                      handleFieldChange(
-                          'inventoryType',
-                          setInventoryType,
-                          e.target.value
-                      )
-                  }
-                  onBlur={() => pushSnapshot('inventoryType', inventoryType)}
-                  required
-              >
-                <option value="">Select Type</option>
-                {inventoryTypes.map((type, index) => (
-                    <option key={index} value={type.type}>
-                      {type.type}
-                    </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label htmlFor="inventoryDescription">Inventory Description:</label>
-              <input
-                  type="text"
-                  id="inventoryDescription"
-                  value={inventoryDescription}
-                  onChange={e =>
-                      handleFieldChange(
-                          'inventoryDescription',
-                          setInventoryDescription,
-                          e.target.value
-                      )
-                  }
-                  onBlur={() =>
-                      pushSnapshot('inventoryDescription', inventoryDescription)
-                  }
-                  required
-              />
-            </div>
-
-            <div>
-              <label htmlFor="inventoryImage">Inventory Image:</label>
-              <input
-                  type="text"
-                  id="inventoryImage"
-                  value={inventoryImage}
-                  onChange={e =>
-                      handleFieldChange(
-                          'inventoryImage',
-                          setInventoryImage,
-                          e.target.value
-                      )
-                  }
-                  onBlur={() => pushSnapshot('inventoryImage', inventoryImage)}
-                  required
-              />
-            </div>
-
-            <div>
-              <label htmlFor="inventoryImage">Inventory Backup Image:</label>
-              <input
-                  type="text"
-                  id="inventoryBackupImage"
-                  value={inventoryBackupImage}
-                  onChange={e =>
-                      handleFieldChange(
-                          'inventoryBackupImage',
-                          setInventoryBackupImage,
-                          e.target.value
-                      )
-                  }
-                  onBlur={() =>
-                      pushSnapshot('inventoryBackupImage', inventoryBackupImage)
-                  }
-                  required
-              />
-            </div>
-
-            <div>
-              <label htmlFor="imageUpload">Upload Image:</label>
-              <input
-                  type="file"
-                  id="imageUpload"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-              />
-            </div>
-
-            <button type="submit">Add Inventory</button>
-            <button
-                type="button"
-                className="cancel"
-                onClick={handleInventoryClose}
+          <div>
+            <label htmlFor="inventoryType">Inventory Type:</label>
+            <select
+              id="inventoryType"
+              value={inventoryType}
+              onChange={e =>
+                handleFieldChange(
+                  'inventoryType',
+                  setInventoryType,
+                  e.target.value
+                )
+              }
+              onBlur={() => pushSnapshot('inventoryType', inventoryType)}
+              required
             >
-              Cancel
-            </button>
+              <option value="">Select Type</option>
+              {inventoryTypes.map((type, index) => (
+                <option key={index} value={type.type}>
+                  {type.type}
+                </option>
+              ))}
+            </select>
+          </div>
 
-            {/* Undo button */}
-            <button type="button" className="undo" onClick={handleUndo}>
-              Undo
-            </button>
-          </form>
-        </div>
+          <div>
+            <label htmlFor="inventoryDescription">Inventory Description:</label>
+            <input
+              type="text"
+              id="inventoryDescription"
+              value={inventoryDescription}
+              onChange={e =>
+                handleFieldChange(
+                  'inventoryDescription',
+                  setInventoryDescription,
+                  e.target.value
+                )
+              }
+              onBlur={() =>
+                pushSnapshot('inventoryDescription', inventoryDescription)
+              }
+              required
+            />
+          </div>
+
+          <div>
+            <label htmlFor="inventoryImage">Inventory Image:</label>
+            <input
+              type="text"
+              id="inventoryImage"
+              value={inventoryImage}
+              onChange={e =>
+                handleFieldChange(
+                  'inventoryImage',
+                  setInventoryImage,
+                  e.target.value
+                )
+              }
+              onBlur={() => pushSnapshot('inventoryImage', inventoryImage)}
+              required
+            />
+          </div>
+
+          <div>
+            <label htmlFor="inventoryImage">Inventory Backup Image:</label>
+            <input
+              type="text"
+              id="inventoryBackupImage"
+              value={inventoryBackupImage}
+              onChange={e =>
+                handleFieldChange(
+                  'inventoryBackupImage',
+                  setInventoryBackupImage,
+                  e.target.value
+                )
+              }
+              onBlur={() =>
+                pushSnapshot('inventoryBackupImage', inventoryBackupImage)
+              }
+              required
+            />
+          </div>
+
+          <div>
+            <label htmlFor="imageUpload">Upload Image:</label>
+            <input
+              type="file"
+              id="imageUpload"
+              accept="image/*"
+              onChange={handleImageUpload}
+            />
+          </div>
+
+          <button type="submit">Add Inventory</button>
+          <button
+            type="button"
+            className="cancel"
+            onClick={handleInventoryClose}
+          >
+            Cancel
+          </button>
+
+          {/* Undo button */}
+          <button type="button" className="undo" onClick={handleUndo}>
+            Undo
+          </button>
+        </form>
       </div>
+    </div>
   );
 };
 
