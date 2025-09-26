@@ -59,11 +59,8 @@ public class SecurityConfig {
                 .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST,"/users/login")).permitAll()
                         .requestMatchers(AntPathRequestMatcher.antMatcher("/users/forgot_password")).permitAll()
                         .requestMatchers(AntPathRequestMatcher.antMatcher("/users/reset_password")).permitAll()
-                // .antMatchers("/users").permitAll()
-                // .antMatchers("/users/*").permitAll()
                 .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.HEAD,"/users")).authenticated()
                 .requestMatchers(AntPathRequestMatcher.antMatcher( HttpMethod.POST,"/users")).permitAll()
-                //.requestMatchers(AUTH_WHITELIST).permitAll()
                 .anyRequest().authenticated())
                 .logout(logout -> logout
                         .logoutUrl("/api/v1/users/logout")

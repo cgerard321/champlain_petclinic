@@ -78,7 +78,7 @@ class PetTypeControllerIntegrationTest {
                 .expectBodyList(PetTypeResponseDTO.class)
                 .value((list) -> {
                     assertNotNull(list);
-                    assertEquals(6, list.size());
+                    assertEquals(7, list.size());
                 });
     }
 
