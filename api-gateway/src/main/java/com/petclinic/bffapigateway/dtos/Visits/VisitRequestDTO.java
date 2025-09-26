@@ -25,7 +25,7 @@ public class VisitRequestDTO {
     private Status status;
     private String visitId;
 
-    public VisitRequestDTO(LocalDateTime now, String description, String petId, String ownerId, String jwtToken, String practitionerId, String visitId, String visitType) {
+    public VisitRequestDTO(LocalDateTime now, String description, String petId, String ownerId, String jwtToken, String practitionerId, String visitId) {
         this.visitDate = now;
         this.description = description;
         this.petId =  petId;
