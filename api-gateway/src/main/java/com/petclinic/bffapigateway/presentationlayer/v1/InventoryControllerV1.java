@@ -25,7 +25,7 @@ import java.util.Optional;
 @RestController()
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping("api/gateway/inventory")
+@RequestMapping("api/gateway/inventories")
 public class InventoryControllerV1 {
 
     private final InventoryServiceClient inventoryServiceClient;

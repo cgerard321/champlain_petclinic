@@ -4,7 +4,7 @@ import { InventoryType } from '@/features/inventories/models/InventoryType.ts';
 export async function getAllInventoryTypes(): Promise<InventoryType[]> {
   try {
     const response = await axiosInstance.get<InventoryType[]>(
-      '/inventory/types',
+      '/inventories/types',
       {
         useV2: false,
       }
