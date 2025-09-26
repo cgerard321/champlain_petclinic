@@ -5,7 +5,7 @@ angular.module('productDetailsInfo')
         var inventoryId = InventoryService.getInventoryId();
         var productId = $stateParams.productId;
 
-        $http.get('/api/gateway/inventory/' + inventoryId + '/products/' + productId)
+        $http.get('/api/gateway/inventories/' + inventoryId + '/products/' + productId)
             .then(function (resp) {
                 // Handle the response data for the specific product
                 var product = resp.data;
