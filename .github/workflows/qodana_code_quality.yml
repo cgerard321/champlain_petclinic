@@ -36,6 +36,7 @@ jobs:
       run: ./gradlew clean build -x test
       working-directory: ./
     - name: Qodana Scan
+      id: qodana
       uses: JetBrains/qodana-action@v2023.3
       with:
         linter: jetbrains/qodana-jvm-community:latest
@@ -51,11 +52,13 @@ jobs:
       run: |
         echo "## Qodana Analysis Results" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
-        echo "🔍 **Qodana analysis completed successfully!**" >> $GITHUB_STEP_SUMMARY
+        echo "**Qodana analysis completed successfully!**" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
-        echo "📊 View detailed results at: https://qodana.cloud/project/${{ github.repository }}" >> $GITHUB_STEP_SUMMARY
+        echo "**View detailed results:**" >> $GITHUB_STEP_SUMMARY
+        echo "- [Qodana Cloud Report](${{ steps.qodana.outputs.qodana-cloud-url }})" >> $GITHUB_STEP_SUMMARY
+        echo "- [Download Artifacts](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
-        echo "📋 **Analysis includes:**" >> $GITHUB_STEP_SUMMARY
+        echo "**Analysis includes:**" >> $GITHUB_STEP_SUMMARY
         echo "- Code quality issues" >> $GITHUB_STEP_SUMMARY
         echo "- Security vulnerabilities" >> $GITHUB_STEP_SUMMARY
         echo "- Unused imports and dead code" >> $GITHUB_STEP_SUMMARY
