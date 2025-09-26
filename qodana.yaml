@@ -20,10 +20,28 @@ include:
 
 
 exclude:
+  # Exclude regex warnings that are false positives in JaCoCo reports
   - name: RegExpRedundantEscape
   - name: RegExpDuplicateAlternationBranch
   - name: RegExpUnnecessaryNonCapturingGroup
   - name: RegExpSimplifiable
+  - name: RegExpSingleCharAlternation
+  - name: RegExpEmptyAlternationBranch
+  - name: RegExpSuspiciousBackref
+  - name: RegExpRepeatedSpace
+  - name: RegExpUnexpectedAnchor
+  - name: RegExpUnnecessaryEscape
+  - name: RegExpUnnecessaryQuantifier
+  - name: RegExpUnnecessaryGroup
+  - name: RegExpUnnecessaryCharacterClass
+  - name: RegExpUnnecessaryCaseInsensitiveFlag
+  - name: RegExpUnnecessaryDotAllFlag
+  - name: RegExpUnnecessaryMultilineFlag
+  - name: RegExpUnnecessaryUnicodeFlag
+  - name: RegExpUnnecessaryVerboseFlag
+  - name: RegExpUnnecessaryCommentsFlag
+  - name: RegExpUnnecessaryLiteralFlag
+  - name: RegExpUnnecessaryCanonEqFlag
 
 projectJDK: 17 #(Applied in CI/CD pipeline)
 
