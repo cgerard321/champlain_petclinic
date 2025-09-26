@@ -3,7 +3,6 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { FormEvent, useState, useEffect } from 'react';
 import './EditVisit.css';
 import { VisitRequestModel } from '@/features/visits/models/VisitRequestModel';
-import { Status } from '@/features/visits/models/Status';
 import { VisitResponseModel } from './VisitResponseModel';
 import { getVisit } from '../api/getVisit';
 import { updateVisit } from '../api/updateVisit';
@@ -18,7 +17,7 @@ type VisitType = {
   petId: string;
   practitionerId: string;
   // ownerId: string;
-  status: Status;
+  //status: Status;
   visitType: string;
 };
 
@@ -34,7 +33,7 @@ const EditingVisit: React.FC = (): JSX.Element => {
     description: '',
     petId: '',
     practitionerId: '',
-    status: 'UPCOMING' as Status,
+    //status: 'UPCOMING' as Status,
     visitType: '',
   });
 
@@ -56,7 +55,7 @@ const EditingVisit: React.FC = (): JSX.Element => {
             description: response.description,
             petId: response.petId,
             visitStartDate: new Date(response.visitDate),
-            status: response.status,
+            //status: response.status,
             visitType: response.visitType || '',
           });
         } catch (error) {
@@ -88,9 +87,7 @@ const EditingVisit: React.FC = (): JSX.Element => {
     if (!visit.description) newErrors.description = 'Description is required';
     if (!visit.practitionerId)
       newErrors.practitionerId = 'Practitioner ID is required';
-    if (!visit.status) newErrors.status = 'Status is required';
-    setErrors(newErrors);
-    if (!visit.visitType) newErrors.visitType = 'Visit type is required'; // ADD THIS LINE
+    if (!visit.visitType) newErrors.visitType = 'Visit type is required';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -193,14 +190,6 @@ const EditingVisit: React.FC = (): JSX.Element => {
         {errors.practitionerId && (
           <span className="error">{errors.practitionerId}</span>
         )}
-        <br />
-        <label>Status: </label>
-        <select name="status" value={visit.status} onChange={handleChange}>
-          <option value="UPCOMING">Upcoming</option>
-          <option value="CONFIRMED">Confirmed</option>
-          <option value="COMPLETED">Completed</option>
-        </select>
-        {errors.status && <span className="error">{errors.status}</span>}
         <br />
         <button type="submit" disabled={isLoading}>
           {isLoading ? 'Updating...' : 'Update'}

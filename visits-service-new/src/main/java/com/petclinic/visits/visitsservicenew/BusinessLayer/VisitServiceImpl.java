@@ -428,8 +428,6 @@ public class VisitServiceImpl implements VisitService {
             return Mono.error(new BadRequestException("VetId cannot be null or blank"));
         } else if (dto.getVisitType() == null || dto.getVisitType().isBlank()) {
                 return Mono.error(new BadRequestException("Visit type must be selected"));
-        } else if (dto.getStatus() != Status.UPCOMING && dto.getStatus() != Status.WAITING_FOR_CONFIRMATION) {
-            return Mono.error(new BadRequestException("Status must be UPCOMING or WAITING_FOR_CONFIRMATION for new visits!"));
         } else {
             return Mono.just(dto);
         }

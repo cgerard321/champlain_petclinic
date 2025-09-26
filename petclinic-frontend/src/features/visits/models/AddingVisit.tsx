@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { FormEvent, useState } from 'react';
 import './EditVisit.css';
 import { VisitRequestModel } from '@/features/visits/models/VisitRequestModel';
-import { Status } from '@/features/visits/models/Status';
 import { addVisit } from '@/features/visits/api/addVisit';
 
 interface ApiError {
@@ -15,7 +14,7 @@ type VisitType = {
   petId: string;
   practitionerId: string;
   // ownerId: string;
-  status: Status;
+  //status: Status;
   visitType: string;
   //visitEndDate: Date;
 };
@@ -26,7 +25,7 @@ const AddingVisit: React.FC = (): JSX.Element => {
     description: '',
     petId: '',
     practitionerId: '',
-    status: 'WAITING_FOR_CONFIRMATION' as Status,
+    //status: 'WAITING_FOR_CONFIRMATION' as Status,
     visitType: '',
     //visitEndDate: new Date(),
   });
@@ -61,8 +60,6 @@ const AddingVisit: React.FC = (): JSX.Element => {
     if (!visit.description) newErrors.description = 'Description is required';
     if (!visit.practitionerId)
       newErrors.practitionerId = 'Practitioner ID is required';
-    if (!visit.status) newErrors.status = 'Status is required';
-    setErrors(newErrors);
     if (!visit.visitType) newErrors.visitType = 'Visit type is required';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -97,7 +94,7 @@ const AddingVisit: React.FC = (): JSX.Element => {
         description: '',
         petId: '',
         practitionerId: '',
-        status: 'UPCOMING' as Status,
+        //status: 'UPCOMING' as Status,
         visitType: '',
         //visitEndDate: new Date(),
       });
@@ -172,15 +169,6 @@ const AddingVisit: React.FC = (): JSX.Element => {
         {errors.practitionerId && (
           <span className="error">{errors.practitionerId}</span>
         )}
-        <br />
-        <label>Status: </label>
-        <select name="status" value={visit.status} onChange={handleChange}>
-          <option value="UPCOMING">Upcoming</option>
-          <option value="WAITING_FOR_CONFIRMATION">
-            Waiting for Confirmation
-          </option>
-        </select>
-        {errors.status && <span className="error">{errors.status}</span>}
         <br />
         <button type="submit" disabled={isLoading}>
           {isLoading ? 'Adding...' : 'Add'}

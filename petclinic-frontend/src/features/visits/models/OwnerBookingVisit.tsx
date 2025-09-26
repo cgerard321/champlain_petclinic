@@ -170,15 +170,6 @@ const OwnerBookingVisit: React.FC = (): JSX.Element => {
           <span className="error">{errors.practitionerId}</span>
         )}
         <br />
-        <label>Status: </label>
-        <select name="status" value={visit.status} onChange={handleChange}>
-          <option value="UPCOMING">Upcoming</option>
-          <option value="WAITING_FOR_CONFIRMATION">
-            Waiting for Confirmation
-          </option>
-        </select>
-        {errors.status && <span className="error">{errors.status}</span>}
-        <br />
         <button type="submit" disabled={isLoading}>
           {isLoading ? 'Adding...' : 'Add'}
         </button>
