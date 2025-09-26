@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Visit } from './models/Visit';
 import './VisitListTable.css';
 import { useNavigate } from 'react-router-dom';
-import { AppRoutePaths } from '@/shared/models/path.routes.ts';
+// import { AppRoutePaths } from '@/shared/models/path.routes.ts';
 import { getAllEmergency } from './Emergency/Api/getAllEmergency';
 import { EmergencyResponseDTO } from './Emergency/Model/EmergencyResponseDTO';
 import { deleteEmergency } from './Emergency/Api/deleteEmergency';
@@ -11,6 +11,7 @@ import { exportVisitsCSV } from './api/exportVisitsCSV';
 import axiosInstance from '@/shared/api/axiosInstance.ts';
 import { getAllVisits } from './api/getAllVisits';
 import { IsOwner, IsVet } from '@/context/UserContext';
+import { AppRoutePaths } from '@/shared/models/path.routes';
 
 export default function VisitListTable(): JSX.Element {
   const [visitIdToDelete, setConfirmDeleteId] = useState<string | null>(null);
@@ -497,11 +498,14 @@ export default function VisitListTable(): JSX.Element {
         <button
           className="btn btn-primary"
           onClick={exportVisitsCSV}
-          title="Download Visits CSV"
+          title="Download CSV"
         >
-          Download Visits CSV
+          Download CSV
         </button>
       </div>
+      {/* Emergency Table below buttons, but above visit tables */}
+      {renderEmergencyTable('Emergency Visits', emergencyList)}
+      {/* Search bar for filtering visits */}
 
       {/* Emergency Table below buttons, but above visit tables */}
       {renderEmergencyTable('Emergency Visits', emergencyList)}

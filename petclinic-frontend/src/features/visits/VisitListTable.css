@@ -1,7 +1,15 @@
+
+@import './VisitsColors.css';
+
 .visit-actions {
   display: flex;
-  justify-content: space-around;
+  justify-content: space-between;
+  flex-grow: 100;
   margin-bottom: 20px;
+}
+
+.search-bar{
+  width: 60%;
 }
 
 .visit-table-section {
