@@ -80,7 +80,7 @@ const InventoryProducts: React.FC = () => {
   useEffect(() => {
     if (!inventoryId) return;
     axiosInstance
-      .get(`/inventory/${inventoryId}`, { useV2: false })
+      .get(`/inventories/${inventoryId}`, { useV2: false })
       .then(res => {
         const name = (res.data?.inventoryName ?? res.data?.name ?? '')
           .toString()
