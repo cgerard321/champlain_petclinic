@@ -4,7 +4,7 @@ import { InventoryName } from '@/features/inventories/models/InventoryName.ts';
 export async function getAllInventoryNames(): Promise<InventoryName[]> {
   try {
     const response = await axiosInstance.get<InventoryName[]>(
-      '/inventory/names',
+      '/inventories/names',
       { useV2: false } // not implemented
     );
     return response.data;
