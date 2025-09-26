@@ -26,7 +26,7 @@ func (i *FilesServiceImpl) GetFile(bucket string, id string) (*models.FileRespon
 		return nil, exception.NewNotFoundException("url not found for fileId: " + id)
 	}
 
-	resp, err := i.minioServiceClient.GetFile(bucket + url)
+	resp, err := i.minioServiceClient.GetFile(bucket, url)
 
 	if err != nil {
 		return nil, err
@@ -38,7 +38,7 @@ func (i *FilesServiceImpl) GetFile(bucket string, id string) (*models.FileRespon
 }
 
 // needs to care about folders
-func (i *FilesServiceImpl) AddFile(bucket string, dto *models.FileResponseModel) (string, error) {
+func (i *FilesServiceImpl) AddFile(bucket string, dto *models.FileResponseModel) (string, error) { //request model not response
 	//TODO implement me
 	panic("implement me")
 }
@@ -48,7 +48,7 @@ func (i *FilesServiceImpl) DeleteFile(bucket string, id string) error {
 	panic("implement me")
 }
 
-func (i *FilesServiceImpl) UpdateFile(bucket string, id string, dto *models.FileResponseModel) error {
+func (i *FilesServiceImpl) UpdateFile(bucket string, id string, dto *models.FileResponseModel) error { //request model not response
 	//TODO implement me
 	panic("implement me")
 }

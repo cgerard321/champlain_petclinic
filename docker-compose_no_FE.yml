@@ -100,6 +100,11 @@ services:
     build: files-service
     ports:
       - "8000:8000"
+    environment:
+      - FILE_ENDPOINT=minio:9100
+      - FILE_ENV=dev
+    env_file:
+      - mailer.env
     depends_on:
       mysql-files:
         condition: service_healthy
@@ -116,8 +121,6 @@ services:
       - "9101:9101"
     expose:
       - "9100:9100"
-    volumes:
-      - ./minio-data:/data
     restart: always
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9100/minio/health/live"]

@@ -1,44 +1,39 @@
 package clientlayer
 
 import (
-	"errors"
+	"context"
 	"files-service/files/models"
-	"files-service/files/util/exception"
 	"io"
-	"net/http"
 	"path"
 	"strings"
+
+	"github.com/minio/minio-go/v7"
 )
 
 type MinioServiceClient struct {
-	baseUrl string
+	client *minio.Client
 }
 
-func NewMinioServiceClient(url string) *MinioServiceClient {
+func NewMinioServiceClient(client *minio.Client) *MinioServiceClient {
 	return &MinioServiceClient{
-		baseUrl: url,
+		client: client,
 	}
 }
 
-func (msc *MinioServiceClient) GetFile(FileUrl string) (*models.FileResponseModel, error) {
-	url := msc.baseUrl + FileUrl
-	resp, err := http.Get(url)
+func (msc *MinioServiceClient) GetFile(bucket string, FileUrl string) (*models.FileResponseModel, error) {
+	ctx := context.Background()
+	object, err := msc.client.GetObject(ctx, bucket, FileUrl, minio.GetObjectOptions{}) //maybe add content type to object options
+	if err != nil {
+		return nil, err
+	}
+	defer object.Close()
 
+	info, err := object.Stat()
 	if err != nil {
 		return nil, err
 	}
 
-	if resp.StatusCode != http.StatusOK {
-		if resp.StatusCode == http.StatusNotFound { //only possible if the file is deleted in minio but not in the file database
-			return nil, exception.NewNotFoundException("file not found at url: " + url)
-		} else { //something being wrong with the url should be the only reason how we get here
-			return nil, errors.New("something is wrong with the url: " + url)
-		}
-	}
-
-	defer resp.Body.Close()
-
-	data, err := io.ReadAll(resp.Body)
+	data, err := io.ReadAll(object)
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +45,7 @@ func (msc *MinioServiceClient) GetFile(FileUrl string) (*models.FileResponseMode
 	file := models.FileResponseModel{
 		FileId:   "",
 		FileName: fileName,
-		FileType: resp.Header.Get("Content-Type"),
+		FileType: info.ContentType,
 		FileData: data,
 	}
 

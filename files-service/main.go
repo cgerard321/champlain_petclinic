@@ -1,13 +1,17 @@
 package main
 
 import (
+	"crypto/tls"
 	"database/sql"
 	"files-service/files/clientlayer"
 	"files-service/files/datalayer"
 	"files-service/files/util"
 	"fmt"
+	"log"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/minio/minio-go/v7/pkg/credentials"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
@@ -16,6 +20,7 @@ import (
 	"os"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/minio/minio-go/v7"
 )
 
 // @host localhost:8000
@@ -34,9 +39,41 @@ func main() {
 
 	engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
+	endpoint := os.Getenv("FILE_ENDPOINT")
+	accessKeyID := os.Getenv("FILE_ACCESS_KEY_ID")
+	secretAccessKey := os.Getenv("FILE_SECRET_ACCESS_KEY")
+	env := os.Getenv("FILE_ENV")
+
+	var minioOptions minio.Options
+
+	if env == "dev" {
+		minioOptions = minio.Options{
+			Creds: credentials.NewStaticV4("user", "password", ""), //minio root user and password
+		}
+	} else if env == "prod" {
+		minioOptions = minio.Options{
+			Creds:  credentials.NewStaticV4(accessKeyID, secretAccessKey, ""),
+			Secure: true,
+			Transport: &http.Transport{
+				TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+			},
+		}
+	}
+
+	// Initialize minio client object.
+	minioClient, err := minio.New(endpoint, &minioOptions)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	//only for dev env
+	if env == "dev" {
+		util.SetupMinio(minioClient, accessKeyID, secretAccessKey)
+	}
+
 	ir := datalayer.NewFileLinkRepo(db)
 
-	mc := clientlayer.NewMinioServiceClient("http://minio:9100/")
+	mc := clientlayer.NewMinioServiceClient(minioClient)
 	is := businesslayer.NewFileLinkService(ir, mc)
 
 	ic := presentationlayer.NewFilesLinkController(is)

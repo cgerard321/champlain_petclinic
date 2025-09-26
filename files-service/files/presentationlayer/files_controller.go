@@ -42,10 +42,25 @@ func (i *FilesControllerImpl) getFile(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, img)
 }
 
-func (i *FilesControllerImpl) Routes(engine *gin.Engine) error {
-	imagesGroup := engine.Group("/images").Use(UseBucket("images"))
+func (i *FilesControllerImpl) addFile(c *gin.Context) {
+
+}
+
+func (i *FilesControllerImpl) updateFile(c *gin.Context) {
+
+}
+
+func (i *FilesControllerImpl) deleteFile(c *gin.Context) {
+
+}
+
+func (i *FilesControllerImpl) Routes(engine *gin.Engine) error { //TODO a way to make sure only image can be saved to the image bucket should be implemented
+	imagesGroup := engine.Group("/images").Use(UseBucket("pet-clinic-images"))
 
 	imagesGroup.GET("/:id", i.getFile)
+	//imagesGroup.POST("", i.addFile)
+	//imagesGroup.PUT("/:id", i.updateFile)
+	//imagesGroup.DELETE("/:id", i.deleteFile)
 
 	//for anybody reading this in the future that wants to add handling for another type than image just make a new group and give it a new bucket
 	//make sure to create the bucket in minio or the cloud if that is what you guys are using by then
