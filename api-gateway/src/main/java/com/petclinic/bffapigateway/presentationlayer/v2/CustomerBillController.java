@@ -13,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -57,4 +58,19 @@ public class CustomerBillController {
     public Mono<Double> getCurrentBalance(@PathVariable String customerId) {
         return billService.getCurrentBalance(customerId);
     }
+
+    @IsUserSpecific(idToMatch = {"customerId"})
+    @PostMapping(value = "/{billId}/pay", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<BillResponseDTO>> payBill(
+            @PathVariable String customerId,
+            @PathVariable String billId,
+            @RequestBody PaymentRequestDTO paymentRequestDTO) {
+
+        return billService.payBill(customerId, billId, paymentRequestDTO)
+                .map(ResponseEntity::ok)
+                // billing-service returns 400 for invalid payment; the client maps that to ResponseStatusException(BAD_REQUEST)
+                .onErrorResume(ResponseStatusException.class, e ->
+                        Mono.just(ResponseEntity.status(e.getStatusCode()).build()));
+    }
+
 }

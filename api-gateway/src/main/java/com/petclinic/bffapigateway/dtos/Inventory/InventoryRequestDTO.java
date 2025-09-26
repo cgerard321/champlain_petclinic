@@ -17,4 +17,5 @@ public class InventoryRequestDTO {
     private String inventoryImage;
     private String inventoryBackupImage;
     private byte[] imageUploaded;
+    private Boolean important;
 }

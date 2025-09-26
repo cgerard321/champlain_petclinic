@@ -69,4 +69,13 @@ public class PetController {
         return petService.getAllPets().map(EntityDTOUtil::toPetResponseDTO);
     }
 
+    @PostMapping("/owners/{ownerId}/pets")
+    public Mono<ResponseEntity<PetResponseDTO>> createPetForOwner(
+            @PathVariable String ownerId,
+            @RequestBody PetRequestDTO petRequest) {
+        return petService.createPetForOwner(ownerId, Mono.just(petRequest))
+                .map(pet -> ResponseEntity.status(HttpStatus.CREATED).body(pet))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
 }

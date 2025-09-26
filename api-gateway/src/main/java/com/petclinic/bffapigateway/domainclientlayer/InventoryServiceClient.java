@@ -25,6 +25,7 @@ import reactor.core.publisher.Mono;
 
 
 import java.nio.channels.FileChannel;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.springframework.http.HttpStatus.*;
@@ -196,19 +197,30 @@ public class InventoryServiceClient {
                         resp -> rethrower.rethrow(resp, ex -> new ProductListNotFoundException(ex.get("message").toString(), NOT_FOUND)))
                 .bodyToMono(Long.class);
     }
+
+    public Mono<Void> updateImportantStatus(String inventoryId, Boolean important) {
+        return webClient.patch()
+                .uri("/{inventoryId}/important", inventoryId)
+                .body(Mono.just(Map.of("important", important)), Map.class)
+                .retrieve()
+                .bodyToMono(Void.class);
+    }
+
     public Flux<InventoryResponseDTO> searchInventory(
             final Optional<Integer> page,
             final Optional<Integer> size,
             final String inventoryName,
             final String inventoryType,
-            final String inventoryDescription
+            final String inventoryDescription,
+            final Boolean importantOnly
     ) {
         UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(inventoryServiceUrl)
                 .queryParamIfPresent("page", page)
                 .queryParamIfPresent("size", size)
                 .queryParamIfPresent("inventoryName", Optional.ofNullable(inventoryName))
                 .queryParamIfPresent("inventoryType", Optional.ofNullable(inventoryType))
-                .queryParamIfPresent("inventoryDescription", Optional.ofNullable(inventoryDescription));
+                .queryParamIfPresent("inventoryDescription", Optional.ofNullable(inventoryDescription))
+                .queryParamIfPresent("importantOnly", Optional.ofNullable(importantOnly));
 
 
         return webClient.get()
