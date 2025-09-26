@@ -31,5 +31,4 @@ public class VisitResponseDTO {
     private Status status;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime visitEndDate;
-    private String visitType;
 }

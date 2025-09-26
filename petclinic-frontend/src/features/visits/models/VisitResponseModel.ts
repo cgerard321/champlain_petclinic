@@ -14,5 +14,4 @@ export interface VisitResponseModel {
   status: Status;
   visitId: string;
   visitEndDate: string;
-  visitType?: string;
 }

@@ -1,3 +1,5 @@
+import { Status } from '@/features/visits/models/Status.ts';
+
 export interface VisitRequestModel {
   visitDate: string;
   description: string;
@@ -5,7 +7,5 @@ export interface VisitRequestModel {
   practitionerId: string;
   ownerId?: string;
   jwtToken?: string;
-  //status: Status;
-
-  visitType: string;
+  status: Status;
 }

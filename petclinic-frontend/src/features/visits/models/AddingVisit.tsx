@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { FormEvent, useState } from 'react';
 import './EditVisit.css';
 import { VisitRequestModel } from '@/features/visits/models/VisitRequestModel';
+import { Status } from '@/features/visits/models/Status';
 import { addVisit } from '@/features/visits/api/addVisit';
 
 interface ApiError {
@@ -13,10 +14,7 @@ type VisitType = {
   description: string;
   petId: string;
   practitionerId: string;
-  // ownerId: string;
-  //status: Status;
-  visitType: string;
-  //visitEndDate: Date;
+  status: Status;
 };
 
 const AddingVisit: React.FC = (): JSX.Element => {
@@ -25,9 +23,7 @@ const AddingVisit: React.FC = (): JSX.Element => {
     description: '',
     petId: '',
     practitionerId: '',
-    //status: 'WAITING_FOR_CONFIRMATION' as Status,
-    visitType: '',
-    //visitEndDate: new Date(),
+    status: 'UPCOMING' as Status,
   });
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -60,7 +56,7 @@ const AddingVisit: React.FC = (): JSX.Element => {
     if (!visit.description) newErrors.description = 'Description is required';
     if (!visit.practitionerId)
       newErrors.practitionerId = 'Practitioner ID is required';
-    if (!visit.visitType) newErrors.visitType = 'Visit type is required';
+    if (!visit.status) newErrors.status = 'Status is required';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -94,8 +90,7 @@ const AddingVisit: React.FC = (): JSX.Element => {
         description: '',
         petId: '',
         practitionerId: '',
-        //status: 'UPCOMING' as Status,
-        visitType: '',
+        status: 'UPCOMING' as Status,
         //visitEndDate: new Date(),
       });
     } catch (error) {
@@ -108,8 +103,7 @@ const AddingVisit: React.FC = (): JSX.Element => {
 
   return (
     <div className="profile-edit">
-      <h1>Add Visit</h1>
-      <p className="owner-intro">Schedule an appointment for your pet below.</p>
+      <h1>Schedule Visit For Your Pet</h1>
       <form onSubmit={handleSubmit}>
         <label>Pet ID: </label>
         <input
@@ -132,7 +126,7 @@ const AddingVisit: React.FC = (): JSX.Element => {
           <span className="error">{errors.visitStartDate}</span>
         )}
         <br />
-        <label>Details: </label>
+        <label>Description: </label>
         <input
           type="text"
           name="description"
@@ -142,22 +136,6 @@ const AddingVisit: React.FC = (): JSX.Element => {
         {errors.description && (
           <span className="error">{errors.description}</span>
         )}
-        <br />
-        <label>Appointment Type: </label>
-        <select
-          name="visitType"
-          value={visit.visitType}
-          onChange={handleChange}
-          required
-        >
-          <option value="">Select appointment type</option>
-          <option value="routine-checkup">Routine Check-up</option>
-          <option value="vaccination">Vaccination</option>
-          <option value="emergency">Emergency</option>
-          <option value="surgery">Surgery</option>
-          <option value="other">Other</option>
-        </select>
-        {errors.visitType && <span className="error">{errors.visitType}</span>}
         <br />
         <label>Practitioner ID: </label>
         <input
@@ -169,6 +147,12 @@ const AddingVisit: React.FC = (): JSX.Element => {
         {errors.practitionerId && (
           <span className="error">{errors.practitionerId}</span>
         )}
+        <br />
+        <label>Status: </label>
+        <select name="status" value={visit.status} onChange={handleChange}>
+          <option value="UPCOMING">Upcoming</option>
+        </select>
+        {errors.status && <span className="error">{errors.status}</span>}
         <br />
         <button type="submit" disabled={isLoading}>
           {isLoading ? 'Adding...' : 'Add'}

@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { FormEvent, useState, useEffect } from 'react';
 import './EditVisit.css';
 import { VisitRequestModel } from '@/features/visits/models/VisitRequestModel';
+import { Status } from '@/features/visits/models/Status';
 import { VisitResponseModel } from './VisitResponseModel';
 import { getVisit } from '../api/getVisit';
 import { updateVisit } from '../api/updateVisit';
@@ -17,8 +18,7 @@ type VisitType = {
   petId: string;
   practitionerId: string;
   // ownerId: string;
-  //status: Status;
-  visitType: string;
+  status: Status;
 };
 
 const formatDate = (date: Date): string => {
@@ -33,8 +33,7 @@ const EditingVisit: React.FC = (): JSX.Element => {
     description: '',
     petId: '',
     practitionerId: '',
-    //status: 'UPCOMING' as Status,
-    visitType: '',
+    status: 'UPCOMING' as Status,
   });
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -55,8 +54,7 @@ const EditingVisit: React.FC = (): JSX.Element => {
             description: response.description,
             petId: response.petId,
             visitStartDate: new Date(response.visitDate),
-            //status: response.status,
-            visitType: response.visitType || '',
+            status: response.status,
           });
         } catch (error) {
           console.error(`Error fetching visit with ID ${visitId}:`, error);
@@ -87,7 +85,7 @@ const EditingVisit: React.FC = (): JSX.Element => {
     if (!visit.description) newErrors.description = 'Description is required';
     if (!visit.practitionerId)
       newErrors.practitionerId = 'Practitioner ID is required';
-    if (!visit.visitType) newErrors.visitType = 'Visit type is required';
+    if (!visit.status) newErrors.status = 'Status is required';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -108,7 +106,6 @@ const EditingVisit: React.FC = (): JSX.Element => {
         .toISOString()
         .slice(0, 16)
         .replace('T', ' '),
-      visitType: visit.visitType || 'other',
     };
 
     try {
@@ -164,22 +161,6 @@ const EditingVisit: React.FC = (): JSX.Element => {
           <span className="error">{errors.description}</span>
         )}
         <br />
-        <label>Visit Type: </label>
-        <select
-          name="visitType"
-          value={visit.visitType}
-          onChange={handleChange}
-          required
-        >
-          <option value="">Select visit type</option>
-          <option value="routine-checkup">Routine Check-up</option>
-          <option value="vaccination">Vaccination</option>
-          <option value="emergency">Emergency</option>
-          <option value="surgery">Surgery</option>
-          <option value="other">Other</option>
-        </select>
-        {errors.visitType && <span className="error">{errors.visitType}</span>}
-        <br />
         <label>Practitioner ID: </label>
         <input
           type="text"
@@ -190,6 +171,14 @@ const EditingVisit: React.FC = (): JSX.Element => {
         {errors.practitionerId && (
           <span className="error">{errors.practitionerId}</span>
         )}
+        <br />
+        <label>Status: </label>
+        <select name="status" value={visit.status} onChange={handleChange}>
+          <option value="UPCOMING">Upcoming</option>
+          <option value="CONFIRMED">Confirmed</option>
+          <option value="COMPLETED">Completed</option>
+        </select>
+        {errors.status && <span className="error">{errors.status}</span>}
         <br />
         <button type="submit" disabled={isLoading}>
           {isLoading ? 'Updating...' : 'Update'}

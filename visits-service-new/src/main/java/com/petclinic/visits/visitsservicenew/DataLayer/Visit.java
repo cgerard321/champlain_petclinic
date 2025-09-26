@@ -35,7 +35,4 @@ public class Visit {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     LocalDateTime visitEndDate;
 
-    @JsonProperty("visitType")
-    private String visitType;
-
 }

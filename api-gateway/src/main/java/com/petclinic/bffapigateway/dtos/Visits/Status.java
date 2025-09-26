@@ -6,7 +6,6 @@ public enum Status {
     COMPLETED,
     CONFIRMED,
     CANCELLED,
-    ARCHIVED,
-    WAITING_FOR_CONFIRMATION
+    ARCHIVED
 
 }
