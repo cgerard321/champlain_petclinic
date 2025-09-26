@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -103,7 +104,7 @@ public class InventoryControllerTest {
         //Arrange
         Optional<Integer> page = Optional.of(0);
         Optional<Integer> size = Optional.of(2);
-        when(inventoryServiceClient.searchInventory(page, size, null, null, null))
+        when(inventoryServiceClient.searchInventory(page, size, null, null, null, null))
                 .thenReturn(Flux.just(buildInventoryDTO()));
 
         // Act
@@ -119,7 +120,7 @@ public class InventoryControllerTest {
 
         // Assert
         verify(inventoryServiceClient, times(1))
-                .searchInventory(eq(page), eq(size), eq(null), eq(null), eq(null));
+                .searchInventory(eq(page), eq(size), eq(null), eq(null), eq(null), eq(null));
     }
 
     @Test
@@ -127,7 +128,7 @@ public class InventoryControllerTest {
         // Arrange
         Optional<Integer> page = Optional.of(0);
         Optional<Integer> size = Optional.of(2);
-        when(inventoryServiceClient.searchInventory(page, size, "invt1", "Internal", "invtone"))
+        when(inventoryServiceClient.searchInventory(page, size, "invt1", "Internal", "invtone", null))
                 .thenReturn(Flux.just(buildInventoryDTO()));
 
         // Act
@@ -143,7 +144,7 @@ public class InventoryControllerTest {
 
         // Assert
         verify(inventoryServiceClient, times(1))
-                .searchInventory(eq(page), eq(size), eq("invt1"), eq("Internal"), eq("invtone"));
+                .searchInventory(eq(page), eq(size), eq("invt1"), eq("Internal"), eq("invtone"), eq(null));
     }
 
     @Test
@@ -151,7 +152,7 @@ public class InventoryControllerTest {
         // Arrange
         Optional<Integer> page = Optional.of(0);
         Optional<Integer> size = Optional.of(2);
-        when(inventoryServiceClient.searchInventory(page, size, "invalid", "invalid", "invalid"))
+        when(inventoryServiceClient.searchInventory(page, size, "invalid", "invalid", "invalid", null))
                 .thenReturn(Flux.empty());
 
         // Act
@@ -166,7 +167,7 @@ public class InventoryControllerTest {
 
         // Assert
         verify(inventoryServiceClient, times(1))
-                .searchInventory(eq(page), eq(size), eq("invalid"), eq("invalid"), eq("invalid"));
+                .searchInventory(eq(page), eq(size), eq("invalid"), eq("invalid"), eq("invalid"), eq(null));
     }
 
     @Test
@@ -1515,6 +1516,41 @@ public class InventoryControllerTest {
                 .exchange()
                 .expectStatus().isBadRequest();
         verify(inventoryServiceClient, times(1)).addInventoryType(any(InventoryTypeRequestDTO.class));
+    }
+
+    @Test
+    void updateImportantStatus_withValidData_shouldSucceed() {
+        String inventoryId = "dfa0a7e3-5a40-4b86-881e-9549ecda5e4b";
+        Map<String, Boolean> request = Map.of("important", true);
+
+        when(inventoryServiceClient.updateImportantStatus(eq(inventoryId), eq(true)))
+                .thenReturn(Mono.empty());
+
+        client.patch()
+                .uri(baseInventoryURL + "/" + inventoryId + "/important")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(request)
+                .exchange()
+                .expectStatus().isOk();
+
+        verify(inventoryServiceClient, times(1))
+                .updateImportantStatus(eq(inventoryId), eq(true));
+    }
+
+    @Test
+    void updateImportantStatus_withInvalidInventoryId_shouldReturnNotFound() {
+        String invalidId = "invalid-id";
+        Map<String, Boolean> request = Map.of("important", false);
+
+        when(inventoryServiceClient.updateImportantStatus(eq(invalidId), eq(false)))
+                .thenReturn(Mono.error(new RuntimeException("Inventory not found")));
+
+        client.patch()
+                .uri(baseInventoryURL + "/" + invalidId + "/important")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(request)
+                .exchange()
+                .expectStatus().is5xxServerError();
     }
 
 }
