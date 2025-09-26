@@ -33,9 +33,19 @@ jobs:
 
       - name: Build and generate coverage reports
         run: |
-          # Build all services and generate JaCoCo reports
-          # Run tests but ignore failures to allow Qodana analysis
-          ./gradlew clean build jacocoTestReport --parallel -x jacocoTestCoverageVerification || true
+          echo "Building Java/Gradle services..."
+          ./gradlew clean build -x test -x jacocoTestCoverageVerification
+          
+          echo "Running tests for Java services..."
+          ./gradlew :auth-service:test :auth-service:jacocoTestReport || echo "Auth service tests failed"
+          ./gradlew :billing-service:test :billing-service:jacocoTestReport || echo "Billing service tests failed"
+          ./gradlew :api-gateway:test :api-gateway:jacocoTestReport || echo "API Gateway tests failed"
+          ./gradlew :customers-service-reactive:test :customers-service-reactive:jacocoTestReport || echo "Customers service reactive tests failed"
+          ./gradlew :visits-service-new:test :visits-service-new:jacocoTestReport || echo "Visits service new tests failed"
+          ./gradlew :vet-service:test :vet-service:jacocoTestReport || echo "Vet service tests failed"
+          ./gradlew :inventory-service:test :inventory-service:jacocoTestReport || echo "Inventory service tests failed"
+          ./gradlew :products-service:test :products-service:jacocoTestReport || echo "Products service tests failed"
+          ./gradlew :cart-service:test :cart-service:jacocoTestReport || echo "Cart service tests failed"
         working-directory: ./
 
       - name: Create coverage-data directory and copy JaCoCo reports
