@@ -45,12 +45,14 @@ public class PetControllerV1 {
                                 .map(addVisitsToOwner(owner))
                 );*/
     }
-    @IsUserSpecific(idToMatch = {"petTypeId"}, bypassRoles = {Roles.ADMIN})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @DeleteMapping(value = "/{petTypeId}")
-    public Mono<ResponseEntity<PetTypeResponseDTO>> deletePetTypeByPetTypeId(final @PathVariable String petTypeId){
-        return customersServiceClient.deletePetType(petTypeId).then(Mono.just(ResponseEntity.noContent().<PetTypeResponseDTO>build()))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+    public Mono<ResponseEntity<Void>> deletePetTypeByPetTypeId(final @PathVariable String petTypeId){
+        return customersServiceClient.deletePetTypeV2(petTypeId)
+                .then(Mono.just(ResponseEntity.ok().<Void>build()))
+                .defaultIfEmpty(ResponseEntity.notFound().<Void>build());
     }
+
 
     @IsUserSpecific(idToMatch = {"petTypeId"})
     @PutMapping("/{petTypeId}")
