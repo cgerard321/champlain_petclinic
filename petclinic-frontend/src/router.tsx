@@ -11,7 +11,6 @@ import InventoryProducts from '@/features/inventories/InventoryProducts.tsx';
 import Vet from '@/pages/Vet/Vet.tsx';
 import VetDetails from '@/pages/Vet/VetDetails.tsx';
 import Visits from './pages/Visit/Visit';
-import AddReviewForm from './features/visits/Review/AddReviewForm';
 import EditReviewForm from './features/visits/Review/EditReviewForm';
 import Review from './pages/Review/Review';
 import CartPage from '@/pages/Carts/Cart.tsx';
@@ -151,15 +150,6 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
-      {
-        path: AppRoutePaths.Form,
-        element: (
-          <ProtectedRoute>
-            <AddReviewForm />
-          </ProtectedRoute>
-        ),
-      },
-
       {
         path: AppRoutePaths.Review,
         element: (
@@ -316,7 +306,7 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.Visits,
         element: (
-          <ProtectedRoute>
+          <ProtectedRoute roles={['ADMIN']}>
             <Visits />
           </ProtectedRoute>
         ),

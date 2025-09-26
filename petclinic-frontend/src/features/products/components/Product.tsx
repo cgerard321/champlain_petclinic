@@ -8,6 +8,11 @@ import { AppRoutePaths } from '@/shared/models/path.routes';
 import StarRating from './StarRating';
 import './Product.css';
 import { useAddToCart } from '@/features/carts/api/addToCartFromProducts.ts';
+import {
+  IsInventoryManager,
+  IsVet,
+  IsReceptionist,
+} from '@/context/UserContext';
 import { useAddToWishlist } from '@/features/carts/api/addToWishlistFromProducts';
 
 export default function Product({
@@ -15,6 +20,9 @@ export default function Product({
 }: {
   product: ProductModel;
 }): JSX.Element {
+  const isInventoryManager = IsInventoryManager();
+  const isVet = IsVet();
+  const isReceptionist = IsReceptionist();
   const [currentProduct, setCurrentProduct] = useState<ProductModel>(product);
   const [selectedProduct, setSelectedProduct] = useState<ProductModel | null>(
     null
@@ -198,19 +206,25 @@ export default function Product({
       </p>
       <p>Price: ${currentProduct.productSalePrice.toFixed(2)}</p>
 
-      <button
-        onClick={handleAddToCart}
-        disabled={currentProduct.productQuantity === 0}
-      >
-        {currentProduct.productQuantity === 0 ? 'Out of Stock' : 'Add to Cart'}
-      </button>
+      {!isInventoryManager && !isVet && !isReceptionist && (
+        <button
+          onClick={handleAddToCart}
+          disabled={currentProduct.productQuantity === 0}
+        >
+          {currentProduct.productQuantity === 0
+            ? 'Out of Stock'
+            : 'Add to Cart'}
+        </button>
+      )}
       {successMessageCart && (
         <p className="success-message">{successMessageCart}</p>
       )}
 
-      <button onClick={handleAddToWishlist} style={{ marginLeft: '10px' }}>
-        Add to Wishlist
-      </button>
+      {!isInventoryManager && !isVet && !isReceptionist && (
+        <button onClick={handleAddToWishlist} style={{ marginLeft: '10px' }}>
+          Add to Wishlist
+        </button>
+      )}
 
       {successMessageWishlist && (
         <p className="success-message">{successMessageWishlist}</p>
