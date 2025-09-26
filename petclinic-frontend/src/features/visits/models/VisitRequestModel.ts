@@ -1,5 +1,3 @@
-
-
 export interface VisitRequestModel {
   visitDate: string;
   description: string;
