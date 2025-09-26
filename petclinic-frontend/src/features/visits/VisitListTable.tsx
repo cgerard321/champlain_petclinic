@@ -10,7 +10,7 @@ import './Emergency.css';
 import { exportVisitsCSV } from './api/exportVisitsCSV';
 import axiosInstance from '@/shared/api/axiosInstance.ts';
 import { getAllVisits } from './api/getAllVisits';
-import { IsOwner, IsVet } from '@/context/UserContext';
+import { IsVet } from '@/context/UserContext';
 import { AppRoutePaths } from '@/shared/models/path.routes';
 
 export default function VisitListTable(): JSX.Element {
@@ -20,7 +20,6 @@ export default function VisitListTable(): JSX.Element {
   const [visitsAll, setVisitsAll] = useState<Visit[]>([]);
   const [archivedVisits, setArchivedVisits] = useState<Visit[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>(''); // Search term state
-  const canLeaveReview = IsOwner() || IsVet();
   const [emergencyList, setEmergencyList] = useState<EmergencyResponseDTO[]>(
     []
   );
