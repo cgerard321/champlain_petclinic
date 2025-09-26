@@ -183,6 +183,31 @@ public class BillServiceClient {
                 .retrieve()
                 .bodyToFlux(BillResponseDTO.class);
     }
+
+    public Flux<BillResponseDTO> getBillsByOwnerName(final String ownerFirstName, final String ownerLastName) {
+        return webClientBuilder.build().get()
+                .uri(billServiceUrl + "/owner/{ownerFirstName}/{ownerLastName}", ownerFirstName, ownerLastName)
+                .retrieve()
+                .bodyToFlux(BillResponseDTO.class)
+                .switchIfEmpty(Flux.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "No bills found for owner: " + ownerFirstName + " " + ownerLastName)));
+    }
+
+    public Flux<BillResponseDTO> getBillsByVetName(final String vetFirstName, final String vetLastName) {
+        return webClientBuilder.build().get()
+                .uri(billServiceUrl + "/vet/{vetFirstName}/{vetLastName}", vetFirstName, vetLastName)
+                .retrieve()
+                .bodyToFlux(BillResponseDTO.class)
+                .switchIfEmpty(Flux.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "No bills found for vet: " + vetFirstName + " " + vetLastName)));
+    }
+
+    public Flux<BillResponseDTO> getBillsByVisitType(final String visitType) {
+        return webClientBuilder.build().get()
+                .uri(billServiceUrl + "/visit-type/{visitType}", visitType)
+                .retrieve()
+                .bodyToFlux(BillResponseDTO.class)
+                .switchIfEmpty(Flux.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "No bills found for visit type: " + visitType)));
+    }
+
     public Mono<BillResponseDTO> createBill(final BillRequestDTO model){
         return webClientBuilder.build().post()
                 .uri(billServiceUrl)

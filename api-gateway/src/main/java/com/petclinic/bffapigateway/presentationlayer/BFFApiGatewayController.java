@@ -200,6 +200,24 @@ public class BFFApiGatewayController {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping(value = "bills/owner/{ownerFirstName}/{ownerLastName}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<BillResponseDTO> getAllBillsByOwnerName(@PathVariable String ownerFirstName, @PathVariable String ownerLastName) {
+        return billServiceClient.getBillsByOwnerName(ownerFirstName, ownerLastName);
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping(value = "bills/vet/{vetFirstName}/{vetLastName}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<BillResponseDTO> getAllBillsByVetName(@PathVariable String vetFirstName, @PathVariable String vetLastName) {
+        return billServiceClient.getBillsByVetName(vetFirstName, vetLastName);
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping(value = "bills/visitType/{visitType}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<BillResponseDTO> getAllBillsByVisitType(@PathVariable String visitType) {
+        return billServiceClient.getBillsByVisitType(visitType);
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @PutMapping("/bills/{billId}")
     public Mono<ResponseEntity<BillResponseDTO>> updateBill(@PathVariable String billId, @RequestBody Mono<BillRequestDTO> billRequestDTO){
         return billServiceClient.updateBill(billId, billRequestDTO)
