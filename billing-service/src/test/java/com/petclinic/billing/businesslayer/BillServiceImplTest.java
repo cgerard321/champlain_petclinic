@@ -734,7 +734,132 @@ public class BillServiceImplTest {
                 .verify();
     }
 
+    @Test
+    void getNumberOfBillsWithFilters_Positive_ShouldCountMatchingBills() {
 
+        Bill b1 = buildBill();
+        b1.setBillId("B-1");
+        b1.setCustomerId("C-1");
+        b1.setOwnerFirstName("Alice");
+        b1.setOwnerLastName("Smith");
+        b1.setVisitType("ANNUAL");
+        b1.setVetId("V-1");
+        b1.setVetFirstName("Jenny");
+        b1.setVetLastName("Doe");
+
+        Bill b2 = buildBill();
+        b2.setBillId("B-2");
+        b2.setCustomerId("C-1");
+        b2.setOwnerFirstName("Alice");
+        b2.setOwnerLastName("Smith");
+        b2.setVisitType("ANNUAL");
+        b2.setVetId("V-1");
+        b2.setVetFirstName("Jenny");
+        b2.setVetLastName("Doe");
+
+        Bill b3 = buildBill();
+        b3.setBillId("B-3");
+        b3.setCustomerId("C-2");
+        b3.setOwnerFirstName("Bob");
+        b3.setOwnerLastName("Jones");
+        b3.setVisitType("SURGERY");
+        b3.setVetId("V-2");
+        b3.setVetFirstName("Tom");
+        b3.setVetLastName("Lee");
+
+        when(repo.findAll()).thenReturn(Flux.just(b1, b2, b3));
+
+        Mono<Long> result = billService.getNumberOfBillsWithFilters(
+                null,
+                "C-1",
+                "Alice",
+                "Smith",
+                "ANNUAL",
+                "V-1",
+                "Jenny",
+                "Doe"
+        );
+
+        StepVerifier.create(result)
+                .expectNext(2L)
+                .verifyComplete();
+    }
+
+    @Test
+    void getNumberOfBillsWithFilters_Negative_NoMatches_ShouldReturnZero() {
+        Bill b1 = buildBill();
+        b1.setBillId("B-10");
+        b1.setCustomerId("C-10");
+        b1.setOwnerFirstName("Alice");
+        b1.setOwnerLastName("Smith");
+        b1.setVisitType("ANNUAL");
+        b1.setVetId("V-10");
+        b1.setVetFirstName("Jenny");
+        b1.setVetLastName("Doe");
+
+        Bill b2 = buildBill();
+        b2.setBillId("B-11");
+        b2.setCustomerId("C-11");
+        b2.setOwnerFirstName("Bob");
+        b2.setOwnerLastName("Jones");
+        b2.setVisitType("SURGERY");
+        b2.setVetId("V-11");
+        b2.setVetFirstName("Tom");
+        b2.setVetLastName("Lee");
+
+        when(repo.findAll()).thenReturn(Flux.just(b1, b2));
+
+        Mono<Long> result = billService.getNumberOfBillsWithFilters(
+                "NO-SUCH-BILL",
+                "C-999",
+                "Nonexistent",
+                "Person",
+                "DENTAL",
+                "V-999",
+                "Nobody",
+                "Nowhere"
+        );
+
+        StepVerifier.create(result)
+                .expectNext(0L)
+                .verifyComplete();
+    }
+
+    @Test
+    void getBillByCustomerIdAndBillId_Positive_ShouldReturnDtoWhenCustomerMatches() {
+        Bill bill = buildBill();
+        bill.setBillId("B-42");
+        bill.setCustomerId("C-123");
+
+        when(repo.findByBillId("B-42")).thenReturn(Mono.just(bill));
+
+        Mono<BillResponseDTO> result =
+                billService.getBillByCustomerIdAndBillId("C-123", "B-42");
+
+        StepVerifier.create(result)
+                .assertNext(dto -> {
+                    assertEquals("B-42", dto.getBillId());
+                    assertEquals("C-123", dto.getCustomerId());
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void getBillByCustomerIdAndBillId_Negative_NoMatchOnCustomer_ShouldBeEmpty() {
+
+        Bill bill = buildBill();
+        bill.setBillId("B-42");
+        bill.setCustomerId("C-123");
+
+        when(repo.findByBillId("B-42")).thenReturn(Mono.just(bill));
+
+        Mono<BillResponseDTO> result =
+                billService.getBillByCustomerIdAndBillId("C-999", "B-42");
+
+        StepVerifier.create(result)
+                .expectNextCount(0)
+                .verifyComplete();
+    }
 
 
 }
