@@ -5,6 +5,7 @@ import com.petclinic.customersservice.customersExceptions.exceptions.NotFoundExc
 import com.petclinic.customersservice.data.Owner;
 import com.petclinic.customersservice.data.PetType;
 import com.petclinic.customersservice.data.PetTypeRepo;
+import com.petclinic.customersservice.presentationlayer.PetTypeRequestDTO;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,22 +96,33 @@ class PetTypeControllerIntegrationTest {
     }*/
 
 
-    /*
     @Test
     void updatePetType() {
-        Publisher<PetType> setup = petTypeRepo.deleteAll().thenMany(petTypeRepo.save(petTypeEntity2));
+        PetType testPetType = PetType.builder()
+                .id("test-id-123")
+                .petTypeId("test-petTypeId-123")
+                .name("Original Dog")
+                .petTypeDescription("Original Mammal")
+                .build();
+        
+        Publisher<PetType> setup = petTypeRepo.deleteAll().thenMany(petTypeRepo.save(testPetType));
         StepVerifier.create(setup).expectNextCount(1).verifyComplete();
-        webTestClient.put().uri("/owners/petTypes/" + PUBLIC_PETTYPE_ID)
-                .body(Mono.just(petTypeEntity2), PetType.class)
+        
+        PetTypeRequestDTO updateRequest = PetTypeRequestDTO.builder()
+                .name("Updated Dog")
+                .petTypeDescription("Updated Mammal")
+                .build();
+        
+        webTestClient.put().uri("/owners/petTypes/" + testPetType.getPetTypeId())
+                .body(Mono.just(updateRequest), PetTypeRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
-                .exchange().expectStatus().isOk()
+                .exchange()
+                .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.petTypeId").isEqualTo(petTypeEntity2.getPetTypeId())
-                .jsonPath("$.name").isEqualTo(petTypeEntity2.getName())
-                .jsonPath("$.petTypeDescription").isEqualTo(petTypeEntity2.getPetTypeDescription());
-
-
+                .jsonPath("$.petTypeId").isEqualTo(testPetType.getPetTypeId())
+                .jsonPath("$.name").isEqualTo("Updated Dog")
+                .jsonPath("$.petTypeDescription").isEqualTo("Updated Mammal");
     }
 
 
@@ -133,8 +145,6 @@ class PetTypeControllerIntegrationTest {
                 });
 
     }
-
-     */
 
     @Test
     void deletePetType_ShouldReturnNoContent() {
@@ -159,7 +169,7 @@ class PetTypeControllerIntegrationTest {
                     .expectStatus().isNoContent()
                     .expectBody().isEmpty();
 
-            StepVerifier.create(petTypeRepo.findOPetTypeById("4283c9b8-4ffd-4866-a5ed-287117c60a40")
+            StepVerifier.create(petTypeRepo.findByPetTypeId("4283c9b8-4ffd-4866-a5ed-287117c60a40")
                             .timeout(Duration.ofSeconds(5))
                             .onErrorMap(TimeoutException.class, e ->
                                     new RuntimeException("Database query timed out", e)))
