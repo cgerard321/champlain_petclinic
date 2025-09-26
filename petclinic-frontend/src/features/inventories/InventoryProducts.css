@@ -240,3 +240,16 @@ select:focus {
   max-width: 320px;
   margin: 12px 0 16px 16px;
 }
+.card button[type="submit"],
+form button[type="submit"].btn {
+  width: auto !important;
+  min-width: 10rem;
+  max-width: 100%;
+  padding-inline: 16px;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+button.btn {
+  word-break: keep-all;
+}
