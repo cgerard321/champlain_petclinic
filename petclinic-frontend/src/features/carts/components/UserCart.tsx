@@ -7,6 +7,8 @@ import { ProductModel } from '../models/ProductModel';
 import './UserCart.css';
 import { NavBar } from '@/layouts/AppNavBar';
 import { FaShoppingCart } from 'react-icons/fa'; // Importing the shopping cart icon
+import { IsAdmin } from '@/context/UserContext';
+import { AppRoutePaths } from '@/shared/models/path.routes';
 
 interface ProductAPIResponse {
   productId: number;
@@ -424,6 +426,37 @@ const UserCart = (): JSX.Element => {
       }
     }
   };
+  //a function to remove from wishlist
+  const removeFromWishlist = async (item: ProductModel): Promise<void> => {
+    if (!cartId) return;
+
+    const ok = window.confirm(`Remove "${item.productName}" from wishlist?`);
+    if (!ok) return;
+
+    try {
+      const res = await fetch(
+        `http://localhost:8080/api/v2/gateway/carts/${cartId}/wishlist/${item.productId}`,
+        {
+          method: 'DELETE',
+          headers: { Accept: 'application/json' },
+          credentials: 'include',
+        }
+      );
+
+      if (!res.ok) {
+        const errText = await res.text().catch(() => '');
+        throw new Error(errText || 'Failed to remove from wishlist');
+      }
+
+      setWishlistItems(prev =>
+        prev.filter(p => p.productId !== item.productId)
+      );
+      setNotificationMessage(`Removed "${item.productName}" from wishlist.`);
+    } catch (e) {
+      console.error(e);
+      alert('Could not remove item from wishlist.');
+    }
+  };
 
   useEffect(() => {
     const savedInvoices = localStorage.getItem('invoices');
@@ -436,7 +469,18 @@ const UserCart = (): JSX.Element => {
     localStorage.setItem('invoices', JSON.stringify(invoices));
   }, [invoices]);
 
+  // role flag for conditional UI
+  const isAdmin = IsAdmin();
+
+  //method modified so admin can't check out anymore
   const handleCheckoutConfirmation = (): void => {
+    if (isAdmin) {
+      navigate(AppRoutePaths.Unauthorized, {
+        state: { message: 'Admins are not allowed to perform checkout.' },
+      });
+      return;
+    }
+    // Non-admin flow: open billing form first; on submit we show confirm modal
     setShowBillingForm(true);
     setIsCheckoutModalOpen(false);
   };
@@ -571,114 +615,116 @@ const UserCart = (): JSX.Element => {
             </div>
           </div>
 
-          {/* Checkout Section */}
-          <div className="Checkout-section">
-            {/* Voucher Code Section */}
-            <div className="voucher-code-section">
-              <input
-                type="text"
-                placeholder="Enter voucher code"
-                value={voucherCode}
-                onChange={e => {
-                  setVoucherCode(e.target.value);
-                  setVoucherError(null);
-                }}
-                className="voucher-input"
-              />
+          {/* Checkout Section — hidden for admins */}
+          {!isAdmin && (
+            <div className="Checkout-section">
+              {/* Voucher Code Section */}
+              <div className="voucher-code-section">
+                <input
+                  type="text"
+                  placeholder="Enter voucher code"
+                  value={voucherCode}
+                  onChange={e => {
+                    setVoucherCode(e.target.value);
+                    setVoucherError(null);
+                  }}
+                  className="voucher-input"
+                />
+                <button
+                  onClick={applyVoucherCode}
+                  className="apply-voucher-button"
+                >
+                  Apply
+                </button>
+                {voucherError && (
+                  <div className="voucher-error">{voucherError}</div>
+                )}
+              </div>
+
+              <div className="CartSummary">
+                <h3>Cart Summary</h3>
+                <p className="summary-item">Subtotal: ${subtotal.toFixed(2)}</p>
+                <p className="summary-item">TVQ (9.975%): ${tvq.toFixed(2)}</p>
+                <p className="summary-item">TVC (5%): ${tvc.toFixed(2)}</p>
+                <p className="summary-item">Discount: ${discount.toFixed(2)}</p>
+                <p className="total-price summary-item">
+                  Total: ${total.toFixed(2)}
+                </p>
+              </div>
+
               <button
-                onClick={applyVoucherCode}
-                className="apply-voucher-button"
+                className="checkout-btn"
+                onClick={handleCheckoutConfirmation}
+                disabled={cartItems.length === 0}
               >
-                Apply
+                Checkout
               </button>
-              {voucherError && (
-                <div className="voucher-error">{voucherError}</div>
+
+              {/* Cart Billing Form Modal */}
+              {showBillingForm && (
+                <div className="checkout-modal">
+                  <CartBillingForm
+                    onSubmit={() => {
+                      setShowBillingForm(false);
+                      setIsCheckoutModalOpen(true);
+                    }}
+                  />
+                  <button onClick={() => setShowBillingForm(false)}>
+                    Cancel
+                  </button>
+                </div>
+              )}
+
+              {/* Checkout Confirmation Modal */}
+              {isCheckoutModalOpen && (
+                <div className="checkout-modal">
+                  <h3>Confirm Checkout</h3>
+                  <p>Are you sure you want to checkout?</p>
+                  <button onClick={handleCheckout}>Yes</button>
+                  <button onClick={() => setIsCheckoutModalOpen(false)}>
+                    No
+                  </button>
+                </div>
+              )}
+
+              {checkoutMessage && (
+                <div className="checkout-message">{checkoutMessage}</div>
+              )}
+
+              {/* Invoice Section */}
+              {invoices.length > 0 && (
+                <div className="invoices-section">
+                  <h2>Invoice</h2>
+                  <div className="invoice-summary">
+                    <h3>Items</h3>
+                    {invoices.map(invoice => (
+                      <div key={invoice.productId} className="invoice-card">
+                        <h4>{invoice.productName}</h4>
+                        <p>Price: ${invoice.productSalePrice.toFixed(2)}</p>
+                        <p>Quantity: {invoice.quantity}</p>
+                        <p>
+                          Total: $
+                          {(
+                            invoice.productSalePrice * invoice.quantity
+                          ).toFixed(2)}
+                        </p>
+                      </div>
+                    ))}
+                    <h3>
+                      Total: $
+                      {invoices
+                        .reduce(
+                          (total, inv) =>
+                            total + inv.productSalePrice * inv.quantity,
+                          0
+                        )
+                        .toFixed(2)}
+                    </h3>
+                  </div>
+                </div>
               )}
             </div>
-
-            <div className="CartSummary">
-              <h3>Cart Summary</h3>
-              <p className="summary-item">Subtotal: ${subtotal.toFixed(2)}</p>
-              <p className="summary-item">TVQ (9.975%): ${tvq.toFixed(2)}</p>
-              <p className="summary-item">TVC (5%): ${tvc.toFixed(2)}</p>
-              <p className="summary-item">Discount: ${discount.toFixed(2)}</p>
-              <p className="total-price summary-item">
-                Total: ${total.toFixed(2)}
-              </p>
-            </div>
-
-            <button
-              className="checkout-btn"
-              onClick={handleCheckoutConfirmation}
-              disabled={cartItems.length === 0}
-            >
-              Checkout
-            </button>
-
-            {/* Cart Billing Form Modal */}
-            {showBillingForm && (
-              <div className="checkout-modal">
-                <CartBillingForm
-                  onSubmit={() => {
-                    setShowBillingForm(false);
-                    setIsCheckoutModalOpen(true);
-                  }}
-                />
-                <button onClick={() => setShowBillingForm(false)}>
-                  Cancel
-                </button>
-              </div>
-            )}
-
-            {/* Checkout Confirmation Modal */}
-            {isCheckoutModalOpen && (
-              <div className="checkout-modal">
-                <h3>Confirm Checkout</h3>
-                <p>Are you sure you want to checkout?</p>
-                <button onClick={handleCheckout}>Yes</button>
-                <button onClick={() => setIsCheckoutModalOpen(false)}>
-                  No
-                </button>
-              </div>
-            )}
-
-            {checkoutMessage && (
-              <div className="checkout-message">{checkoutMessage}</div>
-            )}
-
-            {/* Invoice Section */}
-            {invoices.length > 0 && (
-              <div className="invoices-section">
-                <h2>Invoice</h2>
-                <div className="invoice-summary">
-                  <h3>Items</h3>
-                  {invoices.map(invoice => (
-                    <div key={invoice.productId} className="invoice-card">
-                      <h4>{invoice.productName}</h4>
-                      <p>Price: ${invoice.productSalePrice.toFixed(2)}</p>
-                      <p>Quantity: {invoice.quantity}</p>
-                      <p>
-                        Total: $
-                        {(invoice.productSalePrice * invoice.quantity).toFixed(
-                          2
-                        )}
-                      </p>
-                    </div>
-                  ))}
-                  <h3>
-                    Total: $
-                    {invoices
-                      .reduce(
-                        (total, invoice) =>
-                          total + invoice.productSalePrice * invoice.quantity,
-                        0
-                      )
-                      .toFixed(2)}
-                  </h3>
-                </div>
-              </div>
-            )}
-          </div>
+          )}
         </div>
 
         {/* Wishlist Section */}
@@ -694,9 +740,10 @@ const UserCart = (): JSX.Element => {
                   changeItemQuantity={() => {}}
                   deleteItem={() => {}}
                   addToWishlist={() => {}}
-                  addToCart={addToCartFunction} // Use the updated addToCart function
+                  addToCart={addToCartFunction}
                   isInWishlist={true}
-                  showNotification={setNotificationMessage} // Pass the notification handler
+                  removeFromWishlist={removeFromWishlist}
+                  showNotification={setNotificationMessage}
                 />
               ))
             ) : (
