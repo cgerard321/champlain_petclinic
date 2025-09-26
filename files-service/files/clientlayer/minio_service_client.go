@@ -2,7 +2,6 @@ package clientlayer
 
 import (
 	"context"
-	"files-service/files/datalayer"
 	"files-service/files/models"
 	"io"
 	"path"
@@ -21,9 +20,9 @@ func NewMinioServiceClient(client *minio.Client) *MinioServiceClient {
 	}
 }
 
-func (msc *MinioServiceClient) GetFile(fileInfo *datalayer.FileInfo) (*models.FileResponseModel, error) {
+func (msc *MinioServiceClient) GetFile(bucket string, FileUrl string) (*models.FileResponseModel, error) {
 	ctx := context.Background()
-	object, err := msc.client.GetObject(ctx, datalayer.Buckets[fileInfo.FileType], fileInfo.Url, minio.GetObjectOptions{}) //maybe add content type to object options
+	object, err := msc.client.GetObject(ctx, bucket, FileUrl, minio.GetObjectOptions{}) //maybe add content type to object options
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +39,7 @@ func (msc *MinioServiceClient) GetFile(fileInfo *datalayer.FileInfo) (*models.Fi
 	}
 
 	//get file name from url
-	fileNameWithExt := path.Base(fileInfo.Url)
+	fileNameWithExt := path.Base(FileUrl)
 	fileName := strings.Replace(strings.TrimSuffix(fileNameWithExt, path.Ext(fileNameWithExt)), "_", " ", -1) //removes extension from name and replaces "_" with " "
 
 	file := models.FileResponseModel{
