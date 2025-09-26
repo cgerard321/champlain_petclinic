@@ -11,6 +11,7 @@ import com.petclinic.billing.util.PdfGenerator;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import lombok.var;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -139,15 +140,17 @@ public class BillServiceImpl implements BillService{
     @Override
     public Mono<BillResponseDTO> createBill(Mono<BillRequestDTO> billRequestDTO) {
 
-            return billRequestDTO
-//                    .map(RequestContextAdd::new)
-//                    .flatMap(this::vetRequestResponse)
-//                    .flatMap(this::ownerRequestResponse)
-//                    .map(EntityDtoUtil::toBillEntityRC)
-                    .map(EntityDtoUtil::toBillEntity)
-                    .doOnNext(e -> e.setBillId(EntityDtoUtil.generateUUIDString()))
-                    .flatMap(billRepository::insert)
+        return billRequestDTO.flatMap(req -> {
+            if (req.getBillStatus() == null) {
+                return Mono.error(new IllegalArgumentException("billStatus is required"));
+            }
+
+            var entity = EntityDtoUtil.toBillEntity(req);
+            entity.setBillId(EntityDtoUtil.generateUUIDString());
+
+            return billRepository.insert(entity)
                     .map(EntityDtoUtil::toBillResponseDto);
+        });
     }
 
 

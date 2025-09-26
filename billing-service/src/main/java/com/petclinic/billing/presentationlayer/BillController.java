@@ -27,10 +27,11 @@ public class BillController {
 
     // Create Bill //
     @PostMapping("/bills")
-    public Mono<ResponseEntity<BillResponseDTO>> createBill(@Valid @RequestBody Mono<BillRequestDTO> billDTO){
+    public Mono<ResponseEntity<BillResponseDTO>> createBill(@Valid @RequestBody Mono<BillRequestDTO> billDTO) {
         return billService.createBill(billDTO)
                 .map(e -> ResponseEntity.status(HttpStatus.CREATED).body(e))
-                .defaultIfEmpty(ResponseEntity.badRequest().build());
+                .onErrorResume(IllegalArgumentException.class,
+                        e -> Mono.just(ResponseEntity.badRequest().build()));
     }
 
     // Read Bill //

@@ -1,5 +1,6 @@
 package com.petclinic.billing.presentationlayer;
 
+import com.petclinic.billing.datalayer.BillRequestDTO;
 import com.petclinic.billing.exceptions.InvalidPaymentException;
 import com.petclinic.billing.exceptions.NotFoundException;
 import com.petclinic.billing.businesslayer.BillService;
@@ -20,6 +21,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -184,7 +187,45 @@ public class CustomerBillsControllerUnitTest {
         verify(billService, times(1)).processPayment(customerId, billId, paymentRequest);
     }
 
+    @Test
+    void whenDeleteBillWithInvalidCustomerId_thenReturnNotFound() {
+        // given
+        String invalidCustomerId = "INVALID-ID";
 
+        // mock service to throw error
+        when(billService.deleteBillsByCustomerId(invalidCustomerId))
+                .thenReturn(Flux.error(new RuntimeException("Invalid customerId")));
+
+        // when + then
+        client.delete()
+                .uri("/bills/customer/{customerId}", invalidCustomerId)
+                .exchange()
+                .expectStatus().is5xxServerError();
+
+    }
+
+    @Test
+    void whenCreatingBillsIfBillStatusIsEmpty_thenReturnMissingVariable() {
+        BillRequestDTO invalidRequest = BillRequestDTO.builder()
+                .customerId("C001")
+                .visitType("Regular Checkup")
+                .vetId("V100")
+                .date(LocalDate.now())
+                .amount(75.50)
+                .billStatus(null) // invalid
+                .dueDate(LocalDate.now().plusDays(10))
+                .build();
+
+        // Mock service so it doesn’t return null
+        when(billService.createBill(any()))
+                .thenReturn(Mono.error(new IllegalArgumentException("billStatus is required")));
+
+        client.post()
+                .uri("/bills")
+                .bodyValue(invalidRequest)
+                .exchange()
+                .expectStatus().isBadRequest();
+    }
 
 
 
