@@ -22,7 +22,7 @@ import java.util.Optional;
 @RestController()
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping("/api/v2/gateway/inventories")
+//@RequestMapping("/api/v2/gateway/inventories")
 @Validated
 public class InventoryController {
     private final InventoryServiceClient inventoryServiceClient;

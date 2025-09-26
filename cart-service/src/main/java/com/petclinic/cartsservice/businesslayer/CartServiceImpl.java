@@ -22,6 +22,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import reactor.core.publisher.Mono;
+import com.petclinic.cartsservice.utils.exceptions.NotFoundException;
+
 
 @Service
 @Slf4j
@@ -90,6 +93,29 @@ public class CartServiceImpl implements CartService {
                     } else {
                         return Mono.error(new NotFoundException("Product id was not found: " + productId));
                     }
+                });
+    }
+
+    @Override
+    public Mono<CartResponseModel> removeProductFromWishlist(String cartId, String productId) {
+        return cartRepository.findCartByCartId(cartId)
+                .switchIfEmpty(Mono.error(new NotFoundException("Cart not found: " + cartId)))
+                .flatMap(cart -> {
+                    List<CartProduct> wish = cart.getWishListProducts();
+
+                    if (wish == null || wish.isEmpty()) {
+                        return Mono.error(new NotFoundException("No wishlist for cart: " + cartId));
+                    }
+
+                    boolean removed = wish.removeIf(p -> p.getProductId().equals(productId));
+                    if (!removed) {
+                        return Mono.error(new NotFoundException("Product not found in wishlist: " + productId));
+                    }
+
+                    cart.setWishListProducts(wish);
+
+                    return cartRepository.save(cart)
+                            .map(saved -> EntityModelUtil.toCartResponseModel(saved, saved.getWishListProducts()));
                 });
     }
 

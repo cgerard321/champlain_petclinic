@@ -9,7 +9,7 @@ export async function addProductToInventoryByName(
   //Not implemented neither in v1 or v2
   try {
     const response = await axiosInstance.post(
-      `/inventory/${inventoryName}/products/by-name`,
+      `/inventories/${inventoryName}/products/by-name`,
       product,
       { useV2: false }
     );
