@@ -16,7 +16,11 @@ export default function axiosErrorResponseHandler(
   statusCode: number
 ): void {
   const redirectPath = errorPageRedirects[statusCode];
-
+  if (statusCode ==401){
+      console.log("redirect to logout");
+      localStorage.removeItem("token");
+      localStorage.clear()
+      router.navigate('/logout')
   if (redirectPath) {
     // log for easy debug
     console.error(`Redirecting to ${redirectPath} due to error:`, error);
@@ -25,4 +29,4 @@ export default function axiosErrorResponseHandler(
     // log whatever that wasn't handled
     console.error('Unhandled error:', error, 'Status code:', statusCode);
   }
-}
+}}
