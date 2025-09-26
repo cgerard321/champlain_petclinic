@@ -14,7 +14,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import org.springframework.data.domain.PageRequest;
 
-import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 @RestController
 @AllArgsConstructor
@@ -88,9 +88,10 @@ public Flux<InventoryResponseDTO> searchInventories(
         @RequestParam Optional<Integer> page, @RequestParam Optional<Integer> size,
         @RequestParam(name = "inventoryName", required = false) String inventoryName,
         @RequestParam(name = "inventoryType", required = false) String inventoryType,
-        @RequestParam(name = "inventoryDescription", required = false) String inventoryDescription) {
+        @RequestParam(name = "inventoryDescription", required = false) String inventoryDescription,
+        @RequestParam(name = "importantOnly", required = false) Boolean importantOnly) {
 
-    return productInventoryService.searchInventories(PageRequest.of(page.orElse(0),size.orElse(10)), inventoryName, inventoryType, inventoryDescription);
+    return productInventoryService.searchInventories(PageRequest.of(page.orElse(0),size.orElse(10)), inventoryName, inventoryType, inventoryDescription, importantOnly);
 }
 
 
@@ -200,6 +201,14 @@ public Flux<InventoryResponseDTO> searchInventories(
                                                                    @PathVariable String productId) {
         return productInventoryService.consumeProduct(inventoryId, productId)
                 .map(productResponseDTO -> ResponseEntity.ok().body(productResponseDTO))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    @PatchMapping("/{inventoryId}/important")
+    public Mono<ResponseEntity<Object>> updateImportantStatus(@PathVariable String inventoryId, @RequestBody Map<String, Boolean> request) {
+        Boolean important = request.get("important");
+        return productInventoryService.updateImportantStatus(inventoryId, important)
+                .then(Mono.just(ResponseEntity.ok().build()))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 

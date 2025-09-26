@@ -189,16 +189,4 @@ public class BillController {
         return billService.getBillsByMonth(year, month);
     }
 
-
-    @PostMapping("/bills/customer/{customerId}/bills/{billId}/pay")
-    public Mono<ResponseEntity<String>> payBill(
-            @PathVariable("customerId") String customerId,
-            @PathVariable("billId") String billId,
-            @RequestBody PaymentRequestDTO paymentRequestDTO) {
-        return billService.processPayment(customerId, billId, paymentRequestDTO)
-                .map(bill -> ResponseEntity.ok("Payment successful! Bill status updated to PAID."))
-                .onErrorResume(InvalidPaymentException.class, e -> Mono.just(ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid payment details: " + e.getMessage())))
-                .onErrorResume(NotFoundException.class, e -> Mono.just(ResponseEntity.status(HttpStatus.NOT_FOUND).body("Bill not found.")));
-    }
-
 }

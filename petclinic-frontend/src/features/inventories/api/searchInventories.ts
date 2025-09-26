@@ -6,21 +6,28 @@ export async function searchInventories(
   listSize: number,
   inventoryName?: string,
   inventoryType?: string,
-  inventoryDescription?: string
+  inventoryDescription?: string,
+  importantOnly?: boolean
 ): Promise<Inventory[]> {
-  const queryParams = new URLSearchParams();
-  if (inventoryName) queryParams.append('inventoryName', inventoryName);
-  if (inventoryType) queryParams.append('inventoryType', inventoryType);
-  if (inventoryDescription)
-    queryParams.append('inventoryDescription', inventoryDescription);
+  try {
+    const queryParams = new URLSearchParams();
+    if (inventoryName) queryParams.append('inventoryName', inventoryName);
+    if (inventoryType) queryParams.append('inventoryType', inventoryType);
+    if (inventoryDescription)
+      queryParams.append('inventoryDescription', inventoryDescription);
+    if (importantOnly) queryParams.append('importantOnly', 'true');
 
-  const queryString = queryParams.toString();
-  const url = queryString
-    ? `inventories?page=${currentPage}&size=${listSize}&${queryString}`
-    : `inventories?page=${currentPage}&size=${listSize}`;
+    const queryString = queryParams.toString();
+    const url = queryString
+      ? `/inventory?page=${currentPage}&size=${listSize}&${queryString}`
+      : `/inventory?page=${currentPage}&size=${listSize}`;
 
-  const response = await axiosInstance.get<Inventory[]>(
-    axiosInstance.defaults.baseURL + 'v2/gateway/' + url
-  );
-  return response.data;
+    const response = await axiosInstance.get<Inventory[]>(url, {
+      useV2: false,
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error Searching Inventories:', error);
+    throw error;
+  }
 }

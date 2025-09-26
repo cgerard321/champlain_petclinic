@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react';
 import { OwnerResponseModel } from '@/features/customers/models/OwnerResponseModel';
 import './AllOwners.css';
 import { NavBar } from '@/layouts/AppNavBar.tsx';
-import axios from 'axios';
 import { Link } from 'react-router-dom';
+import { getAllOwners } from '@/features/customers/api/getAllOwners.ts';
+import { deleteOwner } from '@/features/customers/api/deleteOwner';
+import { IsVet } from '@/context/UserContext';
 
 const AllOwners: React.FC = (): JSX.Element => {
   interface FilterModel {
@@ -16,6 +18,7 @@ const AllOwners: React.FC = (): JSX.Element => {
     telephone: string;
   }
 
+  const isVet = IsVet();
   const [owners, setOwners] = useState<OwnerResponseModel[]>([]);
   const [filter, setFilter] = useState<FilterModel>({
     firstName: '',
@@ -29,30 +32,12 @@ const AllOwners: React.FC = (): JSX.Element => {
   const [isFilterVisible, setFilterVisible] = useState(true);
 
   useEffect(() => {
-    const eventSource = new EventSource(
-      'http://localhost:8080/api/v2/gateway/owners',
-      {
-        withCredentials: true,
-      }
-    );
-
-    eventSource.onmessage = event => {
-      try {
-        const parsedData: OwnerResponseModel = JSON.parse(event.data);
-        setOwners(prevOwners => [...prevOwners, parsedData]);
-      } catch (error) {
-        console.error('Error parsing event data:', error);
-      }
+    const getOwners = async (): Promise<void> => {
+      const fetchedOwners = await getAllOwners();
+      setOwners(fetchedOwners);
     };
 
-    eventSource.onerror = error => {
-      console.error('EventSource error:', error);
-      eventSource.close();
-    };
-
-    return () => {
-      eventSource.close();
-    };
+    getOwners();
   }, []);
 
   const handleDelete = async (ownerId: string): Promise<void> => {
@@ -61,19 +46,9 @@ const AllOwners: React.FC = (): JSX.Element => {
     );
 
     if (confirmDelete) {
-      try {
-        await axios.delete(
-          `http://localhost:8080/api/v2/gateway/owners/${ownerId}`,
-          {
-            withCredentials: true,
-          }
-        );
-        setOwners(owners.filter(owner => owner.ownerId !== ownerId));
-        alert('Owner deleted successfully.');
-      } catch (error) {
-        console.error('Error deleting owner:', error);
-        alert('Error deleting owner. Please try again.');
-      }
+      await deleteOwner(ownerId);
+      setOwners(owners.filter(owner => owner.ownerId !== ownerId));
+      alert('Owner deleted successfully.');
     } else {
       alert('Owner deletion canceled.');
     }
@@ -195,24 +170,26 @@ const AllOwners: React.FC = (): JSX.Element => {
                 <td>{owner.province}</td>
                 <td>{owner.telephone}</td>
                 <td>
-                  <button
-                    className="btn btn-danger"
-                    onClick={() => handleDelete(owner.ownerId)}
-                    title="Delete"
-                    style={{ backgroundColor: 'red', color: 'white' }}
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="32"
-                      height="32"
-                      fill="#fff"
-                      className="bi bi-trash"
-                      viewBox="0 0 16 16"
+                  {!isVet && (
+                    <button
+                      className="btn btn-danger"
+                      onClick={() => handleDelete(owner.ownerId)}
+                      title="Delete"
+                      style={{ backgroundColor: 'red', color: 'white' }}
                     >
-                      <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z" />
-                      <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z" />
-                    </svg>
-                  </button>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="32"
+                        height="32"
+                        fill="#fff"
+                        className="bi bi-trash"
+                        viewBox="0 0 16 16"
+                      >
+                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z" />
+                        <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z" />
+                      </svg>
+                    </button>
+                  )}
                 </td>
               </tr>
             ))}

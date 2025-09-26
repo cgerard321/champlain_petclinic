@@ -1,79 +1,72 @@
 import { FC, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import axiosInstance from '@/shared/api/axiosInstance';
 import { OwnerResponseModel } from '@/features/customers/models/OwnerResponseModel';
 import { PetResponseModel } from '@/features/customers/models/PetResponseModel'; // Import the PetResponseModel
 import { Bill } from '@/features/bills/models/Bill';
+import { getOwner } from '../api/getOwner';
 import './CustomerDetails.css';
+import { deleteOwner } from '../api/deleteOwner';
+import { IsVet } from '@/context/UserContext';
 
 const CustomerDetails: FC = () => {
   const { ownerId } = useParams<{ ownerId: string }>();
   const navigate = useNavigate();
+  const isVet = IsVet();
 
   const [isDisabled, setIsDisabled] = useState<boolean>(false);
   const [owner, setOwner] = useState<OwnerResponseModel | null>(null);
   const [pets, setPets] = useState<PetResponseModel[]>([]); // State for pets
   const [bills, setBills] = useState<Bill[]>([]);
-  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchOwnerDetails = async (): Promise<void> => {
-      try {
-        const ownerResponse = await axios.get(
-          `http://localhost:8080/api/v2/gateway/owners/${ownerId}`,
-          { withCredentials: true }
-        );
-        setOwner(ownerResponse.data);
+      //ownerId can't be undefied here so it is ok to assert it.
+      const ownerResponse = await getOwner(ownerId!);
+      setOwner(ownerResponse.data);
 
-        const userResponse = await axios.get(
-          `http://localhost:8080/api/v2/gateway/users/${ownerId}`,
-          { withCredentials: true }
-        );
-        setIsDisabled(userResponse.data.disabled);
+      const userResponse = await axiosInstance.get(`/users/${ownerId}`, {
+        useV2: true,
+      });
+      setIsDisabled(userResponse.data.disabled);
 
-        // Fetch pets by owner ID
-        const petsResponse = await axios.get(
-          `http://localhost:8080/api/v2/gateway/pets/owner/${ownerId}/pets`,
-          { withCredentials: true }
-        );
-        setPets(petsResponse.data); // Set the pets state
+      // Fetch pets by owner ID
+      const petsResponse = await axiosInstance.get(
+        `/pets/owner/${ownerId}/pets`,
+        { useV2: false }
+      );
+      setPets(petsResponse.data); // Set the pets state
 
-        const billsResponse = await axios.get(
-          `http://localhost:8080/api/v2/gateway/bills/customer/${ownerId}`,
-          { withCredentials: true }
-        );
+      const billsResponse = await axiosInstance.get(
+        `/bills/customer/${ownerId}`,
+        { useV2: false }
+      );
 
-        const billsData: Bill[] = [];
-        const data = billsResponse.data;
+      const billsData: Bill[] = [];
+      const data = billsResponse.data;
 
-        if (typeof data === 'string') {
-          const pieces = data.split('\n').filter(Boolean);
-          for (const piece of pieces) {
-            if (piece.startsWith('data:')) {
-              const billData = piece.slice(5).trim();
-              try {
-                const bill: Bill = JSON.parse(billData);
-                billsData.push(bill);
-              } catch (error) {
-                console.error('Error parsing bill data:', error);
-              }
+      if (typeof data === 'string') {
+        const pieces = data.split('\n').filter(Boolean);
+        for (const piece of pieces) {
+          if (piece.startsWith('data:')) {
+            const billData = piece.slice(5).trim();
+            try {
+              const bill: Bill = JSON.parse(billData);
+              billsData.push(bill);
+            } catch (error) {
+              console.error('Error parsing bill data:', error);
             }
           }
-        } else if (Array.isArray(data)) {
-          billsData.push(...data);
-        } else {
-          console.error('Unexpected bills response format:', data);
         }
-
-        setBills(billsData);
-        setError(null);
-      } catch (err) {
-        console.error('Error fetching owner or bills:', err);
-        setError('Failed to fetch owner details. Please try again later.');
-      } finally {
-        setLoading(false);
+      } else if (Array.isArray(data)) {
+        billsData.push(...data);
+      } else {
+        console.error('Unexpected bills response format:', data);
       }
+
+      setBills(billsData);
+      setLoading(false);
     };
 
     if (ownerId) {
@@ -95,20 +88,9 @@ const CustomerDetails: FC = () => {
     );
 
     if (confirmDelete) {
-      try {
-        await axios.delete(
-          `http://localhost:8080/api/v2/gateway/owners/${ownerId}`,
-          {
-            withCredentials: true,
-          }
-        );
-
-        alert('Owner deleted successfully.');
-        navigate('/customers');
-      } catch (error) {
-        console.error('Error deleting owner:', error);
-        alert('Error deleting owner. Please try again.');
-      }
+      await deleteOwner(ownerId);
+      alert('Owner deleted successfully.');
+      navigate('/customers');
     } else {
       alert('Owner deletion canceled.');
     }
@@ -116,10 +98,6 @@ const CustomerDetails: FC = () => {
 
   if (loading) {
     return <p>Loading...</p>;
-  }
-
-  if (error) {
-    return <p>Error: {error}</p>;
   }
 
   if (!owner) {
@@ -148,33 +126,18 @@ const CustomerDetails: FC = () => {
     );
 
     if (confirmAction) {
-      try {
-        if (isDisabled) {
-          await axios.patch(
-            `http://localhost:8080/api/v2/gateway/users/${ownerId}/enable`,
-            {},
-            { withCredentials: true }
-          );
-          alert('User account enabled successfully.');
-        } else {
-          await axios.patch(
-            `http://localhost:8080/api/v2/gateway/users/${ownerId}/disable`,
-            {},
-            { withCredentials: true }
-          );
-          alert('User account disabled successfully.');
-        }
-
-        const userResponse = await axios.get(
-          `http://localhost:8080/api/v2/gateway/users/${ownerId}`,
-          { withCredentials: true }
-        );
-
-        setIsDisabled(userResponse.data.disabled);
-      } catch (error) {
-        console.error('Error updating user account status:', error);
-        alert('Error updating user account status. Please try again.');
+      if (isDisabled) {
+        await axiosInstance.patch(`/users/${ownerId}/enable`, {
+          useV2: true,
+        });
+        alert('User account enabled successfully.');
+      } else {
+        await axiosInstance.patch(`/users/${ownerId}/disable`, {
+          useV2: true,
+        });
+        alert('User account disabled successfully.');
       }
+      setIsDisabled(!isDisabled);
     }
   };
 
@@ -282,14 +245,16 @@ const CustomerDetails: FC = () => {
         >
           Add New Pet
         </button>
-        <button
-          className="btn btn-danger"
-          onClick={() => handleDelete(owner.ownerId)}
-          title="Delete"
-          style={{ backgroundColor: 'red', color: 'white' }}
-        >
-          Delete Owner
-        </button>
+        {!isVet && (
+          <button
+            className="btn btn-danger"
+            onClick={() => handleDelete(owner.ownerId)}
+            title="Delete"
+            style={{ backgroundColor: 'red', color: 'white' }}
+          >
+            Delete Owner
+          </button>
+        )}
         <button
           className={`btn ${isDisabled ? 'btn-success' : 'btn-warning'}`}
           onClick={handleDisableEnable}

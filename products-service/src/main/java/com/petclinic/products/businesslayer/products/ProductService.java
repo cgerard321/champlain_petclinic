@@ -11,7 +11,7 @@ import java.util.List;
 
 public interface ProductService {
 
-    Flux<ProductResponseModel> getAllProducts(Double minPrice, Double maxPrice,Double minRating, Double maxRating, String sort,String deliveryType);
+    Flux<ProductResponseModel> getAllProducts(Double minPrice, Double maxPrice,Double minRating, Double maxRating, String sort,String deliveryType,String productType);
     Mono<ProductResponseModel> getProductByProductId(String productId);
     Mono<ProductResponseModel> addProduct(Mono<ProductRequestModel> productRequestModel);
     Mono<ProductResponseModel> updateProductByProductId(String productId, Mono<ProductRequestModel> productRequestModel);
