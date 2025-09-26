@@ -5,8 +5,9 @@ export default function AddReviewsCustomer(): JSX.Element {
   return (
     <div>
       <NavBar />
-      <h1></h1>
-      <AddCustomerReviewForm />
+      <div style={{ margin: '40px' }}>
+        <AddCustomerReviewForm />
+      </div>
     </div>
   );
 }
