@@ -322,6 +322,13 @@ public class CustomersServiceClient {
                 .bodyToMono(PetTypeResponseDTO.class);
     }
 
+    public Mono<Void> deletePetTypeV2(final String petTypeId) {
+        return webClientBuilder.build().delete()
+                .uri(customersServiceUrl +"/owners/petTypes/"+ petTypeId)
+                .retrieve()
+                .bodyToMono(Void.class);
+    }
+
     public Mono<PetTypeResponseDTO> updatePetType(String petTypeId, Mono<PetTypeRequestDTO> petTypeRequestDTO) {
         return petTypeRequestDTO.flatMap(requestDTO ->
                 webClientBuilder.build()

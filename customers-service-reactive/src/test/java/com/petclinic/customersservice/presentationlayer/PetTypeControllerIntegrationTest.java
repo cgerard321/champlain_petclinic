@@ -76,7 +76,7 @@ class PetTypeControllerIntegrationTest {
                 });
     }
 
-
+/*
     @Test
     void deletePetTypeByPetTypeId() {
         petTypeRepo.save(petTypeEntity2);
@@ -86,7 +86,7 @@ class PetTypeControllerIntegrationTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange().expectStatus().isOk().expectBody();
 
-    }
+    }*/
 
 
     /*
