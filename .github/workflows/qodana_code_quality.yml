@@ -36,7 +36,8 @@ jobs:
           echo "Building Java/Gradle services..."
           ./gradlew clean build -x test -x jacocoTestCoverageVerification
           
-          echo "Running tests for Java services..."
+          echo "Running tests for Java services individually..."
+          # Try to run tests and generate coverage for each service
           ./gradlew :auth-service:test :auth-service:jacocoTestReport || echo "Auth service tests failed"
           ./gradlew :billing-service:test :billing-service:jacocoTestReport || echo "Billing service tests failed"
           ./gradlew :api-gateway:test :api-gateway:jacocoTestReport || echo "API Gateway tests failed"
@@ -46,6 +47,9 @@ jobs:
           ./gradlew :inventory-service:test :inventory-service:jacocoTestReport || echo "Inventory service tests failed"
           ./gradlew :products-service:test :products-service:jacocoTestReport || echo "Products service tests failed"
           ./gradlew :cart-service:test :cart-service:jacocoTestReport || echo "Cart service tests failed"
+          
+          echo "Checking what coverage files were generated..."
+          find . -name "*jacoco*" -type f
         working-directory: ./
 
       - name: Create coverage-data directory and copy JaCoCo reports
