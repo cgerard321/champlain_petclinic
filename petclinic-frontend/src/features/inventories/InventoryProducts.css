@@ -200,3 +200,43 @@ select:focus {
   margin: 20px 0;
   float: right;
 }
+.table th,
+.table td {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  text-overflow: initial;
+  line-height: 1.2;
+}
+
+.table td:nth-child(4),
+.table td:nth-child(5),
+.table td:nth-child(6),
+.table td:nth-child(7) {
+  white-space: nowrap;
+}
+
+.table th:nth-child(2),
+.table th:nth-child(3) {
+  min-width: 16ch;
+}
+.table th:nth-child(6) {
+  min-width: 12ch;
+}
+
+.table th:nth-child(4),
+.table th:nth-child(5),
+.table th:nth-child(6) {
+  word-spacing: normal;
+}
+
+@media (min-width: 992px) {
+  .table { table-layout: auto; }
+}
+
+#google_translate_element {
+  float: right;
+  width: auto;
+  max-width: 320px;
+  margin: 12px 0 16px 16px;
+}
