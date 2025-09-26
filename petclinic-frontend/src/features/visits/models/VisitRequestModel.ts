@@ -6,6 +6,6 @@ export interface VisitRequestModel {
   ownerId?: string;
   jwtToken?: string;
   //status: Status;
-  
+
   visitType: string;
 }
