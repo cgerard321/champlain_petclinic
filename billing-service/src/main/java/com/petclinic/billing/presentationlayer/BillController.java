@@ -116,6 +116,20 @@ public class BillController {
                 vetFirstName, vetLastName);
     }
 
+    @GetMapping(value = "/bills/owner/{ownerFirstName}/{ownerLastName}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<BillResponseDTO> getAllBillsByOwnerName(@PathVariable String ownerFirstName, @PathVariable String ownerLastName) {
+        return billService.getAllBillsByOwnerName(ownerFirstName, ownerLastName);
+    }
+
+    @GetMapping(value = "/bills/vet/{vetFirstName}/{vetLastName}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<BillResponseDTO> getAllBillsByVetName(@PathVariable String vetFirstName, @PathVariable String vetLastName) {
+        return billService.getAllBillsByVetName(vetFirstName, vetLastName);
+    }
+
+    @GetMapping(value = "/bills/visitType/{visitType}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<BillResponseDTO> getAllBillsByVisitType(@PathVariable String visitType) {
+        return billService.getAllBillsByVisitType(visitType);
+    }
 
     @GetMapping(value = "/bills/paid", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<BillResponseDTO> getAllPaidBills() {

@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Bill } from '@/features/bills/models/Bill.ts';
 import { getAllOwners } from '../customers/api/getAllOwners';
 import { getAllVets } from '../veterinarians/api/getAllVets';
@@ -15,16 +15,32 @@ import { getAllOverdueBills } from '@/features/bills/api/getAllOverdueBills.tsx'
 import { getAllUnpaidBills } from '@/features/bills/api/getAllUnpaidBills.tsx';
 import { getBillByBillId } from '@/features/bills/api/GetBillByBillId.tsx';
 import { getBillsByMonth } from '@/features/bills/api/getBillByMonth.tsx';
+import { getAllBillsByOwnerName } from './api/getAllBillsByOwnerName';
+import { getAllBillsByVetName } from './api/getAllBillsByVetName';
+import { getAllBillsByVisitType } from './api/getAllBillsByVisitType';
+import { getAllBills } from './api/getAllBills';
 
 export default function AdminBillsListTable(): JSX.Element {
   const navigate = useNavigate();
   const [searchId, setSearchId] = useState<string>('');
   const [searchedBill, setSearchedBill] = useState<Bill | null>(null);
+  const [selectedOwnerFilter, setSelectedOwnerFilter] = useState<string>('');
+  const [selectedVetFilter, setSelectedVetFilter] = useState<string>('');
+  const [selectedVisitTypeFilter, setSelectedVisitTypeFilter] =
+    useState<string>('');
   const [error, setError] = useState<string | null>(null);
   const { billsList, getBillsList, setCurrentPage, currentPage, hasMore } =
     useGetAllBillsPaginated();
   const [filter, setFilter] = useState<FilterModel>({
     customerId: '',
+    //owner
+    firstName: '',
+    //owner
+    lastName: '',
+    visitType: '',
+    //vetId: '',
+    vetFirstName: '',
+    vetLastName: '',
   });
   const [filterYear, setFilterYear] = useState<number>(
     new Date().getFullYear()
@@ -36,6 +52,14 @@ export default function AdminBillsListTable(): JSX.Element {
   interface FilterModel {
     [key: string]: string;
     customerId: string;
+    //owner
+    firstName: string;
+    //owner
+    lastName: string;
+    visitType: string;
+    //vetId: string;
+    vetFirstName: string;
+    vetLastName: string;
   }
 
   const [selectedFilter, setSelectedFilter] = useState<string>('');
@@ -45,9 +69,9 @@ export default function AdminBillsListTable(): JSX.Element {
   const [newBill, setNewBill] = useState<BillRequestModel>({
     customerId: '',
     vetId: '',
-    visitType: '',
     date: '',
     amount: 0,
+    visitType: '',
     billStatus: '',
     dueDate: '',
   });
@@ -75,7 +99,6 @@ export default function AdminBillsListTable(): JSX.Element {
     if (
       !newBill.customerId ||
       !newBill.vetId ||
-      !newBill.visitType ||
       !newBill.date ||
       newBill.amount <= 0 ||
       !newBill.billStatus ||
@@ -125,6 +148,79 @@ export default function AdminBillsListTable(): JSX.Element {
     }
   };
 
+  const handleOwnerNameChange = async (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ): Promise<void> => {
+    const fullName = event.target.value;
+    setSelectedOwnerFilter(fullName);
+
+    try {
+      if (fullName) {
+        const [ownerFirstName, ownerLastName] = fullName.split(' ');
+        if (ownerFirstName && ownerLastName) {
+          const billsByOwner = await getAllBillsByOwnerName(
+            ownerFirstName,
+            ownerLastName
+          );
+          setFilteredBills(billsByOwner);
+        }
+      } else {
+        // Reset to show all bills
+        const all = await getAllBills();
+        setFilteredBills(all);
+      }
+    } catch (error) {
+      console.error('Error fetching bills by owner name:', error);
+      setError('Error fetching bills by owner name. Please try again.');
+    }
+  };
+
+  const handleVetNameChange = async (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ): Promise<void> => {
+    const fullName = event.target.value;
+    setSelectedVetFilter(fullName);
+
+    try {
+      if (fullName) {
+        const [vetFirstName, vetLastName] = fullName.split(' ');
+        if (vetFirstName && vetLastName) {
+          const billsByVetName = await getAllBillsByVetName(
+            vetFirstName,
+            vetLastName
+          );
+          setFilteredBills(billsByVetName);
+        } else {
+          setSelectedFilter('');
+          getBillsList(currentPage, 10);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching bills by vet name:', error);
+      setError('Error fetching bills by vet name. Please try again.');
+    }
+  };
+
+  const handleVisitTypeChange = async (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ): Promise<void> => {
+    const visitType = event.target.value;
+    setSelectedVisitTypeFilter(visitType);
+
+    try {
+      if (visitType) {
+        const billsByVisitType = await getAllBillsByVisitType(visitType);
+        setFilteredBills(billsByVisitType);
+      } else {
+        setSelectedVisitTypeFilter('');
+        getBillsList(currentPage, 10);
+      }
+    } catch (error) {
+      console.error('Error fetching bills by visit type:', error);
+      setError('Error fetching bills by visit type. Please try again.');
+    }
+  };
+
   const handleMonthFilter = async (): Promise<void> => {
     setError(null);
     setFilteredBills(null);
@@ -147,6 +243,25 @@ export default function AdminBillsListTable(): JSX.Element {
 
   const getFilteredBills = (): Bill[] => {
     const billsToFilter = filteredBills || billsList;
+
+    if (
+      filteredBills &&
+      (selectedOwnerFilter ||
+        selectedFilter === 'paid' ||
+        selectedFilter === 'unpaid' ||
+        selectedFilter === 'overdue')
+    ) {
+      return billsToFilter.filter(bill => {
+        const matchesCustomerId =
+          !filter.customerId || bill.customerId.includes(filter.customerId);
+
+        return matchesCustomerId;
+      });
+    }
+
+    if (filteredBills && filter.vetId) {
+      return billsToFilter.filter(bill => bill.vetId === filter.vetId);
+    }
 
     return billsToFilter.filter(bill => {
       const matchesStatus =
@@ -322,6 +437,54 @@ export default function AdminBillsListTable(): JSX.Element {
                 {new Date(0, i).toLocaleString('default', { month: 'long' })}
               </option>
             ))}
+          </select>
+
+          <label htmlFor="ownerNameFilter">Owner Name</label>
+          <select
+            id="ownerNameFilter"
+            value={selectedOwnerFilter}
+            onChange={handleOwnerNameChange}
+          >
+            <option value="">All Owners</option>
+            {owners.map(owner => (
+              <option
+                key={owner.ownerId}
+                value={`${owner.firstName} ${owner.lastName}`}
+              >
+                {owner.firstName} {owner.lastName}
+              </option>
+            ))}
+          </select>
+          <label htmlFor="vetNameFilter">Vet Name</label>
+          <select
+            id="vetNameFilter"
+            value={selectedVetFilter}
+            onChange={handleVetNameChange}
+          >
+            <option value="">All Vets</option>
+            {vets.map(vet => (
+              <option
+                key={vet.vetId}
+                value={`${vet.firstName} ${vet.lastName}`}
+              >
+                {vet.firstName} {vet.lastName}
+              </option>
+            ))}
+          </select>
+
+          <label htmlFor="visitTypeFilter">Visit Type</label>
+          <select
+            id="visitTypeFilter"
+            value={selectedVisitTypeFilter}
+            onChange={handleVisitTypeChange}
+          >
+            <option value="">All Visit Types</option>
+            <option value="Checkup">Check-Up</option>
+            <option value="Vaccine">Vaccine</option>
+            <option value="Surgery">Surgery</option>
+            <option value="Dental">Dental</option>
+            <option value="Regular">Regular</option>
+            <option value="Emergency">Emergency</option>
           </select>
 
           <div className="filter-buttons">
