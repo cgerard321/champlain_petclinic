@@ -1,5 +1,7 @@
 package com.petclinic.customersservice.presentationlayer;
 
+import com.petclinic.customersservice.customersExceptions.exceptions.InvalidInputException;
+import com.petclinic.customersservice.customersExceptions.exceptions.NotFoundException;
 import com.petclinic.customersservice.data.Owner;
 import com.petclinic.customersservice.data.PetType;
 import com.petclinic.customersservice.data.PetTypeRepo;
@@ -136,7 +138,6 @@ class PetTypeControllerIntegrationTest {
 
     @Test
     void deletePetType_ShouldReturnNoContent() {
-
         PetType petType = PetType.builder()
                 .id("4283c9b8-4ffd-4866-a5ed-287117c60a40")
                 .petTypeId("4283c9b8-4ffd-4866-a5ed-287117c60a40")
@@ -144,55 +145,39 @@ class PetTypeControllerIntegrationTest {
                 .petTypeDescription("Mammal")
                 .build();
 
-
         try {
-
             PetType savedPetType = petTypeRepo.save(petType).block();
-
 
             System.out.println("Saved pet type: " + savedPetType);
             if (savedPetType != null) {
                 System.out.println("Pet type ID: " + savedPetType.getPetTypeId());
             }
 
-
             webTestClient.delete()
-                    .uri("/owners/petTypes/test-pet-type-id")
-                    .exchange()
-                    .expectStatus().isNoContent();
-
-
-            StepVerifier.create(petTypeRepo.findOPetTypeById("test-pet-type-id"))
-                    .expectComplete()
-                    .verify();
-
-        } catch (Exception e) {
-            fail("Failed to save pet type for test: " + e.getMessage());
-        }
-
-        try {
-
-            webTestClient.delete()
-                    .uri("/owners/petTypes/test-pet-type-id")
+                    .uri("/owners/petTypes/4283c9b8-4ffd-4866-a5ed-287117c60a40")
                     .exchange()
                     .expectStatus().isNoContent()
                     .expectBody().isEmpty();
 
-        } catch (Exception e) {
-            fail("Delete operation failed: " + e.getMessage());
-        }
-
-        try {
-
-            StepVerifier.create(petTypeRepo.findOPetTypeById("test-pet-type-id")
+            StepVerifier.create(petTypeRepo.findOPetTypeById("4283c9b8-4ffd-4866-a5ed-287117c60a40")
                             .timeout(Duration.ofSeconds(5))
                             .onErrorMap(TimeoutException.class, e ->
                                     new RuntimeException("Database query timed out", e)))
                     .expectComplete()
                     .verify();
 
-        } catch (Exception e) {
-            fail("Verification failed: " + e.getMessage());
+        } catch (NotFoundException e) {
+            fail("Pet type not found during test: " + e.getMessage());
+        } catch (InvalidInputException e) {
+            fail("Invalid input during test: " + e.getMessage());
+        }catch (Exception e) {
+            fail("Test failed with unexpected exception: " + e.getMessage());
+        } finally {
+            try {
+                petTypeRepo.deleteByPetTypeId("4283c9b8-4ffd-4866-a5ed-287117c60a40").block();
+            } catch (Exception cleanupException) {
+                System.err.println("Cleanup failed: " + cleanupException.getMessage());
+            }
         }
 
 

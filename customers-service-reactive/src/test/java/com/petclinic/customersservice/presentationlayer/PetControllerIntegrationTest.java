@@ -1,5 +1,7 @@
 package com.petclinic.customersservice.presentationlayer;
 
+import com.petclinic.customersservice.customersExceptions.exceptions.InvalidInputException;
+import com.petclinic.customersservice.customersExceptions.exceptions.NotFoundException;
 import com.petclinic.customersservice.data.Pet;
 import com.petclinic.customersservice.data.PetRepo;
 import com.petclinic.customersservice.data.PetType;
@@ -161,11 +163,16 @@ class PetControllerIntegrationTest {
                     .uri("/owners/petTypes/")
                     .exchange()
                     .expectStatus().is4xxClientError();
+        } catch (NotFoundException e) {
+            fail("Unexpected NotFoundException: " + e.getMessage());
+        } catch (InvalidInputException e) {
+            fail("Unexpected InvalidInputException: " + e.getMessage());
         } catch (Exception e) {
             System.err.println("Test failed with unexpected exception: " + e.getMessage());
             e.printStackTrace();
             fail("Test failed with exception: " + e.getMessage());
-        }}
+        }
+    }
 
 
     @Test
@@ -175,6 +182,10 @@ class PetControllerIntegrationTest {
                     .uri("/owners/petTypes/non-existent-pet-type")
                     .exchange()
                     .expectStatus().isNoContent();
+        } catch (NotFoundException e) {
+            fail("Unexpected NotFoundException: " + e.getMessage());
+        } catch (InvalidInputException e) {
+            fail("Unexpected InvalidInputException: " + e.getMessage());
         } catch (Exception e) {
             System.err.println("Test failed with unexpected exception: " + e.getMessage());
             e.printStackTrace();
@@ -189,6 +200,10 @@ class PetControllerIntegrationTest {
                     .uri("/owners/petTypes/invalid@id#format")
                     .exchange()
                     .expectStatus().isNoContent();
+        } catch (NotFoundException e) {
+            fail("Unexpected NotFoundException: " + e.getMessage());
+        } catch (InvalidInputException e) {
+            fail("Unexpected InvalidInputException: " + e.getMessage());
         } catch (Exception e) {
             System.err.println("Test failed with unexpected exception: " + e.getMessage());
             e.printStackTrace();

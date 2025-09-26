@@ -1,6 +1,8 @@
 package com.petclinic.customersservice.business;
 
 import com.petclinic.customersservice.business.PetTypeService;
+import com.petclinic.customersservice.customersExceptions.exceptions.InvalidInputException;
+import com.petclinic.customersservice.customersExceptions.exceptions.NotFoundException;
 import com.petclinic.customersservice.data.Owner;
 import com.petclinic.customersservice.data.PetType;
 import com.petclinic.customersservice.data.PetTypeRepo;
@@ -50,6 +52,10 @@ class PetTypeServiceImplTest {
 
             verify(petTypeRepo).deleteByPetTypeId(petTypeId);
 
+        } catch (NotFoundException e) {
+            fail("Unexpected NotFoundException: " + e.getMessage());
+        } catch (InvalidInputException e) {
+            fail("Unexpected InvalidInputException: " + e.getMessage());
         } catch (Exception e) {
             System.err.println("Test failed with exception: " + e.getMessage());
             e.printStackTrace();
@@ -68,6 +74,10 @@ class PetTypeServiceImplTest {
             StepVerifier.create(result)
                     .verifyComplete();
 
+        } catch (NotFoundException e) {
+            fail("Unexpected NotFoundException: " + e.getMessage());
+        } catch (InvalidInputException e) {
+            fail("Unexpected InvalidInputException: " + e.getMessage());
         } catch (Exception e) {
             System.err.println("Test failed with exception: " + e.getMessage());
             e.printStackTrace();

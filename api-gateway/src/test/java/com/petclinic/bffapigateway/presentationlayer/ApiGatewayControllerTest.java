@@ -4150,7 +4150,7 @@ private VetAverageRatingDTO buildVetAverageRatingDTO(){
 
 
     @Test
-    void deletePetType_WhenServiceReturnsWebClientError_ShouldReturnAppropriateStatus() {
+    void whenDeletePetType_ReturnsWebClientError_ShouldReturnStatusNotFound() {
         try {
             String petTypeId = "4283c9b8-4ffd-4866-a5ed-287117c60a40";
             WebClientResponseException serviceException = WebClientResponseException.create(
