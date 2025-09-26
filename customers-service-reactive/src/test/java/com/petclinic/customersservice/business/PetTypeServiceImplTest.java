@@ -39,32 +39,40 @@ class PetTypeServiceImplTest {
 
     @Test
     void deletePetTypeByPetTypeId_ShouldDeleteSuccessfully() {
+        try {
+            String petTypeId = "4283c9b8-4ffd-4866-a5ed-287117c60a40";
+            when(petTypeRepo.deleteByPetTypeId(petTypeId)).thenReturn(Mono.empty());
 
-        String petTypeId = "test-pet-type-id";
-        when(petTypeRepo.deleteByPetTypeId(petTypeId)).thenReturn(Mono.empty());
+            Mono<Void> result = petTypeService.deletePetTypeByPetTypeId(petTypeId);
 
+            StepVerifier.create(result)
+                    .verifyComplete();
 
-        Mono<Void> result = petTypeService.deletePetTypeByPetTypeId(petTypeId);
+            verify(petTypeRepo).deleteByPetTypeId(petTypeId);
 
-
-        StepVerifier.create(result)
-                .verifyComplete();
-
-        verify(petTypeRepo).deleteByPetTypeId(petTypeId);
+        } catch (Exception e) {
+            System.err.println("Test failed with exception: " + e.getMessage());
+            e.printStackTrace();
+            fail("Test failed: " + e.getMessage());
+        }
     }
 
     @Test
     void deletePetTypeByPetTypeId_WhenPetTypeNotFound_ShouldComplete() {
+        try {
+            String petTypeId = "non-existent-id";
+            when(petTypeRepo.deleteByPetTypeId(petTypeId)).thenReturn(Mono.empty());
 
-        String petTypeId = "non-existent-id";
-        when(petTypeRepo.deleteByPetTypeId(petTypeId)).thenReturn(Mono.empty());
+            Mono<Void> result = petTypeService.deletePetTypeByPetTypeId(petTypeId);
 
+            StepVerifier.create(result)
+                    .verifyComplete();
 
-        Mono<Void> result = petTypeService.deletePetTypeByPetTypeId(petTypeId);
-
-
-        StepVerifier.create(result)
-                .verifyComplete();
+        } catch (Exception e) {
+            System.err.println("Test failed with exception: " + e.getMessage());
+            e.printStackTrace();
+            fail("Test failed: " + e.getMessage());
+        }
     }
 
 

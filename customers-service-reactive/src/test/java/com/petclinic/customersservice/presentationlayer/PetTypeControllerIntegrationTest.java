@@ -14,7 +14,11 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.util.concurrent.TimeoutException;
 
+import static com.mongodb.assertions.Assertions.fail;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -134,27 +138,65 @@ class PetTypeControllerIntegrationTest {
     void deletePetType_ShouldReturnNoContent() {
 
         PetType petType = PetType.builder()
-                .id("test-id")
-                .petTypeId("test-pet-type-id")
-                .name("Test Pet Type")
-                .petTypeDescription("Test Description")
+                .id("4283c9b8-4ffd-4866-a5ed-287117c60a40")
+                .petTypeId("4283c9b8-4ffd-4866-a5ed-287117c60a40")
+                .name("Cat")
+                .petTypeDescription("Mammal")
                 .build();
 
-        petTypeRepo.save(petType).block();
+
+        try {
+
+            PetType savedPetType = petTypeRepo.save(petType).block();
 
 
-        webTestClient.delete()
-                .uri("/owners/petTypes/test-pet-type-id")
-                .exchange()
-                .expectStatus().isNoContent();
+            System.out.println("Saved pet type: " + savedPetType);
+            if (savedPetType != null) {
+                System.out.println("Pet type ID: " + savedPetType.getPetTypeId());
+            }
 
 
-        StepVerifier.create(petTypeRepo.findOPetTypeById("test-pet-type-id"))
-                .expectComplete()
-                .verify();
+            webTestClient.delete()
+                    .uri("/owners/petTypes/test-pet-type-id")
+                    .exchange()
+                    .expectStatus().isNoContent();
+
+
+            StepVerifier.create(petTypeRepo.findOPetTypeById("test-pet-type-id"))
+                    .expectComplete()
+                    .verify();
+
+        } catch (Exception e) {
+            fail("Failed to save pet type for test: " + e.getMessage());
+        }
+
+        try {
+
+            webTestClient.delete()
+                    .uri("/owners/petTypes/test-pet-type-id")
+                    .exchange()
+                    .expectStatus().isNoContent()
+                    .expectBody().isEmpty();
+
+        } catch (Exception e) {
+            fail("Delete operation failed: " + e.getMessage());
+        }
+
+        try {
+
+            StepVerifier.create(petTypeRepo.findOPetTypeById("test-pet-type-id")
+                            .timeout(Duration.ofSeconds(5))
+                            .onErrorMap(TimeoutException.class, e ->
+                                    new RuntimeException("Database query timed out", e)))
+                    .expectComplete()
+                    .verify();
+
+        } catch (Exception e) {
+            fail("Verification failed: " + e.getMessage());
+        }
+
+
     }
-
-
 
 
 
