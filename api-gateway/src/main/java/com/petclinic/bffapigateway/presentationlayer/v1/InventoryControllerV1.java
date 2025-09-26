@@ -19,6 +19,7 @@ import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Map;
 import java.util.Optional;
 
 @RestController()
@@ -300,13 +301,23 @@ public class InventoryControllerV1 {
 
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER})
+    @PatchMapping("/{inventoryId}/important")
+    public Mono<ResponseEntity<Object>> updateImportantStatus(@PathVariable String inventoryId, @RequestBody Map<String, Boolean> request) {
+        Boolean important = request.get("important");
+        return inventoryServiceClient.updateImportantStatus(inventoryId, important)
+                .then(Mono.just(ResponseEntity.ok().build()))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER,Roles.VET})
     @GetMapping()//, produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<InventoryResponseDTO> searchInventory(@RequestParam Optional<Integer> page,
                                                       @RequestParam Optional<Integer> size,
                                                       @RequestParam(required = false) String inventoryName,
                                                       @RequestParam(required = false) String inventoryType,
-                                                      @RequestParam(required = false) String inventoryDescription){
+                                                      @RequestParam(required = false) String inventoryDescription,
+                                                      @RequestParam(required = false) Boolean importantOnly){
         if(page.isEmpty()){
             page = Optional.of(0);
         }
@@ -314,7 +325,7 @@ public class InventoryControllerV1 {
         if (size.isEmpty()) {
             size = Optional.of(10);
         }
-        return inventoryServiceClient.searchInventory(page, size, inventoryName, inventoryType, inventoryDescription);
+        return inventoryServiceClient.searchInventory(page, size, inventoryName, inventoryType, inventoryDescription, importantOnly);
     }
 
         @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
