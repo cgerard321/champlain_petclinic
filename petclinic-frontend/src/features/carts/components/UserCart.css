@@ -66,7 +66,7 @@
   transition: transform 0.2s;
 }
 
-.continue-shopping-btn{
+.continue-shopping-btn {
   background-color: gray;
   color: white;
   transition:
@@ -74,8 +74,8 @@
     transform 0.2s;
 }
 
-.continue-shopping-btn:hover{
-  background-color: black; 
+.continue-shopping-btn:hover {
+  background-color: black;
   transform: scale(1.05);
 }
 
@@ -410,4 +410,19 @@
 
 .cart-header-title {
   margin-top: 20px;
+}
+
+/* If the overlay is an actual <img> with matching src or alt */
+.Wishlist-items img[src*="out-of-stock" i],
+.Wishlist-items img[alt*="out of stock" i],
+.Wishlist-items .oos-overlay {
+  display: none !important;
+}
+
+/* If the overlay is drawn via pseudo-elements (ribbons/badges) */
+.Wishlist-items *::before,
+.Wishlist-items *::after {
+  /* suppress when OOS ribbon text/image is explicitly called*/
+  background-image: none !important;
+  content: normal; 
 }

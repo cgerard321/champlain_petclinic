@@ -4,10 +4,16 @@ import { InventoryResponseModel } from '@/features/inventories/models/InventoryM
 export const getAllInventories = async (): Promise<
   InventoryResponseModel[]
 > => {
-  const response = await axiosInstance.get<InventoryResponseModel[]>(
-    'http://localhost:8080/api/v2/gateway/inventories/all'
-  );
-  return response.data;
+  try {
+    const response = await axiosInstance.get<InventoryResponseModel[]>(
+      '/inventories',
+      { useV2: false }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error getting All Inventories:', error);
+    throw error;
+  }
 };
 
 export const updateProductInventoryId = async (
@@ -15,7 +21,13 @@ export const updateProductInventoryId = async (
   productId: string,
   newInventoryId: string
 ): Promise<void> => {
-  await axiosInstance.put<void>(
-    `http://localhost:8080/api/v2/gateway/inventories/${currentInventoryId}/products/${productId}/updateInventoryId/${newInventoryId}`
-  );
+  try {
+    await axiosInstance.put<void>(
+      `/inventories/${currentInventoryId}/products/${productId}/updateInventoryId/${newInventoryId}`,
+      { useV2: false } // not implemented, must find
+    );
+  } catch (error) {
+    console.error('Error updating Product by Inventory Id:', error);
+    throw error;
+  }
 };

@@ -8,7 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -314,6 +313,13 @@ public class CustomersServiceClient {
                 .bodyToMono(PetTypeResponseDTO.class);
     }
 
+    public Mono<Void> deletePetTypeV2(final String petTypeId) {
+        return webClientBuilder.build().delete()
+                .uri(customersServiceUrl +"/owners/petTypes/"+ petTypeId)
+                .retrieve()
+                .bodyToMono(Void.class);
+    }
+
     public Mono<PetTypeResponseDTO> updatePetType(String petTypeId, Mono<PetTypeRequestDTO> petTypeRequestDTO) {
         return petTypeRequestDTO.flatMap(requestDTO ->
                 webClientBuilder.build()
@@ -323,6 +329,15 @@ public class CustomersServiceClient {
                         .retrieve()
                         .bodyToMono(PetTypeResponseDTO.class)
         );
+    }
+
+    public Mono<PetResponseDTO> createPetForOwner(String ownerId, PetRequestDTO petRequest) {
+        return webClientBuilder.build()
+                .post()
+                .uri(customersServiceUrl + "/pet/owners/" + ownerId + "/pets")
+                .body(BodyInserters.fromValue(petRequest))
+                .retrieve()
+                .bodyToMono(PetResponseDTO.class);
     }
 
 }
