@@ -31,25 +31,85 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
-      - name: Build and generate coverage reports
+      - name: Make gradlew executable - API Gateway
+        run: chmod +x ./gradlew
+        working-directory: ./api-gateway
+      - name: Build with Gradle Wrapper - API Gateway
+        run: ./gradlew clean build jacocoTestReport
+        working-directory: ./api-gateway
+        continue-on-error: true
+
+      - name: Make gradlew executable - Auth Service
+        run: chmod +x ./gradlew
+        working-directory: ./auth-service
+      - name: Build with Gradle Wrapper - Auth Service
+        run: ./gradlew clean build jacocoTestReport
+        working-directory: ./auth-service
+        continue-on-error: true
+
+      - name: Make gradlew executable - Billing Service
+        run: chmod +x ./gradlew
+        working-directory: ./billing-service
+      - name: Build with Gradle Wrapper - Billing Service
+        run: ./gradlew clean build jacocoTestReport
+        working-directory: ./billing-service
+        continue-on-error: true
+
+      - name: Make gradlew executable - Cart Service
+        run: chmod +x ./gradlew
+        working-directory: ./cart-service
+      - name: Build with Gradle Wrapper - Cart Service
+        run: ./gradlew clean build jacocoTestReport
+        working-directory: ./cart-service
+        continue-on-error: true
+
+      - name: Make gradlew executable - Customers Service Reactive
+        run: chmod +x ./gradlew
+        working-directory: ./customers-service-reactive
+      - name: Build with Gradle Wrapper - Customers Service Reactive
+        run: ./gradlew clean build jacocoTestReport
+        working-directory: ./customers-service-reactive
+        continue-on-error: true
+
+      - name: Make gradlew executable - Inventory Service
+        run: chmod +x ./gradlew
+        working-directory: ./inventory-service
+      - name: Build with Gradle Wrapper - Inventory Service
+        run: ./gradlew clean build jacocoTestReport
+        working-directory: ./inventory-service
+        continue-on-error: true
+
+      - name: Make gradlew executable - Products Service
+        run: chmod +x ./gradlew
+        working-directory: ./products-service
+      - name: Build with Gradle Wrapper - Products Service
+        run: ./gradlew clean build jacocoTestReport
+        working-directory: ./products-service
+        continue-on-error: true
+
+      - name: Make gradlew executable - Vet Service
+        run: chmod +x ./gradlew
+        working-directory: ./vet-service
+      - name: Build with Gradle Wrapper - Vet Service
+        run: ./gradlew clean build jacocoTestReport
+        working-directory: ./vet-service
+        continue-on-error: true
+
+      - name: Make gradlew executable - Visits Service New
+        run: chmod +x ./gradlew
+        working-directory: ./visits-service-new
+      - name: Build with Gradle Wrapper - Visits Service New
+        run: ./gradlew clean build jacocoTestReport
+        working-directory: ./visits-service-new
+        continue-on-error: true
+
+      - name: Check generated coverage files
         run: |
-          echo "Building Java/Gradle services..."
-          ./gradlew clean build -x test -x jacocoTestCoverageVerification
-          
-          echo "Running tests for Java services individually..."
-          # Try to run tests and generate coverage for each service
-          ./gradlew :auth-service:test :auth-service:jacocoTestReport || echo "Auth service tests failed"
-          ./gradlew :billing-service:test :billing-service:jacocoTestReport || echo "Billing service tests failed"
-          ./gradlew :api-gateway:test :api-gateway:jacocoTestReport || echo "API Gateway tests failed"
-          ./gradlew :customers-service-reactive:test :customers-service-reactive:jacocoTestReport || echo "Customers service reactive tests failed"
-          ./gradlew :visits-service-new:test :visits-service-new:jacocoTestReport || echo "Visits service new tests failed"
-          ./gradlew :vet-service:test :vet-service:jacocoTestReport || echo "Vet service tests failed"
-          ./gradlew :inventory-service:test :inventory-service:jacocoTestReport || echo "Inventory service tests failed"
-          ./gradlew :products-service:test :products-service:jacocoTestReport || echo "Products service tests failed"
-          ./gradlew :cart-service:test :cart-service:jacocoTestReport || echo "Cart service tests failed"
-          
           echo "Checking what coverage files were generated..."
           find . -name "*jacoco*" -type f
+          echo "Checking build directories for coverage reports..."
+          find . -path "*/build/reports/jacoco/test/*.xml" -type f
+          find . -path "*/build/jacoco/*.exec" -type f
         working-directory: ./
 
       - name: Create coverage-data directory and copy JaCoCo reports
