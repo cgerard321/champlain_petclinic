@@ -1,5 +1,6 @@
 // UserCart.tsx
 import { useState, useEffect, useCallback } from 'react';
+import CartBillingForm from './CartBillingForm';
 import { useParams, useNavigate } from 'react-router-dom';
 import CartItem from './CartItem';
 import { ProductModel } from '../models/ProductModel';
@@ -42,6 +43,7 @@ const UserCart = (): JSX.Element => {
   const [cartItemCount, setCartItemCount] = useState<number>(0);
   const [isCheckoutModalOpen, setIsCheckoutModalOpen] =
     useState<boolean>(false); // Modal state
+  const [showBillingForm, setShowBillingForm] = useState<boolean>(false); // Billing form state
   const [wishlistUpdated, setWishlistUpdated] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState<string | null>(
     null
@@ -471,7 +473,6 @@ const UserCart = (): JSX.Element => {
   const isAdmin = IsAdmin();
 
   //method modified so admin can't check out anymore
-
   const handleCheckoutConfirmation = (): void => {
     if (isAdmin) {
       navigate(AppRoutePaths.Unauthorized, {
@@ -479,7 +480,9 @@ const UserCart = (): JSX.Element => {
       });
       return;
     }
-    setIsCheckoutModalOpen(true);
+    // Non-admin flow: open billing form first; on submit we show confirm modal
+    setShowBillingForm(true);
+    setIsCheckoutModalOpen(false);
   };
 
   const handleCheckout = async (): Promise<void> => {
@@ -511,7 +514,9 @@ const UserCart = (): JSX.Element => {
         // Set the invoices state
         setInvoices(invoiceItems);
 
-        setCheckoutMessage('Checkout successful!');
+        setCheckoutMessage(
+          'Checkout successful! Your order is being processed.'
+        );
         setCartItems([]); // Clear the cart after successful checkout
         setCartItemCount(0);
         setIsCheckoutModalOpen(false);
@@ -562,12 +567,12 @@ const UserCart = (): JSX.Element => {
             {/* Cart Header with Badge */}
             <div className="cart-header">
               <div className="cart-badge-container">
-                <FaShoppingCart aria-label="Shopping Cart" />
+                <FaShoppingCart aria-label="Shopping Cart"/>
                 {cartItemCount > 0 && (
-                  <span
-                    className="cart-badge"
-                    aria-label={`Cart has ${cartItemCount} items`}
-                  >
+                    <span
+                        className="cart-badge"
+                        aria-label={`Cart has ${cartItemCount} items`}
+                    >
                     {cartItemCount}
                   </span>
                 )}
@@ -577,30 +582,31 @@ const UserCart = (): JSX.Element => {
             {/* Cart Items */}
             <div className="cart-items-container">
               {cartItems.length > 0 ? (
-                cartItems.map((item, index) => (
-                  <CartItem
-                    key={item.productId}
-                    item={item}
-                    index={index}
-                    changeItemQuantity={changeItemQuantity}
-                    deleteItem={deleteItem}
-                    errorMessage={errorMessages[index]}
-                    addToWishlist={addToWishlist}
-                    addToCart={() => {}}
-                    isInWishlist={false}
-                    showNotification={setNotificationMessage}
-                  />
-                ))
+                  cartItems.map((item, index) => (
+                      <CartItem
+                          key={item.productId}
+                          item={item}
+                          index={index}
+                          changeItemQuantity={changeItemQuantity}
+                          deleteItem={deleteItem}
+                          errorMessage={errorMessages[index]}
+                          addToWishlist={addToWishlist}
+                          addToCart={() => {
+                          }}
+                          isInWishlist={false}
+                          showNotification={setNotificationMessage}
+                      />
+                  ))
               ) : (
-                <p className="empty-cart-message">No products in the cart.</p>
+                  <p className="empty-cart-message">No products in the cart.</p>
               )}
             </div>
 
             {/* Cart Control Buttons */}
             <div className="UserCart-buttons">
               <button
-                className="continue-shopping-btn"
-                onClick={() => navigate('/products')}
+                  className="continue-shopping-btn"
+                  onClick={() => navigate('/products')}
               >
                 Continue Shopping
               </button>
@@ -612,127 +618,134 @@ const UserCart = (): JSX.Element => {
 
           {/* Checkout Section — hidden for admins */}
           {!isAdmin && (
-            <div className="Checkout-section">
-              {/* Voucher Code Section */}
-              <div className="voucher-code-section">
-                <input
-                  type="text"
-                  placeholder="Enter voucher code"
-                  value={voucherCode}
-                  onChange={e => {
-                    setVoucherCode(e.target.value);
-                    setVoucherError(null);
-                  }}
-                  className="voucher-input"
-                />
+              <div className="Checkout-section">
+                {/* Voucher Code Section */}
+                <div className="voucher-code-section">
+                  <input
+                      type="text"
+                      placeholder="Enter voucher code"
+                      value={voucherCode}
+                      onChange={e => {
+                        setVoucherCode(e.target.value);
+                        setVoucherError(null);
+                      }}
+                      className="voucher-input"
+                  />
+                  <button onClick={applyVoucherCode} className="apply-voucher-button">
+                    Apply
+                  </button>
+                  {voucherError && <div className="voucher-error">{voucherError}</div>}
+                </div>
+
+                <div className="CartSummary">
+                  <h3>Cart Summary</h3>
+                  <p className="summary-item">Subtotal: ${subtotal.toFixed(2)}</p>
+                  <p className="summary-item">TVQ (9.975%): ${tvq.toFixed(2)}</p>
+                  <p className="summary-item">TVC (5%): ${tvc.toFixed(2)}</p>
+                  <p className="summary-item">Discount: ${discount.toFixed(2)}</p>
+                  <p className="total-price summary-item">Total: ${total.toFixed(2)}</p>
+                </div>
+
                 <button
-                  onClick={applyVoucherCode}
-                  className="apply-voucher-button"
+                    className="checkout-btn"
+                    onClick={handleCheckoutConfirmation}
+                    disabled={cartItems.length === 0}
                 >
-                  Apply
+                  Checkout
                 </button>
-                {voucherError && (
-                  <div className="voucher-error">{voucherError}</div>
+
+                {/* Cart Billing Form Modal */}
+                {showBillingForm && (
+                    <div className="checkout-modal">
+                      <CartBillingForm
+                          onSubmit={() => {
+                            setShowBillingForm(false);
+                            setIsCheckoutModalOpen(true);
+                          }}
+                      />
+                      <button onClick={() => setShowBillingForm(false)}>Cancel</button>
+                    </div>
+                )}
+
+                {/* Checkout Confirmation Modal */}
+                {isCheckoutModalOpen && (
+                    <div className="checkout-modal">
+                      <h3>Confirm Checkout</h3>
+                      <p>Are you sure you want to checkout?</p>
+                      <button onClick={handleCheckout}>Yes</button>
+                      <button onClick={() => setIsCheckoutModalOpen(false)}>No</button>
+                    </div>
+                )}
+
+                {checkoutMessage && (
+                    <div className="checkout-message">{checkoutMessage}</div>
+                )}
+
+                {/* Invoice Section */}
+                {invoices.length > 0 && (
+                    <div className="invoices-section">
+                      <h2>Invoice</h2>
+                      <div className="invoice-summary">
+                        <h3>Items</h3>
+                        {invoices.map(invoice => (
+                            <div key={invoice.productId} className="invoice-card">
+                              <h4>{invoice.productName}</h4>
+                              <p>Price: ${invoice.productSalePrice.toFixed(2)}</p>
+                              <p>Quantity: {invoice.quantity}</p>
+                              <p>
+                                Total: ${(invoice.productSalePrice * invoice.quantity).toFixed(2)}
+                              </p>
+                            </div>
+                        ))}
+                        <h3>
+                          Total: $
+                          {invoices
+                              .reduce(
+                                  (total, inv) => total + inv.productSalePrice * inv.quantity,
+                                  0
+                              )
+                              .toFixed(2)}
+                        </h3>
+                      </div>
+                    </div>
                 )}
               </div>
-
-              <div className="CartSummary">
-                <h3>Cart Summary</h3>
-                <p className="summary-item">Subtotal: ${subtotal.toFixed(2)}</p>
-                <p className="summary-item">TVQ (9.975%): ${tvq.toFixed(2)}</p>
-                <p className="summary-item">TVC (5%): ${tvc.toFixed(2)}</p>
-                <p className="summary-item">Discount: ${discount.toFixed(2)}</p>
-                <p className="total-price summary-item">
-                  Total: ${total.toFixed(2)}
-                </p>
-              </div>
-
-              <button
-                className="checkout-btn"
-                onClick={handleCheckoutConfirmation}
-                disabled={cartItems.length === 0}
-              >
-                Checkout
-              </button>
-
-              {/* Checkout Confirmation Modal */}
-              {isCheckoutModalOpen && (
-                <div className="checkout-modal">
-                  <h3>Confirm Checkout</h3>
-                  <p>Are you sure you want to checkout?</p>
-                  <button onClick={handleCheckout}>Yes</button>
-                  <button onClick={() => setIsCheckoutModalOpen(false)}>
-                    No
-                  </button>
-                </div>
-              )}
-              {checkoutMessage && (
-                <div className="checkout-message">{checkoutMessage}</div>
-              )}
-
-              {/* Invoice Section */}
-              {invoices.length > 0 && (
-                <div className="invoices-section">
-                  <h2>Invoice</h2>
-                  <div className="invoice-summary">
-                    <h3>Items</h3>
-                    {invoices.map(invoice => (
-                      <div key={invoice.productId} className="invoice-card">
-                        <h4>{invoice.productName}</h4>
-                        <p>Price: ${invoice.productSalePrice.toFixed(2)}</p>
-                        <p>Quantity: {invoice.quantity}</p>
-                        <p>
-                          Total: $
-                          {(
-                            invoice.productSalePrice * invoice.quantity
-                          ).toFixed(2)}
-                        </p>
-                      </div>
-                    ))}
-                    <h3>
-                      Total: $
-                      {invoices
-                        .reduce(
-                          (total, invoice) =>
-                            total + invoice.productSalePrice * invoice.quantity,
-                          0
-                        )
-                        .toFixed(2)}
-                    </h3>
-                  </div>
-                </div>
-              )}
-            </div>
           )}
+
+
         </div>
 
-        {/* Wishlist Section */}
-        <div className="wishlist-section">
-          <h2>Your Wishlist</h2>
-          <div className="Wishlist-items">
-            {wishlistItems.length > 0 ? (
+      {/* Wishlist Section */}
+      <div className="wishlist-section">
+        <h2>Your Wishlist</h2>
+        <div className="Wishlist-items">
+          {wishlistItems.length > 0 ? (
               wishlistItems.map(item => (
-                <CartItem
-                  key={item.productId}
-                  item={item}
-                  index={-1}
-                  changeItemQuantity={() => {}}
-                  deleteItem={() => {}}
-                  addToWishlist={() => {}}
-                  addToCart={addToCartFunction}
-                  isInWishlist={true}
-                  removeFromWishlist={removeFromWishlist}
-                  showNotification={setNotificationMessage}
-                />
+                  <CartItem
+                      key={item.productId}
+                      item={item}
+                      index={-1}
+                      changeItemQuantity={() => {
+                      }}
+                      deleteItem={() => {
+                      }}
+                      addToWishlist={() => {
+                      }}
+                      addToCart={addToCartFunction}
+                      isInWishlist={true}
+                      removeFromWishlist={removeFromWishlist}
+                      showNotification={setNotificationMessage}
+                  />
               ))
-            ) : (
+          ) : (
               <p>No products in the wishlist.</p>
-            )}
-          </div>
+          )}
         </div>
       </div>
     </div>
-  );
+</div>
+)
+  ;
 };
 
 export default UserCart;

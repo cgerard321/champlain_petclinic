@@ -14,20 +14,20 @@ angular.module('inventoryList')
         getInventoryList()
 
 
-        $http.get('api/gateway/inventory').then(function (resp) {
+        $http.get('api/gateway/inventories').then(function (resp) {
             self.inventoryList = resp.data;
             console.log("Resp data: " + resp.data)
             console.log("inventory list: " + self.inventoryList)
         });
 
-                $http.get('api/gateway/inventory').then(function (resp) {
+                $http.get('api/gateway/inventories').then(function (resp) {
                     self.inventoryList = resp.data;
                     console.log("Resp data: " + resp.data)
                     console.log("inventory list: " + self.inventoryList)
                 });
         $scope.inventoryTypeOptions = []
         //custom types handler
-        $http.get("api/gateway/inventory/type").then(function (resp) {
+        $http.get("api/gateway/inventories/type").then(function (resp) {
             //Includes all types inside the array
             resp.data.forEach(function (type) {
                 $scope.inventoryTypeOptions.push(type.type);
@@ -80,7 +80,7 @@ angular.module('inventoryList')
                 self.currentPage = 0
                 self.realPage = parseInt(self.currentPage) + 1
 
-                $http.get("api/gateway/inventory?page=" + self.currentPage + "&size=" + self.listSize + "&" + queryString)
+                $http.get("api/gateway/inventories?page=" + self.currentPage + "&size=" + self.listSize + "&" + queryString)
                     .then(function(resp) {
                         numberOfPage = Math.ceil(resp.data.length / 10)
                         self.inventoryList = resp.data;
@@ -94,7 +94,7 @@ angular.module('inventoryList')
                         }
                     });
             } else {
-                $http.get("api/gateway/inventory?page=" + self.currentPage + "&size=" + self.listSize)
+                $http.get("api/gateway/inventories?page=" + self.currentPage + "&size=" + self.listSize)
                     .then(function(resp) {
                         numberOfPage = Math.ceil(resp.data.length / 10)
                         self.inventoryList = resp.data;
@@ -114,11 +114,11 @@ angular.module('inventoryList')
         $scope.deleteAllInventories = function () {
             let varIsConf = confirm('Are you sure you want to clear all entries from the inventory?');
             if (varIsConf) {
-                $http.delete('api/gateway/inventory')
+                $http.delete('api/gateway/inventories')
                     .then(function(response) {
                         alert("All inventory entries have been cleared!");
 
-                        $http.get('api/gateway/inventory').then(function (resp) {
+                        $http.get('api/gateway/inventories').then(function (resp) {
                             self.inventoryList = [];
                         });
 
@@ -130,7 +130,7 @@ angular.module('inventoryList')
         };
 
         $scope.fetchInventoryList = function() {
-            $http.get('api/gateway/inventory').then(function (resp) {
+            $http.get('api/gateway/inventories').then(function (resp) {
                 self.inventoryList = resp.data;
                 arr = resp.data;
             });
@@ -160,7 +160,7 @@ angular.module('inventoryList')
         function proceedToDelete(inventory) {
             if (!inventory.isTemporarilyDeleted) return;  // In case the user clicked undo just before the timeout.
 
-            $http.delete('api/gateway/inventory/' + inventory.inventoryId)
+            $http.delete('api/gateway/inventories/' + inventory.inventoryId)
                 .then(successCallback, errorCallback)
 
             function showNotification(message) {

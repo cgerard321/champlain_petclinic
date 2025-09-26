@@ -6,7 +6,7 @@ angular.module('inventoryForm')
         console.log("State params: " + $stateParams)
         $scope.inventoryTypeFormSearch = "";
         $scope.inventoryTypeOptions = ["New Type"] //get all form the inventory type repository but dont remove the New Type
-        $http.get("api/gateway/inventory/type").then(function (resp) {
+        $http.get("api/gateway/inventories/type").then(function (resp) {
             //Includes all types inside the array
             resp.data.forEach(function (type) {
                 $scope.inventoryTypeOptions.push(type.type);
@@ -26,9 +26,9 @@ angular.module('inventoryForm')
                         inventoryType: $scope.selectedOption,
                         inventoryDescription: self.inventory.inventoryDescription
                     }
-                    $http.post("api/gateway/inventory/type", {"type":$scope.selectedOption})
+                    $http.post("api/gateway/inventories/type", {"type":$scope.selectedOption})
                         .then(function (resp) {
-                            $http.post("api/gateway/inventory", data)
+                            $http.post("api/gateway/inventories", data)
                                 .then(function (resp) {
                                     console.log(resp)
                                     $state.go('inventories');
@@ -50,7 +50,7 @@ angular.module('inventoryForm')
                         inventoryType: $scope.selectedOption,
                         inventoryDescription: self.inventory.inventoryDescription
                     }
-                    $http.post("api/gateway/inventory", data)
+                    $http.post("api/gateway/inventories", data)
                         .then(function (resp) {
                             console.log(resp)
                             $state.go('inventories');

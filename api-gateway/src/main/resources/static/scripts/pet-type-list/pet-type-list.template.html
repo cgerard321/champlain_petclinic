@@ -54,6 +54,7 @@
             <th class="bg-white border">Pet Type ID</th>
             <th class="bg-white border">Pet Type Name</th>
             <th class="bg-white d-none d-sm-table-cell d-md-table-cell border">Description</th>
+            <th class="bg-white border">Delete</th>
         </tr>
         </thead>
         <tbody class="border">
@@ -61,6 +62,9 @@
             <td>{{petType.petTypeId }}</td>
             <td class="responsive-text">{{ petType.name }}</td>
             <td class="d-none d-sm-table-cell d-md-table-cell responsive-text">{{ petType.petTypeDescription }}</td>
+            <td>
+            <button class="btn btn-danger btn-sm" ng-click="$ctrl.deletePetType(petType.petTypeId)">Delete</button>
+            </td>
         </tr>
         </tbody>
     </table>
