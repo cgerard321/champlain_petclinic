@@ -23,7 +23,7 @@ const LowStockPage: React.FC = () => {
     const fetchInventories = async (): Promise<void> => {
       try {
         const response = await axiosInstance.get<Inventory[]>(
-          '/inventory/all',
+          '/inventories/all',
           { useV2: false }
         );
         setInventories(response.data);
@@ -42,7 +42,7 @@ const LowStockPage: React.FC = () => {
       const promises = inventories.map(async inventory => {
         try {
           const response = await axiosInstance.get<ProductResponseModel[]>(
-            `/inventory/${inventory.inventoryId}/products/lowstock`,
+            `/inventories/${inventory.inventoryId}/products/lowstock`,
             { useV2: false }
           );
           if (response.data && response.data.length > 0) {
@@ -72,7 +72,7 @@ const LowStockPage: React.FC = () => {
   ): Promise<void> => {
     try {
       const response = await axiosInstance.put(
-        `/inventory/${inventoryId}/products/${productId}/restockProduct`,
+        `/inventories/${inventoryId}/products/${productId}/restockProduct`,
         null,
         {
           params: { productQuantity: quantity },
