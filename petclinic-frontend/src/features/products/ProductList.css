@@ -201,3 +201,23 @@
   margin-bottom: 15px;
   font-weight: bold;
 }
+
+
+/**THESE WERE ADDED FOR THE RECENTLY VIEWED TO BE HORIZONTAL**/
+.recently-viewed-flex{
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 10px;
+}
+
+.recently-viewed-flex > div{
+  flex: 0 0 350px;
+  max-width: 350px;
+  min-width: 350px;
+  height: 100%;
+  scroll-snap-align: start;
+
+}

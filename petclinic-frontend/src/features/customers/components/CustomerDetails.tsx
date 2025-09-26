@@ -7,10 +7,12 @@ import { Bill } from '@/features/bills/models/Bill';
 import { getOwner } from '../api/getOwner';
 import './CustomerDetails.css';
 import { deleteOwner } from '../api/deleteOwner';
+import { IsVet } from '@/context/UserContext';
 
 const CustomerDetails: FC = () => {
   const { ownerId } = useParams<{ ownerId: string }>();
   const navigate = useNavigate();
+  const isVet = IsVet();
 
   const [isDisabled, setIsDisabled] = useState<boolean>(false);
   const [owner, setOwner] = useState<OwnerResponseModel | null>(null);
@@ -243,14 +245,16 @@ const CustomerDetails: FC = () => {
         >
           Add New Pet
         </button>
-        <button
-          className="btn btn-danger"
-          onClick={() => handleDelete(owner.ownerId)}
-          title="Delete"
-          style={{ backgroundColor: 'red', color: 'white' }}
-        >
-          Delete Owner
-        </button>
+        {!isVet && (
+          <button
+            className="btn btn-danger"
+            onClick={() => handleDelete(owner.ownerId)}
+            title="Delete"
+            style={{ backgroundColor: 'red', color: 'white' }}
+          >
+            Delete Owner
+          </button>
+        )}
         <button
           className={`btn ${isDisabled ? 'btn-success' : 'btn-warning'}`}
           onClick={handleDisableEnable}

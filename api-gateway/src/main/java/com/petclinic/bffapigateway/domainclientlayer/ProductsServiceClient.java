@@ -34,7 +34,7 @@ public class ProductsServiceClient {
 
     }
 
-    public Flux<ProductResponseDTO> getAllProducts(Double minPrice, Double maxPrice,Double minRating, Double maxRating, String sort,String deliveryType) {
+    public Flux<ProductResponseDTO> getAllProducts(Double minPrice, Double maxPrice,Double minRating, Double maxRating, String sort,String deliveryType, String productType) {
         return webClient.get()
                 .uri(uriBuilder -> {
                     if (minPrice != null) {
@@ -54,6 +54,9 @@ public class ProductsServiceClient {
                     }
                     if (deliveryType != null) {
                         uriBuilder.queryParam("deliveryType", deliveryType);
+                    }
+                    if (productType != null) {
+                        uriBuilder.queryParam("productType", productType);
                     }
                     return uriBuilder.build();
                 })

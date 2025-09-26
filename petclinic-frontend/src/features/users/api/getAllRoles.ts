@@ -5,5 +5,7 @@ import { RoleResponseModel } from '@/features/users/model/RoleResponseModel.ts';
 export const getAllRoles = async (): Promise<
   AxiosResponse<RoleResponseModel[]>
 > => {
-  return await axiosInstance.get<RoleResponseModel[]>('/roles');
+  return await axiosInstance.get<RoleResponseModel[]>('/roles', {
+    useV2: true,
+  });
 };

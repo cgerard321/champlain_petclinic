@@ -3,7 +3,7 @@ import axiosInstance from '@/shared/api/axiosInstance.ts';
 
 export async function getBillByBillId(billId: string): Promise<Bill | null> {
   const response = await axiosInstance.get(`/bills/admin/${billId}`, {
-    responseType: 'stream',
+    responseType: 'text',
     useV2: false,
   });
 

@@ -1,22 +1,13 @@
 import axiosInstance from '@/shared/api/axiosInstance';
 import { EmergencyRequestDTO } from '../Model/EmergencyRequestDTO';
-import { EmergencyResponseDTO } from '../Model/EmergencyResponseDTO';
 
 export const updateEmergency = async (
-  visitEmergencyId: string,
+  emergencyVisitId: string,
   emergency: EmergencyRequestDTO
 ): Promise<void> => {
   await axiosInstance.put<void>(
-    `/visits/emergency/${visitEmergencyId}`,
-    emergency
+    `/visits/emergency/${emergencyVisitId}`,
+    emergency,
+    { useV2: false }
   );
-};
-
-export const getEmergency = async (
-  visitEmergencyId: string
-): Promise<EmergencyResponseDTO> => {
-  const response = await axiosInstance.get<EmergencyResponseDTO>(
-    `http://localhost:8080/api/v2/gateway/visits/emergency/${visitEmergencyId}`
-  );
-  return response.data; // Return only the data
 };

@@ -5,6 +5,7 @@ import './VetListCard.css';
 import DeleteVet from '@/pages/Vet/DeleteVet.tsx';
 import { deleteVet } from '@/features/veterinarians/api/deleteVet';
 import { fetchVetPhoto } from './api/fetchPhoto';
+import { IsVet } from '@/context/UserContext';
 
 interface VetCardTableProps {
   vets: VetRequestModel[];
@@ -16,6 +17,7 @@ export default function VetCardTable({
   onDeleteVet,
 }: VetCardTableProps): JSX.Element {
   const navigate = useNavigate();
+  const isVet = IsVet();
   const [vetPhotos, setVetPhotos] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
@@ -80,10 +82,12 @@ export default function VetCardTable({
                 {vet.specialties.map(specialty => specialty.name).join(', ')}
               </p>
               <div className="card-actions">
-                <DeleteVet
-                  vetId={vet.vetId}
-                  onVetDeleted={event => handleVetDelete(event, vet.vetId)}
-                />
+                {!isVet && (
+                  <DeleteVet
+                    vetId={vet.vetId}
+                    onVetDeleted={event => handleVetDelete(event, vet.vetId)}
+                  />
+                )}
               </div>
             </div>
           </div>

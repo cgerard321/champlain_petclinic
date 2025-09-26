@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 // Assuming this function gets the visit by visitId
 import { Visit } from '../models/Visit';
-import { getVisitByVisitId } from '../Review/Api/getVisitByVisitId';
 import './VisitDetails.css';
+import { getVisit } from '../api/getVisit';
 
 export default function VisitDetails(): JSX.Element {
   const { visitId } = useParams<{ visitId: string }>(); // Extract visitId from URL parameters
@@ -12,7 +12,7 @@ export default function VisitDetails(): JSX.Element {
 
   useEffect(() => {
     if (visitId) {
-      getVisitByVisitId(visitId)
+      getVisit(visitId)
         .then(response => {
           setVisit(response);
         })

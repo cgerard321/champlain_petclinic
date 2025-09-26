@@ -16,7 +16,6 @@ public class PasswordValidation implements ConstraintValidator<PasswordStrengthC
 
     @Override
     public void initialize(PasswordStrengthCheck constraintAnnotation) {
-        // ConstraintValidator.super.initialize(constraintAnnotation);
     }
 
     @Override
@@ -28,10 +27,6 @@ public class PasswordValidation implements ConstraintValidator<PasswordStrengthC
         String pattern = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=*!()_.<>,{}])(?=\\S+$).{8,}$";
 
         return value.matches(pattern);
-
-//        String pattern = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$";
-//
-//        return value != null && value.matches(pattern);
     }
 
 }

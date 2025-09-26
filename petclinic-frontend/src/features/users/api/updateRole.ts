@@ -6,7 +6,11 @@ export const updateRole = async (
   id: number,
   name: string
 ): Promise<AxiosResponse<RoleResponseModel>> => {
-  return await axiosInstance.patch<RoleResponseModel>(`/roles/${id}`, {
-    name: name,
-  });
+  return await axiosInstance.patch<RoleResponseModel>(
+    `/roles/${id}`,
+    {
+      name: name,
+    },
+    { useV2: true }
+  );
 };

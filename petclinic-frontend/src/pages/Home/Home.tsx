@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { NavBar } from '@/layouts/AppNavBar.tsx';
 import './Home.css';
+import axiosInstance from '@/shared/api/axiosInstance';
 import { getAllVets } from '@/features/veterinarians/api/getAllVets.ts';
 import { VetResponseModel } from '@/features/veterinarians/models/VetResponseModel.ts';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -24,7 +25,6 @@ function getRandomVets(vets: VetResponseModel[]): VetResponseModel[] {
   const shuffled = vets.sort(() => 0.5 - Math.random());
   return shuffled.slice(0, 3);
 }
-
 export default function Home(): JSX.Element {
   useParams<{ vetId: string }>();
   const navigate = useNavigate();
@@ -36,21 +36,15 @@ export default function Home(): JSX.Element {
 
   const fetchVetPhoto = async (vetId: string): Promise<void> => {
     try {
-      const response = await fetch(
-        import.meta.env.VITE_BACKEND_URL + `v2/gateway/vets/${vetId}/photo`,
-        {
-          method: 'GET',
-          headers: {
-            Accept: 'image/*',
-          },
-        }
-      );
+      const response = await axiosInstance.get(`/vets/${vetId}/photo`, {
+        useV2: true,
+        responseType: 'blob',
+        headers: {
+          Accept: 'image/*',
+        },
+      });
 
-      if (!response.ok) {
-        throw new Error(`Error: ${response.statusText}`);
-      }
-
-      const blob = await response.blob();
+      const blob = await response.data;
       const imageUrl = URL.createObjectURL(blob);
       setVetPhotos(prevPhotos => ({
         ...prevPhotos,

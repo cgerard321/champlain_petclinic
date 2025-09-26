@@ -3,7 +3,7 @@ import { OwnerResponseModel } from '../models/OwnerResponseModel';
 
 export async function getAllOwners(): Promise<OwnerResponseModel[]> {
   const response = await axiosInstance.get('/owners', {
-    responseType: 'stream',
+    responseType: 'text',
     useV2: true,
   });
   return response.data

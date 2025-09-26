@@ -75,7 +75,7 @@ class ProductControllerUnitTest {
 
     @Test
     void whenGetAllProductsWithValidMinAndMaxRating_thenReturnFluxProductResponseDTO() {
-        when(productsServiceClient.getAllProducts(null, null, 3.0, 5.0, null,null))
+        when(productsServiceClient.getAllProducts(null, null, 3.0, 5.0, null,null,null))
                 .thenReturn(Flux.just(productResponseDTO1, productResponseDTO2));
 
         webTestClient.get()
@@ -94,7 +94,7 @@ class ProductControllerUnitTest {
                     assertEquals(productResponseDTO2.getProductId(), productResponseDTOS.get(1).getProductId());
                 });
 
-        verify(productsServiceClient, times(1)).getAllProducts(null, null, 3.0, 5.0, null,null);
+        verify(productsServiceClient, times(1)).getAllProducts(null, null, 3.0, 5.0, null,null,null);
     }
 
     @Test
@@ -119,7 +119,7 @@ class ProductControllerUnitTest {
     @Test
     void getAllProducts_whenProductsExist_thenReturnFluxProductResponseDTO() {
 
-        when(productsServiceClient.getAllProducts(null, null,null,null,null,null))
+        when(productsServiceClient.getAllProducts(null, null,null,null,null,null,null))
                 .thenReturn(Flux.just(productResponseDTO1,productResponseDTO2));
 
         webTestClient.get()
@@ -134,13 +134,13 @@ class ProductControllerUnitTest {
                     assertEquals(productResponseDTO1.getProductId(), productResponseDTOS.get(0).getProductId());
                     assertEquals(productResponseDTO2.getProductId(), productResponseDTOS.get(1).getProductId());
                 });
-        verify(productsServiceClient, times(1)).getAllProducts(null, null,null,null,null,null);
+        verify(productsServiceClient, times(1)).getAllProducts(null, null,null,null,null,null,null);
     }
 
     @Test
     void getAllProducts_whenNoProductsExist_thenReturnEmptyFlux() {
 
-        when(productsServiceClient.getAllProducts(null, null,null,null,null,null))
+        when(productsServiceClient.getAllProducts(null, null,null,null,null,null,null))
                 .thenReturn(Flux.empty());
 
         webTestClient.get()
@@ -153,7 +153,7 @@ class ProductControllerUnitTest {
                     assertNotNull(productResponseDTOS);
                     assertEquals(0, productResponseDTOS.size());
                 });
-        verify(productsServiceClient, times(1)).getAllProducts(null, null,null,null,null,null);
+        verify(productsServiceClient, times(1)).getAllProducts(null, null,null,null,null,null,null);
     }
 
     @Test
@@ -164,7 +164,7 @@ class ProductControllerUnitTest {
         productResponseDTO1.setDeliveryType(DeliveryType.DELIVERY);
         productResponseDTO2.setDeliveryType(DeliveryType.PICKUP);
 
-        when(productsServiceClient.getAllProducts(null, null, null, null, null, deliveryType.toString()))
+        when(productsServiceClient.getAllProducts(null, null, null, null, null, deliveryType.toString(),null))
                 .thenReturn(Flux.just(productResponseDTO1));
 
         webTestClient.get()
@@ -182,7 +182,7 @@ class ProductControllerUnitTest {
                     assertEquals(DeliveryType.DELIVERY, productResponseDTOS.get(0).getDeliveryType());
                 });
 
-        verify(productsServiceClient, times(1)).getAllProducts(null, null, null, null, null, deliveryType.toString());
+        verify(productsServiceClient, times(1)).getAllProducts(null, null, null, null, null, deliveryType.toString(),null);
     }
 
     @Test
@@ -190,7 +190,7 @@ class ProductControllerUnitTest {
         String invalidDeliveryType = "INVALID_DELIVERY_TYPE";
 
 
-        when(productsServiceClient.getAllProducts(null, null, null, null, null, invalidDeliveryType))
+        when(productsServiceClient.getAllProducts(null, null, null, null, null, invalidDeliveryType,null))
                 .thenReturn(Flux.just(productResponseDTO1, productResponseDTO2));
 
         webTestClient.get()
@@ -208,7 +208,7 @@ class ProductControllerUnitTest {
                     assertEquals(productResponseDTO2.getProductId(), productResponseDTOS.get(1).getProductId());
                 });
 
-        verify(productsServiceClient, times(1)).getAllProducts(null, null, null, null, null, invalidDeliveryType);
+        verify(productsServiceClient, times(1)).getAllProducts(null, null, null, null, null, invalidDeliveryType,null);
     }
 
 

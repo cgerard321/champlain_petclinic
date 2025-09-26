@@ -61,11 +61,11 @@ public class VisitServiceImpl implements VisitService {
      * @return all Visits as Flux
      */
     @Override
-    public Flux<VisitResponseDTO> getAllVisits(String descritpion) {
+    public Flux<VisitResponseDTO> getAllVisits(String description) {
         Flux<Visit> visits;
 
-        if (descritpion != null && !descritpion.isBlank()) {
-            visits = repo.findVisitsByDescriptionContainingIgnoreCase(descritpion);
+        if (description != null && !description.isBlank()) {
+            visits = repo.findVisitsByDescriptionContainingIgnoreCase(description);
         } else {
             visits = repo.findAll();
         }

@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAllReviews } from './Api/getAllReviews';
 import { ReviewResponseDTO } from './Model/ReviewResponseDTO';
+import { deleteReview } from './Api/deleteReview';
 
 const ReviewsList: React.FC = (): JSX.Element => {
   const [reviewList, setReviewList] = useState<ReviewResponseDTO[]>([]);
@@ -42,28 +43,16 @@ const ReviewsList: React.FC = (): JSX.Element => {
     const confirmDelete = window.confirm(
       `Are you sure you want to delete review with ID: ${reviewId}?`
     );
-    if (confirmDelete) {
-      try {
-        const response = await fetch(
-          `http://localhost:8080/api/v2/gateway/visits/reviews/${reviewId}`,
-          {
-            method: 'DELETE',
-            credentials: 'include',
-          }
-        );
-        if (response.ok) {
-          setReviewList(prev =>
-            prev.filter(review => review.reviewId !== reviewId)
-          );
-          alert('Review deleted successfully!');
-        } else {
-          console.error('Failed to delete the review.');
-          alert('Failed to delete the review.');
-        }
-      } catch (error) {
-        console.error('Error deleting review:', error);
-        alert('Error deleting review.');
-      }
+    if (!confirmDelete) return;
+    try {
+      await deleteReview(reviewId.toString());
+
+      setReviewList(prev =>
+        prev.filter(review => review.reviewId !== reviewId)
+      );
+    } catch (error) {
+      console.error('Error deleting review:', error);
+      alert('Error deleting review.');
     }
   };
 

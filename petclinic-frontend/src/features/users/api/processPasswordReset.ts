@@ -7,6 +7,7 @@ export const processPasswordReset = async (
 ): Promise<AxiosResponse<void>> => {
   return await axiosInstance.post<void>(
     `/users/reset_password`,
-    userPasswordAndTokenRequestModel
+    userPasswordAndTokenRequestModel,
+    { useV2: false }
   );
 };

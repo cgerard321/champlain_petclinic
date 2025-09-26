@@ -85,6 +85,7 @@ class ProductServiceUnitTest {
         Double maxPrice = null;
         String sort = null;
         String deliveryType=null;
+        String productType = null;
 
         Product product1 = createProduct("1", 50.0,3.5);
         Product product2 = createProduct("2", 60.0,3.7);
@@ -112,7 +113,7 @@ class ProductServiceUnitTest {
         );
 
         // When
-        Flux<ProductResponseModel> result = productService.getAllProducts(minPrice, maxPrice, minRating, maxRating, sort, deliveryType);
+        Flux<ProductResponseModel> result = productService.getAllProducts(minPrice, maxPrice, minRating, maxRating, sort, deliveryType, productType);
 
         // Then
         StepVerifier.create(result)
@@ -133,10 +134,12 @@ class ProductServiceUnitTest {
         Double maxRating = null;
         String invalidSort = "invalidSort";
         String deliveryType=null;
+        String productType = null;
+
 
         // When & Then
         try {
-            productService.getAllProducts(minPrice, maxPrice, minRating, maxRating, invalidSort,deliveryType);
+            productService.getAllProducts(minPrice, maxPrice, minRating, maxRating, invalidSort,deliveryType, productType);
         } catch (InvalidInputException e) {
             assertNotNull(e);
             assertEquals("Invalid sort parameter: " + invalidSort, e.getMessage());
@@ -158,7 +161,7 @@ class ProductServiceUnitTest {
                 .thenReturn(Flux.just(rating2));
 
 
-        Flux<ProductResponseModel> result = productService.getAllProducts(null,null,null,null,null,null);
+        Flux<ProductResponseModel> result = productService.getAllProducts(null,null,null,null,null,null, null);
 
 
         StepVerifier.create(result)
@@ -182,7 +185,7 @@ class ProductServiceUnitTest {
         when(ratingRepository.findRatingsByProductId(product1.getProductId())).thenReturn(Flux.just(rating1));
         when(ratingRepository.findRatingsByProductId(product2.getProductId())).thenReturn(Flux.just(rating2));
 
-        Flux<ProductResponseModel> result = productService.getAllProducts(null, null, null, null, null, deliveryType.toString());
+        Flux<ProductResponseModel> result = productService.getAllProducts(null, null, null, null, null, deliveryType.toString(), null);
 
 
         StepVerifier.create(result)
@@ -207,7 +210,7 @@ class ProductServiceUnitTest {
         when(ratingRepository.findRatingsByProductId(product1.getProductId())).thenReturn(Flux.just(rating1));
         when(ratingRepository.findRatingsByProductId(product2.getProductId())).thenReturn(Flux.just(rating2));
 
-        Flux<ProductResponseModel> result = productService.getAllProducts(null, null, null, null, null, deliveryType);
+        Flux<ProductResponseModel> result = productService.getAllProducts(null, null, null, null, null, deliveryType,null);
 
         StepVerifier.create(result)
                 .expectNextMatches(product -> product.getProductId().equals("1") && product.getDeliveryType().equals(DeliveryType.DELIVERY))
@@ -225,7 +228,7 @@ class ProductServiceUnitTest {
         when(productRepository.findAll())
                 .thenReturn(Flux.empty());
 
-        Flux<ProductResponseModel> result = productService.getAllProducts(null,null,null,null,null,null);
+        Flux<ProductResponseModel> result = productService.getAllProducts(null,null,null,null,null,null, null);
 
         StepVerifier.create(result)
                 .expectNextCount(0)

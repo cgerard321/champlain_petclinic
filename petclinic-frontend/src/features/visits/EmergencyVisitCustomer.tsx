@@ -4,7 +4,7 @@ import { useUser } from '@/context/UserContext';
 import { EmergencyResponseDTO } from './Emergency/Model/EmergencyResponseDTO';
 import './Emergency.css';
 import { useNavigate } from 'react-router-dom';
-import { getAllEmergencyForOwner } from './Emergency/Api/getAllEmergency';
+import { getEmergencyVisitsByOwnerId } from './Emergency/Api/getEmergencyVisitsByOwnerId';
 
 export default function EmergencyVisitCustomer(): JSX.Element {
   const { user } = useUser();
@@ -19,7 +19,7 @@ export default function EmergencyVisitCustomer(): JSX.Element {
       if (!user.userId) return; // Ensure userId is available
 
       try {
-        const response = await getAllEmergencyForOwner(user.userId);
+        const response = await getEmergencyVisitsByOwnerId(user.userId);
         const formattedResponse = formatEmergencyData(response);
         if (Array.isArray(formattedResponse)) {
           setEmergencies(formattedResponse); // Set the emergencies if response is an array

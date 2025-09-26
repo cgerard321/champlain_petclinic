@@ -5,7 +5,8 @@ export async function getUserRatingsForProduct(
   productId: string
 ): Promise<RatingModel[]> {
   const res = await axiosInstance.get('/ratings/product/' + productId, {
-    responseType: 'stream',
+    responseType: 'text',
+    useV2: true,
   });
 
   return res.data

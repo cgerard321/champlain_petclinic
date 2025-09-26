@@ -33,7 +33,9 @@ public class ProductController {
             @RequestParam(required = false) Double minRating,
             @RequestParam(required = false) Double maxRating,
             @RequestParam(required = false) String sort,
-            @RequestParam(required = false) String deliveryType) {
+            @RequestParam(required = false) String deliveryType,
+            @RequestParam(required = false) String productType) {
+
         // Validate negative prices
         if ((minPrice != null && minPrice < 0) || (maxPrice != null && maxPrice < 0) ||
                 (minRating != null && minRating < 0) || (maxRating != null && maxRating < 0)) {
@@ -48,8 +50,9 @@ public class ProductController {
             return Flux.error(new IllegalArgumentException("minRating cannot be greater than maxRating"));
         }
 
-        return productsServiceClient.getAllProducts(minPrice, maxPrice, minRating, maxRating, sort, deliveryType);
+        return productsServiceClient.getAllProducts(minPrice, maxPrice, minRating, maxRating, sort, deliveryType, productType);
     }
+
 
 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})

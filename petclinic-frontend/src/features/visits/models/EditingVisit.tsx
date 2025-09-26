@@ -4,8 +4,9 @@ import { FormEvent, useState, useEffect } from 'react';
 import './EditVisit.css';
 import { VisitRequestModel } from '@/features/visits/models/VisitRequestModel';
 import { Status } from '@/features/visits/models/Status';
-import { getVisit, updateVisit } from '@/features/visits/api/updateVisit.ts';
 import { VisitResponseModel } from './VisitResponseModel';
+import { getVisit } from '../api/getVisit';
+import { updateVisit } from '../api/updateVisit';
 
 interface ApiError {
   message: string;

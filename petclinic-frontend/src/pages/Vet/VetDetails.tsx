@@ -10,6 +10,11 @@ import DeleteVetEducation from '@/pages/Vet/DeleteVetEducation';
 import { Workday } from '@/features/veterinarians/models/Workday.ts';
 import UpdateVet from '@/pages/Vet/UpdateVet.tsx';
 import { fetchVetPhoto } from '@/features/veterinarians/api/fetchPhoto';
+import {
+  IsInventoryManager,
+  IsOwner,
+  IsReceptionist,
+} from '@/context/UserContext';
 
 interface VetResponseType {
   vetId: string;
@@ -69,6 +74,9 @@ interface RatingResponseType {
 
 export default function VetDetails(): JSX.Element {
   const { vetId } = useParams<{ vetId: string }>();
+  const isInventoryManager = IsInventoryManager();
+  const isOwner = IsOwner();
+  const isReceptionist = IsReceptionist();
   const [vet, setVet] = useState<VetResponseType | null>(null);
   const [education, setEducation] = useState<EducationResponseType[] | null>(
     null
@@ -464,26 +472,30 @@ export default function VetDetails(): JSX.Element {
               onChange={handleUpdateVetProfilePhoto}
               accept="image/*"
             />
-            {!isDefaultPhoto && (
-              <DeleteVetPhoto
-                vetId={vetId!}
-                onPhotoDeleted={handlePhotoDeleted}
-              />
-            )}
+            {!isInventoryManager && !isOwner && !isReceptionist && (
+              <>
+                {!isDefaultPhoto && (
+                  <DeleteVetPhoto
+                    vetId={vetId!}
+                    onPhotoDeleted={handlePhotoDeleted}
+                  />
+                )}
 
-            <button
-              className="btn btn-primary"
-              onClick={() => setSelectedVet(mapVetResponseToRequest(vet!))}
-            >
-              Update Profile
-            </button>
+                <button
+                  className="btn btn-primary"
+                  onClick={() => setSelectedVet(mapVetResponseToRequest(vet!))}
+                >
+                  Update Profile
+                </button>
 
-            {selectedVet && (
-              <UpdateVet
-                vet={selectedVet}
-                onClose={() => setSelectedVet(null)}
-                refreshVetDetails={refreshVetDetails}
-              />
+                {selectedVet && (
+                  <UpdateVet
+                    vet={selectedVet}
+                    onClose={() => setSelectedVet(null)}
+                    refreshVetDetails={refreshVetDetails}
+                  />
+                )}
+              </>
             )}
           </section>
         )}
@@ -542,7 +554,7 @@ export default function VetDetails(): JSX.Element {
               <p>
                 <strong>Resume:</strong> {vet.resume}
               </p>
-              <p>
+              <div>
                 <strong>Workdays:</strong>
                 {vet.workday && vet.workday.length > 0 ? (
                   <ul>
@@ -553,11 +565,11 @@ export default function VetDetails(): JSX.Element {
                 ) : (
                   <p>No workdays available</p>
                 )}
-              </p>
-              <p>
+              </div>
+              <div>
                 <strong>Work Hours:</strong>{' '}
                 {renderWorkHours(vet.workHoursJson)}
-              </p>
+              </div>
               <p>
                 <strong>Active:</strong> {vet.active ? 'Yes' : 'No'}
               </p>
@@ -570,13 +582,15 @@ export default function VetDetails(): JSX.Element {
                   {vet.specialties.map((specialty, index) => (
                     <li key={index}>
                       {specialty.name}
-                      <button
-                        onClick={() =>
-                          handleDeleteSpecialty(specialty.specialtyId)
-                        }
-                      >
-                        Delete
-                      </button>
+                      {!isInventoryManager && !isOwner && !isReceptionist && (
+                        <button
+                          onClick={() =>
+                            handleDeleteSpecialty(specialty.specialtyId)
+                          }
+                        >
+                          Delete
+                        </button>
+                      )}
                     </li>
                   ))}
                 </ul>
@@ -585,7 +599,11 @@ export default function VetDetails(): JSX.Element {
               )}
 
               {/* Button to open the form */}
-              <button onClick={() => setIsFormOpen(true)}>Add Specialty</button>
+              {!isInventoryManager && !isOwner && !isReceptionist && (
+                <button onClick={() => setIsFormOpen(true)}>
+                  Add Specialty
+                </button>
+              )}
 
               {/* Conditionally render the form */}
               {isFormOpen && (
@@ -650,6 +668,54 @@ export default function VetDetails(): JSX.Element {
                     <p>
                       <strong>End Date:</strong> {edu.endDate}
                     </p>
+                    {!isInventoryManager && !isOwner && !isReceptionist && (
+                      <>
+                        <div
+                          style={{ marginBottom: '20px', textAlign: 'right' }}
+                        >
+                          <button
+                            onClick={() => setFormVisible(prev => !prev)}
+                            style={{
+                              backgroundColor: formVisible
+                                ? '#ff6347'
+                                : '#4CAF50',
+                            }}
+                          >
+                            {formVisible ? 'Cancel' : 'Add Education'}
+                          </button>
+                          {formVisible && (
+                            <AddEducation
+                              vetId={vetId}
+                              onClose={() => setFormVisible(false)}
+                            />
+                          )}
+                        </div>
+
+                        <button
+                          className="btn btn-primary"
+                          onClick={event => {
+                            event.stopPropagation();
+                            setSelectedEducation(edu);
+                          }}
+                        >
+                          Update Education
+                        </button>
+                        <DeleteVetEducation
+                          vetId={vetId!}
+                          educationId={edu.educationId}
+                          onEducationDeleted={handleEducationDeleted}
+                        />
+                      </>
+                    )}
+                    <hr />
+                  </div>
+                ))
+              ) : (
+                // When there are no education entries
+                <div>
+                  <p>No education details available</p>
+
+                  {!isInventoryManager && !isOwner && !isReceptionist && (
                     <div style={{ marginBottom: '20px', textAlign: 'right' }}>
                       <button
                         onClick={() => setFormVisible(prev => !prev)}
@@ -666,55 +732,21 @@ export default function VetDetails(): JSX.Element {
                         />
                       )}
                     </div>
-
-                    <button
-                      className="btn btn-primary"
-                      onClick={event => {
-                        event.stopPropagation();
-                        setSelectedEducation(edu);
-                      }}
-                    >
-                      Update Education
-                    </button>
-                    <DeleteVetEducation
-                      vetId={vetId!}
-                      educationId={edu.educationId}
-                      onEducationDeleted={handleEducationDeleted}
-                    />
-                    <hr />
-                  </div>
-                ))
-              ) : (
-                // When there are no education entries
-                <div>
-                  <p>No education details available</p>
-
-                  <div style={{ marginBottom: '20px', textAlign: 'right' }}>
-                    <button
-                      onClick={() => setFormVisible(prev => !prev)}
-                      style={{
-                        backgroundColor: formVisible ? '#ff6347' : '#4CAF50',
-                      }}
-                    >
-                      {formVisible ? 'Cancel' : 'Add Education'}
-                    </button>
-                    {formVisible && (
-                      <AddEducation
-                        vetId={vetId}
-                        onClose={() => setFormVisible(false)}
-                      />
-                    )}
-                  </div>
+                  )}
                 </div>
               )}
-              {selectedEducation && vetId && (
-                <UpdateVetEducation
-                  vetId={vetId}
-                  education={selectedEducation}
-                  educationId={selectedEducation.educationId}
-                  onClose={() => setSelectedEducation(null)}
-                />
-              )}
+              {!isInventoryManager &&
+                !isOwner &&
+                !isReceptionist &&
+                selectedEducation &&
+                vetId && (
+                  <UpdateVetEducation
+                    vetId={vetId}
+                    education={selectedEducation}
+                    educationId={selectedEducation.educationId}
+                    onClose={() => setSelectedEducation(null)}
+                  />
+                )}
             </section>
 
             <section className="album-photos">
@@ -736,15 +768,17 @@ export default function VetDetails(): JSX.Element {
                         alt={`Album Photo ${index + 1}`}
                         className="album-photo-thumbnail"
                       />
-                      <button
-                        className="delete-photo-button"
-                        onClick={e => {
-                          e.stopPropagation(); // This prevents the modal from opening
-                          handleDeleteAlbumPhoto(photo.id); // Pass the photo ID for deletion
-                        }}
-                      >
-                        Delete Image
-                      </button>
+                      {!isInventoryManager && !isOwner && !isReceptionist && (
+                        <button
+                          className="delete-photo-button"
+                          onClick={e => {
+                            e.stopPropagation(); // This prevents the modal from opening
+                            handleDeleteAlbumPhoto(photo.id); // Pass the photo ID for deletion
+                          }}
+                        >
+                          Delete Image
+                        </button>
+                      )}
                     </div>
                   ))}
                 </div>
