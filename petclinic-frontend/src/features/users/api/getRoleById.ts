@@ -5,5 +5,7 @@ import { AxiosResponse } from 'axios';
 export const getRoleById = async (
   id: number
 ): Promise<AxiosResponse<RoleResponseModel>> => {
-  return await axiosInstance.get<RoleResponseModel>(`/roles/${id}`);
+  return await axiosInstance.get<RoleResponseModel>(`/roles/${id}`, {
+    useV2: true,
+  });
 };

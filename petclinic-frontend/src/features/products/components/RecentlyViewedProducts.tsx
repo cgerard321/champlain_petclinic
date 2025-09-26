@@ -28,7 +28,7 @@ export default function RecentlyViewedProducts(): JSX.Element {
   return (
     <div className="recently-viewed-container">
       <h2>Recently Seen</h2>
-      <div className="grid">
+      <div className="recently-viewed-flex">
         {recentlyClickedProducts.length > 0 ? (
           recentlyClickedProducts
             .filter(product => !product.isUnlisted)
@@ -47,4 +47,6 @@ export default function RecentlyViewedProducts(): JSX.Element {
       </div>
     </div>
   );
+
+  /**recently-viewed-list used to be grid changed it since I wanted it to be horizontally scrollable */
 }

@@ -13,6 +13,7 @@ import inventoryStyles from './InventoriesListTable.module.css';
 import cardStylesInventory from './CardInventoryTeam.module.css';
 // import axios from 'axios';
 import axiosInstance from '@/shared/api/axiosInstance';
+import { toggleInventoryImportant } from './api/toggleInventoryImportant';
 
 export default function InventoriesListTable(): JSX.Element {
   const [selectedInventories, setSelectedInventories] = useState<Inventory[]>(
@@ -38,6 +39,8 @@ export default function InventoriesListTable(): JSX.Element {
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [isActionsMenuVisible, setActionsMenu] = useState(false);
 
+  const [showImportantOnly, setShowImportantOnly] = useState(false);
+
   const handleMenuClick = (
     e: React.MouseEvent<SVGElement>,
     inventoryId: string
@@ -53,10 +56,11 @@ export default function InventoriesListTable(): JSX.Element {
     realPage,
     getInventoryList,
     setCurrentPage,
+    updateFilters,
   } = useSearchInventories();
 
   useEffect(() => {
-    getInventoryList('', '', '');
+    getInventoryList('', '', '', showImportantOnly);
     fetchAllInventoryTypes();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage]);
@@ -66,16 +70,73 @@ export default function InventoriesListTable(): JSX.Element {
   };
 
   useEffect(() => {
-    getInventoryList('', '', '');
+    getInventoryList('', '', '', showImportantOnly);
     refreshInventoryTypes();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage]);
+
+  const handleInventoryNameChange = (value: string): void => {
+    setInventoryName(value);
+    updateFilters({
+      inventoryName: value,
+      inventoryType,
+      inventoryDescription,
+      importantOnly: showImportantOnly,
+    });
+  };
+
+  const handleInventoryTypeChange = (value: string): void => {
+    setInventoryType(value);
+    updateFilters({
+      inventoryName,
+      inventoryType: value,
+      inventoryDescription,
+      importantOnly: showImportantOnly,
+    });
+  };
+
+  const handleInventoryDescriptionChange = (value: string): void => {
+    setInventoryDescription(value);
+    updateFilters({
+      inventoryName,
+      inventoryType,
+      inventoryDescription: value,
+      importantOnly: showImportantOnly,
+    });
+  };
+
+  const handleToggleImportant = async (
+    e: React.MouseEvent,
+    inventory: Inventory
+  ): Promise<void> => {
+    e.stopPropagation();
+    try {
+      const newImportantStatus = !inventory.important;
+      await toggleInventoryImportant(inventory.inventoryId, newImportantStatus);
+
+      const updatedList = inventoryList.map(inv =>
+        inv.inventoryId === inventory.inventoryId
+          ? { ...inv, important: newImportantStatus }
+          : inv
+      );
+      setInventoryList(updatedList);
+    } catch (error) {
+      console.error('Error toggling important status:', error);
+      alert('Failed to update important status. Please try again.');
+    }
+  };
 
   const clearQueries = (): void => {
     setInventoryName('');
     setInventoryType('');
     setInventoryDescription('');
-    getInventoryList('', '', '');
+    setShowImportantOnly(false);
+    updateFilters({
+      inventoryName: '',
+      inventoryType: '',
+      inventoryDescription: '',
+      importantOnly: false,
+    });
   };
 
   const pageBefore = (): void => {
@@ -119,7 +180,7 @@ export default function InventoriesListTable(): JSX.Element {
   const fetchProductQuantity = async (inventoryId: string): Promise<void> => {
     try {
       const response = await axiosInstance.get<number>(
-        `/inventory/${inventoryId}/productquantity`,
+        `/inventories/${inventoryId}/productquantity`,
         { useV2: false }
       );
 
@@ -138,7 +199,7 @@ export default function InventoriesListTable(): JSX.Element {
   ): Promise<void> => {
     try {
       const response = await axiosInstance.get<ProductModel[]>(
-        `/inventory/${inventory.inventoryId}/products/lowstock`,
+        `/inventories/${inventory.inventoryId}/products/lowstock`,
         { useV2: false }
       );
       const data = response.data;
@@ -193,7 +254,7 @@ export default function InventoriesListTable(): JSX.Element {
     location.state?.lastConsultedInventoryId || null;
 
   const handleCardClick = (inventoryId: string): void => {
-    navigate(`/inventory/${inventoryId}/products`, {
+    navigate(`/inventories/${inventoryId}/products`, {
       state: { lastConsultedInventoryId: inventoryId },
     });
   };
@@ -303,7 +364,7 @@ export default function InventoriesListTable(): JSX.Element {
               <td style={{ fontWeight: 'bold' }}>Name</td>
               <td style={{ fontWeight: 'bold' }}>Type</td>
               <td style={{ fontWeight: 'bold' }}>Description</td>
-              <td></td>
+              <td style={{ fontWeight: 'bold' }}>Important</td>
               <td></td>
               <td></td>
             </tr>
@@ -313,34 +374,20 @@ export default function InventoriesListTable(): JSX.Element {
                 <input
                   type="text"
                   value={inventoryName}
-                  onChange={e => setInventoryName(e.target.value)}
-                  onKeyUp={e =>
-                    e.key === 'Enter' &&
-                    getInventoryList(
-                      inventoryName,
-                      inventoryType,
-                      inventoryDescription
-                    )
-                  }
+                  onChange={e => handleInventoryNameChange(e.target.value)}
                 />
               </td>
               <td>
                 <select
                   className="form-control col-sm-4"
                   value={inventoryType}
-                  onChange={e => setInventoryType(e.target.value)}
-                  onKeyUp={e =>
-                    e.key === 'Enter' &&
-                    getInventoryList(
-                      inventoryName,
-                      inventoryType,
-                      inventoryDescription
-                    )
-                  }
+                  onChange={e => handleInventoryTypeChange(e.target.value)}
                 >
                   <option value="">None</option>
                   {inventoryTypeList.map(type => (
-                    <option key={type.type}>{type.type}</option>
+                    <option key={type.type} value={type.type}>
+                      {type.type}
+                    </option>
                   ))}
                 </select>
               </td>
@@ -348,15 +395,25 @@ export default function InventoriesListTable(): JSX.Element {
                 <input
                   type="text"
                   value={inventoryDescription}
-                  onChange={e => setInventoryDescription(e.target.value)}
-                  onKeyUp={e =>
-                    e.key === 'Enter' &&
-                    getInventoryList(
+                  onChange={e =>
+                    handleInventoryDescriptionChange(e.target.value)
+                  }
+                />
+              </td>
+              <td>
+                <input
+                  type="checkbox"
+                  checked={showImportantOnly}
+                  onChange={e => {
+                    const value = e.target.checked;
+                    setShowImportantOnly(value);
+                    updateFilters({
                       inventoryName,
                       inventoryType,
-                      inventoryDescription
-                    )
-                  }
+                      inventoryDescription,
+                      importantOnly: value,
+                    });
+                  }}
                 />
               </td>
               <td>
@@ -378,34 +435,21 @@ export default function InventoriesListTable(): JSX.Element {
                   </svg>
                 </button>
               </td>
-              <td>
-                <button
-                  className="btn btn-info"
-                  onClick={() =>
-                    getInventoryList(
-                      inventoryName,
-                      inventoryType,
-                      inventoryDescription
-                    )
-                  }
-                  title="Search"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="32"
-                    height="32"
-                    fill="white"
-                    className="bi bi-search"
-                    viewBox="0 0 16 16"
-                  >
-                    <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
-                  </svg>
-                </button>
-              </td>
               <td></td>
             </tr>
           </thead>
         </table>
+        {inventoryList.length === 0 &&
+          (inventoryName !== '' ||
+            inventoryType !== '' ||
+            inventoryDescription !== '') && (
+            <div className="text-center p-4">
+              <div className="alert alert-info">
+                <h5>No inventory found</h5>
+                <p>No inventories match your current search criteria.</p>
+              </div>
+            </div>
+          )}
         {/*//Cards start here*/}
         <div className={cardStylesInventory.cardContainerCustom}>
           {inventoryList.map(inventory => (
@@ -436,6 +480,20 @@ export default function InventoriesListTable(): JSX.Element {
               <div className={cardStylesInventory.inventoryNameSection}>
                 <p id={cardStylesInventory.inventoryNameText}>
                   {inventory.inventoryName}
+                  <svg
+                    onClick={e => handleToggleImportant(e, inventory)}
+                    style={{
+                      marginLeft: '10px',
+                      cursor: 'pointer',
+                      fill: inventory.important ? '#FFD700' : '#D3D3D3',
+                    }}
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 16 16"
+                  >
+                    <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z" />
+                  </svg>
                 </p>
                 <div id={cardStylesInventory.iconSection}>
                   <p id={cardStylesInventory.productQuantityNumber}>
