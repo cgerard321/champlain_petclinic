@@ -70,5 +70,5 @@ jobs:
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
         with:
-          args: "-i,.qodana/code-coverage,--linter,jetbrains/qodana-jvm:latest"
+          args: "-i,.qodana/code-coverage,--linter,jetbrains/qodana-jvm-community:latest"
           pr-mode: false
