@@ -7,6 +7,6 @@ export const addCustomerReview = async (
   review: ReviewRequestDTO
 ): Promise<AxiosResponse<void>> => {
   return await axiosInstance.post(`/visits/owners/${ownerId}/reviews`, review, {
-    useV2: false,
+    useV2: true,
   });
 };

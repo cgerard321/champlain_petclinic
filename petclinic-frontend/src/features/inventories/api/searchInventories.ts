@@ -6,7 +6,8 @@ export async function searchInventories(
   listSize: number,
   inventoryName?: string,
   inventoryType?: string,
-  inventoryDescription?: string
+  inventoryDescription?: string,
+  importantOnly?: boolean
 ): Promise<Inventory[]> {
   try {
     const queryParams = new URLSearchParams();
@@ -14,6 +15,7 @@ export async function searchInventories(
     if (inventoryType) queryParams.append('inventoryType', inventoryType);
     if (inventoryDescription)
       queryParams.append('inventoryDescription', inventoryDescription);
+    if (importantOnly) queryParams.append('importantOnly', 'true');
 
     const queryString = queryParams.toString();
     const url = queryString
