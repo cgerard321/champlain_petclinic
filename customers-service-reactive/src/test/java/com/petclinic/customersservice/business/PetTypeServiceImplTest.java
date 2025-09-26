@@ -17,6 +17,7 @@ import reactor.test.StepVerifier;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
@@ -31,7 +32,40 @@ class PetTypeServiceImplTest {
     private PetTypeService petTypeService;
 
     @MockBean
-    private PetTypeRepo repo;
+    private PetTypeRepo petTypeRepo;
+
+
+
+
+    @Test
+    void deletePetTypeByPetTypeId_ShouldDeleteSuccessfully() {
+
+        String petTypeId = "test-pet-type-id";
+        when(petTypeRepo.deleteByPetTypeId(petTypeId)).thenReturn(Mono.empty());
+
+
+        Mono<Void> result = petTypeService.deletePetTypeByPetTypeId(petTypeId);
+
+
+        StepVerifier.create(result)
+                .verifyComplete();
+
+        verify(petTypeRepo).deleteByPetTypeId(petTypeId);
+    }
+
+    @Test
+    void deletePetTypeByPetTypeId_WhenPetTypeNotFound_ShouldComplete() {
+
+        String petTypeId = "non-existent-id";
+        when(petTypeRepo.deleteByPetTypeId(petTypeId)).thenReturn(Mono.empty());
+
+
+        Mono<Void> result = petTypeService.deletePetTypeByPetTypeId(petTypeId);
+
+
+        StepVerifier.create(result)
+                .verifyComplete();
+    }
 
 
     /*

@@ -130,6 +130,31 @@ class PetTypeControllerIntegrationTest {
 
      */
 
+    @Test
+    void deletePetType_ShouldReturnNoContent() {
+
+        PetType petType = PetType.builder()
+                .id("test-id")
+                .petTypeId("test-pet-type-id")
+                .name("Test Pet Type")
+                .petTypeDescription("Test Description")
+                .build();
+
+        petTypeRepo.save(petType).block();
+
+
+        webTestClient.delete()
+                .uri("/owners/petTypes/test-pet-type-id")
+                .exchange()
+                .expectStatus().isNoContent();
+
+
+        StepVerifier.create(petTypeRepo.findOPetTypeById("test-pet-type-id"))
+                .expectComplete()
+                .verify();
+    }
+
+
 
 
 
