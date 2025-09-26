@@ -16,17 +16,17 @@ export default function axiosErrorResponseHandler(
   statusCode: number
 ): void {
   const redirectPath = errorPageRedirects[statusCode];
-  if (statusCode ==401){
-      console.log("clear the tocken");
-      localStorage.removeItem("token");
-      localStorage.clear()
-      router.navigate('/home')
-  if (redirectPath) {
-    // log for easy debug
-    console.error(`Redirecting to ${redirectPath} due to error:`, error);
-    router.navigate(redirectPath);
-  } else {
-    // log whatever that wasn't handled
-    console.error('Unhandled error:', error, 'Status code:', statusCode);
+  if (statusCode == 401) {
+    localStorage.removeItem('token');
+    localStorage.clear();
+    router.navigate('/home');
+    if (redirectPath) {
+      // log for easy debug
+      console.error(`Redirecting to ${redirectPath} due to error:`, error);
+      router.navigate(redirectPath);
+    } else {
+      // log whatever that wasn't handled
+      console.error('Unhandled error:', error, 'Status code:', statusCode);
+    }
   }
-}}
+}
