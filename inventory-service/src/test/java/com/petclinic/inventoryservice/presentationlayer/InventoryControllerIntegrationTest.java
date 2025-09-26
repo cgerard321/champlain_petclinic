@@ -25,6 +25,7 @@ import reactor.test.StepVerifier;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 
 import static com.mongodb.assertions.Assertions.assertTrue;
 
@@ -1377,6 +1378,32 @@ class InventoryControllerIntegrationTest {
         webTestClient.patch()
                 .uri("/inventory/{inventoryId}/products/{productId}/consume", invalidInventoryId, invalidProductId)
                 .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    void updateImportantStatus_withValidData_shouldSucceed() {
+        String inventoryId = "inventoryId_3";
+        Map<String, Boolean> request = Map.of("important", true);
+
+        webTestClient.patch()
+                .uri("/inventory/{inventoryId}/important", inventoryId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(request)
+                .exchange()
+                .expectStatus().isOk();
+    }
+
+    @Test
+    void updateImportantStatus_withInvalidInventoryId_shouldReturnNotFound() {
+        String invalidId = "invalidId";
+        Map<String, Boolean> request = Map.of("important", false);
+
+        webTestClient.patch()
+                .uri("/inventory/{inventoryId}/important", invalidId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(request)
                 .exchange()
                 .expectStatus().isNotFound();
     }

@@ -10,12 +10,15 @@ import './Emergency.css';
 import { exportVisitsCSV } from './api/exportVisitsCSV';
 import axiosInstance from '@/shared/api/axiosInstance.ts';
 import { getAllVisits } from './api/getAllVisits';
+import { IsOwner, IsVet } from '@/context/UserContext';
 
 export default function VisitListTable(): JSX.Element {
   const [visitIdToDelete, setConfirmDeleteId] = useState<string | null>(null);
+  const isVet = IsVet();
   const [visitsList, setVisitsList] = useState<Visit[]>([]);
   const [visitsAll, setVisitsAll] = useState<Visit[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>(''); // Search term state
+  const canLeaveReview = IsOwner() || IsVet();
   const [emergencyList, setEmergencyList] = useState<EmergencyResponseDTO[]>(
     []
   );
@@ -255,24 +258,30 @@ export default function VisitListTable(): JSX.Element {
               <td>{emergency.vetEmail}</td>
               <td>{emergency.vetPhoneNumber}</td>
               <td>
-                <button
-                  className="btn btn-warning"
-                  onClick={() => {
-                    navigate(`/visits/emergency/${emergency.visitEmergencyId}`);
-                  }}
-                  title="Edit"
-                >
-                  Edit
-                </button>
-                <button
-                  className="btn btn-danger"
-                  onClick={async () =>
-                    setConfirmDeleteId(emergency.visitEmergencyId)
-                  }
-                  title="Delete"
-                >
-                  Delete
-                </button>
+                {!isVet && (
+                  <button
+                    className="btn btn-warning"
+                    onClick={() => {
+                      navigate(
+                        `/visits/emergency/${emergency.visitEmergencyId}`
+                      );
+                    }}
+                    title="Edit"
+                  >
+                    Edit
+                  </button>
+                )}
+                {!isVet && (
+                  <button
+                    className="btn btn-danger"
+                    onClick={async () =>
+                      setConfirmDeleteId(emergency.visitEmergencyId)
+                    }
+                    title="Delete"
+                  >
+                    Delete
+                  </button>
+                )}
                 <button
                   className="btn btn-dark"
                   onClick={() =>
@@ -357,14 +366,16 @@ export default function VisitListTable(): JSX.Element {
                   >
                     View
                   </button>
-                  <button
-                    className="btn btn-warning"
-                    onClick={() => navigate(`/visits/${visit.visitId}/edit`)}
-                    title="Edit"
-                  >
-                    Edit
-                  </button>
-                  {allowArchive && (
+                  {!isVet && (
+                    <button
+                      className="btn btn-warning"
+                      onClick={() => navigate(`/visits/${visit.visitId}/edit`)}
+                      title="Edit"
+                    >
+                      Edit
+                    </button>
+                  )}
+                  {allowArchive && !isVet && (
                     <button
                       className="btn btn-secondary"
                       onClick={() => handleArchive(visit.visitId)}
@@ -376,7 +387,8 @@ export default function VisitListTable(): JSX.Element {
 
                   {visit.status !== 'CANCELLED' &&
                     visit.status !== 'ARCHIVED' &&
-                    visit.status !== 'COMPLETED' && (
+                    visit.status !== 'COMPLETED' &&
+                    !isVet && (
                       <button
                         className="btn btn-danger"
                         onClick={() => handleCancel(visit.visitId)}
@@ -395,13 +407,15 @@ export default function VisitListTable(): JSX.Element {
   return (
     <div>
       <div className="visit-actions">
-        <button
-          className="btn btn-warning"
-          onClick={() => navigate('/forms')}
-          title="Leave a Review"
-        >
-          Leave a Review
-        </button>
+        {canLeaveReview && (
+          <button
+            className="btn btn-warning"
+            onClick={() => navigate('/forms')}
+            title="Leave a Review"
+          >
+            Leave a Review
+          </button>
+        )}
         <button
           className="btn btn-dark"
           onClick={() => navigate('/reviews')}
@@ -416,13 +430,15 @@ export default function VisitListTable(): JSX.Element {
         {/*>*/}
         {/*  Create Emergency visit*/}
         {/*</button>*/}
-        <button
-          className="btn btn-warning"
-          onClick={() => navigate(AppRoutePaths.AddVisit)}
-          title="Make a Visit"
-        >
-          Make a Visit
-        </button>
+        {!isVet && (
+          <button
+            className="btn btn-warning"
+            onClick={() => navigate(AppRoutePaths.AddVisit)}
+            title="Make a Visit"
+          >
+            Make a Visit
+          </button>
+        )}
 
         <button
           className="btn btn-primary"

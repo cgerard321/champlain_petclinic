@@ -4,11 +4,12 @@ import { useNavigate } from 'react-router-dom';
 import { getAllReviews } from './Api/getAllReviews';
 import { ReviewResponseDTO } from './Model/ReviewResponseDTO';
 import { deleteReview } from './Api/deleteReview';
+import { IsOwner } from '@/context/UserContext';
 
 const ReviewsList: React.FC = (): JSX.Element => {
   const [reviewList, setReviewList] = useState<ReviewResponseDTO[]>([]);
-  const [showConfirmDialog, setShowConfirmDialog] = useState<boolean>(false);
   const navigate = useNavigate();
+  const canAccessActions = IsOwner();
 
   useEffect(() => {
     const fetchReviewsData = async (): Promise<void> => {
@@ -28,17 +29,6 @@ const ReviewsList: React.FC = (): JSX.Element => {
       console.error('Error in fetchReviewsData:', error)
     );
   }, []);
-
-  const handleDeleteAllReviews = (confirm: boolean): void => {
-    if (confirm) {
-      // Logic to delete all reviews (e.g., API call to delete)
-      setReviewList([]);
-      setShowConfirmDialog(false);
-    } else {
-      setShowConfirmDialog(false);
-    }
-  };
-
   const handleDelete = async (reviewId: number): Promise<void> => {
     const confirmDelete = window.confirm(
       `Are you sure you want to delete review with ID: ${reviewId}?`
@@ -66,7 +56,7 @@ const ReviewsList: React.FC = (): JSX.Element => {
             <th>Review</th>
             <th>Rating</th>
             <th>Date Submitted</th>
-            <th>Actions</th>
+            {canAccessActions && <th>Actions</th>}
           </tr>
         </thead>
         <tbody>
@@ -77,24 +67,26 @@ const ReviewsList: React.FC = (): JSX.Element => {
                 <td>{review.review}</td>
                 <td>{review.rating}/5</td>
                 <td>{new Date(review.dateSubmitted).toLocaleDateString()}</td>
-                <td>
-                  <button
-                    className="btn btn-warning"
-                    onClick={() =>
-                      navigate(`/updateReview/${review.reviewId}/edit`)
-                    }
-                    title="Edit"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    className="btn btn-danger"
-                    onClick={() => handleDelete(review.reviewId)}
-                    title="Delete"
-                  >
-                    Delete
-                  </button>
-                </td>
+                {canAccessActions && (
+                  <td>
+                    <button
+                      className="btn btn-warning"
+                      onClick={() =>
+                        navigate(`/updateReview/${review.reviewId}/edit`)
+                      }
+                      title="Edit"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      className="btn btn-danger"
+                      onClick={() => handleDelete(review.reviewId)}
+                      title="Delete"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                )}
               </tr>
             ))
           ) : (
@@ -114,37 +106,6 @@ const ReviewsList: React.FC = (): JSX.Element => {
       >
         Return to visits
       </button>
-
-      <button
-        className="delete-all-reviews-button btn btn-success"
-        onClick={() => setShowConfirmDialog(true)}
-      >
-        Delete All Reviews
-      </button>
-
-      {showConfirmDialog && (
-        <>
-          <div
-            className="overlay"
-            onClick={() => setShowConfirmDialog(false)}
-          ></div>
-          <div className="confirm-dialog">
-            <p>Are you sure you want to delete all reviews?</p>
-            <button
-              className="btn-danger mx-1"
-              onClick={() => handleDeleteAllReviews(true)}
-            >
-              Yes
-            </button>
-            <button
-              className="btn-warning mx-1"
-              onClick={() => setShowConfirmDialog(false)}
-            >
-              No
-            </button>
-          </div>
-        </>
-      )}
     </div>
   );
 };

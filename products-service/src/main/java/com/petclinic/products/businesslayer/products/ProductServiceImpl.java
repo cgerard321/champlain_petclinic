@@ -61,7 +61,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Flux<ProductResponseModel> getAllProducts(Double minPrice, Double maxPrice, Double minRating, Double maxRating, String sort,String deliveryType) {
+    public Flux<ProductResponseModel> getAllProducts(Double minPrice, Double maxPrice, Double minRating, Double maxRating, String sort,String deliveryType, String productType) {
         if (sort != null && !Arrays.asList("asc", "desc", "default").contains(sort.toLowerCase())) {
             throw new InvalidInputException("Invalid sort parameter: " + sort);
         }
@@ -91,6 +91,13 @@ public class ProductServiceImpl implements ProductService {
                     } else {
                         return product.getDeliveryType().toString().equalsIgnoreCase(deliveryType);
                     }
+                })
+                //Filter productType
+                .filter(product->{
+                    if(productType == null || productType.trim().isEmpty()){
+                        return true;
+                    }
+                    return product.getProductType().toString().equalsIgnoreCase(productType);
                 })
                 .collectList()
                 .flatMapMany(productList -> {
@@ -235,6 +242,8 @@ public class ProductServiceImpl implements ProductService {
                     return productRepository.save(product).then();
                 });
     }
+
+
     @Override
     public List<Product> getProductsByType(ProductType productType) {
         return productRepository.findByProductType(productType);
