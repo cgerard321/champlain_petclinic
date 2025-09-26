@@ -8,22 +8,17 @@ import { EmergencyResponseDTO } from './Emergency/Model/EmergencyResponseDTO';
 import { deleteEmergency } from './Emergency/Api/deleteEmergency';
 import './Emergency.css';
 import { exportVisitsCSV } from './api/exportVisitsCSV';
-import axiosInstance from '@/shared/api/axiosInstance.ts';
-import { getAllVisits } from './api/getAllVisits';
-import { IsOwner, IsVet } from '@/context/UserContext';
+import axiosInstance from '@/shared/api/axiosInstance';
+import { getAllVisits } from '@/features/visits/api/getAllVisits.ts';
 
 export default function VisitListTable(): JSX.Element {
-  const [visitIdToDelete, setConfirmDeleteId] = useState<string | null>(null);
-  const isVet = IsVet();
-  const [visitsList, setVisitsList] = useState<Visit[]>([]);
-  const [visitsAll, setVisitsAll] = useState<Visit[]>([]);
-  const [searchTerm, setSearchTerm] = useState<string>(''); // Search term state
-  const canLeaveReview = IsOwner();
+  const [allVisits, setAllVisits] = useState<Visit[]>([]);
   const [emergencyList, setEmergencyList] = useState<EmergencyResponseDTO[]>(
     []
   );
 
   //make tables collapsable
+  const [searchTerm, setSearchTerm] = useState<string>(''); // Search term state
   const [confirmedCollapsed, setConfirmedCollapsed] = useState(false);
   const [upcomingCollapsed, setUpcomingCollapsed] = useState(false);
   const [completedCollapsed, setCompletedCollapsed] = useState(false);
@@ -32,6 +27,29 @@ export default function VisitListTable(): JSX.Element {
 
   const navigate = useNavigate();
 
+  const filteredVisits = searchTerm
+    ? allVisits.filter(visit =>
+        visit.description.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : allVisits;
+
+  // Filter visits based on status
+  const confirmedVisits = filteredVisits.filter(
+    visit => visit.status === 'CONFIRMED'
+  );
+  const upcomingVisits = filteredVisits.filter(
+    visit => visit.status === 'UPCOMING'
+  );
+  const completedVisits = filteredVisits.filter(
+    visit => visit.status === 'COMPLETED'
+  );
+  const cancelledVisits = filteredVisits.filter(
+    visit => visit.status === 'CANCELLED'
+  );
+  const archivedVisits = filteredVisits.filter(
+    visit => visit.status === 'ARCHIVED'
+  );
+
   useEffect(() => {
     const loadInitialData = async (): Promise<void> => {
       try {
@@ -39,7 +57,7 @@ export default function VisitListTable(): JSX.Element {
           getAllVisits(),
           getAllEmergency(),
         ]);
-        setVisitsList(visits);
+        setAllVisits(visits);
         setEmergencyList(emergencies);
       } catch (error) {
         console.error('Error loading initial data:', error);
@@ -53,38 +71,17 @@ export default function VisitListTable(): JSX.Element {
 
     eventSource.onmessage = event => {
       try {
-        const newVisit: Visit = JSON.parse(event.data);
+        const updatedVisit: Visit = JSON.parse(event.data);
 
-        setVisitsList(oldVisits =>
-          oldVisits.filter(visit => visit.visitId !== newVisit.visitId)
-        );
-
-        setVisitsList(oldVisits => {
-          const index = oldVisits.findIndex(
-            visit => visit.visitId === newVisit.visitId
+        setAllVisits(prevVisits => {
+          const index = prevVisits.findIndex(
+            v => v.visitId === updatedVisit.visitId
           );
           if (index !== -1) {
-            // Update existing visit
-            const newVisits = [...oldVisits];
-            newVisits[index] = newVisit;
-            return newVisits;
+            return prevVisits.map((v, i) => (i === index ? updatedVisit : v));
           } else {
-            // Add new visit
-            return [...oldVisits, newVisit];
+            return [...prevVisits, updatedVisit];
           }
-        });
-
-        setVisitsList(oldVisits => {
-          if (!oldVisits.some(visit => visit.visitId === newVisit.visitId)) {
-            return [...oldVisits, newVisit];
-          }
-          return oldVisits;
-        });
-        setVisitsAll(oldVisits => {
-          if (!oldVisits.some(visit => visit.visitId === newVisit.visitId)) {
-            return [...oldVisits, newVisit];
-          }
-          return oldVisits;
         });
       } catch (error) {
         console.error('Error parsing SSE data:', error);
@@ -99,19 +96,6 @@ export default function VisitListTable(): JSX.Element {
     return () => {
       eventSource.close();
     };
-  }, []);
-
-  useEffect(() => {
-    // Fetch emergency visits
-    async function fetchEmergencies(): Promise<void> {
-      try {
-        const emergencies = await getAllEmergency();
-        setEmergencyList(emergencies); // Set emergency data to state
-      } catch (error) {
-        console.error('Error fetching emergencies:', error);
-      }
-    }
-    fetchEmergencies();
   }, []);
 
   const handleDeleteEmergency = async (
@@ -132,67 +116,35 @@ export default function VisitListTable(): JSX.Element {
     }
   };
 
-  useEffect(() => {
-    if (searchTerm) {
-      setVisitsList(
-        visitsAll.filter(visit =>
-          visit.description.toLowerCase().includes(searchTerm.toLowerCase())
-        )
-      );
-    } else {
-      return;
-    }
-  }, [searchTerm, visitsAll, visitsList]);
-
-  // Filter visits based on status
-  const confirmedVisits = visitsList.filter(
-    visit => visit.status === 'CONFIRMED'
-  );
-  const upcomingVisits = visitsList.filter(
-    visit => visit.status === 'UPCOMING'
-  );
-  const completedVisits = visitsList.filter(
-    visit => visit.status === 'COMPLETED'
-  );
-  const cancelledVisits = visitsList.filter(
-    visit => visit.status === 'CANCELLED'
-  );
-  const archivedVisits = visitsList.filter(
-    visit => visit.status === 'ARCHIVED'
-  );
-
   const handleArchive = async (visitId: string): Promise<void> => {
     const confirmArchive = window.confirm(
       `Are you sure you want to archive visit with ID: ${visitId}?`
     );
-    if (confirmArchive) {
-      try {
-        const requestBody = { status: 'ARCHIVED' };
-        await axiosInstance.put(
-          `/visits/completed/${visitId}/archive`,
-          requestBody,
-          { useV2: true }
-        );
+    if (!confirmArchive) return;
 
-        // Fetch the updated visit data from the backend
-        const updatedVisitResponse = await axiosInstance.get<Visit>(
-          `/visits/${visitId}`,
-          {
-            useV2: false,
-          }
-        );
+    // TODO Make this use V1
+    try {
+      const requestBody = { status: 'ARCHIVED' };
+      await axiosInstance.put(
+        `/visits/completed/${visitId}/archive`,
+        requestBody,
+        { useV2: true }
+      );
 
-        const updatedVisit = await updatedVisitResponse.data;
-        setVisitsList(prev =>
-          prev.filter(visit =>
-            visit.visitId === visitId ? updatedVisit : visit
-          )
-        );
-        alert('Visit archived successfully!');
-      } catch (error) {
-        console.error('Error archiving visit:', error);
-        alert('Error archiving visit.');
-      }
+      const updatedVisitResponse = await axiosInstance.get<Visit>(
+        `/visits/${visitId}`,
+        { useV2: false }
+      );
+
+      const updatedVisit = updatedVisitResponse.data;
+      setAllVisits(prevVisits =>
+        prevVisits.map(visit =>
+          visit.visitId === visitId ? updatedVisit : visit
+        )
+      );
+      alert('Visit archived successfully!');
+    } catch (error) {
+      console.error('Error archiving visit:', error);
     }
   };
 
@@ -208,7 +160,7 @@ export default function VisitListTable(): JSX.Element {
         useV2: false,
       });
       // Update the visit list after cancellation
-      setVisitsAll(prevVisits =>
+      setAllVisits(prevVisits =>
         prevVisits.map(visit =>
           visit.visitId === visitId ? { ...visit, status: 'CANCELLED' } : visit
         )
@@ -232,10 +184,10 @@ export default function VisitListTable(): JSX.Element {
             <th>Visit Emergency Id</th>
             <th>Visit Date</th>
             <th>Description</th>
-            <th> PetId</th>
+            <th>PetId</th>
             <th>Pet Birthdate </th>
             <th>Pet Name</th>
-            <th> PractitionnerId</th>
+            <th>PractitionnerId</th>
             <th>vetFirstName</th>
             <th>vetLastName</th>
             <th>Email</th>
@@ -258,30 +210,26 @@ export default function VisitListTable(): JSX.Element {
               <td>{emergency.vetEmail}</td>
               <td>{emergency.vetPhoneNumber}</td>
               <td>
-                {!isVet && (
-                  <button
-                    className="btn btn-warning"
-                    onClick={() => {
-                      navigate(
-                        `/visits/emergency/${emergency.visitEmergencyId}`
-                      );
-                    }}
-                    title="Edit"
-                  >
-                    Edit
-                  </button>
-                )}
-                {!isVet && (
-                  <button
-                    className="btn btn-danger"
-                    onClick={async () =>
-                      setConfirmDeleteId(emergency.visitEmergencyId)
-                    }
-                    title="Delete"
-                  >
-                    Delete
-                  </button>
-                )}
+                <button
+                  className="btn btn-warning"
+                  onClick={() => {
+                    navigate(
+                      `/visits/emergency/${emergency.visitEmergencyId}/edit`
+                    );
+                  }}
+                  title="Edit"
+                >
+                  Edit
+                </button>
+                <button
+                  className="btn btn-danger"
+                  onClick={async () => {
+                    await handleDeleteEmergency(emergency.visitEmergencyId);
+                  }}
+                  title="Delete"
+                >
+                  Delete
+                </button>
                 <button
                   className="btn btn-dark"
                   onClick={() =>
@@ -366,16 +314,14 @@ export default function VisitListTable(): JSX.Element {
                   >
                     View
                   </button>
-                  {!isVet && (
-                    <button
-                      className="btn btn-warning"
-                      onClick={() => navigate(`/visits/${visit.visitId}/edit`)}
-                      title="Edit"
-                    >
-                      Edit
-                    </button>
-                  )}
-                  {allowArchive && !isVet && (
+                  <button
+                    className="btn btn-warning"
+                    onClick={() => navigate(`/visits/${visit.visitId}/edit`)}
+                    title="Edit"
+                  >
+                    Edit
+                  </button>
+                  {allowArchive && (
                     <button
                       className="btn btn-secondary"
                       onClick={() => handleArchive(visit.visitId)}
@@ -387,8 +333,7 @@ export default function VisitListTable(): JSX.Element {
 
                   {visit.status !== 'CANCELLED' &&
                     visit.status !== 'ARCHIVED' &&
-                    visit.status !== 'COMPLETED' &&
-                    !isVet && (
+                    visit.status !== 'COMPLETED' && (
                       <button
                         className="btn btn-danger"
                         onClick={() => handleCancel(visit.visitId)}
@@ -407,15 +352,14 @@ export default function VisitListTable(): JSX.Element {
   return (
     <div>
       <div className="visit-actions">
-        {canLeaveReview && (
-          <button
-            className="btn btn-warning"
-            onClick={() => navigate('/forms')}
-            title="Leave a Review"
-          >
-            Leave a Review
-          </button>
-        )}
+        <button
+          className="btn btn-warning"
+          //TODO This has to be fixed. We should create a new endpoint like /reviews/add
+          onClick={() => navigate('/forms')}
+          title="Leave a Review"
+        >
+          Leave a Review
+        </button>
         <button
           className="btn btn-dark"
           onClick={() => navigate('/reviews')}
@@ -430,15 +374,13 @@ export default function VisitListTable(): JSX.Element {
         {/*>*/}
         {/*  Create Emergency visit*/}
         {/*</button>*/}
-        {!isVet && (
-          <button
-            className="btn btn-warning"
-            onClick={() => navigate(AppRoutePaths.AddVisit)}
-            title="Make a Visit"
-          >
-            Make a Visit
-          </button>
-        )}
+        <button
+          className="btn btn-warning"
+          onClick={() => navigate(AppRoutePaths.AddVisit)}
+          title="Make a Visit"
+        >
+          Make a Visit
+        </button>
 
         <button
           className="btn btn-primary"
@@ -490,34 +432,6 @@ export default function VisitListTable(): JSX.Element {
         archivedVisits,
         archivedCollapsed,
         setArchivedCollapsed
-      )}
-      {visitIdToDelete && (
-        <div className="modal">
-          <div className="modal-content">
-            <h3>Confirm Deletion</h3>
-            <p>
-              Are you sure you want to delete emergency visit {visitIdToDelete}?
-            </p>
-            <div className="modal-buttons">
-              <button onClick={() => setConfirmDeleteId(null)}>Cancel</button>
-              <button
-                onClick={async () => {
-                  try {
-                    await handleDeleteEmergency(visitIdToDelete);
-                    setConfirmDeleteId(null);
-                  } catch (error) {
-                    console.error('Error deleting emergency visit:', error);
-                    alert(
-                      'Failed to delete emergency visit. Please try again.'
-                    );
-                  }
-                }}
-              >
-                Confirm
-              </button>
-            </div>
-          </div>
-        </div>
       )}
     </div>
   );
