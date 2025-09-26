@@ -1,52 +1,73 @@
-# name: Qodana
-# on:
-#   workflow_dispatch:
-#   pull_request:
-#   push:
-#     branches:
-#       - main
-#       - 'releases/*'
+name: Qodana Code Quality Analysis
 
-# jobs:
-#   build:
-#     runs-on: ubuntu-latest
-#     permissions:
-#       contents: write
-#       pull-requests: write
-#       checks: write
-#     steps:
-#       - uses: actions/checkout@v3
-#         with:
-#           ref: ${{ github.event.pull_request.head.sha }}
-#           fetch-depth: 0
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - main
+      - 'releases/*'
 
-#       - name: Set up JDK 17
-#         uses: actions/setup-java@v2
-#         with:
-#           java-version: '17'
-#           distribution: 'adopt'
-#           cache: 'gradle'
+jobs:
+  qodana-analysis:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      checks: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
 
-#       - name: Run Build
-#         run: ./gradlew build
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'gradle'
 
-#       - name: Create coverage-data directory and copy contents
-#         run: |
-#           mkdir -p .qodana/code-coverage
-#           cp -R */build/reports/* .qodana/code-coverage/
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
 
-#       - name: Archive coverage data
-#         uses: actions/upload-artifact@v4
-#         with:
-#           name: gradle-coverage-data.zip
-#           path: .qodana/code-coverage
+      - name: Build and generate coverage reports
+        run: |
+          # Build all services and generate JaCoCo reports
+          ./gradlew clean build jacocoTestReport --parallel
+        working-directory: ./
 
-# #      - name: 'Qodana Scan'
-# #        uses: JetBrains/qodana-action@v2023.2
-# #        env:
-# #          QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
-# #        with:
-# #          args: "--linter,jetbrains/qodana-jvm:latest"
-# #          #todo Will setup the code-coverage percent to show on the Qodana reports in the future
-# ##          args: "-i,.qodana/code-coverage,--linter,jetbrains/qodana-jvm:latest"
-# #          pr-mode: false
+      - name: Create coverage-data directory and copy JaCoCo reports
+        run: |
+          mkdir -p .qodana/code-coverage
+          
+          # Copy JaCoCo XML reports for Qodana analysis
+          echo "Collecting JaCoCo XML reports..."
+          find . -name "jacocoTestReport.xml" -exec cp {} .qodana/code-coverage/ \;
+          
+          # Copy JaCoCo exec files (binary coverage data)
+          echo "Collecting JaCoCo exec files..."
+          find . -name "jacoco.exec" -exec cp {} .qodana/code-coverage/ \;
+          
+          # List collected files for debugging
+          echo "Collected coverage files:"
+          ls -la .qodana/code-coverage/
+          
+          # Create a summary of coverage data
+          echo "Coverage Summary:" > .qodana/code-coverage/coverage-summary.txt
+          find . -name "jacocoTestReport.xml" -exec echo "Found: {}" \; >> .qodana/code-coverage/coverage-summary.txt
+
+      - name: Archive coverage data
+        uses: actions/upload-artifact@v4
+        with:
+          name: qodana-coverage-data
+          path: .qodana/code-coverage
+          retention-days: 30
+
+      - name: 'Qodana Scan with Code Coverage'
+        uses: JetBrains/qodana-action@v2023.3
+        env:
+          QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
+        with:
+          args: "-i,.qodana/code-coverage,--linter,jetbrains/qodana-jvm:latest"
+          pr-mode: false

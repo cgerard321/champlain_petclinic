@@ -16,7 +16,14 @@ include:
   - name: FieldCanBeLocal
 #  - name: DefaultAnnotationParam
   - name: CommentedOutCode
-#  - name: JvmCoverageInspection
+  - name: JvmCoverageInspection
+
+
+exclude:
+  - name: RegExpRedundantEscape
+  - name: RegExpDuplicateAlternationBranch
+  - name: RegExpUnnecessaryNonCapturingGroup
+  - name: RegExpSimplifiable
 
 projectJDK: 17 #(Applied in CI/CD pipeline)
 
