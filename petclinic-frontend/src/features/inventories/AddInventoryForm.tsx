@@ -1,339 +1,352 @@
-import {useState, useEffect} from 'react';
-import {Inventory} from './models/Inventory';
-import {getAllInventoryTypes} from '@/features/inventories/api/getAllInventoryTypes.ts';
+import { useState, useEffect } from 'react';
+import { Inventory } from './models/Inventory';
+import { getAllInventoryTypes } from '@/features/inventories/api/getAllInventoryTypes.ts';
 import addInventory from '@/features/inventories/api/addInventory.ts';
-import {InventoryType} from '@/features/inventories/models/InventoryType.ts';
+import { InventoryType } from '@/features/inventories/models/InventoryType.ts';
 import './AddInventoryForm.css';
 
 interface AddInventoryProps {
-    showAddInventoryForm: boolean;
-    handleInventoryClose: () => void;
-    refreshInventoryTypes: () => void;
+  showAddInventoryForm: boolean;
+  handleInventoryClose: () => void;
+  refreshInventoryTypes: () => void;
 }
 
 type FieldKey =
-    | 'inventoryName'
-    | 'inventoryType'
-    | 'inventoryDescription'
-    | 'inventoryImage'
-    | 'inventoryBackupImage';
+  | 'inventoryName'
+  | 'inventoryType'
+  | 'inventoryDescription'
+  | 'inventoryImage'
+  | 'inventoryBackupImage';
 
 const AddInventoryForm: React.FC<AddInventoryProps> = ({
-                                                           showAddInventoryForm,
-                                                           handleInventoryClose,
-                                                           refreshInventoryTypes,
-                                                       }: AddInventoryProps): React.ReactElement | null => {
-    const [inventoryName, setInventoryName] = useState<string>('');
-    const [inventoryType, setInventoryType] = useState<string>('');
-    const [inventoryDescription, setInventoryDescription] = useState<string>('');
-    const [inventoryImage, setInventoryImage] = useState<string>('');
-    const [inventoryBackupImage, setInventoryBackupImage] = useState<string>('');
-    const [inventoryTypes, setInventoryTypes] = useState<InventoryType[]>([]);
-    const [imageUploaded, setImageUploaded] = useState<Uint8Array | null>(null);
+  showAddInventoryForm,
+  handleInventoryClose,
+  refreshInventoryTypes,
+}: AddInventoryProps): React.ReactElement | null => {
+  const [inventoryName, setInventoryName] = useState<string>('');
+  const [inventoryType, setInventoryType] = useState<string>('');
+  const [inventoryDescription, setInventoryDescription] = useState<string>('');
+  const [inventoryImage, setInventoryImage] = useState<string>('');
+  const [inventoryBackupImage, setInventoryBackupImage] = useState<string>('');
+  const [inventoryTypes, setInventoryTypes] = useState<InventoryType[]>([]);
+  const [imageUploaded, setImageUploaded] = useState<Uint8Array | null>(null);
 
-    // Per-field history arrays. Initialize with the initial/current value so there is always a baseline.
-    const [history, setHistory] = useState<Record<FieldKey, string[]>>({
-        inventoryName: [''],
-        inventoryType: [''],
-        inventoryDescription: [''],
-        inventoryImage: [''],
-        inventoryBackupImage: [''],
-    });
+  // Per-field history arrays. Initialize with the initial/current value so there is always a baseline.
+  const [history, setHistory] = useState<Record<FieldKey, string[]>>({
+    inventoryName: [''],
+    inventoryType: [''],
+    inventoryDescription: [''],
+    inventoryImage: [''],
+    inventoryBackupImage: [''],
+  });
 
-    // Track edit order. Last element = most recently edited field.
-    const [lastEditedFields, setLastEditedFields] = useState<string[]>([]);
+  // Track edit order. Last element = most recently edited field.
+  const [lastEditedFields, setLastEditedFields] = useState<string[]>([]);
 
-    useEffect(() => {
-        async function fetchInventoryTypes(): Promise<void> {
-            try {
-                const types = await getAllInventoryTypes();
-                setInventoryTypes(types);
-            } catch (error) {
-                console.error('Error fetching inventory types:', error);
-            }
-        }
-
-        fetchInventoryTypes();
-    }, []);
-
-    // helper: count words in a string (0 for empty/whitespace-only)
-    const countWords = (s: string): number => {
-        const trimmed = s.trim();
-        if (trimmed === '') return 0;
-        return trimmed.split(/\s+/).filter(Boolean).length;
-    };
-
-
-    // Save snapshot for field only when the *word count* changed compared to the last recorded snapshot.
-    const handleFieldChange = (
-        field: FieldKey,
-        setter: React.Dispatch<React.SetStateAction<string>>,
-        value: string
-    ) => {
-        setHistory(prev => {
-            const fieldHist = prev[field] ?? [''];
-            const lastRecorded = fieldHist[fieldHist.length - 1] ?? '';
-
-            const isWordBoundary =
-                value.endsWith(' ') || value.trim() === '' || countWords(value) < countWords(lastRecorded);
-
-            if (isWordBoundary && value !== lastRecorded) {
-                return {
-                    ...prev,
-                    [field]: [...fieldHist, value], // push only at word boundary
-                };
-            }
-            return prev;
-        });
-
-        // update edit-order: move this field to the end (most recent)
-        setLastEditedFields(prev => {
-            const updated = prev.filter(f => f !== field);
-            return [...updated, field];
-        });
-
-        setter(value);
-    };
-
-    // Undo handler
-    const handleUndo = (): void => {
-        const order = [...lastEditedFields];
-
-        while (order.length > 0) {
-            const candidate = order[order.length - 1] as FieldKey;
-            const fieldHist = history[candidate];
-
-            if (fieldHist && fieldHist.length > 1) {
-                const newHist = fieldHist.slice(0, -1); // remove last snapshot
-                const restoredValue = newHist[newHist.length - 1] ?? '';
-
-                setHistory(prev => ({
-                    ...prev,
-                    [candidate]: newHist,
-                }));
-
-                setLastEditedFields(prev => {
-                    const filtered = prev.filter(f => f !== candidate);
-                    if (newHist.length > 1) {
-                        return [...filtered, candidate];
-                    }
-                    return filtered;
-                });
-
-                switch (candidate) {
-                    case 'inventoryName':
-                        setInventoryName(restoredValue);
-                        break;
-                    case 'inventoryType':
-                        setInventoryType(restoredValue);
-                        break;
-                    case 'inventoryDescription':
-                        setInventoryDescription(restoredValue);
-                        break;
-                    case 'inventoryImage':
-                        setInventoryImage(restoredValue);
-                        break;
-                    case 'inventoryBackupImage':
-                        setInventoryBackupImage(restoredValue);
-                        break;
-                }
-                return;
-            }
-
-            order.pop();
-        }
-    };
-
-    // Handling form submission
-    const handleSubmit = async (e: React.FormEvent): Promise<void> => {
-        e.preventDefault();
-        const selectedInventoryType = inventoryTypes.find(
-            type => type.type === inventoryType
-        );
-
-        if (!selectedInventoryType) {
-            console.error('Invalid inventory type selected.');
-            return;
-        }
-
-        const base64Image = imageUploaded
-            ? arrayBufferToBase64(imageUploaded)
-            : null;
-
-        const newInventory: Omit<Inventory, 'inventoryId'> = {
-            inventoryName,
-            inventoryType: selectedInventoryType.type,
-            inventoryDescription,
-            inventoryImage,
-            inventoryBackupImage,
-            imageUploaded: base64Image,
-        };
-
-        try {
-            await addInventory(newInventory as Omit<Inventory, 'inventoryId'>);
-            alert('Inventory added successfully!');
-            setInventoryName('');
-            setInventoryType('');
-            setInventoryDescription('');
-            setInventoryImage('');
-            setImageUploaded(null);
-            refreshInventoryTypes(); // Call the function to refresh inventory types
-            handleInventoryClose(); // Close the form after adding the inventory
-        } catch (error) {
-            console.error('Error adding inventory:', error);
-        }
-    };
-
-    // Conditionally render the form based on the show prop
-    if (!showAddInventoryForm) return null; // Do not render if show is false
-
-    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>): void => {
-        const file = e.target.files?.[0];
-        if (file) {
-            if (file.size > 160 * 1024) {
-                alert('Select a smaller image that does not exceed 160kb');
-                setImageUploaded(null);
-                e.target.value = '';
-                return;
-            }
-
-            const reader = new FileReader();
-            reader.onload = event => {
-                if (event.target?.result instanceof ArrayBuffer) {
-                    // Track image change in undo history as well (push current text field value)
-                    setHistory(prev => ({
-                        ...prev,
-                        inventoryImage: [...(prev.inventoryImage ?? ['']), inventoryImage],
-                    }));
-
-                    setLastEditedFields(prev => {
-                        const updated = prev.filter(f => f !== 'inventoryImage');
-                        return [...updated, 'inventoryImage'];
-                    });
-                    const uint8Array = new Uint8Array(event.target.result as ArrayBuffer);
-                    setImageUploaded(uint8Array);
-                }
-            };
-            reader.readAsArrayBuffer(file);
-        }
-    };
-
-    function arrayBufferToBase64(buffer: Uint8Array): string {
-        const binary = String.fromCharCode(...buffer);
-        return window.btoa(binary);
+  useEffect(() => {
+    async function fetchInventoryTypes(): Promise<void> {
+      try {
+        const types = await getAllInventoryTypes();
+        setInventoryTypes(types);
+      } catch (error) {
+        console.error('Error fetching inventory types:', error);
+      }
     }
 
-    return (
-        <div className="overlay">
-            <div className="form-container">
-                <h2>Add Inventory</h2>
-                <form onSubmit={handleSubmit}>
-                    <div>
-                        <label htmlFor="inventoryName">Inventory Name:</label>
-                        <input
-                            type="text"
-                            id="inventoryName"
-                            value={inventoryName}
-                            onChange={e =>
-                                handleFieldChange('inventoryName', setInventoryName, e.target.value)
-                            }
-                            required
-                        />
-                    </div>
+    fetchInventoryTypes();
+  }, []);
 
-                    <div>
-                        <label htmlFor="inventoryType">Inventory Type:</label>
-                        <select
-                            id="inventoryType"
-                            value={inventoryType}
-                            onChange={e =>
-                                handleFieldChange('inventoryType', setInventoryType, e.target.value)
-                            }
-                            required
-                        >
-                            <option value="">Select Type</option>
-                            {inventoryTypes.map((type, index) => (
-                                <option key={index} value={type.type}>
-                                    {type.type}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+  // helper: count words in a string (0 for empty/whitespace-only)
+  const countWords = (s: string): number => {
+    const trimmed = s.trim();
+    if (trimmed === '') return 0;
+    return trimmed.split(/\s+/).filter(Boolean).length;
+  };
 
-                    <div>
-                        <label htmlFor="inventoryDescription">Inventory Description:</label>
-                        <input
-                            type="text"
-                            id="inventoryDescription"
-                            value={inventoryDescription}
-                            onChange={e =>
-                                handleFieldChange(
-                                    'inventoryDescription',
-                                    setInventoryDescription,
-                                    e.target.value
-                                )
-                            }
-                            required
-                        />
-                    </div>
+  // Save snapshot for field only when the *word count* changed compared to the last recorded snapshot.
+  const handleFieldChange = (
+    field: FieldKey,
+    setter: React.Dispatch<React.SetStateAction<string>>,
+    value: string
+  ): void => {
+    setHistory(prev => {
+      const fieldHist = prev[field] ?? [''];
+      const lastRecorded = fieldHist[fieldHist.length - 1] ?? '';
 
-                    <div>
-                        <label htmlFor="inventoryImage">Inventory Image:</label>
-                        <input
-                            type="text"
-                            id="inventoryImage"
-                            value={inventoryImage}
-                            onChange={e =>
-                                handleFieldChange('inventoryImage', setInventoryImage, e.target.value)
-                            }
-                            required
-                        />
-                    </div>
+      const isWordBoundary =
+        value.endsWith(' ') ||
+        value.trim() === '' ||
+        countWords(value) < countWords(lastRecorded);
 
-                    <div>
-                        <label htmlFor="inventoryImage">Inventory Backup Image:</label>
-                        <input
-                            type="text"
-                            id="inventoryBackupImage"
-                            value={inventoryBackupImage}
-                            onChange={e =>
-                                handleFieldChange(
-                                    'inventoryBackupImage',
-                                    setInventoryBackupImage,
-                                    e.target.value
-                                )
-                            }
-                            required
-                        />
-                    </div>
+      if (isWordBoundary && value !== lastRecorded) {
+        return {
+          ...prev,
+          [field]: [...fieldHist, value], // push only at word boundary
+        };
+      }
+      return prev;
+    });
 
-                    <div>
-                        <label htmlFor="imageUpload">Upload Image:</label>
-                        <input
-                            type="file"
-                            id="imageUpload"
-                            accept="image/*"
-                            onChange={handleImageUpload}
-                        />
-                    </div>
+    // update edit-order: move this field to the end (most recent)
+    setLastEditedFields(prev => {
+      const updated = prev.filter(f => f !== field);
+      return [...updated, field];
+    });
 
-                    <button type="submit">Add Inventory</button>
-                    <button
-                        type="button"
-                        className="cancel"
-                        onClick={handleInventoryClose}
-                    >
-                        Cancel
-                    </button>
+    setter(value);
+  };
 
-                    {/* Undo button: triggers the word-level undo handler above */}
-                    <button type="button" className="undo" onClick={handleUndo}>
-                        Undo
-                    </button>
-                </form>
-            </div>
-        </div>
+  // Undo handler
+  const handleUndo = (): void => {
+    const order = [...lastEditedFields];
+
+    while (order.length > 0) {
+      const candidate = order[order.length - 1] as FieldKey;
+      const fieldHist = history[candidate];
+
+      if (fieldHist && fieldHist.length > 1) {
+        const newHist = fieldHist.slice(0, -1); // remove last snapshot
+        const restoredValue = newHist[newHist.length - 1] ?? '';
+
+        setHistory(prev => ({
+          ...prev,
+          [candidate]: newHist,
+        }));
+
+        setLastEditedFields(prev => {
+          const filtered = prev.filter(f => f !== candidate);
+          if (newHist.length > 1) {
+            return [...filtered, candidate];
+          }
+          return filtered;
+        });
+
+        switch (candidate) {
+          case 'inventoryName':
+            setInventoryName(restoredValue);
+            break;
+          case 'inventoryType':
+            setInventoryType(restoredValue);
+            break;
+          case 'inventoryDescription':
+            setInventoryDescription(restoredValue);
+            break;
+          case 'inventoryImage':
+            setInventoryImage(restoredValue);
+            break;
+          case 'inventoryBackupImage':
+            setInventoryBackupImage(restoredValue);
+            break;
+        }
+        return;
+      }
+
+      order.pop();
+    }
+  };
+
+  // Handling form submission
+  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
+    e.preventDefault();
+    const selectedInventoryType = inventoryTypes.find(
+      type => type.type === inventoryType
     );
+
+    if (!selectedInventoryType) {
+      console.error('Invalid inventory type selected.');
+      return;
+    }
+
+    const base64Image = imageUploaded
+      ? arrayBufferToBase64(imageUploaded)
+      : null;
+
+    const newInventory: Omit<Inventory, 'inventoryId'> = {
+      inventoryName,
+      inventoryType: selectedInventoryType.type,
+      inventoryDescription,
+      inventoryImage,
+      inventoryBackupImage,
+      imageUploaded: base64Image,
+    };
+
+    try {
+      await addInventory(newInventory as Omit<Inventory, 'inventoryId'>);
+      alert('Inventory added successfully!');
+      setInventoryName('');
+      setInventoryType('');
+      setInventoryDescription('');
+      setInventoryImage('');
+      setImageUploaded(null);
+      refreshInventoryTypes(); // Call the function to refresh inventory types
+      handleInventoryClose(); // Close the form after adding the inventory
+    } catch (error) {
+      console.error('Error adding inventory:', error);
+    }
+  };
+
+  // Conditionally render the form based on the show prop
+  if (!showAddInventoryForm) return null; // Do not render if show is false
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 160 * 1024) {
+        alert('Select a smaller image that does not exceed 160kb');
+        setImageUploaded(null);
+        e.target.value = '';
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = event => {
+        if (event.target?.result instanceof ArrayBuffer) {
+          // Track image change in undo history as well (push current text field value)
+          setHistory(prev => ({
+            ...prev,
+            inventoryImage: [...(prev.inventoryImage ?? ['']), inventoryImage],
+          }));
+
+          setLastEditedFields(prev => {
+            const updated = prev.filter(f => f !== 'inventoryImage');
+            return [...updated, 'inventoryImage'];
+          });
+          const uint8Array = new Uint8Array(event.target.result as ArrayBuffer);
+          setImageUploaded(uint8Array);
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+  };
+
+  function arrayBufferToBase64(buffer: Uint8Array): string {
+    const binary = String.fromCharCode(...buffer);
+    return window.btoa(binary);
+  }
+
+  return (
+    <div className="overlay">
+      <div className="form-container">
+        <h2>Add Inventory</h2>
+        <form onSubmit={handleSubmit}>
+          <div>
+            <label htmlFor="inventoryName">Inventory Name:</label>
+            <input
+              type="text"
+              id="inventoryName"
+              value={inventoryName}
+              onChange={e =>
+                handleFieldChange(
+                  'inventoryName',
+                  setInventoryName,
+                  e.target.value
+                )
+              }
+              required
+            />
+          </div>
+
+          <div>
+            <label htmlFor="inventoryType">Inventory Type:</label>
+            <select
+              id="inventoryType"
+              value={inventoryType}
+              onChange={e =>
+                handleFieldChange(
+                  'inventoryType',
+                  setInventoryType,
+                  e.target.value
+                )
+              }
+              required
+            >
+              <option value="">Select Type</option>
+              {inventoryTypes.map((type, index) => (
+                <option key={index} value={type.type}>
+                  {type.type}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label htmlFor="inventoryDescription">Inventory Description:</label>
+            <input
+              type="text"
+              id="inventoryDescription"
+              value={inventoryDescription}
+              onChange={e =>
+                handleFieldChange(
+                  'inventoryDescription',
+                  setInventoryDescription,
+                  e.target.value
+                )
+              }
+              required
+            />
+          </div>
+
+          <div>
+            <label htmlFor="inventoryImage">Inventory Image:</label>
+            <input
+              type="text"
+              id="inventoryImage"
+              value={inventoryImage}
+              onChange={e =>
+                handleFieldChange(
+                  'inventoryImage',
+                  setInventoryImage,
+                  e.target.value
+                )
+              }
+              required
+            />
+          </div>
+
+          <div>
+            <label htmlFor="inventoryImage">Inventory Backup Image:</label>
+            <input
+              type="text"
+              id="inventoryBackupImage"
+              value={inventoryBackupImage}
+              onChange={e =>
+                handleFieldChange(
+                  'inventoryBackupImage',
+                  setInventoryBackupImage,
+                  e.target.value
+                )
+              }
+              required
+            />
+          </div>
+
+          <div>
+            <label htmlFor="imageUpload">Upload Image:</label>
+            <input
+              type="file"
+              id="imageUpload"
+              accept="image/*"
+              onChange={handleImageUpload}
+            />
+          </div>
+
+          <button type="submit">Add Inventory</button>
+          <button
+            type="button"
+            className="cancel"
+            onClick={handleInventoryClose}
+          >
+            Cancel
+          </button>
+
+          {/* Undo button: triggers the word-level undo handler above */}
+          <button type="button" className="undo" onClick={handleUndo}>
+            Undo
+          </button>
+        </form>
+      </div>
+    </div>
+  );
 };
 
 export default AddInventoryForm;
