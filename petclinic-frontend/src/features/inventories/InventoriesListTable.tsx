@@ -180,7 +180,7 @@ export default function InventoriesListTable(): JSX.Element {
   const fetchProductQuantity = async (inventoryId: string): Promise<void> => {
     try {
       const response = await axiosInstance.get<number>(
-        `/inventory/${inventoryId}/productquantity`,
+        `/inventories/${inventoryId}/productquantity`,
         { useV2: false }
       );
 
@@ -199,7 +199,7 @@ export default function InventoriesListTable(): JSX.Element {
   ): Promise<void> => {
     try {
       const response = await axiosInstance.get<ProductModel[]>(
-        `/inventory/${inventory.inventoryId}/products/lowstock`,
+        `/inventories/${inventory.inventoryId}/products/lowstock`,
         { useV2: false }
       );
       const data = response.data;
@@ -254,7 +254,7 @@ export default function InventoriesListTable(): JSX.Element {
     location.state?.lastConsultedInventoryId || null;
 
   const handleCardClick = (inventoryId: string): void => {
-    navigate(`/inventory/${inventoryId}/products`, {
+    navigate(`/inventories/${inventoryId}/products`, {
       state: { lastConsultedInventoryId: inventoryId },
     });
   };

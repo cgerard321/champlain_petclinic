@@ -6,7 +6,7 @@ export const toggleInventoryImportant = async (
 ): Promise<void> => {
   try {
     await axiosInstance.patch<void>(
-      `/inventory/${inventoryId}/important`,
+      `/inventories/${inventoryId}/important`,
       { important: isImportant },
       { useV2: false }
     );

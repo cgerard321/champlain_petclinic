@@ -55,8 +55,9 @@ public class PetTypeServiceImpl implements PetTypeService {
 
     @Override
     public Mono<Void> deletePetTypeByPetTypeId(String petTypeId) {
-        return petTypeRepo.deleteById(petTypeId);
+        return petTypeRepo.deleteByPetTypeId(petTypeId);
     }
+
 
     /*
     @Override
@@ -66,12 +67,12 @@ public class PetTypeServiceImpl implements PetTypeService {
 
     }
 
-     */
+
 
 
     @Override
     public Mono<PetType> getPetTypeById(Integer Id) {
         return petTypeRepo.findPetTypeById(Id);
-    }
+    }*/
 
 }

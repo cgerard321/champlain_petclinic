@@ -5,7 +5,7 @@ angular.module('inventoryProductList', ['ui.router'])
         $stateProvider
             .state('productList', {
                 parent: 'app',
-                url: '/inventory/:inventoryId/products-pagination?page&size',
+                url: '/inventories/:inventoryId/products-pagination?page&size',
                 template: '<inventory-product-list></inventory-product-list>',
                 controller: 'InventoryProductController',
                 controllerAs: 'self'
@@ -13,12 +13,12 @@ angular.module('inventoryProductList', ['ui.router'])
 
             .state('deleteProduct', {
                 parent: 'app',
-                url: '/inventory/:inventoryId/products/:productId',
+                url: '/inventories/:inventoryId/products/:productId',
                 template: '<inventory-product-item></inventory-product-item>'
             })
             .state('deleteAllProducts', {
                 parent: 'app',
-                url: '/inventory/:inventoryId/products',
+                url: '/inventories/:inventoryId/products',
                 template: '<inventory-product-item></inventory-product-item>'
             })
     }]);

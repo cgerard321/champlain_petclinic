@@ -44,9 +44,12 @@ public class PetTypeController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
+
     @DeleteMapping("/{petTypeId}")
-    public Mono<Void> DeletePetTypeByPetTypeId(@PathVariable String petTypeId) {
-        return petTypeService.deletePetTypeByPetTypeId(petTypeId);
+    public Mono<ResponseEntity<Object>> DeletePetTypeByPetTypeId(@PathVariable String petTypeId) {
+        return petTypeService.deletePetTypeByPetTypeId(petTypeId)
+                .then(Mono.just(ResponseEntity.noContent().build()))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
 
