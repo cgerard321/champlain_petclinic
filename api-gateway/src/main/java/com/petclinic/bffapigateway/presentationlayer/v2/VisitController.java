@@ -215,7 +215,8 @@ public class VisitController {
     public Flux<VisitResponseDTO> getArchivedVisits() {
         return visitsServiceClient.getAllArchivedVisits();
     }
-  
+
+    @SecuredEndpoint(allowedRoles = {Roles.OWNER})
     @DeleteMapping(value="/reviews/{reviewId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<ReviewResponseDTO>> deleteReview(@PathVariable String reviewId) {
         return Mono.just(reviewId)
