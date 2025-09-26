@@ -2,8 +2,13 @@
 // eslint-disable-next-line import/default
 import React, { useState } from 'react';
 import { Button, Form, Modal } from 'react-bootstrap';
+import { VetRequestModel } from '@/features/veterinarians/models/VetRequestModel.ts';
 
-const UploadVetPhoto: React.FC = () => {
+interface UploadVetPhotoProps {
+  vets: VetRequestModel[];
+}
+
+const UploadVetPhoto: React.FC<UploadVetPhotoProps> = ({ vets }) => {
   const [vetId, setVetId] = useState('');
   const [photoName, setPhotoName] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -67,14 +72,21 @@ const UploadVetPhoto: React.FC = () => {
         <Modal.Body>
           <Form>
             <Form.Group controlId="vetId">
-              <Form.Label>Vet ID</Form.Label>
-              <Form.Control
-                type="text"
+              <Form.Label>Select Vet</Form.Label>
+              <Form.Select
                 value={vetId}
                 onChange={e => setVetId(e.target.value)}
-                placeholder="Enter Vet ID"
                 required
-              />
+              >
+                <option disabled value="">
+                  -- Choose a Vet --
+                </option>
+                {vets.map(vet => (
+                  <option key={vet.vetId} value={vet.vetId}>
+                    {vet.firstName} {vet.lastName}
+                  </option>
+                ))}
+              </Form.Select>
             </Form.Group>
             <Form.Group controlId="photoName">
               <Form.Label>Photo Name</Form.Label>
