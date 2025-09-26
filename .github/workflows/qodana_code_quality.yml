@@ -35,19 +35,14 @@ jobs:
     - name: Build Java services
       run: ./gradlew clean build -x test
       working-directory: ./
-    - name: Qodana Scan
+    - name: 'Qodana Scan with Code Coverage'
       id: qodana
       uses: JetBrains/qodana-action@v2023.3
+      env:
+        QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
       with:
-        linter: jetbrains/qodana-jvm-community:latest
-        results-dir: .qodana/results
-        cache-dir: .qodana/cache
-        upload-result: true
-        artifact-name: qodana-results
-        use-caches: true
-        use-annotations: true
-        upload-to-cloud: true
-        qodana-token: ${{ secrets.QODANA_TOKEN }}
+        args: "--linter,jetbrains/qodana-jvm-community:latest"
+        pr-mode: false
     - name: Display Qodana Cloud URL
       run: |
         echo "## Qodana Analysis Results" >> $GITHUB_STEP_SUMMARY
