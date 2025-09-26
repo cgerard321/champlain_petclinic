@@ -11,7 +11,6 @@ import axiosInstance from '@/shared/api/axiosInstance';
 import { IsAdmin } from '@/context/UserContext';
 import { AppRoutePaths } from '@/shared/models/path.routes';
 
-
 interface ProductAPIResponse {
   productId: number;
   imageId: string;
@@ -436,18 +435,15 @@ const UserCart = (): JSX.Element => {
       // Set the invoices state
       setInvoices(invoiceItems);
 
-
-        setCheckoutMessage(
-          'Checkout successful! Your order is being processed.'
-        );
-        setCartItems([]); // Clear the cart after successful checkout
-        setCartItemCount(0);
-        setIsCheckoutModalOpen(false);
-      } catch (error: unknown) {
-        if (error && typeof error === 'object' && 'response' in error) {
-          const errorData = (
-            error as { response?: { data?: { message?: string } } }
-          ).response?.data;
+      setCheckoutMessage('Checkout successful! Your order is being processed.');
+      setCartItems([]); // Clear the cart after successful checkout
+      setCartItemCount(0);
+      setIsCheckoutModalOpen(false);
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'response' in error) {
+        const errorData = (
+          error as { response?: { data?: { message?: string } } }
+        ).response?.data;
         setCheckoutMessage(
           `Checkout failed: ${errorData?.message || 'Unexpected error'}`
         );
