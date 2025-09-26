@@ -58,7 +58,7 @@ export default function CustomerVisitListTable(): JSX.Element {
           onClick={() => navigate(AppRoutePaths.OwnerBookAppointment)}
           title="Schedule a Visit"
         >
-          Make a Visit
+          Schedule a Visit
         </button>
       </div>
 
