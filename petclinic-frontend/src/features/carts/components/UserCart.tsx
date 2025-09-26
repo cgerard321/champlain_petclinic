@@ -7,6 +7,7 @@ import { ProductModel } from '../models/ProductModel';
 import './UserCart.css';
 import { NavBar } from '@/layouts/AppNavBar';
 import { FaShoppingCart } from 'react-icons/fa'; // Importing the shopping cart icon
+import axiosInstance from '@/shared/api/axiosInstance';
 import { IsAdmin } from '@/context/UserContext';
 import { AppRoutePaths } from '@/shared/models/path.routes';
 
@@ -78,19 +79,9 @@ const UserCart = (): JSX.Element => {
       }
 
       try {
-        const response = await fetch(
-          `http://localhost:8080/api/v2/gateway/carts/${cartId}`,
-          {
-            headers: { Accept: 'application/json' },
-            credentials: 'include',
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error(`Error: ${response.status} ${response.statusText}`);
-        }
-
-        const data = await response.json();
+        const { data } = await axiosInstance.get(`/carts/${cartId}`, {
+          useV2: true,
+        });
 
         // Ensure that data.products exists and is an array
         if (!Array.isArray(data.products)) {
@@ -136,24 +127,12 @@ const UserCart = (): JSX.Element => {
 
   const applyVoucherCode = async (): Promise<void> => {
     try {
-      const response = await fetch(
-        `http://localhost:8080/api/v2/gateway/promos/validate/${voucherCode}`,
-        {
-          method: 'GET',
-          headers: {
-            Accept: 'application/json',
-          },
-          credentials: 'include',
-        }
+      const { data } = await axiosInstance.get(
+        `/promos/validate/${voucherCode}`,
+        { useV2: true }
       );
-
-      if (response.ok) {
-        const data = await response.json();
-        setDiscount((subtotal * data.discount) / 100);
-        setVoucherError(null);
-      } else {
-        setVoucherError('Promo Code Invalid');
-      }
+      setDiscount((subtotal * data.discount) / 100);
+      setVoucherError(null);
     } catch (err: unknown) {
       console.error('Error validating voucher code:', err);
       setVoucherError('Error validating voucher code.');
@@ -186,28 +165,22 @@ const UserCart = (): JSX.Element => {
 
       // Update quantity in backend
       try {
-        const response = await fetch(
-          `http://localhost:8080/api/v2/gateway/carts/${cartId}/products/${item.productId}`,
-          {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-              Accept: 'application/json',
-            },
-            credentials: 'include',
-            body: JSON.stringify({ quantity: newQuantity }),
-          }
+        const { data } = await axiosInstance.put(
+          `/carts/${cartId}/products/${item.productId}`,
+          { quantity: newQuantity },
+          { useV2: true }
         );
 
-        const data = await response.json();
-
-        if (!response.ok) {
+        if (data && data.message) {
           setErrorMessages(prevErrors => ({
             ...prevErrors,
             [index]: data.message || 'Failed to update quantity',
           }));
           // Check if the product has been moved to wishlist
-          if (data.message && data.message.includes('moved to your wishlist')) {
+          if (
+            typeof data.message === 'string' &&
+            data.message.includes('moved to your wishlist')
+          ) {
             // Remove the item from cart
             setCartItems(prevItems =>
               prevItems.filter((_, idx) => idx !== index)
@@ -215,6 +188,7 @@ const UserCart = (): JSX.Element => {
             // Add to wishlist
             setWishlistItems(prevItems => [...prevItems, item]);
             setNotificationMessage(data.message);
+            return;
           }
         } else {
           // Update local state
@@ -254,19 +228,9 @@ const UserCart = (): JSX.Element => {
       }
 
       try {
-        const response = await fetch(
-          `http://localhost:8080/api/v2/gateway/carts/${cartId}/${productId}`,
-          {
-            method: 'DELETE',
-            headers: {
-              Accept: 'application/json',
-            },
-            credentials: 'include',
-          }
-        );
-        if (!response.ok) {
-          throw new Error('Failed to delete item from the cart');
-        }
+        await axiosInstance.delete(`/carts/${cartId}/${productId}`, {
+          useV2: true,
+        });
 
         setCartItems(prevItems =>
           prevItems.filter((_, index) => index !== indexToDelete)
@@ -293,21 +257,11 @@ const UserCart = (): JSX.Element => {
 
     if (window.confirm('Are you sure you want to clear the cart?')) {
       try {
-        const response = await fetch(
-          `http://localhost:8080/api/v2/gateway/carts/${cartId}/clear`,
-          {
-            method: 'DELETE',
-            credentials: 'include',
-          }
-        );
+        await axiosInstance.delete(`/carts/${cartId}/clear`, { useV2: true });
 
-        if (response.ok) {
-          setCartItems([]);
-          setCartItemCount(0);
-          alert('Cart has been successfully cleared!');
-        } else {
-          throw new Error('Failed to clear cart');
-        }
+        setCartItems([]);
+        setCartItemCount(0);
+        alert('Cart has been successfully cleared!');
       } catch (error: unknown) {
         // Changed from any to unknown
         console.error('Error clearing cart:', error);
@@ -324,39 +278,26 @@ const UserCart = (): JSX.Element => {
   const addToWishlist = async (item: ProductModel): Promise<void> => {
     try {
       const productId = item.productId;
-      const response = await fetch(
-        `http://localhost:8080/api/v2/gateway/carts/${cartId}/wishlist/${productId}/toWishList`,
+      const { data } = await axiosInstance.put(
+        `/carts/${cartId}/wishlist/${productId}/toWishList`,
         {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-          },
-          credentials: 'include',
-          body: JSON.stringify({
-            productId: item.productId,
-            imageId: item.imageId,
-            productName: item.productName,
-            productSalePrice: item.productSalePrice,
-          }),
-        }
+          productId: item.productId,
+          imageId: item.imageId,
+          productName: item.productName,
+          productSalePrice: item.productSalePrice,
+        },
+        { useV2: true }
       );
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to add to wishlist');
-      }
-
-      // Update wishlist state
-      setWishlistItems(prevItems => [...prevItems, item]);
-
-      // Display notification message from backend
-      if (data.message) {
+      if (data && data.message) {
+        // Display notification message from backend
         setNotificationMessage(data.message);
       } else {
         alert(`${item.productName} has been added to your wishlist!`);
       }
+
+      // Update wishlist state
+      setWishlistItems(prevItems => [...prevItems, item]);
 
       // Trigger the useEffect by updating the wishlistUpdated state
       setWishlistUpdated(true);
@@ -375,28 +316,21 @@ const UserCart = (): JSX.Element => {
   const addToCartFunction = async (item: ProductModel): Promise<void> => {
     try {
       const productId = item.productId;
-      const response = await fetch(
-        `http://localhost:8080/api/v2/gateway/carts/${cartId}/wishlist/${productId}/toCart`,
+      const { data } = await axiosInstance.put(
+        `/carts/${cartId}/wishlist/${productId}/toCart`,
         {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-          },
-          credentials: 'include',
-          body: JSON.stringify({
-            productId: item.productId,
-            imageId: item.imageId,
-            productName: item.productName,
-            productSalePrice: item.productSalePrice,
-          }),
-        }
+          productId: item.productId,
+          imageId: item.imageId,
+          productName: item.productName,
+          productSalePrice: item.productSalePrice,
+        },
+        { useV2: true }
       );
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to add to cart');
+      if (data && data.message) {
+        setNotificationMessage(data.message);
+      } else {
+        alert(`${item.productName} has been added to your cart!`);
       }
 
       // Update cart items state
@@ -406,13 +340,6 @@ const UserCart = (): JSX.Element => {
       setWishlistItems(prevItems =>
         prevItems.filter(product => product.productId !== item.productId)
       );
-
-      // Display notification message from backend
-      if (data.message) {
-        setNotificationMessage(data.message);
-      } else {
-        alert(`${item.productName} has been added to your cart!`);
-      }
 
       // Trigger the useEffect by updating the wishlistUpdated state
       setWishlistUpdated(true);
@@ -492,43 +419,37 @@ const UserCart = (): JSX.Element => {
     }
 
     try {
-      const response = await fetch(
-        `http://localhost:8080/api/v2/gateway/carts/${cartId}/checkout`,
-        {
-          method: 'POST',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
+      await axiosInstance.post(
+        `/carts/${cartId}/checkout`,
+        {},
+        { useV2: true }
       );
 
-      if (response.ok) {
-        const invoiceItems: Invoice[] = cartItems.map(item => ({
-          productId: Number(item.productId), // Ensure productId is a number
-          productName: item.productName,
-          productSalePrice: item.productSalePrice,
-          quantity: item.quantity || 1,
-        }));
+      const invoiceItems: Invoice[] = cartItems.map(item => ({
+        productId: Number(item.productId), // Ensure productId is a number
+        productName: item.productName,
+        productSalePrice: item.productSalePrice,
+        quantity: item.quantity || 1,
+      }));
 
-        // Set the invoices state
-        setInvoices(invoiceItems);
+      // Set the invoices state
+      setInvoices(invoiceItems);
 
+      setCheckoutMessage('Checkout successful! Your order is being processed.');
+      setCartItems([]); // Clear the cart after successful checkout
+      setCartItemCount(0);
+      setIsCheckoutModalOpen(false);
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'response' in error) {
+        const errorData = (
+          error as { response?: { data?: { message?: string } } }
+        ).response?.data;
         setCheckoutMessage(
-          'Checkout successful! Your order is being processed.'
+          `Checkout failed: ${errorData?.message || 'Unexpected error'}`
         );
-        setCartItems([]); // Clear the cart after successful checkout
-        setCartItemCount(0);
-        setIsCheckoutModalOpen(false);
       } else {
-        const errorData = await response.json();
-        setCheckoutMessage(
-          `Checkout failed: ${errorData.message || response.statusText}`
-        );
+        setCheckoutMessage('Checkout failed: Unexpected error');
       }
-    } catch (error) {
-      console.error('Error during checkout:', error);
-      setCheckoutMessage('Checkout failed due to an unexpected error.');
     }
   };
 

@@ -410,8 +410,6 @@
 
 .cart-header-title {
   margin-top: 20px;
-}
-
 /* If the overlay is an actual <img> with matching src or alt */
 .Wishlist-items img[src*="out-of-stock" i],
 .Wishlist-items img[alt*="out of stock" i],
@@ -426,3 +424,4 @@
   background-image: none !important;
   content: normal; 
 }
+
