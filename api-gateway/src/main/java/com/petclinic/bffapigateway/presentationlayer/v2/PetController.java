@@ -94,4 +94,12 @@ public class PetController {
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @DeleteMapping(value = "owners/petTypes/{petTypeId}")
+    public Mono<ResponseEntity<Void>> deletePetTypeByPetTypeId(final @PathVariable String petTypeId){
+        return customersServiceClient.deletePetTypeV2(petTypeId)
+                .then(Mono.just(ResponseEntity.ok().<Void>build()))
+                .defaultIfEmpty(ResponseEntity.notFound().<Void>build());
+    }
+
 }

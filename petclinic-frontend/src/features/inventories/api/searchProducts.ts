@@ -17,8 +17,8 @@ export async function searchProducts(
 
     const queryString = queryParams.toString();
     const url = queryString
-      ? `/inventory/${inventoryId}/products/search?${queryString}`
-      : `/inventory/${inventoryId}/products/search`;
+      ? `/inventories/${inventoryId}/products/search?${queryString}`
+      : `/inventories/${inventoryId}/products/search`;
 
     const response = await axiosInstance.get<ProductModel[]>(url, {
       useV2: false,
