@@ -75,6 +75,8 @@ import static com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockS
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -1461,14 +1463,19 @@ class ApiGatewayControllerTest {
         pet.setPetTypeId("5");
         pet.setIsActive("true");
 
-        when(customersServiceClient.createPet(pet,od.getOwnerId()))
-
+        when(customersServiceClient.createPetForOwner(eq(od.getOwnerId()), any(PetRequestDTO.class)))
                 .thenReturn(Mono.just(pet));
+
+        PetRequestDTO petRequest = new PetRequestDTO();
+        petRequest.setOwnerId(od.getOwnerId());
+        petRequest.setName("Fluffy");
+        petRequest.setBirthDate(date);
+        petRequest.setPetTypeId("5");
+        petRequest.setIsActive("true");
 
         client.post()
                 .uri("/api/gateway/owners/{ownerId}/pets", od.getOwnerId())
-
-                .body(Mono.just(pet), PetResponseDTO.class)
+                .body(Mono.just(petRequest), PetRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isCreated()
@@ -1795,13 +1802,19 @@ class ApiGatewayControllerTest {
         pet.setIsActive("true");
 
 
-        when(customersServiceClient.createPet(pet,od.getOwnerId()))
-
+        when(customersServiceClient.createPetForOwner(eq(od.getOwnerId()), any(PetRequestDTO.class)))
                 .thenReturn(Mono.just(pet));
+
+        PetRequestDTO petRequest = new PetRequestDTO();
+        petRequest.setOwnerId(od.getOwnerId());
+        petRequest.setName("Fluffy");
+        petRequest.setBirthDate(date);
+        petRequest.setPetTypeId("5");
+        petRequest.setIsActive("true");
 
         client.post()
                 .uri("/api/gateway/owners/{ownerId}/pets", od.getOwnerId())
-                .body(Mono.just(pet), PetResponseDTO.class)
+                .body(Mono.just(petRequest), PetRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isCreated()
@@ -1831,13 +1844,19 @@ class ApiGatewayControllerTest {
         pet.setPetTypeId("5");
         pet.setIsActive("true");
 
-
-        when(customersServiceClient.createPet(pet,od.getOwnerId()))
+        when(customersServiceClient.createPetForOwner(eq(od.getOwnerId()), any(PetRequestDTO.class)))
                 .thenReturn(Mono.just(pet));
+
+        PetRequestDTO petRequest = new PetRequestDTO();
+        petRequest.setOwnerId(od.getOwnerId());
+        petRequest.setName("Fluffy");
+        petRequest.setBirthDate(date);
+        petRequest.setPetTypeId("5");
+        petRequest.setIsActive("true");
 
         client.post()
                 .uri("/api/gateway/owners/{ownerId}/pets", od.getOwnerId())
-                .body(Mono.just(pet), PetResponseDTO.class)
+                .body(Mono.just(petRequest), PetRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isCreated()
