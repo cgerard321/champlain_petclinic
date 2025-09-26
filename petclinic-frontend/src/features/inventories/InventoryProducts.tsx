@@ -56,6 +56,7 @@ const InventoryProducts: React.FC = () => {
   const { productList, setProductList, getProductList } = useSearchProducts();
 
   // Declare state
+  const [inventoryName, setInventoryName] = useState<string>('');
   const [productName, setProductName] = useState<string>('');
   const [productDescription, setProductDescription] = useState<string>('');
   const [productStatus, setProductStatus] = useState<Status | ''>('');
@@ -76,6 +77,20 @@ const InventoryProducts: React.FC = () => {
       }
     }
   };
+  useEffect(() => {
+    if (!inventoryId) return;
+    axiosInstance
+      .get(`/inventory/${inventoryId}`, { useV2: false })
+      .then(res => {
+        const name = (res.data?.inventoryName ?? res.data?.name ?? '')
+          .toString()
+          .trim();
+        if (name) setInventoryName(name);
+      })
+      .catch(err => {
+        console.warn('Failed to fetch inventory details', err);
+      });
+  }, [inventoryId]);
 
   useEffect(() => {
     const w = window as WindowWithGoogle;
@@ -145,7 +160,6 @@ const InventoryProducts: React.FC = () => {
       fetchProducts().catch(err => console.error(err));
     }
   }, [inventoryId, setProductList]);
-
   const deleteProduct = async (): Promise<void> => {
     if (productToDelete) {
       try {
@@ -308,7 +322,7 @@ const InventoryProducts: React.FC = () => {
   return (
     <div className="inventory-supplies">
       <h2 className="inventory-title">
-        Supplies in Inventory: <span>{inventoryId}</span>
+        Supplies in Inventory: <span>{inventoryName}</span>
       </h2>
       <button
         className="btn btn-secondary"
