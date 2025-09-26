@@ -1,6 +1,8 @@
 package com.petclinic.customersservice.business;
 
 import com.petclinic.customersservice.business.PetTypeService;
+import com.petclinic.customersservice.customersExceptions.exceptions.InvalidInputException;
+import com.petclinic.customersservice.customersExceptions.exceptions.NotFoundException;
 import com.petclinic.customersservice.data.Owner;
 import com.petclinic.customersservice.data.PetType;
 import com.petclinic.customersservice.data.PetTypeRepo;
@@ -17,6 +19,7 @@ import reactor.test.StepVerifier;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
@@ -31,7 +34,56 @@ class PetTypeServiceImplTest {
     private PetTypeService petTypeService;
 
     @MockBean
-    private PetTypeRepo repo;
+    private PetTypeRepo petTypeRepo;
+
+
+
+
+    @Test
+    void deletePetTypeByPetTypeId_ShouldDeleteSuccessfully() {
+        try {
+            String petTypeId = "4283c9b8-4ffd-4866-a5ed-287117c60a40";
+            when(petTypeRepo.deleteByPetTypeId(petTypeId)).thenReturn(Mono.empty());
+
+            Mono<Void> result = petTypeService.deletePetTypeByPetTypeId(petTypeId);
+
+            StepVerifier.create(result)
+                    .verifyComplete();
+
+            verify(petTypeRepo).deleteByPetTypeId(petTypeId);
+
+        } catch (NotFoundException e) {
+            fail("Unexpected NotFoundException: " + e.getMessage());
+        } catch (InvalidInputException e) {
+            fail("Unexpected InvalidInputException: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Test failed with exception: " + e.getMessage());
+            e.printStackTrace();
+            fail("Test failed: " + e.getMessage());
+        }
+    }
+
+    @Test
+    void deletePetTypeByPetTypeId_WhenPetTypeNotFound_ShouldComplete() {
+        try {
+            String petTypeId = "non-existent-id";
+            when(petTypeRepo.deleteByPetTypeId(petTypeId)).thenReturn(Mono.empty());
+
+            Mono<Void> result = petTypeService.deletePetTypeByPetTypeId(petTypeId);
+
+            StepVerifier.create(result)
+                    .verifyComplete();
+
+        } catch (NotFoundException e) {
+            fail("Unexpected NotFoundException: " + e.getMessage());
+        } catch (InvalidInputException e) {
+            fail("Unexpected InvalidInputException: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Test failed with exception: " + e.getMessage());
+            e.printStackTrace();
+            fail("Test failed: " + e.getMessage());
+        }
+    }
 
 
     /*

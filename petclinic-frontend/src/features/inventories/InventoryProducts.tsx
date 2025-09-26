@@ -138,7 +138,7 @@ const InventoryProducts: React.FC = () => {
       setError(null);
       try {
         const response = await axiosInstance.get<ProductModel[]>(
-          `/inventory/${inventoryId}/products/search`,
+          `/inventories/${inventoryId}/products/search`,
           { useV2: false }
         );
         const data = Array.isArray(response.data) ? response.data : [];
@@ -164,7 +164,7 @@ const InventoryProducts: React.FC = () => {
     if (productToDelete) {
       try {
         await axiosInstance.delete(
-          `/inventory/${inventoryId}/products/${productToDelete}`,
+          `/inventories/${inventoryId}/products/${productToDelete}`,
           { useV2: false }
         );
         const updatedProducts = products.filter(
@@ -244,7 +244,7 @@ const InventoryProducts: React.FC = () => {
       const delta = 1;
 
       await axiosInstance.put(
-        `/inventory/${inventoryId}/products/${productId}/restockProduct`,
+        `/inventories/${inventoryId}/products/${productId}/restockProduct`,
         null,
         { params: { productQuantity: delta }, useV2: false }
       );
@@ -280,7 +280,7 @@ const InventoryProducts: React.FC = () => {
     try {
       const updatedQuantity = currentQuantity - 1;
       await axiosInstance.patch(
-        `/inventory/${inventoryId}/products/${productId}/consume`,
+        `/inventories/${inventoryId}/products/${productId}/consume`,
         { productQuantity: updatedQuantity },
         { useV2: false }
       );
@@ -500,7 +500,7 @@ const InventoryProducts: React.FC = () => {
       </table>
       <button
         className="btn btn-add"
-        onClick={() => navigate(`/inventory/${inventoryId}/products/add`)}
+        onClick={() => navigate(`/inventories/${inventoryId}/products/add`)}
       >
         Add
       </button>

@@ -237,6 +237,26 @@ class InventoryRepositoryTest {
                 .build();
     }
 
+    @Test
+    void findByImportant_shouldReturnImportantInventories() {
+        Inventory importantInventory = buildInventory(
+                "important_1",
+                "ImportantInventory",
+                "Internal",
+                "Critical supplies",
+                "https://example.com/image.jpg",
+                "https://example.com/backup.jpg",
+                diagnosticKitImage
+        );
+        importantInventory.setImportant(true);
+        inventoryRepository.save(importantInventory).block();
+
+        StepVerifier
+                .create(inventoryRepository.findByImportant(true))
+                .expectNextMatches(result -> result.getImportant().equals(true))
+                .verifyComplete();
+    }
+
 
 
 }

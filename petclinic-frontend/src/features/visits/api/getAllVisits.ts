@@ -5,7 +5,7 @@ export async function getAllVisits(): Promise<VisitResponseModel[]> {
   try {
     const response = await axiosInstance.get('/visits', {
       responseType: 'stream',
-      useV2: false,
+      useV2: true,
     });
     return response.data
       .split('data:')
