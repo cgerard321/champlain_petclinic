@@ -19,7 +19,7 @@ const petTypeOptions: { [key: string]: string } = {
 
 const UpdatePetForm: React.FC = (): JSX.Element => {
   const navigate = useNavigate();
-  const { petId } = useParams<{ petId: string }>();
+  const { ownerId, petId } = useParams<{ ownerId: string; petId: string }>();
   const [pet, setPet] = useState<PetResponseModel | null>(null);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [successMessage, setSuccessMessage] = useState<string>('');
@@ -30,9 +30,9 @@ const UpdatePetForm: React.FC = (): JSX.Element => {
   // Fetch pet data on component mount
   useEffect(() => {
     const fetchPetData = async (): Promise<void> => {
-      if (petId) {
+      if (petId && ownerId) {
         try {
-          const response = await getPet(petId);
+          const response = await getPet(ownerId, petId);
           const petData: PetResponseModel = response.data;
           setPet({
             ...petData,
@@ -52,7 +52,7 @@ const UpdatePetForm: React.FC = (): JSX.Element => {
     fetchPetData().catch(error =>
       console.error('Error in fetchPetData:', error)
     );
-  }, [petId]);
+  }, [petId, ownerId]);
 
   // Handle form field changes
   const handleChange = (
@@ -90,7 +90,7 @@ const UpdatePetForm: React.FC = (): JSX.Element => {
     event: FormEvent<HTMLFormElement>
   ): Promise<void> => {
     event.preventDefault();
-    if (!validate() || !pet) return;
+    if (!validate() || !pet || !ownerId || !petId) return;
     const petRequestData: PetRequestModel = {
       ownerId: pet.ownerId,
       name: pet.name,
@@ -101,7 +101,7 @@ const UpdatePetForm: React.FC = (): JSX.Element => {
     };
 
     try {
-      const response = await updatePet(petId!, petRequestData);
+      const response = await updatePet(ownerId, petId, petRequestData);
       if (response.status === 200) {
         setSuccessMessage('Pet updated successfully!');
         setIsUpdateModalOpen(true);
@@ -115,9 +115,9 @@ const UpdatePetForm: React.FC = (): JSX.Element => {
 
   // Handle delete pet
   const handleDelete = async (): Promise<void> => {
-    if (petId) {
+    if (petId && ownerId) {
       try {
-        const response = await deletePet(petId);
+        const response = await deletePet(ownerId, petId);
         if (response.status === 200) {
           navigate(`/customers/${response.data.ownerId}`); // Redirect after deletion
         } else {
