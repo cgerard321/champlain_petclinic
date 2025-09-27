@@ -19,14 +19,14 @@ func NewFileLinkService(repository *datalayer.FileLinkRepo, minioServiceClient *
 	}
 }
 
-func (i *FilesServiceImpl) GetFile(bucket string, id string) (*models.FileResponseModel, error) {
-	url := i.repository.GetFileLink(id)
+func (i *FilesServiceImpl) GetFile(id string) (*models.FileResponseModel, error) {
+	fileInfo := i.repository.GetFileInfo(id)
 
-	if url == "" {
-		return nil, exception.NewNotFoundException("url not found for fileId: " + id)
+	if fileInfo == nil {
+		return nil, exception.NewNotFoundException("fileId: " + id + " was not inside the database")
 	}
 
-	resp, err := i.minioServiceClient.GetFile(bucket, url)
+	resp, err := i.minioServiceClient.GetFile(fileInfo)
 
 	if err != nil {
 		return nil, err
@@ -35,20 +35,4 @@ func (i *FilesServiceImpl) GetFile(bucket string, id string) (*models.FileRespon
 	resp.FileId = id
 
 	return resp, nil
-}
-
-// needs to care about folders
-func (i *FilesServiceImpl) AddFile(bucket string, dto *models.FileResponseModel) (string, error) { //request model not response
-	//TODO implement me
-	panic("implement me")
-}
-
-func (i *FilesServiceImpl) DeleteFile(bucket string, id string) error {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (i *FilesServiceImpl) UpdateFile(bucket string, id string, dto *models.FileResponseModel) error { //request model not response
-	//TODO implement me
-	panic("implement me")
 }
