@@ -35,6 +35,7 @@
   font-size: 16px;
 }
 
+/* Change this part since it has priority over the buttons */
 .profile-edit button {
   padding: 12px;
   background-color: #28a745;
@@ -63,4 +64,18 @@
   border-color: #28a745;
   box-shadow: 0 0 5px rgba(40, 167, 69, 0.5);
   outline: none;
+}
+
+.cancel {
+  background-color: red;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px; 
+  cursor: pointer; 
+  font-weight: bold;
+}
+
+.cancel:hover {
+  background-color: darkred; 
 }

@@ -64,6 +64,10 @@ const AddingVisit: React.FC = (): JSX.Element => {
     return Object.keys(newErrors).length === 0;
   };
 
+  const handleCancel = (): void => {
+    navigate(-1);
+  };
+
   const handleSubmit = async (
     event: FormEvent<HTMLFormElement>
   ): Promise<void> => {
@@ -157,6 +161,10 @@ const AddingVisit: React.FC = (): JSX.Element => {
         </select>
         {errors.status && <span className="error">{errors.status}</span>}
         <br />
+        <button className="cancel" type="button" onClick={handleCancel}>
+          Cancel
+        </button>
+
         <button type="submit" disabled={isLoading}>
           {isLoading ? 'Adding...' : 'Add'}
         </button>
