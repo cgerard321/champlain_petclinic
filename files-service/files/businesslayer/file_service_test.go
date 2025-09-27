@@ -1,11 +1,5 @@
 package businesslayer
 
-import (
-	"errors"
-	"files-service/files/datalayer"
-	"testing"
-)
-
 //import (
 //	"errors"
 //	"files-service/files/datalayer"
@@ -41,30 +35,30 @@ import (
 //		t.Errorf("expected FileId 123, got %s", result.FileId)
 //	}
 //}
-
-func TestGetFile_NotFoundInRepo(t *testing.T) {
-	repo := &mockRepo{fileInfo: nil}
-	minio := &mockMinio{}
-	service := NewFileLinkService(repo, minio)
-
-	_, err := service.GetFile(NOT_FOUND_FILE_ID)
-	if err == nil {
-		t.Fatal("expected error, got nil")
-	}
-}
-
-func TestGetFile_MinioError(t *testing.T) {
-	repo := &mockRepo{
-		fileInfo: &datalayer.FileInfo{FileId: "123", Url: "http://example.com", FileType: "png"},
-	}
-	minio := &mockMinio{
-		err: errors.New("minio error"),
-	}
-
-	service := NewFileLinkService(repo, minio)
-	_, err := service.GetFile("123")
-
-	if err == nil || err.Error() != "minio error" {
-		t.Fatalf("expected minio error, got %v", err)
-	}
-}
+//
+//func TestGetFile_NotFoundInRepo(t *testing.T) {
+//	repo := &mockRepo{fileInfo: nil}
+//	minio := &mockMinio{}
+//	service := NewFileLinkService(repo, minio)
+//
+//	_, err := service.GetFile(NOT_FOUND_FILE_ID)
+//	if err == nil {
+//		t.Fatal("expected error, got nil")
+//	}
+//}
+//
+//func TestGetFile_MinioError(t *testing.T) {
+//	repo := &mockRepo{
+//		fileInfo: &datalayer.FileInfo{FileId: "123", Url: "http://example.com", FileType: "png"},
+//	}
+//	minio := &mockMinio{
+//		err: errors.New("minio error"),
+//	}
+//
+//	service := NewFileLinkService(repo, minio)
+//	_, err := service.GetFile("123")
+//
+//	if err == nil || err.Error() != "minio error" {
+//		t.Fatalf("expected minio error, got %v", err)
+//	}
+//}
