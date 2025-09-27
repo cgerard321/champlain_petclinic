@@ -427,4 +427,20 @@ class BillControllerUnitTest {
     }
 
 
+    @Test
+    void whenDeletingNonExistentBill_thenReturnNotFound() {
+        String invalidBillId = "NON_EXISTENT_ID";
+
+        // Mock the service to throw NotFoundException
+        Mockito.when(billService.deleteBill(invalidBillId))
+                .thenReturn(Mono.error(new NotFoundException("Bill not found")));
+
+        client.delete()
+                .uri("/bills/{billId}", invalidBillId)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Bill not found");
+    }
+
 }
