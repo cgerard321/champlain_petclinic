@@ -139,10 +139,8 @@ services:
 
   files-service:
     build: files-service
-    ports:
-      - "8000:8000"
     environment:
-      - FILE_ENDPOINT=pet-clinic-bucket.benmusicgeek.synology.me
+      - FILE_ENDPOINT=petclinic-bucket.benmusicgeek.synology.me
       - FILE_ENV=prod
     env_file:
       - stack.env

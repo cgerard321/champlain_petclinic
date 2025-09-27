@@ -98,8 +98,6 @@ services:
 
   files-service:
     build: files-service
-    ports:
-      - "8000:8000"
     environment:
       - FILE_ENDPOINT=minio:9100
       - FILE_ENV=dev
