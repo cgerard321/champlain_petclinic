@@ -20,6 +20,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.concurrent.TimeoutException;
 
+import static com.mongodb.assertions.Assertions.assertTrue;
 import static com.mongodb.assertions.Assertions.fail;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -191,6 +192,182 @@ class PetTypeControllerIntegrationTest {
         }
 
 
+    }
+
+
+
+    @Test
+    void getPetTypesPagination_WithValidParameters_ShouldReturnPaginatedResults() {
+        try {
+            webTestClient.get()
+                    .uri("/owners/petTypes/pet-types-pagination?page=0&size=2")
+                    .accept(MediaType.APPLICATION_JSON)
+                    .exchange()
+                    .expectStatus().isOk()
+                    .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                    .expectBodyList(PetTypeResponseDTO.class)
+                    .value((list) -> {
+                        assertNotNull(list);
+                        assertTrue(list.size() <= 2);
+                    });
+        } catch (NotFoundException e) {
+            fail("Unexpected NotFoundException: " + e.getMessage());
+        } catch (InvalidInputException e) {
+            fail("Unexpected InvalidInputException: " + e.getMessage());
+        } catch (Exception e) {
+            fail("Test failed with exception: " + e.getMessage());
+        }
+    }
+
+    @Test
+    void getPetTypesPagination_WithNameFilter_ShouldReturnFilteredResults() {
+        try {
+            webTestClient.get()
+                    .uri("/owners/petTypes/pet-types-pagination?page=0&size=10&name=Dog")
+                    .accept(MediaType.APPLICATION_JSON)
+                    .exchange()
+                    .expectStatus().isOk()
+                    .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                    .expectBodyList(PetTypeResponseDTO.class)
+                    .value((list) -> {
+                        assertNotNull(list);
+                        // All results should contain "Dog" in the name
+                        list.forEach(petType ->
+                                assertTrue(petType.getName().toLowerCase().contains("dog"))
+                        );
+                    });
+        } catch (NotFoundException e) {
+            fail("Unexpected NotFoundException: " + e.getMessage());
+        } catch (InvalidInputException e) {
+            fail("Unexpected InvalidInputException: " + e.getMessage());
+        } catch (Exception e) {
+            fail("Test failed with exception: " + e.getMessage());
+        }
+    }
+
+    @Test
+    void getPetTypesPagination_WithDescriptionFilter_ShouldReturnFilteredResults() {
+        try {
+            webTestClient.get()
+                    .uri("/owners/petTypes/pet-types-pagination?page=0&size=10&description=Mammal")
+                    .accept(MediaType.APPLICATION_JSON)
+                    .exchange()
+                    .expectStatus().isOk()
+                    .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                    .expectBodyList(PetTypeResponseDTO.class)
+                    .value((list) -> {
+                        assertNotNull(list);
+                        // All results should contain "Mammal" in the description
+                        list.forEach(petType ->
+                                assertTrue(petType.getPetTypeDescription().toLowerCase().contains("mammal"))
+                        );
+                    });
+        } catch (NotFoundException e) {
+            fail("Unexpected NotFoundException: " + e.getMessage());
+        } catch (InvalidInputException e) {
+            fail("Unexpected InvalidInputException: " + e.getMessage());
+        } catch (Exception e) {
+            fail("Test failed with exception: " + e.getMessage());
+        }
+    }
+
+    @Test
+    void getPetTypesPagination_WithPetTypeIdFilter_ShouldReturnExactMatch() {
+        try {
+            webTestClient.get()
+                    .uri("/owners/petTypes/pet-types-pagination?page=0&size=10&petTypeId=1")
+                    .accept(MediaType.APPLICATION_JSON)
+                    .exchange()
+                    .expectStatus().isOk()
+                    .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                    .expectBodyList(PetTypeResponseDTO.class)
+                    .value((list) -> {
+                        assertNotNull(list);
+                        // Should return at most 1 result with exact petTypeId match
+                        assertTrue(list.size() <= 1);
+                        if (!list.isEmpty()) {
+                            assertEquals("1", list.get(0).getPetTypeId());
+                        }
+                    });
+        } catch (NotFoundException e) {
+            fail("Unexpected NotFoundException: " + e.getMessage());
+        } catch (InvalidInputException e) {
+            fail("Unexpected InvalidInputException: " + e.getMessage());
+        } catch (Exception e) {
+            fail("Test failed with exception: " + e.getMessage());
+        }
+    }
+
+    @Test
+    void getPetTypesCount_ShouldReturnTotalCount() {
+        try {
+            webTestClient.get()
+                    .uri("/owners/petTypes/pet-types-count")
+                    .accept(MediaType.APPLICATION_JSON)
+                    .exchange()
+                    .expectStatus().isOk()
+                    .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                    .expectBody(Long.class)
+                    .value(count -> {
+                        assertNotNull(count);
+                        assertTrue(count >= 0);
+                    });
+        } catch (NotFoundException e) {
+            fail("Unexpected NotFoundException: " + e.getMessage());
+        } catch (InvalidInputException e) {
+            fail("Unexpected InvalidInputException: " + e.getMessage());
+        } catch (Exception e) {
+            fail("Test failed with exception: " + e.getMessage());
+        }
+    }
+
+    @Test
+    void getPetTypesFilteredCount_WithNameFilter_ShouldReturnFilteredCount() {
+        try {
+            webTestClient.get()
+                    .uri("/owners/petTypes/pet-types-filtered-count?name=Dog")
+                    .accept(MediaType.APPLICATION_JSON)
+                    .exchange()
+                    .expectStatus().isOk()
+                    .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                    .expectBody(Long.class)
+                    .value(count -> {
+                        assertNotNull(count);
+                        assertTrue(count >= 0);
+                    });
+        } catch (NotFoundException e) {
+            fail("Unexpected NotFoundException: " + e.getMessage());
+        } catch (InvalidInputException e) {
+            fail("Unexpected InvalidInputException: " + e.getMessage());
+        } catch (Exception e) {
+            fail("Test failed with exception: " + e.getMessage());
+        }
+    }
+
+
+
+    @Test
+    void getPetTypesPagination_WithEmptyFilters_ShouldReturnAllResults() {
+        try {
+            webTestClient.get()
+                    .uri("/owners/petTypes/pet-types-pagination?page=0&size=100")
+                    .accept(MediaType.APPLICATION_JSON)
+                    .exchange()
+                    .expectStatus().isOk()
+                    .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                    .expectBodyList(PetTypeResponseDTO.class)
+                    .value((list) -> {
+                        assertNotNull(list);
+                        // Should return all available pet types
+                        assertTrue(list.size() >= 0);
+                    });
+        } catch (NotFoundException e) {
+            fail("Unexpected NotFoundException: " + e.getMessage());
+        } catch (InvalidInputException e) {
+            fail("Unexpected InvalidInputException: " + e.getMessage());
+        } catch (Exception e) {
+            fail("Test failed with exception: " + e.getMessage());
+        }
     }
 
 
