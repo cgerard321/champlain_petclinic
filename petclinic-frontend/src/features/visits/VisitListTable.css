@@ -92,8 +92,8 @@ h2 {
 
 
 .confirm-dialog-buttons button:first-of-type {
-  background-color: #6c757d !important;
-  color: #fff !important;
+  background-color: #6c757d;
+  color: #fff;
 }
 
 .confirm-dialog-buttons button:first-of-type:hover {
@@ -102,8 +102,8 @@ h2 {
 
 
 .confirm-dialog-buttons button:last-of-type {
-  background-color: #0144aa !important; 
-  color: #fff !important;
+  background-color: #0144aa; 
+  color: #fff;
 }
 
 .confirm-dialog-buttons button:last-of-type:hover {
