@@ -7,7 +7,7 @@ export async function addVetEducation(
   const { vetId, ...educationData } = education;
   const response = await axiosInstance.post(
     `/vets/${vetId}/educations`,
-    educationData
+    educationData, {useV2: false}
   );
   return response.data;
 }

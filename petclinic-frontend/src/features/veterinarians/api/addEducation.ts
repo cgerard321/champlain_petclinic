@@ -1,10 +1,13 @@
-import { AxiosResponse } from 'axios';
 import axiosInstance from '@/shared/api/axiosInstance';
-import { EducationRequestModel } from '../models/EducationRequestModel';
+import { EducationRequestModel } from '@/features/veterinarians/models/EducationRequestModel';
 
-export const addVetEducation = async (
-  vetId: string,
+export async function addVetEducation(
   education: EducationRequestModel
-): Promise<AxiosResponse<void>> => {
-  return await axiosInstance.post<void>(`/vets/${vetId}/educations`, education);
-};
+): Promise<EducationRequestModel> {
+  const { vetId, ...educationData } = education;
+  const response = await axiosInstance.post(
+    `/vets/${vetId}/educations`,
+    educationData, {useV2: false}
+  );
+  return response.data;
+}

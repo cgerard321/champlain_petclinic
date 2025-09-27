@@ -95,7 +95,7 @@ export default function VetDetails(): JSX.Element {
   const refreshVetDetails = useCallback(async (): Promise<void> => {
     try {
       const response = await axiosInstance.get<VetResponseType>(
-        `/vets/${vetId}`
+        `/vets/${vetId}`, {useV2: false}
       );
       setVet(response.data);
     } catch (error) {
@@ -169,7 +169,7 @@ export default function VetDetails(): JSX.Element {
     const fetchVetDetails = async (): Promise<void> => {
       try {
         const response = await axiosInstance.get<VetResponseType>(
-          `/vets/${vetId}`
+          `/vets/${vetId}`, {useV2: false}
         );
         setVet(response.data);
       } catch (error) {
@@ -180,7 +180,7 @@ export default function VetDetails(): JSX.Element {
     const fetchEducationDetails = async (): Promise<void> => {
       try {
         const response = await axiosInstance.get<EducationResponseType[]>(
-          `/vets/${vetId}/educations`
+          `/vets/${vetId}/educations`, {useV2: false}
         );
         setEducation(response.data);
       } catch (error) {
@@ -193,6 +193,7 @@ export default function VetDetails(): JSX.Element {
         const response = await axiosInstance.get<AlbumPhotoType[]>(
           `/vets/${vetId}/albums`,
           {
+            useV2: false,
             method: 'GET',
             headers: {
               Accept: 'application/json',
@@ -236,6 +237,7 @@ export default function VetDetails(): JSX.Element {
       const response = await axiosInstance.put(
         `/vets/${vetId}/photo/${file.name}`,
         {
+          useV2: false,
           method: 'PUT',
           body: file,
           headers: {
@@ -255,7 +257,7 @@ export default function VetDetails(): JSX.Element {
   const handleDeleteAlbumPhoto = async (photoId: string): Promise<void> => {
     try {
       await axiosInstance.delete(
-        `/vets/${vetId}/albums/${photoId}`
+        `/vets/${vetId}/albums/${photoId}`, {useV2: false}
       );
 
       // Update the state to remove the deleted photo
@@ -370,7 +372,7 @@ export default function VetDetails(): JSX.Element {
     try {
       await axiosInstance.post(
         `/vets/${vetId}/specialties`,
-        specialtyDTO
+        specialtyDTO, {useV2: false}
       );
       alert('Specialty added successfully!');
       setIsFormOpen(false); // Close form on success
@@ -395,7 +397,7 @@ export default function VetDetails(): JSX.Element {
     try {
       // Make a DELETE request to the API
       await axiosInstance.delete(
-        `/vets/${vetId}/specialties/${specialtyId}`
+        `/vets/${vetId}/specialties/${specialtyId}`, {useV2: false}
       );
 
       // Update the vet data after deleting the specialty

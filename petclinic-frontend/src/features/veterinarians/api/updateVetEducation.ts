@@ -9,7 +9,7 @@ export const updateVetEducation = async (
 ): Promise<EducationRequestModel> => {
   return await axiosInstance.put(
     `/vets/${vetId}/educations/${educationId}`,
-    education
+    education, {useV2: false}
   );
 };
 
