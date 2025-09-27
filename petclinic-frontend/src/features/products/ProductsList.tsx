@@ -1,4 +1,4 @@
-import { useState, useEffect, JSX } from 'react';
+import { useState, useEffect, useCallback, JSX } from 'react';
 import { getAllProducts } from '@/features/products/api/getAllProducts.ts';
 import './ProductList.css';
 import { ProductModel } from '@/features/products/models/ProductModels/ProductModel';
@@ -56,7 +56,7 @@ export default function ProductList({
     }
   };
 
-  function FilterByPriceErrorHandling(): void {
+  const FilterByPriceErrorHandling = useCallback(() => {
     if (
       minPrice !== undefined &&
       maxPrice !== undefined &&
@@ -64,9 +64,9 @@ export default function ProductList({
     ) {
       alert('Min Price cannot be greater than Max Price');
     }
-  }
+  }, [minPrice, maxPrice]);
 
-  const fetchProducts = async (): Promise<void> => {
+  const fetchProducts = useCallback(async (): Promise<void> => {
     FilterByPriceErrorHandling();
     setIsLoading(true);
     try {
@@ -91,14 +91,23 @@ export default function ProductList({
     } finally {
       setIsLoading(false);
     }
-
     try {
       const bundles = await getAllProductBundles();
       setBundleList(bundles);
     } catch (err) {
       console.error('Error fetching product bundles:', err);
     }
-  };
+  }, [
+    FilterByPriceErrorHandling,
+    filterType,
+    minPrice,
+    maxPrice,
+    minStars,
+    maxStars,
+    ratingSort,
+    deliveryType,
+    productType,
+  ]);
 
   useEffect(() => {
     fetchProducts();
