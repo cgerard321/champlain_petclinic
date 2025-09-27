@@ -11,6 +11,9 @@ import axiosInstance from '@/shared/api/axiosInstance';
 import { IsAdmin } from '@/context/UserContext';
 import { AppRoutePaths } from '@/shared/models/path.routes';
 
+// NEW: cart change notifier (lets the NavBar update automatically)
+import { notifyCartChanged } from '../api/cartEvent';
+
 interface ProductAPIResponse {
   productId: number;
   imageId: string;
@@ -188,6 +191,9 @@ const UserCart = (): JSX.Element => {
             // Add to wishlist
             setWishlistItems(prevItems => [...prevItems, item]);
             setNotificationMessage(data.message);
+
+            //notify navbar (product left cart)
+            notifyCartChanged();
             return;
           }
         } else {
@@ -199,6 +205,9 @@ const UserCart = (): JSX.Element => {
           });
           // Optionally, display success message
           setNotificationMessage('Item quantity updated successfully.');
+
+          // notify navbar (cart quantity changed)
+          notifyCartChanged();
         }
       } catch (err: unknown) {
         // Changed from any to unknown
@@ -236,6 +245,9 @@ const UserCart = (): JSX.Element => {
           prevItems.filter((_, index) => index !== indexToDelete)
         );
         alert('Item successfully removed!');
+
+        // notify navbar (item removed)
+        notifyCartChanged();
       } catch (error: unknown) {
         // Changed from any to unknown
         console.error('Error deleting item: ', error);
@@ -262,6 +274,9 @@ const UserCart = (): JSX.Element => {
         setCartItems([]);
         setCartItemCount(0);
         alert('Cart has been successfully cleared!');
+
+        // notify navbar (cart cleared)
+        notifyCartChanged();
       } catch (error: unknown) {
         // Changed from any to unknown
         console.error('Error clearing cart:', error);
@@ -301,6 +316,9 @@ const UserCart = (): JSX.Element => {
 
       // Trigger the useEffect by updating the wishlistUpdated state
       setWishlistUpdated(true);
+
+      //notify navbar (item moved out of cart)
+      notifyCartChanged();
     } catch (error: unknown) {
       // Changed from any to unknown
       console.error('Error adding to wishlist:', error);
@@ -343,6 +361,9 @@ const UserCart = (): JSX.Element => {
 
       // Trigger the useEffect by updating the wishlistUpdated state
       setWishlistUpdated(true);
+
+      //notify navbar (item moved into cart)
+      notifyCartChanged();
     } catch (error: unknown) {
       // Changed from any to unknown
       console.error('Error adding to cart:', error);
@@ -353,7 +374,8 @@ const UserCart = (): JSX.Element => {
       }
     }
   };
-  //a function to remove from wishlist
+
+  // a function to remove from wishlist
   const removeFromWishlist = async (item: ProductModel): Promise<void> => {
     if (!cartId) return;
 
@@ -361,19 +383,10 @@ const UserCart = (): JSX.Element => {
     if (!ok) return;
 
     try {
-      const res = await fetch(
-        `http://localhost:8080/api/v2/gateway/carts/${cartId}/wishlist/${item.productId}`,
-        {
-          method: 'DELETE',
-          headers: { Accept: 'application/json' },
-          credentials: 'include',
-        }
+      await axiosInstance.delete(
+        `/carts/${cartId}/wishlist/${item.productId}`,
+        { useV2: true }
       );
-
-      if (!res.ok) {
-        const errText = await res.text().catch(() => '');
-        throw new Error(errText || 'Failed to remove from wishlist');
-      }
 
       setWishlistItems(prev =>
         prev.filter(p => p.productId !== item.productId)
@@ -399,7 +412,7 @@ const UserCart = (): JSX.Element => {
   // role flag for conditional UI
   const isAdmin = IsAdmin();
 
-  //method modified so admin can't check out anymore
+  // method modified so admin can't check out anymore
   const handleCheckoutConfirmation = (): void => {
     if (isAdmin) {
       navigate(AppRoutePaths.Unauthorized, {
@@ -439,6 +452,9 @@ const UserCart = (): JSX.Element => {
       setCartItems([]); // Clear the cart after successful checkout
       setCartItemCount(0);
       setIsCheckoutModalOpen(false);
+
+      // notify navbar (cart emptied)
+      notifyCartChanged();
     } catch (error: unknown) {
       if (error && typeof error === 'object' && 'response' in error) {
         const errorData = (
