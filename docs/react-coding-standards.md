@@ -278,7 +278,7 @@ const VetList: React.FC = () => {
       setVets(vets);
       setError('');
     } catch (error) {
-      // Handle local errors (404, 400) with user feedback
+      // Handle local errors (404) with user feedback
       if (axios.isAxiosError(error)) {
         switch (error.response?.status) {
           case 404:
