@@ -38,7 +38,7 @@ public class PetTypeServiceImpl implements PetTypeService {
     @Override
     public Mono<PetTypeResponseDTO> getPetTypeByPetTypeId(String petTypeId) {
 
-        return petTypeRepo.findOPetTypeById(petTypeId)
+        return petTypeRepo.findByPetTypeId(petTypeId)
                 .switchIfEmpty(Mono.error(new NotFoundException("Pet Type not found with id : " + petTypeId)))
                 .map(EntityDTOUtil::toPetTypeResponseDTO);
 
@@ -46,7 +46,7 @@ public class PetTypeServiceImpl implements PetTypeService {
 
     @Override
     public Mono<PetTypeResponseDTO> updatePetType(Mono<PetTypeRequestDTO> petTypeRequestDTO, String petTypeId) {
-        return petTypeRepo.findOPetTypeById(petTypeId)
+        return petTypeRepo.findByPetTypeId(petTypeId)
                 .flatMap(existingPetType -> petTypeRequestDTO.map(requestDTO -> {
                     existingPetType.setName(requestDTO.getName());
                     existingPetType.setPetTypeDescription(requestDTO.getPetTypeDescription());
