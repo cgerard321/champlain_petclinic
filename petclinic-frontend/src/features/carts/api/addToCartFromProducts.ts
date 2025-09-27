@@ -1,6 +1,7 @@
 import axiosInstance from '@/shared/api/axiosInstance';
 import { fetchCartIdByCustomerId } from './getCart';
 import { useUser } from '@/context/UserContext';
+import { notifyCartChanged } from './cartEvent';
 
 type UseAddToCartReturnType = {
   addToCart: (productId: string) => Promise<boolean>;
@@ -32,10 +33,14 @@ export function useAddToCart(): UseAddToCartReturnType {
       await axiosInstance.post(`/carts/${cartId}/${productId}`, undefined, {
         useV2: true,
       });
-      return true;
+
+      // trigger navbar auto-refresh
+      notifyCartChanged();
+
+      return true; //returns true
     } catch (error) {
       console.error('Error adding product to cart:', error);
-      return false;
+      return false; //returns false
     }
   };
 

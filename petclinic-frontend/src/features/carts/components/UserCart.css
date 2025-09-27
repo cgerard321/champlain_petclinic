@@ -423,5 +423,5 @@
   /* suppress when OOS ribbon text/image is explicitly called*/
   background-image: none !important;
   content: normal; 
+  }
 }
-
