@@ -231,6 +231,33 @@ public class CartController {
                     return Mono.error(e);
                 });
     }
+    @DeleteMapping("/{cartId}/wishlist/{productId}")
+    public Mono<ResponseEntity<CartResponseModel>> removeProductFromWishlist(
+            @PathVariable String cartId,
+            @PathVariable String productId) {
+        return Mono.just(cartId)
+                .filter(id -> id.length() == 36)
+                .switchIfEmpty(Mono.error(new InvalidInputException("Provided cart id is invalid: " + cartId)))
+                .flatMap(validCartId -> Mono.just(productId)
+                        .filter(id -> id.length() == 36)
+                        .switchIfEmpty(Mono.error(new InvalidInputException("Provided product id is invalid: " + productId)))
+                        .flatMap(validProductId -> cartService.removeProductFromWishlist(validCartId, validProductId))
+                )
+                .map(ResponseEntity::ok)
+                .onErrorResume(e -> {
+                    if (e instanceof InvalidInputException) {
+                        CartResponseModel errorResponse = new CartResponseModel();
+                        errorResponse.setMessage(e.getMessage());
+                        return Mono.just(ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(errorResponse));
+                    } else if (e instanceof NotFoundException) {
+                        CartResponseModel errorResponse = new CartResponseModel();
+                        errorResponse.setMessage(e.getMessage());
+                        return Mono.just(ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse));
+                    } else {
+                        return Mono.error(e);
+                    }
+                });
+    }
 
     @PostMapping("/{cartId}/{productId}")
     public Mono<ResponseEntity<CartResponseModel>> addProductToCartFromProducts(

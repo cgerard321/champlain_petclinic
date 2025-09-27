@@ -39,6 +39,11 @@ public interface BillService {
                                            String vetFirstName,
                                            String vetLastName);
 
+    Flux<BillResponseDTO> getAllBillsByOwnerName(String ownerFirstName, String ownerLastName);
+
+    Flux<BillResponseDTO> getAllBillsByVetName(String vetFirstName, String vetLastName);
+
+    Flux<BillResponseDTO> getAllBillsByVisitType(String visitType);
 
     Mono<BillResponseDTO> createBill(@RequestBody Mono<BillRequestDTO> model);
 
