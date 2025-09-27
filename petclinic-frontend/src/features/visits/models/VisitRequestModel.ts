@@ -5,6 +5,7 @@ export interface VisitRequestModel {
   description: string;
   petId: string;
   practitionerId: string;
-  // ownerId: string;
+  ownerId?: string;
+  jwtToken?: string;
   status: Status;
 }

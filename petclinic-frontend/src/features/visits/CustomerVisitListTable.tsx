@@ -53,6 +53,13 @@ export default function CustomerVisitListTable(): JSX.Element {
         >
           View Reviews
         </button>
+        <button
+          className="btn btn-warning"
+          onClick={() => navigate(AppRoutePaths.OwnerBookAppointment)}
+          title="Schedule a Visit"
+        >
+          Schedule a Visit
+        </button>
       </div>
 
       {error ? (

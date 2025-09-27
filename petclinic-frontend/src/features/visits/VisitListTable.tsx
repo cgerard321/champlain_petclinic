@@ -19,7 +19,7 @@ export default function VisitListTable(): JSX.Element {
   const [visitsAll, setVisitsAll] = useState<Visit[]>([]);
   const [archivedVisits, setArchivedVisits] = useState<Visit[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>(''); // Search term state
-  const canLeaveReview = IsOwner() || IsVet();
+  const canLeaveReview = IsOwner();
   const [emergencyList, setEmergencyList] = useState<EmergencyResponseDTO[]>(
     []
   );
