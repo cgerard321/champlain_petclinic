@@ -3,6 +3,7 @@ package com.petclinic.billing.businesslayer;
 import com.petclinic.billing.datalayer.*;
 import com.petclinic.billing.exceptions.InvalidPaymentException;
 import com.petclinic.billing.exceptions.NotFoundException;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -174,7 +175,139 @@ public class BillServiceImplTest {
                 .verifyComplete();
     }
 
+    @Test
+    public void test_getBillsByOwnerName() {
+        // Arrange
+        String ownerFirstName = "John";
+        String ownerLastName = "Doe";
 
+        Bill billEntity = buildBill();
+        billEntity.setOwnerFirstName(ownerFirstName);
+        billEntity.setOwnerLastName(ownerLastName);
+
+        when(repo.findAll()).thenReturn(Flux.just(billEntity));
+
+        // Act
+        Flux<BillResponseDTO> result = billService.getAllBillsByOwnerName(ownerFirstName, ownerLastName);
+
+        // Assert
+        StepVerifier.create(result)
+                .consumeNextWith(bill -> {
+                    assertNotNull(bill);
+                    assertEquals(ownerFirstName, bill.getOwnerFirstName());
+                    assertEquals(ownerLastName, bill.getOwnerLastName());
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    public void test_getBillsByVetName() {
+        // Arrange
+        String vetFirstName = "Alice";
+        String vetLastName = "Smith";
+
+        Bill billEntity = buildBill();
+        billEntity.setVetFirstName(vetFirstName);
+        billEntity.setVetLastName(vetLastName);
+
+        when(repo.findAll()).thenReturn(Flux.just(billEntity));
+
+        // Act
+        Flux<BillResponseDTO> result = billService.getAllBillsByVetName(vetFirstName, vetLastName);
+
+        // Assert
+        StepVerifier.create(result)
+                .consumeNextWith(bill -> {
+                    assertNotNull(bill);
+                    assertEquals(vetFirstName, bill.getVetFirstName());
+                    assertEquals(vetLastName, bill.getVetLastName());
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    public void test_getBillsByVisitType() {
+        // Arrange
+        String visitType = "Regular";
+
+        Bill billEntity = buildBill();
+        billEntity.setVisitType(visitType);
+
+        when(repo.findAll()).thenReturn(Flux.just(billEntity));
+
+        // Act
+        Flux<BillResponseDTO> result = billService.getAllBillsByVisitType(visitType);
+
+        // Assert
+        StepVerifier.create(result)
+                .consumeNextWith(bill -> {
+                    assertNotNull(bill);
+                    assertEquals(visitType, bill.getVisitType());
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    public void test_getBillsByOwnerName_notFound() {
+        // Arrange
+        String ownerFirstName = "Nonexistent";
+        String ownerLastName = "Person";
+
+        when(repo.findAll()).thenReturn(Flux.empty());
+
+        // Act
+        Flux<BillResponseDTO> result = billService.getAllBillsByOwnerName(ownerFirstName, ownerLastName);
+
+        // Assert
+        StepVerifier.create(result)
+                .consumeErrorWith(error -> {
+                    assertNotNull(error);
+                    assertTrue(error instanceof NotFoundException);
+                    assertEquals("No bills found for the given owner name", error.getMessage());
+                })
+                .verify();
+    }
+
+    @Test
+    public void test_getBillsByVetName_notFound() {
+        // Arrange
+        String vetFirstName = "Nonexistent";
+        String vetLastName = "Vet";
+
+        when(repo.findAll()).thenReturn(Flux.empty());
+
+        // Act
+        Flux<BillResponseDTO> result = billService.getAllBillsByVetName(vetFirstName, vetLastName);
+
+        // Assert
+        StepVerifier.create(result)
+                .consumeErrorWith(error -> {
+                    assertNotNull(error);
+                    assertTrue(error instanceof NotFoundException);
+                    assertEquals("No bills found for the given vet name", error.getMessage());
+                })
+                .verify();
+    }
+
+    @Test
+    public void test_getBillsByVisitType_notFound() {
+        // Arrange
+        String visitType = "ImaginaryType";
+
+        when(repo.findAll()).thenReturn(Flux.empty());
+
+        // Act
+        Flux<BillResponseDTO> result = billService.getAllBillsByVisitType(visitType);
+
+        // Assert
+        StepVerifier.create(result)
+                .consumeErrorWith(error -> {
+                    assertNotNull(error);
+                    assertTrue(error instanceof NotFoundException);
+                    assertEquals("No bills found for the given visit type", error.getMessage());
+                })
+                .verify();
+    }
     @Test
     public void test_createBill(){
 

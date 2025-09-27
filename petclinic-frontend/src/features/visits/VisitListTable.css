@@ -42,7 +42,7 @@ h2 {
   margin-bottom: 15px;
 }
 
-.modal {
+/* .modal {
   position: fixed;
   top: 0;
   left: 0;
@@ -77,7 +77,7 @@ h2 {
 
 .modal-buttons {
   display: flex;
-  justify-content: space-between; 
+  justify-content: space-between;
   margin-top: 20px;
 }
 
@@ -91,9 +91,9 @@ h2 {
 }
 
 /* Cancel button */
-.modal-buttons button:first-of-type {
-  background-color: #6c757d !important;
-  color: #fff !important;
+/* .modal-buttons button:first-of-type {
+  background-color: #6c757d;
+  color: #fff;
 }
 
 .modal-buttons button:first-of-type:hover {
@@ -101,13 +101,13 @@ h2 {
 }
 
 /* Confirm button */
-.modal-buttons button:last-of-type {
-  background-color: #0144aa !important; 
-  color: #fff !important;
+/* .modal-buttons button:last-of-type {
+  background-color: #0144aa;
+  color: #fff;
 }
 
 .modal-buttons button:last-of-type:hover {
-  background-color: #014cbc; 
+  background-color: #014cbc;
 }
 
 @keyframes fadeIn {
@@ -118,7 +118,5 @@ h2 {
   to {
     opacity: 1;
     transform: scale(1);
-  }
-}
-
-
+  } */
+/* }    */
