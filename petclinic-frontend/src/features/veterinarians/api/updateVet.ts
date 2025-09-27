@@ -8,7 +8,10 @@ export const updateVet = async (
 ): Promise<VetRequestModel> => {
   const response = await axiosInstance.put<VetRequestModel>(
     `/vets/${vetId}`,
-    vet, {useV2: false}
+    vet,
+    {
+      useV2: false,
+    }
   );
   return response.data;
 };

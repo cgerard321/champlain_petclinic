@@ -89,13 +89,17 @@ export default function VetDetails(): JSX.Element {
 
   const [selectedEducation, setSelectedEducation] =
     useState<EducationResponseType | null>(null);
-  const [ratings/*, setRatings*/] = useState<RatingResponseType[] | null>(null);
+  const [ratings /*, setRatings*/] = useState<RatingResponseType[] | null>(
+    null
+  );
   const [selectedVet, setSelectedVet] = useState<VetRequestModel | null>(null);
-
   const refreshVetDetails = useCallback(async (): Promise<void> => {
     try {
       const response = await axiosInstance.get<VetResponseType>(
-        `/vets/${vetId}`, {useV2: false}
+        `/vets/${vetId}`,
+        {
+          useV2: false,
+        }
       );
       setVet(response.data);
     } catch (error) {
@@ -169,7 +173,10 @@ export default function VetDetails(): JSX.Element {
     const fetchVetDetails = async (): Promise<void> => {
       try {
         const response = await axiosInstance.get<VetResponseType>(
-          `/vets/${vetId}`, {useV2: false}
+          `/vets/${vetId}`,
+          {
+            useV2: false,
+          }
         );
         setVet(response.data);
       } catch (error) {
@@ -180,7 +187,10 @@ export default function VetDetails(): JSX.Element {
     const fetchEducationDetails = async (): Promise<void> => {
       try {
         const response = await axiosInstance.get<EducationResponseType[]>(
-          `/vets/${vetId}/educations`, {useV2: false}
+          `/vets/${vetId}/educations`,
+          {
+            useV2: false,
+          }
         );
         setEducation(response.data);
       } catch (error) {
@@ -200,13 +210,10 @@ export default function VetDetails(): JSX.Element {
             },
           }
         );
-          setAlbumPhotos(response.data);
-      } catch (error: any) {
-        if (error.response?.status === 404) {
-          setAlbumPhotos([]);
-        } else {
-          setError('Failed to fetch album photos');
-        }
+        setAlbumPhotos(response.data);
+      } catch (error) {
+        setAlbumPhotos([]);
+        setError('Failed to fetch album photos');
       }
     };
 
@@ -256,10 +263,9 @@ export default function VetDetails(): JSX.Element {
   };
   const handleDeleteAlbumPhoto = async (photoId: string): Promise<void> => {
     try {
-      await axiosInstance.delete(
-        `/vets/${vetId}/albums/${photoId}`, {useV2: false}
-      );
-
+      await axiosInstance.delete(`/vets/${vetId}/albums/${photoId}`, {
+        useV2: false,
+      });
       // Update the state to remove the deleted photo
       setAlbumPhotos(prevPhotos =>
         prevPhotos.filter(photo => photo.id !== photoId)
@@ -370,10 +376,9 @@ export default function VetDetails(): JSX.Element {
     };
 
     try {
-      await axiosInstance.post(
-        `/vets/${vetId}/specialties`,
-        specialtyDTO, {useV2: false}
-      );
+      await axiosInstance.post(`/vets/${vetId}/specialties`, specialtyDTO, {
+        useV2: false,
+      });
       alert('Specialty added successfully!');
       setIsFormOpen(false); // Close form on success
       setSpecialtyId(''); // Clear fields
@@ -396,9 +401,9 @@ export default function VetDetails(): JSX.Element {
   const handleDeleteSpecialty = async (specialtyId: string): Promise<void> => {
     try {
       // Make a DELETE request to the API
-      await axiosInstance.delete(
-        `/vets/${vetId}/specialties/${specialtyId}`, {useV2: false}
-      );
+      await axiosInstance.delete(`/vets/${vetId}/specialties/${specialtyId}`, {
+        useV2: false,
+      });
 
       // Update the vet data after deleting the specialty
       setVet(prevVet =>

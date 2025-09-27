@@ -12,9 +12,11 @@ const DeleteVetEducation: React.FC<DeleteVetEducationProps> = ({
   educationId,
   onEducationDeleted,
 }) => {
-  const handleDeleteEducation = async (event: React.MouseEvent) => {
+  const handleDeleteEducation = async (
+    event: React.MouseEvent<HTMLButtonElement>
+  ): Promise<void> => {
     event.stopPropagation();
-    if (window.confirm('Are you sure you want to delete this Education>')) {
+    if (window.confirm('Are you sure you want to delete this Education?')) {
       try {
         await deleteVetEducation(vetId, educationId);
         onEducationDeleted(educationId);

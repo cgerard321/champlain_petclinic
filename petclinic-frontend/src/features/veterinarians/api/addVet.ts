@@ -22,6 +22,8 @@ export const addVet = async (vet: {
   email: string;
   username: string;
 }): Promise<VetRequestModel> => {
-  const response = await axiosInstance.post(`/vets`, vet, {useV2: false});
+  const response = await axiosInstance.post(`/vets`, vet, {
+    useV2: false,
+  });
   return response.data;
 };

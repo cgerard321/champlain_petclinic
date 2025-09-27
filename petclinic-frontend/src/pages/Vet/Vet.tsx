@@ -17,36 +17,35 @@ export default function Vet(): JSX.Element {
   const [formVisible, setFormVisible] = useState<boolean>(false);
   const [isSearchActive, setIsSearchActive] = useState<boolean>(false);
 
- const fetchAllVets = async (): Promise<void> => {
-  try {
-    const response = await getAllVets();
+  const fetchAllVets = async (): Promise<void> => {
+    try {
+      const response = await getAllVets();
 
-    // Map VetResponseModel -> VetRequestModel since getAllVets returns ResponseModel but both the sets want RequestModel
-    const vets: VetRequestModel[] = response.map(vet => ({
-      vetId: vet.vetId,
-      vetBillId: vet.vetBillId,
-      firstName: vet.firstName,
-      lastName: vet.lastName,
-      email: vet.email,
-      phoneNumber: vet.phoneNumber,
-      resume: vet.resume ?? '',
-      workday: vet.workday ?? [],
-      workHoursJson: vet.workHoursJson ?? '',
-      active: vet.active ?? false,
-      specialties: vet.specialties ?? [],
-      photoDefault: false,
-      password: '',
-      username: vet.username ?? '',
-    }));
+      // Map VetResponseModel -> VetRequestModel since getAllVets returns ResponseModel but both the sets want RequestModel
+      const vets: VetRequestModel[] = response.map(vet => ({
+        vetId: vet.vetId,
+        vetBillId: vet.vetBillId,
+        firstName: vet.firstName,
+        lastName: vet.lastName,
+        email: vet.email,
+        phoneNumber: vet.phoneNumber,
+        resume: vet.resume ?? '',
+        workday: vet.workday ?? [],
+        workHoursJson: vet.workHoursJson ?? '',
+        active: vet.active ?? false,
+        specialties: vet.specialties ?? [],
+        photoDefault: false,
+        password: '',
+        username: vet.username ?? '',
+      }));
 
-    setAllVets(vets);
-    setResults(vets);
-
-  } catch (err) {
-    console.error('Error fetching all vets:', err);
-    setError('Error fetching all vets.');
-  }
-};
+      setAllVets(vets);
+      setResults(vets);
+    } catch (err) {
+      console.error('Error fetching all vets:', err);
+      setError('Error fetching all vets.');
+    }
+  };
 
   useEffect(() => {
     fetchAllVets();

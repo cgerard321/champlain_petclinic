@@ -7,7 +7,9 @@ interface DeleteVetProps {
 }
 
 const DeleteVet: React.FC<DeleteVetProps> = ({ vetId, onVetDeleted }) => {
-  const handleDelete = async (event: React.MouseEvent) => {
+  const handleDelete = async (
+    event: React.MouseEvent<HTMLButtonElement>
+  ): Promise<void> => {
     event.stopPropagation();
     if (window.confirm('Are you sure you want to delete this vet?')) {
       try {
@@ -18,7 +20,6 @@ const DeleteVet: React.FC<DeleteVetProps> = ({ vetId, onVetDeleted }) => {
       }
     }
   };
-
   return (
     <button onClick={handleDelete} className="btn btn-danger">
       Delete
