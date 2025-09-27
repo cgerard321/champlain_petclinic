@@ -1007,4 +1007,41 @@ public class BFFApiGatewayController {
         );
     }
 
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping(value = "/pet-types-pagination")
+    public Flux<PetTypeResponseDTO> getPetTypesByPagination(@RequestParam Optional<Integer> page,
+                                                            @RequestParam Optional<Integer> size,
+                                                            @RequestParam(required = false) String petTypeId,
+                                                            @RequestParam(required = false) String name,
+                                                            @RequestParam(required = false) String description) {
+
+        if(page.isEmpty()){
+            page = Optional.of(0);
+        }
+
+        if (size.isEmpty()) {
+            size = Optional.of(5);
+        }
+
+        return customersServiceClient.getPetTypesByPagination(page, size, petTypeId, name, description);
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping(value = "/pet-types-count")
+    public Mono<Long> getTotalNumberOfPetTypes(){
+        return customersServiceClient.getTotalNumberOfPetTypes();
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping(value = "/pet-types-filtered-count")
+    public Mono<Long> getTotalNumberOfPetTypesWithFilters (
+            @RequestParam(required = false) String petTypeId,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String description)
+    {
+        return customersServiceClient.getTotalNumberOfPetTypesWithFilters(petTypeId, name, description);
+    }
+
+
 }

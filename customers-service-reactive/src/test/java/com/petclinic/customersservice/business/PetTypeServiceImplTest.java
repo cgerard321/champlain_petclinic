@@ -7,10 +7,13 @@ import com.petclinic.customersservice.data.Owner;
 import com.petclinic.customersservice.data.PetType;
 import com.petclinic.customersservice.data.PetTypeRepo;
 import com.petclinic.customersservice.presentationlayer.OwnerResponseDTO;
+import com.petclinic.customersservice.presentationlayer.PetTypeResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
@@ -147,6 +150,221 @@ class PetTypeServiceImplTest {
     }
 
  */
+
+    @Test
+    void getAllPetTypesPagination_WithNoFilters_ShouldReturnPaginatedResults() {
+        try {
+            // Arrange
+            PetType petType1 = buildPetType("1", "Dog", "Mammal");
+            PetType petType2 = buildPetType("2", "Cat", "Mammal");
+            PetType petType3 = buildPetType("3", "Bird", "Bird");
+
+            when(petTypeRepo.findAll()).thenReturn(Flux.just(petType1, petType2, petType3));
+
+            Pageable pageable = PageRequest.of(0, 2);
+
+            // Act
+            Flux<PetTypeResponseDTO> result = petTypeService.getAllPetTypesPagination(
+                    pageable, null, null, null);
+
+            // Assert
+            StepVerifier.create(result)
+                    .expectNextCount(2)
+                    .verifyComplete();
+
+        } catch (NotFoundException e) {
+            fail("Unexpected NotFoundException: " + e.getMessage());
+        } catch (InvalidInputException e) {
+            fail("Unexpected InvalidInputException: " + e.getMessage());
+        } catch (Exception e) {
+            fail("Test failed with exception: " + e.getMessage());
+        }
+    }
+
+    @Test
+    void getAllPetTypesPagination_WithNameFilter_ShouldReturnFilteredResults() {
+        try {
+            // Arrange
+            PetType petType1 = buildPetType("1", "Dog", "Mammal");
+            PetType petType2 = buildPetType("2", "Cat", "Mammal");
+            PetType petType3 = buildPetType("3", "Dog", "Mammal");
+
+            when(petTypeRepo.findAll()).thenReturn(Flux.just(petType1, petType2, petType3));
+
+            Pageable pageable = PageRequest.of(0, 10);
+
+            // Act
+            Flux<PetTypeResponseDTO> result = petTypeService.getAllPetTypesPagination(
+                    pageable, null, "Dog", null);
+
+            // Assert
+            StepVerifier.create(result)
+                    .expectNextCount(2)
+                    .verifyComplete();
+
+        } catch (NotFoundException e) {
+            fail("Unexpected NotFoundException: " + e.getMessage());
+        } catch (InvalidInputException e) {
+            fail("Unexpected InvalidInputException: " + e.getMessage());
+        } catch (Exception e) {
+            fail("Test failed with exception: " + e.getMessage());
+        }
+    }
+
+    @Test
+    void getAllPetTypesPagination_WithDescriptionFilter_ShouldReturnFilteredResults() {
+        try {
+            // Arrange
+            PetType petType1 = buildPetType("1", "Dog", "Mammal");
+            PetType petType2 = buildPetType("2", "Cat", "Mammal");
+            PetType petType3 = buildPetType("3", "Bird", "Bird");
+
+            when(petTypeRepo.findAll()).thenReturn(Flux.just(petType1, petType2, petType3));
+
+            Pageable pageable = PageRequest.of(0, 10);
+
+            // Act
+            Flux<PetTypeResponseDTO> result = petTypeService.getAllPetTypesPagination(
+                    pageable, null, null, "Mammal");
+
+            // Assert
+            StepVerifier.create(result)
+                    .expectNextCount(2)
+                    .verifyComplete();
+
+        } catch (NotFoundException e) {
+            fail("Unexpected NotFoundException: " + e.getMessage());
+        } catch (InvalidInputException e) {
+            fail("Unexpected InvalidInputException: " + e.getMessage());
+        } catch (Exception e) {
+            fail("Test failed with exception: " + e.getMessage());
+        }
+    }
+
+    @Test
+    void getAllPetTypesPagination_WithPetTypeIdFilter_ShouldReturnExactMatch() {
+        try {
+            // Arrange
+            PetType petType1 = buildPetType("1", "Dog", "Mammal");
+            PetType petType2 = buildPetType("2", "Cat", "Mammal");
+
+            when(petTypeRepo.findAll()).thenReturn(Flux.just(petType1, petType2));
+
+            Pageable pageable = PageRequest.of(0, 10);
+
+            // Act
+            Flux<PetTypeResponseDTO> result = petTypeService.getAllPetTypesPagination(
+                    pageable, "1", null, null);
+
+            // Assert
+            StepVerifier.create(result)
+                    .expectNextCount(1)
+                    .verifyComplete();
+
+        } catch (NotFoundException e) {
+            fail("Unexpected NotFoundException: " + e.getMessage());
+        } catch (InvalidInputException e) {
+            fail("Unexpected InvalidInputException: " + e.getMessage());
+        } catch (Exception e) {
+            fail("Test failed with exception: " + e.getMessage());
+        }
+    }
+
+    @Test
+    void getAllPetTypesPagination_WithMultipleFilters_ShouldReturnFilteredResults() {
+        try {
+            // Arrange
+            PetType petType1 = buildPetType("1", "Dog", "Mammal");
+            PetType petType2 = buildPetType("2", "Cat", "Mammal");
+            PetType petType3 = buildPetType("3", "Dog", "Bird");
+
+            when(petTypeRepo.findAll()).thenReturn(Flux.just(petType1, petType2, petType3));
+
+            Pageable pageable = PageRequest.of(0, 10);
+
+            // Act
+            Flux<PetTypeResponseDTO> result = petTypeService.getAllPetTypesPagination(
+                    pageable, null, "Dog", "Mammal");
+
+            // Assert
+            StepVerifier.create(result)
+                    .expectNextCount(1)
+                    .verifyComplete();
+
+        } catch (NotFoundException e) {
+            fail("Unexpected NotFoundException: " + e.getMessage());
+        } catch (InvalidInputException e) {
+            fail("Unexpected InvalidInputException: " + e.getMessage());
+        } catch (Exception e) {
+            fail("Test failed with exception: " + e.getMessage());
+        }
+    }
+
+    @Test
+    void getTotalNumberOfPetTypesWithFilters_WithNoFilters_ShouldReturnTotalCount() {
+        try {
+            // Arrange
+            PetType petType1 = buildPetType("1", "Dog", "Mammal");
+            PetType petType2 = buildPetType("2", "Cat", "Mammal");
+
+            when(petTypeRepo.findAll()).thenReturn(Flux.just(petType1, petType2));
+
+            // Act
+            Mono<Long> result = petTypeService.getTotalNumberOfPetTypesWithFilters(
+                    null, null, null);
+
+            // Assert
+            StepVerifier.create(result)
+                    .expectNext(2L)
+                    .verifyComplete();
+
+        } catch (NotFoundException e) {
+            fail("Unexpected NotFoundException: " + e.getMessage());
+        } catch (InvalidInputException e) {
+            fail("Unexpected InvalidInputException: " + e.getMessage());
+        } catch (Exception e) {
+            fail("Test failed with exception: " + e.getMessage());
+        }
+    }
+
+    @Test
+    void getTotalNumberOfPetTypesWithFilters_WithNameFilter_ShouldReturnFilteredCount() {
+        try {
+            // Arrange
+            PetType petType1 = buildPetType("1", "Dog", "Mammal");
+            PetType petType2 = buildPetType("2", "Cat", "Mammal");
+            PetType petType3 = buildPetType("3", "Dog", "Bird");
+
+            when(petTypeRepo.findAll()).thenReturn(Flux.just(petType1, petType2, petType3));
+
+            // Act
+            Mono<Long> result = petTypeService.getTotalNumberOfPetTypesWithFilters(
+                    null, "Dog", null);
+
+            // Assert
+            StepVerifier.create(result)
+                    .expectNext(2L)
+                    .verifyComplete();
+
+        } catch (NotFoundException e) {
+            fail("Unexpected NotFoundException: " + e.getMessage());
+        } catch (InvalidInputException e) {
+            fail("Unexpected InvalidInputException: " + e.getMessage());
+        } catch (Exception e) {
+            fail("Test failed with exception: " + e.getMessage());
+        }
+    }
+
+    // Helper method for building PetType objects
+    private PetType buildPetType(String id, String name, String description) {
+        return PetType.builder()
+                .id(id)
+                .petTypeId(id)
+                .name(name)
+                .petTypeDescription(description)
+                .build();
+    }
+
 
     private PetType buildPetType() {
         return PetType.builder().id("10").petTypeId("petType-Id-123").name("TestType").petTypeDescription("Mammal").build();
