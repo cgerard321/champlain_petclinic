@@ -16,6 +16,7 @@ import org.springframework.http.*;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.webjars.NotFoundException;
@@ -29,6 +30,7 @@ import java.util.UUID;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static reactor.core.publisher.Mono.just;
 
 @Slf4j
 @Component
@@ -127,7 +129,7 @@ public class AuthServiceClient {
                     register.setUserId(uuid);
                     return webClientBuilder.build().post()
                             .uri(authServiceUrl + "/users")
-                            .body(Mono.just(register), Register.class)
+                            .body(just(register), Register.class)
                             .accept(MediaType.APPLICATION_JSON)
                             .retrieve()
                             .onStatus(HttpStatusCode::is4xxClientError,
@@ -164,7 +166,7 @@ public class AuthServiceClient {
             register.setUserId(uuid);
             return webClientBuilder.build().post()
                     .uri(authServiceUrl + "/users")
-                    .body(Mono.just(register), Register.class)
+                    .body(just(register), Register.class)
                     .accept(MediaType.APPLICATION_JSON)
                     .retrieve()
                     .onStatus(HttpStatusCode::is4xxClientError,
@@ -173,7 +175,7 @@ public class AuthServiceClient {
                     )
                     .bodyToMono(UserPasswordLessDTO.class)
                     .flatMap(userDetails -> {
-                        Mono<OwnerRequestDTO> ownerRequestDTO = Mono.just(OwnerRequestDTO.builder()
+                        Mono<OwnerRequestDTO> ownerRequestDTO = just(OwnerRequestDTO.builder()
                                 .firstName(register.getOwner().getFirstName())
                                 .lastName(register.getOwner().getLastName())
                                 .address(register.getOwner().getAddress())
@@ -206,7 +208,7 @@ public class AuthServiceClient {
             registerInventoryManager.setUserId(uuid);
             return webClientBuilder.build().post()
                     .uri(authServiceUrl + "/users")
-                    .body(Mono.just(registerInventoryManager), RegisterInventoryManager.class)
+                    .body(just(registerInventoryManager), RegisterInventoryManager.class)
                     .accept(MediaType.APPLICATION_JSON)
                     .retrieve()
                     .onStatus(HttpStatusCode::is4xxClientError,
@@ -226,7 +228,7 @@ public class AuthServiceClient {
             registerVet.setUserId(uuid);
             return webClientBuilder.build().post()
                     .uri(authServiceUrl + "/users")
-                    .body(Mono.just(registerVet), RegisterVet.class)
+                    .body(just(registerVet), RegisterVet.class)
                     .accept(MediaType.APPLICATION_JSON)
                     .retrieve()
                     .onStatus(HttpStatusCode::is4xxClientError,
@@ -248,7 +250,7 @@ public class AuthServiceClient {
                                         .lastName(registerVet.getVet().getLastName())
                                         .vetId(uuid)
                                         .build();
-                                return vetsServiceClient.createVet((Mono.just(vetDTO)));
+                                return vetsServiceClient.createVet((just(vetDTO)));
                             }
                     );
         }).doOnError(throwable -> {
@@ -265,7 +267,7 @@ public class AuthServiceClient {
             registerVet.setUserId(uuid);
             return webClientBuilder.build().post()
                     .uri(authServiceUrl + "/users")
-                    .body(Mono.just(registerVet), RegisterVet.class)
+                    .body(just(registerVet), RegisterVet.class)
                     .accept(MediaType.APPLICATION_JSON)
                     .retrieve()
                     .onStatus(HttpStatusCode::is4xxClientError,
@@ -287,7 +289,7 @@ public class AuthServiceClient {
                                         .lastName(registerVet.getVet().getLastName())
                                         .vetId(uuid)
                                         .build();
-                                return vetsServiceClient.addVet((Mono.just(vetDTO)));
+                                return vetsServiceClient.addVet((just(vetDTO)));
                             }
                     );
         }).doOnError(throwable -> {
@@ -297,18 +299,6 @@ public class AuthServiceClient {
     }
 
 
-    //    public Mono<UserDetails> updateUser (final long userId, final Register model) {
-//        return webClientBuilder.build().put()
-//                .uri(authServiceUrl + "/users/{userId}", userId)
-//                .body(just(model), Register.class)
-//                .accept(MediaType.APPLICATION_JSON)
-//                .retrieve()
-//                .onStatus(HttpStatus::is4xxClientError,
-//                        n -> rethrower.rethrow(n,
-//                                x -> new GenericHttpException(x.get("message").toString(), BAD_REQUEST))
-//                        )
-//                .bodyToMono(UserDetails.class);
-//    }
 
     public Mono<ResponseEntity<UserDetails>> verifyUser(final String token) {
 
@@ -387,12 +377,12 @@ public class AuthServiceClient {
         // If the cookie is not empty, return a 204 No Content response
         if (cookies != null && !cookies.isEmpty()) {
             log.info("Logout Success: Account session ended");
-            return Mono.just(ResponseEntity.noContent().build());
+            return just(ResponseEntity.noContent().build());
 
             // If the cookie is empty, return a 401 Unauthorized response
         } else {
             log.warn("Logout Error: Problem removing account cookies, Session may have expired, redirecting to login page");
-            return Mono.just(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
+            return just(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
         }
     }
 
@@ -415,6 +405,20 @@ public class AuthServiceClient {
         } catch (HttpClientErrorException ex) {
             throw new InvalidInputException(ex.getMessage());
         }
+    }
+
+    public Mono<String> updateUsername (final String userId, String username, String jwToken) {
+        return webClientBuilder.build()
+                .patch()
+                .uri(authServiceUrl + "/users/{userId}/username", userId)
+                .bodyValue(username)
+                .cookie("Bearer", jwToken)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, n -> rethrower.rethrow(n,
+                        x -> new GenericHttpException(x.get("message").toString(), (HttpStatus) n.statusCode())))
+                .bodyToMono(String.class);
+
     }
 
     public Mono<ResponseEntity<Void>> changePassword(Mono<UserPasswordAndTokenRequestModel> pwdChange) {
@@ -537,4 +541,6 @@ public class AuthServiceClient {
                 .retrieve()
                 .bodyToMono(Role.class);
     }
+
+
 }

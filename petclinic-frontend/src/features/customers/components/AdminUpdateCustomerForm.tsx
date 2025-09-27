@@ -43,7 +43,6 @@ const AdminUpdateCustomerForm: FC = () => {
         console.error('Owner id is undefined');
         return;
       }
-
       try {
         const response = await getOwner(ownerId);
         const ownerData: OwnerResponseModel = response.data;
