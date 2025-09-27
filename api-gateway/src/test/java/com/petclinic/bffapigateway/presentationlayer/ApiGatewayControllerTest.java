@@ -61,6 +61,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
@@ -3808,6 +3809,54 @@ private VetAverageRatingDTO buildVetAverageRatingDTO(){
                 .build();
     }
 
+
+
+
+
+    @Test
+    void whenDeletePetType_ReturnsWebClientError_ShouldReturnStatusNotFound() {
+        try {
+            String petTypeId = "4283c9b8-4ffd-4866-a5ed-287117c60a40";
+            WebClientResponseException serviceException = WebClientResponseException.create(
+                    500, "Internal Server Error", null, null, null);
+
+            when(customersServiceClient.deletePetTypeV2(petTypeId))
+                    .thenReturn(Mono.error(serviceException));
+
+            client.delete()
+                    .uri("/api/gateway/owners/petTypes/{petTypeId}", petTypeId)
+                    .exchange()
+                    .expectStatus().is5xxServerError();
+
+        } catch (Exception e) {
+            System.err.println("Test failed with exception: " + e.getMessage());
+            e.printStackTrace();
+            fail("Test failed: " + e.getMessage());
+        }
+    }
+
+
+
+    @Test
+    void deletePetType_WhenServiceTimeout_ShouldReturnGatewayTimeout() {
+        try {
+            // Given
+            String petTypeId = "4283c9b8-4ffd-4866-a5ed-287117c60a40";
+            when(customersServiceClient.deletePetTypeV2(petTypeId))
+                    .thenReturn(Mono.error(new RuntimeException("Connection timeout")));
+
+            // When & Then
+            client.delete()
+                    .uri("/api/gateway/owners/petTypes/{petTypeId}", petTypeId)
+                    .exchange()
+                    .expectStatus().is5xxServerError();
+
+        } catch (Exception e) {
+            System.err.println("Test failed with exception: " + e.getMessage());
+            e.printStackTrace();
+            fail("Test failed: " + e.getMessage());
+        }
+    }
 
 
 

@@ -108,6 +108,32 @@ public Mono<CartResponseDTO> deleteCartByCartId(String CardId) {
                 .block();
     }
 
+    //method that helps to delete products from wishlist
+    public Mono<CartResponseDTO> removeProductFromWishlist(String cartId, String productId) {
+        return webClientBuilder.build()
+                .delete()
+                .uri(CartServiceUrl + "/" + cartId + "/wishlist/" + productId)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, error -> {
+                    HttpStatusCode statusCode = error.statusCode();
+                    if (statusCode.equals(HttpStatus.NOT_FOUND)) {
+                        return Mono.error(new NotFoundException(
+                                "Wishlist item not found for cartId: " + cartId + " and productId: " + productId));
+                    } else if (statusCode.equals(HttpStatus.UNPROCESSABLE_ENTITY)) {
+                        return Mono.error(new InvalidInputException(
+                                "Invalid input for cartId: " + cartId + " or productId: " + productId));
+                    }
+                    return Mono.error(new IllegalArgumentException("Client error"));
+                })
+                .onStatus(HttpStatusCode::is5xxServerError,
+                        error -> Mono.error(new IllegalArgumentException("Server error")))
+                .bodyToMono(CartResponseDTO.class)
+                .doOnSuccess(res -> log.info("Removed product {} from wishlist in cart {}", productId, cartId))
+                .doOnError(e -> log.error("Error removing product {} from wishlist in cart {}: {}", productId, cartId, e.getMessage()));
+    }
+
+
+
     public Mono<Void> clearCart(String cartId) {
         return webClientBuilder.build()
                 .delete()

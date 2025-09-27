@@ -15,6 +15,14 @@ interface ApiError {
   message: string;
 }
 
+// Fields that support undo
+type FieldKey =
+  | 'inventoryName'
+  | 'inventoryType'
+  | 'inventoryDescription'
+  | 'inventoryImage'
+  | 'inventoryBackupImage';
+
 const EditInventory: React.FC = (): JSX.Element => {
   const { inventoryId } = useParams<{ inventoryId: string }>();
   const [inventory, setInventory] = useState<InventoryRequestModel>({
@@ -33,6 +41,16 @@ const EditInventory: React.FC = (): JSX.Element => {
   const [showNotification, setShowNotification] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
+  // Undo state
+  const [history, setHistory] = useState<Record<FieldKey, string[]>>({
+    inventoryName: [''],
+    inventoryType: [''],
+    inventoryDescription: [''],
+    inventoryImage: [''],
+    inventoryBackupImage: [''],
+  });
+  const [lastEditedFields, setLastEditedFields] = useState<string[]>([]);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -48,6 +66,15 @@ const EditInventory: React.FC = (): JSX.Element => {
             inventoryImage: response.inventoryImage,
             inventoryBackupImage: response.inventoryBackupImage,
             imageUploaded: response.imageUploaded,
+          });
+
+          // Initialize undo history with loaded values
+          setHistory({
+            inventoryName: [response.inventoryName],
+            inventoryType: [response.inventoryType],
+            inventoryDescription: [response.inventoryDescription],
+            inventoryImage: [response.inventoryImage],
+            inventoryBackupImage: [response.inventoryBackupImage],
           });
         } catch (error) {
           console.error(
@@ -65,7 +92,7 @@ const EditInventory: React.FC = (): JSX.Element => {
     const fetchInventoryTypes = async (): Promise<void> => {
       try {
         const types = await getAllInventoryTypes();
-        setInventoryTypes(types); // Set the fetched types in state
+        setInventoryTypes(types);
       } catch (error) {
         console.error('Error fetching inventory types:', error);
       }
@@ -73,6 +100,74 @@ const EditInventory: React.FC = (): JSX.Element => {
 
     fetchInventoryTypes();
   }, [inventoryId]);
+
+  // Word-count helper
+  const countWords = (s: string): number => {
+    const trimmed = s.trim();
+    if (trimmed === '') return 0;
+    return trimmed.split(/\s+/).filter(Boolean).length;
+  };
+
+  // Push snapshots at word boundaries
+  const handleFieldChange = (field: FieldKey, value: string): void => {
+    setHistory(prev => {
+      const fieldHist = prev[field] ?? [''];
+      const lastRecorded = fieldHist[fieldHist.length - 1] ?? '';
+
+      const isWordBoundary =
+        value.endsWith(' ') ||
+        value.trim() === '' ||
+        countWords(value) < countWords(lastRecorded);
+
+      if (isWordBoundary && value !== lastRecorded) {
+        return {
+          ...prev,
+          [field]: [...fieldHist, value],
+        };
+      }
+      return prev;
+    });
+
+    setLastEditedFields(prev => {
+      const updated = prev.filter(f => f !== field);
+      return [...updated, field];
+    });
+
+    setInventory({ ...inventory, [field]: value });
+  };
+
+  // Undo handler
+  const handleUndo = (): void => {
+    const order = [...lastEditedFields];
+
+    while (order.length > 0) {
+      const candidate = order[order.length - 1] as FieldKey;
+      const fieldHist = history[candidate];
+
+      if (fieldHist && fieldHist.length > 1) {
+        const newHist = fieldHist.slice(0, -1);
+        const restoredValue = newHist[newHist.length - 1] ?? '';
+
+        setHistory(prev => ({
+          ...prev,
+          [candidate]: newHist,
+        }));
+
+        setLastEditedFields(prev => {
+          const filtered = prev.filter(f => f !== candidate);
+          if (newHist.length > 1) {
+            return [...filtered, candidate];
+          }
+          return filtered;
+        });
+
+        setInventory({ ...inventory, [candidate]: restoredValue });
+        return;
+      }
+
+      order.pop();
+    }
+  };
 
   const validate = (): boolean => {
     const newError: { [key: string]: string } = {};
@@ -174,10 +269,7 @@ const EditInventory: React.FC = (): JSX.Element => {
                   className="form-control"
                   value={inventory.inventoryName}
                   onChange={e =>
-                    setInventory({
-                      ...inventory,
-                      inventoryName: e.target.value,
-                    })
+                    handleFieldChange('inventoryName', e.target.value)
                   }
                   required
                 />
@@ -194,10 +286,7 @@ const EditInventory: React.FC = (): JSX.Element => {
                   className="form-control"
                   value={inventory.inventoryType}
                   onChange={e =>
-                    setInventory({
-                      ...inventory,
-                      inventoryType: e.target.value,
-                    })
+                    handleFieldChange('inventoryType', e.target.value)
                   }
                   required
                 >
@@ -225,10 +314,7 @@ const EditInventory: React.FC = (): JSX.Element => {
                   placeholder="Inventory Description"
                   value={inventory.inventoryDescription}
                   onChange={e =>
-                    setInventory({
-                      ...inventory,
-                      inventoryDescription: e.target.value,
-                    })
+                    handleFieldChange('inventoryDescription', e.target.value)
                   }
                   required
                 />
@@ -251,10 +337,7 @@ const EditInventory: React.FC = (): JSX.Element => {
                   placeholder="Inventory Image"
                   value={inventory.inventoryImage}
                   onChange={e =>
-                    setInventory({
-                      ...inventory,
-                      inventoryImage: e.target.value,
-                    })
+                    handleFieldChange('inventoryImage', e.target.value)
                   }
                   required
                 />
@@ -275,10 +358,7 @@ const EditInventory: React.FC = (): JSX.Element => {
                   placeholder="Inventory Backup Image"
                   value={inventory.inventoryBackupImage}
                   onChange={e =>
-                    setInventory({
-                      ...inventory,
-                      inventoryBackupImage: e.target.value,
-                    })
+                    handleFieldChange('inventoryBackupImage', e.target.value)
                   }
                   required
                 />
@@ -310,6 +390,14 @@ const EditInventory: React.FC = (): JSX.Element => {
           <div className="row">
             <button type="submit" className="btn btn-info">
               Update
+            </button>
+            {/* Undo button */}
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={handleUndo}
+            >
+              Undo
             </button>
           </div>
         </form>
