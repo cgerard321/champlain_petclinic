@@ -33,9 +33,9 @@ class PetTypeControllerIntegrationTest {
     PetType petTypeEntity2 = buildPetType2();
     String PUBLIC_PETTYPE_ID = petTypeEntity2.getPetTypeId();
 
-    /** ----------------------------------------------------
-     *   Basic CRUD endpoint tests
-     *  ---------------------------------------------------- */
+    // -------------------------------------------------------------------------
+    // Basic CRUD endpoint tests
+    // -------------------------------------------------------------------------
 
     @Test
     void getAllPetTypes_shouldSucceed() {
@@ -72,6 +72,53 @@ class PetTypeControllerIntegrationTest {
     }
 
     @Test
+    void updatePetType() {
+        PetType testPetType = PetType.builder()
+                .id("test-id-123")
+                .petTypeId("test-petTypeId-123")
+                .name("Original Dog")
+                .petTypeDescription("Original Mammal")
+                .build();
+
+        Publisher<PetType> setup = petTypeRepo.deleteAll().thenMany(petTypeRepo.save(testPetType));
+        StepVerifier.create(setup).expectNextCount(1).verifyComplete();
+
+        PetTypeRequestDTO updateRequest = PetTypeRequestDTO.builder()
+                .name("Updated Dog")
+                .petTypeDescription("Updated Mammal")
+                .build();
+
+        webTestClient.put().uri("/owners/petTypes/" + testPetType.getPetTypeId())
+                .body(Mono.just(updateRequest), PetTypeRequestDTO.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.petTypeId").isEqualTo(testPetType.getPetTypeId())
+                .jsonPath("$.name").isEqualTo("Updated Dog")
+                .jsonPath("$.petTypeDescription").isEqualTo("Updated Mammal");
+    }
+
+    @Test
+    void getOwnerByOwnerId() {
+        Publisher<PetType> setup = petTypeRepo.deleteAll().thenMany(petTypeRepo.save(petTypeEntity2));
+        StepVerifier.create(setup).expectNextCount(1).verifyComplete();
+        webTestClient.get().uri("/owners/petTypes/" + PUBLIC_PETTYPE_ID)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(PetTypeResponseDTO.class)
+                .value(petTypeResponseDTO -> {
+                    assertNotNull(petTypeResponseDTO);
+                    assertEquals(petTypeResponseDTO.getPetTypeId(), petTypeEntity2.getPetTypeId());
+                    assertEquals(petTypeResponseDTO.getName(), petTypeEntity2.getName());
+                    assertEquals(petTypeResponseDTO.getPetTypeDescription(), petTypeEntity2.getPetTypeDescription());
+                });
+    }
+
+    @Test
     void deletePetType_ShouldReturnNoContent() {
         PetType petType = PetType.builder()
                 .id("4283c9b8-4ffd-4866-a5ed-287117c60a40")
@@ -91,7 +138,7 @@ class PetTypeControllerIntegrationTest {
                     .expectBody().isEmpty();
 
             StepVerifier.create(
-                            petTypeRepo.findOPetTypeById(savedPetType.getPetTypeId())
+                            petTypeRepo.findByPetTypeId(savedPetType.getPetTypeId())
                                     .timeout(Duration.ofSeconds(5))
                                     .onErrorMap(TimeoutException.class,
                                             e -> new RuntimeException("Database query timed out", e)))
@@ -109,9 +156,9 @@ class PetTypeControllerIntegrationTest {
         }
     }
 
-    /** ----------------------------------------------------
-     *   Pagination, filtering & counting tests
-     *  ---------------------------------------------------- */
+    // -------------------------------------------------------------------------
+    // Pagination, filtering & counting tests
+    // -------------------------------------------------------------------------
 
     @Test
     void getPetTypesPagination_WithValidParameters_ShouldReturnPaginatedResults() {
@@ -223,15 +270,12 @@ class PetTypeControllerIntegrationTest {
                 });
     }
 
-    /** ----------------------------------------------------
-     *   Helper builders
-     *  ---------------------------------------------------- */
+    // -------------------------------------------------------------------------
+    // Helper builders
+    // -------------------------------------------------------------------------
 
     private PetType buildPetType() {
-        return PetType.builder()
-                .id("10")
-                .name("TestType")
-                .build();
+        return PetType.builder().id("10").name("TestType").build();
     }
 
     private PetType buildPetType2() {

@@ -11,7 +11,7 @@
     }
 
     .FilterPetTypesLabel {
-        color: rgba(0,0,0,0.5);
+        color: rgba(0, 0, 0, 0.5);
     }
 
     @media (max-width: 576px) {
@@ -75,7 +75,6 @@
         </form>
     </div>
 
-
     <!-- Filter & pagination controls -->
     <form class="d-flex flex-column ng-pristine ng-valid">
         <div class="d-flex flex-row justify-content-between align-items-end">
@@ -110,7 +109,7 @@
         <div class="d-flex gap-4 mb-4 flex-wrap">
             <div class="d-flex flex-column">
                 <select id="sizeInput" style="width: 100px">
-                    <option value=""> </option>
+                    <option value=""></option>
                     <option value="2">2</option>
                     <option value="5">5</option>
                     <option value="10">10</option>
@@ -121,14 +120,14 @@
         </div>
     </form>
 
-    <!-- Table showing pet types -->
+    <!-- Table showing pet types with inline update/delete -->
     <table id="petType" class="table table-striped table-responsive petTypeTable pb-3">
         <thead class="bg-white">
         <tr>
             <th class="bg-white border text-dark">Pet Type ID</th>
             <th class="bg-white border text-dark">Pet Type Name</th>
             <th class="bg-white d-none d-sm-table-cell d-md-table-cell border text-dark">Description</th>
-            <th class="bg-white border text-dark">Delete</th>
+            <th class="bg-white border text-dark">Actions</th>
         </tr>
         </thead>
         <tbody class="border">
@@ -139,9 +138,30 @@
                     {{petType.petTypeId}}
                 </a>
             </td>
-            <td class="responsive-text">{{petType.name}}</td>
-            <td class="d-none d-sm-table-cell d-md-table-cell responsive-text">{{petType.petTypeDescription}}</td>
+            <td class="responsive-text">
+                <span ng-if="self.editingPetType !== petType.petTypeId">{{petType.name}}</span>
+                <input ng-if="self.editingPetType === petType.petTypeId"
+                       type="text"
+                       ng-model="self.editForm.name"
+                       class="form-control form-control-sm">
+            </td>
+            <td class="d-none d-sm-table-cell d-md-table-cell responsive-text">
+                <span ng-if="self.editingPetType !== petType.petTypeId">{{petType.petTypeDescription}}</span>
+                <input ng-if="self.editingPetType === petType.petTypeId"
+                       type="text"
+                       ng-model="self.editForm.petTypeDescription"
+                       class="form-control form-control-sm">
+            </td>
             <td>
+                <button ng-if="self.editingPetType !== petType.petTypeId"
+                        class="btn btn-primary btn-sm me-2"
+                        ng-click="self.editPetType(petType)">Update</button>
+                <button ng-if="self.editingPetType === petType.petTypeId"
+                        class="btn btn-success btn-sm me-2"
+                        ng-click="self.savePetType(petType.petTypeId)">Save</button>
+                <button ng-if="self.editingPetType === petType.petTypeId"
+                        class="btn btn-secondary btn-sm me-2"
+                        ng-click="self.cancelEdit()">Cancel</button>
                 <button class="btn btn-danger btn-sm"
                         ng-click="self.deletePetType(petType.petTypeId)">Delete</button>
             </td>
@@ -171,5 +191,4 @@
             </ul>
         </nav>
     </div>
-
 </div>

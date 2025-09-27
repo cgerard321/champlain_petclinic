@@ -8,7 +8,7 @@ angular.module('petTypeList')
                 var self = this;
 
                 // -------------------------------------------------------------------
-                // Add Pet Type Form state
+                // Add Pet Type form state
                 // -------------------------------------------------------------------
                 self.petTypes = [];
                 self.showAddForm = false;
@@ -22,7 +22,6 @@ angular.module('petTypeList')
                 };
 
                 self.addPetType = function () {
-                    // Extra check: letters and spaces only
                     var lettersOnly = /^[a-zA-Z\s]+$/;
 
                     if (!lettersOnly.test(self.newPetType.name) ||
@@ -41,11 +40,40 @@ angular.module('petTypeList')
                             alert('Pet type added successfully!');
                             self.showAddForm = false;
                             self.newPetType = { name: '', petTypeDescription: '' };
-                            loadDefaultData(); // refresh full list
+                            loadDefaultData();
                         }, function (error) {
-                            alert('Failed to add pet type: ' +
-                                (error.data.message || 'Unknown error'));
+                            alert('Failed to add pet type: ' + (error.data.message || 'Unknown error'));
                         });
+                };
+
+                // -------------------------------------------------------------------
+                // Inline editing (Update)
+                // -------------------------------------------------------------------
+                self.editingPetType = null;
+                self.editForm = {};
+
+                self.editPetType = function (petType) {
+                    self.editingPetType = petType.petTypeId;
+                    self.editForm = {
+                        name: petType.name,
+                        petTypeDescription: petType.petTypeDescription
+                    };
+                };
+
+                self.savePetType = function (petTypeId) {
+                    $http.put('api/gateway/owners/petTypes/' + petTypeId, self.editForm)
+                        .then(function () {
+                            alert('Pet type updated successfully!');
+                            loadDefaultData();
+                            self.cancelEdit();
+                        }, function (error) {
+                            alert('Failed to update pet type: ' + (error.data.message || 'Unknown error'));
+                        });
+                };
+
+                self.cancelEdit = function () {
+                    self.editingPetType = null;
+                    self.editForm = {};
                 };
 
                 self.deletePetType = function (petTypeId) {
@@ -53,13 +81,10 @@ angular.module('petTypeList')
                     if (isConfirmed) {
                         $http.delete('api/gateway/owners/petTypes/' + petTypeId)
                             .then(function () {
-                                console.log('Pet type deleted successfully');
                                 alert('Pet type deleted successfully!');
                                 loadDefaultData();
                             }, function (error) {
-                                console.error('Error deleting pet type:', error);
-                                alert('Failed to delete pet type: ' +
-                                    (error.data.message || 'Unknown error'));
+                                alert('Failed to delete pet type: ' + (error.data.message || 'Unknown error'));
                             });
                     }
                 };
@@ -100,76 +125,66 @@ angular.module('petTypeList')
                     self.petTypes = self.allPetTypes.slice(startIndex, endIndex);
                 }
 
-                self.searchPetTypesByPaginationAndFilters =
-                    function (currentPage = 0, prevOrNextPressed = false) {
+                self.searchPetTypesByPaginationAndFilters = function (currentPage = 0, prevOrNextPressed = false) {
+                    self.selectedSize = document.getElementById('sizeInput').value;
 
-                        self.selectedSize = document.getElementById("sizeInput").value;
+                    if (!prevOrNextPressed) {
+                        self.petTypeId = document.getElementById('petTypeIdInput').value;
+                        self.name = document.getElementById('nameInput').value;
+                        self.description = document.getElementById('descriptionInput').value;
 
-                        if (!prevOrNextPressed) {
-                            self.petTypeId = document.getElementById("petTypeIdInput").value;
-                            self.name = document.getElementById("nameInput").value;
-                            self.description = document.getElementById("descriptionInput").value;
-
-                            if (checkIfAllEmpty(self.petTypeId, self.name,
-                                self.description, self.selectedSize)) {
-                                alert("Oops! It seems like you forgot to enter any filter criteria.");
-                                return;
-                            }
+                        if (!self.petTypeId && !self.name && !self.description && !self.selectedSize) {
+                            alert('Oops! It seems like you forgot to enter any filter criteria.');
+                            return;
                         }
+                    }
 
-                        self.searchActive = true;
+                    self.searchActive = true;
 
-                        var filteredPetTypes = self.allPetTypes;
+                    var filteredPetTypes = self.allPetTypes;
 
-                        if (self.petTypeId) {
-                            filteredPetTypes = filteredPetTypes.filter(function (petType) {
-                                return petType.petTypeId &&
-                                    petType.petTypeId.toString().includes(self.petTypeId);
-                            });
-                        }
+                    if (self.petTypeId) {
+                        filteredPetTypes = filteredPetTypes.filter(function (petType) {
+                            return petType.petTypeId && petType.petTypeId.toString().includes(self.petTypeId);
+                        });
+                    }
 
-                        if (self.name) {
-                            filteredPetTypes = filteredPetTypes.filter(function (petType) {
-                                return petType.name &&
-                                    petType.name.toLowerCase().includes(self.name.toLowerCase());
-                            });
-                        }
+                    if (self.name) {
+                        filteredPetTypes = filteredPetTypes.filter(function (petType) {
+                            return petType.name && petType.name.toLowerCase().includes(self.name.toLowerCase());
+                        });
+                    }
 
-                        if (self.description) {
-                            filteredPetTypes = filteredPetTypes.filter(function (petType) {
-                                return petType.petTypeDescription &&
-                                    petType.petTypeDescription.toLowerCase()
-                                        .includes(self.description.toLowerCase());
-                            });
-                        }
+                    if (self.description) {
+                        filteredPetTypes = filteredPetTypes.filter(function (petType) {
+                            return petType.petTypeDescription &&
+                                petType.petTypeDescription.toLowerCase().includes(self.description.toLowerCase());
+                        });
+                    }
 
-                        if (self.selectedSize) {
-                            self.pageSize = self.selectedSize;
-                        }
+                    if (self.selectedSize) {
+                        self.pageSize = self.selectedSize;
+                    }
 
-                        if (!prevOrNextPressed) {
-                            self.currentPage = 0;
-                        }
+                    if (!prevOrNextPressed) {
+                        self.currentPage = 0;
+                    }
 
-                        self.totalItems = filteredPetTypes.length;
-                        self.totalPages = Math.ceil(self.totalItems / parseInt(self.pageSize));
+                    self.totalItems = filteredPetTypes.length;
+                    self.totalPages = Math.ceil(self.totalItems / parseInt(self.pageSize));
 
-                        var startIndex = self.currentPage * parseInt(self.pageSize);
-                        var endIndex = startIndex + parseInt(self.pageSize);
-                        self.petTypes = filteredPetTypes.slice(startIndex, endIndex);
+                    var startIndex = self.currentPage * parseInt(self.pageSize);
+                    var endIndex = startIndex + parseInt(self.pageSize);
+                    self.petTypes = filteredPetTypes.slice(startIndex, endIndex);
 
-                        updateCurrentPageOnSite();
-                    };
-
-                function checkIfAllEmpty(petTypeId, name, description, selectedSize) {
-                    return (!petTypeId && !name && !description && !selectedSize);
-                }
+                    updateCurrentPageOnSite();
+                };
 
                 self.clearInputAndResetDefaultData = function () {
-                    document.getElementById("petTypeIdInput").value = "";
-                    document.getElementById("nameInput").value = "";
-                    document.getElementById("descriptionInput").value = "";
-                    document.getElementById("sizeInput").selectedIndex = 0;
+                    document.getElementById('petTypeIdInput').value = '';
+                    document.getElementById('nameInput').value = '';
+                    document.getElementById('descriptionInput').value = '';
+                    document.getElementById('sizeInput').selectedIndex = 0;
 
                     self.currentPage = 0;
                     self.pageSize = 5;
@@ -185,7 +200,7 @@ angular.module('petTypeList')
                     applyPagination();
                     updateCurrentPageOnSite();
 
-                    alert("All filters have been cleared successfully.");
+                    alert('All filters have been cleared successfully.');
                 };
 
                 self.goNextPage = function () {
@@ -219,5 +234,4 @@ angular.module('petTypeList')
                 function updateCurrentPageOnSite() {
                     self.currentPageOnSite = parseInt(self.currentPage) + 1;
                 }
-
             }]);

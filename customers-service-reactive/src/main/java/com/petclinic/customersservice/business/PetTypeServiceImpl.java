@@ -37,7 +37,7 @@ public class PetTypeServiceImpl implements PetTypeService {
 
     @Override
     public Mono<PetTypeResponseDTO> getPetTypeByPetTypeId(String petTypeId) {
-        return petTypeRepo.findOPetTypeById(petTypeId)
+        return petTypeRepo.findByPetTypeId(petTypeId)
                 .switchIfEmpty(Mono.error(
                         new NotFoundException("Pet Type not found with id : " + petTypeId)))
                 .map(EntityDTOUtil::toPetTypeResponseDTO);
@@ -70,7 +70,7 @@ public class PetTypeServiceImpl implements PetTypeService {
     @Override
     public Mono<PetTypeResponseDTO> updatePetType(Mono<PetTypeRequestDTO> petTypeRequestDTO,
                                                   String petTypeId) {
-        return petTypeRepo.findOPetTypeById(petTypeId)
+        return petTypeRepo.findByPetTypeId(petTypeId)
                 .flatMap(existingPetType -> petTypeRequestDTO.map(requestDTO -> {
                     existingPetType.setName(requestDTO.getName());
                     existingPetType.setPetTypeDescription(requestDTO.getPetTypeDescription());
@@ -110,17 +110,14 @@ public class PetTypeServiceImpl implements PetTypeService {
                         (name == null || petType.getName().toLowerCase().contains(name.toLowerCase())) &&
                         (description == null || petType.getPetTypeDescription().toLowerCase().contains(description.toLowerCase()));
 
-        if (petTypeId == null && name == null && description == null) {
-            return petTypeRepo.findAll()
-                    .map(EntityDTOUtil::toPetTypeResponseDTO)
-                    .skip((long) pageable.getPageNumber() * pageable.getPageSize())
-                    .take(pageable.getPageSize());
-        } else {
-            return petTypeRepo.findAll()
-                    .filter(filterCriteria)
-                    .map(EntityDTOUtil::toPetTypeResponseDTO)
-                    .skip((long) pageable.getPageNumber() * pageable.getPageSize())
-                    .take(pageable.getPageSize());
+        Flux<PetType> source = petTypeRepo.findAll();
+        if (petTypeId != null || name != null || description != null) {
+            source = source.filter(filterCriteria);
         }
+
+        return source
+                .map(EntityDTOUtil::toPetTypeResponseDTO)
+                .skip((long) pageable.getPageNumber() * pageable.getPageSize())
+                .take(pageable.getPageSize());
     }
 }
