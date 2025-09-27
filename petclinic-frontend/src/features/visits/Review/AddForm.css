@@ -105,3 +105,11 @@ button[type='submit']:hover {
   font-size: 14px;
   margin-top: -10px;
 }
+
+.add-review-form button.cancel {
+  background-color: red;
+}
+
+.add-review-form button.cancel:hover {
+  background-color: darkred;
+}

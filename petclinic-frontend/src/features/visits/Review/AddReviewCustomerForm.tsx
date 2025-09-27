@@ -47,6 +47,14 @@ const AddCustomerReviewForm: React.FC = (): JSX.Element => {
     }));
   };
 
+  const handleCancel = (): void => {
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate('/visits');
+    }
+  };
+
   const validate = (): boolean => {
     const newErrors: { [key: string]: string } = {};
     if (review.rating < 1 || review.rating > 5)
@@ -158,6 +166,9 @@ const AddCustomerReviewForm: React.FC = (): JSX.Element => {
             required
           />
         </div>
+        <button className="cancel" type="submit" onClick={handleCancel}>
+          Cancel
+        </button>
         <button type="submit">Submit Review</button>
       </form>
 
