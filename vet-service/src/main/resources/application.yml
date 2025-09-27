@@ -74,9 +74,16 @@ spring:
       on-profile: docker
 
   r2dbc:
-    url: r2dbc:postgresql://postgres:5432/images
+    url: r2dbc:postgresql://postgres-vet:5432/images
     username: user
     password: pwd
+
+  datasource:
+    url: jdbc:postgresql://postgres-vet:5432/images
+    username: user
+    password: pwd
+    driver-class-name: org.postgresql.Driver
+
   data:
     mongodb:
       host: mongo

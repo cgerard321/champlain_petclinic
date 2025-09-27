@@ -24,7 +24,7 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:
-      - mongo2
+      - mongo-visits-new
       - mailer-service
 
   inventory-service:
@@ -41,7 +41,7 @@ services:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:
       - mongo
-      - postgres
+      - postgres-vet
 
   customers-service-reactive:
     build: customers-service-reactive
@@ -68,7 +68,7 @@ services:
     build: auth-service
     hostname: auth
     depends_on:
-      mysql4:
+      mysql-auth:
         condition: service_healthy
       mailer-service:
         condition: service_started
@@ -188,7 +188,7 @@ services:
   #            timeout: 5s
   #            retries: 10
 
-  mysql4:
+  mysql-auth:
     image: mysql:5.7
     platform: linux/amd64 # for M1 Macs
     ports:
@@ -199,7 +199,7 @@ services:
       - MYSQL_USER=user
       - MYSQL_PASSWORD=pwd
     volumes:
-      - ./data/mysql4:/var/lib/mysql4
+      - ./data/mysql-auth:/var/lib/mysql-auth
       - ./data/init.d:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-uuser", "-ppwd", "-h", "localhost"]
@@ -211,7 +211,7 @@ services:
     image: phpmyadmin:5.2.0
     container_name: PhpMyAdmin
     links:
-      - mysql4
+      - mysql-auth
     restart: always
     ports:
       - 5013:80
@@ -262,15 +262,16 @@ services:
       - vet-service
 
   #Vet Images Postgres container
-  postgres:
+  postgres-vet:
     image: postgres
-    container_name: postgres
+    container_name: postgres-vet
     environment:
       - POSTGRES_USER=user
       - POSTGRES_PASSWORD=pwd
       - POSTGRES_DB=images
     ports:
       - 5432:5432
+
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: pgadmin
@@ -281,7 +282,7 @@ services:
     ports:
       - 9003:80
     depends_on:
-      - postgres
+      - postgres-vet
 
   # billing mongo container
   mongo1:
@@ -313,9 +314,9 @@ services:
       - mongo1
       - billing-service
 
-  mongo2:
+  mongo-visits-new:
     image: mongo
-    container_name: mongo2
+    container_name: mongo-visits-new
     restart: always
     ports:
       - 27015:27017
@@ -334,12 +335,12 @@ services:
     environment:
       - ME_CONFIG_MONGODB_ADMINUSERNAME=root
       - ME_CONFIG_MONGODB_ADMINPASSWORD=password
-      - ME_CONFIG_MONGODB_SERVER=mongo2
+      - ME_CONFIG_MONGODB_SERVER=mongo-visits-new
       - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
     ports:
       - 9001:8081
     depends_on:
-      - mongo2
+      - mongo-visits-new
       - visits-service-new
 
   mongo-customers:
