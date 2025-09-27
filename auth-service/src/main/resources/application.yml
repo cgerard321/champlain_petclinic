@@ -29,7 +29,6 @@ gateway:
   protocol: http
   subdomain:
 
-
 ---
 # for test
 
@@ -66,6 +65,17 @@ spring:
 # for docker
 
 spring:
+  # performance optimizationn
+  main:
+    lazy-initialization: true
+  server:
+    netty:
+      connection-provider:
+        max-connections: 10
+    tomcat:
+      threads:
+        max: 50
+
   datasource:
     url: jdbc:mysql://mysql4/auth-db
     username: user
@@ -100,7 +110,6 @@ logging:
   level:
     root: INFO
     com.petclinic: DEBUG
-
 
 server.port: 8080
 

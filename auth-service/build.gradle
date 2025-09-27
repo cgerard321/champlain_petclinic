@@ -16,6 +16,7 @@ java {
 
 repositories {
     mavenCentral()
+    gradlePluginPortal()
 }
 ext {
     mapstructVersion = "1.4.1.Final"
@@ -92,4 +93,9 @@ check.dependsOn jacocoTestCoverageVerification
 
 test {
     useJUnitPlatform()
+}
+
+
+bootJar {
+    layered
 }
