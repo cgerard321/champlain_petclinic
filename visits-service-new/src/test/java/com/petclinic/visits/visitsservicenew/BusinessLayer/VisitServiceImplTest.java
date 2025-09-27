@@ -282,7 +282,6 @@ class VisitServiceImplTest {
         visitRequestDTO.setPetId(petId);
         visitRequestDTO.setPractitionerId(practitionerId);
         visitRequestDTO.setStatus(status);
-        visitRequestDTO.setVisitType("CONSULTATION");
 
         Visit visit = new Visit(); // Create a Visit entity with appropriate data
         VisitResponseDTO visitResponseDTO = new VisitResponseDTO(); // Create a VisitResponseDTO with appropriate data
@@ -323,7 +322,6 @@ class VisitServiceImplTest {
         visitRequestDTO.setPetId(petId);
         visitRequestDTO.setPractitionerId(practitionerId);
         visitRequestDTO.setStatus(status);
-        visitRequestDTO.setVisitType("CONSULTATION");
 
         // Create an instance of existingVisit with required properties
         Visit existingVisit = buildVisit("meow");
@@ -711,7 +709,6 @@ class VisitServiceImplTest {
                 .petId("ecb109cd-57ea-4b85-b51e-99751fd1c349")
                 .practitionerId("ecb109cd-57ea-4b85-b51e-99751fd1c342")
                 .status(Status.UPCOMING)
-                .visitType("CONSULTATION")
                 .build();
     }
 
