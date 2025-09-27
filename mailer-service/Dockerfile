@@ -1,4 +1,4 @@
-FROM golang:1.20 AS builder
+FROM golang:1.25 AS builder
 WORKDIR /app/GoMailer
 COPY . .
 RUN ["go", "install", "github.com/swaggo/swag/cmd/swag@v1.3.2"]

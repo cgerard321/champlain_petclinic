@@ -113,7 +113,7 @@ func TestValidateEmailInValidEmail(t *testing.T) {
 	ValidateEmail(context)
 
 	assert.Equal(t, http.StatusBadRequest, recorder.Code)
-	assert.Equal(t, "\"Key: 'Mail.To' Error:Field validation for 'To' failed on the 'required' tag\\nKey: 'Mail.Message' Error:Field validation for 'Message' failed on the 'required' tag\"", recorder.Body.String())
+	assert.Equal(t,"\"Key: 'Mail.EmailSendTo' Error:Field validation for 'EmailSendTo' failed on the 'required' tag\\nKey: 'Mail.EmailTitle' Error:Field validation for 'EmailTitle' failed on the 'required' tag\"", recorder.Body.String())
 }
 
 
@@ -135,13 +135,14 @@ func TestValidateEmailValidEmail(t *testing.T) {
 	context, _ := gin.CreateTestContext(recorder)
 
 	const emailSendTo = "test@test.test"
+	const emailTitle = "Test Email Title"
 	const templateName = "test TemplateName"
 	const header = "test Header"
 	const body = "Body Testing, testing, 1, 2, 3"
 	const footer = "Footer Testing, testing, 1, 2, 3"
 	const correspondantName = "Test Correspondant Name"
 	const senderName = "Test Sender Name"
-	context.Set("mail", &mailer.Mail{EmailSendTo: emailSendTo, TemplateName: templateName, Header: header,
+	context.Set("mail", &mailer.Mail{EmailSendTo: emailSendTo, EmailTitle: emailTitle, TemplateName: templateName, Header: header,
 	    Body: body, Footer: footer, CorrespondantName: correspondantName, SenderName: senderName})
 
 	ValidateEmail(context)

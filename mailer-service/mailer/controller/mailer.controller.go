@@ -2,9 +2,10 @@ package controller
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"mailer-service/mailer"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 type MailerControllerImpl struct {

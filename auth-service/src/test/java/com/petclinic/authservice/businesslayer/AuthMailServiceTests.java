@@ -1,7 +1,6 @@
 package com.petclinic.authservice.businesslayer;
 
 
-import com.petclinic.authservice.domainclientlayer.Mail.Mail;
 import com.petclinic.authservice.domainclientlayer.Mail.MailService;
 
 import com.petclinic.authservice.domainclientlayer.Mail.MailServiceCall;
@@ -48,7 +47,7 @@ public class AuthMailServiceTests {
     void setUp(){
 
         when(mockMailCall.sendMail(EMAIL_VALID))
-                .thenReturn(Calls.response(format("Message sent to %s", EMAIL_VALID.getEmailToSendTo())));
+                .thenReturn(Calls.response(format("Message sent to %s", EMAIL_VALID.getEmailSendTo())));
 
         when(mockMailCall.sendMail(EMAIL_EMPTY_INVALID))
                 .thenReturn(Calls.response(Response.error(400, ResponseBody.create("Bad request", JSON))));
@@ -60,7 +59,7 @@ public class AuthMailServiceTests {
     @Test
     @DisplayName("Send valid email")
     void send_valid_email() {
-        assertEquals("Message sent to " + EMAIL_VALID.getEmailToSendTo(), mailService.sendMail(EMAIL_VALID));
+        assertEquals("Message sent to " + EMAIL_VALID.getEmailSendTo(), mailService.sendMail(EMAIL_VALID));
     }
 
     @Test

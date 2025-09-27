@@ -2,6 +2,7 @@ package mailer
 
 import (
 	"crypto/tls"
+
 	"github.com/gin-gonic/gin"
 	gomail "gopkg.in/mail.v2"
 )
@@ -18,17 +19,17 @@ type MailerService interface {
 
 // New mailing struct
 type Mail struct {
-    EmailSendTo string `json:"email_send_to" validate:"required,email"`
-    EmailTitle string `json:"email_title" validate:"required"`
-    TemplateName string `json:"template_name"`
-    Header string `json:"header"`
-    Body string `json:"body"`
-    Footer string `json:"footer"`
-    CorrespondantName string `json:"correspondant_name"`
-    SenderName string `json:"sender_name"`
+	EmailSendTo       string `json:"EmailSendTo" validate:"required,email"`
+	EmailTitle        string `json:"EmailTitle" validate:"required"`
+	TemplateName      string `json:"TemplateName"`
+	Header            string `json:"Header"`
+	Body              string `json:"Body"`
+	Footer            string `json:"Footer"`
+	CorrespondantName string `json:"CorrespondantName"`
+	SenderName        string `json:"SenderName"`
 }
 
-func CreateDialer(host, email, password string, port... int) *gomail.Dialer {
+func CreateDialer(host, email, password string, port ...int) *gomail.Dialer {
 
 	truePort := 587
 

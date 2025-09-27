@@ -158,7 +158,7 @@ public class UserServiceImpl implements UserService {
                         "We have received a request to create an account for Pet Clinic from this email.\n\n" +
                         "Click on the following button to verify your identity: " + formatedLink + "\n\n\n" +
                         "If you do not wish to create an account, please disregard this email.",
-                "Thank you for choosing Pet Clinic.", user.getUsername(), "ChamplainPetClinic");
+                "Thank you for choosing Pet Clinic.", user.getUsername(), "ChamplainPetClinic@gmail.com");
 
 
 
@@ -352,7 +352,7 @@ public class UserServiceImpl implements UserService {
                 "Click on the following link to access the password reset page: " + link
                         + "Follow the on-screen instructions to create a new password for your account."
                         + "If you did not request this password reset, please disregard this email. Your account security is important to us, and no changes will be made without your verification.",
-                "Thank you for choosing Pet Clinic.", "", "ChamplainPetClinic");
+                "Thank you for choosing Pet Clinic.", "", "ChamplainPetClinic@gmail.com");
 
         mailService.sendMail(newMail);
     }

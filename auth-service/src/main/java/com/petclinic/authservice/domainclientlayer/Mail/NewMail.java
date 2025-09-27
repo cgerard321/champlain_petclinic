@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class NewMail {
-    private String EmailToSendTo;
+    private String EmailSendTo;
     private String EmailTitle;
     private String TemplateName;
     private String Header ;
