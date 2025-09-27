@@ -42,32 +42,39 @@
     </button>
 
     <div ng-show="self.showAddForm" class="border p-3 mb-3">
-        <h5>Add New Pet Type</h5>
-        <div class="form-group">
-            <label>Name:</label>
-            <input type="text"
-                   class="form-control"
-                   ng-model="self.newPetType.name"
-                   ng-pattern="/^[a-zA-Z\s]+$/"
-                   required>
-            <small class="text-danger" ng-show="self.addForm.name.$error?.pattern">
-                Letters and spaces only
-            </small>
-        </div>
-        <div class="form-group">
-            <label>Description:</label>
-            <input type="text"
-                   class="form-control"
-                   ng-model="self.newPetType.petTypeDescription"
-                   ng-pattern="/^[a-zA-Z\s]+$/"
-                   required>
-            <small class="text-danger" ng-show="self.addForm.description.$error?.pattern">
-                Letters and spaces only
-            </small>
-        </div>
-        <button class="btn btn-primary btn-sm" ng-click="self.addPetType()">Save</button>
-        <button class="btn btn-secondary btn-sm" ng-click="self.toggleAddForm()">Cancel</button>
+        <form name="addForm" novalidate>
+            <h5>Add New Pet Type</h5>
+            <div class="form-group">
+                <label>Name:</label>
+                <input type="text"
+                       class="form-control"
+                       name="name"
+                       ng-model="self.newPetType.name"
+                       ng-pattern="/^[a-zA-Z\s]+$/"
+                       required>
+                <small class="text-danger" ng-show="addForm.name.$error.pattern">
+                    Letters and spaces only
+                </small>
+            </div>
+            <div class="form-group">
+                <label>Description:</label>
+                <input type="text"
+                       class="form-control"
+                       name="description"
+                       ng-model="self.newPetType.petTypeDescription"
+                       ng-pattern="/^[a-zA-Z\s]+$/"
+                       required>
+                <small class="text-danger" ng-show="addForm.description.$error.pattern">
+                    Letters and spaces only
+                </small>
+            </div>
+            <button type="button" class="btn btn-primary btn-sm"
+                    ng-click="self.addPetType()">Save</button>
+            <button type="button" class="btn btn-secondary btn-sm"
+                    ng-click="self.toggleAddForm()">Cancel</button>
+        </form>
     </div>
+
 
     <!-- Filter & pagination controls -->
     <form class="d-flex flex-column ng-pristine ng-valid">
