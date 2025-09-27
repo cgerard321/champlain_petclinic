@@ -114,18 +114,18 @@ public class EmergencyServiceImpl implements EmergencyService{
                 .flatMap(emergencyRepository::save)
                 .map(EntityDtoUtil::toEmergencyResponseDTO);
     }
-
+*/
     @Override
     public Mono<EmergencyResponseDTO> DeleteEmergency(String emergencyId) {
        return  emergencyRepository.findEmergenciesByVisitEmergencyId(emergencyId)
                  .switchIfEmpty(Mono.defer(()-> Mono.error(new NotFoundException("emergency id is not found: "+ emergencyId))))
                  .flatMap(found ->emergencyRepository.delete(found)
                          .then(Mono.just(found)))
-                 .map(EntityDtoUtil::toEmergencyResponseDTO);
+                 .flatMap(entityDtoUtil::toEmergencyResponseDTO);
 
 
     }
-
+/*
     @Override
     public Mono<EmergencyResponseDTO> GetEmergencyByEmergencyId(String emergencyId) {
         return emergencyRepository.findEmergenciesByVisitEmergencyId(emergencyId)
