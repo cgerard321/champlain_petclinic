@@ -31,14 +31,14 @@ const CustomerDetails: FC = () => {
       setIsDisabled(userResponse.data.disabled);
 
       const petsResponse = await axiosInstance.get(
-          `/pets/owners/${ownerId}/pets`,
-          { useV2: true }
+        `/pets/owners/${ownerId}/pets`,
+        { useV2: true }
       );
       setPets(petsResponse.data);
 
       const billsResponse = await axiosInstance.get(
-          `/bills/customer/${ownerId}`,
-          { useV2: false }
+        `/bills/customer/${ownerId}`,
+        { useV2: false }
       );
 
       const billsData: Bill[] = [];
@@ -78,7 +78,7 @@ const CustomerDetails: FC = () => {
 
   const handleDelete = async (id: string): Promise<void> => {
     const confirmDelete = window.confirm(
-        'Are you sure you want to delete this owner?'
+      'Are you sure you want to delete this owner?'
     );
 
     if (confirmDelete) {
@@ -90,7 +90,7 @@ const CustomerDetails: FC = () => {
 
   const handleDisableEnable = async (): Promise<void> => {
     const confirmAction = window.confirm(
-        `Are you sure you want to ${isDisabled ? 'enable' : 'disable'} this user's account?`
+      `Are you sure you want to ${isDisabled ? 'enable' : 'disable'} this user's account?`
     );
 
     if (confirmAction) {
@@ -129,97 +129,111 @@ const CustomerDetails: FC = () => {
   };
 
   return (
-      <div className="form-container" style={{ maxWidth: '900px' }}>
-        <h2>
-          Customer Details for {owner.firstName} {owner.lastName}
-        </h2>
+    <div className="form-container" style={{ maxWidth: '900px' }}>
+      <h2>
+        Customer Details for {owner.firstName} {owner.lastName}
+      </h2>
 
-        <div className="customer-details-container">
-          <div className="form-group">
-            <h3>Owner Info</h3>
-            <p><strong>First Name:</strong> {owner.firstName}</p>
-            <p><strong>Last Name:</strong> {owner.lastName}</p>
-            <p><strong>Address:</strong> {owner.address}</p>
-            <p><strong>City:</strong> {owner.city}</p>
-            <p><strong>Province:</strong> {owner.province}</p>
-            <p><strong>Telephone:</strong> {owner.telephone}</p>
-          </div>
-
-          <div className="form-group">
-            <h3>Owner Pets</h3>
-            {pets && pets.length > 0 ? (
-                <ul>
-                  {pets.map(pet => (
-                      <li key={pet.petId}>
-                        <strong>Name:</strong> {pet.name}, <strong>Type:</strong>{' '}
-                        {petTypeMapping[pet.petTypeId] || 'Unknown'}, <strong>Weight:</strong>{' '}
-                        {pet.weight} kg, <strong>Age:</strong> {calculateAge(pet.birthDate)}
-                        <button
-                            className="button-base secondary-button mt-2"
-                            onClick={() => handleEditPetClick(pet.petId)}
-                        >
-                          Edit Pet
-                        </button>
-                      </li>
-                  ))}
-                </ul>
-            ) : (
-                <p>No pets found.</p>
-            )}
-          </div>
-
-          <div className="form-group">
-            <h3>Owner Bills</h3>
-            {Array.isArray(bills) && bills.length > 0 ? (
-                <ul>
-                  {bills.map(bill => (
-                      <li key={bill.billId}>
-                        <strong>Bill ID:</strong> {bill.billId}, <strong>Amount:</strong>{' '}
-                        {bill.amount}, <strong>Date:</strong> {bill.date}
-                      </li>
-                  ))}
-                </ul>
-            ) : (
-                <p>No bills found.</p>
-            )}
-          </div>
+      <div className="customer-details-container">
+        <div className="form-group">
+          <h3>Owner Info</h3>
+          <p>
+            <strong>First Name:</strong> {owner.firstName}
+          </p>
+          <p>
+            <strong>Last Name:</strong> {owner.lastName}
+          </p>
+          <p>
+            <strong>Address:</strong> {owner.address}
+          </p>
+          <p>
+            <strong>City:</strong> {owner.city}
+          </p>
+          <p>
+            <strong>Province:</strong> {owner.province}
+          </p>
+          <p>
+            <strong>Telephone:</strong> {owner.telephone}
+          </p>
         </div>
 
-        <div className="form-group" style={{ textAlign: 'center' }}>
-          <button
-              className="button-base primary-button"
-              onClick={handleEditClick}
-          >
-            Edit Customer
-          </button>
-          <button
-              className="button-base secondary-button mt-2"
-              onClick={handleBackClick}
-          >
-            Back to All Owners
-          </button>
-          <button
-              className="button-base primary-button mt-2"
-              onClick={() => navigate(`/owners/${ownerId}/pets/new`)}
-          >
-            Add New Pet
-          </button>
-          {!isVet && (
-              <button
-                  className="button-base danger-button mt-2"
-                  onClick={() => handleDelete(owner.ownerId)}
-              >
-                Delete Owner
-              </button>
+        <div className="form-group">
+          <h3>Owner Pets</h3>
+          {pets && pets.length > 0 ? (
+            <ul>
+              {pets.map(pet => (
+                <li key={pet.petId}>
+                  <strong>Name:</strong> {pet.name}, <strong>Type:</strong>{' '}
+                  {petTypeMapping[pet.petTypeId] || 'Unknown'},{' '}
+                  <strong>Weight:</strong> {pet.weight} kg,{' '}
+                  <strong>Age:</strong> {calculateAge(pet.birthDate)}
+                  <button
+                    className="button-base secondary-button mt-2"
+                    onClick={() => handleEditPetClick(pet.petId)}
+                  >
+                    Edit Pet
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>No pets found.</p>
           )}
-          <button
-              className="button-base secondary-button mt-2"
-              onClick={handleDisableEnable}
-          >
-            {isDisabled ? 'Enable Account' : 'Disable Account'}
-          </button>
+        </div>
+
+        <div className="form-group">
+          <h3>Owner Bills</h3>
+          {Array.isArray(bills) && bills.length > 0 ? (
+            <ul>
+              {bills.map(bill => (
+                <li key={bill.billId}>
+                  <strong>Bill ID:</strong> {bill.billId},{' '}
+                  <strong>Amount:</strong> {bill.amount}, <strong>Date:</strong>{' '}
+                  {bill.date}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>No bills found.</p>
+          )}
         </div>
       </div>
+
+      <div className="form-group" style={{ textAlign: 'center' }}>
+        <button
+          className="button-base primary-button"
+          onClick={handleEditClick}
+        >
+          Edit Customer
+        </button>
+        <button
+          className="button-base secondary-button mt-2"
+          onClick={handleBackClick}
+        >
+          Back to All Owners
+        </button>
+        <button
+          className="button-base primary-button mt-2"
+          onClick={() => navigate(`/owners/${ownerId}/pets/new`)}
+        >
+          Add New Pet
+        </button>
+        {!isVet && (
+          <button
+            className="button-base danger-button mt-2"
+            onClick={() => handleDelete(owner.ownerId)}
+          >
+            Delete Owner
+          </button>
+        )}
+        <button
+          className="button-base secondary-button mt-2"
+          onClick={handleDisableEnable}
+        >
+          {isDisabled ? 'Enable Account' : 'Disable Account'}
+        </button>
+      </div>
+    </div>
   );
 };
 

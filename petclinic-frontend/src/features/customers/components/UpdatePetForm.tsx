@@ -47,11 +47,13 @@ const UpdatePetForm: React.FC = (): JSX.Element => {
         }
       }
     };
-    fetchPetData().catch(error => console.error('Error in fetchPetData:', error));
+    fetchPetData().catch(error =>
+      console.error('Error in fetchPetData:', error)
+    );
   }, [petId, ownerId]);
 
   const handleChange = (
-      e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ): void => {
     if (pet) {
       const { name, type, value } = e.target;
@@ -80,7 +82,7 @@ const UpdatePetForm: React.FC = (): JSX.Element => {
   };
 
   const handleSubmit = async (
-      event: FormEvent<HTMLFormElement>
+    event: FormEvent<HTMLFormElement>
   ): Promise<void> => {
     event.preventDefault();
     if (!validate() || !pet || !ownerId || !petId) return;
@@ -141,136 +143,134 @@ const UpdatePetForm: React.FC = (): JSX.Element => {
   }
 
   return (
-      <div className="form-container">
-        <h1>Edit Pet: {pet.name}</h1>
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label>Name</label>
-            <input
-                type="text"
-                name="name"
-                value={pet.name}
-                onChange={handleChange}
-                className={errors.name ? 'error-input' : ''}
-            />
-            {errors.name && <span className="error-message">{errors.name}</span>}
-          </div>
+    <div className="form-container">
+      <h1>Edit Pet: {pet.name}</h1>
+      <form onSubmit={handleSubmit}>
+        <div className="form-group">
+          <label>Name</label>
+          <input
+            type="text"
+            name="name"
+            value={pet.name}
+            onChange={handleChange}
+            className={errors.name ? 'error-input' : ''}
+          />
+          {errors.name && <span className="error-message">{errors.name}</span>}
+        </div>
 
-          <div className="form-group">
-            <label>Pet Type</label>
-            <select
-                name="petTypeId"
-                value={pet.petTypeId}
-                onChange={handleChange}
-                className={errors.petTypeId ? 'error-input' : ''}
+        <div className="form-group">
+          <label>Pet Type</label>
+          <select
+            name="petTypeId"
+            value={pet.petTypeId}
+            onChange={handleChange}
+            className={errors.petTypeId ? 'error-input' : ''}
+          >
+            <option value="">Select a pet type</option>
+            {Object.entries(petTypeOptions).map(([id, name]) => (
+              <option key={id} value={id}>
+                {name}
+              </option>
+            ))}
+          </select>
+          {errors.petTypeId && (
+            <span className="error-message">{errors.petTypeId}</span>
+          )}
+        </div>
+
+        <div className="form-group">
+          <label>Is Active</label>
+          <input
+            type="checkbox"
+            name="isActive"
+            checked={pet.isActive === 'true'}
+            onChange={handleChange}
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Weight (kg)</label>
+          <input
+            type="text"
+            name="weight"
+            value={pet.weight}
+            onChange={handleChange}
+            className={errors.weight ? 'error-input' : ''}
+          />
+          {errors.weight && (
+            <span className="error-message">{errors.weight}</span>
+          )}
+        </div>
+
+        <div className="form-group" style={{ textAlign: 'center' }}>
+          <button type="submit" className="button-base primary-button">
+            Update Pet
+          </button>
+          <button
+            type="button"
+            onClick={() => setIsDeleteModalOpen(true)}
+            className="button-base danger-button mt-2"
+          >
+            Delete Pet
+          </button>
+          <button
+            type="button"
+            onClick={handleCancel}
+            className="button-base secondary-button mt-2"
+          >
+            Cancel
+          </button>
+        </div>
+      </form>
+
+      {successMessage && <p className="error-message">{successMessage}</p>}
+
+      {isUpdateModalOpen && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h2>Success!</h2>
+              <button className="modal-close" onClick={closeUpdateModal}>
+                &times;
+              </button>
+            </div>
+            <p>Pet has been successfully updated.</p>
+            <button
+              onClick={closeUpdateModal}
+              className="button-base primary-button mt-4"
             >
-              <option value="">Select a pet type</option>
-              {Object.entries(petTypeOptions).map(([id, name]) => (
-                  <option key={id} value={id}>
-                    {name}
-                  </option>
-              ))}
-            </select>
-            {errors.petTypeId && (
-                <span className="error-message">{errors.petTypeId}</span>
-            )}
+              Close
+            </button>
           </div>
+        </div>
+      )}
 
-          <div className="form-group">
-            <label>Is Active</label>
-            <input
-                type="checkbox"
-                name="isActive"
-                checked={pet.isActive === 'true'}
-                onChange={handleChange}
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Weight (kg)</label>
-            <input
-                type="text"
-                name="weight"
-                value={pet.weight}
-                onChange={handleChange}
-                className={errors.weight ? 'error-input' : ''}
-            />
-            {errors.weight && (
-                <span className="error-message">{errors.weight}</span>
-            )}
-          </div>
-
-          <div className="form-group" style={{ textAlign: 'center' }}>
-            <button type="submit" className="button-base primary-button">
-              Update Pet
+      {isDeleteModalOpen && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h2>Confirm Deletion</h2>
+              <button className="modal-close" onClick={closeDeleteModal}>
+                &times;
+              </button>
+            </div>
+            <p>Are you sure you want to delete this pet?</p>
+            <button
+              onClick={handleDelete}
+              className="button-base danger-button mt-4"
+            >
+              Yes, Delete
             </button>
             <button
-                type="button"
-                onClick={() => setIsDeleteModalOpen(true)}
-                className="button-base danger-button mt-2"
-            >
-              Delete Pet
-            </button>
-            <button
-                type="button"
-                onClick={handleCancel}
-                className="button-base secondary-button mt-2"
+              onClick={closeDeleteModal}
+              className="button-base secondary-button mt-4"
             >
               Cancel
             </button>
           </div>
-        </form>
-
-        {successMessage && (
-            <p className="error-message">{successMessage}</p>
-        )}
-
-        {isUpdateModalOpen && (
-            <div className="modal-overlay">
-              <div className="modal-content">
-                <div className="modal-header">
-                  <h2>Success!</h2>
-                  <button className="modal-close" onClick={closeUpdateModal}>
-                    &times;
-                  </button>
-                </div>
-                <p>Pet has been successfully updated.</p>
-                <button
-                    onClick={closeUpdateModal}
-                    className="button-base primary-button mt-4"
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-        )}
-
-        {isDeleteModalOpen && (
-            <div className="modal-overlay">
-              <div className="modal-content">
-                <div className="modal-header">
-                  <h2>Confirm Deletion</h2>
-                  <button className="modal-close" onClick={closeDeleteModal}>
-                    &times;
-                  </button>
-                </div>
-                <p>Are you sure you want to delete this pet?</p>
-                <button
-                    onClick={handleDelete}
-                    className="button-base danger-button mt-4"
-                >
-                  Yes, Delete
-                </button>
-                <button
-                    onClick={closeDeleteModal}
-                    className="button-base secondary-button mt-4"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-        )}
-      </div>
+        </div>
+      )}
+    </div>
   );
 };
 

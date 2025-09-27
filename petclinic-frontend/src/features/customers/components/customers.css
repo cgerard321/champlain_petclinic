@@ -5,14 +5,14 @@
 .pet-update-modal-overlay,
 .pet-delete-modal-overlay,
 .admin-update-customer-modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.4);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-    z-index: 1000;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  z-index: 1000;
 }
 
 .modal-content,
@@ -20,136 +20,144 @@
 .pet-update-modal,
 .pet-delete-modal,
 .admin-update-customer-modal {
-    position: relative;
-    background: #ffffff;
-    border-radius: 16px;
-    padding: 40px 60px;
-    width: 90%;
-    max-width: 700px;
-    min-height: 300px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
-    display: flex;
-    flex-direction: column;
-    gap: 30px;
-    text-align: left;
+  position: relative;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 40px 60px;
+  width: 90%;
+  max-width: 700px;
+  min-height: 300px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  text-align: left;
 }
 
 /* Modal header with x button */
 .modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
 }
 .modal-header h2,
 .pet-add-modal h2,
 .pet-update-modal h2,
 .pet-delete-modal h2,
 .admin-update-customer-modal h2 {
-    font-size: 1.6rem;
-    font-weight: 600;
-    color: #2e2e2e;
-    margin: 0;
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: #2e2e2e;
+  margin: 0;
 }
 .modal-close {
-    position: absolute;
-    top: 18px;
-    right: 18px;
-    background: none;
-    border: none;
-    font-size: 1.8rem;
-    color: #6b7280;
-    cursor: pointer;
-    transition: color 0.25s;
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  background: none;
+  border: none;
+  font-size: 1.8rem;
+  color: #6b7280;
+  cursor: pointer;
+  transition: color 0.25s;
 }
-.modal-close:hover { color: #1f2937; }
+.modal-close:hover {
+  color: #1f2937;
+}
 
 /* Update form */
 .add-pet-form {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
 .add-pet-form .form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .add-pet-form label {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: #6b6b6b;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #6b6b6b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .add-pet-form input,
 .add-pet-form select {
-    width: 100%;
-    padding: 14px 16px;
-    border: 1px solid #d1d5db;
-    border-radius: 10px;
-    background: #f9fafb;
-    font-size: 0.95rem;
-    color: #374151;
-    transition: border-color 0.25s, box-shadow 0.25s;
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  background: #f9fafb;
+  font-size: 0.95rem;
+  color: #374151;
+  transition:
+    border-color 0.25s,
+    box-shadow 0.25s;
 }
 .add-pet-form input:focus,
 .add-pet-form select:focus {
-    outline: none;
-    border-color: #2563eb;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
 /* Error display */
 .add-pet-form .error-message {
-    color: #dc2626;
-    font-size: 0.8rem;
+  color: #dc2626;
+  font-size: 0.8rem;
 }
 
 /* Buttons inside of the form modal */
 .modal-content .form-actions,
 .add-pet-form .form-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 16px;
-    margin-top: 24px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  margin-top: 24px;
 }
 
 .modal-content .primary-button,
 .add-pet-form .primary-button {
-    background-color: #2563eb;
-    color: #fff;
-    padding: 12px 32px;
-    border-radius: 10px;
-    font-size: 0.95rem;
-    font-weight: 600;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.25s, transform 0.2s;
+  background-color: #2563eb;
+  color: #fff;
+  padding: 12px 32px;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition:
+    background-color 0.25s,
+    transform 0.2s;
 }
 .modal-content .primary-button:hover,
 .add-pet-form .primary-button:hover {
-    background-color: #1d4ed8;
-    transform: translateY(-2px);
+  background-color: #1d4ed8;
+  transform: translateY(-2px);
 }
 
 .modal-content .secondary-button,
 .add-pet-form .secondary-button {
-    background-color: #6b7280;
-    color: #fff;
-    padding: 12px 32px;
-    border-radius: 10px;
-    font-size: 0.95rem;
-    font-weight: 600;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.25s, transform 0.2s;
+  background-color: #6b7280;
+  color: #fff;
+  padding: 12px 32px;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition:
+    background-color 0.25s,
+    transform 0.2s;
 }
 .modal-content .secondary-button:hover,
 .add-pet-form .secondary-button:hover {
-    background-color: #4b5563;
-    transform: translateY(-2px);
+  background-color: #4b5563;
+  transform: translateY(-2px);
 }

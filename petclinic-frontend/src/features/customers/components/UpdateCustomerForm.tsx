@@ -41,10 +41,14 @@ const UpdateCustomerForm: React.FC = (): JSX.Element => {
         console.error('Error fetching owner data:', err);
       }
     };
-    fetchOwnerData().catch(err => console.error('Error in fetchOwnerData:', err));
+    fetchOwnerData().catch(err =>
+      console.error('Error in fetchOwnerData:', err)
+    );
   }, [user.userId]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ): void => {
     const { name, value } = e.target;
     setOwner(prev => ({ ...prev, [name]: value }));
   };
@@ -75,92 +79,104 @@ const UpdateCustomerForm: React.FC = (): JSX.Element => {
   };
 
   return (
-      <div className="update-customer-form-container">
-        <div className="update-customer-form">
-          <h1>Edit Profile</h1>
-          <form onSubmit={handleSubmit}>
-            <div className="update-customer-fields">
-              <div className="form-group">
-                <label>First Name</label>
-                <input
-                    type="text"
-                    name="firstName"
-                    value={owner.firstName}
-                    onChange={handleChange}
-                    className={errors.firstName ? 'error-input' : ''}
-                />
-                {errors.firstName && <span className="error-message">{errors.firstName}</span>}
-              </div>
-
-              <div className="form-group">
-                <label>Last Name</label>
-                <input
-                    type="text"
-                    name="lastName"
-                    value={owner.lastName}
-                    onChange={handleChange}
-                    className={errors.lastName ? 'error-input' : ''}
-                />
-                {errors.lastName && <span className="error-message">{errors.lastName}</span>}
-              </div>
-
-              <div className="form-group">
-                <label>Address</label>
-                <input
-                    type="text"
-                    name="address"
-                    value={owner.address}
-                    onChange={handleChange}
-                    className={errors.address ? 'error-input' : ''}
-                />
-                {errors.address && <span className="error-message">{errors.address}</span>}
-              </div>
-
-              <div className="form-group">
-                <label>City</label>
-                <input
-                    type="text"
-                    name="city"
-                    value={owner.city}
-                    onChange={handleChange}
-                    className={errors.city ? 'error-input' : ''}
-                />
-                {errors.city && <span className="error-message">{errors.city}</span>}
-              </div>
-
-              <div className="form-group">
-                <label>Province</label>
-                <input
-                    type="text"
-                    name="province"
-                    value={owner.province}
-                    onChange={handleChange}
-                    className={errors.province ? 'error-input' : ''}
-                />
-                {errors.province && <span className="error-message">{errors.province}</span>}
-              </div>
-
-              <div className="form-group">
-                <label>Telephone</label>
-                <input
-                    type="text"
-                    name="telephone"
-                    value={owner.telephone}
-                    onChange={handleChange}
-                    className={errors.telephone ? 'error-input' : ''}
-                />
-                {errors.telephone && <span className="error-message">{errors.telephone}</span>}
-              </div>
+    <div className="update-customer-form-container">
+      <div className="update-customer-form">
+        <h1>Edit Profile</h1>
+        <form onSubmit={handleSubmit}>
+          <div className="update-customer-fields">
+            <div className="form-group">
+              <label>First Name</label>
+              <input
+                type="text"
+                name="firstName"
+                value={owner.firstName}
+                onChange={handleChange}
+                className={errors.firstName ? 'error-input' : ''}
+              />
+              {errors.firstName && (
+                <span className="error-message">{errors.firstName}</span>
+              )}
             </div>
 
-            <div className="update-customer-actions">
-              <button type="submit" className="primary-button">
-                Update Profile
-              </button>
+            <div className="form-group">
+              <label>Last Name</label>
+              <input
+                type="text"
+                name="lastName"
+                value={owner.lastName}
+                onChange={handleChange}
+                className={errors.lastName ? 'error-input' : ''}
+              />
+              {errors.lastName && (
+                <span className="error-message">{errors.lastName}</span>
+              )}
             </div>
-          </form>
-        </div>
+
+            <div className="form-group">
+              <label>Address</label>
+              <input
+                type="text"
+                name="address"
+                value={owner.address}
+                onChange={handleChange}
+                className={errors.address ? 'error-input' : ''}
+              />
+              {errors.address && (
+                <span className="error-message">{errors.address}</span>
+              )}
+            </div>
+
+            <div className="form-group">
+              <label>City</label>
+              <input
+                type="text"
+                name="city"
+                value={owner.city}
+                onChange={handleChange}
+                className={errors.city ? 'error-input' : ''}
+              />
+              {errors.city && (
+                <span className="error-message">{errors.city}</span>
+              )}
+            </div>
+
+            <div className="form-group">
+              <label>Province</label>
+              <input
+                type="text"
+                name="province"
+                value={owner.province}
+                onChange={handleChange}
+                className={errors.province ? 'error-input' : ''}
+              />
+              {errors.province && (
+                <span className="error-message">{errors.province}</span>
+              )}
+            </div>
+
+            <div className="form-group">
+              <label>Telephone</label>
+              <input
+                type="text"
+                name="telephone"
+                value={owner.telephone}
+                onChange={handleChange}
+                className={errors.telephone ? 'error-input' : ''}
+              />
+              {errors.telephone && (
+                <span className="error-message">{errors.telephone}</span>
+              )}
+            </div>
+          </div>
+
+          <div className="update-customer-actions">
+            <button type="submit" className="primary-button">
+              Update Profile
+            </button>
+          </div>
+        </form>
       </div>
+    </div>
   );
 };
 

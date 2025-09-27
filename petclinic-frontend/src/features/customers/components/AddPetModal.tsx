@@ -15,11 +15,11 @@ interface AddPetModalProps {
 }
 
 const AddPetModal: React.FC<AddPetModalProps> = ({
-                                                   ownerId,
-                                                   isOpen,
-                                                   onClose,
-                                                   onPetAdded,
-                                                 }): JSX.Element | null => {
+  ownerId,
+  isOpen,
+  onClose,
+  onPetAdded,
+}): JSX.Element | null => {
   const [pet, setPet] = useState<PetRequestModel>({
     ownerId,
     name: '',
@@ -53,7 +53,9 @@ const AddPetModal: React.FC<AddPetModalProps> = ({
 
   if (!isOpen) return null;
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ): void => {
     const { name, type, value } = e.target;
     if (type === 'date') {
       setPet({ ...pet, [name]: new Date(value) });
@@ -73,7 +75,9 @@ const AddPetModal: React.FC<AddPetModalProps> = ({
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
+  const handleSubmit = async (
+    event: FormEvent<HTMLFormElement>
+  ): Promise<void> => {
     event.preventDefault();
     if (!validate()) return;
     setIsSubmitting(true);
@@ -106,102 +110,108 @@ const AddPetModal: React.FC<AddPetModalProps> = ({
   };
 
   return (
-      <div className="modal-overlay" onClick={handleClose}>
-        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-          <div className="modal-header">
-            <h2>Add New Pet</h2>
-            <button className="modal-close" onClick={handleClose}>
-              &times;
-            </button>
+    <div className="modal-overlay" onClick={handleClose}>
+      <div className="modal-content" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h2>Add New Pet</h2>
+          <button className="modal-close" onClick={handleClose}>
+            &times;
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="add-pet-form">
+          <div className="form-group">
+            <label>Pet Name *</label>
+            <input
+              type="text"
+              name="name"
+              value={pet.name}
+              onChange={handleChange}
+              className={errors.name ? 'error-input' : ''}
+              disabled={isSubmitting}
+            />
+            {errors.name && (
+              <span className="error-message">{errors.name}</span>
+            )}
           </div>
 
-          <form onSubmit={handleSubmit} className="add-pet-form">
-            <div className="form-group">
-              <label>Pet Name *</label>
-              <input
-                  type="text"
-                  name="name"
-                  value={pet.name}
-                  onChange={handleChange}
-                  className={errors.name ? 'error-input' : ''}
-                  disabled={isSubmitting}
-              />
-              {errors.name && <span className="error-message">{errors.name}</span>}
-            </div>
-
-            <div className="form-group">
-              <label>Pet Type *</label>
-              <select
-                  name="petTypeId"
-                  value={pet.petTypeId}
-                  onChange={handleChange}
-                  className={errors.petTypeId ? 'error-input' : ''}
-                  disabled={isSubmitting || isLoadingPetTypes}
-              >
-                <option value="">
-                  {isLoadingPetTypes ? 'Loading pet types...' : 'Select a pet type'}
+          <div className="form-group">
+            <label>Pet Type *</label>
+            <select
+              name="petTypeId"
+              value={pet.petTypeId}
+              onChange={handleChange}
+              className={errors.petTypeId ? 'error-input' : ''}
+              disabled={isSubmitting || isLoadingPetTypes}
+            >
+              <option value="">
+                {isLoadingPetTypes
+                  ? 'Loading pet types...'
+                  : 'Select a pet type'}
+              </option>
+              {petTypes.map(type => (
+                <option key={type.petTypeId} value={type.petTypeId}>
+                  {type.name}
                 </option>
-                {petTypes.map((type) => (
-                    <option key={type.petTypeId} value={type.petTypeId}>
-                      {type.name}
-                    </option>
-                ))}
-              </select>
-              {errors.petTypeId && (
-                  <span className="error-message">{errors.petTypeId}</span>
-              )}
-            </div>
+              ))}
+            </select>
+            {errors.petTypeId && (
+              <span className="error-message">{errors.petTypeId}</span>
+            )}
+          </div>
 
-            <div className="form-group">
-              <label>Birth Date</label>
-              <input
-                  type="date"
-                  name="birthDate"
-                  value={pet.birthDate.toISOString().split('T')[0]}
-                  onChange={handleChange}
-                  disabled={isSubmitting}
-              />
-            </div>
+          <div className="form-group">
+            <label>Birth Date</label>
+            <input
+              type="date"
+              name="birthDate"
+              value={pet.birthDate.toISOString().split('T')[0]}
+              onChange={handleChange}
+              disabled={isSubmitting}
+            />
+          </div>
 
-            <div className="form-group">
-              <label>Weight (kg) *</label>
-              <input
-                  type="number"
-                  name="weight"
-                  step="0.1"
-                  min="0.1"
-                  value={pet.weight}
-                  onChange={handleChange}
-                  className={errors.weight ? 'error-input' : ''}
-                  disabled={isSubmitting}
-              />
-              {errors.weight && (
-                  <span className="error-message">{errors.weight}</span>
-              )}
-            </div>
+          <div className="form-group">
+            <label>Weight (kg) *</label>
+            <input
+              type="number"
+              name="weight"
+              step="0.1"
+              min="0.1"
+              value={pet.weight}
+              onChange={handleChange}
+              className={errors.weight ? 'error-input' : ''}
+              disabled={isSubmitting}
+            />
+            {errors.weight && (
+              <span className="error-message">{errors.weight}</span>
+            )}
+          </div>
 
-            {errors.submit && <div className="error-message">{errors.submit}</div>}
+          {errors.submit && (
+            <div className="error-message">{errors.submit}</div>
+          )}
 
-            <div className="form-actions">
-              <button
-                  type="button"
-                  onClick={handleClose}
-                  className="secondary-button"
-                  disabled={isSubmitting}
-              >
-                Cancel
-              </button>
-              <button
-                  type="submit"
-                  className="primary-button"
-                  disabled={isSubmitting}
-              >
-                {isSubmitting ? 'Adding...' : 'Add Pet'}
-              </button>
-            </div>
-          </form>
-        </div>
+          <div className="form-actions">
+            <button
+              type="button"
+              onClick={handleClose}
+              className="secondary-button"
+              disabled={isSubmitting}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="primary-button"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Adding...' : 'Add Pet'}
+            </button>
+          </div>
+        </form>
       </div>
+    </div>
   );
 };
 
