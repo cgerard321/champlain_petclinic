@@ -9,9 +9,9 @@ import { NavBar } from '@/layouts/AppNavBar';
 import { FaShoppingCart } from 'react-icons/fa'; // shopping cart icon
 import axiosInstance from '@/shared/api/axiosInstance';
 import { IsAdmin } from '@/context/UserContext';
-
+import { AppRoutePaths } from '@/shared/models/path.routes';
+import { getProductByProductId } from '@/features/products/api/getProductByProductId';
 import { notifyCartChanged } from '../api/cartEvent';
-import { AppRoutePaths } from '@/shared/models/path.routes.ts';
 
 interface ProductAPIResponse {
   productId: number;
@@ -115,7 +115,16 @@ const UserCart = (): JSX.Element => {
         );
 
         setCartItems(products);
-        setWishlistItems(data.wishListProducts || []);
+        const enrichedWishlist = await Promise.all(
+          (data.wishListProducts || []).map(async (item: ProductModel) => {
+            const fullProduct = await getProductByProductId(item.productId);
+            return {
+              ...fullProduct,
+              quantity: item.quantity ?? 1,
+            };
+          })
+        );
+        setWishlistItems(enrichedWishlist);
       } catch (err: unknown) {
         console.error(err);
         setError('Failed to fetch cart items');
@@ -307,6 +316,12 @@ const UserCart = (): JSX.Element => {
 
   // move wishlist item back to cart
   const addToCartFunction = async (item: ProductModel): Promise<void> => {
+    if (item.productQuantity <= 0) {
+      setNotificationMessage(
+        `${item.productName} is out of stock and cannot be added to the cart.`
+      );
+      return;
+    }
     try {
       const productId = item.productId;
 

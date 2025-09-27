@@ -1,4 +1,5 @@
 import axiosInstance from '@/shared/api/axiosInstance';
+import { AxiosError } from 'axios';
 import { fetchCartIdByCustomerId } from './getCart';
 import { useUser } from '@/context/UserContext';
 import { notifyCartChanged } from './cartEvent';
@@ -7,40 +8,67 @@ type UseAddToCartReturnType = {
   addToCart: (productId: string) => Promise<boolean>;
 };
 
+type CreateCartResponse = {
+  cartId?: string;
+  id?: string;
+  [k: string]: unknown;
+};
+
 export function useAddToCart(): UseAddToCartReturnType {
   const { user } = useUser();
 
-  const fetchUserCart = async (userId: string): Promise<string | null> => {
+  const getOrCreateCartId = async (userId: string): Promise<string> => {
     try {
-      return await fetchCartIdByCustomerId(userId);
-    } catch (error) {
-      console.error('Error fetching cart ID:', error);
-      return null;
+      const existingCartId = await fetchCartIdByCustomerId(userId);
+      if (!existingCartId) throw new Error('Cart not found');
+      return existingCartId;
+    } catch (err) {
+      const ax = err as AxiosError;
+      const status = ax.response?.status;
+
+      if (status === 404 || status === 401) {
+        const { data } = await axiosInstance.post<CreateCartResponse>(
+          '/carts', // → POST /api/v2/gateway/carts
+          { customerId: userId },
+          { headers: { 'Content-Type': 'application/json' } }
+        );
+
+        const newId = (data?.cartId ?? data?.id) as string | undefined;
+        if (!newId) throw new Error('Could not create cart');
+        return newId;
+      }
+
+      throw err;
     }
   };
 
   const addToCart = async (productId: string): Promise<boolean> => {
     if (!user?.userId) {
-      console.error('User is not authenticated');
+      alert('You must be logged in.');
       return false;
     }
 
     try {
-      const cartId = await fetchUserCart(user.userId);
-      if (!cartId) throw new Error('Cart not found');
+      const cartId = await getOrCreateCartId(user.userId);
 
-      // was http://localhost:8080/api/v2/gateway/carts/${cartId}/${productId}
-      await axiosInstance.post(`/carts/${cartId}/${productId}`, undefined, {
-        useV2: true,
-      });
+      await axiosInstance.post(
+        `/carts/${encodeURIComponent(cartId)}/${encodeURIComponent(String(productId))}`,
+        undefined,
+        { useV2: true }
+      );
 
-      // trigger navbar auto-refresh
+      // refresh navbar/cart badge
       notifyCartChanged();
 
-      return true; //returns true
-    } catch (error) {
-      console.error('Error adding product to cart:', error);
-      return false; //returns false
+      return true;
+    } catch (err) {
+      const ax = err as AxiosError;
+      const status = ax.response?.status ?? 'unknown';
+      const payload = ax.response?.data ?? ax.message;
+
+      console.error('AddToCart failed:', status, payload);
+      alert(`Add to cart failed (${status}).`);
+      return false;
     }
   };
 

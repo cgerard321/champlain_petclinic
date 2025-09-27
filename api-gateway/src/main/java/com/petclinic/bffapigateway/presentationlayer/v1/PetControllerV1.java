@@ -3,7 +3,6 @@ package com.petclinic.bffapigateway.presentationlayer.v1;
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
 import com.petclinic.bffapigateway.dtos.Pets.PetTypeRequestDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetTypeResponseDTO;
-import com.petclinic.bffapigateway.utils.Security.Annotations.IsUserSpecific;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.Optional;
 
 
 @RestController()
@@ -33,7 +34,7 @@ public class PetControllerV1 {
                 );*/
     }
 
-    @IsUserSpecific(idToMatch = {"petTypeId"}, bypassRoles = {Roles.ALL})
+    @SecuredEndpoint(allowedRoles = {Roles.ALL})
     @GetMapping(value = "/{petTypeId}")
     public Mono<ResponseEntity<PetTypeResponseDTO>> getPetTypeById(final @PathVariable String petTypeId) {
         return customersServiceClient.getPetTypeByPetTypeId(petTypeId)
@@ -54,7 +55,7 @@ public class PetControllerV1 {
     }
 
 
-    @IsUserSpecific(idToMatch = {"petTypeId"})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET, Roles.OWNER})
     @PutMapping("/{petTypeId}")
     public Mono<ResponseEntity<PetTypeResponseDTO>> updatePetType(
             @PathVariable String petTypeId,
@@ -65,4 +66,40 @@ public class PetControllerV1 {
                         .defaultIfEmpty(ResponseEntity.notFound().build())
         );
     }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping(value = "/pet-types-pagination")
+    public Flux<PetTypeResponseDTO> getPetTypesByPagination(@RequestParam Optional<Integer> page,
+                                                            @RequestParam Optional<Integer> size,
+                                                            @RequestParam(required = false) String petTypeId,
+                                                            @RequestParam(required = false) String name,
+                                                            @RequestParam(required = false) String description) {
+
+        if(page.isEmpty()){
+            page = Optional.of(0);
+        }
+
+        if (size.isEmpty()) {
+            size = Optional.of(5);
+        }
+
+        return customersServiceClient.getPetTypesByPagination(page, size, petTypeId, name, description);
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping(value = "/pet-types-count")
+    public Mono<Long> getTotalNumberOfPetTypes(){
+        return customersServiceClient.getTotalNumberOfPetTypes();
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping(value = "/pet-types-filtered-count")
+    public Mono<Long> getTotalNumberOfPetTypesWithFilters (
+            @RequestParam(required = false) String petTypeId,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String description)
+    {
+        return customersServiceClient.getTotalNumberOfPetTypesWithFilters(petTypeId, name, description);
+    }
+
 }

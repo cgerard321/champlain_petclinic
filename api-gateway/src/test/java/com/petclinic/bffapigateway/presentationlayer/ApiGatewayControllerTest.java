@@ -76,6 +76,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+import static com.petclinic.bffapigateway.dtos.Bills.BillStatus.PAID;
 import static com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigAuthService.jwtTokenForValidAdmin;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.*;
@@ -1268,7 +1269,7 @@ class ApiGatewayControllerTest {
                 .vetId("1")
                 .date(LocalDate.of(2024,10,1))
                 .dueDate(LocalDate.of(2024,10,30))
-                .billStatus(BillStatus.PAID)
+                .billStatus(PAID)
                 .amount(25.00)
                 .taxedAmount(0)
                 .timeRemaining(0L)
@@ -1281,7 +1282,7 @@ class ApiGatewayControllerTest {
                 .vetId("2")
                 .date(LocalDate.of(2024,10,1))
                 .dueDate(LocalDate.of(2024,10,30))
-                .billStatus(BillStatus.PAID)
+                .billStatus(PAID)
                 .amount(27.00)
                 .taxedAmount(0)
                 .timeRemaining(0L)
@@ -1589,7 +1590,7 @@ class ApiGatewayControllerTest {
     void payBill_Success() {
         BillResponseDTO successResponse = new BillResponseDTO();
         successResponse.setBillId("1");
-        successResponse.setBillStatus(BillStatus.PAID);
+        successResponse.setBillStatus(PAID);
 
         when(billServiceClient.payBill(anyString(), anyString(), any(PaymentRequestDTO.class)))
                 .thenReturn(Mono.just(successResponse));
@@ -1605,7 +1606,7 @@ class ApiGatewayControllerTest {
                 .expectBody(BillResponseDTO.class)
                 .value(response -> {
                     assertEquals("1", response.getBillId());
-                    assertEquals(BillStatus.PAID, response.getBillStatus());
+                    assertEquals(PAID, response.getBillStatus());
                 });
     }
 
@@ -3050,6 +3051,76 @@ private VetAverageRatingDTO buildVetAverageRatingDTO(){
                 .expectStatus().isNoContent();
     }
 
+    @Test
+    void getAllBillsByOwnerName() {
+        // Arrange
+        String ownerFirstName = "John";
+        String ownerLastName = "Doe";
+
+        BillResponseDTO bill = new BillResponseDTO();
+        bill.setBillId("1");
+        bill.setOwnerFirstName(ownerFirstName);
+        bill.setOwnerLastName(ownerLastName);
+
+        when(billServiceClient.getBillsByOwnerName(ownerFirstName, ownerLastName))
+                .thenReturn(Flux.just(bill));
+
+        // Act & Assert
+        client.get()
+                .uri("/api/gateway/bills/owner/" + ownerFirstName + "/" + ownerLastName)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(BillResponseDTO.class)
+                .consumeWith(response -> {
+                    assertEquals(1, response.getResponseBody().size());
+                });
+    }
+
+    @Test
+    void getAllBillsByVetName(){
+        // Arrange
+        String vetFirstName = "John";
+        String vetLastName = "Doe";
+
+        BillResponseDTO bill = new BillResponseDTO();
+        bill.setBillId("1");
+        bill.setVetFirstName(vetFirstName);
+        bill.setVetLastName(vetLastName);
+
+        when(billServiceClient.getBillsByVetName(vetFirstName, vetLastName))
+                .thenReturn(Flux.just(bill));
+
+        // Act & Assert
+        client.get()
+                .uri("/api/gateway/bills/vet/" + vetFirstName + "/" + vetLastName)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(BillResponseDTO.class)
+                .consumeWith(response -> {
+                    assertEquals(1, response.getResponseBody().size());
+                });
+    }
+
+    @Test
+    public void getBillsByVisitType(){
+        String visitType = "Checkup";
+
+        BillResponseDTO bill = new BillResponseDTO();
+        bill.setBillId("1");
+        bill.setVisitType(visitType);
+
+        when(billServiceClient.getBillsByVisitType(visitType))
+                .thenReturn(Flux.just(bill));
+
+        client.get()
+                .uri("/api/gateway/bills/visitType/" + visitType)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(BillResponseDTO.class)
+                .consumeWith(response -> {
+                    assertEquals(1, response.getResponseBody().size());
+                });
+    }
 
     private EducationResponseDTO buildEducation(){
         return EducationResponseDTO.builder()
