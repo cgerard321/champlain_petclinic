@@ -16,7 +16,7 @@ export async function getAllBillsByOwnerName(
     .split('data:')
     .map((payLoad: string) => {
       try {
-        if (payLoad == '') return null;
+        if (payLoad === '') return null;
         return JSON.parse(payLoad);
       } catch (err) {
         console.error("Can't parse JSON: " + err);
