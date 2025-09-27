@@ -492,13 +492,13 @@ export default function VisitListTable(): JSX.Element {
         setArchivedCollapsed
       )}
       {visitIdToDelete && (
-        <div className="modal">
-          <div className="modal-content">
+        <div className="confirm-dialog">
+          <div className="confirm-dialog-content">
             <h3>Confirm Deletion</h3>
             <p>
               Are you sure you want to delete emergency visit {visitIdToDelete}?
             </p>
-            <div className="modal-buttons">
+            <div className="confirm-dialog-buttons">
               <button onClick={() => setConfirmDeleteId(null)}>Cancel</button>
               <button
                 onClick={async () => {
