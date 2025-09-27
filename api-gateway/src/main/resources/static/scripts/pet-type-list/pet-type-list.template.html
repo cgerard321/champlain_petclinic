@@ -1,147 +1,220 @@
 <style>
-    h3.titlePetType {
-        color: #2f2b2b;
-        text-align: left;
-        padding-bottom: 20px;
-        padding-top: 20px;
-    }
+  h3.titlePetType {
+    color: #2f2b2b;
+    text-align: left;
+    padding-bottom: 20px;
+    padding-top: 20px;
+  }
 
-    .CurrentPetTypesContainer {
-        margin: 20px;
-    }
+  .CurrentPetTypesContainer {
+    margin: 20px;
+  }
 
-    .FilterPetTypesLabel {
-        color:rgba(0,0,0,0.5);
-    }
+  .FilterPetTypesLabel {
+    color: rgba(0, 0, 0, 0.5);
+  }
 
-    @media (max-width: 576px) {
-        /* Define styles for small screens */
-        .responsive-text {
-            font-size: 13px;
-        }
+  @media (max-width: 576px) {
+    /* Define styles for small screens */
+    .responsive-text {
+      font-size: 13px;
     }
+  }
 
-    @media (min-width: 577px) and (max-width: 992px) {
-        /* Define styles for medium screens */
-        .responsive-text {
-            font-size: 15px;
-        }
+  @media (min-width: 577px) and (max-width: 992px) {
+    /* Define styles for medium screens */
+    .responsive-text {
+      font-size: 15px;
     }
+  }
 
-    @media (min-width: 993px) {
-        /* Define styles for large screens and above */
-        .responsive-text {
-            font-size: 17px;
-        }
+  @media (min-width: 993px) {
+    /* Define styles for large screens and above */
+    .responsive-text {
+      font-size: 17px;
     }
+  }
 
-    .petTypeTable thead tr th {
-        font-weight: 400;
-        color: gray;
-    }
+  .petTypeTable thead tr th {
+    font-weight: 400;
+    color: gray;
+  }
 
-    input[type="Text"]{
-        font-size: 15px;
-    }
-
+  input[type="Text"] {
+    font-size: 15px;
+  }
 </style>
 
-<div class="CurrentPetTypesContainer" ng-app="petTypeList" ng-controller="PetTypeListController">
+<div
+  class="CurrentPetTypesContainer"
+  ng-app="petTypeList"
+  ng-controller="PetTypeListController"
+>
+  <h3 class="titlePetType">Current Pet Types</h3>
 
-    <h3 class="titlePetType">Current Pet Types</h3>
-
-    <form class="d-flex flex-column ng-pristine ng-valid">
-        <div class="d-flex flex-row justify-content-between align-items-end">
-            <div class="fw-bold">
-                Filters
-            </div>
-            <div class="d-flex flex-row gap-2">
-                <button style="color: gray;" class="border btn btn-light shadow-sm" ng-click="$ctrl.searchPetTypesByPaginationAndFilters()">Search</button>
-                <button style="color: gray;" class="border btn btn-light shadow-sm" ng-click="$ctrl.clearInputAndResetDefaultData()">Reset</button>
-            </div>
-        </div>
-
-        <hr class="m-0 mb-3 mt-3">
-
-        <div class="d-flex gap-4 mb-3 flex-wrap">
-            <div class="d-flex flex-column">
-                <input id="petTypeIdInput" type="text" placeholder="Search...">
-                <label style="font-size: 13px; color: gray;">Pet Type ID</label>
-            </div>
-
-            <div class="d-flex flex-column">
-                <input id="nameInput" type="text" placeholder="Search...">
-                <label style="font-size: 13px; color: gray;">Name</label>
-            </div>
-
-            <div class="d-none d-sm-flex flex-column">
-                <input id="descriptionInput" type="text" placeholder="Search...">
-                <label style="font-size: 13px; color: gray;">Description</label>
-            </div>
-
-        </div>
-
-        <div class="d-flex gap-4 mb-4 flex-wrap">
-            <div class="d-flex flex-column">
-                <select id="sizeInput" style="width: 100px">
-                    <option value=""> </option>
-                    <option value="2">2</option>
-                    <option value="5">5</option>
-                    <option value="10">10</option>
-                    <option value="15">15</option>
-                </select>
-                <label style="font-size: 13px; color: gray;">Size</label>
-            </div>
-        </div>
-
-    </form>
-
-        <table id="petType" class="table table-striped table-responsive petTypeTable pb-3">
-            <thead class="bg-white">
-                <tr>
-                    <th class="bg-white border">Pet Type ID</th>
-                    <th class="bg-white border">Name</th>
-                    <th class="bg-white d-none d-sm-table-cell d-md-table-cell border">Description</th>
-                    <th class="bg-white border">Delete</th>
-                </tr>
-            </thead>
-
-            <tbody class="border">
-
-                <tr class="" id="petTypeTd" ng-repeat="petType in $ctrl.petTypes">
-                    <td>
-                        <a class="btn p-0 responsive-text" style="color: blue" ui-sref="petTypeDetails({ petTypeId: petType.petTypeId })">
-                            {{petType.petTypeId}}
-                        </a>
-                    </td>
-                    <td class="responsive-text">{{petType.name}}</td>
-                    <td class="d-none d-sm-table-cell d-md-table-cell responsive-text">{{petType.petTypeDescription}}</td>
-                    <td>
-                    <button class="btn btn-danger btn-sm" ng-click="$ctrl.deletePetType(petType.petTypeId)">Delete</button>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-
-    <div class="d-flex justify-content-center pb-3">
-        <nav aria-label="Page navigation example">
-            <ul class="pagination">
-                <li class="page-item">
-                    <a class="page-link text-dark" aria-label="Previous" ng-click="$ctrl.goPreviousPage()">
-                        <span aria-hidden="true">&laquo;</span>
-                    </a>
-                </li>
-
-                <li class="page-item">
-                    <a class="page-link text-dark" disabled>Page-{{$ctrl.currentPageOnSite}}</a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link text-dark" aria-label="Next" ng-click="$ctrl.goNextPage()">
-                        <span aria-hidden="true">&raquo;</span>
-                    </a>
-                </li>
-            </ul>
-        </nav>
+  <form class="d-flex flex-column ng-pristine ng-valid">
+    <div class="d-flex flex-row justify-content-between align-items-end">
+      <div class="fw-bold">Filters</div>
+      <div class="d-flex flex-row gap-2">
+        <button
+          style="color: gray"
+          class="border btn btn-light shadow-sm"
+          ng-click="$ctrl.searchPetTypesByPaginationAndFilters()"
+        >
+          Search
+        </button>
+        <button
+          style="color: gray"
+          class="border btn btn-light shadow-sm"
+          ng-click="$ctrl.clearInputAndResetDefaultData()"
+        >
+          Reset
+        </button>
+      </div>
     </div>
 
+    <hr class="m-0 mb-3 mt-3" />
+
+    <div class="d-flex gap-4 mb-3 flex-wrap">
+      <div class="d-flex flex-column">
+        <input id="petTypeIdInput" type="text" placeholder="Search..." />
+        <label style="font-size: 13px; color: gray">Pet Type ID</label>
+      </div>
+
+      <div class="d-flex flex-column">
+        <input id="nameInput" type="text" placeholder="Search..." />
+        <label style="font-size: 13px; color: gray">Name</label>
+      </div>
+
+      <div class="d-none d-sm-flex flex-column">
+        <input id="descriptionInput" type="text" placeholder="Search..." />
+        <label style="font-size: 13px; color: gray">Description</label>
+      </div>
+    </div>
+
+    <div class="d-flex gap-4 mb-4 flex-wrap">
+      <div class="d-flex flex-column">
+        <select id="sizeInput" style="width: 100px">
+          <option value=""></option>
+          <option value="2">2</option>
+          <option value="5">5</option>
+          <option value="10">10</option>
+          <option value="15">15</option>
+        </select>
+        <label style="font-size: 13px; color: gray">Size</label>
+      </div>
+    </div>
+  </form>
+
+  <table
+    id="petType"
+    class="table table-striped table-responsive petTypeTable pb-3"
+  >
+    <thead class="bg-white">
+      <tr>
+        <th class="bg-white border">Pet Type ID</th>
+        <th class="bg-white border">Name</th>
+        <th class="bg-white d-none d-sm-table-cell d-md-table-cell border">
+          Description
+        </th>
+        <th class="bg-white border">Actions</th>
+      </tr>
+    </thead>
+
+    <tbody class="border">
+      <tr class="" id="petTypeTd" ng-repeat="petType in $ctrl.petTypes">
+        <td>
+          <a
+            class="btn p-0 responsive-text"
+            style="color: blue"
+            ui-sref="petTypeDetails({ petTypeId: petType.petTypeId })"
+          >
+            {{petType.petTypeId}}
+          </a>
+        </td>
+        <td class="responsive-text">
+          <span ng-if="$ctrl.editingPetType !== petType.petTypeId"
+            >{{petType.name}}</span
+          >
+          <input
+            ng-if="$ctrl.editingPetType === petType.petTypeId"
+            type="text"
+            ng-model="$ctrl.editForm.name"
+            class="form-control form-control-sm"
+          />
+        </td>
+        <td class="d-none d-sm-table-cell d-md-table-cell responsive-text">
+          <span ng-if="$ctrl.editingPetType !== petType.petTypeId"
+            >{{petType.petTypeDescription}}</span
+          >
+          <input
+            ng-if="$ctrl.editingPetType === petType.petTypeId"
+            type="text"
+            ng-model="$ctrl.editForm.petTypeDescription"
+            class="form-control form-control-sm"
+          />
+        </td>
+        <td>
+          <button
+            ng-if="$ctrl.editingPetType !== petType.petTypeId"
+            class="btn btn-primary btn-sm me-2"
+            ng-click="$ctrl.editPetType(petType)"
+          >
+            Update
+          </button>
+          <button
+            ng-if="$ctrl.editingPetType === petType.petTypeId"
+            class="btn btn-success btn-sm me-2"
+            ng-click="$ctrl.savePetType(petType.petTypeId)"
+          >
+            Save
+          </button>
+          <button
+            ng-if="$ctrl.editingPetType === petType.petTypeId"
+            class="btn btn-secondary btn-sm me-2"
+            ng-click="$ctrl.cancelEdit()"
+          >
+            Cancel
+          </button>
+          <button
+            class="btn btn-danger btn-sm"
+            ng-click="$ctrl.deletePetType(petType.petTypeId)"
+          >
+            Delete
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="d-flex justify-content-center pb-3">
+    <nav aria-label="Page navigation example">
+      <ul class="pagination">
+        <li class="page-item">
+          <a
+            class="page-link text-dark"
+            aria-label="Previous"
+            ng-click="$ctrl.goPreviousPage()"
+          >
+            <span aria-hidden="true">&laquo;</span>
+          </a>
+        </li>
+
+        <li class="page-item">
+          <a class="page-link text-dark" disabled
+            >Page-{{$ctrl.currentPageOnSite}}</a
+          >
+        </li>
+        <li class="page-item">
+          <a
+            class="page-link text-dark"
+            aria-label="Next"
+            ng-click="$ctrl.goNextPage()"
+          >
+            <span aria-hidden="true">&raquo;</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </div>
 </div>
