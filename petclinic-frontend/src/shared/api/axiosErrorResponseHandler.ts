@@ -17,7 +17,6 @@ export default function axiosErrorResponseHandler(
 ): void {
   const redirectPath = errorPageRedirects[statusCode];
   if (statusCode == 401) {
-    localStorage.removeItem('Bearer');
     localStorage.clear();
     router.navigate('/home');
   }
