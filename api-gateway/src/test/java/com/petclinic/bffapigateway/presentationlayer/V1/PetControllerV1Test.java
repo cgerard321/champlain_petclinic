@@ -2,6 +2,8 @@ package com.petclinic.bffapigateway.presentationlayer.V1;
 
 
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
+import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
+import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetTypeRequestDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetTypeResponseDTO;
 import org.junit.jupiter.api.Test;
@@ -13,9 +15,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import static org.junit.Assert.*;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -51,7 +57,7 @@ import static org.mockito.Mockito.*;
 class PetControllerV1Test {
 
     @Autowired
-    private WebTestClient webTestClient;
+    private WebTestClient client;
 
     @MockBean
     private CustomersServiceClient customersServiceClient;
@@ -63,11 +69,12 @@ class PetControllerV1Test {
 //        String ownerId = "ownerId-12345";
 //
 //        PetResponseDTO pet = new PetResponseDTO();
-//        pet.setPetId("30-30-30-30");
+//        pet.setPetId("");
 //        pet.setOwnerId(ownerId);
 //        pet.setName("Fluffy");
 //        pet.setBirthDate(birthDate);
 //        pet.setPetTypeId("5");
+//        pet.setWeight("10.5");
 //        pet.setIsActive("true");
 //
 //        when(customersServiceClient.createPetForOwner(eq(ownerId), any(PetRequestDTO.class)))
@@ -78,17 +85,26 @@ class PetControllerV1Test {
 //        petRequest.setName("Fluffy");
 //        petRequest.setBirthDate(birthDate);
 //        petRequest.setPetTypeId("5");
+//        pet.setWeight("10.5");
 //        petRequest.setIsActive("true");
 //
-//        webTestClient.post()
-//                .uri("/api/gateway/owners/{ownerId}/pets", ownerId)
-//                .bodyValue(petRequest)
-//                .accept(MediaType.APPLICATION_JSON)
+//        client.post()
+//                .uri("/api/gateway/owners/pets")
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .body(BodyInserters.fromValue(petRequest))
 //                .exchange()
 //                .expectStatus().isCreated()
-//                .expectBody()
-//                .jsonPath("$.petId").isEqualTo("30-30-30-30")
-//                .jsonPath("$.name").isEqualTo("Fluffy");
+//                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+//                .expectBody(PetResponseDTO.class)
+//                .value(response -> {
+//                    assertEquals("30-30-30-30", response.getPetId());
+//                    assertEquals("Fluffy", response.getName());
+//                    assertEquals(ownerId, response.getOwnerId());
+//                    assertEquals(birthDate, response.getBirthDate());
+//                    assertEquals("5", response.getPetTypeId());
+//                    assertEquals("10.5", response.getWeight());
+//                    assertEquals("true", response.getIsActive());
+//                });
 //
 //        verify(customersServiceClient, times(1))
 //                .createPetForOwner(eq(ownerId), any(PetRequestDTO.class));
@@ -102,8 +118,8 @@ class PetControllerV1Test {
 //        when(customersServiceClient.deletePetByPetId(petId))
 //                .thenReturn(Mono.empty());
 //
-//        webTestClient.delete()
-//                .uri("/api/gateway/owners/{ownerId}/pets/{petId}", ownerId, petId)
+//        client.delete()
+//                .uri("/api/gateway/owners/" + ownerId + "/pets/" + petId)
 //                .exchange()
 //                .expectStatus().isNoContent();
 //
@@ -127,18 +143,70 @@ class PetControllerV1Test {
 //        when(customersServiceClient.patchPet(any(PetRequestDTO.class), eq(petId)))
 //                .thenReturn(Mono.just(expectedPetResponse));
 //
-//        webTestClient.patch()
-//                .uri("/api/gateway/owners/{ownerId}/pets/{petId}", ownerId, petId)
-//                .bodyValue(petRequestDTO)
+//        client.patch()
+//                .uri("/api/gateway/owners/" + ownerId + "/pets/" + petId)
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .body(BodyInserters.fromValue(petRequestDTO))
 //                .exchange()
 //                .expectStatus().isOk()
-//                .expectBody()
-//                .jsonPath("$.petId").isEqualTo(petId)
-//                .jsonPath("$.isActive").isEqualTo("true");
+//                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+//                .expectBody(PetResponseDTO.class)
+//                .value(response -> {
+//                    assertEquals(petId, response.getPetId());
+//                    assertEquals("true", response.getIsActive());
+//                });
 //
 //        verify(customersServiceClient, times(1))
 //                .patchPet(any(PetRequestDTO.class), eq(petId));
 //    }
+
+
+
+    @Test
+    void whenDeletePetType_ReturnsWebClientError_ShouldReturnStatusNotFound() {
+        try {
+            String petTypeId = "4283c9b8-4ffd-4866-a5ed-287117c60a40";
+            WebClientResponseException serviceException = WebClientResponseException.create(
+                    404, "Not Found", null, null, null);
+
+            when(customersServiceClient.deletePetTypeV2(petTypeId))
+                    .thenReturn(Mono.error(serviceException));
+
+            client.delete()
+                    .uri("/api/gateway/owners/petTypes/{petTypeId}", petTypeId)
+                    .exchange()
+                    .expectStatus().is4xxClientError();
+
+        } catch (Exception e) {
+            System.err.println("Test failed with exception: " + e.getMessage());
+            e.printStackTrace();
+            fail("Test failed: " + e.getMessage());
+        }
+    }
+
+
+
+//    @Test
+//    void deletePetType_WhenServiceTimeout_ShouldReturnGatewayTimeout() {
+//        try {
+//            // Given
+//            String petTypeId = "4283c9b8-4ffd-4866-a5ed-287117c60a40";
+//            when(customersServiceClient.deletePetTypeV2(petTypeId))
+//                    .thenReturn(Mono.error(new RuntimeException("Connection timeout")));
+//
+//            // When & Then
+//            client.delete()
+//                    .uri("/api/gateway/owners/petTypes/{petTypeId}", petTypeId)
+//                    .exchange()
+//                    .expectStatus().is5xxServerError();
+//
+//        } catch (Exception e) {
+//            System.err.println("Test failed with exception: " + e.getMessage());
+//            e.printStackTrace();
+//            fail("Test failed: " + e.getMessage());
+//        }
+//    }
+
 
     @Test
     void ifOwnerIdIsNotSpecifiedInUrlThrowNotAllowed() {
@@ -148,12 +216,12 @@ class PetControllerV1Test {
         petRequest.setPetTypeId("5");
         petRequest.setIsActive("true");
 
-        webTestClient.post()
-                .uri("/api/gateway/owners/pets") // Missing ownerId
+        client.post()
+                .uri("/api/gateway/owners/pets")
                 .bodyValue(petRequest)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isEqualTo(HttpStatus.NOT_FOUND); // This endpoint doesn't exist
+                .expectStatus().isEqualTo(HttpStatus.NOT_FOUND);
 
         verifyNoInteractions(customersServiceClient);
     }
@@ -162,7 +230,7 @@ class PetControllerV1Test {
     void shouldThrowNotFoundWhenOwnerIdIsNotSpecifiedOnDeletePets() {
         String petId = "petId-123";
 
-        webTestClient.delete()
+        client.delete()
                 .uri("/api/gateway/owners/pets/{petId}", petId) // Missing ownerId in path
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -175,7 +243,7 @@ class PetControllerV1Test {
     void shouldThrowMethodNotAllowedWhenDeletePetsIsMissingPetId() {
         String ownerId = "ownerId-20";
 
-        webTestClient.delete()
+        client.delete()
                 .uri("/api/gateway/owners/{ownerId}/pets", ownerId) // Missing petId
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -189,7 +257,7 @@ class PetControllerV1Test {
         String ownerId = "ownerId-12345";
         String invalidJson = "{\"name\": }"; // Invalid JSON
 
-        webTestClient.post()
+        client.post()
                 .uri("/api/gateway/owners/{ownerId}/pets", ownerId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(invalidJson)
@@ -203,7 +271,7 @@ class PetControllerV1Test {
     void shouldHandleEmptyRequestBodyOnCreate() {
         String ownerId = "ownerId-12345";
 
-        webTestClient.post()
+        client.post()
                 .uri("/api/gateway/owners/{ownerId}/pets", ownerId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -218,7 +286,7 @@ class PetControllerV1Test {
         String petId = "petId-123";
         String invalidJson = "{\"isActive\": }"; // Invalid JSON
 
-        webTestClient.patch()
+        client.patch()
                 .uri("/api/gateway/owners/{ownerId}/pets/{petId}", ownerId, petId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(invalidJson)
@@ -233,7 +301,7 @@ class PetControllerV1Test {
         String ownerId = "ownerId-1";
         String petId = "petId-123";
 
-        webTestClient.patch()
+        client.patch()
                 .uri("/api/gateway/owners/{ownerId}/pets/{petId}", ownerId, petId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .exchange()

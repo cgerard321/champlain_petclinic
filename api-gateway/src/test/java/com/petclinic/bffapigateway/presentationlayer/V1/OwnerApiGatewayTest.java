@@ -3,6 +3,7 @@ package com.petclinic.bffapigateway.presentationlayer.V1;
 import com.petclinic.bffapigateway.domainclientlayer.AuthServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VisitsServiceClient;
+import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.presentationlayer.v1.OwnerControllerV1;
 import com.petclinic.bffapigateway.presentationlayer.v1.PetControllerV1;
@@ -12,6 +13,7 @@ import com.petclinic.bffapigateway.utils.Security.Filters.RoleFilter;
 import com.petclinic.bffapigateway.utils.Utility;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
@@ -23,6 +25,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.web.reactive.function.BodyInserters;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -190,6 +193,35 @@ public class OwnerApiGatewayTest {
                     });
         }
 
+    @Test
+    void updateOwner_shouldSucceed() {
+        String ownerId = "f470653d-05c5-4c45-b7a0-7d70f003d2ac";
+        OwnerRequestDTO updatedOwnerData = new OwnerRequestDTO();
+        updatedOwnerData.setOwnerId(ownerId);
+        updatedOwnerData.setFirstName("UpdatedFirstName");
+        updatedOwnerData.setLastName("UpdatedLastName");
+
+        OwnerResponseDTO updatedOwner = new OwnerResponseDTO();
+        updatedOwner.setOwnerId(ownerId);
+        updatedOwner.setFirstName(updatedOwnerData.getFirstName());
+        updatedOwner.setLastName(updatedOwnerData.getLastName());
+
+        when(customersServiceClient.updateOwner(eq(ownerId), any(Mono.class)))
+                .thenReturn(Mono.just(updatedOwner));
+
+        client.put()
+                .uri("/api/gateway/owners/" + ownerId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromValue(updatedOwnerData))
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(OwnerResponseDTO.class)
+                .isEqualTo(updatedOwner);
+
+        Mockito.verify(customersServiceClient, times(1))
+                .updateOwner(eq(ownerId), any(Mono.class));
+    }
     }
 
 

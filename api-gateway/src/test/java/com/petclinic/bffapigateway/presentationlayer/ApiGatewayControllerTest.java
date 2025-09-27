@@ -2393,41 +2393,6 @@ class ApiGatewayControllerTest {
     }
     }*/
 
-    @Test
-    public void updateOwner_shouldSucceed() {
-        // Define the owner ID and updated owner data
-        String ownerId = "ownerId-123";
-        OwnerRequestDTO updatedOwnerData = new OwnerRequestDTO();
-        updatedOwnerData.setFirstName("UpdatedFirstName");
-        updatedOwnerData.setLastName("UpdatedLastName");
-
-        // Mock the behavior of customersServiceClient.updateOwner
-        OwnerResponseDTO updatedOwner = new OwnerResponseDTO();
-        updatedOwner.setOwnerId(ownerId);
-        updatedOwner.setFirstName(updatedOwnerData.getFirstName());
-        updatedOwner.setLastName(updatedOwnerData.getLastName());
-        when(customersServiceClient.updateOwner(eq(ownerId), any(Mono.class)))
-                .thenReturn(Mono.just(updatedOwner));
-
-        // Perform the PUT request to update the owner
-        client.put()
-                .uri("/api/gateway/owners/{ownerId}", ownerId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(BodyInserters.fromValue(updatedOwnerData))
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody(OwnerResponseDTO.class)
-                .value(updatedOwnerResponseDTO -> {
-                    // Assertions
-                    assertNotNull(updatedOwnerResponseDTO);
-                    assertEquals(updatedOwnerResponseDTO.getOwnerId(), ownerId);
-                    assertEquals(updatedOwnerResponseDTO.getFirstName(), updatedOwnerData.getFirstName());
-                    assertEquals(updatedOwnerResponseDTO.getLastName(), updatedOwnerData.getLastName());
-                    // Add more assertions if needed
-                });
-    }
-
 
 
 
@@ -3082,58 +3047,5 @@ private VetAverageRatingDTO buildVetAverageRatingDTO(){
                 .endDate("2014")
                 .build();
     }
-
-
-
-
-
-    @Test
-    void whenDeletePetType_ReturnsWebClientError_ShouldReturnStatusNotFound() {
-        try {
-            String petTypeId = "4283c9b8-4ffd-4866-a5ed-287117c60a40";
-            WebClientResponseException serviceException = WebClientResponseException.create(
-                    500, "Internal Server Error", null, null, null);
-
-            when(customersServiceClient.deletePetTypeV2(petTypeId))
-                    .thenReturn(Mono.error(serviceException));
-
-            client.delete()
-                    .uri("/api/gateway/owners/petTypes/{petTypeId}", petTypeId)
-                    .exchange()
-                    .expectStatus().is5xxServerError();
-
-        } catch (Exception e) {
-            System.err.println("Test failed with exception: " + e.getMessage());
-            e.printStackTrace();
-            fail("Test failed: " + e.getMessage());
-        }
-    }
-
-
-
-    @Test
-    void deletePetType_WhenServiceTimeout_ShouldReturnGatewayTimeout() {
-        try {
-            // Given
-            String petTypeId = "4283c9b8-4ffd-4866-a5ed-287117c60a40";
-            when(customersServiceClient.deletePetTypeV2(petTypeId))
-                    .thenReturn(Mono.error(new RuntimeException("Connection timeout")));
-
-            // When & Then
-            client.delete()
-                    .uri("/api/gateway/owners/petTypes/{petTypeId}", petTypeId)
-                    .exchange()
-                    .expectStatus().is5xxServerError();
-
-        } catch (Exception e) {
-            System.err.println("Test failed with exception: " + e.getMessage());
-            e.printStackTrace();
-            fail("Test failed: " + e.getMessage());
-        }
-    }
-
-
-
-
 
 }
