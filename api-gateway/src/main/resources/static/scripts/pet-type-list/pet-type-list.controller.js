@@ -7,9 +7,7 @@ angular.module('petTypeList')
 
                 var self = this;
 
-                // -------------------------------------------------------------------
-                // Add Pet Type form state
-                // -------------------------------------------------------------------
+
                 self.petTypes = [];
                 self.showAddForm = false;
                 self.newPetType = { name: '', petTypeDescription: '' };
@@ -46,9 +44,6 @@ angular.module('petTypeList')
                         });
                 };
 
-                // -------------------------------------------------------------------
-                // Inline editing (Update)
-                // -------------------------------------------------------------------
                 self.editingPetType = null;
                 self.editForm = {};
 
@@ -89,9 +84,6 @@ angular.module('petTypeList')
                     }
                 };
 
-                // -------------------------------------------------------------------
-                // Pagination + Filtering
-                // -------------------------------------------------------------------
                 self.currentPage = $stateParams.page || 0;
                 self.pageSize = $stateParams.size || 5;
                 self.currentPageOnSite = parseInt(self.currentPage) + 1;

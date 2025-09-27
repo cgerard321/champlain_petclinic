@@ -32,11 +32,7 @@ class PetTypeControllerIntegrationTest {
 
     PetType petTypeEntity2 = buildPetType2();
     String PUBLIC_PETTYPE_ID = petTypeEntity2.getPetTypeId();
-
-    // -------------------------------------------------------------------------
-    // Basic CRUD endpoint tests
-    // -------------------------------------------------------------------------
-
+    
     @Test
     void getAllPetTypes_shouldSucceed() {
         webTestClient.get()
@@ -156,10 +152,6 @@ class PetTypeControllerIntegrationTest {
         }
     }
 
-    // -------------------------------------------------------------------------
-    // Pagination, filtering & counting tests
-    // -------------------------------------------------------------------------
-
     @Test
     void getPetTypesPagination_WithValidParameters_ShouldReturnPaginatedResults() {
         webTestClient.get()
@@ -269,10 +261,6 @@ class PetTypeControllerIntegrationTest {
                     assertTrue(list.size() >= 0);
                 });
     }
-
-    // -------------------------------------------------------------------------
-    // Helper builders
-    // -------------------------------------------------------------------------
 
     private PetType buildPetType() {
         return PetType.builder().id("10").name("TestType").build();
