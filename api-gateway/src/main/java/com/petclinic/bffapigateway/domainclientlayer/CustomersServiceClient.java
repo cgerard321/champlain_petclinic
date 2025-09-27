@@ -320,6 +320,18 @@ public class CustomersServiceClient {
                 .bodyToMono(Void.class);
     }
 
+    public Mono<PetTypeResponseDTO> addPetType(Mono<PetTypeRequestDTO> petTypeRequestDTOMono) {
+        return petTypeRequestDTOMono.flatMap(requestDTO ->
+                webClientBuilder.build()
+                        .post()
+                        .uri(customersServiceUrl + "/owners/petTypes")
+                        .body(BodyInserters.fromValue(requestDTO))
+                        .retrieve()
+                        .bodyToMono(PetTypeResponseDTO.class)
+        );
+    }
+
+
     public Mono<PetTypeResponseDTO> updatePetType(String petTypeId, Mono<PetTypeRequestDTO> petTypeRequestDTO) {
         return petTypeRequestDTO.flatMap(requestDTO ->
                 webClientBuilder.build()

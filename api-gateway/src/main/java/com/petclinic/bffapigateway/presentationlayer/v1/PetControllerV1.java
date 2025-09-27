@@ -53,6 +53,17 @@ public class PetControllerV1 {
                 .defaultIfEmpty(ResponseEntity.notFound().<Void>build());
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @PostMapping
+    public Mono<ResponseEntity<PetTypeResponseDTO>> addPetType(
+            @RequestBody Mono<PetTypeRequestDTO> petTypeRequestDTOMono) {
+
+        return customersServiceClient.addPetType(petTypeRequestDTOMono)
+                .map(createdPetType ->
+                        ResponseEntity.status(HttpStatus.CREATED).body(createdPetType))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
 
     @IsUserSpecific(idToMatch = {"petTypeId"})
     @PutMapping("/{petTypeId}")

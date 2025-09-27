@@ -7,6 +7,7 @@ import com.petclinic.customersservice.data.Owner;
 import com.petclinic.customersservice.data.PetType;
 import com.petclinic.customersservice.data.PetTypeRepo;
 import com.petclinic.customersservice.presentationlayer.OwnerResponseDTO;
+import com.petclinic.customersservice.presentationlayer.PetTypeRequestDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -83,6 +84,45 @@ class PetTypeServiceImplTest {
             e.printStackTrace();
             fail("Test failed: " + e.getMessage());
         }
+    }
+    @Test
+    void whenAddPetType_missingName() {
+        PetTypeRequestDTO dto = new PetTypeRequestDTO(null, "Desc");
+        StepVerifier.create(petTypeService.addPetType(Mono.just(dto)))
+                .expectError(InvalidInputException.class)
+                .verify();
+    }
+
+    @Test
+    void whenAddPetType_missingDescription() {
+        PetTypeRequestDTO dto = new PetTypeRequestDTO("Name", null);
+        StepVerifier.create(petTypeService.addPetType(Mono.just(dto)))
+                .expectError(InvalidInputException.class)
+                .verify();
+    }
+
+    @Test
+    void whenAddPetType_ShouldInsertAndReturnPetType() {
+        // Arrange
+        PetType petTypeToAdd = buildPetType();
+        Mono<PetType> petTypeMono = Mono.just(petTypeToAdd);
+
+        when(petTypeRepo.insert(any(PetType.class)))
+                .thenReturn(Mono.just(petTypeToAdd));
+        // Act
+        Mono<PetType> result = petTypeService.insertPetType(petTypeMono);
+
+        // Assert
+        StepVerifier.create(result)
+                .assertNext(saved -> {
+                    assertNotNull(saved);
+                    assertEquals(petTypeToAdd.getPetTypeId(), saved.getPetTypeId());
+                    assertEquals(petTypeToAdd.getName(), saved.getName());
+                    assertEquals(petTypeToAdd.getPetTypeDescription(), saved.getPetTypeDescription());
+                })
+                .verifyComplete();
+
+        verify(petTypeRepo).insert(any(PetType.class));
     }
 
 

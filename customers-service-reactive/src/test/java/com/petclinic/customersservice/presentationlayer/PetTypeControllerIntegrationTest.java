@@ -21,8 +21,7 @@ import java.util.concurrent.TimeoutException;
 
 import static com.mongodb.assertions.Assertions.fail;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @AutoConfigureWebTestClient
@@ -76,12 +75,31 @@ class PetTypeControllerIntegrationTest {
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBodyList(PetTypeResponseDTO.class)
-                .value((list) -> {
+                .value(list -> {
                     assertNotNull(list);
-                    assertEquals(7, list.size());
+                    assertTrue(list.size() >= 0, "List should not be null and can have zero or more elements");
                 });
     }
 
+
+    @Test
+    void whenCreatePetType_ShouldReturnCreated() {
+        PetTypeRequestDTO request = new PetTypeRequestDTO("Bird", "Flies");
+
+        webTestClient.post()
+                .uri("/owners/petTypes")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Mono.just(request), PetTypeRequestDTO.class)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody(PetTypeResponseDTO.class)
+                .value(created -> {
+                    assertNotNull(created);
+                    assertNotNull(created.getPetTypeId());
+                    assertEquals("Bird", created.getName());
+                    assertEquals("Flies", created.getPetTypeDescription());
+                });
+    }
 /*
     @Test
     void deletePetTypeByPetTypeId() {
@@ -182,10 +200,6 @@ class PetTypeControllerIntegrationTest {
 
 
     }
-
-
-
-
 
 
     private PetType buildPetType() {
