@@ -29,8 +29,18 @@ jobs:
       run: chmod +x ./gradlew
       working-directory: ./api-gateway
     - name: Build with Gradle Wrapper
-      run: ./gradlew clean build
+      run: ./gradlew clean build jacocoTestReport
       working-directory: ./api-gateway
+    - name: Verify coverage threshold
+      run: ./gradlew jacocoTestCoverageVerification
+      working-directory: ./api-gateway
+      continue-on-error: true
+    - name: Upload coverage reports
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-reports-api-gateway
+        path: ./api-gateway/build/reports/jacoco/test/html/
+        retention-days: 30
 
   visits_service_test:
     runs-on: "ubuntu-22.04"
@@ -48,8 +58,14 @@ jobs:
       run: chmod +x ./gradlew
       working-directory: ./visits-service-new
     - name: Build with Gradle
-      run: ./gradlew clean build
+      run: ./gradlew clean build jacocoTestReport jacocoTestCoverageVerification
       working-directory: ./visits-service-new
+    - name: Upload coverage reports
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-reports-visits-service
+        path: ./visits-service-new/build/reports/jacoco/test/html/
+        retention-days: 30
 
   vet_service_test:
     runs-on: "ubuntu-22.04"
@@ -67,8 +83,14 @@ jobs:
       run: chmod +x ./gradlew
       working-directory: ./vet-service
     - name: Build with Gradle
-      run: ./gradlew clean build
+      run: ./gradlew clean build jacocoTestReport jacocoTestCoverageVerification
       working-directory: ./vet-service
+    - name: Upload coverage reports
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-reports-vet-service
+        path: ./vet-service/build/reports/jacoco/test/html/
+        retention-days: 30
 
 
   customers_service_reactive_test:
@@ -87,8 +109,14 @@ jobs:
       run: chmod +x ./gradlew
       working-directory: ./customers-service-reactive
     - name: Build with Gradle
-      run: ./gradlew clean build
+      run: ./gradlew clean build jacocoTestReport jacocoTestCoverageVerification
       working-directory: ./customers-service-reactive
+    - name: Upload coverage reports
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-reports-customers-service
+        path: ./customers-service-reactive/build/reports/jacoco/test/html/
+        retention-days: 30
 
   billing_service_test:
     runs-on: "ubuntu-22.04"
@@ -106,8 +134,14 @@ jobs:
       run: chmod +x ./gradlew
       working-directory: ./billing-service
     - name: Build with Gradle
-      run: ./gradlew clean build
+      run: ./gradlew clean build jacocoTestReport jacocoTestCoverageVerification
       working-directory: ./billing-service
+    - name: Upload coverage reports
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-reports-billing-service
+        path: ./billing-service/build/reports/jacoco/test/html/
+        retention-days: 30
 
   auth_service_test:
     runs-on: "ubuntu-22.04"
@@ -125,8 +159,14 @@ jobs:
       run: chmod +x ./gradlew
       working-directory: ./auth-service
     - name: Build with Gradle
-      run: ./gradlew clean build
+      run: ./gradlew clean build jacocoTestReport jacocoTestCoverageVerification
       working-directory: ./auth-service
+    - name: Upload coverage reports
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-reports-auth-service
+        path: ./auth-service/build/reports/jacoco/test/html/
+        retention-days: 30
 
   inventory_service_test:
     runs-on: "ubuntu-22.04"
@@ -144,8 +184,14 @@ jobs:
       run: chmod +x ./gradlew
       working-directory: ./inventory-service
     - name: Build with Gradle
-      run: ./gradlew clean build
+      run: ./gradlew clean build jacocoTestReport jacocoTestCoverageVerification
       working-directory: ./inventory-service
+    - name: Upload coverage reports
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-reports-inventory-service
+        path: ./inventory-service/build/reports/jacoco/test/html/
+        retention-days: 30
 
   products_service_test:
     runs-on: "ubuntu-22.04"
@@ -163,8 +209,14 @@ jobs:
         run: chmod +x ./gradlew
         working-directory: ./products-service
       - name: Build with Gradle
-        run: ./gradlew clean build
+        run: ./gradlew clean build jacocoTestReport jacocoTestCoverageVerification
         working-directory: ./products-service
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-reports-products-service
+          path: ./products-service/build/reports/jacoco/test/html/
+          retention-days: 30
 
 
   cart_service_test:
@@ -183,10 +235,44 @@ jobs:
         run: chmod +x ./gradlew
         working-directory: ./cart-service
       - name: Build with Gradle
-        run: ./gradlew clean build
+        run: ./gradlew clean build jacocoTestReport jacocoTestCoverageVerification
         working-directory: ./cart-service
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-reports-cart-service
+          path: ./cart-service/build/reports/jacoco/test/html/
+          retention-days: 30
 
     
+  coverage-summary:
+    runs-on: "ubuntu-22.04"
+    needs: [api_gateway_test, visits_service_test, vet_service_test, customers_service_reactive_test, billing_service_test, auth_service_test, inventory_service_test, products_service_test, cart_service_test]
+    if: github.event_name == 'pull_request'
+    steps:
+    - name: Checkout sources
+      uses: actions/checkout@v4
+    - name: Download all coverage reports
+      uses: actions/download-artifact@v4
+      with:
+        path: coverage-reports
+    - name: Generate coverage summary
+      run: |
+        echo "## Code Coverage Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "Coverage reports have been generated for all microservices." >> $GITHUB_STEP_SUMMARY
+        echo "View detailed reports in the Actions artifacts." >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Coverage Thresholds" >> $GITHUB_STEP_SUMMARY
+        echo "- API Gateway: 65%" >> $GITHUB_STEP_SUMMARY
+        echo "- Auth Service: 90%" >> $GITHUB_STEP_SUMMARY
+        echo "- Billing Service: 50%" >> $GITHUB_STEP_SUMMARY
+        echo "- Cart Service: 0%" >> $GITHUB_STEP_SUMMARY
+        echo "- Inventory Service: 88%" >> $GITHUB_STEP_SUMMARY
+        echo "- Products Service: 90%" >> $GITHUB_STEP_SUMMARY
+        echo "- Visits Service: 85%" >> $GITHUB_STEP_SUMMARY
+        echo "- Customers Service: 80%" >> $GITHUB_STEP_SUMMARY
+
   dependency-submission:
     runs-on: "ubuntu-22.04"
     permissions:

@@ -16,6 +16,7 @@ interface CartItemProps {
   addToCart: (item: ProductModel) => void;
   isInWishlist: boolean;
   showNotification?: (message: string) => void; // New prop for notifications
+  removeFromWishlist?: (item: ProductModel) => void;
 }
 
 const formatPrice = (price: number): string => {
@@ -31,7 +32,8 @@ const CartItem = ({
   addToWishlist,
   addToCart,
   isInWishlist,
-  showNotification, // Destructure the new prop
+  showNotification,
+  removeFromWishlist,
 }: CartItemProps): JSX.Element => {
   const remainingStock = item.productQuantity - (item.quantity ?? 0);
 
@@ -56,7 +58,9 @@ const CartItem = ({
         <h2 className="info-title">{item.productName}</h2>
         <p className="info-description">{item.productDescription}</p>
       </div>
+
       <div className="CartItem-details">
+        {/* Normal cart row */}
         {!isInWishlist && (
           <>
             <div className="item-quantity">
@@ -80,27 +84,36 @@ const CartItem = ({
             >
               Remove
             </button>
-            {!isInWishlist && (
-              <button
-                className="wishlist-button"
-                onClick={() => addToWishlist(item)}
-                aria-label={`Add ${item.productName} to wishlist`}
-              >
-                Add to Wishlist
-              </button>
-            )}
+            <button
+              className="wishlist-button"
+              onClick={() => addToWishlist(item)}
+              aria-label={`Add ${item.productName} to wishlist`}
+            >
+              Add to Wishlist
+            </button>
           </>
         )}
 
-        {/* "Add to Cart" button for Wishlist Items */}
+        {/* Wishlist row */}
         {isInWishlist && (
-          <button
-            className="addToCart-button"
-            onClick={handleAddToCart} // Use the new handler
-            aria-label={`Add ${item.productName} to cart`}
-          >
-            Add to Cart
-          </button>
+          <div className="cartitem-actions">
+            <button
+              className="addToCart-button"
+              onClick={handleAddToCart}
+              aria-label={`Add ${item.productName} to cart`}
+            >
+              Add to Cart
+            </button>
+
+            <button
+              className="wishlist-button danger"
+              style={{ marginLeft: '0.5rem' }}
+              onClick={() => removeFromWishlist && removeFromWishlist(item)}
+              aria-label={`Remove ${item.productName} from wishlist`}
+            >
+              Remove
+            </button>
+          </div>
         )}
       </div>
 

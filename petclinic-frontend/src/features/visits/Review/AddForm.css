@@ -18,7 +18,6 @@
 
 .add-review-form label {
   display: block;
-  margin-bottom: 8px;
   color: #495057;
   font-weight: bold;
 }
@@ -50,8 +49,14 @@
   resize: vertical;
 }
 
+.add-review-form button[type='submit']{
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+  color: #fff;
+}
+
 button[type='submit'] {
-  background-color: #007bff;
+  background-color: #0d6efd;
   color: white;
   padding: 10px 20px;
   border: none;
@@ -63,7 +68,7 @@ button[type='submit'] {
 }
 
 button[type='submit']:hover {
-  background-color: #0056b3;
+  background-color: #0d6efd;
 }
 
 .success-message {
@@ -104,4 +109,29 @@ button[type='submit']:hover {
   color: #dc3545;
   font-size: 14px;
   margin-top: -10px;
+}
+
+.reviewer-name-display {
+  margin: 4px 0 0 0;
+  color: #343a40;
+  font-size: 16px;
+  padding-bottom: 10px;
+}
+
+.rating-section {
+  margin-bottom: 16px;
+}
+
+.your-name-section {
+  margin-bottom: 12px;
+}
+
+.submit {
+  color: blue;
+}
+
+.add-review-form button[type='submit']:hover {
+  background-color: #1d5fbd; 
+  border-color: #1d5fbd;
+  color: #fff;
 }

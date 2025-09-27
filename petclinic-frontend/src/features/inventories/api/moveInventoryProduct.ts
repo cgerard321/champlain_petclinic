@@ -6,7 +6,7 @@ export const getAllInventories = async (): Promise<
 > => {
   try {
     const response = await axiosInstance.get<InventoryResponseModel[]>(
-      '/inventory',
+      '/inventories',
       { useV2: false }
     );
     return response.data;
@@ -23,7 +23,7 @@ export const updateProductInventoryId = async (
 ): Promise<void> => {
   try {
     await axiosInstance.put<void>(
-      `/inventory/${currentInventoryId}/products/${productId}/updateInventoryId/${newInventoryId}`,
+      `/inventories/${currentInventoryId}/products/${productId}/updateInventoryId/${newInventoryId}`,
       { useV2: false } // not implemented, must find
     );
   } catch (error) {
