@@ -124,6 +124,39 @@ class BillServiceClientIntegrationTest {
                 .verifyComplete();
     }
 
+    @Test
+    void getBillsByOwnerName() throws Exception {
+        server.enqueue(new MockResponse().setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(mapper.writeValueAsString(billResponseDTO)).addHeader("Content-Type", "application/json"));
+
+        Flux<BillResponseDTO> billResponseDTOMono = billServiceClient.getBillsByOwnerName("Joe", "Nuts");
+        StepVerifier.create(billResponseDTOMono)
+                .expectNextMatches(returnedBillResponseDTO1 -> returnedBillResponseDTO1.getCustomerId().equals("1"))
+                .verifyComplete();
+    }
+
+    @Test
+    void getBillsByVetName() throws Exception{
+        server.enqueue(new MockResponse().setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(mapper.writeValueAsString(billResponseDTO)).addHeader("Content-Type", "application/json"));
+
+        Flux<BillResponseDTO> billResponseDTOMono = billServiceClient.getBillsByVetName("Joe", "Nuts");
+        StepVerifier.create(billResponseDTOMono)
+                .expectNextMatches(returnedBillResponseDTO1 -> returnedBillResponseDTO1.getCustomerId().equals("1"))
+                .verifyComplete();
+    }
+
+    @Test
+    void getBillsByVisitType() throws Exception{
+        server.enqueue(new MockResponse().setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(mapper.writeValueAsString(billResponseDTO)).addHeader("Content-Type", "application/json"));
+
+        Flux<BillResponseDTO> billResponseDTOMono = billServiceClient.getBillsByVisitType("Regular");
+        StepVerifier.create(billResponseDTOMono)
+                .expectNextMatches(returnedBillResponseDTO1 -> returnedBillResponseDTO1.getCustomerId().equals("1"))
+                .verifyComplete();
+    }
+
 //    @Test
 //    void shouldDeleteBill() throws JsonProcessingException {
 //        final BillDetails bill = BillDetails.builder()
