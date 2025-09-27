@@ -78,12 +78,6 @@ spring:
     username: user
     password: pwd
 
-  datasource:
-    url: jdbc:postgresql://postgres-vet:5432/images
-    username: user
-    password: pwd
-    driver-class-name: org.postgresql.Driver
-
   data:
     mongodb:
       host: mongo
