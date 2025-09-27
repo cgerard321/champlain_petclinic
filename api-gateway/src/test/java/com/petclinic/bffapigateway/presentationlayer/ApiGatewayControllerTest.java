@@ -882,12 +882,13 @@ class ApiGatewayControllerTest {
     @Test
     void addPhotoToVet_multipart_ok() {
         String VET_ID = "some-vet-id";
+        String PHOTO_NAME = "vet_photo.jpg";
 
         byte[] bytes = new byte[]{123, 23, 75, 34};
         Resource returnedPhoto = new ByteArrayResource(bytes);
 
         when(vetsServiceClient.addPhotoToVet(
-                eq(VET_ID), eq("vet_photo.jpg"), any(FilePart.class)))
+                eq(VET_ID), eq(PHOTO_NAME), any(FilePart.class)))
                 .thenReturn(Mono.just(returnedPhoto));
 
         DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
@@ -897,9 +898,10 @@ class ApiGatewayControllerTest {
         mb.part("file", buffer)
                 .filename("photo.jpg")
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.IMAGE_JPEG_VALUE);
+        mb.part("photoName", PHOTO_NAME);
 
         client.post()
-                .uri("/api/gateway/vets/{vetId}/photos/{photoName}", VET_ID, "vet_photo.jpg")
+                .uri("/api/gateway/vets/{vetId}/photos", VET_ID)
                 .contentType(MediaType.MULTIPART_FORM_DATA)
                 .body(BodyInserters.fromMultipartData(mb.build()))
                 .exchange()
@@ -909,7 +911,7 @@ class ApiGatewayControllerTest {
                 .isEqualTo(bytes);
 
         verify(vetsServiceClient, times(1))
-                .addPhotoToVet(eq(VET_ID), eq("vet_photo.jpg"), any(FilePart.class));
+                .addPhotoToVet(eq(VET_ID), eq(PHOTO_NAME), any(FilePart.class));
     }
 
     @Test

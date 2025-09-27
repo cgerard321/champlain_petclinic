@@ -1015,12 +1015,10 @@ class VetsServiceClientIntegrationTest {
         assertEquals("POST", req.getMethod());
         String contentType = req.getHeader("Content-Type");
         assertNotNull(contentType);
-        assertTrue(contentType.startsWith("multipart/form-data"));
+        assertEquals("application/octet-stream", contentType);
 
-        String body = req.getBody().readUtf8();
-        assertTrue(body.contains("name=\"file\""));
-        assertTrue(body.contains("filename=\"photo.jpg\""));
-        assertTrue(body.contains("image/jpeg"));
+        byte[] requestBody = req.getBody().readByteArray();
+        assertArrayEquals(bytes, requestBody);
     }
 
     @Test
