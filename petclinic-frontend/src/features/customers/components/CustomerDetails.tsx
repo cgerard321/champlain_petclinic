@@ -33,8 +33,10 @@ const CustomerDetails: FC = () => {
 
       // Fetch pets by owner ID
       const petsResponse = await axiosInstance.get(
-        `/pets/owner/${ownerId}/pets`,
-        { useV2: false }
+        `/pets/owners/${ownerId}/pets`,
+        {
+          useV2: true,
+        }
       );
       setPets(petsResponse.data); // Set the pets state
 
@@ -142,7 +144,7 @@ const CustomerDetails: FC = () => {
   };
 
   const handleEditPetClick = (petId: string): void => {
-    navigate(`/pets/${petId}/edit`);
+    navigate(`/owners/${ownerId}/pets/${petId}/edit`);
   };
 
   return (
@@ -241,7 +243,7 @@ const CustomerDetails: FC = () => {
         </button>
         <button
           className="add-pet-button"
-          onClick={() => navigate(`/customers/${ownerId}/pets/new`)}
+          onClick={() => navigate(`/owners/${ownerId}/pets/new`)}
         >
           Add New Pet
         </button>

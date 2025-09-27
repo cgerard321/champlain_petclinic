@@ -109,7 +109,7 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
         setSuccessMessage('Product updated successfully');
         setShowNotification(true);
         setTimeout(() => {
-          navigate(`/inventory/${inventoryId}/products`);
+          navigate(`/inventories/${inventoryId}/products`);
         }, 2000);
       }
     } catch (err) {

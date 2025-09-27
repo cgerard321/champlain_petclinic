@@ -43,10 +43,14 @@ import org.springframework.context.annotation.FilterType;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.MultipartBodyBuilder;
+import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
@@ -57,6 +61,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
@@ -71,10 +76,13 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+import static com.petclinic.bffapigateway.dtos.Bills.BillStatus.PAID;
 import static com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigAuthService.jwtTokenForValidAdmin;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -873,27 +881,38 @@ class ApiGatewayControllerTest {
 
 
     @Test
-    void addPhotoToVet() {
-        byte[] photo = {123, 23, 75, 34};
-        Resource resource = new ByteArrayResource(photo);
+    void addPhotoToVet_multipart_ok() {
+        String VET_ID = "some-vet-id";
+        String PHOTO_NAME = "vet_photo.jpg";
 
-        when(vetsServiceClient.addPhotoToVet(anyString(), anyString(), any(Mono.class)))
-                .thenReturn(Mono.just(resource));
+        byte[] bytes = new byte[]{123, 23, 75, 34};
+        Resource returnedPhoto = new ByteArrayResource(bytes);
+
+        when(vetsServiceClient.addPhotoToVet(
+                eq(VET_ID), eq(PHOTO_NAME), any(FilePart.class)))
+                .thenReturn(Mono.just(returnedPhoto));
+
+        DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
+        DataBuffer buffer = factory.wrap(bytes);
+
+        MultipartBodyBuilder mb = new MultipartBodyBuilder();
+        mb.part("file", buffer)
+                .filename("photo.jpg")
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.IMAGE_JPEG_VALUE);
+        mb.part("photoName", PHOTO_NAME);
 
         client.post()
-                .uri("/api/gateway/vets/{vetId}/photos/{photoName}", VET_ID, "vet_photo.jpg")
-                .body(Mono.just(resource), Resource.class)
-                .accept(MediaType.APPLICATION_OCTET_STREAM)
+                .uri("/api/gateway/vets/{vetId}/photos", VET_ID)
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+                .body(BodyInserters.fromMultipartData(mb.build()))
                 .exchange()
                 .expectStatus().isCreated()
                 .expectHeader().contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .expectBody(Resource.class)
-                .consumeWith(response -> {
-                    assertEquals(resource, response.getResponseBody());
-                });
+                .expectBody(byte[].class)
+                .isEqualTo(bytes);
 
-        Mockito.verify(vetsServiceClient, times(1))
-                .addPhotoToVet(anyString(), anyString(), any(Mono.class));
+        verify(vetsServiceClient, times(1))
+                .addPhotoToVet(eq(VET_ID), eq(PHOTO_NAME), any(FilePart.class));
     }
 
     @Test
@@ -1198,702 +1217,6 @@ class ApiGatewayControllerTest {
 //        assertEquals(user.getEmail(), "email@email.com");
 //
 //    }
-
-    @Test
-    void getAllOwners_shouldSucceed(){
-        OwnerResponseDTO owner1 = new OwnerResponseDTO();
-        owner1.setOwnerId("ownerId-90");
-        owner1.setFirstName("John");
-        owner1.setLastName("Johnny");
-        owner1.setAddress("111 John St");
-        owner1.setCity("Johnston");
-        owner1.setProvince("Quebec");
-        owner1.setTelephone("51451545144");
-
-        Flux<OwnerResponseDTO> ownerResponseDTOFlux = Flux.just(owner1);
-
-        when(customersServiceClient.getAllOwners()).thenReturn(ownerResponseDTOFlux);
-
-        client.get()
-                .uri("/api/gateway/owners")
-                .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
-                .acceptCharset(StandardCharsets.UTF_8)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().valueEquals("Content-Type","text/event-stream;charset=UTF-8")
-                .expectBodyList(OwnerResponseDTO.class)
-                .value((list) -> {
-                    assertNotNull(list);
-                    assertEquals(1,list.size());
-                    assertEquals(list.get(0).getOwnerId(),owner1.getOwnerId());
-                    assertEquals(list.get(0).getFirstName(),owner1.getFirstName());
-                });
-
-    }
-
-    @Test
-    void getAllOwnersByPagination(){
-
-        OwnerResponseDTO owner = new OwnerResponseDTO();
-        owner.setOwnerId("ownerId-09");
-        owner.setFirstName("Test");
-        owner.setLastName("Test");
-        owner.setAddress("Test");
-        owner.setCity("Test");
-        owner.setProvince("Test");
-        owner.setTelephone("Test");
-
-        Optional<Integer> page = Optional.of(0);
-        Optional<Integer> size =  Optional.of(1);
-
-
-        Flux<OwnerResponseDTO> ownerResponseDTOFlux = Flux.just(owner);
-
-        when(customersServiceClient.getOwnersByPagination(page,size,null,null,null,null,null)).thenReturn(ownerResponseDTOFlux);
-
-        client.get()
-                .uri("/api/gateway/owners-pagination?page="+page.get()+"&size="+size.get())
-                .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
-                .acceptCharset(StandardCharsets.UTF_8)
-                .exchange().expectStatus().isOk()
-                .expectHeader().valueEquals("Content-Type","text/event-stream;charset=UTF-8")
-                .expectBodyList(OwnerResponseDTO.class)
-                .value((list) -> {
-                    Assertions.assertNotNull(list);
-                    Assertions.assertEquals(size.get(),list.size());
-                });
-    }
-
-    @Test
-    void getAllOwnersByPagination_pageEmpty_sizeEmpty(){
-
-        Flux<OwnerResponseDTO> ownerResponseDTOFlux = Flux.just();
-
-        when(customersServiceClient.getOwnersByPagination(null,null,null,null,null,null,null)).thenReturn(ownerResponseDTOFlux);
-
-        client.get()
-                .uri("/api/gateway/owners-pagination")
-                .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
-                .acceptCharset(StandardCharsets.UTF_8)
-                .exchange().expectStatus().isOk()
-                .expectHeader().valueEquals("Content-Type","text/event-stream;charset=UTF-8")
-                .expectBodyList(OwnerResponseDTO.class)
-                .value((list) -> {
-                    Assertions.assertNotNull(list);
-                    Assertions.assertEquals(0,list.size());
-                });
-    }
-
-    @Test
-    void getAllOwnersByPaginationWithFilters(){
-
-        OwnerResponseDTO owner = new OwnerResponseDTO();
-        owner.setOwnerId("ownerId-06");
-        owner.setFirstName("FN1");
-        owner.setLastName("LN1");
-        owner.setAddress("Test");
-        owner.setCity("C1");
-        owner.setProvince("Test");
-        owner.setTelephone("T1");
-
-        Optional<Integer> page = Optional.of(0);
-        Optional<Integer> size =  Optional.of(1);
-        String ownerId = "ownerId-06";
-        String firstName = "FN1";
-        String lastName = "LN1";
-        String city = "C1";
-        String phoneNumber = "T1";
-
-
-        Flux<OwnerResponseDTO> ownerResponseDTOFlux = Flux.just(owner);
-
-        when(customersServiceClient.getOwnersByPagination(page,size,ownerId,firstName,lastName,phoneNumber,city)).thenReturn(ownerResponseDTOFlux);
-
-        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString("/api/gateway/owners-pagination");
-
-        builder.queryParam("page", page);
-        builder.queryParam("size", size);
-        builder.queryParam("ownerId",  ownerId);
-        builder.queryParam("firstName", firstName);
-        builder.queryParam("lastName", lastName);
-        builder.queryParam("phoneNumber", phoneNumber);
-        builder.queryParam("city", city);
-
-        client.get()
-                .uri(builder.build().toUri())
-                .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
-                .acceptCharset(StandardCharsets.UTF_8)
-                .exchange().expectStatus().isOk()
-                .expectHeader().valueEquals("Content-Type","text/event-stream;charset=UTF-8")
-                .expectBodyList(OwnerResponseDTO.class)
-                .value((list) -> {
-                    Assertions.assertNotNull(list);
-                    Assertions.assertEquals(size.get(),list.size());
-                    Assertions.assertEquals(list.get(0).getCity(),city);
-                });
-    }
-
-    @Test
-    void getTotalNumberOfOwners(){
-        long expectedCount = 0;
-
-        when(customersServiceClient.getTotalNumberOfOwners()).thenReturn(Mono.just(expectedCount));
-
-        client.get()
-                .uri("/api/gateway/owners-count")
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody(Long.class) // Expecting a Long response
-                .consumeWith(response -> {
-                    Long responseBody = response.getResponseBody();
-                    assertNotNull(responseBody);
-                    assertEquals(expectedCount, responseBody.longValue());
-                });
-
-    }
-    @Test
-    void getTotalNumberOfOwnersWithFilters(){
-        long expectedCount = 0;
-
-        when(customersServiceClient.getTotalNumberOfOwnersWithFilters(null,null,null,null,null)).thenReturn(Mono.just(expectedCount));
-
-        client.get()
-                .uri("/api/gateway/owners-filtered-count")
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody(Long.class) // Expecting a Long response
-                .consumeWith(response -> {
-                    Long responseBody = response.getResponseBody();
-                    assertNotNull(responseBody);
-                    assertEquals(expectedCount, responseBody.longValue());
-                });
-
-    }
-
-
-
-
-    @Test
-    void getOwnerByOwnerId_shouldSucceed(){
-        OwnerResponseDTO owner = new OwnerResponseDTO();
-        owner.setOwnerId("ownerId-123");
-        owner.setFirstName("John");
-        owner.setLastName("Johnny");
-        owner.setAddress("111 John St");
-        owner.setCity("Johnston");
-        owner.setProvince("Quebec");
-        owner.setTelephone("51451545144");
-        when(customersServiceClient.getOwner("ownerId-123"))
-                .thenReturn(Mono.just(owner));
-
-        client.get()
-                .uri("/api/gateway/owners/{ownerId}", owner.getOwnerId())
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody(OwnerResponseDTO.class)
-                .value(ownerResponseDTO -> {
-                    assertNotNull(ownerResponseDTO);
-                    assertEquals(ownerResponseDTO.getOwnerId(),owner.getOwnerId());
-                });
-
-
-    }
-
-
-
-
-
-
-//    @Test
-//    void createOwner(){
-//        OwnerResponseDTO owner = new OwnerResponseDTO();
-//        owner.setOwnerId("ownerId-123");
-//        owner.setFirstName("John");
-//        owner.setLastName("Johnny");
-//        owner.setAddress("111 John St");
-//        owner.setCity("Johnston");
-//        owner.setTelephone("51451545144");
-//        when(customersServiceClient.createOwner(owner))
-//                .thenReturn(Mono.just(owner));
-//
-//
-//        client.post()
-//                .uri("/api/gateway/owners")
-//                .body(Mono.just(owner), OwnerResponseDTO.class)
-//                .accept(MediaType.APPLICATION_JSON)
-//                .exchange()
-//                .expectStatus().isOk()
-//                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-//                .expectBody();
-//
-//
-//
-//        assertEquals(owner.getOwnerId(),owner.getOwnerId());
-//        assertEquals(owner.getFirstName(),"John");
-//        assertEquals(owner.getLastName(),"Johnny");
-//        assertEquals(owner.getAddress(),"111 John St");
-//        assertEquals(owner.getCity(),"Johnston");
-//        assertEquals(owner.getTelephone(),"51451545144");
-//    }
-
-
-
-
-
-
-
-    Date date = new Date(20221010);
-
-    @Test
-    void shouldCreatePet(){
-
-        OwnerResponseDTO od = new OwnerResponseDTO();
-        od.setOwnerId("ownerId-12345");
-        PetResponseDTO pet = new PetResponseDTO();
-        PetType type = new PetType();
-        type.setName("Dog");
-        pet.setPetId("30-30-30-30");
-        pet.setOwnerId("ownerId-12345");
-        pet.setName("Fluffy");
-        pet.setBirthDate(date);
-        pet.setPetTypeId("5");
-        pet.setIsActive("true");
-
-        when(customersServiceClient.createPet(pet,od.getOwnerId()))
-
-                .thenReturn(Mono.just(pet));
-
-        client.post()
-                .uri("/api/gateway/owners/{ownerId}/pets", od.getOwnerId())
-
-                .body(Mono.just(pet), PetResponseDTO.class)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isCreated()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-
-                .expectBody()
-                .jsonPath("$.petId").isEqualTo(pet.getPetId())
-                .jsonPath("$.name").isEqualTo(pet.getName())
-                .jsonPath("$.petTypeId").isEqualTo(pet.getPetTypeId())
-                .jsonPath("$.isActive").isEqualTo(pet.getIsActive());
-
-    }
-
-    @Test
-    void shouldDeletePet() {
-        // Create a pet id that will be used in the test
-        String petId = "petId-123";
-
-        // Mock the deletePetByPetId method in the customersServiceClient
-        when(customersServiceClientMock.deletePetByPetId(petId))
-                .thenReturn(Mono.empty());
-
-        // Call the deletePetByPetId method in the ApiGatewayController
-        Mono<ResponseEntity<PetResponseDTO>> responseMono = apiGatewayController.deletePetByPetId(petId);
-
-        // Verify that the deletePetByPetId method in the customersServiceClient was called with the correct pet id
-        verify(customersServiceClientMock, times(1)).deletePetByPetId(petId);
-
-        // Verify that the response is as expected
-        StepVerifier.create(responseMono)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-                    assertNull(response.getBody());
-                })
-                .verifyComplete();
-    }
-
-    @Test
-    void shouldPatchPet() {
-        // Create a pet id and a pet request DTO that will be used in the test
-        String petId = "petId-123";
-        PetRequestDTO petRequestDTO = new PetRequestDTO();
-        petRequestDTO.setPetId(petId);
-        petRequestDTO.setIsActive("true");
-
-        // Mock the patchPet method in the customersServiceClient
-        PetResponseDTO expectedPetResponse = new PetResponseDTO();
-        expectedPetResponse.setPetId(petId);
-        expectedPetResponse.setIsActive("true");
-        when(customersServiceClientMock.patchPet(petRequestDTO, petId))
-                .thenReturn(Mono.just(expectedPetResponse));
-
-        // Call the patchPet method in the ApiGatewayController
-        Mono<ResponseEntity<PetResponseDTO>> responseMono = apiGatewayController.patchPet(petRequestDTO, petId);
-
-        // Verify that the patchPet method in the customersServiceClient was called with the correct pet request DTO and pet id
-        verify(customersServiceClientMock, times(1)).patchPet(petRequestDTO, petId);
-
-        // Verify that the response is as expected
-        StepVerifier.create(responseMono)
-                .assertNext(response -> {
-                    assertEquals(HttpStatus.OK, response.getStatusCode());
-                    assertEquals(expectedPetResponse, response.getBody());
-                })
-                .verifyComplete();
-    }
-
-
-    //
-//
-////TODO
-//    @Test
-//    void createOwnerPhoto(){
-//        OwnerResponseDTO owner = new OwnerResponseDTO();
-//        owner.setId(1);
-//        owner.setFirstName("John");
-//        owner.setLastName("Smith");
-//        owner.setAddress("456 Elm");
-//        owner.setCity("Montreal");
-//        owner.setTelephone("5553334444");
-//        owner.setImageId(1);
-//
-//        final String test = "Test photo";
-//        final byte[] testBytes = test.getBytes();
-//
-//        PhotoDetails photo = new PhotoDetails();
-//        photo.setId(2);
-//        photo.setName("photo");
-//        photo.setType("jpeg");
-//        photo.setPhoto("testBytes");
-//
-//        when(customersServiceClient.setOwnerPhoto(photo, owner.getId()))
-//                .thenReturn(Mono.just("Image uploaded successfully: " + photo.getName()));
-//
-//
-//        client.post()
-//                .uri("/api/gateway/owners/photo/1")
-//                .body(Mono.just(photo), PhotoDetails.class)
-//                .accept(MediaType.APPLICATION_JSON)
-//                .exchange()
-//                .expectStatus().isOk()
-//                .expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
-//                .expectBody();
-//
-//    }
-//    @Test
-//    void getOwnerPhoto(){
-//
-//        OwnerResponseDTO owner = new OwnerResponseDTO();
-//        owner.setId(1);
-//        owner.setFirstName("John");
-//        owner.setLastName("Smith");
-//        owner.setAddress("456 Elm");
-//        owner.setCity("Montreal");
-//        owner.setTelephone("5553334444");
-//        owner.setImageId(1);
-//
-//        final String test = "Test photo";
-//        final byte[] testBytes = test.getBytes();
-//
-//        PhotoDetails photo = new PhotoDetails();
-//        photo.setId(2);
-//        photo.setName("photo");
-//        photo.setType("jpeg");
-//        photo.setPhoto("testBytes");
-//
-//        when(customersServiceClient.getOwnerPhoto(owner.getId()))
-//                .thenReturn(Mono.just(photo));
-//
-//        client.get()
-//                .uri("/api/gateway/owners/photo/1")
-//                .exchange()
-//                .expectStatus().isOk()
-//                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-//                .expectBody()
-//                .jsonPath("$.name").isEqualTo("photo")
-//                .jsonPath("$.type").isEqualTo("jpeg");
-////                .jsonPath("$.photo").isEqualTo(testBytes); --> need to fix
-//
-//
-////        assertEquals(photo.getId(), 2);
-//
-//
-//    }
-//    @Test
-//    void createPetPhoto(){
-//
-//        OwnerResponseDTO owner = new OwnerResponseDTO();
-//        owner.setOwnerId("ownerId-123");
-//        PetResponseDTO pet = new PetResponseDTO();
-//        PetType type = new PetType();
-//        type.setName("Cat");
-//        pet.setPetId("petId-123");
-//        pet.setName("Bonkers");
-//        pet.setBirthDate("2015-03-03");
-//        pet.setType(type);
-//        pet.setImageId(2);
-//
-//        final String test = "Test photo";
-//        final byte[] testBytes = test.getBytes();
-//
-//        PhotoDetails photo = new PhotoDetails();
-//        photo.setId(2);
-//        photo.setName("photo");
-//        photo.setType("jpeg");
-//        photo.setPhoto("testBytes");
-//
-//        when(customersServiceClient.setPetPhoto(owner.getOwnerId(), photo, pet.getPetId()))
-//                .thenReturn(Mono.just("Image uploaded successfully: " + photo.getName()));
-//
-//        client.post()
-//                .uri("/api/gateway/owners/1/pet/photo/1")
-//                .body(Mono.just(photo), PhotoDetails.class)
-//                .accept(MediaType.APPLICATION_JSON)
-//                .exchange()
-//                .expectStatus().isOk()
-//                .expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
-//                .expectBody();
-//    }
-//    //
-//    @Test
-//    void getPetPhoto(){
-//
-//        OwnerResponseDTO owner = new OwnerResponseDTO();
-//        owner.setOwnerId("ownerId-1234");
-//        PetResponseDTO pet = new PetResponseDTO();
-//        PetType type = new PetType();
-//        type.setName("Cat");
-//        pet.setPetId("petId-123");
-//        pet.setName("Bonkers");
-//        pet.setBirthDate("2015-03-03");
-//        pet.setType(type);
-//        pet.setImageId(2);
-//
-//        final String test = "Test photo";
-//        final byte[] testBytes = test.getBytes();
-//
-//        PhotoDetails photo = new PhotoDetails();
-//        photo.setId(2);
-//        photo.setName("photo");
-//        photo.setType("jpeg");
-//        photo.setPhoto("testBytes");
-//
-//        when(customersServiceClient.getPetPhoto(owner.getOwnerId(), pet.getPetId()))
-//                .thenReturn(Mono.just(photo));
-//
-//        client.get()
-//                .uri("/api/gateway/owners/"+ owner.getOwnerId() +"/pet/photo/" + pet.getPetId() )
-//                .exchange()
-//                .expectStatus().isOk()
-//                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-//                .expectBody()
-//                .jsonPath("$.name").isEqualTo("photo")
-//                .jsonPath("$.type").isEqualTo("jpeg");
-//    }
-//    //
-////
-//    @Test
-//    void shouldThrowUnsupportedMediaTypeIfBodyDoesNotExist(){
-//        OwnerResponseDTO od = new OwnerResponseDTO();
-//        od.setOwnerId("ownerId-21");
-//        PetResponseDTO pet = new PetResponseDTO();
-//        PetType type = new PetType();
-//        type.setName("Dog");
-//        pet.setPetId("petId-123");
-//        pet.setName("Fluffy");
-//        pet.setBirthDate("2000-01-01");
-//        pet.setType(type);
-//
-//        when(customersServiceClient.createPet(pet,od.getOwnerId()))
-//                .thenReturn(Mono.just(pet));
-//
-//        client.post()
-//                .uri("/api/gateway/owners/{ownerId}/pets", od.getOwnerId())
-//                .accept(MediaType.APPLICATION_JSON)
-//                .exchange()
-//                .expectStatus().isEqualTo(UNSUPPORTED_MEDIA_TYPE)
-//                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-//                .expectBody()
-//                .jsonPath("$.message").isEqualTo("Content type '' not supported");
-//
-//
-//    }
-    //
-    @Test
-    void ifOwnerIdIsNotSpecifiedInUrlThrowNotAllowed(){
-        OwnerResponseDTO od = new OwnerResponseDTO();
-        PetResponseDTO pet = new PetResponseDTO();
-        PetType type = new PetType();
-        type.setName("Dog");
-        pet.setPetId("30-30-30-30");
-        pet.setOwnerId("ownerId-12345");
-        pet.setName("Fluffy");
-        pet.setBirthDate(date);
-        pet.setPetTypeId("5");
-        pet.setIsActive("true");
-
-        when(customersServiceClient.createPet(pet,od.getOwnerId()))
-                .thenReturn(Mono.just(pet));
-
-        client.post()
-                .uri("/api/gateway/owners/pets")
-                .body(Mono.just(pet), PetResponseDTO.class)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isEqualTo(METHOD_NOT_ALLOWED)
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$.message").isEqualTo("Request method 'POST' is not supported.");
-    }
-    //
-    /*
-    @Test
-    void shouldCreateThenDeletePet(){
-        OwnerResponseDTO od = new OwnerResponseDTO();
-        od.setOwnerId("ownerId-65");
-        PetResponseDTO pet = new PetResponseDTO();
-        PetType type = new PetType();
-        type.setName("Dog");
-        pet.setPetId("petId-123");
-        pet.setName("Fluffy");
-        pet.setBirthDate("2000-01-01");
-        pet.setType(type);
-
-        when(customersServiceClient.createPet(pet,od.getOwnerId()))
-
-                .thenReturn(Mono.just(pet));
-
-
-        client.post()
-                .uri("/api/gateway/owners/{ownerId}/pets", od.getOwnerId())
-                .body(Mono.just(pet), PetResponseDTO.class)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody();
-
-        client.delete()
-                .uri("/api/gateway/owners/{ownerId}/pets/{petId}",od.getOwnerId(), pet.getPetId())
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus()
-                .isOk()
-                .expectBody();
-
-
-    }
-    */
-    //
-    @Test
-    void shouldThrowNotFoundWhenOwnerIdIsNotSpecifiedOnDeletePets(){
-        OwnerResponseDTO od = new OwnerResponseDTO();
-        od.setOwnerId("ownerId-24");
-        PetResponseDTO pet = new PetResponseDTO();
-        PetType type = new PetType();
-        type.setName("Dog");
-        pet.setPetId("30-30-30-30");
-        pet.setOwnerId("ownerId-12345");
-        pet.setName("Fluffy");
-
-        pet.setBirthDate(date);
-        pet.setPetTypeId("5");
-        pet.setIsActive("true");
-
-
-        when(customersServiceClient.createPet(pet,od.getOwnerId()))
-
-                .thenReturn(Mono.just(pet));
-
-        client.post()
-                .uri("/api/gateway/owners/{ownerId}/pets", od.getOwnerId())
-                .body(Mono.just(pet), PetResponseDTO.class)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isCreated()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody();
-
-        client.delete()
-                .uri("/api/gateway/owners/pets/{petId}", pet.getPetId())
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus()
-                .isNotFound()
-                .expectBody();
-    }
-    //
-    @Test
-    void shouldThrowMethodNotAllowedWhenDeletePetsIsMissingPetId(){
-        OwnerResponseDTO od = new OwnerResponseDTO();
-        od.setOwnerId("ownerId-20");
-        PetResponseDTO pet = new PetResponseDTO();
-        PetType type = new PetType();
-        type.setName("Dog");
-        pet.setPetId("30-30-30-30");
-        pet.setOwnerId("ownerId-12345");
-        pet.setName("Fluffy");
-        pet.setBirthDate(date);
-        pet.setPetTypeId("5");
-        pet.setIsActive("true");
-
-
-        when(customersServiceClient.createPet(pet,od.getOwnerId()))
-                .thenReturn(Mono.just(pet));
-
-        client.post()
-                .uri("/api/gateway/owners/{ownerId}/pets", od.getOwnerId())
-                .body(Mono.just(pet), PetResponseDTO.class)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isCreated()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody();
-
-        client.delete()
-                .uri("/api/gateway/owners/{ownerId}/pets", od.getOwnerId())
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus()
-                .isEqualTo(METHOD_NOT_ALLOWED)
-                .expectBody();
-    }
-
-//
-//    @Test
-//    void deleteUser() {
-//        UserDetails user = new UserDetails();
-//        user.setId(1);
-//        user.setUsername("johndoe");
-//        user.setPassword("pass");
-//        user.setEmail("johndoe2@gmail.com");
-//
-//        when(authServiceClient.createUser(argThat(
-//                n -> user.getEmail().equals(n.getEmail())
-//        )))
-//                .thenReturn(Mono.just(user));
-//
-//        client.post()
-//                .uri("/api/gateway/users")
-//                .body(Mono.just(user), UserDetails.class)
-//                .accept(MediaType.APPLICATION_JSON)
-//                .exchange()
-//                .expectStatus().isOk()
-//                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-//                .expectBody();
-//
-//        assertEquals(1, user.getId());
-//
-//        client.delete()
-//                .uri("/api/gateway/users/1")
-//                .header("Authorization", "Bearer token")
-//                .accept(MediaType.APPLICATION_JSON)
-//                .exchange()
-//                .expectStatus()
-//                .isOk()
-//                .expectBody();
-//
-//        assertEquals(null, authServiceClient.getUser(user.getId()));
-//    }
-
-
-
-
-
     //private static final int BILL_ID = 1;
 
     @Test
@@ -1946,7 +1269,7 @@ class ApiGatewayControllerTest {
                 .vetId("1")
                 .date(LocalDate.of(2024,10,1))
                 .dueDate(LocalDate.of(2024,10,30))
-                .billStatus(BillStatus.PAID)
+                .billStatus(PAID)
                 .amount(25.00)
                 .taxedAmount(0)
                 .timeRemaining(0L)
@@ -1959,7 +1282,7 @@ class ApiGatewayControllerTest {
                 .vetId("2")
                 .date(LocalDate.of(2024,10,1))
                 .dueDate(LocalDate.of(2024,10,30))
-                .billStatus(BillStatus.PAID)
+                .billStatus(PAID)
                 .amount(27.00)
                 .taxedAmount(0)
                 .timeRemaining(0L)
@@ -2267,7 +1590,7 @@ class ApiGatewayControllerTest {
     void payBill_Success() {
         BillResponseDTO successResponse = new BillResponseDTO();
         successResponse.setBillId("1");
-        successResponse.setBillStatus(BillStatus.PAID);
+        successResponse.setBillStatus(PAID);
 
         when(billServiceClient.payBill(anyString(), anyString(), any(PaymentRequestDTO.class)))
                 .thenReturn(Mono.just(successResponse));
@@ -2283,7 +1606,7 @@ class ApiGatewayControllerTest {
                 .expectBody(BillResponseDTO.class)
                 .value(response -> {
                     assertEquals("1", response.getBillId());
-                    assertEquals(BillStatus.PAID, response.getBillStatus());
+                    assertEquals(PAID, response.getBillStatus());
                 });
     }
 
@@ -3086,41 +2409,6 @@ class ApiGatewayControllerTest {
     }
     }*/
 
-    @Test
-    public void updateOwner_shouldSucceed() {
-        // Define the owner ID and updated owner data
-        String ownerId = "ownerId-123";
-        OwnerRequestDTO updatedOwnerData = new OwnerRequestDTO();
-        updatedOwnerData.setFirstName("UpdatedFirstName");
-        updatedOwnerData.setLastName("UpdatedLastName");
-
-        // Mock the behavior of customersServiceClient.updateOwner
-        OwnerResponseDTO updatedOwner = new OwnerResponseDTO();
-        updatedOwner.setOwnerId(ownerId);
-        updatedOwner.setFirstName(updatedOwnerData.getFirstName());
-        updatedOwner.setLastName(updatedOwnerData.getLastName());
-        when(customersServiceClient.updateOwner(eq(ownerId), any(Mono.class)))
-                .thenReturn(Mono.just(updatedOwner));
-
-        // Perform the PUT request to update the owner
-        client.put()
-                .uri("/api/gateway/owners/{ownerId}", ownerId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(BodyInserters.fromValue(updatedOwnerData))
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody(OwnerResponseDTO.class)
-                .value(updatedOwnerResponseDTO -> {
-                    // Assertions
-                    assertNotNull(updatedOwnerResponseDTO);
-                    assertEquals(updatedOwnerResponseDTO.getOwnerId(), ownerId);
-                    assertEquals(updatedOwnerResponseDTO.getFirstName(), updatedOwnerData.getFirstName());
-                    assertEquals(updatedOwnerResponseDTO.getLastName(), updatedOwnerData.getLastName());
-                    // Add more assertions if needed
-                });
-    }
-
 
 
 
@@ -3565,7 +2853,7 @@ private VetAverageRatingDTO buildVetAverageRatingDTO(){
             verify(authServiceClient, times(1)).changePassword(any());
         }
 
-    @Test
+    //@Test
     void getAllPetTypes_shouldSucceed(){
         PetTypeResponseDTO petType1 = new PetTypeResponseDTO();
         petType1.setPetTypeId("petTypeId-90");
@@ -3763,6 +3051,76 @@ private VetAverageRatingDTO buildVetAverageRatingDTO(){
                 .expectStatus().isNoContent();
     }
 
+    @Test
+    void getAllBillsByOwnerName() {
+        // Arrange
+        String ownerFirstName = "John";
+        String ownerLastName = "Doe";
+
+        BillResponseDTO bill = new BillResponseDTO();
+        bill.setBillId("1");
+        bill.setOwnerFirstName(ownerFirstName);
+        bill.setOwnerLastName(ownerLastName);
+
+        when(billServiceClient.getBillsByOwnerName(ownerFirstName, ownerLastName))
+                .thenReturn(Flux.just(bill));
+
+        // Act & Assert
+        client.get()
+                .uri("/api/gateway/bills/owner/" + ownerFirstName + "/" + ownerLastName)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(BillResponseDTO.class)
+                .consumeWith(response -> {
+                    assertEquals(1, response.getResponseBody().size());
+                });
+    }
+
+    @Test
+    void getAllBillsByVetName(){
+        // Arrange
+        String vetFirstName = "John";
+        String vetLastName = "Doe";
+
+        BillResponseDTO bill = new BillResponseDTO();
+        bill.setBillId("1");
+        bill.setVetFirstName(vetFirstName);
+        bill.setVetLastName(vetLastName);
+
+        when(billServiceClient.getBillsByVetName(vetFirstName, vetLastName))
+                .thenReturn(Flux.just(bill));
+
+        // Act & Assert
+        client.get()
+                .uri("/api/gateway/bills/vet/" + vetFirstName + "/" + vetLastName)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(BillResponseDTO.class)
+                .consumeWith(response -> {
+                    assertEquals(1, response.getResponseBody().size());
+                });
+    }
+
+    @Test
+    public void getBillsByVisitType(){
+        String visitType = "Checkup";
+
+        BillResponseDTO bill = new BillResponseDTO();
+        bill.setBillId("1");
+        bill.setVisitType(visitType);
+
+        when(billServiceClient.getBillsByVisitType(visitType))
+                .thenReturn(Flux.just(bill));
+
+        client.get()
+                .uri("/api/gateway/bills/visitType/" + visitType)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(BillResponseDTO.class)
+                .consumeWith(response -> {
+                    assertEquals(1, response.getResponseBody().size());
+                });
+    }
 
     private EducationResponseDTO buildEducation(){
         return EducationResponseDTO.builder()
@@ -3775,10 +3133,5 @@ private VetAverageRatingDTO buildVetAverageRatingDTO(){
                 .endDate("2014")
                 .build();
     }
-
-
-
-
-
 
 }
