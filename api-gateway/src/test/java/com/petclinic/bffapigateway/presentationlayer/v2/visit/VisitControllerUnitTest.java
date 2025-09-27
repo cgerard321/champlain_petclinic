@@ -190,7 +190,7 @@ public class VisitControllerUnitTest {
     void whenAddVisit_asAdmin_thenReturnCreatedVisitDTO() {
         // Arrange
         VisitRequestDTO newVisitRequestDTO = VisitRequestDTO.builder()
-                .visitDate(LocalDateTime.of(2023, 10, 10, 10, 0))
+                .visitDate(LocalDateTime.of(2030, 10, 10, 10, 0))
                 .description("Routine check-up")
                 .petId("P001")
                 .practitionerId("PR001")

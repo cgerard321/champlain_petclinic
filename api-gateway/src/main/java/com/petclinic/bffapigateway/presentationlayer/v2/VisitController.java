@@ -28,6 +28,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.io.ByteArrayInputStream;
+import java.time.LocalDateTime;
 
 @RestController
 @RequiredArgsConstructor
@@ -55,11 +56,41 @@ public class VisitController {
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @PostMapping(value = "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<VisitResponseDTO>> addVisit(@RequestBody Mono<VisitRequestDTO> visitResponseDTO) {
-        return visitsServiceClient.addVisit(visitResponseDTO)
-                .map(v -> ResponseEntity.status(HttpStatus.CREATED).body(v))
-                .defaultIfEmpty(ResponseEntity.badRequest().build());
-        }
+    public Mono<ResponseEntity<VisitResponseDTO>> addVisit(@RequestBody Mono<VisitRequestDTO> visitRequestDTOMono) {
+        return visitRequestDTOMono
+                .flatMap(visitRequest -> {
+                    // Validate visitDate
+                    if (visitRequest.getVisitDate() == null) {
+                        return Mono.error(new InvalidInputException("Visit date is required."));
+                    }
+
+                    LocalDateTime now = LocalDateTime.now();
+                    if (!visitRequest.getVisitDate().isAfter(now)) {
+                        return Mono.error(new InvalidInputException("Visit date must be in the future."));
+                    }
+
+                    // Validate description
+                    if (visitRequest.getDescription() == null || visitRequest.getDescription().isBlank()) {
+                        return Mono.error(new InvalidInputException("Description is required."));
+                    }
+
+                    // Validate petId
+                    if (visitRequest.getPetId() == null || visitRequest.getPetId().isBlank()) {
+                        return Mono.error(new InvalidInputException("Pet ID is required."));
+                    }
+
+                    // Validate practitionerId
+                    if (visitRequest.getPractitionerId() == null || visitRequest.getPractitionerId().isBlank()) {
+                        return Mono.error(new InvalidInputException("Practitioner ID is required."));
+                    }
+
+                    return visitsServiceClient.addVisit(Mono.just(visitRequest))
+                            .map(v -> ResponseEntity.status(HttpStatus.CREATED).body(v));
+                })
+                .onErrorResume(InvalidInputException.class, ex ->
+                        Mono.just(ResponseEntity.badRequest().body(null))
+                );
+    }
 
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})

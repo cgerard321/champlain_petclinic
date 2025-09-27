@@ -55,7 +55,11 @@ const AddingVisit: React.FC = (): JSX.Element => {
   const validate = (): boolean => {
     const newErrors: { [key: string]: string } = {};
     if (!visit.petId) newErrors.petId = 'Pet ID is required';
-    if (!visit.visitStartDate) newErrors.visitDate = 'Visit date is required';
+    if (!visit.visitStartDate) {
+      newErrors.visitStartDate = 'Visit date is required';
+    } else if (visit.visitStartDate <= new Date()) {
+      newErrors.visitStartDate = 'Visit date must be in the future';
+    }
     if (!visit.description) newErrors.description = 'Description is required';
     if (!visit.practitionerId)
       newErrors.practitionerId = 'Practitioner ID is required';
@@ -124,6 +128,7 @@ const AddingVisit: React.FC = (): JSX.Element => {
           value={formatDate(visit.visitStartDate)}
           onChange={handleChange}
           required
+          min={formatDate(new Date())}
         />
         {errors.visitStartDate && (
           <span className="error">{errors.visitStartDate}</span>
