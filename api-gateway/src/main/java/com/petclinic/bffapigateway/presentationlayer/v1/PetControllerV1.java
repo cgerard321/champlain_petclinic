@@ -3,7 +3,6 @@ package com.petclinic.bffapigateway.presentationlayer.v1;
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
 import com.petclinic.bffapigateway.dtos.Pets.PetTypeRequestDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetTypeResponseDTO;
-import com.petclinic.bffapigateway.utils.Security.Annotations.IsUserSpecific;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +32,7 @@ public class PetControllerV1 {
                 );*/
     }
 
-    @IsUserSpecific(idToMatch = {"petTypeId"}, bypassRoles = {Roles.ALL})
+    @SecuredEndpoint(allowedRoles = {Roles.ALL})
     @GetMapping(value = "/{petTypeId}")
     public Mono<ResponseEntity<PetTypeResponseDTO>> getPetTypeById(final @PathVariable String petTypeId) {
         return customersServiceClient.getPetTypeByPetTypeId(petTypeId)
@@ -54,7 +53,7 @@ public class PetControllerV1 {
     }
 
 
-    @IsUserSpecific(idToMatch = {"petTypeId"})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET, Roles.OWNER})
     @PutMapping("/{petTypeId}")
     public Mono<ResponseEntity<PetTypeResponseDTO>> updatePetType(
             @PathVariable String petTypeId,
