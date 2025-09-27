@@ -3,7 +3,7 @@ import { FormEvent, useState } from 'react';
 import { addPetForOwner } from '../api/addPetForOwner';
 import { PetRequestModel } from '../models/PetRequestModel';
 import { useNavigate, useParams } from 'react-router-dom';
-import './AddPetForm.css';
+import './customers.css';
 
 const petTypeOptions: { [key: string]: string } = {
   '1': 'Cat',
@@ -28,8 +28,9 @@ const AddPetForm: React.FC = (): JSX.Element => {
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [successMessage, setSuccessMessage] = useState<string>('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+      e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ): void => {
     const { name, type, value } = e.target;
     if (type === 'checkbox') {
@@ -51,7 +52,6 @@ const AddPetForm: React.FC = (): JSX.Element => {
     }
   };
 
-  // Form validation
   const validate = (): boolean => {
     const newErrors: { [key: string]: string } = {};
     if (!pet?.name) newErrors.name = 'Name is required';
@@ -61,9 +61,8 @@ const AddPetForm: React.FC = (): JSX.Element => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Handle form submission
   const handleSubmit = async (
-    event: FormEvent<HTMLFormElement>
+      event: FormEvent<HTMLFormElement>
   ): Promise<void> => {
     event.preventDefault();
     if (!validate() || !ownerId) return;
@@ -80,78 +79,107 @@ const AddPetForm: React.FC = (): JSX.Element => {
     }
   };
 
-  // Modal handlers
   const closeAddModal = (): void => {
     setIsAddModalOpen(false);
     navigate(`/customers/${ownerId}`);
   };
 
   return (
-    <div className="add-pet-form">
-      <h1>Add New Pet</h1>
-      <form onSubmit={handleSubmit}>
-        <label>Name: </label>
-        <input
-          type="text"
-          name="name"
-          value={pet.name}
-          onChange={handleChange}
-        />
-        {errors.name && <span className="error">{errors.name}</span>}
-        <br />
-
-        <label>Pet Type: </label>
-        <select name="petTypeId" value={pet.petTypeId} onChange={handleChange}>
-          <option value="">Select a pet type</option>
-          {Object.entries(petTypeOptions).map(([id, name]) => (
-            <option key={id} value={id}>
-              {name}
-            </option>
-          ))}
-        </select>
-        {errors.petTypeId && <span className="error">{errors.petTypeId}</span>}
-        <br />
-
-        <label>Birth Date: </label>
-        <input
-          type="date"
-          name="birthDate"
-          value={pet.birthDate.toISOString().split('T')[0]}
-          onChange={handleChange}
-        />
-        <br />
-
-        <label>Weight (kg): </label>
-        <input
-          type="text"
-          name="weight"
-          value={pet.weight}
-          onChange={handleChange}
-        />
-        {errors.weight && <span className="error">{errors.weight}</span>}
-        <br />
-
-        <button type="submit">Add Pet</button>
-        <button
-          type="button"
-          onClick={() => navigate(`/customers/${ownerId}`)}
-          className={'cancel-form-button'}
-        >
-          Cancel
-        </button>
-      </form>
-      {successMessage && <p className="success">{successMessage}</p>}
-
-      {isAddModalOpen && (
-        <div className="pet-add-modal-overlay">
-          <div className="pet-add-modal">
-            <h2>Success!</h2>
-            <p>Pet has been successfully added.</p>
-            <button onClick={closeAddModal}>Close</button>
+      <div className="form-container">
+        <h1>Add New Pet</h1>
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label>Name</label>
+            <input
+                type="text"
+                name="name"
+                value={pet.name}
+                onChange={handleChange}
+                className={errors.name ? 'error-input' : ''}
+            />
+            {errors.name && <span className="error-message">{errors.name}</span>}
           </div>
-        </div>
-      )}
-    </div>
+
+          <div className="form-group">
+            <label>Pet Type</label>
+            <select
+                name="petTypeId"
+                value={pet.petTypeId}
+                onChange={handleChange}
+                className={errors.petTypeId ? 'error-input' : ''}
+            >
+              <option value="">Select a pet type</option>
+              {Object.entries(petTypeOptions).map(([id, name]) => (
+                  <option key={id} value={id}>
+                    {name}
+                  </option>
+              ))}
+            </select>
+            {errors.petTypeId && (
+                <span className="error-message">{errors.petTypeId}</span>
+            )}
+          </div>
+
+          <div className="form-group">
+            <label>Birth Date</label>
+            <input
+                type="date"
+                name="birthDate"
+                value={pet.birthDate.toISOString().split('T')[0]}
+                onChange={handleChange}
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Weight (kg)</label>
+            <input
+                type="text"
+                name="weight"
+                value={pet.weight}
+                onChange={handleChange}
+                className={errors.weight ? 'error-input' : ''}
+            />
+            {errors.weight && (
+                <span className="error-message">{errors.weight}</span>
+            )}
+          </div>
+
+          <div className="form-group" style={{ textAlign: 'center' }}>
+            <button type="submit" className="button-base primary-button">
+              Add Pet
+            </button>
+            <button
+                type="button"
+                onClick={() => navigate(`/customers/${ownerId}`)}
+                className="button-base secondary-button mt-2"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+
+        {successMessage && <p className="error-message">{successMessage}</p>}
+
+        {isAddModalOpen && (
+            <div className="modal-overlay">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h2>Success!</h2>
+                  <button className="modal-close" onClick={closeAddModal}>
+                    &times;
+                  </button>
+                </div>
+                <p>Pet has been successfully added.</p>
+                <button
+                    onClick={closeAddModal}
+                    className="button-base primary-button mt-4"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+        )}
+      </div>
   );
 };
 

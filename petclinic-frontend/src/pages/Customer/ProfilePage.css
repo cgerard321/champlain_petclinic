@@ -1,188 +1,168 @@
+/* This is the CSS for the profile page */
 .container-profile {
+  min-height: 100vh;
+  padding: 60px 40px;
+  background-color: #f8f9fb;
   display: flex;
   justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  background-color: #f4f4f4;
 }
+
 
 .profile-card {
-  background-color: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-  padding: 40px;
-  margin: 40px auto;
-  max-width: 900px;
-  text-align: left;
+  width: 100%;
+  max-width: 1100px;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 40px 60px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
 }
 
-h1 {
-  font-size: 2.5rem !important;
-  color: #333;
-  text-align: center;
-  margin-bottom: 20px;
+.profile-card h1 {
+  font-size: 1.8rem;
+  color: #2e2e2e;
+  margin: 0;
+  font-weight: 600;
+}
+
+/* user info area */
+.profile-info {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px 40px;
 }
 
 .profile-info p {
-  font-size: 1.2rem;
-  margin: 15px 0;
-  color: #555;
+  margin: 0;
+  font-size: 0.95rem;
+  color: #4a4a4a;
+  display: flex;
+  flex-direction: column;
 }
 
 .profile-info strong {
-  color: #333;
+  font-size: 0.85rem;
+  color: #6b6b6b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
 }
 
-.section {
-  background-color: #f8f9fa;
-  border-radius: 8px;
-  padding: 20px;
-  margin: 15px 0;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  transition:
-    transform 0.3s,
-    box-shadow 0.3s;
-}
-
-.section:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-}
-
-.section h3 {
-  color: #007bff;
-  margin-bottom: 15px;
-  font-size: 1.5em;
-}
-
-.section p {
-  color: #555;
-  font-size: 1.1em;
-}
-
+/* Pets section header with button */
 .pets-section {
-  margin-top: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
 .pets-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
 }
 
-.pets-section h3 {
-  font-size: 1.8rem;
-  color: #007bff;
+.pets-header h3 {
+  font-size: 1.4rem;
+  color: #2e2e2e;
   margin: 0;
 }
 
 .add-pet-button {
-  background-color: #4caf50;
-  color: white;
+  background-color: #2563eb;
+  color: #fff;
   border: none;
-  padding: 10px 20px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
+  padding: 10px 22px;
+  border-radius: 8px;
+  font-size: 0.9rem;
   font-weight: 600;
-  transition: all 0.3s ease;
+  cursor: pointer;
+  transition: background-color 0.25s, transform 0.2s;
 }
 
 .add-pet-button:hover {
-  background-color: #45a049;
+  background-color: #1d4ed8;
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
+/* grid of pet cards, to have a grid look and prettier */
 .pets-list {
   display: grid;
-  gap: 15px;
-  margin-top: 15px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
 }
 
 .pet-card {
-  background: #f8f9fa;
-  border: 1px solid #e9ecef;
-  border-radius: 8px;
-  padding: 20px;
-  transition: all 0.3s ease;
+  background: #f3f4f6;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  transition: box-shadow 0.2s, transform 0.2s;
 }
 
 .pet-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  border-color: #4caf50;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.08);
 }
 
 .pet-name {
-  color: #333;
-  font-size: 1.3rem;
-  margin: 0 0 10px 0;
+  font-size: 1.1rem;
   font-weight: 600;
+  color: #111827;
+  margin-bottom: 8px;
 }
 
 .pet-details {
   display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
-}
-
-.pet-detail {
-  font-size: 1rem;
-  color: #555;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.95rem;
+  color: #4b5563;
 }
 
 .pet-detail strong {
-  color: #333;
   font-weight: 600;
+  color: #374151;
 }
 
+/* when there are no pets */
 .no-pets {
   text-align: center;
-  padding: 40px 20px;
-  background: #f8f9fa;
-  border-radius: 8px;
-  border: 2px dashed #ddd;
-}
-
-.no-pets p {
-  font-size: 1.1rem;
-  color: #666;
-  margin: 10px 0;
+  padding: 40px;
+  border: 2px dashed #d1d5db;
+  border-radius: 12px;
+  background: #f9fafb;
+  color: #6b7280;
 }
 
 .no-pets-subtitle {
-  font-size: 1rem !important;
-  color: #999 !important;
+  font-size: 0.9rem;
+  color: #9ca3af;
 }
 
+/* modify profile button */
 .updateButton {
-  background-color: #28a745;
-  color: white;
-  padding: 12px 20px;
+  align-self: flex-end;
+  background-color: #2563eb;
+  color: #fff;
   border: none;
-  border-radius: 6px;
-  font-size: 1.1rem;
+  padding: 12px 30px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
   cursor: pointer;
-  transition:
-    background-color 0.3s,
-    transform 0.3s;
-  margin-top: 30px;
-  display: block;
-  width: 100%;
-  text-align: center;
+  transition: background-color 0.25s, transform 0.2s;
 }
 
 .updateButton:hover {
-  background-color: #218838;
+  background-color: #1d4ed8;
   transform: translateY(-2px);
 }
 
-.delete-button {
-  background-color: #dc3545;
-}
-
-.delete-button:hover {
-  background-color: #c82333;
+/* makes it responsive */
+@media (max-width: 768px) {
+  .profile-info {
+    grid-template-columns: 1fr;
+  }
 }
