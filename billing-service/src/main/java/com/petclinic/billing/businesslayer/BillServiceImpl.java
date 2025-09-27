@@ -138,17 +138,25 @@ public class BillServiceImpl implements BillService{
 
     @Override
     public Mono<BillResponseDTO> createBill(Mono<BillRequestDTO> billRequestDTO) {
+        return billRequestDTO
+                .flatMap(dto -> {
+                    // Validate required fields
+                    if (dto.getBillStatus() == null) {
+                        return Mono.error(new ResponseStatusException(
+                                HttpStatus.BAD_REQUEST, "Bill status is required"
+                        ));
+                    }
 
-            return billRequestDTO
-//                    .map(RequestContextAdd::new)
-//                    .flatMap(this::vetRequestResponse)
-//                    .flatMap(this::ownerRequestResponse)
-//                    .map(EntityDtoUtil::toBillEntityRC)
-                    .map(EntityDtoUtil::toBillEntity)
-                    .doOnNext(e -> e.setBillId(EntityDtoUtil.generateUUIDString()))
-                    .flatMap(billRepository::insert)
-                    .map(EntityDtoUtil::toBillResponseDto);
+
+                    // Add more field checks if needed
+                    return Mono.just(dto);
+                })
+                .map(EntityDtoUtil::toBillEntity)
+                .doOnNext(e -> e.setBillId(EntityDtoUtil.generateUUIDString()))
+                .flatMap(billRepository::insert)
+                .map(EntityDtoUtil::toBillResponseDto);
     }
+
 
 
     @Override
