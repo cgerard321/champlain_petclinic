@@ -6,7 +6,7 @@ export default async function addInventory(
 ): Promise<void> {
   try {
     // Append the appropriate endpoint for adding an inventory
-    await axiosInstance.post<void>('/inventory', inventoryData, {
+    await axiosInstance.post<void>('/inventories', inventoryData, {
       useV2: false,
     });
   } catch (error) {

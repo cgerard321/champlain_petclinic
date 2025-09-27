@@ -5,7 +5,7 @@ angular.module('inventoryForm', ['ui.router'])
         $stateProvider
             .state('inventoryNew', {
                 parent: 'app',
-                url: '/inventory/new',
+                url: '/inventories/new',
                 template: '<inventory-form></inventory-form>'
             })
 
