@@ -52,7 +52,7 @@ const UpdatePetForm: React.FC = (): JSX.Element => {
     fetchPetData().catch(error =>
       console.error('Error in fetchPetData:', error)
     );
-  }, [petId]);
+  }, [petId, ownerId]);
 
   // Handle form field changes
   const handleChange = (
