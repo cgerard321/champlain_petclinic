@@ -2,7 +2,6 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { NavBar } from '@/layouts/AppNavBar.tsx';
 import './VetDetails.css';
-import axios from 'axios';
 import axiosInstance from '@/shared/api/axiosInstance';
 import DeleteVetPhoto from '@/pages/Vet/DeleteVetPhoto.tsx';
 import UpdateVetEducation from '@/pages/Vet/UpdateVetEducation';
