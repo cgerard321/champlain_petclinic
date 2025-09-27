@@ -17,7 +17,7 @@ public class MailServiceImpl implements MailService {
     private final MailServiceCall mailServiceCall;
 
     @Override
-    public String sendMail(NewMail mail) {
+    public String sendMail(Mail mail) {
         try {
             Response<String> execute = mailServiceCall.sendMail(mail).execute();
             if (execute.code() == 400) {

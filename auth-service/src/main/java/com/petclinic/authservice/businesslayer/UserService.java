@@ -27,7 +27,7 @@ package com.petclinic.authservice.businesslayer;
 import com.petclinic.authservice.Util.Exceptions.IncorrectPasswordException;
 import com.petclinic.authservice.Util.Exceptions.NotFoundException;
 import com.petclinic.authservice.datalayer.user.User;
-import com.petclinic.authservice.domainclientlayer.Mail.NewMail;
+import com.petclinic.authservice.domainclientlayer.Mail.Mail;
 import com.petclinic.authservice.presentationlayer.User.*;
 
 import java.util.HashMap;
@@ -45,7 +45,7 @@ public interface UserService {
 
 //    NewMail generateVerificationMail(User user);
 
-    NewMail generateVerificationMail(User user);
+    Mail generateVerificationMail(User user);
 
     UserPasswordLessDTO verifyEmailFromToken(String token);
 

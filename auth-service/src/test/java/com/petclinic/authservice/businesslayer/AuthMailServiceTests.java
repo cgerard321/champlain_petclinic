@@ -4,7 +4,7 @@ package com.petclinic.authservice.businesslayer;
 import com.petclinic.authservice.domainclientlayer.Mail.MailService;
 
 import com.petclinic.authservice.domainclientlayer.Mail.MailServiceCall;
-import com.petclinic.authservice.domainclientlayer.Mail.NewMail;
+import com.petclinic.authservice.domainclientlayer.Mail.Mail;
 import okhttp3.MediaType;
 import okhttp3.ResponseBody;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,11 +35,11 @@ public class AuthMailServiceTests {
     @MockBean
     private MailServiceCall mockMailCall;
 
-    private final NewMail
-            EMAIL_VALID = new NewMail("jeremy.roos@champlaincollege.com", "Test-email",
+    private final Mail
+            EMAIL_VALID = new Mail("jeremy.roos@champlaincollege.com", "Test-email",
             "test-message", "Test-header","Test body, words are wording and wording 6 7"
             , "Test-Footer", "Test-Name", "Test Sender name" ),
-            EMAIL_EMPTY_INVALID = new NewMail();
+            EMAIL_EMPTY_INVALID = new Mail();
     public final MediaType JSON
             = MediaType.parse("application/json; charset=utf-8");
 

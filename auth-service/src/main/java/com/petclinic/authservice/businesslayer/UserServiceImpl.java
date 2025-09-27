@@ -12,7 +12,7 @@ import com.petclinic.authservice.Util.Exceptions.*;
 import com.petclinic.authservice.datalayer.roles.Role;
 import com.petclinic.authservice.datalayer.roles.RoleRepo;
 import com.petclinic.authservice.datamapperlayer.UserMapper;
-import com.petclinic.authservice.domainclientlayer.Mail.NewMail;
+import com.petclinic.authservice.domainclientlayer.Mail.Mail;
 import com.petclinic.authservice.domainclientlayer.Mail.MailService;
 import com.petclinic.authservice.domainclientlayer.cart.CartService;
 import com.petclinic.authservice.presentationlayer.User.*;
@@ -142,7 +142,7 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public NewMail generateVerificationMail(User user) {
+    public Mail generateVerificationMail(User user) {
         final String base64Token = Base64.getEncoder()
                 .withoutPadding()
                 .encodeToString(jwtService.generateToken(user).getBytes(StandardCharsets.UTF_8));
@@ -152,7 +152,7 @@ public class UserServiceImpl implements UserService {
 
         String formatedLink = format("<a class=\"email-button\" href=\"%s://%s%s/verification/%s\">Verify Email</a>", gatewayProtocol, niceSub, gatewayOrigin, base64Token);
 
-        return new NewMail(
+        return new Mail(
                 user.getEmail(), "Verification Email", "Default", "Pet clinic - Verification Email",
                 "Thank you for Signing Up with us.\n" +
                         "We have received a request to create an account for Pet Clinic from this email.\n\n" +
@@ -347,7 +347,7 @@ public class UserServiceImpl implements UserService {
     public void sendEmailForgotPassword(String recipientEmail, String link){
 
 
-        NewMail newMail = new NewMail(
+        Mail newMail = new Mail(
                 recipientEmail, "Password Reset", "Default", "Reset Your Password - Verification Code",
                 "Click on the following link to access the password reset page: " + link
                         + "Follow the on-screen instructions to create a new password for your account."
