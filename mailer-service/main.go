@@ -2,10 +2,12 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/gin-gonic/gin"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
-	_ "mailer-service/docs"
+
+	// _ "mailer-service/docs"
 	"mailer-service/mailer"
 	"mailer-service/mailer/controller"
 	"mailer-service/mailer/service"

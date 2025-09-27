@@ -2,9 +2,10 @@ package controller
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"mailer-service/mailer"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 type MailerControllerImpl struct {
@@ -44,7 +45,7 @@ func (m MailerControllerImpl) handleMailPOST(context *gin.Context) {
 		return
 	}
 
-	context.IndentedJSON(http.StatusOK, fmt.Sprintf("Message sent to %s", mail.To))
+	context.IndentedJSON(http.StatusOK, fmt.Sprintf("Message sent to %s", mail.EmailSendTo))
 }
 
 func (m MailerControllerImpl) Routes(engine *gin.Engine) error {
