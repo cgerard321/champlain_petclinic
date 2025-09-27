@@ -7,7 +7,6 @@ import AddProduct from './components/AddProduct';
 import { addProduct } from '@/features/products/api/addProduct';
 import { useUser } from '@/context/UserContext';
 import './components/Sidebar.css';
-//import { getProductsByType } from '@/features/products/api/getProductsByType.ts';
 import { addImage } from './api/addImage';
 import { ImageModel } from './models/ProductModels/ImageModel';
 import StarRating from '@/features/products/components/StarRating.tsx';
@@ -17,7 +16,13 @@ import { getAllProductBundles } from './api/getAllProductBundles';
 import { ProductBundleModel } from './models/ProductModels/ProductBundleModel';
 import ProductBundle from './components/ProductBundle';
 
-export default function ProductList(): JSX.Element {
+interface ProductsListProps {
+  searchQuery: string;
+}
+
+export default function ProductList({
+  searchQuery,
+}: ProductsListProps): JSX.Element {
   const [productList, setProductList] = useState<ProductModel[]>([]);
   const [bundleList, setBundleList] = useState<ProductBundleModel[]>([]);
   const [minPrice, setMinPrice] = useState<number | undefined>(undefined);
@@ -36,6 +41,7 @@ export default function ProductList(): JSX.Element {
   const [validationMessage, setValidationMessage] = useState<string>('');
   const [deliveryType, setDeliveryType] = useState<string>('');
   const [productType, setProductType] = useState<string>('');
+  const [filteredList, setFilteredList] = useState<ProductModel[]>([]);
 
   const validationStars = async (
     minStars: number,
@@ -51,7 +57,6 @@ export default function ProductList(): JSX.Element {
   };
 
   function FilterByPriceErrorHandling(): void {
-    // Validate inputs for filter by price
     if (
       minPrice !== undefined &&
       maxPrice !== undefined &&
@@ -77,18 +82,16 @@ export default function ProductList(): JSX.Element {
         );
         const filteredList = list.filter(product => !product.isUnlisted);
         setProductList(filteredList);
+        setFilteredList(filteredList);
       }
-      // } else {
-      //   const filteredList = await getProductsByType(filterType);
-      //   setProductList(filteredList);
-      // }
     } catch (err) {
       console.error('Error fetching products:', err);
       setProductList([]);
+      setFilteredList([]);
     } finally {
       setIsLoading(false);
     }
-    // Fetch product bundles
+
     try {
       const bundles = await getAllProductBundles();
       setBundleList(bundles);
@@ -105,8 +108,6 @@ export default function ProductList(): JSX.Element {
     if (savedProducts) {
       setRecentlyClickedProducts(JSON.parse(savedProducts));
     }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -115,6 +116,18 @@ export default function ProductList(): JSX.Element {
       Array.from(user.roles).some(role => role.name === 'ADMIN');
     setIsRightRole(hasRightRole);
   }, [user]);
+
+  useEffect(() => {
+    if (searchQuery === '') {
+      setFilteredList(productList);
+    } else {
+      setFilteredList(
+        productList.filter(product =>
+          product.productName.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+      );
+    }
+  }, [searchQuery, productList]);
 
   const handleAddImage = async (formData: FormData): Promise<ImageModel> => {
     try {
@@ -166,26 +179,22 @@ export default function ProductList(): JSX.Element {
       const updatedProducts = listOfProducts.filter(
         currentProduct => currentProduct.productId !== product.productId
       );
-
       updatedProducts.unshift(product);
-
       if (updatedProducts.length > 5) {
         updatedProducts.pop();
       }
-
       localStorage.setItem(
         `recentlyClickedProducts_${user.userId}`,
         JSON.stringify(updatedProducts)
       );
-
       return updatedProducts;
     });
   };
+
   const RecentlyViewedProducts = (): JSX.Element => (
     <div className="recently-viewed-container">
       <h2>Recently Seen</h2>
       <div className="recently-viewed-flex">
-        {' '}
         {recentlyClickedProducts.length > 0 ? (
           recentlyClickedProducts
             .filter(product => !product.isUnlisted)
@@ -327,44 +336,46 @@ export default function ProductList(): JSX.Element {
       {isRightRole && (
         <AddProduct addProduct={handleAddProduct} addImage={handleAddImage} />
       )}
+
       <div className="main-content">
-        <div className="product-bundle-container">
-          <h2>Bundles</h2>
-          <div className="grid product-bundles-grid">
-            {bundleList.length > 0 ? (
-              bundleList.map((bundle: ProductBundleModel) => (
-                <ProductBundle key={bundle.bundleId} bundle={bundle} />
-              ))
-            ) : (
-              <p>No Bundles Available.</p>
-            )}
-          </div>
-        </div>
-        <div>
-          <hr />
-        </div>
+        {!searchQuery && (
+          <>
+            <div className="product-bundle-container">
+              <h2>Bundles</h2>
+              <div className="grid product-bundles-grid">
+                {bundleList.length > 0 ? (
+                  bundleList.map(bundle => (
+                    <ProductBundle key={bundle.bundleId} bundle={bundle} />
+                  ))
+                ) : (
+                  <p>No Bundles Available.</p>
+                )}
+              </div>
+            </div>
+
+            <div>
+              <hr />
+            </div>
+          </>
+        )}
+
         <div className="list-container">
           <h2>Catalog</h2>
           {!isSidebarOpen && (
-            <button
-              className="toggle-sidebar-button"
-              onClick={toggleSidebar}
-              aria-expanded={isSidebarOpen}
-              aria-controls="sidebar"
-            >
+            <button className="toggle-sidebar-button" onClick={toggleSidebar}>
               &#9776; Filters
             </button>
           )}
           <div className="grid">
             {isLoading ? (
               <p>Loading items...</p>
-            ) : productList.length > 0 ? (
-              productList.map((product: ProductModel) => (
+            ) : filteredList.length > 0 ? (
+              filteredList.map(product => (
                 <div
                   key={product.productId}
                   onClick={() => handleProductClick(product)}
                 >
-                  <Product key={product.productId} product={product} />
+                  <Product product={product} />
                 </div>
               ))
             ) : (
@@ -375,7 +386,7 @@ export default function ProductList(): JSX.Element {
         <div>
           <hr />
         </div>
-        <RecentlyViewedProducts />
+        {!searchQuery && <RecentlyViewedProducts />}
       </div>
     </div>
   );
