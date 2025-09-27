@@ -79,6 +79,7 @@ const UserCart = (): JSX.Element => {
       (acc, item) => acc + (item.quantity || 0),
       0
     );
+    setCartItemCount(count);
   }, [cartItems]);
 
   // Fetch cart items when cartId or wishlistUpdated changes
@@ -98,7 +99,6 @@ const UserCart = (): JSX.Element => {
         if (!Array.isArray(data.products)) {
           throw new Error('Invalid data format: products should be an array');
         }
-
 
         // map API payload to ProductModel
         const products: ProductModel[] = data.products.map(
