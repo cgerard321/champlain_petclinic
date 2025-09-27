@@ -14,7 +14,7 @@ import (
 )
 
 var defaultData = []datalayer.FileInfo{
-	{"3e5a214b-009d-4a25-9313-344676e6157d", "54746305265_48e2332383_c.jpg", "image"},
+	{"3e5a214b-009d-4a25-9313-344676e6157d", "petclinic-base-image.jpg", "image"},
 }
 
 func SetupDatabase(db *sql.DB) {

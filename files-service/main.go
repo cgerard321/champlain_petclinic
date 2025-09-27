@@ -10,14 +10,12 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/gin-gonic/gin"
-	"github.com/minio/minio-go/v7/pkg/credentials"
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
-
 	"files-service/files/businesslayer"
 	"files-service/files/presentationlayer"
 	"os"
+
+	"github.com/gin-gonic/gin"
+	"github.com/minio/minio-go/v7/pkg/credentials"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/minio/minio-go/v7"
@@ -36,8 +34,6 @@ func main() {
 
 	engine := gin.Default()
 	defer engine.Run(":8000")
-
-	engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	endpoint := os.Getenv("FILE_ENDPOINT")
 	accessKeyID := os.Getenv("FILE_ACCESS_KEY_ID")

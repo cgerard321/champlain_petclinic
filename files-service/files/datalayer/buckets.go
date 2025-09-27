@@ -1,5 +1,5 @@
 package datalayer
 
 var Buckets = map[string]string{
-	"image": /*"pet-clinic-images"*/ "test-bucket",
+	"image": /*"pet-clinic-images"*/ "petclinic-images",
 }
