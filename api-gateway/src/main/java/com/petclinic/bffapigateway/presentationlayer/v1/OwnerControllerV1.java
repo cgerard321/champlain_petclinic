@@ -159,13 +159,6 @@ public class OwnerControllerV1 {
         );
     }
 
-
-
-
-
-
-
-
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @DeleteMapping(value = "/{ownerId}")
     public Mono<ResponseEntity<OwnerResponseDTO>> deleteOwner(@PathVariable String ownerId){
