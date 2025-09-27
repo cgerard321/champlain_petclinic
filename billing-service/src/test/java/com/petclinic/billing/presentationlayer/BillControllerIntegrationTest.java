@@ -1,15 +1,23 @@
 package com.petclinic.billing.presentationlayer;
 
+import com.petclinic.billing.businesslayer.BillService;
 import com.petclinic.billing.datalayer.*;
+import com.petclinic.billing.exceptions.NotFoundException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static reactor.core.publisher.Mono.just;
 
 import java.time.Duration;
@@ -31,6 +39,9 @@ class BillControllerIntegrationTest {
 
     @Autowired
     private BillRepository repo;
+
+    @MockBean
+    private BillService billService;
 
     @Test
     void getBillByValidBillID() {
@@ -73,7 +84,7 @@ class BillControllerIntegrationTest {
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE+";charset=UTF-8")
+                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE + ";charset=UTF-8")
                 .expectBodyList(Bill.class)
                 .consumeWith(response -> {
                     List<Bill> bills = response.getResponseBody();
@@ -257,7 +268,7 @@ class BillControllerIntegrationTest {
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE+";charset=UTF-8")
+                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE + ";charset=UTF-8")
                 .expectBodyList(Bill.class)
                 .consumeWith(response -> {
                     List<Bill> bills = response.getResponseBody();
@@ -282,7 +293,7 @@ class BillControllerIntegrationTest {
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE+";charset=UTF-8")
+                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE + ";charset=UTF-8")
                 .expectBodyList(Bill.class)
                 .consumeWith(response -> {
                     List<Bill> bills = response.getResponseBody();
@@ -373,7 +384,7 @@ class BillControllerIntegrationTest {
                 .expectBody();
     }
 
-    private Bill buildBill(){
+    private Bill buildBill() {
 
         Calendar calendar = Calendar.getInstance();
         calendar.set(2022, Calendar.SEPTEMBER, 25);
@@ -381,13 +392,13 @@ class BillControllerIntegrationTest {
                 .atZone(ZoneId.systemDefault())
                 .toLocalDate();
 
-        LocalDate dueDate = LocalDate.of(2022,Month.OCTOBER,15);
+        LocalDate dueDate = LocalDate.of(2022, Month.OCTOBER, 15);
 
 
         return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(13.37).billStatus(BillStatus.PAID).dueDate(dueDate).build();
     }
 
-    private Bill buildUnpaidBill(){
+    private Bill buildUnpaidBill() {
 
         Calendar calendar = Calendar.getInstance();
         calendar.set(2022, Calendar.SEPTEMBER, 25);
@@ -401,7 +412,7 @@ class BillControllerIntegrationTest {
         return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(13.37).billStatus(BillStatus.UNPAID).dueDate(dueDate).build();
     }
 
-    private Bill buildOverdueBill(){
+    private Bill buildOverdueBill() {
 
         Calendar calendar = Calendar.getInstance();
         calendar.set(2022, Calendar.SEPTEMBER, 25);
@@ -414,6 +425,7 @@ class BillControllerIntegrationTest {
 
         return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(13.37).billStatus(BillStatus.OVERDUE).dueDate(dueDate).build();
     }
+
     @Test
     void whenValidPageAndSizeProvided_thenReturnsCorrectBillsPage() {
         repo.deleteAll().block();
@@ -471,6 +483,7 @@ class BillControllerIntegrationTest {
                 .expectBodyList(BillResponseDTO.class)
                 .hasSize(0);
     }
+
     @Test
     void getBillWithTimeRemaining() {
 
@@ -592,5 +605,23 @@ class BillControllerIntegrationTest {
         }
         return Duration.between(LocalDate.now().atStartOfDay(), billEntity.getDueDate().atStartOfDay()).toDays();
     }
+
+    @Test
+    void whenDeletingNonExistentBill_thenReturnNotFound() {
+        String invalidBillId = "NON_EXISTENT_ID";
+
+        // Mock the service to throw NotFoundException
+        Mockito.when(billService.deleteBill(invalidBillId))
+                .thenReturn(Mono.error(new NotFoundException("Bill not found")));
+
+        client.delete()
+                .uri("/bills/{billId}", invalidBillId)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Bill not found");
+    }
+
+
 
 }
