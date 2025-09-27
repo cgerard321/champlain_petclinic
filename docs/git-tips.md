@@ -127,6 +127,7 @@ git commit -m "A short description of what work was done in the commit"
 git push
 ```
 
+
 - Again this is the same this as saying `git push origin YOUR-BRANCH-NAME` the `origin` and `YOUR-BRANCH-NAME` are implicitly applied
 - If git gives you and error here telling you that you need to set the remote as upstream, simply copy/paste the command it gives you. Next time you push on this branch, you won't get this error.
 
