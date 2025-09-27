@@ -6,13 +6,17 @@ import com.petclinic.bffapigateway.exceptions.ExistingVetNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.MultipartBodyBuilder;
+import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.webjars.NotFoundException;
@@ -82,25 +86,54 @@ public class VetsServiceClient {
                 .bodyToMono(PhotoResponseDTO.class);
     }
 
-    public Mono<Resource> addPhotoToVet(String vetId, String photoName, Mono<Resource> image) {
-        return webClientBuilder
-                .build()
+    public Mono<Resource> addPhotoToVetFromBytes(String vetId, String photoName, byte[] fileData) {
+        return webClientBuilder.build()
                 .post()
                 .uri(vetsServiceUrl + "/" + vetId + "/photos/" + photoName)
-                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_VALUE)
-                .body(image, Resource.class)
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .bodyValue(fileData)
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, error -> {
-                    HttpStatusCode statusCode = error.statusCode();
-                    if (statusCode.equals(NOT_FOUND))
+                    if (error.statusCode().equals(NOT_FOUND)) {
                         return Mono.error(new NotFoundException("Photo for vet " + vetId + " not found"));
-                    return Mono.error(new IllegalArgumentException("Something went wrong with the client"));
+                    }
+                    return Mono.error(new IllegalArgumentException("Client error"));
                 })
-                .onStatus(HttpStatusCode::is5xxServerError, error ->
-                        Mono.error(new IllegalArgumentException("Something went wrong with the server"))
-                )
+                .onStatus(HttpStatusCode::is5xxServerError,
+                        error -> Mono.error(new IllegalArgumentException("Server error")))
                 .bodyToMono(Resource.class);
     }
+
+    public Mono<Resource> addPhotoToVet(String vetId, String photoName, FilePart filePart) {
+        return filePart.content()
+                .map(dataBuffer -> {
+                    byte[] bytes = new byte[dataBuffer.readableByteCount()];
+                    dataBuffer.read(bytes);
+                    return bytes;
+                })
+                .reduce((byte[] a, byte[] b) -> {
+                    byte[] combined = new byte[a.length + b.length];
+                    System.arraycopy(a, 0, combined, 0, a.length);
+                    System.arraycopy(b, 0, combined, a.length, b.length);
+                    return combined;
+                })
+                .flatMap(bytes -> webClientBuilder.build()
+                        .post()
+                        .uri(vetsServiceUrl + "/" + vetId + "/photos/" + photoName)
+                        .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                        .bodyValue(bytes)
+                        .retrieve()
+                        .onStatus(HttpStatusCode::is4xxClientError, error -> {
+                            if (error.statusCode().equals(NOT_FOUND)) {
+                                return Mono.error(new NotFoundException("Photo for vet " + vetId + " not found"));
+                            }
+                            return Mono.error(new IllegalArgumentException("Client error"));
+                        })
+                        .onStatus(HttpStatusCode::is5xxServerError,
+                                error -> Mono.error(new IllegalArgumentException("Server error")))
+                        .bodyToMono(Resource.class));
+    }
+
 
     public Mono<Resource> updatePhotoOfVet(String vetId, String photoName, Mono<Resource> image){
         return webClientBuilder
@@ -632,6 +665,10 @@ public class VetsServiceClient {
                 .onStatus(HttpStatusCode::is5xxServerError, error -> Mono.error(new IllegalArgumentException("Server error")))
                 .bodyToFlux(Album.class);
     }
+
+
+
+
 
 
     public Mono<Void> deletePhotoByVetId(String vetId) {
