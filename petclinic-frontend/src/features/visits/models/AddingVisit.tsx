@@ -5,6 +5,8 @@ import './EditVisit.css';
 import { VisitRequestModel } from '@/features/visits/models/VisitRequestModel';
 import { Status } from '@/features/visits/models/Status';
 import { addVisit } from '@/features/visits/api/addVisit';
+import { AppRoutePaths } from '@/shared/models/path.routes.ts';
+import { useUser } from '@/context/UserContext';
 
 interface ApiError {
   message: string;
@@ -20,6 +22,7 @@ type VisitType = {
 };
 
 const AddingVisit: React.FC = (): JSX.Element => {
+  const { user } = useUser();
   const [visit, setVisit] = useState<VisitType>({
     visitStartDate: new Date(),
     description: '',
@@ -87,7 +90,15 @@ const AddingVisit: React.FC = (): JSX.Element => {
       setSuccessMessage('Visit added successfully!');
       setShowNotification(true);
       setTimeout(() => setShowNotification(false), 3000);
-      navigate('/visits');
+      if (
+        Array.from(user.roles).some(
+          r => r.name === 'RECEPTIONIST' || r.name === 'VET'
+        )
+      ) {
+        navigate(AppRoutePaths.CustomerVisits);
+      } else if (Array.from(user.roles).some(r => r.name === 'ADMIN')) {
+        navigate(AppRoutePaths.Visits);
+      }
       setVisit({
         visitStartDate: new Date(),
         description: '',
