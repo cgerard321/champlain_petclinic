@@ -1,7 +1,28 @@
+
+:root{
+    --base-clr: #FFFFFF;
+    --secondary-clr: #F5F5FF;
+    --hover-clr: #E1E5EF;
+    --active-clr: #d4d4e7;
+    --dark-clr: #212529;
+    --emergency-clr: #FF3C56;
+    --accent-clr: #5e63ff;
+}
+
+.page-container{
+  display:grid;
+  grid-template-columns: auto 1fr;
+}
+
 .visit-actions {
   display: flex;
-  justify-content: space-around;
+  justify-content: space-between;
+  flex-grow: 100;
   margin-bottom: 20px;
+}
+
+.search-bar{
+  width: 60%;
 }
 
 .visit-table-section {
@@ -42,7 +63,7 @@ h2 {
   margin-bottom: 15px;
 }
 
-/* .modal {
+.modal {
   position: fixed;
   top: 0;
   left: 0;
@@ -91,7 +112,7 @@ h2 {
 }
 
 /* Cancel button */
-/* .modal-buttons button:first-of-type {
+ .modal-buttons button:first-of-type {
   background-color: #6c757d;
   color: #fff;
 }
@@ -101,7 +122,7 @@ h2 {
 }
 
 /* Confirm button */
-/* .modal-buttons button:last-of-type {
+ .modal-buttons button:last-of-type {
   background-color: #0144aa;
   color: #fff;
 }
@@ -118,5 +139,4 @@ h2 {
   to {
     opacity: 1;
     transform: scale(1);
-  } */
-/* }    */
+
