@@ -15,23 +15,35 @@ import Reveal from '@/features/home/components/Reveal';
 
 const CORE_SERVICES = [
   {
-    icon: '🩺',
+    icon: '\uD83E\uDE7A',
     title: 'Wellness Exams',
     desc: 'Annual check-ups & preventive care.',
   },
-  { icon: '💉', title: 'Vaccinations', desc: 'Core & lifestyle vaccines.' },
   {
-    icon: '🦷',
+    icon: '\uD83D\uDC89',
+    title: 'Vaccinations',
+    desc: 'Core & lifestyle vaccines.',
+  },
+  {
+    icon: '\uD83E\uDDB7',
     title: 'Dental Care',
     desc: 'Cleaning, polishing & dental X-rays.',
   },
   {
-    icon: '🩻',
+    icon: '\uD83E\uDDBB',
     title: 'Diagnostics',
     desc: 'Digital radiology & in-house lab.',
   },
-  { icon: '✂️', title: 'Surgery', desc: 'Routine & soft-tissue procedures.' },
-  { icon: '🚑', title: 'Emergency', desc: 'Urgent care during open hours.' },
+  {
+    icon: '\u2702\uFE0F',
+    title: 'Surgery',
+    desc: 'Routine & soft-tissue procedures.',
+  },
+  {
+    icon: '\uD83D\uDE91',
+    title: 'Emergency',
+    desc: 'Urgent care during open hours.',
+  },
 ];
 
 export default function Home(): JSX.Element {
@@ -41,9 +53,21 @@ export default function Home(): JSX.Element {
 
   const highlights = useMemo(
     () => [
-      { icon: '🌟', title: '4.9/5 average rating', label: 'from pet parents' },
-      { icon: '👩‍⚕️', title: 'Experienced team', label: 'Board-certified vets' },
-      { icon: '⏰', title: 'Same-day appointments', label: 'When available' },
+      {
+        icon: '\uD83C\uDF1F',
+        title: '4.9/5 average rating',
+        label: 'from pet parents',
+      },
+      {
+        icon: '\uD83D\uDC69\u200D\u2695\uFE0F',
+        title: 'Experienced team',
+        label: 'Board-certified vets',
+      },
+      {
+        icon: '\u23F0',
+        title: 'Same-day appointments',
+        label: 'When available',
+      },
     ],
     []
   );
@@ -66,23 +90,29 @@ export default function Home(): JSX.Element {
       {/* Intro */}
       <header className="intro">
         <div className="intro-inner">
-          <h1 className="intro-title">
-            Welcome to <span>Champlain Pet Clinic</span> 🐾
-          </h1>
-          <p className="intro-sub">
-            At Champlain Pet Clinic, we offer a wide range of services to ensure
-            the health and well-being of your beloved pets. Our experienced
-            veterinarians and staff are dedicated to providing the best care
-            possible.
-          </p>
-          <div className="intro-ctas">
-            <Button variant="primary" onClick={() => navigate('/visits/add')}>
-              Book Appointment
-            </Button>
-            <Button variant="light" onClick={() => navigate('/contact')}>
-              Contact Us
-            </Button>
-          </div>
+          <Reveal delay={80}>
+            <h1 className="intro-title">
+              Welcome to <span>Champlain Pet Clinic</span> 🐾
+            </h1>
+          </Reveal>
+          <Reveal delay={240}>
+            <p className="intro-sub">
+              At Champlain Pet Clinic, we offer a wide range of services to
+              ensure the health and well-being of your beloved pets. Our
+              experienced veterinarians and staff are dedicated to providing the
+              best care possible.
+            </p>
+          </Reveal>
+          <Reveal delay={500}>
+            <div className="intro-ctas">
+              <Button variant="primary" onClick={() => navigate('/visits/add')}>
+                Book Appointment
+              </Button>
+              <Button variant="light" onClick={() => navigate('/contact')}>
+                Contact Us
+              </Button>
+            </div>
+          </Reveal>
         </div>
       </header>
 
@@ -90,32 +120,36 @@ export default function Home(): JSX.Element {
       <Container className="py-4">
         {/* Reviews & Info or something like that. Extra info? */}
         <section className="home-section mb-2" aria-label="Highlights">
-          <Row xs={1} md={3} className="g-1">
-            {highlights.map(h => (
-              <Col key={h.title}>
-                <Card className="shadow-soft stat-card stat-compact h-100">
-                  <Card.Body className="d-flex align-items-center gap-2 p-0">
-                    <div className="stat-icon">{h.icon}</div>
-                    <div>
-                      <div className="stat-title fw-semibold">{h.title}</div>
-                      <div className="eyebrow">{h.label}</div>
-                    </div>
-                  </Card.Body>
-                </Card>
-              </Col>
-            ))}
-          </Row>
+          <Reveal delay={500}>
+            <Row xs={1} md={3} className="g-1">
+              {highlights.map(h => (
+                <Col key={h.title}>
+                  <Card className="shadow-soft stat-card stat-compact h-100">
+                    <Card.Body className="d-flex align-items-center gap-2 p-0">
+                      <div className="stat-icon">{h.icon}</div>
+                      <div>
+                        <div className="stat-title fw-semibold">{h.title}</div>
+                        <div className="eyebrow">{h.label}</div>
+                      </div>
+                    </Card.Body>
+                  </Card>
+                </Col>
+              ))}
+            </Row>
+          </Reveal>
         </section>
 
         {/* Services at a glance */}
         <section className="home-section" aria-label="Services">
-          <h2 className="section-title text-center mb-2">
-            Services at a Glance
-          </h2>
+          <Reveal delay={500}>
+            <h2 className="section-title text-center mb-2">
+              Services at a Glance
+            </h2>
+          </Reveal>
           <Row xs={1} sm={2} md={3} className="g-2">
             {CORE_SERVICES.map((s, i) => (
               <Col key={s.title}>
-                <Reveal delay={i * 80}>
+                <Reveal delay={i * 80 + 500}>
                   <ServiceCard icon={s.icon} title={s.title} desc={s.desc} />
                 </Reveal>
               </Col>
@@ -149,14 +183,16 @@ export default function Home(): JSX.Element {
           <h2 className="section-title text-center mb-3">FAQ</h2>
           <Row className="justify-content-center">
             <Col lg={8}>
-              <Accordion alwaysOpen defaultActiveKey={HOME_FAQ[0]?.id}>
-                {HOME_FAQ.map(item => (
-                  <Accordion.Item eventKey={item.id} key={item.id}>
-                    <Accordion.Header>{item.question}</Accordion.Header>
-                    <Accordion.Body>{item.answer}</Accordion.Body>
-                  </Accordion.Item>
-                ))}
-              </Accordion>
+              <Reveal delay={80}>
+                <Accordion alwaysOpen defaultActiveKey={HOME_FAQ[0]?.id}>
+                  {HOME_FAQ.map(item => (
+                    <Accordion.Item eventKey={item.id} key={item.id}>
+                      <Accordion.Header>{item.question}</Accordion.Header>
+                      <Accordion.Body>{item.answer}</Accordion.Body>
+                    </Accordion.Item>
+                  ))}
+                </Accordion>
+              </Reveal>
             </Col>
           </Row>
           <div className="text-center mt-3">
@@ -176,23 +212,28 @@ export default function Home(): JSX.Element {
           aria-label="Contact"
         >
           <Row className="align-items-center g-3">
-            <Col lg>
-              <h3 className="mb-1">Have questions or need help?</h3>
-              <p className="text-muted mb-0">
-                Our team is just a message away.
-              </p>
-            </Col>
-            <Col lg="auto" className="d-flex gap-2">
-              <Button
-                variant="outline-secondary"
-                onClick={() => navigate('/contact')}
-              >
-                Contact Us
-              </Button>
-              <Button variant="primary" onClick={() => navigate('/visits/add')}>
-                Book Appointment
-              </Button>
-            </Col>
+            <Reveal delay={80}>
+              <Col lg>
+                <h3 className="mb-1">Have questions or need help?</h3>
+                <p className="text-muted mb-0">
+                  Our team is just a message away.
+                </p>
+              </Col>
+              <Col lg="auto" className="d-flex gap-2">
+                <Button
+                  variant="outline-secondary"
+                  onClick={() => navigate('/contact')}
+                >
+                  Contact Us
+                </Button>
+                <Button
+                  variant="primary"
+                  onClick={() => navigate('/visits/add')}
+                >
+                  Book Appointment
+                </Button>
+              </Col>
+            </Reveal>
           </Row>
         </section>
       </Container>
