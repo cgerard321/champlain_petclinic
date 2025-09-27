@@ -2,7 +2,11 @@ FROM golang:1.20 AS builder
 WORKDIR /app/GoMailer
 COPY . .
 
-RUN go get -d -v ./...
+# Resolve dependencies
+RUN go mod tidy
+RUN go mod download
+
+# Build
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o app .
 
 FROM scratch
