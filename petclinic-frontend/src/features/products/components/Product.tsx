@@ -194,11 +194,11 @@ export default function Product({
       <h2 onClick={handleProductTitleClick} className="product-title">
         {currentProduct.productName}
       </h2>
-      <p>
+      {/*<p>
         {!tooLong
           ? currentProduct.productDescription
           : `${currentProduct.productDescription.substring(0, 100)}...`}
-      </p>
+      </p>*/}
       <p>Price: ${currentProduct.productSalePrice.toFixed(2)}</p>
 
       <div className="deliveryType-container">
