@@ -16,8 +16,13 @@ import { ProductType } from '@/features/products/api/ProductTypeEnum.ts';
 import { getAllProductBundles } from './api/getAllProductBundles';
 import { ProductBundleModel } from './models/ProductModels/ProductBundleModel';
 import ProductBundle from './components/ProductBundle';
+import ProductSearch from './components/ProductSearch';
 
-export default function ProductList(): JSX.Element {
+export default function ProductList({
+  view,
+}: {
+  view: 'catalog' | 'extras';
+}): JSX.Element {
   const [productList, setProductList] = useState<ProductModel[]>([]);
   const [bundleList, setBundleList] = useState<ProductBundleModel[]>([]);
   const [minPrice, setMinPrice] = useState<number | undefined>(undefined);
@@ -180,7 +185,7 @@ export default function ProductList(): JSX.Element {
   };
   const RecentlyViewedProducts = (): JSX.Element => (
     <div className="recently-viewed-container">
-      <h2>Recently Seen</h2>
+      <h2 className="section-header">Recently Seen</h2>
       <div className="recently-viewed-flex">
         {' '}
         {recentlyClickedProducts.length > 0 ? (
@@ -324,7 +329,8 @@ export default function ProductList(): JSX.Element {
       {isRightRole && (
         <AddProduct addProduct={handleAddProduct} addImage={handleAddImage} />
       )}
-      <div className="main-content">
+
+      {/*<div className="main-content">
         <div className="product-bundle-container">
           <h2>Bundles</h2>
           <div className="grid product-bundles-grid">
@@ -342,6 +348,8 @@ export default function ProductList(): JSX.Element {
         </div>
         <div className="list-container">
           <h2>Catalog</h2>
+
+
           {!isSidebarOpen && (
             <button
               className="toggle-sidebar-button"
@@ -352,6 +360,8 @@ export default function ProductList(): JSX.Element {
               &#9776; Filters
             </button>
           )}
+
+          
           <div className="grid">
             {isLoading ? (
               <p>Loading items...</p>
@@ -373,6 +383,70 @@ export default function ProductList(): JSX.Element {
           <hr />
         </div>
         <RecentlyViewedProducts />
+      </div>
+    </div>*/}
+
+      <div className="search-and-filter">
+        {!isSidebarOpen && (
+          <button
+            className="toggle-sidebar-button"
+            onClick={toggleSidebar}
+            aria-expanded={isSidebarOpen}
+            aria-controls="sidebar"
+          >
+            &#9776; Filters
+          </button>
+        )}
+
+        <div className="search-wrapper">
+          <ProductSearch />
+        </div>
+      </div>
+
+      <div className="main-content">
+        {view == 'catalog' && (
+          <div className="list-container">
+            <h2 className="section-header">Catalog</h2>
+
+            <div className="grid">
+              {isLoading ? (
+                <p>Loading items...</p>
+              ) : productList.length > 0 ? (
+                productList.map((product: ProductModel) => (
+                  <div
+                    key={product.productId}
+                    onClick={() => handleProductClick(product)}
+                  >
+                    <Product key={product.productId} product={product} />
+                  </div>
+                ))
+              ) : (
+                <p>No items found.</p>
+              )}
+            </div>
+          </div>
+        )}
+
+        {view == 'extras' && (
+          <>
+            <div className="list-container">
+              <h2 className="section-header">Bundles</h2>
+              <div className="grid product-bundles-grid">
+                {bundleList.length > 0 ? (
+                  bundleList.map((bundle: ProductBundleModel) => (
+                    <ProductBundle key={bundle.bundleId} bundle={bundle} />
+                  ))
+                ) : (
+                  <p>No Bundles Available</p>
+                )}
+              </div>
+            </div>
+            <div>
+              <hr />
+            </div>
+            <RecentlyViewedProducts />
+          </>
+        )}
       </div>
     </div>
   );

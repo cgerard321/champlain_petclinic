@@ -1,6 +1,5 @@
 import { NavBar } from '@/layouts/AppNavBar.tsx';
 import ProductsList from '@/features/products/ProductsList.tsx';
-import ProductSearch from '@/features/products/components/ProductSearch';
 import './Products.css';
 import TrendingList from '@/features/products/TrendingList';
 
@@ -22,9 +21,12 @@ export default function Products(): JSX.Element {
           className="full-width-image"
         />
       </header>
-      <div className="block">
+
+      {/*      <div className="block">
         <ProductSearch />
       </div>
+
+
       <div className="trending-list-container-gold">
         <h2>Trending</h2>
         <TrendingList />
@@ -34,6 +36,28 @@ export default function Products(): JSX.Element {
         <hr />
       </div>
       <ProductsList />
+    </div>
+
+      <div className="block">
+        <ProductSearch />
+      </div>*/}
+
+      <ProductsList view="catalog" />
+
+      <div className="block">
+        <hr />
+      </div>
+
+      <div className="trending-list-container-gold">
+        <h2 className="section-header">Trending</h2>
+        <TrendingList />
+      </div>
+
+      <div className="block">
+        <hr />
+      </div>
+
+      <ProductsList view="extras" />
     </div>
   );
 }
