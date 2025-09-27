@@ -108,7 +108,7 @@ export default function ProductList({
     if (savedProducts) {
       setRecentlyClickedProducts(JSON.parse(savedProducts));
     }
-  }, []);
+  }, [fetchProducts, user.userId]);
 
   useEffect(() => {
     const hasRightRole =
