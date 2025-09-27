@@ -166,15 +166,10 @@ export default function VetDetails(): JSX.Element {
   useEffect(() => {
     const fetchVetDetails = async (): Promise<void> => {
       try {
-        const response = await fetch(
-          `http://localhost:8080/api/v2/gateway/vets/${vetId}`
+        const response = await axiosInstance.get<VetResponseType>(
+          `/vets/${vetId}`
         );
-
-        if (!response.ok) {
-          throw new Error(`Error: ${response.statusText}`);
-        }
-        const data: VetResponseType = await response.json();
-        setVet(data);
+        setVet(response.data);
       } catch (error) {
         setError('Failed to fetch vet details');
       }
@@ -182,15 +177,10 @@ export default function VetDetails(): JSX.Element {
 
     const fetchEducationDetails = async (): Promise<void> => {
       try {
-        const response = await fetch(
-          `http://localhost:8080/api/v2/gateway/vets/${vetId}/educations`
+        const response = await axiosInstance.get<EducationResponseType[]>(
+          `/vets/${vetId}/educations`
         );
-
-        if (!response.ok) {
-          throw new Error(`Error: ${response.statusText}`);
-        }
-        const data: EducationResponseType[] = await response.json();
-        setEducation(data);
+        setEducation(response.data);
       } catch (error) {
         setError('Failed to fetch education details');
       }
@@ -198,8 +188,8 @@ export default function VetDetails(): JSX.Element {
 
     const fetchAlbumPhotos = async (): Promise<void> => {
       try {
-        const response = await fetch(
-          `http://localhost:8080/api/v2/gateway/vets/${vetId}/albums`,
+        const response = await axiosInstance.get<AlbumPhotoType[]>(
+          `/vets/${vetId}/albums`,
           {
             method: 'GET',
             headers: {
@@ -207,19 +197,13 @@ export default function VetDetails(): JSX.Element {
             },
           }
         );
-
-        if (!response.ok) {
-          if (response.status === 404) {
-            setAlbumPhotos([]); // No albums found
-          } else {
-            throw new Error(`Error: ${response.statusText}`);
-          }
+          setAlbumPhotos(response.data);
+      } catch (error: any) {
+        if (error.response?.status === 404) {
+          setAlbumPhotos([]);
         } else {
-          const photos: AlbumPhotoType[] = await response.json();
-          setAlbumPhotos(photos); // Set the album photos in state
+          setError('Failed to fetch album photos');
         }
-      } catch (error) {
-        setError('Failed to fetch album photos');
       }
     };
 
@@ -247,8 +231,8 @@ export default function VetDetails(): JSX.Element {
     setIsDefaultPhoto(false); // Set to false because a new photo is uploaded
 
     try {
-      const response = await fetch(
-        `http://localhost:8080/api/v2/gateway/vets/${vetId}/photo/${file.name}`,
+      const response = await axiosInstance.put(
+        `/vets/${vetId}/photo/${file.name}`,
         {
           method: 'PUT',
           body: file,
@@ -258,12 +242,7 @@ export default function VetDetails(): JSX.Element {
           },
         }
       );
-
-      if (!response.ok) {
-        throw new Error(`Error: ${response.statusText}`);
-      }
-
-      const updatedBlob = await response.blob();
+      const updatedBlob = await response.data;
       const updatedImageUrl = URL.createObjectURL(updatedBlob);
       setPhoto(updatedImageUrl);
       setIsDefaultPhoto(false);
@@ -273,8 +252,8 @@ export default function VetDetails(): JSX.Element {
   };
   const handleDeleteAlbumPhoto = async (photoId: string): Promise<void> => {
     try {
-      await axios.delete(
-        `http://localhost:8080/api/v2/gateway/vets/${vetId}/albums/${photoId}`
+      await axiosInstance.delete(
+        `/vets/${vetId}/albums/${photoId}`
       );
 
       // Update the state to remove the deleted photo
@@ -387,8 +366,8 @@ export default function VetDetails(): JSX.Element {
     };
 
     try {
-      await axios.post(
-        `http://localhost:8080/api/v2/gateway/vets/${vetId}/specialties`,
+      await axiosInstance.post(
+        `/vets/${vetId}/specialties`,
         specialtyDTO
       );
       alert('Specialty added successfully!');
@@ -413,8 +392,8 @@ export default function VetDetails(): JSX.Element {
   const handleDeleteSpecialty = async (specialtyId: string): Promise<void> => {
     try {
       // Make a DELETE request to the API
-      await axios.delete(
-        `http://localhost:8080/api/v2/gateway/vets/${vetId}/specialties/${specialtyId}`
+      await axiosInstance.delete(
+        `/vets/${vetId}/specialties/${specialtyId}`
       );
 
       // Update the vet data after deleting the specialty
