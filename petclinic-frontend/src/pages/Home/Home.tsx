@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { NavBar } from '@/layouts/AppNavBar';
 import './Home.css';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { AppFooter } from '@/layouts/AppFooter';
 import { Container, Row, Col, Card, Button, Accordion } from 'react-bootstrap';
 
@@ -160,7 +160,10 @@ export default function Home(): JSX.Element {
             </Col>
           </Row>
           <div className="text-center mt-3">
-            <Button variant="outline-secondary" as={Link} to="/faq">
+            <Button
+              variant="outline-secondary"
+              onClick={() => navigate('/faq')}
+            >
               View all FAQs
             </Button>
           </div>
@@ -180,10 +183,13 @@ export default function Home(): JSX.Element {
               </p>
             </Col>
             <Col lg="auto" className="d-flex gap-2">
-              <Button variant="outline-secondary" as={Link} to="/contact">
+              <Button
+                variant="outline-secondary"
+                onClick={() => navigate('/contact')}
+              >
                 Contact Us
               </Button>
-              <Button variant="primary" as={Link} to="/visits/add">
+              <Button variant="primary" onClick={() => navigate('/visits/add')}>
                 Book Appointment
               </Button>
             </Col>
