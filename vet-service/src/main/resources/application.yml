@@ -80,7 +80,7 @@ spring:
 
   data:
     mongodb:
-      host: mongo
+      host: mongo-vet
       port: 27017
       database: veterinarians
       username: root

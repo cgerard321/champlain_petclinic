@@ -40,7 +40,7 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:
-      - mongo
+      - mongo-vet
       - postgres-vet
 
   customers-service-reactive:
@@ -82,7 +82,7 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:
-      - mongo1
+      - mongo-billing
   #            mysql5:
   #                condition: service_healthy
 
@@ -232,9 +232,9 @@ services:
     #  - emailing-service-mysql-db
 
   # vet mongo container
-  mongo:
+  mongo-vet:
     image: mongo
-    container_name: mongo
+    container_name: mongo-vet
     restart: always
     ports:
       - 27017:27017
@@ -253,12 +253,12 @@ services:
     environment:
       - ME_CONFIG_MONGODB_ADMINUSERNAME=root
       - ME_CONFIG_MONGODB_ADMINPASSWORD=password
-      - ME_CONFIG_MONGODB_SERVER=mongo
+      - ME_CONFIG_MONGODB_SERVER=mongo-vet
       - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
     ports:
       - 9000:8081
     depends_on:
-      - mongo
+      - mongo-vet
       - vet-service
 
   #Vet Images Postgres container
@@ -285,9 +285,9 @@ services:
       - postgres-vet
 
   # billing mongo container
-  mongo1:
+  mongo-billing:
     image: mongo
-    container_name: mongo1
+    container_name: mongo-billing
     restart: always
     ports:
       - 27018:27017
@@ -306,12 +306,12 @@ services:
     environment:
       - ME_CONFIG_MONGODB_ADMINUSERNAME=root
       - ME_CONFIG_MONGODB_ADMINPASSWORD=password
-      - ME_CONFIG_MONGODB_SERVER=mongo1
+      - ME_CONFIG_MONGODB_SERVER=mongo-billing
       - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
     ports:
       - 8081:8081
     depends_on:
-      - mongo1
+      - mongo-billing
       - billing-service
 
   mongo-visits-new:

@@ -78,7 +78,7 @@ services:
       - SPRING_PROFILES_ACTIVE=docker
     restart: unless-stopped
     depends_on:
-      - mongo
+      - mongo-vet
       - postgres-vet
 
   customers-service-reactive:
@@ -108,7 +108,7 @@ services:
       - SPRING_PROFILES_ACTIVE=docker
     restart: unless-stopped
     depends_on:
-      - mongo1
+      - mongo-billing
 
   mailer-service:
     build: mailer-service
@@ -207,30 +207,30 @@ services:
   # -------------------
   # MONGODB DATABASES
   # -------------------
-  mongo:
+  mongo-vet:
     image: mongo
-    container_name: mongo
+    container_name: mongo-vet
     ports:
       - "27017:27017"
     environment:
       - MONGO_INITDB_ROOT_USERNAME=root
       - MONGO_INITDB_ROOT_PASSWORD=password
     volumes:
-      - mongo-data:/data/db
-      - mongo-config:/data/configdb
+      - mongo-vet-data:/data/db
+      - mongo-vet-config:/data/configdb
     restart: unless-stopped
 
-  mongo1:
+  mongo-billing:
     image: mongo
-    container_name: mongo1
+    container_name: mongo-billing
     ports:
       - "27018:27017"
     environment:
       - MONGO_INITDB_ROOT_USERNAME=root
       - MONGO_INITDB_ROOT_PASSWORD=password
     volumes:
-      - mongo1-data:/data/db
-      - mongo1-config:/data/configdb
+      - mongo-billing-data:/data/db
+      - mongo-billing-config:/data/configdb
     restart: unless-stopped
 
   mongo-visits-new:
@@ -303,10 +303,10 @@ services:
 # -------------------
 volumes:
   mysql-auth-data:
-  mongo-data:
-  mongo-config:
-  mongo1-data:
-  mongo1-config:
+  mongo-vet-data:
+  mongo-vet-config:
+  mongo-billing-data:
+  mongo-billing-config:
   mongo-visits-new-data:
   mongo-visits-new-config:
   mongo-customers-data:
