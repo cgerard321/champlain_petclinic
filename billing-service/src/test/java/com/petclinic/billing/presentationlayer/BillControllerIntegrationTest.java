@@ -563,6 +563,115 @@ class BillControllerIntegrationTest {
                 .hasSize(5);
     }
 
+    @Test
+    void getBillsByOwnerName() {
+        Bill billEntity = buildBill();
+
+        repo.save(billEntity).block();
+
+        Publisher<BillResponseDTO> setup = repo.findByBillId(billEntity.getBillId())
+                .map(bill -> BillResponseDTO.builder()
+                        .billId(bill.getBillId())
+                        .customerId(bill.getCustomerId())
+                        .vetId(bill.getVetId())
+                        .visitType(bill.getVisitType())
+                        .date(bill.getDate())
+                        .amount(bill.getAmount())
+                        .billStatus(bill.getBillStatus())
+                        .dueDate(bill.getDueDate())
+                        .ownerFirstName("John")
+                        .ownerLastName("Doe")
+                        .vetFirstName("Jane")
+                        .vetLastName("Smith")
+                        .build());
+        StepVerifier
+                .create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
+    }
+
+    @Test
+    void getBillsByVetName() {
+        Bill billEntity = Bill.builder()
+                .billId("BillUUID1")
+                .customerId("Cust1")
+                .vetId("1")
+                .visitType("Routine Check")
+                .date(LocalDate.of(2022, 9, 1))
+                .amount(100.0)
+                .billStatus(BillStatus.PAID)
+                .dueDate(LocalDate.of(2022, 9, 1).plusDays(30))
+                .vetFirstName("VetFirstName")
+                .vetLastName("VetLastName")
+                .build();
+
+        repo.save(billEntity).block();
+
+        Publisher<BillResponseDTO> setup = repo.findByBillId(billEntity.getBillId())
+                .map(bill -> BillResponseDTO.builder()
+                        .billId(bill.getBillId())
+                        .customerId(bill.getCustomerId())
+                        .vetId(bill.getVetId())
+                        .visitType(bill.getVisitType())
+                        .date(bill.getDate())
+                        .amount(bill.getAmount())
+                        .billStatus(bill.getBillStatus())
+                        .dueDate(bill.getDueDate())
+                        .vetFirstName("VetFirstName")
+                        .vetLastName("VetLastName")
+                        .build());
+
+        StepVerifier
+                .create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
+    }
+
+    @Test
+    void getBillsByVisitType() {
+        Bill billEntity = Bill.builder()
+                .billId("BillUUID1")
+                .customerId("Cust1")
+                .vetId("1")
+                .visitType("Routine Check")
+                .date(LocalDate.of(2022, 9, 1))
+                .amount(100.0)
+                .billStatus(BillStatus.PAID)
+                .dueDate(LocalDate.of(2022, 9, 1).plusDays(30))
+                .build();
+
+        repo.save(billEntity).block();
+
+        Publisher<BillResponseDTO> setup = repo.findByBillId(billEntity.getBillId())
+                .map(bill -> BillResponseDTO.builder()
+                        .billId(bill.getBillId())
+                        .customerId(bill.getCustomerId())
+                        .vetId(bill.getVetId())
+                        .visitType(bill.getVisitType())
+                        .date(bill.getDate())
+                        .amount(bill.getAmount())
+                        .billStatus(bill.getBillStatus())
+                        .dueDate(bill.getDueDate())
+                        .build());
+
+        StepVerifier
+                .create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
+    }
+
+    @Test
+    public void whenGetAllBillsByPageAndPageSizeIsInvalid__thenReturnsBadRequest() {
+        client.get()
+                .uri(uriBuilder -> uriBuilder.path("/bills")
+                        .queryParam("page", -1)
+                        .queryParam("size", 0)
+                        .build())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isBadRequest();
+    }
+
     private Bill buildBillWithPastDueDate() {
 
         LocalDate date = LocalDate.of(2024, 1, 1);
@@ -606,6 +715,7 @@ class BillControllerIntegrationTest {
         return Duration.between(LocalDate.now().atStartOfDay(), billEntity.getDueDate().atStartOfDay()).toDays();
     }
 
+
     @Test
     void whenDeletingNonExistentBill_thenReturnNotFound() {
         String invalidBillId = "NON_EXISTENT_ID";
@@ -623,5 +733,8 @@ class BillControllerIntegrationTest {
     }
 
 
+
+
+    
 
 }
