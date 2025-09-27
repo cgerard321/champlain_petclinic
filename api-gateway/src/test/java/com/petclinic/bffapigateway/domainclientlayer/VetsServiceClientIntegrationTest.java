@@ -7,6 +7,7 @@ import com.petclinic.bffapigateway.exceptions.ExistingVetNotFoundException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
+import okio.Buffer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,7 +18,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.codec.multipart.FilePart;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -978,18 +984,41 @@ class VetsServiceClientIntegrationTest {
     }
 
     @Test
-    void addPhotoToVet() throws IOException {
-        Mono<Resource> photoResource = Mono.just(new ByteArrayResource(new byte[]{12, 24, 52, 87}));
-        prepareResponse(response -> response
-                .setHeader("Content-Type", "image/jpeg")
-                .setBody("    {\n" +
-                        "        {12, 24, 52, 87}" +
-                        "    }"));
+    void addPhotoToVet_multipart_upload_succeeds() throws Exception {
+        byte[] bytes = new byte[]{12, 24, 52, 87};
 
-        final Resource photo = vetsServiceClient.addPhotoToVet("deb1950c-3c56-45dc-874b-89e352695eb7", "image/jpeg", photoResource).block();
-        byte[] photoBytes = FileCopyUtils.copyToByteArray(photo.getInputStream());
+        DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
+        DataBuffer dataBuffer = factory.wrap(bytes);
 
-        assertNotNull(photoBytes);
+        FilePart filePart = Mockito.mock(FilePart.class);
+        Mockito.when(filePart.name()).thenReturn("file");
+        Mockito.when(filePart.filename()).thenReturn("photo.jpg");
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.IMAGE_JPEG);
+        Mockito.when(filePart.headers()).thenReturn(headers);
+        Mockito.when(filePart.content()).thenReturn(Flux.just(dataBuffer));
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(201)
+                .addHeader("Content-Type", "image/jpeg")
+                .setBody(new Buffer().write(bytes)));
+
+        Resource photo = vetsServiceClient
+                .addPhotoToVet("deb1950c-3c56-45dc-874b-89e352695eb7", "photo.jpg", filePart)
+                .block();
+
+        assertNotNull(photo);
+        byte[] returned = FileCopyUtils.copyToByteArray(photo.getInputStream());
+        assertArrayEquals(bytes, returned);
+
+        RecordedRequest req = server.takeRequest();
+        assertEquals("POST", req.getMethod());
+        String contentType = req.getHeader("Content-Type");
+        assertNotNull(contentType);
+        assertEquals("application/octet-stream", contentType);
+
+        byte[] requestBody = req.getBody().readByteArray();
+        assertArrayEquals(bytes, requestBody);
     }
 
     @Test
