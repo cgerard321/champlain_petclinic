@@ -12,7 +12,7 @@ export async function getAllBillsByVisitType(
     .split('data:')
     .map((payload: string) => {
       try {
-        if (payload == '') return null;
+        if (payload === '') return null;
         return JSON.parse(payload);
       } catch (err) {
         console.error("Can't parse JSON: " + err);

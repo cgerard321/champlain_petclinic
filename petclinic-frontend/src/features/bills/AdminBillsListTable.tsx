@@ -192,7 +192,8 @@ export default function AdminBillsListTable(): JSX.Element {
           setFilteredBills(billsByVetName);
         } else {
           setSelectedFilter('');
-          getBillsList(currentPage, 10);
+          const all = await getAllBills();
+          setFilteredBills(all);
         }
       }
     } catch (error) {
