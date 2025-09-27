@@ -1,11 +1,18 @@
 // UserCart.tsx
 import { useState, useEffect, useCallback } from 'react';
+import CartBillingForm from './CartBillingForm';
 import { useParams, useNavigate } from 'react-router-dom';
 import CartItem from './CartItem';
 import { ProductModel } from '../models/ProductModel';
 import './UserCart.css';
 import { NavBar } from '@/layouts/AppNavBar';
 import { FaShoppingCart } from 'react-icons/fa'; // Importing the shopping cart icon
+import axiosInstance from '@/shared/api/axiosInstance';
+import { IsAdmin } from '@/context/UserContext';
+import { AppRoutePaths } from '@/shared/models/path.routes';
+
+// NEW: cart change notifier (lets the NavBar update automatically)
+import { notifyCartChanged } from '../api/cartEvent';
 
 interface ProductAPIResponse {
   productId: number;
@@ -40,6 +47,7 @@ const UserCart = (): JSX.Element => {
   const [cartItemCount, setCartItemCount] = useState<number>(0);
   const [isCheckoutModalOpen, setIsCheckoutModalOpen] =
     useState<boolean>(false); // Modal state
+  const [showBillingForm, setShowBillingForm] = useState<boolean>(false); // Billing form state
   const [wishlistUpdated, setWishlistUpdated] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState<string | null>(
     null
@@ -74,19 +82,9 @@ const UserCart = (): JSX.Element => {
       }
 
       try {
-        const response = await fetch(
-          `http://localhost:8080/api/v2/gateway/carts/${cartId}`,
-          {
-            headers: { Accept: 'application/json' },
-            credentials: 'include',
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error(`Error: ${response.status} ${response.statusText}`);
-        }
-
-        const data = await response.json();
+        const { data } = await axiosInstance.get(`/carts/${cartId}`, {
+          useV2: true,
+        });
 
         // Ensure that data.products exists and is an array
         if (!Array.isArray(data.products)) {
@@ -132,24 +130,12 @@ const UserCart = (): JSX.Element => {
 
   const applyVoucherCode = async (): Promise<void> => {
     try {
-      const response = await fetch(
-        `http://localhost:8080/api/v2/gateway/promos/validate/${voucherCode}`,
-        {
-          method: 'GET',
-          headers: {
-            Accept: 'application/json',
-          },
-          credentials: 'include',
-        }
+      const { data } = await axiosInstance.get(
+        `/promos/validate/${voucherCode}`,
+        { useV2: true }
       );
-
-      if (response.ok) {
-        const data = await response.json();
-        setDiscount((subtotal * data.discount) / 100);
-        setVoucherError(null);
-      } else {
-        setVoucherError('Promo Code Invalid');
-      }
+      setDiscount((subtotal * data.discount) / 100);
+      setVoucherError(null);
     } catch (err: unknown) {
       console.error('Error validating voucher code:', err);
       setVoucherError('Error validating voucher code.');
@@ -182,28 +168,22 @@ const UserCart = (): JSX.Element => {
 
       // Update quantity in backend
       try {
-        const response = await fetch(
-          `http://localhost:8080/api/v2/gateway/carts/${cartId}/products/${item.productId}`,
-          {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-              Accept: 'application/json',
-            },
-            credentials: 'include',
-            body: JSON.stringify({ quantity: newQuantity }),
-          }
+        const { data } = await axiosInstance.put(
+          `/carts/${cartId}/products/${item.productId}`,
+          { quantity: newQuantity },
+          { useV2: true }
         );
 
-        const data = await response.json();
-
-        if (!response.ok) {
+        if (data && data.message) {
           setErrorMessages(prevErrors => ({
             ...prevErrors,
             [index]: data.message || 'Failed to update quantity',
           }));
           // Check if the product has been moved to wishlist
-          if (data.message && data.message.includes('moved to your wishlist')) {
+          if (
+            typeof data.message === 'string' &&
+            data.message.includes('moved to your wishlist')
+          ) {
             // Remove the item from cart
             setCartItems(prevItems =>
               prevItems.filter((_, idx) => idx !== index)
@@ -211,6 +191,10 @@ const UserCart = (): JSX.Element => {
             // Add to wishlist
             setWishlistItems(prevItems => [...prevItems, item]);
             setNotificationMessage(data.message);
+
+            //notify navbar (product left cart)
+            notifyCartChanged();
+            return;
           }
         } else {
           // Update local state
@@ -221,6 +205,9 @@ const UserCart = (): JSX.Element => {
           });
           // Optionally, display success message
           setNotificationMessage('Item quantity updated successfully.');
+
+          // notify navbar (cart quantity changed)
+          notifyCartChanged();
         }
       } catch (err: unknown) {
         // Changed from any to unknown
@@ -250,24 +237,17 @@ const UserCart = (): JSX.Element => {
       }
 
       try {
-        const response = await fetch(
-          `http://localhost:8080/api/v2/gateway/carts/${cartId}/${productId}`,
-          {
-            method: 'DELETE',
-            headers: {
-              Accept: 'application/json',
-            },
-            credentials: 'include',
-          }
-        );
-        if (!response.ok) {
-          throw new Error('Failed to delete item from the cart');
-        }
+        await axiosInstance.delete(`/carts/${cartId}/${productId}`, {
+          useV2: true,
+        });
 
         setCartItems(prevItems =>
           prevItems.filter((_, index) => index !== indexToDelete)
         );
         alert('Item successfully removed!');
+
+        // notify navbar (item removed)
+        notifyCartChanged();
       } catch (error: unknown) {
         // Changed from any to unknown
         console.error('Error deleting item: ', error);
@@ -289,21 +269,14 @@ const UserCart = (): JSX.Element => {
 
     if (window.confirm('Are you sure you want to clear the cart?')) {
       try {
-        const response = await fetch(
-          `http://localhost:8080/api/v2/gateway/carts/${cartId}/clear`,
-          {
-            method: 'DELETE',
-            credentials: 'include',
-          }
-        );
+        await axiosInstance.delete(`/carts/${cartId}/clear`, { useV2: true });
 
-        if (response.ok) {
-          setCartItems([]);
-          setCartItemCount(0);
-          alert('Cart has been successfully cleared!');
-        } else {
-          throw new Error('Failed to clear cart');
-        }
+        setCartItems([]);
+        setCartItemCount(0);
+        alert('Cart has been successfully cleared!');
+
+        // notify navbar (cart cleared)
+        notifyCartChanged();
       } catch (error: unknown) {
         // Changed from any to unknown
         console.error('Error clearing cart:', error);
@@ -320,42 +293,32 @@ const UserCart = (): JSX.Element => {
   const addToWishlist = async (item: ProductModel): Promise<void> => {
     try {
       const productId = item.productId;
-      const response = await fetch(
-        `http://localhost:8080/api/v2/gateway/carts/${cartId}/wishlist/${productId}/toWishList`,
+      const { data } = await axiosInstance.put(
+        `/carts/${cartId}/wishlist/${productId}/toWishList`,
         {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-          },
-          credentials: 'include',
-          body: JSON.stringify({
-            productId: item.productId,
-            imageId: item.imageId,
-            productName: item.productName,
-            productSalePrice: item.productSalePrice,
-          }),
-        }
+          productId: item.productId,
+          imageId: item.imageId,
+          productName: item.productName,
+          productSalePrice: item.productSalePrice,
+        },
+        { useV2: true }
       );
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to add to wishlist');
-      }
-
-      // Update wishlist state
-      setWishlistItems(prevItems => [...prevItems, item]);
-
-      // Display notification message from backend
-      if (data.message) {
+      if (data && data.message) {
+        // Display notification message from backend
         setNotificationMessage(data.message);
       } else {
         alert(`${item.productName} has been added to your wishlist!`);
       }
 
+      // Update wishlist state
+      setWishlistItems(prevItems => [...prevItems, item]);
+
       // Trigger the useEffect by updating the wishlistUpdated state
       setWishlistUpdated(true);
+
+      //notify navbar (item moved out of cart)
+      notifyCartChanged();
     } catch (error: unknown) {
       // Changed from any to unknown
       console.error('Error adding to wishlist:', error);
@@ -371,28 +334,21 @@ const UserCart = (): JSX.Element => {
   const addToCartFunction = async (item: ProductModel): Promise<void> => {
     try {
       const productId = item.productId;
-      const response = await fetch(
-        `http://localhost:8080/api/v2/gateway/carts/${cartId}/wishlist/${productId}/toCart`,
+      const { data } = await axiosInstance.put(
+        `/carts/${cartId}/wishlist/${productId}/toCart`,
         {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-          },
-          credentials: 'include',
-          body: JSON.stringify({
-            productId: item.productId,
-            imageId: item.imageId,
-            productName: item.productName,
-            productSalePrice: item.productSalePrice,
-          }),
-        }
+          productId: item.productId,
+          imageId: item.imageId,
+          productName: item.productName,
+          productSalePrice: item.productSalePrice,
+        },
+        { useV2: true }
       );
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to add to cart');
+      if (data && data.message) {
+        setNotificationMessage(data.message);
+      } else {
+        alert(`${item.productName} has been added to your cart!`);
       }
 
       // Update cart items state
@@ -403,15 +359,11 @@ const UserCart = (): JSX.Element => {
         prevItems.filter(product => product.productId !== item.productId)
       );
 
-      // Display notification message from backend
-      if (data.message) {
-        setNotificationMessage(data.message);
-      } else {
-        alert(`${item.productName} has been added to your cart!`);
-      }
-
       // Trigger the useEffect by updating the wishlistUpdated state
       setWishlistUpdated(true);
+
+      //notify navbar (item moved into cart)
+      notifyCartChanged();
     } catch (error: unknown) {
       // Changed from any to unknown
       console.error('Error adding to cart:', error);
@@ -420,6 +372,29 @@ const UserCart = (): JSX.Element => {
       } else {
         alert('Failed to add item to cart.');
       }
+    }
+  };
+
+  // a function to remove from wishlist
+  const removeFromWishlist = async (item: ProductModel): Promise<void> => {
+    if (!cartId) return;
+
+    const ok = window.confirm(`Remove "${item.productName}" from wishlist?`);
+    if (!ok) return;
+
+    try {
+      await axiosInstance.delete(
+        `/carts/${cartId}/wishlist/${item.productId}`,
+        { useV2: true }
+      );
+
+      setWishlistItems(prev =>
+        prev.filter(p => p.productId !== item.productId)
+      );
+      setNotificationMessage(`Removed "${item.productName}" from wishlist.`);
+    } catch (e) {
+      console.error(e);
+      alert('Could not remove item from wishlist.');
     }
   };
 
@@ -434,8 +409,20 @@ const UserCart = (): JSX.Element => {
     localStorage.setItem('invoices', JSON.stringify(invoices));
   }, [invoices]);
 
+  // role flag for conditional UI
+  const isAdmin = IsAdmin();
+
+  // method modified so admin can't check out anymore
   const handleCheckoutConfirmation = (): void => {
-    setIsCheckoutModalOpen(true);
+    if (isAdmin) {
+      navigate(AppRoutePaths.Unauthorized, {
+        state: { message: 'Admins are not allowed to perform checkout.' },
+      });
+      return;
+    }
+    // Non-admin flow: open billing form first; on submit we show confirm modal
+    setShowBillingForm(true);
+    setIsCheckoutModalOpen(false);
   };
 
   const handleCheckout = async (): Promise<void> => {
@@ -445,41 +432,40 @@ const UserCart = (): JSX.Element => {
     }
 
     try {
-      const response = await fetch(
-        `http://localhost:8080/api/v2/gateway/carts/${cartId}/checkout`,
-        {
-          method: 'POST',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
+      await axiosInstance.post(
+        `/carts/${cartId}/checkout`,
+        {},
+        { useV2: true }
       );
 
-      if (response.ok) {
-        const invoiceItems: Invoice[] = cartItems.map(item => ({
-          productId: Number(item.productId), // Ensure productId is a number
-          productName: item.productName,
-          productSalePrice: item.productSalePrice,
-          quantity: item.quantity || 1,
-        }));
+      const invoiceItems: Invoice[] = cartItems.map(item => ({
+        productId: Number(item.productId), // Ensure productId is a number
+        productName: item.productName,
+        productSalePrice: item.productSalePrice,
+        quantity: item.quantity || 1,
+      }));
 
-        // Set the invoices state
-        setInvoices(invoiceItems);
+      // Set the invoices state
+      setInvoices(invoiceItems);
 
-        setCheckoutMessage('Checkout successful!');
-        setCartItems([]); // Clear the cart after successful checkout
-        setCartItemCount(0);
-        setIsCheckoutModalOpen(false);
-      } else {
-        const errorData = await response.json();
+      setCheckoutMessage('Checkout successful! Your order is being processed.');
+      setCartItems([]); // Clear the cart after successful checkout
+      setCartItemCount(0);
+      setIsCheckoutModalOpen(false);
+
+      // notify navbar (cart emptied)
+      notifyCartChanged();
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'response' in error) {
+        const errorData = (
+          error as { response?: { data?: { message?: string } } }
+        ).response?.data;
         setCheckoutMessage(
-          `Checkout failed: ${errorData.message || response.statusText}`
+          `Checkout failed: ${errorData?.message || 'Unexpected error'}`
         );
+      } else {
+        setCheckoutMessage('Checkout failed: Unexpected error');
       }
-    } catch (error) {
-      console.error('Error during checkout:', error);
-      setCheckoutMessage('Checkout failed due to an unexpected error.');
     }
   };
 
@@ -566,98 +552,116 @@ const UserCart = (): JSX.Element => {
             </div>
           </div>
 
-          {/* Checkout Section */}
-          <div className="Checkout-section">
-            {/* Voucher Code Section */}
-            <div className="voucher-code-section">
-              <input
-                type="text"
-                placeholder="Enter voucher code"
-                value={voucherCode}
-                onChange={e => {
-                  setVoucherCode(e.target.value);
-                  setVoucherError(null);
-                }}
-                className="voucher-input"
-              />
+          {/* Checkout Section — hidden for admins */}
+          {!isAdmin && (
+            <div className="Checkout-section">
+              {/* Voucher Code Section */}
+              <div className="voucher-code-section">
+                <input
+                  type="text"
+                  placeholder="Enter voucher code"
+                  value={voucherCode}
+                  onChange={e => {
+                    setVoucherCode(e.target.value);
+                    setVoucherError(null);
+                  }}
+                  className="voucher-input"
+                />
+                <button
+                  onClick={applyVoucherCode}
+                  className="apply-voucher-button"
+                >
+                  Apply
+                </button>
+                {voucherError && (
+                  <div className="voucher-error">{voucherError}</div>
+                )}
+              </div>
+
+              <div className="CartSummary">
+                <h3>Cart Summary</h3>
+                <p className="summary-item">Subtotal: ${subtotal.toFixed(2)}</p>
+                <p className="summary-item">TVQ (9.975%): ${tvq.toFixed(2)}</p>
+                <p className="summary-item">TVC (5%): ${tvc.toFixed(2)}</p>
+                <p className="summary-item">Discount: ${discount.toFixed(2)}</p>
+                <p className="total-price summary-item">
+                  Total: ${total.toFixed(2)}
+                </p>
+              </div>
+
               <button
-                onClick={applyVoucherCode}
-                className="apply-voucher-button"
+                className="checkout-btn"
+                onClick={handleCheckoutConfirmation}
+                disabled={cartItems.length === 0}
               >
-                Apply
+                Checkout
               </button>
-              {voucherError && (
-                <div className="voucher-error">{voucherError}</div>
+
+              {/* Cart Billing Form Modal */}
+              {showBillingForm && (
+                <div className="checkout-modal">
+                  <CartBillingForm
+                    onSubmit={() => {
+                      setShowBillingForm(false);
+                      setIsCheckoutModalOpen(true);
+                    }}
+                  />
+                  <button onClick={() => setShowBillingForm(false)}>
+                    Cancel
+                  </button>
+                </div>
+              )}
+
+              {/* Checkout Confirmation Modal */}
+              {isCheckoutModalOpen && (
+                <div className="checkout-modal">
+                  <h3>Confirm Checkout</h3>
+                  <p>Are you sure you want to checkout?</p>
+                  <button onClick={handleCheckout}>Yes</button>
+                  <button onClick={() => setIsCheckoutModalOpen(false)}>
+                    No
+                  </button>
+                </div>
+              )}
+
+              {checkoutMessage && (
+                <div className="checkout-message">{checkoutMessage}</div>
+              )}
+
+              {/* Invoice Section */}
+              {invoices.length > 0 && (
+                <div className="invoices-section">
+                  <h2>Invoice</h2>
+                  <div className="invoice-summary">
+                    <h3>Items</h3>
+                    {invoices.map(invoice => (
+                      <div key={invoice.productId} className="invoice-card">
+                        <h4>{invoice.productName}</h4>
+                        <p>Price: ${invoice.productSalePrice.toFixed(2)}</p>
+                        <p>Quantity: {invoice.quantity}</p>
+                        <p>
+                          Total: $
+                          {(
+                            invoice.productSalePrice * invoice.quantity
+                          ).toFixed(2)}
+                        </p>
+                      </div>
+                    ))}
+                    <h3>
+                      Total: $
+                      {invoices
+                        .reduce(
+                          (total, inv) =>
+                            total + inv.productSalePrice * inv.quantity,
+                          0
+                        )
+                        .toFixed(2)}
+                    </h3>
+                  </div>
+                </div>
               )}
             </div>
-
-            <div className="CartSummary">
-              <h3>Cart Summary</h3>
-              <p className="summary-item">Subtotal: ${subtotal.toFixed(2)}</p>
-              <p className="summary-item">TVQ (9.975%): ${tvq.toFixed(2)}</p>
-              <p className="summary-item">TVC (5%): ${tvc.toFixed(2)}</p>
-              <p className="summary-item">Discount: ${discount.toFixed(2)}</p>
-              <p className="total-price summary-item">
-                Total: ${total.toFixed(2)}
-              </p>
-            </div>
-
-            <button
-              className="checkout-btn"
-              onClick={handleCheckoutConfirmation}
-              disabled={cartItems.length === 0}
-            >
-              Checkout
-            </button>
-
-            {/* Checkout Confirmation Modal */}
-            {isCheckoutModalOpen && (
-              <div className="checkout-modal">
-                <h3>Confirm Checkout</h3>
-                <p>Are you sure you want to checkout?</p>
-                <button onClick={handleCheckout}>Yes</button>
-                <button onClick={() => setIsCheckoutModalOpen(false)}>
-                  No
-                </button>
-              </div>
-            )}
-            {checkoutMessage && (
-              <div className="checkout-message">{checkoutMessage}</div>
-            )}
-
-            {/* Invoice Section */}
-            {invoices.length > 0 && (
-              <div className="invoices-section">
-                <h2>Invoice</h2>
-                <div className="invoice-summary">
-                  <h3>Items</h3>
-                  {invoices.map(invoice => (
-                    <div key={invoice.productId} className="invoice-card">
-                      <h4>{invoice.productName}</h4>
-                      <p>Price: ${invoice.productSalePrice.toFixed(2)}</p>
-                      <p>Quantity: {invoice.quantity}</p>
-                      <p>
-                        Total: $
-                        {(invoice.productSalePrice * invoice.quantity).toFixed(
-                          2
-                        )}
-                      </p>
-                    </div>
-                  ))}
-                  <h3>
-                    Total: $
-                    {invoices
-                      .reduce(
-                        (total, invoice) =>
-                          total + invoice.productSalePrice * invoice.quantity,
-                        0
-                      )
-                      .toFixed(2)}
-                  </h3>
-                </div>
-              </div>
-            )}
-          </div>
+          )}
         </div>
 
         {/* Wishlist Section */}
@@ -673,9 +677,10 @@ const UserCart = (): JSX.Element => {
                   changeItemQuantity={() => {}}
                   deleteItem={() => {}}
                   addToWishlist={() => {}}
-                  addToCart={addToCartFunction} // Use the updated addToCart function
+                  addToCart={addToCartFunction}
                   isInWishlist={true}
-                  showNotification={setNotificationMessage} // Pass the notification handler
+                  removeFromWishlist={removeFromWishlist}
+                  showNotification={setNotificationMessage}
                 />
               ))
             ) : (

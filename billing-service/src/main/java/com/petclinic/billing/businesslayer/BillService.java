@@ -68,7 +68,8 @@ public interface BillService {
 
     Mono<Double> calculateCurrentBalance(String customerId);
 
-    Mono<Bill> processPayment(String customerId, String billId, PaymentRequestDTO paymentRequestDTO) throws InvalidPaymentException;
+    Mono<BillResponseDTO> processPayment(String customerId, String billId, PaymentRequestDTO paymentRequestDTO);
+
 
 
 }

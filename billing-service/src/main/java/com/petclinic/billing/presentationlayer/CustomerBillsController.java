@@ -12,8 +12,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import com.petclinic.billing.util.EntityDtoUtil;
+
 
 @RestController
 @Slf4j
@@ -31,7 +34,7 @@ public class CustomerBillsController {
         return billService.getBillsByCustomerId(customerId);
     }
 
-    @GetMapping(value = "/status", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(value = "/status", produces = MediaType.APPLICATION_JSON_VALUE)
     public Flux<BillResponseDTO> getBillsByStatus(@PathVariable("customerId") String customerId,
                                                   @RequestParam("status") BillStatus status) {
         return billService.getBillsByCustomerIdAndStatus(customerId, status);
@@ -50,7 +53,7 @@ public class CustomerBillsController {
                 .map(pdf -> {
                     HttpHeaders headers = new HttpHeaders();
                     headers.setContentType(MediaType.APPLICATION_PDF);
-                    headers.setContentDispositionFormData("attachment", "bill-" + billId + ".pdf");
+                    headers.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=bill-" + billId + ".pdf"); //inline lets the browser open the PDF in a new tab.
                     return new ResponseEntity<>(pdf, headers, HttpStatus.OK);
                 })
                 .onErrorResume(e -> {
@@ -63,4 +66,24 @@ public class CustomerBillsController {
     public Mono<Double> getCurrentBalance(@PathVariable String customerId) {
         return billService.calculateCurrentBalance(customerId);
     }
+
+    @PostMapping("/{billId}/pay")
+    public Mono<ResponseEntity<BillResponseDTO>> payBill(
+            @PathVariable String customerId,
+            @PathVariable String billId,
+            @RequestBody PaymentRequestDTO paymentRequest) {
+
+        return billService.processPayment(customerId, billId, paymentRequest)
+                .map(ResponseEntity::ok)   // already BillResponseDTO
+                .onErrorResume(InvalidPaymentException.class,
+                        e -> Mono.just(ResponseEntity.status(HttpStatus.BAD_REQUEST).build()))
+                .onErrorResume(ResponseStatusException.class,
+                        e -> Mono.just(ResponseEntity.status(e.getStatus()).build()));
+
+    }
+
+
+
+
+
 }

@@ -8,8 +8,8 @@ angular.module('inventoryProductList')
         self.currentPage = $stateParams.page || 0;
         self.pageSize = $stateParams.size || pageSize;
         self.actualCurrentPageShown = parseInt(self.currentPage) + 1;
-        self.baseUrl = "api/gateway/inventory/" + $stateParams.inventoryId + "/products-pagination?page=" + self.currentPage + "&size=" + self.pageSize;
-        self.baseURLforTotalNumberOfProductsByFiltering = "api/gateway/inventory/" + $stateParams.inventoryId + "/products-count";
+        self.baseUrl = "api/gateway/inventories/" + $stateParams.inventoryId + "/products-pagination?page=" + self.currentPage + "&size=" + self.pageSize;
+        self.baseURLforTotalNumberOfProductsByFiltering = "api/gateway/inventories/" + $stateParams.inventoryId + "/products-count";
         self.lastParams = {
             productName: '',
             productQuantity: '',
@@ -42,7 +42,7 @@ angular.module('inventoryProductList')
         function proceedToDelete(product) {
             if (!product.isTemporarilyDeleted) return;  // In case the user clicked undo just before the timeout.
 
-            $http.delete('api/gateway/inventory/' + product.inventoryId + '/products/' + product.productId)
+            $http.delete('api/gateway/inventories/' + product.inventoryId + '/products/' + product.productId)
                 .then(successCallback, errorCallback)
 
             function showNotification(message) {
@@ -125,7 +125,7 @@ angular.module('inventoryProductList')
             }
 
 
-            var apiUrl = "api/gateway/inventory/" + inventoryId + "/products";
+            var apiUrl = "api/gateway/inventories/" + inventoryId + "/products";
             if (queryString !== '') {
                 apiUrl += "?" + queryString;
             }
@@ -159,7 +159,7 @@ angular.module('inventoryProductList')
             if (varIsConf) {
                 let inventoryId = $stateParams.inventoryId;  // Retrieve the inventoryId from the appropriate location
 
-                $http.delete('api/gateway/inventory/' + inventoryId + '/products')
+                $http.delete('api/gateway/inventories/' + inventoryId + '/products')
                     .then(function(response) {
                         alert("All products for this inventory have been deleted!");
                         fetchProductList();
@@ -185,7 +185,7 @@ angular.module('inventoryProductList')
                 self.lastParams.productQuantity = null;
                 let inventoryId = $stateParams.inventoryId;
                 let response = [];
-                $http.get('api/gateway/inventory/' + $stateParams.inventoryId + '/products-pagination?page=' + self.currentPage + '&size=' + self.pageSize).then(function (resp) {
+                $http.get('api/gateway/inventories/' + $stateParams.inventoryId + '/products-pagination?page=' + self.currentPage + '&size=' + self.pageSize).then(function (resp) {
                     resp.data.forEach(function (current) {
                         current.productPrice = current.productPrice.toFixed(2);
                         current.productSalePrice = current.productSalePrice.toFixed(2);
@@ -269,7 +269,7 @@ angular.module('inventoryProductList')
                     query += '&productSalePrice='+productSalePrice
                 }
             }
-            $http.get('api/gateway/inventory/' + $stateParams.inventoryId + '/products-count' + query)
+            $http.get('api/gateway/inventories/' + $stateParams.inventoryId + '/products-count' + query)
                 .then(function (resp) {
                     self.totalItems = resp.data;
                     self.totalPages = Math.ceil(self.totalItems / parseInt(self.pageSize));

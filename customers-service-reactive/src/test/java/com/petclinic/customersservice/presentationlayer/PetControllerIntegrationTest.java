@@ -1,7 +1,10 @@
 package com.petclinic.customersservice.presentationlayer;
 
+import com.petclinic.customersservice.customersExceptions.exceptions.InvalidInputException;
+import com.petclinic.customersservice.customersExceptions.exceptions.NotFoundException;
 import com.petclinic.customersservice.data.Pet;
 import com.petclinic.customersservice.data.PetRepo;
+import com.petclinic.customersservice.data.PetType;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +17,7 @@ import reactor.test.StepVerifier;
 
 import java.nio.charset.StandardCharsets;
 
+import static com.mongodb.assertions.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -149,5 +153,64 @@ class PetControllerIntegrationTest {
                 .isActive("true")
                 .build();
     }
+
+
+
+    @Test
+    void deletePetType_WithEmptyId_ShouldReturnBadRequest() {
+        try {
+            client.delete()
+                    .uri("/owners/petTypes/")
+                    .exchange()
+                    .expectStatus().is4xxClientError();
+        } catch (NotFoundException e) {
+            fail("Unexpected NotFoundException: " + e.getMessage());
+        } catch (InvalidInputException e) {
+            fail("Unexpected InvalidInputException: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Test failed with unexpected exception: " + e.getMessage());
+            e.printStackTrace();
+            fail("Test failed with exception: " + e.getMessage());
+        }
+    }
+
+
+    @Test
+    void deletePetType_WhenPetTypeNotFound_ShouldReturnNoContent() {
+        try {
+            client.delete()
+                    .uri("/owners/petTypes/non-existent-pet-type")
+                    .exchange()
+                    .expectStatus().isNoContent();
+        } catch (NotFoundException e) {
+            fail("Unexpected NotFoundException: " + e.getMessage());
+        } catch (InvalidInputException e) {
+            fail("Unexpected InvalidInputException: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Test failed with unexpected exception: " + e.getMessage());
+            e.printStackTrace();
+            fail("Test failed with exception: " + e.getMessage());
+        }
+    }
+
+    @Test
+    void deletePetType_WithInvalidIdFormat_ShouldReturnNoContent() {
+        try {
+            client.delete()
+                    .uri("/owners/petTypes/invalid@id#format")
+                    .exchange()
+                    .expectStatus().isNoContent();
+        } catch (NotFoundException e) {
+            fail("Unexpected NotFoundException: " + e.getMessage());
+        } catch (InvalidInputException e) {
+            fail("Unexpected InvalidInputException: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Test failed with unexpected exception: " + e.getMessage());
+            e.printStackTrace();
+            fail("Test failed with exception: " + e.getMessage());
+        }
+    }
+
+
 
 }

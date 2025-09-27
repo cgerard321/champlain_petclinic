@@ -54,8 +54,9 @@ public class DataSetupService implements CommandLineRunner {
         PetType pt4 = new PetType("4", "9133c9b8-4ffd-4866-a5ed-287117c60a19", "Snake", "Reptile");
         PetType pt5 = new PetType("5", "2093c9b8-4ffd-4866-a5ed-287117c60a11", "Bird", "Mammal");
         PetType pt6 = new PetType("6", "1103c9b8-4ffd-4866-a5ed-287117c60a89", "Hamster", "Mammal");
+        PetType pt7 = new PetType("7", "9993c9b8-4ffd-4866-a5ed-287117c60a99", "Others", "Various");
 
-        Flux.just(pt1, pt2, pt3, pt4, pt5, pt6)
+        Flux.just(pt1, pt2, pt3, pt4, pt5, pt6, pt7)
                 .flatMap(p -> petTypeService.insertPetType(Mono.just(p))
                         .log(p.toString()))
                 .subscribe();
