@@ -1,16 +1,13 @@
-FROM golang:1.20 AS builder
+FROM golang:1.24 AS builder
 WORKDIR /app/GoMailer
 COPY . .
-
-# Resolve dependencies
-RUN go mod tidy
-RUN go mod download
-
-# Build
+RUN ["go", "install", "github.com/swaggo/swag/cmd/swag@v1.3.2"]
+RUN ["swag", "init"]
+RUN ["go", "get", "-d", "-v", "./..."]
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o app .
 
 FROM scratch
 COPY --from=builder /app/GoMailer/app .
 EXPOSE 8080
-ENV GIN_MODE=release
+ENV GIN_MODE release
 ENTRYPOINT ["./app"]
