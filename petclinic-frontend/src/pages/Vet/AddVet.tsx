@@ -8,7 +8,6 @@ import { useNavigate } from 'react-router-dom';
 import { AppRoutePaths } from '@/shared/models/path.routes';
 import { Button, Modal, Form } from 'react-bootstrap';
 import { Workday } from '@/features/veterinarians/models/Workday.ts';
-import axios from 'axios';
 
 const AddVet: React.FC = (): JSX.Element => {
   const navigate = useNavigate();
@@ -63,20 +62,12 @@ const AddVet: React.FC = (): JSX.Element => {
     };
 
     try {
-      const response = await addVet(vetPayload);
-      if (response.status === 201) {
-        handleClose();
-        navigate(AppRoutePaths.Vet);
-        window.location.reload();
-      } else {
-        console.error('Failed to add vet');
-      }
+      await addVet(vetPayload);
+      handleClose();
+      navigate(AppRoutePaths.Vet);
+      window.location.reload();
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        console.error('Error:', error.response?.data || error.message);
-      } else {
-        console.error('Error:', error);
-      }
+      console.error('Error:', error);
     }
   };
 

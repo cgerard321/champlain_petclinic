@@ -13,24 +13,16 @@ const DeleteVetEducation: React.FC<DeleteVetEducationProps> = ({
   onEducationDeleted,
 }) => {
   const handleDeleteEducation = async (
-    event: React.MouseEvent
+    event: React.MouseEvent<HTMLButtonElement>
   ): Promise<void> => {
     event.stopPropagation();
-    const confirmed = window.confirm(
-      'Are you sure you want to delete this education entry?'
-    );
-    if (!confirmed) return;
-
-    try {
-      await deleteVetEducation(vetId, educationId);
-
-      // Call the callback function to update the parent component
-      onEducationDeleted(educationId);
-
-      alert('Education entry deleted successfully.');
-    } catch (error) {
-      console.error('Failed to delete education entry:', error);
-      alert('Failed to delete education entry.');
+    if (window.confirm('Are you sure you want to delete this Education?')) {
+      try {
+        await deleteVetEducation(vetId, educationId);
+        onEducationDeleted(educationId);
+      } catch (error) {
+        console.error('Failed to delete education:', error);
+      }
     }
   };
 
