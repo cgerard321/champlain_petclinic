@@ -99,10 +99,13 @@ export default function ProductList(): JSX.Element {
 
   useEffect(() => {
     fetchProducts();
-    const savedProducts = localStorage.getItem('recentlyClickedProducts');
+    const savedProducts = localStorage.getItem(
+      `recentlyClickedProducts_${user.userId}`
+    );
     if (savedProducts) {
       setRecentlyClickedProducts(JSON.parse(savedProducts));
     }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -171,7 +174,7 @@ export default function ProductList(): JSX.Element {
       }
 
       localStorage.setItem(
-        'recentlyClickedProducts',
+        `recentlyClickedProducts_${user.userId}`,
         JSON.stringify(updatedProducts)
       );
 
