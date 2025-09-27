@@ -1,276 +1,229 @@
-"use strict";
+'use strict';
 
-angular.module("petTypeList").controller("PetTypeListController", [
-  "$http",
-  "$stateParams",
-  "$scope",
-  "$state",
-  function ($http, $stateParams, $scope, $state) {
-    var vm = this;
-    /*------------------------------------------------------------*/
-    vm.currentPage = $stateParams.page || 0;
-    vm.pageSize = $stateParams.size || 5;
-    /*------------------------------------------------------------*/
-    vm.currentPageOnSite = parseInt(vm.currentPage) + 1;
-    /*------------------------------------------------------------*/
-    vm.petTypeId = null;
-    vm.name = null;
-    vm.description = null;
-    vm.selectedSize = null;
-    /*------------------------------------------------------------*/
-    vm.searchActive = false;
-    vm.allPetTypes = []; // Store all pet types for filtering
-    /*------------------------------------------------------------*/
-    // Inline editing functionality
-    vm.editingPetType = null;
-    vm.editForm = {};
-    /*------------------------------------------------------------*/
+angular.module('petTypeList')
+    .controller('PetTypeListController',
+        ['$http', '$stateParams', '$scope', '$state',
+            function ($http, $stateParams, $scope, $state) {
 
-    // Initial data load
-    loadDefaultData();
+                var self = this;
 
-    function loadDefaultData() {
-      $http.get("api/gateway/owners/petTypes").then(function (resp) {
-        vm.allPetTypes = resp.data;
-        vm.petTypes = resp.data;
-        console.log("Pet types loaded:", resp.data);
 
-        // Calculate pagination
-        vm.totalItems = vm.allPetTypes.length;
-        vm.totalPages = Math.ceil(vm.totalItems / parseInt(vm.pageSize));
+                self.petTypes = [];
+                self.showAddForm = false;
+                self.newPetType = { name: '', petTypeDescription: '' };
 
-        // Apply initial pagination
-        applyPagination();
-        updateCurrentPageOnSite();
-      });
-    }
+                self.toggleAddForm = function () {
+                    self.showAddForm = !self.showAddForm;
+                    if (!self.showAddForm) {
+                        self.newPetType = { name: '', petTypeDescription: '' };
+                    }
+                };
 
-    function applyPagination() {
-      var startIndex = vm.currentPage * parseInt(vm.pageSize);
-      var endIndex = startIndex + parseInt(vm.pageSize);
-      vm.petTypes = vm.allPetTypes.slice(startIndex, endIndex);
-    }
+                self.addPetType = function () {
+                    var lettersOnly = /^[a-zA-Z\s]+$/;
 
-    vm.searchPetTypesByPaginationAndFilters = function (
-      currentPage = 0,
-      prevOrNextPressed = false
-    ) {
-      // Collect search parameters
-      vm.selectedSize = document.getElementById("sizeInput").value;
+                    if (!lettersOnly.test(self.newPetType.name) ||
+                        !lettersOnly.test(self.newPetType.petTypeDescription)) {
+                        alert('Name and Description must contain letters and spaces only.');
+                        return;
+                    }
 
-      if (!prevOrNextPressed) {
-        vm.petTypeId = document.getElementById("petTypeIdInput").value;
-        vm.name = document.getElementById("nameInput").value;
-        vm.description = document.getElementById("descriptionInput").value;
+                    if (!self.newPetType.name || !self.newPetType.petTypeDescription) {
+                        alert('Name and Description are required.');
+                        return;
+                    }
 
-        // Check if all input fields are empty
-        if (
-          checkIfAllInputFieldsAreEmptyOrNull(
-            vm.petTypeId,
-            vm.name,
-            vm.description,
-            vm.selectedSize
-          )
-        ) {
-          alert(
-            "Oops! It seems like you forgot to enter any filter criteria. Please provide some filter input to continue."
-          );
-          return;
-        }
-      }
+                    $http.post('api/gateway/owners/petTypes', self.newPetType)
+                        .then(function () {
+                            alert('Pet type added successfully!');
+                            self.showAddForm = false;
+                            self.newPetType = { name: '', petTypeDescription: '' };
+                            loadDefaultData();
+                        }, function (error) {
+                            alert('Failed to add pet type: ' + (error.data.message || 'Unknown error'));
+                        });
+                };
 
-      vm.searchActive = true;
+                self.editingPetType = null;
+                self.editForm = {};
 
-      // Apply client-side filtering
-      var filteredPetTypes = vm.allPetTypes;
+                self.editPetType = function (petType) {
+                    self.editingPetType = petType.petTypeId;
+                    self.editForm = {
+                        name: petType.name,
+                        petTypeDescription: petType.petTypeDescription
+                    };
+                };
 
-      // Apply filters
-      if (vm.petTypeId) {
-        filteredPetTypes = filteredPetTypes.filter(function (petType) {
-          return (
-            petType.petTypeId &&
-            petType.petTypeId.toString().includes(vm.petTypeId)
-          );
-        });
-      }
+                self.savePetType = function (petTypeId) {
+                    $http.put('api/gateway/owners/petTypes/' + petTypeId, self.editForm)
+                        .then(function () {
+                            alert('Pet type updated successfully!');
+                            loadDefaultData();
+                            self.cancelEdit();
+                        }, function (error) {
+                            alert('Failed to update pet type: ' + (error.data.message || 'Unknown error'));
+                        });
+                };
 
-      if (vm.name) {
-        filteredPetTypes = filteredPetTypes.filter(function (petType) {
-          return (
-            petType.name &&
-            petType.name.toLowerCase().includes(vm.name.toLowerCase())
-          );
-        });
-      }
+                self.cancelEdit = function () {
+                    self.editingPetType = null;
+                    self.editForm = {};
+                };
 
-      if (vm.description) {
-        filteredPetTypes = filteredPetTypes.filter(function (petType) {
-          return (
-            petType.petTypeDescription &&
-            petType.petTypeDescription
-              .toLowerCase()
-              .includes(vm.description.toLowerCase())
-          );
-        });
-      }
+                self.deletePetType = function (petTypeId) {
+                    let isConfirmed = confirm('Are you sure you want to delete this pet type?');
+                    if (isConfirmed) {
+                        $http.delete('api/gateway/owners/petTypes/' + petTypeId)
+                            .then(function () {
+                                alert('Pet type deleted successfully!');
+                                loadDefaultData();
+                            }, function (error) {
+                                alert('Failed to delete pet type: ' + (error.data.message || 'Unknown error'));
+                            });
+                    }
+                };
 
-      // Update page size if changed
-      if (vm.selectedSize) {
-        vm.pageSize = vm.selectedSize;
-      }
+                self.currentPage = $stateParams.page || 0;
+                self.pageSize = $stateParams.size || 5;
+                self.currentPageOnSite = parseInt(self.currentPage) + 1;
 
-      // Reset to first page if not navigating
-      if (!prevOrNextPressed) {
-        vm.currentPage = 0;
-      }
+                self.petTypeId = null;
+                self.name = null;
+                self.description = null;
+                self.selectedSize = null;
 
-      // Apply pagination
-      vm.totalItems = filteredPetTypes.length;
-      vm.totalPages = Math.ceil(vm.totalItems / parseInt(vm.pageSize));
+                self.searchActive = false;
+                self.allPetTypes = [];
 
-      var startIndex = vm.currentPage * parseInt(vm.pageSize);
-      var endIndex = startIndex + parseInt(vm.pageSize);
-      vm.petTypes = filteredPetTypes.slice(startIndex, endIndex);
+                loadDefaultData();
 
-      console.log("Filtered pet types:", vm.petTypes);
-      updateCurrentPageOnSite();
-    };
+                function loadDefaultData() {
+                    $http.get('api/gateway/owners/petTypes').then(function (resp) {
+                        self.allPetTypes = resp.data;
+                        self.petTypes = resp.data;
 
-    function checkIfAllInputFieldsAreEmptyOrNull(
-      petTypeId,
-      name,
-      description,
-      selectedSize
-    ) {
-      return (
-        (petTypeId === null || petTypeId === "") &&
-        (name === null || name === "") &&
-        (description === null || description === "") &&
-        (selectedSize === null || selectedSize === "")
-      );
-    }
+                        self.totalItems = self.allPetTypes.length;
+                        self.totalPages = Math.ceil(self.totalItems / parseInt(self.pageSize));
 
-    vm.clearInputAndResetDefaultData = function () {
-      var petTypeIdInput = document.getElementById("petTypeIdInput");
-      var nameInput = document.getElementById("nameInput");
-      var descriptionInput = document.getElementById("descriptionInput");
-      var sizeInput = document.getElementById("sizeInput");
+                        applyPagination();
+                        updateCurrentPageOnSite();
+                    });
+                }
 
-      if (petTypeIdInput) petTypeIdInput.value = "";
-      if (nameInput) nameInput.value = "";
-      if (descriptionInput) descriptionInput.value = "";
-      if (sizeInput) sizeInput.selectedIndex = 0;
+                function applyPagination() {
+                    var startIndex = self.currentPage * parseInt(self.pageSize);
+                    var endIndex = startIndex + parseInt(self.pageSize);
+                    self.petTypes = self.allPetTypes.slice(startIndex, endIndex);
+                }
 
-      vm.currentPage = 0;
-      vm.pageSize = 5;
+                self.searchPetTypesByPaginationAndFilters = function (currentPage = 0, prevOrNextPressed = false) {
+                    self.selectedSize = document.getElementById('sizeInput').value;
 
-      vm.petTypeId = null;
-      vm.name = null;
-      vm.description = null;
-      vm.selectedSize = null;
+                    if (!prevOrNextPressed) {
+                        self.petTypeId = document.getElementById('petTypeIdInput').value;
+                        self.name = document.getElementById('nameInput').value;
+                        self.description = document.getElementById('descriptionInput').value;
 
-      vm.searchActive = false;
+                        if (!self.petTypeId && !self.name && !self.description && !self.selectedSize) {
+                            alert('Oops! It seems like you forgot to enter any filter criteria.');
+                            return;
+                        }
+                    }
 
-      // Reset to show all pet types
-      vm.petTypes = vm.allPetTypes;
-      vm.totalItems = vm.allPetTypes.length;
-      vm.totalPages = Math.ceil(vm.totalItems / parseInt(vm.pageSize));
-      applyPagination();
-      updateCurrentPageOnSite();
+                    self.searchActive = true;
 
-      alert("All filters have been cleared successfully.");
-    };
+                    var filteredPetTypes = self.allPetTypes;
 
-    vm.goNextPage = function () {
-      if (parseInt(vm.currentPage) + 1 < vm.totalPages) {
-        var currentPageInt = parseInt(vm.currentPage) + 1;
-        vm.currentPage = currentPageInt.toString();
-        updateCurrentPageOnSite();
+                    if (self.petTypeId) {
+                        filteredPetTypes = filteredPetTypes.filter(function (petType) {
+                            return petType.petTypeId && petType.petTypeId.toString().includes(self.petTypeId);
+                        });
+                    }
 
-        if (vm.searchActive) {
-          vm.searchPetTypesByPaginationAndFilters(currentPageInt, true);
-        } else {
-          applyPagination();
-        }
-      }
-    };
+                    if (self.name) {
+                        filteredPetTypes = filteredPetTypes.filter(function (petType) {
+                            return petType.name && petType.name.toLowerCase().includes(self.name.toLowerCase());
+                        });
+                    }
 
-    vm.goPreviousPage = function () {
-      if (vm.currentPage - 1 >= 0) {
-        var currentPageInt = parseInt(vm.currentPage) - 1;
-        vm.currentPage = currentPageInt.toString();
-        updateCurrentPageOnSite();
+                    if (self.description) {
+                        filteredPetTypes = filteredPetTypes.filter(function (petType) {
+                            return petType.petTypeDescription &&
+                                petType.petTypeDescription.toLowerCase().includes(self.description.toLowerCase());
+                        });
+                    }
 
-        if (vm.searchActive) {
-          vm.searchPetTypesByPaginationAndFilters(currentPageInt, true);
-        } else {
-          applyPagination();
-        }
-      }
-    };
+                    if (self.selectedSize) {
+                        self.pageSize = self.selectedSize;
+                    }
 
-    function updateCurrentPageOnSite() {
-      vm.currentPageOnSite = parseInt(vm.currentPage) + 1;
-      console.log("Current page:", vm.currentPage);
-    }
+                    if (!prevOrNextPressed) {
+                        self.currentPage = 0;
+                    }
 
-    // Inline editing functionality
-    vm.editPetType = function (petType) {
-      vm.editingPetType = petType.petTypeId;
-      vm.editForm = {
-        name: petType.name,
-        petTypeDescription: petType.petTypeDescription,
-      };
-    };
+                    self.totalItems = filteredPetTypes.length;
+                    self.totalPages = Math.ceil(self.totalItems / parseInt(self.pageSize));
 
-    vm.savePetType = function (petTypeId) {
-      $http.put("api/gateway/owners/petTypes/" + petTypeId, vm.editForm).then(
-        function (response) {
-          console.log("Pet type updated successfully");
-          alert("Pet type updated successfully!");
+                    var startIndex = self.currentPage * parseInt(self.pageSize);
+                    var endIndex = startIndex + parseInt(self.pageSize);
+                    self.petTypes = filteredPetTypes.slice(startIndex, endIndex);
 
-          // Refresh the pet types list
-          loadDefaultData();
+                    updateCurrentPageOnSite();
+                };
 
-          vm.cancelEdit();
-        },
-        function (error) {
-          console.error("Error updating pet type:", error);
-          alert(
-            "Failed to update pet type: " +
-              (error.data.message || "Unknown error")
-          );
-        }
-      );
-    };
+                self.clearInputAndResetDefaultData = function () {
+                    document.getElementById('petTypeIdInput').value = '';
+                    document.getElementById('nameInput').value = '';
+                    document.getElementById('descriptionInput').value = '';
+                    document.getElementById('sizeInput').selectedIndex = 0;
 
-    vm.cancelEdit = function () {
-      vm.editingPetType = null;
-      vm.editForm = {};
-    };
+                    self.currentPage = 0;
+                    self.pageSize = 5;
+                    self.petTypeId = null;
+                    self.name = null;
+                    self.description = null;
+                    self.selectedSize = null;
+                    self.searchActive = false;
 
-    vm.deletePetType = function (petTypeId) {
-      let isConfirmed = confirm(
-        "Are you sure you want to delete this pet type?"
-      );
-      if (isConfirmed) {
-        $http.delete("api/gateway/owners/petTypes/" + petTypeId).then(
-          function (response) {
-            console.log("Pet type deleted successfully");
-            alert("Pet type deleted successfully!");
+                    self.petTypes = self.allPetTypes;
+                    self.totalItems = self.allPetTypes.length;
+                    self.totalPages = Math.ceil(self.totalItems / parseInt(self.pageSize));
+                    applyPagination();
+                    updateCurrentPageOnSite();
 
-            // Refresh the pet types list
-            loadDefaultData();
-          },
-          function (error) {
-            console.error("Error deleting pet type:", error);
-            alert(
-              "Failed to delete pet type: " +
-                (error.data.message || "Unknown error")
-            );
-          }
-        );
-      }
-    };
-  },
-]);
+                    alert('All filters have been cleared successfully.');
+                };
+
+                self.goNextPage = function () {
+                    if (parseInt(self.currentPage) + 1 < self.totalPages) {
+                        var currentPageInt = parseInt(self.currentPage) + 1;
+                        self.currentPage = currentPageInt.toString();
+                        updateCurrentPageOnSite();
+
+                        if (self.searchActive) {
+                            self.searchPetTypesByPaginationAndFilters(currentPageInt, true);
+                        } else {
+                            applyPagination();
+                        }
+                    }
+                };
+
+                self.goPreviousPage = function () {
+                    if (self.currentPage - 1 >= 0) {
+                        var currentPageInt = parseInt(self.currentPage) - 1;
+                        self.currentPage = currentPageInt.toString();
+                        updateCurrentPageOnSite();
+
+                        if (self.searchActive) {
+                            self.searchPetTypesByPaginationAndFilters(currentPageInt, true);
+                        } else {
+                            applyPagination();
+                        }
+                    }
+                };
+
+                function updateCurrentPageOnSite() {
+                    self.currentPageOnSite = parseInt(self.currentPage) + 1;
+                }
+            }]);

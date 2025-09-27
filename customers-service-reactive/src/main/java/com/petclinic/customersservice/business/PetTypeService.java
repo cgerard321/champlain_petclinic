@@ -17,8 +17,9 @@ public interface PetTypeService {
     //Flux<PetType> getAllPetTypes();
 
     Flux<PetTypeResponseDTO> getAllPetTypes();
-    Mono<PetTypeResponseDTO> getPetTypeByPetTypeId(String petTypeId);
 
+    Mono<PetTypeResponseDTO> getPetTypeByPetTypeId(String petTypeId);
+    Mono<PetTypeResponseDTO> addPetType(Mono<PetTypeRequestDTO> petTypeRequestDTOMono);
     Mono<PetTypeResponseDTO> updatePetType(Mono<PetTypeRequestDTO> petTypeRequestDTO, String petTypeId);
 
     Mono<Void> deletePetTypeByPetTypeId(String petTypeId);

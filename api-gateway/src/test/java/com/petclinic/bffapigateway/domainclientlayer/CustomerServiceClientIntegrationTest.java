@@ -407,6 +407,41 @@ public class CustomerServiceClientIntegrationTest {
         assertEquals(firstPetTypeFromFlux.getName(), TEST_PETTYPE.getName());
     }
 
+    @Test
+    void whenAddPetType_ShouldReturnCreatedPetType() throws Exception {
+        // Arrange
+        final PetTypeRequestDTO request = PetTypeRequestDTO.builder()
+                .name("Hamster")
+                .petTypeDescription("Small and friendly rodent")
+                .build();
+
+        final PetTypeResponseDTO expectedResponse = PetTypeResponseDTO.builder()
+                .petTypeId("petTypeId-xyz")
+                .name("Hamster")
+                .petTypeDescription("Small and friendly rodent")
+                .build();
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(201)
+                .setHeader("Content-Type", "application/json")
+                .setBody(mapper.writeValueAsString(expectedResponse)));
+
+        // Act
+        Mono<PetTypeResponseDTO> result =
+                customersServiceClient.addPetType(Mono.just(request));
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNextMatches(r ->
+                        r.getPetTypeId().equals(expectedResponse.getPetTypeId()) &&
+                                r.getName().equals(expectedResponse.getName()) &&
+                                r.getPetTypeDescription().equals(expectedResponse.getPetTypeDescription()))
+                .verifyComplete();
+
+        RecordedRequest recorded = server.takeRequest();
+        assertEquals("/owners/petTypes", recorded.getPath());
+        assertEquals("POST", recorded.getMethod());
+    }
 
     @Test
     void testUpdatePet() throws Exception {
