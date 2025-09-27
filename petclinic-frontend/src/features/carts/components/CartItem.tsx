@@ -98,18 +98,20 @@ const CartItem = ({
         {isInWishlist && (
           <div className="cartitem-actions">
             <button
-              className="addToCart-button"
-              onClick={handleAddToCart}
-              aria-label={`Add ${item.productName} to cart`}
+                className="addToCart-button"
+                onClick={handleAddToCart}
+                aria-label={`Add ${item.productName} to cart`}
+                disabled={item.productQuantity === 0}
+                aria-disabled={item.productQuantity === 0}
             >
-              Add to Cart
+              {item.productQuantity === 0 ? 'Out of Stock' : 'Add to Cart'}
             </button>
 
             <button
-              className="wishlist-button danger"
-              style={{ marginLeft: '0.5rem' }}
-              onClick={() => removeFromWishlist && removeFromWishlist(item)}
-              aria-label={`Remove ${item.productName} from wishlist`}
+                className="wishlist-button danger"
+                style={{ marginLeft: '0.5rem' }}
+                onClick={() => removeFromWishlist && removeFromWishlist(item)}
+                aria-label={`Remove ${item.productName} from wishlist`}
             >
               Remove
             </button>
