@@ -12,7 +12,6 @@ import { IsAdmin } from '@/context/UserContext';
 import { AppRoutePaths } from '@/shared/models/path.routes';
 import { getProductByProductId } from '@/features/products/api/getProductByProductId';
 
-
 // NEW: cart change notifier (lets the NavBar update automatically)
 import { notifyCartChanged } from '../api/cartEvent';
 
@@ -109,13 +108,13 @@ const UserCart = (): JSX.Element => {
 
         setCartItems(products);
         const enrichedWishlist = await Promise.all(
-            (data.wishListProducts || []).map(async (item: ProductModel) => {
-              const fullProduct = await getProductByProductId(item.productId);
-              return {
-                ...fullProduct,
-                quantity: item.quantity ?? 1,
-              };
-            })
+          (data.wishListProducts || []).map(async (item: ProductModel) => {
+            const fullProduct = await getProductByProductId(item.productId);
+            return {
+              ...fullProduct,
+              quantity: item.quantity ?? 1,
+            };
+          })
         );
         setWishlistItems(enrichedWishlist);
       } catch (err: unknown) {
@@ -344,7 +343,9 @@ const UserCart = (): JSX.Element => {
   // Add to Cart Function (from Wishlist)
   const addToCartFunction = async (item: ProductModel): Promise<void> => {
     if (item.productQuantity <= 0) {
-      setNotificationMessage(`${item.productName} is out of stock and cannot be added to the cart.`);
+      setNotificationMessage(
+        `${item.productName} is out of stock and cannot be added to the cart.`
+      );
       return;
     }
     try {
