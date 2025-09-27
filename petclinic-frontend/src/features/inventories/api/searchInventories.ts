@@ -19,8 +19,8 @@ export async function searchInventories(
 
     const queryString = queryParams.toString();
     const url = queryString
-      ? `/inventory?page=${currentPage}&size=${listSize}&${queryString}`
-      : `/inventory?page=${currentPage}&size=${listSize}`;
+      ? `/inventories?page=${currentPage}&size=${listSize}&${queryString}`
+      : `/inventories?page=${currentPage}&size=${listSize}`;
 
     const response = await axiosInstance.get<Inventory[]>(url, {
       useV2: false,

@@ -64,7 +64,7 @@ const AddSupplyToInventory: React.FC = (): JSX.Element => {
         setSuccessMessage('Supply added successfully');
         setShowNotification(true);
         setTimeout(() => {
-          navigate(`/inventory/${inventoryId}/products`);
+          navigate(`/inventories/${inventoryId}/products`);
         }, 2000);
       }
     } catch (error) {

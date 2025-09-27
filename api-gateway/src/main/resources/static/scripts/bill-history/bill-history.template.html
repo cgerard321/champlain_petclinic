@@ -1,234 +1,141 @@
-<h2 class="titleOwner">Bill History</h2>
+<div class="bill-history-container">
+    <h2 class="titleOwner">Bill History</h2>
 
-<a ui-sref="billNew">
-    <button class="add-bill-button btn btn-success">Add Bill</button>
-</a>
-<br><br>
+    <div class="btn-toolbar mb-3 toolbar-gap" role="toolbar" aria-label="Bills toolbar">
+        <div class="btn-group" role="group">
+            <button class="btn btn-primary"
+                    ng-class="{'active': $ctrl.toolbar.open==='search'}"
+                    ng-click="$ctrl.togglePanel('search')">Search</button>
+        </div>
+        <div class="btn-group" role="group">
+            <button class="btn btn-primary"
+                    ng-class="{'active': $ctrl.toolbar.open==='filter'}"
+                    ng-click="$ctrl.togglePanel('filter')">Filter</button>
+        </div>
+        <div class="btn-group" role="group">
+            <a ui-sref="billNew" class="btn btn-success">New Bill</a>
+        </div>
+        <div class="btn-group" role="group">
+            <button class="btn btn-outline-danger" ng-click="deleteAllBills()">Delete All Bills</button>
+        </div>
+    </div>
 
-<button type="button" class="collapsible" data-section="Paid">Open Paid</button>
-<table class="content table table-striped">
-    <thead>
-    <tr>
-        <td>Bill ID</td>
-        <td>Owner Name</td>
-        <td>Owner Details</td>
-        <td>Vet Name</td>
-        <td>Visit Type</td>
-        <td>Amount</td>
-        <td>Status</td>
-        <td>Due Date</td>
-        <td>Date</td>
-        <td>Details</td>
-        <td>Delete</td>
+    <div class="card mb-3" ng-if="$ctrl.toolbar.open==='search'">
+        <div class="card-body d-flex gap-2 flex-wrap">
+            <input type="text" class="form-control" style="max-width:420px"
+                   placeholder="Search bills…"
+                   ng-model="$ctrl.searchQuery">
+            <button class="btn btn-primary">Apply</button>
+            <button class="btn btn-light" ng-click="$ctrl.searchQuery=''">Clear</button>
+        </div>
+    </div>
 
-    </tr>
-    </thead>
+    <div class="card mb-3" ng-if="$ctrl.toolbar.open==='filter'">
+        <div class="card-body">
+            <h5 class="mb-3">Filter Bills</h5>
+            <div class="d-flex flex-wrap align-items-end gap-3">
+                <div class="form-group">
+                    <label for="statusSel" class="form-label">Status</label>
+                    <select id="statusSel" class="form-select" style="min-width: 160px"
+                            ng-model="$ctrl.tempStatus">
+                        <option value="">Any</option>
+                        <option value="paid">Paid</option>
+                        <option value="unpaid">Unpaid</option>
+                        <option value="overdue">Overdue</option>
+                    </select>
+                </div>
 
-    <tr id="billIdPaid" ng-repeat="paidBill in $ctrl.paidBills | filter:$ctrl.query track by paidBill.billIdPaid">
-    <tr ng-repeat="paidBill in $ctrl.paidBills | filter:search:strict">
-        <td><a href="http://localhost:8080/#!/bills/details/{{paidBill.billId}}/owner/{{paidBill.customerId}}">{{paidBill.billId}}</a></td>
-        <td>{{ getCustomerDetails(paidBill.customerId) }}</td>
-    <td><a href="http://localhost:8080/#!/owners/details/{{ getOwnerUUIDByCustomerId(paidBill.customerId) }}">Owner details</a></td>
-        <td>{{ getVetDetails(paidBill.vetId) }}</td>
-        <td>{{paidBill.visitType}}</td>
-        <td>{{paidBill.amount}}</td>
-        <td>{{paidBill.billStatus}}</td>
-        <td>{{paidBill.dueDate}}</td>
-        <td>{{paidBill.date}}</td>
-        <td><a href="http://localhost:8080/#!/bills/details/{{paidBill.billId}}/owner/{{paidBill.customerId}}">Get Details</a></td>
-        <td><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteBill(paidBill.billId)">Delete Bill</a></td>
-    </tr>
-</table>
-<br><br>
-<button type="button" class="collapsible" data-section="Unpaid">Open Unpaid Bills</button>
-<table class="content table table-striped">
-    <thead>
-    <tr>
-        <td>Bill ID</td>
-        <td>Owner Name</td>
-        <td>Owner Details</td>
-        <td>Vet Name</td>
-        <td>Visit Type</td>
-        <td>Amount</td>
-        <td>Status</td>
-        <td>Due Date</td>
-        <td>Date</td>
-        <td>Details</td>
-        <td>Delete</td>
+                <div class="form-group">
+                    <label for="yearSel" class="form-label">Year</label>
+                    <select id="yearSel" class="form-select" style="min-width: 120px"
+                            ng-model="$ctrl.tempYear">
+                        <option value="">Any</option>
+                        <option ng-repeat="y in $ctrl.availableYears" ng-value="y">{{y}}</option>
+                    </select>
+                </div>
 
-    </tr>
-    </thead>
+                <div class="form-group">
+                    <label for="visitSel" class="form-label">Visit Type</label>
+                    <select id="visitSel" class="form-select" style="min-width: 180px"
+                            ng-model="$ctrl.tempVisitType">
+                        <option value="">Any</option>
+                        <option value="regular">Regular</option>
+                        <option value="emergency">Emergency</option>
+                    </select>
+                </div>
 
-    <tr id="billIdUnpaid" ng-repeat="unpaidBill in $ctrl.unpaidBills | filter:$ctrl.query track by unpaidBill.billIdUnpaid">
-    <tr ng-repeat="unpaidBill in $ctrl.unpaidBills | filter:search:strict">
-        <td><a href="http://localhost:8080/#!/bills/details/{{unpaidBill.billId}}/owner/{{unpaidBill.customerId}}">{{unpaidBill.billId}}</a></td>
-        <td>{{ getCustomerDetails(unpaidBill.customerId) }}</td>
-    <td><a href="http://localhost:8080/#!/owners/details/{{ getOwnerUUIDByCustomerId(unpaidBill.customerId) }}">Owner details</a></td>
-        <td>{{ getVetDetails(unpaidBill.vetId) }}</td>
-        <td>{{unpaidBill.visitType}}</td>
-        <td>{{unpaidBill.amount}}</td>
-        <td>{{unpaidBill.billStatus}}</td>
-        <td>{{unpaidBill.dueDate}}</td>
-        <td>{{unpaidBill.date}}</td>
-        <td><a href="http://localhost:8080/#!/bills/details/{{unpaidBill.billId}}/owner/{{unpaidBill.customerId}}">Get Details</a></td>
-        <td><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteBill(unpaidBill.billId)">Delete Bill</a></td>
-    </tr>
-</table>
+                <div class="ms-auto d-flex gap-2">
+                    <button class="btn btn-primary" ng-click="$ctrl.applyFilter()">Apply</button>
+                    <button class="btn btn-light" ng-click="$ctrl.resetFilter()">Reset</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<br><br>
-<button type="button" class="collapsible" data-section="Overdue">Open Overdue Bills</button>
-<table class="content table table-striped">
-    <thead>
-    <tr>
-        <td>Bill ID</td>
-        <td>Owner Name</td>
-        <td>Owner Details</td>
-        <td>Vet Name</td>
-        <td>Visit Type</td>
-        <td>Amount</td>
-        <td>Status</td>
-        <td>Due Date</td>
-        <td>Date</td>
-        <td>Details</td>
-        <td>Delete</td>
-
-    </tr>
-    </thead>
-
-    <tr id="billIdOverdue" ng-repeat="overdueBill in $ctrl.overdueBills | filter:$ctrl.query track by overdueBill.billIdOverdue">
-    <tr ng-repeat="overdueBill in $ctrl.overdueBills | filter:search:strict">
-        <td><a href="http://localhost:8080/#!/bills/details/{{overdueBill.billId}}/owner/{{overdueBill.customerId}}">{{overdueBill.billId}}</a></td>
-        <td>{{ getCustomerDetails(overdueBill.customerId) }}</td>
-    <td><a href="http://localhost:8080/#!/owners/details/{{ getOwnerUUIDByCustomerId(overdueBill.customerId) }}">Owner details</a></td>
-        <td>{{ getVetDetails(overdueBill.vetId) }}</td>
-        <td>{{overdueBill.visitType}}</td>
-        <td>{{overdueBill.amount}}</td>
-        <td>{{overdueBill.billStatus}}</td>
-        <td>{{overdueBill.dueDate}}</td>
-        <td>{{overdueBill.date}}</td>
-        <td><a href="http://localhost:8080/#!/bills/details/{{overdueBill.billId}}/owner/{{overdueBill.customerId}}">Get Details</a></td>
-        <td><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteBill(overdueBill.billId)">Delete Bill</a></td>
-    </tr>
-</table>
-<br><br>
-<h3>All Bills</h3>
-<table class="table table-striped">
-    <thead>
-        <tr ng-repeat="bill in $ctrl.billHistory | startFrom: ($ctrl.currentPage - 1) * $ctrl.pageSize | limitTo: $ctrl.pageSize track by bill.billId">
-            <td>Bill ID</td>
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <td>Bill Id</td>
             <td>Owner Name</td>
             <td>Owner Details</td>
             <td>Vet Name</td>
             <td>Visit Type</td>
-            <td>Amount</td>
+            <td class="text-end">Amount</td>
             <td>Status</td>
             <td>Due Date</td>
             <td>Date</td>
             <td>Details</td>
             <td>Delete</td>
         </tr>
-    </thead>
+        </thead>
+        <tbody>
+        <tr ng-repeat="bill in ($ctrl.getRows() | filter: $ctrl.visitTypePredicate) track by $index">
+            <td>{{bill.billId || bill.id}}</td>
 
-    <tbody class="bg-white border">
-    <tr>
-        <td class="bg-white border" ></td>
-        <td class="bg-white border">
-         <!--   <input ng-model="$ctrl.query.bill.owner.firstName" placeholder="Filter by Customer Name"> -->
-        </td>
-        <td class="bg-white border"></td>
-        <td class="bg-white border"></td>
-        <td class="bg-white border">
-            <input ng-model="search.visitType" placeholder="Filter by visit type">
-        </td>
-        <td class="bg-white border">
-            <input ng-model="search.amount" placeholder="Filter by amount">
-        </td>
-        <td class="bg-white border">
-            <input ng-model="search.billStatus" placeholder="Filter by status">
-        </td>
-        <td class="bg-white border">
-            <input ng-model="search.dueDate" placeholder="Filter by due date">
-        </td>
-        <td class="bg-white border">
-            <input ng-model="search.date" placeholder="Filter by date">
-        </td>
-        <td class="bg-white border"></td>
-        <td class="bg-white border"></td>
-    </tr>
-    <ul class="pagination">
-        <li ng-class="{disabled: $ctrl.currentPage === 1}">
-            <button class="btn btn-default" ng-click="$ctrl.goPreviousPage()">Previous</button>
-        </li>
-        <li class="page-item">
-            <a class="page-link text-dark" disabled>{{$ctrl.currentPageOnSite}}</a>
-        </li>
-        <li ng-class="{disabled: $ctrl.currentPage === $ctrl.totalPages}">
-            <button class="btn btn-default" ng-click="$ctrl.goNextPage()">Next</button>
-        </li>
-    </ul>
+            <td>{{ getCustomerDetails ? getCustomerDetails(bill.customerId) : (bill.owner || 'Unknown Owner') }}</td>
 
-    <tr id="billId" ng-repeat="bill in $ctrl.billHistory | filter:$ctrl.query track by bill.billId">
-    <tr ng-repeat="bill in $ctrl.billHistory | filter:search:strict">
-    <td><a href="http://localhost:8080/#!/bills/details/{{bill.billId}}/owner/{{bill.customerId}}">{{bill.billId}}</a></td>
-        <td>{{ getCustomerDetails(bill.customerId) }}</td>
+            <td>
+                <a class="btn btn-sm btn-outline-secondary"
+                   ui-sref="ownerDetails({ownerId: getOwnerUUIDByCustomerId ? getOwnerUUIDByCustomerId(bill.customerId) : bill.customerId})">
+                    View Owner
+                </a>
+            </td>
 
-    <td><a href="http://localhost:8080/#!/owners/details/{{ getOwnerUUIDByCustomerId(bill.customerId) }}">Owner details</a></td>
+            <td>{{ getVetDetails ? getVetDetails(bill.vetId) : (bill.vet || 'Unknown Vet') }}</td>
 
-<!--    <td><a href="http://localhost:8080/#!/owners/details/{{bill.customerId}}">Owner details</a></td>-->
-    <td>{{ getVetDetails(bill.vetId) }}</td>
-        <td>{{bill.visitType}}</td>
-        <td>{{bill.amount}}</td>
-        <td>{{bill.billStatus}}</td>
-        <td>{{bill.dueDate}}</td>
-        <td>{{bill.date}}</td>
-        <td><a href="http://localhost:8080/#!/bills/details/{{bill.billId}}/owner/{{bill.customerId}}">Get Details</a></td>
-        <td><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteBill(bill.billId)">Delete Bill</a></td>
-    </tr>
-    </tbody>
-</table>
+            <td>{{bill.visitType}}</td>
+            <td class="text-end">{{bill.amount | currency}}</td>
 
-<a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteAllBills()">Delete All Bills</a>
+            <td>
+          <span class="badge"
+                ng-class="{'bg-success': ($ctrl.activeStatus=='paid') || ((bill.status||'').toLowerCase()=='paid'),
+                           'bg-secondary': ($ctrl.activeStatus=='unpaid') || ((bill.status||'').toLowerCase()=='unpaid'),
+                           'bg-danger': ($ctrl.activeStatus=='overdue') || ((bill.status||'').toLowerCase()=='overdue')}">
+            {{ ($ctrl.activeStatus || (bill.status || '')).toUpperCase() || '—' }}
+          </span>
+            </td>
 
-<style>
-    .content {
-        display: none;
-        overflow: hidden;
-    }
-    .collapsible {
-        background-color: #eee;
-        color: #444;
-        cursor: pointer;
-        padding: 10px;
-        border: none;
-        text-align: left;
-        font-size: 15px;
-        font-weight: bold;
-        text-decoration: underline;
-    }
+            <td>{{bill.dueDate || bill.due}}</td>
+            <td><code>{{bill.date}}</code></td>
 
-    .active, .collapsible:hover {
-        background-color: #ccc;
-    }
+            <td>
+                <a class="btn btn-sm btn-outline-primary"
+                   ui-sref="billDetails({billId: (bill.billId || bill.id)})">Details</a>
+            </td>
 
-</style>
+            <td>
+                <button class="btn btn-sm btn-outline-danger"
+                        ng-click="deleteBill(bill.billId || bill.id)">Delete</button>
+            </td>
+        </tr>
+        </tbody>
+    </table>
 
-<script>
-    var coll = document.getElementsByClassName("collapsible");
-    var i;
+    //comment
 
-    for (i = 0; i < coll.length; i++) {
-        coll[i].addEventListener("click", function() {
-            this.classList.toggle("active");
-            var content = this.nextElementSibling;
-            if (content.style.display === "block") {
-                content.style.display = "none";
-                this.textContent = "Open " + this.getAttribute("data-section") + " Bills";
-
-            } else {
-                content.style.display = "block";
-                this.textContent = "Close " + this.getAttribute("data-section") + " Bills";
-
-            }
-        });
-    }
-</script>
+    <div class="d-flex align-items-center gap-3">
+        <button class="btn btn-light" ng-click="$ctrl.goPreviousPage()">« Prev</button>
+        <span>Page {{$ctrl.page}} of {{$ctrl.totalPages}}</span>
+        <button class="btn btn-light" ng-click="$ctrl.goNextPage()">Next »</button>
+    </div>
+</div>

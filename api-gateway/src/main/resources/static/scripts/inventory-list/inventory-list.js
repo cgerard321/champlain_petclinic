@@ -5,7 +5,7 @@ angular.module('inventoryList', ['ui.router'])
         $stateProvider
             .state('inventories', {
                 parent: 'app',
-                url: '/inventory',
+                url: '/inventories',
                 template: '<inventory-list></inventory-list>'
             })
 
@@ -13,14 +13,14 @@ angular.module('inventoryList', ['ui.router'])
             //delete all inventory
             .state('deleteAllInventories', {
                 parent: 'app',
-                url: '/inventory',
+                url: '/inventories',
                 template: '<inventory-delete-confirm></inventory-delete-confirm>'
 
             })
 
             .state('deleteInventory', {
                 parent: 'app',
-                url: '/inventory/:inventoryId',
+                url: '/inventories/:inventoryId',
                 template: '<inventory-item></inventory-item>'
             })
     }]);
