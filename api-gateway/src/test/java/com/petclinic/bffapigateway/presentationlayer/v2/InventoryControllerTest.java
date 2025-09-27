@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -53,7 +54,7 @@ public class InventoryControllerTest {
     private WebTestClient client;
     @MockBean
     private InventoryServiceClient inventoryServiceClient;
-    private final String baseInventoryURL = "/api/gateway/inventory";
+    private final String baseInventoryURL = "/api/gateway/inventories";
 
     InputStream inputStream = getClass().getResourceAsStream("/images/DiagnosticKitImage.jpg");
     byte[] diagnosticKitImage = ImageUtil.readImage(inputStream);
@@ -87,7 +88,7 @@ public class InventoryControllerTest {
 
         // Act
         client.delete()
-                .uri("/api/gateway/inventory")  // Assuming the endpoint for deleting all inventories is the same without an ID.
+                .uri("/api/gateway/inventories")  // Assuming the endpoint for deleting all inventories is the same without an ID.
                 .exchange()
                 .expectStatus().isNoContent()
                 .expectBody().isEmpty();
@@ -103,7 +104,7 @@ public class InventoryControllerTest {
         //Arrange
         Optional<Integer> page = Optional.of(0);
         Optional<Integer> size = Optional.of(2);
-        when(inventoryServiceClient.searchInventory(page, size, null, null, null))
+        when(inventoryServiceClient.searchInventory(page, size, null, null, null, null))
                 .thenReturn(Flux.just(buildInventoryDTO()));
 
         // Act
@@ -119,7 +120,7 @@ public class InventoryControllerTest {
 
         // Assert
         verify(inventoryServiceClient, times(1))
-                .searchInventory(eq(page), eq(size), eq(null), eq(null), eq(null));
+                .searchInventory(eq(page), eq(size), eq(null), eq(null), eq(null), eq(null));
     }
 
     @Test
@@ -127,7 +128,7 @@ public class InventoryControllerTest {
         // Arrange
         Optional<Integer> page = Optional.of(0);
         Optional<Integer> size = Optional.of(2);
-        when(inventoryServiceClient.searchInventory(page, size, "invt1", "Internal", "invtone"))
+        when(inventoryServiceClient.searchInventory(page, size, "invt1", "Internal", "invtone", null))
                 .thenReturn(Flux.just(buildInventoryDTO()));
 
         // Act
@@ -143,7 +144,7 @@ public class InventoryControllerTest {
 
         // Assert
         verify(inventoryServiceClient, times(1))
-                .searchInventory(eq(page), eq(size), eq("invt1"), eq("Internal"), eq("invtone"));
+                .searchInventory(eq(page), eq(size), eq("invt1"), eq("Internal"), eq("invtone"), eq(null));
     }
 
     @Test
@@ -151,7 +152,7 @@ public class InventoryControllerTest {
         // Arrange
         Optional<Integer> page = Optional.of(0);
         Optional<Integer> size = Optional.of(2);
-        when(inventoryServiceClient.searchInventory(page, size, "invalid", "invalid", "invalid"))
+        when(inventoryServiceClient.searchInventory(page, size, "invalid", "invalid", "invalid", null))
                 .thenReturn(Flux.empty());
 
         // Act
@@ -166,7 +167,7 @@ public class InventoryControllerTest {
 
         // Assert
         verify(inventoryServiceClient, times(1))
-                .searchInventory(eq(page), eq(size), eq("invalid"), eq("invalid"), eq("invalid"));
+                .searchInventory(eq(page), eq(size), eq("invalid"), eq("invalid"), eq("invalid"), eq(null));
     }
 
     @Test
@@ -842,7 +843,7 @@ public class InventoryControllerTest {
 
         // Make the DELETE request to the API.
         client.delete()
-                .uri("/api/gateway/inventory/" + inventoryId +"/products")  // Assuming the endpoint for deleting all products in an inventory is the same with the inventory ID.
+                .uri("/api/gateway/inventories/" + inventoryId +"/products")  // Assuming the endpoint for deleting all products in an inventory is the same with the inventory ID.
                 .exchange()
                 .expectStatus().isNoContent()
                 .expectBody().isEmpty();
@@ -983,7 +984,7 @@ public class InventoryControllerTest {
 
         // Act and Assert
         client.put()
-                .uri("/api/gateway/inventory/" + inventoryId + "/products/" + productId + "/restockProduct?productQuantity=" + productQuantity)
+                .uri("/api/gateway/inventories/" + inventoryId + "/products/" + productId + "/restockProduct?productQuantity=" + productQuantity)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(ProductResponseDTO.class)
@@ -1004,7 +1005,7 @@ public class InventoryControllerTest {
 
         // Act and Assert
         client.put()
-                .uri("/api/gateway/inventory/" + inventoryId + "/products/" + productId + "/restockProduct?productQuantity=" + invalidQuantity)
+                .uri("/api/gateway/inventories/" + inventoryId + "/products/" + productId + "/restockProduct?productQuantity=" + invalidQuantity)
                 .exchange()
                 .expectStatus().isBadRequest();
 
@@ -1022,7 +1023,7 @@ public class InventoryControllerTest {
 
         // Act and Assert
         client.put()
-                .uri("/api/gateway/inventory/" + inventoryId + "/products/" + productId + "/restockProduct")
+                .uri("/api/gateway/inventories/" + inventoryId + "/products/" + productId + "/restockProduct")
                 .exchange()
                 .expectStatus().isBadRequest(); // Expecting 400 Bad Request
 
@@ -1040,7 +1041,7 @@ public class InventoryControllerTest {
 
         // Act and Assert
         client.put()
-                .uri("/api/gateway/inventory/" + inventoryId + "/products/" + productId + "/restockProduct?productQuantity=" + productQuantity)
+                .uri("/api/gateway/inventories/" + inventoryId + "/products/" + productId + "/restockProduct?productQuantity=" + productQuantity)
                 .exchange()
                 .expectStatus().isBadRequest(); // Expecting 400 Bad Request
 
@@ -1058,7 +1059,7 @@ public class InventoryControllerTest {
 
         // Act and Assert
         client.put()
-                .uri("/api/gateway/inventory/" + inventoryId + "/products/" + productId + "/restockProduct?productQuantity=" + productQuantity)
+                .uri("/api/gateway/inventories/" + inventoryId + "/products/" + productId + "/restockProduct?productQuantity=" + productQuantity)
                 .exchange()
                 .expectStatus().isBadRequest(); // Expecting 400 Bad Request
 
@@ -1083,7 +1084,7 @@ public class InventoryControllerTest {
         when(inventoryServiceClient.getProductsInInventoryByInventoryIdAndProductFieldPagination("1", null,null,null, page, size))
                 .thenReturn(resp);
         client.get()
-                .uri("/api/gateway/inventory/{inventoryId}/products-pagination?page={page}&size={size}","1", page.get(), size.get())
+                .uri("/api/gateway/inventories/{inventoryId}/products-pagination?page={page}&size={size}","1", page.get(), size.get())
                 .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
                 .acceptCharset(StandardCharsets.UTF_8)
                 .exchange().expectStatus().isOk()
@@ -1113,7 +1114,7 @@ public class InventoryControllerTest {
         when(inventoryServiceClient.getTotalNumberOfProductsWithRequestParams("1",null,null,null))
                 .thenReturn(Flux.just(expectedResponse).count());
         client.get()
-                .uri("/api/gateway/inventory/{inventoryId}/products-count","1")
+                .uri("/api/gateway/inventories/{inventoryId}/products-count","1")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange().expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
@@ -1144,7 +1145,7 @@ public class InventoryControllerTest {
 
         // Perform the PUT request
         client.put()
-                .uri("/api/gateway/inventory/{inventoryId}/products/{productId}", "sampleInventoryId", "sampleProductId")
+                .uri("/api/gateway/inventories/{inventoryId}/products/{productId}", "sampleInventoryId", "sampleProductId")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(requestDTO)
                 .exchange()
@@ -1187,7 +1188,7 @@ public class InventoryControllerTest {
 
         // Perform the POST request
         client.post()
-                .uri("/api/gateway/inventory/{inventoryId}/products", "sampleInventoryId")
+                .uri("/api/gateway/inventories/{inventoryId}/products", "sampleInventoryId")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(requestDTO)
                 .exchange()
@@ -1220,7 +1221,7 @@ public class InventoryControllerTest {
 
         // Perform the POST request
         client.post()
-                .uri("/api/gateway/inventory/{inventoryId}/products", "invalidInventoryId")
+                .uri("/api/gateway/inventories/{inventoryId}/products", "invalidInventoryId")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(requestDTO)
                 .exchange()
@@ -1251,7 +1252,7 @@ public class InventoryControllerTest {
                 .thenReturn(Mono.just(inventoryResponseDTO));
 
         client.post()
-                .uri("/api/gateway/inventory")
+                .uri("/api/gateway/inventories")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(requestDTO)
                 .exchange()
@@ -1297,7 +1298,7 @@ public class InventoryControllerTest {
 
 
         client.put()
-                .uri("/api/gateway/inventory/{inventoryId}", validInventoryId) // Use the appropriate URI
+                .uri("/api/gateway/inventories/{inventoryId}", validInventoryId) // Use the appropriate URI
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(requestDTO)
                 .exchange()
@@ -1333,7 +1334,7 @@ public class InventoryControllerTest {
                 .thenReturn(Mono.just(productResponseDTO));
 
         client.get()
-                .uri("/api/gateway/inventory/{inventoryId}/products/{productId}", productResponseDTO.getInventoryId(), productResponseDTO.getProductId())
+                .uri("/api/gateway/inventories/{inventoryId}/products/{productId}", productResponseDTO.getInventoryId(), productResponseDTO.getProductId())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -1372,7 +1373,7 @@ public class InventoryControllerTest {
 
 
         client.get()
-                .uri("/api/gateway/inventory/{inventoryId}", validInventoryId)
+                .uri("/api/gateway/inventories/{inventoryId}", validInventoryId)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(APPLICATION_JSON)
@@ -1401,7 +1402,7 @@ public class InventoryControllerTest {
 
         // Make the DELETE request to the API.
         client.delete()
-                .uri("/api/gateway/inventory")  // Assuming the endpoint for deleting all inventories is the same without an ID.
+                .uri("/api/gateway/inventories")  // Assuming the endpoint for deleting all inventories is the same without an ID.
                 .exchange()
                 .expectStatus().isNoContent()
                 .expectBody().isEmpty();
@@ -1418,7 +1419,7 @@ public class InventoryControllerTest {
                 .thenReturn((Mono.empty()));
 
         client.delete()
-                .uri("/api/gateway/inventory/{inventoryId}/products/{productId}",productResponseDTO.getInventoryId()  ,productResponseDTO.getProductId())
+                .uri("/api/gateway/inventories/{inventoryId}/products/{productId}",productResponseDTO.getInventoryId()  ,productResponseDTO.getProductId())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNoContent();
@@ -1441,7 +1442,7 @@ public class InventoryControllerTest {
                 .thenReturn(Flux.fromIterable(products));
 
         client.get()
-                .uri("/api/gateway/inventory/{inventoryName}/products/by-name", inventoryName)
+                .uri("/api/gateway/inventories/{inventoryName}/products/by-name", inventoryName)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -1460,7 +1461,7 @@ public class InventoryControllerTest {
                 .thenReturn(Flux.empty());
 
         client.get()
-                .uri("/api/gateway/inventory/{inventoryName}/products/by-name", inventoryName)
+                .uri("/api/gateway/inventories/{inventoryName}/products/by-name", inventoryName)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNotFound();
@@ -1484,7 +1485,7 @@ public class InventoryControllerTest {
                 .thenReturn(Mono.just(responseDTO));
 
         client.post()
-                .uri("/api/gateway/inventory/type")
+                .uri("/api/gateway/inventories/type")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(requestDTO)
                 .exchange()
@@ -1509,12 +1510,47 @@ public class InventoryControllerTest {
                 .thenReturn(Mono.empty());
 
         client.post()
-                .uri("/api/gateway/inventory/type")
+                .uri("/api/gateway/inventories/type")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(requestDTO)
                 .exchange()
                 .expectStatus().isBadRequest();
         verify(inventoryServiceClient, times(1)).addInventoryType(any(InventoryTypeRequestDTO.class));
+    }
+
+    @Test
+    void updateImportantStatus_withValidData_shouldSucceed() {
+        String inventoryId = "dfa0a7e3-5a40-4b86-881e-9549ecda5e4b";
+        Map<String, Boolean> request = Map.of("important", true);
+
+        when(inventoryServiceClient.updateImportantStatus(eq(inventoryId), eq(true)))
+                .thenReturn(Mono.empty());
+
+        client.patch()
+                .uri(baseInventoryURL + "/" + inventoryId + "/important")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(request)
+                .exchange()
+                .expectStatus().isOk();
+
+        verify(inventoryServiceClient, times(1))
+                .updateImportantStatus(eq(inventoryId), eq(true));
+    }
+
+    @Test
+    void updateImportantStatus_withInvalidInventoryId_shouldReturnNotFound() {
+        String invalidId = "invalid-id";
+        Map<String, Boolean> request = Map.of("important", false);
+
+        when(inventoryServiceClient.updateImportantStatus(eq(invalidId), eq(false)))
+                .thenReturn(Mono.error(new RuntimeException("Inventory not found")));
+
+        client.patch()
+                .uri(baseInventoryURL + "/" + invalidId + "/important")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(request)
+                .exchange()
+                .expectStatus().is5xxServerError();
     }
 
 }

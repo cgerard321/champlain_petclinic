@@ -7,7 +7,7 @@ export const updateInventory = async (
   inventory: InventoryRequestModel
 ): Promise<void> => {
   try {
-    await axiosInstance.put<void>(`/inventory/${inventoryId}`, inventory, {
+    await axiosInstance.put<void>(`/inventories/${inventoryId}`, inventory, {
       useV2: false,
     });
   } catch (error) {
@@ -21,7 +21,7 @@ export const getInventory = async (
 ): Promise<InventoryResponseModel> => {
   try {
     const response = await axiosInstance.get<InventoryResponseModel>(
-      `/inventory/${inventoryId}`,
+      `/inventories/${inventoryId}`,
       { useV2: false }
     );
     return response.data;

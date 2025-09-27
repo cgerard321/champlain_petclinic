@@ -135,6 +135,32 @@ public class BillServiceImpl implements BillService{
                 .count();
     }
 
+    @Override
+    public Flux<BillResponseDTO> getAllBillsByOwnerName(String ownerFirstName, String ownerLastName) {
+        return billRepository.findAll()
+                .filter(bill -> (ownerFirstName == null || bill.getOwnerFirstName().equals(ownerFirstName)) &&
+                        (ownerLastName == null || bill.getOwnerLastName().equals(ownerLastName)))
+                .switchIfEmpty(Flux.error(new NotFoundException("No bills found for the given owner name")))
+                .map(EntityDtoUtil::toBillResponseDto);
+    }
+
+    @Override
+    public Flux<BillResponseDTO> getAllBillsByVetName(String vetFirstName, String vetLastName) {
+        return billRepository.findAll()
+                .filter(bill -> (vetFirstName == null || bill.getVetFirstName().equals(vetFirstName)) &&
+                        (vetLastName == null || bill.getVetLastName().equals(vetLastName)))
+                .switchIfEmpty(Flux.error(new NotFoundException("No bills found for the given vet name")))
+                .map(EntityDtoUtil::toBillResponseDto);
+    }
+
+    @Override
+    public Flux<BillResponseDTO> getAllBillsByVisitType(String visitType) {
+        return billRepository.findAll()
+                .filter(bill -> visitType == null || bill.getVisitType().equals(visitType))
+                .switchIfEmpty(Flux.error(new NotFoundException("No bills found for the given visit type")))
+                .map(EntityDtoUtil::toBillResponseDto);
+    }
+
 
     @Override
     public Mono<BillResponseDTO> createBill(Mono<BillRequestDTO> billRequestDTO) {

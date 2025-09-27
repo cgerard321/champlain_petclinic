@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import './CartTable.css';
 import { ProductModel } from '../models/ProductModel';
+import axiosInstance from '@/shared/api/axiosInstance';
 
 interface CartModel {
   cartId: string;
@@ -16,26 +17,14 @@ export default function CartListTable(): JSX.Element {
 
   const getAllCarts = async (): Promise<void> => {
     try {
-      const response = await fetch(
-        `http://localhost:8080/api/v2/gateway/carts`,
-        {
-          headers: {
-            Accept: 'application/json',
-          },
-          credentials: 'include',
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`Error: ${response.status} ${response.statusText}`);
-      }
-
-      const data = await response.json();
+      const { data } = await axiosInstance.get<CartModel[]>('/carts', {
+        useV2: true,
+      });
       setCarts(data);
-      setLoading(false);
-    } catch (error) {
-      console.error('Error fetching carts:', error);
+    } catch (err) {
+      console.error('Error fetching carts:', err);
       setError('Failed to fetch carts');
+    } finally {
       setLoading(false);
     }
   };
@@ -45,29 +34,13 @@ export default function CartListTable(): JSX.Element {
   }, []);
 
   const handleDelete = async (cartId: string): Promise<void> => {
-    if (window.confirm('Are you sure you want to delete this cart?')) {
-      try {
-        const response = await fetch(
-          `http://localhost:8080/api/v2/gateway/carts/${cartId}`,
-          {
-            method: 'DELETE',
-            headers: {
-              Accept: 'application/json',
-            },
-            credentials: 'include',
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error('Failed to delete cart');
-        }
-
-        // Fetch updated carts after deletion
-        getAllCarts();
-      } catch (err) {
-        console.error('Error deleting cart:', err);
-        setError('Failed to delete cart');
-      }
+    if (!window.confirm('Are you sure you want to delete this cart?')) return;
+    try {
+      await axiosInstance.delete(`/carts/${cartId}`, { useV2: true });
+      await getAllCarts(); // refresh list
+    } catch (err) {
+      console.error('Error deleting cart:', err);
+      setError('Failed to delete cart');
     }
   };
 

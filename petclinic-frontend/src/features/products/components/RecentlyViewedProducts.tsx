@@ -3,19 +3,24 @@ import { ProductModel } from '@/features/products/models/ProductModels/ProductMo
 import Product from './Product';
 import '@/features/products/ProductList.css';
 import { useNavigate } from 'react-router-dom';
+import { useUser } from '@/context/UserContext';
 
 export default function RecentlyViewedProducts(): JSX.Element {
+  const { user } = useUser();
   const [recentlyClickedProducts, setRecentlyClickedProducts] = useState<
     ProductModel[]
   >([]);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const savedProducts = localStorage.getItem('recentlyClickedProducts');
+    if (!user?.userId) return;
+    const savedProducts = localStorage.getItem(
+      `recentlyClickedProducts_${user.userId}`
+    );
     if (savedProducts) {
       setRecentlyClickedProducts(JSON.parse(savedProducts));
     }
-  }, []);
+  }, [user]);
   const handleProductClick = (productId: string): void => {
     navigate(`/products/${productId}`);
   };

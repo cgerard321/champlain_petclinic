@@ -51,19 +51,65 @@ public class PhotoServiceImpl implements PhotoService {
 
 
     @Override
-    public Mono<Resource> insertPhotoOfVet(String vetId, String photoName, Mono<Resource> photo) {
-        return photo
-                .map(p -> EntityDtoUtil.toPhotoEntity(vetId, photoName, p))
+    public Mono<Resource> insertPhotoOfVet(String vetId, String photoName, MultipartFile file) {
+        return Mono.fromCallable(() -> {
+                    if (file == null || file.getSize() <= 0) {
+                        throw new InvalidInputException("Empty file");
+                    }
+                    String ct = file.getContentType();
+                    if (ct == null || !ct.startsWith("image/")) {
+                        throw new InvalidInputException("Unsupported media type");
+                    }
+                    Photo entity = Photo.builder()
+                            .vetId(vetId)
+                            .filename(photoName)
+                            .imgType(ct)
+                            .data(file.getBytes())
+                            .build();
+                    return entity;
+                })
                 .flatMap(photoRepository::save)
-                .map(img -> {
-                    // Create a Resource from the photo's InputStream
-                    ByteArrayResource resource = new ByteArrayResource(img.getData());
-                    //log.debug("Picture byte array in vet-service toServiceImpl" + resource);
-
-
-                    return resource;
-                });
+                .map(saved -> new ByteArrayResource(saved.getData()));
     }
+
+    @Override
+    public Mono<Resource> insertPhotoOfVet(String vetId, String photoName, byte[] fileData) {
+        return Mono.fromCallable(() -> {
+                    if (fileData == null || fileData.length == 0) {
+                        throw new InvalidInputException("Empty file data");
+                    }
+                    
+                    // Determine content type based on file extension or default to JPEG
+                    String contentType = determineContentType(photoName);
+                    
+                    Photo entity = Photo.builder()
+                            .vetId(vetId)
+                            .filename(photoName)
+                            .imgType(contentType)
+                            .data(fileData)
+                            .build();
+                    return entity;
+                })
+                .flatMap(photoRepository::save)
+                .map(saved -> new ByteArrayResource(saved.getData()));
+    }
+
+    private String determineContentType(String filename) {
+        if (filename == null) {
+            return "image/jpeg";
+        }
+        String lowerCase = filename.toLowerCase();
+        if (lowerCase.endsWith(".png")) {
+            return "image/png";
+        } else if (lowerCase.endsWith(".gif")) {
+            return "image/gif";
+        } else if (lowerCase.endsWith(".webp")) {
+            return "image/webp";
+        } else {
+            return "image/jpeg"; // Default to JPEG
+        }
+    }
+
 
 
     @Override
