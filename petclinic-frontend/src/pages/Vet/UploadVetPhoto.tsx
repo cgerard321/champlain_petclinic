@@ -1,56 +1,57 @@
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
-// eslint-disable-next-line import/default
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { Button, Form, Modal } from 'react-bootstrap';
+import { addPhotoByVetId } from '@/features/veterinarians/api/addPhotoByVetId';
+import { VetRequestModel } from '@/features/veterinarians/models/VetRequestModel.ts';
 
-const UploadVetPhoto: React.FC = () => {
+interface UploadVetPhotoProps {
+  vets: VetRequestModel[];
+}
+
+const UploadVetPhoto: React.FC<UploadVetPhotoProps> = ({ vets }) => {
   const [vetId, setVetId] = useState('');
   const [photoName, setPhotoName] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [show, setShow] = useState(false);
 
-  const handleShow = () => setShow(true);
-  const handleClose = () => {
+  const handleShow = (): void => setShow(true);
+  const handleClose = (): void => {
     setShow(false);
     resetForm();
   };
 
-  const resetForm = () => {
+  const resetForm = (): void => {
     setVetId('');
     setPhotoName('');
     setSelectedFile(null);
   };
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ): void => {
     const file = event.target.files?.[0] || null;
     setSelectedFile(file);
   };
 
-  const handleUpload = async () => {
+  const handleUpload = async (): Promise<void> => {
     if (!selectedFile) {
       console.error('No file selected');
       return;
     }
 
-    const formData = new FormData();
-    formData.append('file', selectedFile);
-
     try {
-      const response = await fetch(
-        `api/v2/gateway/vets/${vetId}/photos/${photoName}`,
-        {
-          method: 'POST',
-          body: formData,
-        }
+      await addPhotoByVetId(
+        vetId,
+        photoName || selectedFile.name,
+        selectedFile
       );
+      handleClose();
 
-      if (response.ok) {
-        handleClose(); // Close the modal on success
-      } else {
-        console.error('Failed to upload photo', response.statusText);
-      }
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Error uploading photo:', error);
     }
   };
 
@@ -67,14 +68,21 @@ const UploadVetPhoto: React.FC = () => {
         <Modal.Body>
           <Form>
             <Form.Group controlId="vetId">
-              <Form.Label>Vet ID</Form.Label>
-              <Form.Control
-                type="text"
+              <Form.Label>Select Vet</Form.Label>
+              <Form.Select
                 value={vetId}
                 onChange={e => setVetId(e.target.value)}
-                placeholder="Enter Vet ID"
                 required
-              />
+              >
+                <option disabled value="">
+                  -- Choose a Vet --
+                </option>
+                {vets.map(vet => (
+                  <option key={vet.vetId} value={vet.vetId}>
+                    {vet.firstName} {vet.lastName}
+                  </option>
+                ))}
+              </Form.Select>
             </Form.Group>
             <Form.Group controlId="photoName">
               <Form.Label>Photo Name</Form.Label>

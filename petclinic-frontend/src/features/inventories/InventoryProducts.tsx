@@ -56,9 +56,10 @@ const InventoryProducts: React.FC = () => {
   const { productList, setProductList, getProductList } = useSearchProducts();
 
   // Declare state
+  const [inventoryName, setInventoryName] = useState<string>('');
   const [productName, setProductName] = useState<string>('');
   const [productDescription, setProductDescription] = useState<string>('');
-  const [productStatus, setProductStatus] = useState<Status>(Status.AVAILABLE);
+  const [productStatus, setProductStatus] = useState<Status | ''>('');
   const [products, setProducts] = useState<ProductModel[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<ProductModel[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -76,6 +77,20 @@ const InventoryProducts: React.FC = () => {
       }
     }
   };
+  useEffect(() => {
+    if (!inventoryId) return;
+    axiosInstance
+      .get(`/inventories/${inventoryId}`, { useV2: false })
+      .then(res => {
+        const name = (res.data?.inventoryName ?? res.data?.name ?? '')
+          .toString()
+          .trim();
+        if (name) setInventoryName(name);
+      })
+      .catch(err => {
+        console.warn('Failed to fetch inventory details', err);
+      });
+  }, [inventoryId]);
 
   useEffect(() => {
     const w = window as WindowWithGoogle;
@@ -123,10 +138,16 @@ const InventoryProducts: React.FC = () => {
       setError(null);
       try {
         const response = await axiosInstance.get<ProductModel[]>(
-          `/inventory/${inventoryId}/products/search`,
+          `/inventories/${inventoryId}/products/search`,
           { useV2: false }
         );
         const data = Array.isArray(response.data) ? response.data : [];
+        // Calculate profit margin for each product
+        data.forEach(product => {
+          product.productMargin = parseFloat(
+            (product.productSalePrice - product.productPrice).toFixed(2)
+          );
+        });
         setProducts(data);
         setProductList(data);
         setFilteredProducts(data);
@@ -139,12 +160,11 @@ const InventoryProducts: React.FC = () => {
       fetchProducts().catch(err => console.error(err));
     }
   }, [inventoryId, setProductList]);
-
   const deleteProduct = async (): Promise<void> => {
     if (productToDelete) {
       try {
         await axiosInstance.delete(
-          `/inventory/${inventoryId}/products/${productToDelete}`,
+          `/inventories/${inventoryId}/products/${productToDelete}`,
           { useV2: false }
         );
         const updatedProducts = products.filter(
@@ -224,7 +244,7 @@ const InventoryProducts: React.FC = () => {
       const delta = 1;
 
       await axiosInstance.put(
-        `/inventory/${inventoryId}/products/${productId}/restockProduct`,
+        `/inventories/${inventoryId}/products/${productId}/restockProduct`,
         null,
         { params: { productQuantity: delta }, useV2: false }
       );
@@ -260,7 +280,7 @@ const InventoryProducts: React.FC = () => {
     try {
       const updatedQuantity = currentQuantity - 1;
       await axiosInstance.patch(
-        `/inventory/${inventoryId}/products/${productId}/consume`,
+        `/inventories/${inventoryId}/products/${productId}/consume`,
         { productQuantity: updatedQuantity },
         { useV2: false }
       );
@@ -302,7 +322,7 @@ const InventoryProducts: React.FC = () => {
   return (
     <div className="inventory-supplies">
       <h2 className="inventory-title">
-        Supplies in Inventory: <span>{inventoryId}</span>
+        Supplies in Inventory: <span>{inventoryName}</span>
       </h2>
       <button
         className="btn btn-secondary"
@@ -345,7 +365,7 @@ const InventoryProducts: React.FC = () => {
           <label htmlFor="product-status">Filter by Status:</label>
           <select
             id="product-status"
-            onChange={e => setProductStatus(e.target.value as Status)}
+            onChange={e => setProductStatus(e.target.value as Status | '')}
           >
             <option value="">All</option>
             {Object.values(Status).map(status => (
@@ -362,10 +382,12 @@ const InventoryProducts: React.FC = () => {
       <table className="table table-striped">
         <thead>
           <tr>
-            <th>SupplyId</th>
-            <th>SupplyName</th>
+            <th>Supply Id</th>
+            <th>Supply Name</th>
             <th>Description</th>
-            <th>Price</th>
+            <th>Sale Price</th>
+            <th>Cost Price</th>
+            <th>Profit Margin</th>
             <th>Quantity</th>
             <th>Status</th>
             <th>Actions</th>
@@ -379,6 +401,15 @@ const InventoryProducts: React.FC = () => {
                 <td>{product.productName}</td>
                 <td>{product.productDescription}</td>
                 <td>${product.productSalePrice}</td>
+                <td>${product.productPrice}</td>
+                <td
+                  style={{
+                    color: product.productMargin >= 0 ? 'green' : 'red',
+                    fontWeight: 'bold',
+                  }}
+                >
+                  ${product.productMargin}
+                </td>
                 <td>{product.productQuantity}</td>
                 <td
                   style={{
@@ -469,7 +500,7 @@ const InventoryProducts: React.FC = () => {
       </table>
       <button
         className="btn btn-add"
-        onClick={() => navigate(`/inventory/${inventoryId}/products/add`)}
+        onClick={() => navigate(`/inventories/${inventoryId}/products/add`)}
       >
         Add
       </button>

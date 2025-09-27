@@ -11,7 +11,6 @@ export async function getAllVisits(searchTerm: string): Promise<Visit[]> {
       params,
       useV2: true,
     });
-
     return response.data
       .split('data:')
       .map((payload: string) => {

@@ -1225,7 +1225,7 @@ class ProductInventoryServiceUnitTest {
         when(inventoryRepository.findByInventoryDescriptionRegex(anyString()))
                 .thenReturn(Flux.empty());  // No inventory found
 
-        Flux<InventoryResponseDTO> result =productInventoryService.searchInventories(page, null, null, description);
+        Flux<InventoryResponseDTO> result =productInventoryService.searchInventories(page, null, null, description, false);
 
         StepVerifier.create(result)
                 .expectError(NotFoundException.class)
@@ -1914,8 +1914,8 @@ class ProductInventoryServiceUnitTest {
         String inventoryId = "valid-id";
 
         // Create mock Product objects with correct parameters for Product constructor
-        Product product1 = new Product("1", "P001", inventoryId, "Product1", "Description1", 10, 5.99, 7.99, Status.AVAILABLE);
-        Product product2 = new Product("2", "P002", inventoryId, "Product2", "Description2", 20, 10.99, 12.99, Status.RE_ORDER);
+        Product product1 = new Product("1", "P001", inventoryId, "Product1", "Description1", 10, 5.99, 7.99, product.getProductProfit(), Status.AVAILABLE);
+        Product product2 = new Product("2", "P002", inventoryId, "Product2", "Description2", 20, 10.99, 12.99, product.getProductProfit(), Status.RE_ORDER);
 
         // Mock the repository to return a Flux of products
         when(productRepository.findAllProductsByInventoryId(inventoryId))
@@ -1949,12 +1949,14 @@ class ProductInventoryServiceUnitTest {
         product1.setProductQuantity(10);
         product1.setProductDescription("Description A");
         product1.setProductPrice(100.0);
+        product1.setProductSalePrice(120.00);
 
         Product product2 = new Product();
         product2.setProductName("Product B");
         product2.setProductQuantity(20);
         product2.setProductDescription("Description B");
         product2.setProductPrice(200.0);
+        product2.setProductSalePrice(250.00);
 
         List<Product> productList = Arrays.asList(product1, product2);
         Mockito.when(productRepository.findAllProductsByInventoryId(inventoryId))
@@ -2166,6 +2168,26 @@ class ProductInventoryServiceUnitTest {
 
         verify(productRepository).findProductByInventoryIdAndProductId(inventoryId, productId);
         verify(productRepository, never()).save(any(Product.class));
+    }
+
+    @Test
+    void updateImportantStatus_shouldSucceed() {
+        String inventoryId = "inventoryId_1";
+        Boolean important = true;
+
+        when(inventoryRepository.findInventoryByInventoryId(inventoryId))
+                .thenReturn(Mono.just(inventory));
+        when(inventoryRepository.save(any(Inventory.class)))
+                .thenReturn(Mono.just(inventory));
+
+        Mono<Void> result = productInventoryService.updateImportantStatus(inventoryId, important);
+
+        StepVerifier
+                .create(result)
+                .verifyComplete();
+
+        verify(inventoryRepository).findInventoryByInventoryId(inventoryId);
+        verify(inventoryRepository).save(any(Inventory.class));
     }
 
 

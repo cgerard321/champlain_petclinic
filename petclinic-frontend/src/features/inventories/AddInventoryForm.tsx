@@ -11,6 +11,13 @@ interface AddInventoryProps {
   refreshInventoryTypes: () => void;
 }
 
+type FieldKey =
+  | 'inventoryName'
+  | 'inventoryType'
+  | 'inventoryDescription'
+  | 'inventoryImage'
+  | 'inventoryBackupImage';
+
 const AddInventoryForm: React.FC<AddInventoryProps> = ({
   showAddInventoryForm,
   handleInventoryClose,
@@ -24,6 +31,18 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
   const [inventoryTypes, setInventoryTypes] = useState<InventoryType[]>([]);
   const [imageUploaded, setImageUploaded] = useState<Uint8Array | null>(null);
 
+  // Per-field history arrays. Initialize with the initial/current value so there is always a baseline.
+  const [history, setHistory] = useState<Record<FieldKey, string[]>>({
+    inventoryName: [''],
+    inventoryType: [''],
+    inventoryDescription: [''],
+    inventoryImage: [''],
+    inventoryBackupImage: [''],
+  });
+
+  // Track edit order. Last element = most recently edited field.
+  const [lastEditedFields, setLastEditedFields] = useState<string[]>([]);
+
   useEffect(() => {
     async function fetchInventoryTypes(): Promise<void> {
       try {
@@ -33,8 +52,121 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
         console.error('Error fetching inventory types:', error);
       }
     }
+
     fetchInventoryTypes();
   }, []);
+
+  // When form opens, initialize history baseline with current values
+  useEffect(() => {
+    if (showAddInventoryForm) {
+      setHistory({
+        inventoryName: [inventoryName],
+        inventoryType: [inventoryType],
+        inventoryDescription: [inventoryDescription],
+        inventoryImage: [inventoryImage],
+        inventoryBackupImage: [inventoryBackupImage],
+      });
+      setLastEditedFields([]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showAddInventoryForm]);
+
+  // helper: count words in a string (0 for empty/whitespace-only)
+  const countWords = (s: string): number => {
+    const trimmed = s.trim();
+    if (trimmed === '') return 0;
+    return trimmed.split(/\s+/).filter(Boolean).length;
+  };
+
+  // helper: push a normalized snapshot for a field
+  const pushSnapshot = (field: FieldKey, rawValue: string): void => {
+    const normalized = rawValue.trim(); // trim trailing spaces
+    setHistory(prev => {
+      const fieldHist = prev[field] ?? [''];
+      const lastRecorded = fieldHist[fieldHist.length - 1] ?? '';
+      if (normalized !== lastRecorded) {
+        return {
+          ...prev,
+          [field]: [...fieldHist, normalized],
+        };
+      }
+      return prev;
+    });
+    setLastEditedFields(prev => {
+      const updated = prev.filter(f => f !== field);
+      return [...updated, field];
+    });
+  };
+
+  // Save snapshot for field only when the *word count* changed
+  const handleFieldChange = (
+    field: FieldKey,
+    setter: React.Dispatch<React.SetStateAction<string>>,
+    value: string
+  ): void => {
+    const fieldHist = history[field] ?? [''];
+    const lastRecorded = fieldHist[fieldHist.length - 1] ?? '';
+
+    const isWordBoundary =
+      value.endsWith(' ') ||
+      value.trim() === '' ||
+      countWords(value) < countWords(lastRecorded);
+
+    if (isWordBoundary) {
+      pushSnapshot(field, value);
+    }
+
+    setter(value);
+  };
+
+  // Undo handler
+  const handleUndo = (): void => {
+    const order = [...lastEditedFields];
+
+    while (order.length > 0) {
+      const candidate = order[order.length - 1] as FieldKey;
+      const fieldHist = history[candidate];
+
+      if (fieldHist && fieldHist.length > 1) {
+        const newHist = fieldHist.slice(0, -1);
+        const restoredValue = newHist[newHist.length - 1] ?? '';
+
+        setHistory(prev => ({
+          ...prev,
+          [candidate]: newHist,
+        }));
+
+        setLastEditedFields(prev => {
+          const filtered = prev.filter(f => f !== candidate);
+          if (newHist.length > 1) {
+            return [...filtered, candidate];
+          }
+          return filtered;
+        });
+
+        switch (candidate) {
+          case 'inventoryName':
+            setInventoryName(restoredValue);
+            break;
+          case 'inventoryType':
+            setInventoryType(restoredValue);
+            break;
+          case 'inventoryDescription':
+            setInventoryDescription(restoredValue);
+            break;
+          case 'inventoryImage':
+            setInventoryImage(restoredValue);
+            break;
+          case 'inventoryBackupImage':
+            setInventoryBackupImage(restoredValue);
+            break;
+        }
+        return;
+      }
+
+      order.pop();
+    }
+  };
 
   // Handling form submission
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
@@ -69,15 +201,14 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
       setInventoryDescription('');
       setInventoryImage('');
       setImageUploaded(null);
-      refreshInventoryTypes(); // Call the function to refresh inventory types
-      handleInventoryClose(); // Close the form after adding the inventory
+      refreshInventoryTypes();
+      handleInventoryClose();
     } catch (error) {
       console.error('Error adding inventory:', error);
     }
   };
 
-  // Conditionally render the form based on the show prop
-  if (!showAddInventoryForm) return null; // Do not render if show is false
+  if (!showAddInventoryForm) return null;
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const file = e.target.files?.[0];
@@ -92,6 +223,8 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
       const reader = new FileReader();
       reader.onload = event => {
         if (event.target?.result instanceof ArrayBuffer) {
+          // push snapshot before changing image
+          pushSnapshot('inventoryImage', inventoryImage);
           const uint8Array = new Uint8Array(event.target.result as ArrayBuffer);
           setImageUploaded(uint8Array);
         }
@@ -116,7 +249,14 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
               type="text"
               id="inventoryName"
               value={inventoryName}
-              onChange={e => setInventoryName(e.target.value)}
+              onChange={e =>
+                handleFieldChange(
+                  'inventoryName',
+                  setInventoryName,
+                  e.target.value
+                )
+              }
+              onBlur={() => pushSnapshot('inventoryName', inventoryName)}
               required
             />
           </div>
@@ -126,7 +266,14 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
             <select
               id="inventoryType"
               value={inventoryType}
-              onChange={e => setInventoryType(e.target.value)}
+              onChange={e =>
+                handleFieldChange(
+                  'inventoryType',
+                  setInventoryType,
+                  e.target.value
+                )
+              }
+              onBlur={() => pushSnapshot('inventoryType', inventoryType)}
               required
             >
               <option value="">Select Type</option>
@@ -144,7 +291,16 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
               type="text"
               id="inventoryDescription"
               value={inventoryDescription}
-              onChange={e => setInventoryDescription(e.target.value)}
+              onChange={e =>
+                handleFieldChange(
+                  'inventoryDescription',
+                  setInventoryDescription,
+                  e.target.value
+                )
+              }
+              onBlur={() =>
+                pushSnapshot('inventoryDescription', inventoryDescription)
+              }
               required
             />
           </div>
@@ -155,7 +311,14 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
               type="text"
               id="inventoryImage"
               value={inventoryImage}
-              onChange={e => setInventoryImage(e.target.value)}
+              onChange={e =>
+                handleFieldChange(
+                  'inventoryImage',
+                  setInventoryImage,
+                  e.target.value
+                )
+              }
+              onBlur={() => pushSnapshot('inventoryImage', inventoryImage)}
               required
             />
           </div>
@@ -166,7 +329,16 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
               type="text"
               id="inventoryBackupImage"
               value={inventoryBackupImage}
-              onChange={e => setInventoryBackupImage(e.target.value)}
+              onChange={e =>
+                handleFieldChange(
+                  'inventoryBackupImage',
+                  setInventoryBackupImage,
+                  e.target.value
+                )
+              }
+              onBlur={() =>
+                pushSnapshot('inventoryBackupImage', inventoryBackupImage)
+              }
               required
             />
           </div>
@@ -188,6 +360,11 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
             onClick={handleInventoryClose}
           >
             Cancel
+          </button>
+
+          {/* Undo button */}
+          <button type="button" className="undo" onClick={handleUndo}>
+            Undo
           </button>
         </form>
       </div>

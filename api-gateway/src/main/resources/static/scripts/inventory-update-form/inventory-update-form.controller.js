@@ -7,10 +7,10 @@ angular.module('inventoryUpdateForm')
         var method = $stateParams.method;
         $scope.inventoryTypeFormUpdateSearch = "";
         $scope.inventoryTypeUpdateOptions = ["New Type"];
-        $http.get('api/gateway/inventory/' + inventoryId).then(function (resp) {
+        $http.get('api/gateway/inventories/' + inventoryId).then(function (resp) {
             self.inventory = resp.data;
 
-            $http.get("api/gateway/inventory/type").then(function (typesResp) {
+            $http.get("api/gateway/inventories/type").then(function (typesResp) {
 
                 // Includes all types inside the array
                 typesResp.data.forEach(function (type) {
@@ -38,10 +38,10 @@ angular.module('inventoryUpdateForm')
                     inventoryDescription: self.inventory.inventoryDescription
                 };
 
-                $http.post("api/gateway/inventory/type", { "type": $scope.selectedUpdateOption })
+                $http.post("api/gateway/inventories/type", { "type": $scope.selectedUpdateOption })
                     .then(function (resp) {
                         if (method === 'edit') {
-                            $http.put('/api/gateway/inventory/' + inventoryId, data)
+                            $http.put('/api/gateway/inventories/' + inventoryId, data)
                                 .then(function (response) {
                                     console.log(response);
                                     $state.go('inventories');
@@ -67,7 +67,7 @@ angular.module('inventoryUpdateForm')
                     inventoryDescription: self.inventory.inventoryDescription
                 }
                 if (method === 'edit') {
-                    $http.put('/api/gateway/inventory/' + inventoryId, data)
+                    $http.put('/api/gateway/inventories/' + inventoryId, data)
                         .then(function (response) {
                             console.log(response);
                             $state.go('inventories');
