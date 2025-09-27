@@ -87,7 +87,7 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:
-      - mongo1
+      - mongo-billing
   #            mysql5:
   #                condition: service_healthy
 
@@ -298,9 +298,9 @@ services:
       - postgres
 
   # billing mongo container
-  mongo1:
+  mongo-billing:
     image: mongo
-    container_name: mongo1
+    container_name: mongo-billing
     restart: always
     ports:
       - 27018:27017
@@ -319,12 +319,12 @@ services:
     environment:
       - ME_CONFIG_MONGODB_ADMINUSERNAME=root
       - ME_CONFIG_MONGODB_ADMINPASSWORD=password
-      - ME_CONFIG_MONGODB_SERVER=mongo1
+      - ME_CONFIG_MONGODB_SERVER=mongo-billing
       - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
     ports:
       - 8081:8081
     depends_on:
-      - mongo1
+      - mongo-billing
       - billing-service
 
   mongo2:
