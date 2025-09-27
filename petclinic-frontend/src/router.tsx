@@ -65,7 +65,7 @@ import AllRoles from '@/pages/Users/AllRoles.tsx';
 import OwnerBookAppointment from '@/pages/Visit/OwnerBookAppointment.tsx';
 import FAQ from './pages/FAQ/FAQ';
 import ContactPage from './pages/Contact/Contact';
-import PrivacyPolicyPage from './pages/PrivacyPolicy/PrivacyPolicy'
+import PrivacyPolicyPage from './pages/PrivacyPolicy/PrivacyPolicy';
 
 const router = createBrowserRouter([
   {
