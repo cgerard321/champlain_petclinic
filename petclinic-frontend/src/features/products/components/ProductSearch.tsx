@@ -1,11 +1,17 @@
-import { useState, useEffect } from 'react';
-import { getAllProducts } from '@/features/products/api/getAllProducts';
-
 import './ProductSearch.css';
-import { ProductModel } from '@/features/products/models/ProductModels/ProductModel.ts';
+import { ProductModel } from '@/features/products/models/ProductModels/ProductModel';
+import { getAllProducts } from '@/features/products/api/getAllProducts';
+import { useEffect, useState, JSX } from 'react';
 
-export default function ProductSearch(): JSX.Element {
-  const [searchQuery, setSearchQuery] = useState('');
+interface ProductSearchProps {
+  searchQuery: string;
+  setSearchQuery: (value: string) => void;
+}
+
+export default function ProductSearch({
+  searchQuery,
+  setSearchQuery,
+}: ProductSearchProps): JSX.Element {
   const [products, setProducts] = useState<ProductModel[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<ProductModel[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<ProductModel | null>(
@@ -14,8 +20,7 @@ export default function ProductSearch(): JSX.Element {
 
   const fetchProducts = async (): Promise<void> => {
     const allProducts = await getAllProducts();
-    const listedProducts = allProducts.filter(product => !product.isUnlisted);
-    setProducts(listedProducts);
+    setProducts(allProducts.filter(p => !p.isUnlisted));
   };
 
   useEffect(() => {
@@ -23,44 +28,36 @@ export default function ProductSearch(): JSX.Element {
   }, []);
 
   useEffect(() => {
-    if (searchQuery === '') {
+    if (!searchQuery) {
       setFilteredProducts([]);
     } else {
-      const filtered = products.filter(product =>
-        product.productName.toLowerCase().includes(searchQuery.toLowerCase())
+      setFilteredProducts(
+        products.filter(product =>
+          product.productName.toLowerCase().includes(searchQuery.toLowerCase())
+        )
       );
-      setFilteredProducts(filtered);
     }
   }, [searchQuery, products]);
 
-  const handleInputChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ): void => {
-    setSearchQuery(event.target.value);
-    setSelectedProduct(null);
-  };
-
-  const handleProductClick = (product: ProductModel): void => {
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  const handleProductClick = (product: ProductModel) => {
     setSelectedProduct(product);
     setSearchQuery('');
     setFilteredProducts([]);
   };
 
-  const handleCloseModal = (): void => {
-    setSelectedProduct(null);
-  };
+  const handleCloseModal = (): void => setSelectedProduct(null);
 
   return (
     <div className="product-search">
-      <form onSubmit={e => e.preventDefault()}>
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={handleInputChange}
-          placeholder="Search for a product..."
-          className="search-input"
-        />
-      </form>
+      <input
+        type="text"
+        value={searchQuery}
+        onChange={e => setSearchQuery(e.target.value)}
+        placeholder="Search for a product..."
+        className="search-input"
+      />
+
       {searchQuery && (
         <div className="search-results">
           {filteredProducts.length > 0 ? (
@@ -82,6 +79,7 @@ export default function ProductSearch(): JSX.Element {
           )}
         </div>
       )}
+
       {selectedProduct && (
         <>
           <div
@@ -96,8 +94,10 @@ export default function ProductSearch(): JSX.Element {
                 {selectedProduct.productDescription}
               </p>
               <p>
-                <strong>Price:</strong> $
-                {selectedProduct.productSalePrice.toFixed(2)}
+                <strong>Price:</strong>{' '}
+                <span className="product-price">
+                  ${selectedProduct.productSalePrice.toFixed(2)}
+                </span>
               </p>
               <p>
                 <strong>Quantity:</strong> {selectedProduct.productQuantity}
