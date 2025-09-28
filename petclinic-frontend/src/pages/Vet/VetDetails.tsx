@@ -752,7 +752,8 @@ export default function VetDetails(): JSX.Element {
             {/* Only show album photos section if:
                 1. There are photos to display, OR
                 2. User is admin (not inventory manager, owner, or receptionist) */}
-            {(albumPhotos.length > 0 || (!isInventoryManager && !isOwner && !isReceptionist)) && (
+            {(albumPhotos.length > 0 ||
+              (!isInventoryManager && !isOwner && !isReceptionist)) && (
               <section className="album-photos">
                 <h2>Album Photos</h2>
                 {albumPhotos.length > 0 ? (
