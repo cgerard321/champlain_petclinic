@@ -252,6 +252,52 @@ export default function AdminBillsListTable(): JSX.Element {
   const toggleSection = (section: string): void => {
     setActiveSection(activeSection === section ? null : section);
   };
+  const [oldPaidBills, setOldPaidBills] = useState<Bill[]>([]);
+  const [showOldPaidBills, setShowOldPaidBills] = useState(false);
+  const [cutoffYear, setCutoffYear] = useState<number>(
+    new Date().getFullYear()
+  );
+
+  const handleFetchOldPaidBills = async (): Promise<void> => {
+    try {
+      const bills = await getAllPaidBills();
+      // filter client-side by cutoffYear
+      const filtered = bills.filter(bill => {
+        const billYear = new Date(bill.date).getFullYear();
+        return billYear <= cutoffYear; // bills older than or equal to cutoff year
+      });
+
+      setOldPaidBills(filtered);
+      setShowOldPaidBills(true);
+    } catch (err) {
+      console.error('Failed to fetch paid bills:', err);
+      window.alert('Failed to fetch.' + err);
+    }
+  };
+
+  const handleDeleteOldPaidBills = async (): Promise<void> => {
+    const currentYear = new Date().getFullYear();
+    if (cutoffYear > currentYear - 5) {
+      return;
+    }
+
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete ${oldPaidBills.length} paid bills from ${cutoffYear} or earlier?`
+    );
+    if (!confirmDelete) return;
+
+    try {
+      for (const bill of oldPaidBills) {
+        await deleteBill(bill);
+      }
+      window.alert(`${oldPaidBills.length} bills deleted successfully.`);
+      setOldPaidBills([]);
+      setShowOldPaidBills(false);
+    } catch (err) {
+      console.error('Error deleting bills:', err);
+      window.alert('Some bills could not be deleted.');
+    }
+  };
 
   return (
     <div>
@@ -266,6 +312,9 @@ export default function AdminBillsListTable(): JSX.Element {
 
         <button onClick={() => toggleSection('create')}>
           {activeSection === 'create' ? 'Close Create' : 'Create'}
+        </button>
+        <button onClick={() => toggleSection('debug')}>
+          {activeSection === 'debug' ? 'Close Admin Delete' : 'Admin Delete'}
         </button>
       </div>
 
@@ -441,6 +490,76 @@ export default function AdminBillsListTable(): JSX.Element {
 
             <button type="submit">Create Bill</button>
           </form>
+        </div>
+      )}
+
+      {activeSection === 'debug' && (
+        <div className="p-4 mb-4 border rounded bg-gray-50">
+          <h3 className="text-lg font-semibold mb-2">
+            Fetch Paid Bills by Year
+          </h3>
+          <input
+            type="number"
+            value={cutoffYear}
+            onChange={e => setCutoffYear(parseInt(e.target.value))}
+            placeholder="Enter year"
+          />
+          <button className="ml-2" onClick={handleFetchOldPaidBills}>
+            Get Bills
+          </button>
+
+          {showOldPaidBills && (
+            <>
+              {oldPaidBills.length === 0 ? (
+                <p>No paid bills from {cutoffYear} or earlier.</p>
+              ) : (
+                <>
+                  <table className="min-w-full border mt-4">
+                    <thead>
+                      <tr>
+                        <th className="border px-2 py-1">Bill ID</th>
+                        <th className="border px-2 py-1">CustomerID</th>
+                        <th className="border px-2 py-1">Date</th>
+                        <th className="border px-2 py-1">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {oldPaidBills.map(bill => (
+                        <tr key={bill.billId}>
+                          <td className="border px-2 py-1">{bill.billId}</td>
+                          <td className="border px-2 py-1">
+                            {bill.customerId}
+                          </td>
+                          <td className="border px-2 py-1">{bill.date}</td>
+                          <td className="border px-2 py-1">
+                            {bill.billStatus}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  <div className="flex flex-col items-start space-y-2 mt-4">
+                    <button
+                      onClick={handleDeleteOldPaidBills}
+                      className="bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded"
+                    >
+                      Delete Bills
+                    </button>
+
+                    {/* Warning message */}
+                    {cutoffYear - new Date().getFullYear() < 5 && (
+                      <>
+                        {error && <p className="error-text">{error}</p>}
+                        <p className="error-text">
+                          Cannot delete bills that are not at least 5 years old.
+                        </p>
+                      </>
+                    )}
+                  </div>
+                </>
+              )}
+            </>
+          )}
         </div>
       )}
 
