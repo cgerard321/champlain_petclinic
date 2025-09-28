@@ -58,7 +58,7 @@ export default function MoveInventoryProducts(): JSX.Element {
         setSuccessMessage('Product updated successfully');
         setShowNotification(true);
         setTimeout(() => {
-          navigate(`/inventory/${newInventoryId}/products`);
+          navigate(`/inventories/${newInventoryId}/products`);
         }, 2000);
       }
     } catch (error) {

@@ -78,7 +78,7 @@ public class PetController {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
-    @GetMapping("/owner/{ownerId}/pets")
+    @GetMapping("/owners/{ownerId}/pets")
     public Flux<PetResponseDTO> getPetsByOwnerId(@PathVariable String ownerId) {
         return customersServiceClient.getPetsByOwnerId(ownerId);
     }

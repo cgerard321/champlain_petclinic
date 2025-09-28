@@ -1,9 +1,9 @@
 .admin-bills-list-table-container {
-  max-width: 85%;
+  max-width: 95%;
   margin: 0 auto;
   padding: 20px;
   font-family: 'Arial', sans-serif;
-  overflow: visible;
+  overflow-x: auto;
 }
 
 .filter-search-container {
@@ -30,7 +30,7 @@
   width: 100%;
   padding: 12px 15px;
   font-size: 16px;
-  margin-bottom: 15px;
+  margin-bottom: 10px;
   border: 1px solid #ccc;
   border-radius: 6px;
 }
@@ -109,21 +109,26 @@
 .table {
   width: 100%;
   border-collapse: collapse;
-  margin: 20px 0;
-  font-size: 18px;
+  margin: 10px 0;
+  font-size: 14px;
   text-align: left;
+  table-layout: fixed;
 }
 
 .table th,
 .table td {
-  padding: 12px 15px;
+  padding: 6px 10px;
+  vertical-align: middle;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
 .table thead tr {
   background-color: #009879;
   color: #ffffff;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  font-size: 14px;
+  letter-spacing: 0.03em;
 }
 
 .table tbody tr {
@@ -142,6 +147,69 @@
   background-color: #f9f9f9;
 }
 
+.table th:nth-child(1),
+.table td:nth-child(1) {
+  width: 240px;
+}
+
+.table th:nth-child(2),
+.table td:nth-child(2) {
+  width: 200px;
+}
+
+.table th:nth-child(3),
+.table td:nth-child(3) {
+  width: 160px;
+}
+
+.table th:nth-child(4),
+.table td:nth-child(4) {
+  width: 120px;
+}
+
+.table th:nth-child(5),
+.table td:nth-child(5) {
+  width: 160px;
+}
+
+.table th:nth-child(6),
+.table td:nth-child(6) {
+  width: 110px;
+}
+
+.table th:nth-child(7),
+.table td:nth-child(7) {
+  width: 90px;
+  text-align: right;
+}
+
+.table th:nth-child(8),
+.table td:nth-child(8) {
+  width: 130px;
+  text-align: right;
+}
+
+.table th:nth-child(9),
+.table td:nth-child(9) {
+  width: 110px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.table th:nth-child(10),
+.table td:nth-child(10) {
+  width: 120px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.table th:nth-child(11),
+.table td:nth-child(11) {
+  width: 100px;
+  text-align: center;
+  vertical-align: middle;
+}
+
 .btn {
   padding: 10px 20px;
   border: none;
@@ -153,6 +221,10 @@
 .btn-danger {
   background-color: #d9534f;
   color: white;
+  margin: 0 auto;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .btn-danger:hover {
