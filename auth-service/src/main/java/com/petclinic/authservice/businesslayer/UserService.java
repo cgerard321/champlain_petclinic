@@ -43,9 +43,9 @@ public interface UserService {
 
     List<UserDetails> findAllWithoutPage();
 
-    Mail generateVerificationMail(User user);
+//    NewMail generateVerificationMail(User user);
 
-    void generateVerificationMailWithNewEmailingService(User user);
+    Mail generateVerificationMail(User user);
 
     UserPasswordLessDTO verifyEmailFromToken(String token);
 
