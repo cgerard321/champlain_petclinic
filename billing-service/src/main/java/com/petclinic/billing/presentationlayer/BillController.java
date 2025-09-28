@@ -21,17 +21,23 @@ import java.util.Optional;
 public class BillController {
     private final BillService billService;
 
-    BillController(BillService service){
-        this.billService = service;
+    BillController(BillService billService){
+        this.billService = billService;
     }
 
     // Create Bill //
     @PostMapping("/bills")
-    public Mono<ResponseEntity<BillResponseDTO>> createBill(@Valid @RequestBody Mono<BillRequestDTO> billDTO){
-        return billService.createBill(billDTO)
-                .map(e -> ResponseEntity.status(HttpStatus.CREATED).body(e))
-                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    public Mono<ResponseEntity<BillResponseDTO>> createBill(@RequestBody Mono<BillRequestDTO> billDTO) {
+        return billDTO
+                .flatMap(dto -> {
+                    if (dto.getBillStatus() == null) {
+                        return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bill status is required"));
+                    }
+                    return billService.createBill(Mono.just(dto));
+                })
+                .map(bill -> ResponseEntity.status(HttpStatus.CREATED).body(bill));
     }
+
 
     // Read Bill //
     @GetMapping(value = "/bills/{billId}")
