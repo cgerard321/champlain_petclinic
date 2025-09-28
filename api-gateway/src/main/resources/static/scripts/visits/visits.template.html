@@ -604,7 +604,7 @@
 
     <div class="form-group">
         <label for="selectedVet">Practitioner</label>
-        <select id="selectedVet" ng-model="$ctrl.practitionerId" ng-change="$ctrl.loadVetInfo();$ctrl.getVisitsForPractitionerIdAndMonth()">
+        <select id="selectedVet" ng-model="$ctrl.practitionerId" ng-change="$ctrl.loadVetInfo();$ctrl.getVisitsForPractitionerIdAndMonth();$ctrl.showVetAvailability()">
             <option disabled selected value>Please Select A Veterinarian</option>
             <option ng-repeat="p in $ctrl.vets" data-target="{{p.firstName}} {{p.lastName}}" value="{{p.vetId}}">{{p.firstName}} {{p.lastName}}</option>
         </select>
@@ -622,6 +622,20 @@
 
         <label for="vetWorkdays">Workdays:</label>
         <input id="vetWorkdays" disabled="disabled" style="background-color: #dbd9ce;" onchange=selectChanged() />
+    </div>
+
+    <div id="vetAvailabilitySection" style="margin-top: 15px; display: none;">
+        <label style="font-weight: bold; color: #0066cc;">Vet Availability:</label>
+        <div id="availabilityInfo" style="background-color: #f0f8ff; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-top: 5px;">
+            <div>
+                <strong>Available Days:</strong>
+                <span id="availableDays"></span>
+            </div>
+            <div style="margin-top: 8px;">
+                <strong>Available Hours:</strong>
+                <div id="availableHours"></div>
+            </div>
+        </div>
     </div>
 
     <div class="form-group"> <!--ng-controller="VisitsController as $ctrl" ng-app="visitsApp"-->

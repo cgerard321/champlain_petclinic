@@ -64,3 +64,116 @@
   box-shadow: 0 0 5px rgba(40, 167, 69, 0.5);
   outline: none;
 }
+
+.vet-availability-section {
+  background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%);
+  border: 2px solid #4a90e2;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 20px 0;
+  box-shadow: 0 4px 12px rgba(74, 144, 226, 0.15);
+  position: relative;
+  overflow: hidden;
+}
+
+.vet-availability-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #4a90e2, #357abd, #4a90e2);
+  border-radius: 12px 12px 0 0;
+}
+
+.vet-availability-title {
+  color: #2c5282;
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.vet-availability-title::before {
+  content: '🩺';
+  margin-right: 8px;
+  font-size: 20px;
+}
+
+.availability-info {
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 16px;
+  border-left: 4px solid #4a90e2;
+}
+
+.availability-info strong {
+  color: #2c5282;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.availability-value {
+  margin-left: 8px;
+  color: #2d3748;
+  font-weight: 500;
+  background: rgba(74, 144, 226, 0.1);
+  padding: 4px 8px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.work-hours-display {
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 8px;
+  padding: 12px;
+  border-left: 4px solid #48bb78;
+}
+
+.work-hours-display > strong {
+  color: #2c5282;
+  font-weight: 600;
+  font-size: 14px;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.work-hours-day {
+  background: rgba(255, 255, 255, 0.9);
+  margin: 6px 0;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border-left: 3px solid #48bb78;
+  font-size: 13px;
+  color: #2d3748;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+}
+
+.work-hours-day:hover {
+  transform: translateX(2px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.work-hours-day strong {
+  color: #2c5282;
+  font-weight: 600;
+  min-width: 80px;
+  display: inline-block;
+}
+
+.work-hours-error {
+  color: #e53e3e;
+  font-style: italic;
+  text-align: center;
+  padding: 12px;
+  background: rgba(229, 62, 62, 0.1);
+  border-radius: 6px;
+  border: 1px solid #e53e3e;
+}
+
+

@@ -224,6 +224,75 @@ angular.module('visits')
             console.log("Selected Pet ID:", self.petId);
         };
 
+        self.showVetAvailability = function() {
+            console.log("Showing vet availability for:", self.practitionerId);
+
+            if (!self.practitionerId) {
+                document.getElementById('vetAvailabilitySection').style.display = 'none';
+                return;
+            }
+
+            let selectedVet = null;
+            for (let i = 0; i < self.vets.length; i++) {
+                if (self.vets[i].vetId === self.practitionerId) {
+                    selectedVet = self.vets[i];
+                    break;
+                }
+            }
+
+            if (selectedVet) {
+                document.getElementById('vetAvailabilitySection').style.display = 'block';
+
+                let availableDays = selectedVet.workday ? selectedVet.workday.join(', ') : 'No workdays specified';
+                document.getElementById('availableDays').textContent = availableDays;
+
+                let availableHoursDiv = document.getElementById('availableHours');
+                availableHoursDiv.innerHTML = '';
+
+                if (selectedVet.workHoursJson) {
+                    try {
+                        let workHours = JSON.parse(selectedVet.workHoursJson);
+
+                        for (let day in workHours) {
+                            if (workHours.hasOwnProperty(day)) {
+                                let dayDiv = document.createElement('div');
+                                dayDiv.style.marginBottom = '5px';
+
+                                let hours = workHours[day];
+                                let formattedHours = formatWorkHours(hours);
+
+                                dayDiv.innerHTML = `<strong>${day}:</strong> ${formattedHours}`;
+                                availableHoursDiv.appendChild(dayDiv);
+                            }
+                        }
+                    } catch (e) {
+                        availableHoursDiv.innerHTML = '<div>Work hours format error</div>';
+                    }
+                } else {
+                    availableHoursDiv.innerHTML = '<div>No work hours specified</div>';
+                }
+            }
+        };
+
+        // ADD THIS HELPER FUNCTION TOO
+        function formatWorkHours(hoursArray) {
+            if (!hoursArray || hoursArray.length === 0) {
+                return 'No hours available';
+            }
+
+            let formattedHours = hoursArray.map(hour => {
+                let parts = hour.split('_');
+                if (parts.length === 3) {
+                    let startHour = parseInt(parts[1]);
+                    let endHour = parseInt(parts[2]);
+                    return `${startHour}:00-${endHour}:00`;
+                }
+                return hour;
+            });
+
+            return formattedHours.join(', ');
+        }
+
 
 
 
