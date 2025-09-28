@@ -687,6 +687,29 @@ class CartControllerUnitTest {
 
         verify(cartService, times(1)).addProductToWishList(VALID_CART_ID, wishListProduct1.getProductId(), 2);
     }
+    @Test
+    void addProductToCartFromProducts_ok_returns200() {
+        // given
+        String cartId = "01234567-0123-0123-0123-012345678901";
+        String productId = "11111111-1111-1111-1111-111111111111";
+
+        CartResponseModel resp = new CartResponseModel();
+        resp.setCartId(cartId);
+
+        when(cartService.addProductToCartFromProducts(cartId, productId))
+                .thenReturn(Mono.just(resp));
+
+        // when + then
+        webTestClient.post()
+                .uri("/api/v1/carts/{cartId}/{productId}", cartId, productId)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(CartResponseModel.class)
+                .value(r -> assertEquals(cartId, r.getCartId()));
+
+        verify(cartService).addProductToCartFromProducts(cartId, productId);
+    }
+
 
     @Test
     void whenAddProductToWishList_thenProductIsAlreadyInWishList_thenSuccess(){
@@ -827,6 +850,59 @@ class CartControllerUnitTest {
 
         verify(cartService, times(1)).addProductToWishList(cartId, productId, quantity);
     }
+
+
+
+    //NEGATIF
+
+    @Test
+    void removeProductFromWishlist_invalidIds_returns422() {
+        String badCartId = "short";
+        String badProductId = "short";
+
+        webTestClient.delete()
+                .uri("/api/v1/carts/{cartId}/wishlist/{productId}", badCartId, badProductId)
+                .exchange()
+                .expectStatus().isEqualTo(422)
+                .expectBody(CartResponseModel.class)
+                .value(r -> assertEquals("Provided cart id is invalid: " + badCartId, r.getMessage()));
+
+        verify(cartService, never()).removeProductFromWishlist(anyString(), anyString());
+    }
+
+    @Test
+    void removeProductFromWishlist_notFound_returns404() {
+        String cartId = "01234567-0123-0123-0123-012345678901";
+        String productId = "11111111-1111-1111-1111-111111111111";
+
+        when(cartService.removeProductFromWishlist(cartId, productId))
+                .thenReturn(Mono.error(new NotFoundException("Product not found in wishlist: " + productId)));
+
+        webTestClient.delete()
+                .uri("/api/v1/carts/{cartId}/wishlist/{productId}", cartId, productId)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody(CartResponseModel.class)
+                .value(r -> assertEquals("Product not found in wishlist: " + productId, r.getMessage()));
+    }
+
+
+    @Test
+    void moveProductFromCartToWishlist_invalidIds_returns422() {
+        String badCartId = "bad";
+        String badProductId = "bad";
+
+        webTestClient.put()
+                .uri("/api/v1/carts/{cartId}/wishlist/{productId}/toWishList", badCartId, badProductId)
+                .exchange()
+                .expectStatus().isEqualTo(422)
+                .expectBody(CartResponseModel.class)
+                .value(r -> assertEquals("Provided cart id is invalid: " + badCartId, r.getMessage()));
+
+        verify(cartService, never()).moveProductFromCartToWishlist(anyString(), anyString());
+    }
+
+
 
 
 }
