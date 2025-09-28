@@ -165,6 +165,12 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: password
+    #      healthcheck:
+    #        test: echo 'db.runCommand("ping").ok' | mongo localhost:27017/test --quiet
+    #        retries: 5
+    #        interval: 15s
+    #        start_period: 30s
+
 
   mongo-express:
     image: mongo-express
@@ -213,6 +219,11 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: password
+    #      healthcheck:
+    #        test: echo 'db.runCommand("ping").ok' | mongo localhost:27017/test --quiet
+    #        retries: 5
+    #        interval: 15s
+    #        start_period: 30s
 
   mongo-express1:
     image: mongo-express

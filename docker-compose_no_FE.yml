@@ -147,6 +147,11 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: password
+    #      healthcheck:
+    #        test: echo 'db.runCommand("ping").ok' | mongo localhost:27017/test --quiet
+    #        retries: 5
+    #        interval: 15s
+    #        start_period: 30s
 
   mongo-express:
     image: mongo-express
@@ -195,6 +200,11 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: password
+    #      healthcheck:
+    #        test: echo 'db.runCommand("ping").ok' | mongo localhost:27017/test --quiet
+    #        retries: 5
+    #        interval: 15s
+    #        start_period: 30s
 
   mongo-express1:
     image: mongo-express
@@ -273,6 +283,11 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: password
+    #      healthcheck:
+    #        test: echo 'db.runCommand("ping").ok' | mongo localhost:27017/test --quiet
+    #        retries: 5
+    #        interval: 15s
+    #        start_period: 30s
 
   mongo-express-inventory:
     image: mongo-express
@@ -321,6 +336,11 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: password
+    #      healthcheck:
+    #        test: echo 'db.runCommand("ping").ok' | mongo localhost:27017/test --quiet
+    #        retries: 5
+    #        interval: 15s
+    #        start_period: 30s
 
   mongo-express-carts:
     image: mongo-express
@@ -342,7 +362,8 @@ services:
     build:
       context: ./emailing-service
       dockerfile: emailing-service/Dockerfile
-
+    #  ports:
+    #    - "5000:5115" # Used for testing without gateway
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - DEFAULT_CONNECTION=Server=emailing-service-mysql-db;Port=3306;Database=MyAppDb;User=root;Password=Your_password123;
