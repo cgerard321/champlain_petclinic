@@ -4,6 +4,6 @@ import (
 	"files-service/files/models"
 )
 
-type FilesService interface {
+type FileService interface {
 	GetFile(string) (*models.FileResponseModel, error)
 }

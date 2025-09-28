@@ -12,7 +12,7 @@ type FilesServiceImpl struct {
 	minioServiceClient *clientlayer.MinioServiceClient
 }
 
-func NewFileLinkService(repository *datalayer.FileLinkRepo, minioServiceClient *clientlayer.MinioServiceClient) *FilesServiceImpl {
+func NewFileService(repository *datalayer.FileLinkRepo, minioServiceClient *clientlayer.MinioServiceClient) *FilesServiceImpl {
 	return &FilesServiceImpl{
 		repository:         repository,
 		minioServiceClient: minioServiceClient,

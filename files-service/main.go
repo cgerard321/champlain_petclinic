@@ -70,9 +70,9 @@ func main() {
 	ir := datalayer.NewFileLinkRepo(db)
 
 	mc := clientlayer.NewMinioServiceClient(minioClient)
-	is := businesslayer.NewFileLinkService(ir, mc)
+	is := businesslayer.NewFileService(ir, mc)
 
-	ic := presentationlayer.NewFilesLinkController(is)
+	ic := presentationlayer.NewFileController(is)
 
 	err2 := ic.Routes(engine)
 	if err2 != nil {

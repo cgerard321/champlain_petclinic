@@ -9,17 +9,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type FilesControllerImpl struct {
-	s businesslayer.FilesService
+type FilesController struct {
+	s businesslayer.FileService
 }
 
-func NewFilesLinkController(service businesslayer.FilesService) *FilesControllerImpl {
-	return &FilesControllerImpl{
+func NewFileController(service businesslayer.FileService) *FilesController {
+	return &FilesController{
 		s: service,
 	}
 }
 
-func (i *FilesControllerImpl) getFile(c *gin.Context) {
+func (i *FilesController) getFile(c *gin.Context) {
 	id := c.Param("id")
 	if len([]rune(id)) != 36 {
 		util.HandleExceptions(c, exception.NewInvalidFileIdException(id))
@@ -35,7 +35,7 @@ func (i *FilesControllerImpl) getFile(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, file)
 }
 
-func (i *FilesControllerImpl) Routes(engine *gin.Engine) error { //TODO a way to make sure only image can be saved to the image bucket should be implemented
+func (i *FilesController) Routes(engine *gin.Engine) error { //TODO a way to make sure only image can be saved to the image bucket should be implemented
 	filesGroup := engine.Group("/files")
 
 	filesGroup.GET("/:id", i.getFile)
