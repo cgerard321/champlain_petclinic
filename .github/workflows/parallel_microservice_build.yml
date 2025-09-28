@@ -248,7 +248,7 @@ jobs:
   coverage-summary:
     runs-on: "ubuntu-22.04"
     needs: [api_gateway_test, visits_service_test, vet_service_test, customers_service_reactive_test, billing_service_test, auth_service_test, inventory_service_test, products_service_test, cart_service_test]
-    if: github.event_name == 'pull_request'
+    if: always() && (github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main'))
     steps:
     - name: Checkout sources
       uses: actions/checkout@v4
@@ -256,6 +256,13 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         path: coverage-reports
+    - name: List downloaded artifacts
+      run: |
+        echo "Downloaded artifacts:"
+        ls -la coverage-reports/ || echo "No coverage-reports directory found"
+        find coverage-reports -name "*.html" -type f | head -10 || echo "No HTML files found"
+        echo "Sample HTML content from first report:"
+        find coverage-reports -name "index.html" -type f | head -1 | xargs head -20 || echo "No index.html found"
     - name: Generate coverage summary
       run: |
         echo "## Code Coverage Summary" >> $GITHUB_STEP_SUMMARY
@@ -263,15 +270,30 @@ jobs:
         echo "Coverage reports have been generated for all microservices." >> $GITHUB_STEP_SUMMARY
         echo "View detailed reports in the Actions artifacts." >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
-        echo "### Coverage Thresholds" >> $GITHUB_STEP_SUMMARY
-        echo "- API Gateway: 65%" >> $GITHUB_STEP_SUMMARY
-        echo "- Auth Service: 90%" >> $GITHUB_STEP_SUMMARY
-        echo "- Billing Service: 50%" >> $GITHUB_STEP_SUMMARY
-        echo "- Cart Service: 0%" >> $GITHUB_STEP_SUMMARY
-        echo "- Inventory Service: 88%" >> $GITHUB_STEP_SUMMARY
-        echo "- Products Service: 90%" >> $GITHUB_STEP_SUMMARY
-        echo "- Visits Service: 85%" >> $GITHUB_STEP_SUMMARY
-        echo "- Customers Service: 80%" >> $GITHUB_STEP_SUMMARY
+        echo "### Actual Coverage Results" >> $GITHUB_STEP_SUMMARY
+        
+        for report_dir in coverage-reports/*/; do
+          if [ -d "$report_dir" ]; then
+            service_name=$(basename "$report_dir")
+            main_index="$report_dir/index.html"
+            if [ -f "$main_index" ]; then
+              coverage=$(grep -A 5 'tfoot' "$main_index" | grep -o '[0-9]*%' | head -1)
+              if [ -z "$coverage" ]; then
+                coverage=$(grep -o 'class="ctr2">[0-9]*%' "$main_index" | head -1 | grep -o '[0-9]*%')
+              fi
+              if [ -z "$coverage" ]; then
+                coverage=$(grep -o '[0-9]*%' "$main_index" | head -1)
+              fi
+              if [ -n "$coverage" ]; then
+                echo "- $service_name: $coverage" >> $GITHUB_STEP_SUMMARY
+              else
+                echo "- $service_name: Coverage data not found" >> $GITHUB_STEP_SUMMARY
+              fi
+            else
+              echo "- $service_name: No coverage report found" >> $GITHUB_STEP_SUMMARY
+            fi
+          fi
+        done
 
   dependency-submission:
     runs-on: "ubuntu-22.04"
