@@ -197,29 +197,29 @@ export default function VetDetails(): JSX.Element {
         setError('Failed to fetch education details');
       }
     };
-
-    const fetchAlbumPhotos = async (): Promise<void> => {
-      try {
-        const response = await axiosInstance.get<AlbumPhotoType[]>(
-          `/vets/${vetId}/albums`,
-          {
-            useV2: false,
-            method: 'GET',
-            headers: {
-              Accept: 'application/json',
-            },
-          }
-        );
-        setAlbumPhotos(response.data);
-      } catch (error) {
-        setAlbumPhotos([]);
-        setError('Failed to fetch album photos');
-      }
-    };
+    // fetch album photos not working (will be addressed in new ticket)
+    // const fetchAlbumPhotos = async (): Promise<void> => {
+    //   try {
+    //     const response = await axiosInstance.get<AlbumPhotoType[]>(
+    //       `/vets/${vetId}/albums`,
+    //       {
+    //         useV2: false,
+    //         method: 'GET',
+    //         headers: {
+    //           Accept: 'application/json',
+    //         },
+    //       }
+    //     );
+    //     setAlbumPhotos(response.data);
+    //   } catch (error) {
+    //     setAlbumPhotos([]);
+    //     setError('Failed to fetch album photos');
+    //   }
+    // };
 
     fetchVetDetails().then(() => {
       fetchEducationDetails();
-      fetchAlbumPhotos();
+      // fetchAlbumPhotos();
       setLoading(false);
     });
   }, [vetId]);
