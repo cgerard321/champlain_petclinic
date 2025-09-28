@@ -20,11 +20,8 @@ default-admin:
   username: admin
   password: admin
 
-#This was changed to the new endpoint using the new V2 functions, if you want to access the previous
-gateway:
-  origin: localhost:8080/api/v2/gateway
-  protocol: http
-  subdomain:
+frontend:
+  url: https://petclinic.benmusicgeek.synology.me/api/v2/gateway
 
 ---
 # for test
@@ -108,10 +105,51 @@ emailing-service:
   host: emailing-service
   port: 5115
 
+#This was changed to the new endpoint using the new V2 functions, if you want to access the previous
+frontend:
+  url: http://localhost:8080/api/v2/gateway
+
 logging:
   level:
     root: INFO
     com.petclinic: DEBUG
+
+
+
+---
+#for production
+spring:
+  config:
+    activate:
+      on-profile: prod
+  jpa:
+    hibernate:
+      ddl-auto: none
+  sql:
+    init:
+      platform: mysql
+      mode: always
+
+mailer-service:
+  host: mailer-service
+  port: 8080
+
+cart-service:
+  host: cart-service
+  port: 8080
+
+emailing-service:
+  host: emailing-service
+  port: 5115
+
+logging:
+  level:
+    root: INFO
+    com.petclinic: DEBUG
+
+frontend:
+  url: https://petclinic.benmusicgeek.synology.me/api/v2/gateway
+---
 
 server.port: 8080
 
