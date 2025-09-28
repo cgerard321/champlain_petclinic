@@ -82,7 +82,7 @@ const UserCart = (): JSX.Element => {
     setCartItemCount(count);
   }, [cartItems]);
 
-  // fetch cart & wishlist
+  // Fetch cart items when cartId or wishlistUpdated changes
   useEffect(() => {
     const fetchCartItems = async (): Promise<void> => {
       if (!cartId) {
@@ -130,13 +130,17 @@ const UserCart = (): JSX.Element => {
         setError('Failed to fetch cart items');
       } finally {
         setLoading(false);
+        if (wishlistUpdated) setWishlistUpdated(false);
       }
     };
 
     fetchCartItems();
-    setWishlistUpdated(false);
+  }, [cartId, wishlistUpdated]);
+
+  // Update cart item count whenever cartItems changes
+  useEffect(() => {
     updateCartItemCount();
-  }, [cartId, updateCartItemCount, wishlistUpdated]);
+  }, [cartItems, updateCartItemCount]);
 
   // validate voucher code
   const applyVoucherCode = async (): Promise<void> => {

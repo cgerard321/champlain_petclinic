@@ -74,12 +74,13 @@ spring:
       on-profile: docker
 
   r2dbc:
-    url: r2dbc:postgresql://postgres:5432/images
+    url: r2dbc:postgresql://postgres-vet:5432/images
     username: user
     password: pwd
+
   data:
     mongodb:
-      host: mongo
+      host: mongo-vet
       port: 27017
       database: veterinarians
       username: root
