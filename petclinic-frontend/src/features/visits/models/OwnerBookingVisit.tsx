@@ -1,34 +1,26 @@
 import * as React from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { FormEvent, useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { FormEvent, useState } from 'react';
+import { useUser } from '@/context/UserContext';
 import './EditVisit.css';
 import { VisitRequestModel } from '@/features/visits/models/VisitRequestModel';
 import { Status } from '@/features/visits/models/Status';
-import { VisitResponseModel } from './VisitResponseModel';
-import { getVisit } from '../api/getVisit';
-import { updateVisit } from '../api/updateVisit';
+import { addVisit } from '@/features/visits/api/addVisit';
 
 interface ApiError {
   message: string;
 }
-
-type VisitType = {
+type OwnerVisitType = {
   visitStartDate: Date;
   description: string;
   petId: string;
   practitionerId: string;
-  // ownerId: string;
   status: Status;
 };
 
-const formatDate = (date: Date): string => {
-  const pad = (n: number): string => n.toString().padStart(2, '0');
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
-};
-
-const EditingVisit: React.FC = (): JSX.Element => {
-  const { visitId } = useParams<{ visitId: string }>();
-  const [visit, setVisit] = useState<VisitType>({
+const OwnerBookingVisit: React.FC = (): JSX.Element => {
+  const { user } = useUser();
+  const [visit, setVisit] = useState<OwnerVisitType>({
     visitStartDate: new Date(),
     description: '',
     petId: '',
@@ -44,28 +36,10 @@ const EditingVisit: React.FC = (): JSX.Element => {
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchVisitData = async (): Promise<void> => {
-      if (visitId) {
-        try {
-          const response: VisitResponseModel = await getVisit(visitId);
-          setVisit({
-            practitionerId: response.practitionerId,
-            description: response.description,
-            petId: response.petId,
-            visitStartDate: new Date(response.visitDate),
-            status: response.status,
-          });
-        } catch (error) {
-          console.error(`Error fetching visit with ID ${visitId}:`, error);
-        }
-      }
-    };
-
-    if (visitId) {
-      fetchVisitData();
-    }
-  }, [visitId]);
+  const formatDate = (date: Date): string => {
+    const pad = (n: number): string => n.toString().padStart(2, '0');
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  };
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -73,7 +47,7 @@ const EditingVisit: React.FC = (): JSX.Element => {
     const { name, value } = e.target;
     setVisit(prevVisit => ({
       ...prevVisit,
-      [name]: name === 'visitStartDate' ? new Date(value) : value, // Convert string to Date object for visitDate
+      [name]: name === 'visitStartDate' ? new Date(value) : value,
     }));
   };
 
@@ -82,12 +56,21 @@ const EditingVisit: React.FC = (): JSX.Element => {
     if (!visit.petId) newErrors.petId = 'Pet ID is required';
     if (!visit.visitStartDate)
       newErrors.visitStartDate = 'Visit date is required';
-    if (!visit.description) newErrors.description = 'Description is required';
+    if (!visit.description.trim())
+      newErrors.description = 'Description is required';
     if (!visit.practitionerId)
       newErrors.practitionerId = 'Practitioner ID is required';
     if (!visit.status) newErrors.status = 'Status is required';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  const handleCancel = (): void => {
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate('/visits');
+    }
   };
 
   const handleSubmit = async (
@@ -101,28 +84,27 @@ const EditingVisit: React.FC = (): JSX.Element => {
     setSuccessMessage('');
 
     const formattedVisit: VisitRequestModel = {
+      ...visit,
       visitDate: visit.visitStartDate
         .toISOString()
         .slice(0, 16)
         .replace('T', ' '),
-      description: visit.description,
-      petId: visit.petId,
-      practitionerId: visit.practitionerId,
-      status: visit.status,
+      ownerId: user.userId,
+      jwtToken:
+        localStorage.getItem('authToken') ||
+        localStorage.getItem('token') ||
+        '',
     };
 
     try {
-      if (visitId) {
-        await updateVisit(visitId, formattedVisit);
-        setSuccessMessage('Visit updated successfully!');
-        setShowNotification(true);
-        setTimeout(() => setShowNotification(false), 3000); // Hide notification after 3 seconds
-        navigate('/visits'); // Navigate to a different page or clear form
-      }
+      await addVisit(formattedVisit);
+      setSuccessMessage('Visit added successfully!');
+      setShowNotification(true);
+      setTimeout(() => setShowNotification(false), 5000);
+      navigate('/customer/visits');
     } catch (error) {
-      // Use type assertion or check error type
       const apiError = error as ApiError;
-      setErrorMessage(`Error updating visit: ${apiError.message}`);
+      setErrorMessage(`Error adding visits: ${apiError.message}`);
     } finally {
       setIsLoading(false);
     }
@@ -130,7 +112,7 @@ const EditingVisit: React.FC = (): JSX.Element => {
 
   return (
     <div className="profile-edit">
-      <h1>Edit Visit</h1>
+      <h1>Schedule Visit For Your Pet</h1>
       <form onSubmit={handleSubmit}>
         <label>Pet ID: </label>
         <input
@@ -175,14 +157,11 @@ const EditingVisit: React.FC = (): JSX.Element => {
           <span className="error">{errors.practitionerId}</span>
         )}
         <br />
-        <label>Status: </label>
-        <select name="status" value={visit.status} onChange={handleChange}>
-          <option value="UPCOMING">Upcoming</option>
-        </select>
-        {errors.status && <span className="error">{errors.status}</span>}
-        <br />
+        <button className="cancel" type="button" onClick={handleCancel}>
+          Cancel
+        </button>
         <button type="submit" disabled={isLoading}>
-          {isLoading ? 'Updating...' : 'Update'}
+          {isLoading ? 'Adding...' : 'Add'}
         </button>
       </form>
       {showNotification && <div className="notification">{successMessage}</div>}
@@ -191,4 +170,4 @@ const EditingVisit: React.FC = (): JSX.Element => {
   );
 };
 
-export default EditingVisit;
+export default OwnerBookingVisit;
