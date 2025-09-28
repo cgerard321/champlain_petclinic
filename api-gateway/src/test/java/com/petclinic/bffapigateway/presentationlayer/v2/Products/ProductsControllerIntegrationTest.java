@@ -1,4 +1,4 @@
-package com.petclinic.bffapigateway.presentationlayer.v2;
+package com.petclinic.bffapigateway.presentationlayer.v2.Products;
 
 import com.petclinic.bffapigateway.domainclientlayer.ProductsServiceClient;
 import com.petclinic.bffapigateway.dtos.Products.ProductResponseDTO;
@@ -13,7 +13,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import static com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigAuthService.jwtTokenForValidAdmin;
-import static com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigAuthService.jwtTokenForValidOwnerId;
 import static org.junit.Assert.*;
 
 
