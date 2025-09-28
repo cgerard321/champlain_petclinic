@@ -16,9 +16,6 @@ cart-service:
 mailer-service:
   host: localhost
   port: 8888
-emailing-service:
-  host: localhost
-  port: 5115
 default-admin:
   username: admin
   password: admin
@@ -67,7 +64,7 @@ spring:
 
 spring:
   datasource:
-    url: jdbc:mysql://mysql4/auth-db
+    url: jdbc:mysql://mysql-auth/auth-db
     username: user
     password: pwd
 

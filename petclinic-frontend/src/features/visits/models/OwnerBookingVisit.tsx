@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FormEvent, useState } from 'react';
+import { useUser } from '@/context/UserContext';
 import './EditVisit.css';
 import { VisitRequestModel } from '@/features/visits/models/VisitRequestModel';
 import { Status } from '@/features/visits/models/Status';
@@ -9,7 +10,7 @@ import { addVisit } from '@/features/visits/api/addVisit';
 interface ApiError {
   message: string;
 }
-type VisitType = {
+type OwnerVisitType = {
   visitStartDate: Date;
   description: string;
   petId: string;
@@ -17,8 +18,9 @@ type VisitType = {
   status: Status;
 };
 
-const AddingVisit: React.FC = (): JSX.Element => {
-  const [visit, setVisit] = useState<VisitType>({
+const OwnerBookingVisit: React.FC = (): JSX.Element => {
+  const { user } = useUser();
+  const [visit, setVisit] = useState<OwnerVisitType>({
     visitStartDate: new Date(),
     description: '',
     petId: '',
@@ -45,15 +47,17 @@ const AddingVisit: React.FC = (): JSX.Element => {
     const { name, value } = e.target;
     setVisit(prevVisit => ({
       ...prevVisit,
-      [name]: name === 'visitStartDate' ? new Date(value) : value, // Convert string to Date object for visitDate
+      [name]: name === 'visitStartDate' ? new Date(value) : value,
     }));
   };
 
   const validate = (): boolean => {
     const newErrors: { [key: string]: string } = {};
     if (!visit.petId) newErrors.petId = 'Pet ID is required';
-    if (!visit.visitStartDate) newErrors.visitDate = 'Visit date is required';
-    if (!visit.description) newErrors.description = 'Description is required';
+    if (!visit.visitStartDate)
+      newErrors.visitStartDate = 'Visit date is required';
+    if (!visit.description.trim())
+      newErrors.description = 'Description is required';
     if (!visit.practitionerId)
       newErrors.practitionerId = 'Practitioner ID is required';
     if (!visit.status) newErrors.status = 'Status is required';
@@ -77,25 +81,22 @@ const AddingVisit: React.FC = (): JSX.Element => {
         .toISOString()
         .slice(0, 16)
         .replace('T', ' '),
+      ownerId: user.userId,
+      jwtToken:
+        localStorage.getItem('authToken') ||
+        localStorage.getItem('token') ||
+        '',
     };
 
     try {
-      await addVisit(formattedVisit); // Pass the Date object directly
+      await addVisit(formattedVisit);
       setSuccessMessage('Visit added successfully!');
       setShowNotification(true);
-      setTimeout(() => setShowNotification(false), 3000);
-      navigate('/visits');
-      setVisit({
-        visitStartDate: new Date(),
-        description: '',
-        petId: '',
-        practitionerId: '',
-        status: 'UPCOMING' as Status,
-        //visitEndDate: new Date(),
-      });
+      setTimeout(() => setShowNotification(false), 5000);
+      navigate('/customer/visits');
     } catch (error) {
       const apiError = error as ApiError;
-      setErrorMessage(`Error adding visit: ${apiError.message}`);
+      setErrorMessage(`Error adding visits: ${apiError.message}`);
     } finally {
       setIsLoading(false);
     }
@@ -158,4 +159,4 @@ const AddingVisit: React.FC = (): JSX.Element => {
   );
 };
 
-export default AddingVisit;
+export default OwnerBookingVisit;
