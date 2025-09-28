@@ -51,6 +51,9 @@ const EditInventory: React.FC = (): JSX.Element => {
   });
   const [lastEditedFields, setLastEditedFields] = useState<string[]>([]);
 
+  // Keep the original loaded inventory so Cancel can discard edits
+  const originalInventoryRef = useRef<InventoryRequestModel | null>(null);
+
   const navigate = useNavigate();
 
   useEffect(() => {
