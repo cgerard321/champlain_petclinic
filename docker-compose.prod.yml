@@ -1,4 +1,4 @@
-version: '3.9'
+version: "3.9"
 
 services:
   # -------------------
@@ -93,7 +93,7 @@ services:
     build: auth-service
     hostname: auth
     environment:
-      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_PROFILES_ACTIVE=docker
     restart: unless-stopped
     depends_on:
       mysql-auth:
