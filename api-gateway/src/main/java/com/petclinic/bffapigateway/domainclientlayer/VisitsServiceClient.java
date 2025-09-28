@@ -390,7 +390,7 @@ public class VisitsServiceClient {
         });
 
     }
-
+*/
     public Mono<EmergencyResponseDTO> updateEmergency(String emergencyId, Mono<EmergencyRequestDTO> emergencyRequestDTOMono) {
         return emergencyRequestDTOMono.flatMap(requestDTO ->
                 webClient
@@ -401,7 +401,7 @@ public class VisitsServiceClient {
                         .bodyToMono(EmergencyResponseDTO.class)
         );
     }
-
+/*
     public Mono<EmergencyResponseDTO> getEmergencyByEmergencyId(String emergencyId) {
         return webClient
                 .get()

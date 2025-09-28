@@ -14,8 +14,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class EmergencyRequestDTO {
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     LocalDateTime visitDate;
-
     private String description;
 
     private String petId;

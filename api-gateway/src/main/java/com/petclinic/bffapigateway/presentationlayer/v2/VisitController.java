@@ -169,17 +169,36 @@ public class VisitController {
                 .map(c->ResponseEntity.status(HttpStatus.CREATED).body(c))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
+*/
+//    @PutMapping(value="/emergency/{emergencyId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+//    public Mono<ResponseEntity<EmergencyResponseDTO>> UpdateEmergency(@RequestBody Mono<EmergencyRequestDTO> emergencyRequestDTOMono, @PathVariable String emergencyId){
+//        return Mono.just(emergencyId)
+//                .filter(id -> id.length() == 36)
+//                .switchIfEmpty(Mono.error(new InvalidInputException("the provided emergency id is invalid: " + emergencyId)))
+//                .flatMap(id-> visitsServiceClient.updateEmergency(emergencyId,emergencyRequestDTOMono))
+//                .map(ResponseEntity::ok)
+//                .defaultIfEmpty(ResponseEntity.badRequest().build());
+//    }
 
-    @PutMapping(value="/emergency/{emergencyId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<EmergencyResponseDTO>> UpdateEmergency(@RequestBody Mono<EmergencyRequestDTO> emergencyRequestDTOMono, @PathVariable String emergencyId){
-        return Mono.just(emergencyId)
-              //  .filter(id -> id.length() == 36)
-               // .switchIfEmpty(Mono.error(new InvalidInputException("the provided emergency id is invalid: " + emergencyId)))
-                .flatMap(id-> visitsServiceClient.updateEmergency(emergencyId,emergencyRequestDTOMono))
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    @PutMapping(value = "/emergency/{visitEmergencyId}",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<EmergencyResponseDTO>> updateEmergencyById(
+            @PathVariable String visitEmergencyId,
+            @RequestBody Mono<EmergencyRequestDTO> emergencyRequestDTOMono) {
+
+        return emergencyRequestDTOMono
+                .flatMap(request -> visitsServiceClient
+                        .updateEmergency(visitEmergencyId, Mono.just(request))
+                        .map(ResponseEntity::ok)
+                        .defaultIfEmpty(ResponseEntity.notFound().build())
+                );
     }
 
+
+
+
+/*
     @DeleteMapping(value="/emergency/{emergencyId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<EmergencyResponseDTO>> DeteleEmergency(@PathVariable String emergencyId) {
         return Mono.just(emergencyId)

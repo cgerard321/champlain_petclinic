@@ -10,7 +10,7 @@ export enum AppRoutePaths {
   EmergencyById = '/visits/emergency/:visitEmergencyId',
   Emergency = '/add/emergency',
   EmergencyList = '/visits/emergencyList',
-  //EditEmergency = '/visits/emergency/:emergencyId',
+  EditEmergency = '/visits/emergency/:visitEmergencyId/edit',
   UpdateReview = '/updateReview/:reviewId/edit',
   GetVisitByVistId = 'visits/:visitId',
   Form = '/forms',

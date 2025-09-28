@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { Visit } from './models/Visit';
 import './VisitListTable.css';
 import { useNavigate } from 'react-router-dom';
-// import { AppRoutePaths } from '@/shared/models/path.routes.ts';
 import { getAllEmergency } from './Emergency/Api/getAllEmergency';
 import { EmergencyResponseDTO } from './Emergency/Model/EmergencyResponseDTO';
 import { deleteEmergency } from './Emergency/Api/deleteEmergency';
@@ -32,12 +31,13 @@ export default function VisitListTable(): JSX.Element {
   useEffect(() => {
     const loadInitialData = async (): Promise<void> => {
       try {
-        const [visits, emergencies] = await Promise.all([
+        const [visitsRes, emergenciesRes] = await Promise.allSettled([
           getAllVisits(searchTerm),
           getAllEmergency(),
         ]);
-        setVisitsList(visits);
-        setEmergencyList(emergencies);
+        if (visitsRes.status === 'fulfilled') setVisitsList(visitsRes.value);
+        if (emergenciesRes.status === 'fulfilled')
+          setEmergencyList(emergenciesRes.value);
       } catch (error) {
         console.error('Error loading initial data:', error);
       }
@@ -52,7 +52,12 @@ export default function VisitListTable(): JSX.Element {
       return;
     }
 
-    const eventSource = new EventSource('/visits');
+    // const eventSource = new EventSource('/visits');
+    const API_BASE =
+      import.meta.env.VITE_BFF_BASE_URL ?? 'http://localhost:8080';
+    const eventSource = new EventSource(`${API_BASE}/api/v2/gateway/visits`, {
+      withCredentials: true,
+    });
 
     eventSource.onmessage = event => {
       try {
@@ -368,7 +373,7 @@ export default function VisitListTable(): JSX.Element {
                 <td>{new Date(emergency.visitDate).toLocaleString()}</td>
                 <td>{emergency.description}</td>
                 <td> {emergency.petId}</td>
-                <td> {new Date(emergency.vetBirthDate).toLocaleString()}</td>
+                <td> {new Date(emergency.petBirthDate).toLocaleString()}</td>
                 <td>{emergency.petName}</td>
                 <td>{emergency.practitionerId}</td>
                 <td>{emergency.vetFirstName}</td>
@@ -381,7 +386,7 @@ export default function VisitListTable(): JSX.Element {
                       className="btn btn-warning"
                       onClick={() => {
                         navigate(
-                          `/visits/emergency/${emergency.visitEmergencyId}`
+                          `/visits/emergency/${emergency.visitEmergencyId}/edit`
                         );
                       }}
                       title="Edit"

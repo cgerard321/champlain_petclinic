@@ -18,8 +18,8 @@ public class EmergencyResponseDTO {
 
     private String visitEmergencyId;
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     LocalDateTime visitDate;
-
     private String description;
 
 

@@ -37,6 +37,11 @@ public class EmergencyServiceImpl implements EmergencyService{
                 .switchIfEmpty(Mono.error(new NotFoundException("No pet was found with petId: " + petId)));
     }
 
+    private Mono<VetDTO> validateVetId(String vetId) {
+        return vetsClient.getVetByVetId(vetId)
+                .switchIfEmpty(Mono.error(new NotFoundException("No vet was found with vetId: " + vetId)));
+    }
+
     @Override
     public Flux<EmergencyResponseDTO> GetAllEmergencies() {
         Flux<Emergency> emergencyFlux;
@@ -102,19 +107,53 @@ public class EmergencyServiceImpl implements EmergencyService{
                 .map(EntityDtoUtil::toEmergencyResponseDTO);
 
     }
+*/
+//    @Override
+//    public Mono<EmergencyResponseDTO> UpdateEmergency(
+//            Mono<EmergencyRequestDTO> emergencyRequestDTOMono,
+//            String emergencyId
+//    ) {
+//        return emergencyRepository.findEmergenciesByVisitEmergencyId(emergencyId)
+//                .switchIfEmpty(Mono.error(new NotFoundException("emergency id is not found: " + emergencyId)))
+//                // Map incoming DTO -> entity, then copy ids from the found record
+//                .flatMap(found -> emergencyRequestDTOMono
+//                        .map(entityDtoUtil::toEmergencyEntity)
+//                        .doOnNext(e -> {
+//                            e.setVisitEmergencyId(found.getVisitEmergencyId());
+//                            e.setId(found.getId());
+//                        }))
+//                .flatMap(emergencyRepository::save)
+//                // mapper returns Mono<EmergencyResponseDTO> → use flatMap
+//                .flatMap(entityDtoUtil::toEmergencyResponseDTO);
+//    }
 
     @Override
-    public Mono<EmergencyResponseDTO> UpdateEmergency(Mono<EmergencyRequestDTO> emergencyRequestDTOMono, String emergencyId) {
-        return emergencyRepository.findEmergenciesByVisitEmergencyId(emergencyId)
-                .switchIfEmpty(Mono.defer(()-> Mono.error(new NotFoundException("emergency id is not found: "+ emergencyId))))
-                .flatMap(found->emergencyRequestDTOMono
-                        .map(EntityDtoUtil::toEmergencyEntity)
-                        .doOnNext(e->e.setVisitEmergencyId(found.getVisitEmergencyId()))
-                        .doOnNext(e->e.setId(found.getId())))
+    public Mono<EmergencyResponseDTO> updateEmergency(
+            String visitEmergencyId,
+            Mono<EmergencyRequestDTO> emergencyRequestDTOMono) {
+
+        return emergencyRepository.findEmergenciesByVisitEmergencyId(visitEmergencyId)
+                .switchIfEmpty(Mono.defer(() ->
+                        Mono.error(new NotFoundException("No emergency found with id: " + visitEmergencyId))
+                ))
+                .flatMap(existing -> emergencyRequestDTOMono
+                        .flatMap(req ->
+                                validatePetId(req.getPetId())
+                                        .then(validateVetId(req.getPractitionerId()))
+                                        .then(Mono.just(req))
+                        )
+                        .map(entityDtoUtil::toEmergencyEntity)
+                        .doOnNext(emergencyToUpdate -> {
+                            emergencyToUpdate.setId(existing.getId());
+                            emergencyToUpdate.setVisitEmergencyId(existing.getVisitEmergencyId());
+                        })
+                )
                 .flatMap(emergencyRepository::save)
-                .map(EntityDtoUtil::toEmergencyResponseDTO);
+                .flatMap(entityDtoUtil::toEmergencyResponseDTO);
     }
 
+
+/*
     @Override
     public Mono<EmergencyResponseDTO> DeleteEmergency(String emergencyId) {
        return  emergencyRepository.findEmergenciesByVisitEmergencyId(emergencyId)
