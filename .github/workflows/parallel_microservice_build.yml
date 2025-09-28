@@ -270,22 +270,6 @@ jobs:
         echo "Coverage reports have been generated for all microservices." >> $GITHUB_STEP_SUMMARY
         echo "View detailed reports in the Actions artifacts." >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
-        
-        # Extract coverage thresholds from build.gradle files
-        echo "### Coverage Thresholds (from build.gradle)" >> $GITHUB_STEP_SUMMARY
-        for service in api-gateway auth-service billing-service cart-service customers-service-reactive inventory-service products-service vet-service visits-service-new; do
-          if [ -f "$service/build.gradle" ]; then
-            threshold=$(grep -o "minimum = 0\.[0-9]*" "$service/build.gradle" | sed 's/minimum = 0\.//' | head -1)
-            if [ -n "$threshold" ]; then
-              percentage=$((threshold * 100))
-              echo "- $service: ${percentage}%" >> $GITHUB_STEP_SUMMARY
-            else
-              echo "- $service: No threshold set" >> $GITHUB_STEP_SUMMARY
-            fi
-          fi
-        done
-        
-        echo "" >> $GITHUB_STEP_SUMMARY
         echo "### Actual Coverage Results" >> $GITHUB_STEP_SUMMARY
         
         # Extract actual coverage from HTML reports
