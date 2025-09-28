@@ -39,7 +39,7 @@ public class VisitController {
     private final VisitsServiceClient visitsServiceClient;
     private final BFFApiGatewayController bffApiGatewayController;
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
     @GetMapping(value = "", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public ResponseEntity<Flux<VisitResponseDTO>> getAllVisits(@RequestParam(required = false) String description){
         return ResponseEntity.ok().body(visitsServiceClient.getAllVisits(description));
