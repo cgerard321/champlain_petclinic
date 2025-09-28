@@ -388,7 +388,7 @@ export default function AdminBillsListTable(): JSX.Element {
       setShowOldPaidBills(true);
     } catch (err) {
       console.error('Failed to fetch paid bills:', err);
-      window.alert('Failed to fetch.' + err);
+      window.alert(`Failed to fetch. ${err}`);
     }
   };
 
