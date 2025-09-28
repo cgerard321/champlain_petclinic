@@ -16,7 +16,10 @@ export default function axiosErrorResponseHandler(
   statusCode: number
 ): void {
   const redirectPath = errorPageRedirects[statusCode];
-
+  if (statusCode == 401) {
+    localStorage.clear();
+    router.navigate('/home');
+  }
   if (redirectPath) {
     // log for easy debug
     console.error(`Redirecting to ${redirectPath} due to error:`, error);
