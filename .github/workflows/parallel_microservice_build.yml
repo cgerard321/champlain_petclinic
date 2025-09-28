@@ -272,22 +272,42 @@ jobs:
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "### Actual Coverage Results" >> $GITHUB_STEP_SUMMARY
         
+        # Debug: Show what index.html files we're finding
+        echo "Debug: Looking for main index.html files..." 
+        for report_dir in coverage-reports/*/; do
+          if [ -d "$report_dir" ]; then
+            service_name=$(basename "$report_dir")
+            main_index="$report_dir/index.html"
+            echo "Checking: $main_index"
+            if [ -f "$main_index" ]; then
+              echo "Found main index.html for $service_name"
+            else
+              echo "No main index.html for $service_name, looking for alternatives..."
+              find "$report_dir" -name "index.html" -type f | head -3
+            fi
+          fi
+        done
+        
         # Extract actual coverage from HTML reports
         for report_dir in coverage-reports/*/; do
           if [ -d "$report_dir" ]; then
             service_name=$(basename "$report_dir")
-            # Look for the main index.html file (not package-level ones)
+            # Look for the main index.html file (not package-level ones) - it should be directly in the service directory
             main_index="$report_dir/index.html"
             if [ -f "$main_index" ]; then
               # Try multiple patterns to extract coverage percentage from JaCoCo HTML reports
               # Pattern 1: Look for Total row in tfoot with coverage percentage
-              coverage=$(grep -A 10 'tfoot' "$main_index" | grep -o 'Total.*<td class="ctr2">[0-9]*%</td>' | grep -o '[0-9]*%' | head -1)
+              coverage=$(grep -A 10 'tfoot' "$main_index" | grep -o 'Total.*<td class="ctr2">[0-9]*%' | grep -o '[0-9]*%' | head -1)
               if [ -z "$coverage" ]; then
-                # Pattern 2: Look for any ctr2 class with percentage in the main report
-                coverage=$(grep -o 'class="ctr2">[0-9]*%</td>' "$main_index" | head -1 | grep -o '[0-9]*%')
+                # Pattern 2: Look for any ctr2 class with percentage in the main report  
+                coverage=$(grep -o 'class="ctr2">[0-9]*%' "$main_index" | head -1 | grep -o '[0-9]*%')
               fi
               if [ -z "$coverage" ]; then
-                # Pattern 3: Look for any percentage in the HTML
+                # Pattern 3: Look for percentage in tfoot section specifically
+                coverage=$(grep -A 5 'tfoot' "$main_index" | grep -o '[0-9]*%' | head -1)
+              fi
+              if [ -z "$coverage" ]; then
+                # Pattern 4: Look for any percentage in the HTML as last resort
                 coverage=$(grep -o '[0-9]*%' "$main_index" | head -1)
               fi
               if [ -n "$coverage" ]; then
