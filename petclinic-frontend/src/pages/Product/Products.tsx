@@ -3,8 +3,10 @@ import ProductsList from '@/features/products/ProductsList.tsx';
 import ProductSearch from '@/features/products/components/ProductSearch';
 import './Products.css';
 import TrendingList from '@/features/products/TrendingList';
+import { useState } from 'react';
 
 export default function Products(): JSX.Element {
+  const [searchQuery, setSearchQuery] = useState<string>('');
   return (
     <div>
       <NavBar />
@@ -23,17 +25,21 @@ export default function Products(): JSX.Element {
         />
       </header>
       <div className="block">
-        <ProductSearch />
+        <ProductSearch
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+        />
       </div>
-      <div className="trending-list-container-gold">
-        <h2>Trending</h2>
-        <TrendingList />
-      </div>
-
+      {!searchQuery && (
+        <div className="trending-list-container-gold">
+          <h2>Trending</h2>
+          <TrendingList />
+        </div>
+      )}
       <div className="block">
         <hr />
       </div>
-      <ProductsList />
+      <ProductsList searchQuery={searchQuery} />
     </div>
   );
 }
