@@ -24,7 +24,7 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:
-      - mongo-visits-new
+      - mongo-visits
       - mailer-service
 
   inventory-service:
@@ -314,9 +314,9 @@ services:
       - mongo-billing
       - billing-service
 
-  mongo-visits-new:
+  mongo-visits:
     image: mongo
-    container_name: mongo-visits-new
+    container_name: mongo-visits
     restart: always
     ports:
       - 27015:27017
@@ -335,12 +335,12 @@ services:
     environment:
       - ME_CONFIG_MONGODB_ADMINUSERNAME=root
       - ME_CONFIG_MONGODB_ADMINPASSWORD=password
-      - ME_CONFIG_MONGODB_SERVER=mongo-visits-new
+      - ME_CONFIG_MONGODB_SERVER=mongo-visits
       - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
     ports:
       - 9001:8081
     depends_on:
-      - mongo-visits-new
+      - mongo-visits
       - visits-service-new
 
   mongo-customers:

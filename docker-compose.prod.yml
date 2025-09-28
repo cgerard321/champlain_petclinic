@@ -60,7 +60,7 @@ services:
       - SPRING_PROFILES_ACTIVE=docker
     restart: unless-stopped
     depends_on:
-      - mongo-visits-new
+      - mongo-visits
       - mailer-service
 
   inventory-service:
@@ -233,17 +233,17 @@ services:
       - mongo-billing-config:/data/configdb
     restart: unless-stopped
 
-  mongo-visits-new:
+  mongo-visits:
     image: mongo
-    container_name: mongo-visits-new
+    container_name: mongo-visits
     ports:
       - "27015:27017"
     environment:
       - MONGO_INITDB_ROOT_USERNAME=root
       - MONGO_INITDB_ROOT_PASSWORD=password
     volumes:
-      - mongo-visits-new-data:/data/db
-      - mongo-visits-new-config:/data/configdb
+      - mongo-visits-data:/data/db
+      - mongo-visits-config:/data/configdb
     restart: unless-stopped
 
   mongo-customers:
@@ -307,8 +307,8 @@ volumes:
   mongo-vet-config:
   mongo-billing-data:
   mongo-billing-config:
-  mongo-visits-new-data:
-  mongo-visits-new-config:
+  mongo-visits-data:
+  mongo-visits-config:
   mongo-customers-data:
   mongo-customers-config:
   mongo-inventory-data:
