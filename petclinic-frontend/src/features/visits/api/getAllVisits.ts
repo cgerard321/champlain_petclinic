@@ -2,22 +2,28 @@ import axiosInstance from '@/shared/api/axiosInstance.ts';
 import { Visit } from '@/features/visits/models/Visit.ts';
 
 export async function getAllVisits(searchTerm: string): Promise<Visit[]> {
-  const params: Record<string, string> = {};
-  if (searchTerm !== '') params.searchTerm = searchTerm;
-  const res = await axiosInstance.get('/visits', {
-    responseType: 'stream',
-    params,
-  });
+  try {
+    const params: Record<string, string> = {};
+    if (searchTerm !== '') params.searchTerm = searchTerm;
 
-  return res.data
-    .split('data:')
-    .map((dataChunk: string) => {
-      try {
-        if (dataChunk == '') return null;
-        return JSON.parse(dataChunk);
-      } catch (err) {
-        console.error('Could not parse JSON: ' + err);
-      }
-    })
-    .filter((data?: JSON) => data !== null);
+    const response = await axiosInstance.get('/visits', {
+      responseType: 'text',
+      params,
+      useV2: true,
+    });
+    return response.data
+      .split('data:')
+      .map((payload: string) => {
+        try {
+          if (payload == '') return null;
+          return JSON.parse(payload);
+        } catch (err) {
+          console.error("Can't parse JSON:", err);
+        }
+      })
+      .filter((data?: JSON) => data !== null);
+  } catch (error) {
+    console.error('Error fetching visits:', error);
+    throw error;
+  }
 }

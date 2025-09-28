@@ -14,7 +14,7 @@ angular.module('productUpdateForm')
 
 
 
-        $http.get('/api/gateway/inventory/' + inventoryId + '/products/' + productId).then(function (resp) {
+        $http.get('/api/gateway/inventories/' + inventoryId + '/products/' + productId).then(function (resp) {
             self.product = resp.data;
         });
 
@@ -28,7 +28,7 @@ angular.module('productUpdateForm')
                 productSalePrice: self.product.productSalePrice
             }
 
-            $http.put('/api/gateway/inventory/' + inventoryId + '/products/' + productId, data)
+            $http.put('/api/gateway/inventories/' + inventoryId + '/products/' + productId, data)
                     .then(function (response) {
                         console.log(response);
                         $state.go('productList', {inventoryId: inventoryId});

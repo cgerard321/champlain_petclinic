@@ -2,9 +2,10 @@ import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '@/context/UserContext';
-import { getAllReviews } from './Api/getAllCustomerReviews';
+import { getAllReviews } from './Api/getAllReviews';
 import { ReviewResponseDTO } from './Model/ReviewResponseDTO';
 import { AppRoutePaths } from '@/shared/models/path.routes.ts';
+import { deleteReview } from './Api/deleteReview';
 
 const CustomerReviewsList: React.FC = (): JSX.Element => {
   const [reviewList, setReviewList] = useState<ReviewResponseDTO[]>([]);
@@ -14,7 +15,7 @@ const CustomerReviewsList: React.FC = (): JSX.Element => {
   useEffect(() => {
     const fetchReviewsData = async (): Promise<void> => {
       try {
-        const response = await getAllReviews(user.userId);
+        const response = await getAllReviews();
         if (Array.isArray(response)) {
           setReviewList(response);
         } else {
@@ -34,28 +35,16 @@ const CustomerReviewsList: React.FC = (): JSX.Element => {
     const confirmDelete = window.confirm(
       `Are you sure you want to delete review with ID: ${reviewId}?`
     );
-    if (confirmDelete) {
-      try {
-        const response = await fetch(
-          `http://localhost:8080/api/v2/gateway/visits/owners/${user.userId}/reviews/${reviewId}`,
-          {
-            method: 'DELETE',
-            credentials: 'include',
-          }
-        );
-        if (response.ok) {
-          setReviewList(prev =>
-            prev.filter(review => review.reviewId !== reviewId)
-          );
-          alert('Review deleted successfully!');
-        } else {
-          console.error('Failed to delete the review.');
-          alert('Failed to delete the review.');
-        }
-      } catch (error) {
-        console.error('Error deleting review:', error);
-        alert('Error deleting review.');
-      }
+    if (!confirmDelete) return;
+    try {
+      await deleteReview(reviewId.toString());
+      setReviewList(prev =>
+        prev.filter(review => review.reviewId !== reviewId)
+      );
+      alert('Review deleted successfully!');
+    } catch (error) {
+      console.error('Error deleting review:', error);
+      alert('Error deleting review.');
     }
   };
 

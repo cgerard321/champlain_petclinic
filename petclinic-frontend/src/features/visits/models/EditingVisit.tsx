@@ -4,8 +4,9 @@ import { FormEvent, useState, useEffect } from 'react';
 import './EditVisit.css';
 import { VisitRequestModel } from '@/features/visits/models/VisitRequestModel';
 import { Status } from '@/features/visits/models/Status';
-import { getVisit, updateVisit } from '@/features/visits/api/updateVisit.ts';
 import { VisitResponseModel } from './VisitResponseModel';
+import { getVisit } from '../api/getVisit';
+import { updateVisit } from '../api/updateVisit';
 
 interface ApiError {
   message: string;
@@ -100,11 +101,14 @@ const EditingVisit: React.FC = (): JSX.Element => {
     setSuccessMessage('');
 
     const formattedVisit: VisitRequestModel = {
-      ...visit,
       visitDate: visit.visitStartDate
         .toISOString()
         .slice(0, 16)
         .replace('T', ' '),
+      description: visit.description,
+      petId: visit.petId,
+      practitionerId: visit.practitionerId,
+      status: visit.status,
     };
 
     try {
@@ -174,8 +178,6 @@ const EditingVisit: React.FC = (): JSX.Element => {
         <label>Status: </label>
         <select name="status" value={visit.status} onChange={handleChange}>
           <option value="UPCOMING">Upcoming</option>
-          <option value="CONFIRMED">Confirmed</option>
-          <option value="COMPLETED">Completed</option>
         </select>
         {errors.status && <span className="error">{errors.status}</span>}
         <br />

@@ -15,7 +15,7 @@ angular.module('productForm')
             }
             var inventoryId = InventoryService.getInventoryId();
             console.log("InventoryId: " + inventoryId);
-            $http.post('/api/gateway/inventory/' + inventoryId + '/products', data
+            $http.post('/api/gateway/inventories/' + inventoryId + '/products', data
             )
                 .then(function (response) {
                     console.log(response);

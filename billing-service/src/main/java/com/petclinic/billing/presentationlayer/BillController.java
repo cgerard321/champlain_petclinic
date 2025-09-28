@@ -21,17 +21,23 @@ import java.util.Optional;
 public class BillController {
     private final BillService billService;
 
-    BillController(BillService service){
-        this.billService = service;
+    BillController(BillService billService){
+        this.billService = billService;
     }
 
     // Create Bill //
     @PostMapping("/bills")
-    public Mono<ResponseEntity<BillResponseDTO>> createBill(@Valid @RequestBody Mono<BillRequestDTO> billDTO){
-        return billService.createBill(billDTO)
-                .map(e -> ResponseEntity.status(HttpStatus.CREATED).body(e))
-                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    public Mono<ResponseEntity<BillResponseDTO>> createBill(@RequestBody Mono<BillRequestDTO> billDTO) {
+        return billDTO
+                .flatMap(dto -> {
+                    if (dto.getBillStatus() == null) {
+                        return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bill status is required"));
+                    }
+                    return billService.createBill(Mono.just(dto));
+                })
+                .map(bill -> ResponseEntity.status(HttpStatus.CREATED).body(bill));
     }
+
 
     // Read Bill //
     @GetMapping(value = "/bills/{billId}")
@@ -116,6 +122,20 @@ public class BillController {
                 vetFirstName, vetLastName);
     }
 
+    @GetMapping(value = "/bills/owner/{ownerFirstName}/{ownerLastName}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<BillResponseDTO> getAllBillsByOwnerName(@PathVariable String ownerFirstName, @PathVariable String ownerLastName) {
+        return billService.getAllBillsByOwnerName(ownerFirstName, ownerLastName);
+    }
+
+    @GetMapping(value = "/bills/vet/{vetFirstName}/{vetLastName}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<BillResponseDTO> getAllBillsByVetName(@PathVariable String vetFirstName, @PathVariable String vetLastName) {
+        return billService.getAllBillsByVetName(vetFirstName, vetLastName);
+    }
+
+    @GetMapping(value = "/bills/visitType/{visitType}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<BillResponseDTO> getAllBillsByVisitType(@PathVariable String visitType) {
+        return billService.getAllBillsByVisitType(visitType);
+    }
 
     @GetMapping(value = "/bills/paid", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<BillResponseDTO> getAllPaidBills() {

@@ -53,16 +53,16 @@ public class VisitController {
     }
 
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.OWNER})
     @PostMapping(value = "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<VisitResponseDTO>> addVisit(@RequestBody Mono<VisitRequestDTO> visitResponseDTO) {
-        return visitsServiceClient.addVisit(visitResponseDTO)
+    public Mono<ResponseEntity<VisitResponseDTO>> addVisit(@RequestBody Mono<VisitRequestDTO> visitRequestDTO) {
+        return visitsServiceClient.addVisit(visitRequestDTO)
                 .map(v -> ResponseEntity.status(HttpStatus.CREATED).body(v))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
         }
 
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @SecuredEndpoint(allowedRoles = {Roles.ALL})
     @GetMapping(value = "/reviews")
     public ResponseEntity<Flux<ReviewResponseDTO>> getAllReviews(){
         return ResponseEntity.ok().body(visitsServiceClient.getAllReviews());
@@ -215,7 +215,8 @@ public class VisitController {
     public Flux<VisitResponseDTO> getArchivedVisits() {
         return visitsServiceClient.getAllArchivedVisits();
     }
-  
+
+    @SecuredEndpoint(allowedRoles = {Roles.OWNER})
     @DeleteMapping(value="/reviews/{reviewId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<ReviewResponseDTO>> deleteReview(@PathVariable String reviewId) {
         return Mono.just(reviewId)

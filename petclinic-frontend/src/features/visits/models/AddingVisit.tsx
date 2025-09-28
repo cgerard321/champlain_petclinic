@@ -14,9 +14,7 @@ type VisitType = {
   description: string;
   petId: string;
   practitionerId: string;
-  // ownerId: string;
   status: Status;
-  //visitEndDate: Date;
 };
 
 const AddingVisit: React.FC = (): JSX.Element => {
@@ -26,7 +24,6 @@ const AddingVisit: React.FC = (): JSX.Element => {
     petId: '',
     practitionerId: '',
     status: 'UPCOMING' as Status,
-    //visitEndDate: new Date(),
   });
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -75,11 +72,14 @@ const AddingVisit: React.FC = (): JSX.Element => {
     setSuccessMessage('');
 
     const formattedVisit: VisitRequestModel = {
-      ...visit,
       visitDate: visit.visitStartDate
         .toISOString()
         .slice(0, 16)
         .replace('T', ' '),
+      description: visit.description,
+      petId: visit.petId,
+      practitionerId: visit.practitionerId,
+      status: visit.status,
     };
 
     try {
@@ -106,7 +106,7 @@ const AddingVisit: React.FC = (): JSX.Element => {
 
   return (
     <div className="profile-edit">
-      <h1>Add Visit</h1>
+      <h1>Schedule Visit For Your Pet</h1>
       <form onSubmit={handleSubmit}>
         <label>Pet ID: </label>
         <input
@@ -150,12 +150,6 @@ const AddingVisit: React.FC = (): JSX.Element => {
         {errors.practitionerId && (
           <span className="error">{errors.practitionerId}</span>
         )}
-        <br />
-        <label>Status: </label>
-        <select name="status" value={visit.status} onChange={handleChange}>
-          <option value="UPCOMING">Upcoming</option>
-        </select>
-        {errors.status && <span className="error">{errors.status}</span>}
         <br />
         <button type="submit" disabled={isLoading}>
           {isLoading ? 'Adding...' : 'Add'}

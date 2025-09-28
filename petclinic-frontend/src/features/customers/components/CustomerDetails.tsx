@@ -7,10 +7,12 @@ import { Bill } from '@/features/bills/models/Bill';
 import { getOwner } from '../api/getOwner';
 import './CustomerDetails.css';
 import { deleteOwner } from '../api/deleteOwner';
+import { IsVet } from '@/context/UserContext';
 
 const CustomerDetails: FC = () => {
   const { ownerId } = useParams<{ ownerId: string }>();
   const navigate = useNavigate();
+  const isVet = IsVet();
 
   const [isDisabled, setIsDisabled] = useState<boolean>(false);
   const [owner, setOwner] = useState<OwnerResponseModel | null>(null);
@@ -31,8 +33,10 @@ const CustomerDetails: FC = () => {
 
       // Fetch pets by owner ID
       const petsResponse = await axiosInstance.get(
-        `/pets/owner/${ownerId}/pets`,
-        { useV2: false }
+        `/pets/owners/${ownerId}/pets`,
+        {
+          useV2: true,
+        }
       );
       setPets(petsResponse.data); // Set the pets state
 
@@ -140,7 +144,7 @@ const CustomerDetails: FC = () => {
   };
 
   const handleEditPetClick = (petId: string): void => {
-    navigate(`/pets/${petId}/edit`);
+    navigate(`/owners/${ownerId}/pets/${petId}/edit`);
   };
 
   return (
@@ -239,18 +243,20 @@ const CustomerDetails: FC = () => {
         </button>
         <button
           className="add-pet-button"
-          onClick={() => navigate(`/customers/${ownerId}/pets/new`)}
+          onClick={() => navigate(`/owners/${ownerId}/pets/new`)}
         >
           Add New Pet
         </button>
-        <button
-          className="btn btn-danger"
-          onClick={() => handleDelete(owner.ownerId)}
-          title="Delete"
-          style={{ backgroundColor: 'red', color: 'white' }}
-        >
-          Delete Owner
-        </button>
+        {!isVet && (
+          <button
+            className="btn btn-danger"
+            onClick={() => handleDelete(owner.ownerId)}
+            title="Delete"
+            style={{ backgroundColor: 'red', color: 'white' }}
+          >
+            Delete Owner
+          </button>
+        )}
         <button
           className={`btn ${isDisabled ? 'btn-success' : 'btn-warning'}`}
           onClick={handleDisableEnable}

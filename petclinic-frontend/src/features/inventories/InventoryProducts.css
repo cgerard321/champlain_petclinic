@@ -1,6 +1,6 @@
 .inventory-supplies {
   padding: 20px;
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   background-color: #f8f9fa;
   border-radius: 8px;
@@ -64,29 +64,102 @@ select:focus {
   width: 100%;
   margin-bottom: 20px;
   border-collapse: collapse;
+  table-layout: fixed;
+  min-width: 1200px;
 }
 
 .table th,
 .table td {
-  padding: 12px 15px;
+  padding: 10px 12px;
   text-align: left;
   border-bottom: 1px solid #dee2e6;
   color: #495057;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .table th {
   background-color: #343a40;
   color: #ffffff;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: bold;
+  text-align: center;
+  vertical-align: middle;
+  box-sizing: border-box;
+  white-space: normal;
+  min-height: 40px;
+}
+
+/* Break a line to prevent overflowing */
+.table th:nth-child(4),  /* Sale Price */
+.table th:nth-child(5),  /* Regular Price */
+.table th:nth-child(6) { /* Profit Margin */
+  word-spacing: 100vw; 
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+/* Supply Id */
+.table th:nth-child(1), 
+.table td:nth-child(1) {
+  width: 8%; 
+}
+
+/* Supply Name */
+.table th:nth-child(2), 
+.table td:nth-child(2) {
+  width: 15%; 
+}
+
+/* Description */
+.table th:nth-child(3), 
+.table td:nth-child(3) {
+  width: 20%; 
+}
+
+/* Sale Price */
+.table th:nth-child(4), 
+.table td:nth-child(4) {
+  width: 8%; 
+}
+
+/* Regular Price */
+.table th:nth-child(5), 
+.table td:nth-child(5) {
+  width: 9%; 
+}
+
+/* Profit Margin */
+.table th:nth-child(6), 
+.table td:nth-child(6) {
+  width: 9%; 
+}
+
+/* Quantity */
+.table th:nth-child(7), 
+.table td:nth-child(7) {
+  width: 10%; 
+}
+
+/* Status */
+.table th:nth-child(8), 
+.table td:nth-child(8) {
+  width: 8%; 
 }
 
 .table-striped tbody tr:nth-of-type(odd) {
   background-color: #f2f2f2;
+  word-break: break-word;
 }
 
 .table td {
   font-size: 14px;
+  box-sizing: border-box;
+}
+
+.table thead th{
+  text-align: center;
+  vertical-align: middle;
 }
 
 .status-reorder {
@@ -126,4 +199,57 @@ select:focus {
   width: 25%;
   margin: 20px 0;
   float: right;
+}
+.table th,
+.table td {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  text-overflow: initial;
+  line-height: 1.2;
+}
+
+.table td:nth-child(4),
+.table td:nth-child(5),
+.table td:nth-child(6),
+.table td:nth-child(7) {
+  white-space: nowrap;
+}
+
+.table th:nth-child(2),
+.table th:nth-child(3) {
+  min-width: 16ch;
+}
+.table th:nth-child(6) {
+  min-width: 12ch;
+}
+
+.table th:nth-child(4),
+.table th:nth-child(5),
+.table th:nth-child(6) {
+  word-spacing: normal;
+}
+
+@media (min-width: 992px) {
+  .table { table-layout: auto; }
+}
+
+#google_translate_element {
+  float: right;
+  width: auto;
+  max-width: 320px;
+  margin: 12px 0 16px 16px;
+}
+.card button[type="submit"],
+form button[type="submit"].btn {
+  width: auto !important;
+  min-width: 10rem;
+  max-width: 100%;
+  padding-inline: 16px;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+button.btn {
+  word-break: keep-all;
 }

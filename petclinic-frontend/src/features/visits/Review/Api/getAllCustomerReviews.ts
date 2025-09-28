@@ -2,16 +2,19 @@ import axiosInstance from '@/shared/api/axiosInstance';
 import { ReviewResponseDTO } from '../Model/ReviewResponseDTO';
 import { useUser } from '@/context/UserContext';
 
-export const getAllReviews = async (
+export const getAllCustomerReviews = async (
   userId: string
 ): Promise<ReviewResponseDTO[]> => {
   const response = await axiosInstance.get<ReviewResponseDTO[]>(
-    `http://localhost:8080/api/v2/gateway/visits/owners/${userId}/reviews`
+    `/visits/owners/${userId}/reviews`,
+    { useV2: false }
   );
   return response.data; // Return only the data
 };
 
-export const useGetAllReviews = (): (() => Promise<ReviewResponseDTO[]>) => {
+export const useGetAllCustomerReviews = (): (() => Promise<
+  ReviewResponseDTO[]
+>) => {
   const { user } = useUser();
-  return () => getAllReviews(user.userId);
+  return () => getAllCustomerReviews(user.userId);
 };

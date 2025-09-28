@@ -5,7 +5,7 @@ angular.module('productForm', ['ui.router'])
         $stateProvider
             .state('productNew', {
                 parent: 'app',
-                url: '/inventory/:inventoryId/product/new',
+                url: '/inventories/:inventoryId/product/new',
                 params : {inventoryId: null},
                // url: '/product/new',
                 template: '<product-form></product-form>'
