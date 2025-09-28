@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { FormEvent, useState } from 'react';
-import { addPet } from '../api/addPet';
+import { addPetForOwner } from '../api/addPetForOwner';
 import { PetRequestModel } from '../models/PetRequestModel';
 import { useNavigate, useParams } from 'react-router-dom';
 import './AddPetForm.css';
@@ -68,7 +68,7 @@ const AddPetForm: React.FC = (): JSX.Element => {
     event.preventDefault();
     if (!validate() || !ownerId) return;
     try {
-      const response = await addPet(pet);
+      const response = await addPetForOwner(ownerId, pet);
       if (response.status === 201) {
         setSuccessMessage('Pet added successfully!');
         setIsAddModalOpen(true);

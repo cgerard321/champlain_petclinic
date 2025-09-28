@@ -101,8 +101,10 @@ const CartItem = ({
               className="addToCart-button"
               onClick={handleAddToCart}
               aria-label={`Add ${item.productName} to cart`}
+              disabled={item.productQuantity === 0}
+              aria-disabled={item.productQuantity === 0}
             >
-              Add to Cart
+              {item.productQuantity === 0 ? 'Out of Stock' : 'Add to Cart'}
             </button>
 
             <button
