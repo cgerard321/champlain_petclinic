@@ -10,57 +10,57 @@
 }
 
 .page-container{
-  display:grid;
-  grid-template-columns: auto 1fr;
+    display:grid;
+    grid-template-columns: auto 1fr;
 }
 
 .visit-actions {
-  display: flex;
-  justify-content: space-between;
-  flex-grow: 100;
-  margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    flex-grow: 100;
+    margin-bottom: 20px;
 }
 
 .search-bar{
-  width: 60%;
+    width: 60%;
 }
 
 .visit-table-section {
-  margin-top: 40px;
+    margin-top: 40px;
 }
 
 .btn {
-  padding: 10px 20px;
-  margin: 5px;
-  font-size: 14px;
-  cursor: pointer;
+    padding: 10px 20px;
+    margin: 5px;
+    font-size: 14px;
+    cursor: pointer;
 }
 
 table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 10px;
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
 }
 
 table th,
 table td {
-  padding: 12px;
-  text-align: left;
-  border-bottom: 1px solid #ddd;
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
 }
 
 table th {
-  background-color: #f2f2f2;
+    background-color: #f2f2f2;
 }
 
 table tr:hover {
-  background-color: #f5f5f5;
+    background-color: #f5f5f5;
 }
 
 h1,
 h2 {
-  font-size: 24px;
-  margin-bottom: 15px;
+    font-size: 24px;
+    margin-bottom: 15px;
 }
 
 /*.modal {*/
@@ -144,7 +144,7 @@ h2 {
 
 
 main{
-  padding: 20px;
+    padding: 20px;
 }
 
 /* Sidebar */
@@ -162,7 +162,7 @@ main{
     transition: 300ms ease-in-out;
     overflow: hidden;
     text-wrap: nowrap;
-    
+
 }
 
 #sidebar.close{
@@ -236,4 +236,8 @@ ul > li:first-child{
     font-size: 16px;
 }
 
-
+#sidebar button svg{
+    width:28px;
+    height:28px;
+    fill:#ffffff;
+}
