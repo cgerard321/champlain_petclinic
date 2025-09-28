@@ -1,6 +1,7 @@
 package com.petclinic.bffapigateway.dtos.Visits.Emergency;
 
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,6 +14,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class EmergencyRequestDTO {
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     LocalDateTime visitDate;
 
     private String description;

@@ -2,6 +2,9 @@ package com.petclinic.visits.visitsservicenew.BusinessLayer.Emergency;
 
 import com.petclinic.visits.visitsservicenew.PresentationLayer.Emergency.EmergencyRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.Emergency.EmergencyResponseDTO;
+import com.petclinic.visits.visitsservicenew.PresentationLayer.Review.ReviewRequestDTO;
+import com.petclinic.visits.visitsservicenew.PresentationLayer.Review.ReviewResponseDTO;
+import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitResponseDTO;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -18,6 +21,8 @@ public interface EmergencyService {
 
 
 
+
+    Mono<EmergencyResponseDTO> updateEmergency(String visitEmergencyId, Mono<EmergencyRequestDTO> emergencyRequestDTOMono);
 
     Mono<EmergencyResponseDTO> GetEmergencyByEmergencyId(String emergencyId);
 }

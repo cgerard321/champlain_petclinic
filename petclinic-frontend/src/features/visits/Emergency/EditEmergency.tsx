@@ -1,10 +1,12 @@
-/*import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import * as React from 'react';
 import { FormEvent, useState, useEffect } from 'react';
 import { EmergencyRequestDTO } from './Model/EmergencyRequestDTO';
 import { EmergencyResponseDTO } from './Model/EmergencyResponseDTO';
-import { getEmergency, updateEmergency } from './Api/updateEmegency';
+import { getAllEmergency } from './Api/getAllEmergency';
 import { UrgencyLevel } from './Model/UrgencyLevel';
+import { updateEmergency } from './Api/updateEmergency';
+
 import './AddEmergencyForm.css';
 
 interface ApiError {
@@ -12,7 +14,8 @@ interface ApiError {
 }
 
 const EditEmergency: React.FC = (): JSX.Element => {
-  const { emergencyId } = useParams<{ emergencyId: string }>();
+  const { visitEmergencyId } = useParams<{ visitEmergencyId: string }>();
+  const [showConfirmUpdate, setShowConfirmUpdate] = useState(false);
   const [emergency, setEmergency] = useState<EmergencyRequestDTO | null>(null);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [successMessage, setSuccessMessage] = useState<string>('');
@@ -23,26 +26,40 @@ const EditEmergency: React.FC = (): JSX.Element => {
 
   const navigate = useNavigate();
 
+  // Converts "YYYY-MM-DD HH:mm" to "YYYY-MM-DDTHH:mm"
+  const toInputValue = (val: string): string => {
+    return val.replace(' ', 'T').slice(0, 16);
+  };
+
   useEffect(() => {
     const fetchEmergencyData = async (): Promise<void> => {
-      if (emergencyId) {
+      if (visitEmergencyId) {
         try {
           setIsDataLoading(true);
 
-          const response: EmergencyResponseDTO =
-            await getEmergency(emergencyId);
+          const responses: EmergencyResponseDTO[] = await getAllEmergency();
 
-          setEmergency({
-            visitDate: new Date(response.visitDate),
-            description: response.description,
-            petName: response.petName,
-            urgencyLevel: response.urgencyLevel,
-            emergencyType: response.emergencyType,
-          });
+          const response = Array.isArray(responses)
+            ? responses.find(r => r.visitEmergencyId === visitEmergencyId) ||
+              responses[0]
+            : responses;
+
+          if (response) {
+            setEmergency({
+              // visitDate: new Date(response.visitDate),
+              visitDate: toInputValue(response.visitDate),
+              description: response.description,
+              petName: response.petName,
+              urgencyLevel: response.urgencyLevel,
+              emergencyType: response.emergencyType,
+              petId: response.petId,
+              practitionerId: response.practitionerId,
+            });
+          }
           setIsDataLoading(false);
         } catch (error) {
           console.error(
-            `Error fetching emergency with ID ${emergencyId}:`,
+            `Error fetching emergency with ID ${visitEmergencyId}:`,
             error
           );
           setIsDataLoading(false);
@@ -56,7 +73,7 @@ const EditEmergency: React.FC = (): JSX.Element => {
     fetchEmergencyData().catch(error =>
       console.error('Error in fetchEmergencyData: ', error)
     );
-  }, [emergencyId]);
+  }, [visitEmergencyId]);
 
   const handleInputChange = (
     e: React.ChangeEvent<
@@ -70,11 +87,16 @@ const EditEmergency: React.FC = (): JSX.Element => {
     }));
   };
 
+  // const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+  //   setEmergency(prevEmergency => ({
+  //     ...prevEmergency!,
+  //     visitDate: new Date(e.target.value),
+  //   }));
+  // };
+
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
-    setEmergency(prevEmergency => ({
-      ...prevEmergency!,
-      visitDate: new Date(e.target.value),
-    }));
+    const { value } = e.target; // "YYYY-MM-DDTHH:mm"
+    setEmergency(prev => (prev ? { ...prev, visitDate: value } : prev));
   };
 
   const validate = (): boolean => {
@@ -91,12 +113,22 @@ const EditEmergency: React.FC = (): JSX.Element => {
   ): Promise<void> => {
     event.preventDefault();
     if (!validate()) return;
-    setIsLoading(true);
-    setErrorMessage('');
-    setSuccessMessage('');
+
+    // --- Old confirmation window ---
+    // const confirmed = window.confirm(
+    //   'Are you sure you want to update this emergency?'
+    // );
+    // if (!confirmed) return;
+    // setIsLoading(true);
+    // setErrorMessage('');
+    // setSuccessMessage('');
+    setShowConfirmUpdate(true);
+  };
+
+  const confirmUpdate = async (): Promise<void> => {
     try {
-      if (emergencyId && emergency) {
-        await updateEmergency(emergencyId, emergency);
+      if (visitEmergencyId && emergency) {
+        await updateEmergency(visitEmergencyId, emergency);
         setSuccessMessage('Emergency updated successfully!');
         setShowNotification(true);
         setTimeout(() => setShowNotification(false), 3000);
@@ -122,9 +154,18 @@ const EditEmergency: React.FC = (): JSX.Element => {
         <div>
           <label>Visit Date:</label>
           <input
-            type="date"
+            // type="date"
+            type="datetime-local"
             name="visitDate"
-            value={emergency?.visitDate.toISOString().split('T')[0]}
+            // name="visitDate"
+            // value={emergency?.visitDate.toISOString().split('T')[0]}
+            // value={emergency?.visitDate.toString()}
+            // value={emergency?.visitDate ?? ''}
+            value={
+              emergency?.visitDate
+                ? emergency.visitDate.replace(' ', 'T').slice(0, 16)
+                : ''
+            }
             onChange={handleDateChange}
             required
           />
@@ -183,9 +224,22 @@ const EditEmergency: React.FC = (): JSX.Element => {
       {showNotification && (
         <div className="notification">Emergency updated successfully!</div>
       )}
+      {showConfirmUpdate && (
+        <div className="modal">
+          <div className="modal-content">
+            <h3>Confirm Update</h3>
+            <p>Are you sure you want to update this emergency?</p>
+            <div className="modal-buttons">
+              <button onClick={() => setShowConfirmUpdate(false)}>
+                Cancel
+              </button>
+              <button onClick={confirmUpdate}>Confirm</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
 export default EditEmergency;
-*/

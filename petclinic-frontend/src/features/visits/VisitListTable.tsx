@@ -3,7 +3,6 @@ import { Visit } from './models/Visit';
 import './VisitListTable.css';
 import './Emergency.css';
 import { useNavigate } from 'react-router-dom';
-// import { AppRoutePaths } from '@/shared/models/path.routes.ts';
 import { getAllEmergency } from './Emergency/Api/getAllEmergency';
 import { EmergencyResponseDTO } from './Emergency/Model/EmergencyResponseDTO';
 import { deleteEmergency } from './Emergency/Api/deleteEmergency';
@@ -688,7 +687,7 @@ export default function VisitListTable(): JSX.Element {
   };
 
   return (
-    <div className="visit-page-container">
+    <div className="page-container">
       {renderSidebar('Visits')} {renderVisitsTables()}
     </div>
   );
