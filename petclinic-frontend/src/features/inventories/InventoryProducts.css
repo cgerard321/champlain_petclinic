@@ -49,8 +49,8 @@ select {
   background-color: #ffffff;
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.075);
   transition:
-    border-color 0.15s ease-in-out,
-    box-shadow 0.15s ease-in-out;
+          border-color 0.15s ease-in-out,
+          box-shadow 0.15s ease-in-out;
 }
 
 input[type='text']:focus,
@@ -93,8 +93,7 @@ select:focus {
 /* Break a line to prevent overflowing */
 .table th:nth-child(4),  /* Sale Price */
 .table th:nth-child(5),  /* Regular Price */
-.table th:nth-child(6) {
-  /* Profit Margin */
+.table th:nth-child(6) { /* Profit Margin */
   word-spacing: 100vw;
   overflow-wrap: break-word;
   word-break: break-word;
@@ -158,7 +157,7 @@ select:focus {
   box-sizing: border-box;
 }
 
-.table thead th {
+.table thead th{
   text-align: center;
   vertical-align: middle;
 }
@@ -232,9 +231,7 @@ select:focus {
 }
 
 @media (min-width: 992px) {
-  .table {
-    table-layout: auto;
-  }
+  .table { table-layout: auto; }
 }
 
 #google_translate_element {
@@ -243,8 +240,8 @@ select:focus {
   max-width: 320px;
   margin: 12px 0 16px 16px;
 }
-.card button[type='submit'],
-form button[type='submit'].btn {
+.card button[type="submit"],
+form button[type="submit"].btn {
   width: auto !important;
   min-width: 10rem;
   max-width: 100%;
