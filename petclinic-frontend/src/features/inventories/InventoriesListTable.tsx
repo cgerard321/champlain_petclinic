@@ -281,11 +281,11 @@ export default function InventoriesListTable(): JSX.Element {
             onClick={toggleActionsMenu}
             id={inventoryStyles.menuIcon}
             xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            fill="currentColor"
-            className="bi bi-list"
             viewBox="0 0 16 16"
+            fill="currentColor" // bars follow CSS 'color'
+            className="bi bi-list"
+            role="button"
+            aria-label="Open menu"
           >
             <path
               fillRule="evenodd"
@@ -361,10 +361,12 @@ export default function InventoriesListTable(): JSX.Element {
           <thead>
             <tr>
               <td></td>
-              <td style={{ fontWeight: 'bold' }}>Name</td>
-              <td style={{ fontWeight: 'bold' }}>Type</td>
-              <td style={{ fontWeight: 'bold' }}>Description</td>
-              <td style={{ fontWeight: 'bold' }}>Important</td>
+              <td style={{ fontWeight: 'bold' }}>NAME</td>
+              <td style={{ fontWeight: 'bold' }}>TYPE</td>
+              <td style={{ fontWeight: 'bold' }}>DESCRIPTION</td>
+              <td className="text-center" style={{ fontWeight: 'bold' }}>
+                IMPORTANT
+              </td>
               <td></td>
               <td></td>
             </tr>
@@ -400,25 +402,28 @@ export default function InventoriesListTable(): JSX.Element {
                   }
                 />
               </td>
-              <td>
-                <input
-                  type="checkbox"
-                  checked={showImportantOnly}
-                  onChange={e => {
-                    const value = e.target.checked;
-                    setShowImportantOnly(value);
-                    updateFilters({
-                      inventoryName,
-                      inventoryType,
-                      inventoryDescription,
-                      importantOnly: value,
-                    });
-                  }}
-                />
+              <td className="text-center align-middle">
+                <div className="form-check d-inline-flex align-items-center justify-content-center m-0">
+                  <input
+                    className="form-check-input"
+                    type="checkbox"
+                    checked={showImportantOnly}
+                    onChange={e => {
+                      const value = e.target.checked;
+                      setShowImportantOnly(value);
+                      updateFilters({
+                        inventoryName,
+                        inventoryType,
+                        inventoryDescription,
+                        importantOnly: value,
+                      });
+                    }}
+                  />
+                </div>
               </td>
               <td>
                 <button
-                  className="btn btn-info"
+                  className="btn btn-primary"
                   onClick={clearQueries}
                   title="Clear"
                 >

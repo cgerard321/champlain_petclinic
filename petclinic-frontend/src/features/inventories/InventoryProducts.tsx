@@ -91,7 +91,6 @@ const InventoryProducts: React.FC = () => {
         console.warn('Failed to fetch inventory details', err);
       });
   }, [inventoryId]);
-
   useEffect(() => {
     const w = window as WindowWithGoogle;
 
