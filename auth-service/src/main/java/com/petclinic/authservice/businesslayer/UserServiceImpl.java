@@ -416,4 +416,18 @@ public class UserServiceImpl implements UserService {
         return userMapper.modelToDetailsList(userRepo.findByUsernameContaining(username));
     }
 
+    @Override
+    public String updateUserUsername(String userId, String username, String token) {
+        User existingUser = userRepo.findUserByUserIdentifier_UserId(userId);
+
+        if(existingUser == null) {
+            throw new NotFoundException("No user was found with id : " + userId);
+        }
+        username = username.replace("{\"username\":\"", "");
+        username = username.replace("\"}", "");
+        existingUser.setUsername(username);
+        userRepo.save(existingUser);
+        return existingUser.getUsername();
+    }
+
 }

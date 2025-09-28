@@ -409,6 +409,7 @@ public class VisitServiceImpl implements VisitService {
      * @return The DTO as Mono or BadRequestException if it doesn't respect the needed format
      */
     private Mono<VisitRequestDTO> validateVisitRequest(VisitRequestDTO dto) {
+
         if (dto.getDescription() == null || dto.getDescription().isBlank()) {
             return Mono.error(new BadRequestException("Please enter a description for this visit"));
         } else if (dto.getVisitDate() == null) {
