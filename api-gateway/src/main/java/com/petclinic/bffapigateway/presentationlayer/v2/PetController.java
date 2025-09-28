@@ -78,7 +78,7 @@ public class PetController {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
-    @GetMapping("/owner/{ownerId}/pets")
+    @GetMapping("/owners/{ownerId}/pets")
     public Flux<PetResponseDTO> getPetsByOwnerId(@PathVariable String ownerId) {
         return customersServiceClient.getPetsByOwnerId(ownerId);
     }
@@ -92,14 +92,6 @@ public class PetController {
                 .flatMap(customersServiceClient::deletePetByPetIdV2)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
-    }
-
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @DeleteMapping(value = "owners/petTypes/{petTypeId}")
-    public Mono<ResponseEntity<Void>> deletePetTypeByPetTypeId(final @PathVariable String petTypeId){
-        return customersServiceClient.deletePetTypeV2(petTypeId)
-                .then(Mono.just(ResponseEntity.ok().<Void>build()))
-                .defaultIfEmpty(ResponseEntity.notFound().<Void>build());
     }
 
 }

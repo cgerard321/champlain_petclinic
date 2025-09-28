@@ -189,6 +189,71 @@ class BillControllerUnitTest {
 
     }
 
+
+    @Test
+    void getAllBillsByOwnerName() {
+        when(billService.getAllBillsByOwnerName(anyString(), anyString())).thenReturn(Flux.just(responseDTO));
+
+        client.get()
+                .uri("/bills/owner/" + responseDTO.getOwnerFirstName() + "/" + responseDTO.getOwnerLastName())
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE+";charset=UTF-8")
+                .expectBodyList(BillResponseDTO.class)
+                .consumeWith(response -> {
+                    List<BillResponseDTO> billResponseDTOS = response.getResponseBody();
+                    Assertions.assertNotNull(billResponseDTOS);
+                });
+
+        Mockito.verify(billService, times(1)).getAllBillsByOwnerName(responseDTO.getOwnerFirstName(), responseDTO.getOwnerLastName());
+    }
+
+    @Test
+    void getBillsByVetName() {
+        when(billService.getAllBillsByVetName(anyString(), anyString())).thenReturn(Flux.just(responseDTO));
+
+        client.get()
+                .uri("/bills/vet/" + responseDTO.getVetFirstName() + "/" + responseDTO.getVetLastName())
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE + ";charset=UTF-8")
+                .expectBodyList(BillResponseDTO.class)
+                .consumeWith(response -> {
+                    List<BillResponseDTO> billResponseDTOS = response.getResponseBody();
+                    Assertions.assertNotNull(billResponseDTOS);
+                });
+
+        Mockito.verify(billService, times(1)).getAllBillsByVetName(responseDTO.getVetFirstName(), responseDTO.getVetLastName());
+    }
+
+    @Test
+    void getBillsByVisitType() {
+        String visitType = "Regular";
+
+        when(billService.getAllBillsByVisitType(eq(visitType)))
+                .thenReturn(Flux.just(responseDTO));
+
+        client.get()
+                .uri("/bills/visitType/{visitType}", visitType)
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
+                .expectBodyList(BillResponseDTO.class)
+                .consumeWith(response -> {
+                    List<BillResponseDTO> billResponseDTOS = response.getResponseBody();
+                    Assertions.assertNotNull(billResponseDTOS);
+                    Assertions.assertFalse(billResponseDTOS.isEmpty());
+                    Assertions.assertEquals(visitType, billResponseDTOS.get(0).getVisitType());
+                });
+
+        Mockito.verify(billService, times(1)).getAllBillsByVisitType(visitType);
+        Mockito.verifyNoMoreInteractions(billService);
+    }
+
+
     @Test
     void deleteAllBills() {
         when(billService.deleteAllBills()).thenReturn(Mono.empty());
@@ -249,17 +314,29 @@ class BillControllerUnitTest {
     }
 
 
-    private BillResponseDTO buildBillResponseDTO(){
-
+    private BillResponseDTO buildBillResponseDTO() {
         Calendar calendar = Calendar.getInstance();
         calendar.set(2022, Calendar.SEPTEMBER, 25);
         LocalDate date = calendar.getTime().toInstant()
                 .atZone(ZoneId.systemDefault())
                 .toLocalDate();
 
-        LocalDate dueDate = LocalDate.of(2022,Month.OCTOBER,15);
+        LocalDate dueDate = LocalDate.of(2022, Month.OCTOBER, 15);
 
-        return BillResponseDTO.builder().billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(13.37).billStatus(BillStatus.PAID).dueDate(dueDate).build();
+        return BillResponseDTO.builder()
+                .billId("BillUUID")
+                .customerId("1")
+                .vetId("1")
+                .visitType("Regular")
+                .date(date)
+                .amount(13.37)
+                .billStatus(BillStatus.PAID)
+                .dueDate(dueDate)
+                .ownerFirstName("John")
+                .ownerLastName("Doe")
+                .vetFirstName("Jane") // Set valid vetFirstName
+                .vetLastName("Smith") // Set valid vetLastName
+                .build();
     }
 
     private BillResponseDTO buildUnpaidBillResponseDTO(){
