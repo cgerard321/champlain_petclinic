@@ -20,6 +20,9 @@ default-admin:
   username: admin
   password: admin
 
+frontend:
+  url: https://petclinic.benmusicgeek.synology.me/api/v2/gateway
+
 #This was changed to the new endpoint using the new V2 functions, if you want to access the previous
 #Default port
 #frontend:
@@ -134,7 +137,7 @@ logging:
 
 frontend:
   url: https://petclinic.benmusicgeek.synology.me/api/v2/gateway
-
+---
 server.port: 8080
 
 spring.datasource.hikari.initializationFailTimeout: 60000
