@@ -1,13 +1,12 @@
-package com.petclinic.bffapigateway.presentationlayer.v2;
+package com.petclinic.bffapigateway.presentationlayer.v2.Products;
 
 import com.petclinic.bffapigateway.config.GlobalExceptionHandler;
 import com.petclinic.bffapigateway.domainclientlayer.ProductsServiceClient;
-import com.petclinic.bffapigateway.domainclientlayer.ProductsServiceClient;
 import com.petclinic.bffapigateway.dtos.Products.ProductBundleRequestDTO;
 import com.petclinic.bffapigateway.dtos.Products.ProductBundleResponseDTO;
+import com.petclinic.bffapigateway.presentationlayer.v2.ProductController;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;

@@ -544,7 +544,7 @@ export default function InventoriesListTable(): JSX.Element {
                     <button
                       onClick={e => {
                         e.stopPropagation();
-                        navigate(`inventory/${inventory.inventoryId}/edit`);
+                        navigate(`/inventories/${inventory.inventoryId}/edit`);
                       }}
                       className="btn btn-warning"
                     >
