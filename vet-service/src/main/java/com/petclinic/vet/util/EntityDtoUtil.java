@@ -183,7 +183,7 @@ public class EntityDtoUtil {
     public static DataSource createDataSource() {
         // url specifies address of database along with username and password
         final String url =
-                "jdbc:postgresql://postgres:5432/images?user=user&password=pwd";
+                "jdbc:postgresql://postgres-vet:5432/images?user=user&password=pwd";
         final PGSimpleDataSource dataSource = new PGSimpleDataSource();
         dataSource.setUrl(url);
         return dataSource;

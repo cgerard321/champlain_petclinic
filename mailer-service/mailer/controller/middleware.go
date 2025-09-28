@@ -2,10 +2,12 @@ package controller
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/go-playground/validator/v10"
+	"log"
 	"mailer-service/mailer"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 )
 
 func UnMarshallMail(c *gin.Context) {
@@ -24,9 +26,8 @@ func UnMarshallMail(c *gin.Context) {
 }
 
 func ValidateEmail(c *gin.Context) {
-
 	validate := validator.New()
-
+	
 	get, exists := c.Get("mail")
 	if !exists || get == nil {
 		fmt.Println("E-mail not in context")
@@ -35,8 +36,9 @@ func ValidateEmail(c *gin.Context) {
 		return
 	}
 
-	mail := get.(*mailer.Mail)
+	log.Println(get)
 
+	mail := get.(*mailer.Mail)
 
 	if err := validate.Struct(mail); err != nil {
 		fmt.Println(err)
