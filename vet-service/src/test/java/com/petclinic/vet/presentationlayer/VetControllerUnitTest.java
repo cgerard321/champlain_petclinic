@@ -9,6 +9,8 @@ import com.petclinic.vet.dataaccesslayer.ratings.PredefinedDescription;
 import com.petclinic.vet.dataaccesslayer.ratings.Rating;
 import com.petclinic.vet.exceptions.InvalidInputException;
 import com.petclinic.vet.exceptions.NotFoundException;
+import com.petclinic.vet.presentationlayer.PhotoRequestDTO;
+import com.petclinic.vet.presentationlayer.PhotoResponseDTO;
 import com.petclinic.vet.servicelayer.*;
 import com.petclinic.vet.servicelayer.badges.BadgeResponseDTO;
 import com.petclinic.vet.servicelayer.badges.BadgeService;
@@ -766,17 +768,26 @@ class VetControllerUnitTest {
 
     @Test
     void getPhotoByVetId() {
+        PhotoResponseDTO photoResponse = PhotoResponseDTO.builder()
+                .vetId(VET_ID)
+                .filename("vet_photo.jpg")
+                .imgType("image/jpeg")
+                .resource(photo.getData())
+                .build();
+                
         when(photoService.getPhotoByVetId(anyString()))
-                .thenReturn(Mono.just(buildPhotoData()));
+                .thenReturn(Mono.just(photoResponse));
 
         client.get()
                 .uri("/vets/{vetId}/photo", VET_ID)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.IMAGE_JPEG_VALUE)
-                .expectBody(Resource.class)
+                .expectBody(PhotoResponseDTO.class)
                 .consumeWith(response -> {
-                    assertEquals(buildPhotoData(), response.getResponseBody());
+                    PhotoResponseDTO result = response.getResponseBody();
+                    assertNotNull(result);
+                    assertEquals(VET_ID, result.getVetId());
+                    assertEquals("vet_photo.jpg", result.getFilename());
                 });
 
         Mockito.verify(photoService, times(1))
@@ -807,26 +818,39 @@ class VetControllerUnitTest {
 */
     @Test
     void updatePhotoByVetId() {
-        Photo photo = buildPhoto();
-        Resource photoResource = buildPhotoData(photo);
+        PhotoRequestDTO photoRequest = PhotoRequestDTO.builder()
+                .vetId(VET_ID)
+                .filename("vet_photo.jpg")
+                .imgType("image/jpeg")
+                .data(photo.getData())
+                .build();
+                
+        PhotoResponseDTO photoResponse = PhotoResponseDTO.builder()
+                .vetId(VET_ID)
+                .filename("vet_photo.jpg")
+                .imgType("image/jpeg")
+                .resource(photo.getData())
+                .build();
 
-        when(photoService.updatePhotoByVetId(anyString(), anyString(), any(Mono.class)))
-                .thenReturn(Mono.just(photoResource));
+        when(photoService.updatePhotoByVetId(anyString(), any(Mono.class)))
+                .thenReturn(Mono.just(photoResponse));
 
         client.put()
-                .uri("/vets/{vetId}/photos/{photoName}", VET_ID, photo.getFilename())
-                .bodyValue(photoResource)
+                .uri("/vets/{vetId}/photo", VET_ID)
+                .bodyValue(photoRequest)
                 .accept(APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.IMAGE_JPEG_VALUE)
-                .expectBody(Resource.class)
+                .expectBody(PhotoResponseDTO.class)
                 .consumeWith(response -> {
-                    assertEquals(buildPhotoData(), response.getResponseBody());
+                    PhotoResponseDTO result = response.getResponseBody();
+                    assertNotNull(result);
+                    assertEquals(VET_ID, result.getVetId());
+                    assertEquals("vet_photo.jpg", result.getFilename());
                 });
 
         Mockito.verify(photoService, times(1))
-                .updatePhotoByVetId(anyString(), anyString(), any(Mono.class));
+                .updatePhotoByVetId(anyString(), any(Mono.class));
     }
 
     @Test

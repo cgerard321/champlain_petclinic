@@ -5,7 +5,6 @@ import ImageContainer from './ImageContainer';
 import { changeProductQuantity } from '../api/changeProductQuantity';
 import { generatePath, useNavigate } from 'react-router-dom';
 import { AppRoutePaths } from '@/shared/models/path.routes';
-import StarRating from './StarRating';
 import './Product.css';
 import { useAddToCart } from '@/features/carts/api/addToCartFromProducts.ts';
 import {
@@ -30,7 +29,7 @@ export default function Product({
   const [selectedProductForQuantity, setSelectedProductForQuantity] =
     useState<ProductModel | null>(null);
   const [quantity, setQuantity] = useState<number>(0);
-  const [tooLong, setTooLong] = useState<boolean>(false);
+  const [, setTooLong] = useState<boolean>(false); //tooLong
 
   const navigate = useNavigate();
   const { addToCart } = useAddToCart();
@@ -61,6 +60,8 @@ export default function Product({
     }
     return 'Unknown Delivery Type';
   };
+
+  //return toolong
 
   useEffect(() => {
     if (product.productDescription.length > 100) {
@@ -141,6 +142,11 @@ export default function Product({
         <h1>{selectedProduct.productName}</h1>
         <p>{selectedProduct.productDescription}</p>
         <p>Price: ${selectedProduct.productSalePrice.toFixed(2)}</p>
+
+        <div className="deliveryType-container">
+          <p>{getDeliveryTypeLabel(currentProduct.deliveryType)}</p>
+        </div>
+
         <button onClick={handleBackToList}>Back to Catalog</button>
       </div>
     );
@@ -184,27 +190,22 @@ export default function Product({
         onClick={() =>
           handleProductClickForProductQuantity(currentProduct.productId)
         }
-        style={{ cursor: 'pointer', color: 'blue', fontWeight: 'bold' }}
-      >
-        +
-      </span>
+        className="product-title"
+      ></span>
 
-      <h2
-        onClick={handleProductTitleClick}
-        style={{
-          cursor: 'pointer',
-          color: 'blue',
-          textDecoration: 'underline',
-        }}
-      >
+      <h2 onClick={handleProductTitleClick} className="product-title">
         {currentProduct.productName}
       </h2>
-      <p>
+      {/*<p>
         {!tooLong
           ? currentProduct.productDescription
           : `${currentProduct.productDescription.substring(0, 100)}...`}
-      </p>
+      </p>*/}
       <p>Price: ${currentProduct.productSalePrice.toFixed(2)}</p>
+
+      <div className="deliveryType-container">
+        <p>{getDeliveryTypeLabel(currentProduct.deliveryType)}</p>
+      </div>
 
       {!isInventoryManager && !isVet && !isReceptionist && (
         <button
@@ -221,19 +222,18 @@ export default function Product({
       )}
 
       {!isInventoryManager && !isVet && !isReceptionist && (
-        <button onClick={handleAddToWishlist} style={{ marginLeft: '10px' }}>
-          Add to Wishlist
-        </button>
+        <button onClick={handleAddToWishlist}>Add to Wishlist</button>
       )}
 
       {successMessageWishlist && (
         <p className="success-message">{successMessageWishlist}</p>
       )}
 
-      <StarRating
+      {/*<StarRating
         currentRating={currentProduct.averageRating}
         viewOnly={true}
-      />
+      />*/}
+
       {currentProduct.productStatus === 'PRE_ORDER' && (
         <div
           style={{
@@ -252,9 +252,6 @@ export default function Product({
           PRE-ORDER
         </div>
       )}
-      <div className="deliveryType-container">
-        <p>{getDeliveryTypeLabel(currentProduct.deliveryType)}</p>
-      </div>
     </div>
   );
 }
