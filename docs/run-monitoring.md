@@ -1,6 +1,6 @@
 # Project Monitoring with Prometheus and Grafana
 
-![Alt text](attachments/Running.png "Optional Title")
+![Alt text](../monitoring/attachments/Running.png "Optional Title")
 
 ## Running the Stack
 
@@ -34,7 +34,7 @@ Grafana is a visualization and analytics software that allows you to query, visu
 1.  Access the Grafana UI by navigating to the following URL in your web browser:
     [http://localhost:3001](http://localhost:3001)
 
-![Alt text](attachments/DashboardButton.png "Optional Title") 2. Use the following default credentials to log in:
+![Alt text](../monitoring/attachments/DashboardButton.png "Optional Title") 2. Use the following default credentials to log in:
 
 | Username | Password |
 | :------- | :------- |
@@ -48,4 +48,4 @@ Grafana is a visualization and analytics software that allows you to query, visu
 
 > **Note:** Make sure to adjust the time range to something smaller because there is little data
 
-![Alt text](attachments/Troubleshooting.webp "Optional Title")
+![Alt text](../monitoring/attachments/Troubleshooting.webp "Optional Title")
