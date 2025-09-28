@@ -261,6 +261,8 @@ jobs:
         echo "Downloaded artifacts:"
         ls -la coverage-reports/ || echo "No coverage-reports directory found"
         find coverage-reports -name "*.html" -type f | head -10 || echo "No HTML files found"
+        echo "Sample HTML content from first report:"
+        find coverage-reports -name "index.html" -type f | head -1 | xargs head -20 || echo "No index.html found"
     - name: Generate coverage summary
       run: |
         echo "## Code Coverage Summary" >> $GITHUB_STEP_SUMMARY
@@ -291,8 +293,16 @@ jobs:
           if [ -d "$report_dir" ]; then
             service_name=$(basename "$report_dir")
             if [ -f "$report_dir/index.html" ]; then
-              # Extract total coverage percentage from the HTML report
+              # Try multiple patterns to extract coverage percentage
               coverage=$(grep -o 'Total[^>]*>[0-9]*%' "$report_dir/index.html" | grep -o '[0-9]*%' | head -1)
+              if [ -z "$coverage" ]; then
+                # Try alternative pattern for JaCoCo HTML reports
+                coverage=$(grep -o '[0-9]*%' "$report_dir/index.html" | head -1)
+              fi
+              if [ -z "$coverage" ]; then
+                # Try to find any percentage in the HTML
+                coverage=$(grep -o '[0-9]*\.[0-9]*%' "$report_dir/index.html" | head -1)
+              fi
               if [ -n "$coverage" ]; then
                 echo "- $service_name: $coverage" >> $GITHUB_STEP_SUMMARY
               else
