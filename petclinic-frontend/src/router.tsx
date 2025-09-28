@@ -62,6 +62,9 @@ import CustomerPromoPage from '@/pages/Promos/CustomerPromoPage.tsx';
 import UserDetailsPage from './pages/Users/UserDetailsPage';
 import UpdateUserPage from './pages/Users/UpdateUserPage';
 import AllRoles from '@/pages/Users/AllRoles.tsx';
+import FAQ from './pages/FAQ/FAQ';
+import ContactPage from './pages/Contact/Contact';
+import PrivacyPolicyPage from './pages/PrivacyPolicy/PrivacyPolicy';
 
 const router = createBrowserRouter([
   {
@@ -478,8 +481,20 @@ const router = createBrowserRouter([
     element: <Navigate to={AppRoutePaths.Home} replace />,
   },
   {
+    path: AppRoutePaths.FAQ,
+    element: <FAQ />,
+  },
+  {
+    path: AppRoutePaths.Contact,
+    element: <ContactPage />,
+  },
+  {
     path: AppRoutePaths.Home,
     element: <Home />,
+  },
+  {
+    path: AppRoutePaths.Privacy,
+    element: <PrivacyPolicyPage />,
   },
   { path: AppRoutePaths.Login, element: <Login /> },
   { path: AppRoutePaths.SignUp, element: <SignUp /> },
