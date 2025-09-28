@@ -172,7 +172,7 @@ services:
     #        start_period: 30s
 
 
-  mongo-express:
+  mongo-express-vet:
     image: mongo-express
     restart: always
     environment:
