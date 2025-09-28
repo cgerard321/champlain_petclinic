@@ -749,43 +749,48 @@ export default function VetDetails(): JSX.Element {
                 )}
             </section>
 
-            <section className="album-photos">
-              <h2>Album Photos</h2>
-              {albumPhotos.length > 0 ? (
-                <div className="album-photo-grid">
-                  {albumPhotos.map((photo, index) => (
-                    <div
-                      key={index}
-                      className="album-photo-card"
-                      onClick={() =>
-                        openPhotoModal(
-                          `data:${photo.imgType};base64,${photo.data}`
-                        )
-                      }
-                    >
-                      <img
-                        src={`data:${photo.imgType};base64,${photo.data}`} // Construct the image URL from data and type
-                        alt={`Album Photo ${index + 1}`}
-                        className="album-photo-thumbnail"
-                      />
-                      {!isInventoryManager && !isOwner && !isReceptionist && (
-                        <button
-                          className="delete-photo-button"
-                          onClick={e => {
-                            e.stopPropagation(); // This prevents the modal from opening
-                            handleDeleteAlbumPhoto(photo.id); // Pass the photo ID for deletion
-                          }}
-                        >
-                          Delete Image
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p>No album photos available</p>
-              )}
-            </section>
+            {/* Only show album photos section if:
+                1. There are photos to display, OR
+                2. User is admin (not inventory manager, owner, or receptionist) */}
+            {(albumPhotos.length > 0 || (!isInventoryManager && !isOwner && !isReceptionist)) && (
+              <section className="album-photos">
+                <h2>Album Photos</h2>
+                {albumPhotos.length > 0 ? (
+                  <div className="album-photo-grid">
+                    {albumPhotos.map((photo, index) => (
+                      <div
+                        key={index}
+                        className="album-photo-card"
+                        onClick={() =>
+                          openPhotoModal(
+                            `data:${photo.imgType};base64,${photo.data}`
+                          )
+                        }
+                      >
+                        <img
+                          src={`data:${photo.imgType};base64,${photo.data}`} // Construct the image URL from data and type
+                          alt={`Album Photo ${index + 1}`}
+                          className="album-photo-thumbnail"
+                        />
+                        {!isInventoryManager && !isOwner && !isReceptionist && (
+                          <button
+                            className="delete-photo-button"
+                            onClick={e => {
+                              e.stopPropagation(); // This prevents the modal from opening
+                              handleDeleteAlbumPhoto(photo.id); // Pass the photo ID for deletion
+                            }}
+                          >
+                            Delete Image
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p>No album photos available</p>
+                )}
+              </section>
+            )}
           </>
         )}
       </div>
