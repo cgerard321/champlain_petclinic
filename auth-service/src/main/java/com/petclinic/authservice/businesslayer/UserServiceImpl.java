@@ -19,9 +19,12 @@ import com.petclinic.authservice.presentationlayer.User.*;
 import com.petclinic.authservice.security.JwtTokenUtil;
 import com.petclinic.authservice.security.SecurityConst;
 import com.petclinic.authservice.datalayer.user.*;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -56,13 +59,8 @@ public class UserServiceImpl implements UserService {
     private final String salt = BCrypt.gensalt(10);
 
 
-    @Value("${gateway.origin}")
+    @Value("${frontend.url}")
     private String gatewayOrigin;
-    @Value("${gateway.subdomain}")
-    private String gatewaySubdomain;
-    @Value("${gateway.protocol}")
-    private String gatewayProtocol;
-
     @Override
     public List<UserDetails> findAllWithoutPage() {
         return userMapper.modelToDetailsList(userRepo.findAll());
@@ -148,9 +146,9 @@ public class UserServiceImpl implements UserService {
                 .encodeToString(jwtService.generateToken(user).getBytes(StandardCharsets.UTF_8));
 
         // Remove dangling . in case of empty sub
-        String niceSub = gatewaySubdomain.length() > 0 ? gatewaySubdomain + "." : "";
+//        String niceSub = gatewaySubdomain.length() > 0 ? gatewaySubdomain + "." : "";
 
-        String formatedLink = format("<a class=\"email-button\" href=\"%s://%s%s/verification/%s\">Verify Email</a>", gatewayProtocol, niceSub, gatewayOrigin, base64Token);
+        String formatedLink = format("<a class=\"email-button\" href=\"%s/verification/%s\">Verify Email</a>", gatewayOrigin, base64Token);
 
         return new Mail(
                 user.getEmail(), "Verification Email", "Default", "Pet clinic - Verification Email",

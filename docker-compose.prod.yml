@@ -93,7 +93,7 @@ services:
     build: auth-service
     hostname: auth
     environment:
-      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_PROFILES_ACTIVE=prod
     restart: unless-stopped
     depends_on:
       mysql4:

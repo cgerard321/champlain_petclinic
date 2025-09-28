@@ -44,6 +44,8 @@ public class AuthServiceClient {
 
     private final CartServiceClient cartServiceClient;
 
+    private final String authServiceHost;
+
     @Autowired
     private Rethrower rethrower;
 
@@ -55,6 +57,7 @@ public class AuthServiceClient {
         this.customersServiceClient = customersServiceClient;
         this.vetsServiceClient = vetsServiceClient;
         this.cartServiceClient = cartServiceClient;
+        this.authServiceHost = authServiceHost;
         authServiceUrl = "http://" + authServiceHost + ":" + authServicePort;
     }
 
@@ -326,7 +329,7 @@ public class AuthServiceClient {
                 .toEntity(UserDetails.class)
                 .map(responseEntity -> {
                     HttpHeaders headers = new HttpHeaders();
-                    headers.add("Location", "http://localhost:8080/#!/login");
+                    headers.add("Location", authServiceUrl+"/#!/login");
                     return ResponseEntity.status(HttpStatus.FOUND)
                             .headers(headers)
                             .body(responseEntity.getBody());
@@ -349,7 +352,7 @@ public class AuthServiceClient {
                 .toEntity(UserDetails.class)
                 .map(responseEntity -> {
                     HttpHeaders headers = new HttpHeaders();
-                    headers.add("Location", "http://localhost:3000/users/login");
+                    headers.add("Location", "http://"+authServiceHost+":3000/users/login");
                     return ResponseEntity.status(HttpStatus.FOUND)
                             .headers(headers)
                             .body(responseEntity.getBody());
