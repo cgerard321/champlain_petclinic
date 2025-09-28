@@ -32,14 +32,16 @@ public class MailServiceTests {
     private MailServiceCall mockMailCall;
 
     private final Mail
-            EMAIL_VALID = new Mail("to@test.com", "test-subject", "test-message"),
+            EMAIL_VALID = new Mail("test@gmail.com", "Verification Email", "Default", "Pet clinic - Verification Email",
+            "valid email body",
+            "Test Footer", "test_correspondant_name", "ChamplainPetClinic@gmail.com"),
             EMAIL_EMPTY_INVALID = new Mail();
     public final MediaType JSON
             = MediaType.parse("application/json; charset=utf-8");
 
     @BeforeEach
     void setUp(){
-        when(mockMailCall.sendMail(EMAIL_VALID)).thenReturn(Calls.response(format("Message sent to %s", EMAIL_VALID.getTo())));
+        when(mockMailCall.sendMail(EMAIL_VALID)).thenReturn(Calls.response(format("Message sent to %s", EMAIL_VALID.getEmailSendTo())));
         when(mockMailCall.sendMail(EMAIL_EMPTY_INVALID)).thenReturn(Calls.response(Response.error(400, ResponseBody.create("Bad request", JSON))));
     }
 
@@ -49,7 +51,7 @@ public class MailServiceTests {
     @Test
     @DisplayName("Send valid email")
     void send_valid_email() {
-        assertEquals("Message sent to " + EMAIL_VALID.getTo(), mailService.sendMail(EMAIL_VALID));
+        assertEquals("Message sent to " + EMAIL_VALID.getEmailSendTo(), mailService.sendMail(EMAIL_VALID));
     }
 
     @Test

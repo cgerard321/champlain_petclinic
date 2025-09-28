@@ -1,16 +1,4 @@
 services:
-#  petclinicFrontend:
-#    image: petclinic-frontend
-#    container_name: petclinic-frontend
-#    build:
-#      context: ./petclinic-frontend
-#      dockerfile: Dockerfile
-#      args:
-#        - BUILD_MODE=development
-#    ports:
-#      - "3000:3000"
-#    volumes:
-#      - .petclinic-frontend/src:/app/src
   janus:
     image: nginx
     ports:
@@ -61,8 +49,7 @@ services:
       - customers-service-reactive
       - vet-service
       - visits-service-new
-  #            - visits
-  #            - inventory-service
+
 
   auth-service:
     build: auth-service
@@ -83,8 +70,7 @@ services:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:
       - mongo-billing
-  #            mysql5:
-  #                condition: service_healthy
+
 
   mailer-service:
     build: mailer-service
@@ -109,84 +95,6 @@ services:
       - mongo-carts
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-
-  #    visits:
-  #        build: visits-service
-  #        hostname: visits
-  #        #mem_limit: 350m
-  #        environment:
-  #            - SPRING_PROFILES_ACTIVE=docker
-  #        depends_on:
-  #            mysql1:
-  #                condition: service_healthy
-
-  #    customers:
-  #        build: customers-service
-  #        hostname: customers
-  #        #mem_limit: 350m
-  #        environment:
-  #            - SPRING_PROFILES_ACTIVE=docker
-  #        depends_on:
-  #            mysql3:
-  #                condition: service_healthy
-
-  #     mysql1:
-  #         image: mysql:5.7
-  #         platform: linux/amd64
-  #         #mem_limit: 350m
-  #         ports:
-  #             - "3307:3306"
-  #         environment:
-  #             - MYSQL_ROOT_PASSWORD=rootpwd
-  #             - MYSQL_DATABASE=visits-db
-  #             - MYSQL_USER=user
-  #             - MYSQL_PASSWORD=pwd
-  #         volumes:
-  #             - ./data/mysql1:/var/lib/mysql1
-  #             - ./data/init.d:/docker-entrypoint-initdb.d
-  #         healthcheck:
-  #             test:
-  #                 [
-  #                     "CMD",
-  #                     "mysqladmin",
-  #                     "ping",
-  #                     "-uuser",
-  #                     "-ppwd",
-  #                     "-h",
-  #                     "localhost"
-  #                 ]
-  #             interval: 10s
-  #             timeout: 5s
-  #             retries: 10
-
-  #    mysql3:
-  #        image: mysql:5.7
-  #        platform: linux/amd64
-  #        #mem_limit: 350m
-  #        ports:
-  #            - "3309:3306"
-  #        environment:
-  #            - MYSQL_ROOT_PASSWORD=rootpwd
-  #            - MYSQL_DATABASE=customers-db
-  #            - MYSQL_USER=user
-  #            - MYSQL_PASSWORD=pwd
-  #        volumes:
-  #            - ./data/mysql3:/var/lib/mysql3
-  #            - ./data/init.d:/docker-entrypoint-initdb.d
-  #        healthcheck:
-  #            test:
-  #                [
-  #                    "CMD",
-  #                    "mysqladmin",
-  #                    "ping",
-  #                    "-uuser",
-  #                    "-ppwd",
-  #                    "-h",
-  #                    "localhost"
-  #                ]
-  #            interval: 10s
-  #            timeout: 5s
-  #            retries: 10
 
   mysql-auth:
     image: mysql:5.7
@@ -227,9 +135,6 @@ services:
     environment:
       - PMA_HOST=emailing-service-mysql-db
       - MYSQL_ROOT_PASSWORD=Your_password123
-    #depends_on:
-    #  - emailing-service
-    #  - emailing-service-mysql-db
 
   # vet mongo container
   mongo-vet:
@@ -241,11 +146,11 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: password
-  #      healthcheck:
-  #        test: echo 'db.runCommand("ping").ok' | mongo localhost:27017/test --quiet
-  #        retries: 5
-  #        interval: 15s
-  #        start_period: 30s
+    #      healthcheck:
+    #        test: echo 'db.runCommand("ping").ok' | mongo localhost:27017/test --quiet
+    #        retries: 5
+    #        interval: 15s
+    #        start_period: 30s
 
   mongo-express:
     image: mongo-express
@@ -294,11 +199,11 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: password
-  #      healthcheck:
-  #        test: echo 'db.runCommand("ping").ok' | mongo localhost:27017/test --quiet
-  #        retries: 5
-  #        interval: 15s
-  #        start_period: 30s
+    #      healthcheck:
+    #        test: echo 'db.runCommand("ping").ok' | mongo localhost:27017/test --quiet
+    #        retries: 5
+    #        interval: 15s
+    #        start_period: 30s
 
   mongo-express1:
     image: mongo-express
@@ -377,11 +282,11 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: password
-  #      healthcheck:
-  #        test: echo 'db.runCommand("ping").ok' | mongo localhost:27017/test --quiet
-  #        retries: 5
-  #        interval: 15s
-  #        start_period: 30s
+    #      healthcheck:
+    #        test: echo 'db.runCommand("ping").ok' | mongo localhost:27017/test --quiet
+    #        retries: 5
+    #        interval: 15s
+    #        start_period: 30s
 
   mongo-express-inventory:
     image: mongo-express
@@ -430,6 +335,11 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: password
+    #      healthcheck:
+    #        test: echo 'db.runCommand("ping").ok' | mongo localhost:27017/test --quiet
+    #        retries: 5
+    #        interval: 15s
+    #        start_period: 30s
 
   mongo-express-carts:
     image: mongo-express

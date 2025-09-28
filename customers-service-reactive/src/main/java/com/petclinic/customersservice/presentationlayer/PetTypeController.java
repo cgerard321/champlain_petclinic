@@ -29,6 +29,15 @@ public class PetTypeController {
         return petTypeService.getAllPetTypes();
     }
 
+    @PostMapping
+    public Mono<ResponseEntity<PetTypeResponseDTO>> addPetType(@RequestBody Mono<PetTypeRequestDTO> petTypeRequestDTOMono){
+        
+        return petTypeService.addPetType(petTypeRequestDTOMono)
+                .map(createdPetType ->
+                        ResponseEntity.status(HttpStatus.CREATED).body(createdPetType))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
     @PutMapping("/{petTypeId}")
     public Mono<ResponseEntity<PetTypeResponseDTO>> updatePetType(
             @RequestBody Mono<PetTypeRequestDTO> petTypeRequestDTO,
