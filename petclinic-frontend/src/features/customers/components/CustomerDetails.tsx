@@ -33,16 +33,16 @@ const CustomerDetails: FC = () => {
 
       // Fetch pets by owner ID
       const petsResponse = await axiosInstance.get(
-          `/pets/owners/${ownerId}/pets`,
-          {
-            useV2: true,
-          }
+        `/pets/owners/${ownerId}/pets`,
+        {
+          useV2: true,
+        }
       );
       setPets(petsResponse.data); // Set the pets state
 
       const billsResponse = await axiosInstance.get(
-          `/bills/customer/${ownerId}`,
-          { useV2: false }
+        `/bills/customer/${ownerId}`,
+        { useV2: false }
       );
 
       const billsData: Bill[] = [];
@@ -86,7 +86,7 @@ const CustomerDetails: FC = () => {
 
   const handleDelete = async (ownerId: string): Promise<void> => {
     const confirmDelete = window.confirm(
-        'Are you sure you want to delete this owner?'
+      'Are you sure you want to delete this owner?'
     );
 
     if (confirmDelete) {
@@ -124,7 +124,7 @@ const CustomerDetails: FC = () => {
 
   const handleDisableEnable = async (): Promise<void> => {
     const confirmAction = window.confirm(
-        `Are you sure you want to ${isDisabled ? 'enable' : 'disable'} this user's account?`
+      `Are you sure you want to ${isDisabled ? 'enable' : 'disable'} this user's account?`
     );
 
     if (confirmAction) {
@@ -148,123 +148,123 @@ const CustomerDetails: FC = () => {
   };
 
   return (
-      <div className="customer-details-card">
-        <h2>
-          {' '}
-          Customer Details for {owner.firstName} {owner.lastName}{' '}
-        </h2>
+    <div className="customer-details-card">
+      <h2>
+        {' '}
+        Customer Details for {owner.firstName} {owner.lastName}{' '}
+      </h2>
 
-        <div className="customer-details-container">
-          {/* Owner Info */}
-          <div className="section owner-info">
-            <h3>Owner Info</h3>
-            <p>
-              <strong>First Name: </strong>
-              {owner.firstName}
-            </p>
-            <p>
-              <strong>Last Name: </strong>
-              {owner.lastName}
-            </p>
-            <p>
-              <strong>Address: </strong>
-              {owner.address}
-            </p>
-            <p>
-              <strong>City: </strong>
-              {owner.city}
-            </p>
-            <p>
-              <strong>Province: </strong>
-              {owner.province}
-            </p>
-            <p>
-              <strong>Telephone: </strong>
-              {owner.telephone}
-            </p>
-          </div>
-
-          {/* Owner Pets */}
-          <div className="section owner-pets">
-            <h3>Owner Pets</h3>
-            {pets && pets.length > 0 ? (
-                <ul>
-                  {pets.map(pet => (
-                      <li key={pet.petId}>
-                        <strong>Pet ID: </strong>
-                        {pet.petId}
-                        <strong>Name: </strong>
-                        {pet.name}, <strong>Type: </strong>
-                        {petTypeMapping[pet.petTypeId] || 'Unknown'},{' '}
-                        <strong>Weight: </strong>
-                        {pet.weight}kg,<strong> Age: </strong>
-                        {calculateAge(pet.birthDate)}
-                        <button
-                            className="edit-pet-button"
-                            onClick={() => handleEditPetClick(pet.petId)}
-                            style={{ marginLeft: '10px' }}
-                        >
-                          Edit Pet
-                        </button>
-                      </li>
-                  ))}
-                </ul>
-            ) : (
-                <p>No pets found.</p>
-            )}
-          </div>
-
-          {/* Owner Bills */}
-          <div className="section owner-bills">
-            <h3>Owner Bills</h3>
-            {Array.isArray(bills) && bills.length > 0 ? (
-                <ul>
-                  {bills.map(bill => (
-                      <li key={bill.billId}>
-                        <strong>Bill ID: </strong>
-                        {bill.billId}, <strong>Amount: </strong>
-                        {bill.amount}, <strong>Date: </strong>
-                        {bill.date}
-                      </li>
-                  ))}
-                </ul>
-            ) : (
-                <p>No bills found.</p>
-            )}
-          </div>
+      <div className="customer-details-container">
+        {/* Owner Info */}
+        <div className="section owner-info">
+          <h3>Owner Info</h3>
+          <p>
+            <strong>First Name: </strong>
+            {owner.firstName}
+          </p>
+          <p>
+            <strong>Last Name: </strong>
+            {owner.lastName}
+          </p>
+          <p>
+            <strong>Address: </strong>
+            {owner.address}
+          </p>
+          <p>
+            <strong>City: </strong>
+            {owner.city}
+          </p>
+          <p>
+            <strong>Province: </strong>
+            {owner.province}
+          </p>
+          <p>
+            <strong>Telephone: </strong>
+            {owner.telephone}
+          </p>
         </div>
 
-        <div className="customer-details-buttons">
-          <button className="customer-details-button" onClick={handleEditClick}>
-            Edit Customer
-          </button>
-          <button className="customer-details-button" onClick={handleBackClick}>
-            Back to All Owners
-          </button>
-          <button
-              className="add-pet-button"
-              onClick={() => navigate(`/owners/${ownerId}/pets/new`)}
-          >
-            Add New Pet
-          </button>
-          {!isVet && (
-              <button
-                  className="btn btn-danger"
-                  onClick={() => handleDelete(owner.ownerId)}
-                  title="Delete"
-                  style={{ backgroundColor: 'red', color: 'white' }}
-              >
-                Delete Owner
-              </button>
+        {/* Owner Pets */}
+        <div className="section owner-pets">
+          <h3>Owner Pets</h3>
+          {pets && pets.length > 0 ? (
+            <ul>
+              {pets.map(pet => (
+                <li key={pet.petId}>
+                  <strong>Pet ID: </strong>
+                  {pet.petId}
+                  <strong>Name: </strong>
+                  {pet.name}, <strong>Type: </strong>
+                  {petTypeMapping[pet.petTypeId] || 'Unknown'},{' '}
+                  <strong>Weight: </strong>
+                  {pet.weight}kg,<strong> Age: </strong>
+                  {calculateAge(pet.birthDate)}
+                  <button
+                    className="edit-pet-button"
+                    onClick={() => handleEditPetClick(pet.petId)}
+                    style={{ marginLeft: '10px' }}
+                  >
+                    Edit Pet
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>No pets found.</p>
           )}
-          <button
-              className={`btn ${isDisabled ? 'btn-success' : 'btn-warning'}`}
-              onClick={handleDisableEnable}
-          >
-            {isDisabled ? 'Enable Account' : 'Disable Account'}
-          </button>
+        </div>
+
+        {/* Owner Bills */}
+        <div className="section owner-bills">
+          <h3>Owner Bills</h3>
+          {Array.isArray(bills) && bills.length > 0 ? (
+            <ul>
+              {bills.map(bill => (
+                <li key={bill.billId}>
+                  <strong>Bill ID: </strong>
+                  {bill.billId}, <strong>Amount: </strong>
+                  {bill.amount}, <strong>Date: </strong>
+                  {bill.date}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>No bills found.</p>
+          )}
         </div>
       </div>
+
+      <div className="customer-details-buttons">
+        <button className="customer-details-button" onClick={handleEditClick}>
+          Edit Customer
+        </button>
+        <button className="customer-details-button" onClick={handleBackClick}>
+          Back to All Owners
+        </button>
+        <button
+          className="add-pet-button"
+          onClick={() => navigate(`/owners/${ownerId}/pets/new`)}
+        >
+          Add New Pet
+        </button>
+        {!isVet && (
+          <button
+            className="btn btn-danger"
+            onClick={() => handleDelete(owner.ownerId)}
+            title="Delete"
+            style={{ backgroundColor: 'red', color: 'white' }}
+          >
+            Delete Owner
+          </button>
+        )}
+        <button
+          className={`btn ${isDisabled ? 'btn-success' : 'btn-warning'}`}
+          onClick={handleDisableEnable}
+        >
+          {isDisabled ? 'Enable Account' : 'Disable Account'}
+        </button>
+      </div>
+    </div>
   );
 };
 
