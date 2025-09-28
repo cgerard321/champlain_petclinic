@@ -1,10 +1,10 @@
 package com.petclinic.authservice.businesslayer;
 
 
-import com.petclinic.authservice.domainclientlayer.Mail.Mail;
 import com.petclinic.authservice.domainclientlayer.Mail.MailService;
 
 import com.petclinic.authservice.domainclientlayer.Mail.MailServiceCall;
+import com.petclinic.authservice.domainclientlayer.Mail.Mail;
 import okhttp3.MediaType;
 import okhttp3.ResponseBody;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,7 +36,9 @@ public class AuthMailServiceTests {
     private MailServiceCall mockMailCall;
 
     private final Mail
-            EMAIL_VALID = new Mail("to@test.com", "test-subject", "test-message"),
+            EMAIL_VALID = new Mail("jeremy.roos@champlaincollege.com", "Test-email",
+            "test-message", "Test-header","Test body, words are wording and wording 6 7"
+            , "Test-Footer", "Test-Name", "Test Sender name" ),
             EMAIL_EMPTY_INVALID = new Mail();
     public final MediaType JSON
             = MediaType.parse("application/json; charset=utf-8");
@@ -45,7 +47,7 @@ public class AuthMailServiceTests {
     void setUp(){
 
         when(mockMailCall.sendMail(EMAIL_VALID))
-                .thenReturn(Calls.response(format("Message sent to %s", EMAIL_VALID.getTo())));
+                .thenReturn(Calls.response(format("Message sent to %s", EMAIL_VALID.getEmailSendTo())));
 
         when(mockMailCall.sendMail(EMAIL_EMPTY_INVALID))
                 .thenReturn(Calls.response(Response.error(400, ResponseBody.create("Bad request", JSON))));
@@ -57,7 +59,7 @@ public class AuthMailServiceTests {
     @Test
     @DisplayName("Send valid email")
     void send_valid_email() {
-        assertEquals("Message sent to " + EMAIL_VALID.getTo(), mailService.sendMail(EMAIL_VALID));
+        assertEquals("Message sent to " + EMAIL_VALID.getEmailSendTo(), mailService.sendMail(EMAIL_VALID));
     }
 
     @Test
