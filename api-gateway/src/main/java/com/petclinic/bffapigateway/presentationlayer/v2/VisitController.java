@@ -62,7 +62,7 @@ public class VisitController {
         }
 
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.OWNER})
     @GetMapping(value = "/reviews")
     public ResponseEntity<Flux<ReviewResponseDTO>> getAllReviews(){
         return ResponseEntity.ok().body(visitsServiceClient.getAllReviews());

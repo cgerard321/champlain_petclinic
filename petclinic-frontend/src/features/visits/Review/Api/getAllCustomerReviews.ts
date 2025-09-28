@@ -2,7 +2,7 @@ import axiosInstance from '@/shared/api/axiosInstance';
 import { ReviewResponseDTO } from '../Model/ReviewResponseDTO';
 import { useUser } from '@/context/UserContext';
 
-export const getAllReviews = async (
+export const getAllCustomerReviews = async (
   userId: string
 ): Promise<ReviewResponseDTO[]> => {
   const response = await axiosInstance.get<ReviewResponseDTO[]>(
@@ -12,7 +12,9 @@ export const getAllReviews = async (
   return response.data; // Return only the data
 };
 
-export const useGetAllReviews = (): (() => Promise<ReviewResponseDTO[]>) => {
+export const useGetAllCustomerReviews = (): (() => Promise<
+  ReviewResponseDTO[]
+>) => {
   const { user } = useUser();
-  return () => getAllReviews(user.userId);
+  return () => getAllCustomerReviews(user.userId);
 };
