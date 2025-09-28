@@ -212,14 +212,17 @@ export default function Home(): JSX.Element {
           aria-label="Contact"
         >
           <Row className="align-items-center g-3">
-            <Reveal delay={80}>
-              <Col lg>
+            <Col lg>
+              <Reveal delay={80}>
                 <h3 className="mb-1">Have questions or need help?</h3>
                 <p className="text-muted mb-0">
                   Our team is just a message away.
                 </p>
-              </Col>
-              <Col lg="auto" className="d-flex gap-2">
+              </Reveal>
+            </Col>
+
+            <Col xs="auto" className="d-flex gap-2 ms-lg-auto">
+              <Reveal delay={100}>
                 <Button
                   variant="outline-secondary"
                   onClick={() => navigate('/contact')}
@@ -232,8 +235,8 @@ export default function Home(): JSX.Element {
                 >
                   Book Appointment
                 </Button>
-              </Col>
-            </Reveal>
+              </Reveal>
+            </Col>
           </Row>
         </section>
       </Container>
