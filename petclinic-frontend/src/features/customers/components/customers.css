@@ -89,8 +89,8 @@
 
 .customer-add-pet-form input,
 .customer-add-pet-form select,
-.customer-add-pet-form input[type="date"],
-.customer-add-pet-form input[type="number"] {
+.customer-add-pet-form input[type='date'],
+.customer-add-pet-form input[type='number'] {
   width: 100%;
   padding: 14px 16px;
   border: 1px solid #d1d5db;
@@ -99,13 +99,13 @@
   font-size: 0.95rem;
   color: #374151;
   transition:
-          border-color 0.25s,
-          box-shadow 0.25s;
+    border-color 0.25s,
+    box-shadow 0.25s;
 }
 .customer-add-pet-form input:focus,
 .customer-add-pet-form select:focus,
-.customer-add-pet-form input[type="date"]:focus,
-.customer-add-pet-form input[type="number"]:focus {
+.customer-add-pet-form input[type='date']:focus,
+.customer-add-pet-form input[type='number']:focus {
   outline: none;
   border-color: #2563eb;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
@@ -137,8 +137,8 @@
   border: none;
   cursor: pointer;
   transition:
-          background-color 0.25s,
-          transform 0.2s;
+    background-color 0.25s,
+    transform 0.2s;
 }
 .customer-modal-content .primary-button:hover,
 .customer-add-pet-form .primary-button:hover {
@@ -157,8 +157,8 @@
   border: none;
   cursor: pointer;
   transition:
-          background-color 0.25s,
-          transform 0.2s;
+    background-color 0.25s,
+    transform 0.2s;
 }
 .customer-modal-content .secondary-button:hover,
 .customer-add-pet-form .secondary-button:hover {
@@ -298,8 +298,8 @@
   text-decoration: none;
   border-radius: 5px;
   transition:
-          background-color 0.3s ease,
-          transform 0.2s ease;
+    background-color 0.3s ease,
+    transform 0.2s ease;
   white-space: nowrap;
   position: fixed;
   left: 15px;
