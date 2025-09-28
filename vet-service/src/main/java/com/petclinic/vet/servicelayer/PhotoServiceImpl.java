@@ -3,20 +3,16 @@ package com.petclinic.vet.servicelayer;
 
 import com.petclinic.vet.dataaccesslayer.Photo;
 import com.petclinic.vet.dataaccesslayer.PhotoRepository;
-import com.petclinic.vet.dataaccesslayer.badges.BadgeTitle;
 import com.petclinic.vet.exceptions.InvalidInputException;
 import com.petclinic.vet.exceptions.NotFoundException;
+import com.petclinic.vet.presentationlayer.PhotoRequestDTO;
 import com.petclinic.vet.presentationlayer.PhotoResponseDTO;
 import com.petclinic.vet.util.EntityDtoUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StreamUtils;
-import org.springframework.web.multipart.MultipartFile;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 
@@ -32,13 +28,12 @@ public class PhotoServiceImpl implements PhotoService {
     private final PhotoRepository photoRepository;
 
     @Override
-    public Mono<Resource> getPhotoByVetId(String vetId) {
+    public Mono<PhotoResponseDTO> getPhotoByVetId(String vetId) {
         return photoRepository.findByVetId(vetId)
                 .doOnSubscribe(subscription -> log.debug("Fetching photo for vetId: {}", vetId))
                 .switchIfEmpty(Mono.error(new NotFoundException("Photo for vet " + vetId + " does not exist.")))
-                .map(this::createResourceFromPhoto)
-                .cast(Resource.class) // Explicit cast to Resource
-                .doOnSuccess(resource -> log.info("Successfully fetched photo for vetId: {}", vetId))
+                .map(EntityDtoUtil::toPhotoResponseDTO)
+                .doOnSuccess(photo -> log.info("Successfully fetched photo for vetId: {}", vetId))
                 .doOnError(error -> log.error("Error fetching photo for vetId: {}", vetId, error));
     }
 
@@ -51,48 +46,28 @@ public class PhotoServiceImpl implements PhotoService {
 
 
     @Override
-    public Mono<Resource> insertPhotoOfVet(String vetId, String photoName, MultipartFile file) {
-        return Mono.fromCallable(() -> {
-                    if (file == null || file.getSize() <= 0) {
-                        throw new InvalidInputException("Empty file");
+    public Mono<PhotoResponseDTO> insertPhotoOfVet(String vetId, Mono<PhotoRequestDTO> photoRequestDTO) {
+        return photoRequestDTO.flatMap(request -> {
+                    if (request.getData() == null || request.getData().length == 0) {
+                        return Mono.error(new InvalidInputException("Empty file data"));
                     }
-                    String ct = file.getContentType();
-                    if (ct == null || !ct.startsWith("image/")) {
-                        throw new InvalidInputException("Unsupported media type");
+                    
+                    String contentType = request.getImgType();
+                    if (contentType == null || contentType.isEmpty()) {
+                        contentType = determineContentType(request.getFilename());
                     }
+                    
                     Photo entity = Photo.builder()
                             .vetId(vetId)
-                            .filename(photoName)
-                            .imgType(ct)
-                            .data(file.getBytes())
+                            .filename(request.getFilename())
+                            .imgType(contentType)
+                            .data(request.getData())
                             .build();
-                    return entity;
+                    return photoRepository.save(entity);
                 })
-                .flatMap(photoRepository::save)
-                .map(saved -> new ByteArrayResource(saved.getData()));
+                .map(EntityDtoUtil::toPhotoResponseDTO);
     }
 
-    @Override
-    public Mono<Resource> insertPhotoOfVet(String vetId, String photoName, byte[] fileData) {
-        return Mono.fromCallable(() -> {
-                    if (fileData == null || fileData.length == 0) {
-                        throw new InvalidInputException("Empty file data");
-                    }
-                    
-                    // Determine content type based on file extension or default to JPEG
-                    String contentType = determineContentType(photoName);
-                    
-                    Photo entity = Photo.builder()
-                            .vetId(vetId)
-                            .filename(photoName)
-                            .imgType(contentType)
-                            .data(fileData)
-                            .build();
-                    return entity;
-                })
-                .flatMap(photoRepository::save)
-                .map(saved -> new ByteArrayResource(saved.getData()));
-    }
 
     private String determineContentType(String filename) {
         if (filename == null) {
@@ -113,21 +88,29 @@ public class PhotoServiceImpl implements PhotoService {
 
 
     @Override
-    public Mono<Resource> updatePhotoByVetId(String vetId, String photoName, Mono<Resource> photo) {
+    public Mono<PhotoResponseDTO> updatePhotoByVetId(String vetId, Mono<PhotoRequestDTO> photoRequestDTO) {
         return photoRepository.findByVetId(vetId)
                 .switchIfEmpty(Mono.error(new NotFoundException("Photo for vet " + vetId + " does not exist.")))
-                .flatMap(existingPhoto -> photo.map(resource -> {
-                            Photo updatedPhoto = EntityDtoUtil.toPhotoEntity(
-                                    vetId, photoName, resource);
-                            updatedPhoto.setId(existingPhoto.getId());
-                            return updatedPhoto;
-                        })
-                        .flatMap(updatedPhoto -> {
-                            return photoRepository.save(updatedPhoto)
-                                    .map(savedPhoto -> {
-                                        return new ByteArrayResource(savedPhoto.getData());
-                                    });
-                        }));
+                .flatMap(existingPhoto -> photoRequestDTO.flatMap(request -> {
+                            if (request.getData() == null || request.getData().length == 0) {
+                                return Mono.error(new InvalidInputException("Empty file data"));
+                            }
+                            
+                            String contentType = request.getImgType();
+                            if (contentType == null || contentType.isEmpty()) {
+                                contentType = determineContentType(request.getFilename());
+                            }
+                            
+                            Photo updatedPhoto = Photo.builder()
+                                    .id(existingPhoto.getId())
+                                    .vetId(vetId)
+                                    .filename(request.getFilename())
+                                    .imgType(contentType)
+                                    .data(request.getData())
+                                    .build();
+                            return photoRepository.save(updatedPhoto);
+                        }))
+                .map(EntityDtoUtil::toPhotoResponseDTO);
     }
 
     @Override
@@ -158,11 +141,6 @@ public class PhotoServiceImpl implements PhotoService {
                 return Mono.error(new RuntimeException("Failed to load default photo", e));
             }
         });
-    }
-
-
-    private ByteArrayResource createResourceFromPhoto(Photo img) {
-        return new ByteArrayResource(img.getData());
     }
 
 }
