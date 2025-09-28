@@ -209,4 +209,9 @@ public class UserController {
         }
     }
 
+    @PatchMapping("/{userId}/username")
+    public ResponseEntity<String> updateUserUsername (@PathVariable String userId, @RequestBody String username, @CookieValue("Bearer") String token) {
+        return ResponseEntity.ok().body(userService.updateUserUsername(userId, username, token));
+    }
+
 }

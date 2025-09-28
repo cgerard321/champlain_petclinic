@@ -79,7 +79,7 @@ spring:
         max: 50
 
   datasource:
-    url: jdbc:mysql://mysql4/auth-db
+    url: jdbc:mysql://mysql-auth/auth-db
     username: user
     password: pwd
 
