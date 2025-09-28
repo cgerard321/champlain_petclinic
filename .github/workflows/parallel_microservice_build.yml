@@ -292,17 +292,19 @@ jobs:
         for report_dir in coverage-reports/*/; do
           if [ -d "$report_dir" ]; then
             service_name=$(basename "$report_dir")
-            if [ -f "$report_dir/index.html" ]; then
+            # Look for the main index.html file (not package-level ones)
+            main_index="$report_dir/index.html"
+            if [ -f "$main_index" ]; then
               # Try multiple patterns to extract coverage percentage from JaCoCo HTML reports
-              # Pattern 1: Look for Total row with coverage percentage
-              coverage=$(grep -o 'Total.*<td class="ctr2">[0-9]*%</td>' "$report_dir/index.html" | grep -o '[0-9]*%' | head -1)
+              # Pattern 1: Look for Total row in tfoot with coverage percentage
+              coverage=$(grep -A 10 'tfoot' "$main_index" | grep -o 'Total.*<td class="ctr2">[0-9]*%</td>' | grep -o '[0-9]*%' | head -1)
               if [ -z "$coverage" ]; then
-                # Pattern 2: Look for any ctr2 class with percentage
-                coverage=$(grep -o 'class="ctr2">[0-9]*%</td>' "$report_dir/index.html" | grep -o '[0-9]*%' | head -1)
+                # Pattern 2: Look for any ctr2 class with percentage in the main report
+                coverage=$(grep -o 'class="ctr2">[0-9]*%</td>' "$main_index" | head -1 | grep -o '[0-9]*%')
               fi
               if [ -z "$coverage" ]; then
                 # Pattern 3: Look for any percentage in the HTML
-                coverage=$(grep -o '[0-9]*%' "$report_dir/index.html" | head -1)
+                coverage=$(grep -o '[0-9]*%' "$main_index" | head -1)
               fi
               if [ -n "$coverage" ]; then
                 echo "- $service_name: $coverage" >> $GITHUB_STEP_SUMMARY
