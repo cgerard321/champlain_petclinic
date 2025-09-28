@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Visit } from './models/Visit';
 import './VisitListTable.css';
+import './Emergency.css';
 import { useNavigate } from 'react-router-dom';
 // import { AppRoutePaths } from '@/shared/models/path.routes.ts';
 import { getAllEmergency } from './Emergency/Api/getAllEmergency';
 import { EmergencyResponseDTO } from './Emergency/Model/EmergencyResponseDTO';
 import { deleteEmergency } from './Emergency/Api/deleteEmergency';
-import './Emergency.css';
+
 import { exportVisitsCSV } from './api/exportVisitsCSV';
 import axiosInstance from '@/shared/api/axiosInstance.ts';
 import { getAllVisits } from './api/getAllVisits';
@@ -17,15 +18,18 @@ export default function VisitListTable(): JSX.Element {
   const [visitIdToDelete, setConfirmDeleteId] = useState<string | null>(null);
   const isVet = IsVet();
   const [visitsList, setVisitsList] = useState<Visit[]>([]);
+  //visits all used for search bar filtering
   const [visitsAll, setVisitsAll] = useState<Visit[]>([]);
   const [archivedVisits, setArchivedVisits] = useState<Visit[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>(''); // Search term state
   const [emergencyList, setEmergencyList] = useState<EmergencyResponseDTO[]>(
     []
   );
+  //emergency all used for search bar filtering
+  const [emergencyAll, setEmergencyAll] = useState<EmergencyResponseDTO[]>([]);
 
   //use sidebar to select which table is shown
-  const [currentTab, setCurrentTab] = useState<string | null>('Emergencies');
+  const [currentTab, setCurrentTab] = useState<string | null>('All');
 
   const navigate = useNavigate();
 
@@ -37,7 +41,9 @@ export default function VisitListTable(): JSX.Element {
           getAllEmergency(),
         ]);
         setVisitsList(visits);
+        setVisitsAll(visits);
         setEmergencyList(emergencies);
+        setEmergencyAll(emergencies);
       } catch (error) {
         console.error('Error loading initial data:', error);
       }
@@ -189,10 +195,16 @@ export default function VisitListTable(): JSX.Element {
           visit.description.toLowerCase().includes(searchTerm.toLowerCase())
         )
       );
+
+      setEmergencyList(
+        emergencyAll.filter(visit =>
+          visit.description.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+      );
     } else {
       return;
     }
-  }, [searchTerm, visitsAll, visitsList]);
+  }, [searchTerm, visitsList, visitsAll, emergencyList, emergencyAll]);
 
   // Filter visits based on status
   const confirmedVisits = visitsList.filter(
@@ -340,66 +352,41 @@ export default function VisitListTable(): JSX.Element {
     emergencies: EmergencyResponseDTO[]
   ): JSX.Element =>
     currentTab == title || currentTab == 'All' ? (
-      <div className="visit-table-section-red">
-        <h2>{title}</h2>
+      <div className="visit-table-section emergency">
         <table>
           <thead>
             <tr>
-              <th>Visit Emergency Id</th>
-              <th>Visit Date</th>
-              <th>Description</th>
-              <th> PetId</th>
-              <th>Pet Birthdate </th>
+              <th>Emergency Id</th>
+              <th>Pet Id</th>
               <th>Pet Name</th>
-              <th> PractitionnerId</th>
-              <th>vetFirstName</th>
-              <th>vetLastName</th>
-              <th>Email</th>
-              <th>Phone Number</th>
-              <th>Actions</th>
+              <th>Description</th>
+              <th>Pet Birthdate </th>
+              <th>Practitionner Id</th>
+              <th>Veterinarian</th>
+              <th>Vet Email</th>
+              <th>Vet Phone Number</th>
+              <th>Date</th>
+              <th className="action-column"></th>
             </tr>
           </thead>
           <tbody>
             {emergencies.map(emergency => (
               <tr key={emergency.visitEmergencyId}>
                 <td>{emergency.visitEmergencyId}</td>
-                <td>{new Date(emergency.visitDate).toLocaleString()}</td>
-                <td>{emergency.description}</td>
                 <td> {emergency.petId}</td>
-                <td> {new Date(emergency.vetBirthDate).toLocaleString()}</td>
                 <td>{emergency.petName}</td>
+                <td>{emergency.description}</td>
+                <td> {new Date(emergency.petBirthDate).toLocaleString()}</td>
                 <td>{emergency.practitionerId}</td>
-                <td>{emergency.vetFirstName}</td>
-                <td>{emergency.vetLastName}</td>
+                <td>
+                  {emergency.vetFirstName} {emergency.vetLastName}
+                </td>
                 <td>{emergency.vetEmail}</td>
                 <td>{emergency.vetPhoneNumber}</td>
-                <td>
-                  {!isVet && (
-                    <button
-                      className="btn btn-warning"
-                      onClick={() => {
-                        navigate(
-                          `/visits/emergency/${emergency.visitEmergencyId}`
-                        );
-                      }}
-                      title="Edit"
-                    >
-                      Edit
-                    </button>
-                  )}
-                  {!isVet && (
-                    <button
-                      className="btn btn-danger"
-                      onClick={async () =>
-                        setConfirmDeleteId(emergency.visitEmergencyId)
-                      }
-                      title="Delete"
-                    >
-                      Delete
-                    </button>
-                  )}
-                  <button
-                    className="btn btn-dark"
+                <td>{new Date(emergency.visitDate).toLocaleString()}</td>
+                <td className="action-column">
+                  <a
+                    className="icon"
                     onClick={() =>
                       navigate(
                         `/visits/emergency/${emergency.visitEmergencyId}`
@@ -407,8 +394,65 @@ export default function VisitListTable(): JSX.Element {
                     }
                     title="View"
                   >
-                    View
-                  </button>
+                    <svg
+                      viewBox="0 -3 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <circle cx="12" cy="12" r="3.5" fill="#212529" />
+                      <path
+                        d="M21 12C21 12 20 4 12 4C4 4 3 12 3 12"
+                        stroke="#212529"
+                        strokeWidth="1.2"
+                      />
+                    </svg>
+                  </a>
+                  {!isVet && (
+                    <a
+                      className="icon"
+                      onClick={() => {
+                        navigate(
+                          `/visits/emergency/${emergency.visitEmergencyId}`
+                        );
+                      }}
+                      title="Edit"
+                    >
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <rect width="24" height="24" fill="none" />
+                        <path
+                          d="M15.6287 5.12132L4.31497 16.435M15.6287 5.12132L19.1642 8.65685M15.6287 5.12132L17.0429 3.70711C17.4334 3.31658 18.0666 3.31658 18.4571 3.70711L20.5784 5.82843C20.969 6.21895 20.969 6.85212 20.5784 7.24264L19.1642 8.65685M7.85051 19.9706L4.31497 16.435M7.85051 19.9706L19.1642 8.65685M7.85051 19.9706L3.25431 21.0312L4.31497 16.435"
+                          stroke="#212529"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </a>
+                  )}
+                  {!isVet && (
+                    <a
+                      className="icon"
+                      onClick={async () =>
+                        setConfirmDeleteId(emergency.visitEmergencyId)
+                      }
+                      title="Delete"
+                    >
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M5 6.5H20M10 6.5V4.5C10 3.94772 10.4477 3.5 11 3.5H14C14.5523 3.5 15 3.94772 15 4.5V6.5M12.5 9V17M15.5 9L15 17M9.5 9L10 17M18.5 6.5L17.571 18.5767C17.5309 19.0977 17.0965 19.5 16.574 19.5H8.42603C7.90349 19.5 7.46905 19.0977 7.42898 18.5767L6.5 6.5H18.5Z"
+                          stroke="#121923"
+                          strokeWidth="1.2"
+                        />
+                      </svg>
+                    </a>
+                  )}
                 </td>
               </tr>
             ))}
@@ -418,42 +462,40 @@ export default function VisitListTable(): JSX.Element {
     ) : (
       <></>
     );
-  const renderTable = (
-    title: string,
-    visits: Visit[],
-    allowArchive: boolean = false
-  ): JSX.Element =>
-    currentTab == title || currentTab == 'All' ? (
+  const renderTable = (title: string, visits: Visit[]): JSX.Element =>
+    currentTab == title ? (
       <div className="visit-table-section">
-        <h2>{title}</h2>
         {
           <table>
             <thead>
               <tr>
                 <th>Visit Id</th>
-                <th>Visit Date</th>
-                <th>Description</th>
                 <th>Pet Name</th>
-                <th>Vet First Name</th>
-                <th>Vet Last Name</th>
+                <th>Description</th>
+                <th>Veterinarian</th>
                 <th>Vet Email</th>
-                <th>Visit End Date</th>
-                <th>Status</th>
-                <th>Actions</th>
+                <th>Vet Phone Number</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th className="status-column">Status</th>
+                <th className="action-column"></th>
               </tr>
             </thead>
             <tbody>
               {visits.map(visit => (
                 <tr key={visit.visitId}>
                   <td>{visit.visitId}</td>
-                  <td>{new Date(visit.visitDate).toLocaleString()}</td>
-                  <td>{visit.description}</td>
                   <td>{visit.petName}</td>
-                  <td>{visit.vetFirstName}</td>
-                  <td>{visit.vetLastName}</td>
+                  <td>{visit.description}</td>
+                  <td>
+                    {visit.vetFirstName} {visit.vetLastName}
+                  </td>
                   <td>{visit.vetEmail}</td>
+                  <td>{visit.vetPhoneNumber}</td>
+                  <td>{new Date(visit.visitDate).toLocaleString()}</td>
                   <td>{new Date(visit.visitEndDate).toLocaleString()}</td>
                   <td
+                    className="status-column"
                     style={{
                       color:
                         visit.status === 'CONFIRMED'
@@ -472,45 +514,100 @@ export default function VisitListTable(): JSX.Element {
                   >
                     {visit.status}
                   </td>
-                  <td>
-                    <button
-                      className="btn btn-dark"
+                  <td className="action-column">
+                    <a
+                      className="icon"
                       onClick={() => navigate(`/visits/${visit.visitId}`)}
                       title="View"
                     >
-                      View
-                    </button>
+                      <svg
+                        viewBox="0 -3 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <circle cx="12" cy="12" r="3.5" fill="#212529" />
+                        <path
+                          d="M21 12C21 12 20 4 12 4C4 4 3 12 3 12"
+                          stroke="#212529"
+                          strokeWidth="1.2"
+                        />
+                      </svg>
+                    </a>
                     {!isVet && (
-                      <button
-                        className="btn btn-warning"
+                      <a
+                        className="icon"
                         onClick={() =>
                           navigate(`/visits/${visit.visitId}/edit`)
                         }
                         title="Edit"
                       >
-                        Edit
-                      </button>
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <rect width="24" height="24" fill="none" />
+                          <path
+                            d="M15.6287 5.12132L4.31497 16.435M15.6287 5.12132L19.1642 8.65685M15.6287 5.12132L17.0429 3.70711C17.4334 3.31658 18.0666 3.31658 18.4571 3.70711L20.5784 5.82843C20.969 6.21895 20.969 6.85212 20.5784 7.24264L19.1642 8.65685M7.85051 19.9706L4.31497 16.435M7.85051 19.9706L19.1642 8.65685M7.85051 19.9706L3.25431 21.0312L4.31497 16.435"
+                            stroke="#212529"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      </a>
                     )}
-                    {allowArchive && !isVet && (
-                      <button
-                        className="btn btn-secondary"
+                    {visit.status === 'COMPLETED' && !isVet && (
+                      <a
+                        className="icon"
                         onClick={() => handleArchive(visit.visitId)}
                         title="Archive"
                       >
-                        Archive
-                      </button>
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M16 14L12.5 17.5L9 14M4.5 7.5V20.5H20.5V7.5L18.5 4.5H6.5L4.5 7.5Z"
+                            stroke="#212529"
+                            strokeWidth="1.2"
+                          />
+                          <path
+                            d="M12.5 10.5V17"
+                            stroke="#212529"
+                            strokeWidth="1.2"
+                          />
+                          <path
+                            d="M4.5 7.5H20.5"
+                            stroke="#212529"
+                            strokeWidth="1.2"
+                          />
+                        </svg>
+                      </a>
                     )}
 
                     {visit.status !== 'CANCELLED' &&
                       visit.status !== 'ARCHIVED' &&
                       visit.status !== 'COMPLETED' &&
                       !isVet && (
-                        <button
-                          className="btn btn-danger"
+                        <a
+                          className="icon"
                           onClick={() => handleCancel(visit.visitId)}
+                          title="Cancel"
                         >
-                          Cancel Visit
-                        </button>
+                          <svg
+                            viewBox="0 -2 18 18"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              clipRule="evenodd"
+                              d="M12.8536 2.85355C13.0488 2.65829 13.0488 2.34171 12.8536 2.14645C12.6583 1.95118 12.3417 1.95118 12.1464 2.14645L7.5 6.79289L2.85355 2.14645C2.65829 1.95118 2.34171 1.95118 2.14645 2.14645C1.95118 2.34171 1.95118 2.65829 2.14645 2.85355L6.79289 7.5L2.14645 12.1464C1.95118 12.3417 1.95118 12.6583 2.14645 12.8536C2.34171 13.0488 2.65829 13.0488 2.85355 12.8536L7.5 8.20711L12.1464 12.8536C12.3417 13.0488 12.6583 13.0488 12.8536 12.8536C13.0488 12.6583 13.0488 12.3417 12.8536 12.1464L8.20711 7.5L12.8536 2.85355Z"
+                              fill="#212529"
+                            />
+                          </svg>
+                        </a>
                       )}
                   </td>
                 </tr>
@@ -525,20 +622,20 @@ export default function VisitListTable(): JSX.Element {
 
   const renderVisitsTables = (): JSX.Element => {
     return (
-      <div>
-        <div className="visit-actions">
+      <div className="page-container">
+        <div className="visit-action-bar">
           {/* Search bar for filtering visits */}
           <div className="search-bar">
             <input
               type="text"
-              placeholder="Search by visit description"
+              placeholder="Search by description"
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)} // Update the search term when input changes
             />
           </div>
 
           <button
-            className="btn btn-primary"
+            className="btn-primary csv-btn"
             onClick={exportVisitsCSV}
             title="Download CSV"
           >
@@ -547,10 +644,10 @@ export default function VisitListTable(): JSX.Element {
         </div>
         {/* Emergency Table below buttons, but above visit tables */}
         {renderEmergencyTable('Emergencies', emergencyList)}
-
+        {renderTable('All', visitsList)}
         {renderTable('Confirmed', confirmedVisits)}
         {renderTable('Upcoming', upcomingVisits)}
-        {renderTable('Completed', completedVisits, true)}
+        {renderTable('Completed', completedVisits)}
         {renderTable('Cancelled', cancelledVisits)}
         {renderTable('Archived', archivedVisits)}
         {visitIdToDelete && (
@@ -587,7 +684,7 @@ export default function VisitListTable(): JSX.Element {
   };
 
   return (
-    <div className="page-container">
+    <div className="visit-page-container">
       {renderSidebar('Visits')} {renderVisitsTables()}
     </div>
   );
