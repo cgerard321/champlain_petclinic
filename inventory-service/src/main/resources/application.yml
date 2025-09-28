@@ -36,7 +36,7 @@ spring:
       on-profile: docker
   data:
     mongodb:
-      host: mongo-vet
+      host: mongo
       port: 27017
       database: inventory
       username: root
