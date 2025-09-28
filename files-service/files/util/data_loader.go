@@ -68,7 +68,16 @@ func SetupMinio(lc *minio.Client, key string, secret string) {
 	c := context.Background()
 	for fileType, files := range grouped {
 		bucket := datalayer.Buckets[fileType]
-		err := lc.MakeBucket(c, bucket, minio.MakeBucketOptions{})
+		exists, err := lc.BucketExists(c, bucket)
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		if exists {
+			continue
+		}
+
+		err = lc.MakeBucket(c, bucket, minio.MakeBucketOptions{})
 
 		if err != nil {
 			log.Fatalln(err)
