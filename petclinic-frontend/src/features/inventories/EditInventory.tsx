@@ -260,167 +260,175 @@ const EditInventory: React.FC = (): JSX.Element => {
   };
 
   return (
-    <div className="edit-inventory-form">
-      <h3 className="text-center">
-        Inventories &nbsp;
-        <small className="text-muted">Edit Form</small>
-      </h3>
-      {loading && <div className="loader">Loading...</div>}
-      <br />
-      <div className="container">
-        <form onSubmit={handleSubmit} className="text-center">
-          <div className="row">
-            <div className="col-4">
-              <div className="form-group">
-                <label>Inventory Name</label>
-                <input
-                  type="text"
-                  name="inventoryName"
-                  placeholder="Inventory Name"
-                  className="form-control"
-                  value={inventory.inventoryName}
-                  onChange={e =>
-                    handleFieldChange('inventoryName', e.target.value)
-                  }
-                  required
-                />
-                {error.inventoryName && (
-                  <span className="error">{error.inventoryName}</span>
-                )}
+      <div className="edit-inventory-form">
+        <h3 className="text-center">
+          Inventories &nbsp;
+          <small className="text-muted">Edit Form</small>
+        </h3>
+        {loading && <div className="loader">Loading...</div>}
+        <br />
+        <div className="container">
+          <form onSubmit={handleSubmit} className="text-center">
+            <div className="row">
+              <div className="col-4">
+                <div className="form-group">
+                  <label>Inventory Name</label>
+                  <input
+                      type="text"
+                      name="inventoryName"
+                      placeholder="Inventory Name"
+                      className="form-control"
+                      value={inventory.inventoryName}
+                      onChange={e =>
+                          handleFieldChange('inventoryName', e.target.value)
+                      }
+                      required
+                  />
+                  {error.inventoryName && (
+                      <span className="error">{error.inventoryName}</span>
+                  )}
+                </div>
               </div>
-            </div>
-            <div className="col-4">
-              <div className="form-group">
-                <label>Inventory Type</label>
-                <select
-                  name="inventoryType"
-                  className="form-control"
-                  value={inventory.inventoryType}
-                  onChange={e =>
-                    handleFieldChange('inventoryType', e.target.value)
-                  }
-                  required
-                >
-                  <option value="" disabled>
-                    Select inventory type
-                  </option>
-                  {inventoryTypes.map(type => (
-                    <option key={type.typeId} value={type.type}>
-                      {type.type}
+              <div className="col-4">
+                <div className="form-group">
+                  <label>Inventory Type</label>
+                  <select
+                      name="inventoryType"
+                      className="form-control"
+                      value={inventory.inventoryType}
+                      onChange={e =>
+                          handleFieldChange('inventoryType', e.target.value)
+                      }
+                      required
+                  >
+                    <option value="" disabled>
+                      Select inventory type
                     </option>
-                  ))}
-                </select>
-                {error.inventoryType && (
-                  <span className="error">{error.inventoryType}</span>
-                )}
+                    {inventoryTypes.map(type => (
+                        <option key={type.typeId} value={type.type}>
+                          {type.type}
+                        </option>
+                    ))}
+                  </select>
+                  {error.inventoryType && (
+                      <span className="error">{error.inventoryType}</span>
+                  )}
+                </div>
               </div>
-            </div>
-            <div className="col-4">
-              <div className="form-group">
-                <label>Inventory Description</label>
-                <input
-                  type="text"
-                  name="inventoryDescription"
-                  className="form-control"
-                  placeholder="Inventory Description"
-                  value={inventory.inventoryDescription}
-                  onChange={e =>
-                    handleFieldChange('inventoryDescription', e.target.value)
-                  }
-                  required
-                />
-                {error.inventoryDescription && (
-                  <span className="error">{error.inventoryDescription}</span>
-                )}
+              <div className="col-4">
+                <div className="form-group">
+                  <label>Inventory Description</label>
+                  <input
+                      type="text"
+                      name="inventoryDescription"
+                      className="form-control"
+                      placeholder="Inventory Description"
+                      value={inventory.inventoryDescription}
+                      onChange={e =>
+                          handleFieldChange('inventoryDescription', e.target.value)
+                      }
+                      required
+                  />
+                  {error.inventoryDescription && (
+                      <span className="error">{error.inventoryDescription}</span>
+                  )}
+                </div>
               </div>
-            </div>
-            <div className="col-4">
-              <div className="form-group">
-                <label>
+              <div className="col-4">
+                <div className="form-group">
+                  <label>
+                    <div className={EditInventoryFormStyles.labelContainer}>
+                      Inventory Image
+                    </div>
+                  </label>
+                  <input
+                      type="text"
+                      name="inventoryImage"
+                      className="form-control"
+                      placeholder="Inventory Image"
+                      value={inventory.inventoryImage}
+                      onChange={e =>
+                          handleFieldChange('inventoryImage', e.target.value)
+                      }
+                      required
+                  />
+                  {error.inventoryImage && (
+                      <span className="error">{error.inventoryImage}</span>
+                  )}
+                </div>
+              </div>
+              <div className="col-4">
+                <div className="form-group">
                   <div className={EditInventoryFormStyles.labelContainer}>
-                    Inventory Image
+                    <label>Inventory Backup Image</label>
                   </div>
-                </label>
-                <input
-                  type="text"
-                  name="inventoryImage"
-                  className="form-control"
-                  placeholder="Inventory Image"
-                  value={inventory.inventoryImage}
-                  onChange={e =>
-                    handleFieldChange('inventoryImage', e.target.value)
-                  }
-                  required
-                />
-                {error.inventoryImage && (
-                  <span className="error">{error.inventoryImage}</span>
-                )}
-              </div>
-            </div>
-            <div className="col-4">
-              <div className="form-group">
-                <div className={EditInventoryFormStyles.labelContainer}>
-                  <label>Inventory Backup Image</label>
+                  <input
+                      type="text"
+                      name="inventoryBackupImage"
+                      className="form-control"
+                      placeholder="Inventory Backup Image"
+                      value={inventory.inventoryBackupImage}
+                      onChange={e =>
+                          handleFieldChange('inventoryBackupImage', e.target.value)
+                      }
+                      required
+                  />
+                  {error.inventoryBackupImage && (
+                      <span className="error">{error.inventoryBackupImage}</span>
+                  )}
                 </div>
-                <input
-                  type="text"
-                  name="inventoryBackupImage"
-                  className="form-control"
-                  placeholder="Inventory Backup Image"
-                  value={inventory.inventoryBackupImage}
-                  onChange={e =>
-                    handleFieldChange('inventoryBackupImage', e.target.value)
-                  }
-                  required
-                />
-                {error.inventoryBackupImage && (
-                  <span className="error">{error.inventoryBackupImage}</span>
-                )}
               </div>
-            </div>
-            <div className="col-4">
-              <div className="form-group">
-                <div className={EditInventoryFormStyles.labelContainer}>
-                  <label>Upload Image:</label>
+              <div className="col-4">
+                <div className="form-group">
+                  <div className={EditInventoryFormStyles.labelContainer}>
+                    <label>Upload Image:</label>
+                  </div>
+                  <input
+                      type="file"
+                      name="uploadedImage"
+                      className="form-control"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      ref={fileInputRef}
+                  />
+                  {error.uploadedImage && (
+                      <span className="error">{error.uploadedImage}</span>
+                  )}
                 </div>
-                <input
-                  type="file"
-                  name="uploadedImage"
-                  className="form-control"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  ref={fileInputRef}
-                />
-                {error.uploadedImage && (
-                  <span className="error">{error.uploadedImage}</span>
-                )}
               </div>
             </div>
-          </div>
-          <br />
-          <div className="row">
-            <button type="submit" className="btn btn-info">
-              Update
-            </button>
-            {/* Undo button */}
-            <button
-              type="button"
-              className="btn btn-secondary"
-              onClick={handleUndo}
-            >
-              Undo
-            </button>
-          </div>
-        </form>
-      </div>
-      {successMessage && <p className="success-message">{successMessage}</p>}
-      {errorMessage && <p className="error-message">{errorMessage}</p>}
-      {showNotification && (
-        <div className="notification">
-          <p>Inventory updated successfully</p>
+            <br />
+            <div className="row">
+              <button type="submit" className="btn btn-info">
+                Update
+              </button>
+              {/* Cancel button: discard edits and close form */}
+              <button
+                  type="button"
+                  className="btn btn-light"
+                  onClick={handleCancel}
+              >
+                Cancel
+              </button>
+              {/* Undo button */}
+              <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={handleUndo}
+              >
+                Undo
+              </button>
+            </div>
+          </form>
         </div>
-      )}
-    </div>
+        {successMessage && <p className="success-message">{successMessage}</p>}
+        {errorMessage && <p className="error-message">{errorMessage}</p>}
+        {showNotification && (
+            <div className="notification">
+              <p>Inventory updated successfully</p>
+            </div>
+        )}
+      </div>
   );
 };
 export default EditInventory;
