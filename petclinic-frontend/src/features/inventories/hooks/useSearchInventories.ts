@@ -10,7 +10,8 @@ interface useSearchInventoriesResponseModel {
   getInventoryList: (
     inventoryName: string,
     inventoryType: string,
-    inventoryDescription: string
+    inventoryDescription: string,
+    importantOnly?: boolean
   ) => void;
   setCurrentPage: (currentPage: (prevPage: number) => number) => void;
   isLoading: boolean;
@@ -18,11 +19,14 @@ interface useSearchInventoriesResponseModel {
     inventoryName?: string;
     inventoryType?: string;
     inventoryDescription?: string;
+    importantOnly?: boolean;
   }) => void;
   currentFilters: {
     inventoryName: string;
     inventoryType: string;
     inventoryDescription: string;
+    // currentInventory: boolean;
+    importantOnly?: boolean;
   };
 }
 
@@ -35,20 +39,23 @@ export default function useSearchInventories(): useSearchInventoriesResponseMode
     inventoryName: '',
     inventoryType: '',
     inventoryDescription: '',
+    importantOnly: false,
   });
   const listSize: number = 10;
 
   const getInventoryList = async (
     inventoryName: string,
     inventoryType: string,
-    inventoryDescription: string
+    inventoryDescription: string,
+    importantOnly: boolean = false
   ): Promise<void> => {
     const data = await searchInventories(
       currentPage,
       listSize,
       inventoryName,
       inventoryType,
-      inventoryDescription
+      inventoryDescription,
+      importantOnly
     );
     setInventoryList(data);
     setRealPage(currentPage + 1);
@@ -59,6 +66,7 @@ export default function useSearchInventories(): useSearchInventoriesResponseMode
       inventoryName?: string;
       inventoryType?: string;
       inventoryDescription?: string;
+      importantOnly?: boolean;
     }) => {
       setFilters((prev: typeof filters) => ({
         ...prev,
@@ -81,11 +89,29 @@ export default function useSearchInventories(): useSearchInventoriesResponseMode
         const data = await searchInventories(
           0,
           listSize,
-          filters.inventoryName || undefined,
-          filters.inventoryType || undefined,
-          filters.inventoryDescription || undefined
+          undefined,
+          undefined,
+          undefined
         );
-        setInventoryList(data);
+        const filtered = data.filter(item => {
+          const nameMatch =
+            !filters.inventoryName ||
+            item.inventoryName
+              .toLowerCase()
+              .includes(filters.inventoryName.toLowerCase());
+          const typeMatch =
+            !filters.inventoryType ||
+            item.inventoryType === filters.inventoryType;
+          const descMatch =
+            !filters.inventoryDescription ||
+            (item.inventoryDescription || '')
+              .toLowerCase()
+              .includes(filters.inventoryDescription.toLowerCase());
+          const importantMatch =
+            !filters.importantOnly || item.important === true;
+          return nameMatch && typeMatch && descMatch && importantMatch;
+        });
+        setInventoryList(filtered);
         setRealPage(1);
         setCurrentPage(() => 0);
       } catch (error) {

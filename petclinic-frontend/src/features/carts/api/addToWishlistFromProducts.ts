@@ -24,22 +24,26 @@ export function useAddToWishlist(): UseAddToWishlistReturnType {
   ): Promise<boolean> => {
     if (!user?.userId) {
       console.error('User is not authenticated');
-      return false; // Return false when user is not authenticated
+      return false;
     }
 
     try {
       const cartId = await fetchUserCart(user.userId);
       if (!cartId) {
         console.error('Cart not found');
-        return false; // Return false if cart is not found
+        return false;
       }
 
-      const endpoint = `http://localhost:8080/api/v2/gateway/carts/${cartId}/products/${productId}/quantity/${quantity}`;
-      await axiosInstance.post(endpoint);
-      return true; // Return true when product is successfully added to wishlist
+      // was http://localhost:8080/api/v2/gateway/carts/${cartId}/products/${productId}/quantity/${quantity}
+      await axiosInstance.post(
+        `/carts/${cartId}/products/${productId}/quantity/${quantity}`,
+        undefined,
+        { useV2: true }
+      );
+      return true;
     } catch (error) {
       console.error('Error adding product to wishlist:', error);
-      return false; // Return false if there's an error
+      return false;
     }
   };
 

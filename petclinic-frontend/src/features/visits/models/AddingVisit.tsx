@@ -14,9 +14,7 @@ type VisitType = {
   description: string;
   petId: string;
   practitionerId: string;
-  // ownerId: string;
   status: Status;
-  //visitEndDate: Date;
 };
 
 const AddingVisit: React.FC = (): JSX.Element => {
@@ -26,7 +24,6 @@ const AddingVisit: React.FC = (): JSX.Element => {
     petId: '',
     practitionerId: '',
     status: 'UPCOMING' as Status,
-    //visitEndDate: new Date(),
   });
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -110,7 +107,7 @@ const AddingVisit: React.FC = (): JSX.Element => {
 
   return (
     <div className="profile-edit">
-      <h1>Add Visit</h1>
+      <h1>Schedule Visit For Your Pet</h1>
       <form onSubmit={handleSubmit}>
         <label>Pet ID: </label>
         <input
@@ -164,7 +161,6 @@ const AddingVisit: React.FC = (): JSX.Element => {
         <button className="cancel" type="button" onClick={handleCancel}>
           Cancel
         </button>
-
         <button type="submit" disabled={isLoading}>
           {isLoading ? 'Adding...' : 'Add'}
         </button>

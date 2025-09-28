@@ -135,20 +135,54 @@ public class BillServiceImpl implements BillService{
                 .count();
     }
 
+    @Override
+    public Flux<BillResponseDTO> getAllBillsByOwnerName(String ownerFirstName, String ownerLastName) {
+        return billRepository.findAll()
+                .filter(bill -> (ownerFirstName == null || bill.getOwnerFirstName().equals(ownerFirstName)) &&
+                        (ownerLastName == null || bill.getOwnerLastName().equals(ownerLastName)))
+                .switchIfEmpty(Flux.error(new NotFoundException("No bills found for the given owner name")))
+                .map(EntityDtoUtil::toBillResponseDto);
+    }
+
+    @Override
+    public Flux<BillResponseDTO> getAllBillsByVetName(String vetFirstName, String vetLastName) {
+        return billRepository.findAll()
+                .filter(bill -> (vetFirstName == null || bill.getVetFirstName().equals(vetFirstName)) &&
+                        (vetLastName == null || bill.getVetLastName().equals(vetLastName)))
+                .switchIfEmpty(Flux.error(new NotFoundException("No bills found for the given vet name")))
+                .map(EntityDtoUtil::toBillResponseDto);
+    }
+
+    @Override
+    public Flux<BillResponseDTO> getAllBillsByVisitType(String visitType) {
+        return billRepository.findAll()
+                .filter(bill -> visitType == null || bill.getVisitType().equals(visitType))
+                .switchIfEmpty(Flux.error(new NotFoundException("No bills found for the given visit type")))
+                .map(EntityDtoUtil::toBillResponseDto);
+    }
+
 
     @Override
     public Mono<BillResponseDTO> createBill(Mono<BillRequestDTO> billRequestDTO) {
+        return billRequestDTO
+                .flatMap(dto -> {
+                    // Validate required fields
+                    if (dto.getBillStatus() == null) {
+                        return Mono.error(new ResponseStatusException(
+                                HttpStatus.BAD_REQUEST, "Bill status is required"
+                        ));
+                    }
 
-            return billRequestDTO
-//                    .map(RequestContextAdd::new)
-//                    .flatMap(this::vetRequestResponse)
-//                    .flatMap(this::ownerRequestResponse)
-//                    .map(EntityDtoUtil::toBillEntityRC)
-                    .map(EntityDtoUtil::toBillEntity)
-                    .doOnNext(e -> e.setBillId(EntityDtoUtil.generateUUIDString()))
-                    .flatMap(billRepository::insert)
-                    .map(EntityDtoUtil::toBillResponseDto);
+
+                    // Add more field checks if needed
+                    return Mono.just(dto);
+                })
+                .map(EntityDtoUtil::toBillEntity)
+                .doOnNext(e -> e.setBillId(EntityDtoUtil.generateUUIDString()))
+                .flatMap(billRepository::insert)
+                .map(EntityDtoUtil::toBillResponseDto);
     }
+
 
 
     @Override
