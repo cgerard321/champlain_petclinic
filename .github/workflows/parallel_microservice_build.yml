@@ -248,7 +248,7 @@ jobs:
   coverage-summary:
     runs-on: "ubuntu-22.04"
     needs: [api_gateway_test, visits_service_test, vet_service_test, customers_service_reactive_test, billing_service_test, auth_service_test, inventory_service_test, products_service_test, cart_service_test]
-    if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    if: always() && (github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main'))
     steps:
     - name: Checkout sources
       uses: actions/checkout@v4
@@ -256,6 +256,11 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         path: coverage-reports
+    - name: List downloaded artifacts
+      run: |
+        echo "Downloaded artifacts:"
+        ls -la coverage-reports/ || echo "No coverage-reports directory found"
+        find coverage-reports -name "*.html" -type f | head -10 || echo "No HTML files found"
     - name: Generate coverage summary
       run: |
         echo "## Code Coverage Summary" >> $GITHUB_STEP_SUMMARY
