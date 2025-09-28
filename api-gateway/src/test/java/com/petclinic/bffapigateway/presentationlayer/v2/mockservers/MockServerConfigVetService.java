@@ -274,6 +274,21 @@ public class MockServerConfigVetService {
     }
 
     public void registerGetPhotoByVetIdEndpoint(String vetId, byte[] photoData) {
+        // Create PhotoResponseDTO with the photo data
+        PhotoResponseDTO photoResponseDTO = PhotoResponseDTO.builder()
+                .vetId(vetId)
+                .filename("vet_photo.jpg")
+                .imgType("image/jpeg")
+                .resourceBase64(java.util.Base64.getEncoder().encodeToString(photoData))
+                .build();
+
+        String jsonResponse;
+        try {
+            jsonResponse = mapper.writeValueAsString(photoResponseDTO);
+        } catch (JsonProcessingException e) {
+            jsonResponse = "{\"error\":\"Failed to serialize photo response\"}";
+        }
+
         mockServerClient_VetService
                 .when(
                         request()
@@ -283,8 +298,8 @@ public class MockServerConfigVetService {
                 .respond(
                         response()
                                 .withStatusCode(200)
-                                .withHeader("Content-Type", MediaType.IMAGE_JPEG_VALUE)
-                                .withBody(photoData)
+                                .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                                .withBody(jsonResponse)
                 );
     }
 
