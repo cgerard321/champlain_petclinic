@@ -1,10 +1,7 @@
 package com.petclinic.billing.presentationlayer;
 
 import com.petclinic.billing.businesslayer.BillService;
-import com.petclinic.billing.datalayer.Bill;
-import com.petclinic.billing.datalayer.BillResponseDTO;
-import com.petclinic.billing.datalayer.BillStatus;
-import com.petclinic.billing.datalayer.PaymentRequestDTO;
+import com.petclinic.billing.datalayer.*;
 import com.petclinic.billing.exceptions.InvalidPaymentException;
 import com.petclinic.billing.exceptions.NotFoundException;
 import org.junit.jupiter.api.Assertions;
@@ -426,5 +423,42 @@ class BillControllerUnitTest {
                 .expectStatus().isBadRequest();
     }
 
+    @Test
+    void whenPostingBillWithNoBillStatus_thenReturnsBadRequest() {
+        BillRequestDTO invalidBill = BillRequestDTO.builder()
+                .customerId("C001")
+                .visitType("Checkup")
+                .vetId("V100")
+                .date(LocalDate.now())
+                .amount(100.0)
+                .billStatus(null)
+                .dueDate(LocalDate.now().plusDays(10))
+                .build();
+
+        client.post()
+                .uri("/bills")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(invalidBill)
+                .exchange()
+                .expectStatus().isBadRequest();  // only check 400
+    }
+
+
+
+    @Test
+    void whenDeletingNonExistentBill_thenReturnNotFound() {
+        String invalidBillId = "NON_EXISTENT_ID";
+
+        // Mock the service to throw NotFoundException
+        Mockito.when(billService.deleteBill(invalidBillId))
+                .thenReturn(Mono.error(new NotFoundException("Bill not found")));
+
+        client.delete()
+                .uri("/bills/{billId}", invalidBillId)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Bill not found");
+    }
 
 }

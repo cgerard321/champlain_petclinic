@@ -1,15 +1,22 @@
 package com.petclinic.bffapigateway.presentationlayer.V1;
 
-
+import com.petclinic.bffapigateway.presentationlayer.v1.PetControllerV1;
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
+import com.petclinic.bffapigateway.utils.Security.Filters.JwtTokenFilter;
+import com.petclinic.bffapigateway.utils.Security.Filters.RoleFilter;
+import com.petclinic.bffapigateway.utils.Security.Filters.IsUserFilter;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
+import org.junit.runner.RunWith;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
+import org.springframework.test.context.junit4.SpringRunner;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetTypeRequestDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetTypeResponseDTO;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -32,7 +39,7 @@ import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -46,14 +53,15 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest(properties = {
-        "spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration,org.springframework.boot.autoconfigure.security.reactive.ReactiveSecurityAutoConfiguration"
-})
+@RunWith(SpringRunner.class)
+@WebFluxTest(
+        controllers = {PetControllerV1.class},
+        excludeFilters = @ComponentScan.Filter(
+                type = FilterType.ASSIGNABLE_TYPE,
+                classes = {JwtTokenFilter.class, RoleFilter.class, IsUserFilter.class}
+        )
+)
 @AutoConfigureWebTestClient
-@TestPropertySource(properties = {
-        "spring.main.allow-bean-definition-overriding=true",
-        "logging.level.org.springframework.security=OFF"
-})
 class PetControllerV1Test {
 
     @Autowired
@@ -308,5 +316,34 @@ class PetControllerV1Test {
                 .expectStatus().is4xxClientError();
 
         verify(customersServiceClient, never()).patchPet(any(), any());
+    }
+
+    @Test
+    void updatePetType_shouldSucceed() {
+        String petTypeId = "petTypeId-123";
+        PetTypeRequestDTO requestDTO = new PetTypeRequestDTO();
+        requestDTO.setName("Updated Dog");
+        requestDTO.setPetTypeDescription("Updated Mammal");
+
+        PetTypeResponseDTO responseDTO = new PetTypeResponseDTO();
+        responseDTO.setPetTypeId(petTypeId);
+        responseDTO.setName("Updated Dog");
+        responseDTO.setPetTypeDescription("Updated Mammal");
+
+        when(customersServiceClient.updatePetType(eq(petTypeId), any(Mono.class)))
+                .thenReturn(Mono.just(responseDTO));
+
+        client.put()
+                .uri("/api/gateway/owners/petTypes/{petTypeId}", petTypeId)
+                .body(BodyInserters.fromValue(requestDTO))
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.petTypeId").isEqualTo(petTypeId)
+                .jsonPath("$.name").isEqualTo("Updated Dog")
+                .jsonPath("$.petTypeDescription").isEqualTo("Updated Mammal");
+
+        verify(customersServiceClient, times(1)).updatePetType(eq(petTypeId), any(Mono.class));
     }
 }

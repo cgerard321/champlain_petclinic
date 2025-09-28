@@ -44,7 +44,7 @@ spring:
       on-profile: docker
   data:
     mongodb:
-      host: mongo
+      host: mongo-billing
       port: 27017
       database: billings
       username: root
