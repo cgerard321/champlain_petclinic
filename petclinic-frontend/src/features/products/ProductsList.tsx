@@ -9,81 +9,58 @@ import { useUser } from '@/context/UserContext';
 import './components/Sidebar.css';
 import { addImage } from './api/addImage';
 import { ImageModel } from './models/ProductModels/ImageModel';
-import StarRating from '@/features/products/components/StarRating.tsx';
+//import StarRating from '@/features/products/components/StarRating.tsx';
 import './components/StarRating.css';
-import { ProductType } from '@/features/products/api/ProductTypeEnum.ts';
+//import { ProductType } from '@/features/products/api/ProductTypeEnum.ts';
 import { getAllProductBundles } from './api/getAllProductBundles';
 import { ProductBundleModel } from './models/ProductModels/ProductBundleModel';
 import ProductBundle from './components/ProductBundle';
+//import ProductSearch from './components/ProductSearch';
 
 interface ProductsListProps {
   searchQuery: string;
+  view: 'catalog' | 'extras';
+  filters: {
+    minPrice?: number;
+    maxPrice?: number;
+    ratingSort?: string;
+    minStars?: number;
+    maxStars?: number;
+    deliveryType?: string;
+    productType?: string;
+  };
 }
 
 export default function ProductList({
   searchQuery,
+  view,
+  filters,
 }: ProductsListProps): JSX.Element {
   const [productList, setProductList] = useState<ProductModel[]>([]);
   const [bundleList, setBundleList] = useState<ProductBundleModel[]>([]);
-  const [minPrice, setMinPrice] = useState<number | undefined>(undefined);
-  const [maxPrice, setMaxPrice] = useState<number | undefined>(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { user } = useUser();
   const [isRightRole, setIsRightRole] = useState<boolean>(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
-  const [filterType, setFilterType] = useState<string>('');
   const [recentlyClickedProducts, setRecentlyClickedProducts] = useState<
     ProductModel[]
   >([]);
-  const [ratingSort, setRatingSort] = useState<string>('default');
-  const [minStars, setMinStars] = useState<number>(0);
-  const [maxStars, setMaxStars] = useState<number>(5);
-  const [validationMessage, setValidationMessage] = useState<string>('');
-  const [deliveryType, setDeliveryType] = useState<string>('');
-  const [productType, setProductType] = useState<string>('');
   const [filteredList, setFilteredList] = useState<ProductModel[]>([]);
 
-  const validationStars = async (
-    minStars: number,
-    maxStars: number
-  ): Promise<void> => {
-    if (minStars >= maxStars) {
-      setValidationMessage(
-        'Minimum stars cannot be greater than or equal to maximum stars.'
-      );
-    } else {
-      setValidationMessage('');
-    }
-  };
-
-  const FilterByPriceErrorHandling = useCallback(() => {
-    if (
-      minPrice !== undefined &&
-      maxPrice !== undefined &&
-      minPrice > maxPrice
-    ) {
-      alert('Min Price cannot be greater than Max Price');
-    }
-  }, [minPrice, maxPrice]);
-
   const fetchProducts = useCallback(async (): Promise<void> => {
-    FilterByPriceErrorHandling();
     setIsLoading(true);
     try {
-      if (filterType.trim() === '') {
-        const list = await getAllProducts(
-          minPrice,
-          maxPrice,
-          minStars,
-          maxStars,
-          ratingSort,
-          deliveryType,
-          productType
-        );
-        const filteredList = list.filter(product => !product.isUnlisted);
-        setProductList(filteredList);
-        setFilteredList(filteredList);
-      }
+      const list = await getAllProducts(
+        filters.minPrice,
+        filters.maxPrice,
+        filters.minStars,
+        filters.maxStars,
+        filters.ratingSort ?? 'default',
+        filters.deliveryType ?? '',
+        filters.productType ?? ''
+      );
+      const visible = list.filter(p => !p.isUnlisted);
+      setProductList(visible);
+      setFilteredList(visible);
     } catch (err) {
       console.error('Error fetching products:', err);
       setProductList([]);
@@ -91,125 +68,70 @@ export default function ProductList({
     } finally {
       setIsLoading(false);
     }
+
     try {
       const bundles = await getAllProductBundles();
       setBundleList(bundles);
     } catch (err) {
       console.error('Error fetching product bundles:', err);
     }
-  }, [
-    FilterByPriceErrorHandling,
-    filterType,
-    minPrice,
-    maxPrice,
-    minStars,
-    maxStars,
-    ratingSort,
-    deliveryType,
-    productType,
-  ]);
+  }, [filters]);
 
   useEffect(() => {
     fetchProducts();
-    const savedProducts = localStorage.getItem(
+    const saved = localStorage.getItem(
       `recentlyClickedProducts_${user.userId}`
     );
-    if (savedProducts) {
-      setRecentlyClickedProducts(JSON.parse(savedProducts));
-    }
+    if (saved) setRecentlyClickedProducts(JSON.parse(saved));
   }, [fetchProducts, user.userId]);
-
-  useEffect(() => {
-    const hasRightRole =
-      user?.roles !== undefined &&
-      Array.from(user.roles).some(role => role.name === 'ADMIN');
-    setIsRightRole(hasRightRole);
-  }, [user]);
 
   useEffect(() => {
     if (searchQuery === '') {
       setFilteredList(productList);
     } else {
       setFilteredList(
-        productList.filter(product =>
-          product.productName.toLowerCase().includes(searchQuery.toLowerCase())
+        productList.filter(p =>
+          p.productName.toLowerCase().includes(searchQuery.toLowerCase())
         )
       );
     }
   }, [searchQuery, productList]);
 
   const handleAddImage = async (formData: FormData): Promise<ImageModel> => {
-    try {
-      const createdImage = await addImage(formData);
-      await fetchProducts();
-      return createdImage;
-    } catch (error) {
-      console.error('Error adding image:', error);
-      throw error;
-    }
+    const created = await addImage(formData);
+    await fetchProducts();
+    return created;
   };
 
   const handleAddProduct = async (
     product: ProductModel
   ): Promise<ProductModel> => {
-    try {
-      const savedProduct = await addProduct(product);
-      await fetchProducts();
-      return savedProduct;
-    } catch (error) {
-      throw error;
-    }
-  };
-
-  const toggleSidebar = (): void => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
-
-  const handleOverlayClick = (): void => {
-    setIsSidebarOpen(false);
-  };
-
-  const clearFilters = async (): Promise<void> => {
-    setMinPrice(undefined);
-    setMaxPrice(undefined);
-    setFilterType('');
-    setRatingSort('');
-    setMaxStars(5);
-    setMinStars(0);
-    setValidationMessage('');
-    setDeliveryType('');
-    setProductType('');
-    const list = await getAllProducts(minPrice, maxPrice, minStars, maxStars);
-    setProductList(list);
+    const saved = await addProduct(product);
+    await fetchProducts();
+    return saved;
   };
 
   const handleProductClick = (product: ProductModel): void => {
-    setRecentlyClickedProducts(listOfProducts => {
-      const updatedProducts = listOfProducts.filter(
-        currentProduct => currentProduct.productId !== product.productId
-      );
-      updatedProducts.unshift(product);
-      if (updatedProducts.length > 5) {
-        updatedProducts.pop();
-      }
+    setRecentlyClickedProducts(prev => {
+      const updated = prev.filter(p => p.productId !== product.productId);
+      updated.unshift(product);
+      if (updated.length > 5) updated.pop();
       localStorage.setItem(
         `recentlyClickedProducts_${user.userId}`,
-        JSON.stringify(updatedProducts)
+        JSON.stringify(updated)
       );
-      return updatedProducts;
+      return updated;
     });
   };
 
   const RecentlyViewedProducts = (): JSX.Element => (
     <div className="recently-viewed-container">
-      <h2>Recently Seen</h2>
+      <h2 className="section-header">Recently Seen</h2>
       <div className="recently-viewed-flex">
         {recentlyClickedProducts.length > 0 ? (
           recentlyClickedProducts
-            .filter(product => !product.isUnlisted)
-            .map(product => (
-              <Product key={product.productId} product={product} />
-            ))
+            .filter(p => !p.isUnlisted)
+            .map(p => <Product key={p.productId} product={p} />)
         ) : (
           <p>No Recently Seen Items.</p>
         )}
@@ -219,183 +141,50 @@ export default function ProductList({
 
   return (
     <div className="product-list-container">
-      {isSidebarOpen && (
-        <div className="overlay" onClick={handleOverlayClick}></div>
-      )}
-
-      <div
-        className={`sidebar ${isSidebarOpen ? 'open' : ''}`}
-        id="sidebar"
-        aria-hidden={!isSidebarOpen}
-      >
-        <button
-          className="close-button"
-          onClick={toggleSidebar}
-          aria-label="Close Filters"
-        >
-          &times;
-        </button>
-        <div className="filter-container">
-          <h2>Filters</h2>
-          <label>
-            Min Price:
-            <input
-              type="number"
-              value={minPrice ?? typeof 'number'}
-              onChange={e =>
-                setMinPrice(
-                  e.target.value ? parseFloat(e.target.value) : undefined
-                )
-              }
-              min="0"
-              placeholder="e.g., 10"
-            />
-          </label>
-          <label>
-            Max Price:
-            <input
-              type="number"
-              value={maxPrice ?? typeof 'number'}
-              onChange={e =>
-                setMaxPrice(
-                  e.target.value ? parseFloat(e.target.value) : undefined
-                )
-              }
-              min="0"
-              placeholder="e.g., 100"
-            />
-          </label>
-          <label>
-            Item Type:
-            <select
-              value={productType}
-              onChange={e => setProductType(e.target.value)}
-            >
-              <option value="">Select Item Type</option>
-              {Object.values(ProductType).map(type => (
-                <option key={type} value={type}>
-                  {type.charAt(0).toUpperCase() + type.slice(1).toLowerCase()}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Delivery Type:
-            <select
-              value={deliveryType}
-              onChange={e => setDeliveryType(e.target.value)}
-            >
-              <option value="">Sort by Delivery Type</option>
-              <option value="DELIVERY">Delivery</option>
-              <option value="PICKUP">Pickup</option>
-              <option value="DELIVERY_AND_PICKUP">Delivery & Pickup</option>
-              <option value="NO_DELIVERY_OPTION">No Delivery Option</option>
-            </select>
-          </label>
-          <div className="star-rating-container">
-            <h2>Filter by Star Rating</h2>
-            <div className="star-row">
-              <label>Min Stars:</label>
-              <StarRating
-                currentRating={minStars}
-                viewOnly={false}
-                updateRating={rating => {
-                  setMinStars(rating);
-                  validationStars(rating, maxStars);
-                }}
-              />
-            </div>
-            <div className="star-row">
-              <label>Max Stars:</label>
-              <StarRating
-                currentRating={maxStars}
-                viewOnly={false}
-                updateRating={rating => {
-                  setMaxStars(rating);
-                  validationStars(minStars, rating);
-                }}
-              />
-            </div>
-            {validationMessage && (
-              <div style={{ color: 'red' }}>{validationMessage}</div>
-            )}
-          </div>
-          <select
-            name="rating"
-            value={ratingSort}
-            onChange={e => setRatingSort(e.target.value)}
-          >
-            <option value="default">Sort by Rating</option>
-            <option value="asc">Low to High</option>
-            <option value="desc">High to Low</option>
-          </select>
-          <button
-            className="apply-filter-button"
-            disabled={validationMessage !== ''}
-            onClick={fetchProducts}
-          >
-            Apply
-          </button>
-          <button className="clear-filter-button" onClick={clearFilters}>
-            Clear
-          </button>
-        </div>
-      </div>
-
       {isRightRole && (
         <AddProduct addProduct={handleAddProduct} addImage={handleAddImage} />
       )}
 
       <div className="main-content">
-        {!searchQuery && (
+        {view === 'catalog' && (
+          <div className="list-container">
+            {/*<h2 className="section-header">Catalog</h2>*/}
+            <div className="grid">
+              {isLoading ? (
+                <p>Loading items...</p>
+              ) : filteredList.length > 0 ? (
+                filteredList.map(p => (
+                  <div key={p.productId} onClick={() => handleProductClick(p)}>
+                    <Product product={p} />
+                  </div>
+                ))
+              ) : (
+                <p>No items found.</p>
+              )}
+            </div>
+          </div>
+        )}
+
+        {view === 'extras' && (
           <>
-            <div className="product-bundle-container">
-              <h2>Bundles</h2>
+            <div className="list-container">
+              <h2 className="section-header">Bundles</h2>
               <div className="grid product-bundles-grid">
                 {bundleList.length > 0 ? (
-                  bundleList.map(bundle => (
-                    <ProductBundle key={bundle.bundleId} bundle={bundle} />
+                  bundleList.map(b => (
+                    <ProductBundle key={b.bundleId} bundle={b} />
                   ))
                 ) : (
-                  <p>No Bundles Available.</p>
+                  <p>No Bundles Available</p>
                 )}
               </div>
             </div>
-
             <div>
               <hr />
             </div>
+            <RecentlyViewedProducts />
           </>
         )}
-
-        <div className="list-container">
-          <h2>Catalog</h2>
-          {!isSidebarOpen && (
-            <button className="toggle-sidebar-button" onClick={toggleSidebar}>
-              &#9776; Filters
-            </button>
-          )}
-          <div className="grid">
-            {isLoading ? (
-              <p>Loading items...</p>
-            ) : filteredList.length > 0 ? (
-              filteredList.map(product => (
-                <div
-                  key={product.productId}
-                  onClick={() => handleProductClick(product)}
-                >
-                  <Product product={product} />
-                </div>
-              ))
-            ) : (
-              <p>No items found.</p>
-            )}
-          </div>
-        </div>
-        <div>
-          <hr />
-        </div>
-        {!searchQuery && <RecentlyViewedProducts />}
       </div>
     </div>
   );
