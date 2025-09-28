@@ -1,6 +1,5 @@
 package com.petclinic.visits.visitsservicenew.DomainClientLayer.Mailing;
 
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder(toBuilder = true)
-public class Mail {
+public class OldMail {
     private String emailSendTo;
     private String emailTitle;
     private String templateName;
