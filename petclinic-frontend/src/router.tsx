@@ -62,6 +62,7 @@ import CustomerPromoPage from '@/pages/Promos/CustomerPromoPage.tsx';
 import UserDetailsPage from './pages/Users/UserDetailsPage';
 import UpdateUserPage from './pages/Users/UpdateUserPage';
 import AllRoles from '@/pages/Users/AllRoles.tsx';
+import OwnerBookAppointment from '@/pages/Visit/OwnerBookAppointment.tsx';
 import FAQ from './pages/FAQ/FAQ';
 import ContactPage from './pages/Contact/Contact';
 import PrivacyPolicyPage from './pages/PrivacyPolicy/PrivacyPolicy';
@@ -473,6 +474,14 @@ const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <AddReviewsCustomer />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: AppRoutePaths.OwnerBookAppointment,
+    element: (
+      <ProtectedRoute roles={['OWNER']}>
+        <OwnerBookAppointment />
       </ProtectedRoute>
     ),
   },

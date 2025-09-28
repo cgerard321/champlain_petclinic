@@ -3,6 +3,7 @@ package com.petclinic.visits.visitsservicenew.Utils;
 
 import com.petclinic.visits.visitsservicenew.DataLayer.Emergency.Emergency;
 import com.petclinic.visits.visitsservicenew.DataLayer.Review.Review;
+import com.petclinic.visits.visitsservicenew.DataLayer.Status;
 import com.petclinic.visits.visitsservicenew.DataLayer.Visit;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.PetResponseDTO;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.PetsClient;
@@ -72,6 +73,7 @@ public class EntityDtoUtil {
     public Visit toVisitEntity(VisitRequestDTO visitRequestDTO) {
         Visit visit = new Visit();
         BeanUtils.copyProperties(visitRequestDTO, visit);
+        visit.setStatus(Status.UPCOMING);
         return visit;
     }
 
