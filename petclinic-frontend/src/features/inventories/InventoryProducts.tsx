@@ -56,8 +56,8 @@ const InventoryProducts: React.FC = () => {
   const { productList, setProductList, getProductList } = useSearchProducts();
 
   // Declare state
-  const [inventoryName, setInventoryName] = useState<string>('');
   const [productName, setProductName] = useState<string>('');
+  const [inventoryName, setInventoryName] = useState<string>('');
   const [productDescription, setProductDescription] = useState<string>('');
   const [productStatus, setProductStatus] = useState<Status | ''>('');
   const [products, setProducts] = useState<ProductModel[]>([]);
@@ -159,6 +159,7 @@ const InventoryProducts: React.FC = () => {
       fetchProducts().catch(err => console.error(err));
     }
   }, [inventoryId, setProductList]);
+
   const deleteProduct = async (): Promise<void> => {
     if (productToDelete) {
       try {

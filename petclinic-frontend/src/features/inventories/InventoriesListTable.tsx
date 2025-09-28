@@ -357,17 +357,21 @@ export default function InventoriesListTable(): JSX.Element {
         </div>
       </div>
       <div>
-        <table className="table table-striped">
+        <table
+          className={`table table-striped${inventoryStyles.inventoryTable} ${inventoryStyles.fixedTable} ${inventoryStyles.cleanTable}`}
+        >
           <thead>
             <tr>
               <td></td>
-              <td style={{ fontWeight: 'bold' }}>NAME</td>
-              <td style={{ fontWeight: 'bold' }}>TYPE</td>
-              <td style={{ fontWeight: 'bold' }}>DESCRIPTION</td>
+              <td style={{ fontWeight: 'bold' }}>Name</td>
+              <td style={{ fontWeight: 'bold' }}>Type</td>
+              <td style={{ fontWeight: 'bold' }}>Description</td>
               <td className="text-center" style={{ fontWeight: 'bold' }}>
-                IMPORTANT
+                Important
               </td>
-              <td></td>
+              <td className="text-center" style={{ fontWeight: 'bold' }}>
+                Clear
+              </td>
               <td></td>
             </tr>
             <tr>
