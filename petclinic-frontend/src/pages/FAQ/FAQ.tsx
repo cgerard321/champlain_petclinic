@@ -1,10 +1,10 @@
-// src/pages/FAQ.tsx
 import { Container, Row, Col, Accordion, Form, Button } from 'react-bootstrap';
 import { NavBar } from '@/layouts/AppNavBar';
 import { AppFooter } from '@/layouts/AppFooter';
 import useFaqSearch from '@/features/faq/hooks/useFaqSearch';
 
 import './FAQ.css';
+import Reveal from '@/features/home/components/Reveal';
 
 export default function FAQ(): JSX.Element {
   const { query, setQuery, results } = useFaqSearch();
@@ -42,10 +42,12 @@ export default function FAQ(): JSX.Element {
               defaultActiveKey={results[0]?.id}
             >
               {results.map(item => (
-                <Accordion.Item eventKey={item.id} id={item.id} key={item.id}>
-                  <Accordion.Header>{item.question}</Accordion.Header>
-                  <Accordion.Body>{item.answer}</Accordion.Body>
-                </Accordion.Item>
+                <Reveal key={item.id} delay={results.indexOf(item) * 50}>
+                  <Accordion.Item eventKey={item.id} id={item.id} key={item.id}>
+                    <Accordion.Header>{item.question}</Accordion.Header>
+                    <Accordion.Body>{item.answer}</Accordion.Body>
+                  </Accordion.Item>
+                </Reveal>
               ))}
               {results.length === 0 && (
                 <div className="text-center text-muted py-4">
