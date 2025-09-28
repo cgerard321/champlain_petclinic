@@ -6,41 +6,84 @@
   border-top: 1px solid #e5e7eb;
 }
 
-.footer-brand {
+.app-footer .footer-brand {
   font-weight: 700;
   font-size: 1.25rem;
-  margin-bottom: .5rem;
+  margin: 0 0 .75rem;
   color: #0f172a;
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  line-height: 1.1;
 }
 
-.footer-desc {
+.app-footer .footer-col h6 {
+  margin: 0 0 .75rem;
+  font-weight: 600;
+}
+
+.app-footer .footer-desc {
   color: #475569;
-  font-size: 0.95rem;
+  font-size: .95rem;
   line-height: 1.5;
 }
 
-.footer-links,
-.footer-contact {
+.app-footer .footer-links,
+.app-footer .footer-contact {
   list-style: none;
   padding: 0;
   margin: 0;
 }
-
-.footer-links li,
-.footer-contact li { margin-bottom: .45rem; }
-
-.footer-links a {
-  color: #0f172a;
-  text-decoration: none;
-  opacity: .8;
-  transition: opacity .2s ease, color .2s ease;
+.app-footer .footer-links li,
+.app-footer .footer-contact li {
+  margin: 0;
+  margin-bottom: .45rem;
+  padding: 0;
 }
-.footer-links a:hover {
+
+.app-footer .footer-links a,
+.app-footer .footer-contact a {
+  color: inherit;
+  text-decoration: none;
+  opacity: .85;
+  transition: opacity .2s ease, color .2s ease, text-decoration-color .2s ease;
+}
+.app-footer .footer-links a:hover,
+.app-footer .footer-contact a:hover {
   opacity: 1;
-  color: #1d4ed8;
   text-decoration: underline;
 }
+.app-footer .footer-links a:visited,
+.app-footer .footer-contact a:visited {
+  color: inherit;
+}
+.app-footer .footer-links a:focus-visible,
+.app-footer .footer-contact a:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
 
-.footer-contact li { color: #475569; }
+.app-footer .footer-contact li {
+  display: grid;
+  grid-template-columns: 1.25rem 1fr;
+  column-gap: .5rem;
+  align-items: center;
+  margin: .25rem 0;
+  color: #475569;
+}
 
-.border-top.border-secondary { border-color: #e5e7eb !important; }
+.app-footer .footer-contact .icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  font-size: 1rem;
+  font-family: "Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji","Segoe UI Symbol", system-ui, sans-serif;
+}
+
+.app-footer .border-top.border-secondary {
+  border-color: #e5e7eb !important;
+}
