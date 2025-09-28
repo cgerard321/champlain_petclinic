@@ -273,22 +273,17 @@ public class VetController {
     }
 
 
-  /*  @PostMapping("{vetId}/photos/{photoName}")
-    public Mono<ResponseEntity<Resource>> addPhoto(
+    @PostMapping(value = "{vetId}/photos/{photoName}",
+            consumes = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    public Mono<ResponseEntity<Resource>> addPhotoByVetId(
             @PathVariable String vetId,
             @PathVariable String photoName,
-            @RequestParam("file") MultipartFile file) throws IOException {
-
-
-        // Convert MultipartFile to Resource
-        Mono<Resource> photoResource = Mono.just(new ByteArrayResource(file.getBytes()));
-
-
-        return photoService.insertPhotoOfVet(vetId, photoName, photoResource)
-                .map(p -> ResponseEntity.status(HttpStatus.CREATED).body(p))
-                .defaultIfEmpty(ResponseEntity.badRequest().build());
+            @RequestBody byte[] fileData) {
+        return photoService.insertPhotoOfVet(vetId, photoName, fileData)
+                .map(res -> ResponseEntity.status(HttpStatus.CREATED).body(res))
+                .switchIfEmpty(Mono.just(ResponseEntity.badRequest().build()));
     }
-*/
+
 
     @DeleteMapping("{vetId}/photo")
     public Mono<ResponseEntity<Void>> deletePhotoByVetId(@PathVariable String vetId) {
@@ -297,7 +292,7 @@ public class VetController {
                 .onErrorResume(NotFoundException.class, e -> Mono.just(ResponseEntity.notFound().build()));
     }
 
-    
+
 
     @PutMapping("{vetId}/photos/{photoName}")
     public Mono<ResponseEntity<Resource>> updatePhotoByVetId(@PathVariable String vetId, @PathVariable String photoName, @RequestBody Mono<Resource> photo){
