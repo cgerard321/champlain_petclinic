@@ -294,10 +294,12 @@ export default function AdminBillsListTable(): JSX.Element {
     if (!confirmDelete) return;
 
     try {
-      for (const bill of oldPaidBills) {
-        await deleteBill(bill);
-      }
-      window.alert(`${oldPaidBills.length} bills deleted successfully.`);
+      const results = await Promise.allSettled(
+        oldPaidBills.map(bill => deleteBill(bill))
+      );
+      const successCount = results.filter(r => r.status === 'fulfilled').length;
+      const failCount = results.filter(r => r.status === 'rejected').length;
+      window.alert(`${successCount} bills deleted successfully.${failCount > 0 ? ' ' + failCount + ' bills failed to delete.' : ''}`);
       setOldPaidBills([]);
       setShowOldPaidBills(false);
     } catch (err) {
