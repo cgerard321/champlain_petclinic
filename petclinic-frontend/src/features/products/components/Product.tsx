@@ -30,7 +30,7 @@ export default function Product({
     useState<ProductModel | null>(null);
   const [quantity, setQuantity] = useState<number>(0);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [tooLong, setTooLong] = useState<boolean>(false);
+  const [, setTooLong] = useState<boolean>(false); //tooLong
 
   const navigate = useNavigate();
   const { addToCart } = useAddToCart();
@@ -61,6 +61,8 @@ export default function Product({
     }
     return 'Unknown Delivery Type';
   };
+
+  //return toolong
 
   useEffect(() => {
     if (product.productDescription.length > 100) {

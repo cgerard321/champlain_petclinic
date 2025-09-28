@@ -41,7 +41,7 @@ export default function ProductList({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { user } = useUser();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [isRightRole, setIsRightRole] = useState<boolean>(false);
+  const [isRightRole] = useState<boolean>(false); //setIsRightRole
   const [recentlyClickedProducts, setRecentlyClickedProducts] = useState<
     ProductModel[]
   >([]);

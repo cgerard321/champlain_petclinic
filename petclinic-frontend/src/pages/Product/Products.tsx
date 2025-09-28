@@ -81,6 +81,14 @@ export default function Products(): JSX.Element {
             setSearchQuery={setSearchQuery}
           />
         </div>
+
+        <button
+          className="toggle-sidebar-button"
+          type="button"
+          aria-label="Sort By"
+        >
+          Sort By
+        </button>
       </div>
 
       {isSidebarOpen && (
