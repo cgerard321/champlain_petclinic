@@ -71,6 +71,16 @@ const EditInventory: React.FC = (): JSX.Element => {
             imageUploaded: response.imageUploaded,
           });
 
+          // store original values so Cancel can restore them
+          originalInventoryRef.current = {
+            inventoryName: response.inventoryName,
+            inventoryType: response.inventoryType,
+            inventoryDescription: response.inventoryDescription,
+            inventoryImage: response.inventoryImage,
+            inventoryBackupImage: response.inventoryBackupImage,
+            imageUploaded: response.imageUploaded || '',
+          };
+
           // Initialize undo history with loaded values
           setHistory({
             inventoryName: [response.inventoryName],
