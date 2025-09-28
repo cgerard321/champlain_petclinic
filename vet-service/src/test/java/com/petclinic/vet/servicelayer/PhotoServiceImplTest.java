@@ -3,6 +3,7 @@ package com.petclinic.vet.servicelayer;
 import com.petclinic.vet.dataaccesslayer.Photo;
 import com.petclinic.vet.dataaccesslayer.PhotoRepository;
 import com.petclinic.vet.exceptions.InvalidInputException;
+import com.petclinic.vet.presentationlayer.PhotoRequestDTO;
 import com.petclinic.vet.presentationlayer.PhotoResponseDTO;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
@@ -60,15 +61,15 @@ class PhotoServiceImplTest {
     void getPhotoByValidVetId() {
         when(photoRepository.findByVetId(anyString())).thenReturn(Mono.just(photo));
 
-        Mono<Resource> photoMono = photoService.getPhotoByVetId(VET_ID);
+        Mono<PhotoResponseDTO> photoMono = photoService.getPhotoByVetId(VET_ID);
 
         StepVerifier
                 .create(photoMono)
-                .consumeNextWith(image -> {
-                    assertNotNull(image);
-
-                    Resource photo = photoMono.block();
-                    assertEquals(photo, image);
+                .consumeNextWith(photoResponse -> {
+                    assertNotNull(photoResponse);
+                    assertEquals(VET_ID, photoResponse.getVetId());
+                    assertEquals("vet_default.jpg", photoResponse.getFilename());
+                    assertEquals("image/jpeg", photoResponse.getImgType());
                 })
                 .verifyComplete();
     }
@@ -99,17 +100,17 @@ class PhotoServiceImplTest {
 
 
     @Test
-    void insertPhotoOfVet_multipart_savesAndReturnsResource() throws Exception {
+    void insertPhotoOfVet_savesAndReturnsDTO() throws Exception {
         String vetId = "VET_ID";
         String photoName = "vet_default.jpg";
         byte[] photoData = "fake-bytes".getBytes();
 
-        MockMultipartFile file = new MockMultipartFile(
-                "file",
-                photoName,
-                "image/jpeg",
-                photoData
-        );
+        PhotoRequestDTO photoRequest = PhotoRequestDTO.builder()
+                .vetId(vetId)
+                .filename(photoName)
+                .imgType("image/jpeg")
+                .data(photoData)
+                .build();
 
         Photo savedPhoto = Photo.builder()
                 .vetId(vetId)
@@ -121,17 +122,14 @@ class PhotoServiceImplTest {
         when(photoRepository.save(ArgumentMatchers.any(Photo.class)))
                 .thenReturn(Mono.just(savedPhoto));
 
-        Mono<Resource> result = photoService.insertPhotoOfVet(vetId, photoName, file);
+        Mono<PhotoResponseDTO> result = photoService.insertPhotoOfVet(vetId, Mono.just(photoRequest));
 
         StepVerifier.create(result)
                 .assertNext(res -> {
                     assertNotNull(res);
-                    try {
-                        byte[] returned = res.getInputStream().readAllBytes();
-                        assertArrayEquals(photoData, returned);
-                    } catch (Exception e) {
-                        fail(e);
-                    }
+                    assertEquals(vetId, res.getVetId());
+                    assertEquals(photoName, res.getFilename());
+                    assertEquals("image/jpeg", res.getImgType());
                 })
                 .verifyComplete();
 
@@ -141,7 +139,13 @@ class PhotoServiceImplTest {
     @Test
     void updatePhotoOfVet() {
         String photoName = "vet_default.jpg";
-        Mono<Resource> photoResource = Mono.just(new ByteArrayResource(photoData));
+        PhotoRequestDTO photoRequest = PhotoRequestDTO.builder()
+                .vetId(VET_ID)
+                .filename(photoName)
+                .imgType("image/jpeg")
+                .data(photoData)
+                .build();
+                
         Photo savedPhoto = new Photo();
         savedPhoto.setVetId(VET_ID);
         savedPhoto.setFilename(photoName);
@@ -151,15 +155,15 @@ class PhotoServiceImplTest {
         when(photoRepository.save(any(Photo.class))).thenReturn(Mono.just(savedPhoto));
         when(photoRepository.findByVetId(anyString())).thenReturn(Mono.just(savedPhoto));
 
-        Mono<Resource> savedPhotoMono = photoService.updatePhotoByVetId(VET_ID, photoName, photoResource);
+        Mono<PhotoResponseDTO> savedPhotoMono = photoService.updatePhotoByVetId(VET_ID, Mono.just(photoRequest));
 
         StepVerifier
                 .create(savedPhotoMono)
-                .consumeNextWith(image -> {
-                    assertNotNull(image);
-
-                    Resource photo = savedPhotoMono.block();
-                    assertEquals(photo, image);
+                .consumeNextWith(photoResponse -> {
+                    assertNotNull(photoResponse);
+                    assertEquals(VET_ID, photoResponse.getVetId());
+                    assertEquals(photoName, photoResponse.getFilename());
+                    assertEquals("image/jpeg", photoResponse.getImgType());
                 })
                 .verifyComplete();
     }
