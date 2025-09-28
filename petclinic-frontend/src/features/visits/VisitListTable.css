@@ -9,9 +9,12 @@
     --accent-clr: #5e63ff;
 }
 
-.page-container{
-    display:grid;
-    grid-template-columns: auto 1fr;
+.page-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 40px 20px;
 }
 
 .visit-actions {
