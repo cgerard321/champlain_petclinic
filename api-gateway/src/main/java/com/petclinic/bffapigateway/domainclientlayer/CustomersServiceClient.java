@@ -320,6 +320,18 @@ public class CustomersServiceClient {
                 .bodyToMono(Void.class);
     }
 
+    public Mono<PetTypeResponseDTO> addPetType(Mono<PetTypeRequestDTO> petTypeRequestDTOMono) {
+        return petTypeRequestDTOMono.flatMap(requestDTO ->
+                webClientBuilder.build()
+                        .post()
+                        .uri(customersServiceUrl + "/owners/petTypes")
+                        .body(BodyInserters.fromValue(requestDTO))
+                        .retrieve()
+                        .bodyToMono(PetTypeResponseDTO.class)
+        );
+    }
+
+
     public Mono<PetTypeResponseDTO> updatePetType(String petTypeId, Mono<PetTypeRequestDTO> petTypeRequestDTO) {
         return petTypeRequestDTO.flatMap(requestDTO ->
                 webClientBuilder.build()
@@ -339,5 +351,59 @@ public class CustomersServiceClient {
                 .retrieve()
                 .bodyToMono(PetResponseDTO.class);
     }
+
+    public Flux<PetTypeResponseDTO> getPetTypesByPagination(Optional<Integer> page, Optional<Integer> size, String petTypeId, String name, String description) {
+
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(customersServiceUrl + "/owners/petTypes/pet-types-pagination");
+
+        builder.queryParam("page", page);
+        builder.queryParam("size", size);
+
+        // Add query parameters conditionally if they are not null or empty
+        if (petTypeId != null && !petTypeId.isEmpty()) {
+            builder.queryParam("petTypeId", petTypeId);
+        }
+        if (name != null && !name.isEmpty()) {
+            builder.queryParam("name", name);
+        }
+        if (description != null && !description.isEmpty()) {
+            builder.queryParam("description", description);
+        }
+
+        return webClientBuilder.build()
+                .get()
+                .uri(builder.build().toUri())
+                .retrieve()
+                .bodyToFlux(PetTypeResponseDTO.class);
+    }
+
+    public Mono<Long> getTotalNumberOfPetTypes(){
+        return webClientBuilder.build().get()
+                .uri(customersServiceUrl + "/owners/petTypes/pet-types-count")
+                .retrieve()
+                .bodyToMono(Long.class);
+    }
+
+    public Mono<Long> getTotalNumberOfPetTypesWithFilters(String petTypeId, String name, String description){
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(customersServiceUrl + "/owners/petTypes/pet-types-filtered-count");
+
+        // Add query parameters conditionally if they are not null or empty
+        if (petTypeId != null && !petTypeId.isEmpty()) {
+            builder.queryParam("petTypeId", petTypeId);
+        }
+        if (name != null && !name.isEmpty()) {
+            builder.queryParam("name", name);
+        }
+        if (description != null && !description.isEmpty()) {
+            builder.queryParam("description", description);
+        }
+
+        return webClientBuilder.build()
+                .get()
+                .uri(builder.build().toUri())
+                .retrieve()
+                .bodyToMono(Long.class);
+    }
+
 
 }

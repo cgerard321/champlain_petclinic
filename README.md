@@ -2,26 +2,28 @@
 
 Champlain Final Project 1 420-N52-LA Pet Clinic repo
 
-* [Champlain Pet Clinic](#champlain-pet-clinic)
-  * [Source](#source)
-  * [Getting Started](#getting-started)
-  * [Questions or Issues?](#questions-or-issues)
-  * [Development Notes](#development-notes)
-* [Pull Request Guidelines](docs/pull-requests.md)
-* [Git Guidelines](docs/git-tips.md)
-* [React Coding Standards](docs/react-coding-standards.md)
-* [Playwright Testing](docs/playwright-testing.md)
-* [Java (Spring) Coding Standards](docs/java-coding-standards.md)
-* [API Versioning Guidelines](docs/api-versioning.md)
-* [Scrum and Agile Guidelines](docs/scrum-agile.md)
-* [Environment Setup](docs/environment.md)
-* [Running the Application with Docker](docs/running-project.md)
-* [Spring Security Overview](docs/Spring%20Security.md)
-
+- [Champlain Pet Clinic](#champlain-pet-clinic)
+  - [Source](#source)
+  - [Getting Started](#getting-started)
+  - [Questions or Issues?](#questions-or-issues)
+  - [Development Notes](#development-notes)
+- [Pull Request Guidelines](docs/pull-requests.md)
+- [Git Guidelines](docs/git-tips.md)
+- [React Coding Standards](docs/react-coding-standards.md)
+- [Playwright Testing](docs/playwright-testing.md)
+- [Java (Spring) Coding Standards](docs/java-coding-standards.md)
+- [API Versioning Guidelines](docs/api-versioning.md)
+- [Scrum and Agile Guidelines](docs/scrum-agile.md)
+- [Environment Setup](docs/environment.md)
+- [Running the Application with Docker](docs/running-project.md)
+- [Running the monitoring Stack](docs/run-monitoring.md)
+- [Spring Security Overview](docs/Spring%20Security.md)
+- [Code Coverage Reports Access Guide](docs/code-coverage-reports.md)
 
 ## Source
+
 This project is based on the spring petclinic microservices (https://github.com/spring-petclinic/spring-petclinic-microservices) implementation.
-However, only the customers, visits, vets, and api-gateway services have been retained. In addition, the 
+However, only the customers, visits, vets, and api-gateway services have been retained. In addition, the
 Docker setup has been changed.
 
 ## Getting Started
@@ -45,11 +47,12 @@ If you have questions about these standards or need clarification on any pattern
 
 **Remember**: These standards ensure consistency, maintainability, and reliability across the entire codebase. Following them helps everyone and makes the application more robust.
 
-
 ## Development Notes
+
 If there's tests that are commented out, they need to be fixed. They were likely causing issues with the CI/CD pipeline.
 
 ## C4 L2
+
 [See Here](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/cgerard321/champlain_petclinic/main/docs/diagrams/C4/champlain-pet-clinic-ms_C4_L2_container_diagram.puml&fmt=svg)
 
 ![C4 L2](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/cgerard321/champlain_petclinic/main/docs/diagrams/C4/champlain-pet-clinic-ms_C4_L2_container_diagram.puml&fmt=svg)
