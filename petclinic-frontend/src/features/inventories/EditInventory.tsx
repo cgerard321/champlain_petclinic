@@ -172,6 +172,14 @@ const EditInventory: React.FC = (): JSX.Element => {
     }
   };
 
+  // Cancel handler: discard local edits and close form (navigate back)
+  const handleCancel = (): void => {
+    if (originalInventoryRef.current) {
+      setInventory(originalInventoryRef.current);
+    }
+    navigate('/inventories');
+  };
+
   const validate = (): boolean => {
     const newError: { [key: string]: string } = {};
     if (!inventory.inventoryName) {
