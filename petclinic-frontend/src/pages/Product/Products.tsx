@@ -4,8 +4,11 @@ import './Products.css';
 import TrendingList from '@/features/products/TrendingList';
 import { useState } from 'react';
 import ProductSearch from '@/features/products/components/ProductSearch';
+<<<<<<< HEAD
 import StarRating from '@/features/products/components/StarRating';
 import { ProductType } from '@/features/products/api/ProductTypeEnum';
+=======
+>>>>>>> a4381812 (fixed merging error)
 
 export default function Products(): JSX.Element {
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -63,6 +66,7 @@ export default function Products(): JSX.Element {
         />
       </header>
 
+<<<<<<< HEAD
       <div className="search-and-filter">
         {!isSidebarOpen && (
           <button
@@ -81,6 +85,13 @@ export default function Products(): JSX.Element {
             setSearchQuery={setSearchQuery}
           />
         </div>
+=======
+      <div className="block">
+        <ProductSearch
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+        />
+>>>>>>> a4381812 (fixed merging error)
       </div>
 
       {isSidebarOpen && (
@@ -182,28 +193,43 @@ export default function Products(): JSX.Element {
         </div>
       )}
 
+<<<<<<< HEAD
       <ProductsList
         view="catalog"
         searchQuery={searchQuery}
         filters={filters}
       />
+=======
+      <ProductsList view="catalog" searchQuery={''} />
+>>>>>>> a4381812 (fixed merging error)
 
       <div className="block">
         <hr />
       </div>
 
+<<<<<<< HEAD
       {!searchQuery && (
         <div className="trending-list-container-gold">
           <h2 className="section-header">Trending</h2>
           <TrendingList />
         </div>
       )}
+=======
+      <div className="trending-list-container-gold">
+        <h2 className="section-header">Trending</h2>
+        <TrendingList />
+      </div>
+>>>>>>> a4381812 (fixed merging error)
 
       <div className="block">
         <hr />
       </div>
 
+<<<<<<< HEAD
       <ProductsList view="extras" searchQuery={searchQuery} filters={filters} />
+=======
+      <ProductsList view="extras" searchQuery={''} />
+>>>>>>> a4381812 (fixed merging error)
     </div>
   );
 }
