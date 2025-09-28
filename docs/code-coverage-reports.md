@@ -67,25 +67,28 @@ When you create a pull request, the CI/CD pipeline automatically generates a cov
 
 ## Understanding Coverage Thresholds
 
-Each microservice has specific coverage requirements that must be met for the CI/CD pipeline to pass:
+Each microservice has specific coverage requirements that must be met for the CI/CD pipeline to pass (they all should reach 90%):
 
-| Service           | Coverage Threshold | Current Status                  |
-| ----------------- | ------------------ | ------------------------------- |
-| API Gateway       | 65%                | ✅ Temporary (should reach 90%) |
-| Auth Service      | 90%                | ✅ Required                     |
-| Billing Service   | 50%                | ✅ Required                     |
-| Cart Service      | 0%                 | ⚠️ No threshold set             |
-| Customers Service | 80%                | ✅ Required                     |
-| Inventory Service | 88%                | ✅ Required                     |
-| Products Service  | 90%                | ✅ Required                     |
-| Visits Service    | 85%                | ✅ Required                     |
+| Service           | Team Responsibility             |
+| ----------------- | ------------------------------- |
+| API Gateway       | All Teams (Shared Responsibility) |
+| Auth Service      | Auth Team                      |
+| Billing Service   | Billing Team                   |
+| Cart Service      | Cart Team                      |
+| Customers Service | Customers Team                 |
+| Inventory Service | Inventory Team                 |
+| Products Service  | Products Team                  |
+| Vet Service       | Vet Team                       |
+| Visits Service    | Visits Team                    |
 
 **Important Notes:**
 
-- API Gateway threshold is temporarily lowered to 65% but should be improved to 90%
-- Cart Service currently has no coverage threshold (0%)
-- All thresholds are enforced during CI/CD pipeline execution
-- Failing to meet thresholds will cause the build to fail
+- **Target Goal:** All services must reach 90% coverage
+- **API Gateway:** All teams share responsibility for this service
+- **Other Services:** Each team is responsible for their own service
+- **CI/CD Enforcement:** All thresholds are enforced during CI/CD pipeline execution
+- **Build Failure:** Failing to meet thresholds will cause the build to fail
+- **Continuous Improvement:** Teams should continuously work on increasing test coverage
 
 ## How to Read Coverage Reports
 
@@ -102,7 +105,7 @@ The JaCoCo HTML report provides a comprehensive view of code coverage:
 
 2. **Package View:**
 
-   - Click on any package to drill down
+   - Click on any package 
    - See coverage for all classes in the package
    - Identify which classes need more testing
 
@@ -125,38 +128,26 @@ The JaCoCo HTML report provides a comprehensive view of code coverage:
 - **Method Coverage:** Percentage of methods called by tests
 - **Class Coverage:** Percentage of classes with at least one method covered
 
-**Good Coverage Indicators:**
 
-- Line coverage > 80%
-- Branch coverage > 70%
-- No red lines in critical business logic
-- All public methods have test coverage
 
-## Troubleshooting
 
-### Common Issues
 
-**Q: Coverage reports not appearing in artifacts**
+**: Coverage reports not appearing in artifacts**
 
 - Ensure the workflow completed successfully
 - Check that `jacocoTestReport` task ran without errors
 - Verify the service has test files
 
-**Q: Coverage threshold failures**
+**: Coverage threshold failures**
 
 - Review the coverage report to identify uncovered code
 - Add tests for missing coverage areas
 - Consider if the threshold is appropriate for the service
 
-**Q: Local reports differ from CI reports**
 
-- Ensure you're running the same test suite locally
-- Check for environment-specific test configurations
-- Verify you're using the same Gradle version
 
-**Q: Cannot access HTML reports**
+**: Cannot access HTML reports**
 
-- Ensure you have the necessary permissions on the repository
 - Try downloading artifacts from a different browser
 - Check if the artifact has expired (30-day retention)
 
@@ -164,9 +155,9 @@ The JaCoCo HTML report provides a comprehensive view of code coverage:
 
 If you encounter issues with coverage reports:
 
-1. Check the [GitHub Actions logs](https://github.com/cgerard321/champlain_petclinic/actions) for error messages
-2. Review the [Java Coding Standards](java-coding-standards.md) for testing guidelines
-3. Refer to the [JaCoCo documentation](https://www.jacoco.org/jacoco/trunk/doc/) for advanced usage
+1. Check the [GitHub Actions logs](https://github.com/cgerard321/champlain_petclinic/actions)
+2. Review the [Java Coding Standards](java-coding-standards.md) 
+3. Refer to the [JaCoCo documentation](https://www.jacoco.org/jacoco/trunk/doc/) 
 
 ---
 
