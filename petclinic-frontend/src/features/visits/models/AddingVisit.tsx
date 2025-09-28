@@ -80,11 +80,14 @@ const AddingVisit: React.FC = (): JSX.Element => {
     setSuccessMessage('');
 
     const formattedVisit: VisitRequestModel = {
-      ...visit,
       visitDate: visit.visitStartDate
         .toISOString()
         .slice(0, 16)
         .replace('T', ' '),
+      description: visit.description,
+      petId: visit.petId,
+      practitionerId: visit.practitionerId,
+      status: visit.status,
     };
 
     try {
