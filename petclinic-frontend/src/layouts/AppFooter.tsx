@@ -8,7 +8,12 @@ export function AppFooter(): JSX.Element {
       <Container>
         <Row className="gy-4">
           <Col md={4}>
-            <h5 className="footer-brand">🐾 PetClinic</h5>
+            <h5 className="footer-brand">
+              <span className="icon" aria-hidden="true">
+                {'\uD83D\uDC3E'}
+              </span>
+              PetClinic
+            </h5>
             <p className="footer-desc">
               Providing compassionate veterinary care to keep your pets healthy
               and happy.
@@ -48,9 +53,26 @@ export function AppFooter(): JSX.Element {
           <Col md={3}>
             <h6>Contact Us</h6>
             <ul className="footer-contact">
-              <li>📍 900 Rue Riverside</li>
-              <li>📞 (450) 672-7360</li>
-              <li>✉️ info@champlainpetclinic.com</li>
+              <li>
+                <span className="icon" aria-hidden="true">
+                  {'\uD83D\uDCCD'}
+                </span>
+                <span>900 Rue Riverside</span>
+              </li>
+              <li>
+                <span className="icon" aria-hidden="true">
+                  {'\uD83D\uDCDE'}
+                </span>
+                <a href="tel:+14506727360">(450) 672-7360</a>
+              </li>
+              <li>
+                <span className="icon" aria-hidden="true">
+                  {'\uD83D\uDCE7'}
+                </span>
+                <a href="mailto:info@champlainpetclinic.com">
+                  info@champlainpetclinic.com
+                </a>
+              </li>
             </ul>
           </Col>
         </Row>

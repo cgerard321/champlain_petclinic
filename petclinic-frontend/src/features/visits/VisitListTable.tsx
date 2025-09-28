@@ -143,10 +143,8 @@ export default function VisitListTable(): JSX.Element {
     }
 
     const archivedEventSource = new EventSource(
-      'http://localhost:8080/api/v2/gateway/visits/archived',
-      {
-        withCredentials: true,
-      }
+      `${import.meta.env.VITE_BACKEND_URL}v2/gateway/visits/archived`,
+      { withCredentials: true }
     );
 
     archivedEventSource.onmessage = event => {
