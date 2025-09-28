@@ -26,7 +26,7 @@ func (m *MailerControllerImpl) New(service mailer.MailerService) {
 // @Failure 400 {object} object
 // @Failure 500 {object} object
 // @Router / [post]
-func (m MailerControllerImpl) handleMailPOST(context *gin.Context) {
+func (m MailerControllerImpl) handleMailPost(context *gin.Context) {
 
 	get, exists := context.Get("mail")
 	if !exists || get == nil {
@@ -52,7 +52,7 @@ func (m MailerControllerImpl) Routes(engine *gin.Engine) error {
 
 	group := engine.Group("/mail").Use(UnMarshallMail, ValidateEmail)
 
-	group.POST("", m.handleMailPOST)
+	group.POST("", m.handleMailPost)
 
 	return nil
 }
