@@ -37,7 +37,7 @@
 
 .profile-edit button {
   padding: 12px;
-  background-color: #28a745;
+  background-color: #0d6efd;
   color: white;
   border: none;
   border-radius: 5px;
@@ -49,7 +49,7 @@
 }
 
 .profile-edit button:hover {
-  background-color: #218838;
+  background-color: #1d5fbd;
 }
 
 .error {
@@ -63,4 +63,12 @@
   border-color: #28a745;
   box-shadow: 0 0 5px rgba(40, 167, 69, 0.5);
   outline: none;
+}
+
+.profile-edit button.cancel {
+  background-color: red;
+}
+
+.profile-edit button.cancel:hover {
+  background-color: darkred;
 }

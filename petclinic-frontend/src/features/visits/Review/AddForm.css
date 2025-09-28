@@ -111,12 +111,20 @@ button[type='submit']:hover {
   margin-top: -10px;
 }
 
+.add-review-form button.cancel {
+  background-color: red;
+}
+
+.add-review-form button.cancel:hover {
+  background-color: darkred;
+}
+
 .reviewer-name-display {
   margin: 4px 0 0 0;
   color: #343a40;
   font-size: 16px;
   padding-bottom: 10px;
-}
+  }
 
 .rating-section {
   margin-bottom: 16px;
@@ -130,7 +138,7 @@ button[type='submit']:hover {
   color: blue;
 }
 
-.add-review-form button[type='submit']:hover {
+.add-review-form button.submit:hover {
   background-color: #1d5fbd; 
   border-color: #1d5fbd;
   color: #fff;

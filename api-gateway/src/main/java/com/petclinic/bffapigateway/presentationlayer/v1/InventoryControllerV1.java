@@ -99,7 +99,7 @@ public class InventoryControllerV1 {
 
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
-    @GetMapping(value = "{inventoryId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/{inventoryId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<InventoryResponseDTO>> getInventoryById(@PathVariable String inventoryId) {
         return inventoryServiceClient.getInventoryById(inventoryId)
                 .map(product -> ResponseEntity.status(HttpStatus.OK).body(product))
