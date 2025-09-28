@@ -6,7 +6,7 @@ angular.module('inventoryUpdateForm', ['ui.router'])
 
             .state('updateInventory', {
                     parent: 'app',
-                    url: '/inventory/:inventoryId/:method',
+                    url: '/inventories/:inventoryId/:method',
                     template: '<inventory-update-form></inventory-update-form>'
                 }
             )
