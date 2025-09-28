@@ -29,3 +29,5 @@ export async function patchGetProduct(
     throw error;
   }
 }
+
+// This page needs to be deleted since react is only for customers and not employees.

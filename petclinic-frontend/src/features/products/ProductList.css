@@ -5,7 +5,7 @@
   margin-top: 20px;
 }
 
-.card {
+/*.card {
   background-color: #fff;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
@@ -34,7 +34,7 @@
 
 .card .star-rating {
   margin-top: 12px;
-}
+}*/
 
 .main-content {
   padding: 20px;
@@ -217,7 +217,31 @@
   flex: 0 0 350px;
   max-width: 350px;
   min-width: 350px;
-  height: 100%;
   scroll-snap-align: start;
 
+}
+
+.search-and-filter{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /*margin: 20px 0;
+  flex-wrap: wrap;
+  position: relative;
+  padding-right: 25%;*/
+  gap: 12px;
+}
+
+.search-and-filter .search-wrapper{
+  flex: 1 1 auto;
+}
+
+.search-and-filter .toggle-sidebar-button{
+  flex: 0 0 auto;
+}
+
+.search-wrapper{
+  flex: 1;
+  max-width: 600px;
+  justify-content: center;
 }
