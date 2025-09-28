@@ -29,7 +29,6 @@ export default function Product({
   const [selectedProductForQuantity, setSelectedProductForQuantity] =
     useState<ProductModel | null>(null);
   const [quantity, setQuantity] = useState<number>(0);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [, setTooLong] = useState<boolean>(false); //tooLong
 
   const navigate = useNavigate();
