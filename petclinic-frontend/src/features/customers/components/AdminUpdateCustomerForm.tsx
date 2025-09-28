@@ -4,7 +4,7 @@ import { getOwner } from '../api/getOwner';
 import { updateOwner } from '../api/updateOwner';
 import { OwnerRequestModel } from '../models/OwnerRequestModel';
 import { OwnerResponseModel } from '../models/OwnerResponseModel';
-import './customers.css';
+import './UpdateCustomerForm.css';
 
 const provincesOfCanada = [
   'Alberta',
@@ -39,7 +39,11 @@ const AdminUpdateCustomerForm: FC = () => {
 
   useEffect(() => {
     const fetchOwnerData = async (): Promise<void> => {
-      if (!ownerId) return;
+      if (!ownerId) {
+        console.error('Owner id is undefined');
+        return;
+      }
+
       try {
         const response = await getOwner(ownerId);
         const ownerData: OwnerResponseModel = response.data;
@@ -50,12 +54,12 @@ const AdminUpdateCustomerForm: FC = () => {
     };
 
     fetchOwnerData().catch(error =>
-      console.error('Error in fetchOwnerData:', error)
+        console.error('Error in fetchOwnerData:', error)
     );
   }, [ownerId]);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+      e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ): void => {
     setFormData({
       ...formData,
@@ -84,13 +88,16 @@ const AdminUpdateCustomerForm: FC = () => {
   };
 
   const handleSubmit = async (
-    e: React.FormEvent<HTMLFormElement>
+      e: React.FormEvent<HTMLFormElement>
   ): Promise<void> => {
     e.preventDefault();
     if (!validate()) return;
 
     try {
-      if (!ownerId) return;
+      if (!ownerId) {
+        console.error('Owner id is undefined');
+        return;
+      }
       await updateOwner(ownerId, formData);
       setIsModalOpen(true);
     } catch (error) {
@@ -108,131 +115,86 @@ const AdminUpdateCustomerForm: FC = () => {
   };
 
   return (
-    <div className="form-container">
-      <h1>Edit Customer</h1>
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label>First Name</label>
+      <div className="update-customer-form">
+        <h1>Edit Customer</h1>
+        <form onSubmit={handleSubmit}>
+          <label>First Name: </label>
           <input
-            type="text"
-            name="firstName"
-            value={formData.firstName}
-            onChange={handleChange}
-            className={errors.firstName ? 'error-input' : ''}
+              type="text"
+              name="firstName"
+              value={formData.firstName}
+              onChange={handleChange}
           />
-          {errors.firstName && (
-            <span className="error-message">{errors.firstName}</span>
-          )}
-        </div>
-
-        <div className="form-group">
-          <label>Last Name</label>
+          {errors.firstName && <span className="error">{errors.firstName}</span>}
+          <br />
+          <label>Last Name: </label>
           <input
-            type="text"
-            name="lastName"
-            value={formData.lastName}
-            onChange={handleChange}
-            className={errors.lastName ? 'error-input' : ''}
+              type="text"
+              name="lastName"
+              value={formData.lastName}
+              onChange={handleChange}
           />
-          {errors.lastName && (
-            <span className="error-message">{errors.lastName}</span>
-          )}
-        </div>
-
-        <div className="form-group">
-          <label>Address</label>
+          {errors.lastName && <span className="error">{errors.lastName}</span>}
+          <br />
+          <label>Address: </label>
           <input
-            type="text"
-            name="address"
-            value={formData.address}
-            onChange={handleChange}
-            className={errors.address ? 'error-input' : ''}
+              type="text"
+              name="address"
+              value={formData.address}
+              onChange={handleChange}
           />
-          {errors.address && (
-            <span className="error-message">{errors.address}</span>
-          )}
-        </div>
-
-        <div className="form-group">
-          <label>City</label>
+          {errors.address && <span className="error">{errors.address}</span>}
+          <br />
+          <label>City: </label>
           <input
-            type="text"
-            name="city"
-            value={formData.city}
-            onChange={handleChange}
-            className={errors.city ? 'error-input' : ''}
+              type="text"
+              name="city"
+              value={formData.city}
+              onChange={handleChange}
           />
-          {errors.city && <span className="error-message">{errors.city}</span>}
-        </div>
-
-        <div className="form-group">
-          <label>Province</label>
+          {errors.city && <span className="error">{errors.city}</span>}
+          <br />
+          <label>Province: </label>
           <select
-            name="province"
-            value={formData.province}
-            onChange={handleChange}
-            className={errors.province ? 'error-input' : ''}
+              name="province"
+              value={formData.province}
+              onChange={handleChange}
           >
             <option value="">Select Province</option>
             {provincesOfCanada.map(province => (
-              <option key={province} value={province}>
-                {province}
-              </option>
+                <option key={province} value={province}>
+                  {province}
+                </option>
             ))}
           </select>
-          {errors.province && (
-            <span className="error-message">{errors.province}</span>
-          )}
-        </div>
-
-        <div className="form-group">
-          <label>Telephone</label>
+          {errors.province && <span className="error">{errors.province}</span>}
+          <br />
+          <label>Telephone: </label>
           <input
-            type="text"
-            name="telephone"
-            value={formData.telephone}
-            onChange={handleChange}
-            className={errors.telephone ? 'error-input' : ''}
+              type="text"
+              name="telephone"
+              value={formData.telephone}
+              onChange={handleChange}
           />
-          {errors.telephone && (
-            <span className="error-message">{errors.telephone}</span>
-          )}
-        </div>
+          {errors.telephone && <span className="error">{errors.telephone}</span>}
+          <br />
+          <button type="submit">Update</button>
+        </form>
 
-        <div className="form-group" style={{ textAlign: 'center' }}>
-          <button type="submit" className="button-base primary-button">
-            Update
-          </button>
-          <button
-            type="button"
-            onClick={handleBack}
-            className="button-base secondary-button mt-2"
-          >
-            Back
-          </button>
-        </div>
-      </form>
+        <button id="back-button" onClick={handleBack}>
+          Back
+        </button>
 
-      {isModalOpen && (
-        <div className="customer-modal-overlay">
-          <div className="customer-modal-content">
-            <div className="customer-modal-header">
-              <h2>Success!</h2>
-              <button className="customer-modal-close" onClick={closeModal}>
-                &times;
-              </button>
+        {isModalOpen && (
+            <div className="admin-update-customer-modal-overlay">
+              <div className="admin-update-customer-modal">
+                <h2>Success!</h2>
+                <p>Customer has been successfully updated.</p>
+                <button onClick={closeModal}>Close</button>
+              </div>
             </div>
-            <p>Customer has been successfully updated.</p>
-            <button
-              onClick={closeModal}
-              className="button-base primary-button mt-4"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
   );
 };
 
