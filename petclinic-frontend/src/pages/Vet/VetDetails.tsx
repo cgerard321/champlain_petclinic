@@ -10,6 +10,7 @@ import DeleteVetEducation from '@/pages/Vet/DeleteVetEducation';
 import { Workday } from '@/features/veterinarians/models/Workday.ts';
 import UpdateVet from '@/pages/Vet/UpdateVet.tsx';
 import { fetchVetPhoto } from '@/features/veterinarians/api/fetchPhoto';
+import { addAlbumPhoto } from '@/features/veterinarians/api/addPhotoToAlbum';
 import {
   IsInventoryManager,
   IsOwner,
@@ -84,6 +85,9 @@ export default function VetDetails(): JSX.Element {
   const [photo, setPhoto] = useState<string | null>(null);
   const [isDefaultPhoto, setIsDefaultPhoto] = useState(false);
   const [albumPhotos, setAlbumPhotos] = useState<AlbumPhotoType[]>([]);
+  const [albumFile, setAlbumFile] = useState<File | null>(null);
+  const [albumPhotoName, setAlbumPhotoName] = useState<string>('');
+  const [isUploadingAlbum, setIsUploadingAlbum] = useState<boolean>(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [isFormOpen, setIsFormOpen] = useState(false); // To handle form visibility
@@ -298,6 +302,57 @@ export default function VetDetails(): JSX.Element {
       );
     } catch (error) {
       setError('Failed to delete album photo');
+    }
+  };
+
+  const handleAlbumFileChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ): void => {
+    const file = e.target.files?.[0] || null;
+    setAlbumFile(file);
+
+    if (file && !albumPhotoName) {
+      setAlbumPhotoName(file.name);
+    }
+  };
+
+  const handleAddAlbumPhoto = async (): Promise<void> => {
+    if (!vetId) {
+      setError('Missing vetId');
+      return;
+    }
+
+    if (!albumFile) {
+      setError('Please choose a photo to upload.');
+      return;
+    }
+
+    try {
+      setIsUploadingAlbum(true);
+
+      const saved = await addAlbumPhoto(
+        vetId,
+        albumPhotoName || albumFile.name,
+        albumFile
+      );
+
+      setAlbumPhotos(prev => [
+        ...prev,
+        {
+          id: String(saved.id ?? Date.now()),
+          imgType: saved.imgType ?? 'image/jpeg',
+          data: saved.data, // base64 string
+        },
+      ]);
+
+      setAlbumFile(null);
+      setAlbumPhotoName('');
+      setError('');
+    } catch (err) {
+      console.error(err);
+      setError('Failed to upload album photo');
+    } finally {
+      setIsUploadingAlbum(false);
     }
   };
 
@@ -751,6 +806,43 @@ export default function VetDetails(): JSX.Element {
 
             <section className="album-photos">
               <h2>Album Photos</h2>
+              {!isInventoryManager && !isOwner && !isReceptionist && (
+                <div
+                  className="album-upload-panel"
+                  style={{ marginBottom: 16 }}
+                >
+                  <div
+                    style={{
+                      display: 'flex',
+                      gap: 8,
+                      alignItems: 'center',
+                      flexWrap: 'wrap',
+                    }}
+                  >
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleAlbumFileChange}
+                    />
+
+                    <input
+                      type="text"
+                      placeholder="Photo name (optional)"
+                      value={albumPhotoName}
+                      onChange={e => setAlbumPhotoName(e.target.value)}
+                      style={{ padding: 6 }}
+                    />
+
+                    <button
+                      className="btn btn-primary"
+                      onClick={handleAddAlbumPhoto}
+                      disabled={isUploadingAlbum || !albumFile}
+                    >
+                      {isUploadingAlbum ? 'Uploading...' : 'Add Photo to Album'}
+                    </button>
+                  </div>
+                </div>
+              )}
               {albumPhotos.length > 0 ? (
                 <div className="album-photo-grid">
                   {albumPhotos.map((photo, index) => (

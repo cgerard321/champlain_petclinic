@@ -343,4 +343,40 @@ public class VetController {
                 .onErrorResume(NotFoundException.class, e -> Mono.defer(() -> Mono.just(ResponseEntity.<Void>notFound().build())));
     }
 
+
+
+
+
+
+
+    @PostMapping(
+            value = "{vetId}/albums/photos/{photoName}",
+            consumes = MediaType.APPLICATION_OCTET_STREAM_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public Mono<ResponseEntity<Album>> addAlbumPhotoOctet(
+            @PathVariable String vetId,
+            @PathVariable String photoName,
+            @RequestBody byte[] fileData
+    ) {
+        return albumService.insertAlbumPhoto(vetId, photoName, fileData)
+                .map(saved -> ResponseEntity.status(HttpStatus.CREATED).body(saved))
+                .switchIfEmpty(Mono.just(ResponseEntity.badRequest().build()));
+    }
+
+    @PostMapping(
+            value = "{vetId}/albums/photos",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public Mono<ResponseEntity<Album>> addAlbumPhotoMultipart(
+            @PathVariable String vetId,
+            @RequestPart("photoName") String photoName,
+            @RequestPart("file") MultipartFile file
+    ) {
+        return albumService.insertAlbumPhoto(vetId, photoName, file)
+                .map(saved -> ResponseEntity.status(HttpStatus.CREATED).body(saved))
+                .switchIfEmpty(Mono.just(ResponseEntity.badRequest().build()));
+    }
+
 }

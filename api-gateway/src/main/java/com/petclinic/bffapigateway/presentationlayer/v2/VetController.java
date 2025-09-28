@@ -228,4 +228,50 @@ public class VetController {
         return vetsServiceClient.deleteEducation(vetId, educationId)
                 .then(Mono.just(ResponseEntity.noContent().<Void>build()));
     }
+
+
+
+
+
+
+
+
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
+    @PostMapping(
+            value = "{vetId}/albums/photos",
+            consumes = MediaType.APPLICATION_OCTET_STREAM_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public Mono<ResponseEntity<Album>> addAlbumPhotoOctet(
+            @PathVariable String vetId,
+            @RequestHeader("Photo-Name") String photoName,
+            @RequestBody Mono<byte[]> fileData
+    ) {
+        return fileData
+                .flatMap(bytes -> vetsServiceClient.addAlbumPhotoFromBytes(vetId, photoName, bytes))
+                .map(saved -> ResponseEntity.status(HttpStatus.CREATED).body(saved))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
+    @PostMapping(
+            value = "{vetId}/albums/photos",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public Mono<ResponseEntity<Album>> addAlbumPhotoMultipart(
+            @PathVariable String vetId,
+            @RequestPart("photoName") String photoName,
+            @RequestPart("file") Mono<FilePart> file
+    ) {
+        return file
+                .flatMap(fp -> vetsServiceClient.addAlbumPhoto(vetId, photoName, fp))
+                .map(saved -> ResponseEntity.status(HttpStatus.CREATED).body(saved))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
+
+
+
 }

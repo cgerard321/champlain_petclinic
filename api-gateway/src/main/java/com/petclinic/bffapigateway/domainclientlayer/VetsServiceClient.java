@@ -781,4 +781,58 @@ public class VetsServiceClient {
     }
 
 
+
+
+
+
+
+    public Mono<Album> addAlbumPhotoFromBytes(String vetId, String photoName, byte[] fileData) {
+        return webClientBuilder.build()
+                .post()
+                .uri(vetsServiceUrl + "/" + vetId + "/albums/photos/" + photoName)
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .bodyValue(fileData)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, error -> {
+                    if (error.statusCode().equals(NOT_FOUND)) {
+                        return Mono.error(new NotFoundException("Album source not found for vet " + vetId));
+                    }
+                    return Mono.error(new IllegalArgumentException("Client error while adding album photo"));
+                })
+                .onStatus(HttpStatusCode::is5xxServerError,
+                        error -> Mono.error(new IllegalArgumentException("Server error while adding album photo")))
+                .bodyToMono(Album.class);
+    }
+
+    public Mono<Album> addAlbumPhoto(String vetId, String photoName, FilePart filePart) {
+        return filePart.content()
+                .map(dataBuffer -> {
+                    byte[] bytes = new byte[dataBuffer.readableByteCount()];
+                    dataBuffer.read(bytes);
+                    return bytes;
+                })
+                .reduce((a, b) -> {
+                    byte[] combined = new byte[a.length + b.length];
+                    System.arraycopy(a, 0, combined, 0, a.length);
+                    System.arraycopy(b, 0, combined, a.length, b.length);
+                    return combined;
+                })
+                .flatMap(bytes -> webClientBuilder.build()
+                        .post()
+                        .uri(vetsServiceUrl + "/" + vetId + "/albums/photos/" + photoName)
+                        .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                        .bodyValue(bytes)
+                        .retrieve()
+                        .onStatus(HttpStatusCode::is4xxClientError, error -> {
+                            if (error.statusCode().equals(NOT_FOUND)) {
+                                return Mono.error(new NotFoundException("Album source not found for vet " + vetId));
+                            }
+                            return Mono.error(new IllegalArgumentException("Client error while adding album photo"));
+                        })
+                        .onStatus(HttpStatusCode::is5xxServerError,
+                                error -> Mono.error(new IllegalArgumentException("Server error while adding album photo")))
+                        .bodyToMono(Album.class));
+    }
+
+
 }
