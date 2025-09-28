@@ -415,7 +415,12 @@ export default function AdminBillsListTable(): JSX.Element {
       );
       const successCount = results.filter(r => r.status === 'fulfilled').length;
       const failCount = results.filter(r => r.status === 'rejected').length;
-      window.alert(`${successCount} bills deleted successfully.${failCount > 0 ? ' ' + failCount + ' bills failed to delete.' : ''}`);
+      if (successCount > 0) {
+        window.alert(`${successCount} bills deleted successfully.`);
+      }
+      if (failCount > 0) {
+        window.alert(`${failCount} bills failed to delete.`);
+      }
       setOldPaidBills([]);
       setShowOldPaidBills(false);
     } catch (err) {
