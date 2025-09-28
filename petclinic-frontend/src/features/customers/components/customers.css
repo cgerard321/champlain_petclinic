@@ -1,10 +1,10 @@
 /* This is a universal CSS, that works for all files, instead of having indivudual files for each one. Easier to work with, less space*/
 /* This is for the rectangular look */
-.modal-overlay,
-.pet-add-modal-overlay,
-.pet-update-modal-overlay,
-.pet-delete-modal-overlay,
-.admin-update-customer-modal-overlay {
+.customer-modal-overlay,
+.customer-pet-add-modal-overlay,
+.customer-pet-update-modal-overlay,
+.customer-pet-delete-modal-overlay,
+.customer-admin-update-customer-modal-overlay {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.4);
@@ -15,11 +15,11 @@
   z-index: 1000;
 }
 
-.modal-content,
-.pet-add-modal,
-.pet-update-modal,
-.pet-delete-modal,
-.admin-update-customer-modal {
+.customer-modal-content,
+.customer-pet-add-modal,
+.customer-pet-update-modal,
+.customer-pet-delete-modal,
+.customer-admin-update-customer-modal {
   position: relative;
   background: #ffffff;
   border-radius: 16px;
@@ -35,23 +35,23 @@
 }
 
 /* Modal header with x button */
-.modal-header {
+.customer-modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 24px;
 }
-.modal-header h2,
-.pet-add-modal h2,
-.pet-update-modal h2,
-.pet-delete-modal h2,
-.admin-update-customer-modal h2 {
+.customer-modal-header h2,
+.customer-pet-add-modal h2,
+.customer-pet-update-modal h2,
+.customer-pet-delete-modal h2,
+.customer-admin-update-customer-modal h2 {
   font-size: 1.6rem;
   font-weight: 600;
   color: #2e2e2e;
   margin: 0;
 }
-.modal-close {
+.customer-modal-close {
   position: absolute;
   top: 18px;
   right: 18px;
@@ -62,24 +62,24 @@
   cursor: pointer;
   transition: color 0.25s;
 }
-.modal-close:hover {
+.customer-modal-close:hover {
   color: #1f2937;
 }
 
 /* Update form */
-.add-pet-form {
+.customer-add-pet-form {
   display: flex;
   flex-direction: column;
   gap: 24px;
 }
 
-.add-pet-form .form-group {
+.customer-add-pet-form .form-group {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-.add-pet-form label {
+.customer-add-pet-form label {
   font-size: 0.85rem;
   font-weight: 600;
   color: #6b6b6b;
@@ -87,8 +87,10 @@
   letter-spacing: 0.5px;
 }
 
-.add-pet-form input,
-.add-pet-form select {
+.customer-add-pet-form input,
+.customer-add-pet-form select,
+.customer-add-pet-form input[type="date"],
+.customer-add-pet-form input[type="number"] {
   width: 100%;
   padding: 14px 16px;
   border: 1px solid #d1d5db;
@@ -97,33 +99,35 @@
   font-size: 0.95rem;
   color: #374151;
   transition:
-    border-color 0.25s,
-    box-shadow 0.25s;
+          border-color 0.25s,
+          box-shadow 0.25s;
 }
-.add-pet-form input:focus,
-.add-pet-form select:focus {
+.customer-add-pet-form input:focus,
+.customer-add-pet-form select:focus,
+.customer-add-pet-form input[type="date"]:focus,
+.customer-add-pet-form input[type="number"]:focus {
   outline: none;
   border-color: #2563eb;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
 /* Error display */
-.add-pet-form .error-message {
+.customer-add-pet-form .error-message {
   color: #dc2626;
   font-size: 0.8rem;
 }
 
 /* Buttons inside of the form modal */
-.modal-content .form-actions,
-.add-pet-form .form-actions {
+.customer-modal-content .form-actions,
+.customer-add-pet-form .form-actions {
   display: flex;
   justify-content: flex-end;
   gap: 16px;
   margin-top: 24px;
 }
 
-.modal-content .primary-button,
-.add-pet-form .primary-button {
+.customer-modal-content .primary-button,
+.customer-add-pet-form .primary-button {
   background-color: #2563eb;
   color: #fff;
   padding: 12px 32px;
@@ -133,17 +137,17 @@
   border: none;
   cursor: pointer;
   transition:
-    background-color 0.25s,
-    transform 0.2s;
+          background-color 0.25s,
+          transform 0.2s;
 }
-.modal-content .primary-button:hover,
-.add-pet-form .primary-button:hover {
+.customer-modal-content .primary-button:hover,
+.customer-add-pet-form .primary-button:hover {
   background-color: #1d4ed8;
   transform: translateY(-2px);
 }
 
-.modal-content .secondary-button,
-.add-pet-form .secondary-button {
+.customer-modal-content .secondary-button,
+.customer-add-pet-form .secondary-button {
   background-color: #6b7280;
   color: #fff;
   padding: 12px 32px;
@@ -153,11 +157,162 @@
   border: none;
   cursor: pointer;
   transition:
-    background-color 0.25s,
-    transform 0.2s;
+          background-color 0.25s,
+          transform 0.2s;
 }
-.modal-content .secondary-button:hover,
-.add-pet-form .secondary-button:hover {
+.customer-modal-content .secondary-button:hover,
+.customer-add-pet-form .secondary-button:hover {
   background-color: #4b5563;
   transform: translateY(-2px);
+}
+
+/* Update Customer Form container */
+.update-customer-form-container {
+  display: flex;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+.update-customer-form {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background-color: #ffffff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.update-customer-form h1 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #333;
+  font-family: 'Arial', sans-serif;
+}
+
+.update-customer-form form {
+  display: flex;
+  flex-direction: column;
+}
+
+.update-customer-form label {
+  margin-bottom: 15px;
+  font-family: 'Arial', sans-serif;
+  color: #555;
+}
+
+.update-customer-form input {
+  padding: 10px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-family: 'Arial', sans-serif;
+  font-size: 16px;
+}
+
+.update-customer-form button {
+  padding: 12px;
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 20px;
+  font-family: 'Arial', sans-serif;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+}
+
+.update-customer-form button:hover {
+  background-color: #1d4ed8;
+}
+
+.error {
+  color: red;
+  font-size: 0.8em;
+  margin-top: 5px;
+  font-family: 'Arial', sans-serif;
+}
+
+.update-customer-form input:focus {
+  border-color: #28a745;
+  box-shadow: 0 0 5px rgba(40, 167, 69, 0.5);
+  outline: none;
+}
+
+.customer-admin-update-customer-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.customer-admin-update-customer-modal {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  max-width: 400px;
+  width: 100%;
+}
+
+.customer-admin-update-customer-modal h2 {
+  margin-bottom: 10px;
+  font-size: 24px;
+}
+
+.customer-admin-update-customer-modal p {
+  margin-bottom: 20px;
+  font-size: 18px;
+}
+
+.customer-admin-update-customer-modal button {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 10px 30px;
+  font-size: 16px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.customer-admin-update-customer-modal button:hover {
+  background-color: #45a049;
+}
+
+#back-button {
+  display: inline-block;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #ffffff;
+  background-color: #007bff;
+  text-decoration: none;
+  border-radius: 5px;
+  transition:
+          background-color 0.3s ease,
+          transform 0.2s ease;
+  white-space: nowrap;
+  position: fixed;
+  left: 15px;
+  bottom: 15px;
+  z-index: 1000;
+}
+
+#back-button:hover {
+  background-color: #0056b3;
+  color: #ffffff;
+}
+
+#back-button:active {
+  background-color: #004085;
+  transform: scale(0.98);
 }
