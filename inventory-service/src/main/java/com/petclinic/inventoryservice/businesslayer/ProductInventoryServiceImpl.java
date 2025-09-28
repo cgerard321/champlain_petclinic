@@ -291,7 +291,18 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
     }
 
     @Override
-    public Flux<InventoryResponseDTO> searchInventories(Pageable page, String inventoryName, String inventoryType, String inventoryDescription) {
+    public Mono<Void> updateImportantStatus(String inventoryId, Boolean important) {
+        return inventoryRepository.findInventoryByInventoryId(inventoryId)
+                .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with id: " + inventoryId)))
+                .flatMap(inventory -> {
+                    inventory.setImportant(important);
+                    return inventoryRepository.save(inventory);
+                })
+                .then();
+    }
+
+    @Override
+    public Flux<InventoryResponseDTO> searchInventories(Pageable page, String inventoryName, String inventoryType, String inventoryDescription, Boolean importantOnly) {
 
         if (inventoryName != null && inventoryType != null && inventoryDescription != null) {
             return inventoryRepository
@@ -372,8 +383,14 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
         }
 
         // Default - fetch all if no criteria provided.
-        return inventoryRepository
-                .findAll()
+        Flux<Inventory> inventoryFlux = inventoryRepository.findAll();
+
+        if (importantOnly != null && importantOnly) {
+            inventoryFlux = inventoryFlux.filter(inventory ->
+                    inventory.getImportant() != null && inventory.getImportant());
+        }
+
+        return inventoryFlux
                 .skip(page.getPageNumber() * page.getPageSize())
                 .take(page.getPageSize())
                 .map(EntityDTOUtil::toInventoryResponseDTO);
@@ -553,10 +570,15 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                         document.add(new Paragraph(" ")); // Blank line
 
                         for (Product supply : supplies) {
+                            Double cost = supply.getProductPrice();
+                            Double sell = supply.getProductSalePrice();
+                            Double profit = sell - cost;
                             document.add(new Paragraph("Product Name: " + supply.getProductName()));
                             document.add(new Paragraph("Quantity: " + supply.getProductQuantity()));
                             document.add(new Paragraph("Description: " + supply.getProductDescription()));
-                            document.add(new Paragraph("Price: $" + supply.getProductPrice()));
+                            document.add(new Paragraph("Regular Price: $" + supply.getProductPrice()));
+                            document.add(new Paragraph("Sale Price: $" + supply.getProductSalePrice()));
+                            document.add(new Paragraph("Profit Margin: $" + profit));
                             document.add(new Paragraph(" "));
                         }
 

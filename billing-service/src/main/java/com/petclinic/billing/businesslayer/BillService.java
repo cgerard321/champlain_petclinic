@@ -39,6 +39,11 @@ public interface BillService {
                                            String vetFirstName,
                                            String vetLastName);
 
+    Flux<BillResponseDTO> getAllBillsByOwnerName(String ownerFirstName, String ownerLastName);
+
+    Flux<BillResponseDTO> getAllBillsByVetName(String vetFirstName, String vetLastName);
+
+    Flux<BillResponseDTO> getAllBillsByVisitType(String visitType);
 
     Mono<BillResponseDTO> createBill(@RequestBody Mono<BillRequestDTO> model);
 
@@ -68,7 +73,8 @@ public interface BillService {
 
     Mono<Double> calculateCurrentBalance(String customerId);
 
-    Mono<Bill> processPayment(String customerId, String billId, PaymentRequestDTO paymentRequestDTO) throws InvalidPaymentException;
+    Mono<BillResponseDTO> processPayment(String customerId, String billId, PaymentRequestDTO paymentRequestDTO);
+
 
 
 }

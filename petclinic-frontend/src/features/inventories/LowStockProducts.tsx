@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+// import axios from 'axios';
 import { Inventory } from '@/features/inventories/models/Inventory';
 import { ProductResponseModel } from '@/features/inventories/models/InventoryModels/ProductResponseModel.ts';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Status } from '@/features/inventories/models/ProductModels/Status.ts';
+import axiosInstance from '@/shared/api/axiosInstance';
 
 const LowStockPage: React.FC = () => {
   const [lowStockProductsByInventory, setLowStockProductsByInventory] =
@@ -21,9 +22,9 @@ const LowStockPage: React.FC = () => {
   useEffect(() => {
     const fetchInventories = async (): Promise<void> => {
       try {
-        const response = await axios.get<Inventory[]>(
-          'http://localhost:8080/api/v2/gateway/inventories',
-          { withCredentials: true }
+        const response = await axiosInstance.get<Inventory[]>(
+          '/inventories/all',
+          { useV2: false }
         );
         setInventories(response.data);
       } catch (error) {
@@ -40,12 +41,9 @@ const LowStockPage: React.FC = () => {
       const lowStockData: { [key: string]: ProductResponseModel[] } = {};
       const promises = inventories.map(async inventory => {
         try {
-          const response = await axios.get<ProductResponseModel[]>(
-            `http://localhost:8080/api/gateway/inventory/${inventory.inventoryId}/products/lowstock`,
-            {
-              withCredentials: true,
-              params: { threshold: 20 },
-            }
+          const response = await axiosInstance.get<ProductResponseModel[]>(
+            `/inventories/${inventory.inventoryId}/products/lowstock`,
+            { useV2: false }
           );
           if (response.data && response.data.length > 0) {
             lowStockData[inventory.inventoryName] = response.data;
@@ -73,12 +71,12 @@ const LowStockPage: React.FC = () => {
     quantity: number
   ): Promise<void> => {
     try {
-      const response = await axios.put(
-        `http://localhost:8080/api/v2/gateway/inventories/${inventoryId}/products/${productId}/restockProduct`,
+      const response = await axiosInstance.put(
+        `/inventories/${inventoryId}/products/${productId}/restockProduct`,
         null,
         {
           params: { productQuantity: quantity },
-          withCredentials: true,
+          useV2: false,
         }
       );
 

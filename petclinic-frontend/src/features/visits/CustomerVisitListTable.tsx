@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useUser } from '@/context/UserContext';
+import { useUser, IsVet } from '@/context/UserContext';
 import { Visit } from '@/features/visits/models/Visit.ts';
 import { useNavigate } from 'react-router-dom';
 import { AppRoutePaths } from '@/shared/models/path.routes.ts';
@@ -7,13 +7,14 @@ import { getAllOwnerVisits } from './api/getAllOwnerVisits';
 
 export default function CustomerVisitListTable(): JSX.Element {
   const { user } = useUser();
+  const isVet = IsVet();
   const [visits, setVisits] = useState<Visit[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!user.userId) return;
+    if (!user.userId || isVet) return;
 
     const fetchVisits = async (): Promise<void> => {
       try {
@@ -33,7 +34,7 @@ export default function CustomerVisitListTable(): JSX.Element {
     };
 
     fetchVisits();
-  }, [user.userId]);
+  }, [user.userId, isVet]);
 
   return (
     <div>
@@ -51,6 +52,13 @@ export default function CustomerVisitListTable(): JSX.Element {
           title="View Reviews"
         >
           View Reviews
+        </button>
+        <button
+          className="btn btn-warning"
+          onClick={() => navigate(AppRoutePaths.OwnerBookAppointment)}
+          title="Schedule a Visit"
+        >
+          Schedule a Visit
         </button>
       </div>
 

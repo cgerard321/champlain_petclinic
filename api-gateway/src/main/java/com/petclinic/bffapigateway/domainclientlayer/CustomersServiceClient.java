@@ -8,7 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -280,14 +279,6 @@ public class CustomersServiceClient {
                 .bodyToMono(OwnerResponseDTO.class);
     }
 
-
-    public Mono<OwnerResponseDTO> deleteOwnerV2(final String ownerId) {
-        return webClientBuilder.build().delete()
-                .uri(customersServiceUrl +"/owners/"+ ownerId)
-                .retrieve()
-                .bodyToMono(OwnerResponseDTO.class);
-    }
-
     public Mono<String> setOwnerPhoto(PhotoDetails file, int id) {
         return webClientBuilder.build().post()
                 .uri(customersServiceUrl + "/photo/" + id)
@@ -322,6 +313,13 @@ public class CustomersServiceClient {
                 .bodyToMono(PetTypeResponseDTO.class);
     }
 
+    public Mono<Void> deletePetTypeV2(final String petTypeId) {
+        return webClientBuilder.build().delete()
+                .uri(customersServiceUrl +"/owners/petTypes/"+ petTypeId)
+                .retrieve()
+                .bodyToMono(Void.class);
+    }
+
     public Mono<PetTypeResponseDTO> updatePetType(String petTypeId, Mono<PetTypeRequestDTO> petTypeRequestDTO) {
         return petTypeRequestDTO.flatMap(requestDTO ->
                 webClientBuilder.build()
@@ -332,5 +330,68 @@ public class CustomersServiceClient {
                         .bodyToMono(PetTypeResponseDTO.class)
         );
     }
+
+    public Mono<PetResponseDTO> createPetForOwner(String ownerId, PetRequestDTO petRequest) {
+        return webClientBuilder.build()
+                .post()
+                .uri(customersServiceUrl + "/pet/owners/" + ownerId + "/pets")
+                .body(BodyInserters.fromValue(petRequest))
+                .retrieve()
+                .bodyToMono(PetResponseDTO.class);
+    }
+
+    public Flux<PetTypeResponseDTO> getPetTypesByPagination(Optional<Integer> page, Optional<Integer> size, String petTypeId, String name, String description) {
+
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(customersServiceUrl + "/owners/petTypes/pet-types-pagination");
+
+        builder.queryParam("page", page);
+        builder.queryParam("size", size);
+
+        // Add query parameters conditionally if they are not null or empty
+        if (petTypeId != null && !petTypeId.isEmpty()) {
+            builder.queryParam("petTypeId", petTypeId);
+        }
+        if (name != null && !name.isEmpty()) {
+            builder.queryParam("name", name);
+        }
+        if (description != null && !description.isEmpty()) {
+            builder.queryParam("description", description);
+        }
+
+        return webClientBuilder.build()
+                .get()
+                .uri(builder.build().toUri())
+                .retrieve()
+                .bodyToFlux(PetTypeResponseDTO.class);
+    }
+
+    public Mono<Long> getTotalNumberOfPetTypes(){
+        return webClientBuilder.build().get()
+                .uri(customersServiceUrl + "/owners/petTypes/pet-types-count")
+                .retrieve()
+                .bodyToMono(Long.class);
+    }
+
+    public Mono<Long> getTotalNumberOfPetTypesWithFilters(String petTypeId, String name, String description){
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(customersServiceUrl + "/owners/petTypes/pet-types-filtered-count");
+
+        // Add query parameters conditionally if they are not null or empty
+        if (petTypeId != null && !petTypeId.isEmpty()) {
+            builder.queryParam("petTypeId", petTypeId);
+        }
+        if (name != null && !name.isEmpty()) {
+            builder.queryParam("name", name);
+        }
+        if (description != null && !description.isEmpty()) {
+            builder.queryParam("description", description);
+        }
+
+        return webClientBuilder.build()
+                .get()
+                .uri(builder.build().toUri())
+                .retrieve()
+                .bodyToMono(Long.class);
+    }
+
 
 }

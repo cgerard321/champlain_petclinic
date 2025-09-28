@@ -109,12 +109,6 @@ public class UserController {
         return ResponseEntity.ok().body(userService.updateUser(userId, userPasswordLessDTO));
     }
 
-//    @DeleteMapping("/{userId}")
-//    public void deleteUser(@PathVariable long userId) {
-//        userService.deleteUser(userId);
-//        log.info("Deleted role with id {}", userId);
-//    }
-
     @GetMapping("/verification/{base64EncodedToken}")
     public ResponseEntity <UserPasswordLessDTO> verifyEmail(@PathVariable String base64EncodedToken) {
 
@@ -216,6 +210,11 @@ public class UserController {
         } catch (IllegalArgumentException e) {
             return false;
         }
+    }
+
+    @PatchMapping("/{userId}/username")
+    public ResponseEntity<String> updateUserUsername (@PathVariable String userId, @RequestBody String username, @CookieValue("Bearer") String token) {
+        return ResponseEntity.ok().body(userService.updateUserUsername(userId, username, token));
     }
 
 }

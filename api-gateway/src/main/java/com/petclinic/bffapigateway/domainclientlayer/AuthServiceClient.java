@@ -195,7 +195,7 @@ public class AuthServiceClient {
                     });
         }).doOnError(throwable -> {
             log.error("Error creating user: " + throwable.getMessage());
-            customersServiceClient.deleteOwnerV2(uuid);
+            customersServiceClient.deleteOwner(uuid);
         });
     }
 
@@ -536,5 +536,18 @@ public class AuthServiceClient {
                 .cookie("Bearer", jwtToken)
                 .retrieve()
                 .bodyToMono(Role.class);
+    }
+    public Mono<String> updateUsername (final String userId, String username, String jwToken) {
+        return webClientBuilder.build()
+                .patch()
+                .uri(authServiceUrl + "/users/{userId}/username", userId)
+                .bodyValue(username)
+                .cookie("Bearer", jwToken)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, n -> rethrower.rethrow(n,
+                        x -> new GenericHttpException(x.get("message").toString(), (HttpStatus) n.statusCode())))
+                .bodyToMono(String.class);
+
     }
 }

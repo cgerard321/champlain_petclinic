@@ -3,19 +3,24 @@ import { ProductModel } from '@/features/products/models/ProductModels/ProductMo
 import Product from './Product';
 import '@/features/products/ProductList.css';
 import { useNavigate } from 'react-router-dom';
+import { useUser } from '@/context/UserContext';
 
 export default function RecentlyViewedProducts(): JSX.Element {
+  const { user } = useUser();
   const [recentlyClickedProducts, setRecentlyClickedProducts] = useState<
     ProductModel[]
   >([]);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const savedProducts = localStorage.getItem('recentlyClickedProducts');
+    if (!user?.userId) return;
+    const savedProducts = localStorage.getItem(
+      `recentlyClickedProducts_${user.userId}`
+    );
     if (savedProducts) {
       setRecentlyClickedProducts(JSON.parse(savedProducts));
     }
-  }, []);
+  }, [user]);
   const handleProductClick = (productId: string): void => {
     navigate(`/products/${productId}`);
   };
@@ -23,7 +28,7 @@ export default function RecentlyViewedProducts(): JSX.Element {
   return (
     <div className="recently-viewed-container">
       <h2>Recently Seen</h2>
-      <div className="grid">
+      <div className="recently-viewed-flex">
         {recentlyClickedProducts.length > 0 ? (
           recentlyClickedProducts
             .filter(product => !product.isUnlisted)
@@ -42,4 +47,6 @@ export default function RecentlyViewedProducts(): JSX.Element {
       </div>
     </div>
   );
+
+  /**recently-viewed-list used to be grid changed it since I wanted it to be horizontally scrollable */
 }

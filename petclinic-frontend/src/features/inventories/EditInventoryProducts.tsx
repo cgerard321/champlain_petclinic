@@ -7,15 +7,31 @@ import {
 } from '@/features/inventories/api/EditInventoryProducts.ts';
 import { ProductRequestModel } from '@/features/inventories/models/InventoryModels/ProductRequestModel';
 
+const MAX_QTY = 100;
+
+function validateQuantityValue(n: unknown): string | null {
+  if (n === null || n === undefined || Number.isNaN(Number(n))) {
+    return 'Quantity is required';
+  }
+  const num = Number(n);
+  if (!Number.isInteger(num)) return 'Quantity must be a whole number';
+  if (num <= 0) return 'Quantity must be greater than 0';
+  if (num > MAX_QTY) return `Quantity cannot exceed ${MAX_QTY}`;
+  return null;
+}
+
 interface ApiError {
   message: string;
 }
+
+type ProductKeys = keyof ProductRequestModel;
 
 const EditInventoryProducts: React.FC = (): JSX.Element => {
   const { inventoryId, productId } = useParams<{
     inventoryId: string;
     productId: string;
-  }>(); // Get params from URL
+  }>();
+
   const [product, setProduct] = useState<ProductRequestModel>({
     productName: '',
     productDescription: '',
@@ -23,7 +39,10 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
     productQuantity: 0,
     productSalePrice: 0,
   });
-  const [error, setError] = useState<{ [key: string]: string }>({});
+
+  const [error, setError] = useState<
+    { [key: string]: string } & { message?: string }
+  >({});
   const [successMessage, setSuccessMessage] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
@@ -40,33 +59,35 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
             productId
           );
           setProduct(response);
-        } catch (error) {
-          console.error(`Error fetching product with ID ${productId}:`, error);
+        } catch (err) {
+          console.error(`Error fetching product with ID ${productId}:`, err);
         }
       }
     };
-    fetchProduct().catch(error =>
-      console.error('Error in fetchProduct:', error)
-    );
+    fetchProduct().catch(err => console.error('Error in fetchProduct:', err));
   }, [inventoryId, productId]);
 
   const validate = (): boolean => {
     const newError: { [key: string]: string } = {};
-    if (!product.productName) {
-      newError.productName = 'Product name is required';
-    }
-    if (!product.productDescription) {
+
+    if (!product.productName) newError.productName = 'Product name is required';
+    if (!product.productDescription)
       newError.productDescription = 'Product description is required';
-    }
-    if (!product.productPrice) {
+
+    if (product.productPrice === undefined || product.productPrice === null) {
       newError.productPrice = 'Product price is required';
     }
-    if (!product.productQuantity) {
-      newError.productQuantity = 'Product quantity is required';
-    }
-    if (!product.productSalePrice) {
+
+    const qtyMsg = validateQuantityValue(product.productQuantity);
+    if (qtyMsg) newError.productQuantity = qtyMsg;
+
+    if (
+      product.productSalePrice === undefined ||
+      product.productSalePrice === null
+    ) {
       newError.productSalePrice = 'Product sale price is required';
     }
+
     setError(newError);
     return Object.keys(newError).length === 0;
   };
@@ -88,26 +109,46 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
         setSuccessMessage('Product updated successfully');
         setShowNotification(true);
         setTimeout(() => {
-          navigate(`/inventory/${inventoryId}/products`);
+          navigate(`/inventories/${inventoryId}/products`);
         }, 2000);
       }
-    } catch (error) {
-      const apiError = error as ApiError;
+    } catch (err) {
+      const apiError = err as ApiError;
       setErrorMessage(`Error updating product: ${apiError.message}`);
     } finally {
       setLoading(false);
     }
   };
 
-  // Handle input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
-    setProduct({
-      ...product,
-      [e.target.name]:
-        e.target.type === 'number'
-          ? parseFloat(e.target.value)
-          : e.target.value,
-    });
+    const { name, type, value } = e.target as HTMLInputElement & {
+      name: ProductKeys;
+    };
+
+    if (name === 'productQuantity') {
+      const digitsOnly = value.replace(/[^\d]/g, '');
+
+      setProduct(prev => ({
+        ...prev,
+        productQuantity:
+          digitsOnly === '' ? ('' as unknown as number) : Number(digitsOnly),
+      }));
+
+      const msg =
+        digitsOnly === ''
+          ? 'Quantity is required'
+          : validateQuantityValue(Number(digitsOnly));
+      setError(prev => ({ ...prev, productQuantity: msg ?? '' }));
+      return;
+    }
+
+    setProduct(prev => ({
+      ...prev,
+      [name]:
+        type === 'number'
+          ? Number(value)
+          : (value as ProductRequestModel[typeof name]),
+    }));
   };
 
   return (
@@ -125,7 +166,7 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
     >
       <h2>Edit Product</h2>
 
-      <br></br>
+      <br />
 
       <form onSubmit={handleSubmit}>
         <h6>Name</h6>
@@ -140,7 +181,7 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
           />
         </div>
 
-        <br></br>
+        <br />
 
         <h6>Description</h6>
         <div className="input-group mb-3">
@@ -154,9 +195,9 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
           />
         </div>
 
-        <br></br>
+        <br />
 
-        <h6>Price</h6>
+        <h6>Cost Price</h6>
         <div className="input-group mb-3">
           <span className="input-group-text">$</span>
           <input
@@ -171,7 +212,7 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
           <span className="input-group-text">.00</span>
         </div>
 
-        <br></br>
+        <br />
 
         <h6>Quantity</h6>
         <div className="input-group mb-3">
@@ -181,11 +222,23 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
             name="productQuantity"
             value={product.productQuantity}
             onChange={handleChange}
+            inputMode="numeric"
+            pattern="\d*"
+            step={1}
+            min={1}
+            max={MAX_QTY}
+            onKeyDown={e => {
+              // prevent '.', '-', 'e', 'E', '+'
+              if (['.', '-', 'e', 'E', '+'].includes(e.key)) e.preventDefault();
+            }}
             required
           />
         </div>
+        {error.productQuantity && (
+          <p style={{ color: 'red', marginTop: -8 }}>{error.productQuantity}</p>
+        )}
 
-        <br></br>
+        <br />
 
         <h6>Sale Price</h6>
         <div className="input-group mb-3">
@@ -213,9 +266,10 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
           Update
         </button>
       </form>
+
       <div>
         {loading && <p>Loading...</p>}
-        {error && <p style={{ color: 'red' }}>{error.message}</p>}
+        {error.message && <p style={{ color: 'red' }}>{error.message}</p>}
         {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
         {showNotification ? (
           <div className="notification">

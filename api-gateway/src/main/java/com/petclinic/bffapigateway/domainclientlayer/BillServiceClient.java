@@ -183,6 +183,31 @@ public class BillServiceClient {
                 .retrieve()
                 .bodyToFlux(BillResponseDTO.class);
     }
+
+    public Flux<BillResponseDTO> getBillsByOwnerName(final String ownerFirstName, final String ownerLastName) {
+        return webClientBuilder.build().get()
+                .uri(billServiceUrl + "/owner/{ownerFirstName}/{ownerLastName}", ownerFirstName, ownerLastName)
+                .retrieve()
+                .bodyToFlux(BillResponseDTO.class)
+                .switchIfEmpty(Flux.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "No bills found for owner: " + ownerFirstName + " " + ownerLastName)));
+    }
+
+    public Flux<BillResponseDTO> getBillsByVetName(final String vetFirstName, final String vetLastName) {
+        return webClientBuilder.build().get()
+                .uri(billServiceUrl + "/vet/{vetFirstName}/{vetLastName}", vetFirstName, vetLastName)
+                .retrieve()
+                .bodyToFlux(BillResponseDTO.class)
+                .switchIfEmpty(Flux.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "No bills found for vet: " + vetFirstName + " " + vetLastName)));
+    }
+
+    public Flux<BillResponseDTO> getBillsByVisitType(final String visitType) {
+        return webClientBuilder.build().get()
+                .uri(billServiceUrl + "/visitType/{visitType}", visitType)
+                .retrieve()
+                .bodyToFlux(BillResponseDTO.class)
+                .switchIfEmpty(Flux.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "No bills found for visit type: " + visitType)));
+    }
+
     public Mono<BillResponseDTO> createBill(final BillRequestDTO model){
         return webClientBuilder.build().post()
                 .uri(billServiceUrl)
@@ -333,14 +358,34 @@ public class BillServiceClient {
                 .retrieve()
                 .bodyToMono(Double.class);
     }
-  
-    public Mono<String> payBill(String customerId, String billId, PaymentRequestDTO paymentRequestDTO) {
+
+    public Mono<BillResponseDTO> payBill(String customerId, String billId, PaymentRequestDTO paymentRequestDTO) {
         return webClientBuilder.build()
                 .post()
                 .uri(billServiceUrl + "/customer/{customerId}/bills/{billId}/pay", customerId, billId)
+                .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(paymentRequestDTO)
-                .retrieve()
-                .bodyToMono(String.class);
+                .exchangeToMono(resp -> {
+                    if (resp.statusCode().is2xxSuccessful()) {
+                        return resp.bodyToMono(BillResponseDTO.class);
+                    }
+                    if (resp.statusCode().value() == 400) {
+                        return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid payment details"));
+                    }
+                    if (resp.statusCode().value() == 404) {
+                        return Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Bill not found"));
+                    }
+                    if (resp.statusCode().is5xxServerError()) {
+                        return Mono.error(new ResponseStatusException(
+                                resp.statusCode(),
+                                "Upstream billing service error: " + resp.statusCode().value()
+                        ));
+                    }
+                    // Fallback: let other statuses bubble up
+                    return resp.createException().flatMap(Mono::error);
+                });
     }
+
+
 
 }

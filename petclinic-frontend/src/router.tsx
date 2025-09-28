@@ -11,7 +11,6 @@ import InventoryProducts from '@/features/inventories/InventoryProducts.tsx';
 import Vet from '@/pages/Vet/Vet.tsx';
 import VetDetails from '@/pages/Vet/VetDetails.tsx';
 import Visits from './pages/Visit/Visit';
-import AddReviewForm from './features/visits/Review/AddReviewForm';
 import EditReviewForm from './features/visits/Review/EditReviewForm';
 import Review from './pages/Review/Review';
 import CartPage from '@/pages/Carts/Cart.tsx';
@@ -19,7 +18,7 @@ import UpdateBillPage from '@/pages/Bills/UpdateBill.tsx';
 import UserCart from '@/features/carts/components/UserCart.tsx';
 import AddingCustomer from '@/pages/Customer/AddingCustomer.tsx';
 import AllOwners from '@/pages/Customer/AllOwners.tsx';
-import CustomerBillingPage from '@/pages/Bills/CostumerBills.tsx';
+import CustomerBillingPage from '@/pages/Bills/CustomerBills.tsx';
 import AdminBillingPage from '@/pages/Bills/AdminBill.tsx';
 import EditingVisit from './features/visits/models/EditingVisit';
 import AddingVisit from './features/visits/models/AddingVisit';
@@ -63,6 +62,10 @@ import CustomerPromoPage from '@/pages/Promos/CustomerPromoPage.tsx';
 import UserDetailsPage from './pages/Users/UserDetailsPage';
 import UpdateUserPage from './pages/Users/UpdateUserPage';
 import AllRoles from '@/pages/Users/AllRoles.tsx';
+import OwnerBookAppointment from '@/pages/Visit/OwnerBookAppointment.tsx';
+import FAQ from './pages/FAQ/FAQ';
+import ContactPage from './pages/Contact/Contact';
+import PrivacyPolicyPage from './pages/PrivacyPolicy/PrivacyPolicy';
 
 const router = createBrowserRouter([
   {
@@ -151,15 +154,6 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
-      {
-        path: AppRoutePaths.Form,
-        element: (
-          <ProtectedRoute>
-            <AddReviewForm />
-          </ProtectedRoute>
-        ),
-      },
-
       {
         path: AppRoutePaths.Review,
         element: (
@@ -316,7 +310,7 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.Visits,
         element: (
-          <ProtectedRoute>
+          <ProtectedRoute roles={['ADMIN']}>
             <Visits />
           </ProtectedRoute>
         ),
@@ -484,12 +478,32 @@ const router = createBrowserRouter([
     ),
   },
   {
+    path: AppRoutePaths.OwnerBookAppointment,
+    element: (
+      <ProtectedRoute roles={['OWNER']}>
+        <OwnerBookAppointment />
+      </ProtectedRoute>
+    ),
+  },
+  {
     path: AppRoutePaths.Default,
     element: <Navigate to={AppRoutePaths.Home} replace />,
   },
   {
+    path: AppRoutePaths.FAQ,
+    element: <FAQ />,
+  },
+  {
+    path: AppRoutePaths.Contact,
+    element: <ContactPage />,
+  },
+  {
     path: AppRoutePaths.Home,
     element: <Home />,
+  },
+  {
+    path: AppRoutePaths.Privacy,
+    element: <PrivacyPolicyPage />,
   },
   { path: AppRoutePaths.Login, element: <Login /> },
   { path: AppRoutePaths.SignUp, element: <SignUp /> },

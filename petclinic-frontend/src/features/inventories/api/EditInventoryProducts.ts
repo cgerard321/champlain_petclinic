@@ -7,18 +7,30 @@ export const updateProductInInventory = async (
   productId: string,
   product: ProductRequestModel
 ): Promise<void> => {
-  await axiosInstance.put<void>(
-    `inventories/${inventoryId}/products/${productId}`,
-    product
-  );
+  try {
+    await axiosInstance.put<void>(
+      `/inventories/${inventoryId}/products/${productId}`,
+      product,
+      { useV2: false }
+    );
+  } catch (error) {
+    console.error('Error update product in Inventory:', error);
+    throw error;
+  }
 };
 
 export const getProductByProductIdInInventory = async (
   inventoryId: string,
   productId: string
 ): Promise<ProductResponseModel> => {
-  const response = await axiosInstance.get<ProductResponseModel>(
-    `http://localhost:8080/api/v2/gateway/inventories/${inventoryId}/products/${productId}`
-  );
-  return response.data;
+  try {
+    const response = await axiosInstance.get<ProductResponseModel>(
+      `/inventories/${inventoryId}/products/${productId}`,
+      { useV2: false }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error get product by product id in Inventory:', error);
+    throw error;
+  }
 };

@@ -408,8 +408,8 @@ class InventoryServiceClientIntegrationTest {
         List<ProductResponseDTO> productResponseDTOList1 = new ArrayList<>(Arrays.asList(productResponseDTO1));
         List<ProductResponseDTO> productResponseDTOList2 = new ArrayList<>(Arrays.asList(productResponseDTO2));
 
-        InventoryResponseDTO inventoryResponseDTO1 = new InventoryResponseDTO("inventoryId1", "Medication", "Medications", "desc1", "", "", diagnosticKitImage, productResponseDTOList1);
-        InventoryResponseDTO inventoryResponseDTO2 = new InventoryResponseDTO("inventoryId2", "Vaccine", "Vaccines", "desc2", "", "", diagnosticKitImage, productResponseDTOList2);
+        InventoryResponseDTO inventoryResponseDTO1 = new InventoryResponseDTO("inventoryId1", "Medication", "Medications", "desc1", "", "", diagnosticKitImage, false, productResponseDTOList1);
+        InventoryResponseDTO inventoryResponseDTO2 = new InventoryResponseDTO("inventoryId2", "Vaccine", "Vaccines", "desc2", "", "", diagnosticKitImage,false, productResponseDTOList2);
 
         // Mock the response from the MockWebServer
         mockWebServer.enqueue(new MockResponse()

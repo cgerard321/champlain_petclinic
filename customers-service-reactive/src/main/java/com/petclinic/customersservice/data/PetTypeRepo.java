@@ -5,12 +5,13 @@ import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Mono;
 
 @Repository
-public interface PetTypeRepo extends ReactiveMongoRepository<PetType, Integer> {
-    Mono<PetType> findPetTypeById(Integer Id);
+public interface PetTypeRepo extends ReactiveMongoRepository<PetType, String> {
+    //Mono<PetType> findPetTypeById(String Id);
 
-    Mono<PetType> findOPetTypeById(String petTypeId);
+    Mono<PetType> findByPetTypeId(String petTypeId);
 
-    Mono<Void> deleteById(String petTypeId);
+    Mono<Void> deleteByPetTypeId(String petTypeId);
 
 
 }
+

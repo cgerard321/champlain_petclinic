@@ -110,6 +110,8 @@ public class CartController {
                 });
     }
 
+    //admin restriction at check out
+    @SecuredEndpoint(allowedRoles = {Roles.OWNER})
     @PostMapping("/{cartId}/checkout")
     public Mono<ResponseEntity<CartResponseDTO>> checkoutCart(@PathVariable String cartId) {
         return cartServiceClient.checkoutCart(cartId)
@@ -190,6 +192,29 @@ public class CartController {
                 });
     }
 
+
+
+    @DeleteMapping("/{cartId}/wishlist/{productId}")
+    public Mono<ResponseEntity<CartResponseDTO>> removeProductFromWishlist(
+            @PathVariable String cartId,
+            @PathVariable String productId) {
+
+        return cartServiceClient.removeProductFromWishlist(cartId, productId)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build())
+                .onErrorResume(e -> {
+                    if (e instanceof WebClientResponseException.UnprocessableEntity) {
+                        log.error("Invalid input for cartId: {} or productId: {} - {}", cartId, productId, e.getMessage());
+                        return Mono.just(ResponseEntity.unprocessableEntity().build());
+                    } else if (e instanceof WebClientResponseException.NotFound) {
+                        log.error("Wishlist item not found for cartId: {} and productId: {} - {}", cartId, productId, e.getMessage());
+                        return Mono.just(ResponseEntity.notFound().build());
+                    } else {
+                        log.error("Unexpected error while removing wishlist item: {}", e.getMessage());
+                        return Mono.error(e);
+                    }
+                });
+    }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping(value = "promos", produces= MediaType.APPLICATION_JSON_VALUE)

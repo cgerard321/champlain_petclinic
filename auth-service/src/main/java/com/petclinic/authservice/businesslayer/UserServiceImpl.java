@@ -14,8 +14,6 @@ import com.petclinic.authservice.datalayer.roles.RoleRepo;
 import com.petclinic.authservice.datamapperlayer.UserMapper;
 import com.petclinic.authservice.domainclientlayer.Mail.Mail;
 import com.petclinic.authservice.domainclientlayer.Mail.MailService;
-import com.petclinic.authservice.domainclientlayer.NewEmailingService.DirectEmailModelRequestDTO;
-import com.petclinic.authservice.domainclientlayer.NewEmailingService.EmailingServiceClient;
 import com.petclinic.authservice.domainclientlayer.cart.CartService;
 import com.petclinic.authservice.presentationlayer.User.*;
 import com.petclinic.authservice.security.JwtTokenUtil;
@@ -25,7 +23,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -56,7 +53,6 @@ public class UserServiceImpl implements UserService {
     private final JwtTokenUtil jwtService;
     private final AuthenticationManager authenticationManager;
     private final CartService cartService;
-    private final EmailingServiceClient emailingServiceClient;
     private final String salt = BCrypt.gensalt(10);
 
 
@@ -144,40 +140,6 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-//    @Override
-//    public void deleteUser
-//            (long userId) {
-//        log.info("deleteUser: trying to delete entity with userId: {}", userId);
-//        userRepo.findById(userId).ifPresent(userRepo::delete);
-//    }
-
-    @Override
-    public void generateVerificationMailWithNewEmailingService(User user) {
-        final String base64Token = Base64.getEncoder()
-                .withoutPadding()
-                .encodeToString(jwtService.generateToken(user).getBytes(StandardCharsets.UTF_8));
-
-        // Remove dangling . in case of empty sub
-        String niceSub = gatewaySubdomain.length() > 0 ? gatewaySubdomain + "." : "";
-
-        String formatedLink = format("<a class=\"email-button\" href=\"%s://%s%s/verification/%s\">Verify Email</a>", gatewayProtocol, niceSub, gatewayOrigin, base64Token);
-
-        DirectEmailModelRequestDTO directEmailModelRequestDTO = new DirectEmailModelRequestDTO(
-                user.getEmail(), "Verification Email", "Default", "Pet clinic - Verification Email",
-                "Thank you for Signing Up with us.\n" +
-                        "We have received a request to create an account for Pet Clinic from this email.\n\n" +
-                        "Click on the following button to verify your identity: " + formatedLink + "\n\n\n" +
-                        "If you do not wish to create an account, please disregard this email.",
-                "Thank you for choosing Pet Clinic.", user.getUsername(), "ChamplainPetClinic");
-
-        HttpStatus result = emailingServiceClient.sendEmail(directEmailModelRequestDTO).block();
-
-        if (result != null && result.equals(HttpStatus.OK)) {
-            log.info("Email sent to {}", user.getEmail());
-        } else {
-            throw new EmailSendingFailedException("Failed to send email to " + user.getEmail());
-        }
-    }
 
     @Override
     public Mail generateVerificationMail(User user) {
@@ -188,64 +150,18 @@ public class UserServiceImpl implements UserService {
         // Remove dangling . in case of empty sub
         String niceSub = gatewaySubdomain.length() > 0 ? gatewaySubdomain + "." : "";
 
-        String email = format("""
-                     <!DOCTYPE html>
-                     <html lang="en">
-                     <head>
-                         <meta charset="UTF-8">
-                         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                         <title>Email Verification</title>
-                         <style>
-                             body {
-                                 font-family: Arial, sans-serif;
-                                 background-color: #f4f4f4;
-                                 margin: 0;
-                                 padding: 0;
-                             }
-                             .container {
-                                 max-width: 600px;
-                                 margin: 0 auto;
-                                 padding: 20px;
-                                 background-color: #fff;
-                                 border-radius: 5px;
-                                 box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-                             }
-                             h1 {
-                                 color: #333;
-                             }
-                             p {
-                                 color: #555;
-                             }
-                             a {
-                                 color: #007BFF;
-                             }
-                         </style>
-                     </head>
-                     <body>
-                         <div class="container">
-                             <h1>Thank you for Signing Up with us - Verify your email address</h1>
-                             <h3>We have received a request to create an account for Pet Clinic from this email.</h3>
-                            \s
-                             <ol>
-                                 <li>Click on the following link to verify your identity: <a href="%s://%s%s/verification/%s">Verify Email</a></li>
-                             </ol>
-                            \s
-                             <p>If you do not wish to create an account, please disregard this email.</p>
-                            \s
-                             <p>Thank you for choosing Pet Clinic.</p>
-                         </div>
-                     </body>
-                     </html>
-                     """, gatewayProtocol, niceSub, gatewayOrigin, base64Token);
+        String formatedLink = format("<a class=\"email-button\" href=\"%s://%s%s/verification/%s\">Verify Email</a>", gatewayProtocol, niceSub, gatewayOrigin, base64Token);
 
-        return Mail.builder()
-                .message(email)
-                .subject("PetClinic e-mail verification")
-                .to(user.getEmail())
-                .build();
+        return new Mail(
+                user.getEmail(), "Verification Email", "Default", "Pet clinic - Verification Email",
+                "Thank you for Signing Up with us.\n" +
+                        "We have received a request to create an account for Pet Clinic from this email.\n\n" +
+                        "Click on the following button to verify your identity: " + formatedLink + "\n\n\n" +
+                        "If you do not wish to create an account, please disregard this email.",
+                "Thank you for choosing Pet Clinic.", user.getUsername(), "ChamplainPetClinic@gmail.com");
 
-//                .message(format("Your verification link: %s://%s%s/verification/%s",
-//                gatewayProtocol, niceSub, gatewayOrigin, base64Token))
+
+
     }
 
     @Override
@@ -430,64 +346,15 @@ public class UserServiceImpl implements UserService {
 
     public void sendEmailForgotPassword(String recipientEmail, String link){
 
-         String email = format("""
-                     <!DOCTYPE html>
-                     <html lang="en">
-                     <head>
-                         <meta charset="UTF-8">
-                         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                         <title>Password Reset</title>
-                         <style>
-                             body {
-                                 font-family: Arial, sans-serif;
-                                 background-color: #f4f4f4;
-                                 margin: 0;
-                                 padding: 0;
-                             }
-                             .container {
-                                 max-width: 600px;
-                                 margin: 0 auto;
-                                 padding: 20px;
-                                 background-color: #fff;
-                                 border-radius: 5px;
-                                 box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-                             }
-                             h1 {
-                                 color: #333;
-                             }
-                             p {
-                                 color: #555;
-                             }
-                             a {
-                                 color: #007BFF;
-                             }
-                         </style>
-                     </head>
-                     <body>
-                         <div class="container">
-                             <h1>Reset Your Password - Verification Code</h1>
-                             <h3>We have received a request to reset your password for your Pet Clinic account. To ensure the security of your account, please follow the instructions below to reset your password.</h3>
-                            \s
-                             <ol>
-                                 <li>Click on the following link to access the password reset page: <a href="%s">Reset Password</a></li>
-                                 <li>Follow the on-screen instructions to create a new password for your account.</li>
-                             </ol>
-                            \s
-                             <p>If you did not request this password reset, please disregard this email. Your account security is important to us, and no changes will be made without your verification.</p>
-                            \s
-                             <p>Thank you for choosing Pet Clinic.</p>
-                         </div>
-                     </body>
-                     </html>
-                     """, link);
 
-        Mail mail = Mail.builder()
-                .message(email)
-                .subject("PetClinic forgot password")
-                .to(recipientEmail)
-                .build();
+        Mail newMail = new Mail(
+                recipientEmail, "Password Reset", "Default", "Reset Your Password - Verification Code",
+                "Click on the following link to access the password reset page: " + link
+                        + "Follow the on-screen instructions to create a new password for your account."
+                        + "If you did not request this password reset, please disregard this email. Your account security is important to us, and no changes will be made without your verification.",
+                "Thank you for choosing Pet Clinic.", "", "ChamplainPetClinic@gmail.com");
 
-        mailService.sendMail(mail);
+        mailService.sendMail(newMail);
     }
 
 
@@ -547,6 +414,20 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<UserDetails> getUsersByUsernameContaining(String username) {
         return userMapper.modelToDetailsList(userRepo.findByUsernameContaining(username));
+    }
+
+    @Override
+    public String updateUserUsername(String userId, String username, String token) {
+        User existingUser = userRepo.findUserByUserIdentifier_UserId(userId);
+
+        if(existingUser == null) {
+            throw new NotFoundException("No user was found with id : " + userId);
+        }
+        username = username.replace("{\"username\":\"", "");
+        username = username.replace("\"}", "");
+        existingUser.setUsername(username);
+        userRepo.save(existingUser);
+        return existingUser.getUsername();
     }
 
 }

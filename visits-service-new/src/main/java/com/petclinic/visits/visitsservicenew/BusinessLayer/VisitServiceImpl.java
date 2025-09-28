@@ -61,11 +61,11 @@ public class VisitServiceImpl implements VisitService {
      * @return all Visits as Flux
      */
     @Override
-    public Flux<VisitResponseDTO> getAllVisits(String descritpion) {
+    public Flux<VisitResponseDTO> getAllVisits(String description) {
         Flux<Visit> visits;
 
-        if (descritpion != null && !descritpion.isBlank()) {
-            visits = repo.findVisitsByDescriptionContainingIgnoreCase(descritpion);
+        if (description != null && !description.isBlank()) {
+            visits = repo.findVisitsByDescriptionContainingIgnoreCase(description);
         } else {
             visits = repo.findAll();
         }
@@ -407,6 +407,7 @@ public class VisitServiceImpl implements VisitService {
      * @return The DTO as Mono or BadRequestException if it doesn't respect the needed format
      */
     private Mono<VisitRequestDTO> validateVisitRequest(VisitRequestDTO dto) {
+
         if (dto.getDescription() == null || dto.getDescription().isBlank()) {
             return Mono.error(new BadRequestException("Please enter a description for this visit"));
         } else if (dto.getVisitDate() == null) {

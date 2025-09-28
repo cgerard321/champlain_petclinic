@@ -10,6 +10,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -118,6 +119,39 @@ class BillServiceClientIntegrationTest {
                 .setBody(mapper.writeValueAsString(billResponseDTO)).addHeader("Content-Type", "application/json"));
 
         Flux<BillResponseDTO> billResponseDTOMono = billServiceClient.getBillsByOwnerId("1");
+        StepVerifier.create(billResponseDTOMono)
+                .expectNextMatches(returnedBillResponseDTO1 -> returnedBillResponseDTO1.getCustomerId().equals("1"))
+                .verifyComplete();
+    }
+
+    @Test
+    void getBillsByOwnerName() throws Exception {
+        server.enqueue(new MockResponse().setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(mapper.writeValueAsString(billResponseDTO)).addHeader("Content-Type", "application/json"));
+
+        Flux<BillResponseDTO> billResponseDTOMono = billServiceClient.getBillsByOwnerName("Joe", "Nuts");
+        StepVerifier.create(billResponseDTOMono)
+                .expectNextMatches(returnedBillResponseDTO1 -> returnedBillResponseDTO1.getCustomerId().equals("1"))
+                .verifyComplete();
+    }
+
+    @Test
+    void getBillsByVetName() throws Exception{
+        server.enqueue(new MockResponse().setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(mapper.writeValueAsString(billResponseDTO)).addHeader("Content-Type", "application/json"));
+
+        Flux<BillResponseDTO> billResponseDTOMono = billServiceClient.getBillsByVetName("Joe", "Nuts");
+        StepVerifier.create(billResponseDTOMono)
+                .expectNextMatches(returnedBillResponseDTO1 -> returnedBillResponseDTO1.getCustomerId().equals("1"))
+                .verifyComplete();
+    }
+
+    @Test
+    void getBillsByVisitType() throws Exception{
+        server.enqueue(new MockResponse().setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(mapper.writeValueAsString(billResponseDTO)).addHeader("Content-Type", "application/json"));
+
+        Flux<BillResponseDTO> billResponseDTOMono = billServiceClient.getBillsByVisitType("Regular");
         StepVerifier.create(billResponseDTOMono)
                 .expectNextMatches(returnedBillResponseDTO1 -> returnedBillResponseDTO1.getCustomerId().equals("1"))
                 .verifyComplete();
@@ -535,18 +569,26 @@ class BillServiceClientIntegrationTest {
     void payBill_Success() throws Exception {
         PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("1234567812345678", "123", "12/23");
 
-        String responseMessage = "Payment successful";
+        BillResponseDTO mockResponse = new BillResponseDTO();
+        mockResponse.setBillId("1");
+        mockResponse.setBillStatus(BillStatus.PAID);
+
+        // Serialize before the lambda
+        String body = new ObjectMapper().writeValueAsString(mockResponse);
+
         prepareResponse(response -> response
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody(responseMessage)
+                .setBody(body)
         );
 
-        Mono<String> resultMono = billServiceClient.payBill("1", "1", paymentRequestDTO);
+        Mono<BillResponseDTO> resultMono = billServiceClient.payBill("1", "1", paymentRequestDTO);
 
         StepVerifier.create(resultMono)
-                .expectNextMatches(response -> response.equals("Payment successful"))
+                .expectNextMatches(bill -> bill.getBillId().equals("1") && bill.getBillStatus() == BillStatus.PAID)
                 .verifyComplete();
     }
+
+
 
     @Test
     void payBill_Failure() throws Exception {
@@ -555,14 +597,14 @@ class BillServiceClientIntegrationTest {
         prepareResponse(response -> response
                 .setResponseCode(400)
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody("Payment failed")
+                .setBody("{\"error\": \"Payment failed\"}")
         );
 
-        Mono<String> resultMono = billServiceClient.payBill("1", "1", paymentRequestDTO);
+        Mono<BillResponseDTO> resultMono = billServiceClient.payBill("1", "1", paymentRequestDTO);
 
         StepVerifier.create(resultMono)
-                .expectErrorMatches(throwable -> throwable instanceof WebClientResponseException &&
-                        ((WebClientResponseException) throwable).getRawStatusCode() == 400)
+                .expectErrorMatches(throwable -> throwable instanceof ResponseStatusException &&
+                        ((ResponseStatusException) throwable).getStatusCode().value() == 400)
                 .verify();
     }
 
@@ -573,14 +615,14 @@ class BillServiceClientIntegrationTest {
         prepareResponse(response -> response
                 .setResponseCode(400)
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody("Invalid card number")
+                .setBody("{\"error\": \"Invalid card number\"}")
         );
 
-        Mono<String> resultMono = billServiceClient.payBill("1", "1", paymentRequestDTO);
+        Mono<BillResponseDTO> resultMono = billServiceClient.payBill("1", "1", paymentRequestDTO);
 
         StepVerifier.create(resultMono)
-                .expectErrorMatches(throwable -> throwable instanceof WebClientResponseException &&
-                        ((WebClientResponseException) throwable).getRawStatusCode() == 400)
+                .expectErrorMatches(throwable -> throwable instanceof ResponseStatusException &&
+                        ((ResponseStatusException) throwable).getStatusCode().value() == 400)
                 .verify();
     }
 
@@ -591,14 +633,14 @@ class BillServiceClientIntegrationTest {
         prepareResponse(response -> response
                 .setResponseCode(400)
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody("Invalid expiry date")
+                .setBody("{\"error\": \"Invalid expiry date\"}")
         );
 
-        Mono<String> resultMono = billServiceClient.payBill("1", "1", paymentRequestDTO);
+        Mono<BillResponseDTO> resultMono = billServiceClient.payBill("1", "1", paymentRequestDTO);
 
         StepVerifier.create(resultMono)
-                .expectErrorMatches(throwable -> throwable instanceof WebClientResponseException &&
-                        ((WebClientResponseException) throwable).getRawStatusCode() == 400)
+                .expectErrorMatches(throwable -> throwable instanceof ResponseStatusException &&
+                        ((ResponseStatusException) throwable).getStatusCode().value() == 400)
                 .verify();
     }
 
@@ -609,14 +651,14 @@ class BillServiceClientIntegrationTest {
         prepareResponse(response -> response
                 .setResponseCode(400)
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody("Card expired")
+                .setBody("{\"error\": \"Card expired\"}")
         );
 
-        Mono<String> resultMono = billServiceClient.payBill("1", "1", paymentRequestDTO);
+        Mono<BillResponseDTO> resultMono = billServiceClient.payBill("1", "1", paymentRequestDTO);
 
         StepVerifier.create(resultMono)
-                .expectErrorMatches(throwable -> throwable instanceof WebClientResponseException &&
-                        ((WebClientResponseException) throwable).getRawStatusCode() == 400)
+                .expectErrorMatches(throwable -> throwable instanceof ResponseStatusException &&
+                        ((ResponseStatusException) throwable).getStatusCode().value() == 400)
                 .verify();
     }
 
@@ -627,14 +669,14 @@ class BillServiceClientIntegrationTest {
         prepareResponse(response -> response
                 .setResponseCode(400)
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody("Invalid CVV")
+                .setBody("{\"error\": \"Invalid CVV\"}")
         );
 
-        Mono<String> resultMono = billServiceClient.payBill("1", "1", paymentRequestDTO);
+        Mono<BillResponseDTO> resultMono = billServiceClient.payBill("1", "1", paymentRequestDTO);
 
         StepVerifier.create(resultMono)
-                .expectErrorMatches(throwable -> throwable instanceof WebClientResponseException &&
-                        ((WebClientResponseException) throwable).getRawStatusCode() == 400)
+                .expectErrorMatches(throwable -> throwable instanceof ResponseStatusException &&
+                        ((ResponseStatusException) throwable).getStatusCode().value() == 400)
                 .verify();
     }
 
@@ -645,14 +687,14 @@ class BillServiceClientIntegrationTest {
         prepareResponse(response -> response
                 .setResponseCode(404)
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody("Bill not found")
+                .setBody("{\"error\": \"Bill not found\"}")
         );
 
-        Mono<String> resultMono = billServiceClient.payBill("1", "nonexistent-bill-id", paymentRequestDTO);
+        Mono<BillResponseDTO> resultMono = billServiceClient.payBill("1", "nonexistent-bill-id", paymentRequestDTO);
 
         StepVerifier.create(resultMono)
-                .expectErrorMatches(throwable -> throwable instanceof WebClientResponseException &&
-                        ((WebClientResponseException) throwable).getRawStatusCode() == 404)
+                .expectErrorMatches(throwable -> throwable instanceof ResponseStatusException &&
+                        ((ResponseStatusException) throwable).getStatusCode().value() == 404)
                 .verify();
     }
 
@@ -661,16 +703,16 @@ class BillServiceClientIntegrationTest {
         PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("1234567812345678", "123", "12/23");
 
         prepareResponse(response -> response
-                .setResponseCode(504)  // Gateway Timeout
+                .setResponseCode(504)
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody("Payment service timeout")
+                .setBody("{\"error\": \"Payment service timeout\"}")
         );
 
-        Mono<String> resultMono = billServiceClient.payBill("1", "1", paymentRequestDTO);
+        Mono<BillResponseDTO> resultMono = billServiceClient.payBill("1", "1", paymentRequestDTO);
 
         StepVerifier.create(resultMono)
-                .expectErrorMatches(throwable -> throwable instanceof WebClientResponseException &&
-                        ((WebClientResponseException) throwable).getRawStatusCode() == 504)
+                .expectErrorMatches(throwable -> throwable instanceof ResponseStatusException &&
+                        ((ResponseStatusException) throwable).getStatusCode().value() == 504)
                 .verify();
     }
 
@@ -681,14 +723,14 @@ class BillServiceClientIntegrationTest {
         prepareResponse(response -> response
                 .setResponseCode(400)
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody("Invalid customer ID")
+                .setBody("{\"error\": \"Invalid customer ID\"}")
         );
 
-        Mono<String> resultMono = billServiceClient.payBill("invalid-customer-id", "1", paymentRequestDTO);
+        Mono<BillResponseDTO> resultMono = billServiceClient.payBill("invalid-customer-id", "1", paymentRequestDTO);
 
         StepVerifier.create(resultMono)
-                .expectErrorMatches(throwable -> throwable instanceof WebClientResponseException &&
-                        ((WebClientResponseException) throwable).getRawStatusCode() == 400)
+                .expectErrorMatches(throwable -> throwable instanceof ResponseStatusException &&
+                        ((ResponseStatusException) throwable).getStatusCode().value() == 400)
                 .verify();
     }
 

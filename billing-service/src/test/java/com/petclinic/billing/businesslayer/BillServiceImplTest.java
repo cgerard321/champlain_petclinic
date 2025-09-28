@@ -3,6 +3,7 @@ package com.petclinic.billing.businesslayer;
 import com.petclinic.billing.datalayer.*;
 import com.petclinic.billing.exceptions.InvalidPaymentException;
 import com.petclinic.billing.exceptions.NotFoundException;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +11,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -172,7 +175,139 @@ public class BillServiceImplTest {
                 .verifyComplete();
     }
 
+    @Test
+    public void test_getBillsByOwnerName() {
+        // Arrange
+        String ownerFirstName = "John";
+        String ownerLastName = "Doe";
 
+        Bill billEntity = buildBill();
+        billEntity.setOwnerFirstName(ownerFirstName);
+        billEntity.setOwnerLastName(ownerLastName);
+
+        when(repo.findAll()).thenReturn(Flux.just(billEntity));
+
+        // Act
+        Flux<BillResponseDTO> result = billService.getAllBillsByOwnerName(ownerFirstName, ownerLastName);
+
+        // Assert
+        StepVerifier.create(result)
+                .consumeNextWith(bill -> {
+                    assertNotNull(bill);
+                    assertEquals(ownerFirstName, bill.getOwnerFirstName());
+                    assertEquals(ownerLastName, bill.getOwnerLastName());
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    public void test_getBillsByVetName() {
+        // Arrange
+        String vetFirstName = "Alice";
+        String vetLastName = "Smith";
+
+        Bill billEntity = buildBill();
+        billEntity.setVetFirstName(vetFirstName);
+        billEntity.setVetLastName(vetLastName);
+
+        when(repo.findAll()).thenReturn(Flux.just(billEntity));
+
+        // Act
+        Flux<BillResponseDTO> result = billService.getAllBillsByVetName(vetFirstName, vetLastName);
+
+        // Assert
+        StepVerifier.create(result)
+                .consumeNextWith(bill -> {
+                    assertNotNull(bill);
+                    assertEquals(vetFirstName, bill.getVetFirstName());
+                    assertEquals(vetLastName, bill.getVetLastName());
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    public void test_getBillsByVisitType() {
+        // Arrange
+        String visitType = "Regular";
+
+        Bill billEntity = buildBill();
+        billEntity.setVisitType(visitType);
+
+        when(repo.findAll()).thenReturn(Flux.just(billEntity));
+
+        // Act
+        Flux<BillResponseDTO> result = billService.getAllBillsByVisitType(visitType);
+
+        // Assert
+        StepVerifier.create(result)
+                .consumeNextWith(bill -> {
+                    assertNotNull(bill);
+                    assertEquals(visitType, bill.getVisitType());
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    public void test_getBillsByOwnerName_notFound() {
+        // Arrange
+        String ownerFirstName = "Nonexistent";
+        String ownerLastName = "Person";
+
+        when(repo.findAll()).thenReturn(Flux.empty());
+
+        // Act
+        Flux<BillResponseDTO> result = billService.getAllBillsByOwnerName(ownerFirstName, ownerLastName);
+
+        // Assert
+        StepVerifier.create(result)
+                .consumeErrorWith(error -> {
+                    assertNotNull(error);
+                    assertTrue(error instanceof NotFoundException);
+                    assertEquals("No bills found for the given owner name", error.getMessage());
+                })
+                .verify();
+    }
+
+    @Test
+    public void test_getBillsByVetName_notFound() {
+        // Arrange
+        String vetFirstName = "Nonexistent";
+        String vetLastName = "Vet";
+
+        when(repo.findAll()).thenReturn(Flux.empty());
+
+        // Act
+        Flux<BillResponseDTO> result = billService.getAllBillsByVetName(vetFirstName, vetLastName);
+
+        // Assert
+        StepVerifier.create(result)
+                .consumeErrorWith(error -> {
+                    assertNotNull(error);
+                    assertTrue(error instanceof NotFoundException);
+                    assertEquals("No bills found for the given vet name", error.getMessage());
+                })
+                .verify();
+    }
+
+    @Test
+    public void test_getBillsByVisitType_notFound() {
+        // Arrange
+        String visitType = "ImaginaryType";
+
+        when(repo.findAll()).thenReturn(Flux.empty());
+
+        // Act
+        Flux<BillResponseDTO> result = billService.getAllBillsByVisitType(visitType);
+
+        // Assert
+        StepVerifier.create(result)
+                .consumeErrorWith(error -> {
+                    assertNotNull(error);
+                    assertTrue(error instanceof NotFoundException);
+                    assertEquals("No bills found for the given visit type", error.getMessage());
+                })
+                .verify();
+    }
     @Test
     public void test_createBill(){
 
@@ -654,7 +789,7 @@ public class BillServiceImplTest {
         String customerId = "customerId-1";
         String billId = "billId-1";
         Bill bill = buildBill();
-        bill.setBillStatus(BillStatus.UNPAID); // Make sure it's unpaid before payment
+        bill.setBillStatus(BillStatus.UNPAID);
 
         PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "123", "12/23");
 
@@ -662,74 +797,202 @@ public class BillServiceImplTest {
         when(repo.save(any(Bill.class))).thenReturn(Mono.just(bill));
 
         // Act
-        Mono<Bill> result = billService.processPayment(customerId, billId, paymentRequest);
+        Mono<BillResponseDTO> result = billService.processPayment(customerId, billId, paymentRequest);
 
         // Assert
         StepVerifier.create(result)
-                .consumeNextWith(updatedBill -> {
-                    assertEquals(BillStatus.PAID, updatedBill.getBillStatus());
+                .consumeNextWith(updatedBillDto -> {
+                    assertEquals(BillStatus.PAID, updatedBillDto.getBillStatus());
                     verify(repo, times(1)).save(any(Bill.class));
                 })
                 .verifyComplete();
     }
 
+
     @Test
     void processPayment_InvalidCardNumber_Failure() {
-        // Arrange
         String customerId = "customerId-1";
         String billId = "billId-1";
-        PaymentRequestDTO paymentRequest = new PaymentRequestDTO("12345678", "123", "12/23"); // Invalid card number
+        PaymentRequestDTO paymentRequest = new PaymentRequestDTO("12345678", "123", "12/23");
 
-        // Act & Assert
         StepVerifier.create(billService.processPayment(customerId, billId, paymentRequest))
                 .expectErrorMatches(throwable -> throwable instanceof InvalidPaymentException &&
                         throwable.getMessage().contains("Invalid payment details"))
                 .verify();
     }
+
 
     @Test
     void processPayment_InvalidCVV_Failure() {
-        // Arrange
         String customerId = "customerId-1";
         String billId = "billId-1";
-        PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "12", "12/23"); // Invalid CVV
+        PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "12", "12/23");
 
-        // Act & Assert
         StepVerifier.create(billService.processPayment(customerId, billId, paymentRequest))
                 .expectErrorMatches(throwable -> throwable instanceof InvalidPaymentException &&
                         throwable.getMessage().contains("Invalid payment details"))
                 .verify();
     }
+
 
     @Test
     void processPayment_InvalidExpirationDate_Failure() {
-        // Arrange
         String customerId = "customerId-1";
         String billId = "billId-1";
-        PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "123", "1223"); // Invalid expiration date
+        PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "123", "1223");
 
-        // Act & Assert
         StepVerifier.create(billService.processPayment(customerId, billId, paymentRequest))
                 .expectErrorMatches(throwable -> throwable instanceof InvalidPaymentException &&
                         throwable.getMessage().contains("Invalid payment details"))
                 .verify();
     }
+
 
 
     @Test
     void processPayment_BillNotFound_Failure() {
-        // Arrange
         String customerId = "customerId-1";
         String billId = "billId-1";
         PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "123", "12/23");
 
-        when(repo.findByCustomerIdAndBillId(customerId, billId)).thenReturn(Mono.empty()); // Bill not found
+        when(repo.findByCustomerIdAndBillId(customerId, billId)).thenReturn(Mono.empty());
 
-        // Act & Assert
         StepVerifier.create(billService.processPayment(customerId, billId, paymentRequest))
-                .expectErrorMatches(throwable -> throwable instanceof NotFoundException &&
-                        throwable.getMessage().contains("Bill not found"))
+                .expectErrorSatisfies(throwable -> {
+                    assertThat(throwable).isInstanceOf(ResponseStatusException.class);
+                    ResponseStatusException ex = (ResponseStatusException) throwable;
+                    assertThat(ex.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
+                    assertThat(ex.getReason()).isEqualTo("Bill not found");
+                })
                 .verify();
     }
+
+    @Test
+    void getNumberOfBillsWithFilters_Positive_ShouldCountMatchingBills() {
+
+        Bill b1 = buildBill();
+        b1.setBillId("B-1");
+        b1.setCustomerId("C-1");
+        b1.setOwnerFirstName("Alice");
+        b1.setOwnerLastName("Smith");
+        b1.setVisitType("ANNUAL");
+        b1.setVetId("V-1");
+        b1.setVetFirstName("Jenny");
+        b1.setVetLastName("Doe");
+
+        Bill b2 = buildBill();
+        b2.setBillId("B-2");
+        b2.setCustomerId("C-1");
+        b2.setOwnerFirstName("Alice");
+        b2.setOwnerLastName("Smith");
+        b2.setVisitType("ANNUAL");
+        b2.setVetId("V-1");
+        b2.setVetFirstName("Jenny");
+        b2.setVetLastName("Doe");
+
+        Bill b3 = buildBill();
+        b3.setBillId("B-3");
+        b3.setCustomerId("C-2");
+        b3.setOwnerFirstName("Bob");
+        b3.setOwnerLastName("Jones");
+        b3.setVisitType("SURGERY");
+        b3.setVetId("V-2");
+        b3.setVetFirstName("Tom");
+        b3.setVetLastName("Lee");
+
+        when(repo.findAll()).thenReturn(Flux.just(b1, b2, b3));
+
+        Mono<Long> result = billService.getNumberOfBillsWithFilters(
+                null,
+                "C-1",
+                "Alice",
+                "Smith",
+                "ANNUAL",
+                "V-1",
+                "Jenny",
+                "Doe"
+        );
+
+        StepVerifier.create(result)
+                .expectNext(2L)
+                .verifyComplete();
+    }
+
+    @Test
+    void getNumberOfBillsWithFilters_Negative_NoMatches_ShouldReturnZero() {
+        Bill b1 = buildBill();
+        b1.setBillId("B-10");
+        b1.setCustomerId("C-10");
+        b1.setOwnerFirstName("Alice");
+        b1.setOwnerLastName("Smith");
+        b1.setVisitType("ANNUAL");
+        b1.setVetId("V-10");
+        b1.setVetFirstName("Jenny");
+        b1.setVetLastName("Doe");
+
+        Bill b2 = buildBill();
+        b2.setBillId("B-11");
+        b2.setCustomerId("C-11");
+        b2.setOwnerFirstName("Bob");
+        b2.setOwnerLastName("Jones");
+        b2.setVisitType("SURGERY");
+        b2.setVetId("V-11");
+        b2.setVetFirstName("Tom");
+        b2.setVetLastName("Lee");
+
+        when(repo.findAll()).thenReturn(Flux.just(b1, b2));
+
+        Mono<Long> result = billService.getNumberOfBillsWithFilters(
+                "NO-SUCH-BILL",
+                "C-999",
+                "Nonexistent",
+                "Person",
+                "DENTAL",
+                "V-999",
+                "Nobody",
+                "Nowhere"
+        );
+
+        StepVerifier.create(result)
+                .expectNext(0L)
+                .verifyComplete();
+    }
+
+    @Test
+    void getBillByCustomerIdAndBillId_Positive_ShouldReturnDtoWhenCustomerMatches() {
+        Bill bill = buildBill();
+        bill.setBillId("B-42");
+        bill.setCustomerId("C-123");
+
+        when(repo.findByBillId("B-42")).thenReturn(Mono.just(bill));
+
+        Mono<BillResponseDTO> result =
+                billService.getBillByCustomerIdAndBillId("C-123", "B-42");
+
+        StepVerifier.create(result)
+                .assertNext(dto -> {
+                    assertEquals("B-42", dto.getBillId());
+                    assertEquals("C-123", dto.getCustomerId());
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void getBillByCustomerIdAndBillId_Negative_NoMatchOnCustomer_ShouldBeEmpty() {
+
+        Bill bill = buildBill();
+        bill.setBillId("B-42");
+        bill.setCustomerId("C-123");
+
+        when(repo.findByBillId("B-42")).thenReturn(Mono.just(bill));
+
+        Mono<BillResponseDTO> result =
+                billService.getBillByCustomerIdAndBillId("C-999", "B-42");
+
+        StepVerifier.create(result)
+                .expectNextCount(0)
+                .verifyComplete();
+    }
+
 
 }
