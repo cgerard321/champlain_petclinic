@@ -5,10 +5,15 @@ import TrendingList from '@/features/products/TrendingList';
 import { useState } from 'react';
 import ProductSearch from '@/features/products/components/ProductSearch';
 <<<<<<< HEAD
+<<<<<<< HEAD
 import StarRating from '@/features/products/components/StarRating';
 import { ProductType } from '@/features/products/api/ProductTypeEnum';
 =======
 >>>>>>> a4381812 (fixed merging error)
+=======
+import StarRating from '@/features/products/components/StarRating';
+import { ProductType } from '@/features/products/api/ProductTypeEnum';
+>>>>>>> 774074cf (fix conflict errors)
 
 export default function Products(): JSX.Element {
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -67,6 +72,9 @@ export default function Products(): JSX.Element {
       </header>
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 774074cf (fix conflict errors)
       <div className="search-and-filter">
         {!isSidebarOpen && (
           <button
@@ -85,6 +93,7 @@ export default function Products(): JSX.Element {
             setSearchQuery={setSearchQuery}
           />
         </div>
+<<<<<<< HEAD
 =======
       <div className="block">
         <ProductSearch
@@ -92,6 +101,8 @@ export default function Products(): JSX.Element {
           setSearchQuery={setSearchQuery}
         />
 >>>>>>> a4381812 (fixed merging error)
+=======
+>>>>>>> 774074cf (fix conflict errors)
       </div>
 
       {isSidebarOpen && (
@@ -190,6 +201,7 @@ export default function Products(): JSX.Element {
               <span style={{ color: 'red' }}>{validationMessage}</span>
             )}
           </div>
+<<<<<<< HEAD
         </div>
       )}
 
@@ -203,10 +215,33 @@ export default function Products(): JSX.Element {
       <ProductsList view="catalog" searchQuery={''} />
 >>>>>>> a4381812 (fixed merging error)
 
+=======
+        </div>
+      )}
+
+      <ProductsList
+        view="catalog"
+        searchQuery={searchQuery}
+        filters={filters}
+      />
+
       <div className="block">
         <hr />
       </div>
 
+      {!searchQuery && (
+        <div className="trending-list-container-gold">
+          <h2 className="section-header">Trending</h2>
+          <TrendingList />
+        </div>
+      )}
+
+>>>>>>> 774074cf (fix conflict errors)
+      <div className="block">
+        <hr />
+      </div>
+
+<<<<<<< HEAD
 <<<<<<< HEAD
       {!searchQuery && (
         <div className="trending-list-container-gold">
@@ -230,6 +265,9 @@ export default function Products(): JSX.Element {
 =======
       <ProductsList view="extras" searchQuery={''} />
 >>>>>>> a4381812 (fixed merging error)
+=======
+      <ProductsList view="extras" searchQuery={searchQuery} filters={filters} />
+>>>>>>> 774074cf (fix conflict errors)
     </div>
   );
 }
