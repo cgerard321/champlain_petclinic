@@ -10,15 +10,12 @@ interface ErrorResponse {
 export async function deleteBill(bill: Bill): Promise<AxiosResponse> {
   try {
     const response: AxiosResponse = await axiosInstance.delete(
-      `bills/${bill.billId}`,
-      {
-        useV2: false,
-      }
+      `/bills/admin${bill.billId}`
     );
     return response;
   } catch (error) {
     const axiosError = error as AxiosError<ErrorResponse>;
-    console.error('Error deleting bill:', axiosError);
+    window.alert('Error deleting bill: ' + axiosError);
     if (
       axiosError.response &&
       axiosError.response.data &&

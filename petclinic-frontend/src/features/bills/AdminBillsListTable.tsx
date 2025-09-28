@@ -257,6 +257,7 @@ export default function AdminBillsListTable(): JSX.Element {
   const [cutoffYear, setCutoffYear] = useState<number>(
     new Date().getFullYear()
   );
+  const [showDeleteWarning, setShowDeleteWarning] = useState(false);
 
   const handleFetchOldPaidBills = async (): Promise<void> => {
     try {
@@ -277,9 +278,15 @@ export default function AdminBillsListTable(): JSX.Element {
 
   const handleDeleteOldPaidBills = async (): Promise<void> => {
     const currentYear = new Date().getFullYear();
-    if (cutoffYear > currentYear - 5) {
-      return;
+
+    // Check if cutoffYear is less than 5 years old
+    if (currentYear - cutoffYear < 5) {
+      setShowDeleteWarning(true); // show red text
+      return; // do not delete
     }
+
+    // Otherwise, proceed with deletion
+    setShowDeleteWarning(false);
 
     const confirmDelete = window.confirm(
       `Are you sure you want to delete ${oldPaidBills.length} paid bills from ${cutoffYear} or earlier?`
@@ -295,7 +302,7 @@ export default function AdminBillsListTable(): JSX.Element {
       setShowOldPaidBills(false);
     } catch (err) {
       console.error('Error deleting bills:', err);
-      window.alert('Some bills could not be deleted.');
+      window.alert('Some bills could not be deleted: ' + err);
     }
   };
 
@@ -504,7 +511,13 @@ export default function AdminBillsListTable(): JSX.Element {
             onChange={e => setCutoffYear(parseInt(e.target.value))}
             placeholder="Enter year"
           />
-          <button className="ml-2" onClick={handleFetchOldPaidBills}>
+          <button
+            className="ml-2"
+            onClick={() => {
+              handleFetchOldPaidBills();
+              setShowDeleteWarning(false);
+            }}
+          >
             Get Bills
           </button>
 
@@ -547,13 +560,10 @@ export default function AdminBillsListTable(): JSX.Element {
                     </button>
 
                     {/* Warning message */}
-                    {cutoffYear - new Date().getFullYear() < 5 && (
-                      <>
-                        {error && <p className="error-text">{error}</p>}
-                        <p className="error-text">
-                          Cannot delete bills that are not at least 5 years old.
-                        </p>
-                      </>
+                    {showDeleteWarning && (
+                      <p className="error-text">
+                        Cannot delete bills that are not at least 5 years old.
+                      </p>
                     )}
                   </div>
                 </>
