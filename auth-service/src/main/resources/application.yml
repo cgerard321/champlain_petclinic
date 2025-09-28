@@ -16,9 +16,6 @@ cart-service:
 mailer-service:
   host: localhost
   port: 8888
-emailing-service:
-  host: localhost
-  port: 5115
 default-admin:
   username: admin
   password: admin
