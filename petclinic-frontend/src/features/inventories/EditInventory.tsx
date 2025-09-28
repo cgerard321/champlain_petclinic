@@ -51,6 +51,9 @@ const EditInventory: React.FC = (): JSX.Element => {
   });
   const [lastEditedFields, setLastEditedFields] = useState<string[]>([]);
 
+  // Keep the original loaded inventory so Cancel can discard edits
+  const originalInventoryRef = useRef<InventoryRequestModel | null>(null);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -67,6 +70,16 @@ const EditInventory: React.FC = (): JSX.Element => {
             inventoryBackupImage: response.inventoryBackupImage,
             imageUploaded: response.imageUploaded,
           });
+
+          // store original values so Cancel can restore them
+          originalInventoryRef.current = {
+            inventoryName: response.inventoryName,
+            inventoryType: response.inventoryType,
+            inventoryDescription: response.inventoryDescription,
+            inventoryImage: response.inventoryImage,
+            inventoryBackupImage: response.inventoryBackupImage,
+            imageUploaded: response.imageUploaded || '',
+          };
 
           // Initialize undo history with loaded values
           setHistory({
@@ -167,6 +180,14 @@ const EditInventory: React.FC = (): JSX.Element => {
 
       order.pop();
     }
+  };
+
+  // Cancel handler: discard local edits and close form (navigate back)
+  const handleCancel = (): void => {
+    if (originalInventoryRef.current) {
+      setInventory(originalInventoryRef.current);
+    }
+    navigate('/inventories');
   };
 
   const validate = (): boolean => {
@@ -390,6 +411,14 @@ const EditInventory: React.FC = (): JSX.Element => {
           <div className="row">
             <button type="submit" className="btn btn-info">
               Update
+            </button>
+            {/* Cancel button: discard edits and close form */}
+            <button
+              type="button"
+              className="btn btn-light"
+              onClick={handleCancel}
+            >
+              Cancel
             </button>
             {/* Undo button */}
             <button
