@@ -98,18 +98,24 @@ export default function ContactPage(): JSX.Element {
                 <Card.Body>
                   <Card.Title className="mb-2">Clinic Details</Card.Title>
                   <div className="contact-detail">
-                    <div className="icon">📍</div>
+                    <span className="icon" aria-hidden="true">
+                      {'\uD83D\uDCCD'}
+                    </span>
                     <div>
                       <div>900 Rue Riverside</div>
                       <div>Saint-Lambert, QC</div>
                     </div>
                   </div>
                   <div className="contact-detail">
-                    <div className="icon">📞</div>
+                    <span className="icon" aria-hidden="true">
+                      {'\uD83D\uDCDE'}
+                    </span>
                     <a href="tel:+4506727360">+1 (450) 672-7360</a>
                   </div>
                   <div className="contact-detail">
-                    <div className="icon">✉️</div>
+                    <span className="icon" aria-hidden="true">
+                      {'\uD83D\uDCE7'}
+                    </span>
                     <a href="mailto:info@champlainpetclinic.com">
                       info@champlainpetclinic.com
                     </a>
