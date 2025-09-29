@@ -20,8 +20,10 @@ default-admin:
   username: admin
   password: admin
 
+#This was changed to the new endpoint using the new V2 functions, if you want to access the previous
 frontend:
-  url: https://petclinic.benmusicgeek.synology.me/api/v2/gateway
+  url: http://localhost:8080/api/v2/gateway
+
 
 ---
 # for test
@@ -106,6 +108,7 @@ emailing-service:
   port: 5115
 
 #This was changed to the new endpoint using the new V2 functions, if you want to access the previous
+# this is to make it work in prod will be fixed later
 frontend:
   url: http://localhost:8080/api/v2/gateway
 
@@ -115,16 +118,39 @@ logging:
     com.petclinic: DEBUG
 
 
-
 ---
 #for production
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, prometheus
+
 spring:
-  config:
-    activate:
-      on-profile: prod
+  # performance optimizationn
+  main:
+    lazy-initialization: true
+  server:
+    netty:
+      connection-provider:
+        max-connections: 10
+    tomcat:
+      threads:
+        max: 50
+
+  datasource:
+    url: jdbc:mysql://mysql-auth/auth-db
+    username: user
+    password: pwd
+
   jpa:
     hibernate:
       ddl-auto: none
+
+  config:
+    activate:
+      on-profile: prod
+
   sql:
     init:
       platform: mysql
@@ -149,8 +175,8 @@ logging:
 
 frontend:
   url: https://petclinic.benmusicgeek.synology.me/api/v2/gateway
----
 
+---
 server.port: 8080
 
 spring.datasource.hikari.initializationFailTimeout: 60000
