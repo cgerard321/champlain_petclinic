@@ -151,7 +151,7 @@ public class EmergencyServiceImpl implements EmergencyService{
                 .flatMap(emergencyRepository::save)
                 .flatMap(entityDtoUtil::toEmergencyResponseDTO);
     }
-*/
+
     @Override
     public Mono<EmergencyResponseDTO> DeleteEmergency(String emergencyId) {
        return  emergencyRepository.findEmergenciesByVisitEmergencyId(emergencyId)

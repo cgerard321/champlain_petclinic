@@ -5,20 +5,19 @@ import com.petclinic.visits.visitsservicenew.DataLayer.Emergency.EmergencyReposi
 import com.petclinic.visits.visitsservicenew.DataLayer.Emergency.UrgencyLevel;
 import com.petclinic.visits.visitsservicenew.DataLayer.Status;
 import com.petclinic.visits.visitsservicenew.DataLayer.Visit;
-import com.petclinic.visits.visitsservicenew.DomainClientLayer.PetResponseDTO;
-import com.petclinic.visits.visitsservicenew.DomainClientLayer.SpecialtyDTO;
-import com.petclinic.visits.visitsservicenew.DomainClientLayer.VetDTO;
-import com.petclinic.visits.visitsservicenew.DomainClientLayer.Workday;
+import com.petclinic.visits.visitsservicenew.DomainClientLayer.*;
 import com.petclinic.visits.visitsservicenew.Exceptions.NotFoundException;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.Emergency.EmergencyRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.Emergency.EmergencyResponseDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.Review.ReviewResponseDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitResponseDTO;
+import com.petclinic.visits.visitsservicenew.Utils.EntityDtoUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -32,7 +31,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class EmergencyServiceUnitTest {
@@ -42,6 +41,15 @@ class EmergencyServiceUnitTest {
 
     @Mock
     private EmergencyRepository emergencyRepository;
+
+    @Mock
+    private EntityDtoUtil entityDtoUtil;
+
+    @Mock
+    private VetsClient vetsClient;
+
+    @Mock
+    private PetsClient petsClient;
 
 
     String uuidVet = UUID.randomUUID().toString();
@@ -78,7 +86,7 @@ class EmergencyServiceUnitTest {
 
 
 
-  /*  Emergency emergency2 = Emergency.builder()
+    Emergency emergency2 = Emergency.builder()
             .id(UUID.randomUUID().toString())
             .visitEmergencyId(UUID.randomUUID().toString())
             .visitDate(LocalDateTime.now())
@@ -87,7 +95,7 @@ class EmergencyServiceUnitTest {
             .practitionerId(uuidVet)
             .urgencyLevel(UrgencyLevel.HIGH)
             .emergencyType("death")
-            .build();*/
+            .build();
 
    // Emergency visit1 = buildEmergency();
   /*  @Test
@@ -183,78 +191,161 @@ class EmergencyServiceUnitTest {
                 })
                 .verifyComplete();
     }
+*/
+   @Test
+   public void whenUpdateEmergency_thenReturnUpdatedEmergencyResponseDTO() {
+       // Arrange
+       String existingEmergencyId = emergency2.getVisitEmergencyId();
+
+       EmergencyRequestDTO updatedEmergencyRequestDTO = new EmergencyRequestDTO();
+       updatedEmergencyRequestDTO.setVisitDate(LocalDateTime.now().plusDays(1));
+       updatedEmergencyRequestDTO.setDescription("Updated situation");
+       updatedEmergencyRequestDTO.setPetId(uuidPet);
+       updatedEmergencyRequestDTO.setPractitionerId(uuidVet);
+       updatedEmergencyRequestDTO.setUrgencyLevel(UrgencyLevel.MEDIUM);
+       updatedEmergencyRequestDTO.setEmergencyType("Updated Type");
+
+       when(emergencyRepository.findEmergenciesByVisitEmergencyId(existingEmergencyId))
+               .thenReturn(Mono.just(emergency2));
+
+       when(petsClient.getPetById(uuidPet)).thenReturn(Mono.just(petResponseDTO));
+       when(vetsClient.getVetByVetId(uuidVet)).thenReturn(Mono.just(vet));
+
+       Emergency mappedFromReq = Emergency.builder()
+               .visitDate(updatedEmergencyRequestDTO.getVisitDate())
+               .description(updatedEmergencyRequestDTO.getDescription())
+               .petId(updatedEmergencyRequestDTO.getPetId())
+               .practitionerId(updatedEmergencyRequestDTO.getPractitionerId())
+               .urgencyLevel(updatedEmergencyRequestDTO.getUrgencyLevel())
+               .emergencyType(updatedEmergencyRequestDTO.getEmergencyType())
+               .build();
+       when(entityDtoUtil.toEmergencyEntity(updatedEmergencyRequestDTO))
+               .thenReturn(mappedFromReq);
+
+       Emergency updatedEmergency = Emergency.builder()
+               .id(emergency2.getId())
+               .visitEmergencyId(existingEmergencyId)
+               .visitDate(updatedEmergencyRequestDTO.getVisitDate())
+               .description(updatedEmergencyRequestDTO.getDescription())
+               .petId(updatedEmergencyRequestDTO.getPetId())
+               .practitionerId(updatedEmergencyRequestDTO.getPractitionerId())
+               .urgencyLevel(updatedEmergencyRequestDTO.getUrgencyLevel())
+               .emergencyType(updatedEmergencyRequestDTO.getEmergencyType())
+               .build();
+       when(emergencyRepository.save(any(Emergency.class)))
+               .thenReturn(Mono.just(updatedEmergency));
+
+       EmergencyResponseDTO expectedResponse = EmergencyResponseDTO.builder()
+               .visitEmergencyId(updatedEmergency.getVisitEmergencyId())
+               .visitDate(updatedEmergency.getVisitDate())
+               .description(updatedEmergency.getDescription())
+               .petId(updatedEmergency.getPetId())
+               .practitionerId(updatedEmergency.getPractitionerId())
+               .urgencyLevel(updatedEmergency.getUrgencyLevel())
+               .emergencyType(updatedEmergency.getEmergencyType())
+               .build();
+       when(entityDtoUtil.toEmergencyResponseDTO(updatedEmergency))
+               .thenReturn(Mono.just(expectedResponse));
+
+       // Act
+       Mono<EmergencyResponseDTO> result =
+               emergencyService.updateEmergency(existingEmergencyId, Mono.just(updatedEmergencyRequestDTO));
+
+       // Assert
+       StepVerifier.create(result)
+               .expectNextMatches(emergencyResponseDTO -> {
+                   assertNotNull(emergencyResponseDTO);
+                   assertEquals(updatedEmergency.getVisitEmergencyId(), emergencyResponseDTO.getVisitEmergencyId());
+                   assertEquals(updatedEmergency.getDescription(), emergencyResponseDTO.getDescription());
+                   assertEquals(updatedEmergency.getUrgencyLevel(), emergencyResponseDTO.getUrgencyLevel());
+                   assertEquals(updatedEmergency.getEmergencyType(), emergencyResponseDTO.getEmergencyType());
+                   assertEquals(updatedEmergency.getPetId(), emergencyResponseDTO.getPetId());
+                   assertEquals(updatedEmergency.getPractitionerId(), emergencyResponseDTO.getPractitionerId());
+                   return true;
+               })
+               .verifyComplete();
+   }
 
     @Test
-    public void whenUpdateEmergency_thenReturnUpdatedEmergencyResponseDTO() {
+    void whenUpdateEmergency_withInvalidPetId_thenThrowsNotFoundException() {
         // Arrange
-        String existingEmergencyId = emergency1.getVisitEmergencyId();
-        Emergency updatedEmergency = Emergency.builder()
-                .id(emergency1.getId())
-                .visitEmergencyId(existingEmergencyId)
-                .visitDate(emergency1.getVisitDate())
-                .description("Updated situation") // Updated description
-                .petName("Updated Pet Name") // Updated pet name
-                .urgencyLevel(UrgencyLevel.MEDIUM) // Updated urgency level// Updated critical status
-                .emergencyType("Updated Type") // Updated emergency type
-                .build();
+        String visitEmergencyId = emergency2.getVisitEmergencyId();
+        String invalidPetId = "bad-pet-id";
 
-        EmergencyRequestDTO updatedEmergencyRequestDTO = new EmergencyRequestDTO();
-        updatedEmergencyRequestDTO.setDescription(updatedEmergency.getDescription());
-        updatedEmergencyRequestDTO.setPetName(updatedEmergency.getPetName());
-        updatedEmergencyRequestDTO.setUrgencyLevel(updatedEmergency.getUrgencyLevel());
-        updatedEmergencyRequestDTO.setEmergencyType(updatedEmergency.getEmergencyType());
+        EmergencyRequestDTO req = new EmergencyRequestDTO();
+        req.setVisitDate(LocalDateTime.now().plusDays(2));
+        req.setDescription("Should not update");
+        req.setPetId(invalidPetId);
+        req.setPractitionerId(uuidVet);
+        req.setUrgencyLevel(UrgencyLevel.HIGH);
+        req.setEmergencyType("injury");
 
-        when(emergencyRepository.findEmergenciesByVisitEmergencyId(existingEmergencyId)).thenReturn(Mono.just(emergency1));
-        when(emergencyRepository.save(any(Emergency.class))).thenReturn(Mono.just(updatedEmergency));
+        when(emergencyRepository.findEmergenciesByVisitEmergencyId(visitEmergencyId))
+                .thenReturn(Mono.just(emergency2));
+
+        when(petsClient.getPetById(invalidPetId)).thenReturn(Mono.empty());
+
+        when(vetsClient.getVetByVetId(uuidVet)).thenReturn(Mono.just(vet));
 
         // Act
-        Mono<EmergencyResponseDTO> result = emergencyService.UpdateEmergency(Mono.just(updatedEmergencyRequestDTO), existingEmergencyId);
+        Mono<EmergencyResponseDTO> result =
+                emergencyService.updateEmergency(visitEmergencyId, Mono.just(req));
 
         // Assert
-        StepVerifier
-                .create(result)
-                .expectNextMatches(emergencyResponseDTO -> {
-                    assertNotNull(emergencyResponseDTO);
-                    assertEquals(updatedEmergency.getVisitEmergencyId(), emergencyResponseDTO.getVisitEmergencyId());
-                    assertEquals(updatedEmergency.getDescription(), emergencyResponseDTO.getDescription());
-                    assertEquals(updatedEmergency.getPetName(), emergencyResponseDTO.getPetName());
-                    assertEquals(updatedEmergency.getUrgencyLevel(), emergencyResponseDTO.getUrgencyLevel());
-                    assertEquals(updatedEmergency.getEmergencyType(), emergencyResponseDTO.getEmergencyType());
-                    return true;
-                })
-                .verifyComplete();
+        StepVerifier.create(result)
+                .expectErrorMatches(ex ->
+                        ex instanceof NotFoundException &&
+                                ex.getMessage().equals("No pet was found with petId: " + invalidPetId)
+                )
+                .verify();
+
+        verify(entityDtoUtil, never()).toEmergencyEntity(any());
+        verify(emergencyRepository, never()).save(any());
     }
 
 
+
     @Test
-    public void whenDeleteEmergencyByVisitEmergencyId_thenDeleteEmergency() {
-        // Arrange
-        when(emergencyRepository.findEmergenciesByVisitEmergencyId(emergency1.getVisitEmergencyId())).thenReturn(Mono.just(emergency1));
-        when(emergencyRepository.delete(emergency1)).thenReturn(Mono.empty());
+   public void whenDeleteEmergencyByVisitEmergencyId_thenDeleteEmergency() {
+       // Arrange
+       when(emergencyRepository.findEmergenciesByVisitEmergencyId(emergency2.getVisitEmergencyId()))
+               .thenReturn(Mono.just(emergency2));
+       when(emergencyRepository.delete(emergency2))
+               .thenReturn(Mono.empty());
+       when(entityDtoUtil.toEmergencyResponseDTO(emergency2))
+               .thenReturn(Mono.just(EmergencyResponseDTO.builder()
+                       .visitEmergencyId(emergency2.getVisitEmergencyId())
+                       .description(emergency2.getDescription())
+                       .urgencyLevel(emergency2.getUrgencyLevel())
+                       .emergencyType(emergency2.getEmergencyType())
+                       .petId(emergency2.getPetId())
+                       .practitionerId(emergency2.getPractitionerId())
+                       .visitDate(emergency2.getVisitDate())
+                       .build()));
 
-        // Act
-        Mono<EmergencyResponseDTO> result = emergencyService.DeleteEmergency(emergency1.getVisitEmergencyId());
+       // Act
+       Mono<EmergencyResponseDTO> result = emergencyService.DeleteEmergency(emergency2.getVisitEmergencyId());
 
-        // Assert
-        StepVerifier
-                .create(result)
-                .expectNextMatches(emergencyResponseDTO -> emergencyResponseDTO.getVisitEmergencyId().equals(emergency1.getVisitEmergencyId()))
-                .verifyComplete();
-    }
+       // Assert
+       StepVerifier.create(result)
+               .expectNextMatches(emergencyResponseDTO ->
+                       emergencyResponseDTO.getVisitEmergencyId().equals(emergency2.getVisitEmergencyId()))
+               .verifyComplete();
+   }
 
 
     @Test
     public void whenEmergencyIdDoesNotExistOnDelete_thenReturnNotFoundException() {
         // Arrange
         String nonExistentEmergencyId = UUID.randomUUID().toString();
-        when(emergencyRepository.findEmergenciesByVisitEmergencyId(nonExistentEmergencyId)).thenReturn(Mono.empty());
+        when(emergencyRepository.findEmergenciesByVisitEmergencyId(nonExistentEmergencyId))
+                .thenReturn(Mono.empty());
 
         // Act
         Mono<EmergencyResponseDTO> result = emergencyService.DeleteEmergency(nonExistentEmergencyId);
 
         // Assert
-        StepVerifier
-                .create(result)
+        StepVerifier.create(result)
                 .expectErrorMatches(throwable ->
                         throwable instanceof NotFoundException &&
                                 throwable.getMessage().equals("emergency id is not found: " + nonExistentEmergencyId)
@@ -266,7 +357,6 @@ class EmergencyServiceUnitTest {
 
 
 
-*/
 
 
 }
