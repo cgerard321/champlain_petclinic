@@ -116,6 +116,7 @@ logging:
   level:
     root: INFO
     com.petclinic: DEBUG
+
 ---
 #for production
 management:
