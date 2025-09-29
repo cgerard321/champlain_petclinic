@@ -11,8 +11,6 @@ import { Workday } from '@/features/veterinarians/models/Workday.ts';
 import UpdateVet from '@/pages/Vet/UpdateVet.tsx';
 import { addAlbumPhoto } from '@/features/veterinarians/api/addPhotoToAlbum';
 
-
-
 interface VetResponseType {
   vetId: string;
   vetBillId: string;
