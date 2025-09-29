@@ -448,6 +448,7 @@ export default function InventoriesListTable(): JSX.Element {
             </tr>
           </thead>
         </table>
+
         {inventoryList.length === 0 &&
           (inventoryName !== '' ||
             inventoryType !== '' ||
