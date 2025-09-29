@@ -119,22 +119,6 @@ services:
       - stack.env
     restart: unless-stopped
 
-  emailing-service:
-    image: emailing-service
-    pull_policy: never
-    container_name: emailing-service-container
-    build:
-      context: ./emailing-service
-      dockerfile: emailing-service/Dockerfile
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - DEFAULT_CONNECTION=Server=emailing-service-mysql-db;Port=3306;Database=MyAppDb;User=root;Password=Your_password123;
-    env_file:
-      - stack.env
-    restart: unless-stopped
-    depends_on:
-      - emailing-service-mysql-db
-
   products-service:
     build: products-service
     hostname: products-service
@@ -176,19 +160,7 @@ services:
       timeout: 5s
       retries: 10
 
-  emailing-service-mysql-db:
-    image: mysql:8.0
-    container_name: emailing-service-mysql-db
-    platform: linux/amd64
-    environment:
-      - MYSQL_ROOT_PASSWORD=Your_password123
-      - MYSQL_DATABASE=MyAppDb
-      - SPRING_PROFILES_ACTIVE=docker
-    ports:
-      - "3308:3306"
-    volumes:
-      - emailing-service-mysql-db-data:/var/lib/mysql
-    restart: unless-stopped
+
 
   postgres-vet:
     image: postgres
@@ -318,4 +290,3 @@ volumes:
   mongo-carts-data:
   mongo-carts-config:
   postgres-vet-data:
-  emailing-service-mysql-db-data:
