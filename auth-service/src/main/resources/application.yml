@@ -167,7 +167,7 @@ emailing-service:
   port: 5115
 
 frontend:
-  url: https://petclinic.benmusicgeek.synology.me/api/v2/gateway
+  url: petclinic-backend.benmusicgeek.synology.me/api/v2/gateway
 
 ---
 server.port: 8080
