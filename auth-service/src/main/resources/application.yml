@@ -95,8 +95,11 @@ emailing-service:
   port: 5115
 
 #This was changed to the new endpoint using the new V2 functions, if you want to access the previous
+# this is to make it work in prod will be fixed later
 frontend:
-  url: http://localhost:8080/api/v2/gateway
+  url: https://petclinic.benmusicgeek.synology.me/api/v2/gateway
+#frontend:
+#  url: http://localhost:8080/api/v2/gateway
 
 logging:
   level:
