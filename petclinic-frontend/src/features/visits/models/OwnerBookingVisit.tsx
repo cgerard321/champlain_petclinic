@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FormEvent, useState } from 'react';
+import { FormEvent, useState, useEffect } from 'react';
 import { useUser } from '@/context/UserContext';
 import './EditVisit.css';
 import { VisitRequestModel } from '@/features/visits/models/VisitRequestModel';
@@ -10,12 +10,21 @@ import { addVisit } from '@/features/visits/api/addVisit';
 interface ApiError {
   message: string;
 }
+
 type OwnerVisitType = {
   visitStartDate: Date;
   description: string;
   petId: string;
   practitionerId: string;
   status: Status;
+};
+
+type VetInfo = {
+  vetId: string;
+  firstName: string;
+  lastName: string;
+  workday: string[];
+  workHoursJson: string;
 };
 
 const OwnerBookingVisit: React.FC = (): JSX.Element => {
@@ -33,22 +42,134 @@ const OwnerBookingVisit: React.FC = (): JSX.Element => {
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [showNotification, setShowNotification] = useState<boolean>(false);
+  const [availableVets, setAvailableVets] = useState<VetInfo[]>([]);
+  const [selectedVetInfo, setSelectedVetInfo] = useState<VetInfo | null>(null);
+  const [showAvailability, setShowAvailability] = useState<boolean>(false);
 
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const fetchVets = async (): Promise<void> => {
+      try {
+        const response = await fetch('http://localhost:8080/api/gateway/vets');
+        const vets = await response.json();
+        setAvailableVets(Array.isArray(vets) ? vets : [vets]);
+      } catch (error) {
+        console.error('Error fetching vets:', error);
+      }
+    };
+    fetchVets();
+  }, []);
+
+  const formatWorkHours = (hoursArray: string[]): string => {
+    if (!hoursArray || hoursArray.length === 0) return 'No hours available';
+    return hoursArray
+      .map(hour => {
+        const parts = hour.split('_');
+        if (parts.length === 3) {
+          return `${parts[1]}:00-${parts[2]}:00`;
+        }
+        return hour;
+      })
+      .join(', ');
+  };
+
+  const validateVetAvailability = (
+    selectedDate: Date,
+    vetInfo: VetInfo | null
+  ): { isValid: boolean; message: string } => {
+    if (!vetInfo)
+      return { isValid: false, message: 'Please select a veterinarian' };
+
+    const dayNames = [
+      'Sunday',
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+    ];
+    const selectedDay = dayNames[selectedDate.getDay()];
+
+    if (!vetInfo.workday.includes(selectedDay)) {
+      return {
+        isValid: false,
+        message: `Dr. ${vetInfo.firstName} ${vetInfo.lastName} is not available on ${selectedDay}. Available days: ${vetInfo.workday.join(', ')}`,
+      };
+    }
+
+    const selectedHour = selectedDate.getHours();
+
+    try {
+      const workHours = JSON.parse(vetInfo.workHoursJson);
+      const dayHours = workHours[selectedDay];
+
+      if (!dayHours || dayHours.length === 0) {
+        return {
+          isValid: false,
+          message: `No available hours on ${selectedDay}`,
+        };
+      }
+
+      const isHourAvailable = dayHours.some((hourSlot: string) => {
+        const parts = hourSlot.split('_');
+        return parts.length === 3 && parseInt(parts[1]) === selectedHour;
+      });
+
+      if (!isHourAvailable) {
+        const availableHours = dayHours
+          .map((slot: string) => {
+            const parts = slot.split('_');
+            return parts.length === 3 ? `${parts[1]}:00` : slot;
+          })
+          .join(', ');
+
+        return {
+          isValid: false,
+          message: `${selectedHour}:00 is not available. Available hours on ${selectedDay}: ${availableHours}`,
+        };
+      }
+
+      return { isValid: true, message: '' };
+    } catch (e) {
+      return { isValid: false, message: 'Error checking availability' };
+    }
+  };
+
+  const handleVetSelection = (vetId: string): void => {
+    const selectedVet = availableVets.find(vet => vet.vetId === vetId);
+    setSelectedVetInfo(selectedVet || null);
+    setShowAvailability(!!selectedVet);
+    setVisit(prevVisit => ({ ...prevVisit, practitionerId: vetId }));
+  };
+
   const formatDate = (date: Date): string => {
     const pad = (n: number): string => n.toString().padStart(2, '0');
-    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+    const hourOnlyDate = new Date(date);
+    hourOnlyDate.setMinutes(0);
+    hourOnlyDate.setSeconds(0);
+    return `${hourOnlyDate.getFullYear()}-${pad(hourOnlyDate.getMonth() + 1)}-${pad(hourOnlyDate.getDate())}T${pad(hourOnlyDate.getHours())}:00`;
   };
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ): void => {
     const { name, value } = e.target;
-    setVisit(prevVisit => ({
-      ...prevVisit,
-      [name]: name === 'visitStartDate' ? new Date(value) : value,
-    }));
+
+    if (name === 'practitionerId') {
+      handleVetSelection(value);
+    } else if (name === 'visitStartDate') {
+      const selectedDate = new Date(value);
+      selectedDate.setMinutes(0);
+      selectedDate.setSeconds(0);
+      setVisit(prevVisit => ({ ...prevVisit, visitStartDate: selectedDate }));
+    } else {
+      setVisit(prevVisit => ({
+        ...prevVisit,
+        [name]: name === 'visitStartDate' ? new Date(value) : value,
+      }));
+    }
   };
 
   const validate = (): boolean => {
@@ -61,6 +182,17 @@ const OwnerBookingVisit: React.FC = (): JSX.Element => {
     if (!visit.practitionerId)
       newErrors.practitionerId = 'Practitioner ID is required';
     if (!visit.status) newErrors.status = 'Status is required';
+
+    if (visit.practitionerId && visit.visitStartDate && selectedVetInfo) {
+      const availabilityCheck = validateVetAvailability(
+        visit.visitStartDate,
+        selectedVetInfo
+      );
+      if (!availabilityCheck.isValid) {
+        newErrors.availability = availabilityCheck.message;
+      }
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -76,7 +208,6 @@ const OwnerBookingVisit: React.FC = (): JSX.Element => {
     setSuccessMessage('');
 
     const formattedVisit: VisitRequestModel = {
-      ...visit,
       visitDate: visit.visitStartDate
         .toISOString()
         .slice(0, 16)
@@ -86,6 +217,10 @@ const OwnerBookingVisit: React.FC = (): JSX.Element => {
         localStorage.getItem('authToken') ||
         localStorage.getItem('token') ||
         '',
+      description: visit.description,
+      petId: visit.petId,
+      practitionerId: visit.practitionerId,
+      status: visit.status,
     };
 
     try {
@@ -122,6 +257,7 @@ const OwnerBookingVisit: React.FC = (): JSX.Element => {
           value={formatDate(visit.visitStartDate)}
           onChange={handleChange}
           required
+          step="3600"
         />
         {errors.visitStartDate && (
           <span className="error">{errors.visitStartDate}</span>
@@ -138,17 +274,70 @@ const OwnerBookingVisit: React.FC = (): JSX.Element => {
           <span className="error">{errors.description}</span>
         )}
         <br />
-        <label>Practitioner ID: </label>
-        <input
-          type="text"
+        <label>Practitioner: </label>
+        <select
           name="practitionerId"
           value={visit.practitionerId}
           onChange={handleChange}
-        />
+        >
+          <option value="">Select a Veterinarian</option>
+          {availableVets.map(vet => (
+            <option key={vet.vetId} value={vet.vetId}>
+              Dr. {vet.firstName} {vet.lastName}
+            </option>
+          ))}
+        </select>
         {errors.practitionerId && (
           <span className="error">{errors.practitionerId}</span>
         )}
         <br />
+
+        {showAvailability && selectedVetInfo && (
+          <div className="vet-availability-card">
+            <h4 className="vet-availability-header">
+              <span className="vet-icon">🩺</span>
+              Dr. {selectedVetInfo.firstName} {selectedVetInfo.lastName} -
+              Availability
+            </h4>
+
+            <div className="availability-days-section">
+              <strong className="section-label">Available Days:</strong>
+              <span className="days-value">
+                {selectedVetInfo.workday.join(', ')}
+              </span>
+            </div>
+            <div className="availability-hours-section">
+              <strong className="section-label">Available Hours:</strong>
+              <div className="hours-container"></div>
+              {(() => {
+                try {
+                  const workHours = JSON.parse(selectedVetInfo.workHoursJson);
+                  return Object.entries(workHours).map(([day, hours]) => (
+                    <div key={day} className="day-hours-row">
+                      <strong className="day-name">{day}:</strong>
+                      <span className="hours-list">
+                        {formatWorkHours(hours as string[])}
+                      </span>
+                    </div>
+                  ));
+                } catch (e) {
+                  return <div>Work hours unavailable</div>;
+                }
+              })()}
+            </div>
+          </div>
+        )}
+
+        {errors.availability && (
+          <div className="availability-error">{errors.availability}</div>
+        )}
+
+        <label>Status: </label>
+        <select name="status" value={visit.status} onChange={handleChange}>
+          <option value="UPCOMING">Upcoming</option>
+        </select>
+        {errors.status && <span className="error">{errors.status}</span>}
+
         <button type="submit" disabled={isLoading}>
           {isLoading ? 'Adding...' : 'Add'}
         </button>

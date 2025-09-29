@@ -65,115 +65,102 @@
   outline: none;
 }
 
-.vet-availability-section {
+.vet-availability-card {
   background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%);
   border: 2px solid #4a90e2;
+  border-left: 5px solid #357abd;
   border-radius: 12px;
   padding: 20px;
   margin: 20px 0;
   box-shadow: 0 4px 12px rgba(74, 144, 226, 0.15);
   position: relative;
-  overflow: hidden;
 }
 
-.vet-availability-section::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #4a90e2, #357abd, #4a90e2);
-  border-radius: 12px 12px 0 0;
-}
-
-.vet-availability-title {
+.vet-availability-header {
   color: #2c5282;
   font-size: 18px;
   font-weight: 700;
-  margin-bottom: 16px;
+  margin: 0 0 20px 0;
+  padding-bottom: 12px;
+  border-bottom: 2px solid rgba(74, 144, 226, 0.3);
   display: flex;
   align-items: center;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
-.vet-availability-title::before {
-  content: '🩺';
-  margin-right: 8px;
-  font-size: 20px;
+.vet-icon {
+  margin-right: 10px;
+  font-size: 22px;
 }
 
-.availability-info {
+.availability-days-section {
   background: rgba(255, 255, 255, 0.7);
   border-radius: 8px;
-  padding: 12px;
+  padding: 12px 16px;
   margin-bottom: 16px;
   border-left: 4px solid #4a90e2;
 }
 
-.availability-info strong {
+.section-label {
   color: #2c5282;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 15px;
+  display: inline-block;
+  margin-right: 8px;
 }
 
-.availability-value {
-  margin-left: 8px;
+.days-value {
   color: #2d3748;
   font-weight: 500;
-  background: rgba(74, 144, 226, 0.1);
-  padding: 4px 8px;
-  border-radius: 4px;
+  background: rgba(74, 144, 226, 0.12);
+  padding: 4px 10px;
+  border-radius: 6px;
   display: inline-block;
 }
 
-.work-hours-display {
+.availability-hours-section {
   background: rgba(255, 255, 255, 0.7);
   border-radius: 8px;
-  padding: 12px;
+  padding: 12px 16px;
   border-left: 4px solid #48bb78;
 }
 
-.work-hours-display > strong {
-  color: #2c5282;
-  font-weight: 600;
-  font-size: 14px;
-  display: block;
-  margin-bottom: 8px;
+.hours-container {
+  margin-top: 12px;
 }
 
-.work-hours-day {
+.day-hours-row {
   background: rgba(255, 255, 255, 0.9);
-  margin: 6px 0;
-  padding: 8px 12px;
+  margin: 8px 0;
+  padding: 10px 14px;
   border-radius: 6px;
   border-left: 3px solid #48bb78;
-  font-size: 13px;
-  color: #2d3748;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.work-hours-day:hover {
-  transform: translateX(2px);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+.day-hours-row:hover {
+  transform: translateX(3px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
 }
 
-.work-hours-day strong {
+.day-name {
   color: #2c5282;
   font-weight: 600;
-  min-width: 80px;
+  min-width: 100px;
   display: inline-block;
+  font-size: 14px;
 }
 
-.work-hours-error {
+.hours-list {
+  color: #4a5568;
+  font-size: 14px;
+}
+
+.hours-error {
   color: #e53e3e;
   font-style: italic;
+  padding: 10px;
   text-align: center;
-  padding: 12px;
-  background: rgba(229, 62, 62, 0.1);
-  border-radius: 6px;
-  border: 1px solid #e53e3e;
 }
 
 

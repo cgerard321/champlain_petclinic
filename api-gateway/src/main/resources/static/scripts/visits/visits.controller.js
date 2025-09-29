@@ -294,10 +294,6 @@ angular.module('visits')
         }
 
 
-
-
-
-
         self.getVisitDate = function (id) {
             console.log("Getting date for visitId:", id);
             var visitDate = null;
