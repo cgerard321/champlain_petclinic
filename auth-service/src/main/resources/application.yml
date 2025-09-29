@@ -117,7 +117,6 @@ logging:
     root: INFO
     com.petclinic: DEBUG
 
-
 ---
 #for production
 management:
@@ -167,11 +166,6 @@ cart-service:
 emailing-service:
   host: emailing-service
   port: 5115
-
-logging:
-  level:
-    root: INFO
-    com.petclinic: DEBUG
 
 frontend:
   url: https://petclinic.benmusicgeek.synology.me/api/v2/gateway
