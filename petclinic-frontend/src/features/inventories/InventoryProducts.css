@@ -49,8 +49,8 @@ select {
   background-color: #ffffff;
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.075);
   transition:
-    border-color 0.15s ease-in-out,
-    box-shadow 0.15s ease-in-out;
+          border-color 0.15s ease-in-out,
+          box-shadow 0.15s ease-in-out;
 }
 
 input[type='text']:focus,
@@ -94,57 +94,57 @@ select:focus {
 .table th:nth-child(4),  /* Sale Price */
 .table th:nth-child(5),  /* Regular Price */
 .table th:nth-child(6) { /* Profit Margin */
-  word-spacing: 100vw; 
+  word-spacing: 100vw;
   overflow-wrap: break-word;
   word-break: break-word;
 }
 
 /* Supply Id */
-.table th:nth-child(1), 
+.table th:nth-child(1),
 .table td:nth-child(1) {
-  width: 8%; 
+  width: 8%;
 }
 
 /* Supply Name */
-.table th:nth-child(2), 
+.table th:nth-child(2),
 .table td:nth-child(2) {
-  width: 15%; 
+  width: 15%;
 }
 
 /* Description */
-.table th:nth-child(3), 
+.table th:nth-child(3),
 .table td:nth-child(3) {
-  width: 20%; 
+  width: 20%;
 }
 
 /* Sale Price */
-.table th:nth-child(4), 
+.table th:nth-child(4),
 .table td:nth-child(4) {
-  width: 8%; 
+  width: 8%;
 }
 
 /* Regular Price */
-.table th:nth-child(5), 
+.table th:nth-child(5),
 .table td:nth-child(5) {
-  width: 9%; 
+  width: 9%;
 }
 
 /* Profit Margin */
-.table th:nth-child(6), 
+.table th:nth-child(6),
 .table td:nth-child(6) {
-  width: 9%; 
+  width: 9%;
 }
 
 /* Quantity */
-.table th:nth-child(7), 
+.table th:nth-child(7),
 .table td:nth-child(7) {
-  width: 10%; 
+  width: 10%;
 }
 
 /* Status */
-.table th:nth-child(8), 
+.table th:nth-child(8),
 .table td:nth-child(8) {
-  width: 8%; 
+  width: 8%;
 }
 
 .table-striped tbody tr:nth-of-type(odd) {
