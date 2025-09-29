@@ -39,7 +39,7 @@ public class VisitController {
     private final VisitsServiceClient visitsServiceClient;
     private final BFFApiGatewayController bffApiGatewayController;
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
     @GetMapping(value = "", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public ResponseEntity<Flux<VisitResponseDTO>> getAllVisits(@RequestParam(required = false) String description){
         return ResponseEntity.ok().body(visitsServiceClient.getAllVisits(description));
@@ -53,16 +53,16 @@ public class VisitController {
     }
 
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.OWNER})
     @PostMapping(value = "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<VisitResponseDTO>> addVisit(@RequestBody Mono<VisitRequestDTO> visitResponseDTO) {
-        return visitsServiceClient.addVisit(visitResponseDTO)
+    public Mono<ResponseEntity<VisitResponseDTO>> addVisit(@RequestBody Mono<VisitRequestDTO> visitRequestDTO) {
+        return visitsServiceClient.addVisit(visitRequestDTO)
                 .map(v -> ResponseEntity.status(HttpStatus.CREATED).body(v))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
         }
 
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @SecuredEndpoint(allowedRoles = {Roles.ALL})
     @GetMapping(value = "/reviews")
     public ResponseEntity<Flux<ReviewResponseDTO>> getAllReviews(){
         return ResponseEntity.ok().body(visitsServiceClient.getAllReviews());
@@ -169,16 +169,41 @@ public class VisitController {
                 .map(c->ResponseEntity.status(HttpStatus.CREATED).body(c))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
+*/
+//    @PutMapping(value="/emergency/{emergencyId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+//    public Mono<ResponseEntity<EmergencyResponseDTO>> UpdateEmergency(@RequestBody Mono<EmergencyRequestDTO> emergencyRequestDTOMono, @PathVariable String emergencyId){
+//        return Mono.just(emergencyId)
+//                .filter(id -> id.length() == 36)
+//                .switchIfEmpty(Mono.error(new InvalidInputException("the provided emergency id is invalid: " + emergencyId)))
+//                .flatMap(id-> visitsServiceClient.updateEmergency(emergencyId,emergencyRequestDTOMono))
+//                .map(ResponseEntity::ok)
+//                .defaultIfEmpty(ResponseEntity.badRequest().build());
+//    }
 
-    @PutMapping(value="/emergency/{emergencyId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<EmergencyResponseDTO>> UpdateEmergency(@RequestBody Mono<EmergencyRequestDTO> emergencyRequestDTOMono, @PathVariable String emergencyId){
-        return Mono.just(emergencyId)
-              //  .filter(id -> id.length() == 36)
-               // .switchIfEmpty(Mono.error(new InvalidInputException("the provided emergency id is invalid: " + emergencyId)))
-                .flatMap(id-> visitsServiceClient.updateEmergency(emergencyId,emergencyRequestDTOMono))
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    @PutMapping(value = "/emergency/{visitEmergencyId}",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<EmergencyResponseDTO>> updateEmergencyById(
+            @PathVariable String visitEmergencyId,
+            @RequestBody Mono<EmergencyRequestDTO> emergencyRequestDTOMono) {
+
+        return emergencyRequestDTOMono
+                .flatMap(request -> visitsServiceClient
+                        .updateEmergency(visitEmergencyId, Mono.just(request))
+                        .map(ResponseEntity::ok)
+                        .defaultIfEmpty(ResponseEntity.notFound().build())
+                );
     }
+
+
+
+
+
+
+
+
+
+
 
     @DeleteMapping(value="/emergency/{emergencyId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<EmergencyResponseDTO>> DeteleEmergency(@PathVariable String emergencyId) {
@@ -189,7 +214,6 @@ public class VisitController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
-     */
 
     @SecuredEndpoint(allowedRoles = Roles.ADMIN)
     @IsUserSpecific(idToMatch = {"visitId"})

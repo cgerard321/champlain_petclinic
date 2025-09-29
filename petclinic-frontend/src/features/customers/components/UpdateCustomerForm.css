@@ -140,3 +140,129 @@
   background-color: #004085;
   transform: scale(0.98);
 }
+
+.update-customer-form form {
+  display: flex;
+  flex-direction: column;
+}
+
+.update-customer-form label {
+  margin-bottom: 15px;
+  font-family: 'Arial', sans-serif;
+  color: #555;
+}
+
+.update-customer-form input {
+  padding: 10px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-family: 'Arial', sans-serif;
+  font-size: 16px;
+}
+
+.update-customer-form button {
+  padding: 12px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 20px;
+  font-family: 'Arial', sans-serif;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+}
+
+.update-customer-form button:hover {
+  background-color: #218838;
+}
+
+.error {
+  color: red;
+  font-size: 0.8em;
+  margin-top: 5px;
+  font-family: 'Arial', sans-serif;
+}
+
+.update-customer-form input:focus {
+  border-color: #28a745;
+  box-shadow: 0 0 5px rgba(40, 167, 69, 0.5);
+  outline: none;
+}
+
+.admin-update-customer-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.admin-update-customer-modal {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  max-width: 400px;
+  width: 100%;
+}
+
+.admin-update-customer-modal h2 {
+  margin-bottom: 10px;
+  font-size: 24px;
+}
+
+.admin-update-customer-modal p {
+  margin-bottom: 20px;
+  font-size: 18px;
+}
+
+.admin-update-customer-modal button {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 10px 30px;
+  font-size: 16px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.admin-update-customer-modal button:hover {
+  background-color: #45a049;
+}
+
+#back-button {
+  display: inline-block;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #ffffff;
+  background-color: #007bff;
+  text-decoration: none;
+  border-radius: 5px;
+  transition:
+    background-color 0.3s ease,
+    transform 0.2s ease;
+  white-space: nowrap;
+  position: fixed;
+  left: 15px;
+  bottom: 15px;
+  z-index: 1000;
+}
+
+#back-button:hover {
+  background-color: #0056b3;
+  color: #ffffff;
+}
+
+#back-button:active {
+  background-color: #004085;
+  transform: scale(0.98);
+}

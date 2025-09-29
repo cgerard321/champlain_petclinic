@@ -40,7 +40,7 @@ import EditInventoryProducts from './features/inventories/EditInventoryProducts'
 import AddSupplyToInventory from './features/inventories/AddSupplyToInventory';
 import AllUsers from '@/pages/Users/AllUsers.tsx';
 //import AddEmergencyForm from './features/visits/Emergency/AddEmergencyForm';
-//import EditEmergency from './features/visits/Emergency/EditEmergency';
+import EditEmergency from '@/features/visits/Emergency/EditEmergency';
 import EmergencyList from './features/visits/Emergency/EmergencyList';
 import ProductDetails from '@/features/products/api/ProductDetails.tsx';
 // import ProductsList from '@/features/products/ProductsList.tsx';
@@ -62,6 +62,7 @@ import CustomerPromoPage from '@/pages/Promos/CustomerPromoPage.tsx';
 import UserDetailsPage from './pages/Users/UserDetailsPage';
 import UpdateUserPage from './pages/Users/UpdateUserPage';
 import AllRoles from '@/pages/Users/AllRoles.tsx';
+import OwnerBookAppointment from '@/pages/Visit/OwnerBookAppointment.tsx';
 import FAQ from './pages/FAQ/FAQ';
 import ContactPage from './pages/Contact/Contact';
 import PrivacyPolicyPage from './pages/PrivacyPolicy/PrivacyPolicy';
@@ -309,7 +310,7 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.Visits,
         element: (
-          <ProtectedRoute roles={['ADMIN']}>
+          <ProtectedRoute roles={['ADMIN', 'VET']}>
             <Visits />
           </ProtectedRoute>
         ),
@@ -427,6 +428,14 @@ const router = createBrowserRouter([
         ),
       },
       {
+        path: AppRoutePaths.EditEmergency,
+        element: (
+          <ProtectedRoute>
+            <EditEmergency />
+          </ProtectedRoute>
+        ),
+      },
+      {
         path: AppRoutePaths.UpdatePet,
         element: (
           <ProtectedRoute roles={['ADMIN', 'VET']}>
@@ -473,6 +482,14 @@ const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <AddReviewsCustomer />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: AppRoutePaths.OwnerBookAppointment,
+    element: (
+      <ProtectedRoute roles={['OWNER']}>
+        <OwnerBookAppointment />
       </ProtectedRoute>
     ),
   },

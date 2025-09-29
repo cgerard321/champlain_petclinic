@@ -5,5 +5,14 @@ import { ProductModel } from '@/features/products/models/ProductModels/ProductMo
 export const deleteProduct = async (
   productId: string
 ): Promise<AxiosResponse<ProductModel>> => {
-  return await axiosInstance.delete<ProductModel>(`/products/${productId}`);
+  try {
+    return await axiosInstance.delete<ProductModel>(`/products/${productId}`, {
+      useV2: true,
+    });
+  } catch (error) {
+    console.error('Error deleting product:', error);
+    throw error;
+  }
 };
+
+// This page needs to be deleted since react is only for customers and not employees.

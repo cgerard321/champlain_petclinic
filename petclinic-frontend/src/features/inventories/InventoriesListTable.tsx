@@ -281,11 +281,11 @@ export default function InventoriesListTable(): JSX.Element {
             onClick={toggleActionsMenu}
             id={inventoryStyles.menuIcon}
             xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            fill="currentColor"
-            className="bi bi-list"
             viewBox="0 0 16 16"
+            fill="currentColor" // bars follow CSS 'color'
+            className="bi bi-list"
+            role="button"
+            aria-label="Open menu"
           >
             <path
               fillRule="evenodd"
@@ -357,15 +357,21 @@ export default function InventoriesListTable(): JSX.Element {
         </div>
       </div>
       <div>
-        <table className="table table-striped">
+        <table
+          className={`table table-striped ${inventoryStyles.inventoryTable} ${inventoryStyles.fixedTable} ${inventoryStyles.cleanTable}`}
+        >
           <thead>
             <tr>
               <td></td>
               <td style={{ fontWeight: 'bold' }}>Name</td>
               <td style={{ fontWeight: 'bold' }}>Type</td>
               <td style={{ fontWeight: 'bold' }}>Description</td>
-              <td style={{ fontWeight: 'bold' }}>Important</td>
-              <td></td>
+              <td className="text-center" style={{ fontWeight: 'bold' }}>
+                Important
+              </td>
+              <td className="text-center" style={{ fontWeight: 'bold' }}>
+                Clear
+              </td>
               <td></td>
             </tr>
             <tr>
@@ -400,25 +406,28 @@ export default function InventoriesListTable(): JSX.Element {
                   }
                 />
               </td>
-              <td>
-                <input
-                  type="checkbox"
-                  checked={showImportantOnly}
-                  onChange={e => {
-                    const value = e.target.checked;
-                    setShowImportantOnly(value);
-                    updateFilters({
-                      inventoryName,
-                      inventoryType,
-                      inventoryDescription,
-                      importantOnly: value,
-                    });
-                  }}
-                />
+              <td className="text-center align-middle">
+                <div className="form-check d-inline-flex align-items-center justify-content-center m-0">
+                  <input
+                    className="form-check-input"
+                    type="checkbox"
+                    checked={showImportantOnly}
+                    onChange={e => {
+                      const value = e.target.checked;
+                      setShowImportantOnly(value);
+                      updateFilters({
+                        inventoryName,
+                        inventoryType,
+                        inventoryDescription,
+                        importantOnly: value,
+                      });
+                    }}
+                  />
+                </div>
               </td>
               <td>
                 <button
-                  className="btn btn-info"
+                  className="btn btn-primary"
                   onClick={clearQueries}
                   title="Clear"
                 >
@@ -439,6 +448,7 @@ export default function InventoriesListTable(): JSX.Element {
             </tr>
           </thead>
         </table>
+
         {inventoryList.length === 0 &&
           (inventoryName !== '' ||
             inventoryType !== '' ||
@@ -544,7 +554,7 @@ export default function InventoriesListTable(): JSX.Element {
                     <button
                       onClick={e => {
                         e.stopPropagation();
-                        navigate(`inventory/${inventory.inventoryId}/edit`);
+                        navigate(`/inventories/${inventory.inventoryId}/edit`);
                       }}
                       className="btn btn-warning"
                     >
@@ -590,34 +600,26 @@ export default function InventoriesListTable(): JSX.Element {
           className="d-flex justify-content-center"
           style={{ marginBottom: '100px' }}
         >
-          <div className="text-center">
-            <table>
-              <tbody>
-                <tr>
-                  <td>
-                    <button
-                      className="btn btn-primary btn-sm"
-                      onClick={pageBefore}
-                    >
-                      &lt;
-                    </button>
-                  </td>
-                  <td>
-                    <span className="mx-2">{realPage}</span>{' '}
-                    {/* Added margin for space */}
-                  </td>
-                  <td>
-                    <button
-                      className="btn btn-primary btn-sm"
-                      onClick={pageAfter}
-                      disabled={inventoryList.length === 0}
-                    >
-                      &gt;
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+          <div className={inventoryStyles.pager}>
+            <button
+              className="btn btn-primary"
+              onClick={pageBefore}
+              disabled={currentPage === 0}
+              aria-label="Previous page"
+            >
+              &lt;
+            </button>
+
+            <span className={inventoryStyles.pageNumber}>{realPage}</span>
+
+            <button
+              className="btn btn-primary"
+              onClick={pageAfter}
+              disabled={inventoryList.length === 0}
+              aria-label="Next page"
+            >
+              &gt;
+            </button>
           </div>
         </div>
 
