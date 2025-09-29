@@ -204,7 +204,7 @@ public class VisitController {
 
 
 
-/*
+
     @DeleteMapping(value="/emergency/{emergencyId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<EmergencyResponseDTO>> DeteleEmergency(@PathVariable String emergencyId) {
         return Mono.just(emergencyId)
