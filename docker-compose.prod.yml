@@ -137,6 +137,17 @@ services:
     depends_on:
       - mongo-carts
 
+  files-service:
+    build: files-service
+    environment:
+      - FILE_ENDPOINT=petclinic-bucket.benmusicgeek.synology.me
+      - FILE_ENV=prod
+    env_file:
+      - stack.env
+    depends_on:
+      mysql-files:
+        condition: service_healthy
+
   # -------------------
   # DATABASES
   # -------------------
@@ -160,7 +171,23 @@ services:
       timeout: 5s
       retries: 10
 
-
+  mysql-files:
+    image: mysql:5.7
+    platform: linux/amd64
+    ports:
+      - "3311:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpwd
+      - MYSQL_DATABASE=files-db
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=pwd
+    volumes:
+      - mysql-files-data:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-uuser", "-ppwd", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
   postgres-vet:
     image: postgres
@@ -290,3 +317,4 @@ volumes:
   mongo-carts-data:
   mongo-carts-config:
   postgres-vet-data:
+  mysql-files-data:
