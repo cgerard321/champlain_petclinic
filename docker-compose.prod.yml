@@ -1,4 +1,4 @@
-version: '3.9'
+version: "3.9"
 
 services:
   # -------------------
@@ -93,7 +93,7 @@ services:
     build: auth-service
     hostname: auth
     environment:
-      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_PROFILES_ACTIVE=prod
     restart: unless-stopped
     depends_on:
       mysql-auth:
@@ -119,22 +119,6 @@ services:
       - stack.env
     restart: unless-stopped
 
-  emailing-service:
-    image: emailing-service
-    pull_policy: never
-    container_name: emailing-service-container
-    build:
-      context: ./emailing-service
-      dockerfile: emailing-service/Dockerfile
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - DEFAULT_CONNECTION=Server=emailing-service-mysql-db;Port=3306;Database=MyAppDb;User=root;Password=Your_password123;
-    env_file:
-      - stack.env
-    restart: unless-stopped
-    depends_on:
-      - emailing-service-mysql-db
-
   products-service:
     build: products-service
     hostname: products-service
@@ -152,6 +136,17 @@ services:
     restart: unless-stopped
     depends_on:
       - mongo-carts
+
+  files-service:
+    build: files-service
+    environment:
+      - FILE_ENDPOINT=petclinic-bucket.benmusicgeek.synology.me
+      - FILE_ENV=prod
+    env_file:
+      - stack.env
+    depends_on:
+      mysql-files:
+        condition: service_healthy
 
   # -------------------
   # DATABASES
@@ -176,19 +171,23 @@ services:
       timeout: 5s
       retries: 10
 
-  emailing-service-mysql-db:
-    image: mysql:8.0
-    container_name: emailing-service-mysql-db
+  mysql-files:
+    image: mysql:5.7
     platform: linux/amd64
-    environment:
-      - MYSQL_ROOT_PASSWORD=Your_password123
-      - MYSQL_DATABASE=MyAppDb
-      - SPRING_PROFILES_ACTIVE=docker
     ports:
-      - "3308:3306"
+      - "3311:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpwd
+      - MYSQL_DATABASE=files-db
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=pwd
     volumes:
-      - emailing-service-mysql-db-data:/var/lib/mysql
-    restart: unless-stopped
+      - mysql-files-data:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-uuser", "-ppwd", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
   postgres-vet:
     image: postgres
@@ -318,4 +317,4 @@ volumes:
   mongo-carts-data:
   mongo-carts-config:
   postgres-vet-data:
-  emailing-service-mysql-db-data:
+  mysql-files-data:

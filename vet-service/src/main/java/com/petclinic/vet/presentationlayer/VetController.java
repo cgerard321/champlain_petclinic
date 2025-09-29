@@ -260,9 +260,9 @@ public class VetController {
 
     //Photo
     @GetMapping("{vetId}/photo")
-    public Mono<ResponseEntity<Resource>> getPhotoByVetId(@PathVariable String vetId){
+    public Mono<ResponseEntity<PhotoResponseDTO>> getPhotoByVetId(@PathVariable String vetId){
         return photoService.getPhotoByVetId(vetId)
-                .map(r -> ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, MediaType.IMAGE_JPEG_VALUE).body(r))
+                .map(photo -> ResponseEntity.ok().body(photo))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
     @GetMapping("{vetId}/default-photo")
@@ -273,14 +273,13 @@ public class VetController {
     }
 
 
-    @PostMapping(value = "{vetId}/photos/{photoName}",
-            consumes = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-    public Mono<ResponseEntity<Resource>> addPhotoByVetId(
+    @PostMapping(value = "{vetId}/photos",
+            consumes = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<PhotoResponseDTO>> addPhotoByVetId(
             @PathVariable String vetId,
-            @PathVariable String photoName,
-            @RequestBody byte[] fileData) {
-        return photoService.insertPhotoOfVet(vetId, photoName, fileData)
-                .map(res -> ResponseEntity.status(HttpStatus.CREATED).body(res))
+            @RequestBody Mono<PhotoRequestDTO> photoRequestDTO) {
+        return photoService.insertPhotoOfVet(vetId, photoRequestDTO)
+                .map(photo -> ResponseEntity.status(HttpStatus.CREATED).body(photo))
                 .switchIfEmpty(Mono.just(ResponseEntity.badRequest().build()));
     }
 
@@ -294,10 +293,10 @@ public class VetController {
 
 
 
-    @PutMapping("{vetId}/photos/{photoName}")
-    public Mono<ResponseEntity<Resource>> updatePhotoByVetId(@PathVariable String vetId, @PathVariable String photoName, @RequestBody Mono<Resource> photo){
-        return photoService.updatePhotoByVetId(vetId, photoName, photo)
-                .map(p -> ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, MediaType.IMAGE_JPEG_VALUE).body(p))
+    @PutMapping("{vetId}/photo")
+    public Mono<ResponseEntity<PhotoResponseDTO>> updatePhotoByVetId(@PathVariable String vetId, @RequestBody Mono<PhotoRequestDTO> photoRequestDTO){
+        return photoService.updatePhotoByVetId(vetId, photoRequestDTO)
+                .map(photo -> ResponseEntity.ok().body(photo))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 

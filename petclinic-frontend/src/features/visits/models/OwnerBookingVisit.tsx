@@ -197,6 +197,14 @@ const OwnerBookingVisit: React.FC = (): JSX.Element => {
     return Object.keys(newErrors).length === 0;
   };
 
+  const handleCancel = (): void => {
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate('/visits');
+    }
+  };
+
   const handleSubmit = async (
     event: FormEvent<HTMLFormElement>
   ): Promise<void> => {
@@ -212,6 +220,10 @@ const OwnerBookingVisit: React.FC = (): JSX.Element => {
         .toISOString()
         .slice(0, 16)
         .replace('T', ' '),
+      description: visit.description,
+      petId: visit.petId,
+      practitionerId: visit.practitionerId,
+      status: visit.status,
       ownerId: user.userId,
       jwtToken:
         localStorage.getItem('authToken') ||
@@ -337,6 +349,11 @@ const OwnerBookingVisit: React.FC = (): JSX.Element => {
           <option value="UPCOMING">Upcoming</option>
         </select>
         {errors.status && <span className="error">{errors.status}</span>}
+
+
+        <button className="cancel" type="button" onClick={handleCancel}>
+          Cancel
+        </button>
 
         <button type="submit" disabled={isLoading}>
           {isLoading ? 'Adding...' : 'Add'}

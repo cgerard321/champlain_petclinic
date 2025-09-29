@@ -1,6 +1,6 @@
-import { AxiosResponse } from 'axios';
 import axiosInstance from '@/shared/api/axiosInstance';
 import { Workday } from '@/features/veterinarians/models/Workday.ts';
+import { VetRequestModel } from '@/features/veterinarians/models/VetRequestModel';
 
 export const addVet = async (vet: {
   password: string;
@@ -21,6 +21,9 @@ export const addVet = async (vet: {
   userId: string;
   email: string;
   username: string;
-}): Promise<AxiosResponse<void>> => {
-  return await axiosInstance.post<void>('/vets/users/vets', vet);
+}): Promise<VetRequestModel> => {
+  const response = await axiosInstance.post(`/vets`, vet, {
+    useV2: false,
+  });
+  return response.data;
 };

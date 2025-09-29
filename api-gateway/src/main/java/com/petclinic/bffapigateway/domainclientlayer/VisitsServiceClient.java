@@ -409,6 +409,7 @@ public class VisitsServiceClient {
                 .retrieve()
                 .bodyToMono(EmergencyResponseDTO.class);
     }
+    */
 
     public Mono<EmergencyResponseDTO> deleteEmergency(String emergencyId) {
         return webClient
@@ -417,7 +418,7 @@ public class VisitsServiceClient {
                 .retrieve()
                 .bodyToMono(EmergencyResponseDTO.class);
     }
-    */
+
 
     public Mono<VisitResponseDTO> patchVisitStatus(String visitId, String status) {
         return webClient.patch()
