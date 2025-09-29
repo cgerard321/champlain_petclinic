@@ -13,7 +13,7 @@ interface ApiError {
 
 const AddEmergencyForm: React.FC = (): JSX.Element => {
   const [emergency, setEmergency] = useState<EmergencyRequestDTO>({
-    visitDate: new Date(),
+    visitDate: '', // Use string for visitDate
     description: '',
     petId: '', // Added petId
     practitionerId: '', // Added practitionerId
@@ -42,12 +42,17 @@ const AddEmergencyForm: React.FC = (): JSX.Element => {
     }));
   };
 
-  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
-    setEmergency(prevEmergency => ({
-      ...prevEmergency,
-      visitDate: new Date(e.target.value), // Ensure the correct date is passed
-    }));
-  };
+  // const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+  //   setEmergency(prevEmergency => ({
+  //     ...prevEmergency,
+  //     visitDate: new Date(e.target.value), // Ensure the correct date is passed
+  //   }));
+  // };
+
+  // const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+  //   const { value } = e.target; // "YYYY-MM-DDTHH:mm"
+  //   setEmergency(prev => (prev ? { ...prev, visitDate: value } : prev));
+  // };
 
   const validate = (): boolean => {
     const newErrors: { [key: string]: string } = {};
@@ -61,6 +66,11 @@ const AddEmergencyForm: React.FC = (): JSX.Element => {
       newErrors.practitionerId = 'Practitioner ID is required'; // Validation for practitionerId
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const { value } = e.target; // "YYYY-MM-DDTHH:mm"
+    setEmergency(prev => ({ ...prev, visitDate: value }));
   };
 
   const handleSubmit = async (
@@ -80,7 +90,8 @@ const AddEmergencyForm: React.FC = (): JSX.Element => {
       setTimeout(() => setShowNotification(false), 3000); // Hide notification after 3 seconds
       navigate('/customer/emergency'); // Navigate to a different page or clear form
       setEmergency({
-        visitDate: new Date(),
+        // visitDate: new Date(),
+        visitDate: '',
         description: '',
         petId: '', // Reset petId
         practitionerId: '', // Reset practitionerId
@@ -178,9 +189,13 @@ const AddEmergencyForm: React.FC = (): JSX.Element => {
         <div>
           <label>Date:</label>
           <input
-            type="date"
+            // type="date"
+            // name="visitDate"
+            // value={emergency.visitDate} // Use string value directly
+            // onChange={handleDateChange}
+            type="datetime-local"
             name="visitDate"
-            value={emergency.visitDate.toISOString().split('T')[0]} // Format the date correctly
+            value={emergency.visitDate ?? ''}
             onChange={handleDateChange}
             required
           />

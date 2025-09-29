@@ -40,7 +40,7 @@ import EditInventoryProducts from './features/inventories/EditInventoryProducts'
 import AddSupplyToInventory from './features/inventories/AddSupplyToInventory';
 import AllUsers from '@/pages/Users/AllUsers.tsx';
 //import AddEmergencyForm from './features/visits/Emergency/AddEmergencyForm';
-//import EditEmergency from './features/visits/Emergency/EditEmergency';
+import EditEmergency from '@/features/visits/Emergency/EditEmergency';
 import EmergencyList from './features/visits/Emergency/EmergencyList';
 import ProductDetails from '@/features/products/api/ProductDetails.tsx';
 // import ProductsList from '@/features/products/ProductsList.tsx';
@@ -424,6 +424,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <EditingVisit />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.EditEmergency,
+        element: (
+          <ProtectedRoute>
+            <EditEmergency />
           </ProtectedRoute>
         ),
       },

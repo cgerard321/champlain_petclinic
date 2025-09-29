@@ -2,7 +2,8 @@ import { UrgencyLevel } from './UrgencyLevel';
 
 export interface EmergencyResponseDTO {
   visitEmergencyId: string;
-  visitDate: Date;
+  // visitDate: Date;
+  visitDate: string;
 
   description: string;
 

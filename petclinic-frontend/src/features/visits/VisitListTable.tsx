@@ -3,7 +3,6 @@ import { Visit } from './models/Visit';
 import './VisitListTable.css';
 import './Emergency.css';
 import { useNavigate } from 'react-router-dom';
-// import { AppRoutePaths } from '@/shared/models/path.routes.ts';
 import { getAllEmergency } from './Emergency/Api/getAllEmergency';
 import { EmergencyResponseDTO } from './Emergency/Model/EmergencyResponseDTO';
 import { deleteEmergency } from './Emergency/Api/deleteEmergency';
@@ -40,6 +39,7 @@ export default function VisitListTable(): JSX.Element {
           getAllVisits(searchTerm),
           getAllEmergency(),
         ]);
+
         if (visitsRes.status === 'fulfilled') {
           setVisitsList(visitsRes.value);
           setVisitsAll(visitsRes.value);
@@ -62,7 +62,12 @@ export default function VisitListTable(): JSX.Element {
       return;
     }
 
-    const eventSource = new EventSource('/visits');
+    // const eventSource = new EventSource('/visits');
+    const API_BASE =
+      import.meta.env.VITE_BFF_BASE_URL ?? 'http://localhost:8080';
+    const eventSource = new EventSource(`${API_BASE}/api/v2/gateway/visits`, {
+      withCredentials: true,
+    });
 
     eventSource.onmessage = event => {
       try {
@@ -655,14 +660,14 @@ export default function VisitListTable(): JSX.Element {
         {renderTable('Cancelled', cancelledVisits)}
         {renderTable('Archived', archivedVisits)}
         {visitIdToDelete && (
-          <div className="modal">
-            <div className="modal-content">
+          <div className="emergencyVisitModal">
+            <div className="emergencyVisitModal-content">
               <h3>Confirm Deletion</h3>
               <p>
                 Are you sure you want to delete emergency visit{' '}
                 {visitIdToDelete}?
               </p>
-              <div className="modal-buttons">
+              <div className="emergencyVisitModal-buttons">
                 <button onClick={() => setConfirmDeleteId(null)}>Cancel</button>
                 <button
                   onClick={async () => {
@@ -688,7 +693,7 @@ export default function VisitListTable(): JSX.Element {
   };
 
   return (
-    <div className="visit-page-container">
+    <div className="page-container">
       {renderSidebar('Visits')} {renderVisitsTables()}
     </div>
   );
