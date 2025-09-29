@@ -24,8 +24,8 @@ import reactor.core.publisher.Mono;
 public class ProductController {
 
     private final ProductsServiceClient productsServiceClient;
-
-    @SecuredEndpoint(allowedRoles = {Roles.ALL})
+//1
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS}) //from Roles.All
     @GetMapping(value = "", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ProductResponseDTO> getAllProducts(
             @RequestParam(required = false) Double minPrice,
@@ -54,7 +54,7 @@ public class ProductController {
     }
 
 
-
+//2
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @GetMapping(value = "{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<ProductResponseDTO>> getProductByProductId(@PathVariable String productId) {
@@ -63,13 +63,14 @@ public class ProductController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ALL})
+    //3
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS}) //from Roles.All
     @PatchMapping(value = "{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<Void>> incrementRequestCount(@PathVariable String productId) {
         return productsServiceClient.requestCount(productId).then(Mono.just(ResponseEntity.noContent().build()));
     }
 
-
+//4
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
     @PostMapping(value = "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<ProductResponseDTO>> addProduct(@RequestBody ProductRequestDTO productRequestDTO) {
@@ -77,7 +78,7 @@ public class ProductController {
                 .map(product -> ResponseEntity.status(HttpStatus.CREATED).body(product))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
-
+//5
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
     @PutMapping(value = "{productId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<ProductResponseDTO>> updateProduct(@PathVariable String productId,
@@ -86,7 +87,7 @@ public class ProductController {
                 .map(product -> ResponseEntity.status(HttpStatus.OK).body(product))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
-
+//6
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
     @PatchMapping(value = "{productId}/status", consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
@@ -106,7 +107,7 @@ public class ProductController {
                     }
                 });
     }
-
+//7
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @DeleteMapping(value = "{productId}")
     public Mono<ResponseEntity<Void>> deleteProduct(@PathVariable String productId) {
@@ -114,19 +115,20 @@ public class ProductController {
                 .then(Mono.just(ResponseEntity.noContent().<Void>build()))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS}) //this whole line was added
     @GetMapping(value = "/filter/{productType}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Flux<ProductResponseDTO> getProductsByType(@PathVariable String productType) {
         return productsServiceClient.getProductsByType(productType);
     }
 
-
+//8
     @SecuredEndpoint(allowedRoles = {Roles.ALL})
     @PatchMapping(value = "{productId}/decrease", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<Void>> decreaseProductQuantity(@PathVariable String productId) {
         return productsServiceClient.decreaseProductQuantity(productId).then(Mono.just(ResponseEntity.noContent().build()));
     }
 
-
+//9
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
     @PatchMapping(value = "{productId}/quantity", consumes = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<Object>> changeProductQuantity(
@@ -144,13 +146,14 @@ public class ProductController {
                 });
     }
 
+    //10
     // New endpoints for product bundles
-    @SecuredEndpoint(allowedRoles = {Roles.ALL})
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @GetMapping(value = "/bundles", produces = MediaType.APPLICATION_JSON_VALUE)
     public Flux<ProductBundleResponseDTO> getAllProductBundles() {
         return productsServiceClient.getAllProductBundles();
     }
-
+//11
     @SecuredEndpoint(allowedRoles = {Roles.ALL})
     @GetMapping(value = "/bundles/{bundleId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<ProductBundleResponseDTO>> getProductBundleById(@PathVariable String bundleId) {
@@ -158,14 +161,14 @@ public class ProductController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
-
+//12
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
     @PostMapping(value = "/bundles", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<ProductBundleResponseDTO>> createProductBundle(@RequestBody ProductBundleRequestDTO requestDTO) {
         return productsServiceClient.createProductBundle(requestDTO)
                 .map(bundle -> ResponseEntity.status(201).body(bundle));
     }
-
+//13
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
     @PutMapping(value = "/bundles/{bundleId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<ProductBundleResponseDTO>> updateProductBundle(@PathVariable String bundleId,
@@ -173,7 +176,7 @@ public class ProductController {
         return productsServiceClient.updateProductBundle(bundleId, requestDTO)
                 .map(ResponseEntity::ok);
     }
-
+//14
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @DeleteMapping(value = "/bundles/{bundleId}")
     public Mono<ResponseEntity<Void>> deleteProductBundle(@PathVariable String bundleId) {
