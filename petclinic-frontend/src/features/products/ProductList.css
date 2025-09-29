@@ -220,28 +220,3 @@
   scroll-snap-align: start;
 
 }
-
-.search-and-filter{
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  /*margin: 20px 0;
-  flex-wrap: wrap;
-  position: relative;
-  padding-right: 25%;*/
-  gap: 12px;
-}
-
-.search-and-filter .search-wrapper{
-  flex: 1 1 auto;
-}
-
-.search-and-filter .toggle-sidebar-button{
-  flex: 0 0 auto;
-}
-
-.search-wrapper{
-  flex: 1;
-  max-width: 600px;
-  justify-content: center;
-}

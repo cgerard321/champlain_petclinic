@@ -124,7 +124,7 @@ button[type='submit']:hover {
   color: #343a40;
   font-size: 16px;
   padding-bottom: 10px;
-  }
+}
 
 .rating-section {
   margin-bottom: 16px;
@@ -139,7 +139,7 @@ button[type='submit']:hover {
 }
 
 .add-review-form button.submit:hover {
-  background-color: #1d5fbd; 
+  background-color: #1d5fbd;
   border-color: #1d5fbd;
   color: #fff;
 }
