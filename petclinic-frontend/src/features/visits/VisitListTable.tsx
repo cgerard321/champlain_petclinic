@@ -62,11 +62,7 @@ export default function VisitListTable(): JSX.Element {
       return;
     }
 
-    const API_BASE =
-      import.meta.env.VITE_BFF_BASE_URL ?? 'http://localhost:8080';
-    const eventSource = new EventSource(`${API_BASE}/api/v2/gateway/visits`, {
-      withCredentials: true,
-    });
+    const eventSource = new EventSource('/visits');
 
     eventSource.onmessage = event => {
       try {
