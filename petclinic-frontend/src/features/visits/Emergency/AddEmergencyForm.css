@@ -141,7 +141,7 @@
   margin-bottom: 10px;
 }
 
-.modal {
+.emergencyVisitModal {
   position: fixed;
   top: 0;
   left: 0;
@@ -154,7 +154,7 @@
   z-index: 1000;
 }
 
-.modal-content {
+.emergencyVisitModal-content {
   background-color: #fff;
   padding: 20px 30px;
   border-radius: 10px;
@@ -165,22 +165,22 @@
   animation: fadeIn 0.3s ease-in-out;
 }
 
-.modal-content h3 {
+.emergencyVisitModal-content h3 {
   margin-bottom: 10px;
 }
 
-.modal-content p {
+.emergencyVisitModal-content p {
   margin-bottom: 20px;
   color: #444;
 }
 
-.modal-buttons {
+.emergencyVisitModal-buttons {
   display: flex;
   justify-content: space-between;
   margin-top: 20px;
 }
 
-.modal-buttons button {
+.emergencyVisitModal-buttons button {
   padding: 8px 16px;
   border: none;
   border-radius: 6px;
@@ -190,22 +190,22 @@
 }
 
 /* Cancel button */
-.modal-buttons button:first-of-type {
+.emergencyVisitModal-buttons button:first-of-type {
   background-color: #6c757d !important;
   color: #fff !important;
 }
 
-.modal-buttons button:first-of-type:hover {
+.emergencyVisitModal-buttons button:first-of-type:hover {
   background-color: #5a6268;
 }
 
 /* Confirm button */
-.modal-buttons button:last-of-type {
+.emergencyVisitModal-buttons button:last-of-type {
   background-color: #0144aa !important;
   color: #fff !important;
 }
 
-.modal-buttons button:last-of-type:hover {
+.emergencyVisitModal-buttons button:last-of-type:hover {
   background-color: #014cbc;
 }
 
