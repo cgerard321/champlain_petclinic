@@ -5,7 +5,7 @@ import './EditVisit.css';
 import { VisitRequestModel } from '@/features/visits/models/VisitRequestModel';
 import { Status } from '@/features/visits/models/Status';
 import { addVisit } from '@/features/visits/api/addVisit';
-
+import axiosInstance from "@/shared/api/axiosInstance.ts";
 interface ApiError {
   message: string;
 }
