@@ -600,7 +600,6 @@ export default function InventoriesListTable(): JSX.Element {
           className="d-flex justify-content-center"
           style={{ marginBottom: '100px' }}
         >
-          {/* Pagination */}
           <div className={inventoryStyles.pager}>
             <button
               className="btn btn-primary"

@@ -70,18 +70,18 @@
   float: right;
   margin-right: 25px;
 }
-/* hook for the table element itself */
+
 .inventoryTable {
   border-collapse: collapse;
 }
 
-/* remove Bootstrap’s row separators */
+
 .cleanTable :global(thead th),
 .cleanTable :global(tbody td) {
   border-bottom: 0 !important;
 }
 
-/* (paranoid) kill zebra striping if any */
+
 .cleanTable :global(tbody tr:nth-of-type(odd)) {
   --bs-table-accent-bg: transparent !important;
   background-color: transparent !important;
@@ -89,7 +89,7 @@
 
 
 
-/* center key columns */
+
 .inventoryTable :global(thead th:nth-child(1)),
 .inventoryTable :global(tbody td:nth-child(1)),
 .inventoryTable :global(thead th:nth-child(2)),
@@ -101,7 +101,7 @@
   text-align: center;
 }
 
-/* keep your fixed layout */
+
 .fixedTable { table-layout: fixed; width: 100%; }
 
 .inventoryTable :global(th),
@@ -114,7 +114,7 @@
   align-items: center;
   justify-content: center;
   gap: 16px;
-  margin: 40px 0 80px; /* similar spacing as your mock */
+  margin: 40px 0 80px; 
 }
 
 .pageNumber {

@@ -253,63 +253,63 @@ form button[type="submit"].btn {
 button.btn {
   word-break: keep-all;
 }
-/* Let columns size by content (not fixed widths) */
+
 .table.table-striped {
   table-layout: auto !important;
-  min-width: 0 !important;        /* don’t force a wide table */
+  min-width: 0 !important;       
 }
 
-/* STOP clipping: previously you had overflow:hidden somewhere */
+
 .table.table-striped th,
 .table.table-striped td {
   overflow: visible !important;
-  white-space: normal;             /* allow wrapping where needed */
+  white-space: normal;             
   text-overflow: clip !important;
 }
 
-/* Make long text wrap so we reclaim horizontal space */
-.table.table-striped td:nth-child(1),   /* Supply Id */
-.table.table-striped td:nth-child(3) {  /* Description */
+
+.table.table-striped td:nth-child(1),  
+.table.table-striped td:nth-child(3) {  
   word-break: break-word;
   overflow-wrap: anywhere;
 }
 
-/* Give small, wrap-friendly action buttons */
+
 .actions-cell { white-space: normal !important; }
 .actions-group {
   display: flex;
-  flex-wrap: wrap;                 /* wrap to a second line if needed */
+  flex-wrap: wrap;              
   gap: 6px;
 }
 .actions-group .btn {
-  padding: 4px 8px;                /* smaller buttons */
+  padding: 4px 8px;                
   line-height: 1.2;
   font-size: 0.85rem;
 }
 
-/* Keep Actions column reasonable, but not huge */
+
 .table.table-striped th:nth-child(9),
 .table.table-striped td:nth-child(9) {
-  width: 320px;                    /* tweak 280–360px to taste */
+  width: 320px;                  
   min-width: 260px;
 }
 
-/* Slightly tighten other numeric columns */
-.table.table-striped th:nth-child(4),  /* Sale Price */
+
+.table.table-striped th:nth-child(4),  
 .table.table-striped td:nth-child(4),
-.table.table-striped th:nth-child(5),  /* Cost Price */
+.table.table-striped th:nth-child(5),  
 .table.table-striped td:nth-child(5),
-.table.table-striped th:nth-child(6),  /* Profit Margin */
+.table.table-striped th:nth-child(6),  
 .table.table-striped td:nth-child(6),
-.table.table-striped th:nth-child(7),  /* Quantity */
+.table.table-striped th:nth-child(7),  
 .table.table-striped td:nth-child(7),
-.table.table-striped th:nth-child(8),  /* Status */
+.table.table-striped th:nth-child(8), 
 .table.table-striped td:nth-child(8) {
   width: 8%;
-  white-space: nowrap;             /* numbers stay compact */
+  white-space: nowrap;            
 }
 
-/* allow header text to wrap cleanly */
+
 .table.table-striped thead th {
   white-space: normal !important;
   line-height: 1.15;
@@ -317,14 +317,13 @@ button.btn {
   padding-bottom: 10px;
 }
 
-/* 2-line header style */
+
 .th-2line {
   display: inline-block;
-  text-transform: uppercase; /* keep your look */
+  text-transform: uppercase; 
   letter-spacing: .02em;
 }
 
-/* ensure the 4 numeric columns have enough room for two lines */
 .table.table-striped thead th:nth-child(4),
 .table.table-striped thead th:nth-child(5),
 .table.table-striped thead th:nth-child(6),
@@ -333,18 +332,18 @@ button.btn {
 .table.table-striped tbody td:nth-child(5),
 .table.table-striped tbody td:nth-child(6),
 .table.table-striped tbody td:nth-child(7) {
-  min-width: 96px;       /* tweak 90–110px if you like */
+  min-width: 96px;    
   text-align: center;
 }
 
-/* keep actions a bit tighter so numeric headers don't get squeezed */
+
 .table.table-striped th:nth-child(9),
 .table.table-striped td:nth-child(9) {
-  width: 300px;          /* was 320px; reduce a touch */
+  width: 300px;         
   min-width: 260px;
 }
 
-/* safety: prevent any overlap/clipping */
+
 .table.table-striped th,
 .table.table-striped td {
   overflow: visible !important;
