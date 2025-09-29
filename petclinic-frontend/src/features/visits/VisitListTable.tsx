@@ -660,14 +660,14 @@ export default function VisitListTable(): JSX.Element {
         {renderTable('Cancelled', cancelledVisits)}
         {renderTable('Archived', archivedVisits)}
         {visitIdToDelete && (
-          <div className="emergencyVisitModal">
-            <div className="emergencyVisitModal-content">
+          <div className="modal">
+            <div className="modal-content">
               <h3>Confirm Deletion</h3>
               <p>
                 Are you sure you want to delete emergency visit{' '}
                 {visitIdToDelete}?
               </p>
-              <div className="emergencyVisitModal-buttons">
+              <div className="modal-buttons">
                 <button onClick={() => setConfirmDeleteId(null)}>Cancel</button>
                 <button
                   onClick={async () => {
@@ -693,7 +693,7 @@ export default function VisitListTable(): JSX.Element {
   };
 
   return (
-    <div className="page-container">
+    <div className="visit-page-container">
       {renderSidebar('Visits')} {renderVisitsTables()}
     </div>
   );
