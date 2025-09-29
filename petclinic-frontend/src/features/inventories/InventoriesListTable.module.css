@@ -108,3 +108,17 @@
 .inventoryTable :global(td) {
   border: 0 !important;
 }
+
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin: 40px 0 80px; /* similar spacing as your mock */
+}
+
+.pageNumber {
+  min-width: 32px;
+  text-align: center;
+  font-weight: 600;
+}

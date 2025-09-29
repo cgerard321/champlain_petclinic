@@ -358,7 +358,7 @@ export default function InventoriesListTable(): JSX.Element {
       </div>
       <div>
         <table
-          className={`table table-striped${inventoryStyles.inventoryTable} ${inventoryStyles.fixedTable} ${inventoryStyles.cleanTable}`}
+          className={`table table-striped ${inventoryStyles.inventoryTable} ${inventoryStyles.fixedTable} ${inventoryStyles.cleanTable}`}
         >
           <thead>
             <tr>
@@ -600,34 +600,27 @@ export default function InventoriesListTable(): JSX.Element {
           className="d-flex justify-content-center"
           style={{ marginBottom: '100px' }}
         >
-          <div className="text-center">
-            <table>
-              <tbody>
-                <tr>
-                  <td>
-                    <button
-                      className="btn btn-primary btn-sm"
-                      onClick={pageBefore}
-                    >
-                      &lt;
-                    </button>
-                  </td>
-                  <td>
-                    <span className="mx-2">{realPage}</span>{' '}
-                    {/* Added margin for space */}
-                  </td>
-                  <td>
-                    <button
-                      className="btn btn-primary btn-sm"
-                      onClick={pageAfter}
-                      disabled={inventoryList.length === 0}
-                    >
-                      &gt;
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+          {/* Pagination */}
+          <div className={inventoryStyles.pager}>
+            <button
+              className="btn btn-primary"
+              onClick={pageBefore}
+              disabled={currentPage === 0}
+              aria-label="Previous page"
+            >
+              &lt;
+            </button>
+
+            <span className={inventoryStyles.pageNumber}>{realPage}</span>
+
+            <button
+              className="btn btn-primary"
+              onClick={pageAfter}
+              disabled={inventoryList.length === 0}
+              aria-label="Next page"
+            >
+              &gt;
+            </button>
           </div>
         </div>
 
