@@ -253,3 +253,99 @@ form button[type="submit"].btn {
 button.btn {
   word-break: keep-all;
 }
+
+.table.table-striped {
+  table-layout: auto !important;
+  min-width: 0 !important;       
+}
+
+
+.table.table-striped th,
+.table.table-striped td {
+  overflow: visible !important;
+  white-space: normal;             
+  text-overflow: clip !important;
+}
+
+
+.table.table-striped td:nth-child(1),  
+.table.table-striped td:nth-child(3) {  
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+
+.actions-cell { white-space: normal !important; }
+.actions-group {
+  display: flex;
+  flex-wrap: wrap;              
+  gap: 6px;
+}
+.actions-group .btn {
+  padding: 4px 8px;                
+  line-height: 1.2;
+  font-size: 0.85rem;
+}
+
+
+.table.table-striped th:nth-child(9),
+.table.table-striped td:nth-child(9) {
+  width: 320px;                  
+  min-width: 260px;
+}
+
+
+.table.table-striped th:nth-child(4),  
+.table.table-striped td:nth-child(4),
+.table.table-striped th:nth-child(5),  
+.table.table-striped td:nth-child(5),
+.table.table-striped th:nth-child(6),  
+.table.table-striped td:nth-child(6),
+.table.table-striped th:nth-child(7),  
+.table.table-striped td:nth-child(7),
+.table.table-striped th:nth-child(8), 
+.table.table-striped td:nth-child(8) {
+  width: 8%;
+  white-space: nowrap;            
+}
+
+
+.table.table-striped thead th {
+  white-space: normal !important;
+  line-height: 1.15;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+
+.th-2line {
+  display: inline-block;
+  text-transform: uppercase; 
+  letter-spacing: .02em;
+}
+
+.table.table-striped thead th:nth-child(4),
+.table.table-striped thead th:nth-child(5),
+.table.table-striped thead th:nth-child(6),
+.table.table-striped thead th:nth-child(7),
+.table.table-striped tbody td:nth-child(4),
+.table.table-striped tbody td:nth-child(5),
+.table.table-striped tbody td:nth-child(6),
+.table.table-striped tbody td:nth-child(7) {
+  min-width: 96px;    
+  text-align: center;
+}
+
+
+.table.table-striped th:nth-child(9),
+.table.table-striped td:nth-child(9) {
+  width: 300px;         
+  min-width: 260px;
+}
+
+
+.table.table-striped th,
+.table.table-striped td {
+  overflow: visible !important;
+  text-overflow: clip !important;
+}
