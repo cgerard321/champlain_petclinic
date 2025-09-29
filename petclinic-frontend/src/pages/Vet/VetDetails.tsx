@@ -2,14 +2,20 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { NavBar } from '@/layouts/AppNavBar.tsx';
 import './VetDetails.css';
-import axiosInstance from '@/shared/api/axiosInstance';
+import axios from 'axios';
 import DeleteVetPhoto from '@/pages/Vet/DeleteVetPhoto.tsx';
 import UpdateVetEducation from '@/pages/Vet/UpdateVetEducation';
 import AddEducation from '@/pages/Vet/AddEducation.tsx';
 import DeleteVetEducation from '@/pages/Vet/DeleteVetEducation';
 import { Workday } from '@/features/veterinarians/models/Workday.ts';
 import UpdateVet from '@/pages/Vet/UpdateVet.tsx';
+import { fetchVetPhoto } from '@/features/veterinarians/api/fetchPhoto';
 import { addAlbumPhoto } from '@/features/veterinarians/api/addPhotoToAlbum';
+import {
+  IsInventoryManager,
+  IsOwner,
+  IsReceptionist,
+} from '@/context/UserContext';
 
 interface VetResponseType {
   vetId: string;
