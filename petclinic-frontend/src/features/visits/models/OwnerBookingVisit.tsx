@@ -350,7 +350,6 @@ const OwnerBookingVisit: React.FC = (): JSX.Element => {
         </select>
         {errors.status && <span className="error">{errors.status}</span>}
 
-
         <button className="cancel" type="button" onClick={handleCancel}>
           Cancel
         </button>

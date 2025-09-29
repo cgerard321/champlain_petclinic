@@ -341,7 +341,6 @@ const AddingVisit: React.FC = (): JSX.Element => {
         </select>
         {errors.status && <span className="error">{errors.status}</span>}
 
-
         <br />
         <button className="cancel" type="button" onClick={handleCancel}>
           Cancel
