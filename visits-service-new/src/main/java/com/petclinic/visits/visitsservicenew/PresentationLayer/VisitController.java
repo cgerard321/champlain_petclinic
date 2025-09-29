@@ -268,9 +268,9 @@ public class VisitController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
-
+*/
     @DeleteMapping(value = "/emergency/{emergencyId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<EmergencyResponseDTO>> DeteleEmergency(@PathVariable String emergencyId) {
+    public Mono<ResponseEntity<EmergencyResponseDTO>> DeleteEmergency(@PathVariable String emergencyId) {
         return Mono.just(emergencyId)
                 // .filter(id -> id.length() == 36)
                 // .switchIfEmpty(Mono.error(new InvalidInputException("the provided emergency id is invalid: " + emergencyId)))
@@ -278,7 +278,7 @@ public class VisitController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
-*/
+
 
     @PutMapping(value = "/completed/{visitId}/archive", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<VisitResponseDTO>> archiveCompletedVisit(@PathVariable String visitId, @RequestBody Mono<VisitRequestDTO> visitRequestDTO) {
