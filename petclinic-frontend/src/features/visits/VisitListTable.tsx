@@ -660,14 +660,14 @@ export default function VisitListTable(): JSX.Element {
         {renderTable('Cancelled', cancelledVisits)}
         {renderTable('Archived', archivedVisits)}
         {visitIdToDelete && (
-          <div className="modal">
-            <div className="modal-content">
+          <div className="emergencyVisitModal">
+            <div className="emergencyVisitModal-content">
               <h3>Confirm Deletion</h3>
               <p>
                 Are you sure you want to delete emergency visit{' '}
                 {visitIdToDelete}?
               </p>
-              <div className="modal-buttons">
+              <div className="emergencyVisitModal-buttons">
                 <button onClick={() => setConfirmDeleteId(null)}>Cancel</button>
                 <button
                   onClick={async () => {
