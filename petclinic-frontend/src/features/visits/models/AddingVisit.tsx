@@ -49,8 +49,8 @@ const AddingVisit: React.FC = (): JSX.Element => {
   useEffect(() => {
     const fetchVets = async (): Promise<void> => {
       try {
-        const response = await fetch('http://localhost:8080/api/gateway/vets');
-        const vets = await response.json();
+        const response = await axiosInstance.get('/vets', { useV2: false });
+        const vets = response.data;
         setAvailableVets(Array.isArray(vets) ? vets : [vets]);
       } catch (error) {
         console.error('Error fetching vets:', error);
