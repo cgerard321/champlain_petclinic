@@ -97,9 +97,7 @@ emailing-service:
 #This was changed to the new endpoint using the new V2 functions, if you want to access the previous
 # this is to make it work in prod will be fixed later
 frontend:
-  url: https://petclinic.benmusicgeek.synology.me/api/v2/gateway
-#frontend:
-#  url: http://localhost:8080/api/v2/gateway
+  url: http://localhost:8080/api/v2/gateway
 
 logging:
   level:
@@ -110,12 +108,18 @@ logging:
 ---
 #for production
 spring:
-  config:
-    activate:
-      on-profile: prod
+  datasource:
+    url: jdbc:mysql://mysql4/auth-db
+    username: user
+    password: pwd
   jpa:
     hibernate:
       ddl-auto: none
+
+  config:
+    activate:
+      on-profile: prod
+
   sql:
     init:
       platform: mysql
