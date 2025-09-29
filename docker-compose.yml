@@ -157,7 +157,7 @@ services:
     #        start_period: 30s
 
 
-  mongo-express:
+  mongo-express-vet:
     image: mongo-express
     restart: always
     environment:
@@ -210,7 +210,7 @@ services:
     #        interval: 15s
     #        start_period: 30s
 
-  mongo-express1:
+  mongo-express-billing:
     image: mongo-express
     restart: always
     environment:
@@ -239,7 +239,7 @@ services:
       interval: 15s
       start_period: 30s
 
-  mongo-express2:
+  mongo-express-visits:
     image: mongo-express
     restart: always
     environment:
