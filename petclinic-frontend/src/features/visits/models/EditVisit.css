@@ -135,7 +135,9 @@
   border-radius: 6px;
   border-left: 3px solid #48bb78;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .day-hours-row:hover {
@@ -162,5 +164,3 @@
   padding: 10px;
   text-align: center;
 }
-
-
