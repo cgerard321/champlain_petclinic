@@ -36,14 +36,18 @@ export default function VisitListTable(): JSX.Element {
   useEffect(() => {
     const loadInitialData = async (): Promise<void> => {
       try {
-        const [visits, emergencies] = await Promise.all([
+        const [visitsRes, emergenciesRes] = await Promise.allSettled([
           getAllVisits(searchTerm),
           getAllEmergency(),
         ]);
-        setVisitsList(visits);
-        setVisitsAll(visits);
-        setEmergencyList(emergencies);
-        setEmergencyAll(emergencies);
+        if (visitsRes.status === 'fulfilled') {
+          setVisitsList(visitsRes.value);
+          setVisitsAll(visitsRes.value);
+        }
+        if (emergenciesRes.status === 'fulfilled') {
+          setEmergencyList(emergenciesRes.value);
+          setEmergencyAll(emergenciesRes.value);
+        }
       } catch (error) {
         console.error('Error loading initial data:', error);
       }
@@ -58,7 +62,11 @@ export default function VisitListTable(): JSX.Element {
       return;
     }
 
-    const eventSource = new EventSource('/visits');
+    const API_BASE =
+      import.meta.env.VITE_BFF_BASE_URL ?? 'http://localhost:8080';
+    const eventSource = new EventSource(`${API_BASE}/api/v2/gateway/visits`, {
+      withCredentials: true,
+    });
 
     eventSource.onmessage = event => {
       try {
@@ -412,7 +420,7 @@ export default function VisitListTable(): JSX.Element {
                       className="icon"
                       onClick={() => {
                         navigate(
-                          `/visits/emergency/${emergency.visitEmergencyId}`
+                          `/visits/emergency/${emergency.visitEmergencyId}/edit`
                         );
                       }}
                       title="Edit"
