@@ -39,7 +39,7 @@ public class VisitController {
     private final VisitsServiceClient visitsServiceClient;
     private final BFFApiGatewayController bffApiGatewayController;
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
     @GetMapping(value = "", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public ResponseEntity<Flux<VisitResponseDTO>> getAllVisits(@RequestParam(required = false) String description){
         return ResponseEntity.ok().body(visitsServiceClient.getAllVisits(description));
@@ -179,6 +179,8 @@ public class VisitController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
+    */
+
 
     @DeleteMapping(value="/emergency/{emergencyId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<EmergencyResponseDTO>> DeteleEmergency(@PathVariable String emergencyId) {
@@ -189,7 +191,6 @@ public class VisitController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
-     */
 
     @SecuredEndpoint(allowedRoles = Roles.ADMIN)
     @IsUserSpecific(idToMatch = {"visitId"})
