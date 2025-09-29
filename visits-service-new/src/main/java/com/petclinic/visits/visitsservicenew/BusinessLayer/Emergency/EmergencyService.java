@@ -15,8 +15,12 @@ public interface EmergencyService {
     Flux<EmergencyResponseDTO> getEmergencyVisitsForPet(String petId);
 
    Mono<EmergencyResponseDTO> AddEmergency(Mono<EmergencyRequestDTO> emergencyRequestDTOMono);
+
+//    Mono<EmergencyResponseDTO> UpdateEmergency(Mono<EmergencyRequestDTO> emergencyRequestDTOMono, String emergencyId);
+
     /*Mono<EmergencyResponseDTO> UpdateEmergency(Mono<EmergencyRequestDTO> emergencyRequestDTOMono, String emergencyId);
     */
+
     Mono<EmergencyResponseDTO> DeleteEmergency(String emergencyId);
 
 

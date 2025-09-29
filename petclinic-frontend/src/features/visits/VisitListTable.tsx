@@ -39,6 +39,7 @@ export default function VisitListTable(): JSX.Element {
           getAllVisits(searchTerm),
           getAllEmergency(),
         ]);
+
         if (visitsRes.status === 'fulfilled') {
           setVisitsList(visitsRes.value);
           setVisitsAll(visitsRes.value);
@@ -61,7 +62,12 @@ export default function VisitListTable(): JSX.Element {
       return;
     }
 
-    const eventSource = new EventSource('/visits');
+    // const eventSource = new EventSource('/visits');
+    const API_BASE =
+      import.meta.env.VITE_BFF_BASE_URL ?? 'http://localhost:8080';
+    const eventSource = new EventSource(`${API_BASE}/api/v2/gateway/visits`, {
+      withCredentials: true,
+    });
 
     eventSource.onmessage = event => {
       try {
