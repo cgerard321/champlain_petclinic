@@ -14,9 +14,9 @@ public class MockServerConfigProductService {
     // You still need to connect to the MockServer running on localhost with a specific port
     private final MockServerClient mockServerClient;
 
-    public MockServerConfigProductService() {
-        this.clientAndServer = ClientAndServer.startClientAndServer(8080); // Start on a specific port (e.g., 8080)
-        this.mockServerClient = new MockServerClient("localhost", 8080);  // Connect to the same localhost and port
+    public MockServerConfigProductService(int i) {
+        this.clientAndServer = ClientAndServer.startClientAndServer(0); // dynamic port
+        this.mockServerClient = new MockServerClient("localhost", clientAndServer.getLocalPort());
     }
 
     public void registerGetProduct1ByProductIdEndpoint() {
@@ -53,4 +53,9 @@ public class MockServerConfigProductService {
             this.clientAndServer.stop();
         }
     }
+
+    public int getPort() {
+        return clientAndServer.getLocalPort();
+    }
+
 }

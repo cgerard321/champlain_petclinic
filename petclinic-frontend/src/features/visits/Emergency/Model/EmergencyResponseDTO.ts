@@ -8,7 +8,7 @@ export interface EmergencyResponseDTO {
 
   petId: string;
   petName: string;
-  vetBirthDate: Date;
+  petBirthDate: Date;
   practitionerId: string;
   vetFirstName: string;
   vetLastName: string;

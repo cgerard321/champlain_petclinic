@@ -190,6 +190,14 @@ const AddingVisit: React.FC = (): JSX.Element => {
     return Object.keys(newErrors).length === 0;
   };
 
+  const handleCancel = (): void => {
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate('/visits');
+    }
+  };
+
   const handleSubmit = async (
     event: FormEvent<HTMLFormElement>
   ): Promise<void> => {
@@ -332,6 +340,12 @@ const AddingVisit: React.FC = (): JSX.Element => {
           <option value="UPCOMING">Upcoming</option>
         </select>
         {errors.status && <span className="error">{errors.status}</span>}
+
+
+        <br />
+        <button className="cancel" type="button" onClick={handleCancel}>
+          Cancel
+        </button>
 
         <button type="submit" disabled={isLoading}>
           {isLoading ? 'Adding...' : 'Add'}

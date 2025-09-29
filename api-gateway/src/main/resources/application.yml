@@ -33,6 +33,9 @@ app:
   emailing-service:
     host: localhost
     port: 5115
+  files-service:
+    host: localhost
+    port: 8000
 
 logging:
   level:
@@ -86,6 +89,9 @@ app:
   emailing-service:
     host: emailing-service
     port: 5115
+  files-service:
+    host: files-service
+    port: 8000
 
 logging:
   level:
@@ -139,6 +145,9 @@ app:
   emailing-service:
     host: emailing-service
     port: 5115
+  files-service:
+    host: files-service
+    port: 8000
 
 logging:
   level:
