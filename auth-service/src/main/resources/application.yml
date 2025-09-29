@@ -20,13 +20,10 @@ default-admin:
   username: admin
   password: admin
 
-frontend:
-  url: https://petclinic.benmusicgeek.synology.me/api/v2/gateway
-
 #This was changed to the new endpoint using the new V2 functions, if you want to access the previous
 #Default port
-#frontend:
-#  url: localhost:8080/api/v2/gateway
+frontend:
+  url: localhost:8080/api/v2/gateway
 
 ---
 # for test
@@ -62,8 +59,24 @@ spring:
 
 ---
 # for docker
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, prometheus
 
 spring:
+  # performance optimizationn
+  main:
+    lazy-initialization: true
+  server:
+    netty:
+      connection-provider:
+        max-connections: 10
+    tomcat:
+      threads:
+        max: 50
+
   datasource:
     url: jdbc:mysql://mysql-auth/auth-db
     username: user
@@ -103,15 +116,31 @@ logging:
   level:
     root: INFO
     com.petclinic: DEBUG
-
-
 ---
-#for production
+    #for production
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, prometheus
+
 spring:
+  # performance optimizationn
+  main:
+    lazy-initialization: true
+  server:
+    netty:
+      connection-provider:
+        max-connections: 10
+    tomcat:
+      threads:
+        max: 50
+
   datasource:
-    url: jdbc:mysql://mysql4/auth-db
+    url: jdbc:mysql://mysql-auth/auth-db
     username: user
     password: pwd
+
   jpa:
     hibernate:
       ddl-auto: none
@@ -136,11 +165,6 @@ cart-service:
 emailing-service:
   host: emailing-service
   port: 5115
-
-logging:
-  level:
-    root: INFO
-    com.petclinic: DEBUG
 
 frontend:
   url: https://petclinic.benmusicgeek.synology.me/api/v2/gateway
