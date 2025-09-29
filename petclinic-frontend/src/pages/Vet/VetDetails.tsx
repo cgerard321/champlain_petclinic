@@ -9,13 +9,8 @@ import AddEducation from '@/pages/Vet/AddEducation.tsx';
 import DeleteVetEducation from '@/pages/Vet/DeleteVetEducation';
 import { Workday } from '@/features/veterinarians/models/Workday.ts';
 import UpdateVet from '@/pages/Vet/UpdateVet.tsx';
-import { fetchVetPhoto } from '@/features/veterinarians/api/fetchPhoto';
 import { addAlbumPhoto } from '@/features/veterinarians/api/addPhotoToAlbum';
-import {
-  IsInventoryManager,
-  IsOwner,
-  IsReceptionist,
-} from '@/context/UserContext';
+
 
 
 interface VetResponseType {
