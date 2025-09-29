@@ -1,19 +1,22 @@
-import axios, { AxiosResponse } from 'axios';
 import axiosInstance from '@/shared/api/axiosInstance';
-import { VetRequestModel } from '../models/VetRequestModel';
-import { VetResponseModel } from '../models/VetResponseModel';
+import { VetRequestModel } from '@/features/veterinarians/models/VetRequestModel';
+import { VetResponseModel } from '@/features/veterinarians/models/VetResponseModel';
 
 export const updateVet = async (
   vetId: string,
   vet: VetRequestModel
-): Promise<AxiosResponse<void>> => {
-  return await axiosInstance.put<void>(`/vets/${vetId}`, vet);
+): Promise<VetRequestModel> => {
+  const response = await axiosInstance.put<VetRequestModel>(
+    `/vets/${vetId}`,
+    vet,
+    {
+      useV2: false,
+    }
+  );
+  return response.data;
 };
 
-export const getVet = async (
-  userId: string
-): Promise<AxiosResponse<VetResponseModel>> => {
-  return await axios.get<VetResponseModel>(
-    `http://localhost:8080/api/gateway/vet/${userId}`
-  );
+export const getVet = async (userId: string): Promise<VetResponseModel> => {
+  const response = await axiosInstance.get<VetResponseModel>(`/vets/${userId}`);
+  return response.data;
 };
