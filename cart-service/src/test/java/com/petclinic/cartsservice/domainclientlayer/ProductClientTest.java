@@ -26,10 +26,10 @@ public class ProductClientTest {
 
     @BeforeEach
     public void startMockServer() {
-        mockServer = ClientAndServer.startClientAndServer(8080);
+        mockServer = ClientAndServer.startClientAndServer();
+        int port = mockServer.getLocalPort();
 
-        // Initialize the ProductClient with mock base URL
-        productClient = new ProductClient("localhost", "8080");
+        productClient = new ProductClient("localhost", String.valueOf(port));
     }
 
     @AfterEach

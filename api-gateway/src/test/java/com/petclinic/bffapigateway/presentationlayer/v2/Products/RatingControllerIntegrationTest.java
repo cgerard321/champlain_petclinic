@@ -1,8 +1,9 @@
-package com.petclinic.bffapigateway.presentationlayer.v2;
+package com.petclinic.bffapigateway.presentationlayer.v2.Products;
 
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import com.petclinic.bffapigateway.dtos.Ratings.RatingResponseModel;
+import com.petclinic.bffapigateway.presentationlayer.v2.RatingController;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;

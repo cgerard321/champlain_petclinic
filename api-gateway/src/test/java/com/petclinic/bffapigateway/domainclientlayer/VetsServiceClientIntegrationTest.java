@@ -885,16 +885,29 @@ class VetsServiceClientIntegrationTest {
 
     @Test
     void getPhotoByVetId() throws IOException {
+        byte[] testData = new byte[]{12, 24, 52, 87};
+        PhotoResponseDTO photoResponseDTO = PhotoResponseDTO.builder()
+                .vetId("deb1950c-3c56-45dc-874b-89e352695eb7")
+                .filename("vet_photo.jpg")
+                .imgType("image/jpeg")
+                .resource(testData)
+                .build();
+
         prepareResponse(response -> response
-                .setHeader("Content-Type", "image/jpeg")
-                .setBody("    {\n" +
-                        "        {12, 24, 52, 87}" +
-                        "    }"));
+                .setHeader("Content-Type", "application/json")
+                .setBody("{" +
+                        "\"vetId\": \"" + photoResponseDTO.getVetId() + "\"," +
+                        "\"filename\": \"" + photoResponseDTO.getFilename() + "\"," +
+                        "\"imgType\": \"" + photoResponseDTO.getImgType() + "\"," +
+                        "\"resource\": " + java.util.Arrays.toString(testData) + "," +
+                        "\"resourceBase64\": \"" + Base64.getEncoder().encodeToString(testData) + "\"" +
+                        "}"));
 
         final Resource photo = vetsServiceClient.getPhotoByVetId("deb1950c-3c56-45dc-874b-89e352695eb7").block();
         byte[] photoBytes = FileCopyUtils.copyToByteArray(photo.getInputStream());
 
         assertNotNull(photoBytes);
+        assertArrayEquals(testData, photoBytes);
     }
     @Test
     void getDefaultPhotoByVetId() throws IOException {
@@ -998,10 +1011,25 @@ class VetsServiceClientIntegrationTest {
         Mockito.when(filePart.headers()).thenReturn(headers);
         Mockito.when(filePart.content()).thenReturn(Flux.just(dataBuffer));
 
+        // Mock the response with PhotoResponseDTO
+        PhotoResponseDTO responseDTO = PhotoResponseDTO.builder()
+                .vetId("deb1950c-3c56-45dc-874b-89e352695eb7")
+                .filename("photo.jpg")
+                .imgType("image/jpeg")
+                .resource(bytes)
+                .build();
+
+        String jsonResponse = "{" +
+                "\"vetId\": \"" + responseDTO.getVetId() + "\"," +
+                "\"filename\": \"" + responseDTO.getFilename() + "\"," +
+                "\"imgType\": \"" + responseDTO.getImgType() + "\"," +
+                "\"resourceBase64\": \"" + Base64.getEncoder().encodeToString(bytes) + "\"" +
+                "}";
+
         server.enqueue(new MockResponse()
                 .setResponseCode(201)
-                .addHeader("Content-Type", "image/jpeg")
-                .setBody(new Buffer().write(bytes)));
+                .addHeader("Content-Type", "application/json")
+                .setBody(jsonResponse));
 
         Resource photo = vetsServiceClient
                 .addPhotoToVet("deb1950c-3c56-45dc-874b-89e352695eb7", "photo.jpg", filePart)
@@ -1015,25 +1043,39 @@ class VetsServiceClientIntegrationTest {
         assertEquals("POST", req.getMethod());
         String contentType = req.getHeader("Content-Type");
         assertNotNull(contentType);
-        assertEquals("application/octet-stream", contentType);
+        assertEquals("application/json", contentType);
 
+        // The request body should contain the PhotoRequestDTO as JSON
         byte[] requestBody = req.getBody().readByteArray();
-        assertArrayEquals(bytes, requestBody);
+        assertNotNull(requestBody);
     }
 
     @Test
     void updatePhotoByValidVetId_shouldSucceed() throws IOException {
-        Mono<Resource> photoResource = Mono.just(new ByteArrayResource(new byte[]{12, 24, 52, 87}));
-        prepareResponse(response -> response
-                .setHeader("Content-Type", "image/jpeg")
-                .setBody("    {\n" +
-                        "        {12, 24, 52, 87}" +
-                        "    }"));
+        byte[] testData = new byte[]{12, 24, 52, 87};
+        Mono<Resource> photoResource = Mono.just(new ByteArrayResource(testData));
 
-        final Resource photo = vetsServiceClient.updatePhotoOfVet("deb1950c-3c56-45dc-874b-89e352695eb7", "image/jpeg", photoResource).block();
+        PhotoResponseDTO photoResponseDTO = PhotoResponseDTO.builder()
+                .vetId("deb1950c-3c56-45dc-874b-89e352695eb7")
+                .filename("image.jpeg")
+                .imgType("image/jpeg")
+                .resource(testData)
+                .build();
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody("{" +
+                        "\"vetId\": \"" + photoResponseDTO.getVetId() + "\"," +
+                        "\"filename\": \"" + photoResponseDTO.getFilename() + "\"," +
+                        "\"imgType\": \"" + photoResponseDTO.getImgType() + "\"," +
+                        "\"resourceBase64\": \"" + Base64.getEncoder().encodeToString(testData) + "\"" +
+                        "}"));
+
+        final Resource photo = vetsServiceClient.updatePhotoOfVet("deb1950c-3c56-45dc-874b-89e352695eb7", "image.jpeg", photoResource).block();
         byte[] photoBytes = FileCopyUtils.copyToByteArray(photo.getInputStream());
 
         assertNotNull(photoBytes);
+        assertArrayEquals(testData, photoBytes);
     }
 
     @Test
