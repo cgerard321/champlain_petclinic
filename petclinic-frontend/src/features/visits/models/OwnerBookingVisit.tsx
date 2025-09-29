@@ -229,10 +229,6 @@ const OwnerBookingVisit: React.FC = (): JSX.Element => {
         localStorage.getItem('authToken') ||
         localStorage.getItem('token') ||
         '',
-      description: visit.description,
-      petId: visit.petId,
-      practitionerId: visit.practitionerId,
-      status: visit.status,
     };
 
     try {
