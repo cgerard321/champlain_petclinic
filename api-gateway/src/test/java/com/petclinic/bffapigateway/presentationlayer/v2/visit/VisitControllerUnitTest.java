@@ -35,6 +35,7 @@ import java.io.ByteArrayInputStream;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.UUID;
 
@@ -484,22 +485,52 @@ public class VisitControllerUnitTest {
     @Test
     void postEmergency_whenValidRequest_thenReturnCreatedResponse() {
         // Arrange
+        String fixedDate = "2024-09-28 20:00";
+        DateTimeFormatter FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        LocalDateTime fixedLdt = LocalDateTime.parse(fixedDate, FMT);
+
+        EmergencyRequestDTO request = EmergencyRequestDTO.builder()
+                .visitDate(fixedLdt)
+                .description("Updated Emergency")
+                .petId("2")
+                .practitionerId("2332222232323234hhh232")
+                .urgencyLevel(UrgencyLevel.MEDIUM)
+                .emergencyType("Accident")
+                .build();
+
+        EmergencyResponseDTO response = EmergencyResponseDTO.builder()
+                .visitEmergencyId(UUID.randomUUID().toString())
+                .visitDate(fixedLdt)
+                .description(request.getDescription())
+                .petId(request.getPetId())
+                .petName("hamid")
+                .petBirthDate(new Date(0))
+                .practitionerId(request.getPractitionerId())
+                .vetFirstName("carlos")
+                .vetLastName("ambock")
+                .vetEmail("carlos@gmail.com")
+                .vetPhoneNumber("540-233-2323")
+                .urgencyLevel(request.getUrgencyLevel())
+                .emergencyType(request.getEmergencyType())
+                .build();
+
         when(visitsServiceClient.createEmergency(any(Mono.class)))
-                .thenReturn(Mono.just(emergencyResponseDTO));
+                .thenReturn(Mono.just(response));
 
         // Act
         webTestClient.post()
                 .uri(EMERGENCY_URL)
                 .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(emergencyRequestDTO)
+                .bodyValue(request)
                 .exchange()
                 .expectStatus().isCreated()
                 .expectBody(EmergencyResponseDTO.class)
-                .isEqualTo(emergencyResponseDTO);
+                .isEqualTo(response);
 
         // Assert
         verify(visitsServiceClient, times(1)).createEmergency(any(Mono.class));
     }
+
 
     @Test
     void getEmergencyVisitsByOwnerId_whenOwnerExists_thenReturnFluxVisitResponseDTO() {
@@ -545,12 +576,33 @@ public class VisitControllerUnitTest {
     @Test
     void getEmergencyByEmergencyId_whenValidEmergencyId_thenReturnEmergencyResponseDTO() {
         // Arrange
-        when(visitsServiceClient.getEmergencyByEmergencyId(emergencyResponseDTO.getVisitEmergencyId()))
+        DateTimeFormatter FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        LocalDateTime fixedLdt = LocalDateTime.parse("2024-09-28 19:57", FMT);
+
+        String emergencyId = UUID.randomUUID().toString();
+
+        EmergencyResponseDTO emergencyResponseDTO = EmergencyResponseDTO.builder()
+                .visitEmergencyId(emergencyId)
+                .visitDate(fixedLdt)
+                .description("Updated Emergency")
+                .petId("Oscar")
+                .petName("hamid")
+                .petBirthDate(new Date(0))
+                .practitionerId("2332222232323234hhh232")
+                .vetFirstName("carlos")
+                .vetLastName("ambock")
+                .vetEmail("carlos@gmail.com")
+                .vetPhoneNumber("540-233-2323")
+                .urgencyLevel(UrgencyLevel.MEDIUM)
+                .emergencyType("Accident")
+                .build();
+
+        when(visitsServiceClient.getEmergencyByEmergencyId(emergencyId))
                 .thenReturn(Mono.just(emergencyResponseDTO));
 
         // Act
         webTestClient.get()
-                .uri(EMERGENCY_URL + "/{emergencyId}", emergencyResponseDTO.getVisitEmergencyId())
+                .uri(EMERGENCY_URL + "/{emergencyId}", emergencyId)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -558,8 +610,9 @@ public class VisitControllerUnitTest {
                 .isEqualTo(emergencyResponseDTO);
 
         // Assert
-        verify(visitsServiceClient, times(1)).getEmergencyByEmergencyId(emergencyResponseDTO.getVisitEmergencyId());
+        verify(visitsServiceClient, times(1)).getEmergencyByEmergencyId(emergencyId);
     }
+
 
   /*  @Test
     void postEmergency_whenValidRequest_thenReturnCreatedResponse() {

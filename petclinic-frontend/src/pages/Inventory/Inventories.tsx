@@ -7,7 +7,12 @@ export default function Inventories(): JSX.Element {
     <div>
       <NavBar />
       <div id={inventoryPageStyles.titleSection}>
-        <h1 id={inventoryPageStyles.pageTitle}>Inventories</h1>
+        <h1
+          id={inventoryPageStyles.pageTitle}
+          className="text-primary fw-bold display-3"
+        >
+          Inventories
+        </h1>
       </div>
       <InventoriesListTable />
     </div>

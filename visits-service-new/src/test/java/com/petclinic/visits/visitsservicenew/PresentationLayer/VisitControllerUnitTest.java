@@ -621,13 +621,16 @@ class VisitControllerUnitTest {
         verify(emergencyService, times(1)).getEmergencyVisitsForPet(Pet_Id_Emergency);
     }
 
-
     @Test
     public void whenAddEmergency_returnEmergencyResponseDTO() {
+        String fixedDate = "2024-09-28 19:27";
+        DateTimeFormatter FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+
+        LocalDateTime fixedLdt = LocalDateTime.parse(fixedDate, FMT);
 
         Emergency emergency = Emergency.builder()
                 .visitEmergencyId("uuidEmergency")
-                .visitDate(LocalDateTime.now())
+                .visitDate(fixedLdt)
                 .description("Severe injury")
                 .petId("uuidPet")
                 .practitionerId(uuidVet)
@@ -635,9 +638,8 @@ class VisitControllerUnitTest {
                 .emergencyType("Injury")
                 .build();
 
-        // Request DTO
         EmergencyRequestDTO emergencyRequestDTO = EmergencyRequestDTO.builder()
-                .visitDate(LocalDateTime.now())
+                .visitDate(fixedLdt)
                 .description("Severe injury")
                 .petId("uuidPet")
                 .practitionerId(uuidVet)
@@ -647,67 +649,63 @@ class VisitControllerUnitTest {
 
         EmergencyResponseDTO emergencyResponseDTO = EmergencyResponseDTO.builder()
                 .visitEmergencyId("uuidEmergency")
-                .visitDate(emergency.getVisitDate())
-                .description(emergency.getDescription())
+                .visitDate(fixedLdt)
+                .description("Severe injury")
                 .petId("uuidPet")
-                .petName("Buddy") // Pet name from mocked pet
+                .petName("Buddy")
                 .petBirthDate(new Date())
                 .practitionerId(uuidVet)
                 .vetFirstName("John")
                 .vetLastName("Doe")
                 .vetEmail("john.doe@email.com")
                 .vetPhoneNumber("(514)-123-4567")
-                .urgencyLevel(emergency.getUrgencyLevel())
-                .emergencyType(emergency.getEmergencyType())
+                .urgencyLevel(UrgencyLevel.HIGH)
+                .emergencyType("Injury")
                 .build();
 
         when(emergencyService.AddEmergency(any(Mono.class))).thenReturn(Mono.just(emergencyResponseDTO));
 
-        webTestClient
-                .post()
+        webTestClient.post()
                 .uri("/visits/emergency")
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Mono.just(emergencyRequestDTO), EmergencyRequestDTO.class)
                 .exchange()
                 .expectStatus().isCreated()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentTypeCompatibleWith(MediaType.APPLICATION_JSON)
                 .expectBody(EmergencyResponseDTO.class)
                 .isEqualTo(emergencyResponseDTO);
 
         verify(emergencyService, times(1)).AddEmergency(any(Mono.class));
     }
 
+
     @Test
     public void whenGetEmergencyById_returnEmergencyResponseDTO() {
-        Emergency emergency = Emergency.builder()
-                .visitEmergencyId("uuidEmergency")
-                .visitDate(LocalDateTime.now())
-                .description("Severe injury")
-                .petId("uuidPet")
-                .practitionerId(uuidVet)
-                .urgencyLevel(UrgencyLevel.HIGH)
-                .emergencyType("Injury")
-                .build();
+        DateTimeFormatter FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        String fixedStr = "2024-09-28 19:37";
+        LocalDateTime fixedLdt = LocalDateTime.parse(fixedStr, FMT);
+
         String emergencyId = UUID.randomUUID().toString();
 
         EmergencyResponseDTO emergencyResponseDTO = EmergencyResponseDTO.builder()
                 .visitEmergencyId(emergencyId)
-                .visitDate(emergency.getVisitDate())
-                .description(emergency.getDescription())
+                .visitDate(fixedLdt)
+                .description("Severe injury")
                 .petId("uuidPet")
-                .petName("Buddy") // Pet name from mocked pet
-                .petBirthDate(new Date())
+                .petName("Buddy")
+                .petBirthDate(new Date(0))
                 .practitionerId(uuidVet)
                 .vetFirstName("John")
                 .vetLastName("Doe")
                 .vetEmail("john.doe@email.com")
                 .vetPhoneNumber("(514)-123-4567")
-                .urgencyLevel(emergency.getUrgencyLevel())
-                .emergencyType(emergency.getEmergencyType())
+                .urgencyLevel(UrgencyLevel.HIGH)
+                .emergencyType("Injury")
                 .build();
 
-        when(emergencyService.GetEmergencyByEmergencyId(emergencyId)).thenReturn(Mono.just(emergencyResponseDTO));
+        when(emergencyService.GetEmergencyByEmergencyId(emergencyId))
+                .thenReturn(Mono.just(emergencyResponseDTO));
 
         webTestClient
                 .get()
@@ -715,12 +713,13 @@ class VisitControllerUnitTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentTypeCompatibleWith(MediaType.APPLICATION_JSON)
                 .expectBody(EmergencyResponseDTO.class)
                 .isEqualTo(emergencyResponseDTO);
 
         verify(emergencyService, times(1)).GetEmergencyByEmergencyId(emergencyId);
     }
+
 
 
 
