@@ -127,12 +127,12 @@ const ProfilePage = (): JSX.Element => {
   return (
     <div>
       <NavBar />
-      <div className="profile-page container-profile">
-        <div className="profile-card shadow-lg p-5 mb-5 bg-white rounded">
+      <div className="customers-page customers-container-profile">
+        <div className="customers-profile-card shadow-lg p-5 mb-5 bg-white rounded">
           <h1>
             {owner.firstName} {owner.lastName}&apos;s Profile
           </h1>
-          <div className="profile-info">
+          <div className="customers-profile-info">
             <p>
               <strong>First Name:</strong> {owner.firstName}
             </p>
@@ -152,28 +152,31 @@ const ProfilePage = (): JSX.Element => {
               <strong>Telephone:</strong> {owner.telephone}
             </p>
           </div>
-          <div className="pets-section">
-            <div className="pets-header">
+          <div className="customers-pets-section">
+            <div className="customers-pets-header">
               <h3>Owner Pets</h3>
-              <button className="add-pet-button" onClick={handleAddPet}>
+              <button
+                className="customers-add-pet-button"
+                onClick={handleAddPet}
+              >
                 Add Pet
               </button>
             </div>
             {owner.pets && owner.pets.length > 0 ? (
-              <div className="pets-list">
+              <div className="customers-pets-list">
                 {owner.pets.map((pet: PetResponseModel) => (
-                  <div key={pet.petId} className="pet-card">
-                    <div className="pet-info">
-                      <h4 className="pet-name">{pet.name}</h4>
-                      <div className="pet-details">
-                        <span className="pet-detail">
+                  <div key={pet.petId} className="customers-pet-card">
+                    <div className="customers-pet-info">
+                      <h4 className="customers-pet-name">{pet.name}</h4>
+                      <div className="customers-pet-details">
+                        <span className="customers-pet-detail">
                           <strong>Type:</strong>{' '}
                           {getPetTypeName(pet.petTypeId, petTypes)}
                         </span>
-                        <span className="pet-detail">
+                        <span className="customers-pet-detail">
                           <strong>Weight:</strong> {pet.weight}kg
                         </span>
-                        <span className="pet-detail">
+                        <span className="customers-pet-detail">
                           <strong>Age:</strong> {calculateAge(pet.birthDate)}{' '}
                           years
                         </span>
@@ -183,13 +186,16 @@ const ProfilePage = (): JSX.Element => {
                 ))}
               </div>
             ) : (
-              <div className="no-pets">
+              <div className="customers-no-pets">
                 <p>No pets found.</p>
-                <p className="no-pets-subtitle">Add your first pet</p>
+                <p className="customers-no-pets-subtitle">Add your first pet</p>
               </div>
             )}
           </div>
-          <button className="updateButton" onClick={handleUpdateClick}>
+          <button
+            className="customers-updateButton"
+            onClick={handleUpdateClick}
+          >
             Update Profile
           </button>
         </div>

@@ -5,7 +5,7 @@ export default async function addInventoryType(
   inventoryType: Omit<InventoryType, 'typeId'>
 ): Promise<void> {
   try {
-    await axiosInstance.post<void>('/inventory/type', inventoryType, {
+    await axiosInstance.post<void>('/inventories/type', inventoryType, {
       useV2: false,
     });
   } catch (error) {

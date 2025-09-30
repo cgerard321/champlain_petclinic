@@ -5,7 +5,7 @@ export default async function deleteInventory(
   inventory: Inventory
 ): Promise<void> {
   try {
-    await axiosInstance.delete<void>(`/inventory/${inventory.inventoryId}`, {
+    await axiosInstance.delete<void>(`/inventories/${inventory.inventoryId}`, {
       useV2: false,
     });
   } catch (error) {

@@ -72,7 +72,10 @@ func TestMailerControllerImpl_Unmarshalls(t *testing.T) {
 	assert.Nil(t, mC.Routes(router))
 
 	const email = "test@test.test"
-	marshal, _ := json.Marshal(mailer.Mail{To: email, Subject: "Subject", Message: "Message"})
+	marshal, _ := json.Marshal(mailer.Mail{EmailSendTo: email, EmailTitle: "emailTitle", TemplateName: "templateName",
+		Header: "header", Body: "body", Footer: "footer",
+		CorrespondantName: "correspondantName",
+		SenderName:        "senderName"})
 	serial := string(marshal)
 
 	req, err := http.NewRequest(http.MethodPost, "/mail", strings.NewReader(serial))
@@ -98,10 +101,16 @@ func TestMailerControllerImpl_ValidateInValidEmail(t *testing.T) {
 	mC := MailerControllerImpl{}
 	assert.Nil(t, mC.Routes(router))
 
-	const email = ""
-	const subject = ""
-	const message = ""
-	marshal, _ := json.Marshal(mailer.Mail{To: email, Subject: subject, Message: message})
+	const emailSendTo = ""
+	const emailTitle = ""
+	const templateName = ""
+	const header = ""
+	const body = ""
+	const footer = ""
+	const correspondantName = ""
+	const senderName = ""
+	marshal, _ := json.Marshal(mailer.Mail{EmailSendTo: emailSendTo, EmailTitle: emailTitle, TemplateName: templateName, Header: header,
+		Body: body, Footer: footer, CorrespondantName: correspondantName, SenderName: senderName})
 	serial := string(marshal)
 
 	req, err := http.NewRequest(http.MethodPost, "/mail", strings.NewReader(serial))
@@ -118,8 +127,7 @@ func TestMailerControllerImpl_ValidateInValidEmail(t *testing.T) {
 
 		assert.Nil(t, err)
 		assert.Equal(t,
-			"\"Key: 'Mail.To' Error:Field validation for 'To' failed on the 'required' tag"+
-				"\\nKey: 'Mail.Message' Error:Field validation for 'Message' failed on the 'required' tag\"",
+			"\"Key: 'Mail.EmailSendTo' Error:Field validation for 'EmailSendTo' failed on the 'required' tag\\nKey: 'Mail.EmailTitle' Error:Field validation for 'EmailTitle' failed on the 'required' tag\"",
 			string(body))
 
 		return true
@@ -135,17 +143,24 @@ func TestHandleMailPOST_ValidMail(t *testing.T) {
 	mC := MailerControllerImpl{}
 	mC.New(mS)
 
-	const email = "test@test.test"
-	const subject = "subject"
-	const message = "message"
-	mail := mailer.Mail{To: email, Subject: subject, Message: message}
+	const emailSendTo = "test@test.test"
+	const emailTitle = "Test Email Title"
+	const templateName = "test TemplateName"
+	const header = "test Header"
+	const body = "Body Testing, testing, 1, 2, 3"
+	const footer = "Footer Testing, testing, 1, 2, 3"
+	const correspondantName = "Test Correspondant Name"
+	const senderName = "Test Sender Name"
+
+	mail := mailer.Mail{EmailSendTo: emailSendTo, EmailTitle: emailTitle, TemplateName: templateName, Header: header,
+		Body: body, Footer: footer, CorrespondantName: correspondantName, SenderName: senderName}
 
 	context.Set("mail", &mail)
 
-	mC.handleMailPOST(context)
+	mC.handleMailPost(context)
 
 	assert.Equal(t, http.StatusOK, recorder.Code)
-	assert.Equal(t, fmt.Sprintf("\"Message sent to %s\"", email), recorder.Body.String())
+	assert.Equal(t, fmt.Sprintf("\"Message sent to %s\"", emailSendTo), recorder.Body.String())
 }
 
 func TestHandleMailPOST_NilMail(t *testing.T) {
@@ -156,7 +171,7 @@ func TestHandleMailPOST_NilMail(t *testing.T) {
 
 	context.Set("mail", nil)
 
-	mC.handleMailPOST(context)
+	mC.handleMailPost(context)
 
 	assert.Equal(t, http.StatusBadRequest, recorder.Code)
 	assert.Equal(t, "\"Unable to parse e-mail from body\"", recorder.Body.String())
@@ -186,10 +201,10 @@ func TestHandleMailPOST_Full(t *testing.T) {
 			assert.Equal(t, http.StatusOK, w.Code)
 			got, err := get()
 			assert.Nil(t, err)
-			assert.Contains(t, got, "To: "+m.To)
-			assert.Contains(t, got, "Subject: "+m.Subject)
-			assert.Contains(t, got, m.Subject)
-			assert.Equal(t, fmt.Sprintf("\"Message sent to %s\"", m.To), w.Body.String())
+			assert.Contains(t, got, "To: "+m.EmailSendTo)
+			assert.Contains(t, got, "Subject: "+m.EmailTitle)
+			// 			assert.Contains(t, got, m.Body)
+			assert.Equal(t, fmt.Sprintf("\"Message sent to %s\"", m.EmailSendTo), w.Body.String())
 			return true
 		})
 	})
@@ -202,7 +217,12 @@ func TestHandleMailPOST_FullInValid(t *testing.T) {
 		testHTTPResponse(t, engine, req, func(w *httptest.ResponseRecorder) bool {
 
 			assert.Equal(t, http.StatusInternalServerError, w.Code)
-			assert.Contains(t, w.Body.String(), "connection refused")
+			// assert.Contains(t, w.Body.String(), "actively refused" || "connection refused")
+			body := w.Body.String()
+			ok := strings.Contains(body, "actively refused") ||
+				strings.Contains(body, "connection refused")
+
+			assert.True(t, ok, "unexpected error body: %q", body)
 			return true
 		})
 	})
@@ -312,10 +332,18 @@ func fullTestEnv(t *testing.T, port int, f func(e *gin.Engine, r *http.Request, 
 	mC.New(&mS)
 	assert.Nil(t, mC.Routes(engine))
 
-	const email = "test@test.test"
-	const subject = "Test subject"
-	const message = "Test message"
-	mail := mailer.Mail{To: email, Subject: subject, Message: message}
+	const emailSendTo = "test@test.test"
+	const emailTitle = "Test Email Title"
+	const templateName = "test TemplateName"
+	const header = "test Header"
+	const body = "Body Testing, testing, 1, 2, 3"
+	const footer = "Footer Testing, testing, 1, 2, 3"
+	const correspondantName = "Test Correspondant Name"
+	const senderName = "TestSenderName@gmail.com"
+
+	mail := mailer.Mail{EmailSendTo: emailSendTo, EmailTitle: emailTitle, TemplateName: templateName, Header: header,
+		Body: body, Footer: footer, CorrespondantName: correspondantName, SenderName: senderName}
+
 	marshal, _ := json.Marshal(mail)
 	serial := string(marshal)
 

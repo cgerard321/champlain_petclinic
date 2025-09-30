@@ -57,6 +57,7 @@ const InventoryProducts: React.FC = () => {
 
   // Declare state
   const [productName, setProductName] = useState<string>('');
+  const [inventoryName, setInventoryName] = useState<string>('');
   const [productDescription, setProductDescription] = useState<string>('');
   const [productStatus, setProductStatus] = useState<Status | ''>('');
   const [products, setProducts] = useState<ProductModel[]>([]);
@@ -76,7 +77,20 @@ const InventoryProducts: React.FC = () => {
       }
     }
   };
-
+  useEffect(() => {
+    if (!inventoryId) return;
+    axiosInstance
+      .get(`/inventories/${inventoryId}`, { useV2: false })
+      .then(res => {
+        const name = (res.data?.inventoryName ?? res.data?.name ?? '')
+          .toString()
+          .trim();
+        if (name) setInventoryName(name);
+      })
+      .catch(err => {
+        console.warn('Failed to fetch inventory details', err);
+      });
+  }, [inventoryId]);
   useEffect(() => {
     const w = window as WindowWithGoogle;
 
@@ -123,7 +137,7 @@ const InventoryProducts: React.FC = () => {
       setError(null);
       try {
         const response = await axiosInstance.get<ProductModel[]>(
-          `/inventory/${inventoryId}/products/search`,
+          `/inventories/${inventoryId}/products/search`,
           { useV2: false }
         );
         const data = Array.isArray(response.data) ? response.data : [];
@@ -150,7 +164,7 @@ const InventoryProducts: React.FC = () => {
     if (productToDelete) {
       try {
         await axiosInstance.delete(
-          `/inventory/${inventoryId}/products/${productToDelete}`,
+          `/inventories/${inventoryId}/products/${productToDelete}`,
           { useV2: false }
         );
         const updatedProducts = products.filter(
@@ -230,7 +244,7 @@ const InventoryProducts: React.FC = () => {
       const delta = 1;
 
       await axiosInstance.put(
-        `/inventory/${inventoryId}/products/${productId}/restockProduct`,
+        `/inventories/${inventoryId}/products/${productId}/restockProduct`,
         null,
         { params: { productQuantity: delta }, useV2: false }
       );
@@ -266,7 +280,7 @@ const InventoryProducts: React.FC = () => {
     try {
       const updatedQuantity = currentQuantity - 1;
       await axiosInstance.patch(
-        `/inventory/${inventoryId}/products/${productId}/consume`,
+        `/inventories/${inventoryId}/products/${productId}/consume`,
         { productQuantity: updatedQuantity },
         { useV2: false }
       );
@@ -308,7 +322,7 @@ const InventoryProducts: React.FC = () => {
   return (
     <div className="inventory-supplies">
       <h2 className="inventory-title">
-        Supplies in Inventory: <span>{inventoryId}</span>
+        Supplies in Inventory: <span>{inventoryName}</span>
       </h2>
       <button
         className="btn btn-secondary"
@@ -371,9 +385,27 @@ const InventoryProducts: React.FC = () => {
             <th>Supply Id</th>
             <th>Supply Name</th>
             <th>Description</th>
-            <th>Sale Price</th>
-            <th>Cost Price</th>
-            <th>Profit Margin</th>
+            <th>
+              <span className="th-2line">
+                Sale
+                <br />
+                Price
+              </span>
+            </th>
+            <th>
+              <span className="th-2line">
+                Cost
+                <br />
+                Price
+              </span>
+            </th>
+            <th>
+              <span className="th-2line">
+                Profit
+                <br />
+                Margin
+              </span>
+            </th>
             <th>Quantity</th>
             <th>Status</th>
             <th>Actions</th>
@@ -419,20 +451,20 @@ const InventoryProducts: React.FC = () => {
                         e.stopPropagation();
                         navigate(`${product.productId}/edit`);
                       }}
-                      className="btn btn-warning"
+                      className="btn btn-warning btn-sm"
                     >
                       Edit
                     </button>
 
                     <button
-                      className="btn btn-danger"
+                      className="btn btn-danger btm-sm"
                       onClick={() => handleDeleteClick(product.productId)}
                     >
                       Delete
                     </button>
 
                     <button
-                      className="btn btn-success"
+                      className="btn btn-success btn-sm"
                       onClick={() =>
                         addQuantity(product.productId, product.productQuantity)
                       }
@@ -447,7 +479,7 @@ const InventoryProducts: React.FC = () => {
                     </button>
 
                     <button
-                      className="btn btn-info"
+                      className="btn btn-info btn-sm"
                       onClick={() =>
                         reduceQuantity(
                           product.productId,
@@ -467,7 +499,7 @@ const InventoryProducts: React.FC = () => {
                         e.stopPropagation();
                         navigate(`${product.productId}/move`);
                       }}
-                      className="btn btn-info"
+                      className="btn btn-info btn-sm"
                     >
                       Move
                     </button>
@@ -486,7 +518,7 @@ const InventoryProducts: React.FC = () => {
       </table>
       <button
         className="btn btn-add"
-        onClick={() => navigate(`/inventory/${inventoryId}/products/add`)}
+        onClick={() => navigate(`/inventories/${inventoryId}/products/add`)}
       >
         Add
       </button>

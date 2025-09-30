@@ -6,10 +6,20 @@ angular.module('productUpdateForm', ['ui.router'])
 
             .state('updateProductInventory', {
                 parent: 'app',
-                url: '/inventory/:inventoryId/products/:productId',
+                url: '/inventories/:inventoryId/products/:productId',
                 template: '<product-update-form></product-update-form>'
             })
 
     }]);
 
-//url: '/inventory/:inventoryId/products/:productId/:method',
+angular.module('shopProductUpdateForm', ['ui.router'])
+    .config(['$stateProvider', function ($stateProvider) {
+        $stateProvider
+
+            .state('updateProduct', {
+                parent: 'app',
+                url: '/products/:productId',
+                template: '<shop-product-update-form></shop-product-update-form>'
+            })
+
+    }]);
