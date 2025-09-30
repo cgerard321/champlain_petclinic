@@ -83,7 +83,7 @@ public class PetController {
         return customersServiceClient.getPetsByOwnerId(ownerId);
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
+    //@SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
     @DeleteMapping(value = "/{petId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<PetResponseDTO>> deletePet(@PathVariable String petId) {
         return Mono.just(petId)
