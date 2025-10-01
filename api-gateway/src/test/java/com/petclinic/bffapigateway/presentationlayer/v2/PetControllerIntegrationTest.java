@@ -40,6 +40,7 @@ class PetControllerIntegrationTest {
         mockServerConfigAuthService = new MockServerConfigAuthService();
         mockServerConfigAuthService.registerValidateTokenForAdminEndpoint();
         mockServerConfigAuthService.registerValidateTokenForVetEndpoint();
+        mockServerConfigAuthService.registerValidateTokenForOwnerEndpoint();
     }
 
     @AfterAll
@@ -110,7 +111,7 @@ class PetControllerIntegrationTest {
     }
 
     @Test
-    void whenDeletePet_asVet_withValidPetId_thenReturnPetResponseDTO() throws ParseException {
+    void whenDeletePet_asOwner_withValidPetId_thenReturnPetResponseDTO() throws ParseException {
         PetResponseDTO pet = PetResponseDTO.builder()
                 .petId("53163352-8398-4513-bdff-b7715c056d1d")
                 .name("Buddy")
@@ -122,7 +123,7 @@ class PetControllerIntegrationTest {
 
         Mono<PetResponseDTO> result = webTestClient.delete()
                 .uri("/api/v2/gateway/pets/{petId}", pet.getPetId())
-                .cookie("Bearer", jwtTokenForValidVet)
+                .cookie("Bearer", jwtTokenForValidOwnerId)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -147,12 +148,12 @@ class PetControllerIntegrationTest {
     }
 
     @Test
-    void whenDeletePet_asVet_withInvalidPetId_thenReturnInvalidInputException() {
+    void whenDeletePet_asOwner_withInvalidPetId_thenReturnInvalidInputException() {
         String invalidPetId = "invalid-pet-id";
 
         Mono<InvalidInputException> result = webTestClient.delete()
                 .uri("/api/v2/gateway/pets/{petId}", invalidPetId)
-                .cookie("Bearer", jwtTokenForValidVet)
+                .cookie("Bearer", jwtTokenForValidOwnerId)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isEqualTo(422)
