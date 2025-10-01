@@ -41,6 +41,7 @@ class PetControllerIntegrationTest {
         mockServerConfigAuthService.registerValidateTokenForAdminEndpoint();
         mockServerConfigAuthService.registerValidateTokenForVetEndpoint();
         mockServerConfigAuthService.registerValidateTokenForOwnerEndpoint();
+        mockServerConfigCustomersService.registerGetPetByIdEndpoint();
     }
 
     @AfterAll
@@ -58,6 +59,7 @@ class PetControllerIntegrationTest {
                 .petTypeId("1")
                 .isActive("true")
                 .weight("1.3")
+                .ownerId("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
                 .build();
 
         Mono<PetResponseDTO> result = webTestClient.delete()
@@ -119,6 +121,7 @@ class PetControllerIntegrationTest {
                 .petTypeId("1")
                 .isActive("true")
                 .weight("1.3")
+                .ownerId("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
                 .build();
 
         Mono<PetResponseDTO> result = webTestClient.delete()
