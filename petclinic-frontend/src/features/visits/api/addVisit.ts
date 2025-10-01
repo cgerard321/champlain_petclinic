@@ -5,5 +5,5 @@ import { VisitRequestModel } from '@/features/visits/models/VisitRequestModel.ts
 export const addVisit = async (
   visit: VisitRequestModel
 ): Promise<AxiosResponse<void>> => {
-  return await axiosInstance.post<void>('/visits', visit, { useV2: true });
+  return await axiosInstance.post<void>('/visits', visit, { useV2: false });
 };
