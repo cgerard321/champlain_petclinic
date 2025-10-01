@@ -92,10 +92,16 @@ public class VisitsControllerV1 {
                         .defaultIfEmpty(ResponseEntity.notFound().build())); // Return 404 if not found
     }
 
-    @PutMapping(value = "/{visitId}/status/{status}")
-    Mono<VisitResponseDTO> updateStatusForVisitByVisitId(@PathVariable String visitId, @PathVariable String status) {
-        return visitsServiceClient.updateStatusForVisitByVisitId(visitId, status);
+    @PatchMapping("/{visitId}/status/{status}")
+    public Mono<ResponseEntity<VisitResponseDTO>> updateStatusForVisitByVisitId(
+            @PathVariable String visitId,
+            @PathVariable String status) {
+
+        return visitsServiceClient.updateStatusForVisitByVisitId(visitId, status)
+                .map(ResponseEntity::ok)
+                .switchIfEmpty(Mono.just(ResponseEntity.notFound().build()));
     }
+
 
     @DeleteMapping (value = "/{visitId}")
     public Mono<ResponseEntity<Void>> deleteVisitsByVisitId(@PathVariable String visitId){
