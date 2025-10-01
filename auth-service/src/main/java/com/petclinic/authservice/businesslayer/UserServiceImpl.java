@@ -59,7 +59,7 @@ public class UserServiceImpl implements UserService {
     private final String salt = BCrypt.gensalt(10);
 
 
-    @Value("${frontend.url}")
+    @Value("${backend.url}")
     private String gatewayOrigin;
     @Override
     public List<UserDetails> findAllWithoutPage() {
