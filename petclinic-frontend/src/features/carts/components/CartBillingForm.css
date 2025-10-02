@@ -7,7 +7,7 @@
   background: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
   z-index: 1000;
 }
 
@@ -18,8 +18,13 @@
   border-radius: 12px;
   width: 500px;
   max-width: 90%;
-  margin: auto;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  margin-top: 2rem; 
+  margin-bottom: 2rem; 
+  margin-left: auto;
+  margin-right: auto;
+  max-height: calc(100vh - 6rem); 
+  overflow-y: auto; 
 }
 
 .modal-close {
