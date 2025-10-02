@@ -393,5 +393,3 @@ services:
     depends_on:
       - mongo-carts
       - cart-service
-
-

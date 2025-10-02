@@ -20,8 +20,7 @@ export default function VisitDetails(): JSX.Element {
           console.error('Error fetching visit:', error);
         });
     }
-  });
-  [visitId];
+  }, [visitId]);
 
   if (!visit) {
     return <div>Loading...</div>;
