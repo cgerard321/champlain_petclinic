@@ -4,7 +4,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -16,7 +15,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @DataMongoTest
 @ActiveProfiles("test")
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class ProductRepositoryIntegrationTest {
     @Autowired
     private ProductRepository productRepository;
@@ -213,14 +211,11 @@ class ProductRepositoryIntegrationTest {
                 .deliveryType(DeliveryType.NO_DELIVERY_OPTION)
                 .build();
 
-        StepVerifier.create(productRepository.save(product))
-                .expectNextCount(1)
-                .verifyComplete();
+        productRepository.save(product).block();
 
         product.setDeliveryType(DeliveryType.PICKUP);
-        StepVerifier.create(productRepository.save(product))
-                .expectNextCount(1)
-                .verifyComplete();
+        productRepository.save(product).block();
+
 
         Product foundProduct = productRepository.findProductByProductId(id).block();
         assertNotNull(foundProduct);
@@ -238,9 +233,7 @@ class ProductRepositoryIntegrationTest {
                 .deliveryType(null)
                 .build();
 
-        StepVerifier.create(productRepository.save(product))
-                .expectNextCount(1)
-                .verifyComplete();
+        productRepository.save(product).block();
 
         StepVerifier
                 .create(productRepository.findProductByProductId(productId))
@@ -269,10 +262,12 @@ class ProductRepositoryIntegrationTest {
         assertNotNull(savedProduct);
         assertEquals(DeliveryType.DELIVERY, savedProduct.getDeliveryType());
 
+
         savedProduct.setDeliveryType(DeliveryType.DELIVERY_AND_PICKUP);
         Product updatedProduct = productRepository.save(savedProduct).block();
         assertNotNull(updatedProduct);
         assertEquals(DeliveryType.DELIVERY_AND_PICKUP, updatedProduct.getDeliveryType());
+
 
         Product foundProduct = productRepository.findProductByProductId(id).block();
         assertNotNull(foundProduct);
