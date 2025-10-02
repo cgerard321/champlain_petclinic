@@ -3133,5 +3133,67 @@ private VetAverageRatingDTO buildVetAverageRatingDTO(){
                 .endDate("2014")
                 .build();
     }
+    @Test
+    void addPhotoByVetId_LambdaBytes_201Created() {
+        String vetId = "vet123";
+        String photoName = "photo.jpg";
+        byte[] photoData = "test photo data".getBytes();
+        Resource expectedResource = new ByteArrayResource(photoData);
 
+        when(vetsServiceClient.addPhotoToVetFromBytes(vetId, photoName, photoData))
+                .thenReturn(Mono.just(expectedResource));
+
+        client.post()
+                .uri("/api/gateway/vets/{vetId}/photos", vetId)
+                .header("Photo-Name", photoName)
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(Mono.just(photoData), byte[].class)
+                .exchange()
+                .expectStatus().isCreated();
+
+        verify(vetsServiceClient).addPhotoToVetFromBytes(vetId, photoName, photoData);
+    }
+
+    @Test
+    void addPhotoByVetId_LambdaBytes_400BadRequest_EmptyResponse() {
+        String vetId = "vet123";
+        String photoName = "photo.jpg";
+        byte[] photoData = "test photo data".getBytes();
+
+        when(vetsServiceClient.addPhotoToVetFromBytes(vetId, photoName, photoData))
+                .thenReturn(Mono.empty());
+
+        client.post()
+                .uri("/api/gateway/vets/{vetId}/photos", vetId)
+                .header("Photo-Name", photoName)
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(Mono.just(photoData), byte[].class)
+                .exchange()
+                .expectStatus().isBadRequest();
+
+        verify(vetsServiceClient).addPhotoToVetFromBytes(vetId, photoName, photoData);
+    }
+
+    @Test
+    void addSpecialtiesByVetId_VetEndpoint_200Ok() {
+        String vetId = "vet123";
+        SpecialtyDTO specialtyDTO = SpecialtyDTO.builder()
+                .specialtyId("specialty-1")
+                .name("Surgery")
+                .build();
+
+        VetResponseDTO expectedVet = buildVetResponseDTO();
+
+        when(vetsServiceClient.addSpecialtiesByVetId(eq(vetId), any(Mono.class)))
+                .thenReturn(Mono.just(expectedVet));
+
+        client.post()
+                .uri("/api/gateway/vets/{vetId}/specialties", vetId) // note: include "vets" in path
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(fromValue(specialtyDTO))
+                .exchange()
+                .expectStatus().isOk();
+
+        verify(vetsServiceClient).addSpecialtiesByVetId(eq(vetId), any(Mono.class));
+    }
 }
