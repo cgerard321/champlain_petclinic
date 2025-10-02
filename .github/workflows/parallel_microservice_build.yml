@@ -199,19 +199,30 @@ jobs:
     steps:
       - name: Checkout sources
         uses: actions/checkout@v4
-      - name: Setup Java
+      - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: 17
+          java-version: '17'
+      - name: Cache Gradle packages
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-products-${{ hashFiles('**/products-service/*.gradle*', '**/products-service/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-products-
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
       - name: Make gradlew executable
         run: chmod +x ./gradlew
         working-directory: ./products-service
-      - name: Build with Gradle
-        run: ./gradlew clean build jacocoTestReport jacocoTestCoverageVerification
+      - name: Build with Gradle (optimized)
+        run: ./gradlew clean build jacocoTestReport jacocoTestCoverageVerification --parallel --build-cache --configuration-cache
         working-directory: ./products-service
+        env:
+          GRADLE_OPTS: "-Xmx2g -XX:+UseG1GC -XX:MaxGCPauseMillis=200"
       - name: Upload coverage reports
         uses: actions/upload-artifact@v4
         with:
