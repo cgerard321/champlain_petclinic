@@ -15,6 +15,7 @@ import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWeb
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
@@ -26,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {"spring.data.mongodb.port= 0"})
 @ActiveProfiles("test")
-//@TestInstance(TestInstance.Lifecycle.PER_METHOD)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @AutoConfigureWebTestClient
 class RatingControllerIntegrationTest {
     @Autowired
@@ -514,6 +515,7 @@ class RatingControllerIntegrationTest {
                 .expectBody()
                 .jsonPath("$.message").isEqualTo("Review must be less than 2000 characters");
 
+        // Verify no new rating was added to the database
         StepVerifier.create(ratingRepository.findAll())
                 .expectNextCount(4)
                 .verifyComplete();
