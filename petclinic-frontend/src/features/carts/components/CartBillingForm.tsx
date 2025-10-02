@@ -1,4 +1,4 @@
-import React, { useState, ChangeEvent, FormEvent } from 'react';
+import { useState, ChangeEvent, FormEvent } from 'react';
 import './CartBillingForm.css';
 
 export interface CartBillingFormProps {
@@ -36,9 +36,9 @@ const provinces = [
 ];
 
 const CartBillingForm: React.FC<CartBillingFormProps> = ({
-  isOpen,
-  onClose,
-  onSubmit,
+  isOpen, // eslint-disable-line react/prop-types
+  onClose, // eslint-disable-line react/prop-types
+  onSubmit, // eslint-disable-line react/prop-types
 }) => {
   const [billing, setBilling] = useState<BillingInfo>({
     fullName: '',
