@@ -25,6 +25,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
+import java.math.BigDecimal;
+
 @WebFluxTest(controllers = CustomerBillsController.class)
 public class CustomerBillsControllerUnitTest {
 
@@ -73,7 +75,7 @@ public class CustomerBillsControllerUnitTest {
     @Test
     void getCurrentBalance_ValidCustomer_ShouldReturnBalance() {
         String customerId = "valid-customer-id";
-        double expectedBalance = 150.0;
+        BigDecimal expectedBalance = new BigDecimal (150.0);
 
         when(billService.calculateCurrentBalance(customerId)).thenReturn(Mono.just(expectedBalance));
 
@@ -111,7 +113,7 @@ public class CustomerBillsControllerUnitTest {
                 .vetId("vetId")
                 .visitType("surgery")
                 .billStatus(BillStatus.PAID)
-                .amount(150.0)
+                .amount(new BigDecimal(150.0))
                 .build();
     }
 
@@ -125,7 +127,7 @@ public class CustomerBillsControllerUnitTest {
                 .billId(billId)
                 .customerId(customerId)
                 .billStatus(BillStatus.PAID)
-                .amount(200.0)
+                .amount(new BigDecimal(200.0))
                 .build();
 
         when(billService.processPayment(customerId, billId, paymentRequest))
@@ -184,17 +186,28 @@ public class CustomerBillsControllerUnitTest {
         verify(billService, times(1)).processPayment(customerId, billId, paymentRequest);
     }
 
+    @Test
+        void getBillsByCustomerId_OverdueBill_ShouldReturnInterest() {
+                BillResponseDTO overdueBill = BillResponseDTO.builder()
+                        .billId("overdue-1")
+                        .customerId("custId")
+                        .amount(new BigDecimal("100.00"))
+                        .billStatus(BillStatus.OVERDUE)
+                        .interest(new BigDecimal("3.00"))
+                        .build();
 
+                when(billService.getBillsByCustomerId(anyString())).thenReturn(Flux.just(overdueBill));
 
-
-
-
-
-
-
-
-
-
-
-
+                client.get()
+                        .uri("/bills/customer/{customerId}/bills", overdueBill.getCustomerId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .exchange()
+                        .expectStatus().isOk()
+                        .expectBodyList(BillResponseDTO.class)
+                        .consumeWith(response -> {
+                                assert response.getResponseBody() != null;
+                                assertEquals(new BigDecimal("3.00"), response.getResponseBody().get(0).getInterest());
+                        });
+                verify(billService, times(1)).getBillsByCustomerId(overdueBill.getCustomerId());
+        }
 }

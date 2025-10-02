@@ -12,9 +12,12 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.test.StepVerifier;
 import static reactor.core.publisher.Mono.just;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.Month;
+import java.time.Period;
 import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.List;
@@ -195,7 +198,7 @@ class BillControllerIntegrationTest {
         Bill billEntity2 = buildBill();
 
         billEntity2.setVisitType("Different");
-        billEntity2.setAmount(199239);
+        billEntity2.setAmount(new BigDecimal(199239));
         billEntity2.setId("2");
 
         String BILL_ID_OK = billEntity.getBillId();
@@ -384,7 +387,7 @@ class BillControllerIntegrationTest {
         LocalDate dueDate = LocalDate.of(2022,Month.OCTOBER,15);
 
 
-        return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(13.37).billStatus(BillStatus.PAID).dueDate(dueDate).build();
+        return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(new BigDecimal(13.37)).billStatus(BillStatus.PAID).dueDate(dueDate).build();
     }
 
     private Bill buildUnpaidBill(){
@@ -398,7 +401,7 @@ class BillControllerIntegrationTest {
         LocalDate dueDate = LocalDate.of(2022, Month.OCTOBER, 5);
 
 
-        return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(13.37).billStatus(BillStatus.UNPAID).dueDate(dueDate).build();
+        return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(new BigDecimal(13.37)).billStatus(BillStatus.UNPAID).dueDate(dueDate).build();
     }
 
     private Bill buildOverdueBill(){
@@ -412,7 +415,7 @@ class BillControllerIntegrationTest {
         LocalDate dueDate = LocalDate.of(2022, Month.AUGUST, 15);
 
 
-        return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(13.37).billStatus(BillStatus.OVERDUE).dueDate(dueDate).build();
+        return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(new BigDecimal(13.37)).billStatus(BillStatus.OVERDUE).dueDate(dueDate).build();
     }
     @Test
     void whenValidPageAndSizeProvided_thenReturnsCorrectBillsPage() {
@@ -424,7 +427,7 @@ class BillControllerIntegrationTest {
                     .vetId("1")
                     .visitType("Routine Check")
                     .date(LocalDate.now())
-                    .amount(100.0)
+                    .amount(new BigDecimal(100.0))
                     .billStatus(BillStatus.PAID)
                     .dueDate(LocalDate.now().plusDays(30))
                     .build()).block();
@@ -453,7 +456,7 @@ class BillControllerIntegrationTest {
                     .vetId("1")
                     .visitType("Routine Check")
                     .date(LocalDate.now())
-                    .amount(100.0)
+                    .amount(new BigDecimal(100.0))
                     .billStatus(BillStatus.PAID)
                     .dueDate(LocalDate.now().plusDays(30))
                     .build()).block();
@@ -531,7 +534,7 @@ class BillControllerIntegrationTest {
                     .vetId("1")
                     .visitType("Routine Check")
                     .date(LocalDate.of(2022, 9, i))
-                    .amount(100.0)
+                    .amount(new BigDecimal(100.0))
                     .billStatus(BillStatus.PAID)
                     .dueDate(LocalDate.of(2022, 9, i).plusDays(30))
                     .build()).block();
@@ -585,7 +588,7 @@ class BillControllerIntegrationTest {
                 .vetId("1")
                 .visitType("Routine Check")
                 .date(LocalDate.of(2022, 9, 1))
-                .amount(100.0)
+                .amount(new BigDecimal(100.0))
                 .billStatus(BillStatus.PAID)
                 .dueDate(LocalDate.of(2022, 9, 1).plusDays(30))
                 .vetFirstName("VetFirstName")
@@ -622,7 +625,7 @@ class BillControllerIntegrationTest {
                 .vetId("1")
                 .visitType("Routine Check")
                 .date(LocalDate.of(2022, 9, 1))
-                .amount(100.0)
+                .amount(new BigDecimal(100.0))
                 .billStatus(BillStatus.PAID)
                 .dueDate(LocalDate.of(2022, 9, 1).plusDays(30))
                 .build();
@@ -671,7 +674,7 @@ class BillControllerIntegrationTest {
                 .vetId("1")
                 .visitType("Test Type")
                 .date(date)
-                .amount(100.0)
+                .amount(new BigDecimal(100.0))
                 .billStatus(BillStatus.OVERDUE)
                 .dueDate(dueDate)
                 .build();
@@ -689,7 +692,7 @@ class BillControllerIntegrationTest {
                 .vetId("1")
                 .visitType("Test Type")
                 .date(date)
-                .amount(100.0)
+                .amount(new BigDecimal(100.0))
                 .billStatus(BillStatus.UNPAID)
                 .dueDate(dueDate)
                 .build();
@@ -709,7 +712,7 @@ class BillControllerIntegrationTest {
                 .vetId("Vet1")
                 .visitType("Routine Check")
                 .date(LocalDate.of(2022, 9, 25))
-                .amount(150.75)
+                .amount(new BigDecimal(150.75))
                 .billStatus(BillStatus.PAID)
                 .dueDate(LocalDate.of(2022, 10, 15))
                 .ownerFirstName("John")
@@ -718,5 +721,29 @@ class BillControllerIntegrationTest {
                 .vetLastName("Smith")
                 .build();
     }
+        @Test
+        void getBillByValidBillID_Overdue_ShouldReturnInterest() {
+                Bill billEntity = buildOverdueBill();
 
+                Publisher<Bill> setup = repo.deleteAll().thenMany(repo.save(billEntity));
+
+                StepVerifier.create(setup)
+                        .expectNextCount(1)
+                         .verifyComplete();
+
+                int overdueMonths = Period.between(billEntity.getDueDate(), LocalDate.now()).getMonths();
+                BigDecimal expectedInterest = billEntity.getAmount()
+                .multiply(new BigDecimal("0.015"))
+                .multiply(BigDecimal.valueOf(overdueMonths))
+                .setScale(2, RoundingMode.HALF_UP);
+
+                client.get()
+                        .uri("/bills/" + billEntity.getBillId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .exchange()
+                        .expectStatus().isOk()
+                        .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                        .expectBody()
+                        .jsonPath("$.interest").isEqualTo(expectedInterest);
+}
 }

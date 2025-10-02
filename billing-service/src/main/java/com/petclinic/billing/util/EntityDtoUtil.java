@@ -33,6 +33,30 @@ public class EntityDtoUtil {
         billResponseDTO.setTaxedAmount(bill.getTaxedAmount());
         billResponseDTO.setBillStatus(bill.getBillStatus());
         billResponseDTO.setDueDate(bill.getDueDate());
+        billResponseDTO.setInterestExempt(bill.isInterestExempt());
+        
+        // Calculate and set interest with exemption check
+        if (bill.isInterestExempt()) {
+            billResponseDTO.setInterest(java.math.BigDecimal.ZERO);
+        } else if (bill.getBillStatus() == com.petclinic.billing.datalayer.BillStatus.OVERDUE && bill.getDueDate() != null) {
+            java.time.LocalDate dueDate = bill.getDueDate();
+            java.time.LocalDate now = java.time.LocalDate.now();
+            java.time.Period period = java.time.Period.between(dueDate, now);
+            int overdueMonths = period.getYears() * 12 + period.getMonths();
+            if (overdueMonths > 0) {
+                java.math.BigDecimal monthlyRate = new java.math.BigDecimal("0.015");
+                java.math.BigDecimal onePlusRate = java.math.BigDecimal.ONE.add(monthlyRate);
+                java.math.BigDecimal compounded = onePlusRate.pow(overdueMonths);
+                java.math.BigDecimal finalAmount = bill.getAmount().multiply(compounded).setScale(2, java.math.RoundingMode.HALF_UP);
+                java.math.BigDecimal interest = finalAmount.subtract(bill.getAmount()).setScale(2, java.math.RoundingMode.HALF_UP);
+                billResponseDTO.setInterest(interest);
+            } else {
+                billResponseDTO.setInterest(java.math.BigDecimal.ZERO);
+            }
+        } else {
+            billResponseDTO.setInterest(java.math.BigDecimal.ZERO);
+        }
+        
         billResponseDTO.setTimeRemaining(timeRemaining(bill));
 
         log.info("Mapped BillResponseDTO: {}", billResponseDTO);

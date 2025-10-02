@@ -2,8 +2,8 @@ package com.petclinic.billing.businesslayer;
 
 import com.itextpdf.text.DocumentException;
 import com.petclinic.billing.datalayer.*;
-import com.petclinic.billing.domainclientlayer.OwnerClient;
-import com.petclinic.billing.domainclientlayer.VetClient;
+//import com.petclinic.billing.domainclientlayer.OwnerClient;
+//import com.petclinic.billing.domainclientlayer.VetClient;
 import com.petclinic.billing.exceptions.InvalidPaymentException;
 import com.petclinic.billing.exceptions.NotFoundException;
 import com.petclinic.billing.util.EntityDtoUtil;
@@ -11,15 +11,14 @@ import com.petclinic.billing.util.PdfGenerator;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.time.Duration;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.function.Predicate;
@@ -32,22 +31,24 @@ import java.util.function.Predicate;
 public class BillServiceImpl implements BillService{
 
     private final BillRepository billRepository;
-    private final VetClient vetClient;
-    private final OwnerClient ownerClient;
+    //private final VetClient vetClient;
+    //private final OwnerClient ownerClient;
+    private static final BigDecimal MONTHLY_INTEREST_RATE = new BigDecimal("0.015");
 
-    @Override
+
+   @Override
     public Mono<BillResponseDTO> getBillByBillId(String billUUID) {
-
         return billRepository.findByBillId(billUUID)
-                .doOnNext(bill -> {
-                    log.info("Retrieved Bill: {}", bill);
-                })
-                .map(EntityDtoUtil::toBillResponseDto)
-                .doOnNext(t -> t.setTaxedAmount(((t.getAmount() * 15)/100)+ t.getAmount()))
-                .doOnNext(t -> t.setTaxedAmount(Math.round(t.getTaxedAmount() * 100.0) / 100.0));
-               // .doOnNext(t -> t.setTimeRemaining(timeRemaining(t)));
-    }
-
+            .doOnNext(bill -> log.info("Retrieved Bill: {}", bill))
+            .map(EntityDtoUtil::toBillResponseDto)
+            .doOnNext(t -> {
+                BigDecimal taxRate = new BigDecimal("0.15");
+                BigDecimal taxedAmount = t.getAmount().multiply(taxRate).add(t.getAmount());
+                taxedAmount = taxedAmount.setScale(2, RoundingMode.HALF_UP);
+                t.setTaxedAmount(taxedAmount);
+                // Interest calculation is now handled in EntityDtoUtil::toBillResponseDto
+            });
+}
     @Override
     public Flux<BillResponseDTO> getAllBillsByStatus(BillStatus status) {
         return billRepository.findAllBillsByBillStatus(status).map(EntityDtoUtil::toBillResponseDto);
@@ -316,13 +317,30 @@ public class BillServiceImpl implements BillService{
                 .switchIfEmpty(Flux.empty());
     }
 
-    public Mono<Double> calculateCurrentBalance(String customerId) {
+    public Mono<BigDecimal> calculateCurrentBalance(String customerId) {
         return billRepository.findByCustomerIdAndBillStatus(customerId, BillStatus.UNPAID)
-                .concatWith(billRepository.findByCustomerIdAndBillStatus(customerId, BillStatus.OVERDUE))
-                .map(Bill::getAmount)
-                .reduce(0.0, Double::sum)
-                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Customer not found")));
-    }
+            .concatWith(billRepository.findByCustomerIdAndBillStatus(customerId, BillStatus.OVERDUE))
+            .map(bill -> {
+                BigDecimal total = bill.getAmount();
+                // Check interest exemption first - if exempt, don't add interest regardless of status
+                if (bill.getBillStatus() == BillStatus.OVERDUE && bill.getDueDate() != null && !bill.isInterestExempt()) {
+                    LocalDate dueDate = bill.getDueDate();
+                    LocalDate now = LocalDate.now();
+                    java.time.Period period = java.time.Period.between(dueDate, now);
+                    int overdueMonths = period.getYears() * 12 + period.getMonths();
+                    if (overdueMonths > 0) {
+                        BigDecimal onePlusRate = BigDecimal.ONE.add(MONTHLY_INTEREST_RATE);
+                        BigDecimal compounded = onePlusRate.pow(overdueMonths);
+                        BigDecimal finalAmount = bill.getAmount().multiply(compounded).setScale(2, RoundingMode.HALF_UP);
+                        BigDecimal interest = finalAmount.subtract(bill.getAmount()).setScale(2, RoundingMode.HALF_UP);
+                        total = total.add(interest);
+                    }
+                }
+                return total;
+            })
+            .reduce(BigDecimal.ZERO, BigDecimal::add)
+            .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Customer not found")));
+        }
 
     @Override
     public Mono<BillResponseDTO> processPayment(String customerId, String billId, PaymentRequestDTO paymentRequestDTO)
@@ -353,7 +371,39 @@ public class BillServiceImpl implements BillService{
                 .map(EntityDtoUtil::toBillResponseDto);
     }
 
+    public Mono<BigDecimal> getInterestAmount(String billId, BigDecimal amount, int overdueMonths) {
+        return billRepository.findByBillId(billId)
+            .map(bill -> {
+                if (bill.isInterestExempt()) {
+                    return BigDecimal.ZERO;
+                } else {
+                    BigDecimal interestAmount = amount
+                        .multiply(MONTHLY_INTEREST_RATE)
+                        .multiply(BigDecimal.valueOf(overdueMonths));
+                    return interestAmount;
+                }
+            });
+    }
 
+    public Mono<BigDecimal> getTotalWithInterest(String billId, BigDecimal amount, int overdueMonths) {
+        return getInterestAmount(billId, amount, overdueMonths)
+            .map(interest -> amount.add(interest));
+    }
+
+    @Override
+    public Mono<Void> setInterestExempt(String billId, boolean exempt) {
+        log.info("exempt called");
+        return billRepository.findByBillId(billId)
+            .flatMap(bill -> {
+                bill.setInterestExempt(exempt);
+                // If setting exemption to true, also clear any existing interest
+                if (exempt) {
+                    bill.setInterest(BigDecimal.ZERO);
+                }
+                return billRepository.save(bill);
+            })
+            .then();
+    }
 
 
 }

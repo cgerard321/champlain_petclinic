@@ -24,7 +24,9 @@ public class BillResponseDTO {
     private LocalDate date;
     private double amount;
     private double taxedAmount;
+    private double interestAmount;
     private BillStatus billStatus;
     private LocalDate dueDate;
     private Long timeRemaining;
+    private boolean interestExempt;
 }

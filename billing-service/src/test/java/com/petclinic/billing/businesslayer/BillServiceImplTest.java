@@ -20,6 +20,8 @@ import reactor.test.StepVerifier;
 
 import static org.mockito.ArgumentMatchers.*;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.ZoneId;
@@ -424,7 +426,7 @@ public class BillServiceImplTest {
         Bill originalBill = buildBill();
 
 
-        double updatedAmount = 20.0;
+        BigDecimal updatedAmount = new BigDecimal(20.00);
         originalBill.setAmount(updatedAmount);
 
 
@@ -467,7 +469,7 @@ public class BillServiceImplTest {
     @Test
     public void test_updateNonExistentBillId() {
         String nonExistentBillId = "nonExistentId";
-        double updatedAmount = 20.0;
+        BigDecimal updatedAmount = new BigDecimal(20.0);
         BillRequestDTO updatedBillRequestDTO = buildBillRequestDTO();
         updatedBillRequestDTO.setAmount(updatedAmount);
         Mono<BillRequestDTO> updatedBillRequestMono = Mono.just(updatedBillRequestDTO);
@@ -498,7 +500,7 @@ public class BillServiceImplTest {
     @Test
     public void test_updateBillWithInvalidRequest() {
         String billId = "validBillId";
-        double updatedAmount = -5.0; // Negative amount, which is invalid
+        BigDecimal updatedAmount = new BigDecimal (-5.0); // Negative amount, which is invalid
         BillRequestDTO updatedBillRequestDTO = buildBillRequestDTO();
         updatedBillRequestDTO.setAmount(updatedAmount);
         Mono<BillRequestDTO> updatedBillRequestMono = Mono.just(updatedBillRequestDTO);
@@ -552,7 +554,7 @@ public class BillServiceImplTest {
                 .ownerLastName("Doe")
                 .visitType("General")
                 .vetId("vetId-1")
-                .amount(100.0)
+                .amount(new BigDecimal(100.0))
                 .billStatus(BillStatus.PAID)
                 .date(LocalDate.now())
                 .dueDate(LocalDate.now().plusDays(15))
@@ -599,7 +601,7 @@ public class BillServiceImplTest {
                 .vetId("2")
                 .visitType("")
                 .date(date)
-                .amount(100.0)
+                .amount(new BigDecimal(100.0))
                 .billStatus(BillStatus.PAID)
                 .dueDate(date)
                 .build();
@@ -616,7 +618,7 @@ public class BillServiceImplTest {
         LocalDate dueDate = LocalDate.of(2022,Month.OCTOBER,15);
 
 
-        return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(13.37).billStatus(BillStatus.PAID).dueDate(dueDate).build();
+        return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(new BigDecimal(13.37)).billStatus(BillStatus.PAID).dueDate(dueDate).build();
     }
 
     private Bill buildUnpaidBill(){
@@ -631,7 +633,7 @@ public class BillServiceImplTest {
         LocalDate dueDate = LocalDate.of(2022, Month.OCTOBER, 5);
 
 
-        return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(13.37).billStatus(BillStatus.UNPAID).dueDate(dueDate).build();
+        return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(new BigDecimal(13.37)).billStatus(BillStatus.UNPAID).dueDate(dueDate).build();
 
     }
 
@@ -646,7 +648,7 @@ public class BillServiceImplTest {
         LocalDate dueDate = LocalDate.of(2022, Month.AUGUST, 15);
 
 
-        return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(13.37).billStatus(BillStatus.OVERDUE).dueDate(dueDate).build();
+        return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(new BigDecimal(13.37)).billStatus(BillStatus.OVERDUE).dueDate(dueDate).build();
     }
 
 
@@ -667,7 +669,7 @@ public class BillServiceImplTest {
 
 
 
-        return BillRequestDTO.builder().customerId("1").vetId("1").visitType("Test Type").date(date).amount(13.37).billStatus(BillStatus.PAID).dueDate(dueDate).build();
+        return BillRequestDTO.builder().customerId("1").vetId("1").visitType("Test Type").date(date).amount(new BigDecimal(13.37)).billStatus(BillStatus.PAID).dueDate(dueDate).build();
 
     }
 
@@ -751,18 +753,18 @@ public class BillServiceImplTest {
     void calculateCurrentBalance_ShouldReturnCorrectBalance() {
 
         String customerId = "valid-customer-id";
-        Bill unpaidBill = Bill.builder().amount(100.0).billStatus(BillStatus.UNPAID).customerId(customerId).build();
-        Bill overdueBill = Bill.builder().amount(50.0).billStatus(BillStatus.OVERDUE).customerId(customerId).build();
+        Bill unpaidBill = Bill.builder().amount(new BigDecimal(100.0)).billStatus(BillStatus.UNPAID).customerId(customerId).build();
+        Bill overdueBill = Bill.builder().amount(new BigDecimal(50.0)).billStatus(BillStatus.OVERDUE).customerId(customerId).build();
 
         when(repo.findByCustomerIdAndBillStatus(customerId, BillStatus.UNPAID))
                 .thenReturn(Flux.just(unpaidBill));
         when(repo.findByCustomerIdAndBillStatus(customerId, BillStatus.OVERDUE))
                 .thenReturn(Flux.just(overdueBill));
 
-        Mono<Double> result = billService.calculateCurrentBalance(customerId);
+        Mono<BigDecimal> result = billService.calculateCurrentBalance(customerId);
 
         StepVerifier.create(result)
-                .expectNext(150.0) 
+                .expectNext(new BigDecimal(150.0)) 
                 .verifyComplete();
     }
 
@@ -775,10 +777,10 @@ public class BillServiceImplTest {
         when(repo.findByCustomerIdAndBillStatus(invalidCustomerId, BillStatus.OVERDUE))
                 .thenReturn(Flux.empty());
 
-        Mono<Double> result = billService.calculateCurrentBalance(invalidCustomerId);
+        Mono<BigDecimal> result = billService.calculateCurrentBalance(invalidCustomerId);
 
         StepVerifier.create(result)
-                .expectNext(0.0) 
+                .expectNext(new BigDecimal(0.0)) 
                 .verifyComplete();
     }
 
@@ -994,5 +996,104 @@ public class BillServiceImplTest {
                 .verifyComplete();
     }
 
+    @Test
+    void test_getBillById_OverdueBill_ShouldCalculateInterest() {
+        // Arrange
+        LocalDate dueDate = LocalDate.now().minusMonths(2); // 2 months overdue
+        BigDecimal amount = new BigDecimal("100.00");
+        Bill overdueBill = Bill.builder()
+            .billId("overdue-bill-id")
+            .amount(amount)
+            .billStatus(BillStatus.OVERDUE)
+            .dueDate(dueDate)
+            .build();
 
+        when(repo.findByBillId("overdue-bill-id")).thenReturn(Mono.just(overdueBill));
+
+        // Act
+        Mono<BillResponseDTO> result = billService.getBillByBillId("overdue-bill-id");
+
+        // Assert
+        StepVerifier.create(result)
+            .consumeNextWith(dto -> {
+                assertEquals(amount, dto.getAmount());
+                assertEquals(BillStatus.OVERDUE, dto.getBillStatus());
+                // Interest: amount * MONTHLY_INTEREST_RATE * overdueMonths
+                BigDecimal expectedInterest = amount
+                        .multiply(new BigDecimal("0.015"))
+                        .multiply(BigDecimal.valueOf(2))
+                        .setScale(2, RoundingMode.HALF_UP);
+                assertEquals(expectedInterest, dto.getInterest());
+            })
+            .verifyComplete();
+    }
+
+    @Test
+    void test_getBillById_NotOverdueBill_ShouldHaveZeroInterest() {
+        // Arrange
+        LocalDate dueDate = LocalDate.now().plusDays(10); // Not overdue
+        BigDecimal amount = new BigDecimal("200.00");
+        Bill unpaidBill = Bill.builder()
+            .billId("unpaid-bill-id")
+            .amount(amount)
+            .billStatus(BillStatus.UNPAID)
+            .dueDate(dueDate)
+            .build();
+
+        when(repo.findByBillId("unpaid-bill-id")).thenReturn(Mono.just(unpaidBill));
+
+        // Act
+        Mono<BillResponseDTO> result = billService.getBillByBillId("unpaid-bill-id");
+
+        // Assert
+        StepVerifier.create(result)
+            .consumeNextWith(dto -> {
+                assertEquals(amount, dto.getAmount());
+                assertEquals(BillStatus.UNPAID, dto.getBillStatus());
+                assertEquals(BigDecimal.ZERO.setScale(2), dto.getInterest().setScale(2));
+            })
+            .verifyComplete();
+    }
+
+    @Test
+    void test_calculateCurrentBalance_ShouldIncludeInterestForOverdueBills() {
+        // Arrange
+        String customerId = "customer-interest";
+        LocalDate overdueDate = LocalDate.now().minusMonths(1);
+        BigDecimal unpaidAmount = new BigDecimal("100.00");
+        BigDecimal overdueAmount = new BigDecimal("50.00");
+
+        Bill unpaidBill = Bill.builder()
+            .amount(unpaidAmount)
+            .billStatus(BillStatus.UNPAID)
+            .customerId(customerId)
+            .build();
+
+        Bill overdueBill = Bill.builder()
+            .amount(overdueAmount)
+            .billStatus(BillStatus.OVERDUE)
+            .customerId(customerId)
+            .dueDate(overdueDate)
+            .build();
+
+        when(repo.findByCustomerIdAndBillStatus(customerId, BillStatus.UNPAID))
+            .thenReturn(Flux.just(unpaidBill));
+        when(repo.findByCustomerIdAndBillStatus(customerId, BillStatus.OVERDUE))
+            .thenReturn(Flux.just(overdueBill));
+
+        // Act
+        Mono<BigDecimal> result = billService.calculateCurrentBalance(customerId);
+
+        // Assert
+        StepVerifier.create(result)
+            .consumeNextWith(balance -> {
+                BigDecimal expectedInterest = overdueAmount
+                        .multiply(new BigDecimal("0.015"))
+                        .multiply(BigDecimal.valueOf(1))
+                        .setScale(2, RoundingMode.HALF_UP);
+                BigDecimal expectedTotal = unpaidAmount.add(overdueAmount).add(expectedInterest);
+                assertEquals(expectedTotal, balance.setScale(2, RoundingMode.HALF_UP));
+            })
+            .verifyComplete();
+    }
 }

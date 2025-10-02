@@ -3,17 +3,42 @@ package com.petclinic.billing.util;
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.*;
 import com.petclinic.billing.datalayer.BillResponseDTO;
+import com.petclinic.billing.datalayer.BillStatus;
 
 import java.io.ByteArrayOutputStream;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.NumberFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.Optional;
 
-
 public class PdfGenerator {
 
     public static byte[] generateBillPdf(BillResponseDTO bill) throws DocumentException {
+        // Check if bill is exempt from interest first
+        if (bill.isInterestExempt()) {
+            bill.setInterest(BigDecimal.ZERO);
+        } else if (bill.getBillStatus() == BillStatus.OVERDUE && bill.getDueDate() != null) {
+            java.time.LocalDate dueDate = bill.getDueDate();
+            java.time.LocalDate now = java.time.LocalDate.now();
+            java.time.Period period = java.time.Period.between(dueDate, now);
+            int overdueMonths = period.getYears() * 12 + period.getMonths();
+            if (overdueMonths > 0) {
+                BigDecimal monthlyRate = new BigDecimal("0.015");
+                BigDecimal principal = bill.getAmount();
+                BigDecimal onePlusRate = BigDecimal.ONE.add(monthlyRate);
+                BigDecimal compounded = onePlusRate.pow(overdueMonths);
+                BigDecimal finalAmount = principal.multiply(compounded).setScale(2, RoundingMode.HALF_UP);;
+                BigDecimal interest = finalAmount.subtract(principal).setScale(2, RoundingMode.HALF_UP);
+                bill.setInterest(interest);
+            } else {
+                bill.setInterest(BigDecimal.ZERO);
+            }
+        } else {
+            bill.setInterest(BigDecimal.ZERO);
+        }
+
         Document document = new Document(PageSize.A4, 50, 50, 50, 50);
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         PdfWriter.getInstance(document, byteArrayOutputStream);
@@ -73,9 +98,13 @@ public class PdfGenerator {
         addHeaderCell(charges, "Unit Price");
         addHeaderCell(charges, "Subtotal");
 
-        double subtotal = bill.getAmount();
-        double totalWithTax = bill.getTaxedAmount() > 0 ? bill.getTaxedAmount() : subtotal;
-        double tax = Math.max(0, totalWithTax - subtotal);
+        BigDecimal subtotal = bill.getAmount();
+        BigDecimal totalWithTax = bill.getTaxedAmount() != null && bill.getTaxedAmount().compareTo(BigDecimal.ZERO) > 0
+                ? bill.getTaxedAmount()
+                : subtotal;
+        BigDecimal tax = totalWithTax.subtract(subtotal);
+        BigDecimal interest = bill.getInterest() != null ? bill.getInterest() : BigDecimal.ZERO;
+        BigDecimal totalDue = totalWithTax.add(interest);
 
         charges.addCell("Visit – " + Optional.ofNullable(bill.getVisitType()).orElse("N/A"));
         charges.addCell("1");
@@ -104,12 +133,17 @@ public class PdfGenerator {
         totals.addCell("Tax");
         totals.addCell(rightAligned(formatCurrency(tax)));
 
+        if (interest.compareTo(BigDecimal.ZERO) > 0) {
+            totals.addCell("Interest");
+            totals.addCell(rightAligned(formatCurrency(interest)));
+        }
+
         PdfPCell labelCell = new PdfPCell(new Phrase("Total Due",
                 FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12)));
         labelCell.setBorder(Rectangle.NO_BORDER);
         totals.addCell(labelCell);
 
-        PdfPCell totalCell = new PdfPCell(new Phrase(formatCurrency(totalWithTax),
+        PdfPCell totalCell = new PdfPCell(new Phrase(formatCurrency(totalDue),
                 FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12)));
         totalCell.setBorder(Rectangle.NO_BORDER);
         totalCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
@@ -119,8 +153,8 @@ public class PdfGenerator {
 
         // Footer
         Paragraph notes = new Paragraph(
-                "Notes: All bills are due within 30 days. If a bill is not paid on time, " +
-                        "interest charges may be applied to the outstanding balance.",
+                "Notes: All bills must be paid on time. Late payments may be subject to a" +
+                        "1.5% interest charge on the outstanding balance.",
                 FontFactory.getFont(FontFactory.HELVETICA, 9, BaseColor.GRAY));
         notes.setSpacingBefore(30);
         document.add(notes);
@@ -135,7 +169,7 @@ public class PdfGenerator {
         return byteArrayOutputStream.toByteArray();
     }
 
-    private static String formatCurrency(double value) {
+    private static String formatCurrency(BigDecimal value) {
         return NumberFormat.getCurrencyInstance(Locale.CANADA).format(value);
     }
 

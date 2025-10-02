@@ -15,6 +15,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Calendar;
@@ -111,7 +113,7 @@ public class CustomerBillsControllerIntegrationTest {
         Bill bill = Bill.builder()
                 .billId("bill-456")
                 .customerId("cust-123")
-                .amount(200.0)
+                .amount(new BigDecimal(200.0))
                 .billStatus(BillStatus.UNPAID)
                 .dueDate(LocalDate.now().plusDays(10))
                 .build();
@@ -157,7 +159,8 @@ public class CustomerBillsControllerIntegrationTest {
                                 .vetId("vetId")
                                 .visitType("surgery")
                                 .date(LocalDate.now().minusDays(10))
-                                .amount(150.0)
+                                .amount(new BigDecimal(150.0))
+                                .billStatus(BillStatus.UNPAID)
                                 .dueDate(LocalDate.now().plusDays(20))
                                 .build();
         }
@@ -174,8 +177,37 @@ public class CustomerBillsControllerIntegrationTest {
                                 .vetId("vetId")
                                 .visitType("surgery")
                                 .date(date)
-                                .amount(150.0)
+                                .amount(new BigDecimal(150.0))
                                 .billStatus(BillStatus.UNPAID)
                                 .build();
         }
+        @Test
+        void getBillByBillId_ShouldReturnInterest() {
+                billRepository.deleteAll().block();
+
+                Bill overdueBill = Bill.builder()
+                        .billId("overdue-1")
+                        .customerId("custId")
+                        .amount(new BigDecimal("100.00"))
+                        .billStatus(BillStatus.OVERDUE)
+                        .dueDate(LocalDate.now().minusMonths(1))
+                        .build();
+
+                billRepository.save(overdueBill).block();
+
+                int overdueMonths = java.time.Period.between(overdueBill.getDueDate(), LocalDate.now()).getMonths();
+                BigDecimal expectedInterest = overdueBill.getAmount()
+                        .multiply(new BigDecimal("0.015"))
+                        .multiply(BigDecimal.valueOf(overdueMonths))
+                        .setScale(2, RoundingMode.HALF_UP);
+
+                client.get()
+                        .uri("/bills/" + overdueBill.getBillId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .exchange()
+                        .expectStatus().isOk()
+                        .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                        .expectBody()
+                        .jsonPath("$.interest").isEqualTo(expectedInterest);
+}
 }

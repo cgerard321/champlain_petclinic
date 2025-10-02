@@ -17,6 +17,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.net.URI;
 import java.util.Optional;
 
 
@@ -386,6 +387,34 @@ public class BillServiceClient {
                 });
     }
 
+    public Mono<Double> getInterest(String billId) {
+        return webClientBuilder.build()
+                .get()
+                .uri(billServiceUrl + "/{billId}/interest", billId)
+                .retrieve()
+                .bodyToMono(Double.class);
+    }
+
+    public Mono<Double> getTotalWithInterest(String billId) {
+        return webClientBuilder.build()
+                .get()
+                .uri(billServiceUrl + "/{billId}/total", billId)
+                .retrieve()
+                .bodyToMono(Double.class);
+    }
+
+    public Mono<Void> setInterestExempt(String billId, boolean exempt) {
+        URI uri = UriComponentsBuilder
+                .fromUriString(billServiceUrl + "/{billId}/exempt-interest")
+                .queryParam("exempt", exempt)
+                .build(billId);
+
+        return webClientBuilder.build()
+                .patch()
+                .uri(uri)
+                .retrieve()
+                .bodyToMono(Void.class);
+    }
 
 
 }

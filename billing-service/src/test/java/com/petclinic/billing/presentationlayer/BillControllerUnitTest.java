@@ -17,9 +17,12 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.ZoneId;
@@ -329,7 +332,9 @@ class BillControllerUnitTest {
                 .vetId("1")
                 .visitType("Regular")
                 .date(date)
-                .amount(13.37)
+                .amount(new BigDecimal(13.37))
+                .taxedAmount(new BigDecimal(15.10))
+                .interest(new BigDecimal(0.00))
                 .billStatus(BillStatus.PAID)
                 .dueDate(dueDate)
                 .ownerFirstName("John")
@@ -349,7 +354,7 @@ class BillControllerUnitTest {
 
         LocalDate dueDate = LocalDate.of(2022, Month.OCTOBER, 5);
 
-        return BillResponseDTO.builder().billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(13.37).billStatus(BillStatus.UNPAID).dueDate(dueDate).build();
+        return BillResponseDTO.builder().billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(new BigDecimal(13.37)).billStatus(BillStatus.UNPAID).dueDate(dueDate).build();
     }
 
     private BillResponseDTO buildBillOverdueResponseDTO(){
@@ -362,7 +367,7 @@ class BillControllerUnitTest {
 
         LocalDate dueDate = LocalDate.of(2022, Month.AUGUST, 15);
 
-        return BillResponseDTO.builder().billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(13.37).billStatus(BillStatus.OVERDUE).dueDate(dueDate).build();
+        return BillResponseDTO.builder().billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(new BigDecimal(13.37)).billStatus(BillStatus.OVERDUE).dueDate(dueDate).build();
     }
 
     @Test
@@ -430,7 +435,7 @@ class BillControllerUnitTest {
                 .visitType("Checkup")
                 .vetId("V100")
                 .date(LocalDate.now())
-                .amount(100.0)
+                .amount(new BigDecimal(100.0))
                 .billStatus(null)
                 .dueDate(LocalDate.now().plusDays(10))
                 .build();
@@ -461,4 +466,22 @@ class BillControllerUnitTest {
                 .jsonPath("$.message").isEqualTo("Bill not found");
     }
 
+        @Test
+        void getBillByBillId_ShouldReturnInterest() {
+                BigDecimal expectedInterest = new BigDecimal("5.00");
+                overdueResponseDTO.setInterest(expectedInterest);
+
+                when(billService.getBillByBillId(anyString())).thenReturn(Mono.just(overdueResponseDTO));
+
+                client.get()
+                        .uri("/bills/" + overdueResponseDTO.getBillId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .exchange()
+                        .expectStatus().isOk()
+                        .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                        .expectBody()
+                        .jsonPath("$.interest").isEqualTo(expectedInterest);
+
+                Mockito.verify(billService, times(1)).getBillByBillId(overdueResponseDTO.getBillId());
+        }
 }
