@@ -195,6 +195,7 @@ jobs:
 
   products_service_test:
     runs-on: "ubuntu-22.04"
+    timeout-minutes: 15
     steps:
       - name: Checkout sources
         uses: actions/checkout@v4
@@ -208,8 +209,19 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
         working-directory: ./products-service
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            ./products-service/.gradle
+          key: ${{ runner.os }}-gradle-products-${{ hashFiles('**/products-service/*.gradle*', '**/products-service/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-products-
+            ${{ runner.os }}-gradle-
       - name: Build with Gradle
-        run: ./gradlew clean build jacocoTestReport jacocoTestCoverageVerification
+        run: ./gradlew clean build jacocoTestReport jacocoTestCoverageVerification --no-daemon --max-workers=2
         working-directory: ./products-service
       - name: Upload coverage reports
         uses: actions/upload-artifact@v4
