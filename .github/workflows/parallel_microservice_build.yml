@@ -218,11 +218,16 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
         working-directory: ./products-service
-      - name: Build with Gradle (optimized)
-        run: ./gradlew clean build jacocoTestReport jacocoTestCoverageVerification --parallel --build-cache --configuration-cache
+      - name: Pre-download dependencies (faster first run)
+        run: ./gradlew dependencies --no-daemon --parallel
         working-directory: ./products-service
         env:
-          GRADLE_OPTS: "-Xmx2g -XX:+UseG1GC -XX:MaxGCPauseMillis=200"
+          GRADLE_OPTS: "-Xmx3g -XX:+UseG1GC -XX:MaxGCPauseMillis=100"
+      - name: Build with Gradle (optimized)
+        run: ./gradlew clean build jacocoTestReport jacocoTestCoverageVerification --parallel --build-cache --configuration-cache --no-daemon --max-workers=4
+        working-directory: ./products-service
+        env:
+          GRADLE_OPTS: "-Xmx3g -XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:+UseStringDeduplication -XX:+OptimizeStringConcat"
       - name: Upload coverage reports
         uses: actions/upload-artifact@v4
         with:
