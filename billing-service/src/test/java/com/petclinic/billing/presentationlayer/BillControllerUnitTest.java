@@ -16,6 +16,11 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.time.Month;
+import java.time.Period;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -468,7 +473,18 @@ class BillControllerUnitTest {
 
         @Test
         void getBillByBillId_ShouldReturnInterest() {
-                BigDecimal expectedInterest = new BigDecimal("5.00");
+                // Calculate expected compound interest for test data
+                // Due: Aug 15, 2022, Current: Oct 2, 2025 = calculate actual months overdue
+                LocalDate dueDate = LocalDate.of(2022, Month.AUGUST, 15);
+                LocalDate currentDate = LocalDate.now();
+                int overdueMonths = Period.between(dueDate, currentDate).getMonths() + 
+                    (Period.between(dueDate, currentDate).getYears() * 12);
+                
+                BigDecimal monthlyRate = new BigDecimal("0.015");
+                BigDecimal onePlusRate = BigDecimal.ONE.add(monthlyRate);
+                BigDecimal compounded = onePlusRate.pow(overdueMonths);
+                BigDecimal finalAmount = overdueResponseDTO.getAmount().multiply(compounded).setScale(2, RoundingMode.HALF_UP);
+                BigDecimal expectedInterest = finalAmount.subtract(overdueResponseDTO.getAmount()).setScale(2, RoundingMode.HALF_UP);
                 overdueResponseDTO.setInterest(expectedInterest);
 
                 when(billService.getBillByBillId(anyString())).thenReturn(Mono.just(overdueResponseDTO));

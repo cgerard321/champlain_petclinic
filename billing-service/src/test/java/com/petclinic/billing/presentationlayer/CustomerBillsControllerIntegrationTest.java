@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.time.Period;
 import java.time.ZoneId;
 import java.util.Calendar;
 
@@ -84,17 +85,20 @@ public class CustomerBillsControllerIntegrationTest {
                 billRepository.save(bill).block();
 
                 StepVerifier.create(billRepository.findByCustomerId(bill.getCustomerId()))
-                                .assertNext(savedBill -> assertEquals(150.0, savedBill.getAmount()))
+                                .assertNext(savedBill -> {
+                                        assertEquals(new BigDecimal("150.00"), savedBill.getAmount());
+                                })
                                 .verifyComplete();
 
-                double expectedBalance = 150.0;
+                // buildBill2() creates UNPAID bill with no dueDate, so no interest is calculated
+                BigDecimal expectedBalance = new BigDecimal("150.00");
 
                 client.get()
                                 .uri("/bills/customer/" + bill.getCustomerId() + "/bills/current-balance")
                                 .exchange()
                                 .expectStatus().isOk()
-                                .expectBody(Double.class)
-                                .value(balance -> assertEquals(expectedBalance, balance, 0.01));
+                                .expectBody(BigDecimal.class)
+                                .value(balance -> assertEquals(expectedBalance, balance));
         }
 
         @Test
@@ -177,7 +181,7 @@ public class CustomerBillsControllerIntegrationTest {
                                 .vetId("vetId")
                                 .visitType("surgery")
                                 .date(date)
-                                .amount(new BigDecimal(150.0))
+                                .amount(new BigDecimal("150.00"))
                                 .billStatus(BillStatus.UNPAID)
                                 .build();
         }
@@ -195,11 +199,14 @@ public class CustomerBillsControllerIntegrationTest {
 
                 billRepository.save(overdueBill).block();
 
-                int overdueMonths = java.time.Period.between(overdueBill.getDueDate(), LocalDate.now()).getMonths();
-                BigDecimal expectedInterest = overdueBill.getAmount()
-                        .multiply(new BigDecimal("0.015"))
-                        .multiply(BigDecimal.valueOf(overdueMonths))
-                        .setScale(2, RoundingMode.HALF_UP);
+                java.time.Period period = java.time.Period.between(overdueBill.getDueDate(), LocalDate.now());
+                int overdueMonths = period.getMonths() + (period.getYears() * 12);
+                // Compound Interest calculation: finalAmount = amount * (1.015)^overdueMonths, interest = finalAmount - amount
+                BigDecimal monthlyRate = new BigDecimal("0.015");
+                BigDecimal onePlusRate = BigDecimal.ONE.add(monthlyRate);
+                BigDecimal compounded = onePlusRate.pow(overdueMonths);
+                BigDecimal finalAmount = overdueBill.getAmount().multiply(compounded).setScale(2, RoundingMode.HALF_UP);
+                BigDecimal expectedInterest = finalAmount.subtract(overdueBill.getAmount()).setScale(2, RoundingMode.HALF_UP);
 
                 client.get()
                         .uri("/bills/" + overdueBill.getBillId())
@@ -208,6 +215,6 @@ public class CustomerBillsControllerIntegrationTest {
                         .expectStatus().isOk()
                         .expectHeader().contentType(MediaType.APPLICATION_JSON)
                         .expectBody()
-                        .jsonPath("$.interest").isEqualTo(expectedInterest);
+                        .jsonPath("$.interest").isEqualTo(expectedInterest.doubleValue());
 }
 }

@@ -731,11 +731,14 @@ class BillControllerIntegrationTest {
                         .expectNextCount(1)
                          .verifyComplete();
 
-                int overdueMonths = Period.between(billEntity.getDueDate(), LocalDate.now()).getMonths();
-                BigDecimal expectedInterest = billEntity.getAmount()
-                .multiply(new BigDecimal("0.015"))
-                .multiply(BigDecimal.valueOf(overdueMonths))
-                .setScale(2, RoundingMode.HALF_UP);
+                int overdueMonths = Period.between(billEntity.getDueDate(), LocalDate.now()).getMonths() + 
+                    (Period.between(billEntity.getDueDate(), LocalDate.now()).getYears() * 12);
+                // Compound Interest calculation: finalAmount = amount * (1.015)^overdueMonths, interest = finalAmount - amount
+                BigDecimal monthlyRate = new BigDecimal("0.015");
+                BigDecimal onePlusRate = BigDecimal.ONE.add(monthlyRate);
+                BigDecimal compounded = onePlusRate.pow(overdueMonths);
+                BigDecimal finalAmount = billEntity.getAmount().multiply(compounded).setScale(2, RoundingMode.HALF_UP);
+                BigDecimal expectedInterest = finalAmount.subtract(billEntity.getAmount()).setScale(2, RoundingMode.HALF_UP);
 
                 client.get()
                         .uri("/bills/" + billEntity.getBillId())

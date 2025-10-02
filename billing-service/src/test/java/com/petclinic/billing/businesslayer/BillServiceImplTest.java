@@ -1018,11 +1018,12 @@ public class BillServiceImplTest {
             .consumeNextWith(dto -> {
                 assertEquals(amount, dto.getAmount());
                 assertEquals(BillStatus.OVERDUE, dto.getBillStatus());
-                // Interest: amount * MONTHLY_INTEREST_RATE * overdueMonths
-                BigDecimal expectedInterest = amount
-                        .multiply(new BigDecimal("0.015"))
-                        .multiply(BigDecimal.valueOf(2))
-                        .setScale(2, RoundingMode.HALF_UP);
+                // Compound Interest: finalAmount = amount * (1.015)^overdueMonths, interest = finalAmount - amount
+                BigDecimal monthlyRate = new BigDecimal("0.015");
+                BigDecimal onePlusRate = BigDecimal.ONE.add(monthlyRate);
+                BigDecimal compounded = onePlusRate.pow(2); // 2 months overdue
+                BigDecimal finalAmount = amount.multiply(compounded).setScale(2, RoundingMode.HALF_UP);
+                BigDecimal expectedInterest = finalAmount.subtract(amount).setScale(2, RoundingMode.HALF_UP);
                 assertEquals(expectedInterest, dto.getInterest());
             })
             .verifyComplete();

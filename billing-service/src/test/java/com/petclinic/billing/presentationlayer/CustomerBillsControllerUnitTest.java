@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
+
+import java.math.RoundingMode;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.server.ResponseStatusException;
@@ -75,7 +77,7 @@ public class CustomerBillsControllerUnitTest {
     @Test
     void getCurrentBalance_ValidCustomer_ShouldReturnBalance() {
         String customerId = "valid-customer-id";
-        BigDecimal expectedBalance = new BigDecimal (150.0);
+        BigDecimal expectedBalance = new BigDecimal("150.0");
 
         when(billService.calculateCurrentBalance(customerId)).thenReturn(Mono.just(expectedBalance));
 
@@ -84,7 +86,7 @@ public class CustomerBillsControllerUnitTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
-                .expectBody(Double.class)
+                .expectBody(BigDecimal.class)
                 .value(balance -> assertEquals(expectedBalance, balance));
 
         verify(billService, times(1)).calculateCurrentBalance(customerId);
@@ -188,12 +190,21 @@ public class CustomerBillsControllerUnitTest {
 
     @Test
         void getBillsByCustomerId_OverdueBill_ShouldReturnInterest() {
+                // Calculate compound interest for $100, 1 month overdue
+                // finalAmount = 100 * (1.015)^1 = 101.50, interest = 1.50
+                BigDecimal monthlyRate = new BigDecimal("0.015");
+                BigDecimal onePlusRate = BigDecimal.ONE.add(monthlyRate);
+                BigDecimal compounded = onePlusRate.pow(1); // assuming 1 month overdue
+                BigDecimal amount = new BigDecimal("100.00");
+                BigDecimal finalAmount = amount.multiply(compounded).setScale(2, RoundingMode.HALF_UP);
+                BigDecimal calculatedInterest = finalAmount.subtract(amount).setScale(2, RoundingMode.HALF_UP);
+                
                 BillResponseDTO overdueBill = BillResponseDTO.builder()
                         .billId("overdue-1")
                         .customerId("custId")
-                        .amount(new BigDecimal("100.00"))
+                        .amount(amount)
                         .billStatus(BillStatus.OVERDUE)
-                        .interest(new BigDecimal("3.00"))
+                        .interest(calculatedInterest)
                         .build();
 
                 when(billService.getBillsByCustomerId(anyString())).thenReturn(Flux.just(overdueBill));
@@ -206,7 +217,8 @@ public class CustomerBillsControllerUnitTest {
                         .expectBodyList(BillResponseDTO.class)
                         .consumeWith(response -> {
                                 assert response.getResponseBody() != null;
-                                assertEquals(new BigDecimal("3.00"), response.getResponseBody().get(0).getInterest());
+                                // Compare using doubleValue to avoid BigDecimal precision issues (1.50 vs 1.5)
+                                assertEquals(calculatedInterest.doubleValue(), response.getResponseBody().get(0).getInterest().doubleValue());
                         });
                 verify(billService, times(1)).getBillsByCustomerId(overdueBill.getCustomerId());
         }
