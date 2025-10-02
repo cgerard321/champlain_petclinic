@@ -648,19 +648,13 @@ const UserCart = (): JSX.Element => {
           <div className="modal-backdrop">
             <div className="modal-content">
               <CartBillingForm
-                onSubmit={() => {
-                  setShowBillingForm(false);
-                  setIsCheckoutModalOpen(true); // proceed to confirmation
-                }}
                 isOpen={true}
                 onClose={() => setShowBillingForm(false)}
+                onSubmit={async () => {
+                  await handleCheckout(); // This runs the real checkout logic
+                  setShowBillingForm(false);
+                }}
               />
-              <button
-                className="close-btn"
-                onClick={() => setShowBillingForm(false)}
-              >
-                ✕
-              </button>
             </div>
           </div>
         )}

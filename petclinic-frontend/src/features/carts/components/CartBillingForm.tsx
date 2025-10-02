@@ -21,11 +21,14 @@ interface BillingInfo {
 }
 
 const provinces = [
-  'AB', 'BC', 'MB', 'NB', 'NL', 'NS', 'ON', 'PE',
-  'QC', 'SK', 'NT', 'NU', 'YT'
+  'AB','BC','MB','NB','NL','NS','ON','PE','QC','SK','NT','NU','YT'
 ];
 
-const CartBillingForm: React.FC<CartBillingFormProps> = ({ isOpen, onClose, onSubmit }) => {
+const CartBillingForm: React.FC<CartBillingFormProps> = ({
+  isOpen,
+  onClose,
+  onSubmit,
+}) => {
   const [billing, setBilling] = useState<BillingInfo>({
     fullName: '',
     email: '',
@@ -43,7 +46,9 @@ const CartBillingForm: React.FC<CartBillingFormProps> = ({ isOpen, onClose, onSu
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  if (!isOpen) return null; // Don’t render unless modal is open
+  const [showConfirm, setShowConfirm] = useState(false); // NEW
+
+  if (!isOpen) return null;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -61,7 +66,9 @@ const CartBillingForm: React.FC<CartBillingFormProps> = ({ isOpen, onClose, onSu
     setError(null);
     setSuccess(null);
 
-    if (!/^\d{16}$/.test(billing.cardNumber.replace(/\s+/g, ''))) {
+    // validation
+    const rawCardNumber = billing.cardNumber.replace(/\s+/g, '');
+    if (!/^\d{16}$/.test(rawCardNumber)) {
       setError('Credit card number must be 16 digits.');
       setLoading(false);
       return;
@@ -77,76 +84,148 @@ const CartBillingForm: React.FC<CartBillingFormProps> = ({ isOpen, onClose, onSu
       return;
     }
 
-    setTimeout(() => {
-      setSuccess('Checkout successful! (mocked, no backend yet)');
-      setBilling({
-        fullName: '',
-        email: '',
-        phoneNumber: '',
-        address: '',
-        city: '',
-        province: '',
-        postalCode: '',
-        cardNumber: '',
-        expiry: '',
-        cvv: '',
-      });
-      setLoading(false);
-      onSubmit();
-      onClose(); // Close modal after success
-    }, 1000);
+    setLoading(false);
+    setShowConfirm(true); // OPEN CONFIRMATION MODAL
+  };
+
+  const handleConfirm = () => {
+    setShowConfirm(false);
+    setSuccess("Checkout successful! (mocked, no backend yet)");
+    setBilling({
+      fullName: '',
+      email: '',
+      phoneNumber: '',
+      address: '',
+      city: '',
+      province: '',
+      postalCode: '',
+      cardNumber: '',
+      expiry: '',
+      cvv: '',
+    });
+    onSubmit(); // parent callback
+    onClose();  // close billing modal
+  };
+
+  const handleCancel = () => {
+    setShowConfirm(false); // just close confirmation modal
   };
 
   return (
-    <div className="modal-backdrop">
-      <div className="modal-content">
-        <button className="modal-close" onClick={onClose}>✕</button>
+    <div className="cart-billing-modal-backdrop">
+      <div className="cart-billing-modal-content">
+        <button className="cart-billing-modal-close" onClick={onClose}>
+          ✕
+        </button>
         <h2>Billing Information</h2>
 
         {error && <div className="error">{error}</div>}
         {success && <div className="success">{success}</div>}
 
         <form onSubmit={handleSubmit} className="billing-form">
-          <input type="text" name="fullName" placeholder="Full Name"
-            value={billing.fullName} onChange={handleChange} required />
-
-          <input type="email" name="email" placeholder="Email"
-            value={billing.email} onChange={handleChange} required />
-
-          <input type="text" name="address" placeholder="Address"
-            value={billing.address} onChange={handleChange} required />
-
-          <input type="text" name="city" placeholder="City"
-            value={billing.city} onChange={handleChange} required />
-
-          <select name="province" value={billing.province} onChange={handleSelectChange} required>
-            <option value="">Select Province</option>
-            {provinces.map(prov => (
-              <option key={prov} value={prov}>{prov}</option>
-            ))}
-          </select>
-
-          <input type="text" name="postalCode" placeholder="Postal Code"
-            value={billing.postalCode} onChange={handleChange} required />
-
-          <div className="form-row">
-            <div className="form-field">
-              <input type="text" name="cardNumber" placeholder="Card Number"
-                value={billing.cardNumber} onChange={handleChange} required />
-            </div>
-            <div className="form-field">
-              <input type="text" name="expiry" placeholder="MM/YY"
-            value={billing.expiry} onChange={handleChange} required />
+          <div className="main-fields">
+            <input
+              type="text"
+              name="fullName"
+              placeholder="Full Name"
+              value={billing.fullName}
+              onChange={handleChange}
+              required
+            />
+            <input
+              type="email"
+              name="email"
+              placeholder="Email"
+              value={billing.email}
+              onChange={handleChange}
+              required
+            />
+            <input
+              type="text"
+              name="address"
+              placeholder="Address"
+              value={billing.address}
+              onChange={handleChange}
+              required
+            />
+            <input
+              type="text"
+              name="city"
+              placeholder="City"
+              value={billing.city}
+              onChange={handleChange}
+              required
+            />
+            <select
+              name="province"
+              value={billing.province}
+              onChange={handleSelectChange}
+              required
+            >
+              <option value="">Select Province</option>
+              {provinces.map(prov => (
+                <option key={prov} value={prov}>{prov}</option>
+              ))}
+            </select>
+            <input
+              type="text"
+              name="postalCode"
+              placeholder="Postal Code"
+              value={billing.postalCode}
+              onChange={handleChange}
+              required
+            />
+            <input
+              type="text"
+              name="cardNumber"
+              placeholder="Card Number"
+              value={billing.cardNumber}
+              onChange={handleChange}
+              required
+            />
+            <div className="form-row">
+              <div className="form-field">
+                <input
+                  type="text"
+                  name="expiry"
+                  placeholder="MM/YY"
+                  value={billing.expiry}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              <div className="form-field">
+                <input
+                  type="text"
+                  name="cvv"
+                  placeholder="CVV"
+                  value={billing.cvv}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
             </div>
           </div>
-          <input type="text" name="cvv" placeholder="CVV"
-            value={billing.cvv} onChange={handleChange} required />
 
           <button type="submit" disabled={loading}>
             {loading ? 'Processing...' : 'Submit Payment'}
           </button>
         </form>
       </div>
+
+      {/* CONFIRMATION MODAL */}
+      {showConfirm && (
+        <div className="confirm-modal-backdrop">
+          <div className="confirm-modal-content">
+            <h2>Confirm Checkout</h2>
+            <p>Are you sure you want to checkout?</p>
+            <div className="confirm-modal-buttons">
+              <button className="confirm" onClick={handleConfirm}>Yes</button>
+              <button className="cancel" onClick={handleCancel}>No</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
