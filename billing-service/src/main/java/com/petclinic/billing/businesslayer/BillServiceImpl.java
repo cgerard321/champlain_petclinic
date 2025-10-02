@@ -173,12 +173,27 @@ public class BillServiceImpl implements BillService{
                         ));
                     }
 
+                    // Fetch Vet and Owner details
+                    Mono<VetResponseDTO> vetMono = vetClient.getVetByVetId(dto.getVetId());
+                    Mono<OwnerResponseDTO> ownerMono = ownerClient.getOwnerByOwnerId(dto.getCustomerId());
 
-                    // Add more field checks if needed
-                    return Mono.just(dto);
+                    return Mono.zip(vetMono, ownerMono, Mono.just(dto));
                 })
-                .map(EntityDtoUtil::toBillEntity)
-                .doOnNext(e -> e.setBillId(EntityDtoUtil.generateUUIDString()))
+                .map(tuple -> {
+                    VetResponseDTO vet = tuple.getT1();
+                    OwnerResponseDTO owner = tuple.getT2();
+                    BillRequestDTO dto = tuple.getT3();
+
+                    // Map to Bill entity and populate names
+                    Bill bill = EntityDtoUtil.toBillEntity(dto);
+                    bill.setBillId(EntityDtoUtil.generateUUIDString());
+                    bill.setVetFirstName(vet.getFirstName());
+                    bill.setVetLastName(vet.getLastName());
+                    bill.setOwnerFirstName(owner.getFirstName());
+                    bill.setOwnerLastName(owner.getLastName());
+
+                    return bill;
+                })
                 .flatMap(billRepository::insert)
                 .map(EntityDtoUtil::toBillResponseDto);
     }
