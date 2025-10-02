@@ -102,7 +102,9 @@ class ProductControllerIntegrationTest {
     @Test
     public void whenGetAllProductsSortedByRatingAsc_thenReturnProductsSortedAscending() {
 
-        productRepository.saveAll(List.of(product1, product2)).blockLast();
+        StepVerifier.create(productRepository.saveAll(List.of(product1, product2)))
+                .expectNextCount(2)
+                .verifyComplete();
 
 
         Rating ratingForProduct1 = Rating.builder()
@@ -117,7 +119,9 @@ class ProductControllerIntegrationTest {
                 .rating((byte) 2)
                 .build();
 
-        ratingRepository.saveAll(List.of(ratingForProduct1, ratingForProduct2)).blockLast();
+        StepVerifier.create(ratingRepository.saveAll(List.of(ratingForProduct1, ratingForProduct2)))
+                .expectNextCount(2)
+                .verifyComplete();
 
         // Act
         webTestClient.get()
@@ -139,8 +143,10 @@ class ProductControllerIntegrationTest {
     @Test
     public void whenGetAllProductsSortedByRatingDesc_thenReturnProductsSortedDescending() {
 
-        productRepository.deleteAll().block();
-        ratingRepository.deleteAll().block();
+        StepVerifier.create(productRepository.deleteAll())
+                .verifyComplete();
+        StepVerifier.create(ratingRepository.deleteAll())
+                .verifyComplete();
 
         Product product1 = Product.builder()
                 .productId("product-1-id")
@@ -158,7 +164,9 @@ class ProductControllerIntegrationTest {
                 .productQuantity(2)
                 .build();
 
-        productRepository.saveAll(List.of(product1, product2)).blockLast();
+        StepVerifier.create(productRepository.saveAll(List.of(product1, product2)))
+                .expectNextCount(2)
+                .verifyComplete();
         Rating ratingForProduct1 = Rating.builder()
                 .productId(product1.getProductId())
                 .customerId(UUID.randomUUID().toString())
@@ -171,7 +179,9 @@ class ProductControllerIntegrationTest {
                 .rating((byte) 3)
                 .build();
 
-        ratingRepository.saveAll(List.of(ratingForProduct1, ratingForProduct2)).blockLast();
+        StepVerifier.create(ratingRepository.saveAll(List.of(ratingForProduct1, ratingForProduct2)))
+                .expectNextCount(2)
+                .verifyComplete();
 
         // Act
         webTestClient.get()
