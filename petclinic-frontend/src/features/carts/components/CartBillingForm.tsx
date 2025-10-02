@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, ChangeEvent, FormEvent } from 'react';
 import './CartBillingForm.css';
 
 export interface CartBillingFormProps {
@@ -21,7 +21,18 @@ interface BillingInfo {
 }
 
 const provinces = [
-  'AB','BC','MB','NB','NL','NS','ON','PE','QC','SK','NT','NU','YT'
+  'BC',
+  'MB',
+  'NB',
+  'NL',
+  'NS',
+  'ON',
+  'PE',
+  'QC',
+  'SK',
+  'NT',
+  'NU',
+  'YT',
 ];
 
 const CartBillingForm: React.FC<CartBillingFormProps> = ({
@@ -45,28 +56,26 @@ const CartBillingForm: React.FC<CartBillingFormProps> = ({
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-
-  const [showConfirm, setShowConfirm] = useState(false); // NEW
+  const [showConfirm, setShowConfirm] = useState<boolean>(false);
 
   if (!isOpen) return null;
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>): void => {
     const { name, value } = e.target;
-    setBilling(prev => ({ ...prev, [name]: value }));
+    setBilling((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleSelectChange = (e: ChangeEvent<HTMLSelectElement>): void => {
     const { name, value } = e.target;
-    setBilling(prev => ({ ...prev, [name]: value }));
+    setBilling((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
     setLoading(true);
     setError(null);
     setSuccess(null);
 
-    // validation
     const rawCardNumber = billing.cardNumber.replace(/\s+/g, '');
     if (!/^\d{16}$/.test(rawCardNumber)) {
       setError('Credit card number must be 16 digits.');
@@ -85,12 +94,12 @@ const CartBillingForm: React.FC<CartBillingFormProps> = ({
     }
 
     setLoading(false);
-    setShowConfirm(true); // OPEN CONFIRMATION MODAL
+    setShowConfirm(true);
   };
 
-  const handleConfirm = () => {
+  const handleConfirm = (): void => {
     setShowConfirm(false);
-    setSuccess("Checkout successful! (mocked, no backend yet)");
+    setSuccess('Checkout successful! (mocked, no backend yet)');
     setBilling({
       fullName: '',
       email: '',
@@ -103,18 +112,22 @@ const CartBillingForm: React.FC<CartBillingFormProps> = ({
       expiry: '',
       cvv: '',
     });
-    onSubmit(); // parent callback
-    onClose();  // close billing modal
+    onSubmit();
+    onClose();
   };
 
-  const handleCancel = () => {
-    setShowConfirm(false); // just close confirmation modal
+  const handleCancel = (): void => {
+    setShowConfirm(false);
   };
 
   return (
     <div className="cart-billing-modal-backdrop">
       <div className="cart-billing-modal-content">
-        <button className="cart-billing-modal-close" onClick={onClose}>
+        <button
+          className="cart-billing-modal-close"
+          onClick={onClose}
+          aria-label="Close billing form"
+        >
           ✕
         </button>
         <h2>Billing Information</h2>
@@ -163,8 +176,10 @@ const CartBillingForm: React.FC<CartBillingFormProps> = ({
               required
             >
               <option value="">Select Province</option>
-              {provinces.map(prov => (
-                <option key={prov} value={prov}>{prov}</option>
+              {provinces.map((prov) => (
+                <option key={prov} value={prov}>
+                  {prov}
+                </option>
               ))}
             </select>
             <input
@@ -213,15 +228,18 @@ const CartBillingForm: React.FC<CartBillingFormProps> = ({
         </form>
       </div>
 
-      {/* CONFIRMATION MODAL */}
       {showConfirm && (
         <div className="confirm-modal-backdrop">
           <div className="confirm-modal-content">
             <h2>Confirm Checkout</h2>
             <p>Are you sure you want to checkout?</p>
             <div className="confirm-modal-buttons">
-              <button className="confirm" onClick={handleConfirm}>Yes</button>
-              <button className="cancel" onClick={handleCancel}>No</button>
+              <button className="confirm" onClick={handleConfirm}>
+                Yes
+              </button>
+              <button className="cancel" onClick={handleCancel}>
+                No
+              </button>
             </div>
           </div>
         </div>
