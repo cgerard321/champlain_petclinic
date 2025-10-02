@@ -46,17 +46,18 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
 
     @Override
     public Mono<InventoryResponseDTO> addInventory(Mono<InventoryRequestDTO> inventoryRequestDTO) {
-        return inventoryRequestDTO
-                .map(EntityDTOUtil::toInventoryEntity)
-                .doOnNext(e -> {
-                    if (e.getInventoryType() == null) {
-                        throw new InvalidInputException("Invalid input data: inventory type cannot be blank.");
-                    }
-                    e.setInventoryId(EntityDTOUtil.generateUUID());
-                })
-                .flatMap(inventoryRepository::insert)
-                .map(EntityDTOUtil::toInventoryResponseDTO);
-
+        return inventoryRepository.count()
+                .flatMap(count -> inventoryRequestDTO
+                        .map(EntityDTOUtil::toInventoryEntity)
+                        .doOnNext(e -> {
+                            if (e.getInventoryType() == null) {
+                                throw new InvalidInputException("Invalid input data: inventory type cannot be blank.");
+                            }
+                            e.setInventoryId(EntityDTOUtil.generateUUID());
+                            e.setInventoryCode(String.format("INV-%04d", count + 1));
+                        })
+                        .flatMap(inventoryRepository::insert)
+                        .map(EntityDTOUtil::toInventoryResponseDTO));
     }
 
 
