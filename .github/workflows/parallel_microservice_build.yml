@@ -41,13 +41,11 @@ jobs:
       run: chmod +x ./gradlew
       working-directory: ./api-gateway
     - name: Build with Gradle Wrapper
-      run: ./gradlew clean build jacocoTestReport --continue
+      run: ./gradlew clean build jacocoTestReport
       working-directory: ./api-gateway
-      continue-on-error: true
     - name: Verify coverage threshold
       run: ./gradlew jacocoTestCoverageVerification
       working-directory: ./api-gateway
-      continue-on-error: true
     - name: Upload coverage reports
       uses: actions/upload-artifact@v4
       with:
@@ -82,13 +80,11 @@ jobs:
       run: chmod +x ./gradlew
       working-directory: ./visits-service-new
     - name: Build with Gradle
-      run: ./gradlew clean build jacocoTestReport --continue
+      run: ./gradlew clean build jacocoTestReport
       working-directory: ./visits-service-new
-      continue-on-error: true
     - name: Verify coverage threshold
       run: ./gradlew jacocoTestCoverageVerification
       working-directory: ./visits-service-new
-      continue-on-error: true
     - name: Upload coverage reports
       uses: actions/upload-artifact@v4
       with:
@@ -123,13 +119,11 @@ jobs:
       run: chmod +x ./gradlew
       working-directory: ./vet-service
     - name: Build with Gradle
-      run: ./gradlew clean build jacocoTestReport --continue
+      run: ./gradlew clean build jacocoTestReport
       working-directory: ./vet-service
-      continue-on-error: true
     - name: Verify coverage threshold
       run: ./gradlew jacocoTestCoverageVerification
       working-directory: ./vet-service
-      continue-on-error: true
     - name: Upload coverage reports
       uses: actions/upload-artifact@v4
       with:
@@ -165,13 +159,11 @@ jobs:
       run: chmod +x ./gradlew
       working-directory: ./customers-service-reactive
     - name: Build with Gradle
-      run: ./gradlew clean build jacocoTestReport --continue
+      run: ./gradlew clean build jacocoTestReport
       working-directory: ./customers-service-reactive
-      continue-on-error: true
     - name: Verify coverage threshold
       run: ./gradlew jacocoTestCoverageVerification
       working-directory: ./customers-service-reactive
-      continue-on-error: true
     - name: Upload coverage reports
       uses: actions/upload-artifact@v4
       with:
@@ -206,13 +198,11 @@ jobs:
       run: chmod +x ./gradlew
       working-directory: ./billing-service
     - name: Build with Gradle
-      run: ./gradlew clean build jacocoTestReport --continue
+      run: ./gradlew clean build jacocoTestReport
       working-directory: ./billing-service
-      continue-on-error: true
     - name: Verify coverage threshold
       run: ./gradlew jacocoTestCoverageVerification
       working-directory: ./billing-service
-      continue-on-error: true
     - name: Upload coverage reports
       uses: actions/upload-artifact@v4
       with:
@@ -247,13 +237,11 @@ jobs:
       run: chmod +x ./gradlew
       working-directory: ./auth-service
     - name: Build with Gradle
-      run: ./gradlew clean build jacocoTestReport --continue
+      run: ./gradlew clean build jacocoTestReport
       working-directory: ./auth-service
-      continue-on-error: true
     - name: Verify coverage threshold
       run: ./gradlew jacocoTestCoverageVerification
       working-directory: ./auth-service
-      continue-on-error: true
     - name: Upload coverage reports
       uses: actions/upload-artifact@v4
       with:
@@ -288,13 +276,11 @@ jobs:
       run: chmod +x ./gradlew
       working-directory: ./inventory-service
     - name: Build with Gradle
-      run: ./gradlew clean build jacocoTestReport --continue
+      run: ./gradlew clean build jacocoTestReport
       working-directory: ./inventory-service
-      continue-on-error: true
     - name: Verify coverage threshold
       run: ./gradlew jacocoTestCoverageVerification
       working-directory: ./inventory-service
-      continue-on-error: true
     - name: Upload coverage reports
       uses: actions/upload-artifact@v4
       with:
@@ -329,13 +315,11 @@ jobs:
         run: chmod +x ./gradlew
         working-directory: ./products-service
       - name: Build with Gradle
-        run: ./gradlew clean build jacocoTestReport --continue
+        run: ./gradlew clean build jacocoTestReport
         working-directory: ./products-service
-        continue-on-error: true
       - name: Verify coverage threshold
         run: ./gradlew jacocoTestCoverageVerification
         working-directory: ./products-service
-        continue-on-error: true
       - name: Upload coverage reports
         uses: actions/upload-artifact@v4
         with:
@@ -371,13 +355,11 @@ jobs:
         run: chmod +x ./gradlew
         working-directory: ./cart-service
       - name: Build with Gradle
-        run: ./gradlew clean build jacocoTestReport --continue
+        run: ./gradlew clean build jacocoTestReport
         working-directory: ./cart-service
-        continue-on-error: true
       - name: Verify coverage threshold
         run: ./gradlew jacocoTestCoverageVerification
         working-directory: ./cart-service
-        continue-on-error: true
       - name: Upload coverage reports
         uses: actions/upload-artifact@v4
         with:
