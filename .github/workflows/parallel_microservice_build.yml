@@ -224,8 +224,8 @@ jobs:
         env:
           GRADLE_OPTS: "-Xmx3g -XX:+UseG1GC -XX:MaxGCPauseMillis=100"
       - name: Build with Gradle (optimized)
-        run: ./gradlew clean build jacocoTestReport jacocoTestCoverageVerification --parallel --build-cache --configuration-cache --no-daemon --max-workers=4
-        working-directory: ./products-service
+        run: ./gradlew clean build jacocoTestReport jacocoTestCoverageVerification
+
         env:
           GRADLE_OPTS: "-Xmx3g -XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:+UseStringDeduplication -XX:+OptimizeStringConcat"
       - name: Upload coverage reports
