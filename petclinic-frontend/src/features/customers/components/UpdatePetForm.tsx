@@ -109,7 +109,7 @@ const UpdatePetForm: React.FC = (): JSX.Element => {
   const handleDelete = async (): Promise<void> => {
     if (petId && ownerId) {
       try {
-        const response = await deletePet(ownerId, petId);
+        const response = await deletePet(petId);
         if (response.status === 200) {
           navigate(`/customers/${response.data.ownerId}`);
         }
