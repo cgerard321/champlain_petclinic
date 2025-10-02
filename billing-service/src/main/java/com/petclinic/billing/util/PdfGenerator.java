@@ -153,7 +153,7 @@ public class PdfGenerator {
 
         // Footer
         Paragraph notes = new Paragraph(
-                "Notes: All bills must be paid on time. Late payments may be subject to a" +
+                "Notes: All bills must be paid on time. Late payments may be subject to a " +
                         "1.5% interest charge on the outstanding balance.",
                 FontFactory.getFont(FontFactory.HELVETICA, 9, BaseColor.GRAY));
         notes.setSpacingBefore(30);
