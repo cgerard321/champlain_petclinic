@@ -12,6 +12,7 @@ import { AppRoutePaths } from '@/shared/models/path.routes.ts';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '@/shared/api/axiosInstance';
 import { getPetTypeName } from '@/features/customers/utils/petTypeMapping';
+import { deletePet } from '@/features/customers/api/deletePet';
 
 const ProfilePage = (): JSX.Element => {
   const { user } = useUser();
@@ -116,6 +117,33 @@ const ProfilePage = (): JSX.Element => {
     }
   };
 
+  const handleDeletePet = async (petId: string): Promise<void> => {
+    const confirmed = window.confirm(
+      'Are you sure you want to delete this pet? This action cannot be undone.'
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      await deletePet(petId);
+
+      if (owner) {
+        setOwner({
+          ...owner,
+          pets: owner.pets?.filter(pet => pet.petId !== petId) || [],
+        });
+      }
+
+      // eslint-disable-next-line no-console
+      console.log('Pet deleted successfully');
+    } catch (error) {
+      console.error('Error deleting pet:', error);
+      alert('Failed to delete pet. Please try again.');
+    }
+  };
+
   if (error) {
     return <p>{error}</p>;
   }
@@ -181,6 +209,12 @@ const ProfilePage = (): JSX.Element => {
                           years
                         </span>
                       </div>
+                      <button
+                        className="customers-delete-pet-button"
+                        onClick={() => handleDeletePet(pet.petId)}
+                      >
+                        Delete Pet
+                      </button>
                     </div>
                   </div>
                 ))}
