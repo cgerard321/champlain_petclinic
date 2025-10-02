@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { FC } from 'react';
 import './CartBillingForm.css';
 
 interface ConfirmCheckoutModalProps {
@@ -7,10 +7,10 @@ interface ConfirmCheckoutModalProps {
   onCancel: () => void;
 }
 
-const ConfirmCheckoutModal: React.FC<ConfirmCheckoutModalProps> = ({
-  isOpen, // eslint-disable-line react/prop-types
-  onConfirm, // eslint-disable-line react/prop-types
-  onCancel, // eslint-disable-line react/prop-types
+const ConfirmCheckoutModal: FC<ConfirmCheckoutModalProps> = ({
+  isOpen,
+  onConfirm,
+  onCancel,
 }) => {
   if (!isOpen) return null;
 
