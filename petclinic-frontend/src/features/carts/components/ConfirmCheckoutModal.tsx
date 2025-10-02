@@ -1,5 +1,5 @@
-import React from "react";
-import "./CartBillingForm.css";
+import React from 'react';
+import './CartBillingForm.css';
 
 interface ConfirmCheckoutModalProps {
   isOpen: boolean;
@@ -33,3 +33,4 @@ const ConfirmCheckoutModal: React.FC<ConfirmCheckoutModalProps> = ({
 };
 
 export default ConfirmCheckoutModal;
+

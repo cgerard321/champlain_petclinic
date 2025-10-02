@@ -1,4 +1,4 @@
-import { useState, ChangeEvent, FormEvent } from 'react';
+import React, { useState, ChangeEvent, FormEvent } from 'react';
 import './CartBillingForm.css';
 
 export interface CartBillingFormProps {
@@ -53,21 +53,21 @@ const CartBillingForm: React.FC<CartBillingFormProps> = ({
     cvv: '',
   });
 
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const [showConfirm, setShowConfirm] = useState<boolean>(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   if (!isOpen) return null;
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>): void => {
     const { name, value } = e.target;
-    setBilling((prev) => ({ ...prev, [name]: value }));
+    setBilling(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSelectChange = (e: ChangeEvent<HTMLSelectElement>): void => {
     const { name, value } = e.target;
-    setBilling((prev) => ({ ...prev, [name]: value }));
+    setBilling(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>): void => {
@@ -176,7 +176,7 @@ const CartBillingForm: React.FC<CartBillingFormProps> = ({
               required
             >
               <option value="">Select Province</option>
-              {provinces.map((prov) => (
+              {provinces.map(prov => (
                 <option key={prov} value={prov}>
                   {prov}
                 </option>
