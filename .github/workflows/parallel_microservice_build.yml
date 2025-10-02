@@ -224,25 +224,10 @@ jobs:
         env:
           GRADLE_OPTS: "-Xmx3g -XX:+UseG1GC -XX:MaxGCPauseMillis=100"
       - name: Build with Gradle (optimized)
-        run: ./gradlew clean build jacocoTestReport jacocoTestCoverageVerification --parallel --build-cache --configuration-cache --no-daemon --max-workers=4 --info
+        run: ./gradlew clean build jacocoTestReport jacocoTestCoverageVerification --parallel --build-cache --configuration-cache --no-daemon --max-workers=4
         working-directory: ./products-service
         env:
           GRADLE_OPTS: "-Xmx3g -XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:+UseStringDeduplication -XX:+OptimizeStringConcat"
-      - name: Show test results summary
-        run: |
-          echo "## 🧪 Test Results Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          if [ -f "./products-service/build/test-results/test/TEST-*.xml" ]; then
-            echo "✅ Tests completed successfully!" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "**Test Details:**" >> $GITHUB_STEP_SUMMARY
-            find ./products-service/build/test-results/test -name "TEST-*.xml" -exec basename {} \; | sed 's/TEST-//g' | sed 's/.xml//g' | while read test; do
-              echo "- $test" >> $GITHUB_STEP_SUMMARY
-            done
-          else
-            echo "⚠️ No test results found" >> $GITHUB_STEP_SUMMARY
-          fi
-        working-directory: ./
       - name: Upload coverage reports
         uses: actions/upload-artifact@v4
         with:
