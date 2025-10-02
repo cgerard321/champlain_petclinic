@@ -14,8 +14,49 @@ on:
     branches: [ "main" ]
 
 jobs:
+  products_service_test:
+    runs-on: "ubuntu-22.04"
+    timeout-minutes: 15
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: 17
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+        working-directory: ./products-service
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            ./products-service/.gradle
+          key: ${{ runner.os }}-gradle-products-${{ hashFiles('**/products-service/*.gradle*', '**/products-service/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-products-
+            ${{ runner.os }}-gradle-
+      - name: Build with Gradle
+        run: ./gradlew clean build jacocoTestReport jacocoTestCoverageVerification --no-daemon --max-workers=2 --info
+        working-directory: ./products-service
+        env:
+          GRADLE_OPTS: "-Xmx2g -XX:MaxMetaspaceSize=512m"
+          SPRING_DATA_MONGODB_EMBEDDED_VERSION: "4.9.2"
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-reports-products-service
+          path: ./products-service/build/reports/jacoco/test/html/
+          retention-days: 30
+
   api_gateway_test:
     runs-on: "ubuntu-22.04"
+    needs: [products_service_test]
     steps:
     - uses: actions/checkout@v4
     - name: Set up JDK 17
@@ -44,6 +85,7 @@ jobs:
 
   visits_service_test:
     runs-on: "ubuntu-22.04"
+    needs: [products_service_test]
     steps:
     - name: Checkout sources
       uses: actions/checkout@v4
@@ -69,6 +111,7 @@ jobs:
 
   vet_service_test:
     runs-on: "ubuntu-22.04"
+    needs: [products_service_test]
     steps:
     - name: Checkout sources
       uses: actions/checkout@v4
@@ -120,6 +163,7 @@ jobs:
 
   billing_service_test:
     runs-on: "ubuntu-22.04"
+    needs: [products_service_test]
     steps:
     - name: Checkout sources
       uses: actions/checkout@v4
@@ -145,6 +189,7 @@ jobs:
 
   auth_service_test:
     runs-on: "ubuntu-22.04"
+    needs: [products_service_test]
     steps:
     - name: Checkout sources
       uses: actions/checkout@v4
@@ -170,6 +215,7 @@ jobs:
 
   inventory_service_test:
     runs-on: "ubuntu-22.04"
+    needs: [products_service_test]
     steps:
     - name: Checkout sources
       uses: actions/checkout@v4
@@ -193,49 +239,9 @@ jobs:
         path: ./inventory-service/build/reports/jacoco/test/html/
         retention-days: 30
 
-  products_service_test:
-    runs-on: "ubuntu-22.04"
-    timeout-minutes: 15
-    steps:
-      - name: Checkout sources
-        uses: actions/checkout@v4
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: 17
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
-      - name: Make gradlew executable
-        run: chmod +x ./gradlew
-        working-directory: ./products-service
-      - name: Cache Gradle dependencies
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-            ./products-service/.gradle
-          key: ${{ runner.os }}-gradle-products-${{ hashFiles('**/products-service/*.gradle*', '**/products-service/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-products-
-            ${{ runner.os }}-gradle-
-      - name: Build with Gradle
-        run: ./gradlew clean build jacocoTestReport jacocoTestCoverageVerification --no-daemon --max-workers=2 --info
-        working-directory: ./products-service
-        env:
-          GRADLE_OPTS: "-Xmx2g -XX:MaxMetaspaceSize=512m"
-          SPRING_DATA_MONGODB_EMBEDDED_VERSION: "4.9.2"
-      - name: Upload coverage reports
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-reports-products-service
-          path: ./products-service/build/reports/jacoco/test/html/
-          retention-days: 30
-
-
   cart_service_test:
     runs-on: "ubuntu-22.04"
+    needs: [products_service_test]
     steps:
       - name: Checkout sources
         uses: actions/checkout@v4
