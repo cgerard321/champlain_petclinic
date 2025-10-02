@@ -2,7 +2,7 @@ USE `billing-db`;
 
 DROP TABLE IF EXISTS billings;
 
-CREATE TABLE billings (
+CREATE TABLE  IF NOT EXISTS billings (
    id INT(7) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
    bill_id INT,
    customer_id VARCHAR(80),
