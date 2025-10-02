@@ -29,7 +29,7 @@ public class PdfGenerator {
                 BigDecimal principal = bill.getAmount();
                 BigDecimal onePlusRate = BigDecimal.ONE.add(monthlyRate);
                 BigDecimal compounded = onePlusRate.pow(overdueMonths);
-                BigDecimal finalAmount = principal.multiply(compounded).setScale(2, RoundingMode.HALF_UP);;
+                BigDecimal finalAmount = principal.multiply(compounded).setScale(2, RoundingMode.HALF_UP);
                 BigDecimal interest = finalAmount.subtract(principal).setScale(2, RoundingMode.HALF_UP);
                 bill.setInterest(interest);
             } else {

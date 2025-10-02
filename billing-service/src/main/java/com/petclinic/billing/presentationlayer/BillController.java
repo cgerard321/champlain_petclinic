@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.math.BigDecimal;
 import java.util.Optional;
 
 @RestController
@@ -212,15 +214,13 @@ public class BillController {
             .thenReturn(ResponseEntity.ok().build());
     }
 
-    @GetMapping("/bills/{billId}/interest")
-    public Mono<Double> getInterest(@PathVariable String billId) {
+    public Mono<BigDecimal> getInterest(@PathVariable String billId) {
         return billService.getBillByBillId(billId)
-            .map(bill -> bill.getInterest().doubleValue());
+                .map(BillResponseDTO::getInterest);
     }
-
     @GetMapping("/bills/{billId}/total")
-    public Mono<Double> getTotal(@PathVariable String billId) {
+    public Mono<BigDecimal> getTotal(@PathVariable String billId) {
         return billService.getBillByBillId(billId)
-            .map(bill -> bill.getAmount().add(bill.getInterest()).doubleValue());
+                .map(bill -> bill.getAmount().add(bill.getInterest()));
     }
 }

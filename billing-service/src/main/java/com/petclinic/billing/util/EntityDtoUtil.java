@@ -5,11 +5,16 @@ package com.petclinic.billing.util;
 import com.petclinic.billing.datalayer.Bill;
 import com.petclinic.billing.datalayer.BillRequestDTO;
 import com.petclinic.billing.datalayer.BillResponseDTO;
+import com.petclinic.billing.datalayer.BillStatus;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.Period;
 import java.util.UUID;
 
 @Slf4j
@@ -37,24 +42,24 @@ public class EntityDtoUtil {
         
         // Calculate and set interest with exemption check
         if (bill.isInterestExempt()) {
-            billResponseDTO.setInterest(java.math.BigDecimal.ZERO);
-        } else if (bill.getBillStatus() == com.petclinic.billing.datalayer.BillStatus.OVERDUE && bill.getDueDate() != null) {
-            java.time.LocalDate dueDate = bill.getDueDate();
-            java.time.LocalDate now = java.time.LocalDate.now();
-            java.time.Period period = java.time.Period.between(dueDate, now);
+            billResponseDTO.setInterest(BigDecimal.ZERO);
+        } else if (bill.getBillStatus() == BillStatus.OVERDUE && bill.getDueDate() != null) {
+            LocalDate dueDate = bill.getDueDate();
+            LocalDate now = LocalDate.now();
+            Period period = Period.between(dueDate, now);
             int overdueMonths = period.getYears() * 12 + period.getMonths();
             if (overdueMonths > 0) {
-                java.math.BigDecimal monthlyRate = new java.math.BigDecimal("0.015");
-                java.math.BigDecimal onePlusRate = java.math.BigDecimal.ONE.add(monthlyRate);
-                java.math.BigDecimal compounded = onePlusRate.pow(overdueMonths);
-                java.math.BigDecimal finalAmount = bill.getAmount().multiply(compounded).setScale(2, java.math.RoundingMode.HALF_UP);
-                java.math.BigDecimal interest = finalAmount.subtract(bill.getAmount()).setScale(2, java.math.RoundingMode.HALF_UP);
+                BigDecimal monthlyRate = new BigDecimal("0.015");
+                BigDecimal onePlusRate = BigDecimal.ONE.add(monthlyRate);
+                BigDecimal compounded = onePlusRate.pow(overdueMonths);
+                BigDecimal finalAmount = bill.getAmount().multiply(compounded).setScale(2, RoundingMode.HALF_UP);
+                BigDecimal interest = finalAmount.subtract(bill.getAmount()).setScale(2, RoundingMode.HALF_UP);
                 billResponseDTO.setInterest(interest);
             } else {
-                billResponseDTO.setInterest(java.math.BigDecimal.ZERO);
+                billResponseDTO.setInterest(BigDecimal.ZERO);
             }
         } else {
-            billResponseDTO.setInterest(java.math.BigDecimal.ZERO);
+            billResponseDTO.setInterest(BigDecimal.ZERO);
         }
         
         billResponseDTO.setTimeRemaining(timeRemaining(bill));
