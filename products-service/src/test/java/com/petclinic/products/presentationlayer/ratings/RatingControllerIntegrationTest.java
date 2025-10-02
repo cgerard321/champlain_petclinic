@@ -515,7 +515,6 @@ class RatingControllerIntegrationTest {
                 .expectBody()
                 .jsonPath("$.message").isEqualTo("Review must be less than 2000 characters");
 
-        // Verify no new rating was added to the database
         StepVerifier.create(ratingRepository.findAll())
                 .expectNextCount(4)
                 .verifyComplete();
@@ -705,6 +704,7 @@ class RatingControllerIntegrationTest {
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$.message").isEqualTo("Provided product id is invalid: " + INVALID_PRODUCT_ID);
+        
         StepVerifier.create(ratingRepository.findAll())
                 .expectNextCount(4)
                 .verifyComplete();

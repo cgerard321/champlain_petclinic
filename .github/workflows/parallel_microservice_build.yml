@@ -221,8 +221,11 @@ jobs:
             ${{ runner.os }}-gradle-products-
             ${{ runner.os }}-gradle-
       - name: Build with Gradle
-        run: ./gradlew clean build jacocoTestReport jacocoTestCoverageVerification --no-daemon --max-workers=2
+        run: ./gradlew clean build jacocoTestReport jacocoTestCoverageVerification --no-daemon --max-workers=2 --info
         working-directory: ./products-service
+        env:
+          GRADLE_OPTS: "-Xmx2g -XX:MaxMetaspaceSize=512m"
+          SPRING_DATA_MONGODB_EMBEDDED_VERSION: "4.9.2"
       - name: Upload coverage reports
         uses: actions/upload-artifact@v4
         with:
