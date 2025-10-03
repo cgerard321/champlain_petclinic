@@ -6,5 +6,5 @@ export const updateVisit = async (
   visitId: string,
   visit: VisitRequestModel
 ): Promise<void> => {
-  await axiosInstance.put<void>(`/visits/${visitId}`, visit, { useV2: true });
+  await axiosInstance.put<void>(`/visits/${visitId}`, visit, { useV2: false });
 };

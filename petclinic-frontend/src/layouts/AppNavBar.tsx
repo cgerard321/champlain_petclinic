@@ -245,11 +245,6 @@ export function NavBar(): JSX.Element {
                   </Nav.Link>
                 )}
                 {IsAdmin() && (
-                  <Nav.Link as={Link} to={AppRoutePaths.Emailing}>
-                    Emails
-                  </Nav.Link>
-                )}
-                {IsAdmin() && (
                   <Nav.Link as={Link} to={AppRoutePaths.Promos}>
                     Promos
                   </Nav.Link>

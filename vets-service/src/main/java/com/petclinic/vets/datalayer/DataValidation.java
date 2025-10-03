@@ -14,7 +14,7 @@ public class DataValidation {
         String confirmedValue = "";
         firstName = firstName.replaceAll("( |\\d)", "");
         firstName = firstName.substring(0, Math.min(firstName.length(), 30));
-        Pattern p = Pattern.compile("^([A-Z]|[a-z]|\\\\.| |,|-)+");
+        Pattern p = Pattern.compile("^([A-Z]|[a-z]|\\.| |,|-)+");
         Matcher m = p.matcher(firstName);
         boolean b = m.matches();
         if(b) {
@@ -30,7 +30,7 @@ public class DataValidation {
         String confirmedValue = "";
         speciality = speciality.replaceAll("( |\\d)", "");
         speciality = speciality.substring(0, Math.min(speciality.length(), 80));
-        Pattern p = Pattern.compile("^([A-Z]|[a-z]|\\\\.| |,|-)+");
+        Pattern p = Pattern.compile("^([A-Z]|[a-z]|\\.| |,|-)+");
         Matcher m = p.matcher(speciality);
         boolean b = m.matches();
         if(b) {
@@ -46,7 +46,7 @@ public class DataValidation {
         String confirmedValue = "";
         lastName = lastName.replaceAll("( |\\d)", "");
         lastName = lastName.substring(0, Math.min(lastName.length(), 30));
-        Pattern p = Pattern.compile("^([A-Z]|[a-z]|\\\\.| |,|-)+");
+        Pattern p = Pattern.compile("^([A-Z]|[a-z]|\\.| |,|-)+");
         Matcher m = p.matcher(lastName);
         boolean b = m.matches();
         if(b) {

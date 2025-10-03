@@ -23,6 +23,8 @@ default-admin:
 #This was changed to the new endpoint using the new V2 functions, if you want to access the previous
 frontend:
   url: http://localhost:8080/api/v2/gateway
+customer-frontend:
+  url: http://localhost:3000
 
 
 ---
@@ -111,6 +113,8 @@ emailing-service:
 # this is to make it work in prod will be fixed later
 frontend:
   url: http://localhost:8080/api/v2/gateway
+customer-frontend:
+  url: http://localhost:3000
 
 logging:
   level:
@@ -168,7 +172,9 @@ emailing-service:
   port: 5115
 
 frontend:
-  url: https://petclinic.benmusicgeek.synology.me/api/v2/gateway
+  url: https://petclinic-backend.benmusicgeek.synology.me/api/v2/gateway
+customer-frontend:
+  url: https://petclinic.benmusicgeek.synology.me/
 
 ---
 server.port: 8080
