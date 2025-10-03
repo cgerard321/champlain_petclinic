@@ -339,11 +339,11 @@ public class VisitsServiceClient {
     }
 
 
-    //Emergency
+    //emergencies
     public Flux<EmergencyResponseDTO> getAllEmergency() {
         return webClient
                 .get()
-                .uri(reviewUrl + "/emergency")
+                .uri(reviewUrl + "/emergencies")
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .bodyToFlux(EmergencyResponseDTO.class);
@@ -352,7 +352,7 @@ public class VisitsServiceClient {
     public Flux<EmergencyResponseDTO> getEmergencyVisitForPet(final String petId) {
         return webClient
                 .get()
-                .uri("/emergency/pets/{petId}", petId)
+                .uri("/emergencies/pets/{petId}", petId)
                 .retrieve()
                 .bodyToFlux(EmergencyResponseDTO.class);
     }
@@ -362,7 +362,7 @@ public class VisitsServiceClient {
         return model.flatMap(emergencyRequestDTO -> {
             return webClient
                     .post()
-                    .uri(reviewUrl + "/emergency")
+                    .uri(reviewUrl + "/emergencies")
                     .body(BodyInserters.fromValue(emergencyRequestDTO))
                     .retrieve()
                     .bodyToMono(EmergencyResponseDTO.class);
@@ -373,7 +373,7 @@ public class VisitsServiceClient {
     public Mono<EmergencyResponseDTO> getEmergencyByEmergencyId(String visitEmergencyId) {
         return webClient
                 .get()
-                .uri(reviewUrl + "/emergency/" + visitEmergencyId)
+                .uri(reviewUrl + "/emergencies/" + visitEmergencyId)
                 .retrieve()
                 .bodyToMono(EmergencyResponseDTO.class);
     }
@@ -383,7 +383,7 @@ public class VisitsServiceClient {
         return model.flatMap(emergencyRequestDTO -> {
             return webClient
                     .post()
-                    .uri(reviewUrl + "/emergency")
+                    .uri(reviewUrl + "/emergencies")
                     .body(BodyInserters.fromValue(emergencyRequestDTO))
                     .retrieve()
                     .bodyToMono(EmergencyResponseDTO.class);
@@ -395,7 +395,7 @@ public class VisitsServiceClient {
         return emergencyRequestDTOMono.flatMap(requestDTO ->
                 webClient
                         .put()
-                        .uri(reviewUrl + "/emergency/" + emergencyId)
+                        .uri(reviewUrl + "/emergencies/" + emergencyId)
                         .body(BodyInserters.fromValue(requestDTO))
                         .retrieve()
                         .bodyToMono(EmergencyResponseDTO.class)
@@ -405,7 +405,7 @@ public class VisitsServiceClient {
     public Mono<EmergencyResponseDTO> getEmergencyByEmergencyId(String emergencyId) {
         return webClient
                 .get()
-                .uri(reviewUrl + "/emergency/" + emergencyId)
+                .uri(reviewUrl + "/emergencies/" + emergencyId)
                 .retrieve()
                 .bodyToMono(EmergencyResponseDTO.class);
     }
@@ -414,7 +414,7 @@ public class VisitsServiceClient {
     public Mono<EmergencyResponseDTO> deleteEmergency(String emergencyId) {
         return webClient
                 .delete()
-                .uri(reviewUrl + "/emergency/" + emergencyId)
+                .uri(reviewUrl + "/emergencies/" + emergencyId)
                 .retrieve()
                 .bodyToMono(EmergencyResponseDTO.class);
     }
