@@ -9,6 +9,9 @@ import AddEducation from '@/pages/Vet/AddEducation.tsx';
 import DeleteVetEducation from '@/pages/Vet/DeleteVetEducation';
 import { Workday } from '@/features/veterinarians/models/Workday.ts';
 import UpdateVet from '@/pages/Vet/UpdateVet.tsx';
+import UploadAlbumPhoto from '@/features/veterinarians/api/UploadAlbumPhoto';
+import { getAlbumsByVetId } from '@/features/veterinarians/api/getAlbumByVetId.ts';
+
 //import { fetchVetPhoto } from '@/features/veterinarians/api/fetchPhoto';
 
 interface VetResponseType {
@@ -43,7 +46,7 @@ interface VetRequestModel {
 }
 
 interface AlbumPhotoType {
-  id: string;
+  id: number;
   data: string;
   imgType: string;
 }
@@ -107,6 +110,18 @@ export default function VetDetails(): JSX.Element {
       setError('Failed to fetch vet details');
     }
   }, [vetId]);
+
+  const loadAlbumPhotos = useCallback(async (): Promise<void> => {
+    if (!vetId) return;
+    try {
+      const photos = await getAlbumsByVetId(vetId);
+      setAlbumPhotos(photos);
+    } catch (e) {
+      console.error('Failed to fetch album photos:', e);
+      setAlbumPhotos([]);
+    }
+  }, [vetId]);
+
   const mapVetResponseToRequest = (vet: VetResponseType): VetRequestModel => ({
     vetId: vet.vetId,
     firstName: vet.firstName,
@@ -216,13 +231,12 @@ export default function VetDetails(): JSX.Element {
     //     setError('Failed to fetch album photos');
     //   }
     // };
-
-    fetchVetDetails().then(() => {
-      fetchEducationDetails();
-      // fetchAlbumPhotos();
+    fetchVetDetails().then(async () => {
+      await fetchEducationDetails();
+      await loadAlbumPhotos(); // ⬅ add this
       setLoading(false);
     });
-  }, [vetId]);
+  }, [vetId, loadAlbumPhotos]);
 
   const handleImageClick = (): void => {
     if (fileInputRef.current) {
@@ -261,14 +275,14 @@ export default function VetDetails(): JSX.Element {
       setError('Failed to update vet photo');
     }
   };
-  const handleDeleteAlbumPhoto = async (photoId: string): Promise<void> => {
+  const handleDeleteAlbumPhoto = async (photoId: number): Promise<void> => {
     try {
       await axiosInstance.delete(`/vets/${vetId}/albums/${photoId}`, {
-        useV2: false,
+        useV2: true, // <-- go through BFF v2
       });
-      // Update the state to remove the deleted photo
-      setAlbumPhotos(prevPhotos =>
-        prevPhotos.filter(photo => photo.id !== photoId)
+
+      setAlbumPhotos(
+        prev => prev.filter(photo => photo.id !== photoId) // number vs number
       );
     } catch (error) {
       setError('Failed to delete album photo');
@@ -700,12 +714,21 @@ export default function VetDetails(): JSX.Element {
             </section>
 
             <section className="album-photos">
-              <h2>Album Photos</h2>
+              <div className="d-flex justify-content-between align-items-center">
+                <h2>Album Photos</h2>
+                {vetId && (
+                  <UploadAlbumPhoto
+                    vetId={vetId}
+                    onUploadComplete={loadAlbumPhotos}
+                  />
+                )}
+              </div>
+
               {albumPhotos.length > 0 ? (
                 <div className="album-photo-grid">
-                  {albumPhotos.map((photo, index) => (
+                  {albumPhotos.map(photo => (
                     <div
-                      key={index}
+                      key={photo.id}
                       className="album-photo-card"
                       onClick={() =>
                         openPhotoModal(
@@ -714,15 +737,19 @@ export default function VetDetails(): JSX.Element {
                       }
                     >
                       <img
-                        src={`data:${photo.imgType};base64,${photo.data}`} // Construct the image URL from data and type
-                        alt={`Album Photo ${index + 1}`}
+                        src={`data:${photo.imgType};base64,${photo.data}`}
+                        alt={`Album Photo ${photo.id}`}
                         className="album-photo-thumbnail"
                       />
                       <button
+                        style={{
+                          backgroundColor: '#f93142ff',
+                          borderColor: '#f93142ff',
+                        }}
                         className="delete-photo-button"
                         onClick={e => {
-                          e.stopPropagation(); // This prevents the modal from opening
-                          handleDeleteAlbumPhoto(photo.id); // Pass the photo ID for deletion
+                          e.stopPropagation();
+                          void handleDeleteAlbumPhoto(photo.id);
                         }}
                       >
                         Delete Image
@@ -738,7 +765,7 @@ export default function VetDetails(): JSX.Element {
         )}
       </div>
 
-      {/* Modal for enlarged photo */}
+      {}
       {enlargedPhoto && (
         <div className="photo-modal" onClick={closePhotoModal}>
           <img src={enlargedPhoto} alt="Enlarged Vet Album Photo" />
