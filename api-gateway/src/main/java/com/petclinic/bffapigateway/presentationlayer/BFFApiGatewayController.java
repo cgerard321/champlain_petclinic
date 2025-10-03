@@ -63,9 +63,6 @@ public class BFFApiGatewayController {
 
     private final InventoryServiceClient inventoryServiceClient;
 
-
-
-
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET})
     @GetMapping(value = "bills/{billId}")
     public Mono<ResponseEntity<BillResponseDTO>> getBillById(final @PathVariable String billId)
@@ -147,7 +144,6 @@ public class BFFApiGatewayController {
     public Mono<Long> getTotalNumberOfBills(){
         return billServiceClient.getTotalNumberOfBills();
     }
-
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET})
     @GetMapping(value = "bills/bills-filtered-count")
@@ -263,10 +259,6 @@ public class BFFApiGatewayController {
                 .onErrorResume(e -> Mono.just(ResponseEntity.badRequest().build()));
     }
 
-
-
-
-
     @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN,Roles.VET})
     @PostMapping(value = "/owners/{ownerId}/pets" , produces = "application/json", consumes = "application/json")
     public Mono<ResponseEntity<PetResponseDTO>> createPetForOwner(@PathVariable String ownerId, @RequestBody PetRequestDTO petRequest){
@@ -275,18 +267,12 @@ public class BFFApiGatewayController {
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
-  /*@GetMapping(value = "owners/{ownerId}/pets")
-   public Flux<PetResponseDTO> getAllPetsFromOwnerId(@PathVariable String ownerId){
-        return customersServiceClient.getAllPets(ownerId);
-    }*/
-
     @SecuredEndpoint(allowedRoles = {Roles.OWNER,Roles.ADMIN,Roles.VET})
     @PatchMapping(value = "/pet/{petId}", produces = "application/json", consumes = "application/json")
     public Mono<ResponseEntity<PetResponseDTO>> patchPet(@RequestBody PetRequestDTO pet, @PathVariable String petId) {
         return customersServiceClient.patchPet(pet, petId).map(s -> ResponseEntity.status(HttpStatus.OK).body(s))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
-
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET})
     @GetMapping(value = "/pets", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
@@ -329,7 +315,6 @@ public class BFFApiGatewayController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-
     @GetMapping(value = "owners/petTypes", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<PetType> getPetTypes(){
         return customersServiceClient.getPetTypes();
@@ -352,15 +337,6 @@ public class BFFApiGatewayController {
 //    public Flux<ReviewResponseDTO> getAllReviews(){
 //        return visitsServiceClient.getAllReviews();
 //    }
-//
-//
-//
-//
-//
-//
-//
-//
-//
 //
 //    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
 //    @GetMapping(value = "visits", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
@@ -489,7 +465,6 @@ public class BFFApiGatewayController {
 //     * End of Visit Methods
 //     **/
 
-
     /**
      * Start of Vet Methods
      **/
@@ -510,7 +485,6 @@ public class BFFApiGatewayController {
         return vetsServiceClient.addSpecialtiesByVetId(vetId, specialties);
     }
 
- 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @GetMapping("vets/{vetId}/default-photo")
     public Mono<ResponseEntity<PhotoResponseDTO>> getDefaultPhotoByVetId(@PathVariable String vetId) {
@@ -550,7 +524,6 @@ public class BFFApiGatewayController {
                 .map(r -> ResponseEntity.status(HttpStatus.CREATED).body(r))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
-
 
     @PutMapping(value = "vets/{vetId}/photos/{photoName}")
     public Mono<ResponseEntity<Resource>> updatePhotoByVetId(@PathVariable String vetId, @PathVariable String photoName, @RequestBody Mono<Resource> image) {
@@ -603,8 +576,6 @@ public class BFFApiGatewayController {
     public Flux<VetAverageRatingDTO>getTopThreeVetsWithHighestAverageRating(){
         return vetsServiceClient.getTopThreeVetsWithHighestAverageRating();
     }
-
-
 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @GetMapping("vets/{vetId}/ratings/date")
@@ -665,7 +636,6 @@ public class BFFApiGatewayController {
                 .map(e->ResponseEntity.status(HttpStatus.OK).body(e))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
-
 
     //Vets
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
@@ -820,22 +790,17 @@ public class BFFApiGatewayController {
         return authServiceClient.logout(request, response);
     }
 
-
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @PostMapping(value = "/users/forgot_password")
     public Mono<ResponseEntity<Void>> processForgotPassword(@RequestBody Mono<UserEmailRequestDTO> email) {
         return authServiceClient.sendForgottenEmail(email);
     }
 
-
-
-
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @PostMapping("/users/reset_password")
     public Mono<ResponseEntity<Void>> processResetPassword(@RequestBody @Valid Mono<UserPasswordAndTokenRequestModel> resetRequest) {
         return authServiceClient.changePassword(resetRequest);
     }
-
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @PostMapping(value = "/users/inventoryManager")
