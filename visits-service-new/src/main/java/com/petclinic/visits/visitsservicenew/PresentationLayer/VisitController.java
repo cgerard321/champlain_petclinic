@@ -213,25 +213,25 @@ public class VisitController {
     }
 
 
-    //Emergency
+    //emergencies
 
-    @GetMapping(value = "/emergency/pets/{petId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(value = "/emergencies/pets/{petId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<EmergencyResponseDTO> getEmergencyVisitsForPet(@PathVariable String petId) {
         return emergencyService.getEmergencyVisitsForPet(petId);
     }
-    @GetMapping(value = "/emergency")
+    @GetMapping(value = "/emergencies")
     public Flux<EmergencyResponseDTO> getAllEmergency() {
         return emergencyService.GetAllEmergencies();
     }
 
-    @PostMapping(value = "/emergency")
+    @PostMapping(value = "/emergencies")
     public Mono<ResponseEntity<EmergencyResponseDTO>> PostEmergency(@RequestBody Mono<EmergencyRequestDTO> emergencyRequestDTOMono) {
         return emergencyService.AddEmergency(emergencyRequestDTOMono)
                 .map(c -> ResponseEntity.status(HttpStatus.CREATED).body(c))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
-    @GetMapping(value = "/emergency/{emergencyId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/emergencies/{emergencyId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<EmergencyResponseDTO>> getEmergencyByEmergencyId(@PathVariable String emergencyId) {
         return Mono.just(emergencyId)
                 //.filter(id -> id.length() == 36)
@@ -242,7 +242,7 @@ public class VisitController {
     }
 
 /*
-    @GetMapping(value = "/emergency/{emergencyId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/emergencies/{emergencyId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<EmergencyResponseDTO>> getEmergencyByEmergencyId(@PathVariable String emergencyId) {
         return Mono.just(emergencyId)
                 //.filter(id -> id.length() == 36)
@@ -252,7 +252,7 @@ public class VisitController {
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
-    @PostMapping(value = "/emergency")
+    @PostMapping(value = "/emergencies")
     public Mono<ResponseEntity<EmergencyResponseDTO>> PostEmergency(@RequestBody Mono<EmergencyRequestDTO> emergencyRequestDTOMono) {
         return emergencyService.AddEmergency(emergencyRequestDTOMono)
                 .map(c -> ResponseEntity.status(HttpStatus.CREATED).body(c))
@@ -260,7 +260,7 @@ public class VisitController {
     }
     */
 
-//    @PutMapping(value = "/emergency/{emergencyId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+//    @PutMapping(value = "/emergencies/{emergencyId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 //    public Mono<ResponseEntity<EmergencyResponseDTO>> UpdateEmergency(@RequestBody Mono<EmergencyRequestDTO> emergencyRequestDTOMono, @PathVariable String emergencyId) {
 //        return Mono.just(emergencyId)
 //                .filter(id -> id.length() == 36)
@@ -270,14 +270,14 @@ public class VisitController {
 //                .defaultIfEmpty(ResponseEntity.badRequest().build());
 //    }
 
-    @PutMapping(value = "/emergency/{visitEmergencyId}", consumes = "application/json", produces = "application/json")
+    @PutMapping(value = "/emergencies/{visitEmergencyId}", consumes = "application/json", produces = "application/json")
     public Mono<EmergencyResponseDTO> updateEmergencyById(
             @PathVariable String visitEmergencyId,
             @RequestBody Mono<EmergencyRequestDTO> emergencyRequestDTOMono) {
         return emergencyService.updateEmergency(visitEmergencyId, emergencyRequestDTOMono);
     }
 
-    @DeleteMapping(value = "/emergency/{emergencyId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @DeleteMapping(value = "/emergencies/{emergencyId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<EmergencyResponseDTO>> DeleteEmergency(@PathVariable String emergencyId) {
         return Mono.just(emergencyId)
                 // .filter(id -> id.length() == 36)
