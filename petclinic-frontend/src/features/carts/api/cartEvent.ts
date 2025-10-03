@@ -26,7 +26,9 @@ export function getCartIdFromLS(): string | null {
 export function setCartIdInLS(id: string): void {
   try {
     localStorage.setItem(CART_ID_KEY, id);
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
 }
 
 /** Read / write cart count in localStorage (single source of truth for navbar) */
@@ -42,7 +44,9 @@ export function getCartCountFromLS(): number {
 export function setCartCountInLS(n: number): void {
   try {
     localStorage.setItem(CART_COUNT_KEY, String(Math.max(0, Math.trunc(n))));
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
   notifyCartChanged();
 }
 

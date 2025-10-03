@@ -2,7 +2,11 @@ import axiosInstance from '@/shared/api/axiosInstance';
 import { AxiosError } from 'axios';
 import { fetchCartIdByCustomerId } from './getCart';
 import { useUser } from '@/context/UserContext';
-import { notifyCartChanged, setCartIdInLS, bumpCartCountInLS } from './cartEvent';
+import {
+  notifyCartChanged,
+  setCartIdInLS,
+  bumpCartCountInLS,
+} from './cartEvent';
 
 type UseAddToCartReturnType = {
   addToCart: (productId: string) => Promise<boolean>;
@@ -28,9 +32,9 @@ export function useAddToCart(): UseAddToCartReturnType {
 
       if (status === 404 || status === 401) {
         const { data } = await axiosInstance.post<CreateCartResponse>(
-            '/carts',
-            { customerId: userId },
-            { headers: { 'Content-Type': 'application/json' } }
+          '/carts',
+          { customerId: userId },
+          { headers: { 'Content-Type': 'application/json' } }
         );
         const newId = (data?.cartId ?? data?.id) as string | undefined;
         if (!newId) throw new Error('Could not create cart');
@@ -50,9 +54,9 @@ export function useAddToCart(): UseAddToCartReturnType {
       const cartId = await getOrCreateCartId(user.userId);
 
       await axiosInstance.post(
-          `/carts/${encodeURIComponent(cartId)}/${encodeURIComponent(String(productId))}`,
-          undefined,
-          { useV2: true }
+        `/carts/${encodeURIComponent(cartId)}/${encodeURIComponent(String(productId))}`,
+        undefined,
+        { useV2: true }
       );
 
       //keep navbar offline, persist id + bump count locally

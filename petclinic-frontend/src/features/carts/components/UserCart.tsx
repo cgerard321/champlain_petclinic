@@ -11,9 +11,12 @@ import axiosInstance from '@/shared/api/axiosInstance';
 import { IsAdmin } from '@/context/UserContext';
 import { AppRoutePaths } from '@/shared/models/path.routes';
 import { getProductByProductId } from '@/features/products/api/getProductByProductId';
-import { notifyCartChanged, setCartCountInLS, setCartIdInLS, bumpCartCountInLS } from '../api/cartEvent';
-
-
+import {
+  notifyCartChanged,
+  setCartCountInLS,
+  setCartIdInLS,
+  bumpCartCountInLS,
+} from '../api/cartEvent';
 
 interface ProductAPIResponse {
   productId: number;
@@ -118,7 +121,10 @@ const UserCart = (): JSX.Element => {
 
         setCartItems(products);
         setCartIdInLS(cartId);
-        const countFromFetch = products.reduce((acc, p) => acc + (p.quantity || 0), 0);
+        const countFromFetch = products.reduce(
+          (acc, p) => acc + (p.quantity || 0),
+          0
+        );
         setCartCountInLS(countFromFetch);
         const enrichedWishlist = await Promise.all(
           (data.wishListProducts || []).map(async (item: ProductModel) => {

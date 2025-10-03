@@ -26,6 +26,7 @@ export function NavBar(): JSX.Element {
   const navigate = useNavigate();
   const isInventoryManager = IsInventoryManager();
   const isReceptionist = IsReceptionist();
+  const isVet = IsVet();
   const [navbarOpen, setNavbarOpen] = useState(false);
   const [cartId, setCartId] = useState<string | null>(null);
   const [cartItemCount, setCartItemCount] = useState<number>(0); // State for cart item count
@@ -36,7 +37,9 @@ export function NavBar(): JSX.Element {
       localStorage.removeItem('user');
       localStorage.removeItem('cart:id');
       localStorage.removeItem('cart:count');
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
     navigate(AppRoutePaths.Login);
     window.location.reload();
   };
@@ -58,19 +61,34 @@ export function NavBar(): JSX.Element {
     const onCartChanged = (): void => refreshFromLocalStorage();
     // cross-tab updates
     const onStorage = (e: StorageEvent): void => {
-        if (e.key === 'cart:changed' || e.key === 'cart:count' || e.key === 'cart:id') {
-            refreshFromLocalStorage();
-        }
+      if (
+        e.key === 'cart:changed' ||
+        e.key === 'cart:count' ||
+        e.key === 'cart:id'
+      ) {
+        refreshFromLocalStorage();
+      }
     };
 
-    window.addEventListener(CART_CHANGED as unknown as string, onCartChanged as EventListener);
+    window.addEventListener(
+      CART_CHANGED as unknown as string,
+      onCartChanged as EventListener
+    );
     window.addEventListener('storage', onStorage);
     return () => {
-      window.removeEventListener(CART_CHANGED as unknown as string, onCartChanged as EventListener);
+      window.removeEventListener(
+        CART_CHANGED as unknown as string,
+        onCartChanged as EventListener
+      );
       window.removeEventListener('storage', onStorage);
     };
-
-  }, [refreshFromLocalStorage, user.userId, isInventoryManager, isReceptionist]);
+  }, [
+    refreshFromLocalStorage,
+    user.userId,
+    isInventoryManager,
+    isReceptionist,
+    isVet,
+  ]);
 
   return (
     <Navbar bg="light" expand="lg" className="navbar">
