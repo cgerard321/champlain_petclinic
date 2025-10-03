@@ -34,8 +34,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -291,7 +291,35 @@ public class VetController {
                 .onErrorResume(NotFoundException.class, e -> Mono.just(ResponseEntity.notFound().build()));
     }
 
+ @PostMapping(
+        value = "{vetId}/albums/photos/{photoName}",
+        consumes = MediaType.APPLICATION_OCTET_STREAM_VALUE,
+        produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public Mono<ResponseEntity<Album>> addAlbumPhotoOctet(
+            @PathVariable String vetId,
+            @PathVariable String photoName,
+            @RequestBody Mono<byte[]> fileData
+    ) {
+        return albumService.insertAlbumPhoto(vetId, photoName, fileData)
+                .map(saved -> ResponseEntity.status(HttpStatus.CREATED).body(saved))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
 
+    @PostMapping(
+        value = "{vetId}/albums/photos",
+        consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+        produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public Mono<ResponseEntity<Album>> addAlbumPhotoMultipart(
+            @PathVariable String vetId,
+            @RequestPart("photoName") String photoName,
+            @RequestPart("file") FilePart file
+    ) {
+        return albumService.insertAlbumPhoto(vetId, photoName, file)
+                .map(saved -> ResponseEntity.status(HttpStatus.CREATED).body(saved))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
 
     @PutMapping("{vetId}/photo")
     public Mono<ResponseEntity<PhotoResponseDTO>> updatePhotoByVetId(@PathVariable String vetId, @RequestBody Mono<PhotoRequestDTO> photoRequestDTO){
