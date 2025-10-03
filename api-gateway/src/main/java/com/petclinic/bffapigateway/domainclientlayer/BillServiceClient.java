@@ -17,6 +17,9 @@ import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.net.URI;
 import java.util.Optional;
 
 
@@ -44,8 +47,11 @@ public class BillServiceClient {
                 .uri(billServiceUrl + "/{billId}", billId)
                 .retrieve()
                 .bodyToMono(BillResponseDTO.class)
-                .doOnNext(t -> t.setTaxedAmount(((t.getAmount() * 15)/100)+ t.getAmount()))
-                .doOnNext(t -> t.setTaxedAmount(Math.round(t.getTaxedAmount() * 100.0) / 100.0));
+                .doOnNext(t -> {
+                    BigDecimal tax = t.getAmount().multiply(new BigDecimal("0.15"));
+                    BigDecimal taxedAmount = t.getAmount().add(tax);
+                    t.setTaxedAmount(taxedAmount.setScale(2, RoundingMode.HALF_UP));
+                });
     }
     public Flux<BillResponseDTO> getBillsByOwnerId(final String customerId) {
         return webClientBuilder.build().get()
@@ -386,6 +392,34 @@ public class BillServiceClient {
                 });
     }
 
+    public Mono<Double> getInterest(String billId) {
+        return webClientBuilder.build()
+                .get()
+                .uri(billServiceUrl + "/{billId}/interest", billId)
+                .retrieve()
+                .bodyToMono(Double.class);
+    }
+
+    public Mono<Double> getTotalWithInterest(String billId) {
+        return webClientBuilder.build()
+                .get()
+                .uri(billServiceUrl + "/{billId}/total", billId)
+                .retrieve()
+                .bodyToMono(Double.class);
+    }
+
+    public Mono<Void> setInterestExempt(String billId, boolean exempt) {
+        URI uri = UriComponentsBuilder
+                .fromUriString(billServiceUrl + "/{billId}/exempt-interest")
+                .queryParam("exempt", exempt)
+                .build(billId);
+
+        return webClientBuilder.build()
+                .patch()
+                .uri(uri)
+                .retrieve()
+                .bodyToMono(Void.class);
+    }
 
 
 }

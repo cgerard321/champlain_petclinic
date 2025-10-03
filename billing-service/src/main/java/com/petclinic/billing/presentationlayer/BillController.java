@@ -2,8 +2,6 @@ package com.petclinic.billing.presentationlayer;
 
 import com.petclinic.billing.businesslayer.BillService;
 import com.petclinic.billing.datalayer.*;
-import com.petclinic.billing.exceptions.InvalidPaymentException;
-import com.petclinic.billing.exceptions.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
@@ -13,7 +11,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import javax.validation.Valid;
+
+import java.math.BigDecimal;
 import java.util.Optional;
 
 @RestController
@@ -209,4 +208,20 @@ public class BillController {
         return billService.getBillsByMonth(year, month);
     }
 
+    @PatchMapping("/bills/{billId}/exempt-interest")
+    public Mono<ResponseEntity<Void>> exemptInterest(@PathVariable String billId, @RequestParam boolean exempt) {
+        return billService.setInterestExempt(billId, exempt)
+            .thenReturn(ResponseEntity.ok().build());
+    }
+
+    @GetMapping("/bills/{billId}/interest")
+    public Mono<BigDecimal> getInterest(@PathVariable String billId) {
+        return billService.getBillByBillId(billId)
+                .map(BillResponseDTO::getInterest);
+    }
+    @GetMapping("/bills/{billId}/total")
+    public Mono<BigDecimal> getTotal(@PathVariable String billId) {
+        return billService.getBillByBillId(billId)
+                .map(bill -> bill.getAmount().add(bill.getInterest()));
+    }
 }

@@ -4,16 +4,12 @@ import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
-import org.springframework.transaction.annotation.Transactional;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Calendar;
-import java.util.Date;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
@@ -110,7 +106,7 @@ public class BillServicePersistenceTests {
                 .vetId(originalBill.getVetId())
                 .visitType("New Visit Type")
                 .date(originalBill.getDate())
-                .amount(42.0)
+                .amount(new BigDecimal(42.0))
                 .build();
 
 
@@ -207,7 +203,7 @@ public class BillServicePersistenceTests {
                 .toLocalDate();;
 
 
-        return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(13.37).build();
+        return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(new BigDecimal(13.37)).build();
     }
 
 
