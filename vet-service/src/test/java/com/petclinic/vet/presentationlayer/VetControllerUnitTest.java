@@ -1173,7 +1173,7 @@ class VetControllerUnitTest {
                 .contains(album1, album2);
     }
 
-    // To Find
+
     @Test
     void whenGetAllAlbumsByVetId_withError_thenLogError() {
 
@@ -1213,7 +1213,7 @@ class VetControllerUnitTest {
                 .expectStatus().isNotFound(); // Expecting 404 Not Found
     }
 
-    // To Find
+
     @Test
     void whenDeleteAlbumPhotoById_withError_thenReturnServerError() {
         when(albumService.deleteAlbumPhotoById(VET_ID, ALBUM_ID))
