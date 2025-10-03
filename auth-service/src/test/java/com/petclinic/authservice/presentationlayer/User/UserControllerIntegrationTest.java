@@ -32,7 +32,6 @@ import java.util.stream.Collectors;
 @AutoConfigureMockMvc
 class UserControllerIntegrationTest {
 
-
     @Autowired
     private JwtTokenUtil jwtService;
 
