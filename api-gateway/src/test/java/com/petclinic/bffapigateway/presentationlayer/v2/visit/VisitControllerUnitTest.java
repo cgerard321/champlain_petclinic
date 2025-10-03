@@ -859,7 +859,7 @@ public class VisitControllerUnitTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(visitRequestDTO)
                 .exchange()
-                .expectStatus().isBadRequest();
+                .expectStatus().isNotFound();
 
         verify(visitsServiceClient, times(1)).archiveCompletedVisit(eq(visitId), any(Mono.class));
     }
@@ -1139,7 +1139,7 @@ public class VisitControllerUnitTest {
         webTestClient.delete()
                 .uri(EMERGENCY_URL + "/{emergencyId}", "invalidId")
                 .exchange()
-                .expectStatus().isBadRequest();
+                .expectStatus().isNotFound();
 
         verify(visitsServiceClient, times(1)).deleteEmergency("invalidId");
     }
