@@ -3,7 +3,6 @@ package com.petclinic.authservice.presentationlayer.User;
 import com.petclinic.authservice.Util.Exceptions.HTTPErrorMessage;
 import com.petclinic.authservice.datalayer.roles.Role;
 import com.petclinic.authservice.domainclientlayer.Mail.MailService;
-import com.petclinic.authservice.domainclientlayer.cart.CartService;
 import com.petclinic.authservice.security.JwtTokenUtil;
 import com.petclinic.authservice.datalayer.user.*;
 import org.aspectj.lang.annotation.Before;
@@ -33,7 +32,6 @@ import java.util.stream.Collectors;
 @AutoConfigureMockMvc
 class UserControllerIntegrationTest {
 
-
     @Autowired
     private JwtTokenUtil jwtService;
 
@@ -53,8 +51,6 @@ class UserControllerIntegrationTest {
     @MockBean
     private MailService mailService;
 
-    @MockBean
-    CartService cartService;
 
 
     private final String VALID_USER_ID = "7c0d42c2-0c2d-41ce-bd9c-6ca67478956f";

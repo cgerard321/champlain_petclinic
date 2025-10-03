@@ -99,7 +99,7 @@ public class VisitControllerIntegrationTest {
     @Test
     void whenGetAllVisits_asAdmin_thenReturnAllVisits() {
         Flux<VisitResponseDTO> result = webTestClient.get()
-                .uri("/api/v2/gateway/visits")
+                .uri("/api/gateway/visits")
                 .cookie("Bearer", jwtTokenForValidAdmin) // admin token
                 .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
                 .exchange()
