@@ -27,6 +27,8 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
   onPetDeleted,
 }): JSX.Element => {
   const [pet, setPet] = useState<PetResponseModel | null>(null);
+  const [dateInputValue, setDateInputValue] = useState<string>('');
+  const [isDateInputFocused, setIsDateInputFocused] = useState<boolean>(false);
   const [petTypes, setPetTypes] = useState<PetTypeModel[]>([]);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [successMessage, setSuccessMessage] = useState<string>('');
@@ -46,6 +48,11 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
             ...petData,
             birthDate: new Date(petData.birthDate),
           });
+          setDateInputValue(
+            petData.birthDate
+              ? new Date(petData.birthDate).toISOString().split('T')[0]
+              : ''
+          );
         } catch (err) {
           const error = err as { response?: { status: number } };
           if (error.response && error.response.status === 404) {
@@ -81,7 +88,15 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
       const checked = (e.target as HTMLInputElement).checked;
       setPet(prev => (prev ? { ...prev, [name]: checked } : null));
     } else if (type === 'date') {
-      setPet(prev => (prev ? { ...prev, [name]: new Date(value) } : null));
+      setDateInputValue(value);
+
+      if (value && value.length === 10) {
+        const dateValue = new Date(value);
+        if (!isNaN(dateValue.getTime())) {
+          setPet(prev => (prev ? { ...prev, [name]: dateValue } : null));
+        }
+      } else if (!value || value.length < 10) {
+      }
     } else {
       setPet(prev => (prev ? { ...prev, [name]: value } : null));
     }
@@ -127,6 +142,11 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
             : new Date(),
         };
         setPet(updatedPetData);
+        setDateInputValue(
+          updatedPetData.birthDate
+            ? updatedPetData.birthDate.toISOString().split('T')[0]
+            : ''
+        );
       }
 
       if (onPetUpdated) {
@@ -301,8 +321,16 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
             <input
               type="date"
               name="birthDate"
-              value={pet.birthDate.toISOString().split('T')[0]}
+              value={
+                isDateInputFocused
+                  ? dateInputValue
+                  : pet.birthDate && !isNaN(pet.birthDate.getTime())
+                    ? pet.birthDate.toISOString().split('T')[0]
+                    : ''
+              }
               onChange={handleChange}
+              onFocus={() => setIsDateInputFocused(true)}
+              onBlur={() => setIsDateInputFocused(false)}
               disabled={isSubmitting}
             />
           </div>
