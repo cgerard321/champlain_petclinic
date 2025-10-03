@@ -11,11 +11,11 @@ export const updateEmergency = async (
   emergency: EmergencyRequestDTO
 ): Promise<void> => {
   await axiosInstance.put<void>(
-    `/visits/emergency/${emergencyVisitId}`,
+    `/visits/emergencies/${emergencyVisitId}`,
     {
       ...emergency,
       visitDate: toServerDate(emergency.visitDate),
     },
-    { useV2: true }
+    { useV2: false }
   );
 };

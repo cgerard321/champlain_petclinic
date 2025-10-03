@@ -5,8 +5,8 @@ export const getEmergencyById = async (
   visitEmergencyId: string
 ): Promise<EmergencyResponseDTO> => {
   const response = await axiosInstance.get<EmergencyResponseDTO>(
-    `/visits/emergency/${visitEmergencyId}`,
-    { useV2: true }
+    `/visits/emergencies/${visitEmergencyId}`,
+    { useV2: false }
   );
   return response.data; // Return only the data
 };
