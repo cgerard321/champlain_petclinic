@@ -1,11 +1,11 @@
 'use strict';
 
-
-angular.module('shopProductForm')
-    .controller('ShopProductFormController', ["$http", '$state', '$stateParams', function ($http, $state , $stateParams) {
+angular.module('inventoriesProductForm')
+    .controller('InventoriesProductFormController', ["$http", '$state', '$stateParams', '$scope', 'InventoryService', function ($http, $state , $scope,  $stateParams, InventoryService) {
         var self = this;
+        var product = {}
         // post request to create a new product
-        self.submitProductForm = function () {
+        self.submitProductForm = function (product) {
             var data  = {
                 productName: self.product.productName,
                 productDescription: self.product.productDescription,
@@ -13,12 +13,13 @@ angular.module('shopProductForm')
                 productQuantity: self.product.productQuantity,
                 productSalePrice: self.product.productSalePrice
             }
-            $http.post('/api/v2/gateway/products', data
+            var inventoryId = InventoryService.getInventoryId();
+            console.log("InventoryId: " + inventoryId);
+            $http.post('/api/gateway/inventories/' + inventoryId + '/products', data
             )
                 .then(function (response) {
-                    //console.log(response);
-                    $state.go('shopProductList');
-
+                    console.log(response);
+                    $state.go('productList', {inventoryId: inventoryId});
                 }, function (response) {
                     var error = response.data;
                     error.errors = error.errors || [];
@@ -27,4 +28,6 @@ angular.module('shopProductForm')
                     }).join("\r\n"));
                 });
         }
+
+
     }]);
