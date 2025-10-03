@@ -62,6 +62,7 @@ public class AlbumServiceImplTest {
                 .verifyComplete();
     }
 
+    // To Find
     @Test
     void getAllAlbumsByInvalidVetId_thenThrowNotFoundException() {
         when(albumRepository.findAllByVetId(anyString())).thenReturn(Flux.empty());

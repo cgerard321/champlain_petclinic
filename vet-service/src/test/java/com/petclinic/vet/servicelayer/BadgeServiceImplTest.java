@@ -101,6 +101,7 @@ class BadgeServiceImplTest {
                 .verifyComplete();
     }
 
+    // To Find
     @Test
     void getBadge_withRatingInvalidVetId_shouldNotSucceed(){
         String invalidVetId="123";

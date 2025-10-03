@@ -16,6 +16,7 @@ import com.petclinic.vet.servicelayer.education.EducationResponseDTO;
 import com.petclinic.vet.servicelayer.ratings.RatingRequestDTO;
 import com.petclinic.vet.servicelayer.ratings.RatingResponseDTO;
 import com.petclinic.vet.util.EntityDtoUtil;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.r2dbc.connection.init.ConnectionFactoryInitializer;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.util.StreamUtils;
@@ -105,10 +107,23 @@ class VetControllerIntegrationTest {
     //badge image
     ClassPathResource cpr = new ClassPathResource("images/full_food_bowl.png");
 
+    // could this help?
+    @BeforeEach
+    public void setup() {
+        Mono<Void> clean = badgeRepository.deleteAll()
+                .then(photoRepository.deleteAll())
+                .then(ratingRepository.deleteAll())
+                .then(educationRepository.deleteAll())
+                .then(vetRepository.deleteAll());
 
+        clean.block();
+    }
+
+    // Passed own
     @Test
     void getAllRatingsForAVet_WithValidVetId_ShouldSucceed() {
         Publisher<Rating> setup = ratingRepository.deleteAll()
+                .then(vetRepository.save(vet))
                 .thenMany(ratingRepository.save(rating1))
                 .thenMany(ratingRepository.save(rating2));
 
@@ -136,6 +151,7 @@ class VetControllerIntegrationTest {
                 });
     }
 
+    // Passed own
     @Test
     void getAllRatingsForAVet_WithInvalidVetId_ShouldNotSucceed() {
         String invalidVetId="ac90fcca-a79c-411d-93f2-b70a80da0c3a";
@@ -150,9 +166,11 @@ class VetControllerIntegrationTest {
                 .jsonPath("$.message").isEqualTo("vetId not found: " + invalidVetId);
     }
 
+    // Passed own
     @Test
     void getNumberOfRatingsForAVet_WithValidVetId_ShouldSucceed() {
         Publisher<Rating> setup = ratingRepository.deleteAll()
+                .then(vetRepository.save(vet))
                 .thenMany(ratingRepository.save(rating1))
                 .thenMany(ratingRepository.save(rating2));
 
@@ -174,6 +192,7 @@ class VetControllerIntegrationTest {
                 });
     }
 
+    // Passed own
     @Test
     void getNumberOfRatingsForAVet_WithInvalidVetId_ShouldNotSucceed() {
         String invalidVetId="123";
@@ -189,8 +208,17 @@ class VetControllerIntegrationTest {
                 .jsonPath("$.message").isEqualTo("vetId not found: " + invalidVetId);
     }
 
+    // Dupe - Passed when run on it's own
     @Test
     void addRatingToAVet_WithPredefinedDescriptionOnly_ShouldSetRateDescriptionToPredefinedDescription() {
+        Publisher<Vet> setup = vetRepository.deleteAll()
+                .then(vetRepository.save(vet));
+
+        StepVerifier
+                .create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
+
         StepVerifier
                 .create(ratingRepository.deleteAll())
                 .expectNextCount(0)
@@ -223,8 +251,18 @@ class VetControllerIntegrationTest {
                     assertThat(ratingResponseDTO.getRateDate()).isEqualTo(ratingRequestDTO.getRateDate());
                 });
     }
+
+    // Passed own
     @Test
     void addRatingWithWrittenDescriptionAndPredefinedValue_ShouldSetRatingDescriptionToPredefinedValue(){
+        Publisher<Vet> setup = vetRepository.deleteAll()
+                .then(vetRepository.save(vet));
+
+        StepVerifier
+                .create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
+
         StepVerifier
                 .create(ratingRepository.deleteAll())
                 .expectNextCount(0)
@@ -257,6 +295,8 @@ class VetControllerIntegrationTest {
                     assertThat(ratingResponseDTO.getRateDate()).isEqualTo(ratingRequestDTO.getRateDate());
                 });
     }
+
+    // Passed own
     @Test
     void addRatingToAVet_WithInvalidVetId_ShouldNotSucceed() {
         StepVerifier
@@ -290,8 +330,17 @@ class VetControllerIntegrationTest {
                 .jsonPath("$.message").isEqualTo("vetId not found: " + invalidVetId);
     }
 
+    // Passed own
     @Test
     void addRatingToAVet_WithInvalidRateScore_ShouldNotSucceed() {
+        Publisher<Vet> setup = vetRepository.deleteAll()
+                .then(vetRepository.save(vet));
+
+        StepVerifier
+                .create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
+
         StepVerifier
                 .create(ratingRepository.deleteAll())
                 .expectNextCount(0)
@@ -316,8 +365,17 @@ class VetControllerIntegrationTest {
                 .jsonPath("$.message").isEqualTo("rateScore should be between 1 and 5: " + ratingRequestDTO.getRateScore());
     }
 
+    // Dupe - Passed when run on it's own
     @Test
     void addRatingToVet_WithPredefinedDescription_ShouldSetRateDescriptionToPredefinedDescription() {
+        Publisher<Vet> setup = vetRepository.deleteAll()
+                .then(vetRepository.save(vet));
+
+        StepVerifier
+                .create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
+
         StepVerifier
                 .create(ratingRepository.deleteAll())
                 .expectNextCount(0)
@@ -351,9 +409,11 @@ class VetControllerIntegrationTest {
                 });
     }
 
+    // Passed own
     @Test
     void updateRating_withValidVetIdAndValidRatingId_shouldSucceed() {
         Publisher<Rating> setup = ratingRepository.deleteAll()
+                .then(vetRepository.save(vet))
                 .thenMany(ratingRepository.save(rating1));
 
         StepVerifier
@@ -383,6 +443,7 @@ class VetControllerIntegrationTest {
                 });
     }
 
+    // To Find - Passed own
     @Test
     void updateRating_withInvalidVetIdAndValidRatingId_shouldNotSucceed() {
         Publisher<Rating> setup = ratingRepository.deleteAll()
@@ -409,9 +470,11 @@ class VetControllerIntegrationTest {
                 .jsonPath("$.message").isEqualTo("vetId not found: " + invalidVetId);
     }
 
+    // Passed own
     @Test
     void updateRating_withPredefinedDescriptionOnly_ShouldSetRateDescriptionToPredefinedDescription() {
         Publisher<Rating> setup = ratingRepository.deleteAll()
+                .then(vetRepository.save(vet))
                 .thenMany(ratingRepository.save(rating1));
 
         StepVerifier
@@ -449,6 +512,8 @@ class VetControllerIntegrationTest {
                 });
     }
 
+
+    // To Find - Passed own
     @Test
     void updateRating_withValidVetIdAndInvalidRatingId_shouldNotSucceed() {
         Publisher<Rating> setup1 = ratingRepository.deleteAll()
@@ -480,9 +545,11 @@ class VetControllerIntegrationTest {
                 .jsonPath("$.message").isEqualTo("ratingId not found: "+invalidRatingId);
     }
 
+    // Passed own
     @Test
     void updateRating_withInvalidValues_shouldNotSucceed() {
         Publisher<Rating> setup = ratingRepository.deleteAll()
+                .then(vetRepository.save(vet))
                 .thenMany(ratingRepository.save(rating1));
 
         StepVerifier
@@ -511,6 +578,7 @@ class VetControllerIntegrationTest {
                 .jsonPath("$.message").isEqualTo("rateScore should be between 1 and 5" + invalidRateScore);
     }
 
+    // Passed own
     @Test
     void deleteARatingForVet_WithValidId_ShouldSucceed() {
         Publisher<Vet> setup1 = vetRepository.deleteAll()
@@ -537,6 +605,7 @@ class VetControllerIntegrationTest {
                 .expectStatus().isNoContent();
     }
 
+    // To Find - Passed own
     @Test
     void deleteARatingForVet_WithInvalidVetId_ShouldNotSucceed() {
         Publisher<Rating> setup = ratingRepository.deleteAll().
@@ -559,6 +628,7 @@ class VetControllerIntegrationTest {
                 .jsonPath("$.message").isEqualTo("vetId not found: "+invalidVetId);
     }
 
+    // To Find - Passed own
     @Test
     void deleteARatingForVet_WithInvalidRatingId_ShouldNotSucceed() {
         Publisher<Rating> setup1 = ratingRepository.deleteAll().
@@ -588,6 +658,7 @@ class VetControllerIntegrationTest {
                 .jsonPath("$.message").isEqualTo("ratingId not found: "+invalidRatingId);
     }
 
+    // Passed own
     @Test
     void getAverageRatingByVetId_ShouldSucceed() {
 
@@ -608,6 +679,7 @@ class VetControllerIntegrationTest {
                 });
     }
 
+    // Passed own
     @Test
     void getAverageRatingByVetId_withInvalidVetId_ShouldThrowNumberZero() {
 
@@ -625,6 +697,7 @@ class VetControllerIntegrationTest {
                 );
     }
 
+    // Passed own
     @Test
     void getRatingBasedOnYearDate_ShouldSucceed() {
         Publisher<Rating> setup = ratingRepository.deleteAll()
@@ -668,6 +741,7 @@ class VetControllerIntegrationTest {
                 });
     }
 
+    // To Find - Passed own
     @Test
     void getRatingBasedOnYearDateWithInvalidVetID_ShouldFail() {
 
@@ -694,6 +768,7 @@ class VetControllerIntegrationTest {
     }
 
 
+    // To Find - Passed own
     @Test
     void getRatingBasedOnYearDateWithInvalidYear_ShouldFail() {
 
@@ -718,6 +793,7 @@ class VetControllerIntegrationTest {
 
     }
 
+    // Passed own
     @Test
     void getTopThreeVetWithTheHighestRating_ShouldSucceed(){
 
@@ -756,9 +832,11 @@ class VetControllerIntegrationTest {
                 });
     }
 
+    // Passed own
     @Test
     void getPercentageOfRatingsByVetId_ShouldSucceed(){
         Publisher<Rating> setup = ratingRepository.deleteAll()
+                .then(vetRepository.save(vet))
                 .thenMany(ratingRepository.save(rating1))
                 .thenMany(ratingRepository.save(rating2));
         StepVerifier
@@ -778,6 +856,7 @@ class VetControllerIntegrationTest {
                 });
     }
 
+    // To Find - Passed own
     @Test
     void getPercentageOfRatingsByInvalidVetId_ShouldNotSucceed(){
         String invalidVetId="ac90fcca-a79c-411d-93f2-b70a80da0c3a";
@@ -793,6 +872,7 @@ class VetControllerIntegrationTest {
 
     }
 
+    // Passed own
     @Test
     void getAllVets() {
         Publisher<Vet> setup = vetRepository.deleteAll().thenMany(vetRepository.save(vet));
@@ -819,6 +899,7 @@ class VetControllerIntegrationTest {
                 .jsonPath("$[0].workHoursJson").isEqualTo(vet.getWorkHoursJson());
     }
 
+    // Passed own
     @Test
     void getVetByVetId() {
         Publisher<Vet> setup = vetRepository.deleteAll().thenMany(vetRepository.save(vet));
@@ -847,6 +928,7 @@ class VetControllerIntegrationTest {
 
     }
 
+    // Passed own
     @Test
     void getVetByVetBillId() {
         Publisher<Vet> setup = vetRepository.deleteAll().thenMany(vetRepository.save(vet));
@@ -874,6 +956,7 @@ class VetControllerIntegrationTest {
 
     }
 
+    // Passed own
     @Test
     void updateVet() {
         Publisher<Vet> setup = vetRepository.deleteAll().thenMany(vetRepository.save(vet2));
@@ -901,6 +984,7 @@ class VetControllerIntegrationTest {
 
     }
 
+    // Passed own
     @Test
     void updateVet_withInvalidFirstName_shouldNotSucceed(){
         Publisher<Vet> setup = vetRepository.deleteAll().thenMany(vetRepository.save(vet2));
@@ -934,6 +1018,7 @@ class VetControllerIntegrationTest {
                 .jsonPath("$.message").isEqualTo("firstName length should be between 2 and 20 characters: "+updatedVet.getFirstName());
     }
 
+    // Passed own
     @Test
     void updateVet_withInvalidLastName_shouldNotSucceed(){
         Publisher<Vet> setup = vetRepository.deleteAll().thenMany(vetRepository.save(vet2));
@@ -967,6 +1052,7 @@ class VetControllerIntegrationTest {
                 .jsonPath("$.message").isEqualTo("lastName length should be between 2 and 20 characters: "+updatedVet.getLastName());
     }
 
+    // Passed own
     @Test
     void updateVet_withInvalidPhoneNumber_shouldNotSucceed() {
         Publisher<Vet> setup = vetRepository.deleteAll().thenMany(vetRepository.save(vet2));
@@ -1001,6 +1087,7 @@ class VetControllerIntegrationTest {
                 .jsonPath("$.message").isEqualTo("phoneNumber length not equal to 20 characters: "+updatedVet.getPhoneNumber());
     }
 
+    // Passed own
     @Test
     void updateVet_withInvalidEmail_shouldNotSucceed() {
         Publisher<Vet> setup = vetRepository.deleteAll().thenMany(vetRepository.save(vet2));
@@ -1043,6 +1130,7 @@ class VetControllerIntegrationTest {
                 .jsonPath("$.message").isEqualTo("email length should be between 6 and 320 characters: "+updatedVet.getEmail());
     }
 
+    // Passed own
     @Test
     void updateVet_withInvalidResume_shouldNotSucceed() {
         Publisher<Vet> setup = vetRepository.deleteAll().thenMany(vetRepository.save(vet2));
@@ -1078,6 +1166,7 @@ class VetControllerIntegrationTest {
                 .jsonPath("$.message").isEqualTo("resume length should be more than 10 characters: "+updatedVet.getResume());
     }
 
+    // Passed own
     @Test
     void updateVet_withInvalidSpecialties_shouldNotSucceed() {
         Publisher<Vet> setup = vetRepository.deleteAll().thenMany(vetRepository.save(vet2));
@@ -1113,6 +1202,7 @@ class VetControllerIntegrationTest {
                 .jsonPath("$.message").isEqualTo("invalid specialties");
     }
 
+    // Passed own
     @Test
     void getVetIsActive() {
         Publisher<Vet> setup = vetRepository.deleteAll().thenMany(vetRepository.save(vet2));
@@ -1139,6 +1229,7 @@ class VetControllerIntegrationTest {
                 .jsonPath("$[0].workHoursJson").isEqualTo(vet2.getWorkHoursJson());
     }
 
+    // Passed own
     @Test
     void getVetIsInactive() {
         Publisher<Vet> setup = vetRepository.deleteAll().thenMany(vetRepository.save(vet));
@@ -1166,6 +1257,7 @@ class VetControllerIntegrationTest {
     }
 
 
+    // Passed own
     @Test
     void createVet() {
         Publisher<Void> setup = vetRepository.deleteAll();
@@ -1196,6 +1288,7 @@ class VetControllerIntegrationTest {
                 });
     }
 
+    // Passed own
     @Test
     void createVet_withInvalidPhoneNumber() {
         Publisher<Void> setup = vetRepository.deleteAll();
@@ -1230,6 +1323,7 @@ class VetControllerIntegrationTest {
                 .jsonPath("$.message").isEqualTo("phoneNumber length not equal to 20 characters: "+newVet.getPhoneNumber());
     }
 
+    // Passed own
     @Test
     void createVet_withInvalidEmail() {
         Publisher<Void> setup = vetRepository.deleteAll();
@@ -1344,6 +1438,7 @@ class VetControllerIntegrationTest {
                 .jsonPath("$.message").isEqualTo("lastName length should be between 2 and 30 characters: "+newVet.getLastName());
     }*/
 
+    // Passed own
     @Test
     void createVet_withInvalidResume() {
         Publisher<Void> setup = vetRepository.deleteAll();
@@ -1380,6 +1475,7 @@ class VetControllerIntegrationTest {
 
     }
 
+    // Passed own
     @Test
     void createVet_withInvalidSpecialties() {
         Publisher<Void> setup = vetRepository.deleteAll();
@@ -1415,6 +1511,7 @@ class VetControllerIntegrationTest {
                 .jsonPath("$.message").isEqualTo("invalid specialties");
     }
 
+    // Passed own
     @Test
     void deleteVet() {
         Publisher<Vet> setup = vetRepository.deleteAll().thenMany(vetRepository.save(vet));
@@ -1433,6 +1530,7 @@ class VetControllerIntegrationTest {
                 .expectBody();
     }
 
+    // Passed own
     @Test
     void deleteVetById_ShouldDeleteAssociatedDataAndReturnNoContent() throws IOException{
 
@@ -1468,6 +1566,7 @@ class VetControllerIntegrationTest {
         //StepVerifier.create(photosExist).expectNext(false).verifyComplete();
     }
 
+    // Passed own
     @Test
     void deleteVetById_WithNonExistingValidId_ShouldReturnNotFound() {
         client.delete()
@@ -1480,6 +1579,7 @@ class VetControllerIntegrationTest {
                 .jsonPath("$.message").isEqualTo("No vet with this vetId was found: " + NON_EXISTING_VET_ID);
     }
 
+    // Passed own
     @Test
     void deleteVetById_WithInvalidId_ShouldReturnUnprocessableEntity() {
         client.delete()
@@ -1490,6 +1590,7 @@ class VetControllerIntegrationTest {
                 .jsonPath("$.message").isEqualTo("This id is not valid");
     }
 
+    // Passed own
     @Test
     void getAllEducationForAVet_WithValidId_ShouldSucceed(){
         Publisher<Education> setup = educationRepository.deleteAll()
@@ -1520,6 +1621,8 @@ class VetControllerIntegrationTest {
                     assertEquals(education1.getEndDate(), list.get(0).getEndDate());
                 });
     }
+
+    // Passed own
     @Test
     void deleteAnEducationForVet_WithValidId_ShouldSucceed() {
         // Setup: Clear repository and save a new education
@@ -1541,9 +1644,11 @@ class VetControllerIntegrationTest {
                 .expectBody().isEmpty(); // Expect empty body
     }
 
+    // Passed own
     @Test
     void updateEducation_withValidVetIdAndValidEducationId_shouldSucceed() {
         Publisher<Education> setup = educationRepository.deleteAll()
+                .then(vetRepository.save(vet))
                 .thenMany(educationRepository.save(education1));
 
         StepVerifier
@@ -1629,6 +1734,8 @@ class VetControllerIntegrationTest {
                     assertEquals(resource, response.getResponseBody());
                 });
     }*/
+
+    // Passed own
     @Test
     void getPhotoByVetId_NoExistingPhoto_ShouldReturnNotFound() {
         String emptyVetId = "1234567";
@@ -1670,6 +1777,7 @@ class VetControllerIntegrationTest {
                 });
     }*/
 
+    // To Find - Passed own
     @Test
     void getBadgeByInvalidVetId_shouldReturnNotFoundException(){
         String invalidVetId = "1234567";
@@ -1682,12 +1790,14 @@ class VetControllerIntegrationTest {
                 .jsonPath("$.message").isEqualTo("vetId not found: "+invalidVetId);
     }
 
+    // Passed own
     @Test
     void generateVetId(){
         String vetId = EntityDtoUtil.generateVetId();
         assertEquals(vetId.length(), 36);
     }
 
+    // Passed own
     @Test
     void toStringBuilders() {
         System.out.println(Vet.builder());
@@ -1696,6 +1806,7 @@ class VetControllerIntegrationTest {
     }
 
 
+    // Passed own
     @Test
     void getByVetId_Invalid() {
         Publisher<Vet> setup = vetRepository.deleteAll().thenMany(vetRepository.save(vet));
@@ -1717,6 +1828,7 @@ class VetControllerIntegrationTest {
     }
 
 
+    // Passed own
     @Test
     void updateByVetId_Invalid() {
         Publisher<Vet> setup = vetRepository.deleteAll().thenMany(vetRepository.save(vet));
@@ -1739,6 +1851,7 @@ class VetControllerIntegrationTest {
 
     }
 
+    // Passed own
     @Test
     void deleteByVetId_Invalid() {
         Publisher<Vet> setup = vetRepository.deleteAll().thenMany(vetRepository.save(vet));
@@ -1899,6 +2012,7 @@ class VetControllerIntegrationTest {
             .name(null)        // Invalid specialty name
             .build();
 
+    // Passed own
     @Test
     void addSpecialtyToVet_WithValidVetId_ShouldSucceed() {
         Vet vet = buildVet("1234");
@@ -1923,6 +2037,7 @@ class VetControllerIntegrationTest {
                 });
     }
 
+    // To Find - Passed own
     @Test
     void addSpecialtyToVet_WithInvalidVetId_ShouldReturnNotFound() {
         String invalidVetId = "invalid-vet-id";
@@ -1938,6 +2053,7 @@ class VetControllerIntegrationTest {
                 .jsonPath("$.message").isEqualTo("Vet not found with id: " + invalidVetId);
     }
 
+    // Passed own
     @Test
     void deleteSpecialtyFromVet_WithValidVetIdAndSpecialtyId_ShouldSucceed() {
         Vet vet = buildVet("1234");
@@ -1954,6 +2070,7 @@ class VetControllerIntegrationTest {
                 .expectBody().isEmpty(); // No content expected in the response body
     }
 
+    // To Find - Passed own
     @Test
     void deleteSpecialtyFromVet_WithInvalidVetId_ShouldReturnNotFound() {
         String invalidVetId = "invalid-vet";
