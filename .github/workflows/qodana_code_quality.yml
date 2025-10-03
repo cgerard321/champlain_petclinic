@@ -35,14 +35,22 @@ jobs:
     - name: Build Java services
       run: ./gradlew clean build -x test
       working-directory: ./
-    - name: 'Qodana Scan with Code Coverage'
+    - name: Show changed files for analysis
+      if: github.event_name == 'pull_request'
+      run: |
+        echo "## Files changed in this PR:" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        git diff --name-only origin/main...HEAD | head -20 >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Qodana will analyze only these changed files**" >> $GITHUB_STEP_SUMMARY
+    - name: 'Qodana PR Analysis'
       id: qodana
       uses: JetBrains/qodana-action@v2023.3
       env:
         QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
       with:
         args: "--linter,jetbrains/qodana-jvm-community:latest"
-        pr-mode: false
+        pr-mode: true
     - name: Display Qodana Cloud URL
       run: |
         echo "## Qodana Analysis Results" >> $GITHUB_STEP_SUMMARY
@@ -53,8 +61,9 @@ jobs:
         echo "- [Qodana Cloud Report](${{ steps.qodana.outputs.qodana-cloud-url }})" >> $GITHUB_STEP_SUMMARY
         echo "- [Download Artifacts](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
-        echo "**Analysis includes:**" >> $GITHUB_STEP_SUMMARY
-        echo "- Code quality issues" >> $GITHUB_STEP_SUMMARY
-        echo "- Security vulnerabilities" >> $GITHUB_STEP_SUMMARY
-        echo "- Unused imports and dead code" >> $GITHUB_STEP_SUMMARY
+        echo "**PR Analysis includes:**" >> $GITHUB_STEP_SUMMARY
+        echo "- Code quality issues in changed files only" >> $GITHUB_STEP_SUMMARY
+        echo "- Security vulnerabilities in modified code" >> $GITHUB_STEP_SUMMARY
+        echo "- Unused imports and dead code in PR changes" >> $GITHUB_STEP_SUMMARY
         echo "- Regex warnings excluded (false positives)" >> $GITHUB_STEP_SUMMARY
+        echo "- **Faster execution** - Only analyzes modified code" >> $GITHUB_STEP_SUMMARY
