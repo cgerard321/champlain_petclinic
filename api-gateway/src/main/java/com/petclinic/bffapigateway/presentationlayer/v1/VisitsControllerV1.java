@@ -123,7 +123,7 @@ public class VisitsControllerV1 {
     public Mono<ResponseEntity<VisitResponseDTO>> archiveCompletedVisit(@PathVariable String visitId, @RequestBody Mono<VisitRequestDTO> visitRequestDTOMono){
         return visitsServiceClient.archiveCompletedVisit(visitId, visitRequestDTOMono)
                 .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.badRequest().build());
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
@@ -183,7 +183,7 @@ public class VisitsControllerV1 {
                 //.switchIfEmpty(Mono.error(new InvalidInputException("the provided emergency id is invalid: " + emergencyId)))
                 .flatMap(visitsServiceClient::getEmergencyByEmergencyId)
                 .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.badRequest().build());
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @PostMapping(value = "/emergencies")
@@ -215,7 +215,7 @@ public class VisitsControllerV1 {
                 //   .switchIfEmpty(Mono.error(new InvalidInputException("the provided emergency id is invalid: " + emergencyId)))
                 .flatMap(visitsServiceClient::deleteEmergency)
                 .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.badRequest().build());
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
 
@@ -279,7 +279,7 @@ public class VisitsControllerV1 {
                 .switchIfEmpty(Mono.error(new InvalidInputException("Provided review ID is invalid: " + reviewId)))
                 .flatMap(id -> visitsServiceClient.updateReview(id, reviewRequestDTO)) // Assuming `updateReview` method exists in `visitsServiceClient`
                 .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.badRequest().build());
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.OWNER})
