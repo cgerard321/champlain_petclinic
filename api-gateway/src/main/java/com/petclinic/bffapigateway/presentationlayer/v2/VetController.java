@@ -72,6 +72,8 @@ public class VetController {
                 .switchIfEmpty(Mono.error(new InvalidInputException("Provided vet Id is invalid" + vetId)))
                 .flatMap(id -> vetsServiceClient.updateVet(id, vetRequestDTOMono))
                 .map(ResponseEntity::ok)
+                .onErrorResume(InvalidInputException.class, e ->
+                    Mono.just(ResponseEntity.badRequest().<VetResponseDTO>build()))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
@@ -157,6 +159,8 @@ public class VetController {
             @PathVariable String specialtyId) {
         return vetsServiceClient.deleteSpecialtiesByVetId(vetId, specialtyId)
                 .then(Mono.just(ResponseEntity.noContent().<Void>build()))
+                .onErrorResume(RuntimeException.class, e ->
+                    Mono.just(ResponseEntity.notFound().<Void>build()))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
