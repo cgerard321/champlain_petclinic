@@ -36,7 +36,7 @@ public class AlbumServiceImpl implements AlbumService{
                 .switchIfEmpty(Mono.error(new NotFoundException("Album photo not found: " + Id)))
                 .flatMap(albumRepository::delete);
     }
-      @Override
+    @Override
     public Mono<Album> insertAlbumPhoto(String vetId, String photoName, Mono<byte[]> fileData) {
         return fileData
             .switchIfEmpty(Mono.error(new InvalidInputException("Empty file data")))
