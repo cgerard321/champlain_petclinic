@@ -2,9 +2,9 @@ package com.petclinic.vet.servicelayer;
 
 import com.petclinic.vet.dataaccesslayer.Album;
 
- import reactor.core.publisher.Flux;
- import org.springframework.http.codec.multipart.FilePart;
- import reactor.core.publisher.Mono;
+import reactor.core.publisher.Flux;
+import org.springframework.http.codec.multipart.FilePart;
+import reactor.core.publisher.Mono;
 
  public interface AlbumService {
    Flux<Album> getAllAlbumsByVetId(String vetId);
