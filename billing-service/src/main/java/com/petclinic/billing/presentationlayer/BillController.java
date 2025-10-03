@@ -214,6 +214,7 @@ public class BillController {
             .thenReturn(ResponseEntity.ok().build());
     }
 
+    @GetMapping("/bills/{billId}/interest")
     public Mono<BigDecimal> getInterest(@PathVariable String billId) {
         return billService.getBillByBillId(billId)
                 .map(BillResponseDTO::getInterest);

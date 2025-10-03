@@ -8,6 +8,8 @@ import com.petclinic.billing.datalayer.BillStatus;
 import com.petclinic.billing.datalayer.PaymentRequestDTO;
 import com.petclinic.billing.exceptions.InvalidPaymentException;
 import com.petclinic.billing.util.EntityDtoUtil;
+import com.petclinic.billing.util.InterestCalculationUtil;
+import com.petclinic.billing.util.InterestCalculationUtil;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +18,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.server.ResponseStatusException;
@@ -190,14 +193,11 @@ public class CustomerBillsControllerUnitTest {
 
     @Test
         void getBillsByCustomerId_OverdueBill_ShouldReturnInterest() {
-                // Calculate compound interest for $100, 1 month overdue
-                // finalAmount = 100 * (1.015)^1 = 101.50, interest = 1.50
-                BigDecimal monthlyRate = new BigDecimal("0.015");
-                BigDecimal onePlusRate = BigDecimal.ONE.add(monthlyRate);
-                BigDecimal compounded = onePlusRate.pow(1); // assuming 1 month overdue
+                // Use centralized utility for compound interest calculation
                 BigDecimal amount = new BigDecimal("100.00");
-                BigDecimal finalAmount = amount.multiply(compounded).setScale(2, RoundingMode.HALF_UP);
-                BigDecimal calculatedInterest = finalAmount.subtract(amount).setScale(2, RoundingMode.HALF_UP);
+                LocalDate dueDate = LocalDate.now().minusMonths(1); // 1 month overdue
+                LocalDate currentDate = LocalDate.now();
+                BigDecimal calculatedInterest = InterestCalculationUtil.calculateCompoundInterest(amount, dueDate, currentDate);
                 
                 BillResponseDTO overdueBill = BillResponseDTO.builder()
                         .billId("overdue-1")

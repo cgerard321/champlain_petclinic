@@ -3,11 +3,9 @@ package com.petclinic.billing.util;
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.*;
 import com.petclinic.billing.datalayer.BillResponseDTO;
-import com.petclinic.billing.datalayer.BillStatus;
 
 import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.text.NumberFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
@@ -16,29 +14,11 @@ import java.util.Optional;
 public class PdfGenerator {
 
     public static byte[] generateBillPdf(BillResponseDTO bill) throws DocumentException {
-        // Check if bill is exempt from interest first
-        if (bill.isInterestExempt()) {
-            bill.setInterest(BigDecimal.ZERO);
-        } else if (bill.getBillStatus() == BillStatus.OVERDUE && bill.getDueDate() != null) {
-            java.time.LocalDate dueDate = bill.getDueDate();
-            java.time.LocalDate now = java.time.LocalDate.now();
-            java.time.Period period = java.time.Period.between(dueDate, now);
-            int overdueMonths = period.getYears() * 12 + period.getMonths();
-            if (overdueMonths > 0) {
-                BigDecimal monthlyRate = new BigDecimal("0.015");
-                BigDecimal principal = bill.getAmount();
-                BigDecimal onePlusRate = BigDecimal.ONE.add(monthlyRate);
-                BigDecimal compounded = onePlusRate.pow(overdueMonths);
-                BigDecimal finalAmount = principal.multiply(compounded).setScale(2, RoundingMode.HALF_UP);
-                BigDecimal interest = finalAmount.subtract(principal).setScale(2, RoundingMode.HALF_UP);
-                bill.setInterest(interest);
-            } else {
-                bill.setInterest(BigDecimal.ZERO);
-            }
-        } else {
-            bill.setInterest(BigDecimal.ZERO);
-        }
-
+        // Use centralized interest calculation utility
+        // Note: Since this method works with BillResponseDTO, we can't directly use InterestCalculationUtil.calculateInterest(Bill)
+        // However, the interest should already be calculated when the BillResponseDTO was created via EntityDtoUtil.toBillResponseDto()
+        // So we can just use the existing interest value from the DTO
+        
         Document document = new Document(PageSize.A4, 50, 50, 50, 50);
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         PdfWriter.getInstance(document, byteArrayOutputStream);

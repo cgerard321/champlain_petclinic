@@ -3,6 +3,8 @@ package com.petclinic.billing.businesslayer;
 import com.petclinic.billing.datalayer.*;
 import com.petclinic.billing.exceptions.InvalidPaymentException;
 import com.petclinic.billing.exceptions.NotFoundException;
+import com.petclinic.billing.util.EntityDtoUtil;
+import com.petclinic.billing.util.InterestCalculationUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -1018,12 +1020,8 @@ public class BillServiceImplTest {
             .consumeNextWith(dto -> {
                 assertEquals(amount, dto.getAmount());
                 assertEquals(BillStatus.OVERDUE, dto.getBillStatus());
-                // Compound Interest: finalAmount = amount * (1.015)^overdueMonths, interest = finalAmount - amount
-                BigDecimal monthlyRate = new BigDecimal("0.015");
-                BigDecimal onePlusRate = BigDecimal.ONE.add(monthlyRate);
-                BigDecimal compounded = onePlusRate.pow(2); // 2 months overdue
-                BigDecimal finalAmount = amount.multiply(compounded).setScale(2, RoundingMode.HALF_UP);
-                BigDecimal expectedInterest = finalAmount.subtract(amount).setScale(2, RoundingMode.HALF_UP);
+                // Use centralized utility for compound interest calculation
+                BigDecimal expectedInterest = InterestCalculationUtil.calculateCompoundInterest(amount, dueDate, LocalDate.now());
                 assertEquals(expectedInterest, dto.getInterest());
             })
             .verifyComplete();

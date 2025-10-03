@@ -5,16 +5,13 @@ package com.petclinic.billing.util;
 import com.petclinic.billing.datalayer.Bill;
 import com.petclinic.billing.datalayer.BillRequestDTO;
 import com.petclinic.billing.datalayer.BillResponseDTO;
-import com.petclinic.billing.datalayer.BillStatus;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.Duration;
 import java.time.LocalDate;
-import java.time.Period;
 import java.util.UUID;
 
 @Slf4j
@@ -40,27 +37,9 @@ public class EntityDtoUtil {
         billResponseDTO.setDueDate(bill.getDueDate());
         billResponseDTO.setInterestExempt(bill.isInterestExempt());
         
-        // Calculate and set interest with exemption check
-        if (bill.isInterestExempt()) {
-            billResponseDTO.setInterest(BigDecimal.ZERO);
-        } else if (bill.getBillStatus() == BillStatus.OVERDUE && bill.getDueDate() != null) {
-            LocalDate dueDate = bill.getDueDate();
-            LocalDate now = LocalDate.now();
-            Period period = Period.between(dueDate, now);
-            int overdueMonths = period.getYears() * 12 + period.getMonths();
-            if (overdueMonths > 0) {
-                BigDecimal monthlyRate = new BigDecimal("0.015");
-                BigDecimal onePlusRate = BigDecimal.ONE.add(monthlyRate);
-                BigDecimal compounded = onePlusRate.pow(overdueMonths);
-                BigDecimal finalAmount = bill.getAmount().multiply(compounded).setScale(2, RoundingMode.HALF_UP);
-                BigDecimal interest = finalAmount.subtract(bill.getAmount()).setScale(2, RoundingMode.HALF_UP);
-                billResponseDTO.setInterest(interest);
-            } else {
-                billResponseDTO.setInterest(BigDecimal.ZERO);
-            }
-        } else {
-            billResponseDTO.setInterest(BigDecimal.ZERO);
-        }
+        // Calculate and set interest using centralized utility
+        BigDecimal interest = InterestCalculationUtil.calculateInterest(bill);
+        billResponseDTO.setInterest(interest);
         
         billResponseDTO.setTimeRemaining(timeRemaining(bill));
 

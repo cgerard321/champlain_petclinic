@@ -7,6 +7,7 @@ import com.petclinic.billing.datalayer.*;
 import com.petclinic.billing.exceptions.InvalidPaymentException;
 import com.petclinic.billing.exceptions.NotFoundException;
 import com.petclinic.billing.util.EntityDtoUtil;
+import com.petclinic.billing.util.InterestCalculationUtil;
 import com.petclinic.billing.util.PdfGenerator;
 
 import lombok.RequiredArgsConstructor;
@@ -33,7 +34,6 @@ public class BillServiceImpl implements BillService{
     private final BillRepository billRepository;
     //private final VetClient vetClient;
     //private final OwnerClient ownerClient;
-    private static final BigDecimal MONTHLY_INTEREST_RATE = new BigDecimal("0.015");
 
 
    @Override
@@ -323,18 +323,9 @@ public class BillServiceImpl implements BillService{
             .map(bill -> {
                 BigDecimal total = bill.getAmount();
                 // Check interest exemption first - if exempt, don't add interest regardless of status
-                if (bill.getBillStatus() == BillStatus.OVERDUE && bill.getDueDate() != null && !bill.isInterestExempt()) {
-                    LocalDate dueDate = bill.getDueDate();
-                    LocalDate now = LocalDate.now();
-                    java.time.Period period = java.time.Period.between(dueDate, now);
-                    int overdueMonths = period.getYears() * 12 + period.getMonths();
-                    if (overdueMonths > 0) {
-                        BigDecimal onePlusRate = BigDecimal.ONE.add(MONTHLY_INTEREST_RATE);
-                        BigDecimal compounded = onePlusRate.pow(overdueMonths);
-                        BigDecimal finalAmount = bill.getAmount().multiply(compounded).setScale(2, RoundingMode.HALF_UP);
-                        BigDecimal interest = finalAmount.subtract(bill.getAmount()).setScale(2, RoundingMode.HALF_UP);
-                        total = total.add(interest);
-                    }
+                if (!bill.isInterestExempt()) {
+                    BigDecimal interest = InterestCalculationUtil.calculateInterest(bill);
+                    total = total.add(interest);
                 }
                 return total;
             })
@@ -377,10 +368,7 @@ public class BillServiceImpl implements BillService{
                 if (bill.isInterestExempt()) {
                     return BigDecimal.ZERO;
                 } else {
-                    BigDecimal interestAmount = amount
-                        .multiply(MONTHLY_INTEREST_RATE)
-                        .multiply(BigDecimal.valueOf(overdueMonths));
-                    return interestAmount;
+                    return InterestCalculationUtil.calculateInterest(bill);
                 }
             });
     }

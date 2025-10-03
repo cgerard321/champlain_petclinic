@@ -1,6 +1,8 @@
 package com.petclinic.billing.presentationlayer;
 
 import com.petclinic.billing.datalayer.*;
+import com.petclinic.billing.util.EntityDtoUtil;
+import com.petclinic.billing.util.InterestCalculationUtil;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -199,14 +201,9 @@ public class CustomerBillsControllerIntegrationTest {
 
                 billRepository.save(overdueBill).block();
 
-                java.time.Period period = java.time.Period.between(overdueBill.getDueDate(), LocalDate.now());
-                int overdueMonths = period.getMonths() + (period.getYears() * 12);
-                // Compound Interest calculation: finalAmount = amount * (1.015)^overdueMonths, interest = finalAmount - amount
-                BigDecimal monthlyRate = new BigDecimal("0.015");
-                BigDecimal onePlusRate = BigDecimal.ONE.add(monthlyRate);
-                BigDecimal compounded = onePlusRate.pow(overdueMonths);
-                BigDecimal finalAmount = overdueBill.getAmount().multiply(compounded).setScale(2, RoundingMode.HALF_UP);
-                BigDecimal expectedInterest = finalAmount.subtract(overdueBill.getAmount()).setScale(2, RoundingMode.HALF_UP);
+                // Use centralized utility for compound interest calculation
+                BigDecimal expectedInterest = InterestCalculationUtil.calculateCompoundInterest(
+                    overdueBill.getAmount(), overdueBill.getDueDate(), LocalDate.now());
 
                 client.get()
                         .uri("/bills/" + overdueBill.getBillId())
