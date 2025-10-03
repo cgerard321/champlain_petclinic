@@ -3408,6 +3408,306 @@ class VetsServiceClientIntegrationTest {
                 .verify();
     }
 
+    @Test
+    void addAlbumPhotoFromBytes_shouldSucceed() throws Exception {
+        String vetId = "69f852ca-625b-11ee-8c99-0242ac120002";
+        String photoName = "album_photo.jpg";
+        byte[] fileData = "mockImageData".getBytes();
+
+        Album expectedAlbum = new Album(1, vetId, photoName, "image/jpeg", fileData);
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(201)
+                .setHeader("Content-Type", "application/json")
+                .setBody(mapper.writeValueAsString(expectedAlbum)));
+
+        Mono<Album> result = vetsServiceClient.addAlbumPhotoFromBytes(vetId, photoName, fileData);
+
+        StepVerifier.create(result)
+                .expectNext(expectedAlbum)
+                .verifyComplete();
+
+        RecordedRequest recordedRequest = server.takeRequest();
+        assertEquals("POST", recordedRequest.getMethod());
+        assertEquals("/" + vetId + "/albums/photos/" + photoName, recordedRequest.getPath());
+        assertEquals("application/octet-stream", recordedRequest.getHeader("Content-Type"));
+    }
+
+    @Test
+    void addAlbumPhotoFromBytes_shouldThrowNotFoundException_when404() throws Exception {
+        String vetId = "nonexistent-vet";
+        String photoName = "album_photo.jpg";
+        byte[] fileData = "mockImageData".getBytes();
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(404)
+                .setBody(""));
+
+        Mono<Album> result = vetsServiceClient.addAlbumPhotoFromBytes(vetId, photoName, fileData);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable ->
+                        throwable instanceof NotFoundException &&
+                                throwable.getMessage().contains("Album source not found for vet " + vetId))
+                .verify();
+    }
+
+    @Test
+    void addAlbumPhotoFromBytes_shouldThrowIllegalArgumentException_when500() throws Exception {
+        String vetId = "69f852ca-625b-11ee-8c99-0242ac120002";
+        String photoName = "album_photo.jpg";
+        byte[] fileData = "mockImageData".getBytes();
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(500)
+                .setBody(""));
+
+        Mono<Album> result = vetsServiceClient.addAlbumPhotoFromBytes(vetId, photoName, fileData);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable ->
+                        throwable instanceof IllegalArgumentException &&
+                                throwable.getMessage().contains("Server error while adding album photo"))
+                .verify();
+    }
+
+    @Test
+    void addAlbumPhoto_withFilePart_shouldSucceed() throws Exception {
+        String vetId = "69f852ca-625b-11ee-8c99-0242ac120002";
+        String photoName = "album_photo.jpg";
+        byte[] fileData = "mockImageData".getBytes();
+
+        FilePart filePart = Mockito.mock(FilePart.class);
+        DataBuffer dataBuffer = new DefaultDataBufferFactory().wrap(fileData);
+        when(filePart.content()).thenReturn(Flux.just(dataBuffer));
+
+        Album expectedAlbum = new Album(1, vetId, photoName, "image/jpeg", fileData);
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(201)
+                .setHeader("Content-Type", "application/json")
+                .setBody(mapper.writeValueAsString(expectedAlbum)));
+
+        Mono<Album> result = vetsServiceClient.addAlbumPhoto(vetId, photoName, filePart);
+
+        StepVerifier.create(result)
+                .expectNext(expectedAlbum)
+                .verifyComplete();
+
+        RecordedRequest recordedRequest = server.takeRequest();
+        assertEquals("POST", recordedRequest.getMethod());
+        assertEquals("/" + vetId + "/albums/photos/" + photoName, recordedRequest.getPath());
+        assertEquals("application/octet-stream", recordedRequest.getHeader("Content-Type"));
+    }
+
+    @Test
+    void addAlbumPhoto_withFilePart_shouldThrowNotFoundException_when404() throws Exception {
+        String vetId = "nonexistent-vet";
+        String photoName = "album_photo.jpg";
+        byte[] fileData = "mockImageData".getBytes();
+
+        FilePart filePart = Mockito.mock(FilePart.class);
+        DataBuffer dataBuffer = new DefaultDataBufferFactory().wrap(fileData);
+        when(filePart.content()).thenReturn(Flux.just(dataBuffer));
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(404)
+                .setBody(""));
+
+        Mono<Album> result = vetsServiceClient.addAlbumPhoto(vetId, photoName, filePart);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable ->
+                        throwable instanceof NotFoundException &&
+                                throwable.getMessage().contains("Album source not found for vet " + vetId))
+                .verify();
+    }
+
+    @Test
+    void addAlbumPhoto_withFilePart_shouldThrowIllegalArgumentException_when500() throws Exception {
+        String vetId = "69f852ca-625b-11ee-8c99-0242ac120002";
+        String photoName = "album_photo.jpg";
+        byte[] fileData = "mockImageData".getBytes();
+
+        FilePart filePart = Mockito.mock(FilePart.class);
+        DataBuffer dataBuffer = new DefaultDataBufferFactory().wrap(fileData);
+        when(filePart.content()).thenReturn(Flux.just(dataBuffer));
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(500)
+                .setBody(""));
+
+        Mono<Album> result = vetsServiceClient.addAlbumPhoto(vetId, photoName, filePart);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable ->
+                        throwable instanceof IllegalArgumentException &&
+                                throwable.getMessage().contains("Server error while adding album photo"))
+                .verify();
+    }
+
+    @Test
+    void createVet_shouldThrowNotFoundException_when404() throws Exception {
+        VetRequestDTO vetRequestDTO = buildVetRequestDTO();
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(404)
+                .setBody(""));
+
+        Mono<VetResponseDTO> result = vetsServiceClient.createVet(Mono.just(vetRequestDTO));
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable ->
+                        throwable instanceof ExistingVetNotFoundException &&
+                                throwable.getMessage().contains("vetId not found"))
+                .verify();
+    }
+
+    @Test
+    void createVet_shouldThrowIllegalArgumentException_when500() throws Exception {
+        VetRequestDTO vetRequestDTO = buildVetRequestDTO();
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(500)
+                .setBody(""));
+
+        Mono<VetResponseDTO> result = vetsServiceClient.createVet(Mono.just(vetRequestDTO));
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable ->
+                        throwable instanceof IllegalArgumentException &&
+                                throwable.getMessage().contains("Something went wrong with the server"))
+                .verify();
+    }
+
+    @Test
+    void addPhotoToVet_withFilePart_shouldThrowNotFoundException_when404() throws Exception {
+        String vetId = "nonexistent-vet";
+        String photoName = "test_photo.jpg";
+        byte[] fileData = "mockImageData".getBytes();
+
+        FilePart filePart = Mockito.mock(FilePart.class);
+        DataBuffer dataBuffer = new DefaultDataBufferFactory().wrap(fileData);
+        HttpHeaders headers = Mockito.mock(HttpHeaders.class);
+        
+        when(filePart.content()).thenReturn(Flux.just(dataBuffer));
+        when(filePart.headers()).thenReturn(headers);
+        when(headers.getContentType()).thenReturn(MediaType.IMAGE_JPEG);
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(404)
+                .setBody(""));
+
+        Mono<Resource> result = vetsServiceClient.addPhotoToVet(vetId, photoName, filePart);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable ->
+                        throwable instanceof NotFoundException &&
+                                throwable.getMessage().contains("Photo for vet " + vetId + " not found"))
+                .verify();
+    }
+
+    @Test
+    void addPhotoToVet_withFilePart_shouldThrowIllegalArgumentException_when500() throws Exception {
+        String vetId = "69f852ca-625b-11ee-8c99-0242ac120002";
+        String photoName = "test_photo.jpg";
+        byte[] fileData = "mockImageData".getBytes();
+
+        FilePart filePart = Mockito.mock(FilePart.class);
+        DataBuffer dataBuffer = new DefaultDataBufferFactory().wrap(fileData);
+        HttpHeaders headers = Mockito.mock(HttpHeaders.class);
+        
+        when(filePart.content()).thenReturn(Flux.just(dataBuffer));
+        when(filePart.headers()).thenReturn(headers);
+        when(headers.getContentType()).thenReturn(MediaType.IMAGE_JPEG);
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(500)
+                .setBody(""));
+
+        Mono<Resource> result = vetsServiceClient.addPhotoToVet(vetId, photoName, filePart);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable ->
+                        throwable instanceof IllegalArgumentException &&
+                                throwable.getMessage().equals("Server error"))
+                .verify();
+    }
+
+    @Test
+    void determineContentType_shouldReturnCorrectTypes() throws Exception {
+        String vetId = "69f852ca-625b-11ee-8c99-0242ac120002";
+        
+        server.enqueue(new MockResponse()
+                .setResponseCode(201)
+                .setHeader("Content-Type", "application/json")
+                .setBody("{\"filename\":\"test.png\",\"imgType\":\"image/png\"}"));
+                
+        vetsServiceClient.addPhotoToVetFromBytes(vetId, "test.png", "data".getBytes()).block();
+        
+        server.enqueue(new MockResponse()
+                .setResponseCode(201)
+                .setHeader("Content-Type", "application/json")
+                .setBody("{\"filename\":\"test.jpg\",\"imgType\":\"image/jpeg\"}"));
+                
+        vetsServiceClient.addPhotoToVetFromBytes(vetId, "test.jpg", "data".getBytes()).block();
+        
+        server.enqueue(new MockResponse()
+                .setResponseCode(201)
+                .setHeader("Content-Type", "application/json")
+                .setBody("{\"filename\":\"test.jpeg\",\"imgType\":\"image/jpeg\"}"));
+                
+        vetsServiceClient.addPhotoToVetFromBytes(vetId, "test.jpeg", "data".getBytes()).block();
+        
+        server.enqueue(new MockResponse()
+                .setResponseCode(201)
+                .setHeader("Content-Type", "application/json")
+                .setBody("{\"filename\":\"test.gif\",\"imgType\":\"image/gif\"}"));
+                
+        vetsServiceClient.addPhotoToVetFromBytes(vetId, "test.gif", "data".getBytes()).block();
+        
+        server.enqueue(new MockResponse()
+                .setResponseCode(201)
+                .setHeader("Content-Type", "application/json")
+                .setBody("{\"filename\":\"test.unknown\",\"imgType\":\"application/octet-stream\"}"));
+                
+        vetsServiceClient.addPhotoToVetFromBytes(vetId, "test.unknown", "data".getBytes()).block();
+        
+        server.enqueue(new MockResponse()
+                .setResponseCode(201)
+                .setHeader("Content-Type", "application/json")
+                .setBody("{\"filename\":null,\"imgType\":\"application/octet-stream\"}"));
+                
+        vetsServiceClient.addPhotoToVetFromBytes(vetId, null, "data".getBytes()).block();
+    }
+
+    @Test
+    void addAlbumPhoto_withMultipleDataBuffers_shouldCombineData() throws Exception {
+        String vetId = "69f852ca-625b-11ee-8c99-0242ac120002";
+        String photoName = "album_photo.jpg";
+        
+        byte[] data1 = "first".getBytes();
+        byte[] data2 = "second".getBytes();
+        
+        FilePart filePart = Mockito.mock(FilePart.class);
+        DataBuffer dataBuffer1 = new DefaultDataBufferFactory().wrap(data1);
+        DataBuffer dataBuffer2 = new DefaultDataBufferFactory().wrap(data2);
+        when(filePart.content()).thenReturn(Flux.just(dataBuffer1, dataBuffer2));
+
+        Album expectedAlbum = new Album(1, vetId, photoName, "image/jpeg", "firstsecond".getBytes());
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(201)
+                .setHeader("Content-Type", "application/json")
+                .setBody(mapper.writeValueAsString(expectedAlbum)));
+
+        Mono<Album> result = vetsServiceClient.addAlbumPhoto(vetId, photoName, filePart);
+
+        StepVerifier.create(result)
+                .expectNext(expectedAlbum)
+                .verifyComplete();
+    }
+
 
 }
 
