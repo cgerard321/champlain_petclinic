@@ -70,6 +70,7 @@ import reactor.test.StepVerifier;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -1229,8 +1230,8 @@ class ApiGatewayControllerTest {
                 .date(LocalDate.of(2024,10,1))
                 .dueDate(LocalDate.of(2024,10,30))
                 .billStatus(BillStatus.UNPAID)
-                .amount(25.00)
-                .taxedAmount(0)
+                .amount(new BigDecimal("25.00"))
+                .taxedAmount(BigDecimal.ZERO)
                 .timeRemaining(13L)
                 .build();
 
@@ -1243,8 +1244,8 @@ class ApiGatewayControllerTest {
                 .date(LocalDate.of(2024,10,1))
                 .dueDate(LocalDate.of(2024,10,30))
                 .billStatus(BillStatus.UNPAID)
-                .amount(27.00)
-                .taxedAmount(0)
+                .amount(new BigDecimal("27.00"))
+                .taxedAmount(BigDecimal.ZERO)
                 .timeRemaining(13L)
                 .build();
         when(billServiceClient.getAllBills()).thenReturn(Flux.just(billResponseDTO,billResponseDTO2));
@@ -1270,8 +1271,8 @@ class ApiGatewayControllerTest {
                 .date(LocalDate.of(2024,10,1))
                 .dueDate(LocalDate.of(2024,10,30))
                 .billStatus(PAID)
-                .amount(25.00)
-                .taxedAmount(0)
+                .amount(new BigDecimal("25.00"))
+                .taxedAmount(BigDecimal.ZERO)
                 .timeRemaining(0L)
                 .build();
 
@@ -1283,8 +1284,8 @@ class ApiGatewayControllerTest {
                 .date(LocalDate.of(2024,10,1))
                 .dueDate(LocalDate.of(2024,10,30))
                 .billStatus(PAID)
-                .amount(27.00)
-                .taxedAmount(0)
+                .amount(new BigDecimal("27.00"))
+                .taxedAmount(BigDecimal.ZERO)
                 .timeRemaining(0L)
                 .build();
         when(billServiceClient.getAllPaidBills()).thenReturn(Flux.just(billResponseDTO,billResponseDTO2));
@@ -1310,8 +1311,8 @@ class ApiGatewayControllerTest {
                 .date(LocalDate.of(2024,10,1))
                 .dueDate(LocalDate.of(2024,10,30))
                 .billStatus(BillStatus.UNPAID)
-                .amount(25.00)
-                .taxedAmount(0)
+                .amount(new BigDecimal("25.00"))
+                .taxedAmount(BigDecimal.ZERO)
                 .timeRemaining(13L)
                 .build();
 
@@ -1323,8 +1324,8 @@ class ApiGatewayControllerTest {
                 .date(LocalDate.of(2024,10,1))
                 .dueDate(LocalDate.of(2024,10,30))
                 .billStatus(BillStatus.UNPAID)
-                .amount(27.00)
-                .taxedAmount(0)
+                .amount(new BigDecimal("27.00"))
+                .taxedAmount(BigDecimal.ZERO)
                 .timeRemaining(13L)
                 .build();
         when(billServiceClient.getAllUnpaidBills()).thenReturn(Flux.just(billResponseDTO,billResponseDTO2));
@@ -1350,8 +1351,8 @@ class ApiGatewayControllerTest {
                 .date(LocalDate.of(2024,10,1))
                 .dueDate(LocalDate.of(2024,10,8))
                 .billStatus(BillStatus.OVERDUE)
-                .amount(25.00)
-                .taxedAmount(0)
+                .amount(new BigDecimal("25.00"))
+                .taxedAmount(BigDecimal.ZERO)
                 .timeRemaining(0L)
                 .build();
 
@@ -1363,8 +1364,8 @@ class ApiGatewayControllerTest {
                 .date(LocalDate.of(2024,10,1))
                 .dueDate(LocalDate.of(2024,10,8))
                 .billStatus(BillStatus.OVERDUE)
-                .amount(27.00)
-                .taxedAmount(0)
+                .amount(new BigDecimal("27.00"))
+                .taxedAmount(BigDecimal.ZERO)
                 .timeRemaining(0L)
                 .build();
         when(billServiceClient.getAllOverdueBills()).thenReturn(Flux.just(billResponseDTO,billResponseDTO2));
@@ -1387,7 +1388,7 @@ class ApiGatewayControllerTest {
         BillResponseDTO bill = new BillResponseDTO();
         bill.setBillId(billId);
         bill.setCustomerId("1");
-        bill.setAmount(499);
+        bill.setAmount(new BigDecimal("499"));
         bill.setVisitType("Test");
 
         when(billServiceClient.getBillById(billId))
@@ -1415,7 +1416,7 @@ class ApiGatewayControllerTest {
         BillResponseDTO bill = new BillResponseDTO();
         bill.setBillId(UUID.randomUUID().toString());
         bill.setCustomerId("1");
-        bill.setAmount(499);
+        bill.setAmount(new BigDecimal("499"));
         bill.setVisitType("Test");
 
         when(billServiceClient.getBillsByOwnerId(bill.getCustomerId()))
@@ -1439,7 +1440,7 @@ class ApiGatewayControllerTest {
         BillResponseDTO bill = new BillResponseDTO();
         bill.setBillId(UUID.randomUUID().toString());
         bill.setVetId("1");
-        bill.setAmount(499);
+        bill.setAmount(new BigDecimal("499"));
         bill.setVisitType("Test");
 
         when(billServiceClient.getBillsByVetId(bill.getVetId()))
@@ -1514,12 +1515,12 @@ class ApiGatewayControllerTest {
         BillResponseDTO billResponseDTO = new BillResponseDTO();
         billResponseDTO.setBillId("9");
         billResponseDTO.setDate(null);
-        billResponseDTO.setAmount(600);
+        billResponseDTO.setAmount(new BigDecimal("600"));
         billResponseDTO.setVisitType("Adoption");
 
         BillRequestDTO billRequestDTO = new BillRequestDTO();
         billRequestDTO.setDate(null);
-        billRequestDTO.setAmount(600);
+        billRequestDTO.setAmount(new BigDecimal("600"));
         billRequestDTO.setVisitType("Adoption");
         when(billServiceClient.createBill(billRequestDTO))
                 .thenReturn(Mono.just(billResponseDTO));
