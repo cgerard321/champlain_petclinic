@@ -14,8 +14,14 @@ on:
 jobs:
   qodana:
     runs-on: "ubuntu-22.04"
+    permissions:
+      contents: write
+      pull-requests: write
+      checks: write
     steps:
     - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
     - name: Set up JDK 17
       uses: actions/setup-java@v4
       with:
@@ -40,12 +46,24 @@ jobs:
       run: |
         echo "## Files changed in this PR:" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
-        git diff --name-only origin/main...HEAD | head -20 >> $GITHUB_STEP_SUMMARY
+        echo "Debug info:" >> $GITHUB_STEP_SUMMARY
+        echo "- Base SHA: ${{ github.event.pull_request.base.sha }}" >> $GITHUB_STEP_SUMMARY
+        echo "- Head SHA: ${{ github.event.pull_request.head.sha }}" >> $GITHUB_STEP_SUMMARY
+        echo "- Base ref: ${{ github.event.pull_request.base.ref }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        # Get changed files using GitHub API or git diff
+        if [ -n "${{ github.event.pull_request.base.sha }}" ]; then
+          echo "Using base SHA for diff:" >> $GITHUB_STEP_SUMMARY
+          git diff --name-only ${{ github.event.pull_request.base.sha }}...HEAD | head -20 >> $GITHUB_STEP_SUMMARY
+        else
+          echo "Using origin/main for diff:" >> $GITHUB_STEP_SUMMARY
+          git diff --name-only origin/main...HEAD | head -20 >> $GITHUB_STEP_SUMMARY
+        fi
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "**Qodana will analyze only these changed files**" >> $GITHUB_STEP_SUMMARY
     - name: 'Qodana PR Analysis'
       id: qodana
-      uses: JetBrains/qodana-action@v2023.3
+      uses: JetBrains/qodana-action@v2025.2
       env:
         QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
       with:
