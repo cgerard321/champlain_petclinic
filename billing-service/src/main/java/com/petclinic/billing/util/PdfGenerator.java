@@ -5,15 +5,20 @@ import com.itextpdf.text.pdf.*;
 import com.petclinic.billing.datalayer.BillResponseDTO;
 
 import java.io.ByteArrayOutputStream;
+import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.Optional;
 
-
 public class PdfGenerator {
 
     public static byte[] generateBillPdf(BillResponseDTO bill) throws DocumentException {
+        // Use centralized interest calculation utility
+        // Note: Since this method works with BillResponseDTO, we can't directly use InterestCalculationUtil.calculateInterest(Bill)
+        // However, the interest should already be calculated when the BillResponseDTO was created via EntityDtoUtil.toBillResponseDto()
+        // So we can just use the existing interest value from the DTO
+        
         Document document = new Document(PageSize.A4, 50, 50, 50, 50);
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         PdfWriter.getInstance(document, byteArrayOutputStream);
@@ -73,9 +78,13 @@ public class PdfGenerator {
         addHeaderCell(charges, "Unit Price");
         addHeaderCell(charges, "Subtotal");
 
-        double subtotal = bill.getAmount();
-        double totalWithTax = bill.getTaxedAmount() > 0 ? bill.getTaxedAmount() : subtotal;
-        double tax = Math.max(0, totalWithTax - subtotal);
+        BigDecimal subtotal = bill.getAmount();
+        BigDecimal totalWithTax = bill.getTaxedAmount() != null && bill.getTaxedAmount().compareTo(BigDecimal.ZERO) > 0
+                ? bill.getTaxedAmount()
+                : subtotal;
+        BigDecimal tax = totalWithTax.subtract(subtotal);
+        BigDecimal interest = bill.getInterest() != null ? bill.getInterest() : BigDecimal.ZERO;
+        BigDecimal totalDue = totalWithTax.add(interest);
 
         charges.addCell("Visit – " + Optional.ofNullable(bill.getVisitType()).orElse("N/A"));
         charges.addCell("1");
@@ -104,12 +113,17 @@ public class PdfGenerator {
         totals.addCell("Tax");
         totals.addCell(rightAligned(formatCurrency(tax)));
 
+        if (interest.compareTo(BigDecimal.ZERO) > 0) {
+            totals.addCell("Interest");
+            totals.addCell(rightAligned(formatCurrency(interest)));
+        }
+
         PdfPCell labelCell = new PdfPCell(new Phrase("Total Due",
                 FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12)));
         labelCell.setBorder(Rectangle.NO_BORDER);
         totals.addCell(labelCell);
 
-        PdfPCell totalCell = new PdfPCell(new Phrase(formatCurrency(totalWithTax),
+        PdfPCell totalCell = new PdfPCell(new Phrase(formatCurrency(totalDue),
                 FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12)));
         totalCell.setBorder(Rectangle.NO_BORDER);
         totalCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
@@ -119,8 +133,8 @@ public class PdfGenerator {
 
         // Footer
         Paragraph notes = new Paragraph(
-                "Notes: All bills are due within 30 days. If a bill is not paid on time, " +
-                        "interest charges may be applied to the outstanding balance.",
+                "Notes: All bills must be paid on time. Late payments may be subject to a " +
+                        "1.5% interest charge on the outstanding balance.",
                 FontFactory.getFont(FontFactory.HELVETICA, 9, BaseColor.GRAY));
         notes.setSpacingBefore(30);
         document.add(notes);
@@ -135,7 +149,7 @@ public class PdfGenerator {
         return byteArrayOutputStream.toByteArray();
     }
 
-    private static String formatCurrency(double value) {
+    private static String formatCurrency(BigDecimal value) {
         return NumberFormat.getCurrencyInstance(Locale.CANADA).format(value);
     }
 
