@@ -1,4 +1,4 @@
-import axiosInstance from '@/shared/api/axiosInstance.ts';
+import axiosInstance from '@/shared/api/axiosInstance';
 
 type CartIdResponse = { cartId: string };
 

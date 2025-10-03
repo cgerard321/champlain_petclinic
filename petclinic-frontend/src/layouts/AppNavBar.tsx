@@ -7,8 +7,6 @@ import {
   IsVet,
   useUser,
 } from '@/context/UserContext';
-import { fetchCartIdByCustomerId } from '../features/carts/api/getCart';
-import axiosInstance from '@/shared/api/axiosInstance';
 import { AppRoutePaths } from '@/shared/models/path.routes';
 import { useEffect, useState, useCallback } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -16,146 +14,63 @@ import { Navbar, Nav, NavDropdown, Container } from 'react-bootstrap';
 import { FaShoppingCart } from 'react-icons/fa'; // Importing the shopping cart icon
 import './AppNavBar.css';
 
-//  listen for cart changes broadcast by the app
-import { CART_CHANGED } from '../features/carts/api/cartEvent';
-
-interface ProductAPIResponse {
-  productId: number;
-  productName: string;
-  productDescription: string;
-  productSalePrice: number;
-  averageRating: number;
-  quantityInCart: number;
-  productQuantity: number;
-}
+// localStorage-driven cart badge (no API calls in navbar)
+import {
+  CART_CHANGED,
+  getCartIdFromLS,
+  getCartCountFromLS,
+} from '@/features/carts/api/cartEvent';
 
 export function NavBar(): JSX.Element {
   const { user } = useUser();
   const navigate = useNavigate();
   const isInventoryManager = IsInventoryManager();
-  const isVet = IsVet();
   const isReceptionist = IsReceptionist();
   const [navbarOpen, setNavbarOpen] = useState(false);
   const [cartId, setCartId] = useState<string | null>(null);
   const [cartItemCount, setCartItemCount] = useState<number>(0); // State for cart item count
 
   const logoutUser = (): void => {
-    axiosInstance
-      .post('/users/logout', {}, { useV2: false })
-      .then(() => {
-        navigate(AppRoutePaths.Login);
-        localStorage.removeItem('user');
-        // Reload the login page to remove all previous user data
-        window.location.reload();
-      })
-      .catch(error => {
-        console.error('Logout failed:', error);
-      });
+    // Client-side logout only; keep API calls out of navbar
+    try {
+      localStorage.removeItem('user');
+      localStorage.removeItem('cart:id');
+      localStorage.removeItem('cart:count');
+    } catch { /* ignore */ }
+    navigate(AppRoutePaths.Login);
+    window.location.reload();
   };
 
   const toggleNavbar = (): void => {
     setNavbarOpen(prevNavbarOpen => !prevNavbarOpen);
   };
 
-  /* 
-    Note: Fetching the cart ID within the NavBar is not optimal and should be refactored 
-    in future sprints for better performance and separation of concerns.
-  */
-  useEffect(() => {
-    const fetchCartId = async (): Promise<void> => {
-      if (user.userId && !isInventoryManager && !isVet && !isReceptionist) {
-        try {
-          const id = await fetchCartIdByCustomerId(user.userId);
-          setCartId(id);
-        } catch (error) {
-          console.error('Error fetching cart ID:', error);
-        }
-      }
-    };
-
-    fetchCartId();
-  }, [user.userId, isInventoryManager, isVet, isReceptionist]);
-
-  // NEW: uses lightweight /count endpoint when available, falls back to full cart;
-  // also listens for "cart:changed" (same tab) and "storage" (cross-tab) to refresh automatically.
-  const fetchCartItemCount = useCallback(async (): Promise<void> => {
-    if (!cartId) {
-      setCartItemCount(0);
-      return;
-    }
-
-    // Try the lightweight /count endpoint first
-    try {
-      const { data } = await axiosInstance.get<{ itemCount?: number }>(
-        `/carts/${cartId}/count`,
-        { useV2: true }
-      );
-      if (typeof data?.itemCount === 'number') {
-        setCartItemCount(data.itemCount);
-        return;
-      }
-    } catch {
-      // fall through to the full cart request on error
-    }
-
-    // Fallback: fetch the entire cart and sum quantities
-    try {
-      const { data } = await axiosInstance.get<{
-        products?: ProductAPIResponse[];
-      }>(`/carts/${cartId}`, { useV2: true });
-
-      if (Array.isArray(data.products)) {
-        const totalCount = data.products.reduce(
-          (acc: number, product: ProductAPIResponse) =>
-            acc + (product.quantityInCart || 0),
-          0
-        );
-        setCartItemCount(totalCount);
-      } else {
-        setCartItemCount(0);
-      }
-    } catch (error) {
-      console.error('Error fetching cart item count:', error);
-      setCartItemCount(0);
-    }
-  }, [cartId]);
+  // LocalStorage-driven sync (no network here)
+  const refreshFromLocalStorage = useCallback(() => {
+    setCartId(getCartIdFromLS());
+    setCartItemCount(getCartCountFromLS());
+  }, []);
 
   useEffect(() => {
-    if (!cartId) {
-      setCartItemCount(0);
-      return;
-    }
-
-    // initial fetch
-    void fetchCartItemCount();
-
-    // refresh on same-tab cart changes
-    const onCartChanged = (): void => {
-      // fire-and-forget; ignore returned Promise
-      void fetchCartItemCount();
-    };
-
-    // refresh on cross-tab cart changes
+    // initialize from LS
+    refreshFromLocalStorage();
+    // same-tab updates
+    const onCartChanged = (): void => refreshFromLocalStorage();
+    // cross-tab updates
     const onStorage = (e: StorageEvent): void => {
-      if (e.key === 'cart:changed') {
-        void fetchCartItemCount();
-      }
+        if (e.key === 'cart:changed' || e.key === 'cart:count' || e.key === 'cart:id') {
+            refreshFromLocalStorage();
+        }
     };
 
-    window.addEventListener(
-      CART_CHANGED as unknown as string,
-      onCartChanged as EventListener
-    );
+    window.addEventListener(CART_CHANGED as unknown as string, onCartChanged as EventListener);
     window.addEventListener('storage', onStorage);
-
     return () => {
-      window.removeEventListener(
-        CART_CHANGED as unknown as string,
-        onCartChanged as EventListener
-      );
+      window.removeEventListener(CART_CHANGED as unknown as string, onCartChanged as EventListener);
       window.removeEventListener('storage', onStorage);
     };
-  }, [cartId, fetchCartItemCount]);
+
+  }, [refreshFromLocalStorage, user.userId, isInventoryManager, isReceptionist]);
 
   return (
     <Navbar bg="light" expand="lg" className="navbar">
