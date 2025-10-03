@@ -19,6 +19,7 @@ import { getAllBillsByOwnerName } from './api/getAllBillsByOwnerName';
 import { getAllBillsByVetName } from './api/getAllBillsByVetName';
 import { getAllBillsByVisitType } from './api/getAllBillsByVisitType';
 import { getAllBills } from './api/getAllBills';
+import InterestExemptToggle from './components/InterestExemptToggle';
 
 export default function AdminBillsListTable(): JSX.Element {
   const navigate = useNavigate();
@@ -658,6 +659,7 @@ export default function AdminBillsListTable(): JSX.Element {
                 <th>Taxed Amount</th>
                 <th>Status</th>
                 <th>Due Date</th>
+                <th>Interest Exempt</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -678,6 +680,14 @@ export default function AdminBillsListTable(): JSX.Element {
                   <td>{bill.taxedAmount}</td>
                   <td>{bill.billStatus}</td>
                   <td>{bill.dueDate}</td>
+                  <td>
+                    <InterestExemptToggle
+                      billId={bill.billId}
+                      isExempt={bill.interestExempt || false}
+                      onToggleComplete={() => getBillsList(currentPage, 10)}
+                      variant="simple"
+                    />
+                  </td>
                   <td>
                     <button
                       className="btn btn-danger"

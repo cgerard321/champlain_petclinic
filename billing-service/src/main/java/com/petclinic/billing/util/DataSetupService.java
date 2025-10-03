@@ -3,8 +3,6 @@ package com.petclinic.billing.util;
 
 import com.petclinic.billing.businesslayer.BillService;
 import com.petclinic.billing.datalayer.Bill;
-import com.petclinic.billing.datalayer.BillRepository;
-import com.petclinic.billing.datalayer.BillRequestDTO;
 import com.petclinic.billing.datalayer.BillStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -12,6 +10,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
 
@@ -51,8 +50,9 @@ public class DataSetupService implements CommandLineRunner {
                 .vetFirstName("John")
                 .vetLastName("Doe")
                 .date(LocalDate.of(2024, 3, 1))
-                .amount(300.0)
-                .taxedAmount(0.0)
+                .amount(new BigDecimal("300.00"))
+                .taxedAmount(BigDecimal.ZERO)
+                .interest(BigDecimal.ZERO)
                 .billStatus(BillStatus.OVERDUE)
                 .dueDate(LocalDate.of(2024, 3, 31))
                 .build();
@@ -67,8 +67,9 @@ public class DataSetupService implements CommandLineRunner {
                 .vetFirstName("John")
                 .vetLastName("Doe")
                 .date(LocalDate.of(2024, 4, 1))
-                .amount(167.0)
-                .taxedAmount(0.0)
+                .amount(new BigDecimal("167.0"))
+                .taxedAmount(BigDecimal.ZERO)
+                .interest(BigDecimal.ZERO)
                 .billStatus(BillStatus.PAID)
                 .dueDate(LocalDate.of(2024, 4, 30))
                 .build();
@@ -83,8 +84,9 @@ public class DataSetupService implements CommandLineRunner {
                 .vetFirstName("John")
                 .vetLastName("Doe")
                 .date(LocalDate.of(2024, 5, 1))
-                .amount(150.0)
-                .taxedAmount(0.0)
+                .amount(new BigDecimal(150.0))
+                .taxedAmount(BigDecimal.ZERO)
+                .interest(BigDecimal.ZERO)
                 .billStatus(BillStatus.PAID)
                 .dueDate(LocalDate.of(2024, 5, 31))
                 .build();
@@ -99,8 +101,9 @@ public class DataSetupService implements CommandLineRunner {
                 .vetFirstName("Linda")
                 .vetLastName("Douglas")
                 .date(LocalDate.of(2024, 6, 1))
-                .amount(200.0)
-                .taxedAmount(0.0)
+                .amount(new BigDecimal(200.0))
+                .taxedAmount(BigDecimal.ZERO)
+                .interest(BigDecimal.ZERO)
                 .billStatus(BillStatus.PAID)
                 .dueDate(LocalDate.of(2024, 6, 30))
                 .build();
@@ -115,8 +118,9 @@ public class DataSetupService implements CommandLineRunner {
                 .vetFirstName("Linda")
                 .vetLastName("Douglas")
                 .date(LocalDate.of(2024, 10, 1))
-                .amount(130.0)
-                .taxedAmount(0.0)
+                .amount(new BigDecimal(130.0))
+                .taxedAmount(BigDecimal.ZERO)
+                .interest(BigDecimal.ZERO)
                 .billStatus(BillStatus.UNPAID)
                 .dueDate(LocalDate.of(2024, 11, 30))
                 .build();
@@ -131,8 +135,9 @@ public class DataSetupService implements CommandLineRunner {
                 .vetFirstName("John")
                 .vetLastName("Doe")
                 .date(LocalDate.of(2024, 8, 1))
-                .amount(100.0)
-                .taxedAmount(0.0)
+                .amount(new BigDecimal(100.0))
+                .taxedAmount(BigDecimal.ZERO)
+                .interest(BigDecimal.ZERO)
                 .billStatus(BillStatus.UNPAID)
                 .dueDate(LocalDate.of(2024, 8, 30))
                 .build();
@@ -147,8 +152,9 @@ public class DataSetupService implements CommandLineRunner {
                 .vetFirstName("Henry")
                 .vetLastName("Stevens")
                 .date(LocalDate.of(2024, 9, 1))
-                .amount(200.0)
-                .taxedAmount(0.0)
+                .amount(new BigDecimal(200.0))
+                .taxedAmount(BigDecimal.ZERO)
+                .interest(BigDecimal.ZERO)
                 .billStatus(BillStatus.PAID)
                 .dueDate(LocalDate.of(2024, 9, 30))
                 .build();
@@ -163,8 +169,9 @@ public class DataSetupService implements CommandLineRunner {
                 .vetFirstName("Sharon")
                 .vetLastName("Jenkins")
                 .date(LocalDate.of(2024, 3, 1))
-                .amount(150.0)
-                .taxedAmount(0.0)
+                .amount(new BigDecimal(150.0))
+                .taxedAmount(BigDecimal.ZERO)
+                .interest(BigDecimal.ZERO)
                 .billStatus(BillStatus.PAID)
                 .dueDate(LocalDate.of(2024, 4, 30))
                 .build();
@@ -179,8 +186,9 @@ public class DataSetupService implements CommandLineRunner {
                 .vetFirstName("Sharon")
                 .vetLastName("Jenkins")
                 .date(LocalDate.of(2024, 5, 1))
-                .amount(400.0)
-                .taxedAmount(0.0)
+                .amount(new BigDecimal(400.0))
+                .taxedAmount(BigDecimal.ZERO)
+                .interest(BigDecimal.ZERO)
                 .billStatus(BillStatus.PAID)
                 .dueDate(LocalDate.of(2024, 5, 31))
                 .build();
@@ -195,8 +203,9 @@ public class DataSetupService implements CommandLineRunner {
                 .vetFirstName("Helen")
                 .vetLastName("Leary")
                 .date(LocalDate.of(2024, 6, 1))
-                .amount(150.0)
-                .taxedAmount(0.0)
+                .amount(new BigDecimal(150.0))
+                .taxedAmount(BigDecimal.ZERO)
+                .interest(BigDecimal.ZERO)
                 .billStatus(BillStatus.PAID)
                 .dueDate(LocalDate.of(2024, 6, 30))
                 .build();
@@ -211,8 +220,9 @@ public class DataSetupService implements CommandLineRunner {
                 .vetFirstName("Henry")
                 .vetLastName("Stevens")
                 .date(LocalDate.of(2024, 7, 1))
-                .amount(500.0)
-                .taxedAmount(0.0)
+                .amount(new BigDecimal(500.0))
+                .taxedAmount(BigDecimal.ZERO)
+                .interest(BigDecimal.ZERO)
                 .billStatus(BillStatus.PAID)
                 .dueDate(LocalDate.of(2024, 8, 30))
                 .build();
@@ -227,8 +237,9 @@ public class DataSetupService implements CommandLineRunner {
                 .vetFirstName("Rafael")
                 .vetLastName("Ortega")
                 .date(LocalDate.of(2024, 8, 1))
-                .amount(150.0)
-                .taxedAmount(0.0)
+                .amount(new BigDecimal(150.0))
+                .taxedAmount(BigDecimal.ZERO)
+                .interest(BigDecimal.ZERO)
                 .billStatus(BillStatus.PAID)
                 .dueDate(LocalDate.of(2024, 8, 30))
                 .build();
@@ -243,8 +254,9 @@ public class DataSetupService implements CommandLineRunner {
                 .vetFirstName("James")
                 .vetLastName("Carter")
                 .date(LocalDate.of(2024, 10, 1))
-                .amount(200.0)
-                .taxedAmount(0.0)
+                .amount(new BigDecimal(200.0))
+                .taxedAmount(BigDecimal.ZERO)
+                .interest(BigDecimal.ZERO)
                 .billStatus(BillStatus.UNPAID)
                 .dueDate(LocalDate.of(2024, 11, 30))
                 .build();
@@ -259,8 +271,9 @@ public class DataSetupService implements CommandLineRunner {
                 .vetFirstName("James")
                 .vetLastName("Carter")
                 .date(LocalDate.of(2024, 4, 1))
-                .amount(150.0)
-                .taxedAmount(0.0)
+                .amount(new BigDecimal(150.0))
+                .taxedAmount(BigDecimal.ZERO)
+                .interest(BigDecimal.ZERO)
                 .billStatus(BillStatus.PAID)
                 .dueDate(LocalDate.of(2024, 4, 30))
                 .build();
@@ -275,8 +288,9 @@ public class DataSetupService implements CommandLineRunner {
                 .vetFirstName("James")
                 .vetLastName("Carter")
                 .date(LocalDate.of(2024, 10, 1))
-                .amount(150.0)
-                .taxedAmount(0.0)
+                .amount(new BigDecimal(150.0))
+                .taxedAmount(BigDecimal.ZERO)
+                .interest(BigDecimal.ZERO)
                 .billStatus(BillStatus.UNPAID)
                 .dueDate(LocalDate.of(2024, 11, 30))
                 .build();

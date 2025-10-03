@@ -21,6 +21,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Optional;
 
@@ -50,8 +51,8 @@ private final String baseBillURL = "/api/v2/gateway/bills";
             .visitType("general")
             .vetId("3")
             .date(LocalDate.parse("2024-10-11"))
-            .amount(100.0)
-            .taxedAmount(0.0)
+            .amount(new BigDecimal("100.0"))
+            .taxedAmount(new BigDecimal("0.0"))
             .billStatus(BillStatus.UNPAID)
             .dueDate(LocalDate.parse("2024-10-13"))
             .build();
@@ -62,8 +63,8 @@ private final String baseBillURL = "/api/v2/gateway/bills";
             .visitType("general")
             .vetId("2")
             .date(LocalDate.parse("2024-10-11"))
-            .amount(120.0)
-            .taxedAmount(10.0)
+            .amount(new BigDecimal("120.0"))
+            .taxedAmount(new BigDecimal("10.0"))
             .billStatus(BillStatus.UNPAID)
             .dueDate(LocalDate.parse("2024-10-13"))
             .build();
@@ -73,7 +74,7 @@ private final String baseBillURL = "/api/v2/gateway/bills";
             .visitType("general")
             .vetId("3")
             .date(LocalDate.parse("2024-10-11"))
-            .amount(100.0)
+            .amount(new BigDecimal("100.0"))
             .billStatus(BillStatus.UNPAID)
             .dueDate(LocalDate.parse("2024-10-13"))
             .build();

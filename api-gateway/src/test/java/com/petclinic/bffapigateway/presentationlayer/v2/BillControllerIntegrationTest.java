@@ -22,6 +22,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import static com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigAuthService.*;
@@ -70,7 +71,7 @@ public class BillControllerIntegrationTest {
             .visitType("general")
             .vetId("3")
             .date(LocalDate.parse("2024-10-11"))
-            .amount(100.0)
+            .amount(new BigDecimal("100.0"))
             .billStatus(BillStatus.UNPAID)
             .dueDate(LocalDate.parse("2024-10-13"))
             .build();
@@ -82,8 +83,8 @@ public class BillControllerIntegrationTest {
             .visitType("general")
             .vetId("3")
             .date(LocalDate.parse("2024-10-11"))
-            .amount(100.0)
-            .taxedAmount(0.0)
+            .amount(new BigDecimal("100.0"))
+            .taxedAmount(new BigDecimal("0.0"))
             .billStatus(BillStatus.UNPAID)
             .dueDate(LocalDate.parse("2024-10-13"))
             .build();
@@ -94,8 +95,8 @@ public class BillControllerIntegrationTest {
             .visitType("general")
             .vetId("2")
             .date(LocalDate.parse("2024-10-11"))
-            .amount(120.0)
-            .taxedAmount(10.0)
+            .amount(new BigDecimal("120.0"))
+            .taxedAmount(new BigDecimal("10.0"))
             .billStatus(BillStatus.UNPAID)
             .dueDate(LocalDate.parse("2024-10-13"))
             .build();
@@ -145,7 +146,7 @@ public class BillControllerIntegrationTest {
                     assertEquals(billRequestDTO.getVisitType(), response.getVisitType());
                     assertEquals(billRequestDTO.getVetId(), response.getVetId());
                     assertEquals(billRequestDTO.getDate(), response.getDate());
-                    assertEquals(billRequestDTO.getAmount(), response.getAmount());
+                    assertEquals(0, billRequestDTO.getAmount().compareTo(response.getAmount()));
                     assertEquals(billRequestDTO.getBillStatus(), response.getBillStatus());
                     assertEquals(billRequestDTO.getDueDate(), response.getDueDate());
                     return true;})
@@ -193,7 +194,7 @@ public class BillControllerIntegrationTest {
                 .visitType("operation")
                 .vetId("3")
                 .date(LocalDate.parse("2024-10-11"))
-                .amount(100.0)
+                .amount(new BigDecimal("100.0"))
                 .billStatus(BillStatus.PAID)
                 .dueDate(LocalDate.parse("2024-10-13"))
                 .build();
@@ -236,7 +237,7 @@ public class BillControllerIntegrationTest {
                 .visitType("operation")
                 .vetId("3")
                 .date(LocalDate.parse("2024-10-11"))
-                .amount(100.0)
+                .amount(new BigDecimal("100.0"))
                 .billStatus(BillStatus.PAID)
                 .dueDate(LocalDate.parse("2024-10-13"))
                 .build();
