@@ -4,9 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.util.ArrayList; // Unused import for Qodana test
-import java.util.HashMap; 
-import java.util.List;
 @Data
 @Builder
 @NoArgsConstructor
