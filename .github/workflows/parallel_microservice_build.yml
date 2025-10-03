@@ -4,8 +4,7 @@
 # documentation.
 # This workflow will build a Java project with Gradle and cache/restore any dependencies to improve the workflow execution time
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-gradle
-# Test commit for CI improvements - CPC-1667
-# Debug: Optimized all microservice builds for speed and reliability
+# Optimized for sub-2-minute execution with advanced caching and parallel processing
 
 name: Java CI with Gradle
 
@@ -18,7 +17,7 @@ on:
 jobs:
   api_gateway_test:
     runs-on: "ubuntu-22.04"
-    timeout-minutes: 30
+    timeout-minutes: 15
     steps:
     - uses: actions/checkout@v4
     - name: Set up JDK 17
@@ -32,19 +31,23 @@ jobs:
         path: |
           ~/.gradle/caches
           ~/.gradle/wrapper
+          ~/.gradle/daemon
         key: ${{ runner.os }}-gradle-api-gateway-${{ hashFiles('**/api-gateway/*.gradle*', '**/api-gateway/gradle-wrapper.properties') }}
         restore-keys: |
           ${{ runner.os }}-gradle-api-gateway-
+          ${{ runner.os }}-gradle-
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v3
+      with:
+        cache-read-only: false
     - name: Make gradlew executable
       run: chmod +x ./gradlew
       working-directory: ./api-gateway
     - name: Build with Gradle Wrapper
-      run: ./gradlew clean build jacocoTestReport
+      run: ./gradlew clean build jacocoTestReport --parallel --build-cache --daemon
       working-directory: ./api-gateway
     - name: Verify coverage threshold
-      run: ./gradlew jacocoTestCoverageVerification
+      run: ./gradlew jacocoTestCoverageVerification --daemon
       working-directory: ./api-gateway
     - name: Upload coverage reports
       uses: actions/upload-artifact@v4
@@ -56,7 +59,7 @@ jobs:
 
   visits_service_test:
     runs-on: "ubuntu-22.04"
-    timeout-minutes: 30
+    timeout-minutes: 15
     steps:
     - name: Checkout sources
       uses: actions/checkout@v4
@@ -71,19 +74,23 @@ jobs:
         path: |
           ~/.gradle/caches
           ~/.gradle/wrapper
+          ~/.gradle/daemon
         key: ${{ runner.os }}-gradle-visits-${{ hashFiles('**/visits-service-new/*.gradle*', '**/visits-service-new/gradle-wrapper.properties') }}
         restore-keys: |
           ${{ runner.os }}-gradle-visits-
+          ${{ runner.os }}-gradle-
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v3
+      with:
+        cache-read-only: false
     - name: Make gradlew executable
       run: chmod +x ./gradlew
       working-directory: ./visits-service-new
     - name: Build with Gradle
-      run: ./gradlew clean build jacocoTestReport
+      run: ./gradlew clean build jacocoTestReport --parallel --build-cache --daemon
       working-directory: ./visits-service-new
     - name: Verify coverage threshold
-      run: ./gradlew jacocoTestCoverageVerification
+      run: ./gradlew jacocoTestCoverageVerification --daemon
       working-directory: ./visits-service-new
     - name: Upload coverage reports
       uses: actions/upload-artifact@v4
@@ -95,7 +102,7 @@ jobs:
 
   vet_service_test:
     runs-on: "ubuntu-22.04"
-    timeout-minutes: 30
+    timeout-minutes: 15
     steps:
     - name: Checkout sources
       uses: actions/checkout@v4
@@ -110,19 +117,23 @@ jobs:
         path: |
           ~/.gradle/caches
           ~/.gradle/wrapper
+          ~/.gradle/daemon
         key: ${{ runner.os }}-gradle-vet-${{ hashFiles('**/vet-service/*.gradle*', '**/vet-service/gradle-wrapper.properties') }}
         restore-keys: |
           ${{ runner.os }}-gradle-vet-
+          ${{ runner.os }}-gradle-
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v3
+      with:
+        cache-read-only: false
     - name: Make gradlew executable
       run: chmod +x ./gradlew
       working-directory: ./vet-service
     - name: Build with Gradle
-      run: ./gradlew clean build jacocoTestReport
+      run: ./gradlew clean build jacocoTestReport --parallel --build-cache --daemon
       working-directory: ./vet-service
     - name: Verify coverage threshold
-      run: ./gradlew jacocoTestCoverageVerification
+      run: ./gradlew jacocoTestCoverageVerification --daemon
       working-directory: ./vet-service
     - name: Upload coverage reports
       uses: actions/upload-artifact@v4
@@ -135,7 +146,7 @@ jobs:
 
   customers_service_reactive_test:
     runs-on: "ubuntu-22.04"
-    timeout-minutes: 30
+    timeout-minutes: 15
     steps:
     - name: Checkout sources
       uses: actions/checkout@v4
@@ -150,19 +161,23 @@ jobs:
         path: |
           ~/.gradle/caches
           ~/.gradle/wrapper
+          ~/.gradle/daemon
         key: ${{ runner.os }}-gradle-customers-${{ hashFiles('**/customers-service-reactive/*.gradle*', '**/customers-service-reactive/gradle-wrapper.properties') }}
         restore-keys: |
           ${{ runner.os }}-gradle-customers-
+          ${{ runner.os }}-gradle-
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v3
+      with:
+        cache-read-only: false
     - name: Make gradlew executable
       run: chmod +x ./gradlew
       working-directory: ./customers-service-reactive
     - name: Build with Gradle
-      run: ./gradlew clean build jacocoTestReport
+      run: ./gradlew clean build jacocoTestReport --parallel --build-cache --daemon
       working-directory: ./customers-service-reactive
     - name: Verify coverage threshold
-      run: ./gradlew jacocoTestCoverageVerification
+      run: ./gradlew jacocoTestCoverageVerification --daemon
       working-directory: ./customers-service-reactive
     - name: Upload coverage reports
       uses: actions/upload-artifact@v4
@@ -174,7 +189,7 @@ jobs:
 
   billing_service_test:
     runs-on: "ubuntu-22.04"
-    timeout-minutes: 30
+    timeout-minutes: 15
     steps:
     - name: Checkout sources
       uses: actions/checkout@v4
@@ -189,19 +204,23 @@ jobs:
         path: |
           ~/.gradle/caches
           ~/.gradle/wrapper
+          ~/.gradle/daemon
         key: ${{ runner.os }}-gradle-billing-${{ hashFiles('**/billing-service/*.gradle*', '**/billing-service/gradle-wrapper.properties') }}
         restore-keys: |
           ${{ runner.os }}-gradle-billing-
+          ${{ runner.os }}-gradle-
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v3
+      with:
+        cache-read-only: false
     - name: Make gradlew executable
       run: chmod +x ./gradlew
       working-directory: ./billing-service
     - name: Build with Gradle
-      run: ./gradlew clean build jacocoTestReport
+      run: ./gradlew clean build jacocoTestReport --parallel --build-cache --daemon
       working-directory: ./billing-service
     - name: Verify coverage threshold
-      run: ./gradlew jacocoTestCoverageVerification
+      run: ./gradlew jacocoTestCoverageVerification --daemon
       working-directory: ./billing-service
     - name: Upload coverage reports
       uses: actions/upload-artifact@v4
@@ -213,7 +232,7 @@ jobs:
 
   auth_service_test:
     runs-on: "ubuntu-22.04"
-    timeout-minutes: 30
+    timeout-minutes: 15
     steps:
     - name: Checkout sources
       uses: actions/checkout@v4
@@ -228,19 +247,23 @@ jobs:
         path: |
           ~/.gradle/caches
           ~/.gradle/wrapper
+          ~/.gradle/daemon
         key: ${{ runner.os }}-gradle-auth-${{ hashFiles('**/auth-service/*.gradle*', '**/auth-service/gradle-wrapper.properties') }}
         restore-keys: |
           ${{ runner.os }}-gradle-auth-
+          ${{ runner.os }}-gradle-
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v3
+      with:
+        cache-read-only: false
     - name: Make gradlew executable
       run: chmod +x ./gradlew
       working-directory: ./auth-service
     - name: Build with Gradle
-      run: ./gradlew clean build jacocoTestReport
+      run: ./gradlew clean build jacocoTestReport --parallel --build-cache --daemon
       working-directory: ./auth-service
     - name: Verify coverage threshold
-      run: ./gradlew jacocoTestCoverageVerification
+      run: ./gradlew jacocoTestCoverageVerification --daemon
       working-directory: ./auth-service
     - name: Upload coverage reports
       uses: actions/upload-artifact@v4
@@ -252,7 +275,7 @@ jobs:
 
   inventory_service_test:
     runs-on: "ubuntu-22.04"
-    timeout-minutes: 30
+    timeout-minutes: 15
     steps:
     - name: Checkout sources
       uses: actions/checkout@v4
@@ -267,19 +290,23 @@ jobs:
         path: |
           ~/.gradle/caches
           ~/.gradle/wrapper
+          ~/.gradle/daemon
         key: ${{ runner.os }}-gradle-inventory-${{ hashFiles('**/inventory-service/*.gradle*', '**/inventory-service/gradle-wrapper.properties') }}
         restore-keys: |
           ${{ runner.os }}-gradle-inventory-
+          ${{ runner.os }}-gradle-
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v3
+      with:
+        cache-read-only: false
     - name: Make gradlew executable
       run: chmod +x ./gradlew
       working-directory: ./inventory-service
     - name: Build with Gradle
-      run: ./gradlew clean build jacocoTestReport
+      run: ./gradlew clean build jacocoTestReport --parallel --build-cache --daemon
       working-directory: ./inventory-service
     - name: Verify coverage threshold
-      run: ./gradlew jacocoTestCoverageVerification
+      run: ./gradlew jacocoTestCoverageVerification --daemon
       working-directory: ./inventory-service
     - name: Upload coverage reports
       uses: actions/upload-artifact@v4
@@ -291,7 +318,7 @@ jobs:
 
   products_service_test:
     runs-on: "ubuntu-22.04"
-    timeout-minutes: 30
+    timeout-minutes: 15
     steps:
       - name: Checkout sources
         uses: actions/checkout@v4
@@ -306,19 +333,21 @@ jobs:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
+            ~/.gradle/daemon
           key: ${{ runner.os }}-gradle-products-${{ hashFiles('**/products-service/*.gradle*', '**/products-service/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-products-
+            ${{ runner.os }}-gradle-
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
       - name: Make gradlew executable
         run: chmod +x ./gradlew
         working-directory: ./products-service
       - name: Build with Gradle
-        run: ./gradlew clean build jacocoTestReport
+        run: ./gradlew clean build jacocoTestReport --parallel --build-cache --daemon
         working-directory: ./products-service
       - name: Verify coverage threshold
-        run: ./gradlew jacocoTestCoverageVerification
+        run: ./gradlew jacocoTestCoverageVerification --daemon
         working-directory: ./products-service
       - name: Upload coverage reports
         uses: actions/upload-artifact@v4
@@ -331,7 +360,7 @@ jobs:
 
   cart_service_test:
     runs-on: "ubuntu-22.04"
-    timeout-minutes: 30
+    timeout-minutes: 15
     steps:
       - name: Checkout sources
         uses: actions/checkout@v4
@@ -346,19 +375,21 @@ jobs:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
+            ~/.gradle/daemon
           key: ${{ runner.os }}-gradle-cart-${{ hashFiles('**/cart-service/*.gradle*', '**/cart-service/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-cart-
+            ${{ runner.os }}-gradle-
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
       - name: Make gradlew executable
         run: chmod +x ./gradlew
         working-directory: ./cart-service
       - name: Build with Gradle
-        run: ./gradlew clean build jacocoTestReport
+        run: ./gradlew clean build jacocoTestReport --parallel --build-cache --daemon
         working-directory: ./cart-service
       - name: Verify coverage threshold
-        run: ./gradlew jacocoTestCoverageVerification
+        run: ./gradlew jacocoTestCoverageVerification --daemon
         working-directory: ./cart-service
       - name: Upload coverage reports
         uses: actions/upload-artifact@v4
