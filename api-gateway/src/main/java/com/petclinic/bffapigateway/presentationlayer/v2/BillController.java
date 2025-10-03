@@ -155,4 +155,42 @@ public class BillController {
 //                .onErrorResume(e -> Mono.just(ResponseEntity.badRequest().body("Payment failed: " + e.getMessage())));
 //    }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping(value = "/admin/{billId}/interest")
+    public Mono<ResponseEntity<Double>> getInterest(@PathVariable String billId) {
+        return billService.getInterest(billId).map(ResponseEntity::ok);
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping(value = "/admin/{billId}/total")
+    public Mono<ResponseEntity<Double>> getTotal(@PathVariable String billId) {
+        return billService.getTotalWithInterest(billId).map(ResponseEntity::ok);
+    }
+
+    @IsUserSpecific(idToMatch = {"customerId"}, bypassRoles = {Roles.ADMIN})
+    @GetMapping("/customer/{customerId}/bills/{billId}/interest")
+    public Mono<ResponseEntity<Double>> getInterestForCustomer(@PathVariable String customerId,
+                                                               @PathVariable String billId) {
+        return billService.getInterest(billId).map(ResponseEntity::ok);
+    }
+
+    @IsUserSpecific(idToMatch = {"customerId"}, bypassRoles = {Roles.ADMIN})
+    @GetMapping("/customer/{customerId}/bills/{billId}/total")
+    public Mono<ResponseEntity<Double>> getTotalForCustomer(@PathVariable String customerId,
+                                                            @PathVariable String billId) {
+        return billService.getTotalWithInterest(billId).map(ResponseEntity::ok);
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @PatchMapping(value = "/{billId}/exempt-interest")
+    public Mono<ResponseEntity<Void>> setInterestExempt(
+            @PathVariable String billId,
+            @RequestParam boolean exempt) {
+
+        return billService.setInterestExempt(billId, exempt)
+                .thenReturn(ResponseEntity.noContent().build());
+    }
+
+
+
 }

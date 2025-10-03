@@ -25,7 +25,6 @@ import org.springframework.web.bind.annotation.*;
 import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import org.springframework.web.multipart.MultipartFile;
 
 
 import java.io.IOException;
@@ -187,6 +186,41 @@ public class VetController {
                 .then(Mono.defer(() -> Mono.just(ResponseEntity.noContent().<Void>build())))
                 .onErrorResume(NotFoundException.class, e -> Mono.defer(() -> Mono.just(ResponseEntity.<Void>notFound().build())));
     }
+
+  @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
+  @PostMapping(
+    value = "{vetId}/albums/photos",
+    consumes = MediaType.APPLICATION_OCTET_STREAM_VALUE,
+    produces = MediaType.APPLICATION_JSON_VALUE
+)
+public Mono<ResponseEntity<Album>> addAlbumPhotoOctet(
+        @PathVariable String vetId,
+        @RequestHeader("Photo-Name") String photoName,
+        @RequestBody Mono<byte[]> fileData
+) {
+    return fileData
+            .flatMap(bytes -> vetsServiceClient.addAlbumPhotoFromBytes(vetId, photoName, bytes))
+            .map(saved -> ResponseEntity.status(HttpStatus.CREATED).body(saved))
+            .defaultIfEmpty(ResponseEntity.badRequest().build());
+}
+
+@SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
+@PostMapping(
+    value = "{vetId}/albums/photos",
+    consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+    produces = MediaType.APPLICATION_JSON_VALUE
+)
+public Mono<ResponseEntity<Album>> addAlbumPhotoMultipart(
+        @PathVariable String vetId,
+        @RequestPart("photoName") String photoName,
+        @RequestPart("file") Mono<FilePart> file
+) {
+    return file
+            .flatMap(fp -> vetsServiceClient.addAlbumPhoto(vetId, photoName, fp))
+            .map(saved -> ResponseEntity.status(HttpStatus.CREATED).body(saved))
+            .defaultIfEmpty(ResponseEntity.badRequest().build());
+}
+
 
     //education
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
