@@ -31,7 +31,7 @@ angular.module('inventoriesProductUpdateForm')
             $http.put('/api/gateway/inventories/' + inventoryId + '/products/' + productId, data)
                 .then(function (response) {
                     console.log(response);
-                    $state.go('productList', {inventoryId: inventoryId});
+                    $state.go('inventoriesProduct', {inventoryId: inventoryId});
                 }, function (response) {
                     var error = response.data;
                     error.errors = error.errors || [];

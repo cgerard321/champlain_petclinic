@@ -13,13 +13,13 @@ angular.module('inventoriesProductForm')
                 productQuantity: self.product.productQuantity,
                 productSalePrice: self.product.productSalePrice
             }
-            var inventoryId = InventoryService.getInventoryId();
+            var inventoryId = $stateParams.inventoryId || InventoryService.getInventoryId();
             console.log("InventoryId: " + inventoryId);
             $http.post('/api/gateway/inventories/' + inventoryId + '/products', data
             )
                 .then(function (response) {
                     console.log(response);
-                    $state.go('productList', {inventoryId: inventoryId});
+                    $state.go('inventoriesProduct', {inventoryId: inventoryId});
                 }, function (response) {
                     var error = response.data;
                     error.errors = error.errors || [];

@@ -8,7 +8,7 @@ angular.module('inventoriesProductForm', ['ui.router'])
                 url: '/inventories/:inventoryId/product/new',
                 params : {inventoryId: null},
                 // url: '/product/new',
-                template: '<product-form></product-form>'
+                template: '<inventories-product-form></inventories-product-form>'
             })
 
     }]);
