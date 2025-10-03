@@ -43,19 +43,19 @@ public class VisitsControllerV1 {
         return ResponseEntity.ok().body(visitsServiceClient.getAllVisits(description));
     }
 
-    @GetMapping(value ="/{visitId}")
-    public Mono<VisitResponseDTO> getVisitByVisitId(@PathVariable String visitId){
-        return visitsServiceClient.getVisitByVisitId(visitId);
-    }
-
-    // To check
-//    @SecuredEndpoint(allowedRoles = {Roles.ALL})
-//    @GetMapping(value = "/{visitId}", produces = MediaType.APPLICATION_JSON_VALUE)
-//    public Mono<ResponseEntity<VisitResponseDTO>> getVisitByVisitId(@PathVariable String visitId) {
-//        return visitsServiceClient.getVisitByVisitId(visitId)
-//                .map(ResponseEntity::ok)
-//                .defaultIfEmpty(ResponseEntity.notFound().build());
+//    @GetMapping(value ="/{visitId}")
+//    public Mono<VisitResponseDTO> getVisitByVisitId(@PathVariable String visitId){
+//        return visitsServiceClient.getVisitByVisitId(visitId);
 //    }
+
+
+    @SecuredEndpoint(allowedRoles = {Roles.ALL})
+    @GetMapping(value = "/{visitId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<VisitResponseDTO>> getVisitByVisitId(@PathVariable String visitId) {
+        return visitsServiceClient.getVisitByVisitId(visitId)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
 
     @GetMapping(value = "/pets/{petId}/visits", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<VisitResponseDTO> getVisitsForPet(@PathVariable String petId){
@@ -103,16 +103,18 @@ public class VisitsControllerV1 {
     }
 
 
-    @DeleteMapping (value = "/{visitId}")
-    public Mono<ResponseEntity<Void>> deleteVisitsByVisitId(@PathVariable String visitId){
-        return visitsServiceClient.deleteVisitByVisitId(visitId).then(Mono.just(ResponseEntity.noContent().<Void>build()))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+    @DeleteMapping("/{visitId}")
+    public Mono<ResponseEntity<Void>> deleteVisitsByVisitId(@PathVariable String visitId) {
+        return visitsServiceClient.deleteVisitByVisitId(visitId)
+                .map(v -> ResponseEntity.noContent().<Void>build()) // deleted
+                .switchIfEmpty(Mono.just(ResponseEntity.notFound().build())); // not found
     }
 
     @DeleteMapping(value = "/cancelled")
     public Mono<ResponseEntity<Void>> deleteAllCancelledVisits(){
-        return visitsServiceClient.deleteAllCancelledVisits().then(Mono.just(ResponseEntity.noContent().<Void>build()))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+        return visitsServiceClient.deleteAllCancelledVisits()
+                .map(v -> ResponseEntity.noContent().<Void>build())
+                .switchIfEmpty(Mono.just(ResponseEntity.notFound().build()));
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
@@ -207,7 +209,7 @@ public class VisitsControllerV1 {
     }
 
     @DeleteMapping(value="/emergencies/{emergencyId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<EmergencyResponseDTO>> DeteleEmergency(@PathVariable String emergencyId) {
+    public Mono<ResponseEntity<EmergencyResponseDTO>> deleteEmergency(@PathVariable String emergencyId) {
         return Mono.just(emergencyId)
                 //  .filter(id -> id.length() == 36)
                 //   .switchIfEmpty(Mono.error(new InvalidInputException("the provided emergency id is invalid: " + emergencyId)))
