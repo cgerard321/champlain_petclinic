@@ -2224,6 +2224,1190 @@ class VetsServiceClientIntegrationTest {
         assertEquals("DELETE", recordedRequest.getMethod());
     }
 
+    @Test
+    void addPhotoToVetFromBytes_shouldSucceed() throws Exception {
+        String vetId = "deb1950c-3c56-45dc-874b-89e352695eb7";
+        String photoName = "test-photo.jpg";
+        byte[] photoData = "test photo data".getBytes();
+
+        PhotoResponseDTO mockResponse = PhotoResponseDTO.builder()
+                .vetId(vetId)
+                .filename(photoName)
+                .imgType("image/jpeg")
+                .resource(photoData)
+                .build();
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(201)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(mapper.writeValueAsString(mockResponse)));
+
+        Mono<Resource> result = vetsServiceClient.addPhotoToVetFromBytes(vetId, photoName, photoData);
+
+        StepVerifier.create(result)
+                .assertNext(resource -> {
+                    assertThat(resource).isNotNull();
+                    assertThat(resource).isInstanceOf(ByteArrayResource.class);
+                })
+                .verifyComplete();
+
+        RecordedRequest recordedRequest = server.takeRequest();
+        assertEquals("/" + vetId + "/photos", recordedRequest.getPath());
+        assertEquals("POST", recordedRequest.getMethod());
+        assertEquals(MediaType.APPLICATION_JSON_VALUE, recordedRequest.getHeader(HttpHeaders.CONTENT_TYPE));
+    }
+
+    @Test
+    void addPhotoToVetFromBytes_shouldThrowNotFoundException_when404() throws Exception {
+        String vetId = "invalid-vet-id";
+        String photoName = "test-photo.jpg";
+        byte[] photoData = "test photo data".getBytes();
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(404)
+                .setBody(""));
+
+        Mono<Resource> result = vetsServiceClient.addPhotoToVetFromBytes(vetId, photoName, photoData);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable ->
+                        throwable instanceof NotFoundException &&
+                                throwable.getMessage().contains("Photo for vet " + vetId + " not found"))
+                .verify();
+    }
+
+    @Test
+    void addPhotoToVetFromBytes_shouldThrowIllegalArgumentException_when500() throws Exception {
+        String vetId = "deb1950c-3c56-45dc-874b-89e352695eb7";
+        String photoName = "test-photo.jpg";
+        byte[] photoData = "test photo data".getBytes();
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(500)
+                .setBody(""));
+
+        Mono<Resource> result = vetsServiceClient.addPhotoToVetFromBytes(vetId, photoName, photoData);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable ->
+                        throwable instanceof IllegalArgumentException &&
+                                throwable.getMessage().contains("Server error"))
+                .verify();
+    }
+
+    @Test
+    void getVetByVetBillId_shouldSucceed() throws JsonProcessingException, InterruptedException {
+        String vetBillId = "bill-123";
+        VetResponseDTO expectedResponse = buildVetResponseDTO();
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(200)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(mapper.writeValueAsString(expectedResponse)));
+
+        Mono<VetResponseDTO> result = vetsServiceClient.getVetByVetBillId(vetBillId);
+
+        StepVerifier.create(result)
+                .assertNext(vet -> {
+                    assertThat(vet).isNotNull();
+                    assertThat(vet.getVetId()).isEqualTo(expectedResponse.getVetId());
+                    assertThat(vet.getFirstName()).isEqualTo(expectedResponse.getFirstName());
+                    assertThat(vet.getLastName()).isEqualTo(expectedResponse.getLastName());
+                })
+                .verifyComplete();
+
+        RecordedRequest recordedRequest = server.takeRequest();
+        assertEquals("/vetBillId/" + vetBillId, recordedRequest.getPath());
+        assertEquals("GET", recordedRequest.getMethod());
+    }
+
+    @Test
+    void getVetByVetBillId_shouldThrowNotFoundException_when404() throws Exception {
+        String vetBillId = "invalid-bill-id";
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(404)
+                .setBody(""));
+
+        Mono<VetResponseDTO> result = vetsServiceClient.getVetByVetBillId(vetBillId);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable ->
+                        throwable instanceof ExistingVetNotFoundException &&
+                                throwable.getMessage().contains("vet with this vetBillId not found: " + vetBillId))
+                .verify();
+    }
+
+    @Test
+    void getVetByVetBillId_shouldThrowIllegalArgumentException_when500() throws Exception {
+        String vetBillId = "bill-123";
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(500)
+                .setBody(""));
+
+        Mono<VetResponseDTO> result = vetsServiceClient.getVetByVetBillId(vetBillId);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable ->
+                        throwable instanceof IllegalArgumentException &&
+                                throwable.getMessage().contains("Something went wrong with the server"))
+                .verify();
+    }
+
+    @Test
+    void deletePhotoByVetId_shouldSucceed() throws Exception {
+        String vetId = "deb1950c-3c56-45dc-874b-89e352695eb7";
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(204)
+                .setBody(""));
+
+        Mono<Void> result = vetsServiceClient.deletePhotoByVetId(vetId);
+
+        StepVerifier.create(result)
+                .verifyComplete();
+
+        RecordedRequest recordedRequest = server.takeRequest();
+        assertEquals("/" + vetId + "/photo", recordedRequest.getPath());
+        assertEquals("DELETE", recordedRequest.getMethod());
+    }
+
+    @Test
+    void deletePhotoByVetId_shouldThrowNotFoundException_when404() throws Exception {
+        String vetId = "invalid-vet-id";
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(404)
+                .setBody(""));
+
+        Mono<Void> result = vetsServiceClient.deletePhotoByVetId(vetId);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable ->
+                        throwable instanceof ExistingVetNotFoundException &&
+                                throwable.getMessage().equals("Photo not found for vetId: " + vetId))
+                .verify();
+    }
+
+    @Test
+    void deletePhotoByVetId_shouldThrowIllegalArgumentException_when500() throws Exception {
+        String vetId = "deb1950c-3c56-45dc-874b-89e352695eb7";
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(500)
+                .setBody(""));
+
+        Mono<Void> result = vetsServiceClient.deletePhotoByVetId(vetId);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable ->
+                        throwable instanceof IllegalArgumentException &&
+                                throwable.getMessage().contains("Server error occurred while deleting photo for vetId: " + vetId))
+                .verify();
+    }
+
+    @Test
+    void deleteAlbumPhotoById_shouldSucceed() throws Exception {
+        String vetId = "deb1950c-3c56-45dc-874b-89e352695eb7";
+        Integer photoId = 123;
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(204)
+                .setBody(""));
+
+        Mono<Void> result = vetsServiceClient.deleteAlbumPhotoById(vetId, photoId);
+
+        StepVerifier.create(result)
+                .verifyComplete();
+
+        RecordedRequest recordedRequest = server.takeRequest();
+        assertEquals("/" + vetId + "/albums/" + photoId, recordedRequest.getPath());
+        assertEquals("DELETE", recordedRequest.getMethod());
+    }
+
+    @Test
+    void deleteAlbumPhotoById_shouldThrowNotFoundException_when404() throws Exception {
+        String vetId = "invalid-vet-id";
+        Integer photoId = 123;
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(404)
+                .setBody(""));
+
+        Mono<Void> result = vetsServiceClient.deleteAlbumPhotoById(vetId, photoId);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable ->
+                        throwable instanceof NotFoundException &&
+                                throwable.getMessage().contains("Album photo not found: " + photoId))
+                .verify();
+    }
+
+    @Test
+    void deleteAlbumPhotoById_shouldThrowIllegalArgumentException_when500() throws Exception {
+        String vetId = "deb1950c-3c56-45dc-874b-89e352695eb7";
+        Integer photoId = 123;
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(500)
+                .setBody(""));
+
+        Mono<Void> result = vetsServiceClient.deleteAlbumPhotoById(vetId, photoId);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable ->
+                        throwable instanceof IllegalArgumentException &&
+                                throwable.getMessage().contains("Server error occurred while deleting album photo with ID: " + photoId))
+                .verify();
+    }
+
+    @Test
+    void getAllAlbumsByVetId_shouldSucceed() throws JsonProcessingException, InterruptedException {
+        String vetId = "deb1950c-3c56-45dc-874b-89e352695eb7";
+        
+        Album album1 = Album.builder()
+                .id(1)
+                .vetId(vetId)
+                .filename("photo1.jpg")
+                .imgType("image/jpeg")
+                .data("photo1data".getBytes())
+                .build();
+        
+        Album album2 = Album.builder()
+                .id(2)
+                .vetId(vetId)
+                .filename("photo2.jpg")
+                .imgType("image/jpeg")
+                .data("photo2data".getBytes())
+                .build();
+        
+        List<Album> albums = Arrays.asList(album1, album2);
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(200)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(mapper.writeValueAsString(albums)));
+
+        Flux<Album> result = vetsServiceClient.getAllAlbumsByVetId(vetId);
+
+        StepVerifier.create(result)
+                .assertNext(album -> {
+                    assertThat(album).isNotNull();
+                    assertThat(album.getId()).isEqualTo(1);
+                    assertThat(album.getVetId()).isEqualTo(vetId);
+                    assertThat(album.getFilename()).isEqualTo("photo1.jpg");
+                })
+                .assertNext(album -> {
+                    assertThat(album).isNotNull();
+                    assertThat(album.getId()).isEqualTo(2);
+                    assertThat(album.getVetId()).isEqualTo(vetId);
+                    assertThat(album.getFilename()).isEqualTo("photo2.jpg");
+                })
+                .verifyComplete();
+
+        RecordedRequest recordedRequest = server.takeRequest();
+        assertEquals("/" + vetId + "/albums", recordedRequest.getPath());
+        assertEquals("GET", recordedRequest.getMethod());
+    }
+
+    @Test
+    void getAllAlbumsByVetId_shouldThrowNotFoundException_when404() throws Exception {
+        String vetId = "invalid-vet-id";
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(404)
+                .setBody(""));
+
+        Flux<Album> result = vetsServiceClient.getAllAlbumsByVetId(vetId);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable ->
+                        throwable instanceof ExistingVetNotFoundException &&
+                                throwable.getMessage().contains("Albums for vet " + vetId + " not found"))
+                .verify();
+    }
+
+    @Test
+    void getAllAlbumsByVetId_shouldThrowIllegalArgumentException_when500() throws Exception {
+        String vetId = "deb1950c-3c56-45dc-874b-89e352695eb7";
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(500)
+                .setBody(""));
+
+        Flux<Album> result = vetsServiceClient.getAllAlbumsByVetId(vetId);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable ->
+                        throwable instanceof IllegalArgumentException &&
+                                throwable.getMessage().contains("Server error"))
+                .verify();
+    }
+
+    @Test
+    void addVet_shouldSucceed() throws JsonProcessingException, InterruptedException {
+        VetRequestDTO requestDTO = buildVetRequestDTO();
+        VetResponseDTO expectedResponse = buildVetResponseDTO();
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(201)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(mapper.writeValueAsString(expectedResponse)));
+
+        Mono<VetResponseDTO> result = vetsServiceClient.addVet(Mono.just(requestDTO));
+
+        StepVerifier.create(result)
+                .assertNext(vet -> {
+                    assertThat(vet).isNotNull();
+                    assertThat(vet.getVetId()).isEqualTo(expectedResponse.getVetId());
+                    assertThat(vet.getFirstName()).isEqualTo(expectedResponse.getFirstName());
+                    assertThat(vet.getLastName()).isEqualTo(expectedResponse.getLastName());
+                })
+                .verifyComplete();
+
+        RecordedRequest recordedRequest = server.takeRequest();
+        assertEquals("/", recordedRequest.getPath());
+        assertEquals("POST", recordedRequest.getMethod());
+    }
+
+    @Test
+    void addVet_shouldThrowIllegalArgumentException_when400() throws Exception {
+        VetRequestDTO requestDTO = buildVetRequestDTO();
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(400)
+                .setBody(""));
+
+        Mono<VetResponseDTO> result = vetsServiceClient.addVet(Mono.just(requestDTO));
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable ->
+                        throwable instanceof IllegalArgumentException &&
+                                throwable.getMessage().contains("Something went wrong"))
+                .verify();
+    }
+
+    @Test
+    void addVet_shouldThrowIllegalArgumentException_when500() throws Exception {
+        VetRequestDTO requestDTO = buildVetRequestDTO();
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(500)
+                .setBody(""));
+
+        Mono<VetResponseDTO> result = vetsServiceClient.addVet(Mono.just(requestDTO));
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable ->
+                        throwable instanceof IllegalArgumentException &&
+                                throwable.getMessage().contains("Something went wrong with the server"))
+                .verify();
+    }
+
+    @Test
+    void addSpecialtiesByVetId_shouldSucceed() throws Exception {
+        String vetId = "deb1950c-3c56-45dc-874b-89e352695eb7";
+        SpecialtyDTO specialtyDTO = new SpecialtyDTO();
+        specialtyDTO.setSpecialtyId("specialty-123");
+        specialtyDTO.setName("Test Specialty");
+        
+        VetResponseDTO expectedResponse = buildVetResponseDTO();
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(200)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(mapper.writeValueAsString(expectedResponse)));
+
+        Mono<VetResponseDTO> result = vetsServiceClient.addSpecialtiesByVetId(vetId, Mono.just(specialtyDTO));
+
+        StepVerifier.create(result)
+                .assertNext(vet -> {
+                    assertThat(vet).isNotNull();
+                    assertThat(vet.getVetId()).isEqualTo(expectedResponse.getVetId());
+                })
+                .verifyComplete();
+
+        RecordedRequest recordedRequest = server.takeRequest();
+        assertEquals("/" + vetId + "/specialties", recordedRequest.getPath());
+        assertEquals("POST", recordedRequest.getMethod());
+    }
+
+    @Test
+    void addSpecialtiesByVetId_shouldThrowNotFoundException_when404() throws Exception {
+        String vetId = "nonexistent-vet";
+        SpecialtyDTO specialtyDTO = new SpecialtyDTO();
+        specialtyDTO.setSpecialtyId("specialty-123");
+        specialtyDTO.setName("Test Specialty");
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(404)
+                .setBody(""));
+
+        Mono<VetResponseDTO> result = vetsServiceClient.addSpecialtiesByVetId(vetId, Mono.just(specialtyDTO));
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable ->
+                        throwable instanceof ExistingVetNotFoundException &&
+                                throwable.getMessage().contains("Vet not found: " + vetId))
+                .verify();
+    }
+
+    @Test
+    void addSpecialtiesByVetId_shouldThrowIllegalArgumentException_when500() throws Exception {
+        String vetId = "deb1950c-3c56-45dc-874b-89e352695eb7";
+        SpecialtyDTO specialtyDTO = new SpecialtyDTO();
+        specialtyDTO.setSpecialtyId("specialty-123");
+        specialtyDTO.setName("Test Specialty");
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(500)
+                .setBody(""));
+
+        Mono<VetResponseDTO> result = vetsServiceClient.addSpecialtiesByVetId(vetId, Mono.just(specialtyDTO));
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable ->
+                        throwable instanceof IllegalArgumentException &&
+                                throwable.getMessage().contains("Something went wrong with the server"))
+                .verify();
+    }
+
+    @Test
+    void getPhotoByVetId_shouldThrowNotFoundException_when404() throws Exception {
+        String vetId = "nonexistent-vet";
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(404)
+                .setBody(""));
+
+        Mono<Resource> result = vetsServiceClient.getPhotoByVetId(vetId);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable ->
+                        throwable instanceof ExistingVetNotFoundException &&
+                                throwable.getMessage().contains("Photo for vet " + vetId + " not found"))
+                .verify();
+    }
+
+    @Test
+    void getPhotoByVetId_shouldThrowIllegalArgumentException_when500() throws Exception {
+        String vetId = "deb1950c-3c56-45dc-874b-89e352695eb7";
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(500)
+                .setBody(""));
+
+        Mono<Resource> result = vetsServiceClient.getPhotoByVetId(vetId);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable ->
+                        throwable instanceof IllegalArgumentException &&
+                                throwable.getMessage().contains("Something went wrong with the server"))
+                .verify();
+    }
+
+
+
+
+    @Test
+    void addPhotoToVetFromBytes_withNullFilename_shouldUseDefaultContentType() throws Exception {
+        String vetId = "deb1950c-3c56-45dc-874b-89e352695eb7";
+        String photoName = null;
+        byte[] photoData = "test photo data".getBytes();
+
+        PhotoResponseDTO expectedResponse = new PhotoResponseDTO();
+        expectedResponse.setVetId(vetId);
+        expectedResponse.setFilename("default.jpg");
+        expectedResponse.setImgType("image/jpeg");
+        expectedResponse.setResource(photoData);
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(201)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(mapper.writeValueAsString(expectedResponse)));
+
+        Mono<Resource> result = vetsServiceClient.addPhotoToVetFromBytes(vetId, photoName, photoData);
+
+        StepVerifier.create(result)
+                .assertNext(resource -> {
+                    assertThat(resource).isNotNull();
+                    assertThat(resource).isInstanceOf(ByteArrayResource.class);
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void addPhotoToVetFromBytes_withGifExtension_shouldUseGifContentType() throws Exception {
+        String vetId = "deb1950c-3c56-45dc-874b-89e352695eb7";
+        String photoName = "test-photo.gif";
+        byte[] photoData = "test photo data".getBytes();
+
+        PhotoResponseDTO expectedResponse = new PhotoResponseDTO();
+        expectedResponse.setVetId(vetId);
+        expectedResponse.setFilename(photoName);
+        expectedResponse.setImgType("image/gif");
+        expectedResponse.setResource(photoData);
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(201)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(mapper.writeValueAsString(expectedResponse)));
+
+        Mono<Resource> result = vetsServiceClient.addPhotoToVetFromBytes(vetId, photoName, photoData);
+
+        StepVerifier.create(result)
+                .assertNext(resource -> {
+                    assertThat(resource).isNotNull();
+                    assertThat(resource).isInstanceOf(ByteArrayResource.class);
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void addPhotoToVetFromBytes_withUnknownExtension_shouldUseDefaultContentType() throws Exception {
+        String vetId = "deb1950c-3c56-45dc-874b-89e352695eb7";
+        String photoName = "test-photo.xyz";
+        byte[] photoData = "test photo data".getBytes();
+
+        PhotoResponseDTO expectedResponse = new PhotoResponseDTO();
+        expectedResponse.setVetId(vetId);
+        expectedResponse.setFilename(photoName);
+        expectedResponse.setImgType("image/jpeg");
+        expectedResponse.setResource(photoData);
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(201)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(mapper.writeValueAsString(expectedResponse)));
+
+        Mono<Resource> result = vetsServiceClient.addPhotoToVetFromBytes(vetId, photoName, photoData);
+
+        StepVerifier.create(result)
+                .assertNext(resource -> {
+                    assertThat(resource).isNotNull();
+                    assertThat(resource).isInstanceOf(ByteArrayResource.class);
+                })
+                .verifyComplete();
+    }
+   
+
+    @Test
+    void updateVet_shouldSucceed() throws Exception {
+        String vetId = "deb1950c-3c56-45dc-874b-89e352695eb7";
+        
+        VetRequestDTO vetRequest = VetRequestDTO.builder()
+                .firstName("John")
+                .lastName("Smith")
+                .email("john.smith@example.com")
+                .phoneNumber("514-123-4567")
+                .active(true)
+                .build();
+        
+        VetResponseDTO expectedResponse = VetResponseDTO.builder()
+                .vetId(vetId)
+                .firstName("John")
+                .lastName("Smith")
+                .email("john.smith@example.com")
+                .phoneNumber("514-123-4567")
+                .active(true)
+                .build();
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(200)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(mapper.writeValueAsString(expectedResponse)));
+
+        Mono<VetResponseDTO> result = vetsServiceClient.updateVet(vetId, Mono.just(vetRequest));
+
+        StepVerifier.create(result)
+                .assertNext(response -> {
+                    assertThat(response).isNotNull();
+                    assertThat(response.getVetId()).isEqualTo(vetId);
+                    assertThat(response.getFirstName()).isEqualTo("John");
+                    assertThat(response.getLastName()).isEqualTo("Smith");
+                    assertThat(response.getEmail()).isEqualTo("john.smith@example.com");
+                    assertThat(response.getPhoneNumber()).isEqualTo("514-123-4567");
+                    assertThat(response.isActive()).isTrue();
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void updateVet_shouldThrowExistingVetNotFoundException_when404() throws Exception {
+        String vetId = "nonexistent-vet";
+        
+        VetRequestDTO vetRequest = VetRequestDTO.builder()
+                .firstName("John")
+                .lastName("Smith")
+                .build();
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(404)
+                .setBody(""));
+
+        Mono<VetResponseDTO> result = vetsServiceClient.updateVet(vetId, Mono.just(vetRequest));
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable ->
+                        throwable instanceof ExistingVetNotFoundException &&
+                                throwable.getMessage().contains("vetId not found: " + vetId))
+                .verify();
+    }
+
+    @Test
+    void updateVet_shouldThrowIllegalArgumentException_when400() throws Exception {
+        String vetId = "deb1950c-3c56-45dc-874b-89e352695eb7";
+        
+        VetRequestDTO vetRequest = VetRequestDTO.builder()
+                .firstName("John")
+                .lastName("Smith")
+                .build();
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(400)
+                .setBody(""));
+
+        Mono<VetResponseDTO> result = vetsServiceClient.updateVet(vetId, Mono.just(vetRequest));
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable ->
+                        throwable instanceof IllegalArgumentException &&
+                                throwable.getMessage().contains("Something went wrong with the client"))
+                .verify();
+    }
+
+    @Test
+    void updateVet_shouldThrowIllegalArgumentException_when500() throws Exception {
+        String vetId = "deb1950c-3c56-45dc-874b-89e352695eb7";
+        
+        VetRequestDTO vetRequest = VetRequestDTO.builder()
+                .firstName("John")
+                .lastName("Smith")
+                .build();
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(500)
+                .setBody(""));
+
+        Mono<VetResponseDTO> result = vetsServiceClient.updateVet(vetId, Mono.just(vetRequest));
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable ->
+                        throwable instanceof IllegalArgumentException &&
+                                throwable.getMessage().contains("Something went wrong with the server"))
+                .verify();
+    }
+
+    @Test
+    void updateEducationByVetIdAndByEducationId_shouldSucceed() throws Exception {
+        String vetId = "deb1950c-3c56-45dc-874b-89e352695eb7";
+        String educationId = "ed123456";
+
+        EducationRequestDTO educationRequest = EducationRequestDTO.builder()
+                .vetId(vetId)
+                .schoolName("Harvard University")
+                .degree("Doctor of Veterinary Medicine")
+                .fieldOfStudy("Veterinary Medicine")
+                .startDate("2015")
+                .endDate("2019")
+                .build();
+
+        EducationResponseDTO expectedResponse = EducationResponseDTO.builder()
+                .educationId(educationId)
+                .vetId(vetId)
+                .schoolName("Harvard University")
+                .degree("Doctor of Veterinary Medicine")
+                .fieldOfStudy("Veterinary Medicine")
+                .startDate("2015")
+                .endDate("2019")
+                .build();
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(200)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(mapper.writeValueAsString(expectedResponse)));
+
+        Mono<EducationResponseDTO> result = vetsServiceClient.updateEducationByVetIdAndByEducationId(vetId, educationId, Mono.just(educationRequest));
+
+        StepVerifier.create(result)
+                .assertNext(response -> {
+                    assertThat(response).isNotNull();
+                    assertThat(response.getEducationId()).isEqualTo(educationId);
+                    assertThat(response.getVetId()).isEqualTo(vetId);
+                    assertThat(response.getSchoolName()).isEqualTo("Harvard University");
+                    assertThat(response.getDegree()).isEqualTo("Doctor of Veterinary Medicine");
+                    assertThat(response.getFieldOfStudy()).isEqualTo("Veterinary Medicine");
+                    assertThat(response.getStartDate()).isEqualTo("2015");
+                    assertThat(response.getEndDate()).isEqualTo("2019");
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void updateEducationByVetIdAndByEducationId_shouldThrowNotFoundException_when404() throws Exception {
+        String vetId = "nonexistent-vet";
+        String educationId = "nonexistent-education";
+
+        EducationRequestDTO educationRequest = EducationRequestDTO.builder()
+                .vetId(vetId)
+                .schoolName("Harvard University")
+                .degree("Doctor of Veterinary Medicine")
+                .fieldOfStudy("Veterinary Medicine")
+                .startDate("2015")
+                .endDate("2019")
+                .build();
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(404)
+                .setBody(""));
+
+        Mono<EducationResponseDTO> result = vetsServiceClient.updateEducationByVetIdAndByEducationId(vetId, educationId, Mono.just(educationRequest));
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable ->
+                        throwable instanceof NotFoundException &&
+                                throwable.getMessage().contains("Education not found for vetId: " + vetId + " and educationId: " + educationId))
+                .verify();
+    }
+
+    @Test
+    void updateEducationByVetIdAndByEducationId_shouldThrowIllegalArgumentException_when400() throws Exception {
+        String vetId = "deb1950c-3c56-45dc-874b-89e352695eb7";
+        String educationId = "ed123456";
+
+        EducationRequestDTO educationRequest = EducationRequestDTO.builder()
+                .vetId(vetId)
+                .schoolName("Harvard University")
+                .degree("Doctor of Veterinary Medicine")
+                .fieldOfStudy("Veterinary Medicine")
+                .startDate("2015")
+                .endDate("2019")
+                .build();
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(400)
+                .setBody(""));
+
+        Mono<EducationResponseDTO> result = vetsServiceClient.updateEducationByVetIdAndByEducationId(vetId, educationId, Mono.just(educationRequest));
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable ->
+                        throwable instanceof IllegalArgumentException &&
+                                throwable.getMessage().contains("Something went wrong with the client"))
+                .verify();
+    }
+
+    @Test
+    void updateEducationByVetIdAndByEducationId_shouldThrowIllegalArgumentException_when500() throws Exception {
+        String vetId = "deb1950c-3c56-45dc-874b-89e352695eb7";
+        String educationId = "ed123456";
+
+        EducationRequestDTO educationRequest = EducationRequestDTO.builder()
+                .vetId(vetId)
+                .schoolName("Harvard University")
+                .degree("Doctor of Veterinary Medicine")
+                .fieldOfStudy("Veterinary Medicine")
+                .startDate("2015")
+                .endDate("2019")
+                .build();
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(500)
+                .setBody(""));
+
+        Mono<EducationResponseDTO> result = vetsServiceClient.updateEducationByVetIdAndByEducationId(vetId, educationId, Mono.just(educationRequest));
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable ->
+                        throwable instanceof IllegalArgumentException &&
+                                throwable.getMessage().contains("Something went wrong with the server"))
+                .verify();
+    }
+
+    @Test
+    void addPhotoToVetFromBytes_comprehensive_shouldSucceed() throws Exception {
+        String vetId = "deb1950c-3c56-45dc-874b-89e352695eb7";
+        String photoName = "test-photo.jpg";
+        byte[] photoData = "test photo data".getBytes();
+
+        PhotoResponseDTO expectedResponse = new PhotoResponseDTO();
+        expectedResponse.setVetId(vetId);
+        expectedResponse.setFilename(photoName);
+        expectedResponse.setImgType("image/jpeg");
+        expectedResponse.setResource(photoData);
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(201)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(mapper.writeValueAsString(expectedResponse)));
+
+        Mono<Resource> result = vetsServiceClient.addPhotoToVetFromBytes(vetId, photoName, photoData);
+
+        StepVerifier.create(result)
+                .assertNext(resource -> {
+                    assertThat(resource).isNotNull();
+                    assertThat(resource).isInstanceOf(ByteArrayResource.class);
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void addPhotoToVetFromBytes_withBase64Response_shouldSucceed() throws Exception {
+        String vetId = "deb1950c-3c56-45dc-874b-89e352695eb7";
+        String photoName = "test-photo.jpg";
+        byte[] photoData = "test photo data".getBytes();
+        String base64Data = java.util.Base64.getEncoder().encodeToString(photoData);
+
+        PhotoResponseDTO expectedResponse = new PhotoResponseDTO();
+        expectedResponse.setVetId(vetId);
+        expectedResponse.setFilename(photoName);
+        expectedResponse.setImgType("image/jpeg");
+        expectedResponse.setResourceBase64(base64Data);
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(201)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(mapper.writeValueAsString(expectedResponse)));
+
+        Mono<Resource> result = vetsServiceClient.addPhotoToVetFromBytes(vetId, photoName, photoData);
+
+        StepVerifier.create(result)
+                .assertNext(resource -> {
+                    assertThat(resource).isNotNull();
+                    assertThat(resource).isInstanceOf(ByteArrayResource.class);
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void addPhotoToVetFromBytes_withNullPhotoName_comprehensive_shouldUseDefaultContentType() throws Exception {
+        String vetId = "deb1950c-3c56-45dc-874b-89e352695eb7";
+        String photoName = null;
+        byte[] photoData = "test photo data".getBytes();
+
+        PhotoResponseDTO expectedResponse = new PhotoResponseDTO();
+        expectedResponse.setVetId(vetId);
+        expectedResponse.setFilename("default.jpg");
+        expectedResponse.setImgType("image/jpeg");
+        expectedResponse.setResource(photoData);
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(201)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(mapper.writeValueAsString(expectedResponse)));
+
+        Mono<Resource> result = vetsServiceClient.addPhotoToVetFromBytes(vetId, photoName, photoData);
+
+        StepVerifier.create(result)
+                .assertNext(resource -> {
+                    assertThat(resource).isNotNull();
+                    assertThat(resource).isInstanceOf(ByteArrayResource.class);
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void addPhotoToVetFromBytes_comprehensive_shouldThrowNotFoundException_when404() throws Exception {
+        String vetId = "nonexistent-vet";
+        String photoName = "test-photo.jpg";
+        byte[] photoData = "test photo data".getBytes();
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(404)
+                .setBody(""));
+
+        Mono<Resource> result = vetsServiceClient.addPhotoToVetFromBytes(vetId, photoName, photoData);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable ->
+                        throwable instanceof NotFoundException &&
+                                throwable.getMessage().contains("Photo for vet " + vetId + " not found"))
+                .verify();
+    }
+
+    @Test
+    void addPhotoToVetFromBytes_comprehensive_shouldThrowIllegalArgumentException_when400() throws Exception {
+        String vetId = "deb1950c-3c56-45dc-874b-89e352695eb7";
+        String photoName = "test-photo.jpg";
+        byte[] photoData = "test photo data".getBytes();
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(400)
+                .setBody(""));
+
+        Mono<Resource> result = vetsServiceClient.addPhotoToVetFromBytes(vetId, photoName, photoData);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable ->
+                        throwable instanceof IllegalArgumentException &&
+                                throwable.getMessage().contains("Client error"))
+                .verify();
+    }
+
+    @Test
+    void addPhotoToVetFromBytes_comprehensive_shouldThrowIllegalArgumentException_when500() throws Exception {
+        String vetId = "deb1950c-3c56-45dc-874b-89e352695eb7";
+        String photoName = "test-photo.jpg";
+        byte[] photoData = "test photo data".getBytes();
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(500)
+                .setBody(""));
+
+        Mono<Resource> result = vetsServiceClient.addPhotoToVetFromBytes(vetId, photoName, photoData);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable ->
+                        throwable instanceof IllegalArgumentException &&
+                                throwable.getMessage().contains("Server error"))
+                .verify();
+    }
+
+    @Test
+    void updateRatingByVetIdAndByRatingId_shouldSucceed() throws Exception {
+        String vetId = "deb1950c-3c56-45dc-874b-89e352695eb7";
+        String ratingId = "rating-123";
+        
+        RatingRequestDTO ratingRequest = RatingRequestDTO.builder()
+                .vetId(vetId)
+                .rateScore(4.0)
+                .rateDescription("Good service")
+                .rateDate("2024-10-02")
+                .customerName("John Doe")
+                .build();
+
+        RatingResponseDTO expectedResponse = RatingResponseDTO.builder()
+                .ratingId(ratingId)
+                .vetId(vetId)
+                .rateScore(4.0)
+                .rateDescription("Good service")
+                .rateDate("2024-10-02")
+                .customerName("John Doe")
+                .build();
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(200)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(mapper.writeValueAsString(expectedResponse)));
+
+        Mono<RatingResponseDTO> result = vetsServiceClient.updateRatingByVetIdAndByRatingId(
+                vetId, ratingId, Mono.just(ratingRequest));
+
+        StepVerifier.create(result)
+                .assertNext(response -> {
+                    assertThat(response).isNotNull();
+                    assertThat(response.getRatingId()).isEqualTo(ratingId);
+                    assertThat(response.getVetId()).isEqualTo(vetId);
+                    assertThat(response.getRateScore()).isEqualTo(4.0);
+                })
+                .verifyComplete();
+    }
+
+   
+
+    @Test
+    void getVetByVetId_shouldSucceed() throws Exception {
+        String vetId = "deb1950c-3c56-45dc-874b-89e352695eb7";
+        
+        VetResponseDTO expectedResponse = VetResponseDTO.builder()
+                .vetId(vetId)
+                .vetBillId("vet-bill-123")
+                .firstName("John")
+                .lastName("Doe")
+                .email("john.doe@example.com")
+                .phoneNumber("123-456-7890")
+                .resume("Experienced veterinarian")
+                .active(true)
+                .workday(Set.of())
+                .workHoursJson("{}")
+                .specialties(Set.of())
+                .build();
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(200)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(mapper.writeValueAsString(expectedResponse)));
+
+        Mono<VetResponseDTO> result = vetsServiceClient.getVetByVetId(vetId);
+
+        StepVerifier.create(result)
+                .assertNext(response -> {
+                    assertThat(response).isNotNull();
+                    assertThat(response.getVetId()).isEqualTo(vetId);
+                    assertThat(response.getFirstName()).isEqualTo("John");
+                    assertThat(response.getLastName()).isEqualTo("Doe");
+                    assertThat(response.getEmail()).isEqualTo("john.doe@example.com");
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void getVetByVetId_shouldThrowExistingVetNotFoundException_when404() throws Exception {
+        String vetId = "nonexistent-vet";
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(404)
+                .setBody(""));
+
+        Mono<VetResponseDTO> result = vetsServiceClient.getVetByVetId(vetId);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable ->
+                        throwable instanceof ExistingVetNotFoundException &&
+                                throwable.getMessage().contains("vetId not found: " + vetId))
+                .verify();
+    }
+
+    @Test
+    void getVetByVetId_shouldThrowIllegalArgumentException_when400() throws Exception {
+        String vetId = "invalid-vet-id";
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(400)
+                .setBody(""));
+
+        Mono<VetResponseDTO> result = vetsServiceClient.getVetByVetId(vetId);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable ->
+                        throwable instanceof IllegalArgumentException &&
+                                throwable.getMessage().contains("Something went wrong with the client"))
+                .verify();
+    }
+
+    @Test
+    void getVetByVetId_shouldThrowIllegalArgumentException_when500() throws Exception {
+        String vetId = "deb1950c-3c56-45dc-874b-89e352695eb7";
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(500)
+                .setBody(""));
+
+        Mono<VetResponseDTO> result = vetsServiceClient.getVetByVetId(vetId);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable ->
+                        throwable instanceof IllegalArgumentException &&
+                                throwable.getMessage().contains("Something went wrong with the server"))
+                .verify();
+    }
+
+    // Tests for highest value methods to reach 90%+ coverage
+    @Test
+    void createVet_successTest() throws JsonProcessingException {
+        VetRequestDTO vetRequest = buildVetRequestDTO();
+        VetResponseDTO expectedResponse = buildVetResponseDTO();
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(201)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(mapper.writeValueAsString(expectedResponse)));
+
+        Mono<VetResponseDTO> result = vetsServiceClient.createVet(Mono.just(vetRequest));
+
+        StepVerifier.create(result)
+                .assertNext(response -> {
+                    assertThat(response).isNotNull();
+                    assertThat(response.getVetId()).isEqualTo(expectedResponse.getVetId());
+                    assertThat(response.getFirstName()).isEqualTo(expectedResponse.getFirstName());
+                    assertThat(response.getLastName()).isEqualTo(expectedResponse.getLastName());
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void deleteVet_successTest() throws Exception {
+        String vetId = "deb1950c-3c56-45dc-874b-89e352695eb7";
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(204));
+
+        Mono<Void> result = vetsServiceClient.deleteVet(vetId);
+
+        StepVerifier.create(result)
+                .verifyComplete();
+    }
+
+    // Additional tests to cover red (0% coverage) methods
+    @Test
+    void getVets_shouldThrowExistingVetNotFoundException_when404() throws Exception {
+        server.enqueue(new MockResponse()
+                .setResponseCode(404)
+                .setBody(""));
+
+        Flux<VetResponseDTO> result = vetsServiceClient.getVets();
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable ->
+                        throwable instanceof ExistingVetNotFoundException &&
+                                throwable.getMessage().contains("No vets found"))
+                .verify();
+    }
+
+    @Test
+    void getActiveVets_shouldThrowExistingVetNotFoundException_when404() throws Exception {
+        server.enqueue(new MockResponse()
+                .setResponseCode(404)
+                .setBody(""));
+
+        Flux<VetResponseDTO> result = vetsServiceClient.getActiveVets();
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable ->
+                        throwable instanceof ExistingVetNotFoundException &&
+                                throwable.getMessage().contains("No active vets found"))
+                .verify();
+    }
+
+    @Test
+    void getInactiveVets_shouldThrowExistingVetNotFoundException_when404() throws Exception {
+        server.enqueue(new MockResponse()
+                .setResponseCode(404)
+                .setBody(""));
+
+        Flux<VetResponseDTO> result = vetsServiceClient.getInactiveVets();
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable ->
+                        throwable instanceof ExistingVetNotFoundException &&
+                                throwable.getMessage().contains("No inactive vets found"))
+                .verify();
+    }
+
+    @Test
+    void getRatingsOfAVetBasedOnDate_shouldThrowNotFoundException_when404() throws Exception {
+        String vetId = "nonexistent-vet";
+        Map<String, String> queryParams = Map.of("year", "2023");
+        
+        server.enqueue(new MockResponse()
+                .setResponseCode(404)
+                .setBody(""));
+
+        Flux<RatingResponseDTO> result = vetsServiceClient.getRatingsOfAVetBasedOnDate(vetId, queryParams);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable ->
+                        throwable instanceof NotFoundException &&
+                                throwable.getMessage().contains("No ratings found for vetId: " + vetId))
+                .verify();
+    }
+
+    @Test
+    void getTopThreeVetsWithHighestAverageRating_shouldThrowNotFoundException_when404() throws Exception {
+        server.enqueue(new MockResponse()
+                .setResponseCode(404)
+                .setBody(""));
+
+        Flux<VetAverageRatingDTO> result = vetsServiceClient.getTopThreeVetsWithHighestAverageRating();
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable ->
+                        throwable instanceof NotFoundException &&
+                                throwable.getMessage().contains("No vets found"))
+                .verify();
+    }
+
 
 }
 
