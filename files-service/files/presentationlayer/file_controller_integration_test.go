@@ -100,8 +100,11 @@ func reset() {
 
 func addFileToContext(file *datalayer.FileInfo, data []byte) {
 	err := fileRepo.AddFileInfo(file)
+	if err != nil {
+		panic(err)
+	}
+	
 	err = minioService.AddFile(file, data)
-
 	if err != nil {
 		panic(err)
 	}
