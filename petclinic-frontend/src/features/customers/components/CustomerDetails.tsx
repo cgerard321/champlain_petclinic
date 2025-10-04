@@ -155,110 +155,68 @@ const CustomerDetails: FC = () => {
     setSelectedPetId('');
   };
 
-  const handlePetUpdated = (): void => {
-    if (ownerId) {
-      const fetchOwnerDetails = async (): Promise<void> => {
-        const ownerResponse = await getOwner(ownerId);
-        setOwner(ownerResponse.data);
+  //eliminated code duplication
+  const fetchOwnerDetails = async (): Promise<void> => {
+    if (!ownerId) return;
 
-        const userResponse = await axiosInstance.get(`/users/${ownerId}`, {
+    try {
+      const ownerResponse = await getOwner(ownerId);
+      setOwner(ownerResponse.data);
+
+      const userResponse = await axiosInstance.get(`/users/${ownerId}`, {
+        useV2: true,
+      });
+      setIsDisabled(userResponse.data.disabled);
+
+      const petsResponse = await axiosInstance.get(
+        `/pets/owners/${ownerId}/pets`,
+        {
           useV2: true,
-        });
-        setIsDisabled(userResponse.data.disabled);
+        }
+      );
+      setPets(petsResponse.data);
 
-        const petsResponse = await axiosInstance.get(
-          `/pets/owners/${ownerId}/pets`,
-          {
-            useV2: true,
-          }
-        );
-        setPets(petsResponse.data);
+      const billsResponse = await axiosInstance.get(
+        `/bills/customer/${ownerId}`,
+        { useV2: false }
+      );
 
-        const billsResponse = await axiosInstance.get(
-          `/bills/customer/${ownerId}`,
-          { useV2: false }
-        );
+      const billsData: Bill[] = [];
+      const data = billsResponse.data;
 
-        const billsData: Bill[] = [];
-        const data = billsResponse.data;
-
-        if (typeof data === 'string') {
-          const pieces = data.split('\n').filter(Boolean);
-          for (const piece of pieces) {
-            if (piece.startsWith('data:')) {
-              const billData = piece.slice(5).trim();
-              try {
-                const bill: Bill = JSON.parse(billData);
-                billsData.push(bill);
-              } catch (error) {
-                console.error('Error parsing bill data:', error);
-              }
+      if (typeof data === 'string') {
+        const pieces = data.split('\n').filter(Boolean);
+        for (const piece of pieces) {
+          if (piece.startsWith('data:')) {
+            const billData = piece.slice(5).trim();
+            try {
+              const bill: Bill = JSON.parse(billData);
+              billsData.push(bill);
+            } catch (error) {
+              console.error('Error parsing bill data:', error);
             }
           }
-        } else if (Array.isArray(data)) {
-          billsData.push(...data);
-        } else {
-          console.error('Unexpected bills response format:', data);
         }
+      } else if (Array.isArray(data)) {
+        billsData.push(...data);
+      } else {
+        console.error('Unexpected bills response format:', data);
+      }
 
-        setBills(billsData);
-        setLoading(false);
-      };
-      fetchOwnerDetails();
+      setBills(billsData);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching owner details:', error);
+      setLoading(false);
     }
   };
 
+  const handlePetUpdated = (): void => {
+    fetchOwnerDetails();
+  };
+
   const handlePetDeleted = (): void => {
-    if (ownerId) {
-      const fetchOwnerDetails = async (): Promise<void> => {
-        const ownerResponse = await getOwner(ownerId);
-        setOwner(ownerResponse.data);
-
-        const userResponse = await axiosInstance.get(`/users/${ownerId}`, {
-          useV2: true,
-        });
-        setIsDisabled(userResponse.data.disabled);
-
-        const petsResponse = await axiosInstance.get(
-          `/pets/owners/${ownerId}/pets`,
-          {
-            useV2: true,
-          }
-        );
-        setPets(petsResponse.data);
-
-        const billsResponse = await axiosInstance.get(
-          `/bills/customer/${ownerId}`,
-          { useV2: false }
-        );
-
-        const billsData: Bill[] = [];
-        const data = billsResponse.data;
-
-        if (typeof data === 'string') {
-          const pieces = data.split('\n').filter(Boolean);
-          for (const piece of pieces) {
-            if (piece.startsWith('data:')) {
-              const billData = piece.slice(5).trim();
-              try {
-                const bill: Bill = JSON.parse(billData);
-                billsData.push(bill);
-              } catch (error) {
-                console.error('Error parsing bill data:', error);
-              }
-            }
-          }
-        } else if (Array.isArray(data)) {
-          billsData.push(...data);
-        } else {
-          console.error('Unexpected bills response format:', data);
-        }
-
-        setBills(billsData);
-        setLoading(false);
-      };
-      fetchOwnerDetails();
-    }
+    fetchOwnerDetails();
   };
 
   return (

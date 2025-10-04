@@ -157,6 +157,27 @@ const ProfilePage = (): JSX.Element => {
     setSelectedPetId('');
   };
 
+  //eliminated code duplication
+  const fetchOwnerData = async (): Promise<void> => {
+    if (!user.userId) return;
+
+    try {
+      const ownerResponse = await getOwner(user.userId);
+      const ownerData = ownerResponse.data;
+      if (ownerData.pets && ownerData.pets.length > 0) {
+        setOwner(ownerData);
+      } else {
+        setOwner({
+          ...ownerData,
+          pets: [],
+        });
+      }
+    } catch (error) {
+      setError('Error fetching owner data');
+      console.error('Error fetching owner data:', error);
+    }
+  };
+
   const handlePetUpdated = (updatedPet?: PetResponseModel): void => {
     if (updatedPet) {
       setOwner(prevOwner => {
@@ -179,50 +200,12 @@ const ProfilePage = (): JSX.Element => {
         };
       });
     } else {
-      if (user.userId) {
-        const fetchOwnerData = async (): Promise<void> => {
-          try {
-            const ownerResponse = await getOwner(user.userId);
-            const ownerData = ownerResponse.data;
-            if (ownerData.pets && ownerData.pets.length > 0) {
-              setOwner(ownerData);
-            } else {
-              setOwner({
-                ...ownerData,
-                pets: [],
-              });
-            }
-          } catch (error) {
-            setError('Error fetching owner data');
-            console.error('Error fetching owner data:', error);
-          }
-        };
-        fetchOwnerData();
-      }
+      fetchOwnerData();
     }
   };
 
   const handlePetDeleted = (): void => {
-    if (user.userId) {
-      const fetchOwnerData = async (): Promise<void> => {
-        try {
-          const ownerResponse = await getOwner(user.userId);
-          const ownerData = ownerResponse.data;
-          if (ownerData.pets && ownerData.pets.length > 0) {
-            setOwner(ownerData);
-          } else {
-            setOwner({
-              ...ownerData,
-              pets: [],
-            });
-          }
-        } catch (error) {
-          setError('Error fetching owner data');
-          console.error('Error fetching owner data:', error);
-        }
-      };
-      fetchOwnerData();
-    }
+    fetchOwnerData();
   };
 
   if (error) {
