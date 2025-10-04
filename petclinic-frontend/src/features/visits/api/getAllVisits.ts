@@ -9,7 +9,7 @@ export async function getAllVisits(searchTerm: string): Promise<Visit[]> {
     const response = await axiosInstance.get('/visits', {
       responseType: 'text',
       params,
-      useV2: true,
+      useV2: false,
     });
     return response.data
       .split('data:')
