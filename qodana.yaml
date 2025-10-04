@@ -8,15 +8,23 @@ version: "1.0"
 profile:
   name: qodana.recommended
 
+# Use default scope - Qodana will analyze the entire project by default
+
 
 #Enable inspections
 include:
   - name: VulnerableLibrariesGlobal
   - name: UNUSED_IMPORT
   - name: FieldCanBeLocal
-#  - name: DefaultAnnotationParam
   - name: CommentedOutCode
   - name: JvmCoverageInspection
+  # Additional inspections for comprehensive file analysis
+  - name: UnusedDeclaration
+  - name: UnusedLocalVariable
+  - name: UnusedParameter
+  - name: UnusedField
+  - name: UnusedMethod
+  - name: UnusedClass
 
 
 exclude:

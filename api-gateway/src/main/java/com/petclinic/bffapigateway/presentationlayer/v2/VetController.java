@@ -1,5 +1,6 @@
 package com.petclinic.bffapigateway.presentationlayer.v2;
 
+// Test comment for Qodana analysis
 
 import com.petclinic.bffapigateway.domainclientlayer.AuthServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
