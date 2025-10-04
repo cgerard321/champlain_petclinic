@@ -1,10 +1,10 @@
 'use strict';
 
-angular.module('inventoryUpdateForm')
-    .controller('InventoryUpdateFormController', ["$http", '$state', '$stateParams', '$scope', function ($http, $state, $stateParams, $scope) {
+angular.module('inventoriesUpdateForm')
+    .controller('InventoriesUpdateFormController', ["$http", '$state', '$stateParams', '$scope', function ($http, $state, $stateParams, $scope) {
         var self = this;
         var inventoryId = $stateParams.inventoryId || "";
-        var method = $stateParams.method;
+        var method = 'edit';
         $scope.inventoryTypeFormUpdateSearch = "";
         $scope.inventoryTypeUpdateOptions = ["New Type"];
         $http.get('api/gateway/inventories/' + inventoryId).then(function (resp) {

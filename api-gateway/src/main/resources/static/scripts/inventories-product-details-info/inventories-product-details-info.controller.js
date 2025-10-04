@@ -1,16 +1,15 @@
-
-
-angular.module('shopProductDetailsInfo')
-    .controller('ShopProductDetailsInfoController', ["$http", '$state', '$stateParams', function ($http, $state, $stateParams) {
+angular.module('inventoriesProductDetailsInfo')
+    .controller('InventoriesProductDetailsInfoController', ["$http", '$state', '$stateParams', '$scope', 'InventoryService', function ($http, $state, $stateParams, $scope, InventoryService) {
         var self = this;
         self.product = {}; // Initialize self.product
+        var inventoryId = InventoryService.getInventoryId();
         var productId = $stateParams.productId;
 
-        $http.get('/api/v2/gateway/products/' + productId)
+        $http.get('/api/gateway/inventories/' + inventoryId + '/products/' + productId)
             .then(function (resp) {
                 // Handle the response data for the specific product
                 var product = resp.data;
-                //console.log("Product found:", product);
+                console.log("Product found:", product);
                 self.product = product; // Update the product data in your controller
             })
             .catch(function (error) {
