@@ -2,7 +2,7 @@ package presentationlayer
 
 import (
 	"files-service/files/businesslayer"
-	"files-service/files/util"
+	"files-service/files/models"
 	"files-service/files/util/exception"
 	"net/http"
 
@@ -22,23 +22,41 @@ func NewFileController(service businesslayer.FileService) *FilesController {
 func (i *FilesController) getFile(c *gin.Context) {
 	id := c.Param("id")
 	if len([]rune(id)) != 36 {
-		util.HandleExceptions(c, exception.NewInvalidFileIdException(id))
+		cancel(c, exception.NewInvalidFileIdException(id))
 		return
 	}
 
 	file, err := i.s.GetFile(id)
 	if err != nil {
-		util.HandleExceptions(c, err)
+		cancel(c, err)
 		return
 	}
 
 	c.IndentedJSON(http.StatusOK, file)
 }
 
-func (i *FilesController) Routes(engine *gin.Engine) error { //TODO a way to make sure only image can be saved to the image bucket should be implemented
-	filesGroup := engine.Group("/files")
+func (i *FilesController) addFile(c *gin.Context) {
+	model := &models.FileRequestModel{}
+	err := c.ShouldBindJSON(model)
+	if err != nil {
+		cancel(c, err)
+		return
+	}
+
+	file, err := i.s.AddFile(model)
+	if err != nil {
+		cancel(c, err)
+		return
+	}
+
+	c.IndentedJSON(http.StatusCreated, file)
+}
+
+func (i *FilesController) Routes(engine *gin.Engine) error {
+	filesGroup := engine.Group("/files").Use(GlobalExceptionHandler)
 
 	filesGroup.GET("/:id", i.getFile)
+	filesGroup.POST("/", ValidateRequestBody, i.addFile)
 
 	return nil
 }

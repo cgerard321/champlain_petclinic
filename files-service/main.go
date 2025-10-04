@@ -67,7 +67,7 @@ func main() {
 		util.SetupMinio(minioClient, accessKeyID, secretAccessKey)
 	}
 
-	ir := datalayer.NewFileLinkRepo(db)
+	ir := datalayer.NewFileInfoRepo(db)
 
 	mc := clientlayer.NewMinioServiceClient(minioClient)
 	is := businesslayer.NewFileService(ir, mc)
