@@ -40,6 +40,7 @@ func (i *FilesController) addFile(c *gin.Context) {
 	err := c.ShouldBindJSON(model)
 	if err != nil {
 		cancel(c, err)
+		return
 	}
 
 	file, err := i.s.AddFile(model)
