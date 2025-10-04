@@ -16,6 +16,7 @@ import com.petclinic.vet.servicelayer.education.EducationResponseDTO;
 import com.petclinic.vet.servicelayer.ratings.RatingRequestDTO;
 import com.petclinic.vet.servicelayer.ratings.RatingResponseDTO;
 import com.petclinic.vet.util.EntityDtoUtil;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.r2dbc.connection.init.ConnectionFactoryInitializer;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.util.StreamUtils;
@@ -105,10 +107,22 @@ class VetControllerIntegrationTest {
     //badge image
     ClassPathResource cpr = new ClassPathResource("images/full_food_bowl.png");
 
+    // could this help?
+    @BeforeEach
+    public void setup() {
+        Mono<Void> clean = badgeRepository.deleteAll()
+                .then(photoRepository.deleteAll())
+                .then(ratingRepository.deleteAll())
+                .then(educationRepository.deleteAll())
+                .then(vetRepository.deleteAll());
+
+        clean.block();
+    }
 
     @Test
     void getAllRatingsForAVet_WithValidVetId_ShouldSucceed() {
         Publisher<Rating> setup = ratingRepository.deleteAll()
+                .then(vetRepository.save(vet))
                 .thenMany(ratingRepository.save(rating1))
                 .thenMany(ratingRepository.save(rating2));
 
@@ -153,6 +167,7 @@ class VetControllerIntegrationTest {
     @Test
     void getNumberOfRatingsForAVet_WithValidVetId_ShouldSucceed() {
         Publisher<Rating> setup = ratingRepository.deleteAll()
+                .then(vetRepository.save(vet))
                 .thenMany(ratingRepository.save(rating1))
                 .thenMany(ratingRepository.save(rating2));
 
@@ -191,6 +206,14 @@ class VetControllerIntegrationTest {
 
     @Test
     void addRatingToAVet_WithPredefinedDescriptionOnly_ShouldSetRateDescriptionToPredefinedDescription() {
+        Publisher<Vet> setup = vetRepository.deleteAll()
+                .then(vetRepository.save(vet));
+
+        StepVerifier
+                .create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
+
         StepVerifier
                 .create(ratingRepository.deleteAll())
                 .expectNextCount(0)
@@ -223,8 +246,17 @@ class VetControllerIntegrationTest {
                     assertThat(ratingResponseDTO.getRateDate()).isEqualTo(ratingRequestDTO.getRateDate());
                 });
     }
+
     @Test
     void addRatingWithWrittenDescriptionAndPredefinedValue_ShouldSetRatingDescriptionToPredefinedValue(){
+        Publisher<Vet> setup = vetRepository.deleteAll()
+                .then(vetRepository.save(vet));
+
+        StepVerifier
+                .create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
+
         StepVerifier
                 .create(ratingRepository.deleteAll())
                 .expectNextCount(0)
@@ -257,6 +289,7 @@ class VetControllerIntegrationTest {
                     assertThat(ratingResponseDTO.getRateDate()).isEqualTo(ratingRequestDTO.getRateDate());
                 });
     }
+
     @Test
     void addRatingToAVet_WithInvalidVetId_ShouldNotSucceed() {
         StepVerifier
@@ -292,6 +325,14 @@ class VetControllerIntegrationTest {
 
     @Test
     void addRatingToAVet_WithInvalidRateScore_ShouldNotSucceed() {
+        Publisher<Vet> setup = vetRepository.deleteAll()
+                .then(vetRepository.save(vet));
+
+        StepVerifier
+                .create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
+
         StepVerifier
                 .create(ratingRepository.deleteAll())
                 .expectNextCount(0)
@@ -317,43 +358,9 @@ class VetControllerIntegrationTest {
     }
 
     @Test
-    void addRatingToVet_WithPredefinedDescription_ShouldSetRateDescriptionToPredefinedDescription() {
-        StepVerifier
-                .create(ratingRepository.deleteAll())
-                .expectNextCount(0)
-                .verifyComplete();
-
-        RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
-                .vetId(VET_ID)
-                .rateScore(5.0)
-                .rateDescription(null)
-                .predefinedDescription(PredefinedDescription.GOOD)
-                .rateDate("21/09/2023")
-                .build();
-
-        client.post()
-                .uri("/vets/" + VET_ID + "/ratings")
-                .accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(ratingRequestDTO)
-                .exchange()
-                .expectStatus().isCreated()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody(RatingResponseDTO.class)
-                .value(ratingResponseDTO -> {
-                    assertNotNull(ratingResponseDTO);
-                    assertNotNull(ratingResponseDTO.getRatingId());
-                    assertThat(ratingResponseDTO.getVetId()).isEqualTo(ratingRequestDTO.getVetId());
-                    assertThat(ratingResponseDTO.getRateScore()).isEqualTo(ratingRequestDTO.getRateScore());
-                    assertThat(ratingResponseDTO.getRateDescription()).isEqualTo(ratingRequestDTO.getPredefinedDescription().name());
-                    assertThat(ratingResponseDTO.getPredefinedDescription()).isEqualTo(ratingRequestDTO.getPredefinedDescription());
-                    assertThat(ratingResponseDTO.getRateDate()).isEqualTo(ratingRequestDTO.getRateDate());
-                });
-    }
-
-    @Test
     void updateRating_withValidVetIdAndValidRatingId_shouldSucceed() {
         Publisher<Rating> setup = ratingRepository.deleteAll()
+                .then(vetRepository.save(vet))
                 .thenMany(ratingRepository.save(rating1));
 
         StepVerifier
@@ -412,6 +419,7 @@ class VetControllerIntegrationTest {
     @Test
     void updateRating_withPredefinedDescriptionOnly_ShouldSetRateDescriptionToPredefinedDescription() {
         Publisher<Rating> setup = ratingRepository.deleteAll()
+                .then(vetRepository.save(vet))
                 .thenMany(ratingRepository.save(rating1));
 
         StepVerifier
@@ -449,6 +457,7 @@ class VetControllerIntegrationTest {
                 });
     }
 
+
     @Test
     void updateRating_withValidVetIdAndInvalidRatingId_shouldNotSucceed() {
         Publisher<Rating> setup1 = ratingRepository.deleteAll()
@@ -483,6 +492,7 @@ class VetControllerIntegrationTest {
     @Test
     void updateRating_withInvalidValues_shouldNotSucceed() {
         Publisher<Rating> setup = ratingRepository.deleteAll()
+                .then(vetRepository.save(vet))
                 .thenMany(ratingRepository.save(rating1));
 
         StepVerifier
@@ -588,6 +598,7 @@ class VetControllerIntegrationTest {
                 .jsonPath("$.message").isEqualTo("ratingId not found: "+invalidRatingId);
     }
 
+
     @Test
     void getAverageRatingByVetId_ShouldSucceed() {
 
@@ -608,6 +619,7 @@ class VetControllerIntegrationTest {
                 });
     }
 
+
     @Test
     void getAverageRatingByVetId_withInvalidVetId_ShouldThrowNumberZero() {
 
@@ -624,6 +636,7 @@ class VetControllerIntegrationTest {
                         }
                 );
     }
+
 
     @Test
     void getRatingBasedOnYearDate_ShouldSucceed() {
@@ -718,6 +731,7 @@ class VetControllerIntegrationTest {
 
     }
 
+
     @Test
     void getTopThreeVetWithTheHighestRating_ShouldSucceed(){
 
@@ -756,9 +770,11 @@ class VetControllerIntegrationTest {
                 });
     }
 
+
     @Test
     void getPercentageOfRatingsByVetId_ShouldSucceed(){
         Publisher<Rating> setup = ratingRepository.deleteAll()
+                .then(vetRepository.save(vet))
                 .thenMany(ratingRepository.save(rating1))
                 .thenMany(ratingRepository.save(rating2));
         StepVerifier
@@ -792,6 +808,7 @@ class VetControllerIntegrationTest {
                 .jsonPath("$.message").isEqualTo("vetId not found: "+invalidVetId);
 
     }
+
 
     @Test
     void getAllVets() {
@@ -1544,6 +1561,7 @@ class VetControllerIntegrationTest {
     @Test
     void updateEducation_withValidVetIdAndValidEducationId_shouldSucceed() {
         Publisher<Education> setup = educationRepository.deleteAll()
+                .then(vetRepository.save(vet))
                 .thenMany(educationRepository.save(education1));
 
         StepVerifier
@@ -1629,6 +1647,7 @@ class VetControllerIntegrationTest {
                     assertEquals(resource, response.getResponseBody());
                 });
     }*/
+
     @Test
     void getPhotoByVetId_NoExistingPhoto_ShouldReturnNotFound() {
         String emptyVetId = "1234567";

@@ -7,6 +7,7 @@ import com.petclinic.vet.dataaccesslayer.badges.Badge;
 import com.petclinic.vet.dataaccesslayer.badges.BadgeTitle;
 import com.petclinic.vet.dataaccesslayer.ratings.PredefinedDescription;
 import com.petclinic.vet.dataaccesslayer.ratings.Rating;
+import com.petclinic.vet.exceptions.GlobalControllerExceptionHandler;
 import com.petclinic.vet.exceptions.InvalidInputException;
 import com.petclinic.vet.exceptions.NotFoundException;
 import com.petclinic.vet.presentationlayer.PhotoRequestDTO;
@@ -59,7 +60,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @WebFluxTest(controllers=VetController.class)
-@ContextConfiguration(classes = {VetController.class})
+@ContextConfiguration(classes = {VetController.class, GlobalControllerExceptionHandler.class})
 class VetControllerUnitTest {
 
     @Autowired
@@ -570,7 +571,7 @@ class VetControllerUnitTest {
                 .uri("/vets/" + INVALID_VET_ID)
                 .accept(APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
+                .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
                 .expectHeader().contentType(APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$").isNotEmpty();
@@ -587,7 +588,7 @@ class VetControllerUnitTest {
                 .body(Mono.just(vetRequestDTO), VetRequestDTO.class)
                 .accept(APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
+                .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
                 .expectHeader().contentType(APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$").isNotEmpty();
@@ -604,7 +605,7 @@ class VetControllerUnitTest {
                 .uri("/vets/" + INVALID_VET_ID)
                 .accept(APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
+                .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
                 .expectHeader().contentType(APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$").isNotEmpty();
@@ -1172,6 +1173,7 @@ class VetControllerUnitTest {
                 .contains(album1, album2);
     }
 
+
     @Test
     void whenGetAllAlbumsByVetId_withError_thenLogError() {
 
@@ -1210,6 +1212,7 @@ class VetControllerUnitTest {
                 .exchange()
                 .expectStatus().isNotFound(); // Expecting 404 Not Found
     }
+
 
     @Test
     void whenDeleteAlbumPhotoById_withError_thenReturnServerError() {
