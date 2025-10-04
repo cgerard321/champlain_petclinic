@@ -1,6 +1,6 @@
 // inventory.service.js
 
-angular.module('productForm')
+angular.module('inventoriesService', [])
     .service('InventoryService', function () {
         var inventoryId;
 

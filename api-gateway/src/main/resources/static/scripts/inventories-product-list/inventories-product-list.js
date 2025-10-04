@@ -1,14 +1,12 @@
 'use strict';
 
-angular.module('inventoryProductList', ['ui.router'])
+angular.module('inventoriesProductList', ['ui.router'])
     .config(['$stateProvider', function ($stateProvider) {
         $stateProvider
-            .state('productList', {
+            .state('inventoriesProduct', {
                 parent: 'app',
                 url: '/inventories/:inventoryId/products-pagination?page&size',
-                template: '<inventory-product-list></inventory-product-list>',
-                controller: 'InventoryProductController',
-                controllerAs: 'self'
+                template: '<inventories-product-list></inventories-product-list>',
             })
 
             .state('deleteProduct', {

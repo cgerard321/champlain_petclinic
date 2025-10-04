@@ -1,7 +1,7 @@
 'use strict';
 
-angular.module('inventoryProductList')
-    .controller('InventoryProductController', ['$http', '$scope', '$stateParams','$window', 'InventoryService', function ($http, $scope, $stateParams, $window, InventoryService) {
+angular.module('inventoriesProductList')
+    .controller('InventoriesProductController', ['$http', '$scope', '$stateParams','$window', 'InventoryService', function ($http, $scope, $stateParams, $window, InventoryService) {
         var self = this;
         var inventoryId
         const pageSize = 15;
