@@ -2,7 +2,6 @@ package com.petclinic.authservice.datalayer.user;
 
 import jakarta.persistence.Embeddable;
 import lombok.Getter;
-import lombok.Setter;
 
 import java.util.UUID;
 

@@ -580,33 +580,6 @@ const UserCart = (): JSX.Element => {
                 Checkout
               </button>
 
-              {/* Billing Form (step 1) */}
-              {showBillingForm && (
-                <div className="checkout-modal">
-                  <CartBillingForm
-                    onSubmit={() => {
-                      setShowBillingForm(false);
-                      setIsCheckoutModalOpen(true); // proceed to confirmation
-                    }}
-                  />
-                  <button onClick={() => setShowBillingForm(false)}>
-                    Cancel
-                  </button>
-                </div>
-              )}
-
-              {/* Confirm (step 2) */}
-              {isCheckoutModalOpen && (
-                <div className="checkout-modal">
-                  <h3>Confirm Checkout</h3>
-                  <p>Are you sure you want to checkout?</p>
-                  <button onClick={handleCheckout}>Yes</button>
-                  <button onClick={() => setIsCheckoutModalOpen(false)}>
-                    No
-                  </button>
-                </div>
-              )}
-
               {/* Post-checkout message */}
               {checkoutMessage && (
                 <div className="checkout-message">{checkoutMessage}</div>
@@ -670,6 +643,31 @@ const UserCart = (): JSX.Element => {
             )}
           </div>
         </div>
+        {/* Billing Form Modal */}
+        {showBillingForm && (
+          <div className="modal-backdrop">
+            <div className="modal-content">
+              <CartBillingForm
+                isOpen={true}
+                onClose={() => setShowBillingForm(false)}
+                onSubmit={async () => {
+                  await handleCheckout(); // This runs the real checkout logic
+                  setShowBillingForm(false);
+                }}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Confirm (step 2) */}
+        {isCheckoutModalOpen && (
+          <div className="checkout-modal">
+            <h3>Confirm Checkout</h3>
+            <p>Are you sure you want to checkout?</p>
+            <button onClick={handleCheckout}>Yes</button>
+            <button onClick={() => setIsCheckoutModalOpen(false)}>No</button>
+          </div>
+        )}
       </div>
     </div>
   );
