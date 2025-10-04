@@ -61,7 +61,27 @@ jobs:
           git diff --name-only origin/main...HEAD | head -20 >> $GITHUB_STEP_SUMMARY
         fi
         echo "" >> $GITHUB_STEP_SUMMARY
-        echo "**Qodana will analyze only these changed files**" >> $GITHUB_STEP_SUMMARY
+        echo "**Qodana will analyze complete files that have been modified**" >> $GITHUB_STEP_SUMMARY
+    - name: Prepare Qodana for complete file analysis
+      if: github.event_name == 'pull_request'
+      run: |
+        echo "Preparing Qodana for complete file analysis..."
+        if [ -n "${{ github.event.pull_request.base.sha }}" ]; then
+          CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }}...HEAD | grep -E '\.java$' || true)
+        else
+          CHANGED_FILES=$(git diff --name-only origin/main...HEAD | grep -E '\.java$' || true)
+        fi
+        
+        if [ -n "$CHANGED_FILES" ]; then
+          echo "Files that will be analyzed completely:"
+          echo "$CHANGED_FILES"
+          echo ""
+          echo "Note: Qodana will now analyze the complete content of these files,"
+          echo "not just the changed lines. This provides more comprehensive"
+          echo "code quality analysis."
+        else
+          echo "No relevant files changed for analysis"
+        fi
     - name: 'Qodana PR Analysis'
       id: qodana
       uses: JetBrains/qodana-action@v2025.2
@@ -69,7 +89,6 @@ jobs:
         QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
       with:
         args: "--linter,jetbrains/qodana-jvm-community:latest"
-        pr-mode: true
     - name: Display Qodana Cloud URL
       run: |
         echo "## Qodana Analysis Results" >> $GITHUB_STEP_SUMMARY
@@ -81,8 +100,9 @@ jobs:
         echo "- [Download Artifacts](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "**PR Analysis includes:**" >> $GITHUB_STEP_SUMMARY
-        echo "- Code quality issues in changed files only" >> $GITHUB_STEP_SUMMARY
-        echo "- Security vulnerabilities in modified code" >> $GITHUB_STEP_SUMMARY
-        echo "- Unused imports and dead code in PR changes" >> $GITHUB_STEP_SUMMARY
+        echo "- Complete file analysis for all modified files" >> $GITHUB_STEP_SUMMARY
+        echo "- Code quality issues in entire modified files" >> $GITHUB_STEP_SUMMARY
+        echo "- Security vulnerabilities in complete file context" >> $GITHUB_STEP_SUMMARY
+        echo "- Unused imports and dead code in full files" >> $GITHUB_STEP_SUMMARY
         echo "- Regex warnings excluded (false positives)" >> $GITHUB_STEP_SUMMARY
-        echo "- **Faster execution** - Only analyzes modified code" >> $GITHUB_STEP_SUMMARY
+        echo "- **Comprehensive analysis** - Analyzes complete modified files" >> $GITHUB_STEP_SUMMARY
