@@ -1,7 +1,7 @@
 'use strict';
 
-angular.module('inventoryList')
-    .controller('InventoryListController', ['$http', '$scope', '$stateParams', '$state', function ($http, $scope, $stateParams, $state) {
+angular.module('inventoriesList')
+    .controller('InventoriesListController', ['$http', '$scope', '$stateParams', '$state', function ($http, $scope, $stateParams, $state) {
         var self = this;
         self.currentPage = $stateParams.page = 0
         self.listSize = $stateParams.size = 10
@@ -20,11 +20,11 @@ angular.module('inventoryList')
             console.log("inventory list: " + self.inventoryList)
         });
 
-                $http.get('api/gateway/inventories').then(function (resp) {
-                    self.inventoryList = resp.data;
-                    console.log("Resp data: " + resp.data)
-                    console.log("inventory list: " + self.inventoryList)
-                });
+        $http.get('api/gateway/inventories').then(function (resp) {
+            self.inventoryList = resp.data;
+            console.log("Resp data: " + resp.data)
+            console.log("inventory list: " + self.inventoryList)
+        });
         $scope.inventoryTypeOptions = []
         //custom types handler
         $http.get("api/gateway/inventories/type").then(function (resp) {
@@ -49,7 +49,7 @@ angular.module('inventoryList')
 //search by inventory field
         function getInventoryList(inventoryName, inventoryType, inventoryDescription){
 
-            $state.transitionTo('inventoryList', {page: self.currentPage, size: self.listSize}, {notify: false});
+            $state.transitionTo('inventories', {page: self.currentPage, size: self.listSize}, {notify: false});
             var queryString = '';
             name = ""
             type = ""

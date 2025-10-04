@@ -1,12 +1,12 @@
 'use strict';
 
-angular.module('inventoryList', ['ui.router'])
+angular.module('inventoriesList', ['ui.router'])
     .config(['$stateProvider', function ($stateProvider) {
         $stateProvider
             .state('inventories', {
                 parent: 'app',
                 url: '/inventories',
-                template: '<inventory-list></inventory-list>'
+                template: '<inventories-list></inventories-list>'
             })
 
 

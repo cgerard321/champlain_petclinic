@@ -1,13 +1,13 @@
 'use strict';
 
-angular.module('inventoryUpdateForm', ['ui.router'])
+angular.module('inventoriesUpdateForm', ['ui.router'])
     .config(['$stateProvider', function ($stateProvider) {
         $stateProvider
 
             .state('updateInventory', {
                     parent: 'app',
                     url: '/inventories/:inventoryId/edit',
-                    template: '<inventory-update-form></inventory-update-form>'
+                    template: '<inventories-update-form></inventories-update-form>'
                 }
             )
 
