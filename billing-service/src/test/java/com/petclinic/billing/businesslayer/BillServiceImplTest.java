@@ -1,11 +1,16 @@
 package com.petclinic.billing.businesslayer;
 
 import com.petclinic.billing.datalayer.*;
+import com.petclinic.billing.domainclientlayer.OwnerClient;
+import com.petclinic.billing.domainclientlayer.VetClient;
 import com.petclinic.billing.exceptions.InvalidPaymentException;
 import com.petclinic.billing.exceptions.NotFoundException;
+import com.petclinic.billing.util.EntityDtoUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -37,6 +42,11 @@ public class BillServiceImplTest {
     @MockBean
     BillRepository repo;
 
+    @MockBean
+    VetClient vetClient;
+
+    @MockBean
+    OwnerClient ownerClient;
 
     @Autowired
     BillService billService;
@@ -308,25 +318,70 @@ public class BillServiceImplTest {
                 })
                 .verify();
     }
+
     @Test
-    public void test_createBill(){
+    void createBill_success() {
+        // Arrange
+        BillRequestDTO billDTO = new BillRequestDTO();
+        billDTO.setBillStatus(BillStatus.PAID);
+        billDTO.setVetId("vet-123");
+        billDTO.setCustomerId("owner-456");
+        billDTO.setDueDate(LocalDate.now().plusDays(30));
 
-        Bill billEntity = buildBill();
+        // Mock VetClient response
+        VetResponseDTO vetResponse = new VetResponseDTO();
+        vetResponse.setFirstName("John");
+        vetResponse.setLastName("Doe");
+        Mockito.when(vetClient.getVetByVetId("vet-123"))
+                .thenReturn(Mono.just(vetResponse));
 
-        Mono<Bill> billMono = Mono.just(billEntity);
-        BillRequestDTO billDTO = buildBillRequestDTO();
+        // Mock OwnerClient response
+        OwnerResponseDTO ownerResponse = new OwnerResponseDTO();
+        ownerResponse.setFirstName("Alice");
+        ownerResponse.setLastName("Smith");
+        Mockito.when(ownerClient.getOwnerByOwnerId("owner-456"))
+                .thenReturn(Mono.just(ownerResponse));
 
-        when(repo.insert(any(Bill.class))).thenReturn(billMono);
+        // Mock repository insert
+        Bill billEntity = EntityDtoUtil.toBillEntity(billDTO);
+        billEntity.setBillId("generated-id");
+        billEntity.setVetFirstName("John");
+        billEntity.setVetLastName("Doe");
+        billEntity.setOwnerFirstName("Alice");
+        billEntity.setOwnerLastName("Smith");
 
-        Mono<BillResponseDTO> returnedBill = billService.createBill(Mono.just(billDTO));
+        Mockito.when(repo.insert(Mockito.any(Bill.class)))
+                .thenReturn(Mono.just(billEntity));
 
-        StepVerifier.create(returnedBill)
-                .consumeNextWith(monoDTO -> {
-                    assertEquals(billEntity.getCustomerId(), monoDTO.getCustomerId());
-                    assertEquals(billEntity.getAmount(), monoDTO.getAmount());
-                })
+        // Act + Assert
+        StepVerifier.create(billService.createBill(Mono.just(billDTO)))
+                .expectNextMatches(response ->
+                        response.getBillId().equals("generated-id") &&
+                                response.getVetFirstName().equals("John") &&
+                                response.getOwnerFirstName().equals("Alice") &&
+                                response.getBillStatus().equals(BillStatus.PAID) &&
+                                response.getDueDate() != null
+                )
                 .verifyComplete();
+    }
 
+    @Test
+    void createBill_missingBillStatus_shouldReturnError() {
+        // Arrange
+        BillRequestDTO billDTO = new BillRequestDTO();
+        billDTO.setVetId("vet-123");
+        billDTO.setCustomerId("owner-456");
+        billDTO.setDueDate(LocalDate.now().plusDays(30));
+
+        // Act + Assert
+        StepVerifier.create(billService.createBill(Mono.just(billDTO)))
+                .expectErrorSatisfies(throwable -> {
+                    assertTrue(throwable instanceof ResponseStatusException);
+                    ResponseStatusException ex = (ResponseStatusException) throwable;
+                    assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
+                    assertEquals("Bill status is required", ex.getReason());
+                })
+                .verify();
     }
 
     @Test
