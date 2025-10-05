@@ -64,6 +64,8 @@ const UserCart = (): JSX.Element => {
   const [discount, setDiscount] = useState<number>(0);
   const [voucherError, setVoucherError] = useState<string | null>(null);
 
+  const [movingAll, setMovingAll] = useState<boolean>(false);
+
   // derived totals
   const subtotal = cartItems.reduce(
     (acc, item) => acc + item.productSalePrice * (item.quantity || 1),
@@ -385,6 +387,46 @@ const UserCart = (): JSX.Element => {
     }
   };
 
+  // move all wishlist to cart
+  const moveAllWishlistToCart = async (): Promise<void> => {
+    if (!cartId || wishlistItems.length === 0) return;
+
+    setMovingAll(true);
+    setNotificationMessage(null);
+
+    try {
+      const res = await axiosInstance.post(
+        `/carts/${cartId}/wishlist/moveAll`,
+        {},
+        {
+          useV2: true,
+
+          validateStatus: () => true,
+        }
+      );
+
+      if (res.status >= 200 && res.status < 300) {
+        setNotificationMessage(
+          res.data?.message || 'Moved wishlist items to cart.'
+        );
+      } else {
+        const msg =
+          (res.data &&
+            (res.data.message || res.data.error || res.data.title)) ||
+          `Move All failed (${res.status})`;
+        setNotificationMessage(msg);
+      }
+
+      setWishlistUpdated(true);
+      notifyCartChanged();
+    } catch (e) {
+      console.error(e);
+      setNotificationMessage('Unexpected error while moving wishlist items.');
+    } finally {
+      setMovingAll(false);
+    }
+  };
+
   // persist invoices locally
   useEffect(() => {
     const saved = localStorage.getItem('invoices');
@@ -621,7 +663,30 @@ const UserCart = (): JSX.Element => {
 
         {/* Wishlist */}
         <div className="wishlist-section">
-          <h2>Your Wishlist</h2>
+          {/* Header with Move All button */}
+          <div
+            className="wishlist-header"
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}
+          >
+            <h2 style={{ margin: 0 }}>Your Wishlist</h2>
+            {wishlistItems.length > 0 && (
+              <button
+                className="move-all-to-cart-btn"
+                onClick={moveAllWishlistToCart}
+                disabled={movingAll}
+                aria-busy={movingAll}
+                title="Move all wishlist items to cart"
+              >
+                {movingAll ? 'Moving…' : 'Move All to Cart'}
+              </button>
+            )}
+          </div>
+
+          {/* Wishlist items */}
           <div className="Wishlist-items">
             {wishlistItems.length > 0 ? (
               wishlistItems.map(item => (
@@ -643,6 +708,7 @@ const UserCart = (): JSX.Element => {
             )}
           </div>
         </div>
+
         {/* Billing Form Modal */}
         {showBillingForm && (
           <div className="modal-backdrop">
