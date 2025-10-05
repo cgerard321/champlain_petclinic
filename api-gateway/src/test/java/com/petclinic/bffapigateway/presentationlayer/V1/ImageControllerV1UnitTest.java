@@ -1,4 +1,4 @@
-package com.petclinic.bffapigateway.presentationlayer.V1;
+package com.petclinic.bffapigateway.presentationlayer.v1;
 
 import com.petclinic.bffapigateway.config.GlobalExceptionHandler;
 import com.petclinic.bffapigateway.domainclientlayer.ImageServiceClient;

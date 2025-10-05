@@ -1,4 +1,4 @@
-package com.petclinic.bffapigateway.presentationlayer.V1.Products;
+package com.petclinic.bffapigateway.presentationlayer.v1.Products;
 
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
