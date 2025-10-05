@@ -18,7 +18,7 @@ import reactor.util.function.Tuples;
 import javax.print.attribute.standard.Media;
 
 @RestController
-@RequestMapping("/api/v1/ratings")
+@RequestMapping("/ratings")
 @Slf4j
 public class RatingController {
     private final RatingService ratingService;

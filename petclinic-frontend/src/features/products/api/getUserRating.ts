@@ -4,7 +4,7 @@ import axiosInstance from '@/shared/api/axiosInstance.ts';
 export async function getUserRating(productId: string): Promise<RatingModel> {
   try {
     const res = await axiosInstance.get<RatingModel>('/ratings/' + productId, {
-      useV2: true,
+      useV2: false,
     });
     const emptyResponse = { rating: 0, review: '' };
     switch (res.status) {

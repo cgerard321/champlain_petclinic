@@ -7,7 +7,7 @@ export async function getUserRatingsForProduct(
   try {
     const res = await axiosInstance.get('/ratings/product/' + productId, {
       responseType: 'text',
-      useV2: true,
+      useV2: false,
     });
 
     return res.data

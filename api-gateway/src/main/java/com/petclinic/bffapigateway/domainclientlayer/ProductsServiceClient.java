@@ -27,7 +27,7 @@ public class ProductsServiceClient {
                                  @Value("${app.products-service.host}") String productsServiceHost,
                                  @Value("${app.products-service.port}") String productsServicePort) {
         this.webClientBuilder = webClientBuilder;
-        productsServiceUrl = "http://" + productsServiceHost + ":" + productsServicePort + "/api/v1/products";
+        productsServiceUrl = "http://" + productsServiceHost + ":" + productsServicePort + "/products";
         this.webClient = webClientBuilder
                 .baseUrl(productsServiceUrl)
                 .build();

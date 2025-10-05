@@ -8,7 +8,7 @@ export async function patchGetProduct(
     const response = await axiosInstance.patch<ProductModel>(
       `/products/${productId}`,
       {
-        useV2: true,
+        useV2: false,
       }
     );
 

@@ -4,7 +4,7 @@ import { ProductBundleModel } from '@/features/products/models/ProductModels/Pro
 export async function getAllProductBundles(): Promise<ProductBundleModel[]> {
   try {
     const response = await axiosInstance.get('/products/bundles', {
-      useV2: true,
+      useV2: false,
     });
 
     return response.data;
