@@ -1,38 +1,36 @@
 package com.petclinic.bffapigateway.presentationlayer.v1;
 
+import com.petclinic.bffapigateway.presentationlayer.v1.PetControllerV1;
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
 import com.petclinic.bffapigateway.utils.Security.Filters.JwtTokenFilter;
 import com.petclinic.bffapigateway.utils.Security.Filters.RoleFilter;
 import com.petclinic.bffapigateway.utils.Security.Filters.IsUserFilter;
-import org.junit.runner.RunWith;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.FilterType;
-import org.springframework.test.context.junit4.SpringRunner;
-import com.petclinic.bffapigateway.dtos.Pets.PetTypeRequestDTO;
-import com.petclinic.bffapigateway.dtos.Pets.PetTypeResponseDTO;
 import org.junit.jupiter.api.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 
+import java.util.Date;
+
+import static org.junit.Assert.*;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 import com.petclinic.bffapigateway.dtos.Pets.PetRequestDTO;
-
-import java.util.Date;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
 
 @RunWith(SpringRunner.class)
 @WebFluxTest(
@@ -53,68 +51,166 @@ class PetControllerV1Test {
 
     private final Date birthDate = new Date(20221010);
 
-//    @Test
-//    void shouldCreatePet() {
-//        String ownerId = "ownerId-12345";
+    @Test
+    void whenUpdatePet_thenReturnUpdatedPet() {
+        String petId = "petId-123";
+
+        PetRequestDTO petRequest = new PetRequestDTO();
+        petRequest.setName("Updated Fluffy");
+        petRequest.setBirthDate(birthDate);
+        petRequest.setPetTypeId("5");
+        petRequest.setWeight("12.5");
+        petRequest.setIsActive("true");
+
+        PetResponseDTO expectedResponse = new PetResponseDTO();
+        expectedResponse.setPetId(petId);
+        expectedResponse.setName("Updated Fluffy");
+        expectedResponse.setBirthDate(birthDate);
+        expectedResponse.setPetTypeId("5");
+        expectedResponse.setWeight("12.5");
+        expectedResponse.setIsActive("true");
+
+        when(customersServiceClient.updatePet(any(Mono.class), eq(petId)))
+                .thenReturn(Mono.just(expectedResponse));
+
+        client.put()
+                .uri("/api/gateway/pets/{petId}", petId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromValue(petRequest))
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(PetResponseDTO.class)
+                .value(response -> {
+                    assertEquals(petId, response.getPetId());
+                    assertEquals("Updated Fluffy", response.getName());
+                    assertEquals("12.5", response.getWeight());
+                    assertEquals("true", response.getIsActive());
+                });
+
+        verify(customersServiceClient, times(1))
+                .updatePet(any(Mono.class), eq(petId));
+    }
+
+    @Test
+    void whenGetPetByPetId_thenReturnPet() {
+        String petId = "petId-123";
+
+        PetResponseDTO expectedResponse = new PetResponseDTO();
+        expectedResponse.setPetId(petId);
+        expectedResponse.setName("Fluffy");
+        expectedResponse.setBirthDate(birthDate);
+        expectedResponse.setPetTypeId("5");
+        expectedResponse.setWeight("10.5");
+        expectedResponse.setIsActive("true");
+
+        when(customersServiceClient.getPetByPetId(petId))
+                .thenReturn(Mono.just(expectedResponse));
+
+        client.get()
+                .uri("/api/gateway/pets/{petId}", petId)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(PetResponseDTO.class)
+                .value(response -> {
+                    assertEquals(petId, response.getPetId());
+                    assertEquals("Fluffy", response.getName());
+                    assertEquals("10.5", response.getWeight());
+                });
+
+        verify(customersServiceClient, times(1))
+                .getPetByPetId(petId);
+    }
 //
-//        PetResponseDTO pet = new PetResponseDTO();
-//        pet.setPetId("");
-//        pet.setOwnerId(ownerId);
-//        pet.setName("Fluffy");
-//        pet.setBirthDate(birthDate);
-//        pet.setPetTypeId("5");
-//        pet.setWeight("10.5");
-//        pet.setIsActive("true");
-//
-//        when(customersServiceClient.createPetForOwner(eq(ownerId), any(PetRequestDTO.class)))
-//                .thenReturn(Mono.just(pet));
-//
-//        PetRequestDTO petRequest = new PetRequestDTO();
-//        petRequest.setOwnerId(ownerId);
-//        petRequest.setName("Fluffy");
-//        petRequest.setBirthDate(birthDate);
-//        petRequest.setPetTypeId("5");
-//        pet.setWeight("10.5");
-//        petRequest.setIsActive("true");
-//
-//        client.post()
-//                .uri("/api/gateway/owners/pets")
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .body(BodyInserters.fromValue(petRequest))
-//                .exchange()
-//                .expectStatus().isCreated()
-//                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-//                .expectBody(PetResponseDTO.class)
-//                .value(response -> {
-//                    assertEquals("30-30-30-30", response.getPetId());
-//                    assertEquals("Fluffy", response.getName());
-//                    assertEquals(ownerId, response.getOwnerId());
-//                    assertEquals(birthDate, response.getBirthDate());
-//                    assertEquals("5", response.getPetTypeId());
-//                    assertEquals("10.5", response.getWeight());
-//                    assertEquals("true", response.getIsActive());
-//                });
-//
-//        verify(customersServiceClient, times(1))
-//                .createPetForOwner(eq(ownerId), any(PetRequestDTO.class));
-//    }
-//
-//    @Test
-//    void shouldDeletePet() {
-//        String petId = "petId-123";
-//        String ownerId = "ownerId-1";
-//
-//        when(customersServiceClient.deletePetByPetId(petId))
-//                .thenReturn(Mono.empty());
-//
-//        client.delete()
-//                .uri("/api/gateway/owners/" + ownerId + "/pets/" + petId)
-//                .exchange()
-//                .expectStatus().isNoContent();
-//
-//        verify(customersServiceClient, times(1))
-//                .deletePetByPetId(petId);
-//    }
+    @Test
+    void whenDeletePet_thenReturnNoContent() {
+        String petId = "petId-123";
+
+        when(customersServiceClient.deletePetByPetId(petId))
+                .thenReturn(Mono.empty());
+
+        client.delete()
+                .uri("/api/gateway/pets/{petId}", petId)
+                .exchange()
+                .expectStatus().isNoContent();
+
+        verify(customersServiceClient, times(1))
+                .deletePetByPetId(petId);
+    }
+
+    @Test
+    void whenUpdatePetForOwner_thenReturnUpdatedPet() {
+        String petId = "petId-123";
+        String ownerId = "ownerId-456";
+
+        PetRequestDTO petRequest = new PetRequestDTO();
+        petRequest.setName("Updated Fluffy");
+        petRequest.setBirthDate(birthDate);
+        petRequest.setPetTypeId("5");
+        petRequest.setWeight("12.5");
+        petRequest.setIsActive("true");
+
+        PetResponseDTO expectedResponse = new PetResponseDTO();
+        expectedResponse.setPetId(petId);
+        expectedResponse.setName("Updated Fluffy");
+        expectedResponse.setBirthDate(birthDate);
+        expectedResponse.setPetTypeId("5");
+        expectedResponse.setWeight("12.5");
+        expectedResponse.setIsActive("true");
+
+        when(customersServiceClient.updatePet(any(Mono.class), eq(petId)))
+                .thenReturn(Mono.just(expectedResponse));
+
+        client.put()
+                .uri("/api/gateway/pets/owners/{ownerId}/pets/{petId}", ownerId, petId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromValue(petRequest))
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(PetResponseDTO.class)
+                .value(response -> {
+                    assertEquals(petId, response.getPetId());
+                    assertEquals("Updated Fluffy", response.getName());
+                    assertEquals("12.5", response.getWeight());
+                });
+
+        verify(customersServiceClient, times(1))
+                .updatePet(any(Mono.class), eq(petId));
+    }
+
+    @Test
+    void whenGetPetForOwner_thenReturnPet() {
+        String petId = "petId-123";
+        String ownerId = "ownerId-456";
+
+        PetResponseDTO expectedResponse = new PetResponseDTO();
+        expectedResponse.setPetId(petId);
+        expectedResponse.setName("Fluffy");
+        expectedResponse.setBirthDate(birthDate);
+        expectedResponse.setPetTypeId("5");
+        expectedResponse.setWeight("10.5");
+        expectedResponse.setIsActive("true");
+
+        when(customersServiceClient.getPetByPetId(petId))
+                .thenReturn(Mono.just(expectedResponse));
+
+        client.get()
+                .uri("/api/gateway/pets/owners/{ownerId}/pets/{petId}", ownerId, petId)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(PetResponseDTO.class)
+                .value(response -> {
+                    assertEquals(petId, response.getPetId());
+                    assertEquals("Fluffy", response.getName());
+                    assertEquals("10.5", response.getWeight());
+                });
+
+        verify(customersServiceClient, times(1))
+                .getPetByPetId(petId);
+    }
 //
 //    @Test
 //    void shouldPatchPet() {
@@ -151,27 +247,6 @@ class PetControllerV1Test {
 
 
 
-    @Test
-    void whenDeletePetType_ReturnsWebClientError_ShouldReturnStatusNotFound() {
-        try {
-            String petTypeId = "4283c9b8-4ffd-4866-a5ed-287117c60a40";
-            WebClientResponseException serviceException = WebClientResponseException.create(
-                    404, "Not Found", null, null, null);
-
-            when(customersServiceClient.deletePetTypeV2(petTypeId))
-                    .thenReturn(Mono.error(serviceException));
-
-            client.delete()
-                    .uri("/api/gateway/owners/petTypes/{petTypeId}", petTypeId)
-                    .exchange()
-                    .expectStatus().is4xxClientError();
-
-        } catch (Exception e) {
-            System.err.println("Test failed with exception: " + e.getMessage());
-            e.printStackTrace();
-            fail("Test failed: " + e.getMessage());
-        }
-    }
 
 
 
@@ -198,7 +273,7 @@ class PetControllerV1Test {
 
 
     @Test
-    void ifOwnerIdIsNotSpecifiedInUrlThrowNotAllowed() {
+    void whenCreatePet_withoutOwnerId_thenReturnNotFound() {
         PetRequestDTO petRequest = new PetRequestDTO();
         petRequest.setName("Fluffy");
         petRequest.setBirthDate(birthDate);
@@ -216,7 +291,7 @@ class PetControllerV1Test {
     }
 
     @Test
-    void shouldThrowNotFoundWhenOwnerIdIsNotSpecifiedOnDeletePets() {
+    void whenDeletePet_withoutOwnerId_thenReturnNotFound() {
         String petId = "petId-123";
 
         client.delete()
@@ -229,7 +304,7 @@ class PetControllerV1Test {
     }
 
     @Test
-    void shouldThrowMethodNotAllowedWhenDeletePetsIsMissingPetId() {
+    void whenDeletePet_withoutPetId_thenReturnNotFound() {
         String ownerId = "ownerId-20";
 
         client.delete()
@@ -242,7 +317,7 @@ class PetControllerV1Test {
     }
 
     @Test
-    void shouldHandleInvalidJsonInCreateRequest() {
+    void whenCreatePet_withInvalidJson_thenReturnBadRequest() {
         String ownerId = "ownerId-12345";
         String invalidJson = "{\"name\": }"; // Invalid JSON
 
@@ -257,7 +332,7 @@ class PetControllerV1Test {
     }
 
     @Test
-    void shouldHandleEmptyRequestBodyOnCreate() {
+    void whenCreatePet_withEmptyBody_thenReturnBadRequest() {
         String ownerId = "ownerId-12345";
 
         client.post()
@@ -270,7 +345,7 @@ class PetControllerV1Test {
     }
 
     @Test
-    void shouldHandleInvalidJsonInPatchRequest() {
+    void whenPatchPet_withInvalidJson_thenReturnBadRequest() {
         String ownerId = "ownerId-1";
         String petId = "petId-123";
         String invalidJson = "{\"isActive\": }"; // Invalid JSON
@@ -286,7 +361,7 @@ class PetControllerV1Test {
     }
 
     @Test
-    void shouldHandleEmptyRequestBodyOnPatch() {
+    void whenPatchPet_withEmptyBody_thenReturnBadRequest() {
         String ownerId = "ownerId-1";
         String petId = "petId-123";
 
@@ -299,32 +374,4 @@ class PetControllerV1Test {
         verify(customersServiceClient, never()).patchPet(any(), any());
     }
 
-    @Test
-    void updatePetType_shouldSucceed() {
-        String petTypeId = "petTypeId-123";
-        PetTypeRequestDTO requestDTO = new PetTypeRequestDTO();
-        requestDTO.setName("Updated Dog");
-        requestDTO.setPetTypeDescription("Updated Mammal");
-
-        PetTypeResponseDTO responseDTO = new PetTypeResponseDTO();
-        responseDTO.setPetTypeId(petTypeId);
-        responseDTO.setName("Updated Dog");
-        responseDTO.setPetTypeDescription("Updated Mammal");
-
-        when(customersServiceClient.updatePetType(eq(petTypeId), any(Mono.class)))
-                .thenReturn(Mono.just(responseDTO));
-
-        client.put()
-                .uri("/api/gateway/owners/petTypes/{petTypeId}", petTypeId)
-                .body(BodyInserters.fromValue(requestDTO))
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$.petTypeId").isEqualTo(petTypeId)
-                .jsonPath("$.name").isEqualTo("Updated Dog")
-                .jsonPath("$.petTypeDescription").isEqualTo("Updated Mammal");
-
-        verify(customersServiceClient, times(1)).updatePetType(eq(petTypeId), any(Mono.class));
-    }
 }

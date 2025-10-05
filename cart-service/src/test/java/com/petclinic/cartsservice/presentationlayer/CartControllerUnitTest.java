@@ -158,7 +158,7 @@ class CartControllerUnitTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE)
+                .expectHeader().contentType(MediaType.APPLICATION_JSON_VALUE)
                 .expectBodyList(CartResponseModel.class)
                 .value(result -> {
                     assertEquals(2, result.size());

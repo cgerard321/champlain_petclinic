@@ -40,7 +40,7 @@ public class CartController {
                 .map(ResponseEntity::ok);
     }
 
-    @GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public Flux<CartResponseModel> getAllCarts() {
         return cartService.getAllCarts()
                 .doOnNext(e -> log.debug("cart-service controller is returning cart data: " + e.toString()));
