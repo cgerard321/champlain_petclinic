@@ -42,4 +42,14 @@ public class UserControllerV1 {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
+
+    @SecuredEndpoint(allowedRoles = {Roles.OWNER, Roles.ADMIN})
+    @GetMapping("/username/check")
+    public Mono<ResponseEntity<Boolean>> checkUsernameAvailability(
+            @RequestParam String username,
+            @CookieValue("Bearer") String token) {
+        return authServiceClient.checkUsernameAvailability(username, token)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.ok(false));
+    }
 }

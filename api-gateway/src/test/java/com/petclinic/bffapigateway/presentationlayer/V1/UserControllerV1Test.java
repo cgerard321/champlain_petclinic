@@ -130,4 +130,42 @@ class UserControllerV1Test {
 
         verify(authServiceClient).updateUsername(userId, newUsername, token);
     }
+
+    @Test
+    void whenCheckUsernameAvailability_thenReturnTrue() {
+        String username = "testuser";
+        String token = "test-token";
+
+        when(authServiceClient.checkUsernameAvailability(username, token))
+                .thenReturn(Mono.just(true));
+
+        client.get()
+                .uri("/api/gateway/users/username/check?username={username}", username)
+                .cookie("Bearer", token)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(Boolean.class)
+                .value(available -> assertEquals(true, available));
+
+        verify(authServiceClient).checkUsernameAvailability(username, token);
+    }
+
+    @Test
+    void whenCheckUsernameAvailability_thenReturnFalse() {
+        String username = "takenuser";
+        String token = "test-token";
+
+        when(authServiceClient.checkUsernameAvailability(username, token))
+                .thenReturn(Mono.just(false));
+
+        client.get()
+                .uri("/api/gateway/users/username/check?username={username}", username)
+                .cookie("Bearer", token)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(Boolean.class)
+                .value(available -> assertEquals(false, available));
+
+        verify(authServiceClient).checkUsernameAvailability(username, token);
+    }
 }
