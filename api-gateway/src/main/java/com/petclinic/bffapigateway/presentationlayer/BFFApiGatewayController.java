@@ -780,11 +780,6 @@ public class BFFApiGatewayController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @GetMapping(value = "users/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<UserDetails> getUserById(@PathVariable String userId, @CookieValue("Bearer") String auth) {
-        return authServiceClient.getUserById(auth, userId);
-    }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @DeleteMapping(value = "users/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
