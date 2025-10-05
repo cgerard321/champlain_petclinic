@@ -1,9 +1,9 @@
-package com.petclinic.bffapigateway.presentationlayer.V1.Products;
+package com.petclinic.bffapigateway.presentationlayer.v1.Products;
 
 import com.petclinic.bffapigateway.domainclientlayer.ProductsServiceClient;
 import com.petclinic.bffapigateway.dtos.Products.ProductResponseDTO;
 import com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigAuthService;
-import com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigProductsServices;
+import com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigProductsService;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -18,8 +18,6 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import static com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigAuthService.jwtTokenForValidAdmin;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.jupiter.api.Assertions.*;
-
 
 
 @SpringBootTest
@@ -31,7 +29,7 @@ class ProductControllerV1IntegrationTest {
     @Autowired
     private WebTestClient webTestClient;
 
-    private MockServerConfigProductsServices mockServerConfigProductsServices;
+    private MockServerConfigProductsService mockServerConfigProductsServices;
 
     private MockServerConfigAuthService mockServerConfigAuthService;
 
@@ -40,7 +38,7 @@ class ProductControllerV1IntegrationTest {
 
     @BeforeAll
     public void startMockServer(){
-        mockServerConfigProductsServices= new MockServerConfigProductsServices();
+        mockServerConfigProductsServices= new MockServerConfigProductsService();
         mockServerConfigProductsServices.registerGetAllProductsEndpoint();
 
 

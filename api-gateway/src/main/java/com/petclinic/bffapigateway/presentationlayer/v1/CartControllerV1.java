@@ -23,7 +23,7 @@ import reactor.core.publisher.Mono;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/gateway/carts")
+@RequestMapping("/api/gateway/carts")
 @Validated
 @Slf4j
 public class CartControllerV1 {
@@ -104,7 +104,7 @@ public class CartControllerV1 {
     public Mono<ResponseEntity<String>> clearCart(@PathVariable String cartId) {
         return cartServiceClient.clearCart(cartId)
                 .thenReturn(ResponseEntity.ok("Cart successfully cleared"))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+                .onErrorResume(e -> handleErrors(e, cartId, null));
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.OWNER})
