@@ -88,17 +88,15 @@
         <td><span>{{product.productSalePrice}}$</span></td>
 
         <td>
-<<<<<<< HEAD:api-gateway/src/main/resources/static/scripts/inventories-product-list/inventories-product-list.template.html
-            <a class="btn btn-info" href="#!/inventories/{{$ctrl.inventory.inventoryId}}/products/{{product.productId}}" title="Details">
-=======
             <a
                     class="btn btn-info"
-                    ui-sref="deleteProduct({
-      inventoryId: product.inventoryId,
-      productId: product.productId
-    })"
-                    title="Details">
->>>>>>> 5fe0581c (Added 2 files):api-gateway/src/main/resources/static/scripts/inventory-product-list/inventory-product-list.template.html
+                    ui-sref="productDetails({
+  inventoryId: product.inventoryId,
+  productId: product.productId
+})"
+
+                    title="Details"
+            >
                 <lord-icon
                         src="https://cdn.lordicon.com/jnzhohhs.json"
                         trigger="hover"
@@ -106,22 +104,17 @@
                 </lord-icon>
             </a>
         </td>
+        <td><a ui-sref="updateProductInventory({inventoryId: $ctrl.inventoryProductList[0].inventoryId, productId: product.productId})" title="Edit">
+            <button class="add-bundle-button btn btn-warning">
 
+                <lord-icon
+                        src="https://cdn.lordicon.com/wkvacbiw.json"
+                        trigger="hover"
+                        style="width:32px;height:32px">
+                </lord-icon>
 
-
-        <td>
-            <a
-                    ui-sref="updateProductInventory({
-    inventoryId: $ctrl.inventory.inventoryId,
-    productId: product.productId
-  })"
-                    title="Edit">
-                <button class="add-bundle-button btn btn-warning">
-                    <lord-icon src="https://cdn.lordicon.com/wkvacbiw.json" trigger="hover" style="width:32px;height:32px"></lord-icon>
-                </button>
-            </a>
-
-        </td>
+            </button>
+        </a></td>
 
 
 
