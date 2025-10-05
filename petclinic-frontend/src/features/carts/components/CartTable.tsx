@@ -18,7 +18,7 @@ export default function CartListTable(): JSX.Element {
   const getAllCarts = async (): Promise<void> => {
     try {
       const { data } = await axiosInstance.get<CartModel[]>('/carts', {
-        useV2: true,
+        useV2: false,
       });
       setCarts(data);
     } catch (err) {
@@ -36,7 +36,7 @@ export default function CartListTable(): JSX.Element {
   const handleDelete = async (cartId: string): Promise<void> => {
     if (!window.confirm('Are you sure you want to delete this cart?')) return;
     try {
-      await axiosInstance.delete(`/carts/${cartId}`, { useV2: true });
+      await axiosInstance.delete(`/carts/${cartId}`, { useV2: false });
       await getAllCarts(); // refresh list
     } catch (err) {
       console.error('Error deleting cart:', err);

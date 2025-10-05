@@ -1,4 +1,4 @@
-package com.petclinic.bffapigateway.presentationlayer.V1;
+package com.petclinic.bffapigateway.presentationlayer.v1;
 
 import com.petclinic.bffapigateway.presentationlayer.v1.PetControllerV1;
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
@@ -54,7 +54,7 @@ class PetControllerV1Test {
     @Test
     void whenUpdatePet_thenReturnUpdatedPet() {
         String petId = "petId-123";
-        
+
         PetRequestDTO petRequest = new PetRequestDTO();
         petRequest.setName("Updated Fluffy");
         petRequest.setBirthDate(birthDate);
@@ -95,7 +95,7 @@ class PetControllerV1Test {
     @Test
     void whenGetPetByPetId_thenReturnPet() {
         String petId = "petId-123";
-        
+
         PetResponseDTO expectedResponse = new PetResponseDTO();
         expectedResponse.setPetId(petId);
         expectedResponse.setName("Fluffy");
@@ -143,7 +143,7 @@ class PetControllerV1Test {
     void whenUpdatePetForOwner_thenReturnUpdatedPet() {
         String petId = "petId-123";
         String ownerId = "ownerId-456";
-        
+
         PetRequestDTO petRequest = new PetRequestDTO();
         petRequest.setName("Updated Fluffy");
         petRequest.setBirthDate(birthDate);
@@ -184,7 +184,7 @@ class PetControllerV1Test {
     void whenGetPetForOwner_thenReturnPet() {
         String petId = "petId-123";
         String ownerId = "ownerId-456";
-        
+
         PetResponseDTO expectedResponse = new PetResponseDTO();
         expectedResponse.setPetId(petId);
         expectedResponse.setName("Fluffy");
