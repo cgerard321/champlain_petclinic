@@ -27,7 +27,7 @@ export async function getAllProducts(
   try {
     const response = await axiosInstance.get('/products', {
       params,
-      useV2: true,
+      useV2: false,
     });
 
     return response.data
