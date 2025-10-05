@@ -102,7 +102,7 @@ export function NavBar(): JSX.Element {
     try {
       const { data } = await axiosInstance.get<{
         products?: ProductAPIResponse[];
-      }>(`/carts/${cartId}`, { useV2: true });
+      }>(`/carts/${cartId}`, { useV2: false });
 
       if (Array.isArray(data.products)) {
         const totalCount = data.products.reduce(
