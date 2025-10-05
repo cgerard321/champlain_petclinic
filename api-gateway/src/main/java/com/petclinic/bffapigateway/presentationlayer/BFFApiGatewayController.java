@@ -294,12 +294,6 @@ public class BFFApiGatewayController {
         return customersServiceClient.getAllPets();
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET})
-    @GetMapping(value = "/pets/{petId}")
-    public Mono<ResponseEntity<PetResponseDTO>> getPetByPetId(@PathVariable String petId){
-        return customersServiceClient.getPetByPetId(petId).map(s -> ResponseEntity.status(HttpStatus.OK).body(s))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
-    }
 
 
     @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN,Roles.VET})
@@ -323,11 +317,6 @@ public class BFFApiGatewayController {
     }
 
 
-    @DeleteMapping("pets/{petId}")
-    public Mono<ResponseEntity<PetResponseDTO>> deletePetByPetId(@PathVariable String petId){
-        return customersServiceClient.deletePetByPetId(petId).then(Mono.just(ResponseEntity.noContent().<PetResponseDTO>build()))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
-    }
 
 
     @GetMapping(value = "owners/petTypes", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
