@@ -570,5 +570,114 @@ public class MockServerConfigVetService {
                 );
     }
 
+    public void registerAddPhotoByVetIdMultipartEndpoint(String vetId, String photoName) {
+        mockServerClient_VetService
+                .when(
+                        request()
+                                .withMethod("POST")
+                                .withPath("/vets/" + vetId + "/photos")
+                                .withHeader("Content-Type", "application/json")
+                )
+                .respond(
+                        response()
+                                .withStatusCode(201)
+                                .withHeader("Content-Type", "application/json")
+                                .withBody("{\"vetId\": \"" + vetId + "\",\"filename\": \"" + photoName + "\",\"imgType\": \"image/jpeg\",\"resourceBase64\": \"bW9ja1Bob3RvUmVzb3VyY2U=\"}")
+                );
+    }
+
+    public void registerAddPhotoByVetIdMultipartEndpointBadRequest(String vetId) {
+        mockServerClient_VetService
+                .when(
+                        request()
+                                .withMethod("POST")
+                                .withPath("/vets/" + vetId + "/photos")
+                                .withHeader("Content-Type", "application/json")
+                )
+                .respond(
+                        response()
+                                .withStatusCode(400)
+                                .withBody("{\"message\":\"Bad request - invalid photo data\"}")
+                );
+    }
+
+    public void registerAddAlbumPhotoOctetEndpoint(String vetId, String photoName) {
+        String albumJson = "{"
+                + "\"id\": 1,"
+                + "\"vetId\": \"" + vetId + "\","
+                + "\"filename\": \"" + photoName + "\","
+                + "\"imgType\": \"image/jpeg\","
+                + "\"data\": \"" + java.util.Base64.getEncoder().encodeToString("mockPhotoData".getBytes()) + "\""
+                + "}";
+
+        mockServerClient_VetService
+                .when(
+                        request()
+                                .withMethod("POST")
+                                .withPath("/vets/" + vetId + "/albums/photos/" + photoName)
+                                .withHeader("Content-Type", "application/octet-stream")
+                )
+                .respond(
+                        response()
+                                .withStatusCode(201)
+                                .withHeader("Content-Type", "application/json")
+                                .withBody(albumJson)
+                );
+    }
+
+    public void registerAddAlbumPhotoOctetEndpointBadRequest(String vetId) {
+        mockServerClient_VetService
+                .when(
+                        request()
+                                .withMethod("POST")
+                                .withPath("/vets/" + vetId + "/albums/photos/.*")
+                                .withHeader("Content-Type", "application/octet-stream")
+                )
+                .respond(
+                        response()
+                                .withStatusCode(400)
+                                .withBody("{\"message\":\"Bad request - invalid photo data\"}")
+                );
+    }
+
+    public void registerAddAlbumPhotoMultipartEndpoint(String vetId, String photoName) {
+        String albumJson = "{"
+                + "\"id\": 2,"
+                + "\"vetId\": \"" + vetId + "\","
+                + "\"filename\": \"" + photoName + "\","
+                + "\"imgType\": \"image/jpeg\","
+                + "\"data\": \"" + java.util.Base64.getEncoder().encodeToString("mockPhotoData".getBytes()) + "\""
+                + "}";
+
+        mockServerClient_VetService
+                .when(
+                        request()
+                                .withMethod("POST")
+                                .withPath("/vets/" + vetId + "/albums/photos/" + photoName)
+                                .withHeader("Content-Type", "application/octet-stream")
+                )
+                .respond(
+                        response()
+                                .withStatusCode(201)
+                                .withHeader("Content-Type", "application/json")
+                                .withBody(albumJson)
+                );
+    }
+
+    public void registerAddAlbumPhotoMultipartEndpointBadRequest(String vetId) {
+        mockServerClient_VetService
+                .when(
+                        request()
+                                .withMethod("POST")
+                                .withPath("/vets/" + vetId + "/albums/photos/.*")
+                                .withHeader("Content-Type", "application/octet-stream")
+                )
+                .respond(
+                        response()
+                                .withStatusCode(400)
+                                .withBody("{\"message\":\"Bad request - invalid photo data\"}")
+                );
+    }
+
 
 }

@@ -28,7 +28,6 @@ import ServiceUnavailable from '@/pages/Error/ServiceUnavailable.tsx';
 import Forbidden from '@/pages/Error/Forbidden.tsx';
 import Unauthorized from '@/pages/Error/Unauthorized.tsx';
 import PageNotFound from '@/pages/Error/PageNotFound.tsx';
-import EmailingPage from '@/pages/Emailing/EmailingPage.tsx';
 import EditInventory from '@/features/inventories/EditInventory.tsx';
 import { ProtectedRoute } from './shared/components/ProtectedRouteProps';
 import CustomerDetailsPage from '@/pages/Customer/CustomerDetailsPage.tsx';
@@ -372,14 +371,6 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: AppRoutePaths.Emailing,
-        element: (
-          <ProtectedRoute roles={['ADMIN']}>
-            <EmailingPage />
-          </ProtectedRoute>
-        ),
-      },
-      {
         path: AppRoutePaths.CustomerProfile,
         element: (
           <ProtectedRoute roles={['OWNER']}>
@@ -438,7 +429,7 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.UpdatePet,
         element: (
-          <ProtectedRoute roles={['ADMIN', 'VET']}>
+          <ProtectedRoute roles={['ADMIN', 'VET', 'OWNER']}>
             <UpdateOwnerPetPage />
           </ProtectedRoute>
         ),

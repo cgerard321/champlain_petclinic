@@ -11,8 +11,8 @@ const whiteList = new Set([
 const petClinicApp = angular.module('petClinicApp', [
     'ui.router', 'layoutNav', 'layoutFooter', 'layoutWelcome', 'ownerList', 'ownerDetails', 'ownerForm', 'ownerRegister', 'petRegister', 'petForm',
     'shopProductDetailsInfo', 'shopProductForm', 'productList', 'shopProductUpdateForm', 'visits', 'visit', 'visitList' , 'vetList','vetForm',
-    'vetDetails', 'billForm', 'billUpdateForm', 'loginForm', 'rolesDetails', 'signupForm', 'productDetailsInfo',
-    'billDetails', 'billsByOwnerId', 'billHistory','billsByVetId','inventoryList', 'inventoryForm', 'productForm','inventoryProductList', 'inventoryUpdateForm', 'productUpdateForm',
+    'vetDetails', 'billForm', 'billUpdateForm', 'loginForm', 'rolesDetails', 'signupForm',
+    'billDetails', 'billsByOwnerId', 'billHistory','billsByVetId','inventoriesList', 'inventoriesForm','inventoriesService','inventoriesProductList', 'inventoriesUpdateForm', 'inventoriesProductUpdateForm','inventoriesProductDetailsInfo','inventoriesProductForm',
     'verification' , 'adminPanel','resetPwdForm','forgotPwdForm','petTypeList', 'petDetails','userDetails','managerForm','userModule']);
 
 

@@ -15,6 +15,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -57,8 +58,8 @@ class BillServiceClientIntegrationTest {
 
     private final BillResponseDTO billResponseDTO = BillResponseDTO.builder()
             .billId("1")
-            .amount(100.0)
-            .taxedAmount(115.0)
+            .amount(new BigDecimal("100.0"))
+            .taxedAmount(new BigDecimal("115.0"))
             .customerId("1")
             .vetId("1")
             .visitType("Check up")
@@ -69,8 +70,8 @@ class BillServiceClientIntegrationTest {
 
     private final BillResponseDTO billResponseDTO2 = BillResponseDTO.builder()
             .billId("2")
-            .amount(150.0)
-            .taxedAmount(172.5)
+            .amount(new BigDecimal("150.0"))
+            .taxedAmount(new BigDecimal("172.5"))
             .customerId("2")
             .vetId("2")
             .visitType("Check up")
@@ -81,8 +82,8 @@ class BillServiceClientIntegrationTest {
 
     private final BillResponseDTO billResponseDTO3 = BillResponseDTO.builder()
             .billId("3")
-            .amount(250.0)
-            .taxedAmount(287.5)
+            .amount(new BigDecimal("250.0"))
+            .taxedAmount(new BigDecimal("287.5"))
             .customerId("3")
             .vetId("3")
             .visitType("Check up")
@@ -239,7 +240,7 @@ class BillServiceClientIntegrationTest {
         billRequest.setDate(null);
         billRequest.setBillStatus(BillStatus.PAID);
         billRequest.setDueDate(null);
-        billRequest.setAmount(100.0);
+        billRequest.setAmount(new BigDecimal("100.0"));
         billRequest.setVisitType("Check up");
 
         // Serialize the BillRequestDTO object to JSON
@@ -259,7 +260,7 @@ class BillServiceClientIntegrationTest {
                 .expectNextMatches(createdBill -> {
                     assertNotNull(createdBill);
                     assertEquals("1", createdBill.getVetId());
-                    assertEquals(100.0, createdBill.getAmount());
+                    assertEquals(0, new BigDecimal("100.0").compareTo(createdBill.getAmount()));
                     assertEquals("Check up", createdBill.getVisitType());
                     return true;
                 })
@@ -372,7 +373,7 @@ class BillServiceClientIntegrationTest {
                 .date(null)
                 .billStatus(BillStatus.UNPAID)
                 .dueDate(null)
-                .amount(200.0)
+                .amount(new BigDecimal("200.0"))
                 .build();
 
 
@@ -384,7 +385,7 @@ class BillServiceClientIntegrationTest {
                 .date(null)
                 .billStatus(BillStatus.PAID)
                 .dueDate(null)
-                .amount(200.0)
+                .amount(new BigDecimal("200.0"))
                 .build();
 
 
@@ -528,8 +529,8 @@ class BillServiceClientIntegrationTest {
                 null);
 
         StepVerifier.create(resultFlux)
-                .expectNextMatches(bill -> "1".equals(bill.getBillId()) && bill.getAmount() == 100.0)
-                .expectNextMatches(bill -> "2".equals(bill.getBillId()) && bill.getAmount() == 150.0)
+                .expectNextMatches(bill -> "1".equals(bill.getBillId()) && bill.getAmount().compareTo(new BigDecimal("100.0")) == 0)
+                .expectNextMatches(bill -> "2".equals(bill.getBillId()) && bill.getAmount().compareTo(new BigDecimal("150.0")) == 0)
                 .verifyComplete();
     }
 
@@ -560,8 +561,8 @@ class BillServiceClientIntegrationTest {
         Flux<BillResponseDTO> resultFlux = billServiceClient.getBillsByMonth(1, 2022);
 
         StepVerifier.create(resultFlux)
-                .expectNextMatches(bill -> "1".equals(bill.getBillId()) && bill.getAmount() == 100.0)
-                .expectNextMatches(bill -> "2".equals(bill.getBillId()) && bill.getAmount() == 150.0)
+                .expectNextMatches(bill -> "1".equals(bill.getBillId()) && bill.getAmount().compareTo(new BigDecimal("100.0")) == 0)
+                .expectNextMatches(bill -> "2".equals(bill.getBillId()) && bill.getAmount().compareTo(new BigDecimal("150.0")) == 0)
                 .verifyComplete();
     }
 

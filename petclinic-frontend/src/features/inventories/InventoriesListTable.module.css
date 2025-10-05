@@ -16,11 +16,11 @@
   width: 55px;
   height: 55px;
   cursor: pointer;
-  color: #0d6efd; 
+  color: #0d6efd;
 }
 
 #menuIcon:hover {
-   filter: drop-shadow(0 0 8px rgba(13,110,253,.45));
+  filter: drop-shadow(0 0 8px rgba(13, 110, 253, 0.45));
   transform: translateY(-1px);
 }
 
@@ -75,20 +75,15 @@
   border-collapse: collapse;
 }
 
-
 .cleanTable :global(thead th),
 .cleanTable :global(tbody td) {
   border-bottom: 0 !important;
 }
 
-
 .cleanTable :global(tbody tr:nth-of-type(odd)) {
   --bs-table-accent-bg: transparent !important;
   background-color: transparent !important;
 }
-
-
-
 
 .inventoryTable :global(thead th:nth-child(1)),
 .inventoryTable :global(tbody td:nth-child(1)),
@@ -101,8 +96,10 @@
   text-align: center;
 }
 
-
-.fixedTable { table-layout: fixed; width: 100%; }
+.fixedTable {
+  table-layout: fixed;
+  width: 100%;
+}
 
 .inventoryTable :global(th),
 .inventoryTable :global(td) {
@@ -114,7 +111,7 @@
   align-items: center;
   justify-content: center;
   gap: 16px;
-  margin: 40px 0 80px; 
+  margin: 40px 0 80px;
 }
 
 .pageNumber {

@@ -354,5 +354,18 @@ public Mono<CartResponseDTO> deleteCartByCartId(String CardId) {
                 .onStatus(HttpStatusCode::is5xxServerError, error -> Mono.error(new IllegalArgumentException("Server error")))
                 .bodyToMono(CartResponseDTO.class);
     }
+    // move all Wishlist items into cart
+    public Mono<CartResponseDTO> moveAllWishlistToCart(String cartId) {
+        return webClientBuilder.build()
+                .post()
+                .uri(cartServiceUrl + "/" + cartId + "/wishlist/moveAll")
+                .exchangeToMono(resp -> {
+                    if (resp.statusCode().is2xxSuccessful()) {
+                        return resp.bodyToMono(CartResponseDTO.class);
+                    }
+                    // Propagate exact upstream status + body as WebClientResponseException
+                    return resp.createException().flatMap(Mono::error);
+                });
+    }
 
 }
