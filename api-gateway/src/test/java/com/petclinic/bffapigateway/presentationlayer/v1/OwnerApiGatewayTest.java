@@ -1,12 +1,10 @@
-package com.petclinic.bffapigateway.presentationlayer.V1;
+package com.petclinic.bffapigateway.presentationlayer.v1;
 
 import com.petclinic.bffapigateway.domainclientlayer.AuthServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VisitsServiceClient;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
-import com.petclinic.bffapigateway.presentationlayer.v1.OwnerControllerV1;
-import com.petclinic.bffapigateway.presentationlayer.v1.PetControllerV1;
 import com.petclinic.bffapigateway.utils.Security.Filters.IsUserFilter;
 import com.petclinic.bffapigateway.utils.Security.Filters.JwtTokenFilter;
 import com.petclinic.bffapigateway.utils.Security.Filters.RoleFilter;
@@ -20,21 +18,16 @@ import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
