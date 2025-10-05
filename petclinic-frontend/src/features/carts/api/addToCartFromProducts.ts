@@ -2,7 +2,11 @@ import axiosInstance from '@/shared/api/axiosInstance';
 import { AxiosError } from 'axios';
 import { fetchCartIdByCustomerId } from './getCart';
 import { useUser } from '@/context/UserContext';
-import { notifyCartChanged } from './cartEvent';
+import {
+  notifyCartChanged,
+  setCartIdInLS,
+  bumpCartCountInLS,
+} from './cartEvent';
 
 type UseAddToCartReturnType = {
   addToCart: (productId: string) => Promise<boolean>;
@@ -28,16 +32,14 @@ export function useAddToCart(): UseAddToCartReturnType {
 
       if (status === 404 || status === 401) {
         const { data } = await axiosInstance.post<CreateCartResponse>(
-          '/carts', // → POST /api/v2/gateway/carts
+          '/carts',
           { customerId: userId },
           { headers: { 'Content-Type': 'application/json' } }
         );
-
         const newId = (data?.cartId ?? data?.id) as string | undefined;
         if (!newId) throw new Error('Could not create cart');
         return newId;
       }
-
       throw err;
     }
   };
@@ -57,7 +59,9 @@ export function useAddToCart(): UseAddToCartReturnType {
         { useV2: true }
       );
 
-      // refresh navbar/cart badge
+      //keep navbar offline, persist id + bump count locally
+      setCartIdInLS(cartId);
+      bumpCartCountInLS(1);
       notifyCartChanged();
 
       return true;
@@ -65,7 +69,6 @@ export function useAddToCart(): UseAddToCartReturnType {
       const ax = err as AxiosError;
       const status = ax.response?.status ?? 'unknown';
       const payload = ax.response?.data ?? ax.message;
-
       console.error('AddToCart failed:', status, payload);
       alert(`Add to cart failed (${status}).`);
       return false;

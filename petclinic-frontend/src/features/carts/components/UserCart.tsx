@@ -11,7 +11,12 @@ import axiosInstance from '@/shared/api/axiosInstance';
 import { IsAdmin } from '@/context/UserContext';
 import { AppRoutePaths } from '@/shared/models/path.routes';
 import { getProductByProductId } from '@/features/products/api/getProductByProductId';
-import { notifyCartChanged } from '../api/cartEvent';
+import {
+  notifyCartChanged,
+  setCartCountInLS,
+  setCartIdInLS,
+  bumpCartCountInLS,
+} from '../api/cartEvent';
 
 interface ProductAPIResponse {
   productId: number;
@@ -117,6 +122,12 @@ const UserCart = (): JSX.Element => {
         );
 
         setCartItems(products);
+        setCartIdInLS(cartId);
+        const countFromFetch = products.reduce(
+          (acc, p) => acc + (p.quantity || 0),
+          0
+        );
+        setCartCountInLS(countFromFetch);
         const enrichedWishlist = await Promise.all(
           (data.wishListProducts || []).map(async (item: ProductModel) => {
             const fullProduct = await getProductByProductId(item.productId);
@@ -167,7 +178,7 @@ const UserCart = (): JSX.Element => {
     ): Promise<void> => {
       const newQuantity = Math.max(1, Number(event.target.value));
       const item = cartItems[index];
-
+      const prevQty = item.quantity || 1;
       if (newQuantity > item.productQuantity) {
         setErrorMessages(prevErrors => ({
           ...prevErrors,
@@ -204,6 +215,7 @@ const UserCart = (): JSX.Element => {
             );
             setWishlistItems(prevItems => [...prevItems, item]);
             setNotificationMessage(data.message);
+            bumpCartCountInLS(-prevQty);
             notifyCartChanged(); // left cart
             return;
           }
@@ -214,6 +226,7 @@ const UserCart = (): JSX.Element => {
             return next;
           });
           setNotificationMessage('Item quantity updated successfully.');
+          bumpCartCountInLS(newQuantity - prevQty);
           notifyCartChanged(); // qty changed
         }
       } catch (err) {
@@ -236,10 +249,13 @@ const UserCart = (): JSX.Element => {
           useV2: true,
         });
 
+        const removedQty = cartItems[indexToDelete]?.quantity || 1;
+
         setCartItems(prevItems =>
           prevItems.filter((_, index) => index !== indexToDelete)
         );
         alert('Item successfully removed!');
+        bumpCartCountInLS(-removedQty);
         notifyCartChanged(); // item removed
       } catch (error: unknown) {
         console.error('Error deleting item: ', error);
@@ -250,7 +266,7 @@ const UserCart = (): JSX.Element => {
         }
       }
     },
-    [cartId]
+    [cartId, cartItems]
   );
 
   // clear entire cart
@@ -267,7 +283,7 @@ const UserCart = (): JSX.Element => {
         setCartItems([]);
         setCartItemCount(0);
         alert('Cart has been successfully cleared!');
-
+        setCartCountInLS(0);
         // notify navbar (cart cleared)
         notifyCartChanged();
       } catch (error: unknown) {
@@ -306,6 +322,9 @@ const UserCart = (): JSX.Element => {
 
       // Trigger the useEffect by updating the wishlistUpdated state
       setWishlistUpdated(true);
+
+      // Decrement LS count since item left the cart
+      bumpCartCountInLS(-(item.quantity || 1));
 
       //notify navbar (item moved out of cart)
       notifyCartChanged();
@@ -354,6 +373,9 @@ const UserCart = (): JSX.Element => {
 
       // Trigger the useEffect by updating the wishlistUpdated state
       setWishlistUpdated(true);
+
+      // Item entered the cart, increment LS count
+      bumpCartCountInLS(item.quantity || 1);
 
       //notify navbar (item moved into cart)
       notifyCartChanged();
@@ -480,6 +502,9 @@ const UserCart = (): JSX.Element => {
       setCartItems([]); // Clear the cart after successful checkout
       setCartItemCount(0);
       setIsCheckoutModalOpen(false);
+
+      // Reset LS so navbar badge = 0 without API
+      setCartCountInLS(0);
 
       // notify navbar (cart emptied)
       notifyCartChanged();
