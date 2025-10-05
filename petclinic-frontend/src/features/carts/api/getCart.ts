@@ -9,7 +9,7 @@ export const fetchCartIdByCustomerId = async (
     // was http://localhost:8080/api/v2/gateway/carts/customer/${userId}
     const { data } = await axiosInstance.get<CartIdResponse>(
       `/carts/customer/${userId}`,
-      { useV2: true }
+      { useV2: false }
     );
     return data.cartId;
   } catch (error) {

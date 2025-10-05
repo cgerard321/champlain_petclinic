@@ -95,7 +95,7 @@ const UserCart = (): JSX.Element => {
 
       try {
         const { data } = await axiosInstance.get(`/carts/${cartId}`, {
-          useV2: true,
+          useV2: false,
         });
 
         if (!Array.isArray(data.products)) {
@@ -149,7 +149,7 @@ const UserCart = (): JSX.Element => {
     try {
       const { data } = await axiosInstance.get(
         `/promos/validate/${voucherCode}`,
-        { useV2: true }
+        { useV2: false }
       );
       setDiscount((subtotal * data.discount) / 100);
       setVoucherError(null);
@@ -186,7 +186,7 @@ const UserCart = (): JSX.Element => {
         const { data } = await axiosInstance.put(
           `/carts/${cartId}/products/${item.productId}`,
           { quantity: newQuantity },
-          { useV2: true }
+          { useV2: false }
         );
 
         if (data && data.message) {
@@ -233,7 +233,7 @@ const UserCart = (): JSX.Element => {
 
       try {
         await axiosInstance.delete(`/carts/${cartId}/${productId}`, {
-          useV2: true,
+          useV2: false,
         });
 
         setCartItems(prevItems =>
@@ -262,7 +262,7 @@ const UserCart = (): JSX.Element => {
 
     if (window.confirm('Are you sure you want to clear the cart?')) {
       try {
-        await axiosInstance.delete(`/carts/${cartId}/clear`, { useV2: true });
+        await axiosInstance.delete(`/carts/${cartId}/clear`, { useV2: false });
 
         setCartItems([]);
         setCartItemCount(0);
@@ -291,7 +291,7 @@ const UserCart = (): JSX.Element => {
           productName: item.productName,
           productSalePrice: item.productSalePrice,
         },
-        { useV2: true }
+        { useV2: false }
       );
 
       if (data && data.message) {
@@ -335,7 +335,7 @@ const UserCart = (): JSX.Element => {
           productName: item.productName,
           productSalePrice: item.productSalePrice,
         },
-        { useV2: true }
+        { useV2: false }
       );
 
       if (data && data.message) {
@@ -374,7 +374,7 @@ const UserCart = (): JSX.Element => {
     try {
       await axiosInstance.delete(
         `/carts/${cartId}/wishlist/${item.productId}`,
-        { useV2: true }
+        { useV2: false }
       );
 
       setWishlistItems(prev =>
@@ -463,7 +463,7 @@ const UserCart = (): JSX.Element => {
       await axiosInstance.post(
         `/carts/${cartId}/checkout`,
         {},
-        { useV2: true }
+        { useV2: false }
       );
 
       const invoiceItems: Invoice[] = cartItems.map(item => ({
