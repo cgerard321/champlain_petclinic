@@ -19,12 +19,12 @@
   width: 500px;
   max-width: 90%;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-  margin-top: 2rem; 
-  margin-bottom: 2rem; 
+  margin-top: 2rem;
+  margin-bottom: 2rem;
   margin-left: auto;
   margin-right: auto;
-  max-height: calc(100vh - 6rem); 
-  overflow-y: auto; 
+  max-height: calc(100vh - 6rem);
+  overflow-y: auto;
 }
 
 .modal-close {
@@ -105,10 +105,9 @@
   border-radius: 8px;
   font-size: 1rem;
   box-sizing: border-box;
-  
 }
 
-.billing-form button[type="submit"] {
+.billing-form button[type='submit'] {
   margin-top: 0.5rem;
   padding: 0.75rem;
   background-color: #007bff;
@@ -122,11 +121,11 @@
   width: 100%;
 }
 
-.billing-form button[type="submit"]:hover:not(:disabled) {
+.billing-form button[type='submit']:hover:not(:disabled) {
   background-color: #0056b3;
 }
 
-.billing-form button[type="submit"]:disabled {
+.billing-form button[type='submit']:disabled {
   background-color: #ccc;
   cursor: not-allowed;
 }
@@ -167,33 +166,32 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  width: 100%;  
-  align-items:center; 
+  width: 100%;
+  align-items: center;
 }
 
 .modal-content .main-fields > input,
 .modal-content .main-fields > select {
-  width: 90%;       
-  text-align: left;  
+  width: 90%;
+  text-align: left;
   margin-bottom: 1rem;
 }
 
 .main-fields .form-row {
   display: flex;
   gap: 1rem;
-  width: 90%;          
-  justify-content: flex-start; 
-  align-items: stretch;      
+  width: 90%;
+  justify-content: flex-start;
+  align-items: stretch;
 }
-
 
 .main-fields .form-row .form-field {
   flex: 1;
 }
 
 .main-fields .form-row .form-field input {
-  width: 100%;       
-  text-align: left;  
+  width: 100%;
+  text-align: left;
 }
 
 /* Confirmation modal backdrop */
@@ -207,7 +205,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1100; 
+  z-index: 1100;
 }
 
 /* Confirmation modal content */
@@ -224,7 +222,6 @@
   align-items: center;
   gap: 1rem;
 }
-
 
 .confirm-modal-buttons {
   display: flex;
@@ -258,4 +255,3 @@
 .confirm-modal-buttons button.cancel:hover {
   background-color: #d32f2f;
 }
-

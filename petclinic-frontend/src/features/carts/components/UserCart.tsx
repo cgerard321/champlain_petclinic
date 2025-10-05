@@ -396,21 +396,24 @@ const UserCart = (): JSX.Element => {
 
     try {
       const res = await axiosInstance.post(
-          `/carts/${cartId}/wishlist/moveAll`,
-          {},
-          {
-            useV2: true,
+        `/carts/${cartId}/wishlist/moveAll`,
+        {},
+        {
+          useV2: true,
 
-            validateStatus: () => true,
-          }
+          validateStatus: () => true,
+        }
       );
 
       if (res.status >= 200 && res.status < 300) {
-        setNotificationMessage(res.data?.message || 'Moved wishlist items to cart.');
+        setNotificationMessage(
+          res.data?.message || 'Moved wishlist items to cart.'
+        );
       } else {
         const msg =
-            (res.data && (res.data.message || res.data.error || res.data.title)) ||
-            `Move All failed (${res.status})`;
+          (res.data &&
+            (res.data.message || res.data.error || res.data.title)) ||
+          `Move All failed (${res.status})`;
         setNotificationMessage(msg);
       }
 
@@ -662,46 +665,46 @@ const UserCart = (): JSX.Element => {
         <div className="wishlist-section">
           {/* Header with Move All button */}
           <div
-              className="wishlist-header"
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-              }}
+            className="wishlist-header"
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}
           >
             <h2 style={{ margin: 0 }}>Your Wishlist</h2>
             {wishlistItems.length > 0 && (
-                <button
-                    className="move-all-to-cart-btn"
-                    onClick={moveAllWishlistToCart}
-                    disabled={movingAll}
-                    aria-busy={movingAll}
-                    title="Move all wishlist items to cart"
-                >
-                  {movingAll ? 'Moving…' : 'Move All to Cart'}
-                </button>
+              <button
+                className="move-all-to-cart-btn"
+                onClick={moveAllWishlistToCart}
+                disabled={movingAll}
+                aria-busy={movingAll}
+                title="Move all wishlist items to cart"
+              >
+                {movingAll ? 'Moving…' : 'Move All to Cart'}
+              </button>
             )}
           </div>
 
           {/* Wishlist items */}
           <div className="Wishlist-items">
             {wishlistItems.length > 0 ? (
-                wishlistItems.map(item => (
-                    <CartItem
-                        key={item.productId}
-                        item={item}
-                        index={-1}
-                        changeItemQuantity={() => {}}
-                        deleteItem={() => {}}
-                        addToWishlist={() => {}}
-                        addToCart={addToCartFunction}
-                        isInWishlist={true}
-                        removeFromWishlist={removeFromWishlist}
-                        showNotification={setNotificationMessage}
-                    />
-                ))
+              wishlistItems.map(item => (
+                <CartItem
+                  key={item.productId}
+                  item={item}
+                  index={-1}
+                  changeItemQuantity={() => {}}
+                  deleteItem={() => {}}
+                  addToWishlist={() => {}}
+                  addToCart={addToCartFunction}
+                  isInWishlist={true}
+                  removeFromWishlist={removeFromWishlist}
+                  showNotification={setNotificationMessage}
+                />
+              ))
             ) : (
-                <p>No products in the wishlist.</p>
+              <p>No products in the wishlist.</p>
             )}
           </div>
         </div>
