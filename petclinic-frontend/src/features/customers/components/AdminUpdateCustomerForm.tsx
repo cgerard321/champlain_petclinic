@@ -7,7 +7,7 @@ import { updateUsername } from '../api/updateUsername';
 import { OwnerRequestModel } from '../models/OwnerRequestModel';
 import { OwnerResponseModel } from '../models/OwnerResponseModel';
 import { UserDetailsModel } from '../models/UserDetailsModel';
-import { validateUsername } from '../utils/validation';
+import { useUsernameValidation } from '../hooks/useUsernameValidation';
 import './UpdateCustomerForm.css';
 
 const provincesOfCanada = [
@@ -29,6 +29,7 @@ const provincesOfCanada = [
 const AdminUpdateCustomerForm: FC = () => {
   const { ownerId } = useParams<{ ownerId: string }>();
   const navigate = useNavigate();
+  const { validateUsernameField } = useUsernameValidation();
   const [formData, setFormData] = useState<OwnerRequestModel>({
     firstName: '',
     lastName: '',
@@ -110,7 +111,7 @@ const AdminUpdateCustomerForm: FC = () => {
     }
   };
 
-  const validate = (): boolean => {
+  const validate = async (): Promise<boolean> => {
     const newErrors: { [key: string]: string } = {};
 
     if (!formData.firstName) newErrors.firstName = 'First name is required';
@@ -126,7 +127,10 @@ const AdminUpdateCustomerForm: FC = () => {
       newErrors.telephone = 'Telephone must contain only digits';
     }
 
-    const usernameError = validateUsername(username);
+    const usernameError = await validateUsernameField(
+      username,
+      userDetails?.username
+    );
     if (usernameError) {
       newErrors.username = usernameError;
     }
@@ -139,7 +143,7 @@ const AdminUpdateCustomerForm: FC = () => {
     e: React.FormEvent<HTMLFormElement>
   ): Promise<void> => {
     e.preventDefault();
-    if (!validate()) return;
+    if (!(await validate())) return;
 
     try {
       if (!ownerId) {

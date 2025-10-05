@@ -50,9 +50,14 @@ const AddPetModal: React.FC<AddPetModalProps> = ({
     };
     if (isOpen) {
       fetchPetTypes();
-      setDateInputValue(pet.birthDate.toISOString().split('T')[0]);
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    if (isOpen) {
+      setDateInputValue(pet.birthDate.toISOString().split('T')[0]);
+    }
+  }, [isOpen, pet.birthDate]);
 
   if (!isOpen) return null;
 

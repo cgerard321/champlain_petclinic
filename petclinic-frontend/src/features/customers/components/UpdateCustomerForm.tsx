@@ -10,12 +10,13 @@ import { UserDetailsModel } from '@/features/customers/models/UserDetailsModel';
 import { useNavigate } from 'react-router-dom';
 import { AppRoutePaths } from '@/shared/models/path.routes';
 import { useUser } from '@/context/UserContext';
-import { validateUsername } from '../utils/validation';
+import { useUsernameValidation } from '../hooks/useUsernameValidation';
 import './UpdateCustomerForm.css';
 
 const UpdateCustomerForm: React.FC = (): JSX.Element => {
   const navigate = useNavigate();
   const { user, setUser } = useUser();
+  const { validateUsernameField } = useUsernameValidation();
   const [owner, setOwner] = useState<OwnerRequestModel>({
     firstName: '',
     lastName: '',
@@ -80,7 +81,7 @@ const UpdateCustomerForm: React.FC = (): JSX.Element => {
     }
   };
 
-  const validate = (): boolean => {
+  const validate = async (): Promise<boolean> => {
     const newErrors: { [key: string]: string } = {};
     if (!owner.firstName) newErrors.firstName = 'First name is required';
     if (!owner.lastName) newErrors.lastName = 'Last name is required';
@@ -89,7 +90,10 @@ const UpdateCustomerForm: React.FC = (): JSX.Element => {
     if (!owner.province) newErrors.province = 'Province is required';
     if (!owner.telephone) newErrors.telephone = 'Telephone is required';
 
-    const usernameError = validateUsername(username);
+    const usernameError = await validateUsernameField(
+      username,
+      userDetails?.username
+    );
     if (usernameError) {
       newErrors.username = usernameError;
     }
@@ -102,7 +106,7 @@ const UpdateCustomerForm: React.FC = (): JSX.Element => {
     event: FormEvent<HTMLFormElement>
   ): Promise<void> => {
     event.preventDefault();
-    if (!validate()) return;
+    if (!(await validate())) return;
 
     try {
       await updateOwner(user.userId, owner);
