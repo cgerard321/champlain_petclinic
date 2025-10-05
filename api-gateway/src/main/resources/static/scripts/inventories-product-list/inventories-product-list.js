@@ -19,4 +19,11 @@ angular.module('inventoriesProductList', ['ui.router'])
                 url: '/inventories/:inventoryId/products',
                 template: '<inventory-product-item></inventory-product-item>'
             })
+            .state('inventoryProductDetails', {
+                    parent: 'app',
+                    url: '/inventory/:inventoryId/products/:productId/details',
+                    template: '<inventories-product-details-info></inventories-product-details-info>',
+                    controller: 'InventoriesProductDetailsInfoController',
+                    controllerAs: 'self'
+                  })
     }]);
