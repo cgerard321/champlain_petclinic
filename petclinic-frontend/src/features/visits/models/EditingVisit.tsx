@@ -178,6 +178,8 @@ const EditingVisit: React.FC = (): JSX.Element => {
         <label>Status: </label>
         <select name="status" value={visit.status} onChange={handleChange}>
           <option value="UPCOMING">Upcoming</option>
+          <option value="COMPLETED">Completed</option>
+          <option value="CANCELLED">Cancelled</option>
         </select>
         {errors.status && <span className="error">{errors.status}</span>}
         <br />

@@ -542,7 +542,7 @@ export default function VisitListTable(): JSX.Element {
                         />
                       </svg>
                     </a>
-                    {!isVet && (
+                    {
                       <a
                         className="icon"
                         onClick={() =>
@@ -564,7 +564,7 @@ export default function VisitListTable(): JSX.Element {
                           />
                         </svg>
                       </a>
-                    )}
+                    }
                     {visit.status === 'COMPLETED' && !isVet && (
                       <a
                         className="icon"
