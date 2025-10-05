@@ -4,9 +4,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.dtos.Inventory.InventoryRequestDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.InventoryResponseDTO;
+import com.petclinic.bffapigateway.dtos.Vets.VetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.Emergency.EmergencyRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.Emergency.EmergencyResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.Status;
+import com.petclinic.bffapigateway.dtos.Visits.TimeSlotDTO;
 import com.petclinic.bffapigateway.dtos.Visits.VisitRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.VisitResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewRequestDTO;
@@ -43,6 +45,7 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 @Component
 public class VisitsServiceClient {
     private final WebClient webClient;
+    private final WebClient availabilityWebClient;
     private final String reviewUrl;
 
     private Rethrower rethrower;
@@ -56,6 +59,12 @@ public class VisitsServiceClient {
         this.webClient = WebClient.builder()
                 .baseUrl(reviewUrl)
                 .build();
+
+        String baseUrl = "http://" + visitsServiceHost + ":" + visitsServicePort;
+        this.availabilityWebClient = WebClient.builder()
+                .baseUrl(baseUrl)
+                .build();
+
     }
 
     public Flux<VisitResponseDTO> getAllVisits(String description) {
@@ -111,7 +120,7 @@ public class VisitsServiceClient {
         return visitRequestDTO.flatMap(visitRequestDTO1 -> {
             if (visitRequestDTO1.getVisitDate() != null) {
                 LocalDateTime originalDate = visitRequestDTO1.getVisitDate();
-                LocalDateTime adjustedDate = originalDate.minusHours(4);
+                LocalDateTime adjustedDate = originalDate;
                 visitRequestDTO1.setVisitDate(adjustedDate);
             } else {
                 throw new BadRequestException("Visit date is required");
@@ -475,7 +484,55 @@ public class VisitsServiceClient {
                 .map(InputStreamResource::new);  // Wrap in InputStreamResource
     }
 
+    public Flux<VetResponseDTO> getAllVetsForAvailability() {
+        return availabilityWebClient
+                .get()
+                .uri("/api/v1/availability/vets")
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, error ->
+                        Mono.error(new IllegalArgumentException("Error fetching vets for availability")))
+                .onStatus(HttpStatusCode::is5xxServerError, error ->
+                        Mono.error(new IllegalArgumentException("Server error fetching vets")))
+                .bodyToFlux(VetResponseDTO.class);
+    }
 
+    public Flux<TimeSlotDTO> getAvailableTimeSlots(String vetId, String date) {
+        return availabilityWebClient
+                .get()
+                .uri("/api/v1/availability/vets/{vetId}/slots?date={date}", vetId, date)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, error ->
+                        Mono.error(new NotFoundException("Vet not found: " + vetId)))
+                .onStatus(HttpStatusCode::is5xxServerError, error ->
+                        Mono.error(new IllegalArgumentException("Server error")))
+                .bodyToFlux(TimeSlotDTO.class);
+    }
+
+
+    public Flux<String> getAvailableDates(String vetId, String startDate, String endDate) {
+        return availabilityWebClient
+                .get()
+                .uri("/api/v1/availability/vets/{vetId}/dates?startDate={startDate}&endDate={endDate}",
+                        vetId, startDate, endDate)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, error ->
+                        Mono.error(new NotFoundException("Vet not found: " + vetId)))
+                .onStatus(HttpStatusCode::is5xxServerError, error ->
+                        Mono.error(new IllegalArgumentException("Server error")))
+                .bodyToFlux(String.class);
+    }
+
+    public Mono<VetResponseDTO> getVeterinarianAvailability(String vetId) {
+        return availabilityWebClient
+                .get()
+                .uri("/api/v1/availability/vets/{vetId}", vetId)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, error ->
+                        Mono.error(new NotFoundException("Vet not found: " + vetId)))
+                .onStatus(HttpStatusCode::is5xxServerError, error ->
+                        Mono.error(new IllegalArgumentException("Server error fetching vet availability")))
+                .bodyToMono(VetResponseDTO.class);
+    }
 
 }
 

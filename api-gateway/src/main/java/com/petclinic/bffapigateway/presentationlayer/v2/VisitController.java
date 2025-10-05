@@ -2,8 +2,10 @@ package com.petclinic.bffapigateway.presentationlayer.v2;
 
 import com.petclinic.bffapigateway.domainclientlayer.VisitsServiceClient;
 import com.petclinic.bffapigateway.dtos.Auth.Role;
+import com.petclinic.bffapigateway.dtos.Vets.VetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.Emergency.EmergencyRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.Emergency.EmergencyResponseDTO;
+import com.petclinic.bffapigateway.dtos.Visits.TimeSlotDTO;
 import com.petclinic.bffapigateway.dtos.Visits.VisitRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.VisitResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewRequestDTO;
@@ -53,7 +55,7 @@ public class VisitController {
     }
 
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.OWNER})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.OWNER, Roles.VET, Roles.RECEPTIONIST})
     @PostMapping(value = "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<VisitResponseDTO>> addVisit(@RequestBody Mono<VisitRequestDTO> visitRequestDTO) {
         return visitsServiceClient.addVisit(visitRequestDTO)
@@ -282,4 +284,36 @@ public class VisitController {
                         .contentType(MediaType.APPLICATION_OCTET_STREAM)
                         .body(csvData));
     }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.RECEPTIONIST, Roles.OWNER, Roles.VET})
+    @GetMapping(value = "/availability/vets", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Flux<VetResponseDTO>> getAllVetsForAvailability() {
+        return ResponseEntity.ok().body(visitsServiceClient.getAllVetsForAvailability());
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.RECEPTIONIST, Roles.OWNER, Roles.VET})
+    @GetMapping(value = "/availability/vets/{vetId}/slots", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Flux<TimeSlotDTO>> getAvailableTimeSlots(
+            @PathVariable String vetId,
+            @RequestParam String date) {
+        return ResponseEntity.ok().body(visitsServiceClient.getAvailableTimeSlots(vetId, date));
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.RECEPTIONIST, Roles.OWNER, Roles.VET})
+    @GetMapping(value = "/availability/vets/{vetId}/dates", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Flux<String>> getAvailableDates(
+            @PathVariable String vetId,
+            @RequestParam String startDate,
+            @RequestParam String endDate) {
+        return ResponseEntity.ok().body(visitsServiceClient.getAvailableDates(vetId, startDate, endDate));
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.RECEPTIONIST, Roles.OWNER, Roles.VET})
+    @GetMapping(value = "/availability/vets/{vetId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<VetResponseDTO>> getVeterinarianAvailability(@PathVariable String vetId) {
+        return visitsServiceClient.getVeterinarianAvailability(vetId)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
 }
