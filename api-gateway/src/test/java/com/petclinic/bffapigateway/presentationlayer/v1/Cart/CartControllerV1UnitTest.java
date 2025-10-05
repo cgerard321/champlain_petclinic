@@ -439,7 +439,7 @@ public class CartControllerV1UnitTest {
     @DisplayName("POST /api/gateway/carts/{cartId}/checkout - Should return 404 when cart not found")
     void checkoutCart_withNonExistingId_shouldReturnNotFound() {
         // Arrange
-        String cartId = "non-existant-cart";
+        String cartId = "non-existent-cart";
         when(cartServiceClient.checkoutCart(cartId))
                 .thenReturn(Mono.empty());
 
@@ -478,7 +478,7 @@ public class CartControllerV1UnitTest {
     @DisplayName("GET /api/gateway/carts/customer/{customerId} - Should return 404 when customer has no cart")
     void getCartByCustomerId_withNonExistingId_shouldReturnNotFound() {
         // Arrange
-        String customerId = "non-existant-customer";
+        String customerId = "non-existent-customer";
         when(cartServiceClient.getCartByCustomerId(customerId))
                 .thenReturn(Mono.empty());
 
@@ -580,10 +580,10 @@ public class CartControllerV1UnitTest {
 
     @Test
     @DisplayName("DELETE /api/gateway/carts/{cartId}/wishlist/{productId} - Should return 404 when wishlist item not found")
-    void removeProductFromWishlist_withNonExistantProductId_shouldReturnNotFound() {
+    void removeProductFromWishlist_withNonExistentProductId_shouldReturnNotFound() {
         // Arrange
         String cartId = "cart-123";
-        String productId = "non-existant-product";
+        String productId = "non-existent-product";
         when(cartServiceClient.removeProductFromWishlist(cartId, productId))
                 .thenReturn(Mono.error(new NotFoundException("Wishlist item not found")));
 
