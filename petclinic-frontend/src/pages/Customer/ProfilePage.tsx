@@ -7,6 +7,7 @@ import { PetTypeModel } from '@/features/customers/models/PetTypeModel';
 import { useUser } from '@/context/UserContext';
 import { NavBar } from '@/layouts/AppNavBar.tsx';
 import AddPetModal from '@/features/customers/components/AddPetModal';
+import EditPetModal from '@/features/customers/components/EditPetModal';
 import './ProfilePage.css';
 import { AppRoutePaths } from '@/shared/models/path.routes.ts';
 import { useNavigate } from 'react-router-dom';
@@ -19,6 +20,8 @@ const ProfilePage = (): JSX.Element => {
   const [owner, setOwner] = useState<OwnerResponseModel | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isAddPetModalOpen, setIsAddPetModalOpen] = useState<boolean>(false);
+  const [isEditPetModalOpen, setIsEditPetModalOpen] = useState<boolean>(false);
+  const [selectedPetId, setSelectedPetId] = useState<string>('');
   const [petTypes, setPetTypes] = useState<PetTypeModel[]>([]);
   const navigate = useNavigate();
 
@@ -144,6 +147,67 @@ const ProfilePage = (): JSX.Element => {
     }
   };
 
+  const handleEditPet = (petId: string): void => {
+    setSelectedPetId(petId);
+    setIsEditPetModalOpen(true);
+  };
+
+  const handleCloseEditPetModal = (): void => {
+    setIsEditPetModalOpen(false);
+    setSelectedPetId('');
+  };
+
+  //eliminated code duplication
+  const fetchOwnerData = async (): Promise<void> => {
+    if (!user.userId) return;
+
+    try {
+      const ownerResponse = await getOwner(user.userId);
+      const ownerData = ownerResponse.data;
+      if (ownerData.pets && ownerData.pets.length > 0) {
+        setOwner(ownerData);
+      } else {
+        setOwner({
+          ...ownerData,
+          pets: [],
+        });
+      }
+    } catch (error) {
+      setError('Error fetching owner data');
+      console.error('Error fetching owner data:', error);
+    }
+  };
+
+  const handlePetUpdated = (updatedPet?: PetResponseModel): void => {
+    if (updatedPet) {
+      setOwner(prevOwner => {
+        if (!prevOwner || !prevOwner.pets) return prevOwner;
+
+        const updatedPets = prevOwner.pets.map(pet =>
+          pet.petId === updatedPet.petId
+            ? {
+                ...updatedPet,
+                birthDate: updatedPet.birthDate
+                  ? new Date(updatedPet.birthDate)
+                  : new Date(),
+              }
+            : pet
+        );
+
+        return {
+          ...prevOwner,
+          pets: updatedPets,
+        };
+      });
+    } else {
+      fetchOwnerData();
+    }
+  };
+
+  const handlePetDeleted = (): void => {
+    fetchOwnerData();
+  };
+
   if (error) {
     return <p>{error}</p>;
   }
@@ -209,12 +273,20 @@ const ProfilePage = (): JSX.Element => {
                           years
                         </span>
                       </div>
-                      <button
-                        className="customers-delete-pet-button"
-                        onClick={() => handleDeletePet(pet.petId)}
-                      >
-                        Delete Pet
-                      </button>
+                      <div className="customers-pet-actions">
+                        <button
+                          className="customers-edit-pet-button"
+                          onClick={() => handleEditPet(pet.petId)}
+                        >
+                          Edit Pet
+                        </button>
+                        <button
+                          className="customers-delete-pet-button"
+                          onClick={() => handleDeletePet(pet.petId)}
+                        >
+                          Delete Pet
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -240,6 +312,15 @@ const ProfilePage = (): JSX.Element => {
         isOpen={isAddPetModalOpen}
         onClose={handleCloseAddPetModal}
         onPetAdded={handlePetAdded}
+      />
+
+      <EditPetModal
+        isOpen={isEditPetModalOpen}
+        onClose={handleCloseEditPetModal}
+        petId={selectedPetId}
+        ownerId={user.userId}
+        onPetUpdated={handlePetUpdated}
+        onPetDeleted={handlePetDeleted}
       />
     </div>
   );

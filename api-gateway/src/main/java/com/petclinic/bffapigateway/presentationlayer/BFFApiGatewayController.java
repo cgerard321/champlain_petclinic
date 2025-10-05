@@ -294,12 +294,6 @@ public class BFFApiGatewayController {
         return customersServiceClient.getAllPets();
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET})
-    @GetMapping(value = "/pets/{petId}")
-    public Mono<ResponseEntity<PetResponseDTO>> getPetByPetId(@PathVariable String petId){
-        return customersServiceClient.getPetByPetId(petId).map(s -> ResponseEntity.status(HttpStatus.OK).body(s))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
-    }
 
 
     @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN,Roles.VET})
@@ -323,11 +317,6 @@ public class BFFApiGatewayController {
     }
 
 
-    @DeleteMapping("pets/{petId}")
-    public Mono<ResponseEntity<PetResponseDTO>> deletePetByPetId(@PathVariable String petId){
-        return customersServiceClient.deletePetByPetId(petId).then(Mono.just(ResponseEntity.noContent().<PetResponseDTO>build()))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
-    }
 
 
     @GetMapping(value = "owners/petTypes", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
@@ -503,14 +492,14 @@ public class BFFApiGatewayController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
-    @PostMapping(value = "{vetId}/specialties")
+    @PostMapping(value = "vets/{vetId}/specialties")
     public Mono<VetResponseDTO> addSpecialtiesByVetId(
             @PathVariable String vetId,
             @RequestBody Mono<SpecialtyDTO> specialties) {
         return vetsServiceClient.addSpecialtiesByVetId(vetId, specialties);
     }
 
- 
+
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @GetMapping("vets/{vetId}/default-photo")
     public Mono<ResponseEntity<PhotoResponseDTO>> getDefaultPhotoByVetId(@PathVariable String vetId) {

@@ -69,7 +69,7 @@ public class OwnerApiGatewayTest {
     private final Date date = new Date();
 
     @Test
-    void getAllOwners_shouldSucceed() {
+    void whenGetAllOwners_thenReturnOwners() {
         OwnerResponseDTO owner = new OwnerResponseDTO();
         owner.setOwnerId("ownerId-90");
         owner.setFirstName("John");
@@ -91,7 +91,7 @@ public class OwnerApiGatewayTest {
     }
 
     @Test
-    void getAllOwnersByPagination() {
+    void whenGetAllOwnersByPagination_thenReturnOwners() {
         OwnerResponseDTO owner = new OwnerResponseDTO();
         owner.setOwnerId("ownerId-09");
         owner.setFirstName("Test");
@@ -123,7 +123,7 @@ public class OwnerApiGatewayTest {
     }
 
     @Test
-    void getAllOwnersByPagination_pageEmpty_sizeEmpty() {
+    void whenGetAllOwnersByPagination_withEmptyParams_thenReturnEmptyList() {
         when(customersServiceClient.getOwnersByPagination(null, null, null, null, null, null, null))
                 .thenReturn(Flux.empty());
 
@@ -139,7 +139,7 @@ public class OwnerApiGatewayTest {
     }
 
     @Test
-    void getTotalNumberOfOwners() {
+    void whenGetTotalNumberOfOwners_thenReturnCount() {
         long expectedCount = 0L;
         when(customersServiceClient.getTotalNumberOfOwners()).thenReturn(Mono.just(expectedCount));
 
@@ -152,7 +152,7 @@ public class OwnerApiGatewayTest {
     }
 
     @Test
-    void getTotalNumberOfOwnersWithFilters() {
+    void whenGetTotalNumberOfOwnersWithFilters_thenReturnCount() {
         long expectedCount = 0L;
         when(customersServiceClient.getTotalNumberOfOwnersWithFilters(null, null, null, null, null))
                 .thenReturn(Mono.just(expectedCount));
@@ -167,7 +167,7 @@ public class OwnerApiGatewayTest {
 
 
         @Test
-        void getOwnerByOwnerId_shouldSucceed() {
+        void whenGetOwnerByOwnerId_thenReturnOwner() {
             OwnerResponseDTO owner = new OwnerResponseDTO();
             owner.setOwnerId("ownerId-123");
             owner.setFirstName("John");
@@ -194,7 +194,7 @@ public class OwnerApiGatewayTest {
         }
 
     @Test
-    void updateOwner_shouldSucceed() {
+    void whenUpdateOwner_thenReturnUpdatedOwner() {
         String ownerId = "f470653d-05c5-4c45-b7a0-7d70f003d2ac";
         OwnerRequestDTO updatedOwnerData = new OwnerRequestDTO();
         updatedOwnerData.setOwnerId(ownerId);
