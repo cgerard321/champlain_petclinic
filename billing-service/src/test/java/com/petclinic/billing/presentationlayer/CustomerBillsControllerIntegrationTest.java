@@ -156,19 +156,17 @@ public class CustomerBillsControllerIntegrationTest {
                 .expectStatus().isNotFound();
     }
 
-
-
     private Bill buildBill() {
                 return Bill.builder()
-                                .billId("1")
-                                .customerId("custId")
-                                .vetId("vetId")
-                                .visitType("surgery")
-                                .date(LocalDate.now().minusDays(10))
-                                .amount(new BigDecimal(150.0))
-                                .billStatus(BillStatus.UNPAID)
-                                .dueDate(LocalDate.now().plusDays(20))
-                                .build();
+                        .billId("1")
+                        .customerId("custId")
+                        .vetId("vetId")
+                        .visitType("surgery")
+                        .date(LocalDate.now().minusDays(10))
+                        .amount(new BigDecimal(150.0))
+                        .billStatus(BillStatus.UNPAID)
+                        .dueDate(LocalDate.now().plusDays(20))
+                        .build();
         }
 
         private Bill buildBill2() {
@@ -187,6 +185,7 @@ public class CustomerBillsControllerIntegrationTest {
                                 .billStatus(BillStatus.UNPAID)
                                 .build();
         }
+
         @Test
         void getBillByBillId_ShouldReturnInterest() {
                 billRepository.deleteAll().block();
@@ -213,5 +212,5 @@ public class CustomerBillsControllerIntegrationTest {
                         .expectHeader().contentType(MediaType.APPLICATION_JSON)
                         .expectBody()
                         .jsonPath("$.interest").isEqualTo(expectedInterest.doubleValue());
-}
+        }
 }

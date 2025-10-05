@@ -1,7 +1,5 @@
 package com.petclinic.billing.util;
 
-
-//import com.petclinic.billing.businesslayer.RequestContextAdd;
 import com.petclinic.billing.datalayer.Bill;
 import com.petclinic.billing.datalayer.BillRequestDTO;
 import com.petclinic.billing.datalayer.BillResponseDTO;
@@ -16,8 +14,6 @@ import java.util.UUID;
 
 @Slf4j
 public class EntityDtoUtil {
-
-
 
     public static BillResponseDTO toBillResponseDto(Bill bill){
         BillResponseDTO billResponseDTO =new BillResponseDTO();
@@ -44,7 +40,6 @@ public class EntityDtoUtil {
         billResponseDTO.setTimeRemaining(timeRemaining(bill));
 
         log.info("Mapped BillResponseDTO: {}", billResponseDTO);
-
 
         return billResponseDTO;
     }

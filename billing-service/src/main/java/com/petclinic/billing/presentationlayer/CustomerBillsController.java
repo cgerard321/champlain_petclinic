@@ -80,9 +80,4 @@ public class CustomerBillsController {
                         e -> Mono.just(ResponseEntity.status(e.getStatus()).build()));
 
     }
-
-
-
-
-
 }

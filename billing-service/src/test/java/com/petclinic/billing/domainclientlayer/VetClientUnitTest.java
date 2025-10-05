@@ -64,6 +64,7 @@ public class VetClientUnitTest {
                         response.getLastName().equals("Doe"))
                 .verifyComplete();
     }
+
     @Test
     public void getVetByVetId_Invalid(){
         String invalidId = "00000000";
@@ -78,11 +79,11 @@ public class VetClientUnitTest {
                 .expectErrorMatches(throwable -> throwable instanceof NotFoundException && throwable.getMessage().equals("Vet not found with vetId: " + invalidId))
                 .verify();
     }
+
     @Test
     public void getVetByVetId_ClientError() {
         String vetId = "456";
 
-        // Simulate a 4xx client error, e.g., 400 Bad Request
         mockBackEnd.enqueue(new MockResponse()
                 .setResponseCode(400)
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -99,7 +100,6 @@ public class VetClientUnitTest {
     public void getVetByVetId_ServerError() {
         String vetId = "789";
 
-        // Simulate a 5xx server error, e.g., 500 Internal Server Error
         mockBackEnd.enqueue(new MockResponse()
                 .setResponseCode(500)
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)

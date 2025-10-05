@@ -2,14 +2,11 @@ package com.petclinic.billing.businesslayer;
 
 import com.itextpdf.text.DocumentException;
 import com.petclinic.billing.datalayer.*;
-//import com.petclinic.billing.domainclientlayer.OwnerClient;
-//import com.petclinic.billing.domainclientlayer.VetClient;
 import com.petclinic.billing.exceptions.InvalidPaymentException;
 import com.petclinic.billing.exceptions.NotFoundException;
 import com.petclinic.billing.util.EntityDtoUtil;
 import com.petclinic.billing.util.InterestCalculationUtil;
 import com.petclinic.billing.util.PdfGenerator;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -23,8 +20,6 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.function.Predicate;
-
-
 
 @Service
 @RequiredArgsConstructor
@@ -258,8 +253,6 @@ public class BillServiceImpl implements BillService{
     }
 
  */
-
-
 
 //    private Mono<RequestContextAdd> vetRequestResponse(RequestContextAdd rc) {
 //        return
