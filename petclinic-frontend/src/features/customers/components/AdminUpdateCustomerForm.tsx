@@ -2,8 +2,12 @@ import { useEffect, useState, FC } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getOwner } from '../api/getOwner';
 import { updateOwner } from '../api/updateOwner';
+import { getUserDetails } from '../api/getUserDetails';
+import { updateUsername } from '../api/updateUsername';
 import { OwnerRequestModel } from '../models/OwnerRequestModel';
 import { OwnerResponseModel } from '../models/OwnerResponseModel';
+import { UserDetailsModel } from '../models/UserDetailsModel';
+import { validateUsername } from '../utils/validation';
 import './UpdateCustomerForm.css';
 
 const provincesOfCanada = [
@@ -34,6 +38,8 @@ const AdminUpdateCustomerForm: FC = () => {
     telephone: '',
   });
 
+  const [userDetails, setUserDetails] = useState<UserDetailsModel | null>(null);
+  const [username, setUsername] = useState<string>('');
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -53,8 +59,36 @@ const AdminUpdateCustomerForm: FC = () => {
       }
     };
 
+    const fetchUserData = async (): Promise<void> => {
+      if (!ownerId) {
+        console.error('Owner id is undefined');
+        return;
+      }
+
+      try {
+        const response = await getUserDetails(ownerId);
+        const userData: UserDetailsModel = response.data;
+        setUserDetails(userData);
+        setUsername(userData.username);
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        setUserDetails({
+          userId: ownerId,
+          username: 'Unknown',
+          email: '',
+          roles: [],
+          verified: false,
+          disabled: false,
+        });
+        setUsername('Unknown');
+      }
+    };
+
     fetchOwnerData().catch(error =>
       console.error('Error in fetchOwnerData:', error)
+    );
+    fetchUserData().catch(error =>
+      console.error('Error in fetchUserData:', error)
     );
   }, [ownerId]);
 
@@ -65,6 +99,15 @@ const AdminUpdateCustomerForm: FC = () => {
       ...formData,
       [e.target.name]: e.target.value,
     });
+  };
+
+  const handleUsernameChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ): void => {
+    setUsername(e.target.value);
+    if (errors.username) {
+      setErrors(prev => ({ ...prev, username: '' }));
+    }
   };
 
   const validate = (): boolean => {
@@ -83,6 +126,11 @@ const AdminUpdateCustomerForm: FC = () => {
       newErrors.telephone = 'Telephone must contain only digits';
     }
 
+    const usernameError = validateUsername(username);
+    if (usernameError) {
+      newErrors.username = usernameError;
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -98,7 +146,13 @@ const AdminUpdateCustomerForm: FC = () => {
         console.error('Owner id is undefined');
         return;
       }
+
       await updateOwner(ownerId, formData);
+
+      if (userDetails && username !== userDetails.username) {
+        await updateUsername(ownerId, username);
+      }
+
       setIsModalOpen(true);
     } catch (error) {
       console.error('Error updating owner:', error);
@@ -116,8 +170,17 @@ const AdminUpdateCustomerForm: FC = () => {
 
   return (
     <div className="update-customer-form">
-      <h1>Edit Customer</h1>
+      <h1>Edit Profile</h1>
       <form onSubmit={handleSubmit}>
+        <label>Username: </label>
+        <input
+          type="text"
+          name="username"
+          value={username}
+          onChange={handleUsernameChange}
+        />
+        {errors.username && <span className="error">{errors.username}</span>}
+        <br />
         <label>First Name: </label>
         <input
           type="text"

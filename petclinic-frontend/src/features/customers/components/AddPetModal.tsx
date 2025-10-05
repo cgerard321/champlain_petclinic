@@ -28,6 +28,8 @@ const AddPetModal: React.FC<AddPetModalProps> = ({
     isActive: 'true',
     weight: '',
   });
+  const [dateInputValue, setDateInputValue] = useState<string>('');
+  const [isDateInputFocused, setIsDateInputFocused] = useState<boolean>(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [petTypes, setPetTypes] = useState<PetTypeModel[]>([]);
@@ -48,6 +50,7 @@ const AddPetModal: React.FC<AddPetModalProps> = ({
     };
     if (isOpen) {
       fetchPetTypes();
+      setDateInputValue(pet.birthDate.toISOString().split('T')[0]);
     }
   }, [isOpen]);
 
@@ -58,7 +61,16 @@ const AddPetModal: React.FC<AddPetModalProps> = ({
   ): void => {
     const { name, type, value } = e.target;
     if (type === 'date') {
-      setPet({ ...pet, [name]: new Date(value) });
+      setDateInputValue(value);
+
+      if (value && value.length === 10) {
+        const dateValue = new Date(value);
+        if (!isNaN(dateValue.getTime())) {
+          setPet({ ...pet, [name]: dateValue });
+        }
+      } else if (value === '') {
+        setPet({ ...pet, [name]: new Date() });
+      }
     } else {
       setPet({ ...pet, [name]: value });
     }
@@ -104,6 +116,8 @@ const AddPetModal: React.FC<AddPetModalProps> = ({
       isActive: 'true',
       weight: '',
     });
+    setDateInputValue('');
+    setIsDateInputFocused(false);
     setErrors({});
     setIsSubmitting(false);
     onClose();
@@ -168,8 +182,17 @@ const AddPetModal: React.FC<AddPetModalProps> = ({
             <input
               type="date"
               name="birthDate"
-              value={pet.birthDate.toISOString().split('T')[0]}
+              value={
+                isDateInputFocused
+                  ? dateInputValue
+                  : dateInputValue ||
+                    (pet.birthDate && !isNaN(pet.birthDate.getTime())
+                      ? pet.birthDate.toISOString().split('T')[0]
+                      : new Date().toISOString().split('T')[0])
+              }
               onChange={handleChange}
+              onFocus={() => setIsDateInputFocused(true)}
+              onBlur={() => setIsDateInputFocused(false)}
               disabled={isSubmitting}
             />
           </div>
