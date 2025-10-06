@@ -392,6 +392,19 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
         }
 
         return inventoryFlux
+                .sort((inv1, inv2) -> {
+                    if (inv1.getInventoryCode() == null && inv2.getInventoryCode() == null) return 0;
+                    if (inv1.getInventoryCode() == null) return 1;
+                    if (inv2.getInventoryCode() == null) return -1;
+
+                    try {
+                        int num1 = Integer.parseInt(inv1.getInventoryCode().replace("INV-", ""));
+                        int num2 = Integer.parseInt(inv2.getInventoryCode().replace("INV-", ""));
+                        return Integer.compare(num1, num2);
+                    } catch (NumberFormatException e) {
+                        return inv1.getInventoryCode().compareTo(inv2.getInventoryCode());
+                    }
+                })
                 .skip(page.getPageNumber() * page.getPageSize())
                 .take(page.getPageSize())
                 .map(EntityDTOUtil::toInventoryResponseDTO);
@@ -605,8 +618,21 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
 
     @Override
     public Flux<InventoryResponseDTO> getAllInventories() {
-        return inventoryRepository.findAll() // Fetch all inventories from the repository
-                .map(EntityDTOUtil::toInventoryResponseDTO); // Convert each inventory entity to DTO
+        return inventoryRepository.findAll()
+                .sort((inv1, inv2) -> {
+                    if (inv1.getInventoryCode() == null && inv2.getInventoryCode() == null) return 0;
+                    if (inv1.getInventoryCode() == null) return 1;
+                    if (inv2.getInventoryCode() == null) return -1;
+
+                    try {
+                        int num1 = Integer.parseInt(inv1.getInventoryCode().replace("INV-", ""));
+                        int num2 = Integer.parseInt(inv2.getInventoryCode().replace("INV-", ""));
+                        return Integer.compare(num1, num2);
+                    } catch (NumberFormatException e) {
+                        return inv1.getInventoryCode().compareTo(inv2.getInventoryCode());
+                    }
+                })
+                .map(EntityDTOUtil::toInventoryResponseDTO);
     }
 
     @Override
