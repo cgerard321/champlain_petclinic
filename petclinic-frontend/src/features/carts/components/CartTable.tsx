@@ -90,7 +90,9 @@ export default function CartListTable(): JSX.Element {
   const fetchCarts = useCallback(async (): Promise<void> => {
     try {
       setLoading(true);
-      const { data } = await axiosInstance.get<CartModel[] | string | Record<string, unknown>>('/carts', {
+      const { data } = await axiosInstance.get<
+        CartModel[] | string | Record<string, unknown>
+      >('/carts', {
         useV2: false,
       });
       const normalized = cartExtractor(data);
