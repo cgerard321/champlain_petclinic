@@ -50,7 +50,9 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: coverage-reports-api-gateway
-        path: ./api-gateway/build/reports/jacoco/test/html/
+        path: |
+          ./api-gateway/build/reports/jacoco/test/html/
+          ./api-gateway/build/reports/jacoco/test/jacocoTestReport.xml
         retention-days: 30
       if: always()
 
@@ -90,7 +92,9 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: coverage-reports-visits-service
-        path: ./visits-service-new/build/reports/jacoco/test/html/
+        path: |
+          ./visits-service-new/build/reports/jacoco/test/html/
+          ./visits-service-new/build/reports/jacoco/test/jacocoTestReport.xml
         retention-days: 30
       if: always()
 
@@ -130,7 +134,9 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: coverage-reports-vet-service
-        path: ./vet-service/build/reports/jacoco/test/html/
+        path: |
+          ./vet-service/build/reports/jacoco/test/html/
+          ./vet-service/build/reports/jacoco/test/jacocoTestReport.xml
         retention-days: 30
       if: always()
 
@@ -171,7 +177,9 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: coverage-reports-customers-service
-        path: ./customers-service-reactive/build/reports/jacoco/test/html/
+        path: |
+          ./customers-service-reactive/build/reports/jacoco/test/html/
+          ./customers-service-reactive/build/reports/jacoco/test/jacocoTestReport.xml
         retention-days: 30
       if: always()
 
@@ -211,7 +219,9 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: coverage-reports-billing-service
-        path: ./billing-service/build/reports/jacoco/test/html/
+        path: |
+          ./billing-service/build/reports/jacoco/test/html/
+          ./billing-service/build/reports/jacoco/test/jacocoTestReport.xml
         retention-days: 30
       if: always()
 
@@ -251,7 +261,9 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: coverage-reports-auth-service
-        path: ./auth-service/build/reports/jacoco/test/html/
+        path: |
+          ./auth-service/build/reports/jacoco/test/html/
+          ./auth-service/build/reports/jacoco/test/jacocoTestReport.xml
         retention-days: 30
       if: always()
 
@@ -291,7 +303,9 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: coverage-reports-inventory-service
-        path: ./inventory-service/build/reports/jacoco/test/html/
+        path: |
+          ./inventory-service/build/reports/jacoco/test/html/
+          ./inventory-service/build/reports/jacoco/test/jacocoTestReport.xml
         retention-days: 30
       if: always()
 
@@ -332,7 +346,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: coverage-reports-products-service
-          path: ./products-service/build/reports/jacoco/test/html/
+          path: |
+            ./products-service/build/reports/jacoco/test/html/
+            ./products-service/build/reports/jacoco/test/jacocoTestReport.xml
           retention-days: 30
         if: always()
 
@@ -374,7 +390,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: coverage-reports-cart-service
-          path: ./cart-service/build/reports/jacoco/test/html/
+          path: |
+            ./cart-service/build/reports/jacoco/test/html/
+            ./cart-service/build/reports/jacoco/test/jacocoTestReport.xml
           retention-days: 30
         if: always()
 
@@ -410,7 +428,20 @@ jobs:
           if [ -d "$report_dir" ]; then
             service_name=$(basename "$report_dir")
             main_index="$report_dir/index.html"
-            if [ -f "$main_index" ]; then
+            xml_report="$report_dir/jacocoTestReport.xml"
+            
+            # Try to get coverage from XML first (more reliable)
+            if [ -f "$xml_report" ]; then
+              coverage=$(grep -o 'line-rate="[0-9.]*"' "$xml_report" | head -1 | grep -o '[0-9.]*' | awk '{printf "%.1f%%", $1*100}')
+              branch_coverage=$(grep -o 'branch-rate="[0-9.]*"' "$xml_report" | head -1 | grep -o '[0-9.]*' | awk '{printf "%.1f%%", $1*100}')
+              lines_covered=$(grep -o 'lines-covered="[0-9]*"' "$xml_report" | head -1 | grep -o '[0-9]*')
+              lines_total=$(grep -o 'lines-valid="[0-9]*"' "$xml_report" | head -1 | grep -o '[0-9]*')
+              
+              if [ -n "$coverage" ]; then
+                echo "- $service_name: $coverage ($lines_covered/$lines_total lines) | Branch: $branch_coverage | [View Report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
+              fi
+            # Fallback to HTML parsing
+            elif [ -f "$main_index" ]; then
               coverage=$(grep -A 5 'tfoot' "$main_index" | grep -o '[0-9]*%' | head -1)
               if [ -z "$coverage" ]; then
                 coverage=$(grep -o 'class="ctr2">[0-9]*%' "$main_index" | head -1 | grep -o '[0-9]*%')
@@ -419,13 +450,61 @@ jobs:
                 coverage=$(grep -o '[0-9]*%' "$main_index" | head -1)
               fi
               if [ -n "$coverage" ]; then
-                echo "- $service_name: $coverage" >> $GITHUB_STEP_SUMMARY
+                echo "- $service_name: $coverage | [View Report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
               else
                 echo "- $service_name: Coverage data not found" >> $GITHUB_STEP_SUMMARY
               fi
             else
               echo "- $service_name: No coverage report found" >> $GITHUB_STEP_SUMMARY
             fi
+          fi
+        done
+        
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "###  JaCoCo Coverage Bot" >> $GITHUB_STEP_SUMMARY
+        echo "Access detailed coverage reports for all microservices:" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        for report_dir in coverage-reports/*/; do
+          if [ -d "$report_dir" ]; then
+            service_name=$(basename "$report_dir")
+            main_index="$report_dir/index.html"
+            xml_report="$report_dir/jacocoTestReport.xml"
+            
+            echo "####  **$service_name**" >> $GITHUB_STEP_SUMMARY
+            
+            # Try to get detailed coverage from XML first
+            if [ -f "$xml_report" ]; then
+              coverage=$(grep -o 'line-rate="[0-9.]*"' "$xml_report" | head -1 | grep -o '[0-9.]*' | awk '{printf "%.1f%%", $1*100}')
+              branch_coverage=$(grep -o 'branch-rate="[0-9.]*"' "$xml_report" | head -1 | grep -o '[0-9.]*' | awk '{printf "%.1f%%", $1*100}')
+              lines_covered=$(grep -o 'lines-covered="[0-9]*"' "$xml_report" | head -1 | grep -o '[0-9]*')
+              lines_total=$(grep -o 'lines-valid="[0-9]*"' "$xml_report" | head -1 | grep -o '[0-9]*')
+              branches_covered=$(grep -o 'branches-covered="[0-9]*"' "$xml_report" | head -1 | grep -o '[0-9]*')
+              branches_total=$(grep -o 'branches-valid="[0-9]*"' "$xml_report" | head -1 | grep -o '[0-9]*')
+              
+              if [ -n "$coverage" ]; then
+                echo "- **Line Coverage:** $coverage ($lines_covered/$lines_total lines)" >> $GITHUB_STEP_SUMMARY
+                echo "- **Branch Coverage:** $branch_coverage ($branches_covered/$branches_total branches)" >> $GITHUB_STEP_SUMMARY
+                echo "- ** [View HTML Report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})**" >> $GITHUB_STEP_SUMMARY
+                echo "- ** [Download XML Report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})**" >> $GITHUB_STEP_SUMMARY
+              fi
+            # Fallback to HTML parsing
+            elif [ -f "$main_index" ]; then
+              coverage=$(grep -A 5 'tfoot' "$main_index" | grep -o '[0-9]*%' | head -1)
+              if [ -z "$coverage" ]; then
+                coverage=$(grep -o 'class="ctr2">[0-9]*%' "$main_index" | head -1 | grep -o '[0-9]*%')
+              fi
+              if [ -z "$coverage" ]; then
+                coverage=$(grep -o '[0-9]*%' "$main_index" | head -1)
+              fi
+              if [ -n "$coverage" ]; then
+                echo "- **Coverage:** $coverage" >> $GITHUB_STEP_SUMMARY
+                echo "- ** [View HTML Report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})**" >> $GITHUB_STEP_SUMMARY
+              fi
+            else
+              echo "- **Status:** No coverage report found" >> $GITHUB_STEP_SUMMARY
+            fi
+            echo "" >> $GITHUB_STEP_SUMMARY
           fi
         done
 
