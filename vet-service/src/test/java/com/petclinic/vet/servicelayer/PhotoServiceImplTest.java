@@ -1,10 +1,12 @@
 package com.petclinic.vet.servicelayer;
 
-import com.petclinic.vet.dataaccesslayer.Photo;
-import com.petclinic.vet.dataaccesslayer.PhotoRepository;
-import com.petclinic.vet.exceptions.InvalidInputException;
-import com.petclinic.vet.presentationlayer.PhotoRequestDTO;
-import com.petclinic.vet.presentationlayer.PhotoResponseDTO;
+import com.petclinic.vet.businesslayer.photos.PhotoService;
+import com.petclinic.vet.dataaccesslayer.photos.Photo;
+import com.petclinic.vet.dataaccesslayer.photos.PhotoRepository;
+import com.petclinic.vet.presentationlayer.photos.PhotoRequestDTO;
+import com.petclinic.vet.presentationlayer.photos.PhotoResponseDTO;
+import com.petclinic.vet.utils.exceptions.InvalidInputException;
+
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;

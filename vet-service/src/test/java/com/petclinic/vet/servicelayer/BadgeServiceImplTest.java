@@ -1,16 +1,17 @@
 package com.petclinic.vet.servicelayer;
 
-import com.petclinic.vet.dataaccesslayer.PhotoRepository;
+import com.petclinic.vet.businesslayer.badges.BadgeService;
 import com.petclinic.vet.dataaccesslayer.badges.Badge;
 import com.petclinic.vet.dataaccesslayer.badges.BadgeRepository;
 import com.petclinic.vet.dataaccesslayer.badges.BadgeTitle;
+import com.petclinic.vet.dataaccesslayer.photos.PhotoRepository;
 import com.petclinic.vet.dataaccesslayer.ratings.PredefinedDescription;
 import com.petclinic.vet.dataaccesslayer.ratings.Rating;
 import com.petclinic.vet.dataaccesslayer.ratings.RatingRepository;
-import com.petclinic.vet.exceptions.InvalidInputException;
-import com.petclinic.vet.exceptions.NotFoundException;
-import com.petclinic.vet.servicelayer.badges.BadgeResponseDTO;
-import com.petclinic.vet.servicelayer.badges.BadgeService;
+import com.petclinic.vet.presentationlayer.badges.BadgeResponseDTO;
+import com.petclinic.vet.utils.exceptions.InvalidInputException;
+import com.petclinic.vet.utils.exceptions.NotFoundException;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.r2dbc.init.R2dbcScriptDatabaseInitializer;
