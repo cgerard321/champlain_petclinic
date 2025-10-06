@@ -553,4 +553,20 @@ public class AuthServiceClient {
                 .bodyToMono(String.class);
 
     }
+
+    public Mono<Boolean> checkUsernameAvailability(String username, String jwtToken) {
+        return webClientBuilder.build()
+                .get()
+                .uri(authServiceUrl + "/users/withoutPages")
+                .cookie("Bearer", jwtToken)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, n -> rethrower.rethrow(n,
+                        x -> new GenericHttpException(x.get("message").toString(), (HttpStatus) n.statusCode())))
+                .bodyToFlux(UserDetails.class)
+                .collectList()
+                .map(users -> {
+                    return users.stream()
+                            .noneMatch(user -> user.getUsername().equals(username));
+                });
+    }
 }

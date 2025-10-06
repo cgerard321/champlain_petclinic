@@ -70,7 +70,7 @@ const AddEmergencyForm: React.FC = (): JSX.Element => {
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const { value } = e.target; // "YYYY-MM-DDTHH:mm"
-    setEmergency(prev => ({ ...prev, visitDate: value }));
+    setEmergency(prev => (prev ? { ...prev, visitDate: value } : prev));
   };
 
   const handleSubmit = async (
@@ -88,7 +88,7 @@ const AddEmergencyForm: React.FC = (): JSX.Element => {
       setSuccessMessage('Emergency added successfully!');
       setShowNotification(true);
       setTimeout(() => setShowNotification(false), 3000); // Hide notification after 3 seconds
-      navigate('/customer/emergency'); // Navigate to a different page or clear form
+      navigate('/visits'); // Navigate to a different page or clear form
       setEmergency({
         // visitDate: new Date(),
         visitDate: '',
@@ -195,7 +195,11 @@ const AddEmergencyForm: React.FC = (): JSX.Element => {
             // onChange={handleDateChange}
             type="datetime-local"
             name="visitDate"
-            value={emergency.visitDate ?? ''}
+            value={
+              emergency?.visitDate
+                ? emergency.visitDate.replace(' ', 'T').slice(0, 16)
+                : ''
+            }
             onChange={handleDateChange}
             required
           />

@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { getOwner } from '@/features/customers/api/getOwner';
 import { getPetTypes } from '@/features/customers/api/getPetTypes';
+import { getUserDetails } from '@/features/customers/api/getUserDetails';
 import { OwnerResponseModel } from '@/features/customers/models/OwnerResponseModel.ts';
 import { PetResponseModel } from '@/features/customers/models/PetResponseModel.ts';
 import { PetTypeModel } from '@/features/customers/models/PetTypeModel';
+import { UserDetailsModel } from '@/features/customers/models/UserDetailsModel';
 import { useUser } from '@/context/UserContext';
 import { NavBar } from '@/layouts/AppNavBar.tsx';
 import AddPetModal from '@/features/customers/components/AddPetModal';
@@ -18,6 +20,7 @@ import { deletePet } from '@/features/customers/api/deletePet';
 const ProfilePage = (): JSX.Element => {
   const { user } = useUser();
   const [owner, setOwner] = useState<OwnerResponseModel | null>(null);
+  const [userDetails, setUserDetails] = useState<UserDetailsModel | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isAddPetModalOpen, setIsAddPetModalOpen] = useState<boolean>(false);
   const [isEditPetModalOpen, setIsEditPetModalOpen] = useState<boolean>(false);
@@ -40,6 +43,39 @@ const ProfilePage = (): JSX.Element => {
   }, []);
 
   useEffect(() => {
+    let isMounted = true;
+
+    const fetchUserData = async (): Promise<void> => {
+      try {
+        const userDetailsResponse = await getUserDetails(user.userId);
+        if (isMounted) {
+          setUserDetails(userDetailsResponse.data);
+        }
+      } catch (error) {
+        console.error('Error fetching user details:', error);
+        if (isMounted) {
+          setUserDetails({
+            userId: user.userId,
+            username: 'Unknown',
+            email: '',
+            roles: [],
+            verified: false,
+            disabled: false,
+          });
+        }
+      }
+    };
+
+    fetchUserData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [user.userId]);
+
+  useEffect(() => {
+    let isMounted = true;
+
     const fetchOwnerData = async (): Promise<void> => {
       try {
         const ownerResponse = await getOwner(user.userId);
@@ -69,27 +105,37 @@ const ProfilePage = (): JSX.Element => {
             petsData = petsResponse.data;
           }
 
-          setOwner({
-            ...ownerData,
-            pets: petsData,
-          });
+          if (isMounted) {
+            setOwner({
+              ...ownerData,
+              pets: petsData,
+            });
+          }
         } catch (petsError) {
           console.warn(
             'Error fetching pets, setting owner without pets:',
             petsError
           );
-          setOwner({
-            ...ownerData,
-            pets: [],
-          });
+          if (isMounted) {
+            setOwner({
+              ...ownerData,
+              pets: [],
+            });
+          }
         }
       } catch (error) {
-        setError('Error fetching owner data');
+        if (isMounted) {
+          setError('Error fetching owner data');
+        }
         console.error('Error fetching owner data:', error);
       }
     };
 
     fetchOwnerData();
+
+    return () => {
+      isMounted = false;
+    };
   }, [user.userId]);
 
   const handleUpdateClick = (): void => {
@@ -225,6 +271,9 @@ const ProfilePage = (): JSX.Element => {
             {owner.firstName} {owner.lastName}&apos;s Profile
           </h1>
           <div className="customers-profile-info">
+            <p>
+              <strong>Username:</strong> {userDetails?.username || 'Loading...'}
+            </p>
             <p>
               <strong>First Name:</strong> {owner.firstName}
             </p>

@@ -4,6 +4,7 @@ import axiosInstance from '@/shared/api/axiosInstance';
 import { OwnerResponseModel } from '@/features/customers/models/OwnerResponseModel';
 import { PetResponseModel } from '@/features/customers/models/PetResponseModel';
 import { PetTypeModel } from '@/features/customers/models/PetTypeModel';
+import { UserDetailsModel } from '@/features/customers/models/UserDetailsModel';
 import { Bill } from '@/features/bills/models/Bill';
 import { getOwner } from '../api/getOwner';
 import { getPetTypes } from '../api/getPetTypes';
@@ -12,6 +13,7 @@ import './CustomerDetails.css';
 import { deleteOwner } from '../api/deleteOwner';
 import { IsVet } from '@/context/UserContext';
 import EditPetModal from './EditPetModal';
+import AddPetModal from './AddPetModal';
 
 const CustomerDetails: FC = () => {
   const { ownerId } = useParams<{ ownerId: string }>();
@@ -20,10 +22,12 @@ const CustomerDetails: FC = () => {
 
   const [isDisabled, setIsDisabled] = useState<boolean>(false);
   const [owner, setOwner] = useState<OwnerResponseModel | null>(null);
+  const [userDetails, setUserDetails] = useState<UserDetailsModel | null>(null);
   const [pets, setPets] = useState<PetResponseModel[]>([]);
   const [petTypes, setPetTypes] = useState<PetTypeModel[]>([]);
   const [bills, setBills] = useState<Bill[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [isAddPetModalOpen, setIsAddPetModalOpen] = useState<boolean>(false);
   const [isEditPetModalOpen, setIsEditPetModalOpen] = useState<boolean>(false);
   const [selectedPetId, setSelectedPetId] = useState<string>('');
 
@@ -34,8 +38,9 @@ const CustomerDetails: FC = () => {
       setOwner(ownerResponse.data);
 
       const userResponse = await axiosInstance.get(`/users/${ownerId}`, {
-        useV2: true,
+        useV2: false,
       });
+      setUserDetails(userResponse.data);
       setIsDisabled(userResponse.data.disabled);
 
       // Fetch pets by owner ID
@@ -211,6 +216,18 @@ const CustomerDetails: FC = () => {
     }
   };
 
+  const handleAddPet = (): void => {
+    setIsAddPetModalOpen(true);
+  };
+
+  const handleCloseAddPetModal = (): void => {
+    setIsAddPetModalOpen(false);
+  };
+
+  const handlePetAdded = (newPet: PetResponseModel): void => {
+    setPets(prevPets => [...prevPets, newPet]);
+  };
+
   const handlePetUpdated = (): void => {
     fetchOwnerDetails();
   };
@@ -230,6 +247,10 @@ const CustomerDetails: FC = () => {
         {/* Owner Info */}
         <div className="section owner-info">
           <h3>Owner Info</h3>
+          <p>
+            <strong>Username: </strong>
+            {userDetails?.username || 'Loading...'}
+          </p>
           <p>
             <strong>First Name: </strong>
             {owner.firstName}
@@ -327,10 +348,7 @@ const CustomerDetails: FC = () => {
         <button className="customer-details-button" onClick={handleBackClick}>
           Back to All Owners
         </button>
-        <button
-          className="add-pet-button"
-          onClick={() => navigate(`/owners/${ownerId}/pets/new`)}
-        >
+        <button className="add-pet-button" onClick={handleAddPet}>
           Add New Pet
         </button>
         {!isVet && (
@@ -350,6 +368,13 @@ const CustomerDetails: FC = () => {
           {isDisabled ? 'Enable Account' : 'Disable Account'}
         </button>
       </div>
+
+      <AddPetModal
+        ownerId={ownerId || ''}
+        isOpen={isAddPetModalOpen}
+        onClose={handleCloseAddPetModal}
+        onPetAdded={handlePetAdded}
+      />
 
       <EditPetModal
         isOpen={isEditPetModalOpen}

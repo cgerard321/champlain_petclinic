@@ -7,7 +7,7 @@ export const deleteProduct = async (
 ): Promise<AxiosResponse<ProductModel>> => {
   try {
     return await axiosInstance.delete<ProductModel>(`/products/${productId}`, {
-      useV2: true,
+      useV2: false,
     });
   } catch (error) {
     console.error('Error deleting product:', error);

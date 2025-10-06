@@ -2,16 +2,21 @@ import * as React from 'react';
 import { FormEvent, useEffect, useState } from 'react';
 import { getOwner } from '../api/getOwner';
 import { updateOwner } from '../api/updateOwner';
+import { getUserDetails } from '../api/getUserDetails';
+import { updateUsername } from '../api/updateUsername';
 import { OwnerRequestModel } from '@/features/customers/models/OwnerRequestModel.ts';
 import { OwnerResponseModel } from '@/features/customers/models/OwnerResponseModel.ts';
+import { UserDetailsModel } from '@/features/customers/models/UserDetailsModel';
 import { useNavigate } from 'react-router-dom';
 import { AppRoutePaths } from '@/shared/models/path.routes';
 import { useUser } from '@/context/UserContext';
+import { useUsernameValidation } from '../hooks/useUsernameValidation';
 import './UpdateCustomerForm.css';
 
 const UpdateCustomerForm: React.FC = (): JSX.Element => {
   const navigate = useNavigate();
-  const { user } = useUser();
+  const { user, setUser } = useUser();
+  const { validateUsernameField } = useUsernameValidation();
   const [owner, setOwner] = useState<OwnerRequestModel>({
     firstName: '',
     lastName: '',
@@ -20,13 +25,19 @@ const UpdateCustomerForm: React.FC = (): JSX.Element => {
     province: '',
     telephone: '',
   });
+  const [userDetails, setUserDetails] = useState<UserDetailsModel | null>(null);
+  const [username, setUsername] = useState<string>('');
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
-    const fetchOwnerData = async (): Promise<void> => {
+    const fetchData = async (): Promise<void> => {
       try {
-        const response = await getOwner(user.userId);
-        const ownerData: OwnerResponseModel = response.data;
+        const [ownerResponse, userResponse] = await Promise.all([
+          getOwner(user.userId),
+          getUserDetails(user.userId),
+        ]);
+
+        const ownerData: OwnerResponseModel = ownerResponse.data;
         setOwner({
           firstName: ownerData.firstName,
           lastName: ownerData.lastName,
@@ -35,14 +46,25 @@ const UpdateCustomerForm: React.FC = (): JSX.Element => {
           province: ownerData.province,
           telephone: ownerData.telephone,
         });
+
+        const userData: UserDetailsModel = userResponse.data;
+        setUserDetails(userData);
+        setUsername(userData.username);
       } catch (error) {
-        console.error('Error fetching owner data:', error);
+        console.error('Error fetching data:', error);
+        setUserDetails({
+          userId: user.userId,
+          username: 'Unknown',
+          email: '',
+          roles: [],
+          verified: false,
+          disabled: false,
+        });
+        setUsername('Unknown');
       }
     };
 
-    fetchOwnerData().catch(error =>
-      console.error('Error in fetchOwnerData:', error)
-    );
+    fetchData();
   }, [user.userId]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
@@ -50,7 +72,16 @@ const UpdateCustomerForm: React.FC = (): JSX.Element => {
     setOwner({ ...owner, [name]: value });
   };
 
-  const validate = (): boolean => {
+  const handleUsernameChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ): void => {
+    setUsername(e.target.value);
+    if (errors.username) {
+      setErrors(prev => ({ ...prev, username: '' }));
+    }
+  };
+
+  const validate = async (): Promise<boolean> => {
     const newErrors: { [key: string]: string } = {};
     if (!owner.firstName) newErrors.firstName = 'First name is required';
     if (!owner.lastName) newErrors.lastName = 'Last name is required';
@@ -58,6 +89,15 @@ const UpdateCustomerForm: React.FC = (): JSX.Element => {
     if (!owner.city) newErrors.city = 'City is required';
     if (!owner.province) newErrors.province = 'Province is required';
     if (!owner.telephone) newErrors.telephone = 'Telephone is required';
+
+    const usernameError = await validateUsernameField(
+      username,
+      userDetails?.username
+    );
+    if (usernameError) {
+      newErrors.username = usernameError;
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -66,14 +106,21 @@ const UpdateCustomerForm: React.FC = (): JSX.Element => {
     event: FormEvent<HTMLFormElement>
   ): Promise<void> => {
     event.preventDefault();
-    if (!validate()) return;
+    if (!(await validate())) return;
 
     try {
-      const response = await updateOwner(user.userId, owner);
-      if (response.status === 200) {
-        navigate(AppRoutePaths.Home);
-      } else {
+      await updateOwner(user.userId, owner);
+
+      if (userDetails && username !== userDetails.username) {
+        await updateUsername(user.userId, username);
+
+        setUser({
+          ...user,
+          username: username,
+        });
       }
+
+      navigate(AppRoutePaths.Home);
     } catch (error) {
       console.error('Error:', error);
     }
@@ -83,6 +130,15 @@ const UpdateCustomerForm: React.FC = (): JSX.Element => {
     <div className="update-customer-form">
       <h1>Edit Profile</h1>
       <form onSubmit={handleSubmit}>
+        <label>Username: </label>
+        <input
+          type="text"
+          name="username"
+          value={username}
+          onChange={handleUsernameChange}
+        />
+        {errors.username && <span className="error">{errors.username}</span>}
+        <br />
         <label>First Name: </label>
         <input
           type="text"
