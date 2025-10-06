@@ -7,7 +7,7 @@ export async function changeProductQuantity(
   try {
     await axiosInstance.patch(`/products/${productId}/quantity`, {
       productQuantity: newQuantity,
-      useV2: true,
+      useV2: false,
     });
   } catch (err) {
     console.error(`Error updating quantity for product ${productId}:`, err);

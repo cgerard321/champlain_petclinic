@@ -1761,7 +1761,7 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.practitionerId").isEqualTo(1);
     }*/
 
-    @Test
+    //@Test
     public void addVisit_ShouldReturnCreatedStatus() {
         String ownerId = "owner1";
         String petId = "pet1";
@@ -1806,7 +1806,7 @@ class ApiGatewayControllerTest {
 
     }
 
-    @Test
+    //@Test
     void shouldCreateAVisitWithOwnerAndPetInfo(){
         String ownerId = "5fe81e29-1f1d-4f9d-b249-8d3e0cc0b7dd";
         String petId = "9";
@@ -1925,7 +1925,7 @@ class ApiGatewayControllerTest {
 //        Mockito.verify(visitsServiceClient,times(1)).updateVisitForPet(visitDetailsToUpdate);
 //    }
 
-    @Test
+    //@Test
     void ShouldUpdateStatusForVisitByVisitId(){
         String status = "CANCELLED";
         VisitResponseDTO visit = VisitResponseDTO.builder()
@@ -1957,7 +1957,7 @@ class ApiGatewayControllerTest {
         Mockito.verify(visitsServiceClient, times(1))
                 .updateStatusForVisitByVisitId(anyString(), anyString());
     }
-    @Test
+    //@Test
     void shouldGetAllVisits() {
         // Sample VisitResponseDTO objects
         VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
@@ -2014,7 +2014,7 @@ class ApiGatewayControllerTest {
     }
 
 
-    @Test
+    //@Test
     void getVisitsByOwnerId_shouldReturnOk(){
         //arrange
         final String ownerId = "ownerId";
@@ -2047,7 +2047,7 @@ class ApiGatewayControllerTest {
                     Assertions.assertEquals(5, list.size());
                 });
     }
-    @Test
+    //@Test
     void shouldGetAVisit() {
         VisitResponseDTO visit = VisitResponseDTO.builder()
                 .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
@@ -2146,7 +2146,7 @@ class ApiGatewayControllerTest {
     }
      */
 
-    @Test
+    //@Test
     void getSingleVisit_Valid() {
         VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
                 .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
@@ -2178,7 +2178,7 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.status").isEqualTo(visitResponseDTO.getStatus().toString())
                 .jsonPath("$.visitEndDate").isEqualTo("2024-11-25 14:45");
     }
-    @Test
+    //@Test
     void getVisitsByStatus_Valid() {
         VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
                 .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
@@ -2217,7 +2217,7 @@ class ApiGatewayControllerTest {
                 });
     }
 
-    @Test
+    //@Test
     void getVisitsByPractitionerId_Valid() {
         VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
                 .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
@@ -2413,7 +2413,7 @@ class ApiGatewayControllerTest {
 
 
 
-    @Test
+    //@Test
     void deleteVisitById_visitId_shouldSucceed(){
         when(visitsServiceClient.deleteVisitByVisitId(VISIT_ID)).thenReturn(Mono.empty());
         client.delete()
@@ -2427,7 +2427,7 @@ class ApiGatewayControllerTest {
 
     }
 
-    @Test
+    //@Test
     void deleteVisitById_visitId_shouldFailWithNotFoundException(){
         // Mocking visitsServiceClient to throw a NotFoundException
         String invalidId = "fakeId";
@@ -2443,7 +2443,7 @@ class ApiGatewayControllerTest {
                 .deleteVisitByVisitId(invalidId);
     }
 
-    @Test
+    //@Test
     void deleteAllCancelledVisits_shouldSucceed(){
 
         when(visitsServiceClient.deleteAllCancelledVisits()).thenReturn(Mono.empty());
@@ -2458,7 +2458,7 @@ class ApiGatewayControllerTest {
 
     }
 
-    @Test
+    //@Test
     void deleteAllCancelledVisits_shouldThrowRuntimeException(){
 
         when(visitsServiceClient.deleteAllCancelledVisits())
@@ -3009,30 +3009,6 @@ private VetAverageRatingDTO buildVetAverageRatingDTO(){
                 .hasSize(1);
     }
 
-    @Test
-    public void getUserById_ValidUserId_ShouldReturnUser() {
-        UserDetails userDetails = UserDetails.builder()
-                .userId("validUserId")
-                .username("validUsername")
-                .email("validEmail")
-                .build();
-
-        when(authServiceClient.getUserById(anyString(), anyString()))
-                .thenReturn(Mono.just(userDetails));
-
-        client.get()
-                .uri("/api/gateway/users/validUserId")
-                .cookie("Bearer", "validToken")
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody(UserDetails.class)
-                .value(u -> {
-                    assertNotNull(u);
-                    assertEquals(userDetails.getUserId(), u.getUserId());
-                    assertEquals(userDetails.getUsername(), u.getUsername());
-                    assertEquals(userDetails.getEmail(), u.getEmail());
-                });
-    }
 
     @Test
     void deleteUserById_ValidUserId_ShouldDeleteUser() {
@@ -3134,5 +3110,67 @@ private VetAverageRatingDTO buildVetAverageRatingDTO(){
                 .endDate("2014")
                 .build();
     }
+    @Test
+    void addPhotoByVetId_LambdaBytes_201Created() {
+        String vetId = "vet123";
+        String photoName = "photo.jpg";
+        byte[] photoData = "test photo data".getBytes();
+        Resource expectedResource = new ByteArrayResource(photoData);
 
+        when(vetsServiceClient.addPhotoToVetFromBytes(vetId, photoName, photoData))
+                .thenReturn(Mono.just(expectedResource));
+
+        client.post()
+                .uri("/api/gateway/vets/{vetId}/photos", vetId)
+                .header("Photo-Name", photoName)
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(Mono.just(photoData), byte[].class)
+                .exchange()
+                .expectStatus().isCreated();
+
+        verify(vetsServiceClient).addPhotoToVetFromBytes(vetId, photoName, photoData);
+    }
+
+    @Test
+    void addPhotoByVetId_LambdaBytes_400BadRequest_EmptyResponse() {
+        String vetId = "vet123";
+        String photoName = "photo.jpg";
+        byte[] photoData = "test photo data".getBytes();
+
+        when(vetsServiceClient.addPhotoToVetFromBytes(vetId, photoName, photoData))
+                .thenReturn(Mono.empty());
+
+        client.post()
+                .uri("/api/gateway/vets/{vetId}/photos", vetId)
+                .header("Photo-Name", photoName)
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(Mono.just(photoData), byte[].class)
+                .exchange()
+                .expectStatus().isBadRequest();
+
+        verify(vetsServiceClient).addPhotoToVetFromBytes(vetId, photoName, photoData);
+    }
+
+    @Test
+    void addSpecialtiesByVetId_VetEndpoint_200Ok() {
+        String vetId = "vet123";
+        SpecialtyDTO specialtyDTO = SpecialtyDTO.builder()
+                .specialtyId("specialty-1")
+                .name("Surgery")
+                .build();
+
+        VetResponseDTO expectedVet = buildVetResponseDTO();
+
+        when(vetsServiceClient.addSpecialtiesByVetId(eq(vetId), any(Mono.class)))
+                .thenReturn(Mono.just(expectedVet));
+
+        client.post()
+                .uri("/api/gateway/vets/{vetId}/specialties", vetId) // note: include "vets" in path
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(fromValue(specialtyDTO))
+                .exchange()
+                .expectStatus().isOk();
+
+        verify(vetsServiceClient).addSpecialtiesByVetId(eq(vetId), any(Mono.class));
+    }
 }

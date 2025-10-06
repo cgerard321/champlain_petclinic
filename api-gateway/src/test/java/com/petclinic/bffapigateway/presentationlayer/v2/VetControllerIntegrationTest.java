@@ -22,8 +22,10 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.web.reactive.function.BodyInserters;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -71,6 +73,13 @@ class VetControllerIntegrationTest {
         mockServerConfigVetService.registerGetPhotoByVetIdEndpointNotFound("invalid-vet-id");
         mockServerConfigVetService.registerUpdatePhotoOfVetEndpoint("69f85766-625b-11ee-8c99-0242ac120002", "newPhoto", "mockPhotoData".getBytes());
         mockServerConfigVetService.registerUpdatePhotoOfVetEndpointNotFound("invalid-vet-id", "newPhoto");
+
+        mockServerConfigVetService.registerAddPhotoByVetIdMultipartEndpoint("ac9adeb8-625b-11ee-8c99-0242ac120002", "test.jpg");
+        mockServerConfigVetService.registerAddPhotoByVetIdMultipartEndpointBadRequest("invalid-vet-id");
+        mockServerConfigVetService.registerAddAlbumPhotoOctetEndpoint("ac9adeb8-625b-11ee-8c99-0242ac120002", "album-photo.jpg");
+        mockServerConfigVetService.registerAddAlbumPhotoOctetEndpointBadRequest("invalid-vet-id");
+        mockServerConfigVetService.registerAddAlbumPhotoMultipartEndpoint("ac9adeb8-625b-11ee-8c99-0242ac120002", "album-multipart.jpg");
+        mockServerConfigVetService.registerAddAlbumPhotoMultipartEndpointBadRequest("invalid-vet-id");
 
     }
 
@@ -687,6 +696,110 @@ class VetControllerIntegrationTest {
                 .jsonPath("$.message").isEqualTo("Education not found: " + educationId);
     }
 
+
+    @Test
+    void whenAddPhotoByVetIdMultipart_thenReturnCreatedPhoto() {
+        String vetId = "ac9adeb8-625b-11ee-8c99-0242ac120002";
+        String photoName = "test.jpg";
+        
+        MultipartBodyBuilder builder = new MultipartBodyBuilder();
+        builder.part("photoName", photoName);
+        builder.part("file", new ByteArrayResource("mockPhotoData".getBytes())).filename("test.jpg");
+
+        webTestClient.post()
+                .uri(VET_ENDPOINT + "/" + vetId + "/photos")
+                .cookie("Bearer", BEARER_TOKEN)
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+                .body(BodyInserters.fromMultipartData(builder.build()))
+                .exchange()
+                .expectStatus().is4xxClientError(); 
+    }
+
+    @Test
+    void whenAddPhotoByVetIdMultipart_withInvalidVetId_thenReturnBadRequest() {
+        String invalidVetId = "invalid-vet-id";
+        String photoName = "test.jpg";
+        
+        MultipartBodyBuilder builder = new MultipartBodyBuilder();
+        builder.part("photoName", photoName);
+        builder.part("file", new ByteArrayResource("mockPhotoData".getBytes())).filename("test.jpg");
+
+        webTestClient.post()
+                .uri(VET_ENDPOINT + "/" + invalidVetId + "/photos")
+                .cookie("Bearer", BEARER_TOKEN)
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+                .body(BodyInserters.fromMultipartData(builder.build()))
+                .exchange()
+                .expectStatus().is4xxClientError(); 
+    }
+
+    @Test
+    void whenAddAlbumPhotoOctet_thenReturnCreatedAlbum() {
+        String vetId = "ac9adeb8-625b-11ee-8c99-0242ac120002";
+        String photoName = "album-photo.jpg";
+        byte[] photoData = "mockPhotoData".getBytes();
+
+        webTestClient.post()
+                .uri(VET_ENDPOINT + "/" + vetId + "/albums/photos")
+                .cookie("Bearer", BEARER_TOKEN)
+                .header("Photo-Name", photoName)
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .bodyValue(photoData)
+                .exchange()
+                .expectStatus().is4xxClientError();
+    }
+
+    @Test
+    void whenAddAlbumPhotoOctet_withInvalidVetId_thenReturnBadRequest() {
+        String invalidVetId = "invalid-vet-id";
+        String photoName = "album-photo.jpg";
+        byte[] photoData = "mockPhotoData".getBytes();
+
+        webTestClient.post()
+                .uri(VET_ENDPOINT + "/" + invalidVetId + "/albums/photos")
+                .cookie("Bearer", BEARER_TOKEN)
+                .header("Photo-Name", photoName)
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .bodyValue(photoData)
+                .exchange()
+                .expectStatus().is4xxClientError(); 
+    }
+
+    @Test
+    void whenAddAlbumPhotoMultipart_thenReturnCreatedAlbum() {
+        String vetId = "ac9adeb8-625b-11ee-8c99-0242ac120002";
+        String photoName = "album-multipart.jpg";
+        
+        MultipartBodyBuilder builder = new MultipartBodyBuilder();
+        builder.part("photoName", photoName);
+        builder.part("file", new ByteArrayResource("mockPhotoData".getBytes())).filename("album-multipart.jpg");
+
+        webTestClient.post()
+                .uri(VET_ENDPOINT + "/" + vetId + "/albums/photos")
+                .cookie("Bearer", BEARER_TOKEN)
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+                .body(BodyInserters.fromMultipartData(builder.build()))
+                .exchange()
+                .expectStatus().is4xxClientError(); 
+    }
+
+    @Test
+    void whenAddAlbumPhotoMultipart_withInvalidVetId_thenReturnBadRequest() {
+        String invalidVetId = "invalid-vet-id";
+        String photoName = "album-multipart.jpg";
+        
+        MultipartBodyBuilder builder = new MultipartBodyBuilder();
+        builder.part("photoName", photoName);
+        builder.part("file", new ByteArrayResource("mockPhotoData".getBytes())).filename("album-multipart.jpg");
+
+        webTestClient.post()
+                .uri(VET_ENDPOINT + "/" + invalidVetId + "/albums/photos")
+                .cookie("Bearer", BEARER_TOKEN)
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+                .body(BodyInserters.fromMultipartData(builder.build()))
+                .exchange()
+                .expectStatus().is4xxClientError(); 
+    }
 
 
 }

@@ -38,7 +38,7 @@ export function useAddToWishlist(): UseAddToWishlistReturnType {
       await axiosInstance.post(
         `/carts/${cartId}/products/${productId}/quantity/${quantity}`,
         undefined,
-        { useV2: true }
+        { useV2: false }
       );
       return true;
     } catch (error) {

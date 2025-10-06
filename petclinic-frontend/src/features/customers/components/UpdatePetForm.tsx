@@ -29,9 +29,9 @@ const UpdatePetForm: React.FC = (): JSX.Element => {
 
   useEffect(() => {
     const fetchPetData = async (): Promise<void> => {
-      if (petId && ownerId) {
+      if (petId) {
         try {
-          const response = await getPet(ownerId, petId);
+          const response = await getPet(petId, ownerId);
           const petData: PetResponseModel = response.data;
           setPet({
             ...petData,
@@ -96,7 +96,7 @@ const UpdatePetForm: React.FC = (): JSX.Element => {
     };
 
     try {
-      const response = await updatePet(ownerId, petId, petRequestData);
+      const response = await updatePet(petId, petRequestData);
       if (response.status === 200) {
         setSuccessMessage('Pet updated successfully!');
         setIsUpdateModalOpen(true);

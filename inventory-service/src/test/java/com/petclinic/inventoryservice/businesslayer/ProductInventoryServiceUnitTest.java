@@ -101,6 +101,7 @@ class ProductInventoryServiceUnitTest {
     Inventory inventory = Inventory.builder()
             .id("1")
             .inventoryId("1")
+            .inventoryCode("INV-0001")
             .inventoryType(inventoryType.getType())
             .inventoryDescription("Medication for procedures")
             .inventoryImage("https://www.fda.gov/files/iStock-157317886.jpg")
@@ -533,7 +534,7 @@ class ProductInventoryServiceUnitTest {
                 .inventoryDescription("inventory_id1")
                 .build();
 
-
+        when(inventoryRepository.count()).thenReturn(Mono.just(0L));
         assertThrows(InvalidInputException.class, () -> {
             productInventoryService.addInventory(Mono.just(inventoryRequestDTO)).block();
         });
@@ -2172,6 +2173,7 @@ class ProductInventoryServiceUnitTest {
 
     @Test
     void updateImportantStatus_shouldSucceed() {
+        // Arrange
         String inventoryId = "inventoryId_1";
         Boolean important = true;
 
@@ -2180,14 +2182,50 @@ class ProductInventoryServiceUnitTest {
         when(inventoryRepository.save(any(Inventory.class)))
                 .thenReturn(Mono.just(inventory));
 
+        // Act
         Mono<Void> result = productInventoryService.updateImportantStatus(inventoryId, important);
 
+        // Assert
         StepVerifier
                 .create(result)
                 .verifyComplete();
 
         verify(inventoryRepository).findInventoryByInventoryId(inventoryId);
         verify(inventoryRepository).save(any(Inventory.class));
+    }
+
+    @Test
+    void addInventory_shouldAutoGenerateInventoryCode() {
+        // Arrange
+        InventoryRequestDTO requestDTO = InventoryRequestDTO.builder()
+                .inventoryName("New Inventory")
+                .inventoryType("Internal")
+                .inventoryDescription("Test Description")
+                .build();
+
+        Inventory savedInventory = Inventory.builder()
+                .inventoryId("generated_id")
+                .inventoryCode("INV-0001")
+                .inventoryName("New Inventory")
+                .inventoryType("Internal")
+                .inventoryDescription("Test Description")
+                .build();
+
+        when(inventoryRepository.count()).thenReturn(Mono.just(0L));
+        when(inventoryRepository.insert(any(Inventory.class))).thenReturn(Mono.just(savedInventory));
+
+        // Act
+        Mono<InventoryResponseDTO> result = productInventoryService.addInventory(Mono.just(requestDTO));
+
+        // Assert
+        StepVerifier
+                .create(result)
+                .expectNextMatches(response -> {
+                    assertNotNull(response.getInventoryCode());
+                    assertEquals("INV-0001", response.getInventoryCode());
+                    return true;
+                })
+                .verifyComplete();
     }
 
 

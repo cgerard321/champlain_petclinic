@@ -9,22 +9,22 @@
 .app-footer .footer-brand {
   font-weight: 700;
   font-size: 1.25rem;
-  margin: 0 0 .75rem;
+  margin: 0 0 0.75rem;
   color: #0f172a;
   display: inline-flex;
   align-items: center;
-  gap: .5rem;
+  gap: 0.5rem;
   line-height: 1.1;
 }
 
 .app-footer .footer-col h6 {
-  margin: 0 0 .75rem;
+  margin: 0 0 0.75rem;
   font-weight: 600;
 }
 
 .app-footer .footer-desc {
   color: #475569;
-  font-size: .95rem;
+  font-size: 0.95rem;
   line-height: 1.5;
 }
 
@@ -37,7 +37,7 @@
 .app-footer .footer-links li,
 .app-footer .footer-contact li {
   margin: 0;
-  margin-bottom: .45rem;
+  margin-bottom: 0.45rem;
   padding: 0;
 }
 
@@ -45,8 +45,11 @@
 .app-footer .footer-contact a {
   color: inherit;
   text-decoration: none;
-  opacity: .85;
-  transition: opacity .2s ease, color .2s ease, text-decoration-color .2s ease;
+  opacity: 0.85;
+  transition:
+    opacity 0.2s ease,
+    color 0.2s ease,
+    text-decoration-color 0.2s ease;
 }
 .app-footer .footer-links a:hover,
 .app-footer .footer-contact a:hover {
@@ -67,9 +70,9 @@
 .app-footer .footer-contact li {
   display: grid;
   grid-template-columns: 1.25rem 1fr;
-  column-gap: .5rem;
+  column-gap: 0.5rem;
   align-items: center;
-  margin: .25rem 0;
+  margin: 0.25rem 0;
   color: #475569;
 }
 
@@ -81,7 +84,8 @@
   justify-content: center;
   line-height: 1;
   font-size: 1rem;
-  font-family: "Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji","Segoe UI Symbol", system-ui, sans-serif;
+  font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji',
+    'Segoe UI Symbol', system-ui, sans-serif;
 }
 
 .app-footer .border-top.border-secondary {
