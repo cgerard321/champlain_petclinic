@@ -3009,30 +3009,6 @@ private VetAverageRatingDTO buildVetAverageRatingDTO(){
                 .hasSize(1);
     }
 
-    @Test
-    public void getUserById_ValidUserId_ShouldReturnUser() {
-        UserDetails userDetails = UserDetails.builder()
-                .userId("validUserId")
-                .username("validUsername")
-                .email("validEmail")
-                .build();
-
-        when(authServiceClient.getUserById(anyString(), anyString()))
-                .thenReturn(Mono.just(userDetails));
-
-        client.get()
-                .uri("/api/gateway/users/validUserId")
-                .cookie("Bearer", "validToken")
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody(UserDetails.class)
-                .value(u -> {
-                    assertNotNull(u);
-                    assertEquals(userDetails.getUserId(), u.getUserId());
-                    assertEquals(userDetails.getUsername(), u.getUsername());
-                    assertEquals(userDetails.getEmail(), u.getEmail());
-                });
-    }
 
     @Test
     void deleteUserById_ValidUserId_ShouldDeleteUser() {

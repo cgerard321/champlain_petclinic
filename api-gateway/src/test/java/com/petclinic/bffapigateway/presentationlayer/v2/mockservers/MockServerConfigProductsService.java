@@ -8,14 +8,14 @@ import static org.mockserver.model.HttpResponse.response;
 import static org.mockserver.model.Header.header;
 
 
-public class MockServerConfigProductsServices {
+public class MockServerConfigProductsService {
 
     private static final Integer PRODUCTS_SERVICE_SERVER_PORT = 7007;
 
     private final ClientAndServer clientAndServer;
     private final MockServerClient mockServerClient_ProductsService = new MockServerClient("localhost", PRODUCTS_SERVICE_SERVER_PORT);
 
-    public MockServerConfigProductsServices() {
+    public MockServerConfigProductsService() {
         this.clientAndServer = ClientAndServer.startClientAndServer(PRODUCTS_SERVICE_SERVER_PORT);
     }
 
@@ -35,7 +35,7 @@ public class MockServerConfigProductsServices {
                 .when(
                         request()
                                 .withMethod("GET")
-                                .withPath("/api/v1/products")
+                                .withPath("/products")
                 )
                 .respond(
                         response()
