@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -738,11 +739,6 @@ public class VetsServiceClient {
                 .bodyToFlux(Album.class);
     }
 
-
-
-
-
-
     public Mono<Void> deletePhotoByVetId(String vetId) {
         return webClientBuilder
                 .build()
@@ -780,5 +776,48 @@ public class VetsServiceClient {
                 .bodyToMono(Void.class);
     }
 
+
+public Mono<Album> addAlbumPhotoFromBytes(String vetId, String photoName, byte[] fileData) {
+    return webClientBuilder.build()
+            .post()
+            .uri(vetsServiceUrl + "/" + vetId + "/albums/photos/" + photoName)
+            .contentType(MediaType.APPLICATION_OCTET_STREAM)
+            .bodyValue(fileData)
+            .retrieve()
+            .onStatus(HttpStatusCode::is4xxClientError, error -> {
+                if (error.statusCode().equals(NOT_FOUND)) {
+                    return Mono.error(new NotFoundException("Album source not found for vet " + vetId));
+                }
+                return Mono.error(new IllegalArgumentException("Client error while adding album photo"));
+            })
+            .onStatus(HttpStatusCode::is5xxServerError,
+                    error -> Mono.error(new IllegalArgumentException("Server error while adding album photo")))
+            .bodyToMono(Album.class);
+}
+
+public Mono<Album> addAlbumPhoto(String vetId, String photoName, FilePart filePart) {
+    return DataBufferUtils.join(filePart.content())
+            .map(buf -> {
+                byte[] bytes = new byte[buf.readableByteCount()];
+                buf.read(bytes);
+                DataBufferUtils.release(buf);
+                return bytes;
+            })
+            .flatMap(bytes -> webClientBuilder.build()
+                    .post()
+                    .uri(vetsServiceUrl + "/" + vetId + "/albums/photos/" + photoName)
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .bodyValue(bytes)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::is4xxClientError, error -> {
+                        if (error.statusCode().equals(NOT_FOUND)) {
+                            return Mono.error(new NotFoundException("Album source not found for vet " + vetId));
+                        }
+                        return Mono.error(new IllegalArgumentException("Client error while adding album photo"));
+                    })
+                    .onStatus(HttpStatusCode::is5xxServerError,
+                            error -> Mono.error(new IllegalArgumentException("Server error while adding album photo")))
+                    .bodyToMono(Album.class));
+}
 
 }

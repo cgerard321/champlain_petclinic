@@ -64,6 +64,8 @@ const UserCart = (): JSX.Element => {
   const [discount, setDiscount] = useState<number>(0);
   const [voucherError, setVoucherError] = useState<string | null>(null);
 
+  const [movingAll, setMovingAll] = useState<boolean>(false);
+
   // derived totals
   const subtotal = cartItems.reduce(
     (acc, item) => acc + item.productSalePrice * (item.quantity || 1),
@@ -93,7 +95,7 @@ const UserCart = (): JSX.Element => {
 
       try {
         const { data } = await axiosInstance.get(`/carts/${cartId}`, {
-          useV2: true,
+          useV2: false,
         });
 
         if (!Array.isArray(data.products)) {
@@ -147,7 +149,7 @@ const UserCart = (): JSX.Element => {
     try {
       const { data } = await axiosInstance.get(
         `/promos/validate/${voucherCode}`,
-        { useV2: true }
+        { useV2: false }
       );
       setDiscount((subtotal * data.discount) / 100);
       setVoucherError(null);
@@ -184,7 +186,7 @@ const UserCart = (): JSX.Element => {
         const { data } = await axiosInstance.put(
           `/carts/${cartId}/products/${item.productId}`,
           { quantity: newQuantity },
-          { useV2: true }
+          { useV2: false }
         );
 
         if (data && data.message) {
@@ -231,7 +233,7 @@ const UserCart = (): JSX.Element => {
 
       try {
         await axiosInstance.delete(`/carts/${cartId}/${productId}`, {
-          useV2: true,
+          useV2: false,
         });
 
         setCartItems(prevItems =>
@@ -260,7 +262,7 @@ const UserCart = (): JSX.Element => {
 
     if (window.confirm('Are you sure you want to clear the cart?')) {
       try {
-        await axiosInstance.delete(`/carts/${cartId}/clear`, { useV2: true });
+        await axiosInstance.delete(`/carts/${cartId}/clear`, { useV2: false });
 
         setCartItems([]);
         setCartItemCount(0);
@@ -289,7 +291,7 @@ const UserCart = (): JSX.Element => {
           productName: item.productName,
           productSalePrice: item.productSalePrice,
         },
-        { useV2: true }
+        { useV2: false }
       );
 
       if (data && data.message) {
@@ -333,7 +335,7 @@ const UserCart = (): JSX.Element => {
           productName: item.productName,
           productSalePrice: item.productSalePrice,
         },
-        { useV2: true }
+        { useV2: false }
       );
 
       if (data && data.message) {
@@ -372,7 +374,7 @@ const UserCart = (): JSX.Element => {
     try {
       await axiosInstance.delete(
         `/carts/${cartId}/wishlist/${item.productId}`,
-        { useV2: true }
+        { useV2: false }
       );
 
       setWishlistItems(prev =>
@@ -382,6 +384,46 @@ const UserCart = (): JSX.Element => {
     } catch (e) {
       console.error(e);
       alert('Could not remove item from wishlist.');
+    }
+  };
+
+  // move all wishlist to cart
+  const moveAllWishlistToCart = async (): Promise<void> => {
+    if (!cartId || wishlistItems.length === 0) return;
+
+    setMovingAll(true);
+    setNotificationMessage(null);
+
+    try {
+      const res = await axiosInstance.post(
+        `/carts/${cartId}/wishlist/moveAll`,
+        {},
+        {
+          useV2: true,
+
+          validateStatus: () => true,
+        }
+      );
+
+      if (res.status >= 200 && res.status < 300) {
+        setNotificationMessage(
+          res.data?.message || 'Moved wishlist items to cart.'
+        );
+      } else {
+        const msg =
+          (res.data &&
+            (res.data.message || res.data.error || res.data.title)) ||
+          `Move All failed (${res.status})`;
+        setNotificationMessage(msg);
+      }
+
+      setWishlistUpdated(true);
+      notifyCartChanged();
+    } catch (e) {
+      console.error(e);
+      setNotificationMessage('Unexpected error while moving wishlist items.');
+    } finally {
+      setMovingAll(false);
     }
   };
 
@@ -421,7 +463,7 @@ const UserCart = (): JSX.Element => {
       await axiosInstance.post(
         `/carts/${cartId}/checkout`,
         {},
-        { useV2: true }
+        { useV2: false }
       );
 
       const invoiceItems: Invoice[] = cartItems.map(item => ({
@@ -580,33 +622,6 @@ const UserCart = (): JSX.Element => {
                 Checkout
               </button>
 
-              {/* Billing Form (step 1) */}
-              {showBillingForm && (
-                <div className="checkout-modal">
-                  <CartBillingForm
-                    onSubmit={() => {
-                      setShowBillingForm(false);
-                      setIsCheckoutModalOpen(true); // proceed to confirmation
-                    }}
-                  />
-                  <button onClick={() => setShowBillingForm(false)}>
-                    Cancel
-                  </button>
-                </div>
-              )}
-
-              {/* Confirm (step 2) */}
-              {isCheckoutModalOpen && (
-                <div className="checkout-modal">
-                  <h3>Confirm Checkout</h3>
-                  <p>Are you sure you want to checkout?</p>
-                  <button onClick={handleCheckout}>Yes</button>
-                  <button onClick={() => setIsCheckoutModalOpen(false)}>
-                    No
-                  </button>
-                </div>
-              )}
-
               {/* Post-checkout message */}
               {checkoutMessage && (
                 <div className="checkout-message">{checkoutMessage}</div>
@@ -648,7 +663,30 @@ const UserCart = (): JSX.Element => {
 
         {/* Wishlist */}
         <div className="wishlist-section">
-          <h2>Your Wishlist</h2>
+          {/* Header with Move All button */}
+          <div
+            className="wishlist-header"
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}
+          >
+            <h2 style={{ margin: 0 }}>Your Wishlist</h2>
+            {wishlistItems.length > 0 && (
+              <button
+                className="move-all-to-cart-btn"
+                onClick={moveAllWishlistToCart}
+                disabled={movingAll}
+                aria-busy={movingAll}
+                title="Move all wishlist items to cart"
+              >
+                {movingAll ? 'Moving…' : 'Move All to Cart'}
+              </button>
+            )}
+          </div>
+
+          {/* Wishlist items */}
           <div className="Wishlist-items">
             {wishlistItems.length > 0 ? (
               wishlistItems.map(item => (
@@ -670,6 +708,32 @@ const UserCart = (): JSX.Element => {
             )}
           </div>
         </div>
+
+        {/* Billing Form Modal */}
+        {showBillingForm && (
+          <div className="modal-backdrop">
+            <div className="modal-content">
+              <CartBillingForm
+                isOpen={true}
+                onClose={() => setShowBillingForm(false)}
+                onSubmit={async () => {
+                  await handleCheckout(); // This runs the real checkout logic
+                  setShowBillingForm(false);
+                }}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Confirm (step 2) */}
+        {isCheckoutModalOpen && (
+          <div className="checkout-modal">
+            <h3>Confirm Checkout</h3>
+            <p>Are you sure you want to checkout?</p>
+            <button onClick={handleCheckout}>Yes</button>
+            <button onClick={() => setIsCheckoutModalOpen(false)}>No</button>
+          </div>
+        )}
       </div>
     </div>
   );

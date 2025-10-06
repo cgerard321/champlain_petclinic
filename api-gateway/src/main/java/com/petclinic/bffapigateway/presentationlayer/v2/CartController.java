@@ -216,6 +216,37 @@ public class CartController {
                 });
     }
 
+    // move all Wishlist items into cart
+    @PostMapping(value = "/{cartId}/wishlist/moveAll", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<CartResponseDTO>> moveAllWishlistToCart(@PathVariable String cartId) {
+        return cartServiceClient.moveAllWishlistToCart(cartId)
+                .map(ResponseEntity::ok)
+                .onErrorResume(ex -> {
+                    if (ex instanceof org.springframework.web.reactive.function.client.WebClientResponseException.NotFound) {
+                        CartResponseDTO dto = new CartResponseDTO();
+                        dto.setMessage("Cart not found: " + cartId);
+                        return Mono.just(ResponseEntity.status(HttpStatus.NOT_FOUND).body(dto));
+                    }
+                    if (ex instanceof org.springframework.web.reactive.function.client.WebClientResponseException.UnprocessableEntity
+                            || ex instanceof com.petclinic.bffapigateway.exceptions.InvalidInputException) {
+                        CartResponseDTO dto = new CartResponseDTO();
+                        dto.setMessage(ex.getMessage());
+                        return Mono.just(ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(dto));
+                    }
+                    if (ex instanceof org.springframework.web.reactive.function.client.WebClientResponseException wce) {
+                        CartResponseDTO dto = new CartResponseDTO();
+                        String msg = (wce.getResponseBodyAsString() != null && !wce.getResponseBodyAsString().isBlank())
+                                ? wce.getResponseBodyAsString()
+                                : wce.getStatusText();
+                        dto.setMessage(msg);
+                        return Mono.just(ResponseEntity.status(wce.getStatusCode()).body(dto));
+                    }
+                    log.error("moveAllWishlistToCart unexpected error for cartId {}: {}", cartId, ex.getMessage(), ex);
+                    CartResponseDTO dto = new CartResponseDTO();
+                    dto.setMessage("Unexpected error");
+                    return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(dto));
+                });
+    }
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping(value = "promos", produces= MediaType.APPLICATION_JSON_VALUE)
     public Flux<PromoCodeResponseDTO> getAllPromos() {

@@ -14,17 +14,13 @@ import com.petclinic.authservice.datalayer.roles.RoleRepo;
 import com.petclinic.authservice.datamapperlayer.UserMapper;
 import com.petclinic.authservice.domainclientlayer.Mail.Mail;
 import com.petclinic.authservice.domainclientlayer.Mail.MailService;
-import com.petclinic.authservice.domainclientlayer.cart.CartService;
 import com.petclinic.authservice.presentationlayer.User.*;
 import com.petclinic.authservice.security.JwtTokenUtil;
 import com.petclinic.authservice.security.SecurityConst;
 import com.petclinic.authservice.datalayer.user.*;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -55,11 +51,10 @@ public class UserServiceImpl implements UserService {
     private final MailService mailService;
     private final JwtTokenUtil jwtService;
     private final AuthenticationManager authenticationManager;
-    private final CartService cartService;
     private final String salt = BCrypt.gensalt(10);
 
 
-    @Value("${backend.url}")
+    @Value("${frontend.url}")
     private String gatewayOrigin;
     @Override
     public List<UserDetails> findAllWithoutPage() {

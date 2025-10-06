@@ -102,7 +102,7 @@ export function NavBar(): JSX.Element {
     try {
       const { data } = await axiosInstance.get<{
         products?: ProductAPIResponse[];
-      }>(`/carts/${cartId}`, { useV2: true });
+      }>(`/carts/${cartId}`, { useV2: false });
 
       if (Array.isArray(data.products)) {
         const totalCount = data.products.reduce(
@@ -242,11 +242,6 @@ export function NavBar(): JSX.Element {
                 {(isInventoryManager || IsAdmin()) && (
                   <Nav.Link as={Link} to={AppRoutePaths.Inventories}>
                     Inventories
-                  </Nav.Link>
-                )}
-                {IsAdmin() && (
-                  <Nav.Link as={Link} to={AppRoutePaths.Emailing}>
-                    Emails
                   </Nav.Link>
                 )}
                 {IsAdmin() && (

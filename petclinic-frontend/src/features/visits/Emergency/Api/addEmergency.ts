@@ -5,7 +5,7 @@ import { EmergencyRequestDTO } from '../Model/EmergencyRequestDTO';
 export const addEmergency = async (
   emergency: EmergencyRequestDTO
 ): Promise<AxiosResponse<void>> => {
-  return await axiosInstance.post<void>('/visits/emergency', emergency, {
-    useV2: true,
+  return await axiosInstance.post<void>('/visits/emergencies', emergency, {
+    useV2: false,
   });
 };
