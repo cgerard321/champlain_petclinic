@@ -424,6 +424,12 @@ jobs:
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "### Actual Coverage Results" >> $GITHUB_STEP_SUMMARY
         
+        # Check if coverage-reports directory exists
+        if [ ! -d "coverage-reports" ]; then
+          echo "No coverage reports directory found" >> $GITHUB_STEP_SUMMARY
+          exit 0
+        fi
+        
         for report_dir in coverage-reports/*/; do
           if [ -d "$report_dir" ]; then
             service_name=$(basename "$report_dir")
@@ -432,22 +438,22 @@ jobs:
             
             # Try to get coverage from XML first (more reliable)
             if [ -f "$xml_report" ]; then
-              coverage=$(grep -o 'line-rate="[0-9.]*"' "$xml_report" | head -1 | grep -o '[0-9.]*' | awk '{printf "%.1f%%", $1*100}')
-              branch_coverage=$(grep -o 'branch-rate="[0-9.]*"' "$xml_report" | head -1 | grep -o '[0-9.]*' | awk '{printf "%.1f%%", $1*100}')
-              lines_covered=$(grep -o 'lines-covered="[0-9]*"' "$xml_report" | head -1 | grep -o '[0-9]*')
-              lines_total=$(grep -o 'lines-valid="[0-9]*"' "$xml_report" | head -1 | grep -o '[0-9]*')
+              coverage=$(grep -o 'line-rate="[0-9.]*"' "$xml_report" 2>/dev/null | head -1 | grep -o '[0-9.]*' | awk '{printf "%.1f%%", $1*100}' 2>/dev/null || echo "")
+              branch_coverage=$(grep -o 'branch-rate="[0-9.]*"' "$xml_report" 2>/dev/null | head -1 | grep -o '[0-9.]*' | awk '{printf "%.1f%%", $1*100}' 2>/dev/null || echo "")
+              lines_covered=$(grep -o 'lines-covered="[0-9]*"' "$xml_report" 2>/dev/null | head -1 | grep -o '[0-9]*' || echo "")
+              lines_total=$(grep -o 'lines-valid="[0-9]*"' "$xml_report" 2>/dev/null | head -1 | grep -o '[0-9]*' || echo "")
               
               if [ -n "$coverage" ]; then
                 echo "- $service_name: $coverage ($lines_covered/$lines_total lines) | Branch: $branch_coverage | [View Report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
               fi
             # Fallback to HTML parsing
             elif [ -f "$main_index" ]; then
-              coverage=$(grep -A 5 'tfoot' "$main_index" | grep -o '[0-9]*%' | head -1)
+              coverage=$(grep -A 5 'tfoot' "$main_index" 2>/dev/null | grep -o '[0-9]*%' | head -1 || echo "")
               if [ -z "$coverage" ]; then
-                coverage=$(grep -o 'class="ctr2">[0-9]*%' "$main_index" | head -1 | grep -o '[0-9]*%')
+                coverage=$(grep -o 'class="ctr2">[0-9]*%' "$main_index" 2>/dev/null | head -1 | grep -o '[0-9]*%' || echo "")
               fi
               if [ -z "$coverage" ]; then
-                coverage=$(grep -o '[0-9]*%' "$main_index" | head -1)
+                coverage=$(grep -o '[0-9]*%' "$main_index" 2>/dev/null | head -1 || echo "")
               fi
               if [ -n "$coverage" ]; then
                 echo "- $service_name: $coverage | [View Report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
@@ -475,12 +481,12 @@ jobs:
             
             # Try to get detailed coverage from XML first
             if [ -f "$xml_report" ]; then
-              coverage=$(grep -o 'line-rate="[0-9.]*"' "$xml_report" | head -1 | grep -o '[0-9.]*' | awk '{printf "%.1f%%", $1*100}')
-              branch_coverage=$(grep -o 'branch-rate="[0-9.]*"' "$xml_report" | head -1 | grep -o '[0-9.]*' | awk '{printf "%.1f%%", $1*100}')
-              lines_covered=$(grep -o 'lines-covered="[0-9]*"' "$xml_report" | head -1 | grep -o '[0-9]*')
-              lines_total=$(grep -o 'lines-valid="[0-9]*"' "$xml_report" | head -1 | grep -o '[0-9]*')
-              branches_covered=$(grep -o 'branches-covered="[0-9]*"' "$xml_report" | head -1 | grep -o '[0-9]*')
-              branches_total=$(grep -o 'branches-valid="[0-9]*"' "$xml_report" | head -1 | grep -o '[0-9]*')
+              coverage=$(grep -o 'line-rate="[0-9.]*"' "$xml_report" 2>/dev/null | head -1 | grep -o '[0-9.]*' | awk '{printf "%.1f%%", $1*100}' 2>/dev/null || echo "")
+              branch_coverage=$(grep -o 'branch-rate="[0-9.]*"' "$xml_report" 2>/dev/null | head -1 | grep -o '[0-9.]*' | awk '{printf "%.1f%%", $1*100}' 2>/dev/null || echo "")
+              lines_covered=$(grep -o 'lines-covered="[0-9]*"' "$xml_report" 2>/dev/null | head -1 | grep -o '[0-9]*' || echo "")
+              lines_total=$(grep -o 'lines-valid="[0-9]*"' "$xml_report" 2>/dev/null | head -1 | grep -o '[0-9]*' || echo "")
+              branches_covered=$(grep -o 'branches-covered="[0-9]*"' "$xml_report" 2>/dev/null | head -1 | grep -o '[0-9]*' || echo "")
+              branches_total=$(grep -o 'branches-valid="[0-9]*"' "$xml_report" 2>/dev/null | head -1 | grep -o '[0-9]*' || echo "")
               
               if [ -n "$coverage" ]; then
                 echo "- **Line Coverage:** $coverage ($lines_covered/$lines_total lines)" >> $GITHUB_STEP_SUMMARY
@@ -490,12 +496,12 @@ jobs:
               fi
             # Fallback to HTML parsing
             elif [ -f "$main_index" ]; then
-              coverage=$(grep -A 5 'tfoot' "$main_index" | grep -o '[0-9]*%' | head -1)
+              coverage=$(grep -A 5 'tfoot' "$main_index" 2>/dev/null | grep -o '[0-9]*%' | head -1 || echo "")
               if [ -z "$coverage" ]; then
-                coverage=$(grep -o 'class="ctr2">[0-9]*%' "$main_index" | head -1 | grep -o '[0-9]*%')
+                coverage=$(grep -o 'class="ctr2">[0-9]*%' "$main_index" 2>/dev/null | head -1 | grep -o '[0-9]*%' || echo "")
               fi
               if [ -z "$coverage" ]; then
-                coverage=$(grep -o '[0-9]*%' "$main_index" | head -1)
+                coverage=$(grep -o '[0-9]*%' "$main_index" 2>/dev/null | head -1 || echo "")
               fi
               if [ -n "$coverage" ]; then
                 echo "- **Coverage:** $coverage" >> $GITHUB_STEP_SUMMARY
