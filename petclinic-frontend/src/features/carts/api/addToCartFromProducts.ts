@@ -54,7 +54,7 @@ export function useAddToCart(): UseAddToCartReturnType {
       await axiosInstance.post(
         `/carts/${encodeURIComponent(cartId)}/${encodeURIComponent(String(productId))}`,
         undefined,
-        { useV2: true }
+        { useV2: false }
       );
 
       // refresh navbar/cart badge

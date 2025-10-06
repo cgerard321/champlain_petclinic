@@ -1,12 +1,10 @@
-package com.petclinic.bffapigateway.presentationlayer.V1;
+package com.petclinic.bffapigateway.presentationlayer.v1;
 
 import com.petclinic.bffapigateway.domainclientlayer.AuthServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VisitsServiceClient;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
-import com.petclinic.bffapigateway.presentationlayer.v1.OwnerControllerV1;
-import com.petclinic.bffapigateway.presentationlayer.v1.PetControllerV1;
 import com.petclinic.bffapigateway.utils.Security.Filters.IsUserFilter;
 import com.petclinic.bffapigateway.utils.Security.Filters.JwtTokenFilter;
 import com.petclinic.bffapigateway.utils.Security.Filters.RoleFilter;
@@ -20,21 +18,16 @@ import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -69,7 +62,7 @@ public class OwnerApiGatewayTest {
     private final Date date = new Date();
 
     @Test
-    void getAllOwners_shouldSucceed() {
+    void whenGetAllOwners_thenReturnOwners() {
         OwnerResponseDTO owner = new OwnerResponseDTO();
         owner.setOwnerId("ownerId-90");
         owner.setFirstName("John");
@@ -91,7 +84,7 @@ public class OwnerApiGatewayTest {
     }
 
     @Test
-    void getAllOwnersByPagination() {
+    void whenGetAllOwnersByPagination_thenReturnOwners() {
         OwnerResponseDTO owner = new OwnerResponseDTO();
         owner.setOwnerId("ownerId-09");
         owner.setFirstName("Test");
@@ -123,7 +116,7 @@ public class OwnerApiGatewayTest {
     }
 
     @Test
-    void getAllOwnersByPagination_pageEmpty_sizeEmpty() {
+    void whenGetAllOwnersByPagination_withEmptyParams_thenReturnEmptyList() {
         when(customersServiceClient.getOwnersByPagination(null, null, null, null, null, null, null))
                 .thenReturn(Flux.empty());
 
@@ -139,7 +132,7 @@ public class OwnerApiGatewayTest {
     }
 
     @Test
-    void getTotalNumberOfOwners() {
+    void whenGetTotalNumberOfOwners_thenReturnCount() {
         long expectedCount = 0L;
         when(customersServiceClient.getTotalNumberOfOwners()).thenReturn(Mono.just(expectedCount));
 
@@ -152,7 +145,7 @@ public class OwnerApiGatewayTest {
     }
 
     @Test
-    void getTotalNumberOfOwnersWithFilters() {
+    void whenGetTotalNumberOfOwnersWithFilters_thenReturnCount() {
         long expectedCount = 0L;
         when(customersServiceClient.getTotalNumberOfOwnersWithFilters(null, null, null, null, null))
                 .thenReturn(Mono.just(expectedCount));
@@ -167,7 +160,7 @@ public class OwnerApiGatewayTest {
 
 
         @Test
-        void getOwnerByOwnerId_shouldSucceed() {
+        void whenGetOwnerByOwnerId_thenReturnOwner() {
             OwnerResponseDTO owner = new OwnerResponseDTO();
             owner.setOwnerId("ownerId-123");
             owner.setFirstName("John");
@@ -194,7 +187,7 @@ public class OwnerApiGatewayTest {
         }
 
     @Test
-    void updateOwner_shouldSucceed() {
+    void whenUpdateOwner_thenReturnUpdatedOwner() {
         String ownerId = "f470653d-05c5-4c45-b7a0-7d70f003d2ac";
         OwnerRequestDTO updatedOwnerData = new OwnerRequestDTO();
         updatedOwnerData.setOwnerId(ownerId);

@@ -2,12 +2,16 @@ import { FC, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axiosInstance from '@/shared/api/axiosInstance';
 import { OwnerResponseModel } from '@/features/customers/models/OwnerResponseModel';
-import { PetResponseModel } from '@/features/customers/models/PetResponseModel'; // Import the PetResponseModel
+import { PetResponseModel } from '@/features/customers/models/PetResponseModel';
+import { PetTypeModel } from '@/features/customers/models/PetTypeModel';
 import { Bill } from '@/features/bills/models/Bill';
 import { getOwner } from '../api/getOwner';
+import { getPetTypes } from '../api/getPetTypes';
+import { getPetTypeName } from '../utils/petTypeMapping';
 import './CustomerDetails.css';
 import { deleteOwner } from '../api/deleteOwner';
 import { IsVet } from '@/context/UserContext';
+import EditPetModal from './EditPetModal';
 
 const CustomerDetails: FC = () => {
   const { ownerId } = useParams<{ ownerId: string }>();
@@ -16,9 +20,12 @@ const CustomerDetails: FC = () => {
 
   const [isDisabled, setIsDisabled] = useState<boolean>(false);
   const [owner, setOwner] = useState<OwnerResponseModel | null>(null);
-  const [pets, setPets] = useState<PetResponseModel[]>([]); // State for pets
+  const [pets, setPets] = useState<PetResponseModel[]>([]);
+  const [petTypes, setPetTypes] = useState<PetTypeModel[]>([]);
   const [bills, setBills] = useState<Bill[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [isEditPetModalOpen, setIsEditPetModalOpen] = useState<boolean>(false);
+  const [selectedPetId, setSelectedPetId] = useState<string>('');
 
   useEffect(() => {
     const fetchOwnerDetails = async (): Promise<void> => {
@@ -68,6 +75,10 @@ const CustomerDetails: FC = () => {
       }
 
       setBills(billsData);
+
+      const petTypesData = await getPetTypes();
+      setPetTypes(petTypesData);
+
       setLoading(false);
     };
 
@@ -106,15 +117,6 @@ const CustomerDetails: FC = () => {
     return <p>No owner found.</p>;
   }
 
-  const petTypeMapping: { [key: string]: string } = {
-    '1': 'Cat',
-    '2': 'Dog',
-    '3': 'Lizard',
-    '4': 'Snake',
-    '5': 'Bird',
-    '6': 'Hamster',
-  };
-
   const calculateAge = (birthDate: Date): number => {
     const birth = new Date(birthDate);
     const ageDiffMs = Date.now() - birth.getTime();
@@ -144,7 +146,77 @@ const CustomerDetails: FC = () => {
   };
 
   const handleEditPetClick = (petId: string): void => {
-    navigate(`/owners/${ownerId}/pets/${petId}/edit`);
+    setSelectedPetId(petId);
+    setIsEditPetModalOpen(true);
+  };
+
+  const handleCloseEditPetModal = (): void => {
+    setIsEditPetModalOpen(false);
+    setSelectedPetId('');
+  };
+
+  //eliminated code duplication
+  const fetchOwnerDetails = async (): Promise<void> => {
+    if (!ownerId) return;
+
+    try {
+      const ownerResponse = await getOwner(ownerId);
+      setOwner(ownerResponse.data);
+
+      const userResponse = await axiosInstance.get(`/users/${ownerId}`, {
+        useV2: true,
+      });
+      setIsDisabled(userResponse.data.disabled);
+
+      const petsResponse = await axiosInstance.get(
+        `/pets/owners/${ownerId}/pets`,
+        {
+          useV2: true,
+        }
+      );
+      setPets(petsResponse.data);
+
+      const billsResponse = await axiosInstance.get(
+        `/bills/customer/${ownerId}`,
+        { useV2: false }
+      );
+
+      const billsData: Bill[] = [];
+      const data = billsResponse.data;
+
+      if (typeof data === 'string') {
+        const pieces = data.split('\n').filter(Boolean);
+        for (const piece of pieces) {
+          if (piece.startsWith('data:')) {
+            const billData = piece.slice(5).trim();
+            try {
+              const bill: Bill = JSON.parse(billData);
+              billsData.push(bill);
+            } catch (error) {
+              console.error('Error parsing bill data:', error);
+            }
+          }
+        }
+      } else if (Array.isArray(data)) {
+        billsData.push(...data);
+      } else {
+        console.error('Unexpected bills response format:', data);
+      }
+
+      setBills(billsData);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching owner details:', error);
+      setLoading(false);
+    }
+  };
+
+  const handlePetUpdated = (): void => {
+    fetchOwnerDetails();
+  };
+
+  const handlePetDeleted = (): void => {
+    fetchOwnerDetails();
   };
 
   return (
@@ -190,22 +262,36 @@ const CustomerDetails: FC = () => {
           {pets && pets.length > 0 ? (
             <ul>
               {pets.map(pet => (
-                <li key={pet.petId}>
-                  <strong>Pet ID: </strong>
-                  {pet.petId}
-                  <strong>Name: </strong>
-                  {pet.name}, <strong>Type: </strong>
-                  {petTypeMapping[pet.petTypeId] || 'Unknown'},{' '}
-                  <strong>Weight: </strong>
-                  {pet.weight}kg,<strong> Age: </strong>
-                  {calculateAge(pet.birthDate)}
-                  <button
-                    className="edit-pet-button"
-                    onClick={() => handleEditPetClick(pet.petId)}
-                    style={{ marginLeft: '10px' }}
-                  >
-                    Edit Pet
-                  </button>
+                <li key={pet.petId} className="pet-item">
+                  <div className="pet-details">
+                    <div className="pet-info">
+                      <span className="pet-id">Pet ID: {pet.petId}</span>
+                    </div>
+                    <div className="pet-main-info">
+                      <span className="pet-name">
+                        <strong>Name:</strong> {pet.name}
+                      </span>
+                      <span className="pet-type">
+                        <strong>Type:</strong>{' '}
+                        {getPetTypeName(pet.petTypeId, petTypes)}
+                      </span>
+                      <span className="pet-weight">
+                        <strong>Weight:</strong> {pet.weight}kg
+                      </span>
+                      <span className="pet-age">
+                        <strong>Age:</strong> {calculateAge(pet.birthDate)}{' '}
+                        years
+                      </span>
+                    </div>
+                    <div className="pet-actions">
+                      <button
+                        className="edit-pet-button"
+                        onClick={() => handleEditPetClick(pet.petId)}
+                      >
+                        Edit Pet
+                      </button>
+                    </div>
+                  </div>
                 </li>
               ))}
             </ul>
@@ -264,6 +350,15 @@ const CustomerDetails: FC = () => {
           {isDisabled ? 'Enable Account' : 'Disable Account'}
         </button>
       </div>
+
+      <EditPetModal
+        isOpen={isEditPetModalOpen}
+        onClose={handleCloseEditPetModal}
+        petId={selectedPetId}
+        ownerId={ownerId || ''}
+        onPetUpdated={handlePetUpdated}
+        onPetDeleted={handlePetDeleted}
+      />
     </div>
   );
 };

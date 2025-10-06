@@ -119,7 +119,6 @@ public class CartControllerUnitTest {
         //assert
         verify(cartServiceClient, times(1)).getCartByCustomerId(customerId);
     }
-    // --- getCartById: 200 OK ---
     @Test
     void testGetCartById_Success() {
         String cartId = "c-1";
@@ -137,7 +136,6 @@ public class CartControllerUnitTest {
         verify(cartServiceClient).getCartByCartId(cartId);
     }
 
-    // --- getCartById: 404 NOT_FOUND via defaultIfEmpty ---
     @Test
     void testGetCartById_NotFound() {
         String cartId = "missing";
@@ -151,7 +149,6 @@ public class CartControllerUnitTest {
         verify(cartServiceClient).getCartByCartId(cartId);
     }
 
-    // --- getAllCarts: 200 stream OK (minimal happy-path check) ---
     @Test
     void testGetAllCarts_Success() {
         when(cartServiceClient.getAllCarts()).thenReturn(reactor.core.publisher.Flux.empty());
@@ -164,7 +161,6 @@ public class CartControllerUnitTest {
         verify(cartServiceClient).getAllCarts();
     }
 
-    // --- deleteCartByCartId: 200 OK ---
     @Test
     void testDeleteCartByCartId_Success() {
         String cartId = "c-2";
@@ -178,7 +174,6 @@ public class CartControllerUnitTest {
         verify(cartServiceClient).deleteCartByCartId(cartId);
     }
 
-    // --- deleteCartByCartId: 404 defaultIfEmpty ---
     @Test
     void testDeleteCartByCartId_NotFound() {
         String cartId = "missing";
@@ -192,7 +187,6 @@ public class CartControllerUnitTest {
         verify(cartServiceClient).deleteCartByCartId(cartId);
     }
 
-    // --- removeProductFromCart: 200 OK ---
     @Test
     void testRemoveProductFromCart_Success() {
         String cartId = "c-3", productId = "p-9";
@@ -207,7 +201,6 @@ public class CartControllerUnitTest {
         verify(cartServiceClient).removeProductFromCart(cartId, productId);
     }
 
-    // --- removeProductFromCart: 404 defaultIfEmpty ---
     @Test
     void testRemoveProductFromCart_NotFound() {
         String cartId = "c-3", productId = "p-missing";
@@ -221,7 +214,6 @@ public class CartControllerUnitTest {
         verify(cartServiceClient).removeProductFromCart(cartId, productId);
     }
 
-    // --- addProductToCart: 200 OK ---
     @Test
     void testAddProductToCart_Success() {
         String cartId = "c-10";
@@ -237,7 +229,6 @@ public class CartControllerUnitTest {
         verify(cartServiceClient).addProductToCart(eq(cartId), any());
     }
 
-    // --- addProductToCart: 400 with message body (InvalidInput) ---
     @Test
     void testAddProductToCart_BadRequest400_WithMessage() {
         String cartId = "c-10";
@@ -253,7 +244,6 @@ public class CartControllerUnitTest {
                 .consumeWith(r -> assertEquals("Only 10 items left in stock", r.getResponseBody().getMessage()));
     }
 
-    // --- addProductToCart: 404 NotFoundException -> NOT_FOUND ---
     @Test
     void testAddProductToCart_NotFound404() {
         String cartId = "c-10";
@@ -267,7 +257,6 @@ public class CartControllerUnitTest {
                 .expectStatus().isNotFound();
     }
 
-    // --- updateProductQuantityInCart: 422 -> UNPROCESSABLE_ENTITY ---
     @Test
     void testUpdateProductQuantityInCart_422() {
         String cartId = "c-11", productId = "p-1";
@@ -282,7 +271,6 @@ public class CartControllerUnitTest {
                 .expectStatus().isEqualTo(422);
     }
 
-    // --- updateProductQuantityInCart: 404 -> NOT_FOUND ---
     @Test
     void testUpdateProductQuantityInCart_404() {
         String cartId = "c-11", productId = "p-1";
@@ -296,7 +284,6 @@ public class CartControllerUnitTest {
                 .expectStatus().isNotFound();
     }
 
-    // --- moveProductFromWishListToCart: 422 → UNPROCESSABLE_ENTITY ---
     @Test
     void testMoveFromWishListToCart_422() {
         String cartId = "c-1", productId = "p-2";
@@ -310,7 +297,6 @@ public class CartControllerUnitTest {
                 .expectStatus().isEqualTo(422);
     }
 
-    // --- moveProductFromCartToWishlist: 404 → NOT_FOUND ---
     @Test
     void testMoveFromCartToWishlist_404() {
         String cartId = "c-1", productId = "p-x";
@@ -323,7 +309,6 @@ public class CartControllerUnitTest {
                 .expectStatus().isNotFound();
     }
 
-    // --- addProductToWishList: 404 → NOT_FOUND ---
     @Test
     void testAddProductToWishList_404() {
         String cartId = "c-1", productId = "p-x";
@@ -336,7 +321,6 @@ public class CartControllerUnitTest {
                 .expectStatus().isNotFound();
     }
 
-    // --- removeProductFromWishlist: 422 → UNPROCESSABLE_ENTITY ---
     @Test
     void testRemoveProductFromWishlist_422() {
         String cartId = "c-1", productId = "p-1";
@@ -350,7 +334,6 @@ public class CartControllerUnitTest {
                 .expectStatus().isEqualTo(422);
     }
 
-    // --- getAllPromos: passthrough (smoke) ---
     @Test
     void testGetAllPromos_Smoke() {
         when(cartServiceClient.getAllPromoCodes()).thenReturn(reactor.core.publisher.Flux.empty());
@@ -358,7 +341,6 @@ public class CartControllerUnitTest {
         verify(cartServiceClient).getAllPromoCodes();
     }
 
-    // --- getPromoCodeById: 404 defaultIfEmpty ---
     @Test
     void testGetPromoCodeById_NotFound() {
         when(cartServiceClient.getPromoCodeById("x")).thenReturn(Mono.empty());
@@ -367,7 +349,6 @@ public class CartControllerUnitTest {
     }
 
 
-    // === updateProductQuantityInCart ===
     @Test
     void testUpdateProductQuantityInCart_Success() {
         String cartId = "c-11", productId = "p-1";
@@ -394,7 +375,6 @@ public class CartControllerUnitTest {
                 .expectStatus().is5xxServerError();
     }
 
-    // === moveProductFromCartToWishlist ===
     @Test
     void testMoveFromCartToWishlist_422() {
         when(cartServiceClient.moveProductFromCartToWishlist("c-1", "p-1"))
@@ -417,7 +397,6 @@ public class CartControllerUnitTest {
                 .expectStatus().is5xxServerError();
     }
 
-    // === moveProductFromWishListToCart ===
     @Test
     void testMoveFromWishListToCart_5xx_Generic() {
         when(cartServiceClient.moveProductFromWishListToCart("c-1", "p-2"))
@@ -429,7 +408,6 @@ public class CartControllerUnitTest {
                 .expectStatus().is5xxServerError();
     }
 
-    // === addProductToWishList ===
     @Test
     void testAddProductToWishList_422() {
         when(cartServiceClient.addProductToWishList("c-1", "p-2", 2))
@@ -452,7 +430,6 @@ public class CartControllerUnitTest {
                 .expectStatus().is5xxServerError();
     }
 
-    // === removeProductFromWishlist ===
     @Test
     void testRemoveProductFromWishlist_404() {
         when(cartServiceClient.removeProductFromWishlist("c-1", "p-x"))
@@ -475,7 +452,6 @@ public class CartControllerUnitTest {
                 .expectStatus().is5xxServerError();
     }
 
-    // === addProductToCartFromProducts ===
     @Test
     void testAddProductToCartFromProducts_Success() {
         when(cartServiceClient.addProductToCartFromProducts("c-1", "p-7"))
@@ -498,16 +474,6 @@ public class CartControllerUnitTest {
                 .expectStatus().isBadRequest();
     }
 
-//    @Test
-//    void testAddProductToCartFromProducts_404() {
-//        when(cartServiceClient.addProductToCartFromProducts("c-1", "missing"))
-//                .thenReturn(Mono.error(mockNotFound()));
-//
-//        client.post()
-//                .uri("/api/v2/gateway/carts/{cartId}/{productId}", "c-1", "missing")
-//                .exchange()
-//                .expectStatus().isNotFound();
-//    }
 
     @Test
     void testAddProductToCartFromProducts_409_ConflictPropagated() {

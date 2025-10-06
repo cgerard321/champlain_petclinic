@@ -1,4 +1,144 @@
 /* This is a universal CSS, that works for all files, instead of having indivudual files for each one. Easier to work with, less space*/
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  z-index: 1000;
+}
+
+.modal-content {
+  position: relative;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 40px 60px;
+  width: 90%;
+  max-width: 700px;
+  min-height: 300px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  text-align: left;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.modal-header h2 {
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: #2e2e2e;
+  margin: 0;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  cursor: pointer;
+  color: #6b7280;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.close-button:hover {
+  background-color: #f3f4f6;
+}
+
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 24px;
+}
+
+.update-button {
+  background-color: #10b981;
+  color: #fff;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.25s,
+    transform 0.2s;
+}
+
+.update-button:hover {
+  background-color: #059669;
+  transform: translateY(-1px);
+}
+
+.cancel-button {
+  background-color: #6b7280;
+  color: #fff;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.25s,
+    transform 0.2s;
+}
+
+.cancel-button:hover {
+  background-color: #4b5563;
+  transform: translateY(-1px);
+}
+
+.delete-button {
+  background-color: #dc2626;
+  color: #fff;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.25s,
+    transform 0.2s;
+}
+
+.delete-button:hover {
+  background-color: #b91c1c;
+  transform: translateY(-1px);
+}
+
+.success-message {
+  background-color: #d1fae5;
+  color: #065f46;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-align: center;
+}
+
 /* This is for the rectangular look */
 .customer-modal-overlay,
 .customer-pet-add-modal-overlay,
@@ -87,6 +227,21 @@
   letter-spacing: 0.5px;
 }
 
+.customer-add-pet-form .checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-transform: none;
+  font-weight: 500;
+  color: #374151;
+}
+
+.customer-add-pet-form .checkbox-label input[type='checkbox'] {
+  margin: 0;
+  width: 16px;
+  height: 16px;
+}
+
 .customer-add-pet-form input,
 .customer-add-pet-form select,
 .customer-add-pet-form input[type='date'],
@@ -163,6 +318,27 @@
 .customer-modal-content .secondary-button:hover,
 .customer-add-pet-form .secondary-button:hover {
   background-color: #4b5563;
+  transform: translateY(-2px);
+}
+
+.customer-modal-content .delete-button,
+.customer-add-pet-form .delete-button {
+  background-color: #dc2626;
+  color: #fff;
+  padding: 12px 32px;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition:
+    background-color 0.2s,
+    transform 0.2s;
+}
+
+.customer-modal-content .delete-button:hover,
+.customer-add-pet-form .delete-button:hover {
+  background-color: #b91c1c;
   transform: translateY(-2px);
 }
 
