@@ -1,6 +1,6 @@
 // UserCart.tsx
 import { useState, useEffect, useCallback } from 'react';
-import CartBillingForm from './CartBillingForm';
+import CartBillingForm, { BillingInfo } from './CartBillingForm';
 import { useParams, useNavigate } from 'react-router-dom';
 import CartItem from './CartItem';
 import { ProductModel } from '../models/ProductModel';
@@ -60,6 +60,8 @@ const UserCart = (): JSX.Element => {
   const [isCheckoutModalOpen, setIsCheckoutModalOpen] =
     useState<boolean>(false);
   const [showBillingForm, setShowBillingForm] = useState<boolean>(false);
+  const [billingInfo, setBillingInfo] = useState<BillingInfo | null>(null);
+  const [checkoutDate, setCheckoutDate] = useState<string | null>(null);
 
   // state: misc
   const [wishlistUpdated, setWishlistUpdated] = useState(false);
@@ -652,6 +654,27 @@ const UserCart = (): JSX.Element => {
                 <div className="invoices-section">
                   <h2>Invoice</h2>
                   <div className="invoice-summary">
+                    {billingInfo && (
+                      <div className="invoice-client-info">
+                        <h3>Client Information</h3>
+                        <p>
+                          <strong>Name:</strong> {billingInfo.fullName}
+                        </p>
+                        <p>
+                          <strong>Email:</strong> {billingInfo.email}
+                        </p>
+                        <p>
+                          <strong>Address:</strong> {billingInfo.address},{' '}
+                          {billingInfo.city}, {billingInfo.province},{' '}
+                          {billingInfo.postalCode}
+                        </p>
+                      </div>
+                    )}
+                    {checkoutDate && (
+                      <div className="invoice-date">
+                        <strong>Checkout Date/Time:</strong> {checkoutDate}
+                      </div>
+                    )}
                     <h3>Items</h3>
                     {invoices.map(inv => (
                       <div key={inv.productId} className="invoice-card">
@@ -664,16 +687,28 @@ const UserCart = (): JSX.Element => {
                         </p>
                       </div>
                     ))}
-                    <h3>
-                      Total: $
-                      {invoices
-                        .reduce(
+                    <div className="invoice-taxes">
+                      {(() => {
+                        const invoiceSubtotal = invoices.reduce(
                           (sum, inv) =>
                             sum + inv.productSalePrice * inv.quantity,
                           0
-                        )
-                        .toFixed(2)}
-                    </h3>
+                        );
+                        const invoiceTvq = invoiceSubtotal * 0.09975;
+                        const invoiceTvc = invoiceSubtotal * 0.05;
+                        const invoiceTotal =
+                          invoiceSubtotal + invoiceTvq + invoiceTvc - discount;
+                        return (
+                          <>
+                            <p>Subtotal: ${invoiceSubtotal.toFixed(2)}</p>
+                            <p>TVQ (9.975%): ${invoiceTvq.toFixed(2)}</p>
+                            <p>TVC (5%): ${invoiceTvc.toFixed(2)}</p>
+                            <p>Discount: -${discount.toFixed(2)}</p>
+                            <h3>Total: ${invoiceTotal.toFixed(2)}</h3>
+                          </>
+                        );
+                      })()}
+                    </div>
                   </div>
                 </div>
               )}
@@ -736,7 +771,9 @@ const UserCart = (): JSX.Element => {
               <CartBillingForm
                 isOpen={true}
                 onClose={() => setShowBillingForm(false)}
-                onSubmit={async () => {
+                onSubmit={async billing => {
+                  setBillingInfo(billing);
+                  setCheckoutDate(new Date().toLocaleString());
                   await handleCheckout();
                   setShowBillingForm(false);
                 }}
