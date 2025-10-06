@@ -1,8 +1,10 @@
 package com.petclinic.vet.servicelayer;
 
-import com.petclinic.vet.dataaccesslayer.Album;
-import com.petclinic.vet.dataaccesslayer.AlbumRepository;
-import com.petclinic.vet.exceptions.NotFoundException;
+import com.petclinic.vet.businesslayer.albums.AlbumService;
+import com.petclinic.vet.dataaccesslayer.albums.Album;
+import com.petclinic.vet.dataaccesslayer.albums.AlbumRepository;
+import com.petclinic.vet.utils.exceptions.NotFoundException;
+
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
