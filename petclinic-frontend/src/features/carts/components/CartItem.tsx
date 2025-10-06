@@ -1,7 +1,8 @@
-// CartItem.tsx
+// src/features/carts/components/CartItem.tsx
 import './CartItem.css';
 import { ProductModel } from '../models/ProductModel';
 import ImageContainer from '@/features/products/components/ImageContainer';
+import { useUser } from '@/context/UserContext';
 
 interface CartItemProps {
   item: ProductModel;
@@ -15,20 +16,19 @@ interface CartItemProps {
   addToWishlist: (item: ProductModel) => void;
   addToCart: (item: ProductModel) => void;
   isInWishlist: boolean;
-  showNotification?: (message: string) => void; // New prop for notifications
+  showNotification?: (message: string) => void;
   removeFromWishlist?: (item: ProductModel) => void;
 }
 
-const formatPrice = (price: number): string => {
-  return `$${price.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
-};
+const formatPrice = (price: number): string =>
+  `$${price.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
 
 const CartItem = ({
   item,
   index,
   changeItemQuantity,
   deleteItem,
-  errorMessage, // Destructure the new prop
+  errorMessage,
   addToWishlist,
   addToCart,
   isInWishlist,
@@ -37,17 +37,29 @@ const CartItem = ({
 }: CartItemProps): JSX.Element => {
   const remainingStock = item.productQuantity - (item.quantity ?? 0);
 
-  // Handler for "Add to Cart" button click
+  // ---- rôles / read-only staff+admin ----
+  const { user } = useUser();
+  const roleNames = new Set<string>();
+  const rolesSet = user?.roles;
+  if (rolesSet) for (const r of rolesSet) roleNames.add(r.name);
+
+  const isAdmin = roleNames.has('ADMIN');
+  const isStaff =
+    isAdmin ||
+    roleNames.has('EMPLOYEE') ||
+    roleNames.has('VET') ||
+    roleNames.has('INVENTORY_MANAGER') ||
+    roleNames.has('RECEPTIONIST');
+
+  // Add to cart (depuis la wishlist)
   const handleAddToCart = (): void => {
-    // Added return type `void`
+    if (isStaff) return; // lecture seule
     if (item.productQuantity > 0) {
       addToCart(item);
     } else {
-      if (showNotification) {
+      if (showNotification)
         showNotification(`${item.productName} is out of stock.`);
-      } else {
-        alert(`${item.productName} is out of stock.`);
-      }
+      else alert(`${item.productName} is out of stock.`);
     }
   };
 
@@ -60,7 +72,7 @@ const CartItem = ({
       </div>
 
       <div className="CartItem-details">
-        {/* Normal cart row */}
+        {/* Ligne panier normale */}
         {!isInWishlist && (
           <>
             <div className="item-quantity">
@@ -72,6 +84,7 @@ const CartItem = ({
                 onChange={e => changeItemQuantity(e, index)}
                 onBlur={e => changeItemQuantity(e, index)}
                 aria-label={`Quantity of ${item.productName}`}
+                disabled={isStaff}
               />
             </div>
             <span className="CartItem-price">
@@ -81,6 +94,7 @@ const CartItem = ({
               className="wishlist-button"
               onClick={() => deleteItem(item.productId, index)}
               aria-label={`Remove ${item.productName} from cart`}
+              disabled={isStaff}
             >
               Remove
             </button>
@@ -88,22 +102,24 @@ const CartItem = ({
               className="wishlist-button"
               onClick={() => addToWishlist(item)}
               aria-label={`Add ${item.productName} to wishlist`}
+              disabled={isStaff}
             >
               Add to Wishlist
             </button>
           </>
         )}
 
-        {/* Wishlist row */}
+        {/* Ligne wishlist */}
         {isInWishlist && (
           <div className="cartitem-actions">
             <button
               className="addToCart-button"
               onClick={handleAddToCart}
               aria-label={`Add ${item.productName} to cart`}
-              disabled={item.productQuantity === 0}
-              aria-disabled={item.productQuantity === 0}
+              disabled={isStaff || item.productQuantity === 0}
+              aria-disabled={isStaff || item.productQuantity === 0}
             >
+              {/* read-only: staff/admin OR out of stock */}
               {item.productQuantity === 0 ? 'Out of Stock' : 'Add to Cart'}
             </button>
 
@@ -112,6 +128,7 @@ const CartItem = ({
               style={{ marginLeft: '0.5rem' }}
               onClick={() => removeFromWishlist && removeFromWishlist(item)}
               aria-label={`Remove ${item.productName} from wishlist`}
+              disabled={isStaff}
             >
               Remove
             </button>
@@ -129,7 +146,6 @@ const CartItem = ({
         ) : null}
       </div>
 
-      {/* Display per-item error message if exists */}
       {errorMessage && <div className="item-error-message">{errorMessage}</div>}
     </div>
   );
