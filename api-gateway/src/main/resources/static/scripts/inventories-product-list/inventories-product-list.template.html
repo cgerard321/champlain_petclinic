@@ -88,17 +88,22 @@
         <td><span>{{product.productSalePrice}}$</span></td>
 
         <td>
-            <a class="btn btn-info" href="#!/inventories/{{$ctrl.inventory.inventoryId}}/products/{{product.productId}}" title="Details">
+            <a
+                    class="btn btn-info"
+                    ui-sref="productDetails({
+  inventoryId: product.inventoryId,
+  productId: product.productId
+})"
+
+                    title="Details"
+            >
                 <lord-icon
                         src="https://cdn.lordicon.com/jnzhohhs.json"
                         trigger="hover"
                         style="width:32px;height:32px">
                 </lord-icon>
             </a>
-
         </td>
-
-
         <td><a ui-sref="updateProductInventory({inventoryId: $ctrl.inventoryProductList[0].inventoryId, productId: product.productId})" title="Edit">
             <button class="add-bundle-button btn btn-warning">
 
