@@ -5,11 +5,11 @@ export const validateUsername = (username: string): string | null => {
   if (username.length < 3) {
     return 'Username must be at least 3 characters long';
   }
-  if (username.length > 50) {
-    return 'Username must be less than 50 characters';
+  if (username.length > 30) {
+    return 'Username must be less than 30 characters';
   }
-  if (!/^[a-zA-Z0-9_]+$/.test(username)) {
-    return 'Username can only contain letters, numbers, and underscores';
+  if (!/^(?=.*[a-zA-Z])[a-zA-Z0-9_]+$/.test(username)) {
+    return 'Username must contain at least one letter and can only contain letters, numbers, and underscores';
   }
   return null;
 };
