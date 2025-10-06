@@ -176,6 +176,7 @@ public class CartControllerV1 {
                 .map(ResponseEntity::ok)
                 .onErrorResume(this::handleAddProductErrors);
     }
+
     @SecuredEndpoint(allowedRoles = {Roles.OWNER})
     @PostMapping("/{cartId}/wishlist/moveAll")
     public Mono<ResponseEntity<CartResponseDTO>> moveAllWishlistToCart(
