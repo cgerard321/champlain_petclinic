@@ -27,14 +27,24 @@ These are the steps that needs to be followed to integrate your service with the
 You will first need to add the FilesServiceClient to your service. This file should be almost identical across all services that use the files service.
 For an example of what the file should look like please take a look at the one from the customer-service.
 
-### 2. Update Service Implement
+### 2. Add Host and Port to application.yaml
+You will need to add the host and port in the application.yaml of your service for the client to work.
+
+```yaml
+app:
+  files-service:
+    host: files-service
+    port: 8000
+```
+
+### 3. Update Service Implement
 You will need to add the following variable to your service implement
 
 ```java
 private final FilesServiceClient filesServiceClient;
 ```
 
-### 3. Add the File Details DTO
+### 4. Add the File Details DTO
 You will also need to create a new DTO in your service with the following structure:
 
 ```java
@@ -50,7 +60,7 @@ public class FileDetails {
 }
 ```
 
-### 4. Include FileDetails in the Models
+### 5. Include FileDetails in the Models
 
 Your Response and Request Model should be modified to include a FileDetails field.
 
@@ -92,7 +102,7 @@ public class OwnerRequestDTO {
 }
 ```
 
-### 5. Add FileId Field to the Entity
+### 6. Add FileId Field to the Entity
 
 Your Entity should only store the id of the file that it wishes to access later.
 
