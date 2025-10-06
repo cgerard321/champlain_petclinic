@@ -132,3 +132,22 @@
 .addToCart-button:hover {
   background-color: #218838; /* Darker green for hover effect */
 }
+
+
+/* rend l'état disabled évident */
+button:disabled,
+input:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+/* si tu veux un libellé rayé (optionnel) */
+button:disabled {
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+}
+
+button.wishlist-button:disabled {
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+}
