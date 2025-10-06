@@ -690,4 +690,42 @@ public class CartControllerV1UnitTest {
 
         verify(cartServiceClient, times(1)).removeProductFromCart(cartId, productId);
     }
+
+    // New tests for moveAllWishlistToCart endpoint
+    @Test
+    @DisplayName("POST /api/gateway/carts/{cartId}/wishlist/moveAll - Should move all wishlist items to cart successfully")
+    void moveAllWishlistToCart_withValidId_shouldReturnUpdatedCart() {
+        // Arrange
+        String cartId = "cart-123";
+        CartResponseDTO updatedCart = buildCartResponseDTO();
+        when(cartServiceClient.moveAllWishlistToCart(cartId))
+                .thenReturn(Mono.just(updatedCart));
+
+        // Act & Assert
+        webTestClient.post()
+                .uri(baseCartURL + "/" + cartId + "/wishlist/moveAll")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(CartResponseDTO.class)
+                .isEqualTo(updatedCart);
+
+        verify(cartServiceClient, times(1)).moveAllWishlistToCart(cartId);
+    }
+
+    @Test
+    @DisplayName("POST /api/gateway/carts/{cartId}/wishlist/moveAll - Should return 404 when cart not found")
+    void moveAllWishlistToCart_withNonExistingCartId_shouldReturnNotFound() {
+        // Arrange
+        String cartId = "non-existent-cart";
+        when(cartServiceClient.moveAllWishlistToCart(cartId))
+                .thenReturn(Mono.empty());
+
+        // Act & Assert
+        webTestClient.post()
+                .uri(baseCartURL + "/" + cartId + "/wishlist/moveAll")
+                .exchange()
+                .expectStatus().isNotFound();
+
+        verify(cartServiceClient, times(1)).moveAllWishlistToCart(cartId);
+    }
 }
