@@ -8,6 +8,7 @@ angular.module('inventoriesProductDetailsInfo')
       self.loading = true;
       self.error = null;
       self.product = null;
+      self.inventory = null;
 
       var inventoryId = $stateParams.inventoryId;
       var productId = $stateParams.productId;
@@ -24,5 +25,9 @@ angular.module('inventoriesProductDetailsInfo')
           self.error = 'Could not load product details.';
           self.loading = false;
         });
+      $http.get('api/gateway/inventories/' + inventoryId)
+          .then(function(resp){
+              self.inventory = resp.data;
+          });
     }
   ]);

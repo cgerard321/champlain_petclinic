@@ -72,7 +72,7 @@
   </thead>
 
   <tr ng-repeat="inventory in $ctrl.inventoryList | filter:$ctrl.query track by inventory.inventoryId" ui-sref="productList({ inventoryId: inventory.inventoryId })">
-    <td><span>{{inventory.inventoryId}}</span></td>
+    <td><span>{{inventory.inventoryCode}}</span></td>
     <td>
             <span>
                 <a style="text-decoration: none;" ui-sref="inventoriesProduct({ inventoryId: inventory.inventoryId })">{{ inventory.inventoryName }}</a>
