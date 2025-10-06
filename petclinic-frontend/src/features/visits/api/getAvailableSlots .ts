@@ -14,7 +14,7 @@ export const getAvailableSlots = async (
   return await axiosInstance.get<TimeSlot[]>(
     `/visits/availability/vets/${vetId}/slots`,
     {
-      useV2: true,
+      useV2: false,
       params: { date },
     }
   );

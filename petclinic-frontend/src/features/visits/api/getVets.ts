@@ -11,7 +11,7 @@ export interface VetResponse {
 export const getAvailableVets = async (): Promise<VetResponse[]> => {
   const response = await axiosInstance.get('/vets', {
     responseType: 'text',
-    useV2: true,
+    useV2: false,
   });
 
   const data = response.data;
