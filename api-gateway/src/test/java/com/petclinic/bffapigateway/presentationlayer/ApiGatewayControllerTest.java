@@ -3135,7 +3135,7 @@ private VetAverageRatingDTO buildVetAverageRatingDTO(){
     }
 
     @Test
-    void archiveBill_ShouldReturnNotContent_WhenNoBillsArchived() {
+    void archiveBill_ShouldReturnNoContent_WhenNoBillsArchived() {
         Mockito.when(billServiceClient.archiveBill()).thenReturn(Flux.empty());
 
         client.patch()
