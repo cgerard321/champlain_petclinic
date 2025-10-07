@@ -347,7 +347,6 @@ export default function ProductDetails(): JSX.Element {
                     )}
                   </div>
                 </div>
-
                 <div className="review-section-container">
                   <div className="reviewproduct-container">
                     <h2>Review</h2>
