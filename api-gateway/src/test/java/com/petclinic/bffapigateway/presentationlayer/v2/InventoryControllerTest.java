@@ -104,7 +104,7 @@ public class InventoryControllerTest {
         //Arrange
         Optional<Integer> page = Optional.of(0);
         Optional<Integer> size = Optional.of(2);
-        when(inventoryServiceClient.searchInventory(page, size, null, null, null, null))
+        when(inventoryServiceClient.searchInventory(page, size, null,null, null, null, null))
                 .thenReturn(Flux.just(buildInventoryDTO()));
 
         // Act
@@ -120,7 +120,7 @@ public class InventoryControllerTest {
 
         // Assert
         verify(inventoryServiceClient, times(1))
-                .searchInventory(eq(page), eq(size), eq(null), eq(null), eq(null), eq(null));
+                .searchInventory(eq(page), eq(size), eq(null), eq(null), eq(null), eq(null), eq(null));
     }
 
     @Test
@@ -128,7 +128,7 @@ public class InventoryControllerTest {
         // Arrange
         Optional<Integer> page = Optional.of(0);
         Optional<Integer> size = Optional.of(2);
-        when(inventoryServiceClient.searchInventory(page, size, "invt1", "Internal", "invtone", null))
+        when(inventoryServiceClient.searchInventory(page, size, "INVT-000", "invt1", "Internal", "invtone", null))
                 .thenReturn(Flux.just(buildInventoryDTO()));
 
         // Act
@@ -144,7 +144,7 @@ public class InventoryControllerTest {
 
         // Assert
         verify(inventoryServiceClient, times(1))
-                .searchInventory(eq(page), eq(size), eq("invt1"), eq("Internal"), eq("invtone"), eq(null));
+                .searchInventory(eq(page), eq(size), eq("IVNT-000"), eq("invt1"), eq("Internal"), eq("invtone"), eq(null));
     }
 
     @Test
@@ -152,7 +152,7 @@ public class InventoryControllerTest {
         // Arrange
         Optional<Integer> page = Optional.of(0);
         Optional<Integer> size = Optional.of(2);
-        when(inventoryServiceClient.searchInventory(page, size, "invalid", "invalid", "invalid", null))
+        when(inventoryServiceClient.searchInventory(page, size, "invalid", "invalid", "invalid", "invalid", null))
                 .thenReturn(Flux.empty());
 
         // Act
@@ -167,7 +167,7 @@ public class InventoryControllerTest {
 
         // Assert
         verify(inventoryServiceClient, times(1))
-                .searchInventory(eq(page), eq(size), eq("invalid"), eq("invalid"), eq("invalid"), eq(null));
+                .searchInventory(eq(page), eq(size), eq("invalid"), eq("invalid"), eq("invalid"), eq("invalid"), eq(null));
     }
 
     @Test

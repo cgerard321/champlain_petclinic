@@ -314,6 +314,7 @@ public class InventoryControllerV1 {
     @GetMapping()//, produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<InventoryResponseDTO> searchInventory(@RequestParam Optional<Integer> page,
                                                       @RequestParam Optional<Integer> size,
+                                                      @RequestParam(required = false) String inventoryCode,
                                                       @RequestParam(required = false) String inventoryName,
                                                       @RequestParam(required = false) String inventoryType,
                                                       @RequestParam(required = false) String inventoryDescription,
@@ -325,7 +326,7 @@ public class InventoryControllerV1 {
         if (size.isEmpty()) {
             size = Optional.of(10);
         }
-        return inventoryServiceClient.searchInventory(page, size, inventoryName, inventoryType, inventoryDescription, importantOnly);
+        return inventoryServiceClient.searchInventory(page, size, inventoryCode, inventoryName, inventoryType, inventoryDescription, importantOnly);
     }
 
         @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})

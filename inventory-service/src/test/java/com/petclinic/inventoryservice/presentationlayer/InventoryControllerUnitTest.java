@@ -942,7 +942,7 @@ class InventoryControllerUnitTest {
 
         InventoryResponseDTO sampleResponse = new InventoryResponseDTO();
 
-        when(productInventoryService.searchInventories(page, inventoryName, null, null, null))
+        when(productInventoryService.searchInventories(page, null,inventoryName, null, null, null))
                 .thenReturn(Flux.just(sampleResponse));
 
         // Act and Assert
@@ -965,7 +965,7 @@ class InventoryControllerUnitTest {
         String inventoryType = "SampleType";
         InventoryResponseDTO sampleResponse = new InventoryResponseDTO();
 
-        when(productInventoryService.searchInventories(page, null, inventoryType, null, null))
+        when(productInventoryService.searchInventories(page, null,null, inventoryType, null, null))
                 .thenReturn(Flux.just(sampleResponse));
 
         // Act and Assert
@@ -988,7 +988,7 @@ class InventoryControllerUnitTest {
         String inventoryDescription = "SampleDescription";
         InventoryResponseDTO sampleResponse = new InventoryResponseDTO();
 
-        when(productInventoryService.searchInventories(page, null, null, inventoryDescription, null))
+        when(productInventoryService.searchInventories(page, null,null, null, inventoryDescription, null))
                 .thenReturn(Flux.just(sampleResponse));
 
         // Act and Assert
@@ -1010,7 +1010,7 @@ class InventoryControllerUnitTest {
         Pageable page = PageRequest.of(0, 10);
         InventoryResponseDTO sampleResponse = new InventoryResponseDTO();
 
-        when(productInventoryService.searchInventories(page, null, null, null, null))
+        when(productInventoryService.searchInventories(page, null,null, null, null, null))
                 .thenReturn(Flux.just(sampleResponse));
 
         // Act and Assert

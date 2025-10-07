@@ -1226,7 +1226,7 @@ class ProductInventoryServiceUnitTest {
         when(inventoryRepository.findByInventoryDescriptionRegex(anyString()))
                 .thenReturn(Flux.empty());  // No inventory found
 
-        Flux<InventoryResponseDTO> result =productInventoryService.searchInventories(page, null, null, description, false);
+        Flux<InventoryResponseDTO> result =productInventoryService.searchInventories(page, null,null, null, description, false);
 
         StepVerifier.create(result)
                 .expectError(NotFoundException.class)
