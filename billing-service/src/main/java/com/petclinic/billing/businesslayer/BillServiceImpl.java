@@ -6,7 +6,6 @@ import com.petclinic.billing.datalayer.*;
 //import com.petclinic.billing.domainclientlayer.VetClient;
 import com.petclinic.billing.domainclientlayer.OwnerClient;
 import com.petclinic.billing.domainclientlayer.VetClient;
-import com.petclinic.billing.exceptions.InvalidInputException;
 import com.petclinic.billing.exceptions.InvalidPaymentException;
 import com.petclinic.billing.exceptions.NotFoundException;
 import com.petclinic.billing.util.EntityDtoUtil;
