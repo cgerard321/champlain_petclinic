@@ -20,6 +20,7 @@ export interface ProductModel {
     | 'PICKUP'
     | 'DELIVERY_AND_PICKUP'
     | 'NO_DELIVERY_OPTION';
+  
 }
 
 export const emptyProductModel: ProductModel = {

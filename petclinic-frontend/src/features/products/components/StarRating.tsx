@@ -5,6 +5,7 @@ interface RatingProps {
   currentRating: number;
   viewOnly: boolean;
   updateRating?: (rating: number, review: string | null) => void;
+
 }
 
 function StarRating({
@@ -43,8 +44,9 @@ function StarRating({
             <svg
               className={`empty-star star ${!viewOnly && 'star-hover star-pointer'}`}
               xmlns="http://www.w3.org/2000/svg"
-              width="32"
-              height="32"
+              width="25"
+              height="25"
+              stroke="black"
               viewBox="0 0 32 32"
               fill="none"
               onClick={() => !viewOnly && starClick(index)}
@@ -64,8 +66,8 @@ function StarRating({
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width="32"
-                height="32"
+                width="25"
+                height="25"
                 viewBox="0 0 32 32"
                 fill="none"
                 key={index}
@@ -81,11 +83,13 @@ function StarRating({
           </div>
         );
       })}
+
       {currentRating != 0 && !viewOnly && (
         <div className="delete-button-rating" onClick={() => starClick(0)}>
           <span>-</span>
         </div>
       )}
+
     </div>
   );
 }
