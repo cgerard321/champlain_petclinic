@@ -7,7 +7,7 @@ export async function addImage(formData: FormData): Promise<ImageModel> {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
-      useV2: true,
+      useV2: false,
     });
 
     return response.data as ImageModel;

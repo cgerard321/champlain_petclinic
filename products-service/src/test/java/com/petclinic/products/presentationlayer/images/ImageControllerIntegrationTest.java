@@ -36,7 +36,7 @@ class ImageControllerIntegrationTest {
     @Autowired
     private ImageRepository imageRepository;
 
-    private String baseURI = "/api/v1/images";
+    private String baseURI = "/images";
 
     private final Image image1 = Image.builder()
             .imageId("c76ed4c1-fc5d-4868-8b39-1bca6b0be368")
