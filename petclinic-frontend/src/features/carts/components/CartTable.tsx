@@ -75,7 +75,7 @@ export default function CartListTable(): JSX.Element {
       const { data } = await axiosInstance.get<
         CartModel[] | string | Record<string, unknown>
       >('/carts', {
-        useV2: false,
+        useV2: true,
       });
       const normalized = cartExtractor(data);
 
