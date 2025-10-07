@@ -359,7 +359,7 @@ public class BillServiceImpl implements BillService{
         return billRepository.findAllByArchiveFalse()
                 .flatMap(bill -> {
                     if (bill.getBillStatus() == BillStatus.UNPAID || bill.getBillStatus() == BillStatus.OVERDUE) {
-                        bill.setArchive(false);
+                        // No action needed; archive is already false by default.
                     }
                     else if (bill.getDate().isBefore(LocalDate.now().minusYears(1))) {
                         bill.setArchive(true);
