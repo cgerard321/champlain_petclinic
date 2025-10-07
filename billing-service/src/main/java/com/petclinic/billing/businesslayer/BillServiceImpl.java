@@ -175,8 +175,14 @@ public class BillServiceImpl implements BillService{
                     }
 
                     // Fetch Vet and Owner details
-                    Mono<VetResponseDTO> vetMono = vetClient.getVetByVetId(dto.getVetId());
-                    Mono<OwnerResponseDTO> ownerMono = ownerClient.getOwnerByOwnerId(dto.getCustomerId());
+                    Mono<VetResponseDTO> vetMono = vetClient.getVetByVetId(dto.getVetId())
+                        .onErrorResume(e -> Mono.error(new ResponseStatusException(
+                            HttpStatus.NOT_FOUND, "Vet not found for id: " + dto.getVetId(), e
+                        )));
+                    Mono<OwnerResponseDTO> ownerMono = ownerClient.getOwnerByOwnerId(dto.getCustomerId())
+                        .onErrorResume(e -> Mono.error(new ResponseStatusException(
+                            HttpStatus.NOT_FOUND, "Owner not found for id: " + dto.getCustomerId(), e
+                        )));
 
                     return Mono.zip(vetMono, ownerMono, Mono.just(dto));
                 })
