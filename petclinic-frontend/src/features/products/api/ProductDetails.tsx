@@ -30,9 +30,7 @@ import PatchListingStatusButton from '../components/PatchListingStatusButton';
 import RecentlyViewedProducts from '@/features/products/components/RecentlyViewedProducts.tsx';
 import { useAddToCart } from '@/features/carts/api/addToCartFromProducts';
 import { useAddToWishlist } from '@/features/carts/api/addToWishlistFromProducts';
-import { FaHeart } from 'react-icons/fa';
-import { FaCheck } from 'react-icons/fa';
-import { FaTimes } from 'react-icons/fa';
+import { FaHeart, FaCheck, FaTimes } from 'react-icons/fa';
 
 export default function ProductDetails(): JSX.Element {
   const isAdmin = IsAdmin();
