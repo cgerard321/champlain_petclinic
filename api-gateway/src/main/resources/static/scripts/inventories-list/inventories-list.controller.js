@@ -58,8 +58,8 @@ angular.module('inventoriesList')
             desc = ""
 
             if (inventoryCode != null && inventoryCode !== '') {
-                code = inventoryCode
-                queryString += "inventoryCode=" + inventoryCode;
+                code = inventoryCode.toUpperCase();
+                queryString += "inventoryCode=" + code;
             }
 
             if (inventoryName != null && inventoryName !== '') {
