@@ -265,7 +265,9 @@ export default function ProductDetails(): JSX.Element {
 
                     />
                     <h3>{currentProduct.averageRating} </h3>
-                    <div className="review-nums">{productReviews.length||0}reviews</div>
+                    <div className="review-nums">
+                      {productReviews.length||0}reviews
+                    </div>
                   </div>
 
                   <div className="line"></div>
@@ -288,18 +290,20 @@ export default function ProductDetails(): JSX.Element {
 
                   <div className="stock-details">
                     <div className='inStock'>
-                      {currentProduct.productQuantity >= 10&& <p>
+                      {currentProduct.productQuantity >= 10 && <p>
                         <FaCheck/>In Stock - Available for Pickup
                       </p>}
                     </div>
                     <div className="outOfStock">
                       
-                      {currentProduct.productQuantity === 0&& <p>
+                      {currentProduct.productQuantity === 0 && <p>
                         <FaTimes/>Out of Stock
                       </p>}
                     </div>
                     <div className="lowStock">
-                      {currentProduct.productQuantity > 0&&currentProduct.productQuantity < 10 && <p><FaCheck/>Only a few left!</p>}
+                      {currentProduct.productQuantity > 0 && currentProduct.productQuantity < 10 && <p>
+                        <FaCheck/>Only a few left!
+                      </p>}
                     </div>
                   </div>
 
@@ -316,7 +320,7 @@ export default function ProductDetails(): JSX.Element {
                         {'-'}
                       </button>
                       <input className="qty-input"
-                        value={quantity}readOnly
+                        value={quantity} readOnly
                       />
                       <button onClick={handlePlus} className="qty-btn">
                         {'+'}
