@@ -45,10 +45,10 @@ export default function ProductDetails(): JSX.Element {
   //------------------------------------------------------
   const { addToWishlist } = useAddToWishlist();
   const [quantity, setQuantity] = useState(1);
-  const handleMinus = () => {
+  const handleMinus = (): void => {
     if (quantity > 1) setQuantity(quantity - 1);
   };
-  const handlePlus = () => {
+  const handlePlus = (): void => {
     setQuantity(quantity + 1);
   };
 
@@ -322,7 +322,6 @@ export default function ProductDetails(): JSX.Element {
                       {currentProduct.productDescription}
                     </p>
                   </h3>
-
                   <div className=" cart-box">
                     <div className=" quantity-selector">
                       <button onClick={handleMinus} className="qty-btn">
