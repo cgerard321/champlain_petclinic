@@ -21,6 +21,7 @@ import reactor.core.publisher.Mono;
 
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.function.Predicate;
 
@@ -353,6 +354,20 @@ public class BillServiceImpl implements BillService{
                 .map(EntityDtoUtil::toBillResponseDto);
     }
 
+    @Override
+    public Flux<Bill> archiveBill() {
+        return billRepository.findAllByArchiveFalse()
+                .flatMap(bill -> {
+                    if (bill.getBillStatus() == BillStatus.UNPAID || bill.getBillStatus() == BillStatus.OVERDUE) {
+                        bill.setArchive(false);
+                    }
+                    else if (bill.getDate().isBefore(LocalDate.now().minusYears(1))) {
+                        bill.setArchive(true);
+                        return billRepository.save(bill);
+                    }
+                    return Mono.just(bill);
+                });
+    }
 
 
 

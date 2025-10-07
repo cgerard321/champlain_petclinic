@@ -1,7 +1,6 @@
 package com.petclinic.billing.datalayer;
 
 //import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
@@ -12,6 +11,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Repository
 public interface BillRepository extends ReactiveMongoRepository<Bill, String> {
@@ -42,4 +42,12 @@ public interface BillRepository extends ReactiveMongoRepository<Bill, String> {
 
     Mono<Bill> findByCustomerIdAndBillId(String customerId, String billId);
 
-}
+    Flux<Bill> findAllByArchiveFalse();
+
+    @Query("{ '_id': ?0 }")
+    Mono<Void> archiveBillById(String billId);
+
+    Flux<Bill> findAllByDateBefore(LocalDate date);
+
+    @Query("{ 'billStatus': { $in: [?0, ?1] } }")
+    Flux<Bill> findAllByBillStatusIn(BillStatus status1, BillStatus status2);}

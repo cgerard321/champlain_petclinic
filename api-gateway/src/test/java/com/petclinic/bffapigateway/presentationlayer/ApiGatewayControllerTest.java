@@ -3122,6 +3122,30 @@ private VetAverageRatingDTO buildVetAverageRatingDTO(){
                 });
     }
 
+    @Test
+    void archiveBill_ShouldReturnNoContent_WhenSuccessful() {
+        Mockito.when(billServiceClient.archiveBill()).thenReturn(Flux.empty());
+
+        client.patch()
+                .uri("/api/gateway/bills/archive")
+                .exchange()
+                .expectStatus().isNoContent();
+
+        Mockito.verify(billServiceClient).archiveBill();
+    }
+
+    @Test
+    void archiveBill_ShouldReturnNotContent_WhenNoBillsArchived() {
+        Mockito.when(billServiceClient.archiveBill()).thenReturn(Flux.empty());
+
+        client.patch()
+                .uri("/api/gateway/bills/archive")
+                .exchange()
+                .expectStatus().isNoContent();
+
+        Mockito.verify(billServiceClient).archiveBill();
+    }
+
     private EducationResponseDTO buildEducation(){
         return EducationResponseDTO.builder()
                 .educationId("1")

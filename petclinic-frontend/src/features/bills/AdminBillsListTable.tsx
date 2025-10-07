@@ -6,10 +6,10 @@ import { BillRequestModel } from './models/BillRequestModel';
 import { addBill } from './api/addBill';
 import { OwnerResponseModel } from '../customers/models/OwnerResponseModel';
 import { VetResponseModel } from '../veterinarians/models/VetResponseModel';
-import { deleteBill } from '@/features/bills/api/deleteBill.tsx';
 import useGetAllBillsPaginated from '@/features/bills/hooks/useGetAllBillsPaginated.ts';
 import './AdminBillsListTable.css';
 import { useNavigate } from 'react-router-dom';
+import { archiveBills } from './api/archiveBills';
 import { getAllPaidBills } from '@/features/bills/api/getAllPaidBills.tsx';
 import { getAllOverdueBills } from '@/features/bills/api/getAllOverdueBills.tsx';
 import { getAllUnpaidBills } from '@/features/bills/api/getAllUnpaidBills.tsx';
@@ -22,6 +22,7 @@ import { getAllBills } from './api/getAllBills';
 
 export default function AdminBillsListTable(): JSX.Element {
   const navigate = useNavigate();
+  const [showArchivedBills, setShowArchivedBills] = useState<boolean>(false);
   const [searchId, setSearchId] = useState<string>('');
   const [searchedBill, setSearchedBill] = useState<Bill | null>(null);
   const [selectedOwnerFilter, setSelectedOwnerFilter] = useState<string>('');
@@ -94,6 +95,19 @@ export default function AdminBillsListTable(): JSX.Element {
       getBillsList(currentPage, 10);
     }
   }, [currentPage, getBillsList, selectedFilter]);
+
+  useEffect(() => {
+    const callArchiveBills = async (): Promise<void> => {
+      try {
+        await archiveBills();
+      } catch (error) {
+        console.error('Error calling archive bills endpoint:', error);
+        setError('Failed to archive bills');
+      }
+    };
+
+    callArchiveBills();
+  }, []);
 
   const validateForm = (): boolean => {
     if (
@@ -245,6 +259,10 @@ export default function AdminBillsListTable(): JSX.Element {
   const getFilteredBills = (): Bill[] => {
     const billsToFilter = filteredBills || billsList;
 
+    const filteredByArchiveStatus = showArchivedBills
+      ? billsToFilter
+      : billsToFilter.filter(bill => !bill.archive);
+
     if (
       filteredBills &&
       (selectedOwnerFilter ||
@@ -252,7 +270,7 @@ export default function AdminBillsListTable(): JSX.Element {
         selectedFilter === 'unpaid' ||
         selectedFilter === 'overdue')
     ) {
-      return billsToFilter.filter(bill => {
+      return filteredByArchiveStatus.filter(bill => {
         const matchesCustomerId =
           !filter.customerId || bill.customerId.includes(filter.customerId);
 
@@ -261,10 +279,12 @@ export default function AdminBillsListTable(): JSX.Element {
     }
 
     if (filteredBills && filter.vetId) {
-      return billsToFilter.filter(bill => bill.vetId === filter.vetId);
+      return filteredByArchiveStatus.filter(
+        bill => bill.vetId === filter.vetId
+      );
     }
 
-    return billsToFilter.filter(bill => {
+    return filteredByArchiveStatus.filter(bill => {
       const matchesStatus =
         !selectedFilter ||
         bill.billStatus.toLowerCase() === selectedFilter.toLowerCase();
@@ -314,31 +334,6 @@ export default function AdminBillsListTable(): JSX.Element {
     }
   };
 
-  const handleDelete = async (billId: string): Promise<void> => {
-    const billToDelete = billsList.find(bill => bill.billId === billId);
-    if (!billToDelete) {
-      console.error('Bill not found: ${billId}');
-      window.alert('Bill not found: ${billId}');
-      return;
-    }
-
-    const confirmDelete = window.confirm(
-      'Are you sure you want to delete this bill?'
-    );
-    if (!confirmDelete) {
-      return;
-    }
-
-    try {
-      const response = await deleteBill(billToDelete);
-      if (response.status === 200 || response.status === 204) {
-        window.alert(`Bill ${billId} has been deleted successfully`);
-        getBillsList(currentPage, 10);
-      }
-    } catch (error) {
-      window.alert('Cannot delete this bill. It may be unpaid or overdue.');
-    }
-  };
   const handleEditClick = (): void => {
     navigate(`/bills/admin/${searchId}/edit`);
   };
@@ -383,6 +378,17 @@ export default function AdminBillsListTable(): JSX.Element {
         <button onClick={() => toggleSection('create')}>
           {activeSection === 'create' ? 'Close Create' : 'Create'}
         </button>
+
+        <div className="archive-toggle">
+          <label>
+            <input
+              type="checkbox"
+              checked={showArchivedBills}
+              onChange={e => setShowArchivedBills(e.target.checked)}
+            />
+            Show Archived Bills
+          </label>
+        </div>
       </div>
 
       {activeSection === 'search' && (
@@ -658,7 +664,6 @@ export default function AdminBillsListTable(): JSX.Element {
                 <th>Taxed Amount</th>
                 <th>Status</th>
                 <th>Due Date</th>
-                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -678,25 +683,6 @@ export default function AdminBillsListTable(): JSX.Element {
                   <td>{bill.taxedAmount}</td>
                   <td>{bill.billStatus}</td>
                   <td>{bill.dueDate}</td>
-                  <td>
-                    <button
-                      className="btn btn-danger"
-                      onClick={() => handleDelete(bill.billId)}
-                      title="delete"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="32"
-                        height="32"
-                        fill="currentColor"
-                        className="bi bi-trash"
-                        viewBox="0 0 16 16"
-                      >
-                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z" />
-                        <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z" />
-                      </svg>
-                    </button>
-                  </td>
                 </tr>
               ))}
             </tbody>

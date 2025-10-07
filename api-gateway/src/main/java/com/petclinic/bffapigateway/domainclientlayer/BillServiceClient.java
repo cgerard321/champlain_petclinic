@@ -17,6 +17,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 
@@ -384,6 +386,14 @@ public class BillServiceClient {
                     // Fallback: let other statuses bubble up
                     return resp.createException().flatMap(Mono::error);
                 });
+    }
+
+
+    public Flux<BillResponseDTO> archiveBill() {
+        return webClientBuilder.build().patch()
+                .uri(billServiceUrl + "/archive")
+                .retrieve()
+                .bodyToFlux(BillResponseDTO.class);
     }
 
 

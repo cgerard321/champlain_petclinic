@@ -2,6 +2,7 @@ package com.petclinic.billing.datalayer;
 
 import lombok.*;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.time.LocalDate;
 
@@ -27,4 +28,6 @@ public class Bill {
     private double taxedAmount;
     private BillStatus billStatus;
     private LocalDate dueDate;
+    @Field("archive")
+    private Boolean archive = false;
 }

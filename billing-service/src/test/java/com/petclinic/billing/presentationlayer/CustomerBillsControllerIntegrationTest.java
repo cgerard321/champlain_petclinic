@@ -159,6 +159,7 @@ public class CustomerBillsControllerIntegrationTest {
                                 .date(LocalDate.now().minusDays(10))
                                 .amount(150.0)
                                 .dueDate(LocalDate.now().plusDays(20))
+                                .archive(false)
                                 .build();
         }
 
@@ -176,6 +177,7 @@ public class CustomerBillsControllerIntegrationTest {
                                 .date(date)
                                 .amount(150.0)
                                 .billStatus(BillStatus.UNPAID)
+                                .archive(false)
                                 .build();
         }
 }

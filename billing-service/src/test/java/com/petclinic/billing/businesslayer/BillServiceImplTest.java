@@ -994,5 +994,85 @@ public class BillServiceImplTest {
                 .verifyComplete();
     }
 
+    @Test
+    void archiveBill_archivesOnlyOldNonProblemBills_andSavesOnlyThose() {
+        LocalDate now = LocalDate.now();
+        LocalDate twoYearsAgo = now.minusYears(2);
+        LocalDate elevenMonthsAgo = now.minusMonths(11);
 
+        Bill paidOld = new Bill();
+        paidOld.setBillId("A");
+        paidOld.setBillStatus(BillStatus.PAID);
+        paidOld.setDate(twoYearsAgo);
+        paidOld.setArchive(false);
+
+        Bill unpaidOld = new Bill();
+        unpaidOld.setBillId("B");
+        unpaidOld.setBillStatus(BillStatus.UNPAID);
+        unpaidOld.setDate(twoYearsAgo);
+        unpaidOld.setArchive(false);
+
+        Bill paidRecent = new Bill();
+        paidRecent.setBillId("C");
+        paidRecent.setBillStatus(BillStatus.PAID);
+        paidRecent.setDate(elevenMonthsAgo);
+        paidRecent.setArchive(false);
+
+        when(repo.findAllByArchiveFalse())
+                .thenReturn(Flux.just(paidOld, unpaidOld, paidRecent));
+
+        when(repo.save(argThat(b -> "A".equals(b.getBillId()) && Boolean.TRUE.equals(b.getArchive()))))
+                .thenAnswer(inv -> Mono.just(inv.getArgument(0)));
+
+        Flux<Bill> result = billService.archiveBill();
+
+        StepVerifier.create(result.collectList())
+                .assertNext(list -> {
+                    // Should emit the same three bills after processing
+                    // A: archived = true
+                    Bill a = list.stream().filter(bill -> bill.getBillId().equals("A")).findFirst().orElseThrow(() -> new RuntimeException("Bill with ID A not found"));
+                    Bill b = list.stream().filter(bill -> bill.getBillId().equals("B")).findFirst().orElseThrow(() -> new RuntimeException("Bill with ID B not found"));
+                    Bill c = list.stream().filter(bill -> bill.getBillId().equals("C")).findFirst().orElseThrow(() -> new RuntimeException("Bill with ID C not found"));
+
+                    assert a.getArchive() : "A should be archived";
+                    assert !b.getArchive() : "B should remain not archived (UNPAID)";
+                    assert !c.getArchive() : "C should remain not archived (recent)";
+                })
+                .verifyComplete();
+
+        verify(repo, times(1)).findAllByArchiveFalse();
+        verify(repo, times(1)).save(argThat(b -> "A".equals(b.getBillId()) && Boolean.TRUE.equals(b.getArchive())));
+        verify(repo, times(1)).findAllByArchiveFalse();
+        verify(repo, times(1))
+                .save(argThat(b -> "A".equals(b.getBillId()) && Boolean.TRUE.equals(b.getArchive())));
+    }
+
+    @Test
+    void archiveBill_noArchivableBills_meansNoSaves() {
+        LocalDate now = LocalDate.now();
+
+        Bill overdueRecent = new Bill();
+        overdueRecent.setBillId("X");
+        overdueRecent.setBillStatus(BillStatus.OVERDUE);
+        overdueRecent.setDate(now.minusMonths(3));
+        overdueRecent.setArchive(false);
+
+        Bill unpaidRecent = new Bill();
+        unpaidRecent.setBillId("Y");
+        unpaidRecent.setBillStatus(BillStatus.UNPAID);
+        unpaidRecent.setDate(now.minusMonths(2));
+        unpaidRecent.setArchive(false);
+
+        // Stub the getAllBills method
+        when(repo.findAll()).thenReturn(Flux.empty());
+        when(repo.findAllByArchiveFalse()).thenReturn(Flux.just(overdueRecent, unpaidRecent));
+
+        StepVerifier.create(billService.archiveBill())
+                .expectNextMatches(b -> b.getBillId().equals("X") && !b.getArchive())
+                .expectNextMatches(b -> b.getBillId().equals("Y") && !b.getArchive())
+                .verifyComplete();
+
+        verify(repo, times(1)).findAllByArchiveFalse();
+        verify(repo, never()).save(any());
+    }
 }
