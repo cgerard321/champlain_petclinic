@@ -172,7 +172,8 @@ public class BillServiceImpl implements BillService{
                 .flatMap(dto -> {
                     // Validate required fields
                     if (dto.getBillStatus() == null) {
-                        return Mono.error(new InvalidInputException(
+                        return Mono.error(new ResponseStatusException(
+                                HttpStatus.BAD_REQUEST,
                                 "Bill status is required"
                         ));
                     }
