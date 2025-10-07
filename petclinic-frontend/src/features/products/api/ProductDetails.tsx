@@ -264,7 +264,7 @@ export default function ProductDetails(): JSX.Element {
                     />
                     <h3>{currentProduct.averageRating} </h3>
                     <div className="review-nums">
-                      {productReviews.length||0}reviews
+                      {productReviews.length || 0}reviews
                     </div>
                   </div>
                   <div className="line"></div>
@@ -289,7 +289,7 @@ export default function ProductDetails(): JSX.Element {
                     <div className="inStock">
                       {currentProduct.productQuantity >= 10 && (
                         <p>
-                        <FaCheck /> In Stock - Available for Pickup
+                          <FaCheck /> In Stock - Available for Pickup
                         </p> 
                       )}
                     </div>
@@ -297,19 +297,18 @@ export default function ProductDetails(): JSX.Element {
                       
                       {currentProduct.productQuantity === 0 && (
                         <p>
-                        <FaTimes /> Out of Stock
+                          <FaTimes /> Out of Stock
                         </p>
                       )}
                     </div>
                     <div className="lowStock">
                       {currentProduct.productQuantity > 0 && currentProduct.productQuantity < 10 && (
                         <p>
-                        <FaCheck /> Only a few left!
+                          <FaCheck /> Only a few left!
                         </p> 
                       )}
                     </div>
                   </div>
-
                   <h3 className="prod-desc-title">
                     About this Product
                     <p className="prod-description">
