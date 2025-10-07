@@ -4,6 +4,9 @@ import com.itextpdf.text.DocumentException;
 import com.petclinic.billing.datalayer.*;
 //import com.petclinic.billing.domainclientlayer.OwnerClient;
 //import com.petclinic.billing.domainclientlayer.VetClient;
+import com.petclinic.billing.domainclientlayer.OwnerClient;
+import com.petclinic.billing.domainclientlayer.VetClient;
+import com.petclinic.billing.exceptions.InvalidInputException;
 import com.petclinic.billing.exceptions.InvalidPaymentException;
 import com.petclinic.billing.exceptions.NotFoundException;
 import com.petclinic.billing.util.EntityDtoUtil;
@@ -32,8 +35,8 @@ import java.util.function.Predicate;
 public class BillServiceImpl implements BillService{
 
     private final BillRepository billRepository;
-    //private final VetClient vetClient;
-    //private final OwnerClient ownerClient;
+    private final VetClient vetClient;
+    private final OwnerClient ownerClient;
 
 
    @Override
@@ -169,20 +172,14 @@ public class BillServiceImpl implements BillService{
                 .flatMap(dto -> {
                     // Validate required fields
                     if (dto.getBillStatus() == null) {
-                        return Mono.error(new ResponseStatusException(
-                                HttpStatus.BAD_REQUEST, "Bill status is required"
+                        return Mono.error(new InvalidInputException(
+                                "Bill status is required"
                         ));
                     }
 
                     // Fetch Vet and Owner details
-                    Mono<VetResponseDTO> vetMono = vetClient.getVetByVetId(dto.getVetId())
-                        .onErrorResume(e -> Mono.error(new ResponseStatusException(
-                            HttpStatus.NOT_FOUND, "Vet not found for id: " + dto.getVetId(), e
-                        )));
-                    Mono<OwnerResponseDTO> ownerMono = ownerClient.getOwnerByOwnerId(dto.getCustomerId())
-                        .onErrorResume(e -> Mono.error(new ResponseStatusException(
-                            HttpStatus.NOT_FOUND, "Owner not found for id: " + dto.getCustomerId(), e
-                        )));
+                    Mono<VetResponseDTO> vetMono = vetClient.getVetByVetId(dto.getVetId());
+                    Mono<OwnerResponseDTO> ownerMono = ownerClient.getOwnerByOwnerId(dto.getCustomerId());
 
                     return Mono.zip(vetMono, ownerMono, Mono.just(dto));
                 })
