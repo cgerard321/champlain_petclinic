@@ -287,22 +287,25 @@ export default function ProductDetails(): JSX.Element {
 
                   <div className="stock-details">
                     <div className="inStock">
-                      {currentProduct.productQuantity >= 10 && (<p>
+                      {currentProduct.productQuantity >= 10 && (
+                        <p>
                         <FaCheck /> In Stock - Available for Pickup
-                      </p> 
+                        </p> 
                       )}
                     </div>
                     <div className="outOfStock">
                       
-                      {currentProduct.productQuantity === 0 && (<p>
+                      {currentProduct.productQuantity === 0 && (
+                        <p>
                         <FaTimes /> Out of Stock
-                      </p>
+                        </p>
                       )}
                     </div>
                     <div className="lowStock">
-                      {currentProduct.productQuantity > 0 && currentProduct.productQuantity < 10 && (<p>
+                      {currentProduct.productQuantity > 0 && currentProduct.productQuantity < 10 && (
+                        <p>
                         <FaCheck /> Only a few left!
-                      </p> 
+                        </p> 
                       )}
                     </div>
                   </div>
@@ -319,9 +322,7 @@ export default function ProductDetails(): JSX.Element {
                       <button onClick={handleMinus} className="qty-btn">
                         {'-'}
                       </button>
-                      <input className="qty-input"
-                         value={quantity} readOnly
-                      />
+                      <input className="qty-input" value={quantity} readOnly />
                       <button onClick={handlePlus} className="qty-btn">
                         {'+'}
                       </button>
