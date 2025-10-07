@@ -33,8 +33,9 @@
           <input type="text" ng-model="inventoryName" ng-keyup="$event.keyCode == 13 && searchInventory(inventoryCode, inventoryName, inventoryType, inventoryDescription)">
       </td>
       <td>
-          <select class="form-control col-sm-4" id="inventoryType" ng-model="inventoryType" name="inventoryType" ng-options="type for type in inventoryTypeOptions" placeholder="None" required title="Please select the inventory type." ng-keyup="$event.keyCode == 13 && searchInventory(inventoryCode, inventoryName, inventoryType, inventoryDescription)">
+          <select class="form-control col-sm-4" id="inventoryType" ng-model="inventoryType" name="inventoryType" ng-options="type for type in inventoryTypeOptions" ng-keyup="$event.keyCode == 13 && searchInventory(inventoryCode, inventoryName, inventoryType, inventoryDescription)"><option value=""></option>
           </select>
+
       </td>
       <td>
           <input type="text" ng-model="inventoryDescription" ng-keyup="$event.keyCode == 13 && searchInventory(inventoryCode, inventoryName, inventoryType, inventoryDescription)">
