@@ -172,8 +172,7 @@ public class BillServiceImpl implements BillService{
                     // Validate required fields
                     if (dto.getBillStatus() == null) {
                         return Mono.error(new ResponseStatusException(
-                                HttpStatus.BAD_REQUEST,
-                                "Bill status is required"
+                                HttpStatus.BAD_REQUEST, "Bill status is required"
                         ));
                     }
 
