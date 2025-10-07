@@ -1,4 +1,4 @@
-package com.petclinic.bffapigateway.presentationlayer.v1;
+package com.petclinic.bffapigateway.presentationlayer.v1.Owners;
 
 import com.petclinic.bffapigateway.presentationlayer.v1.PetControllerV1;
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
@@ -18,13 +18,11 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 
 import java.util.Date;
 
 import static org.junit.Assert.*;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -41,7 +39,7 @@ import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
         )
 )
 @AutoConfigureWebTestClient
-class PetControllerV1Test {
+class PetsControllerV1UnitTests {
 
     @Autowired
     private WebTestClient client;
@@ -122,7 +120,7 @@ class PetControllerV1Test {
         verify(customersServiceClient, times(1))
                 .getPetByPetId(petId);
     }
-//
+
     @Test
     void whenDeletePet_thenReturnNoContent() {
         String petId = "petId-123";
@@ -211,66 +209,6 @@ class PetControllerV1Test {
         verify(customersServiceClient, times(1))
                 .getPetByPetId(petId);
     }
-//
-//    @Test
-//    void shouldPatchPet() {
-//        String petId = "petId-123";
-//        String ownerId = "ownerId-1";
-//
-//        PetRequestDTO petRequestDTO = new PetRequestDTO();
-//        petRequestDTO.setPetId(petId);
-//        petRequestDTO.setIsActive("true");
-//
-//        PetResponseDTO expectedPetResponse = new PetResponseDTO();
-//        expectedPetResponse.setPetId(petId);
-//        expectedPetResponse.setIsActive("true");
-//
-//        when(customersServiceClient.patchPet(any(PetRequestDTO.class), eq(petId)))
-//                .thenReturn(Mono.just(expectedPetResponse));
-//
-//        client.patch()
-//                .uri("/api/gateway/owners/" + ownerId + "/pets/" + petId)
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .body(BodyInserters.fromValue(petRequestDTO))
-//                .exchange()
-//                .expectStatus().isOk()
-//                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-//                .expectBody(PetResponseDTO.class)
-//                .value(response -> {
-//                    assertEquals(petId, response.getPetId());
-//                    assertEquals("true", response.getIsActive());
-//                });
-//
-//        verify(customersServiceClient, times(1))
-//                .patchPet(any(PetRequestDTO.class), eq(petId));
-//    }
-
-
-
-
-
-
-//    @Test
-//    void deletePetType_WhenServiceTimeout_ShouldReturnGatewayTimeout() {
-//        try {
-//            // Given
-//            String petTypeId = "4283c9b8-4ffd-4866-a5ed-287117c60a40";
-//            when(customersServiceClient.deletePetTypeV2(petTypeId))
-//                    .thenReturn(Mono.error(new RuntimeException("Connection timeout")));
-//
-//            // When & Then
-//            client.delete()
-//                    .uri("/api/gateway/owners/petTypes/{petTypeId}", petTypeId)
-//                    .exchange()
-//                    .expectStatus().is5xxServerError();
-//
-//        } catch (Exception e) {
-//            System.err.println("Test failed with exception: " + e.getMessage());
-//            e.printStackTrace();
-//            fail("Test failed: " + e.getMessage());
-//        }
-//    }
-
 
     @Test
     void whenCreatePet_withoutOwnerId_thenReturnNotFound() {
@@ -295,7 +233,7 @@ class PetControllerV1Test {
         String petId = "petId-123";
 
         client.delete()
-                .uri("/api/gateway/owners/pets/{petId}", petId) // Missing ownerId in path
+                .uri("/api/gateway/owners/pets/{petId}", petId)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNotFound();
@@ -308,10 +246,10 @@ class PetControllerV1Test {
         String ownerId = "ownerId-20";
 
         client.delete()
-                .uri("/api/gateway/owners/{ownerId}/pets", ownerId) // Missing petId
+                .uri("/api/gateway/owners/{ownerId}/pets", ownerId)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isEqualTo(HttpStatus.NOT_FOUND); // This endpoint pattern doesn't exist
+                .expectStatus().isEqualTo(HttpStatus.NOT_FOUND);
 
         verifyNoInteractions(customersServiceClient);
     }
@@ -319,7 +257,7 @@ class PetControllerV1Test {
     @Test
     void whenCreatePet_withInvalidJson_thenReturnBadRequest() {
         String ownerId = "ownerId-12345";
-        String invalidJson = "{\"name\": }"; // Invalid JSON
+        String invalidJson = "{\"name\": }";
 
         client.post()
                 .uri("/api/gateway/owners/{ownerId}/pets", ownerId)
@@ -348,7 +286,7 @@ class PetControllerV1Test {
     void whenPatchPet_withInvalidJson_thenReturnBadRequest() {
         String ownerId = "ownerId-1";
         String petId = "petId-123";
-        String invalidJson = "{\"isActive\": }"; // Invalid JSON
+        String invalidJson = "{\"isActive\": }";
 
         client.patch()
                 .uri("/api/gateway/owners/{ownerId}/pets/{petId}", ownerId, petId)
