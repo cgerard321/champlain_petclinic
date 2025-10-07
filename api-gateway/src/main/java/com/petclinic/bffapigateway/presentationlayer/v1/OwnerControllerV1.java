@@ -23,7 +23,7 @@ import java.util.Optional;
 public class OwnerControllerV1 {
     private final CustomersServiceClient customersServiceClient;
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET,Roles.RECEPTIONIST})
     @GetMapping(value = "")//, produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<OwnerResponseDTO> getAllOwners() {
         return customersServiceClient.getAllOwners();
@@ -33,7 +33,7 @@ public class OwnerControllerV1 {
                 );*/
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET,Roles.RECEPTIONIST})
     @GetMapping(value = "/owners-pagination")
     public Flux<OwnerResponseDTO> getOwnersByPagination(@RequestParam Optional<Integer> page,
                                                         @RequestParam Optional<Integer> size,
@@ -54,14 +54,14 @@ public class OwnerControllerV1 {
         return customersServiceClient.getOwnersByPagination(page,size,ownerId,firstName,lastName,phoneNumber,city);
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET,Roles.RECEPTIONIST})
     @GetMapping(value = "/owners-count")
     public Mono<Long> getTotalNumberOfOwners(){
         return customersServiceClient.getTotalNumberOfOwners();
     }
 
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET,Roles.RECEPTIONIST})
     @GetMapping(value = "/owners-filtered-count")
     public Mono<Long> getTotalNumberOfOwnersWithFilters (
             @RequestParam(required = false) String ownerId,
@@ -96,7 +96,7 @@ public class OwnerControllerV1 {
 //        return customersServiceClient.createOwner(model);
 //    }
 
-    @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN})
+    @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN,Roles.RECEPTIONIST})
     @PostMapping(value = "/photo/{ownerId}")
     public Mono<ResponseEntity<String>> setOwnerPhoto(@RequestBody PhotoDetails photoDetails, @PathVariable int ownerId) {
         return customersServiceClient.setOwnerPhoto(photoDetails, ownerId).map(s -> ResponseEntity.status(HttpStatus.CREATED).body(s))
@@ -147,7 +147,7 @@ public class OwnerControllerV1 {
 
      */
 
-    @IsUserSpecific(idToMatch = {"ownerId"})
+    @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN,Roles.RECEPTIONIST})
     @PutMapping("/{ownerId}")
     public Mono<ResponseEntity<OwnerResponseDTO>> updateOwner(
             @PathVariable String ownerId,
