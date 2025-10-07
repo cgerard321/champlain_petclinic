@@ -7,6 +7,7 @@ angular.module('inventoriesList')
         self.listSize = $stateParams.size = 10
         self.realPage = parseInt(self.currentPage) + 1
         var numberOfPage
+        var code
         var name
         var type
         var desc
@@ -36,6 +37,7 @@ angular.module('inventoriesList')
         //clear inventory queries
         $scope.clearQueries = function (){
             // Clear the input fields
+            $scope.inventoryCode = '';
             $scope.inventoryName = '';
             $scope.inventoryType = '';
             $scope.inventoryDescription = '';
@@ -43,19 +45,27 @@ angular.module('inventoriesList')
             $scope.searchInventory('', '', '');
         }
 //search by inventory field
-        $scope.searchInventory = function (inventoryName, inventoryType, inventoryDescription){
-            getInventoryList(inventoryName, inventoryType, inventoryDescription)
+        $scope.searchInventory = function (inventoryCode, inventoryName, inventoryType, inventoryDescription){
+            getInventoryList(inventoryCode, inventoryName, inventoryType, inventoryDescription)
         }
 //search by inventory field
-        function getInventoryList(inventoryName, inventoryType, inventoryDescription){
-
+        function getInventoryList(inventoryCode, inventoryName, inventoryType, inventoryDescription){
             $state.transitionTo('inventories', {page: self.currentPage, size: self.listSize}, {notify: false});
             var queryString = '';
+            code = ""
             name = ""
             type = ""
             desc = ""
 
+            if (inventoryCode != null && inventoryCode !== '') {
+                code = inventoryCode
+                queryString += "inventoryCode=" + inventoryCode;
+            }
+
             if (inventoryName != null && inventoryName !== '') {
+                if (queryString !== '') {
+                    queryString += "&";
+                }
                 name = inventoryName
                 queryString += "inventoryName=" + inventoryName;
             }
@@ -199,7 +209,7 @@ angular.module('inventoriesList')
                 self.currentPage = (parseInt(self.currentPage) - 1).toString();
                 self.realPage = parseInt(self.currentPage) + 1
 
-                getInventoryList(name, type, desc)
+                getInventoryList(code,name, type, desc)
             }
         }
 
@@ -208,7 +218,7 @@ angular.module('inventoriesList')
                 self.currentPage = (parseInt(self.currentPage) + 1).toString();
                 self.realPage = parseInt(self.currentPage) + 1
 
-                getInventoryList(name, type, desc)
+                getInventoryList(code, name, type, desc)
             }
         }
     }]);
