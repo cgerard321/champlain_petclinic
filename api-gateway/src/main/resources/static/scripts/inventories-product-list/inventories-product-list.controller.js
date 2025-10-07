@@ -16,6 +16,11 @@ angular.module('inventoriesProductList')
             productPrice: '',
             productSalePrice: ''
         }
+        $scope.inventory = {};
+
+        $http.get('api/gateway/inventories/' + $stateParams.inventoryId).then(function (resp) {
+            $scope.inventory = resp.data;
+        });
         fetchProductList();
 
         $scope.deleteProduct = function(product) {

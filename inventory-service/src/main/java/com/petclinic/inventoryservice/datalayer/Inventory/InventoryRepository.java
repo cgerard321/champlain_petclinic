@@ -8,6 +8,8 @@ public interface InventoryRepository extends ReactiveMongoRepository<Inventory, 
     Mono<Inventory> findInventoryByInventoryId(String inventoryId);
     Mono<Boolean> existsByInventoryId(String inventoryId);
 
+    Mono<Inventory> findInventoryByInventoryCode(String inventoryCode);
+
     //search
     Flux<Inventory> findAllByInventoryNameAndInventoryTypeAndInventoryDescription(String inventoryName, String inventoryType, String inventoryDescription);
 
