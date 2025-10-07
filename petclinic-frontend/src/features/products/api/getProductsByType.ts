@@ -8,7 +8,7 @@ export async function getProductsByType(
     const response = await axiosInstance.get(
       '/products/filter/' + productType,
       {
-        useV2: true,
+        useV2: false,
       }
     );
 

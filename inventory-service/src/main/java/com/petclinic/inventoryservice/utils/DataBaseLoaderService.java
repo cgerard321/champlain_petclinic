@@ -118,6 +118,7 @@ public class DataBaseLoaderService implements CommandLineRunner {
 
         Inventory inventory1 = Inventory.builder()
                 .inventoryId(UUID.randomUUID().toString())
+                .inventoryCode("INV-0001")
                 .inventoryName("Medical equipment")
                 .inventoryType(inventoryType1.getType())
                 .inventoryDescription("Medical equipment for surgery")
@@ -131,6 +132,7 @@ public class DataBaseLoaderService implements CommandLineRunner {
 
         Inventory inventory2 = Inventory.builder()
                 .inventoryId(UUID.randomUUID().toString())
+                .inventoryCode("INV-0002")
                 .inventoryName("First-Aid")
                 .inventoryType(inventoryType2.getType())
                 .inventoryDescription("First-aid supplies for pet emergencies")
@@ -144,6 +146,7 @@ public class DataBaseLoaderService implements CommandLineRunner {
 
         Inventory inventory3 = Inventory.builder()
                 .inventoryId(UUID.randomUUID().toString())
+                .inventoryCode("INV-0003")
                 .inventoryName("Vaccines")
                 .inventoryType(inventoryType3.getType())
                 .inventoryDescription("Supplies for disease prevention")
@@ -157,6 +160,7 @@ public class DataBaseLoaderService implements CommandLineRunner {
 
         Inventory inventory4 = Inventory.builder()
                 .inventoryId(UUID.randomUUID().toString())
+                .inventoryCode("INV-0004")
                 .inventoryName("Medications")
                 .inventoryType(inventoryType4.getType())
                 .inventoryDescription("Antibiotics for pet infections")
@@ -170,6 +174,7 @@ public class DataBaseLoaderService implements CommandLineRunner {
 
         Inventory inventory5 = Inventory.builder()
                 .inventoryId(UUID.randomUUID().toString())
+                .inventoryCode("INV-0005")
                 .inventoryName("Pet Carriers")
                 .inventoryType(inventoryType1.getType())
                 .inventoryDescription("Carriers for transporting pets")
@@ -183,6 +188,7 @@ public class DataBaseLoaderService implements CommandLineRunner {
 
         Inventory inventory6 = Inventory.builder()
                 .inventoryId(UUID.randomUUID().toString())
+                .inventoryCode("INV-0006")
                 .inventoryName("Diagnostic Kits")
                 .inventoryType(inventoryType1.getType())
                 .inventoryDescription("Kits for diagnosing various pet illnesses and conditions")
@@ -196,6 +202,7 @@ public class DataBaseLoaderService implements CommandLineRunner {
 
         Inventory inventory7 = Inventory.builder()
                 .inventoryId(UUID.randomUUID().toString())
+                .inventoryCode("INV-0007")
                 .inventoryName("Surgical Instruments")
                 .inventoryType(inventoryType1.getType())
                 .inventoryDescription("Tools for performing surgical procedures on pets")
@@ -209,6 +216,7 @@ public class DataBaseLoaderService implements CommandLineRunner {
 
         Inventory inventory8 = Inventory.builder()
                 .inventoryId(UUID.randomUUID().toString())
+                .inventoryCode("INV-0008")
                 .inventoryName("Anesthesia Supplies")
                 .inventoryType(inventoryType1.getType())
                 .inventoryDescription("Supplies for administering anesthesia during surgeries")
@@ -222,6 +230,7 @@ public class DataBaseLoaderService implements CommandLineRunner {
 
         Inventory inventory9 = Inventory.builder()
                 .inventoryId(UUID.randomUUID().toString())
+                .inventoryCode("INV-0009")
                 .inventoryName("Wound Care Supplies")
                 .inventoryType(inventoryType1.getType())
                 .inventoryDescription("Supplies for treating and dressing wounds")
@@ -235,6 +244,7 @@ public class DataBaseLoaderService implements CommandLineRunner {
 
         Inventory inventory10 = Inventory.builder()
                 .inventoryId(UUID.randomUUID().toString())
+                .inventoryCode("INV-0010")
                 .inventoryName("Infectious Disease Test Kits")
                 .inventoryType(inventoryType5.getType())
                 .inventoryDescription("Kits for testing infectious diseases in pets")

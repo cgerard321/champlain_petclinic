@@ -1,17 +1,18 @@
 // UserCart.tsx
 import { useState, useEffect, useCallback } from 'react';
-import CartBillingForm from './CartBillingForm';
+import CartBillingForm, { BillingInfo } from './CartBillingForm';
 import { useParams, useNavigate } from 'react-router-dom';
 import CartItem from './CartItem';
 import { ProductModel } from '../models/ProductModel';
 import './UserCart.css';
 import { NavBar } from '@/layouts/AppNavBar';
-import { FaShoppingCart } from 'react-icons/fa'; // shopping cart icon
+import { FaShoppingCart } from 'react-icons/fa';
 import axiosInstance from '@/shared/api/axiosInstance';
 import { IsAdmin } from '@/context/UserContext';
 import { AppRoutePaths } from '@/shared/models/path.routes';
 import { getProductByProductId } from '@/features/products/api/getProductByProductId';
 import { notifyCartChanged } from '../api/cartEvent';
+import { useConfirmModal } from '@/shared/hooks/useConfirmModal';
 
 interface ProductAPIResponse {
   productId: number;
@@ -36,6 +37,8 @@ const UserCart = (): JSX.Element => {
   const { cartId } = useParams<{ cartId: string }>();
   const navigate = useNavigate();
 
+  const { confirm, ConfirmModal } = useConfirmModal();
+
   // state: cart + wishlist
   const [cartItems, setCartItems] = useState<ProductModel[]>([]);
   const [wishlistItems, setWishlistItems] = useState<ProductModel[]>([]);
@@ -57,6 +60,8 @@ const UserCart = (): JSX.Element => {
   const [isCheckoutModalOpen, setIsCheckoutModalOpen] =
     useState<boolean>(false);
   const [showBillingForm, setShowBillingForm] = useState<boolean>(false);
+  const [billingInfo, setBillingInfo] = useState<BillingInfo | null>(null);
+  const [checkoutDate, setCheckoutDate] = useState<string | null>(null);
 
   // state: misc
   const [wishlistUpdated, setWishlistUpdated] = useState(false);
@@ -230,51 +235,54 @@ const UserCart = (): JSX.Element => {
   const deleteItem = useCallback(
     async (productId: string, indexToDelete: number): Promise<void> => {
       if (!cartId) return;
+      const ok = await confirm({
+        title: 'Remove item',
+        message: 'Remove this item from your cart?',
+        confirmText: 'Remove',
+        cancelText: 'Cancel',
+        variant: 'danger',
+      });
+      if (!ok) return;
 
       try {
         await axiosInstance.delete(`/carts/${cartId}/${productId}`, {
           useV2: false,
         });
-
-        setCartItems(prevItems =>
-          prevItems.filter((_, index) => index !== indexToDelete)
-        );
-        alert('Item successfully removed!');
-        notifyCartChanged(); // item removed
-      } catch (error: unknown) {
-        console.error('Error deleting item: ', error);
-        if (error instanceof Error) {
-          alert(`Failed to delete item: ${error.message}`);
-        } else {
-          alert('Failed to delete item');
-        }
+        setCartItems(prev => prev.filter((_, idx) => idx !== indexToDelete));
+        notifyCartChanged();
+      } catch (error) {
+        console.error('Error deleting item:', error);
+        setNotificationMessage('Failed to delete item.');
       }
     },
-    [cartId]
+    [cartId, confirm]
   );
 
   // clear entire cart
   const clearCart = async (): Promise<void> => {
     if (!cartId) {
-      alert('Invalid cart ID');
+      setNotificationMessage('Invalid cart ID');
       return;
     }
 
-    if (window.confirm('Are you sure you want to clear the cart?')) {
-      try {
-        await axiosInstance.delete(`/carts/${cartId}/clear`, { useV2: false });
+    const ok = await confirm({
+      title: 'Clear cart',
+      message: 'Are you sure you want to clear the cart?',
+      confirmText: 'Clear cart',
+      cancelText: 'Cancel',
+      variant: 'danger',
+    });
+    if (!ok) return;
 
-        setCartItems([]);
-        setCartItemCount(0);
-        alert('Cart has been successfully cleared!');
-
-        // notify navbar (cart cleared)
-        notifyCartChanged();
-      } catch (error: unknown) {
-        // Changed from any to unknown
-        console.error('Error clearing cart:', error);
-        alert('Failed to clear cart');
-      }
+    try {
+      await axiosInstance.delete(`/carts/${cartId}/clear`, { useV2: false });
+      setCartItems([]);
+      setCartItemCount(0);
+      // notify navbar (cart cleared)
+      notifyCartChanged();
+    } catch (error) {
+      console.error('Error clearing cart:', error);
+      setNotificationMessage('Failed to clear cart.');
     }
   };
 
@@ -298,7 +306,9 @@ const UserCart = (): JSX.Element => {
         // Display notification message from backend
         setNotificationMessage(data.message);
       } else {
-        alert(`${item.productName} has been added to your wishlist!`);
+        setNotificationMessage(
+          `${item.productName} has been added to your wishlist!`
+        );
       }
 
       // Update wishlist state
@@ -341,7 +351,9 @@ const UserCart = (): JSX.Element => {
       if (data && data.message) {
         setNotificationMessage(data.message);
       } else {
-        alert(`${item.productName} has been added to your cart!`);
+        setNotificationMessage(
+          `${item.productName} has been added to your cart!`
+        );
       }
 
       // Update cart items state
@@ -360,7 +372,7 @@ const UserCart = (): JSX.Element => {
     } catch (error: unknown) {
       // Changed from any to unknown
       console.error('Error adding to cart:', error);
-      alert('Failed to add item to cart.');
+      setNotificationMessage('Failed to add item to cart.');
     }
   };
 
@@ -368,7 +380,14 @@ const UserCart = (): JSX.Element => {
   const removeFromWishlist = async (item: ProductModel): Promise<void> => {
     if (!cartId) return;
 
-    const ok = window.confirm(`Remove "${item.productName}" from wishlist?`);
+    const ok = await confirm({
+      title: 'Remove from wishlist',
+      message: `Remove "${item.productName}" from wishlist?`,
+      confirmText: 'Remove',
+      cancelText: 'Cancel',
+      variant: 'danger',
+    });
+
     if (!ok) return;
 
     try {
@@ -380,16 +399,23 @@ const UserCart = (): JSX.Element => {
       setWishlistItems(prev =>
         prev.filter(p => p.productId !== item.productId)
       );
-      setNotificationMessage(`Removed "${item.productName}" from wishlist.`);
     } catch (e) {
       console.error(e);
-      alert('Could not remove item from wishlist.');
+      setNotificationMessage('Could not remove item from wishlist.');
     }
   };
 
   // move all wishlist to cart
   const moveAllWishlistToCart = async (): Promise<void> => {
     if (!cartId || wishlistItems.length === 0) return;
+
+    const ok = await confirm({
+      title: 'Move all from wishlist',
+      message: `Move ${wishlistItems.length} item(s) to your cart?`,
+      confirmText: 'Move all',
+      cancelText: 'Cancel',
+    });
+    if (!ok) return;
 
     setMovingAll(true);
     setNotificationMessage(null);
@@ -398,17 +424,13 @@ const UserCart = (): JSX.Element => {
       const res = await axiosInstance.post(
         `/carts/${cartId}/wishlist/moveAll`,
         {},
-        {
-          useV2: true,
-
-          validateStatus: () => true,
-        }
+        { useV2: false, validateStatus: () => true }
       );
 
       if (res.status >= 200 && res.status < 300) {
-        setNotificationMessage(
-          res.data?.message || 'Moved wishlist items to cart.'
-        );
+        setWishlistUpdated(true);
+        notifyCartChanged();
+        setNotificationMessage(null);
       } else {
         const msg =
           (res.data &&
@@ -416,9 +438,6 @@ const UserCart = (): JSX.Element => {
           `Move All failed (${res.status})`;
         setNotificationMessage(msg);
       }
-
-      setWishlistUpdated(true);
-      notifyCartChanged();
     } catch (e) {
       console.error(e);
       setNotificationMessage('Unexpected error while moving wishlist items.');
@@ -504,6 +523,9 @@ const UserCart = (): JSX.Element => {
   return (
     <div>
       <NavBar />
+
+      <ConfirmModal />
+
       <h2 className="cart-header-title">Your Cart</h2>
 
       <div className="UserCart-container">
@@ -632,6 +654,27 @@ const UserCart = (): JSX.Element => {
                 <div className="invoices-section">
                   <h2>Invoice</h2>
                   <div className="invoice-summary">
+                    {billingInfo && (
+                      <div className="invoice-client-info">
+                        <h3>Client Information</h3>
+                        <p>
+                          <strong>Name:</strong> {billingInfo.fullName}
+                        </p>
+                        <p>
+                          <strong>Email:</strong> {billingInfo.email}
+                        </p>
+                        <p>
+                          <strong>Address:</strong> {billingInfo.address},{' '}
+                          {billingInfo.city}, {billingInfo.province},{' '}
+                          {billingInfo.postalCode}
+                        </p>
+                      </div>
+                    )}
+                    {checkoutDate && (
+                      <div className="invoice-date">
+                        <strong>Checkout Date/Time:</strong> {checkoutDate}
+                      </div>
+                    )}
                     <h3>Items</h3>
                     {invoices.map(inv => (
                       <div key={inv.productId} className="invoice-card">
@@ -644,16 +687,28 @@ const UserCart = (): JSX.Element => {
                         </p>
                       </div>
                     ))}
-                    <h3>
-                      Total: $
-                      {invoices
-                        .reduce(
+                    <div className="invoice-taxes">
+                      {(() => {
+                        const invoiceSubtotal = invoices.reduce(
                           (sum, inv) =>
                             sum + inv.productSalePrice * inv.quantity,
                           0
-                        )
-                        .toFixed(2)}
-                    </h3>
+                        );
+                        const invoiceTvq = invoiceSubtotal * 0.09975;
+                        const invoiceTvc = invoiceSubtotal * 0.05;
+                        const invoiceTotal =
+                          invoiceSubtotal + invoiceTvq + invoiceTvc - discount;
+                        return (
+                          <>
+                            <p>Subtotal: ${invoiceSubtotal.toFixed(2)}</p>
+                            <p>TVQ (9.975%): ${invoiceTvq.toFixed(2)}</p>
+                            <p>TVC (5%): ${invoiceTvc.toFixed(2)}</p>
+                            <p>Discount: -${discount.toFixed(2)}</p>
+                            <h3>Total: ${invoiceTotal.toFixed(2)}</h3>
+                          </>
+                        );
+                      })()}
+                    </div>
                   </div>
                 </div>
               )}
@@ -716,8 +771,10 @@ const UserCart = (): JSX.Element => {
               <CartBillingForm
                 isOpen={true}
                 onClose={() => setShowBillingForm(false)}
-                onSubmit={async () => {
-                  await handleCheckout(); // This runs the real checkout logic
+                onSubmit={async billing => {
+                  setBillingInfo(billing);
+                  setCheckoutDate(new Date().toLocaleString());
+                  await handleCheckout();
                   setShowBillingForm(false);
                 }}
               />

@@ -13,6 +13,7 @@ export async function patchListingStatus(
       productRequestModel,
       {
         responseType: 'json',
+        useV2: false,
       }
     );
 

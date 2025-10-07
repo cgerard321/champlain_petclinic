@@ -35,7 +35,7 @@ public class MockServerConfigProductsService {
                 .when(
                         request()
                                 .withMethod("GET")
-                                .withPath("/api/v1/products")
+                                .withPath("/products")
                 )
                 .respond(
                         response()

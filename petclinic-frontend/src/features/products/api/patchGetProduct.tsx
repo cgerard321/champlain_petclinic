@@ -7,8 +7,12 @@ export async function patchGetProduct(
   try {
     const response = await axiosInstance.patch<ProductModel>(
       `/products/${productId}`,
+      {},
       {
-        useV2: true,
+        useV2: false,
+        headers: {
+          'Content-Type': 'application/json',
+        },
       }
     );
 

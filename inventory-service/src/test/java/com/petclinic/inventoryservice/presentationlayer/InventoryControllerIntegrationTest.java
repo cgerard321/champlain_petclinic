@@ -632,6 +632,7 @@ class InventoryControllerIntegrationTest {
     private Inventory buildInventory(String inventoryId, String name, String inventoryType, String inventoryDescription, String inventoryImage, String inventoryBackupImage, byte[] diagnosticKitImage, List<Product> products) {
         return Inventory.builder()
                 .inventoryId(inventoryId)
+                .inventoryCode("INV-000" + inventoryId.substring(inventoryId.length() - 1))
                 .inventoryName(name)
                 .inventoryType(inventoryType)
                 .inventoryDescription(inventoryDescription)
@@ -1406,6 +1407,48 @@ class InventoryControllerIntegrationTest {
                 .bodyValue(request)
                 .exchange()
                 .expectStatus().isNotFound();
+    }
+
+    @Test
+    void addInventory_shouldReturnInventoryWithGeneratedCode() {
+        InventoryRequestDTO requestDTO = InventoryRequestDTO.builder()
+                .inventoryName("Test Inventory With Code")
+                .inventoryType("Internal")
+                .inventoryDescription("Testing inventory code generation")
+                .inventoryImage("https://example.com/test.jpg")
+                .inventoryBackupImage("https://example.com/backup.jpg")
+                .build();
+
+        webTestClient.post()
+                .uri("/inventory")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestDTO)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(InventoryResponseDTO.class)
+                .value(response -> {
+                    assertNotNull(response);
+                    assertNotNull(response.getInventoryCode());
+                    assertTrue(response.getInventoryCode().matches("INV-\\d{4}"));
+                    assertEquals("Test Inventory With Code", response.getInventoryName());
+                });
+    }
+
+    @Test
+    void getInventoryById_shouldReturnInventoryWithCode() {
+        String inventoryId = "inventoryId_3";
+
+        webTestClient.get()
+                .uri("/inventory/{inventoryId}", inventoryId)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(InventoryResponseDTO.class)
+                .value(response -> {
+                    assertNotNull(response);
+                    assertNotNull(response.getInventoryCode());
+                });
     }
 
 }
