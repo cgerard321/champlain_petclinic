@@ -291,7 +291,7 @@ export default function ProductDetails(): JSX.Element {
                         <p>
                           <FaCheck /> In Stock - Available for Pickup
                         </p>
-                      )} 
+                      )}
                     </div>
                     <div className="outOfStock">
                       {currentProduct.productQuantity === 0 && (
@@ -301,11 +301,12 @@ export default function ProductDetails(): JSX.Element {
                       )}
                     </div>
                     <div className="lowStock">
-                      {currentProduct.productQuantity > 0 && currentProduct.productQuantity < 10 && (
-                        <p>
-                          <FaCheck /> Only a few left!
-                        </p>
-                       )}
+                      {currentProduct.productQuantity > 0 &&
+                        currentProduct.productQuantity < 10 && (
+                          <p>
+                            <FaCheck /> Only a few left!
+                          </p>
+                        )}
                     </div>
                   </div>
                   <h3 className="prod-desc-title">
