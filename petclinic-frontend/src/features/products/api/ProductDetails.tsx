@@ -316,7 +316,6 @@ export default function ProductDetails(): JSX.Element {
                         )}
                     </div>
                   </div>
-
                   <h3 className="prod-desc-title">
                     About this Product
                     <p className="prod-description">
