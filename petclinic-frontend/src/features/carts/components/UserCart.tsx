@@ -103,7 +103,7 @@ const UserCart = (): JSX.Element => {
 
       try {
         const { data } = await axiosInstance.get(`/carts/${cartId}`, {
-          useV2: false,
+          useV2: true,
         });
 
         if (!Array.isArray(data.products)) {
@@ -427,7 +427,7 @@ const UserCart = (): JSX.Element => {
       const res = await axiosInstance.post(
         `/carts/${cartId}/wishlist/moveAll`,
         {},
-        { useV2: false, validateStatus: () => true }
+        { useV2: true, validateStatus: () => true }
       );
 
       if (res.status >= 200 && res.status < 300) {
