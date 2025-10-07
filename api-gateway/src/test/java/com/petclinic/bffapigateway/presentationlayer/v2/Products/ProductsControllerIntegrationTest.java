@@ -3,7 +3,7 @@ package com.petclinic.bffapigateway.presentationlayer.v2.Products;
 import com.petclinic.bffapigateway.domainclientlayer.ProductsServiceClient;
 import com.petclinic.bffapigateway.dtos.Products.ProductResponseDTO;
 import com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigAuthService;
-import com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigProductsServices;
+import com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigProductsService;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
@@ -25,7 +25,7 @@ public class ProductsControllerIntegrationTest {
     @Autowired
     private WebTestClient webTestClient;
 
-    private MockServerConfigProductsServices mockServerConfigProductsServices;
+    private MockServerConfigProductsService mockServerConfigProductsServices;
 
     private MockServerConfigAuthService mockServerConfigAuthService;
     @Autowired
@@ -34,7 +34,7 @@ public class ProductsControllerIntegrationTest {
 
     @BeforeAll
     public void startMockServer(){
-        mockServerConfigProductsServices= new MockServerConfigProductsServices();
+        mockServerConfigProductsServices= new MockServerConfigProductsService();
         mockServerConfigProductsServices.registerGetAllProductsEndpoint();
 
 

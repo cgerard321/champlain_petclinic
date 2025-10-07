@@ -65,7 +65,7 @@ export default function VisitListTable(): JSX.Element {
     // const eventSource = new EventSource('/visits');
     const API_BASE =
       import.meta.env.VITE_BFF_BASE_URL ?? 'http://localhost:8080';
-    const eventSource = new EventSource(`${API_BASE}/api/v2/gateway/visits`, {
+    const eventSource = new EventSource(`${API_BASE}/api/gateway/visits`, {
       withCredentials: true,
     });
 
@@ -158,7 +158,7 @@ export default function VisitListTable(): JSX.Element {
     }
 
     const archivedEventSource = new EventSource(
-      `${import.meta.env.VITE_BACKEND_URL}v2/gateway/visits/archived`,
+      `${import.meta.env.VITE_BACKEND_URL}gateway/visits/archived`,
       { withCredentials: true }
     );
 

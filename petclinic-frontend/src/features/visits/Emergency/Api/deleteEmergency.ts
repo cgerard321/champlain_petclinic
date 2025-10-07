@@ -5,7 +5,7 @@ export const deleteEmergency = async (
   visitEmergencyId: string
 ): Promise<AxiosResponse<void>> => {
   return await axiosInstance.delete<void>(
-    `/visits/emergency/${visitEmergencyId}`,
-    { useV2: true }
+    `/visits/emergencies/${visitEmergencyId}`,
+    { useV2: false }
   );
 };

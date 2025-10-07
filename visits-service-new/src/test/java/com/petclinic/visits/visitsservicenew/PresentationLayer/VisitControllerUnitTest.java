@@ -536,7 +536,7 @@ class VisitControllerUnitTest {
     }
 
 
-    //Emergency
+    //emergencies
     @Test
     void getAllEmergency(){
         Emergency emrgency = new Emergency(); // replace with your actual Visit object
@@ -578,7 +578,7 @@ class VisitControllerUnitTest {
         when(emergencyService.GetAllEmergencies()).thenReturn(Flux.just(emergencyResponseDTO1, emergencyResponseDTO2));
 
         webTestClient.get()
-                .uri("/visits/emergency")
+                .uri("/visits/emergencies")
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
@@ -611,7 +611,7 @@ class VisitControllerUnitTest {
 
        String Pet_Id_Emergency = emergencyResponseDTO1.getPetId();
         webTestClient.get()
-                .uri("/visits/emergency/pets/" + Pet_Id_Emergency)
+                .uri("/visits/emergencies/pets/" + Pet_Id_Emergency)
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
@@ -666,7 +666,7 @@ class VisitControllerUnitTest {
         when(emergencyService.AddEmergency(any(Mono.class))).thenReturn(Mono.just(emergencyResponseDTO));
 
         webTestClient.post()
-                .uri("/visits/emergency")
+                .uri("/visits/emergencies")
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Mono.just(emergencyRequestDTO), EmergencyRequestDTO.class)
@@ -709,7 +709,7 @@ class VisitControllerUnitTest {
 
         webTestClient
                 .get()
-                .uri("/visits/emergency/" + emergencyId)
+                .uri("/visits/emergencies/" + emergencyId)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -755,7 +755,7 @@ class VisitControllerUnitTest {
         // Test the API response
         webTestClient
                 .get()
-                .uri("/visits/emergency")
+                .uri("/visits/emergencies")
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
@@ -785,7 +785,7 @@ class VisitControllerUnitTest {
 
         webTestClient
                 .get()
-                .uri("/visits/emergency/" + emergencyId)
+                .uri("/visits/emergencies/" + emergencyId)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -819,7 +819,7 @@ class VisitControllerUnitTest {
 
         webTestClient
                 .post()
-                .uri("/visits/emergency")
+                .uri("/visits/emergencies")
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Mono.just(emergencyRequestDTO), EmergencyRequestDTO.class)
@@ -857,7 +857,7 @@ class VisitControllerUnitTest {
 
         webTestClient
                 .put()
-                .uri("/visits/emergency/" + emergencyId)
+                .uri("/visits/emergencies/" + emergencyId)
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Mono.just(emergencyRequestDTO), EmergencyRequestDTO.class)
@@ -887,7 +887,7 @@ class VisitControllerUnitTest {
 
         webTestClient
                 .delete()
-                .uri("/visits/emergency/" + emergencyId)
+                .uri("/visits/emergencies/" + emergencyId)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
