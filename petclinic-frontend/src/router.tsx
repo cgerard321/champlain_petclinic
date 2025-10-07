@@ -429,7 +429,7 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.UpdatePet,
         element: (
-          <ProtectedRoute roles={['ADMIN', 'VET']}>
+          <ProtectedRoute roles={['ADMIN', 'VET', 'OWNER']}>
             <UpdateOwnerPetPage />
           </ProtectedRoute>
         ),

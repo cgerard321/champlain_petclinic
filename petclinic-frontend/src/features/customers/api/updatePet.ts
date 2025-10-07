@@ -1,15 +1,13 @@
 import { AxiosResponse } from 'axios';
 import axiosInstance from '@/shared/api/axiosInstance';
 import { PetRequestModel } from '@/features/customers/models/PetRequestModel.ts';
+import { PetResponseModel } from '@/features/customers/models/PetResponseModel.ts';
 
 export const updatePet = async (
-  ownerId: string,
   petId: string,
   pet: PetRequestModel
-): Promise<AxiosResponse<void>> => {
-  return await axiosInstance.put<void>(
-    `/owners/${ownerId}/pets/${petId}`,
-    pet,
-    { useV2: true }
-  );
+): Promise<AxiosResponse<PetResponseModel>> => {
+  return await axiosInstance.put<PetResponseModel>(`/pets/${petId}`, pet, {
+    useV2: false,
+  });
 };
