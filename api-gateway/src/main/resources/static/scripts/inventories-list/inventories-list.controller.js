@@ -179,7 +179,7 @@ angular.module('inventoriesList')
 
                 // After deletion, wait for a short moment (e.g., 1 second) before showing the notification
                 setTimeout(() => {
-                    showNotification(inventory.inventoryName + " has been deleted successfully!");
+                    showNotification(inventory.inventoryCode + " - " + inventory.inventoryName + " has been deleted successfully!");
                     // Then, after displaying the notification for 5 seconds, reload the page
                     setTimeout(() => {
                         location.reload();

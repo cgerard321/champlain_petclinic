@@ -1,13 +1,6 @@
 import { useState, ChangeEvent, FormEvent } from 'react';
 import './CartBillingForm.css';
-
-export interface CartBillingFormProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSubmit: () => void;
-}
-
-interface BillingInfo {
+export interface BillingInfo {
   fullName: string;
   email: string;
   phoneNumber: string;
@@ -19,8 +12,13 @@ interface BillingInfo {
   expiry: string;
   cvv: string;
 }
-
+export interface CartBillingFormProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (billing: BillingInfo) => void;
+}
 const provinces = [
+  'AB',
   'BC',
   'MB',
   'NB',
@@ -36,9 +34,12 @@ const provinces = [
 ];
 
 const CartBillingForm: React.FC<CartBillingFormProps> = ({
-  isOpen, // eslint-disable-line react/prop-types
-  onClose, // eslint-disable-line react/prop-types
-  onSubmit, // eslint-disable-line react/prop-types
+  // eslint-disable-next-line react/prop-types
+  isOpen,
+  // eslint-disable-next-line react/prop-types
+  onClose,
+  // eslint-disable-next-line react/prop-types
+  onSubmit,
 }) => {
   const [billing, setBilling] = useState<BillingInfo>({
     fullName: '',
@@ -100,6 +101,7 @@ const CartBillingForm: React.FC<CartBillingFormProps> = ({
   const handleConfirm = (): void => {
     setShowConfirm(false);
     setSuccess('Checkout successful! (mocked, no backend yet)');
+    onSubmit(billing);
     setBilling({
       fullName: '',
       email: '',
@@ -112,7 +114,6 @@ const CartBillingForm: React.FC<CartBillingFormProps> = ({
       expiry: '',
       cvv: '',
     });
-    onSubmit();
     onClose();
   };
 

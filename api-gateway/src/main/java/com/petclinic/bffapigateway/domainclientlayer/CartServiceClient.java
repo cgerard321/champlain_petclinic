@@ -363,7 +363,6 @@ public Mono<CartResponseDTO> deleteCartByCartId(String CardId) {
                     if (resp.statusCode().is2xxSuccessful()) {
                         return resp.bodyToMono(CartResponseDTO.class);
                     }
-                    // Propagate exact upstream status + body as WebClientResponseException
                     return resp.createException().flatMap(Mono::error);
                 });
     }

@@ -1,6 +1,7 @@
 package com.petclinic.bffapigateway.presentationlayer.v1;
 
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
+import com.petclinic.bffapigateway.dtos.Pets.PetType;
 import com.petclinic.bffapigateway.dtos.Pets.PetTypeRequestDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetTypeResponseDTO;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
@@ -8,6 +9,7 @@ import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -28,11 +30,13 @@ public class PetTypeControllerV1 {
     @GetMapping(value = "")//, produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<PetTypeResponseDTO> getAllPetTypes() {
         return customersServiceClient.getAllPetTypes();
-                /*.flatMap(n ->
-                        visitsServiceClient.getVisitsForPets(n.getPetIds())
-                                .map(addVisitsToOwner(n))
-                );*/
     }
+
+    @GetMapping(value = "", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<PetType> getPetTypes(){
+        return customersServiceClient.getPetTypes();
+    }
+
 
     @SecuredEndpoint(allowedRoles = {Roles.ALL})
     @GetMapping(value = "/{petTypeId}")

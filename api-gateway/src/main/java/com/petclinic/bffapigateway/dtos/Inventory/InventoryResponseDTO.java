@@ -13,6 +13,7 @@ import java.util.List;
 @Builder
 public class InventoryResponseDTO {
     private String inventoryId;
+    private String inventoryCode;
     private String inventoryType;
     private String inventoryName;
     private String inventoryDescription;

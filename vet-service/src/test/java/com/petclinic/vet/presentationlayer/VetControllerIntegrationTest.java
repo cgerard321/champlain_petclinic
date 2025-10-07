@@ -1,21 +1,27 @@
 package com.petclinic.vet.presentationlayer;
 
-import com.petclinic.vet.dataaccesslayer.*;
 import com.petclinic.vet.dataaccesslayer.badges.Badge;
 import com.petclinic.vet.dataaccesslayer.badges.BadgeRepository;
 import com.petclinic.vet.dataaccesslayer.badges.BadgeTitle;
 import com.petclinic.vet.dataaccesslayer.education.Education;
 import com.petclinic.vet.dataaccesslayer.education.EducationRepository;
+import com.petclinic.vet.dataaccesslayer.photos.Photo;
+import com.petclinic.vet.dataaccesslayer.photos.PhotoRepository;
 import com.petclinic.vet.dataaccesslayer.ratings.PredefinedDescription;
 import com.petclinic.vet.dataaccesslayer.ratings.Rating;
 import com.petclinic.vet.dataaccesslayer.ratings.RatingRepository;
-import com.petclinic.vet.servicelayer.*;
-import com.petclinic.vet.servicelayer.badges.BadgeResponseDTO;
-import com.petclinic.vet.servicelayer.education.EducationRequestDTO;
-import com.petclinic.vet.servicelayer.education.EducationResponseDTO;
-import com.petclinic.vet.servicelayer.ratings.RatingRequestDTO;
-import com.petclinic.vet.servicelayer.ratings.RatingResponseDTO;
-import com.petclinic.vet.util.EntityDtoUtil;
+import com.petclinic.vet.dataaccesslayer.vets.Vet;
+import com.petclinic.vet.dataaccesslayer.vets.VetRepository;
+import com.petclinic.vet.presentationlayer.vets.SpecialtyDTO;
+import com.petclinic.vet.presentationlayer.vets.VetAverageRatingDTO;
+import com.petclinic.vet.presentationlayer.vets.VetRequestDTO;
+import com.petclinic.vet.presentationlayer.vets.VetResponseDTO;
+import com.petclinic.vet.presentationlayer.education.EducationRequestDTO;
+import com.petclinic.vet.presentationlayer.education.EducationResponseDTO;
+import com.petclinic.vet.presentationlayer.ratings.RatingRequestDTO;
+import com.petclinic.vet.presentationlayer.ratings.RatingResponseDTO;
+import com.petclinic.vet.utils.EntityDtoUtil;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
@@ -28,7 +34,6 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.r2dbc.connection.init.ConnectionFactoryInitializer;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.util.StreamUtils;
@@ -36,7 +41,6 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.io.IOException;
-import java.util.Base64;
 import java.util.HashSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
