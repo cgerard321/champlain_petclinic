@@ -8,8 +8,10 @@ import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 
@@ -28,6 +30,14 @@ public class PetControllerV1 {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
+
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET})
+    @GetMapping(value = "", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<PetResponseDTO> getAllPets(){
+        return customersServiceClient.getAllPets();
+    }
+
 
     @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN, Roles.VET})
     @GetMapping("/owners/{ownerId}/pets/{petId}")
