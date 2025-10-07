@@ -5,7 +5,6 @@ interface RatingProps {
   currentRating: number;
   viewOnly: boolean;
   updateRating?: (rating: number, review: string | null) => void;
-
 }
 
 function StarRating({
@@ -89,7 +88,6 @@ function StarRating({
           <span>-</span>
         </div>
       )}
-
     </div>
   );
 }
