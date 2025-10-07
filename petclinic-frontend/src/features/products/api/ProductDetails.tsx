@@ -288,31 +288,23 @@ export default function ProductDetails(): JSX.Element {
                   <div className="stock-details">
                     <div className="inStock">
                       {currentProduct.productQuantity >= 10 && (
-                        <p>
-                          <FaCheck /> In Stock - Available for Pickup 
-                        </p> 
+                        <p><FaCheck /> In Stock - Available for Pickup</p>
                       )} 
                     </div>
                     <div className="outOfStock">
                       {currentProduct.productQuantity === 0 && (
-                        <p>
-                          <FaTimes /> Out of Stock
-                        </p>
+                        <p><FaTimes /> Out of Stock</p>
                       )}
                     </div>
                     <div className="lowStock">
                       {currentProduct.productQuantity > 0 && currentProduct.productQuantity < 10 && (
-                        <p>
-                          <FaCheck /> Only a few left!
-                        </p>
+                        <p><FaCheck /> Only a few left!</p>
                       )}
                     </div>
                   </div>
                   <h3 className="prod-desc-title">
                     About this Product
-                    <p className="prod-description">
-                      {currentProduct.productDescription}
-                    </p>
+                    <p className="prod-description">{currentProduct.productDescription}</p>
                   </h3>
                   <div className=" cart-box">
                     <div className=" quantity-selector">
@@ -335,7 +327,6 @@ export default function ProductDetails(): JSX.Element {
                     )}
                   </div>
                 </div>
-
                 <div className="review-section-container">
                   <div className="reviewproduct-container">
                     <h2>Review</h2>
