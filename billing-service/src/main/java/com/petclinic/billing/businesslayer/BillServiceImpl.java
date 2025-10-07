@@ -2,8 +2,6 @@ package com.petclinic.billing.businesslayer;
 
 import com.itextpdf.text.DocumentException;
 import com.petclinic.billing.datalayer.*;
-//import com.petclinic.billing.domainclientlayer.OwnerClient;
-//import com.petclinic.billing.domainclientlayer.VetClient;
 import com.petclinic.billing.domainclientlayer.OwnerClient;
 import com.petclinic.billing.domainclientlayer.VetClient;
 import com.petclinic.billing.exceptions.InvalidPaymentException;
