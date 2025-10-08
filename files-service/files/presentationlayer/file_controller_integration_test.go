@@ -154,6 +154,7 @@ func TestWhenGetFile_withExistingFileId_thenReturnFileResponseModel(t *testing.T
 
 func TestWhenDeleteFile_withExistingFileId_thenReturnSuccessMessage(t *testing.T) {
 	reset()
+	t.Cleanup(reset)
 
 	addFileToContext(&VALID_FILE_INFO, VALID_FILE_DATA)
 	router := gin.Default()
@@ -166,11 +167,12 @@ func TestWhenDeleteFile_withExistingFileId_thenReturnSuccessMessage(t *testing.T
 	assert.Equal(t, http.StatusNoContent, w.Code)
 	assert.Empty(t, w.Body.String())
 
-	t.Cleanup(reset)
 }
 
 func TestWhenDeleteFile_withNonExistingFileId_thenReturnNotFound(t *testing.T) {
 	reset()
+	t.Cleanup(reset)
+
 	router := gin.Default()
 	_ = controller.Routes(router)
 
@@ -185,7 +187,5 @@ func TestWhenDeleteFile_withNonExistingFileId_thenReturnNotFound(t *testing.T) {
 
 	expected := "fileId: " + NON_EXISTING_ID + " was not found"
 	assert.Equal(t, expected, resp)
-
-	t.Cleanup(reset)
 
 }

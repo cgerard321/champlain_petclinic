@@ -66,6 +66,7 @@ func TestWhenGetFileInfo_withNonExistingFileId_thenReturnNilFileInfo(t *testing.
 }
 
 func TestWhenDeleteFileInfo_withExistingFileId_thenDeleteSuccessfully(t *testing.T) {
+	t.Cleanup(reset)
 	err := fileRepo.AddFileInfo(&VALID_FILE_INFO)
 	assert.Nil(t, err)
 
@@ -74,11 +75,12 @@ func TestWhenDeleteFileInfo_withExistingFileId_thenDeleteSuccessfully(t *testing
 
 	file := fileRepo.GetFileInfo(EXISTING_FILE_ID)
 	assert.Nil(t, file)
-	t.Cleanup(reset)
+
 }
 
 func TestWhenDeleteFileInfo_withNonExistingFileId_thenNoError(t *testing.T) {
+	t.Cleanup(reset)
 	err := fileRepo.DeleteFileInfo(NON_EXISTING_FILE_ID)
 	assert.Nil(t, err)
-	t.Cleanup(reset)
+
 }
