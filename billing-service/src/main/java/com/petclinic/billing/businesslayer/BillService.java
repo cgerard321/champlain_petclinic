@@ -76,6 +76,4 @@ public interface BillService {
 
     Mono<Void> setInterestExempt(String billId, boolean exempt);
 
-
-
 }
