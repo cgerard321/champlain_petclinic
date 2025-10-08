@@ -45,7 +45,7 @@ public class CartControllerV1 {
             String context,
             String cartId,
             String productId,
-            Class<R> bodyType,
+            Class<?> bodyType,
             boolean includeBadRequestBodyMessage,
             boolean invalidInputAsUnprocessable
     ) {
@@ -112,7 +112,7 @@ public class CartControllerV1 {
     public Mono<ResponseEntity<Map<String, Integer>>> getCartItemCount(@PathVariable String cartId) {
         return cartServiceClient.getCartItemCount(cartId)
                 .map(count -> ResponseEntity.ok(Collections.singletonMap("itemCount", count)))
-                .onErrorResume(e -> mapCartError(e, "getCartItemCount", cartId, null, (Class<Map<String, Integer>>) (Class<?>) Map.class, false, true));
+                .onErrorResume(e -> mapCartError(e, "getCartItemCount", cartId, null, Map.class, false, true));
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
