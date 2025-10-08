@@ -43,10 +43,7 @@ public interface BillRepository extends ReactiveMongoRepository<Bill, String> {
 
     Flux<Bill> findAllByArchiveFalse();
 
-    @Query("{ '_id': ?0 }")
-    Mono<Void> archiveBillById(String billId);
 
     Flux<Bill> findAllByDateBefore(LocalDate date);
 
-    @Query("{ 'billStatus': { $in: [?0, ?1] } }")
-    Flux<Bill> findAllByBillStatusIn(BillStatus status1, BillStatus status2);}
+}

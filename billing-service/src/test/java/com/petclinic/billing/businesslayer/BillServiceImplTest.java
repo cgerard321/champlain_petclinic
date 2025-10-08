@@ -1143,9 +1143,6 @@ public class BillServiceImplTest {
 
         verify(repo, times(1)).findAllByArchiveFalse();
         verify(repo, times(1)).save(argThat(b -> "A".equals(b.getBillId()) && Boolean.TRUE.equals(b.getArchive())));
-        verify(repo, times(1)).findAllByArchiveFalse();
-        verify(repo, times(1))
-                .save(argThat(b -> "A".equals(b.getBillId()) && Boolean.TRUE.equals(b.getArchive())));
     }
 
     @Test
