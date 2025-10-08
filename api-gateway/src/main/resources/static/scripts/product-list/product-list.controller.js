@@ -5,10 +5,11 @@ angular.module('productList')
         self.currentPage = $stateParams.page || 0;
         self.pageSize = $stateParams.size || pageSize;
         self.actualCurrentPageShown = parseInt(self.currentPage) + 1;
-        self.baseUrl = "api/v2/gateway/products";
+        self.baseUrl = "api/gateway/products";
         self.lastParams = {
             productSalePrice: '',
         }
+        self.productType = ["FOOD", "MEDICATION", "ACCESSORY", "EQUIPMENT"];
         fetchProductList();
 
         // DELETE
@@ -36,7 +37,7 @@ angular.module('productList')
         function proceedToDelete(product) {
             if (!product.isTemporarilyDeleted) return;  // In case the user clicked undo just before the timeout.
 
-            $http.delete('api/v2/gateway/products/' + product.productId)
+            $http.delete('api/gateway/products/' + product.productId)
                 .then(successCallback, errorCallback)
 
             function showNotification(message) {
@@ -76,9 +77,11 @@ angular.module('productList')
             // Clear the input fields
             $scope.productSalePrice = '';
             $scope.searchProduct('');
+            $scope.productType = '';
+            $scope.averageRating = '';
         }
-        //currently removed implementation
-        $scope.searchProduct = function(productSalePrice){
+
+        $scope.searchProduct = function(productSalePrice, productType, averageRating){
             var queryString = '';
             resetDefaultValues()
 
@@ -90,7 +93,23 @@ angular.module('productList')
                 self.lastParams.productSalePrice = productSalePrice;
             }
 
-            var apiUrl = "api/v2/gateway/products";
+            if (productType && productType !== '') {
+                if (queryString !== '') {
+                    queryString += "&";
+                }
+                queryString += "productType=" + productType;
+                self.lastParams.productType = productType;
+            }
+
+            if (averageRating && averageRating !== '') {
+                if (queryString !== '') {
+                    queryString += "&";
+                }
+                queryString += "maxRating=" + averageRating;
+                self.lastParams.averageRating = averageRating;
+            }
+
+            var apiUrl = "api/gateway/products";
             if (queryString !== '') {
                 apiUrl += "?" + queryString;
             }
@@ -98,6 +117,7 @@ angular.module('productList')
             $http.get(apiUrl)
                 .then(function(resp) {
                     self.productList = parseProductsFromResponse(resp.data);
+                    fetchImages();
                 })
                 .catch(function(error) {
                     if (error.status === 404) {
@@ -111,33 +131,37 @@ angular.module('productList')
                 });
         };
 
-        function fetchProductList(productSalePrice) {
+        function fetchProductList(productSalePrice, productType, averageRating) {
             if (productSalePrice) {
                 self.lastParams.productSalePrice = productSalePrice;
-                self.searchProduct(productSalePrice)
+                self.lastParams.productType = productType;
+                self.lastParams.averageRating = averageRating;
+                self.searchProduct(productSalePrice, productType, averageRating)
             }
             else {
                 self.lastParams.productPrice = null;
 
-                $http.get('api/v2/gateway/products').then(function (resp) {
+                $http.get('api/gateway/products').then(function (resp) {
                     //console.log(resp);
                     self.productList = parseProductsFromResponse(resp.data);
                     if (resp.data === 0) {
                         // Handle if inventory is empty
                         console.log("The products list is empty!");
                     }
+                    fetchImages()
+
                 }).catch(function (error) {
                     console.error('An error occurred:', error);
                 });
             }
         }
-        self.nextPage = function () {
+        self.nextPage = function () {S
             if (parseInt(self.currentPage) + 1 < self.totalPages) {
                 var currentPageInt = parseInt(self.currentPage) + 1
                 self.currentPage = currentPageInt.toString();
                 updateActualCurrentPageShown();
                 //refresh product list
-                fetchProductList(self.lastParams.productSalePrice);
+                fetchProductList(self.lastParams.productSalePrice, self.lastParams.productType, self.lastParams.averageRating);
             }
         }
 
@@ -147,7 +171,7 @@ angular.module('productList')
                 self.currentPage = currentPageInt.toString();
                 updateActualCurrentPageShown();
                 // Refresh the owner's list with the new page size
-                fetchProductList(self.lastParams.productSalePrice);
+                fetchProductList(self.lastParams.productSalePrice, self.lastParams.productType, self.lastParams.averageRating);
             }
         }
         function resetDefaultValues() {
@@ -187,5 +211,22 @@ angular.module('productList')
             });
             //console.log(products);
             return products;
+        }
+
+        function fetchImages(){
+        //fetch image
+            self.productList.forEach(function (row) {
+            $http.get('api/v2/gateway/images/' + row.imageId).then(function (imageResp){
+            if(imageResp.data === 0){
+            console.log("no image found");
+            return;
+            }
+            row.imageData = imageResp.data.imageData;
+            row.imageType = imageResp.data.imageType;
+            })
+                .catch(function (err) {
+                console.error("Error fetching image: ", err);
+                });
+            });
         }
     }]);
