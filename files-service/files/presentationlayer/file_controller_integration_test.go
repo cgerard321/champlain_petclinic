@@ -153,6 +153,8 @@ func TestWhenGetFile_withExistingFileId_thenReturnFileResponseModel(t *testing.T
 }
 
 func TestWhenDeleteFile_withExistingFileId_thenReturnSuccessMessage(t *testing.T) {
+	reset()
+
 	addFileToContext(&VALID_FILE_INFO, VALID_FILE_DATA)
 	router := gin.Default()
 	_ = controller.Routes(router)
