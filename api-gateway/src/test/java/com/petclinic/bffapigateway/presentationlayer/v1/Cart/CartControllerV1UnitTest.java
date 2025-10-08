@@ -84,6 +84,93 @@ public class CartControllerV1UnitTest {
                 .build();
     }
 
+    private CartRequestDTO buildCartRequestDTO() {
+        return CartRequestDTO.builder()
+                .customerId("customer-456")
+                .build();
+    }
+
+    // Tests for createCart endpoint
+    @Test
+    @DisplayName("POST /api/gateway/carts - Should create cart successfully")
+    void createCart_withValidRequest_shouldCreateCart() {
+        // Arrange
+        CartRequestDTO requestDTO = buildCartRequestDTO();
+        CartResponseDTO createdCart = buildCartResponseDTO();
+        when(cartServiceClient.createCart(any(CartRequestDTO.class)))
+                .thenReturn(Mono.just(createdCart));
+
+        // Act & Assert
+        webTestClient.post()
+                .uri(baseCartURL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestDTO)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody(CartResponseDTO.class)
+                .isEqualTo(createdCart);
+
+        verify(cartServiceClient, times(1)).createCart(any(CartRequestDTO.class));
+    }
+
+    @Test
+    @DisplayName("POST /api/gateway/carts - Should return 400 for invalid input")
+    void createCart_withInvalidInput_shouldReturnBadRequest() {
+        // Arrange
+        CartRequestDTO requestDTO = buildCartRequestDTO();
+        when(cartServiceClient.createCart(any(CartRequestDTO.class)))
+                .thenReturn(Mono.error(new InvalidInputException("Invalid cart data")));
+
+        // Act & Assert
+        webTestClient.post()
+                .uri(baseCartURL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestDTO)
+                .exchange()
+                .expectStatus().isBadRequest();
+
+        verify(cartServiceClient, times(1)).createCart(any(CartRequestDTO.class));
+    }
+
+    // Tests for getCartItemCount endpoint
+    @Test
+    @DisplayName("GET /api/gateway/carts/{cartId}/count - Should return item count successfully")
+    void getCartItemCount_withValidId_shouldReturnCount() {
+        // Arrange
+        String cartId = "cart-123";
+        when(cartServiceClient.getCartItemCount(cartId))
+                .thenReturn(Mono.just(3));
+
+        // Act & Assert
+        webTestClient.get()
+                .uri(baseCartURL + "/" + cartId + "/count")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.itemCount").isEqualTo(3);
+
+        verify(cartServiceClient, times(1)).getCartItemCount(cartId);
+    }
+
+    @Test
+    @DisplayName("GET /api/gateway/carts/{cartId}/count - Should return 404 when cart not found")
+    void getCartItemCount_withNonExistingId_shouldReturnNotFound() {
+        // Arrange
+        String cartId = "missing-cart";
+        when(cartServiceClient.getCartItemCount(cartId))
+                .thenReturn(Mono.error(new NotFoundException("Cart not found")));
+
+        // Act & Assert
+        webTestClient.get()
+                .uri(baseCartURL + "/" + cartId + "/count")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound();
+
+        verify(cartServiceClient, times(1)).getCartItemCount(cartId);
+    }
+
     // Tests for getAllCarts endpoint
     @Test
     @DisplayName("GET /api/gateway/carts - Should return all carts successfully")

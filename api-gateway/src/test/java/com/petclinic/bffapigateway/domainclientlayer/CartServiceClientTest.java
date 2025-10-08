@@ -70,8 +70,13 @@ public class CartServiceClientTest {
                 .setHeader("Content-Type", "application/json")
                 .setBody(body));
 
-        final CartResponseDTO cartResponseDTO = mockCartServiceClient.createCart(cartRequestDTO);
-        assertEquals(cartResponseDTO.getCartId(), "98f7b33a-d62a-420a-a84a-05a27c85fc91");
+        Mono<CartResponseDTO> cartResponseDTO = mockCartServiceClient.createCart((cartRequestDTO));
+
+        StepVerifier.create(cartResponseDTO)
+                .assertNext(result -> {
+                    assertEquals("98f7b33a-d62a-420a-a84a-05a27c85fc91", result.getCartId());
+                })
+                .verifyComplete();
     }
 
     @Test
