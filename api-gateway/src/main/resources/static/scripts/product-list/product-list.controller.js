@@ -216,7 +216,7 @@ angular.module('productList')
         function fetchImages(){
         //fetch image
             self.productList.forEach(function (row) {
-            $http.get('api/v2/gateway/images/' + row.imageId).then(function (imageResp){
+            $http.get('api/gateway/images/' + row.imageId).then(function (imageResp){
             if(imageResp.data === 0){
             console.log("no image found");
             return;

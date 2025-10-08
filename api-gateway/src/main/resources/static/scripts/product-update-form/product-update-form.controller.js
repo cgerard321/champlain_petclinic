@@ -20,7 +20,7 @@ angular.module('shopProductUpdateForm')
                 self.product = resp.data;
                 var prod = self.product;
                 //fetch image
-                            $http.get('api/v2/gateway/images/' + prod.imageId).then(function (imageResp){
+                            $http.get('api/gateway/images/' + prod.imageId).then(function (imageResp){
                             if(imageResp.data === ""){
                                console.log("no image found");
                                return;

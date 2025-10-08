@@ -14,7 +14,7 @@ angular.module('shopProductDetailsInfo')
                 self.product = product; // Update the product data in your controller
 
                 //fetch image
-                $http.get('api/v2/gateway/images/' + product.imageId).then(function (imageResp){
+                $http.get('api/gateway/images/' + product.imageId).then(function (imageResp){
                             if(imageResp.data === ""){
                                console.log("no image found");
                                return;
