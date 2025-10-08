@@ -8,32 +8,45 @@ export default function CurrentBalance(): JSX.Element {
   const [currentBalance, setCurrentBalance] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const fetchCurrentBalance = async (): Promise<void> => {
     if (!user.userId) return;
 
-    const fetchCurrentBalance = async (): Promise<void> => {
-      try {
-        const response = await axiosInstance.get(
-          `/customers/${user.userId}/bills/current-balance`,
-          {
-            headers: { 'Content-Type': 'application/json' },
-            useV2: true,
-          }
-        );
-
-        if (!response || response.status !== 200 || !response.data) {
-          throw new Error(`Error: ${response.status} ${response.statusText}`);
+    try {
+      const response = await axiosInstance.get(
+        `/customers/${user.userId}/bills/current-balance`,
+        {
+          headers: { 'Content-Type': 'application/json' },
+          useV2: true,
         }
+      );
 
-        const balance = response.data;
-        setCurrentBalance(balance);
-      } catch (err) {
-        console.error('Error fetching current balance:', err);
-        setError('Failed to fetch current balance');
+      if (!response || response.status !== 200) {
+        throw new Error(`Error: ${response.status} ${response.statusText}`);
       }
+
+      const balance = response.data;
+      setCurrentBalance(balance);
+    } catch (err) {
+      console.error('Error fetching current balance:', err);
+      setError('Failed to fetch current balance');
+    }
+  };
+
+  useEffect(() => {
+    fetchCurrentBalance();
+
+    // Listen for payment success events
+    const handlePaymentSuccess = () => {
+      setTimeout(() => {
+        fetchCurrentBalance();
+      }, 500);
     };
 
-    fetchCurrentBalance();
+    window.addEventListener('paymentSuccess', handlePaymentSuccess);
+
+    return () => {
+      window.removeEventListener('paymentSuccess', handlePaymentSuccess);
+    };
   }, [user.userId]);
 
   return (

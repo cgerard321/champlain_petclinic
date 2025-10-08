@@ -10,8 +10,6 @@ import java.time.Period;
 
 /**
  * Utility class for calculating compound interest on overdue bills.
- * This centralizes the interest calculation logic to avoid code duplication
- * across multiple classes (EntityDtoUtil, BillServiceImpl, PdfGenerator).
  */
 public class InterestCalculationUtil {
 
@@ -31,7 +29,15 @@ public class InterestCalculationUtil {
             return BigDecimal.ZERO;
         }
         
-        if (bill.getBillStatus() == BillStatus.OVERDUE && bill.getDueDate() != null) {
+        // For paid bills, return the stored interest (preserves the interest that was paid)
+        if (bill.getBillStatus() == BillStatus.PAID && bill.getInterest() != null) {
+            return bill.getInterest();
+        }
+        
+        // For overdue bills or unpaid bills past due date, calculate current interest
+        if ((bill.getBillStatus() == BillStatus.OVERDUE || 
+             (bill.getBillStatus() == BillStatus.UNPAID && bill.getDueDate() != null && bill.getDueDate().isBefore(LocalDate.now()))) 
+            && bill.getDueDate() != null) {
             return calculateCompoundInterest(bill.getAmount(), bill.getDueDate(), LocalDate.now());
         }
         
@@ -69,11 +75,14 @@ public class InterestCalculationUtil {
      * Calculates the final amount (principal + compound interest) for an overdue bill.
      * 
      * @param bill The bill to calculate the final amount for
-     * @return The final amount including interest
+     * @return The final amount including interest, or just interest if amount is null
      */
     public static BigDecimal calculateFinalAmount(Bill bill) {
         BigDecimal interest = calculateInterest(bill);
-        return bill.getAmount().add(interest);
+        if (bill.getAmount() != null) {
+            return bill.getAmount().add(interest);
+        }
+        return interest;
     }
 
     /**
