@@ -1418,7 +1418,7 @@ public class CartServiceClientTest {
         );
 
         StepVerifier.create(mockCartServiceClient.moveAllWishlistToCart("c-x"))
-                .assertNext(resp -> { assert resp != null; })
+                .assertNext(resp -> { assertThat(resp).isNotNull(); })
                 .verifyComplete();
     }
 
@@ -1454,7 +1454,7 @@ public class CartServiceClientTest {
         );
 
         StepVerifier.create(mockCartServiceClient.addProductToWishList(cartId, productId, qty))
-                .assertNext(resp -> { assert resp != null; })
+                .assertNext(resp -> { assertThat(resp).isNotNull(); })
                 .verifyComplete();
     }
 
@@ -1472,7 +1472,7 @@ public class CartServiceClientTest {
         );
 
         StepVerifier.create(mockCartServiceClient.removeProductFromWishlist(cartId, productId))
-                .assertNext(resp -> { assert resp != null; })
+                .assertNext(resp -> { assertThat(resp).isNotNull(); })
                 .verifyComplete();
     }
 
