@@ -45,7 +45,8 @@ function StarRating({
               xmlns="http://www.w3.org/2000/svg"
               width="25"
               height="25"
-              stroke="black"
+              stroke="#222"
+              strokeWidth="2"
               viewBox="0 0 32 32"
               fill="none"
               onClick={() => !viewOnly && starClick(index)}
