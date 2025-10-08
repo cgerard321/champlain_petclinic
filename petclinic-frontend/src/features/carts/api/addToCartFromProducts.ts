@@ -30,7 +30,10 @@ export function useAddToCart(): UseAddToCartReturnType {
         const { data } = await axiosInstance.post<CreateCartResponse>(
           '/carts', // → POST /api/v2/gateway/carts
           { customerId: userId },
-          { headers: { 'Content-Type': 'application/json' } }
+          {
+            headers: { 'Content-Type': 'application/json' },
+            useV2: true,
+          }
         );
 
         const newId = (data?.cartId ?? data?.id) as string | undefined;
