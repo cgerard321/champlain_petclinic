@@ -90,13 +90,25 @@ const PaymentForm = ({
       } else {
         const [expMonth, expYear] = formData.expirationDate.split('/');
         const currentDate = new Date();
-        const expiryYearFull = `20${expYear}`;
-        const expiryDate = new Date(
-          Number(expiryYearFull),
-          Number(expMonth) - 1
+        const currentYear = currentDate.getFullYear();
+        const currentCentury = Math.floor(currentYear / 100) * 100;
+
+        // Handle 2-digit year by assuming it's in the current or next century
+        const expYearNum = Number(expYear);
+        const expiryYearFull =
+          expYearNum < 50
+            ? currentCentury + 100 + expYearNum // 00-49 -> 2100-2149
+            : currentCentury + expYearNum; // 50-99 -> 2050-2099
+
+        // Create expiry date using the last day of the expiry month
+        const expiryDate = new Date(expiryYearFull, Number(expMonth), 0); // Day 0 gives last day of previous month
+        const currentMonthEnd = new Date(
+          currentDate.getFullYear(),
+          currentDate.getMonth() + 1,
+          0
         );
 
-        if (expiryDate < currentDate) {
+        if (expiryDate < currentMonthEnd) {
           newErrors.expirationDate = 'Card is expired';
         }
       }
