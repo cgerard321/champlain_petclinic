@@ -186,4 +186,5 @@ func TestWhenDeleteFile_withNonExistingFileId_thenReturnNotFound(t *testing.T) {
 	assert.Equal(t, expected, resp)
 
 	t.Cleanup(reset)
+
 }
