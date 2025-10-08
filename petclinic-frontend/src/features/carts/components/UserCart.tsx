@@ -165,7 +165,7 @@ const UserCart = (): JSX.Element => {
     }
   };
 
-  const blockIfReadOnly = (): boolean => {
+  const blockIfReadOnly = useCallback((): boolean => {
     if (isStaff) {
       setNotificationMessage(
         'Read-only mode: staff/admin cannot modify carts.'
@@ -173,7 +173,7 @@ const UserCart = (): JSX.Element => {
       return true;
     }
     return false;
-  };
+  }, [isStaff, setNotificationMessage]);
 
   const changeItemQuantity = useCallback(
     async (
@@ -241,7 +241,7 @@ const UserCart = (): JSX.Element => {
         }));
       }
     },
-    [cartItems, cartId, isStaff, blockIfReadOnly]
+    [cartItems, cartId, blockIfReadOnly]
   );
 
   const deleteItem = useCallback(
