@@ -82,7 +82,6 @@ public class OwnerClientUnitTest {
     public void getOwnerByOwnerId_ClientError() {
         String ownerId = "000";
 
-        // Simulate a 4xx client error, e.g., 400 Bad Request
         mockBackEnd.enqueue(new MockResponse()
                 .setResponseCode(400)
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -99,7 +98,6 @@ public class OwnerClientUnitTest {
     public void getOwnerByOwnerId_ServerError() {
         String ownerId = "000";
 
-        // Simulate a 5xx server error, e.g., 500 Internal Server Error
         mockBackEnd.enqueue(new MockResponse()
                 .setResponseCode(500)
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
