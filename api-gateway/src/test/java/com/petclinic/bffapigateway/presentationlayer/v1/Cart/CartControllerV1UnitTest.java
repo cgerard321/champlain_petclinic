@@ -815,4 +815,77 @@ public class CartControllerV1UnitTest {
 
         verify(cartServiceClient, times(1)).moveAllWishlistToCart(cartId);
     }
+
+    // Focused error mapping tests for wishlist/cart endpoints
+    @Test
+    @DisplayName("PUT /api/gateway/carts/{cartId}/wishlist/{productId}/toCart - Should return 404 when cart or product not found")
+    void moveProductFromWishListToCart_withNonExistingIds_shouldReturnNotFound() {
+        // Arrange
+        String cartId = "missing-cart";
+        String productId = "missing-product";
+        when(cartServiceClient.moveProductFromWishListToCart(cartId, productId))
+                .thenReturn(Mono.error(new NotFoundException("Not found")));
+
+        // Act & Assert
+        webTestClient.put()
+                .uri(baseCartURL + "/" + cartId + "/wishlist/" + productId + "/toCart")
+                .exchange()
+                .expectStatus().isNotFound();
+
+        verify(cartServiceClient, times(1)).moveProductFromWishListToCart(cartId, productId);
+    }
+
+    @Test
+    @DisplayName("PUT /api/gateway/carts/{cartId}/wishlist/{productId}/toWishList - Should return 400 for invalid input")
+    void moveProductFromCartToWishlist_withInvalidInput_shouldReturnBadRequest() {
+        // Arrange
+        String cartId = "cart-123";
+        String productId = "bad-product";
+        when(cartServiceClient.moveProductFromCartToWishlist(cartId, productId))
+                .thenReturn(Mono.error(new InvalidInputException("Invalid input")));
+
+        // Act & Assert
+        webTestClient.put()
+                .uri(baseCartURL + "/" + cartId + "/wishlist/" + productId + "/toWishList")
+                .exchange()
+                .expectStatus().isBadRequest();
+
+        verify(cartServiceClient, times(1)).moveProductFromCartToWishlist(cartId, productId);
+    }
+
+    @Test
+    @DisplayName("POST /api/gateway/carts/{cartId}/products/{productId}/quantity/{quantity} - Should return 422 for unprocessable entity")
+    void addProductToWishList_withUnprocessableEntity_shouldReturnUnprocessable() {
+        // Arrange
+        String cartId = "cart-123";
+        String productId = "product-789";
+        int quantity = 2;
+        when(cartServiceClient.addProductToWishList(cartId, productId, quantity))
+                .thenReturn(Mono.error(WebClientResponseException.create(422, "Unprocessable Entity", null, null, null)));
+
+        // Act & Assert
+        webTestClient.post()
+                .uri(baseCartURL + "/" + cartId + "/products/" + productId + "/quantity/" + quantity)
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
+
+        verify(cartServiceClient, times(1)).addProductToWishList(cartId, productId, quantity);
+    }
+
+    @Test
+    @DisplayName("POST /api/gateway/carts/{cartId}/wishlist/moveAll - Should pass through custom 409 status")
+    void moveAllWishlistToCart_withConflict_shouldReturnConflict() {
+        // Arrange
+        String cartId = "cart-123";
+        when(cartServiceClient.moveAllWishlistToCart(cartId))
+                .thenReturn(Mono.error(WebClientResponseException.create(409, "Conflict", null, null, null)));
+
+        // Act & Assert
+        webTestClient.post()
+                .uri(baseCartURL + "/" + cartId + "/wishlist/moveAll")
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.CONFLICT);
+
+        verify(cartServiceClient, times(1)).moveAllWishlistToCart(cartId);
+    }
 }
