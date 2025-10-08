@@ -2,6 +2,7 @@ package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.petclinic.bffapigateway.dtos.Vets.VetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.*;
 import com.petclinic.bffapigateway.dtos.Visits.Emergency.EmergencyRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.Emergency.EmergencyResponseDTO;
@@ -1403,6 +1404,111 @@ class VisitsServiceClientIntegrationTest {
         StepVerifier.create(result)
                 .expectErrorMatches(throwable -> throwable instanceof RuntimeException &&
                         throwable.getMessage().contains("Server error during review deletion"))
+                .verify();
+    }
+
+    @Test
+    void getAllVetsForAvailability_shouldReturnVets() throws JsonProcessingException {
+        VetResponseDTO vet1 = VetResponseDTO.builder()
+                .vetId("vet-123")
+                .firstName("John")
+                .lastName("Doe")
+                .build();
+
+        server.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(objectMapper.writeValueAsString(Arrays.asList(vet1))));
+
+        Flux<VetResponseDTO> result = visitsServiceClient.getAllVetsForAvailability();
+
+        StepVerifier.create(result)
+                .expectNextMatches(vet -> vet.getVetId().equals("vet-123"))
+                .verifyComplete();
+    }
+
+    @Test
+    void getAllVetsForAvailability_whenServerError_shouldReturnError() {
+        server.enqueue(new MockResponse()
+                .setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.value()));
+
+        Flux<VetResponseDTO> result = visitsServiceClient.getAllVetsForAvailability();
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof IllegalArgumentException)
+                .verify();
+    }
+
+    @Test
+    void getAvailableTimeSlots_shouldReturnTimeSlots() throws JsonProcessingException {
+        TimeSlotDTO slot1 = new TimeSlotDTO(
+                LocalDateTime.of(2025, 10, 13, 9, 0),
+                LocalDateTime.of(2025, 10, 13, 10, 0),
+                true
+        );
+
+        server.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(objectMapper.writeValueAsString(Arrays.asList(slot1))));
+
+        Flux<TimeSlotDTO> result = visitsServiceClient.getAvailableTimeSlots("vet-123", "2025-10-13");
+
+        StepVerifier.create(result)
+                .expectNextMatches(slot -> slot.getStartTime().equals(LocalDateTime.of(2025, 10, 13, 9, 0)))
+                .verifyComplete();
+    }
+
+    @Test
+    void getAvailableTimeSlots_whenVetNotFound_shouldReturnError() {
+        server.enqueue(new MockResponse()
+                .setResponseCode(HttpStatus.NOT_FOUND.value()));
+
+        Flux<TimeSlotDTO> result = visitsServiceClient.getAvailableTimeSlots("invalid-vet", "2025-10-13");
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof NotFoundException)
+                .verify();
+    }
+
+    @Test
+    void getAvailableDates_whenVetNotFound_shouldReturnError() {
+        server.enqueue(new MockResponse()
+                .setResponseCode(HttpStatus.NOT_FOUND.value()));
+
+        Flux<String> result = visitsServiceClient.getAvailableDates("invalid-vet", "2025-10-13", "2025-10-20");
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof NotFoundException)
+                .verify();
+    }
+
+    @Test
+    void getVeterinarianAvailability_shouldReturnVet() throws JsonProcessingException {
+        VetResponseDTO vet = VetResponseDTO.builder()
+                .vetId("vet-123")
+                .firstName("John")
+                .lastName("Doe")
+                .build();
+
+        server.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(objectMapper.writeValueAsString(vet)));
+
+        Mono<VetResponseDTO> result = visitsServiceClient.getVeterinarianAvailability("vet-123");
+
+        StepVerifier.create(result)
+                .expectNextMatches(v -> v.getVetId().equals("vet-123"))
+                .verifyComplete();
+    }
+
+    @Test
+    void getVeterinarianAvailability_whenVetNotFound_shouldReturnError() {
+        server.enqueue(new MockResponse()
+                .setResponseCode(HttpStatus.NOT_FOUND.value()));
+
+        Mono<VetResponseDTO> result = visitsServiceClient.getVeterinarianAvailability("invalid-vet");
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof NotFoundException)
                 .verify();
     }
 

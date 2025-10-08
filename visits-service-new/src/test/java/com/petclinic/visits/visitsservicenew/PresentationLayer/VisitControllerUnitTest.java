@@ -38,8 +38,9 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.Assert.assertArrayEquals;
+
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -124,7 +125,7 @@ class VisitControllerUnitTest {
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
+                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM + ";charset=UTF-8")
                 .returnResult(VisitResponseDTO.class);
 
         verify(visitService, times(1)).getAllVisits(visit1.getDescription());
@@ -176,7 +177,7 @@ class VisitControllerUnitTest {
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
+                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM + ";charset=UTF-8")
                 .returnResult(VisitResponseDTO.class);
 
         verify(visitService, times(1)).getVisitsForPet(Pet_Id_OK);
@@ -201,8 +202,7 @@ class VisitControllerUnitTest {
 
     @Test
     void addVisit() {
-        when(visitService.addVisit(Mockito.<Mono<VisitRequestDTO>>any()))
-                .thenReturn(Mono.just(visitResponseDTO));
+        when(visitService.addVisit(any(Mono.class))).thenReturn(Mono.just(visitResponseDTO));
 
         webTestClient
                 .post()
@@ -214,8 +214,7 @@ class VisitControllerUnitTest {
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody();
 
-        verify(visitService, times(1)).addVisit(Mockito.<Mono<VisitRequestDTO>>any());
-
+        verify(visitService, times(1)).addVisit(any(Mono.class));
     }
 
     @Test
@@ -235,7 +234,7 @@ class VisitControllerUnitTest {
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody();
 
-        verify(visitService, times(1)).updateVisit(anyString(), Mockito.<Mono<VisitRequestDTO>>any());
+        verify(visitService, times(1)).updateVisit(anyString(), any(Mono.class));
     }
 
     /*
@@ -279,8 +278,7 @@ class VisitControllerUnitTest {
                 .exchange()
                 .expectStatus().isNotFound()
                 .expectBody()
-                .jsonPath("$.message").isEqualTo("No visit was found with visitId: " + invalidVisitId);
-
+                .jsonPath("$.message", "No visit was found with visitId: " + invalidVisitId);
     }
 
     @Test
@@ -443,8 +441,7 @@ class VisitControllerUnitTest {
                 .dateSubmitted(LocalDateTime.now())
                 .build();
 
-        when(reviewService.AddReview(Mockito.<Mono<ReviewRequestDTO>>any()))
-                .thenReturn(Mono.just(reviewResponseDTO1));
+        when(reviewService.AddReview(any(Mono.class))).thenReturn(Mono.just(reviewResponseDTO1));
         webTestClient
                 .post()
                 .uri("/visits/reviews")
@@ -494,7 +491,8 @@ class VisitControllerUnitTest {
                 .expectBody(ReviewResponseDTO.class)
                 .isEqualTo(reviewResponseDTO1);
 
-        verify(reviewService, times(1)).UpdateReview(Mockito.<Mono<ReviewRequestDTO>>any(), anyString());
+        verify(reviewService, times(1)).UpdateReview(any(Mono.class), anyString());
+
 
     }
 
@@ -584,7 +582,7 @@ class VisitControllerUnitTest {
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
+                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM + ";charset=UTF-8")
                 .returnResult(VisitResponseDTO.class);
 
         verify(emergencyService, times(1)).GetAllEmergencies();
@@ -617,7 +615,7 @@ class VisitControllerUnitTest {
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
+                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM + ";charset=UTF-8")
                 .returnResult(VisitResponseDTO.class);
 
         verify(emergencyService, times(1)).getEmergencyVisitsForPet(Pet_Id_Emergency);
@@ -665,8 +663,7 @@ class VisitControllerUnitTest {
                 .emergencyType("Injury")
                 .build();
 
-        when(emergencyService.AddEmergency(Mockito.<Mono<EmergencyRequestDTO>>any()))
-                .thenReturn(Mono.just(emergencyResponseDTO));
+        when(emergencyService.AddEmergency(any(Mono.class))).thenReturn(Mono.just(emergencyResponseDTO));
 
         webTestClient.post()
                 .uri("/visits/emergencies")
@@ -1038,7 +1035,7 @@ class VisitControllerUnitTest {
                 .expectBody(VisitResponseDTO.class)
                 .isEqualTo(visitResponseDTO);
 
-        verify(visitService, times(1)).archiveCompletedVisit(anyString(), Mockito.<Mono<VisitRequestDTO>>any());
+        verify(visitService, times(1)).archiveCompletedVisit(anyString(), any(Mono.class));
     }
 
     @Test
