@@ -20,7 +20,6 @@ import reactor.core.publisher.Mono;
 import java.net.URI;
 import java.util.Optional;
 
-
 @Component
 @Slf4j
 public class BillServiceClient {

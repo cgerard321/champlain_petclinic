@@ -1,4 +1,4 @@
-package com.petclinic.bffapigateway.presentationlayer.v1;
+package com.petclinic.bffapigateway.presentationlayer.v1.Owners;
 
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
 import com.petclinic.bffapigateway.dtos.Pets.PetTypeRequestDTO;
@@ -36,7 +36,7 @@ import static org.mockito.Mockito.*;
         )
 )
 @AutoConfigureWebTestClient
-public class PetTypeControllerV1Test {
+public class PetTypesControllerV1UnitTests {
 
     @Autowired
     private WebTestClient client;
@@ -65,6 +65,21 @@ public class PetTypeControllerV1Test {
                     assertEquals(1, list.size());
                     assertEquals("petTypeId-1", list.get(0).getPetTypeId());
                 });
+
+        verify(customersServiceClient, times(1)).getAllPetTypes();
+    }
+
+    @Test
+    void whenGetAllPetTypes_withEmptyFlux_thenReturnEmptyList() {
+        when(customersServiceClient.getAllPetTypes())
+                .thenReturn(Flux.empty());
+
+        client.get()
+                .uri("/api/gateway/owners/petTypes")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(PetTypeResponseDTO.class)
+                .hasSize(0);
 
         verify(customersServiceClient, times(1)).getAllPetTypes();
     }
@@ -133,6 +148,25 @@ public class PetTypeControllerV1Test {
                     assertEquals("petTypeId-456", response.getPetTypeId());
                     assertEquals("Bird", response.getName());
                 });
+
+        verify(customersServiceClient, times(1)).addPetType(any(Mono.class));
+    }
+
+    @Test
+    void whenAddPetType_withEmptyMono_thenReturnBadRequest() {
+        PetTypeRequestDTO requestDTO = new PetTypeRequestDTO();
+        requestDTO.setName("Invalid Pet");
+        requestDTO.setPetTypeDescription("Description");
+
+        when(customersServiceClient.addPetType(any(Mono.class)))
+                .thenReturn(Mono.empty());
+
+        client.post()
+                .uri("/api/gateway/owners/petTypes")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromValue(requestDTO))
+                .exchange()
+                .expectStatus().isBadRequest();
 
         verify(customersServiceClient, times(1)).addPetType(any(Mono.class));
     }
@@ -224,7 +258,7 @@ public class PetTypeControllerV1Test {
         petType.setName("Dog");
         petType.setPetTypeDescription("Mammal");
 
-        when(customersServiceClient.getPetTypesByPagination(any(Optional.class), any(Optional.class), 
+        when(customersServiceClient.getPetTypesByPagination(any(Optional.class), any(Optional.class),
                 any(), any(), any()))
                 .thenReturn(Flux.just(petType));
 
@@ -238,8 +272,63 @@ public class PetTypeControllerV1Test {
                     assertEquals("petTypeId-1", list.get(0).getPetTypeId());
                 });
 
-        verify(customersServiceClient, times(1)).getPetTypesByPagination(any(Optional.class), 
+        verify(customersServiceClient, times(1)).getPetTypesByPagination(any(Optional.class),
                 any(Optional.class), any(), any(), any());
+    }
+
+    @Test
+    void whenGetPetTypesByPagination_withAllFilters_thenReturnValidFlux() {
+        int page = 0;
+        int size = 1;
+        String petTypeIdParam = "petTypeId-1";
+        String nameParam = "Dog";
+        String descriptionParam = "Mammal";
+
+        PetTypeResponseDTO petType = new PetTypeResponseDTO();
+        petType.setPetTypeId(petTypeIdParam);
+        petType.setName(nameParam);
+        petType.setPetTypeDescription(descriptionParam);
+
+        when(customersServiceClient.getPetTypesByPagination(
+                eq(Optional.of(page)), eq(Optional.of(size)), eq(petTypeIdParam), eq(nameParam), eq(descriptionParam)))
+                .thenReturn(Flux.just(petType));
+
+        client.get()
+                .uri(uriBuilder -> uriBuilder.path("/api/gateway/owners/petTypes/pet-types-pagination")
+                        .queryParam("page", page)
+                        .queryParam("size", size)
+                        .queryParam("petTypeId", petTypeIdParam)
+                        .queryParam("name", nameParam)
+                        .queryParam("description", descriptionParam)
+                        .build())
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(PetTypeResponseDTO.class)
+                .hasSize(1);
+
+        verify(customersServiceClient, times(1)).getPetTypesByPagination(
+                any(Optional.class), any(Optional.class), eq(petTypeIdParam), eq(nameParam), eq(descriptionParam));
+    }
+
+    @Test
+    void whenGetPetTypesByPagination_withNoMatchingResults_thenReturnEmptyList() {
+        String nameParam = "Unmatchable Pet Name";
+
+        when(customersServiceClient.getPetTypesByPagination(
+                any(Optional.class), any(Optional.class), any(), eq(nameParam), any()))
+                .thenReturn(Flux.empty());
+
+        client.get()
+                .uri(uriBuilder -> uriBuilder.path("/api/gateway/owners/petTypes/pet-types-pagination")
+                        .queryParam("name", nameParam)
+                        .build())
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(PetTypeResponseDTO.class)
+                .hasSize(0);
+
+        verify(customersServiceClient, times(1)).getPetTypesByPagination(
+                any(Optional.class), any(Optional.class), any(), eq(nameParam), any());
     }
 
     @Test
@@ -272,5 +361,24 @@ public class PetTypeControllerV1Test {
                 .value(count -> assertEquals(expectedCount, count));
 
         verify(customersServiceClient, times(1)).getTotalNumberOfPetTypesWithFilters(any(), any(), any());
+    }
+
+    @Test
+    void whenGetTotalNumberOfPetTypesWithFilters_withNoFilters_thenReturnTotalCount() {
+        Long expectedCount = 10L;
+
+        when(customersServiceClient.getTotalNumberOfPetTypesWithFilters(
+                eq(null), eq(null), eq(null)))
+                .thenReturn(Mono.just(expectedCount));
+
+        client.get()
+                .uri("/api/gateway/owners/petTypes/pet-types-filtered-count")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(Long.class)
+                .isEqualTo(expectedCount);
+
+        verify(customersServiceClient, times(1)).getTotalNumberOfPetTypesWithFilters(
+                eq(null), eq(null), eq(null));
     }
 }

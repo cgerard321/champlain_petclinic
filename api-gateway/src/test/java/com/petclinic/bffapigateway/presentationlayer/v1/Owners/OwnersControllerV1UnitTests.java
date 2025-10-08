@@ -1,16 +1,15 @@
-package com.petclinic.bffapigateway.presentationlayer.v1;
+package com.petclinic.bffapigateway.presentationlayer.v1.Owners;
 
-import com.petclinic.bffapigateway.domainclientlayer.AuthServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
-import com.petclinic.bffapigateway.domainclientlayer.VisitsServiceClient;
-import com.petclinic.bffapigateway.presentationlayer.v1.OwnerControllerV1;
-import com.petclinic.bffapigateway.presentationlayer.v1.PetControllerV1;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
+import com.petclinic.bffapigateway.dtos.Pets.PetRequestDTO;
+import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
+import com.petclinic.bffapigateway.presentationlayer.v1.OwnerControllerV1;
+import com.petclinic.bffapigateway.presentationlayer.v1.PetControllerV1;
 import com.petclinic.bffapigateway.utils.Security.Filters.IsUserFilter;
 import com.petclinic.bffapigateway.utils.Security.Filters.JwtTokenFilter;
 import com.petclinic.bffapigateway.utils.Security.Filters.RoleFilter;
-import com.petclinic.bffapigateway.utils.Utility;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -28,7 +27,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Date;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -45,7 +43,7 @@ import static org.mockito.Mockito.*;
         )
 )
 @AutoConfigureWebTestClient
-public class OwnerApiGatewayTest {
+public class OwnersControllerV1UnitTests {
 
     @Autowired
     private WebTestClient client;
@@ -53,15 +51,6 @@ public class OwnerApiGatewayTest {
     @MockBean
     private CustomersServiceClient customersServiceClient;
 
-    @MockBean
-    private AuthServiceClient authServiceClient;
-    @MockBean
-    private VisitsServiceClient visitsServiceClient;
-
-    @MockBean
-    private Utility utility; // satisfies IsUserFilter dependency if accidentally loaded
-
-    private final Date date = new Date();
 
     @Test
     void whenGetAllOwners_thenReturnOwners() {
@@ -118,7 +107,7 @@ public class OwnerApiGatewayTest {
     }
 
     @Test
-    void whenGetAllOwnersByPagination_withEmptyParams_thenReturnEmptyList() {
+    void whenGetAllOwnersByPagination_withEmptyPageAndSize_thenReturnEmptyList() {
         when(customersServiceClient.getOwnersByPagination(null, null, null, null, null, null, null))
                 .thenReturn(Flux.empty());
 
@@ -147,7 +136,7 @@ public class OwnerApiGatewayTest {
     }
 
     @Test
-    void whenGetTotalNumberOfOwnersWithFilters_thenReturnCount() {
+    void whenGetTotalNumberOfOwners_WithFilters_thenReturnCount() {
         long expectedCount = 0L;
         when(customersServiceClient.getTotalNumberOfOwnersWithFilters(null, null, null, null, null))
                 .thenReturn(Mono.just(expectedCount));
@@ -160,33 +149,32 @@ public class OwnerApiGatewayTest {
                 .value(body -> assertEquals(expectedCount, body));
     }
 
+    @Test
+    void whenGetOwnerByOwnerId_thenReturnOwner() {
+        OwnerResponseDTO owner = new OwnerResponseDTO();
+        owner.setOwnerId("ownerId-123");
+        owner.setFirstName("John");
+        owner.setLastName("Johnny");
+        owner.setAddress("111 John St");
+        owner.setCity("Johnston");
+        owner.setProvince("Quebec");
+        owner.setTelephone("51451545144");
 
-        @Test
-        void whenGetOwnerByOwnerId_thenReturnOwner() {
-            OwnerResponseDTO owner = new OwnerResponseDTO();
-            owner.setOwnerId("ownerId-123");
-            owner.setFirstName("John");
-            owner.setLastName("Johnny");
-            owner.setAddress("111 John St");
-            owner.setCity("Johnston");
-            owner.setProvince("Quebec");
-            owner.setTelephone("51451545144");
+        when(customersServiceClient.getOwner("ownerId-123"))
+                .thenReturn(Mono.just(owner));
 
-            when(customersServiceClient.getOwner("ownerId-123"))
-                    .thenReturn(Mono.just(owner));
-
-            client.get()
-                    .uri("/api/gateway/owners/{ownerId}", owner.getOwnerId())
-                    .accept(MediaType.APPLICATION_JSON)
-                    .exchange()
-                    .expectStatus().isOk()
-                    .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                    .expectBody(OwnerResponseDTO.class)
-                    .value(ownerResponseDTO -> {
-                        assertNotNull(ownerResponseDTO);
-                        assertEquals(ownerResponseDTO.getOwnerId(), owner.getOwnerId());
-                    });
-        }
+        client.get()
+                .uri("/api/gateway/owners/{ownerId}", owner.getOwnerId())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(OwnerResponseDTO.class)
+                .value(ownerResponseDTO -> {
+                    assertNotNull(ownerResponseDTO);
+                    assertEquals(ownerResponseDTO.getOwnerId(), owner.getOwnerId());
+                });
+    }
 
     @Test
     void whenUpdateOwner_thenReturnUpdatedOwner() {
@@ -217,87 +205,105 @@ public class OwnerApiGatewayTest {
         Mockito.verify(customersServiceClient, times(1))
                 .updateOwner(eq(ownerId), any(Mono.class));
     }
+
+    @Test
+    void whenDeletePet_thenReturnNoContent() {
+        String ownerId = "ownerId-123";
+        String petId = "petId-456";
+
+        when(customersServiceClient.deletePet(ownerId, petId)).thenReturn(Mono.empty());
+
+        client.delete()
+                .uri("/api/gateway/owners/{ownerId}/pets/{petId}", ownerId, petId)
+                .exchange()
+                .expectStatus().isNoContent();
+
+        verify(customersServiceClient, times(1)).deletePet(ownerId, petId);
     }
 
+    @Test
+    void whenDeleteOwner_thenReturnNoContent() {
+        String ownerId = "ownerId-123";
 
-//    @Test
-//    void shouldCreatePet() {
-//        String ownerId = "ownerId-12345";
-//
-//        PetResponseDTO pet = new PetResponseDTO();
-//        pet.setPetId("30-30-30-30");
-//        pet.setOwnerId(ownerId);
-//        pet.setName("Fluffy");
-//        pet.setBirthDate(date);
-//        pet.setPetTypeId("5");
-//        pet.setIsActive("true");
-//
-//        when(customersServiceClient.createPetForOwner(eq(ownerId), any(PetRequestDTO.class)))
-//                .thenReturn(Mono.just(pet));
-//
-//        PetRequestDTO petRequest = new PetRequestDTO();
-//        petRequest.setOwnerId(ownerId);
-//        petRequest.setName("Fluffy");
-//        petRequest.setBirthDate(date);
-//        petRequest.setPetTypeId("5");
-//        petRequest.setIsActive("true");
-//
-//        client.post()
-//                .uri("/api/gateway/owners/{ownerId}/pets", ownerId)
-//                .bodyValue(petRequest)
-//                .accept(MediaType.APPLICATION_JSON)
-//                .exchange()
-//                .expectStatus().isCreated()
-//                .expectBody()
-//                .jsonPath("$.petId").isEqualTo("30-30-30-30")
-//                .jsonPath("$.name").isEqualTo("Fluffy");
-//
-//        verify(customersServiceClient, times(1))
-//                .createPetForOwner(eq(ownerId), any(PetRequestDTO.class));
-//    }
-//
-//    @Test
-//    void shouldDeletePet() {
-//        String petId = "petId-123";
-//
-//        when(customersServiceClient.deletePetByPetId(petId))
-//                .thenReturn(Mono.empty());
-//
-//        client.delete()
-//                .uri("/api/gateway/owners/petTypes/{petTypeId}", petId)
-//                .exchange()
-//                .expectStatus().isOk();
-//
-//        verify(customersServiceClient, times(1))
-//                .deletePetTypeV2(petId);
-//    }
-//
-//    @Test
-//    void shouldPatchPet() {
-//        String petId = "petId-123";
-//
-//        PetRequestDTO petRequestDTO = new PetRequestDTO();
-//        petRequestDTO.setPetId(petId);
-//        petRequestDTO.setIsActive("true");
-//
-//        PetResponseDTO expectedPetResponse = new PetResponseDTO();
-//        expectedPetResponse.setPetId(petId);
-//        expectedPetResponse.setIsActive("true");
-//
-//        when(customersServiceClient.patchPet(petRequestDTO, petId))
-//                .thenReturn(Mono.just(expectedPetResponse));
-//
-//        client.patch()
-//                .uri("/api/gateway/owners/pets/{petId}", petId)
-//                .bodyValue(petRequestDTO)
-//                .exchange()
-//                .expectStatus().isOk()
-//                .expectBody()
-//                .jsonPath("$.petId").isEqualTo(petId)
-//                .jsonPath("$.isActive").isEqualTo("true");
-//
-//        verify(customersServiceClient, times(1))
-//                .patchPet(petRequestDTO, petId);
-//    }
+        when(customersServiceClient.deleteOwner(ownerId)).thenReturn(Mono.empty());
 
+        client.delete()
+                .uri("/api/gateway/owners/{ownerId}", ownerId)
+                .exchange()
+                .expectStatus().isNoContent();
 
+        verify(customersServiceClient, times(1)).deleteOwner(ownerId);
+    }
+
+    @Test
+    void whenCreatePetForOwner_thenReturnCreatedPet() {
+        String ownerId = "ownerId-123";
+        PetRequestDTO mockPetRequest = new PetRequestDTO();
+        mockPetRequest.setName("Rex");
+        mockPetRequest.setOwnerId(ownerId);
+
+        PetResponseDTO mockPetResponse = new PetResponseDTO();
+        mockPetResponse.setPetId("new-pet-id");
+        mockPetResponse.setName("Rex");
+
+        when(customersServiceClient.createPetForOwner(eq(ownerId), any(PetRequestDTO.class)))
+                .thenReturn(Mono.just(mockPetResponse));
+
+        client.post()
+                .uri("/api/gateway/owners/{ownerId}/pets", ownerId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromValue(mockPetRequest))
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody(PetResponseDTO.class)
+                .value(body -> assertEquals("Rex", body.getName()));
+
+        verify(customersServiceClient, times(1)).createPetForOwner(eq(ownerId), any(PetRequestDTO.class));
+    }
+
+    @Test
+    void whenGetPet_thenReturnPet() {
+        String ownerId = "ownerId-123";
+        String petId = "petId-456";
+
+        PetResponseDTO mockPetResponse = new PetResponseDTO();
+        mockPetResponse.setPetId(petId);
+        mockPetResponse.setName("Whiskers");
+
+        when(customersServiceClient.getPet(ownerId, petId))
+                .thenReturn(Mono.just(mockPetResponse));
+
+        client.get()
+                .uri("/api/gateway/owners/{ownerId}/pets/{petId}", ownerId, petId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(PetResponseDTO.class)
+                .value(body -> assertEquals("Whiskers", body.getName()));
+
+        verify(customersServiceClient, times(1)).getPet(ownerId, petId);
+    }
+
+    @Test
+    void whenGetPetsByOwnerId_thenReturnListOfPets() {
+        String ownerId = "ownerId-123";
+        PetResponseDTO pet1 = new PetResponseDTO();
+        pet1.setName("Rocky");
+        PetResponseDTO pet2 = new PetResponseDTO();
+        pet2.setName("Bella");
+
+        when(customersServiceClient.getPetsByOwnerId(ownerId)).thenReturn(Flux.just(pet1, pet2));
+
+        client.get()
+                .uri("/api/gateway/owners/{ownerId}/pets", ownerId)
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
+                .expectBodyList(PetResponseDTO.class)
+                .hasSize(2)
+                .value(list -> assertEquals("Rocky", list.get(0).getName()));
+
+        verify(customersServiceClient, times(1)).getPetsByOwnerId(ownerId);
+    }
+}

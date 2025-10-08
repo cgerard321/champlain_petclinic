@@ -79,7 +79,6 @@ private final String baseBillURL = "/api/v2/gateway/bills";
             .dueDate(LocalDate.parse("2024-10-13"))
             .build();
 
-
    @Test
     public void whenGetAllBillsByCustomerId_ThenReturnCustomerBills() {
        when(billServiceClient.getBillsByOwnerId("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")).thenReturn(Flux.just(billresponse, billresponse2));
@@ -276,69 +275,33 @@ private final String baseBillURL = "/api/v2/gateway/bills";
                 .expectStatus().isEqualTo(HttpStatus.SC_UNPROCESSABLE_ENTITY);
     }
 
-    // moved to CustomerBillController
-//    @Test
-//    public void whenPayBill_Success_thenReturnOkResponse() {
-//        // Arrange: Prepare the PaymentRequestDTO and mock the service call
-//        PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("1234567812345678", "123", "12/23");
-//        when(billServiceClient.payBill("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a", "1", paymentRequestDTO))
-//                .thenReturn(Mono.just("Payment successful"));
-//
-//        // Act & Assert: Perform the POST request and verify the response
-//        webTestClient.post()
-//                .uri("/api/v2/gateway/bills/customer/{customerId}/bills/{billId}/pay", "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a", "1")
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .bodyValue(paymentRequestDTO)
-//                .exchange()
-//                .expectStatus().isOk()
-//                .expectBody(String.class)
-//                .isEqualTo("Payment successful");
-//
-//        // Verify: Ensure that the service was called correctly
-//        verify(billServiceClient, times(1)).payBill("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a", "1", paymentRequestDTO);
-//    }
-//
-//    @Test
-//    public void whenPayBill_InvalidCustomerId_thenReturnBadRequest() {
-//        // Arrange: Mock an invalid customer ID scenario
-//        PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("1234567812345678", "123", "12/23");
-//        when(billServiceClient.payBill("invalid-customer-id", "1", paymentRequestDTO))
-//                .thenReturn(Mono.error(new RuntimeException("Invalid customer ID")));
-//
-//        // Act & Assert: Perform the POST request and expect a BadRequest status
-//        webTestClient.post()
-//                .uri("/api/v2/gateway/bills/customer/{customerId}/bills/{billId}/pay", "invalid-customer-id", "1")
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .bodyValue(paymentRequestDTO)
-//                .exchange()
-//                .expectStatus().isBadRequest()
-//                .expectBody(String.class)
-//                .value(response -> assertTrue(response.contains("Payment failed: Invalid customer ID")));
-//
-//        // Verify: Ensure that the service was called correctly
-//        verify(billServiceClient, times(1)).payBill("invalid-customer-id", "1", paymentRequestDTO);
-//    }
-//
-//    @Test
-//    public void whenPayBill_FailureDueToPaymentError_thenReturnBadRequest() {
-//        // Arrange: Mock a payment failure scenario
-//        PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO("1234567812345678", "123", "12/23");
-//        when(billServiceClient.payBill("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a", "1", paymentRequestDTO))
-//                .thenReturn(Mono.error(new RuntimeException("Payment processing error")));
-//
-//        // Act & Assert: Perform the POST request and expect a BadRequest status
-//        webTestClient.post()
-//                .uri("/api/v2/gateway/bills/customer/{customerId}/bills/{billId}/pay", "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a", "1")
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .bodyValue(paymentRequestDTO)
-//                .exchange()
-//                .expectStatus().isBadRequest()
-//                .expectBody(String.class)
-//                .value(response -> assertTrue(response.contains("Payment failed: Payment processing error")));
-//
-//        // Verify: Ensure that the service was called correctly
-//        verify(billServiceClient, times(1)).payBill("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a", "1", paymentRequestDTO);
-//    }
+    @Test
+    public void whenDeleteBill_Succeeds_ThenReturnNoContent() {
+        String billId = "B-77";
 
+        when(billServiceClient.deleteBill(billId)).thenReturn(Mono.empty());
+
+        webTestClient.delete()
+                .uri(baseBillURL + "/{billId}", billId)
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.SC_NO_CONTENT);
+
+        verify(billServiceClient, times(1)).deleteBill(billId);
+    }
+
+    @Test
+    public void whenDeleteBill_Unprocessable_ThenReturn422() {
+        String billId = "B-88";
+
+        when(billServiceClient.deleteBill(billId))
+                .thenReturn(Mono.error(new InvalidInputException("Cannot delete a bill that is unpaid or overdue.")));
+
+        webTestClient.delete()
+                .uri(baseBillURL + "/{billId}", billId)
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.SC_UNPROCESSABLE_ENTITY);
+
+        verify(billServiceClient, times(1)).deleteBill(billId);
+    }
 
 }
