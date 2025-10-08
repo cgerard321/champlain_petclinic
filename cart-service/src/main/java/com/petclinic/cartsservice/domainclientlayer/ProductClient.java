@@ -17,7 +17,7 @@ public class ProductClient {
 
     public ProductClient(@Value("products-service") String productsServiceHost,
                          @Value("8080") String productsServicePort) {
-        this.productsBaseURL = "http://" + productsServiceHost + ":" + productsServicePort + "/api/v1/products";
+        this.productsBaseURL = "http://" + productsServiceHost + ":" + productsServicePort + "/products";
 
         this.webClient = WebClient.builder()
                 .baseUrl(productsBaseURL)
