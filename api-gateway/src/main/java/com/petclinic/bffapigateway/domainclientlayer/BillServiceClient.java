@@ -24,7 +24,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
-
 @Component
 @Slf4j
 public class BillServiceClient {

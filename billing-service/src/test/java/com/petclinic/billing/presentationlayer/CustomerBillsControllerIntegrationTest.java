@@ -156,8 +156,6 @@ public class CustomerBillsControllerIntegrationTest {
                 .expectStatus().isNotFound();
     }
 
-
-
     private Bill buildBill() {
                 return Bill.builder()
                                 .billId("1")
@@ -189,6 +187,7 @@ public class CustomerBillsControllerIntegrationTest {
                                 .archive(false)
                                 .build();
         }
+
         @Test
         void getBillByBillId_ShouldReturnInterest() {
                 billRepository.deleteAll().block();
@@ -215,5 +214,5 @@ public class CustomerBillsControllerIntegrationTest {
                         .expectHeader().contentType(MediaType.APPLICATION_JSON)
                         .expectBody()
                         .jsonPath("$.interest").isEqualTo(expectedInterest.doubleValue());
-}
+        }
 }

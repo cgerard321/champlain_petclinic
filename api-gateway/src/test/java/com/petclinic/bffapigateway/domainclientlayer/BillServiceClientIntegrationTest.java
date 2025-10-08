@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.dtos.Bills.*;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.RecordedRequest;
+import okio.Buffer;
 import org.junit.jupiter.api.*;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -16,6 +18,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -48,7 +51,6 @@ class BillServiceClientIntegrationTest {
     void shutdown() throws IOException {
         this.server.shutdown();
     }
-
 
     private void prepareResponse(Consumer<MockResponse> consumer) {
         MockResponse response = new MockResponse();
@@ -91,6 +93,19 @@ class BillServiceClientIntegrationTest {
             .billStatus(BillStatus.OVERDUE)
             .dueDate(null)
             .build();
+
+    private BillResponseDTO bill(String id, String customerId, BillStatus status) {
+        BillResponseDTO dto = new BillResponseDTO();
+        dto.setBillId(id);
+        dto.setCustomerId(customerId);
+        dto.setBillStatus(status); // enum
+        return dto;
+    }
+
+    private byte[] fakePdf() {
+        String pdf = "%PDF-1.4\n1 0 obj\n<<>>\nendobj\nxref\n0 1\n0000000000 65535 f \ntrailer\n<<>>\nstartxref\n0\n%%EOF";
+        return pdf.getBytes(StandardCharsets.UTF_8);
+    }
 
     @Test
     void getBillById() throws Exception {
@@ -158,29 +173,6 @@ class BillServiceClientIntegrationTest {
                 .verifyComplete();
     }
 
-//    @Test
-//    void shouldDeleteBill() throws JsonProcessingException {
-//        final BillDetails bill = BillDetails.builder()
-//                .billId(UUID.randomUUID().toString())
-//                .vetId("15")
-//                .customerId("2")
-//                .date(null)
-//                .billStatus(BillStatus.PAID)
-//                .dueDate(null)
-//                .amount(100)
-//                .visitType("Check")
-//                .build();
-//
-//        final String body = mapper.writeValueAsString(mapper.convertValue(bill, BillDetails.class));
-//        prepareResponse(response -> response
-//                .setHeader("Content-Type", "application/json")
-//                .setBody(body));
-//
-//        final Mono<Void> empty = billServiceClient.deleteBill(bill.getBillId());
-//
-//        assertNull(empty.block());
-//    }
-
     @Test
     void shouldDeleteBillByVetId() throws JsonProcessingException {
         final BillDetails bill = BillDetails.builder()
@@ -233,7 +225,7 @@ class BillServiceClientIntegrationTest {
 
     @Test
     void createBill() throws JsonProcessingException {
-        // Create a sample BillRequestDTO object to send in the request
+
         BillRequestDTO billRequest = new BillRequestDTO();
         billRequest.setVetId("1");
         billRequest.setCustomerId("1");
@@ -243,19 +235,15 @@ class BillServiceClientIntegrationTest {
         billRequest.setAmount(new BigDecimal("100.0"));
         billRequest.setVisitType("Check up");
 
-        // Serialize the BillRequestDTO object to JSON
         String requestJson = mapper.writeValueAsString(billRequest);
 
-        // Prepare a MockResponse for the createBill request
         prepareResponse(response -> response
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .setBody(requestJson)
         );
 
-        // Send a request to create the bill
         Mono<BillResponseDTO> createdBillMono = billServiceClient.createBill(billRequest);
 
-        // Verify the response
         StepVerifier.create(createdBillMono)
                 .expectNextMatches(createdBill -> {
                     assertNotNull(createdBill);
@@ -266,7 +254,6 @@ class BillServiceClientIntegrationTest {
                 })
                 .verifyComplete();
     }
-
 
     @Test
     void getAllBills() throws JsonProcessingException {
@@ -388,7 +375,6 @@ class BillServiceClientIntegrationTest {
                 .amount(new BigDecimal("200.0"))
                 .build();
 
-
         server.enqueue(new MockResponse()
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .setBody(mapper.writeValueAsString(updatedResponse))
@@ -397,9 +383,7 @@ class BillServiceClientIntegrationTest {
 
         Mono<BillRequestDTO> monoUpdateRequest = Mono.just(updateRequest);
 
-
         Mono<BillResponseDTO> updatedBillResponseMono = billServiceClient.updateBill("1", monoUpdateRequest);
-
 
         StepVerifier.create(updatedBillResponseMono)
                 .expectNext(updatedResponse)
@@ -428,7 +412,6 @@ class BillServiceClientIntegrationTest {
         StepVerifier.create(empty)
                 .expectComplete()
                 .verify();
-
     }
 
     @Test
@@ -588,8 +571,6 @@ class BillServiceClientIntegrationTest {
                 .expectNextMatches(bill -> bill.getBillId().equals("1") && bill.getBillStatus() == BillStatus.PAID)
                 .verifyComplete();
     }
-
-
 
     @Test
     void payBill_Failure() throws Exception {
@@ -822,4 +803,192 @@ class BillServiceClientIntegrationTest {
                 .verifyComplete();
     }
 
+}
+    void deleteBill_WhenBillIsUnpaid_ShouldReturn422_AndNotInvokeDelete() throws Exception {
+        String billId = "B-123";
+
+        BillResponseDTO bill = BillResponseDTO.builder()
+                .billId(billId)
+                .customerId("C-1")
+                .billStatus(BillStatus.UNPAID) // triggers the if-guard
+                .amount(new BigDecimal("100.00"))
+                .taxedAmount(new BigDecimal("115.00"))
+                .build();
+
+        String body = new com.fasterxml.jackson.databind.ObjectMapper()
+                .findAndRegisterModules()
+                .writeValueAsString(bill);
+
+        server.enqueue(new okhttp3.mockwebserver.MockResponse()
+                .setHeader(org.springframework.http.HttpHeaders.CONTENT_TYPE, org.springframework.http.MediaType.APPLICATION_JSON_VALUE)
+                .setBody(body));
+
+        reactor.core.publisher.Mono<Void> result = billServiceClient.deleteBill(billId);
+
+        StepVerifier.create(result)
+                .expectErrorSatisfies(ex -> {
+                    assertTrue(ex instanceof org.springframework.web.server.ResponseStatusException);
+                    org.springframework.web.server.ResponseStatusException rse =
+                            (org.springframework.web.server.ResponseStatusException) ex;
+
+                    assertEquals("Cannot delete a bill that is unpaid or overdue.", rse.getReason());
+                })
+                .verify();
+
+        okhttp3.mockwebserver.RecordedRequest first = server.takeRequest(1, java.util.concurrent.TimeUnit.SECONDS);
+        assertNotNull(first);
+        assertEquals("GET", first.getMethod());
+        assertTrue(first.getPath().endsWith("/" + billId));
+        assertEquals(1, server.getRequestCount());
+    }
+
+    @Test
+    void getBillsByCustomerIdPaginated_Positive_ReturnsFlux() throws Exception {
+        String customerId = "C-1";
+        List<BillResponseDTO> payload = Arrays.asList(
+                bill("B-1", customerId, BillStatus.PAID),
+                bill("B-2", customerId, BillStatus.PAID)
+        );
+        // Build JSON *before* the lambda to avoid checked exception in the lambda
+        String bodyJson = mapper.writeValueAsString(payload);
+
+        prepareResponse(r -> r
+                .setResponseCode(200)
+                .addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                .setBody(bodyJson)
+        );
+
+        Flux<BillResponseDTO> result = billServiceClient.getBillsByCustomerIdPaginated(
+                customerId, Optional.of(0), Optional.of(2));
+
+        StepVerifier.create(result)
+                .expectNextMatches(b ->
+                        "B-1".equals(b.getBillId()) &&
+                                "C-1".equals(b.getCustomerId()) &&
+                                b.getBillStatus() == BillStatus.PAID)
+                .expectNextMatches(b ->
+                        "B-2".equals(b.getBillId()) &&
+                                "C-1".equals(b.getCustomerId()) &&
+                                b.getBillStatus() == BillStatus.PAID)
+                .verifyComplete();
+
+        RecordedRequest req = server.takeRequest();
+        assertTrue(req.getPath().contains("/customer/" + customerId + "/paginated"));
+        assertTrue(req.getPath().contains("page=0"));
+        assertTrue(req.getPath().contains("size=2"));
+        assertEquals("GET", req.getMethod());
+    }
+
+    @Test
+    void getBillsByCustomerIdPaginated_Negative_PropagatesError() {
+        prepareResponse(r -> r
+                .setResponseCode(500)
+                .addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                .setBody("{\"message\":\"Internal error\"}")
+        );
+
+        Flux<BillResponseDTO> result = billServiceClient.getBillsByCustomerIdPaginated(
+                "C-1", Optional.of(1), Optional.of(5));
+
+        StepVerifier.create(result)
+                .expectErrorSatisfies(ex -> {
+                    assertTrue(ex instanceof WebClientResponseException);
+                    WebClientResponseException w = (WebClientResponseException) ex;
+                    assertEquals(500, w.getRawStatusCode());
+                })
+                .verify();
+    }
+
+    @Test
+    void downloadBillPdf_Negative_NotFound() {
+        prepareResponse(r -> r
+                .setResponseCode(404)
+                .addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                .setBody("{\"message\":\"Bill not found\"}")
+        );
+
+        Mono<byte[]> result = billServiceClient.downloadBillPdf("C-404", "B-missing");
+
+        StepVerifier.create(result)
+                .expectErrorSatisfies(ex -> {
+                    assertTrue(ex instanceof WebClientResponseException);
+                    WebClientResponseException w = (WebClientResponseException) ex;
+                    assertEquals(404, w.getRawStatusCode());
+                })
+                .verify();
+    }
+
+    @Test
+    void downloadBillPdf_Positive_ReturnsBytes() throws Exception {
+        String customerId = "C-1";
+        String billId = "B-99";
+        byte[] pdf = fakePdf();
+
+        prepareResponse(r -> r
+                .setResponseCode(200)
+                .addHeader("Content-Type", MediaType.APPLICATION_PDF_VALUE)
+                .setBody(new Buffer().write(pdf))
+        );
+
+        Mono<byte[]> result = billServiceClient.downloadBillPdf(customerId, billId);
+
+        StepVerifier.create(result)
+                .assertNext(bytes -> {
+                    assertNotNull(bytes);
+                    assertArrayEquals(pdf, bytes);
+                })
+                .verifyComplete();
+
+        RecordedRequest req = server.takeRequest(); // <-- throws InterruptedException
+        assertTrue(req.getPath().contains("/customer/" + customerId + "/bills/" + billId + "/pdf"));
+        assertEquals("GET", req.getMethod());
+        String acceptHeader = req.getHeader("Accept");
+        assertNotNull(acceptHeader);
+        assertTrue(acceptHeader.contains("application/pdf"));
+    }
+
+    @Test
+    void getCurrentBalance_Positive_ReturnsBalance() throws Exception {
+        String customerId = "C-123";
+        Double balance = 250.75;
+
+        String bodyJson = mapper.writeValueAsString(balance);
+
+        prepareResponse(r -> r
+                .setResponseCode(200)
+                .addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                .setBody(bodyJson)
+        );
+
+        Mono<Double> result = billServiceClient.getCurrentBalance(customerId);
+
+        StepVerifier.create(result)
+                .expectNext(balance)
+                .verifyComplete();
+
+        RecordedRequest req = server.takeRequest();
+        assertEquals("GET", req.getMethod());
+        assertTrue(req.getPath().contains("/customer/" + customerId + "/bills/current-balance"));
+    }
+
+    @Test
+    void getCurrentBalance_Negative_NotFound() {
+        String customerId = "C-404";
+
+        prepareResponse(r -> r
+                .setResponseCode(404)
+                .addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                .setBody("{\"message\":\"Customer not found\"}")
+        );
+
+        Mono<Double> result = billServiceClient.getCurrentBalance(customerId);
+
+        StepVerifier.create(result)
+                .expectErrorSatisfies(ex -> {
+                    assertTrue(ex instanceof WebClientResponseException);
+                    WebClientResponseException w = (WebClientResponseException) ex;
+                    assertEquals(404, w.getRawStatusCode());
+                })
+                .verify();
+    }
 }

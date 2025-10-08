@@ -35,14 +35,9 @@ import java.util.List;
 class BillControllerUnitTest {
 
     private BillResponseDTO responseDTO = buildBillResponseDTO();
-
     private BillResponseDTO unpaidResponseDTO = buildUnpaidBillResponseDTO();
-
-
     private BillResponseDTO overdueResponseDTO = buildBillOverdueResponseDTO();
-
     private final String BILL_ID_OK = responseDTO.getBillId();
-
     private final String CUSTOMER_ID_OK = responseDTO.getCustomerId();
     private final String VET_ID_OK = responseDTO.getVetId();
 
@@ -51,10 +46,6 @@ class BillControllerUnitTest {
 
     @MockBean
     BillService billService;
-
-
-
-
 
     @Test
     void getBillByBillId() {
@@ -92,7 +83,6 @@ class BillControllerUnitTest {
                     Assertions.assertNotNull(billResponseDTOS);
                 });
         Mockito.verify(billService, times(1)).getAllBills();
-
     }
 
     @Test
@@ -169,9 +159,8 @@ class BillControllerUnitTest {
                     Assertions.assertNotNull(billResponseDTOS);
                 });
         Mockito.verify(billService, times(1)).getBillsByCustomerId(CUSTOMER_ID_OK);
-
-
     }
+
     @Test
     void getBillByVetId() {
 
@@ -190,10 +179,7 @@ class BillControllerUnitTest {
                 });
 
         Mockito.verify(billService, times(1)).getBillsByVetId(VET_ID_OK);
-
-
     }
-
 
     @Test
     void getAllBillsByOwnerName() {
@@ -257,7 +243,6 @@ class BillControllerUnitTest {
         Mockito.verify(billService, times(1)).getAllBillsByVisitType(visitType);
         Mockito.verifyNoMoreInteractions(billService);
     }
-
 
     @Test
     void deleteAllBills() {
@@ -386,11 +371,9 @@ class BillControllerUnitTest {
 
     @Test
     void whenValidParametersForPaginationProvided_thenShouldCallServiceWithCorrectParams() {
-        // Mocking the service layer response
         when(billService.getAllBillsByPage(any(), any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(Flux.just(responseDTO));
 
-        // Triggering the controller endpoint
         client.get()
                 .uri(uriBuilder -> uriBuilder.path("/bills")
                         .queryParam("page", 1)
@@ -401,12 +384,10 @@ class BillControllerUnitTest {
                 .expectBodyList(BillResponseDTO.class)
                 .hasSize(1);  // Checking that the response body has exactly 1 element
 
-        // Verifying the correct method calls
         Mockito.verify(billService, times(1))
                 .getAllBillsByPage(PageRequest.of(1, 10), null, null, null,
                         null, null, null, null, null);
     }
-
 
     @Test
     void whenGetBillsByMonthCalled_thenShouldCallServiceWithCorrectParams() {
@@ -462,13 +443,10 @@ class BillControllerUnitTest {
                 .expectStatus().isBadRequest();  // only check 400
     }
 
-
-
     @Test
     void whenDeletingNonExistentBill_thenReturnNotFound() {
         String invalidBillId = "NON_EXISTENT_ID";
 
-        // Mock the service to throw NotFoundException
         Mockito.when(billService.deleteBill(invalidBillId))
                 .thenReturn(Mono.error(new NotFoundException("Bill not found")));
 
@@ -480,14 +458,14 @@ class BillControllerUnitTest {
                 .jsonPath("$.message").isEqualTo("Bill not found");
     }
 
-        @Test
-        void getBillByBillId_ShouldReturnInterest() {
-                // Calculate expected compound interest using centralized utility
-                LocalDate dueDate = LocalDate.of(2022, Month.AUGUST, 15);
-                LocalDate currentDate = LocalDate.now();
+    @Test
+    void getBillByBillId_ShouldReturnInterest() {
+        // Calculate expected compound interest using centralized utility
+        LocalDate dueDate = LocalDate.of(2022, Month.AUGUST, 15);
+        LocalDate currentDate = LocalDate.now();
                 
-                BigDecimal expectedInterest = InterestCalculationUtil.calculateCompoundInterest(
-                    overdueResponseDTO.getAmount(), dueDate, currentDate);
+        BigDecimal expectedInterest = InterestCalculationUtil.calculateCompoundInterest(
+                overdueResponseDTO.getAmount(), dueDate, currentDate);
                 overdueResponseDTO.setInterest(expectedInterest);
 
                 when(billService.getBillByBillId(anyString())).thenReturn(Mono.just(overdueResponseDTO));
