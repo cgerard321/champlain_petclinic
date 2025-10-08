@@ -6,7 +6,7 @@ export async function getAllProducts(
   maxPrice?: number,
   minRating?: number,
   maxRating?: number,
-  sort?: string,
+  //sort?: string,
   deliveryType?: string,
   productType?: string
 ): Promise<ProductModel[]> {
