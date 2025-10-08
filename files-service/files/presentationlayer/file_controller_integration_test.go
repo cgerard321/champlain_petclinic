@@ -170,6 +170,7 @@ func TestWhenDeleteFile_withExistingFileId_thenReturnSuccessMessage(t *testing.T
 }
 
 func TestWhenDeleteFile_withNonExistingFileId_thenReturnNotFound(t *testing.T) {
+	reset()
 	router := gin.Default()
 	_ = controller.Routes(router)
 
