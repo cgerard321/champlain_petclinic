@@ -155,7 +155,7 @@ const UserCart = (): JSX.Element => {
     try {
       const { data } = await axiosInstance.get(
         `/promos/validate/${voucherCode}`,
-        { useV2: false }
+        { useV2: true }
       );
       setDiscount((subtotal * data.discount) / 100);
       setVoucherError(null);

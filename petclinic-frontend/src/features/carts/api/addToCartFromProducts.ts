@@ -29,9 +29,12 @@ export function useAddToCart(): UseAddToCartReturnType {
 
       if (status === 404 || status === 401) {
         const { data } = await axiosInstance.post<CreateCartResponse>(
-          '/carts', // → POST /api/v2/gateway/carts
+          '/carts', // → POST /api/gateway/carts
           { customerId: userId },
-          { headers: { 'Content-Type': 'application/json' } }
+          {
+            headers: { 'Content-Type': 'application/json' },
+            useV2: false,
+          }
         );
 
         const newId = (data?.cartId ?? data?.id) as string | undefined;
