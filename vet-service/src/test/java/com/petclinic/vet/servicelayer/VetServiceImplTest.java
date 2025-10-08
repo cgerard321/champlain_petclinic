@@ -1,10 +1,13 @@
 package com.petclinic.vet.servicelayer;
 
-import com.petclinic.vet.dataaccesslayer.PhotoRepository;
-import com.petclinic.vet.dataaccesslayer.Vet;
-import com.petclinic.vet.dataaccesslayer.VetRepository;
-import com.petclinic.vet.presentationlayer.VetRequestDTO;
-import com.petclinic.vet.presentationlayer.VetResponseDTO;
+import com.petclinic.vet.businesslayer.photos.PhotoService;
+import com.petclinic.vet.businesslayer.vets.VetService;
+import com.petclinic.vet.dataaccesslayer.photos.PhotoRepository;
+import com.petclinic.vet.dataaccesslayer.vets.Vet;
+import com.petclinic.vet.dataaccesslayer.vets.VetRepository;
+import com.petclinic.vet.presentationlayer.vets.VetRequestDTO;
+import com.petclinic.vet.presentationlayer.vets.VetResponseDTO;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.r2dbc.init.R2dbcScriptDatabaseInitializer;

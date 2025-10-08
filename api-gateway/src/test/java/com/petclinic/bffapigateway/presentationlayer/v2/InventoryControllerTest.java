@@ -1553,4 +1553,65 @@ public class InventoryControllerTest {
                 .expectStatus().is5xxServerError();
     }
 
+    @Test
+    void addInventory_shouldReturnInventoryWithCode() {
+        InventoryRequestDTO requestDTO = InventoryRequestDTO.builder()
+                .inventoryName("Gateway Test Inventory")
+                .inventoryType("Internal")
+                .inventoryDescription("Testing via gateway")
+                .build();
+
+        InventoryResponseDTO responseDTO = InventoryResponseDTO.builder()
+                .inventoryId("generated_id")
+                .inventoryCode("INV-0001")
+                .inventoryName("Gateway Test Inventory")
+                .inventoryType("Internal")
+                .inventoryDescription("Testing via gateway")
+                .build();
+
+        when(inventoryServiceClient.addInventory(any(InventoryRequestDTO.class)))
+                .thenReturn(Mono.just(responseDTO));
+
+        client.post()
+                .uri(baseInventoryURL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestDTO)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody(InventoryResponseDTO.class)
+                .value(response -> {
+                    assertNotNull(response.getInventoryCode());
+                    assertEquals("INV-0001", response.getInventoryCode());
+                });
+
+        verify(inventoryServiceClient, times(1)).addInventory(any(InventoryRequestDTO.class));
+    }
+
+    @Test
+    void getInventoryById_shouldReturnInventoryWithCode() {
+        String inventoryId = "test_id";
+
+        InventoryResponseDTO responseDTO = InventoryResponseDTO.builder()
+                .inventoryId(inventoryId)
+                .inventoryCode("INV-0042")
+                .inventoryName("Test Inventory")
+                .inventoryType("Internal")
+                .build();
+
+        when(inventoryServiceClient.getInventoryById(inventoryId))
+                .thenReturn(Mono.just(responseDTO));
+
+        client.get()
+                .uri(baseInventoryURL + "/{inventoryId}", inventoryId)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(InventoryResponseDTO.class)
+                .value(response -> {
+                    assertNotNull(response.getInventoryCode());
+                    assertEquals("INV-0042", response.getInventoryCode());
+                });
+
+        verify(inventoryServiceClient, times(1)).getInventoryById(inventoryId);
+    }
+
 }

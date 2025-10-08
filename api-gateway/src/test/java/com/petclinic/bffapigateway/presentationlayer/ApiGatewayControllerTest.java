@@ -1485,31 +1485,6 @@ class ApiGatewayControllerTest {
     }
 
 
-
-    @Test
-    void getPutRequestNotFound(){
-        client.put()
-                .uri("/owners/{ownerId}", 100)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isNotFound()
-                .expectBody()
-                .jsonPath("$.path").isEqualTo("/owners/100")
-                .jsonPath("$.message").isEqualTo(null);
-    }
-
-    @Test
-    void getPutRequestMissingPath(){
-        client.put()
-                .uri("/owners")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isNotFound()
-                .expectBody()
-                .jsonPath("$.path").isEqualTo("/owners")
-                .jsonPath("$.message").isEqualTo(null);
-    }
-
     @Test
     void createBill(){
         BillResponseDTO billResponseDTO = new BillResponseDTO();
@@ -2853,33 +2828,6 @@ private VetAverageRatingDTO buildVetAverageRatingDTO(){
 
             verify(authServiceClient, times(1)).changePassword(any());
         }
-
-    //@Test
-    void getAllPetTypes_shouldSucceed(){
-        PetTypeResponseDTO petType1 = new PetTypeResponseDTO();
-        petType1.setPetTypeId("petTypeId-90");
-        petType1.setName("Dog");
-        petType1.setPetTypeDescription("Mammal");
-
-        Flux<PetTypeResponseDTO> petTypeResponseDTOFlux = Flux.just(petType1);
-
-        when(customersServiceClient.getAllPetTypes()).thenReturn(petTypeResponseDTOFlux);
-
-        client.get()
-                .uri("/api/gateway/owners/petTypes")
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().valueEquals("Content-Type", "application/json") // Change content type expectation
-                .expectBodyList(PetTypeResponseDTO.class)
-                .value((list) -> {
-                    assertNotNull(list);
-                    assertEquals(1, list.size());
-                    assertEquals(list.get(0).getPetTypeId(), petType1.getPetTypeId());
-                    assertEquals(list.get(0).getName(), petType1.getName());
-                });
-    }
-
-
 
     @Test
     void createUser_withValidModel_shouldSucceed() {

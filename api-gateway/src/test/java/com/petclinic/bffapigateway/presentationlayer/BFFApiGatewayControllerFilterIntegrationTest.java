@@ -70,8 +70,6 @@ class BFFApiGatewayControllerFilterIntegrationTest {
                 .expectStatus().isUnauthorized();
     }
 
-
-
 //    @Test
     void testGetAllCustomers_ShouldReturnOk() {
         Mockito.when(jwtTokenUtil.getTokenFromRequest(any(ServerWebExchange.class)))
@@ -97,8 +95,6 @@ class BFFApiGatewayControllerFilterIntegrationTest {
                 .exchange()
                 .expectStatus().isOk();
     }
-
-
 
 //    @Test
     void getUserByIdWithWrongAccount_ShouldFail(){
