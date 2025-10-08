@@ -781,7 +781,6 @@ public class CartServiceClientTest {
                 .verify();
     }
 
-    // --- C) getCartByCartId: 500 -> IllegalArgumentException mapping ---
     @Test
     void testGetCartByCartId_ServerError500() {
         String cartId = "c-err";

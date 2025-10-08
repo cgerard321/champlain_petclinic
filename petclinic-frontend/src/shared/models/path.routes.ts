@@ -1,11 +1,11 @@
 export enum AppRoutePaths {
   Default = '/',
-  MoveInventoryProducts = 'inventories/:inventoryId/products/:productId/move',
+  MoveInventoryProducts = 'inventories/:inventoryId/products/:productId',
   EditInventory = 'inventories/:inventoryId/edit',
   EditInventoryProducts = 'inventories/:inventoryId/products/:productId/edit',
   LowStockProducts = '/products/lowstock',
   AddSupplyToInventory = 'inventories/:inventoryId/products/add',
-  CustomerEmergency = '/customer/emergency',
+  CustomerEmergency = '/customer/emergencies',
   Review = '/reviews',
   EmergencyById = '/visits/emergency/:visitEmergencyId',
   Emergency = '/add/emergency',

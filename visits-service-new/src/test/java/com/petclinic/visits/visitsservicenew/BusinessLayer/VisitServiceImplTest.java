@@ -22,10 +22,13 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
@@ -716,4 +719,95 @@ class VisitServiceImplTest {
         VisitRequestDTO requestDTO = buildVisitRequestDTO();
         return Mono.just(requestDTO);
     }
+
+    @Test
+    void exportVisitsToCSV_shouldReturnCSVFile() {
+        Visit visit = buildVisit("Export test");
+        when(visitRepo.findAll()).thenReturn(Flux.just(visit));
+
+        StepVerifier.create(visitService.exportVisitsToCSV())
+                .consumeNextWith(resource -> {
+                    try {
+                        String csvContent = new String(resource.getInputStream().readAllBytes());
+                        assertTrue(csvContent.contains("VisitId,Description,VisitDate,PetId,PractitionerId,Status"));
+                        assertTrue(csvContent.contains(visit.getVisitId()));
+                        assertTrue(csvContent.contains("Export test"));
+                    } catch (Exception e) {
+                        fail("Failed to read InputStreamResource: " + e.getMessage());
+                    }
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void archiveCompletedVisit_completedVisit_shouldArchive() {
+        Visit visit = buildVisit("completed");
+        visit.setStatus(Status.COMPLETED);
+
+        // simulate repo.findByVisitId
+        when(visitRepo.findByVisitId("id")).thenReturn(Mono.just(visit));
+
+        // capture the saved visit and return with ARCHIVED status
+        when(visitRepo.save(any(Visit.class))).thenAnswer(invocation -> {
+            Visit savedVisit = invocation.getArgument(0);
+            savedVisit.setStatus(Status.ARCHIVED);
+            return Mono.just(savedVisit);
+        });
+
+        when(entityDtoUtil.toVisitResponseDTO(any()))
+                .thenAnswer(invocation -> {
+                    Visit v = invocation.getArgument(0);
+                    return Mono.just(buildVisitResponseDTOWithStatus(v.getStatus()));
+                });
+
+        StepVerifier.create(visitService.archiveCompletedVisit("id", Mono.just(buildVisitRequestDTO())))
+                .expectNextMatches(v -> v.getStatus() == Status.ARCHIVED)
+                .verifyComplete();
+    }
+
+
+    @Test
+    void archiveCompletedVisit_notCompletedVisit_shouldThrow() {
+        Visit visit = buildVisit("upcoming visit"); // Status = UPCOMING by default
+        when(visitRepo.findByVisitId(anyString())).thenReturn(Mono.just(visit));
+
+        Mono<VisitResponseDTO> result = visitService.archiveCompletedVisit("id", Mono.just(buildVisitRequestDTO()));
+
+        StepVerifier.create(result)
+                .expectError(BadRequestException.class)
+                .verify();
+    }
+
+    @Test
+    void getAllArchivedVisits_shouldReturnArchivedVisits() {
+        Visit archivedVisit = buildVisit("archived");
+        archivedVisit.setStatus(Status.ARCHIVED);
+
+        when(visitRepo.findAllByStatus("ARCHIVED")).thenReturn(Flux.just(archivedVisit));
+        when(entityDtoUtil.toVisitResponseDTO(archivedVisit)).thenReturn(Mono.just(buildVisitResponseDTO()));
+
+        StepVerifier.create(visitService.getAllArchivedVisits())
+                .expectNextCount(1)
+                .verifyComplete();
+    }
+
+    @Test
+    void deleteAllCancelledVisits_noCancelledVisits_shouldThrow() {
+        when(visitRepo.findAllByStatus("CANCELLED")).thenReturn(Flux.empty());
+        when(visitRepo.deleteAll(anyList())).thenReturn(Mono.empty()); // avoid null
+
+        StepVerifier.create(visitService.deleteAllCancelledVisits())
+                .verifyComplete();
+    }
+
+    private VisitResponseDTO buildVisitResponseDTOWithStatus(Status status) {
+        VisitResponseDTO dto = buildVisitResponseDTO();
+        dto.setStatus(status);
+        return dto;
+    }
+
+
+
+
+
 }

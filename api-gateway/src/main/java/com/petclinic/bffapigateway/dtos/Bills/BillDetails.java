@@ -15,6 +15,7 @@ public class BillDetails {
     private String visitType;
     private double amount;
     private double taxedAmount;
+    private double interestAmount;
     private BillStatus billStatus;
     private LocalDate dueDate;
 }

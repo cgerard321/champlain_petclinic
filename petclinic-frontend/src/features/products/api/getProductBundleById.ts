@@ -6,7 +6,7 @@ export async function getProductBundleById(
 ): Promise<ProductBundleModel> {
   try {
     const response = await axiosInstance.get('/products/bundles/' + bundleId, {
-      useV2: true,
+      useV2: false,
     });
 
     return response.data;

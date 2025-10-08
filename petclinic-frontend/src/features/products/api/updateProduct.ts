@@ -11,7 +11,7 @@ export async function updateProduct(
       productData,
       {
         responseType: 'json',
-        useV2: true,
+        useV2: false,
       }
     );
     return response.data;

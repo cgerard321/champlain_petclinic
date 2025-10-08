@@ -13,6 +13,6 @@
 }
 
 :global(.table) th,
-:global(.table) td { vertical-align: middle; }
-
-
+:global(.table) td {
+  vertical-align: middle;
+}

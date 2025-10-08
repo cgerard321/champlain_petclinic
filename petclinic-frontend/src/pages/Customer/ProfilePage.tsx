@@ -1,23 +1,30 @@
 import { useEffect, useState } from 'react';
 import { getOwner } from '@/features/customers/api/getOwner';
 import { getPetTypes } from '@/features/customers/api/getPetTypes';
+import { getUserDetails } from '@/features/customers/api/getUserDetails';
 import { OwnerResponseModel } from '@/features/customers/models/OwnerResponseModel.ts';
 import { PetResponseModel } from '@/features/customers/models/PetResponseModel.ts';
 import { PetTypeModel } from '@/features/customers/models/PetTypeModel';
+import { UserDetailsModel } from '@/features/customers/models/UserDetailsModel';
 import { useUser } from '@/context/UserContext';
 import { NavBar } from '@/layouts/AppNavBar.tsx';
 import AddPetModal from '@/features/customers/components/AddPetModal';
+import EditPetModal from '@/features/customers/components/EditPetModal';
 import './ProfilePage.css';
 import { AppRoutePaths } from '@/shared/models/path.routes.ts';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '@/shared/api/axiosInstance';
 import { getPetTypeName } from '@/features/customers/utils/petTypeMapping';
+import { deletePet } from '@/features/customers/api/deletePet';
 
 const ProfilePage = (): JSX.Element => {
   const { user } = useUser();
   const [owner, setOwner] = useState<OwnerResponseModel | null>(null);
+  const [userDetails, setUserDetails] = useState<UserDetailsModel | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isAddPetModalOpen, setIsAddPetModalOpen] = useState<boolean>(false);
+  const [isEditPetModalOpen, setIsEditPetModalOpen] = useState<boolean>(false);
+  const [selectedPetId, setSelectedPetId] = useState<string>('');
   const [petTypes, setPetTypes] = useState<PetTypeModel[]>([]);
   const navigate = useNavigate();
 
@@ -36,6 +43,39 @@ const ProfilePage = (): JSX.Element => {
   }, []);
 
   useEffect(() => {
+    let isMounted = true;
+
+    const fetchUserData = async (): Promise<void> => {
+      try {
+        const userDetailsResponse = await getUserDetails(user.userId);
+        if (isMounted) {
+          setUserDetails(userDetailsResponse.data);
+        }
+      } catch (error) {
+        console.error('Error fetching user details:', error);
+        if (isMounted) {
+          setUserDetails({
+            userId: user.userId,
+            username: 'Unknown',
+            email: '',
+            roles: [],
+            verified: false,
+            disabled: false,
+          });
+        }
+      }
+    };
+
+    fetchUserData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [user.userId]);
+
+  useEffect(() => {
+    let isMounted = true;
+
     const fetchOwnerData = async (): Promise<void> => {
       try {
         const ownerResponse = await getOwner(user.userId);
@@ -65,27 +105,37 @@ const ProfilePage = (): JSX.Element => {
             petsData = petsResponse.data;
           }
 
-          setOwner({
-            ...ownerData,
-            pets: petsData,
-          });
+          if (isMounted) {
+            setOwner({
+              ...ownerData,
+              pets: petsData,
+            });
+          }
         } catch (petsError) {
           console.warn(
             'Error fetching pets, setting owner without pets:',
             petsError
           );
-          setOwner({
-            ...ownerData,
-            pets: [],
-          });
+          if (isMounted) {
+            setOwner({
+              ...ownerData,
+              pets: [],
+            });
+          }
         }
       } catch (error) {
-        setError('Error fetching owner data');
+        if (isMounted) {
+          setError('Error fetching owner data');
+        }
         console.error('Error fetching owner data:', error);
       }
     };
 
     fetchOwnerData();
+
+    return () => {
+      isMounted = false;
+    };
   }, [user.userId]);
 
   const handleUpdateClick = (): void => {
@@ -116,6 +166,94 @@ const ProfilePage = (): JSX.Element => {
     }
   };
 
+  const handleDeletePet = async (petId: string): Promise<void> => {
+    const confirmed = window.confirm(
+      'Are you sure you want to delete this pet? This action cannot be undone.'
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      await deletePet(petId);
+
+      if (owner) {
+        setOwner({
+          ...owner,
+          pets: owner.pets?.filter(pet => pet.petId !== petId) || [],
+        });
+      }
+
+      // eslint-disable-next-line no-console
+      console.log('Pet deleted successfully');
+    } catch (error) {
+      console.error('Error deleting pet:', error);
+      alert('Failed to delete pet. Please try again.');
+    }
+  };
+
+  const handleEditPet = (petId: string): void => {
+    setSelectedPetId(petId);
+    setIsEditPetModalOpen(true);
+  };
+
+  const handleCloseEditPetModal = (): void => {
+    setIsEditPetModalOpen(false);
+    setSelectedPetId('');
+  };
+
+  //eliminated code duplication
+  const fetchOwnerData = async (): Promise<void> => {
+    if (!user.userId) return;
+
+    try {
+      const ownerResponse = await getOwner(user.userId);
+      const ownerData = ownerResponse.data;
+      if (ownerData.pets && ownerData.pets.length > 0) {
+        setOwner(ownerData);
+      } else {
+        setOwner({
+          ...ownerData,
+          pets: [],
+        });
+      }
+    } catch (error) {
+      setError('Error fetching owner data');
+      console.error('Error fetching owner data:', error);
+    }
+  };
+
+  const handlePetUpdated = (updatedPet?: PetResponseModel): void => {
+    if (updatedPet) {
+      setOwner(prevOwner => {
+        if (!prevOwner || !prevOwner.pets) return prevOwner;
+
+        const updatedPets = prevOwner.pets.map(pet =>
+          pet.petId === updatedPet.petId
+            ? {
+                ...updatedPet,
+                birthDate: updatedPet.birthDate
+                  ? new Date(updatedPet.birthDate)
+                  : new Date(),
+              }
+            : pet
+        );
+
+        return {
+          ...prevOwner,
+          pets: updatedPets,
+        };
+      });
+    } else {
+      fetchOwnerData();
+    }
+  };
+
+  const handlePetDeleted = (): void => {
+    fetchOwnerData();
+  };
+
   if (error) {
     return <p>{error}</p>;
   }
@@ -133,6 +271,9 @@ const ProfilePage = (): JSX.Element => {
             {owner.firstName} {owner.lastName}&apos;s Profile
           </h1>
           <div className="customers-profile-info">
+            <p>
+              <strong>Username:</strong> {userDetails?.username || 'Loading...'}
+            </p>
             <p>
               <strong>First Name:</strong> {owner.firstName}
             </p>
@@ -181,6 +322,20 @@ const ProfilePage = (): JSX.Element => {
                           years
                         </span>
                       </div>
+                      <div className="customers-pet-actions">
+                        <button
+                          className="customers-edit-pet-button"
+                          onClick={() => handleEditPet(pet.petId)}
+                        >
+                          Edit Pet
+                        </button>
+                        <button
+                          className="customers-delete-pet-button"
+                          onClick={() => handleDeletePet(pet.petId)}
+                        >
+                          Delete Pet
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -206,6 +361,15 @@ const ProfilePage = (): JSX.Element => {
         isOpen={isAddPetModalOpen}
         onClose={handleCloseAddPetModal}
         onPetAdded={handlePetAdded}
+      />
+
+      <EditPetModal
+        isOpen={isEditPetModalOpen}
+        onClose={handleCloseEditPetModal}
+        petId={selectedPetId}
+        ownerId={user.userId}
+        onPetUpdated={handlePetUpdated}
+        onPetDeleted={handlePetDeleted}
       />
     </div>
   );

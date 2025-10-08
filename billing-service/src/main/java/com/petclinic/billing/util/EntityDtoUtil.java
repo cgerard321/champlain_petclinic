@@ -5,9 +5,11 @@ package com.petclinic.billing.util;
 import com.petclinic.billing.datalayer.Bill;
 import com.petclinic.billing.datalayer.BillRequestDTO;
 import com.petclinic.billing.datalayer.BillResponseDTO;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.UUID;
@@ -33,6 +35,12 @@ public class EntityDtoUtil {
         billResponseDTO.setTaxedAmount(bill.getTaxedAmount());
         billResponseDTO.setBillStatus(bill.getBillStatus());
         billResponseDTO.setDueDate(bill.getDueDate());
+        billResponseDTO.setInterestExempt(bill.isInterestExempt());
+        
+        // Calculate and set interest using centralized utility
+        BigDecimal interest = InterestCalculationUtil.calculateInterest(bill);
+        billResponseDTO.setInterest(interest);
+        
         billResponseDTO.setTimeRemaining(timeRemaining(bill));
         billResponseDTO.setArchive(bill.getArchive());
 

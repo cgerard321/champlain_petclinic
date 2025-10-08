@@ -14,6 +14,8 @@ import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.math.BigDecimal;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -207,6 +209,22 @@ public class BillController {
         return billService.getBillsByMonth(year, month);
     }
 
+    @PatchMapping("/bills/{billId}/exempt-interest")
+    public Mono<ResponseEntity<Void>> exemptInterest(@PathVariable String billId, @RequestParam boolean exempt) {
+        return billService.setInterestExempt(billId, exempt)
+            .thenReturn(ResponseEntity.ok().build());
+    }
+
+    @GetMapping("/bills/{billId}/interest")
+    public Mono<BigDecimal> getInterest(@PathVariable String billId) {
+        return billService.getBillByBillId(billId)
+                .map(BillResponseDTO::getInterest);
+    }
+    @GetMapping("/bills/{billId}/total")
+    public Mono<BigDecimal> getTotal(@PathVariable String billId) {
+        return billService.getBillByBillId(billId)
+                .map(bill -> bill.getAmount().add(bill.getInterest()));
+    }
     @PatchMapping("/bills/archive")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public Mono<ResponseEntity<Object>> archiveBill() {
