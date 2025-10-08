@@ -128,7 +128,7 @@ public class InventoryControllerTest {
         // Arrange
         Optional<Integer> page = Optional.of(0);
         Optional<Integer> size = Optional.of(2);
-        when(inventoryServiceClient.searchInventory(page, size, "INVT-000", "invt1", "Internal", "invtone", null))
+        when(inventoryServiceClient.searchInventory(page, size, null, "invt1", "Internal", "invtone", null))
                 .thenReturn(Flux.just(buildInventoryDTO()));
 
         // Act
@@ -144,7 +144,7 @@ public class InventoryControllerTest {
 
         // Assert
         verify(inventoryServiceClient, times(1))
-                .searchInventory(eq(page), eq(size), eq("IVNT-000"), eq("invt1"), eq("Internal"), eq("invtone"), eq(null));
+                .searchInventory(eq(page), eq(size), eq(null), eq("invt1"), eq("Internal"), eq("invtone"), eq(null));
     }
 
     @Test
@@ -152,7 +152,7 @@ public class InventoryControllerTest {
         // Arrange
         Optional<Integer> page = Optional.of(0);
         Optional<Integer> size = Optional.of(2);
-        when(inventoryServiceClient.searchInventory(page, size, "invalid", "invalid", "invalid", "invalid", null))
+        when(inventoryServiceClient.searchInventory(page, size, null, "invalid", "invalid", "invalid", null))
                 .thenReturn(Flux.empty());
 
         // Act
@@ -167,7 +167,7 @@ public class InventoryControllerTest {
 
         // Assert
         verify(inventoryServiceClient, times(1))
-                .searchInventory(eq(page), eq(size), eq("invalid"), eq("invalid"), eq("invalid"), eq("invalid"), eq(null));
+                .searchInventory(eq(page), eq(size), eq(null), eq("invalid"), eq("invalid"), eq("invalid"), eq(null));
     }
 
     @Test
@@ -1614,4 +1614,47 @@ public class InventoryControllerTest {
         verify(inventoryServiceClient, times(1)).getInventoryById(inventoryId);
     }
 
+    @Test
+    void getAllInventories_withValidInventoryCode_shouldReturnInventory() {
+        Optional<Integer> page = Optional.of(0);
+        Optional<Integer> size = Optional.of(2);
+        String inventoryCode = "INV-0001";
+
+        when(inventoryServiceClient.searchInventory(page, size, inventoryCode, null, null, null, null))
+                .thenReturn(Flux.just(buildInventoryDTO()));
+
+        client.get()
+                .uri(baseInventoryURL + "?page=0&size=2&inventoryCode=" + inventoryCode)
+                .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
+                .acceptCharset(StandardCharsets.UTF_8)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(InventoryResponseDTO.class)
+                .hasSize(1);
+
+        verify(inventoryServiceClient, times(1))
+                .searchInventory(eq(page), eq(size), eq(inventoryCode), eq(null), eq(null), eq(null), eq(null));
+    }
+
+    @Test
+    void getAllInventories_withInvalidInventoryCode_shouldReturnEmpty() {
+        Optional<Integer> page = Optional.of(0);
+        Optional<Integer> size = Optional.of(2);
+        String invalidCode = "INV-9999";
+
+        when(inventoryServiceClient.searchInventory(page, size, invalidCode, null, null, null, null))
+                .thenReturn(Flux.empty());
+
+        client.get()
+                .uri(baseInventoryURL + "?page=0&size=2&inventoryCode=" + invalidCode)
+                .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
+                .acceptCharset(StandardCharsets.UTF_8)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(InventoryResponseDTO.class)
+                .hasSize(0);
+
+        verify(inventoryServiceClient, times(1))
+                .searchInventory(eq(page), eq(size), eq(invalidCode), eq(null), eq(null), eq(null), eq(null));
+    }
 }

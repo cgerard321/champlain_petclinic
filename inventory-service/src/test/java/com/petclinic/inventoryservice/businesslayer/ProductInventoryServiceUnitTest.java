@@ -1280,6 +1280,38 @@ class ProductInventoryServiceUnitTest {
                 .verifyComplete();
     }
 
+    @Test
+    void searchInventories_WithInventoryCode_ShouldReturnInventory() {
+        Pageable pageable = PageRequest.of(0, 10);
+        String inventoryCode = "INV-0001";
+
+        when(inventoryRepository.findInventoryByInventoryCode(inventoryCode))
+                .thenReturn(Mono.just(inventory));
+
+        Flux<InventoryResponseDTO> result = productInventoryService.searchInventories(
+                pageable, inventoryCode, null, null, null, null);
+
+        StepVerifier.create(result)
+                .expectNextMatches(inv -> inv.getInventoryCode().equals(inventoryCode))
+                .verifyComplete();
+    }
+
+    @Test
+    void searchInventories_WithInvalidInventoryCode_ShouldThrowNotFoundException() {
+        Pageable pageable = PageRequest.of(0, 10);
+        String invalidCode = "INV-9999";
+
+        when(inventoryRepository.findInventoryByInventoryCode(invalidCode))
+                .thenReturn(Mono.empty());
+
+        Flux<InventoryResponseDTO> result = productInventoryService.searchInventories(
+                pageable, invalidCode, null, null, null, null);
+
+        StepVerifier.create(result)
+                .expectError(NotFoundException.class)
+                .verify();
+    }
+
 
 //    @Test
 //    void getProductsInInventoryByInventoryIdAndProductFieldPagination_ShouldSucceed(){

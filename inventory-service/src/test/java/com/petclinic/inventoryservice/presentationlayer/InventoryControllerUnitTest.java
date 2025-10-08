@@ -1024,6 +1024,27 @@ class InventoryControllerUnitTest {
     }
 
     @Test
+    void searchInventories_WithInventoryCode_ShouldReturnInventory() {
+        Pageable page = PageRequest.of(0, 10);
+        String inventoryCode = "INV-0001";
+        InventoryResponseDTO sampleResponse = new InventoryResponseDTO();
+        sampleResponse.setInventoryCode(inventoryCode);
+
+        when(productInventoryService.searchInventories(page, inventoryCode, null, null, null, null))
+                .thenReturn(Flux.just(sampleResponse));
+
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder.path("/inventory")
+                        .queryParam("inventoryCode", inventoryCode)
+                        .build())
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(InventoryResponseDTO.class)
+                .hasSize(1);
+    }
+
+    @Test
     void getProductsByInventoryIdAndProductName_withValidFields_shouldSucceed() {
         String inventoryId = "1";
         String productName = "B";
