@@ -740,8 +740,8 @@ class BillServiceClientIntegrationTest {
         List<BillResponseDTO> archivedBills = Arrays.asList(
                 BillResponseDTO.builder()
                         .billId("1")
-                        .amount(100.0)
-                        .taxedAmount(115.0)
+                        .amount(new BigDecimal(100.0))
+                        .taxedAmount(new BigDecimal(115.0))
                         .customerId("1")
                         .vetId("1")
                         .visitType("Check up")
@@ -750,8 +750,8 @@ class BillServiceClientIntegrationTest {
                         .build(),
                 BillResponseDTO.builder()
                         .billId("2")
-                        .amount(200.0)
-                        .taxedAmount(230.0)
+                        .amount(new BigDecimal(200.0))
+                        .taxedAmount(new BigDecimal(230.0))
                         .customerId("2")
                         .vetId("2")
                         .visitType("Surgery")
@@ -784,8 +784,8 @@ class BillServiceClientIntegrationTest {
         List<BillResponseDTO> bills = Arrays.asList(
                 BillResponseDTO.builder()
                         .billId("1")
-                        .amount(100.0)
-                        .taxedAmount(115.0)
+                        .amount(new BigDecimal(100.0))
+                        .taxedAmount(new BigDecimal(115.0))
                         .customerId("1")
                         .vetId("1")
                         .visitType("Check up")
@@ -794,8 +794,8 @@ class BillServiceClientIntegrationTest {
                         .build(),
                 BillResponseDTO.builder()
                         .billId("2")
-                        .amount(200.0)
-                        .taxedAmount(230.0)
+                        .amount(new BigDecimal(200.0))
+                        .taxedAmount(new BigDecimal(230.0))
                         .customerId("2")
                         .vetId("2")
                         .visitType("Surgery")
