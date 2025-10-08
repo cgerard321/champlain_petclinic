@@ -803,7 +803,7 @@ class BillServiceClientIntegrationTest {
                 .verifyComplete();
     }
 
-}
+
     void deleteBill_WhenBillIsUnpaid_ShouldReturn422_AndNotInvokeDelete() throws Exception {
         String billId = "B-123";
 
