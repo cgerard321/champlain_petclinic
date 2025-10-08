@@ -387,6 +387,44 @@ public class BillServiceImplTest {
     }
 
     @Test
+    void createBill_missingVetId_shouldReturnError() {
+        // Arrange
+        BillRequestDTO billDTO = new BillRequestDTO();
+        billDTO.setCustomerId("owner-456");
+        billDTO.setBillStatus(BillStatus.PAID);
+        billDTO.setDueDate(LocalDate.now().plusDays(30));
+
+        // Act + Assert
+        StepVerifier.create(billService.createBill(Mono.just(billDTO)))
+                .expectErrorSatisfies(throwable -> {
+                    assertTrue(throwable instanceof ResponseStatusException);
+                    ResponseStatusException ex = (ResponseStatusException) throwable;
+                    assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
+                    assertEquals("Vet ID is required", ex.getReason());
+                })
+                .verify();
+    }
+
+    @Test
+    void createBill_missingCustomerId_shouldReturnError() {
+        // Arrange
+        BillRequestDTO billDTO = new BillRequestDTO();
+        billDTO.setVetId("vet-123");
+        billDTO.setBillStatus(BillStatus.PAID);
+        billDTO.setDueDate(LocalDate.now().plusDays(30));
+
+        // Act + Assert
+        StepVerifier.create(billService.createBill(Mono.just(billDTO)))
+                .expectErrorSatisfies(throwable -> {
+                    assertTrue(throwable instanceof ResponseStatusException);
+                    ResponseStatusException ex = (ResponseStatusException) throwable;
+                    assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
+                    assertEquals("Customer ID is required", ex.getReason());
+                })
+                .verify();
+    }
+
+    @Test
     public void test_deleteAllBills(){
         
         when(repo.deleteAll()).thenReturn(Mono.empty());

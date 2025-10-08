@@ -174,6 +174,14 @@ public class BillServiceImpl implements BillService{
                         ));
                     }
 
+                    // Validate vetId and customerId
+                    if (dto.getVetId() == null || dto.getVetId().isEmpty()) {
+                        return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Vet ID is required"));
+                    }
+                    if (dto.getCustomerId() == null || dto.getCustomerId().isEmpty()) {
+                        return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Customer ID is required"));
+                    }
+
                     // Fetch Vet and Owner details
                     Mono<VetResponseDTO> vetMono = vetClient.getVetByVetId(dto.getVetId());
                     Mono<OwnerResponseDTO> ownerMono = ownerClient.getOwnerByOwnerId(dto.getCustomerId());
