@@ -241,7 +241,7 @@ const UserCart = (): JSX.Element => {
         }));
       }
     },
-    [cartItems, cartId, isStaff]
+    [cartItems, cartId, isStaff, blockIfReadOnly]
   );
 
   const deleteItem = useCallback(
@@ -270,7 +270,7 @@ const UserCart = (): JSX.Element => {
         setNotificationMessage('Failed to delete item.');
       }
     },
-    [cartId, confirm]
+    [cartId, confirm, blockIfReadOnly]
   );
 
   const clearCart = async (): Promise<void> => {
