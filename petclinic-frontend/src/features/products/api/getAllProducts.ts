@@ -18,7 +18,7 @@ export async function getAllProducts(
     params.minRating = minRating;
   if (maxRating !== undefined && maxRating !== null)
     params.maxRating = maxRating;
-  if (sort) params.sort = sort;
+  //if (sort) params.sort = sort;
   if (deliveryType && deliveryType !== 'default')
     params.deliveryType = deliveryType;
   if (productType && productType !== 'default')
