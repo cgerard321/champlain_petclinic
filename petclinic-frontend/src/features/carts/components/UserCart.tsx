@@ -294,7 +294,6 @@ const UserCart = (): JSX.Element => {
       await axiosInstance.delete(`/carts/${cartId}/clear`, { useV2: false });
       setCartItems([]);
       setCartItemCount(0);
-      // notify navbar (cart cleared)
       notifyCartChanged();
     } catch (error) {
       console.error('Error clearing cart:', error);
@@ -408,8 +407,8 @@ const UserCart = (): JSX.Element => {
     }
   };
 
-  // move all wishlist to cart
   const moveAllWishlistToCart = async (): Promise<void> => {
+    if (blockIfReadOnly()) return;
     if (!cartId || wishlistItems.length === 0) return;
 
     const ok = await confirm({
@@ -722,9 +721,14 @@ const UserCart = (): JSX.Element => {
               <button
                 className="move-all-to-cart-btn"
                 onClick={moveAllWishlistToCart}
-                disabled={movingAll}
+                disabled={isStaff || movingAll}
                 aria-busy={movingAll}
-                title="Move all wishlist items to cart"
+                aria-disabled={isStaff || movingAll}
+                title={
+                  isStaff
+                    ? 'Read-only: staff/admin cannot move wishlist items'
+                    : 'Move all wishlist items to cart'
+                }
               >
                 {movingAll ? 'Moving…' : 'Move All to Cart'}
               </button>

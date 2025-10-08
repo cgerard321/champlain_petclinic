@@ -425,3 +425,11 @@
     content: normal;
   }
 }
+
+
+.move-all-to-cart-btn[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: auto; /* laisse le tooltip/title fonctionner */
+}
+
