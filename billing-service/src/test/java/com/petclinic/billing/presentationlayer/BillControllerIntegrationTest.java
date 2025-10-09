@@ -219,7 +219,6 @@ class BillControllerIntegrationTest {
                 .jsonPath("$.amount").isEqualTo(100.00);
     }
 
-
     @Test
     void updateBill() {
 
