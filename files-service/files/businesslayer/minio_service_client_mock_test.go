@@ -23,3 +23,8 @@ func (m *MockMinioServiceClient) AddFile(fileInfo *datalayer.FileInfo, data []by
 	args := m.Called(fileInfo, data)
 	return args.Error(0)
 }
+
+func (m *MockMinioServiceClient) DeleteFile(fileInfo *datalayer.FileInfo) error {
+	args := m.Called(fileInfo)
+	return args.Error(0)
+}

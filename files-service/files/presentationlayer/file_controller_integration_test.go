@@ -103,7 +103,7 @@ func addFileToContext(file *datalayer.FileInfo, data []byte) {
 	if err != nil {
 		panic(err)
 	}
-	
+
 	err = minioService.AddFile(file, data)
 	if err != nil {
 		panic(err)
@@ -111,6 +111,7 @@ func addFileToContext(file *datalayer.FileInfo, data []byte) {
 }
 
 func TestWhenAddNewFile_withValidFileRequestModel_thenReturnFileResponseModel(t *testing.T) {
+	t.Cleanup(reset)
 	router := gin.Default()
 	_ = controller.Routes(router)
 
@@ -130,11 +131,10 @@ func TestWhenAddNewFile_withValidFileRequestModel_thenReturnFileResponseModel(t 
 	assert.EqualValues(t, VALID_FILE_RESPONSE_MODEL.FileName, got.FileName)
 	assert.EqualValues(t, VALID_FILE_RESPONSE_MODEL.FileType, got.FileType)
 	assert.EqualValues(t, VALID_FILE_RESPONSE_MODEL.FileData, got.FileData)
-
-	t.Cleanup(reset)
 }
 
 func TestWhenGetFile_withExistingFileId_thenReturnFileResponseModel(t *testing.T) {
+	t.Cleanup(reset)
 	addFileToContext(&VALID_FILE_INFO, VALID_FILE_DATA)
 	router := gin.Default()
 	_ = controller.Routes(router)
@@ -150,4 +150,38 @@ func TestWhenGetFile_withExistingFileId_thenReturnFileResponseModel(t *testing.T
 	assert.EqualValues(t, VALID_FILE_RESPONSE_MODEL.FileName, got.FileName)
 	assert.EqualValues(t, VALID_FILE_RESPONSE_MODEL.FileType, got.FileType)
 	assert.EqualValues(t, VALID_FILE_RESPONSE_MODEL.FileData, got.FileData)
+}
+
+func TestWhenDeleteFile_withExistingFileId_thenReturnSuccessMessage(t *testing.T) {
+	t.Cleanup(reset)
+
+	addFileToContext(&VALID_FILE_INFO, VALID_FILE_DATA)
+	router := gin.Default()
+	_ = controller.Routes(router)
+
+	req, _ := http.NewRequest(http.MethodDelete, "/files/"+EXISTING_FILE_ID, nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusNoContent, w.Code)
+	assert.Empty(t, w.Body.String())
+}
+
+func TestWhenDeleteFile_withNonExistingFileId_thenReturnNotFound(t *testing.T) {
+	t.Cleanup(reset)
+
+	router := gin.Default()
+	_ = controller.Routes(router)
+
+	req, _ := http.NewRequest(http.MethodDelete, "/files/"+NON_EXISTING_ID, nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusNotFound, w.Code)
+	var resp string
+	err := json.Unmarshal(w.Body.Bytes(), &resp)
+	assert.NoError(t, err)
+
+	expected := "fileId: " + NON_EXISTING_ID + " was not found"
+	assert.Equal(t, expected, resp)
 }
