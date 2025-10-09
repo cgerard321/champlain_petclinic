@@ -3,6 +3,7 @@ package com.petclinic.bffapigateway.presentationlayer.v1;
 
 import com.petclinic.bffapigateway.domainclientlayer.CartServiceClient;
 import com.petclinic.bffapigateway.dtos.Cart.AddProductRequestDTO;
+import com.petclinic.bffapigateway.dtos.Cart.CartProductResponseDTO;
 import com.petclinic.bffapigateway.dtos.Cart.CartRequestDTO;
 import com.petclinic.bffapigateway.dtos.Cart.CartResponseDTO;
 import com.petclinic.bffapigateway.dtos.Cart.UpdateProductQuantityRequestDTO;
@@ -22,6 +23,7 @@ import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
 import java.util.Collections;
 import java.util.Map;
 
@@ -342,6 +344,12 @@ public class CartControllerV1 {
                                 .cartId(cartId)
                                 .build()
                 ));
+    }
+    @GetMapping("/{cartId}/recent-purchases")
+    public Mono<ResponseEntity<List<CartProductResponseDTO>>> getRecentPurchases(@PathVariable String cartId) {
+        return cartServiceClient.getRecentPurchases(cartId)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
 }

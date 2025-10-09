@@ -15,6 +15,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 @Component
@@ -388,5 +389,11 @@ public Mono<CartResponseDTO> deleteCartByCartId(String CardId) {
                     return resp.createException().flatMap(Mono::error);
                 });
     }
-
+    public Mono<List<CartProductResponseDTO>> getRecentPurchases(String cartId) {
+        return webClientBuilder.build()
+                .get()
+                .uri(cartServiceUrl + "/{cartId}/recent-purchases", cartId)
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<List<CartProductResponseDTO>>() {});
+    }
 }
