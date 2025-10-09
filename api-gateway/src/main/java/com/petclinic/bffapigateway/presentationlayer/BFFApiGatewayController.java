@@ -260,21 +260,6 @@ public class BFFApiGatewayController {
 
 
 
-
-
-    @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN,Roles.VET,Roles.RECEPTIONIST})
-    @PostMapping(value = "/owners/{ownerId}/pets" , produces = "application/json", consumes = "application/json")
-    public Mono<ResponseEntity<PetResponseDTO>> createPetForOwner(@PathVariable String ownerId, @RequestBody PetRequestDTO petRequest){
-        return customersServiceClient.createPetForOwner(ownerId, petRequest)
-                .map(pet -> ResponseEntity.status(HttpStatus.CREATED).body(pet))
-                .defaultIfEmpty(ResponseEntity.badRequest().build());
-    }
-
-  /*@GetMapping(value = "owners/{ownerId}/pets")
-   public Flux<PetResponseDTO> getAllPetsFromOwnerId(@PathVariable String ownerId){
-        return customersServiceClient.getAllPets(ownerId);
-    }*/
-
 // Owner method, the endpoint must be changed, but requires bigger changes in owner methods
     //This will still work for this sprint, as the endpoint was fixed in the previous Sprint
     //Yet someone pushed without updating and caused the endpoints to revert back to what they used to be.
@@ -286,52 +271,6 @@ public class BFFApiGatewayController {
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
-
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET})
-    @GetMapping(value = "/pets", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<PetResponseDTO> getAllPets(){
-        return customersServiceClient.getAllPets();
-    }
-
-
-
-    @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN,Roles.VET,Roles.RECEPTIONIST})
-    @GetMapping(value = "owners/{ownerId}/pets/{petId}")
-    public Mono<ResponseEntity<PetResponseDTO>> getPet(@PathVariable String ownerId, @PathVariable String petId){
-        return customersServiceClient.getPet(ownerId, petId).map(s -> ResponseEntity.status(HttpStatus.OK).body(s))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
-    }
-
-    @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN,Roles.VET,Roles.RECEPTIONIST})
-    @GetMapping(value = "/owners/{ownerId}/pets", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<PetResponseDTO> getPetsByOwnerId(@PathVariable String ownerId){
-        return customersServiceClient.getPetsByOwnerId(ownerId);
-    }
-
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET})
-    @DeleteMapping("owners/{ownerId}/pets/{petId}")
-    public Mono<ResponseEntity<PetResponseDTO>> deletePet(@PathVariable String ownerId, @PathVariable String petId){
-        return customersServiceClient.deletePet(ownerId,petId).then(Mono.just(ResponseEntity.noContent().<PetResponseDTO>build()))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
-    }
-
-
-
-
-    @GetMapping(value = "owners/petTypes", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<PetType> getPetTypes(){
-        return customersServiceClient.getPetTypes();
-    }
-    
-    /*
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET})
-    @PutMapping("pets/{petId}")
-    public Mono<ResponseEntity<PetResponseDTO>> updatePet(@RequestBody PetResponseDTO pet, @PathVariable String petId){
-        return customersServiceClient.updatePet(pet, petId).map(s -> ResponseEntity.status(HttpStatus.OK).body(s))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
-    }
-
-*/
 
 //        /* Visits Methods */
 //
