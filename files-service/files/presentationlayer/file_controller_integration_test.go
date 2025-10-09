@@ -111,6 +111,7 @@ func addFileToContext(file *datalayer.FileInfo, data []byte) {
 }
 
 func TestWhenAddNewFile_withValidFileRequestModel_thenReturnFileResponseModel(t *testing.T) {
+	t.Cleanup(reset)
 	router := gin.Default()
 	_ = controller.Routes(router)
 
@@ -130,11 +131,10 @@ func TestWhenAddNewFile_withValidFileRequestModel_thenReturnFileResponseModel(t 
 	assert.EqualValues(t, VALID_FILE_RESPONSE_MODEL.FileName, got.FileName)
 	assert.EqualValues(t, VALID_FILE_RESPONSE_MODEL.FileType, got.FileType)
 	assert.EqualValues(t, VALID_FILE_RESPONSE_MODEL.FileData, got.FileData)
-
-	t.Cleanup(reset)
 }
 
 func TestWhenGetFile_withExistingFileId_thenReturnFileResponseModel(t *testing.T) {
+	t.Cleanup(reset)
 	addFileToContext(&VALID_FILE_INFO, VALID_FILE_DATA)
 	router := gin.Default()
 	_ = controller.Routes(router)
@@ -153,7 +153,6 @@ func TestWhenGetFile_withExistingFileId_thenReturnFileResponseModel(t *testing.T
 }
 
 func TestWhenDeleteFile_withExistingFileId_thenReturnSuccessMessage(t *testing.T) {
-	reset()
 	t.Cleanup(reset)
 
 	addFileToContext(&VALID_FILE_INFO, VALID_FILE_DATA)
@@ -166,11 +165,9 @@ func TestWhenDeleteFile_withExistingFileId_thenReturnSuccessMessage(t *testing.T
 
 	assert.Equal(t, http.StatusNoContent, w.Code)
 	assert.Empty(t, w.Body.String())
-
 }
 
 func TestWhenDeleteFile_withNonExistingFileId_thenReturnNotFound(t *testing.T) {
-	reset()
 	t.Cleanup(reset)
 
 	router := gin.Default()
@@ -187,5 +184,4 @@ func TestWhenDeleteFile_withNonExistingFileId_thenReturnNotFound(t *testing.T) {
 
 	expected := "fileId: " + NON_EXISTING_ID + " was not found"
 	assert.Equal(t, expected, resp)
-
 }
