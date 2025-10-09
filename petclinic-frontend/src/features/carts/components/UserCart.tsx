@@ -250,7 +250,7 @@ const UserCart = (): JSX.Element => {
       }
     };
     fetchRecentPurchases();
-  }, [cartId, setRecentPurchases]);
+  }, [cartId]);
 
   const applyVoucherCode = async (): Promise<void> => {
     try {
