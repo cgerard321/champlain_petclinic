@@ -303,7 +303,14 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
     }
 
     @Override
-    public Flux<InventoryResponseDTO> searchInventories(Pageable page, String inventoryName, String inventoryType, String inventoryDescription, Boolean importantOnly) {
+    public Flux<InventoryResponseDTO> searchInventories(Pageable page, String inventoryCode, String inventoryName, String inventoryType, String inventoryDescription, Boolean importantOnly) {
+
+        if (inventoryCode != null && !inventoryCode.trim().isEmpty()) {
+            return inventoryRepository.findInventoryByInventoryCode(inventoryCode)
+                    .map(EntityDTOUtil::toInventoryResponseDTO)
+                    .flux()
+                    .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with Code: " + inventoryCode)));
+        }
 
         if (inventoryName != null && inventoryType != null && inventoryDescription != null) {
             return inventoryRepository

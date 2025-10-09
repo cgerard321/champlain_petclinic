@@ -636,30 +636,23 @@ public class DataBaseLoaderService implements CommandLineRunner {
         //--------------------------------------------------------------
 
 
-        Flux.just(supply1, supply2, supply3, supply4, supply5, supply6, supply7, supply8, supply9,
-                        supply10, supply11, supply12, supply13, supply14, supply15,
-                        supply16, supply17, supply18, supply19, supply20, supply21, supply22,
-                        supply23, supply24, supply25, supply26, supply27, supply28, supply29, supply30, supply31)
-                .flatMap(productRepository::insert)
-                .log()
-                .subscribe();
+        Flux.concat(
+                        Flux.just(inventoryType1, inventoryType2, inventoryType3, inventoryType4, inventoryType5)
+                                .flatMap(inventoryTypeRepository::insert),
+                        Flux.just(inventoryName1, inventoryName2, inventoryName3, inventoryName4, inventoryName5,
+                                        inventoryName6, inventoryName7, inventoryName8, inventoryName9, inventoryName10)
+                                .flatMap(inventoryNameRepository::insert),
+                        Flux.just(inventory1, inventory2, inventory3, inventory4, inventory5,
+                                        inventory6, inventory7, inventory8, inventory9, inventory10)
+                                .flatMap(inventoryRepository::insert),
+                        Flux.just(supply1, supply2, supply3, supply4, supply5, supply6, supply7, supply8, supply9,
+                                        supply10, supply11, supply12, supply13, supply14, supply15,
+                                        supply16, supply17, supply18, supply19, supply20, supply21, supply22,
+                                        supply23, supply24, supply25, supply26, supply27, supply28, supply29, supply30, supply31)
+                                .flatMap(productRepository::insert)
+                )
+                .then()
+                .block();
 
-
-        Flux.just(inventory1, inventory2, inventory3, inventory4, inventory5,
-                        inventory6, inventory7, inventory8, inventory9, inventory10)
-                .flatMap(inventoryRepository::insert)
-                .log()
-                .subscribe();
-
-        Flux.just(inventoryType1, inventoryType2, inventoryType3, inventoryType4, inventoryType5)
-                .flatMap(inventoryTypeRepository::insert)
-                .log()
-                .subscribe();
-
-        Flux.just(inventoryName1, inventoryName2, inventoryName3, inventoryName4, inventoryName5,
-                        inventoryName6, inventoryName7, inventoryName8, inventoryName9, inventoryName10)
-                .flatMap(inventoryNameRepository::insert)
-                .log()
-                .subscribe();
     }
 }

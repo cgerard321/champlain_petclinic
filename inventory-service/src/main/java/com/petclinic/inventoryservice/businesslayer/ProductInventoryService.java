@@ -24,7 +24,7 @@ public interface ProductInventoryService {
 
     Mono<Void> updateImportantStatus(String inventoryId, Boolean important);
 
-    Flux<InventoryResponseDTO> searchInventories(Pageable page, String inventoryName, String inventoryType, String inventoryDescription, Boolean importantOnly);
+    Flux<InventoryResponseDTO> searchInventories(Pageable page, String inventoryCode, String inventoryName, String inventoryType, String inventoryDescription, Boolean importantOnly);
     Flux<InventoryTypeResponseDTO> getAllInventoryTypes();
 
     Mono<ProductResponseDTO> getProductByProductIdInInventory(String inventoryId, String productId);
