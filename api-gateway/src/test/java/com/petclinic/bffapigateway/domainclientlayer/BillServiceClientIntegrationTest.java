@@ -717,6 +717,93 @@ class BillServiceClientIntegrationTest {
     }
 
     @Test
+    void archiveBill_Success() throws Exception {
+        List<BillResponseDTO> archivedBills = Arrays.asList(
+                BillResponseDTO.builder()
+                        .billId("1")
+                        .amount(new BigDecimal(100.0))
+                        .taxedAmount(new BigDecimal(115.0))
+                        .customerId("1")
+                        .vetId("1")
+                        .visitType("Check up")
+                        .billStatus(BillStatus.PAID)
+                        .archive(false)
+                        .build(),
+                BillResponseDTO.builder()
+                        .billId("2")
+                        .amount(new BigDecimal(200.0))
+                        .taxedAmount(new BigDecimal(230.0))
+                        .customerId("2")
+                        .vetId("2")
+                        .visitType("Surgery")
+                        .billStatus(BillStatus.PAID)
+                        .archive(false)
+                        .build()
+        );
+
+        String responseBody = mapper.writeValueAsString(archivedBills);
+
+        prepareResponse(response -> response
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(responseBody)
+        );
+
+        Flux<BillResponseDTO> result = billServiceClient.archiveBill();
+
+        StepVerifier.create(result.collectList())
+                .expectNextMatches(bills -> {
+                    assertEquals(2, bills.size());
+                    assertTrue(bills.stream().anyMatch(bill -> "1".equals(bill.getBillId())));
+                    assertTrue(bills.stream().anyMatch(bill -> "2".equals(bill.getBillId())));
+                    return true;
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void archiveBill_FailsForUnpaidOrOverdueBills() throws Exception {
+        List<BillResponseDTO> bills = Arrays.asList(
+                BillResponseDTO.builder()
+                        .billId("1")
+                        .amount(new BigDecimal(100.0))
+                        .taxedAmount(new BigDecimal(115.0))
+                        .customerId("1")
+                        .vetId("1")
+                        .visitType("Check up")
+                        .billStatus(BillStatus.UNPAID)
+                        .archive(false)
+                        .build(),
+                BillResponseDTO.builder()
+                        .billId("2")
+                        .amount(new BigDecimal(200.0))
+                        .taxedAmount(new BigDecimal(230.0))
+                        .customerId("2")
+                        .vetId("2")
+                        .visitType("Surgery")
+                        .billStatus(BillStatus.OVERDUE)
+                        .archive(false)
+                        .build()
+        );
+
+        String responseBody = mapper.writeValueAsString(bills);
+
+        prepareResponse(response -> response
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(responseBody)
+        );
+
+        Flux<BillResponseDTO> result = billServiceClient.archiveBill();
+
+        StepVerifier.create(result.collectList())
+                .expectNextMatches(returnedBills -> {
+                    assertEquals(2, returnedBills.size());
+                    assertTrue(returnedBills.stream().allMatch(bill -> !bill.getArchive())); // Ensure no bills are archived
+                    return true;
+                })
+                .verifyComplete();
+    }
+
+
     void deleteBill_WhenBillIsUnpaid_ShouldReturn422_AndNotInvokeDelete() throws Exception {
         String billId = "B-123";
 

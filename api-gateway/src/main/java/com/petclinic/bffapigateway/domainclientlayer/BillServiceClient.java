@@ -18,6 +18,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.net.URI;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Component
@@ -412,6 +414,14 @@ public class BillServiceClient {
                 .retrieve()
                 .bodyToMono(Void.class);
     }
+
+    public Flux<BillResponseDTO> archiveBill() {
+        return webClientBuilder.build().patch()
+                .uri(billServiceUrl + "/archive")
+                .retrieve()
+                .bodyToFlux(BillResponseDTO.class);
+    }
+
 
 
 }

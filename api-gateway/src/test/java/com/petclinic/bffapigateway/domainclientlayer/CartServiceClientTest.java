@@ -1,11 +1,6 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
-import com.petclinic.bffapigateway.dtos.Cart.AddProductRequestDTO;
-import com.petclinic.bffapigateway.dtos.Cart.CartRequestDTO;
-import com.petclinic.bffapigateway.dtos.Cart.CartResponseDTO;
-import com.petclinic.bffapigateway.dtos.Cart.UpdateProductQuantityRequestDTO;
-import com.petclinic.bffapigateway.dtos.Cart.PromoCodeRequestDTO;
-import com.petclinic.bffapigateway.dtos.Cart.PromoCodeResponseDTO;
+import com.petclinic.bffapigateway.dtos.Cart.*;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -1490,6 +1485,53 @@ public class CartServiceClientTest {
                         org.assertj.core.api.Assertions.assertThat(ex.getClass().getSimpleName().toLowerCase())
                                 .contains("notfound"))
                 .verify();
+    }
+    @Test
+    void testGetRecentPurchases_Success() throws IOException {
+        // Arrange
+        String cartId = "test-cart-id";
+        List<CartProductResponseDTO> expectedProducts = List.of(
+                CartProductResponseDTO.builder()
+                        .productId("prod1")
+                        .productName("Product 1")
+                        .productSalePrice(10.0)
+                        .quantityInCart(2)
+                        .productQuantity(5)
+                        .build(),
+                CartProductResponseDTO.builder()
+                        .productId("prod2")
+                        .productName("Product 2")
+                        .productSalePrice(20.0)
+                        .quantityInCart(1)
+                        .productQuantity(3)
+                        .build()
+        );
+
+        String responseBody = "[{\"productId\":\"prod1\",\"productName\":\"Product 1\",\"productSalePrice\":10.0,\"quantityInCart\":2,\"productQuantity\":5}," +
+                "{\"productId\":\"prod2\",\"productName\":\"Product 2\",\"productSalePrice\":20.0,\"quantityInCart\":1,\"productQuantity\":3}]";
+
+        mockWebServer.enqueue(new MockResponse()
+                .setBody(responseBody)
+                .addHeader("Content-Type", "application/json"));
+
+        CartServiceClient client = new CartServiceClient(
+                WebClient.builder(),
+                mockWebServer.getHostName(),
+                String.valueOf(mockWebServer.getPort())
+        );
+
+        // Act
+        Mono<List<CartProductResponseDTO>> resultMono = client.getRecentPurchases(cartId);
+
+        // Assert
+        StepVerifier.create(resultMono)
+                .expectNextMatches(products -> {
+                    assertThat(products).hasSize(2);
+                    assertThat(products.get(0).getProductId()).isEqualTo("prod1");
+                    assertThat(products.get(1).getProductId()).isEqualTo("prod2");
+                    return true;
+                })
+                .verifyComplete();
     }
 
 }

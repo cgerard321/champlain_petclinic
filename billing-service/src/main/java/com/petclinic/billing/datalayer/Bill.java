@@ -2,6 +2,7 @@ package com.petclinic.billing.datalayer;
 
 import lombok.*;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -31,4 +32,6 @@ public class Bill {
     private LocalDate dueDate;
     @Builder.Default
     private boolean interestExempt = false;
+    @Field("archive")
+    private Boolean archive = false;
 }

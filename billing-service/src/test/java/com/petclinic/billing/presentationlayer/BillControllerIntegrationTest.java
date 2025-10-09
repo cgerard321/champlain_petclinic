@@ -671,6 +671,7 @@ class BillControllerIntegrationTest {
                 .amount(new BigDecimal(100.0))
                 .billStatus(BillStatus.OVERDUE)
                 .dueDate(dueDate)
+                .archive(false)
                 .build();
     }
 
@@ -689,6 +690,7 @@ class BillControllerIntegrationTest {
                 .amount(new BigDecimal(100.0))
                 .billStatus(BillStatus.UNPAID)
                 .dueDate(dueDate)
+                .archive(false)
                 .build();
     }
 
@@ -713,6 +715,7 @@ class BillControllerIntegrationTest {
                 .ownerLastName("Doe")
                 .vetFirstName("Jane")
                 .vetLastName("Smith")
+                .archive(false)
                 .build();
     }
         @Test

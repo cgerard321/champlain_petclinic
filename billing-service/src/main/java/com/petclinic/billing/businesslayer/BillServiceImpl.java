@@ -17,6 +17,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.function.Predicate;
 
@@ -380,6 +381,21 @@ public class BillServiceImpl implements BillService{
             })
             .then();
     }
+    @Override
+    public Flux<Bill> archiveBill() {
+        return billRepository.findAllByArchiveFalse()
+                .flatMap(bill -> {
+                    if (bill.getBillStatus() == BillStatus.UNPAID || bill.getBillStatus() == BillStatus.OVERDUE) {
+                        // No action needed; archive is already false by default.
+                    }
+                    else if (bill.getDate().isBefore(LocalDate.now().minusYears(1))) {
+                        bill.setArchive(true);
+                        return billRepository.save(bill);
+                    }
+                    return Mono.just(bill);
+                });
+    }
+
 
 
 }

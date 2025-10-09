@@ -48,7 +48,7 @@ public class BillServiceImplTest {
     BillService billService;
 
     @Test
-    public void test_getBillById(){
+    public void test_getBillById() {
         Bill billEntity = buildBill();
 
         String BILL_ID = billEntity.getBillId();
@@ -67,7 +67,7 @@ public class BillServiceImplTest {
     }
 
     @Test
-    void getBillsByPage_ShouldSucceed(){
+    void getBillsByPage_ShouldSucceed() {
 
         Bill bill1 = Bill.builder()
                 .billId("billId-1")
@@ -78,8 +78,8 @@ public class BillServiceImplTest {
                 .vetId("vetId1")
                 .vetFirstName("vetFirstName1")
                 .vetLastName("vetLastName1")
-                .date(LocalDate.of(2024,10,1))
-                .dueDate(LocalDate.of(2024,10,30))
+                .date(LocalDate.of(2024, 10, 1))
+                .dueDate(LocalDate.of(2024, 10, 30))
                 .amount(new BigDecimal("100.00"))
                 .billStatus(BillStatus.UNPAID)
                 .build();
@@ -92,8 +92,8 @@ public class BillServiceImplTest {
                 .vetId("vetId2")
                 .vetFirstName("vetFirstName2")
                 .vetLastName("vetLastName2")
-                .date(LocalDate.of(2024,10,1))
-                .dueDate(LocalDate.of(2024,10,30))
+                .date(LocalDate.of(2024, 10, 1))
+                .dueDate(LocalDate.of(2024, 10, 30))
                 .amount(new BigDecimal("150.00"))
                 .billStatus(BillStatus.PAID)
                 .build();
@@ -106,8 +106,8 @@ public class BillServiceImplTest {
                 .vetId("vetId3")
                 .vetFirstName("vetFirstName3")
                 .vetLastName("vetLastName3")
-                .date(LocalDate.of(2024,10,1))
-                .dueDate(LocalDate.of(2024,10,30))
+                .date(LocalDate.of(2024, 10, 1))
+                .dueDate(LocalDate.of(2024, 10, 30))
                 .amount(new BigDecimal("200.00"))
                 .billStatus(BillStatus.OVERDUE)
                 .build();
@@ -118,8 +118,8 @@ public class BillServiceImplTest {
         when(repo.findAll()).thenReturn(Flux.just(bill1, bill2, bill3));
 
         // Call the method under test
-        Flux<BillResponseDTO> bills = billService.getAllBillsByPage(pageable,null,null,
-                null,null,null, null, null, null);
+        Flux<BillResponseDTO> bills = billService.getAllBillsByPage(pageable, null, null,
+                null, null, null, null, null, null);
 
 
         StepVerifier.create(bills)
@@ -305,8 +305,9 @@ public class BillServiceImplTest {
                 })
                 .verify();
     }
+
     @Test
-    public void test_createBill(){
+    public void test_createBill() {
 
         Bill billEntity = buildBill();
 
@@ -327,8 +328,8 @@ public class BillServiceImplTest {
     }
 
     @Test
-    public void test_deleteAllBills(){
-        
+    public void test_deleteAllBills() {
+
         when(repo.deleteAll()).thenReturn(Mono.empty());
 
         Mono<Void> deleteObj = billService.deleteAllBills();
@@ -339,7 +340,7 @@ public class BillServiceImplTest {
     }
 
     @Test
-    public void test_deleteBillByVetId(){
+    public void test_deleteBillByVetId() {
 
         Bill billEntity = buildBill();
 
@@ -351,8 +352,9 @@ public class BillServiceImplTest {
                 .expectNextCount(0)
                 .verifyComplete();
     }
+
     @Test
-    public void test_deleteBillsByCustomerId(){
+    public void test_deleteBillsByCustomerId() {
         Bill billEntity = buildBill();
         when(repo.deleteBillsByCustomerId(anyString())).thenReturn(Flux.empty());
         Flux<Void> deletedObj = billService.deleteBillsByCustomerId(billEntity.getCustomerId());
@@ -361,8 +363,9 @@ public class BillServiceImplTest {
                 .expectNextCount(0)
                 .verifyComplete();
     }
+
     @Test
-    public void test_getBillByCustomerId(){
+    public void test_getBillByCustomerId() {
 
         Bill billEntity = buildBill();
 
@@ -382,7 +385,7 @@ public class BillServiceImplTest {
     }
 
     @Test
-    public void test_getBillByVetId(){
+    public void test_getBillByVetId() {
 
         Bill billEntity = buildBill();
 
@@ -461,7 +464,7 @@ public class BillServiceImplTest {
     @Test
     public void test_updateBillWithInvalidRequest() {
         String billId = "validBillId";
-        BigDecimal updatedAmount = new BigDecimal (-5.0); // Negative amount, which is invalid
+        BigDecimal updatedAmount = new BigDecimal(-5.0); // Negative amount, which is invalid
         BillRequestDTO updatedBillRequestDTO = buildBillRequestDTO();
         updatedBillRequestDTO.setAmount(updatedAmount);
         Mono<BillRequestDTO> updatedBillRequestMono = Mono.just(updatedBillRequestDTO);
@@ -504,7 +507,7 @@ public class BillServiceImplTest {
                 .verify();
     }
 
-        @Test
+    @Test
     public void testGenerateBillPdf() {
         Bill mockBill = Bill.builder()
                 .billId("billId-1")
@@ -560,7 +563,7 @@ public class BillServiceImplTest {
                 .build();
     }
 
-    private Bill buildBill(){
+    private Bill buildBill() {
 
         Calendar calendar = Calendar.getInstance();
         calendar.set(2022, Calendar.SEPTEMBER, 25);
@@ -568,12 +571,12 @@ public class BillServiceImplTest {
                 .atZone(ZoneId.systemDefault())
                 .toLocalDate();
 
-        LocalDate dueDate = LocalDate.of(2022,Month.OCTOBER,15);
+        LocalDate dueDate = LocalDate.of(2022, Month.OCTOBER, 15);
 
         return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(new BigDecimal(13.37)).billStatus(BillStatus.PAID).dueDate(dueDate).build();
     }
 
-    private Bill buildUnpaidBill(){
+    private Bill buildUnpaidBill() {
 
         VetResponseDTO vetDTO = buildVetDTO();
         Calendar calendar = Calendar.getInstance();
@@ -588,7 +591,7 @@ public class BillServiceImplTest {
 
     }
 
-    private Bill buildOverdueBill(){
+    private Bill buildOverdueBill() {
 
         Calendar calendar = Calendar.getInstance();
         calendar.set(2022, Calendar.SEPTEMBER, 25);
@@ -602,8 +605,7 @@ public class BillServiceImplTest {
     }
 
 
-
-    private BillRequestDTO buildBillRequestDTO(){
+    private BillRequestDTO buildBillRequestDTO() {
 
         VetResponseDTO vetDTO = buildVetDTO();
 
@@ -613,7 +615,7 @@ public class BillServiceImplTest {
                 .atZone(ZoneId.systemDefault())
                 .toLocalDate();
 
-        LocalDate dueDate =LocalDate.of(2022, Month.OCTOBER, 10);
+        LocalDate dueDate = LocalDate.of(2022, Month.OCTOBER, 10);
 
         return BillRequestDTO.builder().customerId("1").vetId("1").visitType("Test Type").date(date).amount(new BigDecimal(13.37)).billStatus(BillStatus.PAID).dueDate(dueDate).build();
 
@@ -707,7 +709,7 @@ public class BillServiceImplTest {
         Mono<BigDecimal> result = billService.calculateCurrentBalance(customerId);
 
         StepVerifier.create(result)
-                .expectNext(new BigDecimal(150.0)) 
+                .expectNext(new BigDecimal(150.0))
                 .verifyComplete();
     }
 
@@ -723,7 +725,7 @@ public class BillServiceImplTest {
         Mono<BigDecimal> result = billService.calculateCurrentBalance(invalidCustomerId);
 
         StepVerifier.create(result)
-                .expectNext(new BigDecimal(0.0)) 
+                .expectNext(new BigDecimal(0.0))
                 .verifyComplete();
     }
 
@@ -945,11 +947,11 @@ public class BillServiceImplTest {
         LocalDate dueDate = LocalDate.now().minusMonths(2);
         BigDecimal amount = new BigDecimal("100.00");
         Bill overdueBill = Bill.builder()
-            .billId("overdue-bill-id")
-            .amount(amount)
-            .billStatus(BillStatus.OVERDUE)
-            .dueDate(dueDate)
-            .build();
+                .billId("overdue-bill-id")
+                .amount(amount)
+                .billStatus(BillStatus.OVERDUE)
+                .dueDate(dueDate)
+                .build();
 
         when(repo.findByBillId("overdue-bill-id")).thenReturn(Mono.just(overdueBill));
 
@@ -973,11 +975,11 @@ public class BillServiceImplTest {
         LocalDate dueDate = LocalDate.now().plusDays(10);
         BigDecimal amount = new BigDecimal("200.00");
         Bill unpaidBill = Bill.builder()
-            .billId("unpaid-bill-id")
-            .amount(amount)
-            .billStatus(BillStatus.UNPAID)
-            .dueDate(dueDate)
-            .build();
+                .billId("unpaid-bill-id")
+                .amount(amount)
+                .billStatus(BillStatus.UNPAID)
+                .dueDate(dueDate)
+                .build();
 
         when(repo.findByBillId("unpaid-bill-id")).thenReturn(Mono.just(unpaidBill));
 
@@ -986,12 +988,12 @@ public class BillServiceImplTest {
 
 
         StepVerifier.create(result)
-            .consumeNextWith(dto -> {
-                assertEquals(amount, dto.getAmount());
-                assertEquals(BillStatus.UNPAID, dto.getBillStatus());
-                assertEquals(BigDecimal.ZERO.setScale(2), dto.getInterest().setScale(2));
-            })
-            .verifyComplete();
+                .consumeNextWith(dto -> {
+                    assertEquals(amount, dto.getAmount());
+                    assertEquals(BillStatus.UNPAID, dto.getBillStatus());
+                    assertEquals(BigDecimal.ZERO.setScale(2), dto.getInterest().setScale(2));
+                })
+                .verifyComplete();
     }
 
     @Test
@@ -1003,37 +1005,37 @@ public class BillServiceImplTest {
         BigDecimal overdueAmount = new BigDecimal("50.00");
 
         Bill unpaidBill = Bill.builder()
-            .amount(unpaidAmount)
-            .billStatus(BillStatus.UNPAID)
-            .customerId(customerId)
-            .build();
+                .amount(unpaidAmount)
+                .billStatus(BillStatus.UNPAID)
+                .customerId(customerId)
+                .build();
 
         Bill overdueBill = Bill.builder()
-            .amount(overdueAmount)
-            .billStatus(BillStatus.OVERDUE)
-            .customerId(customerId)
-            .dueDate(overdueDate)
-            .build();
+                .amount(overdueAmount)
+                .billStatus(BillStatus.OVERDUE)
+                .customerId(customerId)
+                .dueDate(overdueDate)
+                .build();
 
         when(repo.findByCustomerIdAndBillStatus(customerId, BillStatus.UNPAID))
-            .thenReturn(Flux.just(unpaidBill));
+                .thenReturn(Flux.just(unpaidBill));
         when(repo.findByCustomerIdAndBillStatus(customerId, BillStatus.OVERDUE))
-            .thenReturn(Flux.just(overdueBill));
+                .thenReturn(Flux.just(overdueBill));
 
 
         Mono<BigDecimal> result = billService.calculateCurrentBalance(customerId);
 
 
         StepVerifier.create(result)
-            .consumeNextWith(balance -> {
-                BigDecimal expectedInterest = overdueAmount
-                        .multiply(new BigDecimal("0.015"))
-                        .multiply(BigDecimal.valueOf(1))
-                        .setScale(2, RoundingMode.HALF_UP);
-                BigDecimal expectedTotal = unpaidAmount.add(overdueAmount).add(expectedInterest);
-                assertEquals(expectedTotal, balance.setScale(2, RoundingMode.HALF_UP));
-            })
-            .verifyComplete();
+                .consumeNextWith(balance -> {
+                    BigDecimal expectedInterest = overdueAmount
+                            .multiply(new BigDecimal("0.015"))
+                            .multiply(BigDecimal.valueOf(1))
+                            .setScale(2, RoundingMode.HALF_UP);
+                    BigDecimal expectedTotal = unpaidAmount.add(overdueAmount).add(expectedInterest);
+                    assertEquals(expectedTotal, balance.setScale(2, RoundingMode.HALF_UP));
+                })
+                .verifyComplete();
     }
 
     @Test
