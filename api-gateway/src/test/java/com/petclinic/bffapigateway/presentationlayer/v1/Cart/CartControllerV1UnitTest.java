@@ -7,12 +7,14 @@ import com.petclinic.bffapigateway.presentationlayer.v1.CartControllerV1;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -20,9 +22,11 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.List;
 
 import static org.mockito.Mockito.*;
 
@@ -887,5 +891,50 @@ public class CartControllerV1UnitTest {
                 .expectStatus().isEqualTo(HttpStatus.CONFLICT);
 
         verify(cartServiceClient, times(1)).moveAllWishlistToCart(cartId);
+    }
+    @Test
+    void testGetRecentPurchases_ReturnsOk() {
+        // Arrange
+        CartServiceClient cartServiceClient = Mockito.mock(CartServiceClient.class);
+        CartControllerV1 controller = new CartControllerV1(cartServiceClient);
+
+        String cartId = "test-cart-id";
+        List<CartProductResponseDTO> products = List.of(
+                CartProductResponseDTO.builder().productId("prod1").build()
+        );
+
+        Mockito.when(cartServiceClient.getRecentPurchases(cartId))
+                .thenReturn(Mono.just(products));
+
+        // Act
+        Mono<ResponseEntity<List<CartProductResponseDTO>>> result = controller.getRecentPurchases(cartId);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNextMatches(response -> response.getStatusCode().is2xxSuccessful()
+                        && response.getBody() != null
+                        && response.getBody().size() == 1
+                        && "prod1".equals(response.getBody().get(0).getProductId()))
+                .verifyComplete();
+    }
+
+    @Test
+    void testGetRecentPurchases_ReturnsNotFound() {
+        // Arrange
+        CartServiceClient cartServiceClient = Mockito.mock(CartServiceClient.class);
+        CartControllerV1 controller = new CartControllerV1(cartServiceClient);
+
+        String cartId = "missing-cart-id";
+        Mockito.when(cartServiceClient.getRecentPurchases(cartId))
+                .thenReturn(Mono.empty());
+
+        // Act
+        Mono<ResponseEntity<List<CartProductResponseDTO>>> result = controller.getRecentPurchases(cartId);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNextMatches(response -> response.getStatusCode().is4xxClientError()
+                        && response.getBody() == null)
+                .verifyComplete();
     }
 }
