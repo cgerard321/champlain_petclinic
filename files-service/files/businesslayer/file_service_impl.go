@@ -85,3 +85,20 @@ func (i *FilesServiceImpl) AddFile(model *models.FileRequestModel) (*models.File
 
 	return response, nil
 }
+
+func (i *FilesServiceImpl) DeleteFileByFileId(id string) error {
+	fileInfo := i.repository.GetFileInfo(id)
+	if fileInfo == nil {
+		return exception.NewNotFoundException("fileId: " + id + " was not found")
+	}
+
+	if err := i.minioServiceClient.DeleteFile(fileInfo); err != nil {
+		return err
+	}
+
+	if err := i.repository.DeleteFileInfo(id); err != nil {
+		return err
+	}
+
+	return nil
+}
