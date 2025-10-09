@@ -26,48 +26,39 @@
     <td></td>
   </tr>
   <tr>
-    <td>
-    <td>
-        <span>
-            <input type="text" ng-model="inventoryName" ng-keyup="$event.keyCode == 13 && searchInventory(inventoryName, inventoryType, inventoryDescription)">
-        </span>
-    </td>
-    <td>
-        <span>
-            <select class="form-control col-sm-4" id="inventoryType" ng-model="inventoryType" name="inventoryType" ng-options="type for type in inventoryTypeOptions" placeholder="None" required title="Please select the inventory type." ng-keyup="$event.keyCode == 13 && searchInventory(inventoryName, inventoryType, inventoryDescription)">
-            </select>
-        </span>
-    </td>
-    <td>
-        <span>
-            <input type="text" ng-model="inventoryDescription" ng-keyup="$event.keyCode == 13 && searchInventory(inventoryName, inventoryType, inventoryDescription)">
-        </span>
-    </td>
-    <td></td>
-    <td>
-            <span>
+      <td>
+          <input type="text" ng-model="inventoryCode" placeholder="INV-XXXX" ng-keyup="$event.keyCode == 13 && searchInventory(inventoryCode, inventoryName, inventoryType, inventoryDescription)">
+      </td>
+      <td>
+          <input type="text" ng-model="inventoryName" ng-keyup="$event.keyCode == 13 && searchInventory(inventoryCode, inventoryName, inventoryType, inventoryDescription)">
+      </td>
+      <td>
+          <select class="form-control col-sm-4" id="inventoryType" ng-model="inventoryType" name="inventoryType" ng-options="type for type in inventoryTypeOptions" ng-keyup="$event.keyCode == 13 && searchInventory(inventoryCode, inventoryName, inventoryType, inventoryDescription)"><option value=""></option>
+          </select>
 
-                <a class="btn btn-success" type="button" ng-click="clearQueries()" title="Clear">
-                    <lord-icon
-                            src="https://cdn.lordicon.com/zxvuvcnc.json"
-                            trigger="hover"
-                            style="width:32px;height:32px">
-                    </lord-icon>
-                </a>
-
-            </span>
-    </td>
-    <td>
-        <span>
-            <a class="btn btn-success" type="button" ng-click="searchInventory(inventoryName, inventoryType, inventoryDescription)" title="Search">
-                <lord-icon
-                        src="https://cdn.lordicon.com/fkdzyfle.json"
-                        trigger="hover"
-                        style="width:32px;height:32px">
-                </lord-icon>
-            </a>
-        </span>
-    </td>
+      </td>
+      <td>
+          <input type="text" ng-model="inventoryDescription" ng-keyup="$event.keyCode == 13 && searchInventory(inventoryCode, inventoryName, inventoryType, inventoryDescription)">
+      </td>
+      <td></td>
+      <td>
+          <a class="btn btn-success" type="button" ng-click="clearQueries()" title="Clear">
+              <lord-icon
+                      src="https://cdn.lordicon.com/zxvuvcnc.json"
+                      trigger="hover"
+                      style="width:32px;height:32px">
+              </lord-icon>
+          </a>
+      </td>
+      <td>
+          <a class="btn btn-success" type="button" ng-click="searchInventory(inventoryCode, inventoryName, inventoryType, inventoryDescription)" title="Search">
+              <lord-icon
+                      src="https://cdn.lordicon.com/fkdzyfle.json"
+                      trigger="hover"
+                      style="width:32px;height:32px">
+              </lord-icon>
+          </a>
+      </td>
   </tr>
   </thead>
 
