@@ -624,6 +624,20 @@ const UserCart = (): JSX.Element => {
   if (loading) return <div className="loading">Loading cart items...</div>;
   if (error) return <div className="error">{error}</div>;
 
+  // Helper to filter out duplicate recent purchases by productId
+  const uniqueRecentPurchases = recentPurchases.reduce<{
+    [id: string]: (typeof recentPurchases)[0];
+  }>((acc, item) => {
+    if (!acc[item.productId]) {
+      acc[item.productId] = item;
+    } else {
+      // Optionally, sum quantities if duplicate found
+      acc[item.productId].quantity += item.quantity;
+    }
+    return acc;
+  }, {});
+  const recentPurchasesList = Object.values(uniqueRecentPurchases);
+
   return (
     <div>
       <NavBar />
@@ -825,8 +839,8 @@ const UserCart = (): JSX.Element => {
             className="recent-purchases-list"
             style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}
           >
-            {recentPurchases.length > 0 ? (
-              recentPurchases.map(item => (
+            {recentPurchasesList.length > 0 ? (
+              recentPurchasesList.map(item => (
                 <div
                   key={item.productId}
                   className="recent-purchase-card"
