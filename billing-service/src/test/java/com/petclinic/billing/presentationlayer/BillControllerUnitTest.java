@@ -303,6 +303,19 @@ class BillControllerUnitTest {
         Mockito.verify(billService, times(1)).deleteBillsByCustomerId(CUSTOMER_ID_OK);
     }
 
+    @Test
+    void testArchiveBill() {
+        when(billService.archiveBill()).thenReturn(Flux.empty());
+
+        client.patch()
+                .uri("/bills/archive")
+                .exchange()
+                .expectStatus().isNoContent();
+
+        verify(billService, times(1)).archiveBill();
+    }
+
+
     private BillResponseDTO buildBillResponseDTO() {
         Calendar calendar = Calendar.getInstance();
         calendar.set(2022, Calendar.SEPTEMBER, 25);

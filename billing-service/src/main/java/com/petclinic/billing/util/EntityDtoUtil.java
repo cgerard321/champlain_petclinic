@@ -55,6 +55,7 @@ public class EntityDtoUtil {
         }
         
         billResponseDTO.setTimeRemaining(timeRemaining(bill));
+        billResponseDTO.setArchive(bill.getArchive());
 
         log.info("Mapped BillResponseDTO: {}", billResponseDTO);
 
@@ -64,6 +65,9 @@ public class EntityDtoUtil {
     public static Bill toBillEntity(BillRequestDTO billRequestDTO){
         Bill bill = new Bill();
         BeanUtils.copyProperties(billRequestDTO,bill);
+        if (bill.getArchive() == null) {
+            bill.setArchive(false);
+        }
         return bill;
     }
 

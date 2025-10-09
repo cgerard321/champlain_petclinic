@@ -158,15 +158,16 @@ public class CustomerBillsControllerIntegrationTest {
 
     private Bill buildBill() {
                 return Bill.builder()
-                        .billId("1")
-                        .customerId("custId")
-                        .vetId("vetId")
-                        .visitType("surgery")
-                        .date(LocalDate.now().minusDays(10))
-                        .amount(new BigDecimal(150.0))
-                        .billStatus(BillStatus.UNPAID)
-                        .dueDate(LocalDate.now().plusDays(20))
-                        .build();
+                                .billId("1")
+                                .customerId("custId")
+                                .vetId("vetId")
+                                .visitType("surgery")
+                                .date(LocalDate.now().minusDays(10))
+                                .amount(new BigDecimal(150.0))
+                                .billStatus(BillStatus.UNPAID)
+                                .dueDate(LocalDate.now().plusDays(20))
+                                .archive(false)
+                                .build();
         }
 
         private Bill buildBill2() {
@@ -183,6 +184,7 @@ public class CustomerBillsControllerIntegrationTest {
                                 .date(date)
                                 .amount(new BigDecimal("150.00"))
                                 .billStatus(BillStatus.UNPAID)
+                                .archive(false)
                                 .build();
         }
 
