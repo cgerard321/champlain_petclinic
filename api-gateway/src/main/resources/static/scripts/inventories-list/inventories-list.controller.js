@@ -7,8 +7,8 @@ angular.module('inventoriesList')
         self.listSize = $stateParams.size = 10
         self.realPage = parseInt(self.currentPage) + 1
         var numberOfPage
-        var code
         var name
+        var code
         var type
         var desc
 
@@ -29,12 +29,12 @@ angular.module('inventoriesList')
         //clear inventory queries
         $scope.clearQueries = function (){
             // Clear the input fields
-            $scope.inventoryCode = '';
             $scope.inventoryName = '';
+            $scope.inventoryCode = '';
             $scope.inventoryType = '';
             $scope.inventoryDescription = '';
             // Reset the list by searching all inventories again
-            $scope.searchInventory('', '', '', '');
+            $scope.searchInventory('', '', '');
         }
 //search by inventory field
         $scope.searchInventory = function (inventoryCode, inventoryName, inventoryType, inventoryDescription){
@@ -42,40 +42,73 @@ angular.module('inventoriesList')
         }
 //search by inventory field
         function getInventoryList(inventoryCode, inventoryName, inventoryType, inventoryDescription){
+
             $state.transitionTo('inventories', {page: self.currentPage, size: self.listSize}, {notify: false});
+            var queryString = '';
+            name = ""
+            code = ""
+            type = ""
+            desc = ""
 
-            code = inventoryCode || "";
-            name = inventoryName || "";
-            type = inventoryType || "";
-            desc = inventoryDescription || "";
+            if (inventoryCode != null && inventoryCode !== '') {
+                code = inventoryCode.toUpperCase();
+                queryString += "inventoryCode=" + code;
+            }
 
-            $http.get("api/gateway/inventories/all")
-                .then(function(resp) {
-                    var filtered = resp.data.filter(function(item) {
-                        var codeMatch = !code || !code.trim() ||
-                            (item.inventoryCode && item.inventoryCode.toUpperCase().indexOf(code.toUpperCase()) !== -1);
-                        var nameMatch = !name || !name.trim() ||
-                            (item.inventoryName && item.inventoryName.toLowerCase().indexOf(name.toLowerCase()) !== -1);
-                        var typeMatch = !type || !type.trim() ||
-                            (item.inventoryType && item.inventoryType === type);
-                        var descMatch = !desc || !desc.trim() ||
-                            (item.inventoryDescription && item.inventoryDescription.toLowerCase().indexOf(desc.toLowerCase()) !== -1);
+            if (inventoryName != null && inventoryName !== '') {
+                name = inventoryName
+                queryString += "inventoryName=" + inventoryName;
+            }
 
-                        return codeMatch && nameMatch && typeMatch && descMatch;
+            if (inventoryType) {
+                if (queryString !== '') {
+                    queryString += "&";
+                }
+                type = inventoryType
+                queryString += "inventoryType=" + inventoryType;
+            }
+
+            if (inventoryDescription) {
+                if (queryString !== '') {
+                    queryString += "&";
+                }
+                desc = inventoryDescription
+                queryString += "inventoryDescription=" + inventoryDescription;
+            }
+
+            if (queryString !== '') {
+                self.currentPage = 0
+                self.realPage = parseInt(self.currentPage) + 1
+
+                $http.get("api/gateway/inventories?page=" + self.currentPage + "&size=" + self.listSize + "&" + queryString)
+                    .then(function(resp) {
+                        numberOfPage = Math.ceil(resp.data.length / 10)
+                        self.inventoryList = resp.data;
+                        arr = resp.data; // Ensure 'arr' is declared or handled accordingly
+                    })
+                    .catch(function(error) {
+                        if (error.status === 404) {
+                            alert('inventory not found.');
+                        } else {
+                            alert('An error occurred: ' + error.statusText);
+                        }
                     });
-
-                    numberOfPage = Math.ceil(filtered.length / self.listSize);
-
-                    var startIndex = self.currentPage * self.listSize;
-                    var endIndex = startIndex + self.listSize;
-                    self.inventoryList = filtered.slice(startIndex, endIndex);
-                    arr = filtered;
-                })
-                .catch(function(error) {
-                    alert('An error occurred: ' + error.statusText);
-                    self.inventoryList = [];
-                });
-        }
+            } else {
+                $http.get("api/gateway/inventories?page=" + self.currentPage + "&size=" + self.listSize)
+                    .then(function(resp) {
+                        numberOfPage = Math.ceil(resp.data.length / 10)
+                        self.inventoryList = resp.data;
+                        arr = resp.data; // Ensure 'arr' is declared or handled accordingly
+                    })
+                    .catch(function(error) {
+                        if (error.status === 404) {
+                            alert('inventory not found.');
+                        } else {
+                            alert('An error occurred: ' + error.statusText);
+                        }
+                    });
+            }
+        };
 
 
         $scope.deleteAllInventories = function () {
@@ -166,7 +199,7 @@ angular.module('inventoriesList')
                 self.currentPage = (parseInt(self.currentPage) - 1).toString();
                 self.realPage = parseInt(self.currentPage) + 1
 
-                getInventoryList(code,name, type, desc)
+                getInventoryList(name, type, desc)
             }
         }
 
@@ -175,16 +208,16 @@ angular.module('inventoriesList')
                 self.currentPage = (parseInt(self.currentPage) + 1).toString();
                 self.realPage = parseInt(self.currentPage) + 1
 
-                getInventoryList(code, name, type, desc)
+                getInventoryList(name, type, desc)
             }
         }
 
-        $scope.inventoryType = ''; 
+        $scope.inventoryType = '';
 
-    
+
         $scope.$watch('inventoryType', function(newType, oldType) {
             if (newType !== oldType) {
-                $scope.searchInventory($scope.inventoryName || '', newType, $scope.inventoryDescription || '');
+                $scope.searchInventory($scope.inventoryCode || '', $scope.inventoryName || '', newType, $scope.inventoryDescription || '');
             }
         });
     }]);
