@@ -10,17 +10,17 @@ import { IsVet } from '@/context/UserContext';
 import { archiveVisit } from './api/archiveVisit';
 import { cancelVisit } from './api/cancelVisit';
 
-import BasicModal from '@/shared/components/BasicModal';
-import VisitDetails from '@/features/visits/components/VisitDetails';
-import EditingVisit from './components/EditingVisit';
-
 import eyeIcon from '@/assets/Icons/eyeDark.svg';
 import pencilIcon from '@/assets/Icons/pencilDark.svg';
 import archiveIcon from '@/assets/Icons/archiveDark.svg';
 import xcrossIcon from '@/assets/Icons/xcrossDark.svg';
 import pentosquareIcon from '@/assets/Icons/pentosquareLight.svg';
 import starIcon from '@/assets/Icons/starEmptyLight.svg';
+
 import AddingVisit from './components/AddingVisit';
+import BasicModal from '@/shared/components/BasicModal';
+import VisitDetails from '@/features/visits/components/VisitDetails';
+import EditingVisit from './components/EditingVisit';
 
 export default function VisitListTable(): JSX.Element {
   const isVet = IsVet();
