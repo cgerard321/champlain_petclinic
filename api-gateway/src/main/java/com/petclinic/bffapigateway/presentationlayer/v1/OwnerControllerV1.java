@@ -85,12 +85,6 @@ public class OwnerControllerV1 {
     }
 
 
-//    @PostMapping(value = "owners",
-//            consumes = "application/json",
-//            produces = "application/json")
-//    public Mono<OwnerResponseDTO> createOwner(@RequestBody OwnerResponseDTO model){
-//        return customersServiceClient.createOwner(model);
-//    }
 
     @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN,Roles.RECEPTIONIST})
     @PostMapping(value = "/photo/{ownerId}")
