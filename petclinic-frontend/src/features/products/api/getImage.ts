@@ -4,7 +4,7 @@ import { ImageModel } from '../models/ProductModels/ImageModel';
 export async function getImage(imageId: string): Promise<ImageModel> {
   try {
     const response = await axiosInstance.get('/images/' + imageId, {
-      useV2: false,
+      useV2: true,
     });
 
     return response.data;
