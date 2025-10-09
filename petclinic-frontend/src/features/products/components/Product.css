@@ -90,3 +90,11 @@
   color: #000;
   text-decoration: underline;
 }
+
+.add-to-cart-btn.disabled,
+.add-to-wishlist-btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+
