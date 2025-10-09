@@ -43,7 +43,7 @@ public class ProductClientTest {
         mockServer
                 .when(request()
                         .withMethod("GET")
-                        .withPath("/api/v1/products/" + EXISTING_PRODUCT_ID))
+                        .withPath("/products/" + EXISTING_PRODUCT_ID))
                 .respond(response()
                         .withStatusCode(200)
                         .withHeader("Content-Type", "application/json")
@@ -69,7 +69,7 @@ public class ProductClientTest {
         mockServer
                 .when(request()
                         .withMethod("GET")
-                        .withPath("/api/v1/products/" + NON_EXISTING_PRODUCT_ID))
+                        .withPath("/products/" + NON_EXISTING_PRODUCT_ID))
                 .respond(response()
                         .withStatusCode(404));
 
@@ -88,7 +88,7 @@ public class ProductClientTest {
         mockServer
                 .when(request()
                         .withMethod("GET")
-                        .withPath("/api/v1/products/" + INVALID_PRODUCT_ID))
+                        .withPath("/products/" + INVALID_PRODUCT_ID))
                 .respond(response()
                         .withStatusCode(422));
 
