@@ -7,12 +7,14 @@ import com.petclinic.bffapigateway.presentationlayer.v1.CartControllerV1;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -20,9 +22,11 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.List;
 
 import static org.mockito.Mockito.*;
 
@@ -82,6 +86,93 @@ public class CartControllerV1UnitTest {
         return UpdateProductQuantityRequestDTO.builder()
                 .quantity(5)
                 .build();
+    }
+
+    private CartRequestDTO buildCartRequestDTO() {
+        return CartRequestDTO.builder()
+                .customerId("customer-456")
+                .build();
+    }
+
+    // Tests for createCart endpoint
+    @Test
+    @DisplayName("POST /api/gateway/carts - Should create cart successfully")
+    void createCart_withValidRequest_shouldCreateCart() {
+        // Arrange
+        CartRequestDTO requestDTO = buildCartRequestDTO();
+        CartResponseDTO createdCart = buildCartResponseDTO();
+        when(cartServiceClient.createCart(any(CartRequestDTO.class)))
+                .thenReturn(Mono.just(createdCart));
+
+        // Act & Assert
+        webTestClient.post()
+                .uri(baseCartURL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestDTO)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody(CartResponseDTO.class)
+                .isEqualTo(createdCart);
+
+        verify(cartServiceClient, times(1)).createCart(any(CartRequestDTO.class));
+    }
+
+    @Test
+    @DisplayName("POST /api/gateway/carts - Should return 400 for invalid input")
+    void createCart_withInvalidInput_shouldReturnBadRequest() {
+        // Arrange
+        CartRequestDTO requestDTO = buildCartRequestDTO();
+        when(cartServiceClient.createCart(any(CartRequestDTO.class)))
+                .thenReturn(Mono.error(new InvalidInputException("Invalid cart data")));
+
+        // Act & Assert
+        webTestClient.post()
+                .uri(baseCartURL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestDTO)
+                .exchange()
+                .expectStatus().isBadRequest();
+
+        verify(cartServiceClient, times(1)).createCart(any(CartRequestDTO.class));
+    }
+
+    // Tests for getCartItemCount endpoint
+    @Test
+    @DisplayName("GET /api/gateway/carts/{cartId}/count - Should return item count successfully")
+    void getCartItemCount_withValidId_shouldReturnCount() {
+        // Arrange
+        String cartId = "cart-123";
+        when(cartServiceClient.getCartItemCount(cartId))
+                .thenReturn(Mono.just(3));
+
+        // Act & Assert
+        webTestClient.get()
+                .uri(baseCartURL + "/" + cartId + "/count")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.itemCount").isEqualTo(3);
+
+        verify(cartServiceClient, times(1)).getCartItemCount(cartId);
+    }
+
+    @Test
+    @DisplayName("GET /api/gateway/carts/{cartId}/count - Should return 404 when cart not found")
+    void getCartItemCount_withNonExistingId_shouldReturnNotFound() {
+        // Arrange
+        String cartId = "missing-cart";
+        when(cartServiceClient.getCartItemCount(cartId))
+                .thenReturn(Mono.error(new NotFoundException("Cart not found")));
+
+        // Act & Assert
+        webTestClient.get()
+                .uri(baseCartURL + "/" + cartId + "/count")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound();
+
+        verify(cartServiceClient, times(1)).getCartItemCount(cartId);
     }
 
     // Tests for getAllCarts endpoint
@@ -727,5 +818,123 @@ public class CartControllerV1UnitTest {
                 .expectStatus().isNotFound();
 
         verify(cartServiceClient, times(1)).moveAllWishlistToCart(cartId);
+    }
+
+    // Focused error mapping tests for wishlist/cart endpoints
+    @Test
+    @DisplayName("PUT /api/gateway/carts/{cartId}/wishlist/{productId}/toCart - Should return 404 when cart or product not found")
+    void moveProductFromWishListToCart_withNonExistingIds_shouldReturnNotFound() {
+        // Arrange
+        String cartId = "missing-cart";
+        String productId = "missing-product";
+        when(cartServiceClient.moveProductFromWishListToCart(cartId, productId))
+                .thenReturn(Mono.error(new NotFoundException("Not found")));
+
+        // Act & Assert
+        webTestClient.put()
+                .uri(baseCartURL + "/" + cartId + "/wishlist/" + productId + "/toCart")
+                .exchange()
+                .expectStatus().isNotFound();
+
+        verify(cartServiceClient, times(1)).moveProductFromWishListToCart(cartId, productId);
+    }
+
+    @Test
+    @DisplayName("PUT /api/gateway/carts/{cartId}/wishlist/{productId}/toWishList - Should return 400 for invalid input")
+    void moveProductFromCartToWishlist_withInvalidInput_shouldReturnBadRequest() {
+        // Arrange
+        String cartId = "cart-123";
+        String productId = "bad-product";
+        when(cartServiceClient.moveProductFromCartToWishlist(cartId, productId))
+                .thenReturn(Mono.error(new InvalidInputException("Invalid input")));
+
+        // Act & Assert
+        webTestClient.put()
+                .uri(baseCartURL + "/" + cartId + "/wishlist/" + productId + "/toWishList")
+                .exchange()
+                .expectStatus().isBadRequest();
+
+        verify(cartServiceClient, times(1)).moveProductFromCartToWishlist(cartId, productId);
+    }
+
+    @Test
+    @DisplayName("POST /api/gateway/carts/{cartId}/products/{productId}/quantity/{quantity} - Should return 422 for unprocessable entity")
+    void addProductToWishList_withUnprocessableEntity_shouldReturnUnprocessable() {
+        // Arrange
+        String cartId = "cart-123";
+        String productId = "product-789";
+        int quantity = 2;
+        when(cartServiceClient.addProductToWishList(cartId, productId, quantity))
+                .thenReturn(Mono.error(WebClientResponseException.create(422, "Unprocessable Entity", null, null, null)));
+
+        // Act & Assert
+        webTestClient.post()
+                .uri(baseCartURL + "/" + cartId + "/products/" + productId + "/quantity/" + quantity)
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
+
+        verify(cartServiceClient, times(1)).addProductToWishList(cartId, productId, quantity);
+    }
+
+    @Test
+    @DisplayName("POST /api/gateway/carts/{cartId}/wishlist/moveAll - Should pass through custom 409 status")
+    void moveAllWishlistToCart_withConflict_shouldReturnConflict() {
+        // Arrange
+        String cartId = "cart-123";
+        when(cartServiceClient.moveAllWishlistToCart(cartId))
+                .thenReturn(Mono.error(WebClientResponseException.create(409, "Conflict", null, null, null)));
+
+        // Act & Assert
+        webTestClient.post()
+                .uri(baseCartURL + "/" + cartId + "/wishlist/moveAll")
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.CONFLICT);
+
+        verify(cartServiceClient, times(1)).moveAllWishlistToCart(cartId);
+    }
+    @Test
+    void testGetRecentPurchases_ReturnsOk() {
+        // Arrange
+        CartServiceClient cartServiceClient = Mockito.mock(CartServiceClient.class);
+        CartControllerV1 controller = new CartControllerV1(cartServiceClient);
+
+        String cartId = "test-cart-id";
+        List<CartProductResponseDTO> products = List.of(
+                CartProductResponseDTO.builder().productId("prod1").build()
+        );
+
+        Mockito.when(cartServiceClient.getRecentPurchases(cartId))
+                .thenReturn(Mono.just(products));
+
+        // Act
+        Mono<ResponseEntity<List<CartProductResponseDTO>>> result = controller.getRecentPurchases(cartId);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNextMatches(response -> response.getStatusCode().is2xxSuccessful()
+                        && response.getBody() != null
+                        && response.getBody().size() == 1
+                        && "prod1".equals(response.getBody().get(0).getProductId()))
+                .verifyComplete();
+    }
+
+    @Test
+    void testGetRecentPurchases_ReturnsNotFound() {
+        // Arrange
+        CartServiceClient cartServiceClient = Mockito.mock(CartServiceClient.class);
+        CartControllerV1 controller = new CartControllerV1(cartServiceClient);
+
+        String cartId = "missing-cart-id";
+        Mockito.when(cartServiceClient.getRecentPurchases(cartId))
+                .thenReturn(Mono.empty());
+
+        // Act
+        Mono<ResponseEntity<List<CartProductResponseDTO>>> result = controller.getRecentPurchases(cartId);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNextMatches(response -> response.getStatusCode().is4xxClientError()
+                        && response.getBody() == null)
+                .verifyComplete();
     }
 }

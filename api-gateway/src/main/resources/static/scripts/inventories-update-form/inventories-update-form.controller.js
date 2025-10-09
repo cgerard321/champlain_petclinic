@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('inventoriesUpdateForm')
-    .controller('InventoriesUpdateFormController', ["$http", '$state', '$stateParams', '$scope', function ($http, $state, $stateParams, $scope) {
+    .controller('InventoriesUpdateFormConztroller', ["$http", '$state', '$stateParams', '$scope', function ($http, $state, $stateParams, $scope) {
         var self = this;
         var inventoryId = $stateParams.inventoryId || "";
         var method = 'edit';
@@ -10,7 +10,7 @@ angular.module('inventoriesUpdateForm')
         $http.get('api/gateway/inventories/' + inventoryId).then(function (resp) {
             self.inventory = resp.data;
 
-            $http.get("api/gateway/inventories/type").then(function (typesResp) {
+            $http.get("api/gateway/inventories/types").then(function (typesResp) {
 
                 // Includes all types inside the array
                 typesResp.data.forEach(function (type) {
@@ -38,7 +38,7 @@ angular.module('inventoriesUpdateForm')
                     inventoryDescription: self.inventory.inventoryDescription
                 };
 
-                $http.post("api/gateway/inventories/type", { "type": $scope.selectedUpdateOption })
+                $http.post("api/gateway/inventories/types", { "type": $scope.selectedUpdateOption })
                     .then(function (resp) {
                         if (method === 'edit') {
                             $http.put('/api/gateway/inventories/' + inventoryId, data)

@@ -34,6 +34,8 @@ export default function ProductDetails(): JSX.Element {
   const isInventoryManager = IsInventoryManager();
   const isVet = IsVet();
   const isReceptionist = IsReceptionist();
+  const isStaff = isAdmin || isInventoryManager || isVet || isReceptionist;
+
   const navigate = useNavigate();
   const { productId } = useParams();
   const { addToCart } = useAddToCart();
@@ -160,6 +162,7 @@ export default function ProductDetails(): JSX.Element {
 
   const handleAddToCartClick = async (): Promise<void> => {
     if (!productId) return;
+    if (isStaff) return;
     const ok = await addToCart(String(productId));
     alert(
       ok ? 'Item added to cart' : "Couldn't add to cart. Please try again."
@@ -219,14 +222,15 @@ export default function ProductDetails(): JSX.Element {
                     <h3>{currentProduct.averageRating} / 5</h3>
                   </div>
 
-                  {/* Single, final Add to Cart block */}
-                  {!isInventoryManager && !isVet && !isReceptionist && (
-                    <div className="cartactions-container">
-                      <Button onClick={handleAddToCartClick}>
-                        Add to Cart
-                      </Button>
-                    </div>
-                  )}
+                  <div className="cartactions-container">
+                    <Button
+                      onClick={handleAddToCartClick}
+                      disabled={isStaff}
+                      aria-disabled={isStaff}
+                    >
+                      Add to Cart
+                    </Button>
+                  </div>
 
                   <p>Type: {currentProduct.productType}</p>
                   <div className="deliveryTypeEdit-container">
@@ -238,21 +242,24 @@ export default function ProductDetails(): JSX.Element {
                   <h3>Description</h3>
                   <p>{currentProduct.productDescription}</p>
                 </div>
+
                 <div className="review-section-container">
                   <div className="reviewproduct-container">
                     <h2>Review</h2>
                     <p>Leave a rating:</p>
                     <StarRating
                       currentRating={currentUserRating.rating}
-                      viewOnly={false}
-                      updateRating={updateRating}
+                      viewOnly={isStaff}
+                      updateRating={isStaff ? undefined : updateRating}
                     />
-                    <ReviewBox
-                      updateFunc={(newReview: string) =>
-                        updateRating(currentUserRating.rating, newReview)
-                      }
-                      rating={currentUserRating}
-                    />
+                    {!isStaff && (
+                      <ReviewBox
+                        updateFunc={(newReview: string) =>
+                          updateRating(currentUserRating.rating, newReview)
+                        }
+                        rating={currentUserRating}
+                      />
+                    )}
                   </div>
                   <br />
                   <h3>Users feedback</h3>
