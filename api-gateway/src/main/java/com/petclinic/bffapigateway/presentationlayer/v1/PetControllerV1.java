@@ -21,7 +21,7 @@ public class PetControllerV1 {
 
     private final CustomersServiceClient customersServiceClient;
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET, Roles.OWNER})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET, Roles.OWNER,Roles.RECEPTIONIST})
     @GetMapping("/{petId}")
     public Mono<ResponseEntity<PetResponseDTO>> getPetByPetId(@PathVariable String petId) {
         return customersServiceClient.getPetByPetId(petId)
@@ -29,7 +29,7 @@ public class PetControllerV1 {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN, Roles.VET})
+    @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN, Roles.VET,Roles.RECEPTIONIST})
     @GetMapping("/owners/{ownerId}/pets/{petId}")
     public Mono<ResponseEntity<PetResponseDTO>> getPetForOwner(
             @PathVariable String ownerId,
