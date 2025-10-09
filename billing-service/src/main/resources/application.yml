@@ -69,7 +69,6 @@ server:
 
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
-
 #---
 #spring.profiles: h2
 #
@@ -102,6 +101,4 @@ server:
 #  #    initialization-mode: always
 #
 #spring.datasource.hikari.initializationFailTimeout: 60000
-
-
 
