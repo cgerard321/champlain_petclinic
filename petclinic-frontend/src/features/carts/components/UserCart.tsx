@@ -6,6 +6,7 @@ import { ProductModel } from '../models/ProductModel';
 import './UserCart.css';
 import { NavBar } from '@/layouts/AppNavBar';
 import { FaShoppingCart } from 'react-icons/fa';
+import ImageContainer from '@/features/products/components/ImageContainer';
 import axiosInstance from '@/shared/api/axiosInstance';
 import {
   IsAdmin,
@@ -17,6 +18,7 @@ import { AppRoutePaths } from '@/shared/models/path.routes';
 import { getProductByProductId } from '@/features/products/api/getProductByProductId';
 import { notifyCartChanged } from '../api/cartEvent';
 import { useConfirmModal } from '@/shared/hooks/useConfirmModal';
+import axios from 'axios';
 
 interface ProductAPIResponse {
   productId: number;
@@ -70,6 +72,88 @@ const UserCart = (): JSX.Element => {
   const [voucherError, setVoucherError] = useState<string | null>(null);
 
   const [movingAll, setMovingAll] = useState<boolean>(false);
+
+  // Recent purchases state
+  const [recentPurchases, setRecentPurchases] = useState<
+    Array<{
+      productId: string;
+      productName: string;
+      productSalePrice: number;
+      imageId: string;
+      quantity: number;
+    }>
+  >([]);
+
+  // Quantity state for recent purchases
+  const [recentPurchaseQuantities, setRecentPurchaseQuantities] = useState<{
+    [productId: string]: number;
+  }>({});
+
+  // Handle quantity change for recent purchases
+  const handleRecentPurchaseQuantityChange = (
+    productId: string,
+    value: number
+  ): void => {
+    setRecentPurchaseQuantities(prev => ({
+      ...prev,
+      [productId]: Math.max(1, value),
+    }));
+  };
+
+  // Handle 'Purchase Again' action
+  const handlePurchaseAgain = async (item: {
+    productId: string;
+    productName: string;
+    productSalePrice: number;
+    imageId: string;
+    quantity: number;
+  }): Promise<void> => {
+    if (!cartId) return;
+
+    const quantity = Math.max(1, recentPurchaseQuantities[item.productId] || 1);
+
+    try {
+      // Use the working endpoint and loop for quantity
+      for (let i = 0; i < quantity; i += 1) {
+        await axiosInstance.post(
+          `/carts/${cartId}/${item.productId}`,
+          {},
+          { useV2: false }
+        );
+      }
+
+      setNotificationMessage(
+        `${item.productName} (x${quantity}) added to cart!`
+      );
+      notifyCartChanged();
+
+      // Fetch updated cart and update state
+      const { data } = await axiosInstance.get(`/carts/${cartId}`, {
+        useV2: false,
+      });
+      if (Array.isArray(data.products)) {
+        const products: ProductModel[] = data.products.map(
+          (p: ProductAPIResponse) => ({
+            productId: p.productId,
+            imageId: p.imageId,
+            productName: p.productName,
+            productDescription: p.productDescription,
+            productSalePrice: p.productSalePrice,
+            averageRating: p.averageRating,
+            quantity: p.quantityInCart || 1,
+            productQuantity: p.productQuantity,
+          })
+        );
+        setCartItems(products);
+      }
+    } catch (err: unknown) {
+      const msg =
+        (axios.isAxiosError(err) &&
+          (err.response?.data as { message?: string } | undefined)?.message) ||
+        `Failed to add ${item.productName} to cart.`;
+      setNotificationMessage(msg);
+    }
+  };
 
   // rôles (read-only pour staff/admin)
   const isAdmin = IsAdmin();
@@ -150,6 +234,23 @@ const UserCart = (): JSX.Element => {
   useEffect(() => {
     updateCartItemCount();
   }, [cartItems, updateCartItemCount]);
+
+  // Fetch recent purchases
+  useEffect(() => {
+    if (!cartId) return;
+    const fetchRecentPurchases = async (): Promise<void> => {
+      try {
+        const { data } = await axiosInstance.get(
+          `/carts/${cartId}/recent-purchases`,
+          { useV2: false }
+        );
+        setRecentPurchases(data || []);
+      } catch (err) {
+        setRecentPurchases([]);
+      }
+    };
+    fetchRecentPurchases();
+  }, [cartId]);
 
   const applyVoucherCode = async (): Promise<void> => {
     try {
@@ -495,6 +596,17 @@ const UserCart = (): JSX.Element => {
       setCartItemCount(0);
       setIsCheckoutModalOpen(false);
       notifyCartChanged();
+
+      // Fetch recent purchases after checkout
+      try {
+        const { data } = await axiosInstance.get(
+          `/carts/${cartId}/recent-purchases`,
+          { useV2: false }
+        );
+        setRecentPurchases(data || []);
+      } catch (err) {
+        // Optionally handle error, but don't block checkout
+      }
     } catch (error: unknown) {
       if (error && typeof error === 'object' && 'response' in error) {
         const errorData = (
@@ -512,14 +624,25 @@ const UserCart = (): JSX.Element => {
   if (loading) return <div className="loading">Loading cart items...</div>;
   if (error) return <div className="error">{error}</div>;
 
+  // Helper to filter out duplicate recent purchases by productId
+  const uniqueRecentPurchases = recentPurchases.reduce<{
+    [id: string]: (typeof recentPurchases)[0];
+  }>((acc, item) => {
+    if (!acc[item.productId]) {
+      acc[item.productId] = item;
+    } else {
+      // Optionally, sum quantities if duplicate found
+      acc[item.productId].quantity += item.quantity;
+    }
+    return acc;
+  }, {});
+  const recentPurchasesList = Object.values(uniqueRecentPurchases);
+
   return (
     <div>
       <NavBar />
-
       <ConfirmModal />
-
       <h2 className="cart-header-title">Your Cart</h2>
-
       <div className="UserCart-container">
         {notificationMessage && (
           <div className="notification-message">
@@ -706,6 +829,111 @@ const UserCart = (): JSX.Element => {
           )}
         </div>
 
+        {/* Recent Purchases Section - above Wishlist */}
+        <div
+          className="recent-purchases-section"
+          style={{ marginBottom: '2rem' }}
+        >
+          <h2>Recent Purchases</h2>
+          <div
+            className="recent-purchases-list"
+            style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}
+          >
+            {recentPurchasesList.length > 0 ? (
+              recentPurchasesList.map(item => (
+                <div
+                  key={item.productId}
+                  className="recent-purchase-card"
+                  style={{
+                    border: '1px solid #eee',
+                    borderRadius: 8,
+                    padding: 16,
+                    minWidth: 180,
+                    maxWidth: 200,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                  }}
+                >
+                  <div
+                    style={{
+                      width: 48,
+                      height: 48,
+                      marginBottom: 8,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      overflow: 'hidden',
+                    }}
+                  >
+                    <div className="recent-purchase-image">
+                      <ImageContainer imageId={item.imageId} />
+                    </div>
+                  </div>
+                  <div style={{ fontWeight: 'bold', marginBottom: 4 }}>
+                    {item.productName}
+                  </div>
+                  <div style={{ marginBottom: 8 }}>
+                    ${item.productSalePrice.toFixed(2)}
+                  </div>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      marginBottom: 8,
+                    }}
+                  >
+                    <label
+                      htmlFor={`recent-qty-${item.productId}`}
+                      style={{ marginRight: 8 }}
+                    >
+                      Qty:
+                    </label>
+                    <input
+                      id={`recent-qty-${item.productId}`}
+                      type="number"
+                      min={1}
+                      value={recentPurchaseQuantities[item.productId] || 1}
+                      onChange={e =>
+                        handleRecentPurchaseQuantityChange(
+                          item.productId,
+                          Number(e.target.value)
+                        )
+                      }
+                      style={{ width: 48 }}
+                    />
+                  </div>
+                  <button
+                    className="purchase-again-btn"
+                    style={{
+                      background: '#1976d2',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: 4,
+                      padding: '6px 12px',
+                      cursor: 'pointer',
+                      fontWeight: 'bold',
+                    }}
+                    onClick={() => handlePurchaseAgain(item)}
+                  >
+                    Purchase Again
+                  </button>
+                  <div style={{ marginTop: 8, fontSize: 12, color: '#555' }}>
+                    Total: $
+                    {(
+                      item.productSalePrice *
+                      (recentPurchaseQuantities[item.productId] || 1)
+                    ).toFixed(2)}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p>No recent purchases found.</p>
+            )}
+          </div>
+        </div>
+
+        {/* Wishlist */}
         <div className="wishlist-section">
           {/* Header with Move All button */}
           <div
