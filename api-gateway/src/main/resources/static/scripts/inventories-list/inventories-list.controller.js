@@ -12,14 +12,6 @@ angular.module('inventoriesList')
         var desc
 
         getInventoryList()
-
-
-        $http.get('api/gateway/inventories').then(function (resp) {
-            self.inventoryList = resp.data;
-            console.log("Resp data: " + resp.data)
-            console.log("inventory list: " + self.inventoryList)
-        });
-
         $http.get('api/gateway/inventories').then(function (resp) {
             self.inventoryList = resp.data;
             console.log("Resp data: " + resp.data)
@@ -211,4 +203,13 @@ angular.module('inventoriesList')
                 getInventoryList(name, type, desc)
             }
         }
+
+        $scope.inventoryType = ''; 
+
+    
+        $scope.$watch('inventoryType', function(newType, oldType) {
+            if (newType !== oldType) {
+                $scope.searchInventory($scope.inventoryName || '', newType, $scope.inventoryDescription || '');
+            }
+        });
     }]);
