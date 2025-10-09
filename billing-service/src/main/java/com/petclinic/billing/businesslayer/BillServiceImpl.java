@@ -350,7 +350,7 @@ public class BillServiceImpl implements BillService{
                 .map(EntityDtoUtil::toBillResponseDto);
     }
 
-    public Mono<BigDecimal> getInterestAmount(String billId, BigDecimal amount, int overdueMonths) {
+    public Mono<BigDecimal> getInterest(String billId, BigDecimal amount, int overdueMonths) {
         return billRepository.findByBillId(billId)
             .map(bill -> {
                 if (bill.isInterestExempt()) {
@@ -362,7 +362,7 @@ public class BillServiceImpl implements BillService{
     }
 
     public Mono<BigDecimal> getTotalWithInterest(String billId, BigDecimal amount, int overdueMonths) {
-        return getInterestAmount(billId, amount, overdueMonths)
+        return getInterest(billId, amount, overdueMonths)
             .map(interest -> amount.add(interest));
     }
 

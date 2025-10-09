@@ -72,17 +72,18 @@ public class InterestCalculationUtil {
     }
 
     /**
-     * Calculates the final amount (principal + compound interest) for an overdue bill.
+     * Calculates the total amount owed (principal + compound interest) for an overdue bill.
+     * If the bill amount is null, returns zero as no calculation can be performed.
      * 
-     * @param bill The bill to calculate the final amount for
-     * @return The final amount including interest, or just interest if amount is null
+     * @param bill The bill to calculate the total amount for
+     * @return The total amount including interest, or zero if amount is null
      */
-    public static BigDecimal calculateFinalAmount(Bill bill) {
-        BigDecimal interest = calculateInterest(bill);
-        if (bill.getAmount() != null) {
-            return bill.getAmount().add(interest);
+    public static BigDecimal calculateTotalAmountOwed(Bill bill) {
+        if (bill.getAmount() == null) {
+            return BigDecimal.ZERO;
         }
-        return interest;
+        BigDecimal interest = calculateInterest(bill);
+        return bill.getAmount().add(interest);
     }
 
     /**

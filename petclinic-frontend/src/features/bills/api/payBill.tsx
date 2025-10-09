@@ -19,7 +19,7 @@ export async function payBill(
   try {
     // Make API call to update bill status to PAID
     const response = await axiosInstance.post(
-      `/customers/${customerId}/bills/${billId}/pay`,
+      `/bills/customer/${customerId}/bills/${billId}/pay`,
       {
         cardNumber: paymentDetails.cardNumber,
         cvv: paymentDetails.cvv,
@@ -27,7 +27,7 @@ export async function payBill(
       },
       {
         headers: { 'Content-Type': 'application/json' },
-        useV2: true,
+        useV2: false,
       }
     );
 
