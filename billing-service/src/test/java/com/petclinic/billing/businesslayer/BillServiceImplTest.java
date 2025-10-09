@@ -48,7 +48,7 @@ public class BillServiceImplTest {
     BillService billService;
 
     @Test
-    public void test_getBillById(){
+    public void test_getBillById() {
         Bill billEntity = buildBill();
 
         String BILL_ID = billEntity.getBillId();
@@ -67,7 +67,7 @@ public class BillServiceImplTest {
     }
 
     @Test
-    void getBillsByPage_ShouldSucceed(){
+    void getBillsByPage_ShouldSucceed() {
 
         Bill bill1 = Bill.builder()
                 .billId("billId-1")
@@ -78,8 +78,8 @@ public class BillServiceImplTest {
                 .vetId("vetId1")
                 .vetFirstName("vetFirstName1")
                 .vetLastName("vetLastName1")
-                .date(LocalDate.of(2024,10,1))
-                .dueDate(LocalDate.of(2024,10,30))
+                .date(LocalDate.of(2024, 10, 1))
+                .dueDate(LocalDate.of(2024, 10, 30))
                 .amount(new BigDecimal("100.00"))
                 .billStatus(BillStatus.UNPAID)
                 .build();
@@ -92,8 +92,8 @@ public class BillServiceImplTest {
                 .vetId("vetId2")
                 .vetFirstName("vetFirstName2")
                 .vetLastName("vetLastName2")
-                .date(LocalDate.of(2024,10,1))
-                .dueDate(LocalDate.of(2024,10,30))
+                .date(LocalDate.of(2024, 10, 1))
+                .dueDate(LocalDate.of(2024, 10, 30))
                 .amount(new BigDecimal("150.00"))
                 .billStatus(BillStatus.PAID)
                 .build();
@@ -106,8 +106,8 @@ public class BillServiceImplTest {
                 .vetId("vetId3")
                 .vetFirstName("vetFirstName3")
                 .vetLastName("vetLastName3")
-                .date(LocalDate.of(2024,10,1))
-                .dueDate(LocalDate.of(2024,10,30))
+                .date(LocalDate.of(2024, 10, 1))
+                .dueDate(LocalDate.of(2024, 10, 30))
                 .amount(new BigDecimal("200.00"))
                 .billStatus(BillStatus.OVERDUE)
                 .build();
@@ -118,8 +118,8 @@ public class BillServiceImplTest {
         when(repo.findAll()).thenReturn(Flux.just(bill1, bill2, bill3));
 
         // Call the method under test
-        Flux<BillResponseDTO> bills = billService.getAllBillsByPage(pageable,null,null,
-                null,null,null, null, null, null);
+        Flux<BillResponseDTO> bills = billService.getAllBillsByPage(pageable, null, null,
+                null, null, null, null, null, null);
 
         // Verify the behavior using StepVerifier
         StepVerifier.create(bills)
@@ -305,8 +305,9 @@ public class BillServiceImplTest {
                 })
                 .verify();
     }
+
     @Test
-    public void test_createBill(){
+    public void test_createBill() {
 
         Bill billEntity = buildBill();
 
@@ -327,8 +328,8 @@ public class BillServiceImplTest {
     }
 
     @Test
-    public void test_deleteAllBills(){
-        
+    public void test_deleteAllBills() {
+
         when(repo.deleteAll()).thenReturn(Mono.empty());
 
         Mono<Void> deleteObj = billService.deleteAllBills();
@@ -339,7 +340,7 @@ public class BillServiceImplTest {
     }
 
     @Test
-    public void test_deleteBillByVetId(){
+    public void test_deleteBillByVetId() {
 
         Bill billEntity = buildBill();
 
@@ -351,8 +352,9 @@ public class BillServiceImplTest {
                 .expectNextCount(0)
                 .verifyComplete();
     }
+
     @Test
-    public void test_deleteBillsByCustomerId(){
+    public void test_deleteBillsByCustomerId() {
         Bill billEntity = buildBill();
         when(repo.deleteBillsByCustomerId(anyString())).thenReturn(Flux.empty());
         Flux<Void> deletedObj = billService.deleteBillsByCustomerId(billEntity.getCustomerId());
@@ -361,8 +363,9 @@ public class BillServiceImplTest {
                 .expectNextCount(0)
                 .verifyComplete();
     }
+
     @Test
-    public void test_getBillByCustomerId(){
+    public void test_getBillByCustomerId() {
 
         Bill billEntity = buildBill();
 
@@ -382,7 +385,7 @@ public class BillServiceImplTest {
     }
 
     @Test
-    public void test_getBillByVetId(){
+    public void test_getBillByVetId() {
 
         Bill billEntity = buildBill();
 
@@ -461,7 +464,7 @@ public class BillServiceImplTest {
     @Test
     public void test_updateBillWithInvalidRequest() {
         String billId = "validBillId";
-        BigDecimal updatedAmount = new BigDecimal (-5.0); // Negative amount, which is invalid
+        BigDecimal updatedAmount = new BigDecimal(-5.0); // Negative amount, which is invalid
         BillRequestDTO updatedBillRequestDTO = buildBillRequestDTO();
         updatedBillRequestDTO.setAmount(updatedAmount);
         Mono<BillRequestDTO> updatedBillRequestMono = Mono.just(updatedBillRequestDTO);
@@ -504,7 +507,7 @@ public class BillServiceImplTest {
                 .verify();
     }
 
-        @Test
+    @Test
     public void testGenerateBillPdf() {
         Bill mockBill = Bill.builder()
                 .billId("billId-1")
@@ -560,7 +563,7 @@ public class BillServiceImplTest {
                 .build();
     }
 
-    private Bill buildBill(){
+    private Bill buildBill() {
 
         Calendar calendar = Calendar.getInstance();
         calendar.set(2022, Calendar.SEPTEMBER, 25);
@@ -568,12 +571,12 @@ public class BillServiceImplTest {
                 .atZone(ZoneId.systemDefault())
                 .toLocalDate();
 
-        LocalDate dueDate = LocalDate.of(2022,Month.OCTOBER,15);
+        LocalDate dueDate = LocalDate.of(2022, Month.OCTOBER, 15);
 
         return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(new BigDecimal(13.37)).billStatus(BillStatus.PAID).dueDate(dueDate).build();
     }
 
-    private Bill buildUnpaidBill(){
+    private Bill buildUnpaidBill() {
 
         VetResponseDTO vetDTO = buildVetDTO();
         Calendar calendar = Calendar.getInstance();
@@ -588,7 +591,7 @@ public class BillServiceImplTest {
 
     }
 
-    private Bill buildOverdueBill(){
+    private Bill buildOverdueBill() {
 
         Calendar calendar = Calendar.getInstance();
         calendar.set(2022, Calendar.SEPTEMBER, 25);
@@ -602,8 +605,7 @@ public class BillServiceImplTest {
     }
 
 
-
-    private BillRequestDTO buildBillRequestDTO(){
+    private BillRequestDTO buildBillRequestDTO() {
 
         VetResponseDTO vetDTO = buildVetDTO();
 
@@ -613,7 +615,7 @@ public class BillServiceImplTest {
                 .atZone(ZoneId.systemDefault())
                 .toLocalDate();
 
-        LocalDate dueDate =LocalDate.of(2022, Month.OCTOBER, 10);
+        LocalDate dueDate = LocalDate.of(2022, Month.OCTOBER, 10);
 
         return BillRequestDTO.builder().customerId("1").vetId("1").visitType("Test Type").date(date).amount(new BigDecimal(13.37)).billStatus(BillStatus.PAID).dueDate(dueDate).build();
 
@@ -707,7 +709,7 @@ public class BillServiceImplTest {
         Mono<BigDecimal> result = billService.calculateCurrentBalance(customerId);
 
         StepVerifier.create(result)
-                .expectNext(new BigDecimal(150.0)) 
+                .expectNext(new BigDecimal(150.0))
                 .verifyComplete();
     }
 
@@ -723,7 +725,7 @@ public class BillServiceImplTest {
         Mono<BigDecimal> result = billService.calculateCurrentBalance(invalidCustomerId);
 
         StepVerifier.create(result)
-                .expectNext(new BigDecimal(0.0)) 
+                .expectNext(new BigDecimal(0.0))
                 .verifyComplete();
     }
 
@@ -942,11 +944,11 @@ public class BillServiceImplTest {
         LocalDate dueDate = LocalDate.now().minusMonths(2); // 2 months overdue
         BigDecimal amount = new BigDecimal("100.00");
         Bill overdueBill = Bill.builder()
-            .billId("overdue-bill-id")
-            .amount(amount)
-            .billStatus(BillStatus.OVERDUE)
-            .dueDate(dueDate)
-            .build();
+                .billId("overdue-bill-id")
+                .amount(amount)
+                .billStatus(BillStatus.OVERDUE)
+                .dueDate(dueDate)
+                .build();
 
         when(repo.findByBillId("overdue-bill-id")).thenReturn(Mono.just(overdueBill));
 
@@ -971,11 +973,11 @@ public class BillServiceImplTest {
         LocalDate dueDate = LocalDate.now().plusDays(10); // Not overdue
         BigDecimal amount = new BigDecimal("200.00");
         Bill unpaidBill = Bill.builder()
-            .billId("unpaid-bill-id")
-            .amount(amount)
-            .billStatus(BillStatus.UNPAID)
-            .dueDate(dueDate)
-            .build();
+                .billId("unpaid-bill-id")
+                .amount(amount)
+                .billStatus(BillStatus.UNPAID)
+                .dueDate(dueDate)
+                .build();
 
         when(repo.findByBillId("unpaid-bill-id")).thenReturn(Mono.just(unpaidBill));
 
@@ -984,12 +986,12 @@ public class BillServiceImplTest {
 
         // Assert
         StepVerifier.create(result)
-            .consumeNextWith(dto -> {
-                assertEquals(amount, dto.getAmount());
-                assertEquals(BillStatus.UNPAID, dto.getBillStatus());
-                assertEquals(BigDecimal.ZERO.setScale(2), dto.getInterest().setScale(2));
-            })
-            .verifyComplete();
+                .consumeNextWith(dto -> {
+                    assertEquals(amount, dto.getAmount());
+                    assertEquals(BillStatus.UNPAID, dto.getBillStatus());
+                    assertEquals(BigDecimal.ZERO.setScale(2), dto.getInterest().setScale(2));
+                })
+                .verifyComplete();
     }
 
     @Test
@@ -1001,37 +1003,37 @@ public class BillServiceImplTest {
         BigDecimal overdueAmount = new BigDecimal("50.00");
 
         Bill unpaidBill = Bill.builder()
-            .amount(unpaidAmount)
-            .billStatus(BillStatus.UNPAID)
-            .customerId(customerId)
-            .build();
+                .amount(unpaidAmount)
+                .billStatus(BillStatus.UNPAID)
+                .customerId(customerId)
+                .build();
 
         Bill overdueBill = Bill.builder()
-            .amount(overdueAmount)
-            .billStatus(BillStatus.OVERDUE)
-            .customerId(customerId)
-            .dueDate(overdueDate)
-            .build();
+                .amount(overdueAmount)
+                .billStatus(BillStatus.OVERDUE)
+                .customerId(customerId)
+                .dueDate(overdueDate)
+                .build();
 
         when(repo.findByCustomerIdAndBillStatus(customerId, BillStatus.UNPAID))
-            .thenReturn(Flux.just(unpaidBill));
+                .thenReturn(Flux.just(unpaidBill));
         when(repo.findByCustomerIdAndBillStatus(customerId, BillStatus.OVERDUE))
-            .thenReturn(Flux.just(overdueBill));
+                .thenReturn(Flux.just(overdueBill));
 
         // Act
         Mono<BigDecimal> result = billService.calculateCurrentBalance(customerId);
 
         // Assert
         StepVerifier.create(result)
-            .consumeNextWith(balance -> {
-                BigDecimal expectedInterest = overdueAmount
-                        .multiply(new BigDecimal("0.015"))
-                        .multiply(BigDecimal.valueOf(1))
-                        .setScale(2, RoundingMode.HALF_UP);
-                BigDecimal expectedTotal = unpaidAmount.add(overdueAmount).add(expectedInterest);
-                assertEquals(expectedTotal, balance.setScale(2, RoundingMode.HALF_UP));
-            })
-            .verifyComplete();
+                .consumeNextWith(balance -> {
+                    BigDecimal expectedInterest = overdueAmount
+                            .multiply(new BigDecimal("0.015"))
+                            .multiply(BigDecimal.valueOf(1))
+                            .setScale(2, RoundingMode.HALF_UP);
+                    BigDecimal expectedTotal = unpaidAmount.add(overdueAmount).add(expectedInterest);
+                    assertEquals(expectedTotal, balance.setScale(2, RoundingMode.HALF_UP));
+                })
+                .verifyComplete();
     }
 
     @Test
@@ -1040,14 +1042,14 @@ public class BillServiceImplTest {
         String billId = "overdue-bill-id";
         LocalDate dueDate = LocalDate.now().minusMonths(2);
         BigDecimal amount = new BigDecimal("100.00");
-        
+
         Bill overdueBill = Bill.builder()
-            .billId(billId)
-            .amount(amount)
-            .billStatus(BillStatus.OVERDUE)
-            .dueDate(dueDate)
-            .interestExempt(false)
-            .build();
+                .billId(billId)
+                .amount(amount)
+                .billStatus(BillStatus.OVERDUE)
+                .dueDate(dueDate)
+                .interestExempt(false)
+                .build();
 
         when(repo.findByBillId(billId)).thenReturn(Mono.just(overdueBill));
 
@@ -1056,12 +1058,12 @@ public class BillServiceImplTest {
 
 
         StepVerifier.create(result)
-            .consumeNextWith(interest -> {
-                BigDecimal expectedInterest = InterestCalculationUtil.calculateInterest(overdueBill);
-                assertEquals(expectedInterest, interest);
-                assertTrue(interest.compareTo(BigDecimal.ZERO) > 0);
-            })
-            .verifyComplete();
+                .consumeNextWith(interest -> {
+                    BigDecimal expectedInterest = InterestCalculationUtil.calculateInterest(overdueBill);
+                    assertEquals(expectedInterest, interest);
+                    assertTrue(interest.compareTo(BigDecimal.ZERO) > 0);
+                })
+                .verifyComplete();
     }
 
     @Test
@@ -1069,13 +1071,13 @@ public class BillServiceImplTest {
 
         String billId = "exempt-bill-id";
         BigDecimal amount = new BigDecimal("100.00");
-        
+
         Bill exemptBill = Bill.builder()
-            .billId(billId)
-            .amount(amount)
-            .billStatus(BillStatus.OVERDUE)
-            .interestExempt(true)
-            .build();
+                .billId(billId)
+                .amount(amount)
+                .billStatus(BillStatus.OVERDUE)
+                .interestExempt(true)
+                .build();
 
         when(repo.findByBillId(billId)).thenReturn(Mono.just(exemptBill));
 
@@ -1084,8 +1086,8 @@ public class BillServiceImplTest {
 
 
         StepVerifier.create(result)
-            .expectNext(BigDecimal.ZERO)
-            .verifyComplete();
+                .expectNext(BigDecimal.ZERO)
+                .verifyComplete();
     }
 
     @Test
@@ -1093,13 +1095,13 @@ public class BillServiceImplTest {
 
         String billId = "unpaid-bill-id";
         BigDecimal amount = new BigDecimal("100.00");
-        
+
         Bill unpaidBill = Bill.builder()
-            .billId(billId)
-            .amount(amount)
-            .billStatus(BillStatus.UNPAID)
-            .interestExempt(false)
-            .build();
+                .billId(billId)
+                .amount(amount)
+                .billStatus(BillStatus.UNPAID)
+                .interestExempt(false)
+                .build();
 
         when(repo.findByBillId(billId)).thenReturn(Mono.just(unpaidBill));
 
@@ -1108,8 +1110,8 @@ public class BillServiceImplTest {
 
 
         StepVerifier.create(result)
-            .expectNext(BigDecimal.ZERO)
-            .verifyComplete();
+                .expectNext(BigDecimal.ZERO)
+                .verifyComplete();
     }
 
     @Test
@@ -1118,14 +1120,14 @@ public class BillServiceImplTest {
         String billId = "overdue-bill-id";
         LocalDate dueDate = LocalDate.now().minusMonths(1);
         BigDecimal amount = new BigDecimal("100.00");
-        
+
         Bill overdueBill = Bill.builder()
-            .billId(billId)
-            .amount(amount)
-            .billStatus(BillStatus.OVERDUE)
-            .dueDate(dueDate)
-            .interestExempt(false)
-            .build();
+                .billId(billId)
+                .amount(amount)
+                .billStatus(BillStatus.OVERDUE)
+                .dueDate(dueDate)
+                .interestExempt(false)
+                .build();
 
         when(repo.findByBillId(billId)).thenReturn(Mono.just(overdueBill));
 
@@ -1134,13 +1136,13 @@ public class BillServiceImplTest {
 
 
         StepVerifier.create(result)
-            .consumeNextWith(total -> {
-                BigDecimal expectedInterest = InterestCalculationUtil.calculateInterest(overdueBill);
-                BigDecimal expectedTotal = amount.add(expectedInterest);
-                assertEquals(expectedTotal, total);
-                assertTrue(total.compareTo(amount) > 0);
-            })
-            .verifyComplete();
+                .consumeNextWith(total -> {
+                    BigDecimal expectedInterest = InterestCalculationUtil.calculateInterest(overdueBill);
+                    BigDecimal expectedTotal = amount.add(expectedInterest);
+                    assertEquals(expectedTotal, total);
+                    assertTrue(total.compareTo(amount) > 0);
+                })
+                .verifyComplete();
     }
 
     @Test
@@ -1148,13 +1150,13 @@ public class BillServiceImplTest {
 
         String billId = "exempt-bill-id";
         BigDecimal amount = new BigDecimal("150.00");
-        
+
         Bill exemptBill = Bill.builder()
-            .billId(billId)
-            .amount(amount)
-            .billStatus(BillStatus.OVERDUE)
-            .interestExempt(true)
-            .build();
+                .billId(billId)
+                .amount(amount)
+                .billStatus(BillStatus.OVERDUE)
+                .interestExempt(true)
+                .build();
 
         when(repo.findByBillId(billId)).thenReturn(Mono.just(exemptBill));
 
@@ -1163,8 +1165,8 @@ public class BillServiceImplTest {
 
 
         StepVerifier.create(result)
-            .expectNext(amount)
-            .verifyComplete();
+                .expectNext(amount)
+                .verifyComplete();
     }
 
     @Test
@@ -1172,20 +1174,20 @@ public class BillServiceImplTest {
 
         String billId = "test-bill-id";
         BigDecimal originalInterest = new BigDecimal("15.00");
-        
+
         Bill bill = Bill.builder()
-            .billId(billId)
-            .amount(new BigDecimal("100.00"))
-            .interest(originalInterest)
-            .interestExempt(false)
-            .build();
+                .billId(billId)
+                .amount(new BigDecimal("100.00"))
+                .interest(originalInterest)
+                .interestExempt(false)
+                .build();
 
         Bill savedBill = Bill.builder()
-            .billId(billId)
-            .amount(new BigDecimal("100.00"))
-            .interest(BigDecimal.ZERO)
-            .interestExempt(true)
-            .build();
+                .billId(billId)
+                .amount(new BigDecimal("100.00"))
+                .interest(BigDecimal.ZERO)
+                .interestExempt(true)
+                .build();
 
         when(repo.findByBillId(billId)).thenReturn(Mono.just(bill));
         when(repo.save(any(Bill.class))).thenReturn(Mono.just(savedBill));
@@ -1195,7 +1197,7 @@ public class BillServiceImplTest {
 
 
         StepVerifier.create(result)
-            .verifyComplete();
+                .verifyComplete();
 
         verify(repo, times(1)).save(argThat(savedBillArg -> {
             assertEquals(true, savedBillArg.isInterestExempt());
@@ -1208,20 +1210,20 @@ public class BillServiceImplTest {
     void test_setInterestExempt_SetToFalse_ShouldUpdateBillOnly() {
 
         String billId = "test-bill-id";
-        
+
         Bill bill = Bill.builder()
-            .billId(billId)
-            .amount(new BigDecimal("100.00"))
-            .interest(BigDecimal.ZERO)
-            .interestExempt(true)
-            .build();
+                .billId(billId)
+                .amount(new BigDecimal("100.00"))
+                .interest(BigDecimal.ZERO)
+                .interestExempt(true)
+                .build();
 
         Bill savedBill = Bill.builder()
-            .billId(billId)
-            .amount(new BigDecimal("100.00"))
-            .interest(BigDecimal.ZERO)
-            .interestExempt(false) 
-            .build();
+                .billId(billId)
+                .amount(new BigDecimal("100.00"))
+                .interest(BigDecimal.ZERO)
+                .interestExempt(false)
+                .build();
 
         when(repo.findByBillId(billId)).thenReturn(Mono.just(bill));
         when(repo.save(any(Bill.class))).thenReturn(Mono.just(savedBill));
@@ -1231,7 +1233,7 @@ public class BillServiceImplTest {
 
 
         StepVerifier.create(result)
-            .verifyComplete();
+                .verifyComplete();
 
 
         verify(repo, times(1)).save(argThat(savedBillArg -> {
@@ -1252,7 +1254,7 @@ public class BillServiceImplTest {
 
 
         StepVerifier.create(result)
-            .verifyComplete();
+                .verifyComplete();
 
 
         verify(repo, never()).save(any(Bill.class));
@@ -1266,131 +1268,131 @@ public class BillServiceImplTest {
         bill.setInterestExempt(false);
         bill.setInterest(new BigDecimal("33.33"));
 
-            when(repo.findByBillId("B-300")).thenReturn(Mono.just(bill));
-            when(repo.save(any(Bill.class))).thenAnswer(inv -> Mono.just(inv.getArgument(0)));
+        when(repo.findByBillId("B-300")).thenReturn(Mono.just(bill));
+        when(repo.save(any(Bill.class))).thenAnswer(inv -> Mono.just(inv.getArgument(0)));
 
-            Mono<Void> result = billService.setInterestExempt("B-300", true);
+        Mono<Void> result = billService.setInterestExempt("B-300", true);
 
-            StepVerifier.create(result).verifyComplete();
+        StepVerifier.create(result).verifyComplete();
 
-            ArgumentCaptor<Bill> captor = ArgumentCaptor.forClass(Bill.class);
-            verify(repo).save(captor.capture());
-            Bill saved = captor.getValue();
+        ArgumentCaptor<Bill> captor = ArgumentCaptor.forClass(Bill.class);
+        verify(repo).save(captor.capture());
+        Bill saved = captor.getValue();
 
-            assertTrue(saved.isInterestExempt(), "exempt flag should be true");
-            assertEquals(BigDecimal.ZERO, saved.getInterest(), "interest should be cleared when exempted");
-        }
+        assertTrue(saved.isInterestExempt(), "exempt flag should be true");
+        assertEquals(BigDecimal.ZERO, saved.getInterest(), "interest should be cleared when exempted");
+    }
 
-        @Test
-        void setInterestExempt_Negative_ShouldNotSaveWhenBillNotFound () {
-            when(repo.findByBillId("B-301")).thenReturn(Mono.empty());
+    @Test
+    void setInterestExempt_Negative_ShouldNotSaveWhenBillNotFound() {
+        when(repo.findByBillId("B-301")).thenReturn(Mono.empty());
 
-            Mono<Void> result = billService.setInterestExempt("B-301", true);
+        Mono<Void> result = billService.setInterestExempt("B-301", true);
 
-            StepVerifier.create(result).verifyComplete();
-            verify(repo, never()).save(any(Bill.class));
-        }
+        StepVerifier.create(result).verifyComplete();
+        verify(repo, never()).save(any(Bill.class));
+    }
 
-        @Test
-        void getBillsByCustomerIdAndStatus_Positive_ShouldReturnMappedDtos () {
-            String customerId = "C-007";
-            BillStatus status = BillStatus.UNPAID;
+    @Test
+    void getBillsByCustomerIdAndStatus_Positive_ShouldReturnMappedDtos() {
+        String customerId = "C-007";
+        BillStatus status = BillStatus.UNPAID;
 
-            Bill b1 = buildBill();
-            b1.setBillId("B-1");
-            b1.setCustomerId(customerId);
-            b1.setBillStatus(status);
-            b1.setDueDate(LocalDate.now().plusDays(10)); // ensure non-null
+        Bill b1 = buildBill();
+        b1.setBillId("B-1");
+        b1.setCustomerId(customerId);
+        b1.setBillStatus(status);
+        b1.setDueDate(LocalDate.now().plusDays(10)); // ensure non-null
 
-            Bill b2 = buildBill();
-            b2.setBillId("B-2");
-            b2.setCustomerId(customerId);
-            b2.setBillStatus(status);
-            b2.setDueDate(LocalDate.now().plusDays(20)); // ensure non-null
+        Bill b2 = buildBill();
+        b2.setBillId("B-2");
+        b2.setCustomerId(customerId);
+        b2.setBillStatus(status);
+        b2.setDueDate(LocalDate.now().plusDays(20)); // ensure non-null
 
-            when(repo.findByCustomerIdAndBillStatus(customerId, status))
-                    .thenReturn(Flux.just(b1, b2));
+        when(repo.findByCustomerIdAndBillStatus(customerId, status))
+                .thenReturn(Flux.just(b1, b2));
 
-            Flux<BillResponseDTO> result =
-                    billService.getBillsByCustomerIdAndStatus(customerId, status);
+        Flux<BillResponseDTO> result =
+                billService.getBillsByCustomerIdAndStatus(customerId, status);
 
-            StepVerifier.create(result)
-                    .assertNext(dto -> {
-                        assertEquals("B-1", dto.getBillId());
-                        assertEquals(customerId, dto.getCustomerId());
-                        assertEquals(BillStatus.UNPAID, dto.getBillStatus());
-                    })
-                    .assertNext(dto -> {
-                        assertEquals("B-2", dto.getBillId());
-                        assertEquals(customerId, dto.getCustomerId());
-                        assertEquals(BillStatus.UNPAID, dto.getBillStatus());
-                    })
-                    .verifyComplete();
+        StepVerifier.create(result)
+                .assertNext(dto -> {
+                    assertEquals("B-1", dto.getBillId());
+                    assertEquals(customerId, dto.getCustomerId());
+                    assertEquals(BillStatus.UNPAID, dto.getBillStatus());
+                })
+                .assertNext(dto -> {
+                    assertEquals("B-2", dto.getBillId());
+                    assertEquals(customerId, dto.getCustomerId());
+                    assertEquals(BillStatus.UNPAID, dto.getBillStatus());
+                })
+                .verifyComplete();
 
-            verify(repo, times(1)).findByCustomerIdAndBillStatus(customerId, status);
-        }
+        verify(repo, times(1)).findByCustomerIdAndBillStatus(customerId, status);
+    }
 
-        @Test
-        void getBillsByCustomerIdAndStatus_Negative_NoMatches_ShouldBeEmpty () {
-            String customerId = "NO-SUCH-CUSTOMER";
-            BillStatus status = BillStatus.PAID;
+    @Test
+    void getBillsByCustomerIdAndStatus_Negative_NoMatches_ShouldBeEmpty() {
+        String customerId = "NO-SUCH-CUSTOMER";
+        BillStatus status = BillStatus.PAID;
 
-            when(repo.findByCustomerIdAndBillStatus(customerId, status))
-                    .thenReturn(Flux.empty());
+        when(repo.findByCustomerIdAndBillStatus(customerId, status))
+                .thenReturn(Flux.empty());
 
-            Flux<BillResponseDTO> result =
-                    billService.getBillsByCustomerIdAndStatus(customerId, status);
+        Flux<BillResponseDTO> result =
+                billService.getBillsByCustomerIdAndStatus(customerId, status);
 
-            StepVerifier.create(result)
-                    .verifyComplete();
+        StepVerifier.create(result)
+                .verifyComplete();
 
-            verify(repo, times(1)).findByCustomerIdAndBillStatus(customerId, status);
-        }
+        verify(repo, times(1)).findByCustomerIdAndBillStatus(customerId, status);
+    }
 
-        @Test
-        void deleteBill_Negative_UnpaidOrOverdue_ShouldReturn422AndNotDelete () {
-            String billId = "B-99";
-            Bill bill = buildBill();
-            bill.setBillId(billId);
-            bill.setBillStatus(BillStatus.UNPAID); // or OVERDUE
+    @Test
+    void deleteBill_Negative_UnpaidOrOverdue_ShouldReturn422AndNotDelete() {
+        String billId = "B-99";
+        Bill bill = buildBill();
+        bill.setBillId(billId);
+        bill.setBillStatus(BillStatus.UNPAID); // or OVERDUE
 
-            when(repo.findByBillId(billId)).thenReturn(Mono.just(bill));
+        when(repo.findByBillId(billId)).thenReturn(Mono.just(bill));
 
-            Mono<Void> result = billService.deleteBill(billId);
+        Mono<Void> result = billService.deleteBill(billId);
 
-            StepVerifier.create(result)
-                    .expectErrorSatisfies(ex -> {
-                        assertTrue(ex instanceof ResponseStatusException);
-                        ResponseStatusException rse = (ResponseStatusException) ex;
-                        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, rse.getStatus()); // Spring 5.x
-                        assertEquals("Cannot delete a bill that is unpaid or overdue.", rse.getReason());
-                    })
-                    .verify();
+        StepVerifier.create(result)
+                .expectErrorSatisfies(ex -> {
+                    assertTrue(ex instanceof ResponseStatusException);
+                    ResponseStatusException rse = (ResponseStatusException) ex;
+                    assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, rse.getStatus()); // Spring 5.x
+                    assertEquals("Cannot delete a bill that is unpaid or overdue.", rse.getReason());
+                })
+                .verify();
 
-            verify(repo, times(1)).findByBillId(billId);
-            verify(repo, never()).deleteBillByBillId(anyString());
-        }
+        verify(repo, times(1)).findByBillId(billId);
+        verify(repo, never()).deleteBillByBillId(anyString());
+    }
 
-        @Test
-        void generateBillPdf_Negative_BillNotForCustomer_ShouldErrorAndSkipPdf () {
-            String billId = "B-42";
-            String repoCustomer = "C-123";
-            String requestedCustomer = "C-999";
+    @Test
+    void generateBillPdf_Negative_BillNotForCustomer_ShouldErrorAndSkipPdf() {
+        String billId = "B-42";
+        String repoCustomer = "C-123";
+        String requestedCustomer = "C-999";
 
-            Bill bill = buildBill();
-            bill.setBillId(billId);
-            bill.setCustomerId(repoCustomer);
+        Bill bill = buildBill();
+        bill.setBillId(billId);
+        bill.setCustomerId(repoCustomer);
 
-            when(repo.findByBillId(billId)).thenReturn(Mono.just(bill));
+        when(repo.findByBillId(billId)).thenReturn(Mono.just(bill));
 
-            Mono<byte[]> result = billService.generateBillPdf(requestedCustomer, billId);
+        Mono<byte[]> result = billService.generateBillPdf(requestedCustomer, billId);
 
-            StepVerifier.create(result)
-                    .expectErrorSatisfies(ex -> {
-                        assertTrue(ex instanceof RuntimeException);
-                        assertEquals("Bill not found for given customer", ex.getMessage());
-                    })
-                    .verify();
+        StepVerifier.create(result)
+                .expectErrorSatisfies(ex -> {
+                    assertTrue(ex instanceof RuntimeException);
+                    assertEquals("Bill not found for given customer", ex.getMessage());
+                })
+                .verify();
 
         verify(repo, times(1)).findByBillId(billId);
     }
@@ -1399,26 +1401,26 @@ public class BillServiceImplTest {
     void test_EntityDtoUtil_ToBillResponseDto_WithOverdueBill_ShouldCalculateFreshInterest() {
         LocalDate dueDate = LocalDate.now().minusMonths(2);
         BigDecimal amount = new BigDecimal("100.00");
-        
+
         Bill overdueBill = Bill.builder()
-            .billId("overdue-test-id")
-            .customerId("customer-1")
-            .ownerFirstName("John")
-            .ownerLastName("Doe")
-            .visitType("Surgery")
-            .vetId("vet-1")
-            .vetFirstName("Dr. Jane")
-            .vetLastName("Smith")
-            .date(LocalDate.now().minusDays(70))
-            .amount(amount)
-            .billStatus(BillStatus.OVERDUE)
-            .dueDate(dueDate)
-            .interestExempt(false)
-            .interest(new BigDecimal("5.00"))
-            .build();
+                .billId("overdue-test-id")
+                .customerId("customer-1")
+                .ownerFirstName("John")
+                .ownerLastName("Doe")
+                .visitType("Surgery")
+                .vetId("vet-1")
+                .vetFirstName("Dr. Jane")
+                .vetLastName("Smith")
+                .date(LocalDate.now().minusDays(70))
+                .amount(amount)
+                .billStatus(BillStatus.OVERDUE)
+                .dueDate(dueDate)
+                .interestExempt(false)
+                .interest(new BigDecimal("5.00"))
+                .build();
 
         BillResponseDTO dto = EntityDtoUtil.toBillResponseDto(overdueBill);
-        
+
         assertEquals(overdueBill.getBillId(), dto.getBillId());
         assertEquals(overdueBill.getCustomerId(), dto.getCustomerId());
         assertEquals(overdueBill.getOwnerFirstName(), dto.getOwnerFirstName());
@@ -1432,14 +1434,14 @@ public class BillServiceImplTest {
         assertEquals(overdueBill.getBillStatus(), dto.getBillStatus());
         assertEquals(overdueBill.getDueDate(), dto.getDueDate());
         assertEquals(overdueBill.isInterestExempt(), dto.isInterestExempt());
-        
+
         BigDecimal expectedInterest = InterestCalculationUtil.calculateCompoundInterest(amount, dueDate, LocalDate.now());
         assertEquals(expectedInterest, dto.getInterest());
         assertTrue(dto.getInterest().compareTo(BigDecimal.ZERO) > 0);
-        
+
         BigDecimal expectedTaxedAmount = amount.add(expectedInterest).setScale(2, RoundingMode.HALF_UP);
         assertEquals(expectedTaxedAmount, dto.getTaxedAmount());
-        
+
         assertEquals(0, dto.getTimeRemaining());
     }
 
@@ -1448,32 +1450,32 @@ public class BillServiceImplTest {
         LocalDate dueDate = LocalDate.now().minusMonths(1);
         BigDecimal amount = new BigDecimal("150.00");
         BigDecimal storedInterest = new BigDecimal("12.50");
-        
+
         Bill paidBill = Bill.builder()
-            .billId("paid-test-id")
-            .customerId("customer-2")
-            .ownerFirstName("Alice")
-            .ownerLastName("Johnson")
-            .visitType("Checkup")
-            .vetId("vet-2")
-            .vetFirstName("Dr. Bob")
-            .vetLastName("Wilson")
-            .date(LocalDate.now().minusDays(40))
-            .amount(amount)
-            .billStatus(BillStatus.PAID)
-            .dueDate(dueDate)
-            .interestExempt(false)
-            .interest(storedInterest)
-            .build();
+                .billId("paid-test-id")
+                .customerId("customer-2")
+                .ownerFirstName("Alice")
+                .ownerLastName("Johnson")
+                .visitType("Checkup")
+                .vetId("vet-2")
+                .vetFirstName("Dr. Bob")
+                .vetLastName("Wilson")
+                .date(LocalDate.now().minusDays(40))
+                .amount(amount)
+                .billStatus(BillStatus.PAID)
+                .dueDate(dueDate)
+                .interestExempt(false)
+                .interest(storedInterest)
+                .build();
 
         BillResponseDTO dto = EntityDtoUtil.toBillResponseDto(paidBill);
-        
+
         assertEquals(paidBill.getBillId(), dto.getBillId());
         assertEquals(paidBill.getCustomerId(), dto.getCustomerId());
         assertEquals(paidBill.getBillStatus(), dto.getBillStatus());
-        
+
         assertEquals(storedInterest, dto.getInterest());
-        
+
         BigDecimal expectedTaxedAmount = amount.add(storedInterest).setScale(2, RoundingMode.HALF_UP);
         assertEquals(expectedTaxedAmount, dto.getTaxedAmount());
     }
@@ -1482,22 +1484,22 @@ public class BillServiceImplTest {
     void test_EntityDtoUtil_ToBillResponseDto_WithUnpaidBill_ShouldHaveZeroInterest() {
         LocalDate dueDate = LocalDate.now().plusDays(15);
         BigDecimal amount = new BigDecimal("75.00");
-        
+
         Bill unpaidBill = Bill.builder()
-            .billId("unpaid-test-id")
-            .customerId("customer-3")
-            .amount(amount)
-            .billStatus(BillStatus.UNPAID)
-            .dueDate(dueDate)
-            .interestExempt(false)
-            .build();
+                .billId("unpaid-test-id")
+                .customerId("customer-3")
+                .amount(amount)
+                .billStatus(BillStatus.UNPAID)
+                .dueDate(dueDate)
+                .interestExempt(false)
+                .build();
 
         BillResponseDTO dto = EntityDtoUtil.toBillResponseDto(unpaidBill);
-        
+
         assertEquals(BigDecimal.ZERO.setScale(2), dto.getInterest().setScale(2));
-        
+
         assertEquals(amount.setScale(2, RoundingMode.HALF_UP), dto.getTaxedAmount());
-        
+
         assertTrue(dto.getTimeRemaining() > 0);
         assertEquals(15, dto.getTimeRemaining());
     }
@@ -1506,37 +1508,37 @@ public class BillServiceImplTest {
     void test_EntityDtoUtil_ToBillResponseDto_WithInterestExemptBill_ShouldHaveZeroInterest() {
         LocalDate dueDate = LocalDate.now().minusMonths(1);
         BigDecimal amount = new BigDecimal("200.00");
-        
+
         Bill exemptBill = Bill.builder()
-            .billId("exempt-test-id")
-            .customerId("customer-4")
-            .amount(amount)
-            .billStatus(BillStatus.OVERDUE)
-            .dueDate(dueDate)
-            .interestExempt(true) // Exempt from interest
-            .build();
+                .billId("exempt-test-id")
+                .customerId("customer-4")
+                .amount(amount)
+                .billStatus(BillStatus.OVERDUE)
+                .dueDate(dueDate)
+                .interestExempt(true) // Exempt from interest
+                .build();
 
         BillResponseDTO dto = EntityDtoUtil.toBillResponseDto(exemptBill);
-        
+
         assertEquals(BigDecimal.ZERO.setScale(2), dto.getInterest().setScale(2));
         assertTrue(dto.isInterestExempt());
-        
+
         assertEquals(amount.setScale(2, RoundingMode.HALF_UP), dto.getTaxedAmount());
     }
 
     @Test
     void test_EntityDtoUtil_ToBillResponseDto_WithNullAmount_ShouldHandleGracefully() {
         Bill billWithNullAmount = Bill.builder()
-            .billId("null-amount-test")
-            .customerId("customer-5")
-            .billStatus(BillStatus.UNPAID)
-            .dueDate(LocalDate.now().plusDays(10))
-            .amount(null)
-            .interestExempt(false)
-            .build();
+                .billId("null-amount-test")
+                .customerId("customer-5")
+                .billStatus(BillStatus.UNPAID)
+                .dueDate(LocalDate.now().plusDays(10))
+                .amount(null)
+                .interestExempt(false)
+                .build();
 
         BillResponseDTO dto = EntityDtoUtil.toBillResponseDto(billWithNullAmount);
-        
+
         assertNull(dto.getAmount());
         assertEquals(BigDecimal.ZERO.setScale(2), dto.getInterest().setScale(2));
         assertEquals(BigDecimal.ZERO.setScale(2), dto.getTaxedAmount().setScale(2));
@@ -1546,18 +1548,18 @@ public class BillServiceImplTest {
     void test_InterestCalculationUtil_CalculateCompoundInterest_VariousTimePeriods() {
         BigDecimal amount = new BigDecimal("100.00");
         LocalDate currentDate = LocalDate.now();
-        
+
         LocalDate dueDate1Month = currentDate.minusMonths(1);
         BigDecimal interest1Month = InterestCalculationUtil.calculateCompoundInterest(amount, dueDate1Month, currentDate);
         BigDecimal expected1Month = new BigDecimal("1.50");
         assertEquals(expected1Month, interest1Month);
-        
+
         LocalDate dueDate2Months = currentDate.minusMonths(2);
         BigDecimal interest2Months = InterestCalculationUtil.calculateCompoundInterest(amount, dueDate2Months, currentDate);
         // Expected: 100 * (1.015^2) - 100 = 100 * 1.030225 - 100 = 3.02
         BigDecimal expected2Months = new BigDecimal("3.02");
         assertEquals(expected2Months, interest2Months);
-        
+
         LocalDate dueDate12Months = currentDate.minusMonths(12);
         BigDecimal interest12Months = InterestCalculationUtil.calculateCompoundInterest(amount, dueDate12Months, currentDate);
         // Expected: 100 * (1.015^12) - 100 ≈ 19.56
@@ -1569,13 +1571,13 @@ public class BillServiceImplTest {
     void test_InterestCalculationUtil_CalculateCompoundInterest_WithNullValues() {
         BigDecimal amount = new BigDecimal("100.00");
         LocalDate date = LocalDate.now();
-        
+
         // Null amount
         assertEquals(BigDecimal.ZERO, InterestCalculationUtil.calculateCompoundInterest(null, date, date));
-        
+
         // Null due date
         assertEquals(BigDecimal.ZERO, InterestCalculationUtil.calculateCompoundInterest(amount, null, date));
-        
+
         assertEquals(BigDecimal.ZERO, InterestCalculationUtil.calculateCompoundInterest(amount, date, null));
     }
 
@@ -1584,7 +1586,7 @@ public class BillServiceImplTest {
         BigDecimal amount = new BigDecimal("100.00");
         LocalDate currentDate = LocalDate.now();
         LocalDate futureDueDate = currentDate.plusDays(30);
-        
+
         BigDecimal interest = InterestCalculationUtil.calculateCompoundInterest(amount, futureDueDate, currentDate);
         assertEquals(BigDecimal.ZERO, interest);
     }
@@ -1594,45 +1596,45 @@ public class BillServiceImplTest {
         LocalDate overdueDate = LocalDate.now().minusMonths(1);
         BigDecimal amount = new BigDecimal("100.00");
         BigDecimal storedInterest = new BigDecimal("15.00");
-        
+
         Bill paidBill = Bill.builder()
-            .amount(amount)
-            .billStatus(BillStatus.PAID)
-            .dueDate(overdueDate)
-            .interestExempt(false)
-            .interest(storedInterest)
-            .build();
-        
+                .amount(amount)
+                .billStatus(BillStatus.PAID)
+                .dueDate(overdueDate)
+                .interestExempt(false)
+                .interest(storedInterest)
+                .build();
+
         BigDecimal paidInterest = InterestCalculationUtil.calculateInterest(paidBill);
         assertEquals(storedInterest, paidInterest);
-        
+
         Bill overdueBill = Bill.builder()
-            .amount(amount)
-            .billStatus(BillStatus.OVERDUE)
-            .dueDate(overdueDate)
-            .interestExempt(false)
-            .build();
-        
+                .amount(amount)
+                .billStatus(BillStatus.OVERDUE)
+                .dueDate(overdueDate)
+                .interestExempt(false)
+                .build();
+
         BigDecimal overdueInterest = InterestCalculationUtil.calculateInterest(overdueBill);
         assertTrue(overdueInterest.compareTo(BigDecimal.ZERO) > 0);
-        
+
         Bill unpaidOverdueBill = Bill.builder()
-            .amount(amount)
-            .billStatus(BillStatus.UNPAID)
-            .dueDate(overdueDate)
-            .interestExempt(false)
-            .build();
-        
+                .amount(amount)
+                .billStatus(BillStatus.UNPAID)
+                .dueDate(overdueDate)
+                .interestExempt(false)
+                .build();
+
         BigDecimal unpaidOverdueInterest = InterestCalculationUtil.calculateInterest(unpaidOverdueBill);
         assertTrue(unpaidOverdueInterest.compareTo(BigDecimal.ZERO) > 0);
-        
+
         Bill unpaidNotDueBill = Bill.builder()
-            .amount(amount)
-            .billStatus(BillStatus.UNPAID)
-            .dueDate(LocalDate.now().plusDays(10))
-            .interestExempt(false)
-            .build();
-        
+                .amount(amount)
+                .billStatus(BillStatus.UNPAID)
+                .dueDate(LocalDate.now().plusDays(10))
+                .interestExempt(false)
+                .build();
+
         BigDecimal unpaidNotDueInterest = InterestCalculationUtil.calculateInterest(unpaidNotDueBill);
         assertEquals(BigDecimal.ZERO, unpaidNotDueInterest);
     }
@@ -1641,45 +1643,45 @@ public class BillServiceImplTest {
     void test_InterestCalculationUtil_CalculateTotalAmountOwed() {
         LocalDate overdueDate = LocalDate.now().minusMonths(1);
         BigDecimal amount = new BigDecimal("100.00");
-        
+
         Bill overdueBill = Bill.builder()
-            .amount(amount)
-            .billStatus(BillStatus.OVERDUE)
-            .dueDate(overdueDate)
-            .interestExempt(false)
-            .build();
-        
+                .amount(amount)
+                .billStatus(BillStatus.OVERDUE)
+                .dueDate(overdueDate)
+                .interestExempt(false)
+                .build();
+
         BigDecimal totalOwed = InterestCalculationUtil.calculateTotalAmountOwed(overdueBill);
         BigDecimal expectedInterest = InterestCalculationUtil.calculateInterest(overdueBill);
         BigDecimal expectedTotal = amount.add(expectedInterest);
-        
+
         assertEquals(expectedTotal, totalOwed);
         assertTrue(totalOwed.compareTo(amount) > 0); // Total should be greater than original amount
-        
+
         Bill nullAmountBill = Bill.builder()
-            .amount(null)
-            .billStatus(BillStatus.OVERDUE)
-            .build();
-        
+                .amount(null)
+                .billStatus(BillStatus.OVERDUE)
+                .build();
+
         assertEquals(BigDecimal.ZERO, InterestCalculationUtil.calculateTotalAmountOwed(nullAmountBill));
     }
 
     @Test
     void test_InterestCalculationUtil_CalculateOverdueMonths() {
         LocalDate currentDate = LocalDate.now();
-        
+
         LocalDate dueDate1Month = currentDate.minusMonths(1);
         assertEquals(1, InterestCalculationUtil.calculateOverdueMonths(dueDate1Month, currentDate));
-        
+
         LocalDate dueDate6Months = currentDate.minusMonths(6);
         assertEquals(6, InterestCalculationUtil.calculateOverdueMonths(dueDate6Months, currentDate));
-        
+
         LocalDate dueDate1Year = currentDate.minusYears(1);
         assertEquals(12, InterestCalculationUtil.calculateOverdueMonths(dueDate1Year, currentDate));
-        
+
         LocalDate futureDueDate = currentDate.plusDays(30);
         assertEquals(0, InterestCalculationUtil.calculateOverdueMonths(futureDueDate, currentDate));
-        
+
         assertEquals(0, InterestCalculationUtil.calculateOverdueMonths(null, currentDate));
         assertEquals(0, InterestCalculationUtil.calculateOverdueMonths(currentDate, null));
     }
@@ -1693,19 +1695,19 @@ public class BillServiceImplTest {
     void test_EntityDtoUtil_ToBillEntity_MapsCorrectly() {
         LocalDate date = LocalDate.now();
         LocalDate dueDate = LocalDate.now().plusDays(30);
-        
+
         BillRequestDTO requestDto = BillRequestDTO.builder()
-            .customerId("customer-test")
-            .vetId("vet-test")
-            .visitType("Surgery")
-            .date(date)
-            .amount(new BigDecimal("250.00"))
-            .billStatus(BillStatus.UNPAID)
-            .dueDate(dueDate)
-            .build();
-        
+                .customerId("customer-test")
+                .vetId("vet-test")
+                .visitType("Surgery")
+                .date(date)
+                .amount(new BigDecimal("250.00"))
+                .billStatus(BillStatus.UNPAID)
+                .dueDate(dueDate)
+                .build();
+
         Bill bill = EntityDtoUtil.toBillEntity(requestDto);
-        
+
         assertEquals(requestDto.getCustomerId(), bill.getCustomerId());
         assertEquals(requestDto.getVetId(), bill.getVetId());
         assertEquals(requestDto.getVisitType(), bill.getVisitType());
@@ -1719,10 +1721,10 @@ public class BillServiceImplTest {
     void test_EntityDtoUtil_GenerateUUIDString_CreatesValidUUID() {
         String uuid1 = EntityDtoUtil.generateUUIDString();
         String uuid2 = EntityDtoUtil.generateUUIDString();
-        
+
         assertTrue(uuid1.matches("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"));
         assertTrue(uuid2.matches("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"));
-        
+
         assertNotEquals(uuid1, uuid2);
     }
 
@@ -1730,32 +1732,33 @@ public class BillServiceImplTest {
     void test_UtilityIntegration_ServiceMethodsUseUtilsCorrectly() {
         LocalDate dueDate = LocalDate.now().minusMonths(1);
         BigDecimal amount = new BigDecimal("100.00");
-        
+
         Bill overdueBill = Bill.builder()
-            .billId("integration-test-id")
-            .customerId("customer-integration")
-            .amount(amount)
-            .billStatus(BillStatus.OVERDUE)
-            .dueDate(dueDate)
-            .interestExempt(false)
-            .build();
+                .billId("integration-test-id")
+                .customerId("customer-integration")
+                .amount(amount)
+                .billStatus(BillStatus.OVERDUE)
+                .dueDate(dueDate)
+                .interestExempt(false)
+                .build();
 
         when(repo.findByBillId("integration-test-id")).thenReturn(Mono.just(overdueBill));
 
-        
-        Mono<BillResponseDTO> result = billService.getBillByBillId("integration-test-id");        StepVerifier.create(result)
-            .consumeNextWith(dto -> {
-                assertEquals(overdueBill.getBillId(), dto.getBillId());
-                assertEquals(overdueBill.getCustomerId(), dto.getCustomerId());
-                assertEquals(overdueBill.getAmount(), dto.getAmount());
-                assertEquals(overdueBill.getBillStatus(), dto.getBillStatus());
-                
-                BigDecimal expectedInterest = InterestCalculationUtil.calculateInterest(overdueBill);
-                assertEquals(expectedInterest, dto.getInterest());
-                
-                BigDecimal expectedTaxedAmount = amount.add(expectedInterest).setScale(2, RoundingMode.HALF_UP);
-                assertEquals(expectedTaxedAmount, dto.getTaxedAmount());
-            })
-            .verifyComplete();
+
+        Mono<BillResponseDTO> result = billService.getBillByBillId("integration-test-id");
+        StepVerifier.create(result)
+                .consumeNextWith(dto -> {
+                    assertEquals(overdueBill.getBillId(), dto.getBillId());
+                    assertEquals(overdueBill.getCustomerId(), dto.getCustomerId());
+                    assertEquals(overdueBill.getAmount(), dto.getAmount());
+                    assertEquals(overdueBill.getBillStatus(), dto.getBillStatus());
+
+                    BigDecimal expectedInterest = InterestCalculationUtil.calculateInterest(overdueBill);
+                    assertEquals(expectedInterest, dto.getInterest());
+
+                    BigDecimal expectedTaxedAmount = amount.add(expectedInterest).setScale(2, RoundingMode.HALF_UP);
+                    assertEquals(expectedTaxedAmount, dto.getTaxedAmount());
+                })
+                .verifyComplete();
     }
 }
