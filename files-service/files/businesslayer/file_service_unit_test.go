@@ -57,3 +57,30 @@ func TestWhenGetFileById_withNonExistingFileId_thenReturnError(t *testing.T) {
 	assert.Nil(t, file)
 	mockRepo.AssertExpectations(t)
 }
+
+func TestWhenDeleteFileById_withExistingFileId_thenDeleteSuccessfully(t *testing.T) {
+	mockRepo, mockClient := setupFileServiceUnitTest()
+	mockRepo.On("GetFileInfo", EXISTING_FILE_ID).Return(&VALID_FILE_INFO)
+	mockRepo.On("DeleteFileInfo", EXISTING_FILE_ID).Return(nil)
+	mockClient.On("DeleteFile", &VALID_FILE_INFO).Return(nil)
+
+	service := businesslayer.NewFileService(mockRepo, mockClient)
+	err := service.DeleteFileByFileId(EXISTING_FILE_ID)
+
+	assert.Nil(t, err)
+	mockRepo.AssertExpectations(t)
+	mockClient.AssertExpectations(t)
+}
+
+func TestWhenDeleteFileById_withNonExistingFileId_thenReturnError(t *testing.T) {
+	mockRepo, mockClient := setupFileServiceUnitTest()
+	mockRepo.On("GetFileInfo", NON_EXISTING_FILE_ID).Return(nil)
+
+	service := businesslayer.NewFileService(mockRepo, mockClient)
+	err := service.DeleteFileByFileId(NON_EXISTING_FILE_ID)
+
+	assert.NotNil(t, err)
+	assert.EqualError(t, err, "fileId: "+NON_EXISTING_FILE_ID+" was not found")
+
+	mockRepo.AssertExpectations(t)
+}

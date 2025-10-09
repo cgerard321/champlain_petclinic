@@ -25,3 +25,8 @@ func (m *MockFileService) AddFile(model *models.FileRequestModel) (*models.FileR
 	}
 	return args.Get(0).(*models.FileResponseModel), args.Error(1)
 }
+
+func (m *MockFileService) DeleteFileByFileId(id string) error {
+	args := m.Called(id)
+	return args.Error(0)
+}

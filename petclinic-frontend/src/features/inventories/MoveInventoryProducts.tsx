@@ -100,8 +100,10 @@ export default function MoveInventoryProducts(): JSX.Element {
           <select
             className="form-control"
             id="newInventorySelect"
+            value={newInventoryId}
             onChange={handleNewInventoryChange}
           >
+            <option value="">Select inventory</option>
             {filteredInventories.map(inventory => (
               <option key={inventory.inventoryId} value={inventory.inventoryId}>
                 {inventory.inventoryName}
@@ -109,16 +111,31 @@ export default function MoveInventoryProducts(): JSX.Element {
             ))}
           </select>
         </div>
-        <button
-          type="submit"
-          style={{
-            width: '100px',
-            backgroundColor: '#333',
-            color: 'white',
-          }}
-        >
-          Move
-        </button>
+        <div style={{ display: 'flex', gap: '12px', marginTop: '12px' }}>
+          <button
+            type="submit"
+            disabled={!newInventoryId}
+            style={{
+              width: '100px',
+              backgroundColor: '#333',
+              color: 'white',
+            }}
+          >
+            Move
+          </button>
+
+          <button
+            type="button"
+            onClick={() => navigate(`/inventories/${inventoryId}/products`)}
+            style={{
+              width: '100px',
+              backgroundColor: '#ff0000ff',
+              color: 'white',
+            }}
+          >
+            Cancel
+          </button>
+        </div>
       </form>
       <div>
         {loading && <p>Loading...</p>}
