@@ -79,6 +79,12 @@ public interface BillService {
 
     Mono<Void> setInterestExempt(String billId, boolean exempt);
 
+    Mono<BigDecimal> getInterest(String billId, BigDecimal amount, int overdueMonths);
+
+    Mono<BigDecimal> getTotalWithInterest(String billId, BigDecimal amount, int overdueMonths);
+
+
+
     Flux<Bill> archiveBill();
 
 

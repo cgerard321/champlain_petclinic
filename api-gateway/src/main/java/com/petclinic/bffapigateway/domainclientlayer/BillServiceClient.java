@@ -17,8 +17,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.net.URI;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -47,12 +45,7 @@ public class BillServiceClient {
         return webClientBuilder.build().get()
                 .uri(billServiceUrl + "/{billId}", billId)
                 .retrieve()
-                .bodyToMono(BillResponseDTO.class)
-                .doOnNext(t -> {
-                    BigDecimal tax = t.getAmount().multiply(new BigDecimal("0.15"));
-                    BigDecimal taxedAmount = t.getAmount().add(tax);
-                    t.setTaxedAmount(taxedAmount.setScale(2, RoundingMode.HALF_UP));
-                });
+                .bodyToMono(BillResponseDTO.class);
     }
     public Flux<BillResponseDTO> getBillsByOwnerId(final String customerId) {
         return webClientBuilder.build().get()
