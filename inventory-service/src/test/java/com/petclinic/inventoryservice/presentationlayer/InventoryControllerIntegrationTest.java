@@ -1085,6 +1085,39 @@ class InventoryControllerIntegrationTest {
                 });
     }
 
+    @Test
+    void searchInventories_WithInventoryCode_ShouldReturnSpecificInventory() {
+        String inventoryCode = inventory1.getInventoryCode();
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder.path("/inventory")
+                        .queryParam("inventoryCode", inventoryCode)
+                        .build())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(InventoryResponseDTO.class)
+                .consumeWith(response -> {
+                    List<InventoryResponseDTO> inventories = response.getResponseBody();
+                    assertNotNull(inventories);
+                    assertEquals(1, inventories.size());
+                    assertEquals(inventoryCode, inventories.get(0).getInventoryCode());
+                });
+    }
+
+    @Test
+    void searchInventories_WithInvalidInventoryCode_ShouldReturnNotFound() {
+        String invalidCode = "INV-9999";
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder.path("/inventory")
+                        .queryParam("inventoryCode", invalidCode)
+                        .build())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
 
     /*
     @Test

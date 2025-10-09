@@ -3,6 +3,7 @@ import { AxiosError } from 'axios';
 import { fetchCartIdByCustomerId } from './getCart';
 import { useUser } from '@/context/UserContext';
 import { notifyCartChanged } from './cartEvent';
+import type { Role } from '@/shared/models/Role';
 
 type UseAddToCartReturnType = {
   addToCart: (productId: string) => Promise<boolean>;
@@ -28,9 +29,12 @@ export function useAddToCart(): UseAddToCartReturnType {
 
       if (status === 404 || status === 401) {
         const { data } = await axiosInstance.post<CreateCartResponse>(
-          '/carts', // → POST /api/v2/gateway/carts
+          '/carts', // → POST /api/gateway/carts
           { customerId: userId },
-          { headers: { 'Content-Type': 'application/json' } }
+          {
+            headers: { 'Content-Type': 'application/json' },
+            useV2: false,
+          }
         );
 
         const newId = (data?.cartId ?? data?.id) as string | undefined;
@@ -43,10 +47,28 @@ export function useAddToCart(): UseAddToCartReturnType {
   };
 
   const addToCart = async (productId: string): Promise<boolean> => {
-    if (!user?.userId) {
-      alert('You must be logged in.');
-      return false;
+    // pas connecté → on ne tente rien
+    if (!user?.userId) return false;
+
+    // ---- Rôles utilisateur (simple et lisible) ----
+    const roleNames = new Set<string>();
+    const rolesSet = user?.roles as Set<Role> | undefined; // Set<{ id:number; name:string }>
+
+    if (rolesSet) {
+      for (const role of rolesSet) {
+        roleNames.add(role.name);
+      }
     }
+
+    // staff/admin → on ne tente rien
+    const isStaff =
+      roleNames.has('ADMIN') ||
+      roleNames.has('EMPLOYEE') ||
+      roleNames.has('VET') ||
+      roleNames.has('INVENTORY_MANAGER') ||
+      roleNames.has('RECEPTIONIST');
+
+    if (isStaff) return false;
 
     try {
       const cartId = await getOrCreateCartId(user.userId);
@@ -67,7 +89,7 @@ export function useAddToCart(): UseAddToCartReturnType {
       const payload = ax.response?.data ?? ax.message;
 
       console.error('AddToCart failed:', status, payload);
-      alert(`Add to cart failed (${status}).`);
+      // pas d'alert : l'UI affichera un message propre si nécessaire
       return false;
     }
   };
