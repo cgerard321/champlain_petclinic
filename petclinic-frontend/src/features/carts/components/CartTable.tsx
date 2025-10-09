@@ -24,9 +24,7 @@ export default function CartListTable(): JSX.Element {
 
         if (typeof payload === 'string') {
           const trimmed = payload.trim();
-          if (trimmed.length === 0) {
-            return [];
-          }
+          if (trimmed.length === 0) return [];
 
           if (trimmed.startsWith('[') || trimmed.startsWith('{')) {
             try {
@@ -36,9 +34,7 @@ export default function CartListTable(): JSX.Element {
                 : parsed
                   ? [parsed as CartModel]
                   : [];
-            } catch {
-              // fall through to event-stream parsing
-            }
+            } catch {}
           }
 
           const chunks = trimmed
@@ -49,23 +45,12 @@ export default function CartListTable(): JSX.Element {
             .filter(Boolean);
 
           const carts: CartModel[] = [];
-          let parseFailed = false;
-
           for (const chunk of chunks) {
             try {
               carts.push(JSON.parse(chunk) as CartModel);
-            } catch {
-              parseFailed = true;
-            }
+            } catch {}
           }
-
-          if (parseFailed) {
-            console.warn('Failed to parse some cart stream chunks.');
-          }
-
-          if (carts.length > 0) {
-            return carts;
-          }
+          if (carts.length > 0) return carts;
         }
 
         if (payload && typeof payload === 'object') {
@@ -74,11 +59,8 @@ export default function CartListTable(): JSX.Element {
             (payload as { content?: unknown }).content,
             (payload as { data?: unknown }).data,
           ];
-
           for (const candidate of possibleArrays) {
-            if (Array.isArray(candidate)) {
-              return candidate as CartModel[];
-            }
+            if (Array.isArray(candidate)) return candidate as CartModel[];
           }
         }
 
@@ -93,7 +75,7 @@ export default function CartListTable(): JSX.Element {
       const { data } = await axiosInstance.get<
         CartModel[] | string | Record<string, unknown>
       >('/carts', {
-        useV2: false,
+        useV2: true,
       });
       const normalized = cartExtractor(data);
 
@@ -114,17 +96,6 @@ export default function CartListTable(): JSX.Element {
     void fetchCarts();
   }, [fetchCarts]);
 
-  const handleDelete = async (cartId: string): Promise<void> => {
-    if (!window.confirm('Are you sure you want to delete this cart?')) return;
-    try {
-      await axiosInstance.delete(`/carts/${cartId}`, { useV2: false });
-      await fetchCarts(); // refresh list
-    } catch (err) {
-      console.error('Error deleting cart:', err);
-      setError('Failed to delete cart');
-    }
-  };
-
   return (
     <div className="cart-list-container">
       {loading && <div className="loading">Loading carts...</div>}
@@ -139,7 +110,6 @@ export default function CartListTable(): JSX.Element {
               <th>Cart ID</th>
               <th>Customer ID</th>
               <th>View Cart</th>
-              <th>Delete Cart</th>
             </tr>
           </thead>
           <tbody>
@@ -151,14 +121,6 @@ export default function CartListTable(): JSX.Element {
                   <Link to={`/carts/${cart.cartId}`} className="view-button">
                     View Cart
                   </Link>
-                </td>
-                <td>
-                  <button
-                    className="delete-button"
-                    onClick={() => handleDelete(cart.cartId)}
-                  >
-                    Delete
-                  </button>
                 </td>
               </tr>
             ))}
