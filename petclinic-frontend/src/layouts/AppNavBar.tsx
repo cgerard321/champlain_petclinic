@@ -99,7 +99,7 @@ export function NavBar(): JSX.Element {
     try {
       const { data } = await axiosInstance.get<{ itemCount?: number }>(
         `/carts/${cartId}/count`,
-        { useV2: true }
+        { useV2: false }
       );
       if (typeof data?.itemCount === 'number') {
         setCartItemCount(data.itemCount);
