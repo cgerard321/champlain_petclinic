@@ -4,8 +4,6 @@ import com.petclinic.cartsservice.dataaccesslayer.Cart;
 import com.petclinic.cartsservice.dataaccesslayer.CartRepository;
 import com.petclinic.cartsservice.dataaccesslayer.cartproduct.CartProduct;
 import com.petclinic.cartsservice.domainclientlayer.ProductClient;
-import com.petclinic.cartsservice.domainclientlayer.ProductResponseModel;
-import com.petclinic.cartsservice.presentationlayer.CartRequestModel;
 import com.petclinic.cartsservice.presentationlayer.CartResponseModel;
 import com.petclinic.cartsservice.utils.EntityModelUtil;
 import com.petclinic.cartsservice.utils.exceptions.InvalidInputException;
@@ -15,11 +13,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.*;
-import java.util.stream.Collectors;
-import reactor.core.publisher.Mono;
-import com.petclinic.cartsservice.utils.exceptions.NotFoundException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Collections;
+import java.util.UUID;
 
 
 @Service
@@ -551,6 +552,8 @@ public class CartServiceImpl implements CartService {
                         })
                 );
     }
+
+    // move whole wishlist into cart
     @Override
     public Mono<CartResponseModel> moveAllWishlistToCart(String cartId) {
         return cartRepository.findCartByCartId(cartId)
@@ -624,7 +627,6 @@ public class CartServiceImpl implements CartService {
                             });
                 });
     }
-
 
     @Override
     public Mono<List<CartProduct>> getRecentPurchases(String cartId) {

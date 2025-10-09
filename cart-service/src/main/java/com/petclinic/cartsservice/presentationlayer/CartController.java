@@ -2,7 +2,6 @@ package com.petclinic.cartsservice.presentationlayer;
 
 import com.petclinic.cartsservice.businesslayer.CartService;
 import com.petclinic.cartsservice.dataaccesslayer.cartproduct.CartProduct;
-import com.petclinic.cartsservice.domainclientlayer.ProductResponseModel;
 import com.petclinic.cartsservice.domainclientlayer.AddProductRequestModel;
 import com.petclinic.cartsservice.domainclientlayer.UpdateProductQuantityRequestModel;
 import com.petclinic.cartsservice.utils.exceptions.InvalidInputException;
