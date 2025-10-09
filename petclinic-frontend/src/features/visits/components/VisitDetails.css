@@ -26,16 +26,7 @@
   justify-content: space-between;
   padding: 10px;
   background-color: #fff;
-<<<<<<< HEAD
-<<<<<<< HEAD
   border-bottom: 1px solid #ddd;
-=======
-  border: 1px solid #ddd;
-  border-radius: 5px;
->>>>>>> a50514b4 (Replaced View and Edit pages with modals for visits)
-=======
-  border-bottom: 1px solid #ddd;
->>>>>>> 5f210cf1 (fixed styling for view and edit)
 }
 
 .visit-label {
