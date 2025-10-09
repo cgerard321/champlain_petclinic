@@ -27,7 +27,7 @@ angular.module('inventoriesList')
         });
         $scope.inventoryTypeOptions = []
         //custom types handler
-        $http.get("api/gateway/inventories/type").then(function (resp) {
+        $http.get("api/gateway/inventories/types").then(function (resp) {
             //Includes all types inside the array
             resp.data.forEach(function (type) {
                 $scope.inventoryTypeOptions.push(type.type);
