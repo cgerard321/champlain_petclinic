@@ -2,10 +2,7 @@ package com.petclinic.bffapigateway.presentationlayer.v2;
 
 
 import com.petclinic.bffapigateway.domainclientlayer.CartServiceClient;
-import com.petclinic.bffapigateway.dtos.Cart.AddProductRequestDTO;
-import com.petclinic.bffapigateway.dtos.Cart.CartResponseDTO;
-import com.petclinic.bffapigateway.dtos.Cart.UpdateProductQuantityRequestDTO;
-import com.petclinic.bffapigateway.dtos.Cart.PromoCodeResponseDTO;
+import com.petclinic.bffapigateway.dtos.Cart.*;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
@@ -21,6 +18,8 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -215,6 +214,7 @@ public class CartController {
                     }
                 });
     }
+
 
     // move all Wishlist items into cart
     @PostMapping(value = "/{cartId}/wishlist/moveAll", produces = MediaType.APPLICATION_JSON_VALUE)

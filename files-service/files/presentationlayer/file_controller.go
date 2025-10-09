@@ -52,11 +52,27 @@ func (i *FilesController) addFile(c *gin.Context) {
 	c.IndentedJSON(http.StatusCreated, file)
 }
 
+func (i *FilesController) deleteFileByFileId(c *gin.Context) {
+	id := c.Param("id")
+	if len([]rune(id)) != 36 {
+		cancel(c, exception.NewInvalidFileIdException(id))
+		return
+	}
+
+	err := i.s.DeleteFileByFileId(id)
+	if err != nil {
+		cancel(c, err)
+		return
+	}
+
+	c.Status(http.StatusNoContent)
+}
+
 func (i *FilesController) Routes(engine *gin.Engine) error {
 	filesGroup := engine.Group("/files").Use(GlobalExceptionHandler)
 
 	filesGroup.GET("/:id", i.getFile)
 	filesGroup.POST("/", ValidateRequestBody, i.addFile)
-
+	filesGroup.DELETE("/:id", i.deleteFileByFileId)
 	return nil
 }

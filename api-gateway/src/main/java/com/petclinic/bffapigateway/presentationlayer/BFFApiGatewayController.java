@@ -6,8 +6,6 @@ import com.petclinic.bffapigateway.dtos.Auth.*;
 import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
 import com.petclinic.bffapigateway.dtos.Bills.PaymentRequestDTO;
-import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
-import com.petclinic.bffapigateway.dtos.Inventory.*;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.*;
 import com.petclinic.bffapigateway.dtos.Vets.*;
@@ -24,16 +22,17 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.*;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
 import java.util.Map;
 import java.util.Optional;
 
@@ -743,6 +742,15 @@ public class BFFApiGatewayController {
     public Mono<ResponseEntity<UserPasswordLessDTO>> createInventoryManager(@RequestBody @Valid Mono<RegisterInventoryManager> model) {
         return authServiceClient.createInventoryMangerUser(model).map(s -> ResponseEntity.status(HttpStatus.CREATED).body(s))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @PatchMapping("/bills/archive")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public Mono<ResponseEntity<Object>> archiveBill() {
+        return billServiceClient.archiveBill()
+                .then(Mono.just(ResponseEntity.noContent().build()))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     /**

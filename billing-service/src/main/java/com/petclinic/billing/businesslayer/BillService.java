@@ -8,6 +8,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 public interface BillService {
     Mono<BillResponseDTO> getBillByBillId(String billId);
 
@@ -75,5 +78,14 @@ public interface BillService {
     Mono<BillResponseDTO> processPayment(String customerId, String billId, PaymentRequestDTO paymentRequestDTO);
 
     Mono<Void> setInterestExempt(String billId, boolean exempt);
+
+    Mono<BigDecimal> getInterest(String billId, BigDecimal amount, int overdueMonths);
+
+    Mono<BigDecimal> getTotalWithInterest(String billId, BigDecimal amount, int overdueMonths);
+
+
+
+    Flux<Bill> archiveBill();
+
 
 }

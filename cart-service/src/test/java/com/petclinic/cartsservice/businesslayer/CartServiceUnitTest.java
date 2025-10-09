@@ -1448,6 +1448,39 @@ class CartServiceUnitTest {
 
         verify(cartRepository, never()).delete(any());
     }
+    @Test
+    void testGetRecentPurchases_ReturnsList() {
+        CartRepository cartRepository = Mockito.mock(CartRepository.class);
+        CartServiceImpl service = new CartServiceImpl(cartRepository, null);
+
+        String cartId = "cart123";
+        List<CartProduct> recentPurchases = List.of(
+                CartProduct.builder().productId("prod1").build(),
+                CartProduct.builder().productId("prod2").build()
+        );
+        Cart cart = Cart.builder().cartId(cartId).recentPurchases(recentPurchases).build();
+
+        Mockito.when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart));
+
+        StepVerifier.create(service.getRecentPurchases(cartId))
+                .expectNextMatches(list -> list.size() == 2 && "prod1".equals(list.get(0).getProductId()))
+                .verifyComplete();
+    }
+
+    @Test
+    void testGetRecentPurchases_ReturnsEmptyListIfNull() {
+        CartRepository cartRepository = Mockito.mock(CartRepository.class);
+        CartServiceImpl service = new CartServiceImpl(cartRepository, null);
+
+        String cartId = "cart456";
+        Cart cart = Cart.builder().cartId(cartId).recentPurchases(null).build();
+
+        Mockito.when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart));
+
+        StepVerifier.create(service.getRecentPurchases(cartId))
+                .expectNextMatches(List::isEmpty)
+                .verifyComplete();
+    }
 
 
 }

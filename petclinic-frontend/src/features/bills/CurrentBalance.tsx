@@ -9,9 +9,9 @@ export default function CurrentBalance(): JSX.Element {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!user.userId) return;
-
     const fetchCurrentBalance = async (): Promise<void> => {
+      if (!user.userId) return;
+
       try {
         const response = await axiosInstance.get(
           `/customers/${user.userId}/bills/current-balance`,
@@ -21,7 +21,7 @@ export default function CurrentBalance(): JSX.Element {
           }
         );
 
-        if (!response || response.status !== 200 || !response.data) {
+        if (!response || response.status !== 200) {
           throw new Error(`Error: ${response.status} ${response.statusText}`);
         }
 
@@ -34,6 +34,18 @@ export default function CurrentBalance(): JSX.Element {
     };
 
     fetchCurrentBalance();
+
+    const handlePaymentSuccess = (): void => {
+      setTimeout(() => {
+        fetchCurrentBalance();
+      }, 500);
+    };
+
+    window.addEventListener('paymentSuccess', handlePaymentSuccess);
+
+    return () => {
+      window.removeEventListener('paymentSuccess', handlePaymentSuccess);
+    };
   }, [user.userId]);
 
   return (

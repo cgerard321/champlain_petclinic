@@ -18,8 +18,8 @@ import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.function.Predicate;
 
@@ -37,14 +37,7 @@ public class BillServiceImpl implements BillService{
     public Mono<BillResponseDTO> getBillByBillId(String billUUID) {
         return billRepository.findByBillId(billUUID)
             .doOnNext(bill -> log.info("Retrieved Bill: {}", bill))
-            .map(EntityDtoUtil::toBillResponseDto)
-            .doOnNext(t -> {
-                BigDecimal taxRate = new BigDecimal("0.15");
-                BigDecimal taxedAmount = t.getAmount().multiply(taxRate).add(t.getAmount());
-                taxedAmount = taxedAmount.setScale(2, RoundingMode.HALF_UP);
-                t.setTaxedAmount(taxedAmount);
-                // Interest calculation is now handled in EntityDtoUtil::toBillResponseDto
-            });
+            .map(EntityDtoUtil::toBillResponseDto);
 }
     @Override
     public Flux<BillResponseDTO> getAllBillsByStatus(BillStatus status) {
@@ -368,8 +361,11 @@ public class BillServiceImpl implements BillService{
         return billRepository.findByCustomerIdAndBillId(customerId, billId)
                 .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Bill not found")))
 
-                // 3. If the bill exists, set its status to PAID.
+                // 3. If the bill exists, calculate and preserve the interest, then set status to PAID.
                 .flatMap(bill -> {
+                    // Calculate and preserve the interest before changing status
+                    BigDecimal interestAtPayment = InterestCalculationUtil.calculateInterest(bill);
+                    bill.setInterest(interestAtPayment);
                     bill.setBillStatus(BillStatus.PAID);
 
                     // 4. Save the updated bill back into the repository.
@@ -380,7 +376,7 @@ public class BillServiceImpl implements BillService{
                 .map(EntityDtoUtil::toBillResponseDto);
     }
 
-    public Mono<BigDecimal> getInterestAmount(String billId, BigDecimal amount, int overdueMonths) {
+    public Mono<BigDecimal> getInterest(String billId, BigDecimal amount, int overdueMonths) {
         return billRepository.findByBillId(billId)
             .map(bill -> {
                 if (bill.isInterestExempt()) {
@@ -392,7 +388,7 @@ public class BillServiceImpl implements BillService{
     }
 
     public Mono<BigDecimal> getTotalWithInterest(String billId, BigDecimal amount, int overdueMonths) {
-        return getInterestAmount(billId, amount, overdueMonths)
+        return getInterest(billId, amount, overdueMonths)
             .map(interest -> amount.add(interest));
     }
 
@@ -410,6 +406,21 @@ public class BillServiceImpl implements BillService{
             })
             .then();
     }
+    @Override
+    public Flux<Bill> archiveBill() {
+        return billRepository.findAllByArchiveFalse()
+                .flatMap(bill -> {
+                    if (bill.getBillStatus() == BillStatus.UNPAID || bill.getBillStatus() == BillStatus.OVERDUE) {
+                        // No action needed; archive is already false by default.
+                    }
+                    else if (bill.getDate().isBefore(LocalDate.now().minusYears(1))) {
+                        bill.setArchive(true);
+                        return billRepository.save(bill);
+                    }
+                    return Mono.just(bill);
+                });
+    }
+
 
 
 }

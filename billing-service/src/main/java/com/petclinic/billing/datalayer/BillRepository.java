@@ -10,6 +10,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Repository
 public interface BillRepository extends ReactiveMongoRepository<Bill, String> {
@@ -39,5 +40,10 @@ public interface BillRepository extends ReactiveMongoRepository<Bill, String> {
     Flux<Bill> findByDateBetween(LocalDate start, LocalDate end);
 
     Mono<Bill> findByCustomerIdAndBillId(String customerId, String billId);
+
+    Flux<Bill> findAllByArchiveFalse();
+
+
+    Flux<Bill> findAllByDateBefore(LocalDate date);
 
 }

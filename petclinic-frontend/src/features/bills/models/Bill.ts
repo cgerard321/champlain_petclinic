@@ -10,8 +10,10 @@ export interface Bill {
   date: string;
   amount: number;
   taxedAmount: number;
+  interest: number;
   billStatus: string;
   dueDate: string;
   timeRemaining: number;
   interestExempt: boolean;
+  archive: boolean;
 }

@@ -82,3 +82,20 @@ func TestWhenGetFileById_withInvalidFileId_thenReturnInvalidFileIdException(t *t
 	assert.NoError(t, err)
 	assert.Equal(t, "Invalid fileId: "+INVALID_FILE_ID, resp)
 }
+
+func TestWhenDeleteFile_withExistingFileId_thenReturnSuccess(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	controller, mockService := setUpControllerUnitTests()
+	router := gin.Default()
+	_ = controller.Routes(router)
+
+	mockService.On("DeleteFileByFileId", EXISTING_FILE_ID).Return(nil)
+
+	req, _ := http.NewRequest(http.MethodDelete, "/files/"+EXISTING_FILE_ID, nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusNoContent, w.Code)
+	assert.Empty(t, w.Body.String())
+	mockService.AssertExpectations(t)
+}
