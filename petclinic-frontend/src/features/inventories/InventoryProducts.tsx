@@ -497,7 +497,7 @@ const InventoryProducts: React.FC = () => {
                     <button
                       onClick={e => {
                         e.stopPropagation();
-                        navigate(`${product.productId}/move`);
+                        navigate(`${product.productId}`);
                       }}
                       className="btn btn-info btn-sm"
                     >

@@ -8,18 +8,11 @@ angular.module('inventoriesList')
         self.realPage = parseInt(self.currentPage) + 1
         var numberOfPage
         var name
+        var code
         var type
         var desc
 
         getInventoryList()
-
-
-        $http.get('api/gateway/inventories').then(function (resp) {
-            self.inventoryList = resp.data;
-            console.log("Resp data: " + resp.data)
-            console.log("inventory list: " + self.inventoryList)
-        });
-
         $http.get('api/gateway/inventories').then(function (resp) {
             self.inventoryList = resp.data;
             console.log("Resp data: " + resp.data)
@@ -27,7 +20,7 @@ angular.module('inventoriesList')
         });
         $scope.inventoryTypeOptions = []
         //custom types handler
-        $http.get("api/gateway/inventories/type").then(function (resp) {
+        $http.get("api/gateway/inventories/types").then(function (resp) {
             //Includes all types inside the array
             resp.data.forEach(function (type) {
                 $scope.inventoryTypeOptions.push(type.type);
@@ -37,23 +30,30 @@ angular.module('inventoriesList')
         $scope.clearQueries = function (){
             // Clear the input fields
             $scope.inventoryName = '';
+            $scope.inventoryCode = '';
             $scope.inventoryType = '';
             $scope.inventoryDescription = '';
             // Reset the list by searching all inventories again
             $scope.searchInventory('', '', '');
         }
 //search by inventory field
-        $scope.searchInventory = function (inventoryName, inventoryType, inventoryDescription){
-            getInventoryList(inventoryName, inventoryType, inventoryDescription)
+        $scope.searchInventory = function (inventoryCode, inventoryName, inventoryType, inventoryDescription){
+            getInventoryList(inventoryCode, inventoryName, inventoryType, inventoryDescription)
         }
 //search by inventory field
-        function getInventoryList(inventoryName, inventoryType, inventoryDescription){
+        function getInventoryList(inventoryCode, inventoryName, inventoryType, inventoryDescription){
 
             $state.transitionTo('inventories', {page: self.currentPage, size: self.listSize}, {notify: false});
             var queryString = '';
             name = ""
+            code = ""
             type = ""
             desc = ""
+
+            if (inventoryCode != null && inventoryCode !== '') {
+                code = inventoryCode.toUpperCase();
+                queryString += "inventoryCode=" + code;
+            }
 
             if (inventoryName != null && inventoryName !== '') {
                 name = inventoryName
@@ -179,7 +179,7 @@ angular.module('inventoriesList')
 
                 // After deletion, wait for a short moment (e.g., 1 second) before showing the notification
                 setTimeout(() => {
-                    showNotification(inventory.inventoryName + " has been deleted successfully!");
+                    showNotification(inventory.inventoryCode + " - " + inventory.inventoryName + " has been deleted successfully!");
                     // Then, after displaying the notification for 5 seconds, reload the page
                     setTimeout(() => {
                         location.reload();
@@ -211,4 +211,13 @@ angular.module('inventoriesList')
                 getInventoryList(name, type, desc)
             }
         }
+
+        $scope.inventoryType = '';
+
+
+        $scope.$watch('inventoryType', function(newType, oldType) {
+            if (newType !== oldType) {
+                $scope.searchInventory($scope.inventoryCode || '', $scope.inventoryName || '', newType, $scope.inventoryDescription || '');
+            }
+        });
     }]);

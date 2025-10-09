@@ -6,8 +6,6 @@ import com.petclinic.bffapigateway.dtos.Auth.*;
 import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
 import com.petclinic.bffapigateway.dtos.Bills.PaymentRequestDTO;
-import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
-import com.petclinic.bffapigateway.dtos.Inventory.*;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.*;
 import com.petclinic.bffapigateway.dtos.Vets.*;
@@ -24,16 +22,17 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.*;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
 import java.util.Map;
 import java.util.Optional;
 
@@ -62,9 +61,6 @@ public class BFFApiGatewayController {
     private final BillServiceClient billServiceClient;
 
     private final InventoryServiceClient inventoryServiceClient;
-
-
-
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET})
     @GetMapping(value = "bills/{billId}")
@@ -147,7 +143,6 @@ public class BFFApiGatewayController {
     public Mono<Long> getTotalNumberOfBills(){
         return billServiceClient.getTotalNumberOfBills();
     }
-
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET})
     @GetMapping(value = "bills/bills-filtered-count")
@@ -280,7 +275,11 @@ public class BFFApiGatewayController {
         return customersServiceClient.getAllPets(ownerId);
     }*/
 
+// Owner method, the endpoint must be changed, but requires bigger changes in owner methods
+    //This will still work for this sprint, as the endpoint was fixed in the previous Sprint
+    //Yet someone pushed without updating and caused the endpoints to revert back to what they used to be.
     @SecuredEndpoint(allowedRoles = {Roles.OWNER,Roles.ADMIN,Roles.VET})
+    // /pet should become /pets, with further changes needed afterward.
     @PatchMapping(value = "/pet/{petId}", produces = "application/json", consumes = "application/json")
     public Mono<ResponseEntity<PetResponseDTO>> patchPet(@RequestBody PetRequestDTO pet, @PathVariable String petId) {
         return customersServiceClient.patchPet(pet, petId).map(s -> ResponseEntity.status(HttpStatus.OK).body(s))
@@ -341,15 +340,6 @@ public class BFFApiGatewayController {
 //    public Flux<ReviewResponseDTO> getAllReviews(){
 //        return visitsServiceClient.getAllReviews();
 //    }
-//
-//
-//
-//
-//
-//
-//
-//
-//
 //
 //    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
 //    @GetMapping(value = "visits", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
@@ -478,7 +468,6 @@ public class BFFApiGatewayController {
 //     * End of Visit Methods
 //     **/
 
-
     /**
      * Start of Vet Methods
      **/
@@ -540,7 +529,6 @@ public class BFFApiGatewayController {
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
-
     @PutMapping(value = "vets/{vetId}/photos/{photoName}")
     public Mono<ResponseEntity<Resource>> updatePhotoByVetId(@PathVariable String vetId, @PathVariable String photoName, @RequestBody Mono<Resource> image) {
         return vetsServiceClient.updatePhotoOfVet(vetId, photoName, image)
@@ -592,8 +580,6 @@ public class BFFApiGatewayController {
     public Flux<VetAverageRatingDTO>getTopThreeVetsWithHighestAverageRating(){
         return vetsServiceClient.getTopThreeVetsWithHighestAverageRating();
     }
-
-
 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @GetMapping("vets/{vetId}/ratings/date")
@@ -654,7 +640,6 @@ public class BFFApiGatewayController {
                 .map(e->ResponseEntity.status(HttpStatus.OK).body(e))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
-
 
     //Vets
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
@@ -780,11 +765,6 @@ public class BFFApiGatewayController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @GetMapping(value = "users/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<UserDetails> getUserById(@PathVariable String userId, @CookieValue("Bearer") String auth) {
-        return authServiceClient.getUserById(auth, userId);
-    }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @DeleteMapping(value = "users/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -809,15 +789,11 @@ public class BFFApiGatewayController {
         return authServiceClient.logout(request, response);
     }
 
-
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @PostMapping(value = "/users/forgot_password")
     public Mono<ResponseEntity<Void>> processForgotPassword(@RequestBody Mono<UserEmailRequestDTO> email) {
         return authServiceClient.sendForgottenEmail(email);
     }
-
-
-
 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @PostMapping("/users/reset_password")
@@ -825,12 +801,20 @@ public class BFFApiGatewayController {
         return authServiceClient.changePassword(resetRequest);
     }
 
-
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @PostMapping(value = "/users/inventoryManager")
     public Mono<ResponseEntity<UserPasswordLessDTO>> createInventoryManager(@RequestBody @Valid Mono<RegisterInventoryManager> model) {
         return authServiceClient.createInventoryMangerUser(model).map(s -> ResponseEntity.status(HttpStatus.CREATED).body(s))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @PatchMapping("/bills/archive")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public Mono<ResponseEntity<Object>> archiveBill() {
+        return billServiceClient.archiveBill()
+                .then(Mono.just(ResponseEntity.noContent().build()))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     /**

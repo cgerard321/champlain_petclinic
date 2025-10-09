@@ -1,6 +1,8 @@
 package com.petclinic.vet.exceptions;
 
-import com.petclinic.vet.dataaccesslayer.PhotoRepository;
+import com.petclinic.vet.dataaccesslayer.photos.PhotoRepository;
+import com.petclinic.vet.utils.exceptions.InvalidInputException;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;

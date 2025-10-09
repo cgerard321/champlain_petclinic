@@ -1,37 +1,45 @@
 import axiosInstance from '@/shared/api/axiosInstance';
-import { Bill } from '../models/Bill';
 
 export async function payBill(
   customerId: string,
   billId: string,
   paymentDetails: { cardNumber: string; cvv: string; expirationDate: string }
 ): Promise<void> {
-  const response = await axiosInstance.post(
-    `/bills/customer/${customerId}/bills/${billId}/pay`,
-    paymentDetails,
-    {
-      headers: { 'Content-Type': 'application/json' },
-      withCredentials: true,
-      useV2: true,
-      //body: JSON.stringify(paymentDetails),
-    }
-  );
-  return response.data.filter((item: Bill) => item.billStatus === 'PAID');
-
-  /*const response = await fetch(
-    `http://localhost:8080/api/v2/gateway/bills/customer/${customerId}/bills/${billId}/pay`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-      body: JSON.stringify(paymentDetails),
-    }
-  );
-
-  if (!response.ok) {
-    throw new Error('Payment failed');
+  // Basic validation
+  if (
+    !customerId ||
+    !billId ||
+    !paymentDetails.cardNumber ||
+    !paymentDetails.cvv ||
+    !paymentDetails.expirationDate
+  ) {
+    throw new Error('Invalid payment details');
   }
-    */
+
+  try {
+    // Make API call to update bill status to PAID
+    const response = await axiosInstance.post(
+      `/bills/customer/${customerId}/bills/${billId}/pay`,
+      {
+        cardNumber: paymentDetails.cardNumber,
+        cvv: paymentDetails.cvv,
+        expirationDate: paymentDetails.expirationDate,
+      },
+      {
+        headers: { 'Content-Type': 'application/json' },
+        useV2: false,
+      }
+    );
+
+    if (!response || response.status !== 200) {
+      throw new Error(
+        `Payment failed: ${response.status} ${response.statusText}`
+      );
+    }
+
+    return Promise.resolve();
+  } catch (error) {
+    console.error('Payment processing error:', error);
+    throw new Error('Payment processing failed. Please try again.');
+  }
 }

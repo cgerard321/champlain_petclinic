@@ -46,17 +46,18 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
 
     @Override
     public Mono<InventoryResponseDTO> addInventory(Mono<InventoryRequestDTO> inventoryRequestDTO) {
-        return inventoryRequestDTO
-                .map(EntityDTOUtil::toInventoryEntity)
-                .doOnNext(e -> {
-                    if (e.getInventoryType() == null) {
-                        throw new InvalidInputException("Invalid input data: inventory type cannot be blank.");
-                    }
-                    e.setInventoryId(EntityDTOUtil.generateUUID());
-                })
-                .flatMap(inventoryRepository::insert)
-                .map(EntityDTOUtil::toInventoryResponseDTO);
-
+        return inventoryRepository.count()
+                .flatMap(count -> inventoryRequestDTO
+                        .map(EntityDTOUtil::toInventoryEntity)
+                        .doOnNext(e -> {
+                            if (e.getInventoryType() == null) {
+                                throw new InvalidInputException("Invalid input data: inventory type cannot be blank.");
+                            }
+                            e.setInventoryId(EntityDTOUtil.generateUUID());
+                            e.setInventoryCode(String.format("INV-%04d", count + 1));
+                        })
+                        .flatMap(inventoryRepository::insert)
+                        .map(EntityDTOUtil::toInventoryResponseDTO));
     }
 
 
@@ -302,7 +303,14 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
     }
 
     @Override
-    public Flux<InventoryResponseDTO> searchInventories(Pageable page, String inventoryName, String inventoryType, String inventoryDescription, Boolean importantOnly) {
+    public Flux<InventoryResponseDTO> searchInventories(Pageable page, String inventoryCode, String inventoryName, String inventoryType, String inventoryDescription, Boolean importantOnly) {
+
+        if (inventoryCode != null && !inventoryCode.trim().isEmpty()) {
+            return inventoryRepository.findInventoryByInventoryCode(inventoryCode)
+                    .map(EntityDTOUtil::toInventoryResponseDTO)
+                    .flux()
+                    .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with Code: " + inventoryCode)));
+        }
 
         if (inventoryName != null && inventoryType != null && inventoryDescription != null) {
             return inventoryRepository
@@ -391,6 +399,19 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
         }
 
         return inventoryFlux
+                .sort((inv1, inv2) -> {
+                    if (inv1.getInventoryCode() == null && inv2.getInventoryCode() == null) return 0;
+                    if (inv1.getInventoryCode() == null) return 1;
+                    if (inv2.getInventoryCode() == null) return -1;
+
+                    try {
+                        int num1 = Integer.parseInt(inv1.getInventoryCode().replace("INV-", ""));
+                        int num2 = Integer.parseInt(inv2.getInventoryCode().replace("INV-", ""));
+                        return Integer.compare(num1, num2);
+                    } catch (NumberFormatException e) {
+                        return inv1.getInventoryCode().compareTo(inv2.getInventoryCode());
+                    }
+                })
                 .skip(page.getPageNumber() * page.getPageSize())
                 .take(page.getPageSize())
                 .map(EntityDTOUtil::toInventoryResponseDTO);
@@ -604,8 +625,21 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
 
     @Override
     public Flux<InventoryResponseDTO> getAllInventories() {
-        return inventoryRepository.findAll() // Fetch all inventories from the repository
-                .map(EntityDTOUtil::toInventoryResponseDTO); // Convert each inventory entity to DTO
+        return inventoryRepository.findAll()
+                .sort((inv1, inv2) -> {
+                    if (inv1.getInventoryCode() == null && inv2.getInventoryCode() == null) return 0;
+                    if (inv1.getInventoryCode() == null) return 1;
+                    if (inv2.getInventoryCode() == null) return -1;
+
+                    try {
+                        int num1 = Integer.parseInt(inv1.getInventoryCode().replace("INV-", ""));
+                        int num2 = Integer.parseInt(inv2.getInventoryCode().replace("INV-", ""));
+                        return Integer.compare(num1, num2);
+                    } catch (NumberFormatException e) {
+                        return inv1.getInventoryCode().compareTo(inv2.getInventoryCode());
+                    }
+                })
+                .map(EntityDTOUtil::toInventoryResponseDTO);
     }
 
     @Override

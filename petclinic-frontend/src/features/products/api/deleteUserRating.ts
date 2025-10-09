@@ -5,7 +5,7 @@ export async function deleteUserRating(productId: string): Promise<number> {
   try {
     return await axiosInstance
       .delete<RatingModel>('/ratings/' + productId, {
-        useV2: true,
+        useV2: false,
       })
       .then(() => {
         return 0;

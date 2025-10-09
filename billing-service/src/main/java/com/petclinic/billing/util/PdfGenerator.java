@@ -14,11 +14,6 @@ import java.util.Optional;
 public class PdfGenerator {
 
     public static byte[] generateBillPdf(BillResponseDTO bill) throws DocumentException {
-        // Use centralized interest calculation utility
-        // Note: Since this method works with BillResponseDTO, we can't directly use InterestCalculationUtil.calculateInterest(Bill)
-        // However, the interest should already be calculated when the BillResponseDTO was created via EntityDtoUtil.toBillResponseDto()
-        // So we can just use the existing interest value from the DTO
-        
         Document document = new Document(PageSize.A4, 50, 50, 50, 50);
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         PdfWriter.getInstance(document, byteArrayOutputStream);
@@ -79,12 +74,8 @@ public class PdfGenerator {
         addHeaderCell(charges, "Subtotal");
 
         BigDecimal subtotal = bill.getAmount();
-        BigDecimal totalWithTax = bill.getTaxedAmount() != null && bill.getTaxedAmount().compareTo(BigDecimal.ZERO) > 0
-                ? bill.getTaxedAmount()
-                : subtotal;
-        BigDecimal tax = totalWithTax.subtract(subtotal);
         BigDecimal interest = bill.getInterest() != null ? bill.getInterest() : BigDecimal.ZERO;
-        BigDecimal totalDue = totalWithTax.add(interest);
+        BigDecimal totalDue = subtotal.add(interest);
 
         charges.addCell("Visit – " + Optional.ofNullable(bill.getVisitType()).orElse("N/A"));
         charges.addCell("1");
@@ -109,9 +100,6 @@ public class PdfGenerator {
 
         totals.addCell("Subtotal");
         totals.addCell(rightAligned(formatCurrency(subtotal)));
-
-        totals.addCell("Tax");
-        totals.addCell(rightAligned(formatCurrency(tax)));
 
         if (interest.compareTo(BigDecimal.ZERO) > 0) {
             totals.addCell("Interest");

@@ -50,3 +50,8 @@ func (msc *MinioServiceClientImpl) AddFile(fileInfo *datalayer.FileInfo, data []
 	_, err := msc.client.PutObject(ctx, fileInfo.GetFileBucket(), fileInfo.GetFileLink(), obj, obj.Size(), minio.PutObjectOptions{ContentType: fileInfo.FileType})
 	return err
 }
+
+func (msc *MinioServiceClientImpl) DeleteFile(fileInfo *datalayer.FileInfo) error {
+	ctx := context.Background()
+	return msc.client.RemoveObject(ctx, fileInfo.GetFileBucket(), fileInfo.GetFileLink(), minio.RemoveObjectOptions{})
+}

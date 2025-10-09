@@ -2,13 +2,12 @@ package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.petclinic.bffapigateway.dtos.Cart.*;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
-import com.petclinic.bffapigateway.exceptions.OutOfStockException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.webjars.NotFoundException;
@@ -16,6 +15,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 @Component
 @Slf4j
@@ -98,14 +99,23 @@ public Mono<CartResponseDTO> deleteCartByCartId(String CardId) {
             .bodyToMono(CartResponseDTO.class);
 }
 
-    public CartResponseDTO createCart(CartRequestDTO cartRequestDTO) {
+    public Mono<CartResponseDTO> createCart(CartRequestDTO cartRequestDTO) {
         return webClientBuilder.build()
                 .post()
                 .uri(cartServiceUrl)
                 .bodyValue(cartRequestDTO)
                 .retrieve()
-                .bodyToMono(CartResponseDTO.class)
-                .block();
+                .onStatus(HttpStatusCode::is4xxClientError, error -> {
+                    HttpStatusCode statusCode = error.statusCode();
+                    if (statusCode.equals(HttpStatus.BAD_REQUEST) || statusCode.equals(HttpStatus.UNPROCESSABLE_ENTITY)) {
+                        return Mono.error(new InvalidInputException("Invalid input when creating cart"));
+                    } else if (statusCode.equals(HttpStatus.NOT_FOUND)) {
+                        return Mono.error(new NotFoundException("Related resource not found while creating cart"));
+                    }
+                    return Mono.error(new IllegalArgumentException("Client error"));
+                })
+                .onStatus(HttpStatusCode::is5xxServerError, error -> Mono.error(new IllegalArgumentException("Server error")))
+                .bodyToMono(CartResponseDTO.class);
     }
 
     //method that helps to delete products from wishlist
@@ -152,6 +162,25 @@ public Mono<CartResponseDTO> deleteCartByCartId(String CardId) {
                 .onStatus(HttpStatusCode::is5xxServerError, error -> Mono.error(new IllegalArgumentException("Server error")))
                 .bodyToMono(Void.class)
                 .doOnError(e -> log.error("Failed to clear cart with id {}: {}", cartId, e.getMessage()));
+    }
+
+    public Mono<Integer> getCartItemCount(String cartId) {
+        return webClientBuilder.build()
+                .get()
+                .uri(cartServiceUrl + "/" + cartId + "/count")
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, error -> {
+                    HttpStatusCode statusCode = error.statusCode();
+                    if (statusCode.equals(HttpStatus.NOT_FOUND)) {
+                        return Mono.error(new NotFoundException("Cart not found for cartId: " + cartId));
+                    } else if (statusCode.equals(HttpStatus.UNPROCESSABLE_ENTITY) || statusCode.equals(HttpStatus.BAD_REQUEST)) {
+                        return Mono.error(new InvalidInputException("Invalid cart id: " + cartId));
+                    }
+                    return Mono.error(new IllegalArgumentException("Client error"));
+                })
+                .onStatus(HttpStatusCode::is5xxServerError, error -> Mono.error(new IllegalArgumentException("Server error")))
+                .bodyToMono(new ParameterizedTypeReference<Map<String, Integer>>() {})
+                .map(body -> body != null ? body.getOrDefault("itemCount", 0) : 0);
     }
 
     public Flux<PromoCodeResponseDTO> getAllPromoCodes() {
@@ -243,19 +272,15 @@ public Mono<CartResponseDTO> deleteCartByCartId(String CardId) {
                 .body(Mono.just(requestDTO), AddProductRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
-                .onStatus(status -> status.value() == 400, clientResponse -> {
-                    return clientResponse.bodyToMono(CartResponseDTO.class)
-                            .flatMap(cartResponseDTO -> {
-                                if (cartResponseDTO.getMessage() != null) {
-                                    return Mono.error(new InvalidInputException(cartResponseDTO.getMessage()));
-                                } else {
-                                    return Mono.error(new InvalidInputException("Invalid input"));
-                                }
-                            });
-                })
-                .onStatus(HttpStatusCode::isError, clientResponse -> {
-                    return Mono.error(new Exception("An error occurred while adding product to cart"));
-                })
+                .onStatus(status -> status.value() == 400, clientResponse -> clientResponse.bodyToMono(CartResponseDTO.class)
+                        .flatMap(cartResponseDTO -> {
+                            if (cartResponseDTO.getMessage() != null) {
+                                return Mono.error(new InvalidInputException(cartResponseDTO.getMessage()));
+                            } else {
+                                return Mono.error(new InvalidInputException("Invalid input"));
+                            }
+                        }))
+                .onStatus(HttpStatusCode::isError, clientResponse -> Mono.error(new Exception("An error occurred while adding product to cart")))
                 .bodyToMono(CartResponseDTO.class);
     }
 
@@ -341,16 +366,14 @@ public Mono<CartResponseDTO> deleteCartByCartId(String CardId) {
                 .body(Mono.just(new AddProductRequestDTO(productId, 1)), AddProductRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> {
-                    return clientResponse.bodyToMono(CartResponseDTO.class)
-                            .flatMap(cartResponseDTO -> {
-                                if (cartResponseDTO.getMessage() != null) {
-                                    return Mono.error(new InvalidInputException(cartResponseDTO.getMessage()));
-                                } else {
-                                    return Mono.error(new InvalidInputException("Invalid input"));
-                                }
-                            });
-                })
+                .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> clientResponse.bodyToMono(CartResponseDTO.class)
+                        .flatMap(cartResponseDTO -> {
+                            if (cartResponseDTO.getMessage() != null) {
+                                return Mono.error(new InvalidInputException(cartResponseDTO.getMessage()));
+                            } else {
+                                return Mono.error(new InvalidInputException("Invalid input"));
+                            }
+                        }))
                 .onStatus(HttpStatusCode::is5xxServerError, error -> Mono.error(new IllegalArgumentException("Server error")))
                 .bodyToMono(CartResponseDTO.class);
     }
@@ -363,9 +386,14 @@ public Mono<CartResponseDTO> deleteCartByCartId(String CardId) {
                     if (resp.statusCode().is2xxSuccessful()) {
                         return resp.bodyToMono(CartResponseDTO.class);
                     }
-                    // Propagate exact upstream status + body as WebClientResponseException
                     return resp.createException().flatMap(Mono::error);
                 });
     }
-
+    public Mono<List<CartProductResponseDTO>> getRecentPurchases(String cartId) {
+        return webClientBuilder.build()
+                .get()
+                .uri(cartServiceUrl + "/{cartId}/recent-purchases", cartId)
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<List<CartProductResponseDTO>>() {});
+    }
 }

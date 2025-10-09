@@ -209,6 +209,7 @@ public class InventoryServiceClient {
     public Flux<InventoryResponseDTO> searchInventory(
             final Optional<Integer> page,
             final Optional<Integer> size,
+            final String inventoryCode,
             final String inventoryName,
             final String inventoryType,
             final String inventoryDescription,
@@ -217,6 +218,7 @@ public class InventoryServiceClient {
         UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(inventoryServiceUrl)
                 .queryParamIfPresent("page", page)
                 .queryParamIfPresent("size", size)
+                .queryParamIfPresent("inventoryCode", Optional.ofNullable(inventoryCode))
                 .queryParamIfPresent("inventoryName", Optional.ofNullable(inventoryName))
                 .queryParamIfPresent("inventoryType", Optional.ofNullable(inventoryType))
                 .queryParamIfPresent("inventoryDescription", Optional.ofNullable(inventoryDescription))
