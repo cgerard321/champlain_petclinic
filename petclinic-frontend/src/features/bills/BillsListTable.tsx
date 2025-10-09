@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Bill } from '@/features/bills/models/Bill.ts';
 import { useUser } from '@/context/UserContext';
-import { payBill } from '@/features/bills/api/payBill.tsx';
+import PaymentForm from './PaymentForm';
 import './BillsListTable.css';
 import axiosInstance from '@/shared/api/axiosInstance';
 
@@ -11,6 +11,8 @@ export default function BillsListTable(): JSX.Element {
   const [filteredBills, setFilteredBills] = useState<Bill[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
+  const [selectedBill, setSelectedBill] = useState<Bill | null>(null);
+  const [showPaymentForm, setShowPaymentForm] = useState<boolean>(false);
 
   const fetchBills = useCallback(async (): Promise<void> => {
     if (!user.userId) return;
@@ -93,92 +95,51 @@ export default function BillsListTable(): JSX.Element {
     }
   };
 
-  const handlePayBillClick = async (billId: string): Promise<void> => {
-    let cardNumber: string = '';
-    let cvv: string = '';
-    let expirationDate: string = '';
-    let isExpired = true;
+  const handlePayBillClick = (bill: Bill): void => {
+    setSelectedBill(bill);
+    setShowPaymentForm(true);
+  };
 
-    while (isExpired) {
-      while (
-        !cardNumber ||
-        cardNumber.length !== 16 ||
-        isNaN(Number(cardNumber))
-      ) {
-        const inputCardNumber = window.prompt(
-          'Enter your card number (16 digits):'
+  const handlePaymentSuccess = (): void => {
+    setShowPaymentForm(false);
+
+    // Update bill status to PAID
+    if (selectedBill) {
+      setBills(prevBills => {
+        const updatedBills = prevBills.map(bill =>
+          bill.billId === selectedBill.billId
+            ? { ...bill, billStatus: 'PAID' }
+            : bill
         );
-        if (!inputCardNumber) {
-          alert('Payment cancelled.');
-          return;
-        }
-        if (inputCardNumber.length !== 16 || isNaN(Number(inputCardNumber))) {
-          alert(
-            'Invalid card number. Please enter a valid 16-digit card number.'
-          );
-        } else {
-          cardNumber = inputCardNumber;
-        }
-      }
 
-      while (!cvv || cvv.length !== 3 || isNaN(Number(cvv))) {
-        const inputCvv = window.prompt('Enter your CVV (3 digits):');
-        if (!inputCvv) {
-          alert('Payment cancelled.');
-          return;
-        }
-        if (inputCvv.length !== 3 || isNaN(Number(inputCvv))) {
-          alert('Invalid CVV. Please enter a valid 3-digit CVV.');
-        } else {
-          cvv = inputCvv;
-        }
-      }
-
-      const expirationDatePattern = /^(0[1-9]|1[0-2])\/\d{2}$/;
-      while (!expirationDate || !expirationDatePattern.test(expirationDate)) {
-        const inputExpirationDate = window.prompt(
-          'Enter your expiration date (MM/YY):'
+        // Update filtered bills to reflect the change immediately
+        setFilteredBills(
+          updatedBills.filter(bill => {
+            if (selectedStatus === 'all') return true;
+            return (
+              bill.billStatus.toLowerCase() === selectedStatus.toLowerCase()
+            );
+          })
         );
-        if (!inputExpirationDate) {
-          alert('Payment cancelled.');
-          return;
-        }
-        if (!expirationDatePattern.test(inputExpirationDate)) {
-          alert(
-            'Invalid expiration date. Please enter a valid date in MM/YY format.'
-          );
-        } else {
-          expirationDate = inputExpirationDate;
-        }
-      }
 
-      const [expMonth, expYear] = expirationDate.split('/');
-      const currentDate = new Date();
-      const expiryYearFull = `20${expYear}`;
-      const expiryDate = new Date(Number(expiryYearFull), Number(expMonth) - 1);
-
-      if (expiryDate < currentDate) {
-        alert('Your card is expired. Please enter a new card.');
-        cardNumber = '';
-        cvv = '';
-        expirationDate = '';
-      } else {
-        isExpired = false;
-      }
-    }
-
-    try {
-      await payBill(user.userId, billId, {
-        cardNumber,
-        cvv,
-        expirationDate,
+        return updatedBills;
       });
-      alert('Payment successful!');
-      fetchBills();
-    } catch (error) {
-      alert('Payment failed');
-      console.error('Payment error:', error);
     }
+
+    setSelectedBill(null);
+
+    // Trigger a refresh of the current balance and bills data
+    // to ensure everything is in sync
+    setTimeout(() => {
+      fetchBills();
+      // Notify CurrentBalance component to refresh
+      window.dispatchEvent(new CustomEvent('paymentSuccess'));
+    }, 100);
+  };
+
+  const handlePaymentCancel = (): void => {
+    setShowPaymentForm(false);
+    setSelectedBill(null);
   };
 
   return (
@@ -212,7 +173,8 @@ export default function BillsListTable(): JSX.Element {
                 <th>Vet Name</th>
                 <th>Date</th>
                 <th>Amount</th>
-                <th>Taxed Amount</th>
+                <th>Interest</th>
+                <th>Total Due</th>
                 <th>Status</th>
                 <th>Due Date</th>
                 <th>Time Remaining</th>
@@ -232,8 +194,9 @@ export default function BillsListTable(): JSX.Element {
                     {bill.vetFirstName} {bill.vetLastName}
                   </td>
                   <td>{bill.date}</td>
-                  <td>{bill.amount}</td>
-                  <td>{bill.taxedAmount}</td>
+                  <td>${bill.amount.toFixed(2)}</td>
+                  <td>${(bill.interest || 0).toFixed(2)}</td>
+                  <td>${bill.taxedAmount.toFixed(2)}</td>
                   <td>
                     {bill.billStatus === 'OVERDUE' ? (
                       <span style={{ color: 'red' }}>Overdue</span>
@@ -266,7 +229,7 @@ export default function BillsListTable(): JSX.Element {
                   </td>
                   <td>
                     {bill.billStatus !== 'PAID' && (
-                      <button onClick={() => handlePayBillClick(bill.billId)}>
+                      <button onClick={() => handlePayBillClick(bill)}>
                         Pay Bill
                       </button>
                     )}
@@ -276,6 +239,18 @@ export default function BillsListTable(): JSX.Element {
             </tbody>
           </table>
         </div>
+      )}
+
+      {showPaymentForm && selectedBill && (
+        <PaymentForm
+          billId={selectedBill.billId}
+          customerId={user.userId}
+          billAmount={selectedBill.taxedAmount}
+          baseAmount={selectedBill.amount}
+          interestAmount={selectedBill.interest || 0}
+          onPaymentSuccess={handlePaymentSuccess}
+          onCancel={handlePaymentCancel}
+        />
       )}
     </div>
   );

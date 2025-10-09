@@ -25,7 +25,7 @@ public class BillResponseDTO {
     private LocalDate date;
     private BigDecimal amount;
     private BigDecimal taxedAmount;
-    private BigDecimal interestAmount;
+    private BigDecimal interest;
     private BillStatus billStatus;
     private LocalDate dueDate;
     private Long timeRemaining;
