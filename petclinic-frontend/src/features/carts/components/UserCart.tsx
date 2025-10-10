@@ -1,4 +1,3 @@
-// UserCart.tsx
 import { useState, useEffect, useCallback } from 'react';
 import CartBillingForm, { BillingInfo } from './CartBillingForm';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -7,12 +6,19 @@ import { ProductModel } from '../models/ProductModel';
 import './UserCart.css';
 import { NavBar } from '@/layouts/AppNavBar';
 import { FaShoppingCart } from 'react-icons/fa';
+import ImageContainer from '@/features/products/components/ImageContainer';
 import axiosInstance from '@/shared/api/axiosInstance';
-import { IsAdmin } from '@/context/UserContext';
+import {
+  IsAdmin,
+  IsInventoryManager,
+  IsVet,
+  IsReceptionist,
+} from '@/context/UserContext';
 import { AppRoutePaths } from '@/shared/models/path.routes';
 import { getProductByProductId } from '@/features/products/api/getProductByProductId';
 import { notifyCartChanged } from '../api/cartEvent';
 import { useConfirmModal } from '@/shared/hooks/useConfirmModal';
+import axios from 'axios';
 
 interface ProductAPIResponse {
   productId: number;
@@ -33,7 +39,6 @@ interface Invoice {
 }
 
 const UserCart = (): JSX.Element => {
-  // router + nav
   const { cartId } = useParams<{ cartId: string }>();
   const navigate = useNavigate();
 
@@ -43,7 +48,6 @@ const UserCart = (): JSX.Element => {
   const [cartItems, setCartItems] = useState<ProductModel[]>([]);
   const [wishlistItems, setWishlistItems] = useState<ProductModel[]>([]);
 
-  // state: ui + error/loading
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [errorMessages, setErrorMessages] = useState<Record<number, string>>(
@@ -53,7 +57,6 @@ const UserCart = (): JSX.Element => {
     null
   );
 
-  // state: checkout + invoices
   const [checkoutMessage, setCheckoutMessage] = useState<string | null>(null);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [cartItemCount, setCartItemCount] = useState<number>(0);
@@ -63,7 +66,6 @@ const UserCart = (): JSX.Element => {
   const [billingInfo, setBillingInfo] = useState<BillingInfo | null>(null);
   const [checkoutDate, setCheckoutDate] = useState<string | null>(null);
 
-  // state: misc
   const [wishlistUpdated, setWishlistUpdated] = useState(false);
   const [voucherCode, setVoucherCode] = useState<string>('');
   const [discount, setDiscount] = useState<number>(0);
@@ -71,16 +73,102 @@ const UserCart = (): JSX.Element => {
 
   const [movingAll, setMovingAll] = useState<boolean>(false);
 
+  // Recent purchases state
+  const [recentPurchases, setRecentPurchases] = useState<
+    Array<{
+      productId: string;
+      productName: string;
+      productSalePrice: number;
+      imageId: string;
+      quantity: number;
+    }>
+  >([]);
+
+  // Quantity state for recent purchases
+  const [recentPurchaseQuantities, setRecentPurchaseQuantities] = useState<{
+    [productId: string]: number;
+  }>({});
+
+  // Handle quantity change for recent purchases
+  const handleRecentPurchaseQuantityChange = (
+    productId: string,
+    value: number
+  ): void => {
+    setRecentPurchaseQuantities(prev => ({
+      ...prev,
+      [productId]: Math.max(1, value),
+    }));
+  };
+
+  // Handle 'Purchase Again' action
+  const handlePurchaseAgain = async (item: {
+    productId: string;
+    productName: string;
+    productSalePrice: number;
+    imageId: string;
+    quantity: number;
+  }): Promise<void> => {
+    if (!cartId) return;
+
+    const quantity = Math.max(1, recentPurchaseQuantities[item.productId] || 1);
+
+    try {
+      // Use the working endpoint and loop for quantity
+      for (let i = 0; i < quantity; i += 1) {
+        await axiosInstance.post(
+          `/carts/${cartId}/${item.productId}`,
+          {},
+          { useV2: false }
+        );
+      }
+
+      setNotificationMessage(
+        `${item.productName} (x${quantity}) added to cart!`
+      );
+      notifyCartChanged();
+
+      // Fetch updated cart and update state
+      const { data } = await axiosInstance.get(`/carts/${cartId}`, {
+        useV2: false,
+      });
+      if (Array.isArray(data.products)) {
+        const products: ProductModel[] = data.products.map(
+          (p: ProductAPIResponse) => ({
+            productId: p.productId,
+            imageId: p.imageId,
+            productName: p.productName,
+            productDescription: p.productDescription,
+            productSalePrice: p.productSalePrice,
+            averageRating: p.averageRating,
+            quantity: p.quantityInCart || 1,
+            productQuantity: p.productQuantity,
+          })
+        );
+        setCartItems(products);
+      }
+    } catch (err: unknown) {
+      const msg =
+        (axios.isAxiosError(err) &&
+          (err.response?.data as { message?: string } | undefined)?.message) ||
+        `Failed to add ${item.productName} to cart.`;
+      setNotificationMessage(msg);
+    }
+  };
+
+  // rôles (read-only pour staff/admin)
+  const isAdmin = IsAdmin();
+  const isStaff =
+    isAdmin || IsInventoryManager() || IsVet() || IsReceptionist();
+
   // derived totals
   const subtotal = cartItems.reduce(
     (acc, item) => acc + item.productSalePrice * (item.quantity || 1),
     0
   );
-  const tvq = subtotal * 0.09975; // Quebec tax rate
-  const tvc = subtotal * 0.05; // Canada tax rate
+  const tvq = subtotal * 0.09975;
+  const tvc = subtotal * 0.05;
   const total = subtotal - discount + tvq + tvc;
 
-  // recompute badge count whenever cart changes
   const updateCartItemCount = useCallback(() => {
     const count = cartItems.reduce(
       (acc, item) => acc + (item.quantity || 0),
@@ -89,7 +177,6 @@ const UserCart = (): JSX.Element => {
     setCartItemCount(count);
   }, [cartItems]);
 
-  // Fetch cart items when cartId or wishlistUpdated changes
   useEffect(() => {
     const fetchCartItems = async (): Promise<void> => {
       if (!cartId) {
@@ -100,14 +187,13 @@ const UserCart = (): JSX.Element => {
 
       try {
         const { data } = await axiosInstance.get(`/carts/${cartId}`, {
-          useV2: false,
+          useV2: true,
         });
 
         if (!Array.isArray(data.products)) {
           throw new Error('Invalid data format: products should be an array');
         }
 
-        // map API payload to ProductModel
         const products: ProductModel[] = data.products.map(
           (p: ProductAPIResponse) => ({
             productId: p.productId,
@@ -122,6 +208,7 @@ const UserCart = (): JSX.Element => {
         );
 
         setCartItems(products);
+
         const enrichedWishlist = await Promise.all(
           (data.wishListProducts || []).map(async (item: ProductModel) => {
             const fullProduct = await getProductByProductId(item.productId);
@@ -144,17 +231,32 @@ const UserCart = (): JSX.Element => {
     fetchCartItems();
   }, [cartId, wishlistUpdated]);
 
-  // Update cart item count whenever cartItems changes
   useEffect(() => {
     updateCartItemCount();
   }, [cartItems, updateCartItemCount]);
 
-  // validate voucher code
+  // Fetch recent purchases
+  useEffect(() => {
+    if (!cartId) return;
+    const fetchRecentPurchases = async (): Promise<void> => {
+      try {
+        const { data } = await axiosInstance.get(
+          `/carts/${cartId}/recent-purchases`,
+          { useV2: false }
+        );
+        setRecentPurchases(data || []);
+      } catch (err) {
+        setRecentPurchases([]);
+      }
+    };
+    fetchRecentPurchases();
+  }, [cartId]);
+
   const applyVoucherCode = async (): Promise<void> => {
     try {
       const { data } = await axiosInstance.get(
         `/promos/validate/${voucherCode}`,
-        { useV2: false }
+        { useV2: true }
       );
       setDiscount((subtotal * data.discount) / 100);
       setVoucherError(null);
@@ -164,12 +266,23 @@ const UserCart = (): JSX.Element => {
     }
   };
 
-  // change cart quantity w/ stock guard
+  const blockIfReadOnly = useCallback((): boolean => {
+    if (isStaff) {
+      setNotificationMessage(
+        'Read-only mode: staff/admin cannot modify carts.'
+      );
+      return true;
+    }
+    return false;
+  }, [isStaff, setNotificationMessage]);
+
   const changeItemQuantity = useCallback(
     async (
       event: React.ChangeEvent<HTMLInputElement>,
       index: number
     ): Promise<void> => {
+      if (blockIfReadOnly()) return;
+
       const newQuantity = Math.max(1, Number(event.target.value));
       const item = cartItems[index];
 
@@ -209,7 +322,7 @@ const UserCart = (): JSX.Element => {
             );
             setWishlistItems(prevItems => [...prevItems, item]);
             setNotificationMessage(data.message);
-            notifyCartChanged(); // left cart
+            notifyCartChanged();
             return;
           }
         } else {
@@ -219,7 +332,7 @@ const UserCart = (): JSX.Element => {
             return next;
           });
           setNotificationMessage('Item quantity updated successfully.');
-          notifyCartChanged(); // qty changed
+          notifyCartChanged();
         }
       } catch (err) {
         console.error('Error updating quantity:', err);
@@ -229,12 +342,14 @@ const UserCart = (): JSX.Element => {
         }));
       }
     },
-    [cartItems, cartId]
+    [cartItems, cartId, blockIfReadOnly]
   );
 
   const deleteItem = useCallback(
     async (productId: string, indexToDelete: number): Promise<void> => {
+      if (blockIfReadOnly()) return;
       if (!cartId) return;
+
       const ok = await confirm({
         title: 'Remove item',
         message: 'Remove this item from your cart?',
@@ -248,6 +363,7 @@ const UserCart = (): JSX.Element => {
         await axiosInstance.delete(`/carts/${cartId}/${productId}`, {
           useV2: false,
         });
+
         setCartItems(prev => prev.filter((_, idx) => idx !== indexToDelete));
         notifyCartChanged();
       } catch (error) {
@@ -255,11 +371,12 @@ const UserCart = (): JSX.Element => {
         setNotificationMessage('Failed to delete item.');
       }
     },
-    [cartId, confirm]
+    [cartId, confirm, blockIfReadOnly]
   );
 
-  // clear entire cart
   const clearCart = async (): Promise<void> => {
+    if (blockIfReadOnly()) return;
+
     if (!cartId) {
       setNotificationMessage('Invalid cart ID');
       return;
@@ -278,7 +395,6 @@ const UserCart = (): JSX.Element => {
       await axiosInstance.delete(`/carts/${cartId}/clear`, { useV2: false });
       setCartItems([]);
       setCartItemCount(0);
-      // notify navbar (cart cleared)
       notifyCartChanged();
     } catch (error) {
       console.error('Error clearing cart:', error);
@@ -286,8 +402,9 @@ const UserCart = (): JSX.Element => {
     }
   };
 
-  // move cart item to wishlist
   const addToWishlist = async (item: ProductModel): Promise<void> => {
+    if (blockIfReadOnly()) return;
+
     try {
       const productId = item.productId;
 
@@ -303,7 +420,6 @@ const UserCart = (): JSX.Element => {
       );
 
       if (data && data.message) {
-        // Display notification message from backend
         setNotificationMessage(data.message);
       } else {
         setNotificationMessage(
@@ -311,23 +427,18 @@ const UserCart = (): JSX.Element => {
         );
       }
 
-      // Update wishlist state
       setWishlistItems(prevItems => [...prevItems, item]);
-
-      // Trigger the useEffect by updating the wishlistUpdated state
       setWishlistUpdated(true);
-
-      //notify navbar (item moved out of cart)
       notifyCartChanged();
     } catch (error: unknown) {
-      // Changed from any to unknown
       console.error('Error adding to wishlist:', error);
       alert('Failed to add item to wishlist.');
     }
   };
 
-  // move wishlist item back to cart
   const addToCartFunction = async (item: ProductModel): Promise<void> => {
+    if (blockIfReadOnly()) return;
+
     if (item.productQuantity <= 0) {
       setNotificationMessage(
         `${item.productName} is out of stock and cannot be added to the cart.`
@@ -356,28 +467,20 @@ const UserCart = (): JSX.Element => {
         );
       }
 
-      // Update cart items state
       setCartItems(prevItems => [...prevItems, item]);
-
-      // Remove from wishlist
       setWishlistItems(prevItems =>
         prevItems.filter(product => product.productId !== item.productId)
       );
-
-      // Trigger the useEffect by updating the wishlistUpdated state
       setWishlistUpdated(true);
-
-      //notify navbar (item moved into cart)
       notifyCartChanged();
     } catch (error: unknown) {
-      // Changed from any to unknown
       console.error('Error adding to cart:', error);
       setNotificationMessage('Failed to add item to cart.');
     }
   };
 
-  // a function to remove from wishlist
   const removeFromWishlist = async (item: ProductModel): Promise<void> => {
+    if (blockIfReadOnly()) return;
     if (!cartId) return;
 
     const ok = await confirm({
@@ -405,8 +508,8 @@ const UserCart = (): JSX.Element => {
     }
   };
 
-  // move all wishlist to cart
   const moveAllWishlistToCart = async (): Promise<void> => {
+    if (blockIfReadOnly()) return;
     if (!cartId || wishlistItems.length === 0) return;
 
     const ok = await confirm({
@@ -424,7 +527,7 @@ const UserCart = (): JSX.Element => {
       const res = await axiosInstance.post(
         `/carts/${cartId}/wishlist/moveAll`,
         {},
-        { useV2: false, validateStatus: () => true }
+        { useV2: true, validateStatus: () => true }
       );
 
       if (res.status >= 200 && res.status < 300) {
@@ -446,7 +549,6 @@ const UserCart = (): JSX.Element => {
     }
   };
 
-  // persist invoices locally
   useEffect(() => {
     const saved = localStorage.getItem('invoices');
     if (saved) setInvoices(JSON.parse(saved));
@@ -455,24 +557,20 @@ const UserCart = (): JSX.Element => {
     localStorage.setItem('invoices', JSON.stringify(invoices));
   }, [invoices]);
 
-  // role guard
-  const isAdmin = IsAdmin();
-
   const handleCheckoutConfirmation = (): void => {
-    if (isAdmin) {
+    if (isStaff) {
       navigate(AppRoutePaths.Unauthorized, {
-        state: { message: 'Admins are not allowed to perform checkout.' },
+        state: { message: 'Staff/Admin cannot perform checkout.' },
       });
       return;
     }
-    // show billing form first
     setShowBillingForm(true);
-    // confirm comes after form submit
     setIsCheckoutModalOpen(false);
   };
 
-  // POST checkout
   const handleCheckout = async (): Promise<void> => {
+    if (isStaff) return;
+
     if (!cartId) {
       setCheckoutMessage('Invalid cart ID');
       return;
@@ -486,22 +584,29 @@ const UserCart = (): JSX.Element => {
       );
 
       const invoiceItems: Invoice[] = cartItems.map(item => ({
-        productId: Number(item.productId), // Ensure productId is a number
+        productId: Number(item.productId),
         productName: item.productName,
         productSalePrice: item.productSalePrice,
         quantity: item.quantity || 1,
       }));
 
-      // Set the invoices state
       setInvoices(invoiceItems);
-
       setCheckoutMessage('Checkout successful! Your order is being processed.');
-      setCartItems([]); // Clear the cart after successful checkout
+      setCartItems([]);
       setCartItemCount(0);
       setIsCheckoutModalOpen(false);
-
-      // notify navbar (cart emptied)
       notifyCartChanged();
+
+      // Fetch recent purchases after checkout
+      try {
+        const { data } = await axiosInstance.get(
+          `/carts/${cartId}/recent-purchases`,
+          { useV2: false }
+        );
+        setRecentPurchases(data || []);
+      } catch (err) {
+        // Optionally handle error, but don't block checkout
+      }
     } catch (error: unknown) {
       if (error && typeof error === 'object' && 'response' in error) {
         const errorData = (
@@ -516,20 +621,29 @@ const UserCart = (): JSX.Element => {
     }
   };
 
-  // early returns
   if (loading) return <div className="loading">Loading cart items...</div>;
   if (error) return <div className="error">{error}</div>;
+
+  // Helper to filter out duplicate recent purchases by productId
+  const uniqueRecentPurchases = recentPurchases.reduce<{
+    [id: string]: (typeof recentPurchases)[0];
+  }>((acc, item) => {
+    if (!acc[item.productId]) {
+      acc[item.productId] = item;
+    } else {
+      // Optionally, sum quantities if duplicate found
+      acc[item.productId].quantity += item.quantity;
+    }
+    return acc;
+  }, {});
+  const recentPurchasesList = Object.values(uniqueRecentPurchases);
 
   return (
     <div>
       <NavBar />
-
       <ConfirmModal />
-
       <h2 className="cart-header-title">Your Cart</h2>
-
       <div className="UserCart-container">
-        {/* Notification banner */}
         {notificationMessage && (
           <div className="notification-message">
             {notificationMessage}
@@ -543,9 +657,7 @@ const UserCart = (): JSX.Element => {
           </div>
         )}
 
-        {/* Main layout: cart (left) + summary/checkout (right) */}
         <div className="UserCart-checkout-flex">
-          {/* Cart Column */}
           <div className="UserCart">
             <div className="cart-header">
               <div className="cart-badge-container">
@@ -561,7 +673,6 @@ const UserCart = (): JSX.Element => {
               </div>
             </div>
 
-            {/* Items */}
             <div className="cart-items-container">
               {cartItems.length > 0 ? (
                 cartItems.map((item, index) => (
@@ -583,7 +694,6 @@ const UserCart = (): JSX.Element => {
               )}
             </div>
 
-            {/* Actions */}
             <div className="UserCart-buttons">
               <button
                 className="continue-shopping-btn"
@@ -591,16 +701,23 @@ const UserCart = (): JSX.Element => {
               >
                 Continue Shopping
               </button>
-              <button className="clear-cart-btn" onClick={clearCart}>
+              <button
+                className="clear-cart-btn"
+                onClick={clearCart}
+                disabled={isStaff}
+                title={
+                  isStaff
+                    ? 'Read-only: staff/admin cannot clear carts'
+                    : undefined
+                }
+              >
                 Clear Cart
               </button>
             </div>
           </div>
 
-          {/* Checkout Column (hidden for admins) */}
-          {!isAdmin && (
+          {!isStaff && (
             <div className="Checkout-section">
-              {/* Voucher */}
               <div className="voucher-code-section">
                 <input
                   type="text"
@@ -623,7 +740,6 @@ const UserCart = (): JSX.Element => {
                 )}
               </div>
 
-              {/* Summary */}
               <div className="CartSummary">
                 <h3>Cart Summary</h3>
                 <p className="summary-item">Subtotal: ${subtotal.toFixed(2)}</p>
@@ -635,7 +751,6 @@ const UserCart = (): JSX.Element => {
                 </p>
               </div>
 
-              {/* Checkout CTA */}
               <button
                 className="checkout-btn"
                 onClick={handleCheckoutConfirmation}
@@ -644,12 +759,10 @@ const UserCart = (): JSX.Element => {
                 Checkout
               </button>
 
-              {/* Post-checkout message */}
               {checkoutMessage && (
                 <div className="checkout-message">{checkoutMessage}</div>
               )}
 
-              {/* Invoice */}
               {invoices.length > 0 && (
                 <div className="invoices-section">
                   <h2>Invoice</h2>
@@ -716,6 +829,110 @@ const UserCart = (): JSX.Element => {
           )}
         </div>
 
+        {/* Recent Purchases Section - above Wishlist */}
+        <div
+          className="recent-purchases-section"
+          style={{ marginBottom: '2rem' }}
+        >
+          <h2>Recent Purchases</h2>
+          <div
+            className="recent-purchases-list"
+            style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}
+          >
+            {recentPurchasesList.length > 0 ? (
+              recentPurchasesList.map(item => (
+                <div
+                  key={item.productId}
+                  className="recent-purchase-card"
+                  style={{
+                    border: '1px solid #eee',
+                    borderRadius: 8,
+                    padding: 16,
+                    minWidth: 180,
+                    maxWidth: 200,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                  }}
+                >
+                  <div
+                    style={{
+                      width: 48,
+                      height: 48,
+                      marginBottom: 8,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      overflow: 'hidden',
+                    }}
+                  >
+                    <div className="recent-purchase-image">
+                      <ImageContainer imageId={item.imageId} />
+                    </div>
+                  </div>
+                  <div style={{ fontWeight: 'bold', marginBottom: 4 }}>
+                    {item.productName}
+                  </div>
+                  <div style={{ marginBottom: 8 }}>
+                    ${item.productSalePrice.toFixed(2)}
+                  </div>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      marginBottom: 8,
+                    }}
+                  >
+                    <label
+                      htmlFor={`recent-qty-${item.productId}`}
+                      style={{ marginRight: 8 }}
+                    >
+                      Qty:
+                    </label>
+                    <input
+                      id={`recent-qty-${item.productId}`}
+                      type="number"
+                      min={1}
+                      value={recentPurchaseQuantities[item.productId] || 1}
+                      onChange={e =>
+                        handleRecentPurchaseQuantityChange(
+                          item.productId,
+                          Number(e.target.value)
+                        )
+                      }
+                      style={{ width: 48 }}
+                    />
+                  </div>
+                  <button
+                    className="purchase-again-btn"
+                    style={{
+                      background: '#1976d2',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: 4,
+                      padding: '6px 12px',
+                      cursor: 'pointer',
+                      fontWeight: 'bold',
+                    }}
+                    onClick={() => handlePurchaseAgain(item)}
+                  >
+                    Purchase Again
+                  </button>
+                  <div style={{ marginTop: 8, fontSize: 12, color: '#555' }}>
+                    Total: $
+                    {(
+                      item.productSalePrice *
+                      (recentPurchaseQuantities[item.productId] || 1)
+                    ).toFixed(2)}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p>No recent purchases found.</p>
+            )}
+          </div>
+        </div>
+
         {/* Wishlist */}
         <div className="wishlist-section">
           {/* Header with Move All button */}
@@ -732,9 +949,14 @@ const UserCart = (): JSX.Element => {
               <button
                 className="move-all-to-cart-btn"
                 onClick={moveAllWishlistToCart}
-                disabled={movingAll}
+                disabled={isStaff || movingAll}
                 aria-busy={movingAll}
-                title="Move all wishlist items to cart"
+                aria-disabled={isStaff || movingAll}
+                title={
+                  isStaff
+                    ? 'Read-only: staff/admin cannot move wishlist items'
+                    : 'Move all wishlist items to cart'
+                }
               >
                 {movingAll ? 'Moving…' : 'Move All to Cart'}
               </button>
@@ -782,7 +1004,6 @@ const UserCart = (): JSX.Element => {
           </div>
         )}
 
-        {/* Confirm (step 2) */}
         {isCheckoutModalOpen && (
           <div className="checkout-modal">
             <h3>Confirm Checkout</h3>

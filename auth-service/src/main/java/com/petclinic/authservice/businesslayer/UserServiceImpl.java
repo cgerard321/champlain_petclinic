@@ -106,14 +106,14 @@ public class UserServiceImpl implements UserService {
             log.info("Sending email to {}...", userIDLessDTO.getEmail());
 
             //Commented out the New emailing service and replaced it with the old emailing service as I implemented the new one but was told by Christine to revert back to the old one
-            log.info(mailService.sendMail(generateVerificationMail(user)));  //Old
+            mailService.sendMail(generateVerificationMail(user));  //Old
             //generateVerificationMailWithNewEmailingService(user);          //New
 
             log.info("Email sent to {}", userIDLessDTO.getEmail());
 
             //////////////////////////////////////// BROKEN CODE -> Cart decided to add a code the create a cart and DIDN'T TEST IT! Turns out it breaks everything when trying to sign up :)
             //////////////////////////////////////// So I commented it out and notified the one who initially wrote this piece of code, the error should be fixed in a future pull request
-            //User savedUser = userRepo.save(user);
+//            User savedUser = userRepo.save(user);
             //CartResponse cartResponse = cartService.createCart(new CartRequest(savedUser.getUserIdentifier().getUserId()));
             ////////////////////////////////////////
 

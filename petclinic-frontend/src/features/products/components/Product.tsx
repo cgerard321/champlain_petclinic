@@ -11,8 +11,11 @@ import {
   IsInventoryManager,
   IsVet,
   IsReceptionist,
+  useUser,
 } from '@/context/UserContext';
 import { useAddToWishlist } from '@/features/carts/api/addToWishlistFromProducts';
+
+import type { Role } from '@/shared/models/Role';
 
 export default function Product({
   product,
@@ -22,6 +25,22 @@ export default function Product({
   const isInventoryManager = IsInventoryManager();
   const isVet = IsVet();
   const isReceptionist = IsReceptionist();
+
+  const { user } = useUser();
+
+  // ---- Rôles utilisateur (simple et lisible) ----
+  const roleNames = new Set<string>();
+  const rolesSet = user?.roles as Set<Role> | undefined;
+
+  if (rolesSet) {
+    for (const role of rolesSet) {
+      roleNames.add(role.name);
+    }
+  }
+
+  const isAdmin = roleNames.has('ADMIN');
+  const isStaff = isAdmin || isInventoryManager || isVet || isReceptionist;
+
   const [currentProduct, setCurrentProduct] = useState<ProductModel>(product);
   const [selectedProduct, setSelectedProduct] = useState<ProductModel | null>(
     null
@@ -61,8 +80,6 @@ export default function Product({
     return 'Unknown Delivery Type';
   };
 
-  //return toolong
-
   useEffect(() => {
     if (product.productDescription.length > 100) {
       setTooLong(true);
@@ -70,15 +87,6 @@ export default function Product({
       setTooLong(false);
     }
   }, [product.productDescription]);
-
-  // const handleProductClick = async (productId: string): Promise<void> => {
-  //   try {
-  //     const product = await getProductByProductId(productId);
-  //     setSelectedProduct(product);
-  //   } catch (error) {
-  //     console.error('Failed to fetch product details:', error);
-  //   }
-  // };
 
   const handleProductClickForProductQuantity = async (
     productId: string
@@ -120,8 +128,6 @@ export default function Product({
     const isSuccess = await addToCart(currentProduct.productId);
     if (isSuccess) {
       setSuccessMessageCart('Product added to cart successfully!');
-
-      // Clear the message after 3 seconds
       setTimeout(() => setSuccessMessageCart(null), 3000);
     }
   };
@@ -130,8 +136,6 @@ export default function Product({
     const isSuccess = await addToWishlist(currentProduct.productId, 1);
     if (isSuccess) {
       setSuccessMessageWishlist('Product added to wishlist successfully!');
-
-      // Clear the message after 3 seconds
       setTimeout(() => setSuccessMessageWishlist(null), 3000);
     }
   };
@@ -174,6 +178,9 @@ export default function Product({
     );
   }
 
+  const cartDisabled = isStaff || currentProduct.productQuantity === 0;
+  const wishlistDisabled = isStaff;
+
   return (
     <div
       className={`card ${
@@ -196,43 +203,47 @@ export default function Product({
       <h2 onClick={handleProductTitleClick} className="product-title">
         {currentProduct.productName}
       </h2>
-      {/*<p>
-        {!tooLong
-          ? currentProduct.productDescription
-          : `${currentProduct.productDescription.substring(0, 100)}...`}
-      </p>*/}
+
       <p>Price: ${currentProduct.productSalePrice.toFixed(2)}</p>
 
       <div className="deliveryType-container">
         <p>{getDeliveryTypeLabel(currentProduct.deliveryType)}</p>
       </div>
 
-      {!isInventoryManager && !isVet && !isReceptionist && (
-        <button
-          onClick={handleAddToCart}
-          disabled={currentProduct.productQuantity === 0}
-        >
-          {currentProduct.productQuantity === 0
-            ? 'Out of Stock'
-            : 'Add to Cart'}
-        </button>
-      )}
+      <button
+        onClick={cartDisabled ? undefined : handleAddToCart}
+        disabled={cartDisabled}
+        className={`add-to-cart-btn ${cartDisabled ? 'disabled' : ''}`}
+        title={
+          isStaff
+            ? 'Shopping is disabled for staff/admin accounts.'
+            : currentProduct.productQuantity === 0
+              ? 'Out of stock'
+              : 'Add to cart'
+        }
+      >
+        {currentProduct.productQuantity === 0 ? 'Out of Stock' : 'Add to Cart'}
+      </button>
       {successMessageCart && (
         <p className="success-message">{successMessageCart}</p>
       )}
 
-      {!isInventoryManager && !isVet && !isReceptionist && (
-        <button onClick={handleAddToWishlist}>Add to Wishlist</button>
-      )}
+      <button
+        onClick={wishlistDisabled ? undefined : handleAddToWishlist}
+        disabled={wishlistDisabled}
+        className={`add-to-wishlist-btn ${wishlistDisabled ? 'disabled' : ''}`}
+        title={
+          isStaff
+            ? 'Shopping is disabled for staff/admin accounts.'
+            : 'Add to wishlist'
+        }
+      >
+        Add to Wishlist
+      </button>
 
       {successMessageWishlist && (
         <p className="success-message">{successMessageWishlist}</p>
       )}
-
-      {/*<StarRating
-        currentRating={currentProduct.averageRating}
-        viewOnly={true}
-      />*/}
 
       {currentProduct.productStatus === 'PRE_ORDER' && (
         <div

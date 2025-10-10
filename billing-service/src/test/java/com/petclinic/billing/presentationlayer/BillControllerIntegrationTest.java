@@ -113,7 +113,6 @@ class BillControllerIntegrationTest {
 
     @Test
     void getAllUnpaidBills() {
-        // Send a GET request to /bills/unpaid and expect a JSON response
         Bill billEntity = buildUnpaidBill();
 
         Publisher<Bill> setup = repo.deleteAll().thenMany(repo.save(billEntity));
@@ -138,7 +137,7 @@ class BillControllerIntegrationTest {
 
     @Test
     void getAllOverdueBills() {
-        // Send a GET request to /bills/overdue and expect a JSON response
+
         Bill billEntity = buildOverdueBill();
 
         Publisher<Bill> setup = repo.deleteAll().thenMany(repo.save(billEntity));
@@ -173,7 +172,7 @@ class BillControllerIntegrationTest {
                 .expectNextCount(1)
                 .verifyComplete();
 
-        client.post()                                                            // Create the object
+        client.post()
                 .uri("/bills")
                 .body(just(billEntity), Bill.class)
                 .exchange()
@@ -181,7 +180,7 @@ class BillControllerIntegrationTest {
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody();
 
-        client.get()                                                            // Check if the item was created properly
+        client.get()
                 .uri("/bills/" + billEntity.getBillId())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -242,7 +241,6 @@ class BillControllerIntegrationTest {
                 .jsonPath("$.visitType").isEqualTo(billEntity2.getVisitType())
                 .jsonPath("$.customerId").isEqualTo(billEntity2.getCustomerId())
                 .jsonPath("$.amount").isEqualTo(billEntity2.getAmount());
-
     }
 
     @Test
@@ -314,8 +312,6 @@ class BillControllerIntegrationTest {
                 .exchange()
                 .expectStatus().isNoContent()
                 .expectBody();
-
-
     }
 
     @Test
@@ -334,7 +330,6 @@ class BillControllerIntegrationTest {
                 .exchange()
                 .expectStatus().isNoContent()
                 .expectBody();
-
     }
 
     @Test
@@ -356,8 +351,6 @@ class BillControllerIntegrationTest {
                 .exchange()
                 .expectStatus().isNoContent()
                 .expectBody();
-
-
     }
 
     @Test
@@ -374,7 +367,7 @@ class BillControllerIntegrationTest {
                 .uri("/bills/customer/" + billEntity.getCustomerId())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isNoContent()//.isEqualTo(HttpStatus.METHOD_NOT_ALLOWED)
+                .expectStatus().isNoContent()
                 .expectBody();
     }
 
@@ -387,7 +380,6 @@ class BillControllerIntegrationTest {
                 .toLocalDate();
 
         LocalDate dueDate = LocalDate.of(2022,Month.OCTOBER,15);
-
 
         return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(new BigDecimal(13.37)).billStatus(BillStatus.PAID).dueDate(dueDate).build();
     }
@@ -402,7 +394,6 @@ class BillControllerIntegrationTest {
 
         LocalDate dueDate = LocalDate.of(2022, Month.OCTOBER, 5);
 
-
         return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(new BigDecimal(13.37)).billStatus(BillStatus.UNPAID).dueDate(dueDate).build();
     }
 
@@ -416,9 +407,9 @@ class BillControllerIntegrationTest {
 
         LocalDate dueDate = LocalDate.of(2022, Month.AUGUST, 15);
 
-
         return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(new BigDecimal(13.37)).billStatus(BillStatus.OVERDUE).dueDate(dueDate).build();
     }
+
     @Test
     void whenValidPageAndSizeProvided_thenReturnsCorrectBillsPage() {
         repo.deleteAll().block();
@@ -476,6 +467,7 @@ class BillControllerIntegrationTest {
                 .expectBodyList(BillResponseDTO.class)
                 .hasSize(0);
     }
+
     @Test
     void getBillWithTimeRemaining() {
 
@@ -679,6 +671,7 @@ class BillControllerIntegrationTest {
                 .amount(new BigDecimal(100.0))
                 .billStatus(BillStatus.OVERDUE)
                 .dueDate(dueDate)
+                .archive(false)
                 .build();
     }
 
@@ -697,6 +690,7 @@ class BillControllerIntegrationTest {
                 .amount(new BigDecimal(100.0))
                 .billStatus(BillStatus.UNPAID)
                 .dueDate(dueDate)
+                .archive(false)
                 .build();
     }
 
@@ -721,6 +715,7 @@ class BillControllerIntegrationTest {
                 .ownerLastName("Doe")
                 .vetFirstName("Jane")
                 .vetLastName("Smith")
+                .archive(false)
                 .build();
     }
         @Test
