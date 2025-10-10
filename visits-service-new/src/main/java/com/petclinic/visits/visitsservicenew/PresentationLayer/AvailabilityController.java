@@ -43,10 +43,8 @@ public class AvailabilityController {
     @GetMapping(value = "/vets/{vetId}/dates", produces = MediaType.APPLICATION_JSON_VALUE)
     public Flux<LocalDate> getAvailableDates(
             @PathVariable String vetId,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) String startDate,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) String endDate) {
-        LocalDate start = LocalDate.parse(startDate);
-        LocalDate end = LocalDate.parse(endDate);
-        return availabilityService.getAvailableDatesForVet(vetId, start, end);
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+        return availabilityService.getAvailableDatesForVet(vetId, startDate, endDate);
     }
 }

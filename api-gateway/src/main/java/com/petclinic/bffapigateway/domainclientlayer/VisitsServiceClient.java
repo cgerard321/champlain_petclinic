@@ -118,9 +118,7 @@ public class VisitsServiceClient {
     public Mono<VisitResponseDTO> addVisit(Mono<VisitRequestDTO> visitRequestDTO) {
         return visitRequestDTO.flatMap(visitRequestDTO1 -> {
             if (visitRequestDTO1.getVisitDate() != null) {
-                LocalDateTime originalDate = visitRequestDTO1.getVisitDate();
-                LocalDateTime adjustedDate = originalDate.minusHours(4);
-                visitRequestDTO1.setVisitDate(adjustedDate);
+                visitRequestDTO1.setVisitDate(visitRequestDTO1.getVisitDate());
             } else {
                 throw new BadRequestException("Visit date is required");
             }
@@ -488,10 +486,6 @@ public class VisitsServiceClient {
                 .get()
                 .uri("/api/v1/availability/vets")
                 .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError, error ->
-                        Mono.error(new IllegalArgumentException("Error fetching vets for availability")))
-                .onStatus(HttpStatusCode::is5xxServerError, error ->
-                        Mono.error(new IllegalArgumentException("Server error fetching vets")))
                 .bodyToFlux(VetResponseDTO.class);
     }
 
@@ -500,13 +494,8 @@ public class VisitsServiceClient {
                 .get()
                 .uri("/api/v1/availability/vets/{vetId}/slots?date={date}", vetId, date)
                 .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError, error ->
-                        Mono.error(new NotFoundException("Vet not found: " + vetId)))
-                .onStatus(HttpStatusCode::is5xxServerError, error ->
-                        Mono.error(new IllegalArgumentException("Server error")))
                 .bodyToFlux(TimeSlotDTO.class);
     }
-
 
     public Flux<String> getAvailableDates(String vetId, String startDate, String endDate) {
         return availabilityWebClient
@@ -514,10 +503,6 @@ public class VisitsServiceClient {
                 .uri("/api/v1/availability/vets/{vetId}/dates?startDate={startDate}&endDate={endDate}",
                         vetId, startDate, endDate)
                 .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError, error ->
-                        Mono.error(new NotFoundException("Vet not found: " + vetId)))
-                .onStatus(HttpStatusCode::is5xxServerError, error ->
-                        Mono.error(new IllegalArgumentException("Server error")))
                 .bodyToFlux(String.class);
     }
 
@@ -526,15 +511,8 @@ public class VisitsServiceClient {
                 .get()
                 .uri("/api/v1/availability/vets/{vetId}", vetId)
                 .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError, error ->
-                        Mono.error(new NotFoundException("Vet not found: " + vetId)))
-                .onStatus(HttpStatusCode::is5xxServerError, error ->
-                        Mono.error(new IllegalArgumentException("Server error fetching vet availability")))
                 .bodyToMono(VetResponseDTO.class);
     }
-
-
-
 
 }
 

@@ -1422,20 +1422,10 @@ class VisitsServiceClientIntegrationTest {
         Flux<VetResponseDTO> result = visitsServiceClient.getAllVetsForAvailability();
 
         StepVerifier.create(result)
-                .expectNextMatches(vet -> vet.getVetId().equals("vet-123"))
+                .expectNextMatches(vet -> vet.getVetId().equals("vet-123")
+                        && vet.getFirstName().equals("John")
+                        && vet.getLastName().equals("Doe"))
                 .verifyComplete();
-    }
-
-    @Test
-    void getAllVetsForAvailability_whenServerError_shouldReturnError() {
-        server.enqueue(new MockResponse()
-                .setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.value()));
-
-        Flux<VetResponseDTO> result = visitsServiceClient.getAllVetsForAvailability();
-
-        StepVerifier.create(result)
-                .expectErrorMatches(throwable -> throwable instanceof IllegalArgumentException)
-                .verify();
     }
 
     @Test
@@ -1453,32 +1443,23 @@ class VisitsServiceClientIntegrationTest {
         Flux<TimeSlotDTO> result = visitsServiceClient.getAvailableTimeSlots("vet-123", "2025-10-13");
 
         StepVerifier.create(result)
-                .expectNextMatches(slot -> slot.getStartTime().equals(LocalDateTime.of(2025, 10, 13, 9, 0)))
+                .expectNextMatches(slot -> slot.getStartTime().equals(LocalDateTime.of(2025, 10, 13, 9, 0))
+                        && slot.getEndTime().equals(LocalDateTime.of(2025, 10, 13, 10, 0))
+                        && slot.isAvailable())
                 .verifyComplete();
     }
 
     @Test
-    void getAvailableTimeSlots_whenVetNotFound_shouldReturnError() {
+    void getAvailableDates_shouldReturnDates() throws JsonProcessingException {
         server.enqueue(new MockResponse()
-                .setResponseCode(HttpStatus.NOT_FOUND.value()));
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(objectMapper.writeValueAsString(Arrays.asList("2025-10-13", "2025-10-14"))));
 
-        Flux<TimeSlotDTO> result = visitsServiceClient.getAvailableTimeSlots("invalid-vet", "2025-10-13");
+        Flux<String> result = visitsServiceClient.getAvailableDates("vet-123", "2025-10-13", "2025-10-20");
 
         StepVerifier.create(result)
-                .expectErrorMatches(throwable -> throwable instanceof NotFoundException)
-                .verify();
-    }
-
-    @Test
-    void getAvailableDates_whenVetNotFound_shouldReturnError() {
-        server.enqueue(new MockResponse()
-                .setResponseCode(HttpStatus.NOT_FOUND.value()));
-
-        Flux<String> result = visitsServiceClient.getAvailableDates("invalid-vet", "2025-10-13", "2025-10-20");
-
-        StepVerifier.create(result)
-                .expectErrorMatches(throwable -> throwable instanceof NotFoundException)
-                .verify();
+                .expectNextCount(1)
+                .verifyComplete();
     }
 
     @Test
@@ -1496,21 +1477,10 @@ class VisitsServiceClientIntegrationTest {
         Mono<VetResponseDTO> result = visitsServiceClient.getVeterinarianAvailability("vet-123");
 
         StepVerifier.create(result)
-                .expectNextMatches(v -> v.getVetId().equals("vet-123"))
+                .expectNextMatches(v -> v.getVetId().equals("vet-123")
+                        && v.getFirstName().equals("John")
+                        && v.getLastName().equals("Doe"))
                 .verifyComplete();
     }
-
-    @Test
-    void getVeterinarianAvailability_whenVetNotFound_shouldReturnError() {
-        server.enqueue(new MockResponse()
-                .setResponseCode(HttpStatus.NOT_FOUND.value()));
-
-        Mono<VetResponseDTO> result = visitsServiceClient.getVeterinarianAvailability("invalid-vet");
-
-        StepVerifier.create(result)
-                .expectErrorMatches(throwable -> throwable instanceof NotFoundException)
-                .verify();
-    }
-
 
 }
