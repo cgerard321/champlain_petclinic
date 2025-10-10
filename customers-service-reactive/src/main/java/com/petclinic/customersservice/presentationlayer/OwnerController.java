@@ -3,16 +3,11 @@ package com.petclinic.customersservice.presentationlayer;
 import com.petclinic.customersservice.business.OwnerService;
 import com.petclinic.customersservice.customersExceptions.exceptions.InvalidInputException;
 import com.petclinic.customersservice.data.Owner;
-import com.petclinic.customersservice.domainclientlayer.FileResponseDTO;
-import com.petclinic.customersservice.domainclientlayer.FilesServiceClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import java.util.Optional;
 
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -27,8 +22,6 @@ import reactor.core.publisher.Mono;
 public class OwnerController {
 
     private final OwnerService ownerService;
-
-    private final FilesServiceClient filesServiceClient;
 
     @GetMapping()
     public Flux<OwnerResponseDTO> getAllOwners() {
@@ -96,13 +89,6 @@ public class OwnerController {
 
         return ownerService.updateOwner(ownerRequestDTO, ownerId)
                 .map(updatedOwner -> ResponseEntity.ok().body(updatedOwner))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
-    }
-
-    @GetMapping("/{fileId}/photo")
-    public Mono<ResponseEntity<FileResponseDTO>> getFileByOwnerId(@PathVariable String fileId) {
-        return filesServiceClient.getFile(fileId)
-                .map(file -> ResponseEntity.ok().body(file))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 }
