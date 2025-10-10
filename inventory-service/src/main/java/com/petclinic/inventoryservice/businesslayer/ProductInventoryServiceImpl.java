@@ -25,6 +25,7 @@ import reactor.core.scheduler.Schedulers;
 import org.springframework.data.domain.Pageable;
 
 import java.io.ByteArrayOutputStream;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -104,6 +105,7 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                                             existingProduct.setProductPrice(requestDTO.getProductPrice());
                                             existingProduct.setProductQuantity(requestDTO.getProductQuantity());
                                             existingProduct.setProductSalePrice(requestDTO.getProductSalePrice());
+                                            existingProduct.setLastUpdatedAt(LocalDateTime.now());
 
                                             // Set Status based on the product quantity
 //                                            if (existingProduct.getProductQuantity() == 0) {
@@ -279,8 +281,14 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
     public Mono<InventoryResponseDTO> getInventoryById(String inventoryId) {
         return inventoryRepository.findInventoryByInventoryId(inventoryId)
                 .switchIfEmpty(Mono.error(new NotFoundException("No inventory with this id was found" + inventoryId)))
-                .map(EntityDTOUtil::toInventoryResponseDTO);
-
+                .flatMap(inventory ->
+                        getRecentUpdateMessage(inventoryId)
+                                .map(message -> {
+                                    InventoryResponseDTO dto = EntityDTOUtil.toInventoryResponseDTO(inventory);
+                                    dto.setRecentUpdateMessage(message);
+                                    return dto;
+                                })
+                );
     }
 
     @Override
@@ -414,7 +422,14 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                 })
                 .skip(page.getPageNumber() * page.getPageSize())
                 .take(page.getPageSize())
-                .map(EntityDTOUtil::toInventoryResponseDTO);
+                .flatMap(inventory ->
+                        getRecentUpdateMessage(inventory.getInventoryId())
+                                .map(message -> {
+                                    InventoryResponseDTO dto = EntityDTOUtil.toInventoryResponseDTO(inventory);
+                                    dto.setRecentUpdateMessage(message);
+                                    return dto;
+                                })
+                );
     }
 
 
@@ -537,6 +552,7 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                                 Product product = EntityDTOUtil.toProductEntity(requestDTO);
                                 product.setInventoryId(inventoryId);
                                 product.setProductId(EntityDTOUtil.generateUUID());
+                                product.setLastUpdatedAt(LocalDateTime.now());
                                 return productRepository.save(product)
                                         .map(EntityDTOUtil::toProductResponseDTO);
                             }
@@ -553,6 +569,7 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                         return Mono.error(new InvalidInputException("Not enough stock to consume."));
                     } else {
                         product.setProductQuantity(product.getProductQuantity() - 1);
+                        product.setLastUpdatedAt(LocalDateTime.now());
                         return productRepository.save(product)
                                 .map(EntityDTOUtil::toProductResponseDTO);
                     }
@@ -652,9 +669,24 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                     }
 
                     product.setProductQuantity(product.getProductQuantity() + productQuantity);
+                    product.setLastUpdatedAt(LocalDateTime.now());
 
                     return productRepository.save(product)
                             .map(EntityDTOUtil::toProductResponseDTO);
+                });
+    }
+
+    @Override
+    public Mono<String> getRecentUpdateMessage(String inventoryId) {
+        LocalDateTime fifteenMinutesAgo = LocalDateTime.now().minusMinutes(15);
+
+        return productRepository.countByInventoryIdAndLastUpdatedAtAfter(inventoryId, fifteenMinutesAgo)
+                .map(count -> {
+                    if (count == 0) {
+                        return "No recent updates.";
+                    } else {
+                        return count + " supplies updated in the last 15 min.";
+                    }
                 });
     }
 
