@@ -5,12 +5,9 @@ import com.petclinic.customersservice.customersExceptions.exceptions.InvalidInpu
 import com.petclinic.customersservice.data.Owner;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import java.util.Optional;
 
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +22,7 @@ import reactor.core.publisher.Mono;
 public class OwnerController {
 
     private final OwnerService ownerService;
+
     @GetMapping()
     public Flux<OwnerResponseDTO> getAllOwners() {
         return ownerService.getAllOwners();
@@ -93,7 +91,4 @@ public class OwnerController {
                 .map(updatedOwner -> ResponseEntity.ok().body(updatedOwner))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
-
-
-
 }
