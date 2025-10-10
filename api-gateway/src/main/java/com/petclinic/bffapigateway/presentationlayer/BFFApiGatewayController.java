@@ -258,8 +258,6 @@ public class BFFApiGatewayController {
                 .onErrorResume(e -> Mono.just(ResponseEntity.badRequest().build()));
     }
 
-
-
 // Owner method, the endpoint must be changed, but requires bigger changes in owner methods
     //This will still work for this sprint, as the endpoint was fixed in the previous Sprint
     //Yet someone pushed without updating and caused the endpoints to revert back to what they used to be.
@@ -270,7 +268,6 @@ public class BFFApiGatewayController {
         return customersServiceClient.patchPet(pet, petId).map(s -> ResponseEntity.status(HttpStatus.OK).body(s))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
-
 
 //        /* Visits Methods */
 //
