@@ -3,6 +3,8 @@ package com.petclinic.customersservice.presentationlayer;
 import com.petclinic.customersservice.business.OwnerService;
 import com.petclinic.customersservice.customersExceptions.exceptions.InvalidInputException;
 import com.petclinic.customersservice.data.Owner;
+import com.petclinic.customersservice.domainclientlayer.FileResponseDTO;
+import com.petclinic.customersservice.domainclientlayer.FilesServiceClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +27,9 @@ import reactor.core.publisher.Mono;
 public class OwnerController {
 
     private final OwnerService ownerService;
+
+    private final FilesServiceClient filesServiceClient;
+
     @GetMapping()
     public Flux<OwnerResponseDTO> getAllOwners() {
         return ownerService.getAllOwners();
@@ -94,6 +99,10 @@ public class OwnerController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-
-
+    @GetMapping("/{fileId}/photo")
+    public Mono<ResponseEntity<FileResponseDTO>> getFileByOwnerId(@PathVariable String fileId) {
+        return filesServiceClient.getFile(fileId)
+                .map(file -> ResponseEntity.ok().body(file))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
 }

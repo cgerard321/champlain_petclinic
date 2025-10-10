@@ -1,5 +1,6 @@
 package com.petclinic.customersservice.customersExceptions.http;
 
+import com.petclinic.customersservice.customersExceptions.exceptions.BadRequestException;
 import com.petclinic.customersservice.customersExceptions.exceptions.InvalidInputException;
 import com.petclinic.customersservice.customersExceptions.exceptions.NotFoundException;
 import org.slf4j.Logger;
@@ -27,6 +28,12 @@ public class GlobalControllerExceptionHandler {
     @ExceptionHandler(InvalidInputException.class)
     public HttpErrorInfo handleInvalidInputException(ServerHttpRequest request, Exception ex){
         return createHttpErrorInfo(UNPROCESSABLE_ENTITY, request, ex);
+    }
+
+    @ResponseStatus(BAD_REQUEST)
+    @ExceptionHandler(BadRequestException.class)
+    public HttpErrorInfo handleBadRequestException(ServerHttpRequest request, Exception ex){
+        return createHttpErrorInfo(BAD_REQUEST, request, ex);
     }
 
     @ResponseStatus(INTERNAL_SERVER_ERROR)
