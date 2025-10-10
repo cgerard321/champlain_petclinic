@@ -58,15 +58,12 @@ public class JwtTokenFilter implements WebFilter {
         AUTH_WHITELIST.put("/configuration/ui", "/configuration/ui");
         AUTH_WHITELIST.put("/configuration/security", "/configuration/security");
         AUTH_WHITELIST.put("/swagger-ui.html", "/swagger-ui.html");
-        AUTH_WHITELIST.put("/webjars/**", "/webjars/**");
+        // WebJars whitelist removed - Angular frontend now handles webjars via proxy
         AUTH_WHITELIST.put("/api-docs", "/api-docs");
         AUTH_WHITELIST.put("/api-docs/**", "/api-docs/**");
 
         AUTH_WHITELIST.put("/swagger-ui/**", "/swagger-ui/**");
-        AUTH_WHITELIST.put("/scripts/**", "/scripts/**");
-        AUTH_WHITELIST.put("/css/**", "/css/**");
-        AUTH_WHITELIST.put("/images/**", "/images/**");
-        AUTH_WHITELIST.put("/images/*", "/images/*");
+        // Static resource paths removed - Angular frontend now containerized
     }
 
     @SuppressWarnings("NullableProblems")

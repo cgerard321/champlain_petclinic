@@ -21,6 +21,19 @@ docker push ${ACR_URL}/${SERVICE_NAME}:${TAG}
 echo "${SERVICE_NAME} pushed successfully."
 echo "------------------------------------"
 
+# --- Service: angularFrontend ---
+SERVICE_NAME="angular-frontend"
+SERVICE_DIR="./angular-frontend"
+DOCKERFILE_PATH="${SERVICE_DIR}/Dockerfile"
+echo "Building ${SERVICE_NAME}..."
+docker build -t ${SERVICE_NAME}:${TAG} -f ${DOCKERFILE_PATH} ${SERVICE_DIR}
+echo "Tagging ${SERVICE_NAME} for ACR..."
+docker tag ${SERVICE_NAME}:${TAG} ${ACR_URL}/${SERVICE_NAME}:${TAG}
+echo "Pushing ${SERVICE_NAME} to ACR..."
+docker push ${ACR_URL}/${SERVICE_NAME}:${TAG}
+echo "${SERVICE_NAME} pushed successfully."
+echo "------------------------------------"
+
 # --- Service: visits-service-new ---
 SERVICE_NAME="visits-service-new"
 SERVICE_DIR="./visits-service-new"

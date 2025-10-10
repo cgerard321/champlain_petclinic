@@ -41,7 +41,7 @@ or
 docker-compose -f docker-compose_no_FE.yml up --build
 ```
 ## Bring up Frontend
-React frontend:
+React frontend (containerized):
 ```
 localhost:3000/
 ```
@@ -49,10 +49,11 @@ Until it is fixed, to login on React frontend, use need to enter the following U
 ```
 localhost:3000/users/login
 ```
-Angular frontend:
+Angular frontend (containerized):
 ```
-localhost:8080/
+localhost:8082/
 ```
+Both frontends are now containerized and will start automatically with `docker-compose up`. The Angular frontend runs independently and includes fallback handling when the API Gateway is not available.
 In terminal:
 
 Check database contents (did the script run)

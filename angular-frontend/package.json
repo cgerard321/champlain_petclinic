@@ -1,0 +1,22 @@
+{
+  "name": "angular-frontend",
+  "version": "1.0.0",
+  "description": "AngularJS Frontend for Pet Clinic Application",
+  "main": "index.html",
+  "scripts": {
+    "start": "http-server -p 8080 -c-1 --cors",
+    "build": "echo 'No build step required for static AngularJS app'",
+    "dev": "http-server -p 8080 -c-1 --cors -o"
+  },
+  "dependencies": {
+    "http-server": "^14.1.1"
+  },
+  "devDependencies": {},
+  "keywords": [
+    "angularjs",
+    "petclinic",
+    "frontend"
+  ],
+  "author": "Champlain Pet Clinic Team",
+  "license": "MIT"
+}

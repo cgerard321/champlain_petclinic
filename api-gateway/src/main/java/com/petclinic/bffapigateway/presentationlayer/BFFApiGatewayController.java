@@ -21,6 +21,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.*;
@@ -61,6 +62,9 @@ public class BFFApiGatewayController {
     private final BillServiceClient billServiceClient;
 
     private final InventoryServiceClient inventoryServiceClient;
+
+    @Value("${frontend.url}")
+    private String frontendUrl;
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET})
     @GetMapping(value = "bills/{billId}")
@@ -664,7 +668,7 @@ public class BFFApiGatewayController {
         return authServiceClient.verifyUser(token)
                 .map(userDetailsResponseEntity -> {
                     HttpHeaders headers = new HttpHeaders();
-                    headers.add("Location", "http://localhost:8080/#!/login");
+                    headers.add("Location", frontendUrl + "/#!/login");
                     return ResponseEntity.status(HttpStatus.FOUND)
                             .headers(headers)
                             .body(userDetailsResponseEntity.getBody());
