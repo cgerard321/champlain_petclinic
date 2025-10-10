@@ -31,7 +31,7 @@ public class PetControllerV1 {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    @IsUserSpecific(bypassRoles = {Roles.ADMIN, Roles.VET,Roles.RECEPTIONIST})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET,Roles.RECEPTIONIST})
     @GetMapping(value = "", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<PetResponseDTO> getAllPets(){
         return customersServiceClient.getAllPets();
