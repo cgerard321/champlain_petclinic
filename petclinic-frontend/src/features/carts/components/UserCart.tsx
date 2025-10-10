@@ -113,14 +113,15 @@ const UserCart = (): JSX.Element => {
     const quantity = Math.max(1, recentPurchaseQuantities[item.productId] || 1);
 
     try {
-      // Use the working endpoint and loop for quantity
-      for (let i = 0; i < quantity; i += 1) {
-        await axiosInstance.post(
+      // Concurrently add items to cart
+      const addPromises = Array.from({ length: quantity }, () =>
+        axiosInstance.post(
           `/carts/${cartId}/${item.productId}`,
           {},
           { useV2: false }
-        );
-      }
+        )
+      );
+      await Promise.all(addPromises);
 
       setNotificationMessage(
         `${item.productName} (x${quantity}) added to cart!`
@@ -339,21 +340,23 @@ const UserCart = (): JSX.Element => {
   }, [cartId]);
 
   // Fetch recommendation purchases
-  useEffect(() => {
+  // Reusable function to fetch recommendation purchases
+  const fetchRecommendationPurchases = useCallback(async (): Promise<void> => {
     if (!cartId) return;
-    const fetchRecommendationPurchases = async (): Promise<void> => {
-      try {
-        const { data } = await axiosInstance.get(
-          `/carts/${cartId}/recommendation-purchases`,
-          { useV2: false }
-        );
-        setRecommendationPurchases(data || []);
-      } catch (err) {
-        setRecommendationPurchases([]);
-      }
-    };
-    fetchRecommendationPurchases();
+    try {
+      const { data } = await axiosInstance.get(
+        `/carts/${cartId}/recommendation-purchases`,
+        { useV2: false }
+      );
+      setRecommendationPurchases(data || []);
+    } catch (err) {
+      setRecommendationPurchases([]);
+    }
   }, [cartId]);
+
+  useEffect(() => {
+    fetchRecommendationPurchases();
+  }, [cartId, fetchRecommendationPurchases]);
 
   const applyVoucherCode = async (): Promise<void> => {
     try {
@@ -712,15 +715,7 @@ const UserCart = (): JSX.Element => {
       }
 
       // Fetch recommendation purchases after checkout
-      try {
-        const { data } = await axiosInstance.get(
-          `/carts/${cartId}/recommendation-purchases`,
-          { useV2: false }
-        );
-        setRecommendationPurchases(data || []);
-      } catch (err) {
-        // Optionally handle error, but don't block checkout
-      }
+      await fetchRecommendationPurchases();
     } catch (error: unknown) {
       if (error && typeof error === 'object' && 'response' in error) {
         const errorData = (
