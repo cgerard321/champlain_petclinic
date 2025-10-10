@@ -230,7 +230,7 @@ public class CustomerBillsControllerUnitTest {
                     assertEquals(BillStatus.PAID, response.getResponseBody().getBillStatus());
                 });
 
-        // ✅ Verify token actually reached service call
+        // Verify that the token is passed to the service call
         verify(billService, times(1)).processPayment(customerId, billId, paymentRequest);
     }
 
