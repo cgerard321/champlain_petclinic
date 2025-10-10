@@ -58,7 +58,7 @@ public class PetControllerV1 {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN, Roles.VET})
+    @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN, Roles.VET,Roles.RECEPTIONIST})
     @PutMapping("/owners/{ownerId}/pets/{petId}")
     public Mono<ResponseEntity<PetResponseDTO>> updatePetForOwner(
             @PathVariable String ownerId,
