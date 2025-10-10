@@ -155,6 +155,92 @@ const UserCart = (): JSX.Element => {
     }
   };
 
+  // Recommendation purchases state
+  const [recommendationPurchases, setRecommendationPurchases] = useState<
+    Array<{
+      productId: string;
+      productName: string;
+      productSalePrice: number;
+      imageId: string;
+      quantity: number;
+      averageRating?: number;
+    }>
+  >([]);
+
+  // Quantity state for recommendation purchases
+  const [
+    recommendationPurchaseQuantities,
+    setRecommendationPurchaseQuantities,
+  ] = useState<{
+    [productId: string]: number;
+  }>({});
+
+  // Handle quantity change for recommendation purchases
+  const handleRecommendationPurchaseQuantityChange = (
+    productId: string,
+    value: number
+  ): void => {
+    setRecommendationPurchaseQuantities(prev => ({
+      ...prev,
+      [productId]: Math.max(1, value),
+    }));
+  };
+
+  // Handle 'Purchase Recommendation' action
+  const handlePurchaseRecommendation = async (item: {
+    productId: string;
+    productName: string;
+    productSalePrice: number;
+    imageId: string;
+    quantity: number;
+  }): Promise<void> => {
+    if (!cartId) return;
+
+    const quantity = Math.max(
+      1,
+      recommendationPurchaseQuantities[item.productId] || 1
+    );
+
+    try {
+      for (let i = 0; i < quantity; i += 1) {
+        await axiosInstance.post(
+          `/carts/${cartId}/${item.productId}`,
+          {},
+          { useV2: false }
+        );
+      }
+      setNotificationMessage(
+        `${item.productName} (x${quantity}) added to cart!`
+      );
+      notifyCartChanged();
+      // Fetch updated cart and update state
+      const { data } = await axiosInstance.get(`/carts/${cartId}`, {
+        useV2: false,
+      });
+      if (Array.isArray(data.products)) {
+        const products: ProductModel[] = data.products.map(
+          (p: ProductAPIResponse) => ({
+            productId: p.productId,
+            imageId: p.imageId,
+            productName: p.productName,
+            productDescription: p.productDescription,
+            productSalePrice: p.productSalePrice,
+            averageRating: p.averageRating,
+            quantity: p.quantityInCart || 1,
+            productQuantity: p.productQuantity,
+          })
+        );
+        setCartItems(products);
+      }
+    } catch (err: unknown) {
+      const msg =
+        (axios.isAxiosError(err) &&
+          (err.response?.data as { message?: string } | undefined)?.message) ||
+        `Failed to add ${item.productName} to cart.`;
+      setNotificationMessage(msg);
+    }
+  };
+
   // rôles (read-only pour staff/admin)
   const isAdmin = IsAdmin();
   const isStaff =
@@ -250,6 +336,23 @@ const UserCart = (): JSX.Element => {
       }
     };
     fetchRecentPurchases();
+  }, [cartId]);
+
+  // Fetch recommendation purchases
+  useEffect(() => {
+    if (!cartId) return;
+    const fetchRecommendationPurchases = async (): Promise<void> => {
+      try {
+        const { data } = await axiosInstance.get(
+          `/carts/${cartId}/recommendation-purchases`,
+          { useV2: false }
+        );
+        setRecommendationPurchases(data || []);
+      } catch (err) {
+        setRecommendationPurchases([]);
+      }
+    };
+    fetchRecommendationPurchases();
   }, [cartId]);
 
   const applyVoucherCode = async (): Promise<void> => {
@@ -607,6 +710,17 @@ const UserCart = (): JSX.Element => {
       } catch (err) {
         // Optionally handle error, but don't block checkout
       }
+
+      // Fetch recommendation purchases after checkout
+      try {
+        const { data } = await axiosInstance.get(
+          `/carts/${cartId}/recommendation-purchases`,
+          { useV2: false }
+        );
+        setRecommendationPurchases(data || []);
+      } catch (err) {
+        // Optionally handle error, but don't block checkout
+      }
     } catch (error: unknown) {
       if (error && typeof error === 'object' && 'response' in error) {
         const errorData = (
@@ -637,6 +751,21 @@ const UserCart = (): JSX.Element => {
     return acc;
   }, {});
   const recentPurchasesList = Object.values(uniqueRecentPurchases);
+
+  // Helper to filter out duplicate recommendation purchases by productId
+  const uniqueRecommendationPurchases = recommendationPurchases.reduce<{
+    [id: string]: (typeof recommendationPurchases)[0];
+  }>((acc, item) => {
+    if (!acc[item.productId]) {
+      acc[item.productId] = item;
+    } else {
+      acc[item.productId].quantity += item.quantity;
+    }
+    return acc;
+  }, {});
+  const recommendationPurchasesList = Object.values(
+    uniqueRecommendationPurchases
+  );
 
   return (
     <div>
@@ -982,6 +1111,85 @@ const UserCart = (): JSX.Element => {
               ))
             ) : (
               <p>No products in the wishlist.</p>
+            )}
+          </div>
+        </div>
+
+        {/* Recommendation Purchases Section */}
+        <div className="recommendation-purchases-section">
+          <h2>Your Recommendations</h2>
+          <div className="recommendation-subtitle">
+            Based on your recent purchases
+          </div>
+          <div className="recommendation-purchases-list">
+            {recommendationPurchasesList.length > 0 ? (
+              recommendationPurchasesList.map(item => (
+                <div
+                  key={item.productId}
+                  className="recommendation-purchase-card hover-effect"
+                >
+                  <div className="recommendation-purchase-image">
+                    <ImageContainer imageId={item.imageId} />
+                  </div>
+                  <div className="recommendation-product-name">
+                    {item.productName}
+                  </div>
+                  <div className="recommendation-product-price">
+                    ${item.productSalePrice.toFixed(2)}
+                  </div>
+                  <div className="recommendation-qty-row">
+                    <label
+                      htmlFor={`recommendation-qty-${item.productId}`}
+                      className="recommendation-qty-label"
+                    >
+                      Qty:
+                    </label>
+                    <input
+                      id={`recommendation-qty-${item.productId}`}
+                      type="number"
+                      min={1}
+                      value={
+                        recommendationPurchaseQuantities[item.productId] || 1
+                      }
+                      onChange={e =>
+                        handleRecommendationPurchaseQuantityChange(
+                          item.productId,
+                          Number(e.target.value)
+                        )
+                      }
+                      className="recommendation-qty-input"
+                    />
+                  </div>
+                  <button
+                    className="purchase-again-btn"
+                    onClick={() => handlePurchaseRecommendation(item)}
+                  >
+                    Purchase Again
+                  </button>
+                  <div className="recommendation-total">
+                    Total: $
+                    {(
+                      item.productSalePrice *
+                      (recommendationPurchaseQuantities[item.productId] || 1)
+                    ).toFixed(2)}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="recommendation-empty-state">
+                <div className="recommendation-empty-message">
+                  No recommendations available yet.
+                  <br />
+                  Add more products to your cart to get personalized
+                  suggestions!
+                </div>
+                <button
+                  className="cta-browse-products-btn"
+                  onClick={() => navigate('/products')}
+                >
+                  Browse Products
+                </button>
+              </div>
             )}
           </div>
         </div>
