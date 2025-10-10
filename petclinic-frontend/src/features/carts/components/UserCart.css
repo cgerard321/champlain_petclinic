@@ -1,3 +1,10 @@
+/* Style for recent purchases images in cart */
+.recent-purchase-image img {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 4px;
+}
 .UserCart-container {
   width: 80vw;
   margin: 0 auto;
@@ -425,3 +432,11 @@
     content: normal;
   }
 }
+
+
+.move-all-to-cart-btn[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: auto; /* laisse le tooltip/title fonctionner */
+}
+
