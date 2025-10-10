@@ -788,7 +788,7 @@
 }
 
 .btn-submit {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
     color: white;
     padding: 14px 32px;
     border-radius: 8px;
@@ -800,7 +800,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3);
+    box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.3);
     min-width: 140px;
     justify-content: center;
 }
