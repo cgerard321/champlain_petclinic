@@ -732,13 +732,13 @@ public class BillServiceImplTest {
 
     @Test
     void processPayment_Success() {
-
         String customerId = "customerId-1";
         String billId = "billId-1";
         Bill bill = buildBill();
         bill.setBillStatus(BillStatus.UNPAID);
 
-        PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "123", "12/23");
+        PaymentRequestWithJwtDTO paymentRequest =
+                new PaymentRequestWithJwtDTO("1234567812345678", "123", "12/23", null);
 
         when(repo.findByCustomerIdAndBillId(customerId, billId)).thenReturn(Mono.just(bill));
         when(repo.save(any(Bill.class))).thenAnswer(invocation -> {
@@ -746,9 +746,7 @@ public class BillServiceImplTest {
             return Mono.just(savedBill);
         });
 
-
         Mono<BillResponseDTO> result = billService.processPayment(customerId, billId, paymentRequest);
-
 
         StepVerifier.create(result)
                 .consumeNextWith(updatedBillDto -> {
@@ -758,37 +756,46 @@ public class BillServiceImplTest {
                 .verifyComplete();
     }
 
+
     @Test
     void processPayment_InvalidCardNumber_Failure() {
         String customerId = "customerId-1";
         String billId = "billId-1";
-        PaymentRequestDTO paymentRequest = new PaymentRequestDTO("12345678", "123", "12/23");
+
+        PaymentRequestWithJwtDTO paymentRequest =
+                new PaymentRequestWithJwtDTO("12345678", "123", "12/23", null);
 
         StepVerifier.create(billService.processPayment(customerId, billId, paymentRequest))
                 .expectErrorMatches(throwable -> throwable instanceof InvalidPaymentException &&
                         throwable.getMessage().contains("Invalid payment details"))
                 .verify();
     }
+
 
 
     @Test
     void processPayment_InvalidCVV_Failure() {
         String customerId = "customerId-1";
         String billId = "billId-1";
-        PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "12", "12/23");
+
+        PaymentRequestWithJwtDTO paymentRequest =
+                new PaymentRequestWithJwtDTO("1234567812345678", "12", "12/23", null);
 
         StepVerifier.create(billService.processPayment(customerId, billId, paymentRequest))
                 .expectErrorMatches(throwable -> throwable instanceof InvalidPaymentException &&
                         throwable.getMessage().contains("Invalid payment details"))
                 .verify();
     }
+
 
 
     @Test
     void processPayment_InvalidExpirationDate_Failure() {
         String customerId = "customerId-1";
         String billId = "billId-1";
-        PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "123", "1223");
+
+        PaymentRequestWithJwtDTO paymentRequest =
+                new PaymentRequestWithJwtDTO("1234567812345678", "123", "1223", null);
 
         StepVerifier.create(billService.processPayment(customerId, billId, paymentRequest))
                 .expectErrorMatches(throwable -> throwable instanceof InvalidPaymentException &&
@@ -796,11 +803,14 @@ public class BillServiceImplTest {
                 .verify();
     }
 
+
     @Test
     void processPayment_BillNotFound_Failure() {
         String customerId = "customerId-1";
         String billId = "billId-1";
-        PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "123", "12/23");
+
+        PaymentRequestWithJwtDTO paymentRequest =
+                new PaymentRequestWithJwtDTO("1234567812345678", "123", "12/23", null);
 
         when(repo.findByCustomerIdAndBillId(customerId, billId)).thenReturn(Mono.empty());
 
@@ -813,6 +823,7 @@ public class BillServiceImplTest {
                 })
                 .verify();
     }
+
 
     @Test
     void getNumberOfBillsWithFilters_Positive_ShouldCountMatchingBills() {

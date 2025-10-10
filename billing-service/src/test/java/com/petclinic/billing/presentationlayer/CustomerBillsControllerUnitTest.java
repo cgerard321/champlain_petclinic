@@ -1,5 +1,6 @@
 package com.petclinic.billing.presentationlayer;
 
+import com.petclinic.billing.datalayer.PaymentRequestWithJwtDTO;
 import com.petclinic.billing.exceptions.InvalidPaymentException;
 import com.petclinic.billing.exceptions.NotFoundException;
 import com.petclinic.billing.businesslayer.BillService;
@@ -126,7 +127,8 @@ public class CustomerBillsControllerUnitTest {
     void payBill_ValidRequest_ShouldReturnUpdatedBill() {
         String customerId = "cust-123";
         String billId = "bill-456";
-        PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "123", "12/25");
+        PaymentRequestWithJwtDTO paymentRequest =
+                new PaymentRequestWithJwtDTO("1234567812345678", "123", "12/25", null);
 
         BillResponseDTO billResponse = BillResponseDTO.builder()
                 .billId(billId)
@@ -153,11 +155,14 @@ public class CustomerBillsControllerUnitTest {
         verify(billService, times(1)).processPayment(customerId, billId, paymentRequest);
     }
 
+
     @Test
     void payBill_InvalidPayment_ShouldReturnBadRequest() {
         String customerId = "cust-123";
         String billId = "bill-456";
-        PaymentRequestDTO invalidPayment = new PaymentRequestDTO("123", "12", "12");
+
+        PaymentRequestWithJwtDTO invalidPayment =
+                new PaymentRequestWithJwtDTO("123", "12", "12", null);
 
         when(billService.processPayment(customerId, billId, invalidPayment))
                 .thenReturn(Mono.error(new InvalidPaymentException("Invalid payment details")));
@@ -172,11 +177,14 @@ public class CustomerBillsControllerUnitTest {
         verify(billService, times(1)).processPayment(customerId, billId, invalidPayment);
     }
 
+
     @Test
     void payBill_NonExistentBill_ShouldReturnNotFound() {
         String customerId = "cust-123";
         String billId = "bill-404";
-        PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "123", "12/25");
+
+        PaymentRequestWithJwtDTO paymentRequest =
+                new PaymentRequestWithJwtDTO("1234567812345678", "123", "12/25", null);
 
         when(billService.processPayment(customerId, billId, paymentRequest))
                 .thenReturn(Mono.error(new NotFoundException("Bill not found")));
@@ -190,6 +198,43 @@ public class CustomerBillsControllerUnitTest {
 
         verify(billService, times(1)).processPayment(customerId, billId, paymentRequest);
     }
+
+    @Test
+    void payBill_WithJwtToken_ShouldPassTokenToService() {
+        String customerId = "cust-789";
+        String billId = "bill-999";
+
+        String jwtToken = "fake-jwt-token-123";
+        PaymentRequestWithJwtDTO paymentRequest =
+                new PaymentRequestWithJwtDTO("4111111111111111", "999", "12/25", jwtToken);
+
+        BillResponseDTO billResponse = BillResponseDTO.builder()
+                .billId(billId)
+                .customerId(customerId)
+                .billStatus(BillStatus.PAID)
+                .amount(new BigDecimal(300.0))
+                .build();
+
+        when(billService.processPayment(customerId, billId, paymentRequest))
+                .thenReturn(Mono.just(billResponse));
+
+        client.post()
+                .uri("/bills/customer/{customerId}/bills/{billId}/pay", customerId, billId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(paymentRequest)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(BillResponseDTO.class)
+                .consumeWith(response -> {
+                    assert response.getResponseBody() != null;
+                    assertEquals(BillStatus.PAID, response.getResponseBody().getBillStatus());
+                });
+
+        // ✅ Verify token actually reached service call
+        verify(billService, times(1)).processPayment(customerId, billId, paymentRequest);
+    }
+
+
 
     @Test
         void getBillsByCustomerId_OverdueBill_ShouldReturnInterest() {
