@@ -33,7 +33,7 @@ const EditingVisit: React.FC = (): JSX.Element => {
     description: '',
     petId: '',
     practitionerId: '',
-    status: 'UPCOMING' as Status,
+    status: null as unknown as Status,
   });
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -73,7 +73,12 @@ const EditingVisit: React.FC = (): JSX.Element => {
     const { name, value } = e.target;
     setVisit(prevVisit => ({
       ...prevVisit,
-      [name]: name === 'visitStartDate' ? new Date(value) : value, // Convert string to Date object for visitDate
+      [name]:
+        name === 'visitStartDate'
+          ? new Date(value)
+          : name === 'status'
+            ? (value as Status)
+            : value,
     }));
   };
 
@@ -178,6 +183,8 @@ const EditingVisit: React.FC = (): JSX.Element => {
         <label>Status: </label>
         <select name="status" value={visit.status} onChange={handleChange}>
           <option value="UPCOMING">Upcoming</option>
+          <option value="COMPLETED">Completed</option>
+          <option value="CANCELLED">Cancelled</option>
         </select>
         {errors.status && <span className="error">{errors.status}</span>}
         <br />
