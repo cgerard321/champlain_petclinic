@@ -219,13 +219,6 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
       if (error instanceof Error) {
         setErrorMessage(error.message);
 
-        setFieldErrors({
-          inventoryName: 'Name must be at least 3 characters.',
-          inventoryImage: 'Image URL must start with https://',
-          // inventoryType: 'Please select a type.',
-          // inventoryDescription: 'Description is required.',
-          // inventoryBackupImage: 'Provide a backup image URL.',
-        });
         return;
       }
       //if something odd slip through

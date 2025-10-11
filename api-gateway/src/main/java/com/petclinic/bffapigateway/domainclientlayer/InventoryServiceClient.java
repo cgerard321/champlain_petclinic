@@ -91,8 +91,17 @@ public class InventoryServiceClient {
                 .body(Mono.just(model),InventoryRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
+                .onStatus(status -> status.value() == 422,
+                        resp -> rethrower.rethrow(resp,
+                                ex -> new InvalidInputsInventoryException(
+                                        ex.get("message").toString(), UNPROCESSABLE_ENTITY)))
+
+
                 .onStatus(HttpStatusCode::is4xxClientError,
-                        resp -> rethrower.rethrow(resp, ex -> new InvalidInputsInventoryException(ex.get("message").toString(), BAD_REQUEST)))
+                        resp -> rethrower.rethrow(resp,
+                                ex -> new InvalidInputsInventoryException(
+                                        ex.get("message").toString(), BAD_REQUEST)))
+
                 .bodyToMono(InventoryResponseDTO.class);
     }
 

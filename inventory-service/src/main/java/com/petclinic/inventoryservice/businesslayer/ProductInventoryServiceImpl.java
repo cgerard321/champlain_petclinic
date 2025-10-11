@@ -17,6 +17,7 @@ import com.petclinic.inventoryservice.utils.EntityDTOUtil;
 import com.petclinic.inventoryservice.utils.exceptions.InvalidInputException;
 import com.petclinic.inventoryservice.utils.exceptions.InventoryNotFoundException;
 import com.petclinic.inventoryservice.utils.exceptions.NotFoundException;
+import com.petclinic.inventoryservice.utils.exceptions.UnprocessableEntityException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -51,6 +52,7 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
         return inventoryRepository.count()
                 .flatMap(count -> inventoryRequestDTO
                         .map(EntityDTOUtil::toInventoryEntity)
+                        .flatMap(this::validateInventoryInput)
                         .doOnNext(e -> {
                             if (e.getInventoryType() == null) {
                                 throw new InvalidInputException("Invalid input data: inventory type cannot be blank.");

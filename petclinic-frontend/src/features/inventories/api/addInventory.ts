@@ -14,21 +14,51 @@ export default async function addInventory(
     if (!axios.isAxiosError(error)) throw error;
 
     const status = error.response?.status ?? 0;
+    const payload: unknown = error.response?.data;
+
+    const data =
+      payload && typeof payload === 'object'
+        ? (payload as Record<string, unknown>)
+        : undefined;
+
+    const serverMessage = typeof data?.message === 'string' ? data.message : '';
 
     switch (status) {
-      case 400:
-        const msg = 'Invalid inventory data. Please review your inputs.';
-        throw new Error(msg);
-      case 404:
-        throw new Error('Inventory resource was not found.');
-      case 409:
+      case 400: {
         throw new Error(
-          'An inventory with the similar identifier already exists.'
+          serverMessage.trim()
+            ? serverMessage
+            : 'Invalid inventory data. Please review your input and try again.'
         );
-      case 422:
-        throw new Error('Validation failed. Please check your input fields.');
-      case 429:
-        throw new Error('Too many requests. Please try again later.');
+      }
+      case 404: {
+        throw new Error(
+          serverMessage.trim()
+            ? serverMessage
+            : 'Inventory resource was not found.'
+        );
+      }
+      case 409: {
+        throw new Error(
+          serverMessage.trim()
+            ? serverMessage
+            : 'An inventory with the same name already exists.'
+        );
+      }
+      case 422: {
+        throw new Error(
+          serverMessage.trim()
+            ? serverMessage
+            : 'Some fields failed validation. Please fix the highlighted fields.'
+        );
+      }
+      case 429: {
+        throw new Error(
+          serverMessage.trim()
+            ? serverMessage
+            : 'Too many requests. Please try again later.'
+        );
+      }
       default:
         throw error;
     }
