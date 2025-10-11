@@ -1,7 +1,8 @@
 package com.petclinic.bffapigateway.dtos.Visits;
 
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,7 +16,7 @@ import java.time.LocalDateTime;
 @Builder
 public class VisitRequestDTO {
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime visitDate;
     private String description;
     private String petId;

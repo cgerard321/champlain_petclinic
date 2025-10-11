@@ -143,7 +143,7 @@ class VisitControllerUnitTest {
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$.visitId").isEqualTo(visitResponseDTO.getVisitId())
-                .jsonPath("$.visitDate").isEqualTo("2024-11-25 13:45")
+                .jsonPath("$.visitDate").isEqualTo("2024-11-25T13:45:00")
                 .jsonPath("$.description").isEqualTo(visitResponseDTO.getDescription())
                 .jsonPath("$.petId").isEqualTo(visitResponseDTO.getPetId())
                 .jsonPath("$.practitionerId").isEqualTo(visitResponseDTO.getPractitionerId())

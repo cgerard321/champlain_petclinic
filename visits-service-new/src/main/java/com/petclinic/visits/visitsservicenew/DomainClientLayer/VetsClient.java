@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Objects;
@@ -28,6 +29,21 @@ public class VetsClient {
                 .build();
 
     }
+
+    public Flux<VetDTO> getAllVets() {
+        return webClient
+                .get()
+                .uri(vetClientServiceBaseURL)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, error ->
+                        Mono.error(new IllegalArgumentException("Error fetching vets"))
+                )
+                .onStatus(HttpStatusCode::is5xxServerError, error ->
+                        Mono.error(new IllegalArgumentException("Server error fetching vets"))
+                )
+                .bodyToFlux(VetDTO.class);
+    }
+
 
     /**
      * We are accessing the vet-service/src/main/java/com/petclinic/vet/servicelayer/VetServiceImpl.java --  getVetByVetId()
