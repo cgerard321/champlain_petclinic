@@ -148,6 +148,7 @@ public class BillControllerV1 {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @DeleteMapping(value = "")
     public Mono<ResponseEntity<Void>> deleteAllBills() {
         return billServiceClient.deleteAllBills()
