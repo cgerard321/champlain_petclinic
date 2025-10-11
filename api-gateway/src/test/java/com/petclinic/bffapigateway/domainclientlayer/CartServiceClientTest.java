@@ -1533,5 +1533,43 @@ public class CartServiceClientTest {
                 })
                 .verifyComplete();
     }
+    @Test
+    void testGetRecommendationPurchases_ReturnsProducts() {
+        String host = "localhost";
+        String port = String.valueOf(mockWebServer.getPort());
+        WebClient.Builder webClientBuilder = WebClient.builder();
+
+        String responseBody = "[{\"productId\":\"prod1\",\"imageId\":null,\"productName\":null,\"productDescription\":null,\"productSalePrice\":null,\"averageRating\":null,\"quantityInCart\":null,\"productQuantity\":null}]";
+        mockWebServer.enqueue(new MockResponse()
+                .setBody(responseBody)
+                .addHeader("Content-Type", "application/json"));
+
+        CartServiceClient client = new CartServiceClient(webClientBuilder, host, port);
+
+        Mono<List<CartProductResponseDTO>> result = client.getRecommendationPurchases("test-cart-id");
+
+        StepVerifier.create(result)
+                .expectNextMatches(list -> list.size() == 1 && "prod1".equals(list.get(0).getProductId()))
+                .verifyComplete();
+    }
+    @Test
+    void testGetRecommendationPurchases_ReturnsEmpty() {
+        String host = "localhost";
+        String port = String.valueOf(mockWebServer.getPort());
+        WebClient.Builder webClientBuilder = WebClient.builder();
+
+        String responseBody = "[]";
+        mockWebServer.enqueue(new MockResponse()
+                .setBody(responseBody)
+                .addHeader("Content-Type", "application/json"));
+
+        CartServiceClient client = new CartServiceClient(webClientBuilder, host, port);
+
+        Mono<List<CartProductResponseDTO>> result = client.getRecommendationPurchases("empty-cart-id");
+
+        StepVerifier.create(result)
+                .expectNextMatches(List::isEmpty)
+                .verifyComplete();
+    }
 
 }

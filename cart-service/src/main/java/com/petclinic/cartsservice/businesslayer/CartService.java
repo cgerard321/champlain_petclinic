@@ -43,5 +43,7 @@ public interface CartService {
     Mono<CartResponseModel> moveAllWishlistToCart(String cartId);
 
     Mono<List<CartProduct>> getRecentPurchases(String cartId);
+
+    Mono<List<CartProduct>> getRecommendationPurchases(String cartId);
 }
 
