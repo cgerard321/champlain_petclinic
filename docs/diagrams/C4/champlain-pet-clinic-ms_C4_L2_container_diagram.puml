@@ -109,6 +109,8 @@ Rel(react_spa, api_gateway, "Makes API calls to", "JSON/REST/HTTPS")
 Rel(angular_spa, api_gateway, "Makes API calls to", "JSON/REST/HTTPS")
 
 
+Rel(customers_service, files_service, "Makes API calls to", "JSON/REST/HTTPS")
+
 Rel(files_service, files_db, "Reads from and writes to", "JDCB/SQL/TCP", $tags="blue-line")
 Rel(files_service, minio, "Makes API calls to", "JSON/REST/HTTPS")
 Rel(api_gateway, customers_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="purple-line")
