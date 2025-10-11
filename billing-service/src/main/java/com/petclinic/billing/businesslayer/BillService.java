@@ -75,7 +75,7 @@ public interface BillService {
 
     Mono<BigDecimal> calculateCurrentBalance(String customerId);
 
-    Mono<BillResponseDTO> processPayment(String customerId, String billId, PaymentRequestWithJwtDTO  paymentRequestDTO);
+    Mono<BillResponseDTO> processPayment(String customerId, String billId, PaymentRequestDTO paymentRequestDTO);
 
     Mono<Void> setInterestExempt(String billId, boolean exempt);
 
