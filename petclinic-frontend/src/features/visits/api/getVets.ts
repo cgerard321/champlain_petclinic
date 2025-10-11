@@ -31,7 +31,7 @@ export const getAvailableVets = async (): Promise<VetResponse[]> => {
           if (payLoad.trim() === '') return null;
           return JSON.parse(payLoad);
         } catch (err) {
-          console.error("Can't parse vet payload:", err);
+          console.error("Cannot parse vet payload:", err);
           return null;
         }
       })
