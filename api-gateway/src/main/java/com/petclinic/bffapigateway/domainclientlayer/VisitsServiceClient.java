@@ -2,8 +2,6 @@ package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.petclinic.bffapigateway.dtos.Inventory.InventoryRequestDTO;
-import com.petclinic.bffapigateway.dtos.Inventory.InventoryResponseDTO;
 import com.petclinic.bffapigateway.dtos.Vets.VetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.Emergency.EmergencyRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.Emergency.EmergencyResponseDTO;
@@ -15,7 +13,6 @@ import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewResponseDTO;
 import com.petclinic.bffapigateway.exceptions.BadRequestException;
 import com.petclinic.bffapigateway.exceptions.DuplicateTimeException;
-import com.petclinic.bffapigateway.exceptions.InvalidInputsInventoryException;
 import com.petclinic.bffapigateway.utils.Rethrower;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +28,6 @@ import reactor.core.publisher.Mono;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -118,7 +114,7 @@ public class VisitsServiceClient {
     public Mono<VisitResponseDTO> addVisit(Mono<VisitRequestDTO> visitRequestDTO) {
         return visitRequestDTO.flatMap(visitRequestDTO1 -> {
             if (visitRequestDTO1.getVisitDate() != null) {
-                visitRequestDTO1.setVisitDate(visitRequestDTO1.getVisitDate());
+                visitRequestDTO1.setVisitDate(visitRequestDTO1.getVisitDate().minusHours(4));
             } else {
                 throw new BadRequestException("Visit date is required");
             }
@@ -329,9 +325,7 @@ public class VisitsServiceClient {
                                                        Mono<VisitRequestDTO> visitRequestDTO) {
         return visitRequestDTO.flatMap(requestDTO -> {
             if (requestDTO.getVisitDate() != null) {
-                LocalDateTime originalDate = requestDTO.getVisitDate();
-                LocalDateTime adjustedDate = originalDate.minusHours(4);
-                requestDTO.setVisitDate(adjustedDate);
+                requestDTO.setVisitDate(requestDTO.getVisitDate().minusHours(4));
             } else {
                 throw new BadRequestException("Visit date is required");
             }

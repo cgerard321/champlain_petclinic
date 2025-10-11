@@ -53,7 +53,7 @@ class AvailabilityControllerIntegrationTest {
                     .writeValueAsString(workHours);
             vet.setWorkHoursJson(workHoursJson);
         } catch (Exception e) {
-            // ignore
+            throw new RuntimeException("Test setup failed: Unable to serialize work hours to JSON", e);
         }
         return vet;
     }

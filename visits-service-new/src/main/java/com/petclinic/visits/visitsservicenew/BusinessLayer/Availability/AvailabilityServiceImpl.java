@@ -1,5 +1,6 @@
 package com.petclinic.visits.visitsservicenew.BusinessLayer.Availability;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.visits.visitsservicenew.DataLayer.Visit;
@@ -126,7 +127,9 @@ public class AvailabilityServiceImpl implements AvailabilityService {
                     workHoursJson,
                     new TypeReference<Map<String, List<String>>>() {}
             );
-        } catch (Exception e) {
+        } catch (JsonProcessingException e) {
+            log.warn("Failed to parse workHoursJson. Returning empty schedule. Invalid JSON: '{}'. Error: {}",
+                    workHoursJson, e.getMessage());
             return Map.of();
         }
     }
