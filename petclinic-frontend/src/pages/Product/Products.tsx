@@ -23,6 +23,12 @@ export default function Products(): JSX.Element {
 
   const toggleSidebar = (): void => setIsSidebarOpen(!isSidebarOpen);
   const handleOverlayClick = (): void => setIsSidebarOpen(false);
+  const [showSortOptions, setShowSortOptions] = useState(false);
+  const [sortCriteria, setSortCriteria] = useState('default');
+  const handleSort = (criteria: string): void => {
+    setSortCriteria(criteria);
+    setShowSortOptions(false);
+  };
 
   const clearFilters = (): void => {
     setMinPrice(undefined);
@@ -82,13 +88,39 @@ export default function Products(): JSX.Element {
           />
         </div>
 
-        <button
+        {/*<button
           className="toggle-sidebar-button"
           type="button"
           aria-label="Sort By"
         >
           Sort By
-        </button>
+        </button>*/}
+        <div className="sort-dropdown">
+          <button
+            className="sort-button"
+            type="button"
+            onClick={() => setShowSortOptions(prev => !prev)}
+          >
+            Sort By
+          </button>
+          {showSortOptions && (
+            <div className="sort-options">
+              <button onClick={() => handleSort('default')}>Sort by</button>
+              <button onClick={() => handleSort('rating-desc')}>
+                Rating: High → Low
+              </button>
+              <button onClick={() => handleSort('rating-asc')}>
+                Rating: Low → High
+              </button>
+              <button onClick={() => handleSort('price-desc')}>
+                Price: High → Low
+              </button>
+              <button onClick={() => handleSort('price-asc')}>
+                Price: Low → High
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {isSidebarOpen && (
@@ -172,14 +204,14 @@ export default function Products(): JSX.Element {
               />
             </div>
 
-            <select
+            {/*<select
               value={ratingSort}
               onChange={e => setRatingSort(e.target.value)}
             >
               <option value="default">Sort by Rating</option>
               <option value="asc">Low to High</option>
               <option value="desc">High to Low</option>
-            </select>
+            </select>*/}
 
             <button onClick={toggleSidebar}>Apply</button>
             <button onClick={clearFilters}>Clear</button>
@@ -194,6 +226,7 @@ export default function Products(): JSX.Element {
         view="catalog"
         searchQuery={searchQuery}
         filters={filters}
+        sortCriteria={sortCriteria}
       />
 
       <div className="block">
