@@ -1,15 +1,10 @@
 package com.petclinic.customersservice.presentationlayer;
 
 import com.petclinic.customersservice.business.PetServiceImpl;
-import com.petclinic.customersservice.data.PetType;
-import com.petclinic.customersservice.data.Photo;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.test.web.reactive.server.WebTestClient;
-
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 
 @SpringBootTest
 @AutoConfigureWebTestClient
