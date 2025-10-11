@@ -19,7 +19,8 @@ angular.module('shopProductForm')
                 productType: self.product.productType,
                 productStatus: self.product.productStatus,
                 deliveryType: self.product.deliveryType,
-                imageId: self.product.imageId
+                imageId: self.product.imageId,
+                isUnlisted: self.product.isUnlisted
             }
             $http.post('/api/gateway/products', data
             )

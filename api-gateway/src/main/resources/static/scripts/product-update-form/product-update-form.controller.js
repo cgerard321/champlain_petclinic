@@ -13,11 +13,15 @@ angular.module('shopProductUpdateForm')
             self.productStatus = ["AVAILABLE", "PRE_ORDER", "OUT_OF_STOCK"];
             self.productType = ["FOOD", "MEDICATION", "ACCESSORY", "EQUIPMENT"];
 
+
             console.log("ProductId: " + productId);
 
             // Load product by ID
             $http.get('/api/gateway/products/' + productId).then(function (resp) {
                 self.product = resp.data;
+                if (self.product.isUnlisted === undefined || self.product.isUnlisted === null) {
+                   self.product.isUnlisted = false;
+                }
                 var prod = self.product;
                 //fetch image
                             $http.get('api/gateway/images/' + prod.imageId).then(function (imageResp){
@@ -44,7 +48,8 @@ angular.module('shopProductUpdateForm')
                     productType: self.product.productType,
                     productStatus: self.product.productStatus,
                     deliveryType: self.product.deliveryType,
-                    imageId: self.product.imageId
+                    imageId: self.product.imageId,
+                    isUnlisted: self.product.isUnlisted
                 };
 
                 $http.put('/api/gateway/products/' + productId, data)
