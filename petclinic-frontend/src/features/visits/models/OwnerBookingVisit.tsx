@@ -225,7 +225,7 @@ const OwnerBookingVisit: React.FC = (): JSX.Element => {
     if (window.history.length > 1) {
       navigate(-1);
     } else {
-      navigate('customer/visits');
+      navigate('/customer/visits');
     }
   };
 
