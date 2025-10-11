@@ -4,6 +4,7 @@ import { getAllInventoryTypes } from '@/features/inventories/api/getAllInventory
 import addInventory from '@/features/inventories/api/addInventory.ts';
 import { InventoryType } from '@/features/inventories/models/InventoryType.ts';
 import './AddInventoryForm.css';
+import axios from 'axios';
 
 interface AddInventoryProps {
   showAddInventoryForm: boolean;
@@ -30,6 +31,10 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
   const [inventoryBackupImage, setInventoryBackupImage] = useState<string>('');
   const [inventoryTypes, setInventoryTypes] = useState<InventoryType[]>([]);
   const [imageUploaded, setImageUploaded] = useState<Uint8Array | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string>('');
+  const [fieldErrors, setFieldErrors] = useState<
+    Partial<Record<FieldKey, string>>
+  >({});
 
   // Per-field history arrays. Initialize with the initial/current value so there is always a baseline.
   const [history, setHistory] = useState<Record<FieldKey, string[]>>({
@@ -115,6 +120,8 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
     if (isWordBoundary) {
       pushSnapshot(field, value);
     }
+
+    setFieldErrors(prev => ({ ...prev, [field]: undefined })); // clear error on change
 
     setter(value);
   };
@@ -203,8 +210,30 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
       setImageUploaded(null);
       refreshInventoryTypes();
       handleInventoryClose();
+      setErrorMessage('');
     } catch (error) {
       console.error('Error adding inventory:', error);
+
+      setFieldErrors({});
+
+      if (error instanceof Error) {
+        setErrorMessage(error.message);
+
+        setFieldErrors({
+          inventoryName: 'Name must be at least 3 characters.',
+          inventoryImage: 'Image URL must start with https://',
+          // inventoryType: 'Please select a type.',
+          // inventoryDescription: 'Description is required.',
+          // inventoryBackupImage: 'Provide a backup image URL.',
+        });
+        return;
+      }
+      //if something odd slip through
+      if (axios.isAxiosError(error)) {
+        setErrorMessage('An unexpected error occurred. Please try again.');
+        return;
+      }
+      setErrorMessage('An unexpected error occurred. Please try again.');
     }
   };
 
@@ -243,6 +272,15 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
       <div className="form-container">
         <h2>Add Inventory</h2>
         <form onSubmit={handleSubmit}>
+          {errorMessage && (
+            <div
+              className="form-error"
+              role="alert"
+              style={{ color: 'red', marginBottom: 12 }}
+            >
+              {errorMessage}
+            </div>
+          )}
           <div>
             <label htmlFor="inventoryName">Inventory Name:</label>
             <input
@@ -259,6 +297,11 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
               onBlur={() => pushSnapshot('inventoryName', inventoryName)}
               required
             />
+            {fieldErrors.inventoryName && (
+              <div className="field-error" style={{ color: 'red' }}>
+                {fieldErrors.inventoryName}
+              </div>
+            )}
           </div>
 
           <div>
@@ -283,6 +326,11 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
                 </option>
               ))}
             </select>
+            {fieldErrors.inventoryType && (
+              <div className="field-error" style={{ color: 'red' }}>
+                {fieldErrors.inventoryType}
+              </div>
+            )}
           </div>
 
           <div>
@@ -303,6 +351,11 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
               }
               required
             />
+            {fieldErrors.inventoryDescription && (
+              <div className="field-error" style={{ color: 'red' }}>
+                {fieldErrors.inventoryDescription}
+              </div>
+            )}
           </div>
 
           <div>
@@ -321,6 +374,11 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
               onBlur={() => pushSnapshot('inventoryImage', inventoryImage)}
               required
             />
+            {fieldErrors.inventoryImage && (
+              <div className="field-error" style={{ color: 'red' }}>
+                {fieldErrors.inventoryImage}
+              </div>
+            )}
           </div>
 
           <div>
@@ -341,6 +399,11 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
               }
               required
             />
+            {fieldErrors.inventoryBackupImage && (
+              <div className="field-error" style={{ color: 'red' }}>
+                {fieldErrors.inventoryBackupImage}
+              </div>
+            )}
           </div>
 
           <div>
