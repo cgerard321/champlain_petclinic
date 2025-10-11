@@ -124,6 +124,7 @@ public class CustomerBillsControllerUnitTest {
     void payBill_ValidRequest_ShouldReturnUpdatedBill() {
         String customerId = "cust-123";
         String billId = "bill-456";
+        String jwtToken = "fake-cookie-token";
         PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "123", "12/25");
 
         BillResponseDTO billResponse = BillResponseDTO.builder()
@@ -138,6 +139,7 @@ public class CustomerBillsControllerUnitTest {
 
         client.post()
                 .uri("/bills/customer/{customerId}/bills/{billId}/pay", customerId, billId)
+                .cookie("Bearer", jwtToken)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(paymentRequest)
                 .exchange()
