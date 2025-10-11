@@ -100,44 +100,40 @@ public class OwnerController {
     public Mono<ResponseEntity<byte[]>> getOwnerPhoto(@PathVariable String ownerId) {
         return ownerService.getOwnerEntityByOwnerId(ownerId)
                 .flatMap(owner -> {
-                    // Determine which file to request
                     String photoId = owner.getPhotoId();
                     String fileIdToRequest = (photoId != null && !photoId.isEmpty()) ? photoId : "defaultProfilePicture.png";
 
-                    return filesServiceClient.getFile(fileIdToRequest)
-                            .map(fileResp -> {
-                                // If file or content is null, fallback to default
-                                if (fileResp == null || fileResp.getFileData() == null) {
-                                    log.warn("File {} is missing content, returning default placeholder", fileIdToRequest);
-                                    return getDefaultPlaceholderResponse();
-                                }
+        return filesServiceClient.getFile(fileIdToRequest)
+                .map(fileResp -> {
+                     if (fileResp == null || fileResp.getFileData() == null) {
+                     log.warn("File {} is missing content, returning default placeholder", fileIdToRequest);
+                     return getDefaultPlaceholderResponse();
+                     }
 
-                                byte[] fileBytes = fileResp.getFileData();
-                                String contentType = fileResp.getFileType();
+                     byte[] fileBytes = fileResp.getFileData();
+                     String contentType = fileResp.getFileType();
 
-                                // Fallback content type if missing
-                                if (contentType == null || !contentType.startsWith("image/")) {
-                                    String fileName = fileResp.getFileName();
-                                    if (fileName != null) {
-                                        if (fileName.endsWith(".png")) contentType = "image/png";
-                                        else if (fileName.endsWith(".jpg") || fileName.endsWith(".jpeg")) contentType = "image/jpeg";
-                                        else contentType = "application/octet-stream";
-                                    } else {
-                                        contentType = "application/octet-stream";
-                                    }
-                                }
+                     if (contentType == null || !contentType.startsWith("image/")) {
+                     String fileName = fileResp.getFileName();
+                     if (fileName != null) {
+                      if (fileName.endsWith(".png")) contentType = "image/png";
+                        else if (fileName.endsWith(".jpg") || fileName.endsWith(".jpeg")) contentType = "image/jpeg";
+                      else contentType = "application/octet-stream";
+                      }
+                     else {
+                          contentType = "application/octet-stream";
+                           }
+                     }
 
-                                return ResponseEntity.ok()
-                                        .contentType(MediaType.parseMediaType(contentType))
-                                        .body(fileBytes);
-                            })
-                            .onErrorResume(err -> {
-                                log.error("Error fetching file {} for ownerId {}: {}", fileIdToRequest, ownerId, err.getMessage());
-                                // Return default placeholder on error
+                     return ResponseEntity.ok()
+                        .contentType(MediaType.parseMediaType(contentType))
+                        .body(fileBytes);
+                     })
+                        .onErrorResume(err -> {
+                            log.error("Error fetching file {} for ownerId {}: {}", fileIdToRequest, ownerId, err.getMessage());
                                 return Mono.just(getDefaultPlaceholderResponse());
                             });
                 })
-
                 .defaultIfEmpty(getDefaultPlaceholderResponse());
     }
 
