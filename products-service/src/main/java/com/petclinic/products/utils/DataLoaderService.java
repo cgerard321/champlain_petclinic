@@ -3,6 +3,7 @@ package com.petclinic.products.utils;
 import com.petclinic.products.datalayer.images.Image;
 import com.petclinic.products.datalayer.images.ImageRepository;
 import com.petclinic.products.datalayer.products.DeliveryType;
+import com.petclinic.products.datalayer.products.ProductStatus;
 import com.petclinic.products.datalayer.products.Product;
 import com.petclinic.products.datalayer.products.ProductBundle;
 import com.petclinic.products.datalayer.products.ProductBundleRepository;
@@ -76,6 +77,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productSalePrice(45.99)
                 .requestCount(0)
                 .productType(ProductType.FOOD)
+                .productStatus(ProductStatus.AVAILABLE)
                 .productQuantity(44)
                 .isUnlisted(false)
                 .releaseDate(LocalDate.parse("2002-09-26"))
@@ -90,6 +92,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productSalePrice(12.99)
                 .requestCount(0)
                 .productType(ProductType.ACCESSORY)
+                .productStatus(ProductStatus.AVAILABLE)
                 .productQuantity(3)
                 .isUnlisted(false)
                 .releaseDate(LocalDate.parse("2020-06-30"))
@@ -104,6 +107,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productSalePrice(9.99)
                 .requestCount(0)
                 .productType(ProductType.MEDICATION)
+                .productStatus(ProductStatus.AVAILABLE)
                 .productQuantity(53)
                 .isUnlisted(false)
                 .releaseDate(LocalDate.parse("2019-09-29"))
@@ -118,6 +122,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productSalePrice(29.99)
                 .requestCount(0)
                 .productType(ProductType.ACCESSORY)
+                .productStatus(ProductStatus.AVAILABLE)
                 .productQuantity(8)
                 .isUnlisted(false)
                 .releaseDate(LocalDate.parse("2023-05-06"))
@@ -132,6 +137,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productSalePrice(19.99)
                 .requestCount(0)
                 .productType(ProductType.ACCESSORY)
+                .productStatus(ProductStatus.AVAILABLE)
                 .productQuantity(14)
                 .isUnlisted(false)
                 .releaseDate(LocalDate.parse("2025-09-29"))
@@ -146,6 +152,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productSalePrice(199.99)
                 .requestCount(0)
                 .productType(ProductType.EQUIPMENT)
+                .productStatus(ProductStatus.AVAILABLE)
                 .productQuantity(58)
                 .isUnlisted(false)
                 .releaseDate(LocalDate.parse("1988-09-29"))
@@ -160,6 +167,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productSalePrice(79.99)
                 .requestCount(0)
                 .productType(ProductType.ACCESSORY)
+                .productStatus(ProductStatus.AVAILABLE)
                 .productQuantity(66)
                 .isUnlisted(false)
                 .releaseDate(LocalDate.parse("2024-02-22"))
@@ -174,6 +182,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productSalePrice(14.99)
                 .requestCount(0)
                 .productType(ProductType.ACCESSORY)
+                .productStatus(ProductStatus.AVAILABLE)
                 .productQuantity(0)
                 .isUnlisted(false)
                 .releaseDate(LocalDate.parse("2022-09-19"))
