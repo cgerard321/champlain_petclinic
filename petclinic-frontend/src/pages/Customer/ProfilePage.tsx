@@ -16,8 +16,10 @@ import { useNavigate } from 'react-router-dom';
 import axiosInstance from '@/shared/api/axiosInstance';
 import { getPetTypeName } from '@/features/customers/utils/petTypeMapping';
 import { deletePet } from '@/features/customers/api/deletePet';
+import defaultProfile from '@/assets/Owners/defaultProfilePicture.png';
 
 const ProfilePage = (): JSX.Element => {
+  const [profilePicUrl, setProfilePicUrl] = useState<string>('');
   const { user } = useUser();
   const [owner, setOwner] = useState<OwnerResponseModel | null>(null);
   const [userDetails, setUserDetails] = useState<UserDetailsModel | null>(null);
@@ -70,6 +72,49 @@ const ProfilePage = (): JSX.Element => {
 
     return () => {
       isMounted = false;
+    };
+  }, [user.userId]);
+
+  useEffect(() => {
+    let isMounted = true;
+    let objectUrl: string | null = null;
+
+    const fetchProfilePic = async (): Promise<void> => {
+      if (!user.userId) return;
+
+      try {
+        // useV2:false because your axios instance by default prepends /v2/gateway
+        const response = await axiosInstance.get(
+          `/owners/${user.userId}/photos`,
+          {
+            responseType: 'blob',
+            useV2: false,
+          }
+        );
+
+        const blob = response.data as Blob;
+        objectUrl = URL.createObjectURL(blob);
+        if (isMounted) {
+          setProfilePicUrl(objectUrl);
+        }
+      } catch (err) {
+        console.warn(
+          'Failed to fetch owner profile picture, using local default',
+          err
+        );
+        if (isMounted) {
+          setProfilePicUrl(''); // will fall back to default
+        }
+      }
+    };
+
+    fetchProfilePic();
+
+    return () => {
+      isMounted = false;
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl);
+      }
     };
   }, [user.userId]);
 
@@ -267,9 +312,25 @@ const ProfilePage = (): JSX.Element => {
       <NavBar />
       <div className="customers-page customers-container-profile">
         <div className="customers-profile-card shadow-lg p-5 mb-5 bg-white rounded">
-          <h1>
-            {owner.firstName} {owner.lastName}&apos;s Profile
-          </h1>
+          <div
+            className="customers-profile-header"
+            style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}
+          >
+            <img
+              src={profilePicUrl || defaultProfile}
+              alt="Profile Picture"
+              className="profile-picture"
+              style={{
+                width: '96px',
+                height: '96px',
+                borderRadius: '50%',
+                objectFit: 'cover',
+              }}
+            />
+            <h1>
+              {owner.firstName} {owner.lastName}&apos;s Profile
+            </h1>
+          </div>
           <div className="customers-profile-info">
             <p>
               <strong>Username:</strong> {userDetails?.username || 'Loading...'}

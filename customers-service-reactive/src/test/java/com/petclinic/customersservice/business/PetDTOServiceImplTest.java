@@ -3,23 +3,17 @@ package com.petclinic.customersservice.business;
 import com.petclinic.customersservice.data.Pet;
 import com.petclinic.customersservice.data.PetRepo;
 import com.petclinic.customersservice.data.PetType;
-import com.petclinic.customersservice.data.Photo;
 import com.petclinic.customersservice.presentationlayer.PetResponseDTO;
-import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @AutoConfigureWebTestClient

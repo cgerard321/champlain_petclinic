@@ -20,4 +20,5 @@ public class OwnerRequestDTO {
     private String province;
     private String telephone;
     //private List<PetResponseDTO> pets;
+    private String photoId;
 }

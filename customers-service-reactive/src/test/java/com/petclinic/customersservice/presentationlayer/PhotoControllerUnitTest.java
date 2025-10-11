@@ -1,8 +1,5 @@
 package com.petclinic.customersservice.presentationlayer;
 
-import com.petclinic.customersservice.business.PhotoService;
-import com.petclinic.customersservice.data.Photo;
-import com.petclinic.customersservice.presentationlayer.PhotoController;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +9,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
