@@ -83,11 +83,11 @@ h2, .wishlist-btn{
 }
 
 .qty-btn{
-  padding: 0.5px 10px;
+  padding: 0.1px 10px;
   width: 95px;
   height: 25px;
   color: black;
-  font-size: 1.rem;
+  font-size: 1rem;
   cursor: pointer;
   background-color: white;
   transition: background 0.2s, color 0.2s;
@@ -95,7 +95,7 @@ h2, .wishlist-btn{
 
 .qty-btn:hover{
   color: white;
-  background-color: none;
+  background-color: white;
 }
 
 .qty-input{
