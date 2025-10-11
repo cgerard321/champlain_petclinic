@@ -363,11 +363,12 @@ public class BillServiceClient {
                 .bodyToMono(Double.class);
     }
 
-    public Mono<BillResponseDTO> payBill(String customerId, String billId, PaymentRequestDTO paymentRequestDTO) {
+    public Mono<BillResponseDTO> payBill(String customerId, String billId, PaymentRequestDTO paymentRequestDTO,String jwtToken) {
         return webClientBuilder.build()
                 .post()
                 .uri(billServiceUrl + "/customer/{customerId}/bills/{billId}/pay", customerId, billId)
                 .contentType(MediaType.APPLICATION_JSON)
+                .cookie("Bearer", jwtToken)
                 .bodyValue(paymentRequestDTO)
                 .exchangeToMono(resp -> {
                     if (resp.statusCode().is2xxSuccessful()) {

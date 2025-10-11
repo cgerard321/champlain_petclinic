@@ -72,7 +72,8 @@ public class CustomerBillsController {
     public Mono<ResponseEntity<BillResponseDTO>> payBill(
             @PathVariable String customerId,
             @PathVariable String billId,
-            @RequestBody PaymentRequestDTO paymentRequest) {
+            @RequestBody PaymentRequestDTO paymentRequest,
+            @CookieValue("Bearer") String jwtToken) {
 
         return billService.processPayment(customerId, billId, paymentRequest)
                 .map(ResponseEntity::ok)   // already BillResponseDTO
