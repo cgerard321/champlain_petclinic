@@ -17,17 +17,13 @@ export async function payBill(
   }
 
   try {
-    //Get token from localStorage
-    const token = localStorage.getItem('jwt');
-
-    // Include jwtToken in request body
+    // Make API call to update bill status to PAID
     const response = await axiosInstance.post(
       `/bills/customer/${customerId}/bills/${billId}/pay`,
       {
         cardNumber: paymentDetails.cardNumber,
         cvv: paymentDetails.cvv,
         expirationDate: paymentDetails.expirationDate,
-        jwtToken: token,
       },
       {
         headers: { 'Content-Type': 'application/json' },
