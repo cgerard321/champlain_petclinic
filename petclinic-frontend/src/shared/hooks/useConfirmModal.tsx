@@ -106,12 +106,14 @@ export function useConfirmModal(): UseConfirmModalReturn {
               type="button"
               onClick={() => close(false)}
               style={{
-                padding: '8px 12px',
-                borderRadius: 8,
-                border: '1px solid #d0d6dd',
-                background: '#096618',
-                color: '#fafffb',
+                padding: '10px 20px',
+                borderRadius: 6,
+                border: 'none',
+                background: 'gray',
+                color: 'white',
+                fontWeight: 'bold',
                 cursor: 'pointer',
+                transition: 'background-color 0.3s, transform 0.2s',
               }}
             >
               {cancelText}
