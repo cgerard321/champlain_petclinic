@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.context.Context;
 
 
 @RestController
@@ -75,12 +76,16 @@ public class CustomerBillsController {
             @RequestBody PaymentRequestDTO paymentRequest,
             @CookieValue("Bearer") String jwtToken) {
 
-        return billService.processPayment(customerId, billId, paymentRequest)
-                .map(ResponseEntity::ok)   // already BillResponseDTO
-                .onErrorResume(InvalidPaymentException.class,
-                        e -> Mono.just(ResponseEntity.status(HttpStatus.BAD_REQUEST).build()))
-                .onErrorResume(ResponseStatusException.class,
-                        e -> Mono.just(ResponseEntity.status(e.getStatus()).build()));
+        String userEmail = "getEmail"; // Temporary placeholder
+
+        return Mono.deferContextual(ctx ->
+                billService.processPayment(customerId, billId, paymentRequest)
+                        .map(ResponseEntity::ok)
+                        .onErrorResume(InvalidPaymentException.class,
+                                e -> Mono.just(ResponseEntity.status(HttpStatus.BAD_REQUEST).build()))
+                        .onErrorResume(ResponseStatusException.class,
+                                e -> Mono.just(ResponseEntity.status(e.getStatus()).build()))
+        ).contextWrite(Context.of("userEmail", userEmail)); //store the email reactively
 
     }
 }
