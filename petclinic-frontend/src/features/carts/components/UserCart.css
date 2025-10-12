@@ -436,7 +436,6 @@
 
 .checkout-btn {
   background-color: #007bff;
-  /* lighter blue shade */
   color: white;
   padding: 10px 20px;
   border: none;
@@ -456,12 +455,10 @@
 .checkout-btn:disabled,
 .checkout-btn[disabled] {
   background-color: #90caf9;
-  /* lighter blue shade */
   cursor: not-allowed;
   box-shadow: none;
   border-bottom: none;
   text-decoration: none;
-  /* Remove hover effect for disabled */
 }
 
 .checkout-btn:disabled:hover,
@@ -513,21 +510,17 @@
   margin-top: 20px;
 }
 
-/* If the overlay is an actual <img> with matching src or alt */
 .Wishlist-items img[src*='out-of-stock' i],
 .Wishlist-items img[alt*='out of stock' i],
 .Wishlist-items .oos-overlay {
   display: none !important;
 }
 
-/* If the overlay is drawn via pseudo-elements (ribbons/badges) */
 .Wishlist-items *::before,
 .Wishlist-items *::after {
-  /* suppress when OOS ribbon text/image is explicitly called*/
   background-image: none !important;
   content: normal;
 }
-
 
 .move-all-to-cart-btn[disabled] {
   opacity: 0.6;
