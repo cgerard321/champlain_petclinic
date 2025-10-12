@@ -808,6 +808,7 @@ public void testGenerateBillPdf_BillNotFound() {
 
         String customerId = "customerId-1";
         String billId = "billId-1";
+        String jwtToken = "Bearer faketoken";
         Bill bill = buildBill();
         bill.setBillStatus(BillStatus.UNPAID);
 
@@ -820,7 +821,7 @@ public void testGenerateBillPdf_BillNotFound() {
         });
 
 
-        Mono<BillResponseDTO> result = billService.processPayment(customerId, billId, paymentRequest);
+        Mono<BillResponseDTO> result = billService.processPayment(customerId, billId, paymentRequest, jwtToken);
 
 
         StepVerifier.create(result)
@@ -835,9 +836,10 @@ public void testGenerateBillPdf_BillNotFound() {
     void processPayment_InvalidCardNumber_Failure() {
         String customerId = "customerId-1";
         String billId = "billId-1";
+        String jwtToken = "Bearer faketoken";
         PaymentRequestDTO paymentRequest = new PaymentRequestDTO("12345678", "123", "12/23");
 
-        StepVerifier.create(billService.processPayment(customerId, billId, paymentRequest))
+        StepVerifier.create(billService.processPayment(customerId, billId, paymentRequest, jwtToken))
                 .expectErrorMatches(throwable -> throwable instanceof InvalidPaymentException &&
                         throwable.getMessage().contains("Invalid payment details"))
                 .verify();
@@ -848,9 +850,10 @@ public void testGenerateBillPdf_BillNotFound() {
     void processPayment_InvalidCVV_Failure() {
         String customerId = "customerId-1";
         String billId = "billId-1";
+        String jwtToken = "Bearer faketoken";
         PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "12", "12/23");
 
-        StepVerifier.create(billService.processPayment(customerId, billId, paymentRequest))
+        StepVerifier.create(billService.processPayment(customerId, billId, paymentRequest, jwtToken))
                 .expectErrorMatches(throwable -> throwable instanceof InvalidPaymentException &&
                         throwable.getMessage().contains("Invalid payment details"))
                 .verify();
@@ -861,9 +864,10 @@ public void testGenerateBillPdf_BillNotFound() {
     void processPayment_InvalidExpirationDate_Failure() {
         String customerId = "customerId-1";
         String billId = "billId-1";
+        String jwtToken = "Bearer faketoken";
         PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "123", "1223");
 
-        StepVerifier.create(billService.processPayment(customerId, billId, paymentRequest))
+        StepVerifier.create(billService.processPayment(customerId, billId, paymentRequest, jwtToken))
                 .expectErrorMatches(throwable -> throwable instanceof InvalidPaymentException &&
                         throwable.getMessage().contains("Invalid payment details"))
                 .verify();
@@ -873,11 +877,12 @@ public void testGenerateBillPdf_BillNotFound() {
     void processPayment_BillNotFound_Failure() {
         String customerId = "customerId-1";
         String billId = "billId-1";
+        String jwtToken = "Bearer faketoken";
         PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "123", "12/23");
 
         when(repo.findByCustomerIdAndBillId(customerId, billId)).thenReturn(Mono.empty());
 
-        StepVerifier.create(billService.processPayment(customerId, billId, paymentRequest))
+        StepVerifier.create(billService.processPayment(customerId, billId, paymentRequest, jwtToken))
                 .expectErrorSatisfies(throwable -> {
                     assertThat(throwable).isInstanceOf(ResponseStatusException.class);
                     ResponseStatusException ex = (ResponseStatusException) throwable;

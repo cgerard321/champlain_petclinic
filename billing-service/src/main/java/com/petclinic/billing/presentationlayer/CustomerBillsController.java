@@ -75,9 +75,8 @@ public class CustomerBillsController {
             @RequestBody PaymentRequestDTO paymentRequest,
             @CookieValue("Bearer") String jwtToken) {
 
-        String userEmail = jwtToken; //  Placeholder NOT decoded yet need JWT Utils
 
-        return billService.processPayment(customerId, billId, paymentRequest)
+        return billService.processPayment(customerId, billId, paymentRequest,jwtToken)
                 .map(ResponseEntity::ok)
                         .onErrorResume(InvalidPaymentException.class,
                                 e -> Mono.just(ResponseEntity.status(HttpStatus.BAD_REQUEST).build()))

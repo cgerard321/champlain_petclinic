@@ -134,7 +134,7 @@ public class CustomerBillsControllerUnitTest {
                 .amount(new BigDecimal(200.0))
                 .build();
 
-        when(billService.processPayment(customerId, billId, paymentRequest))
+        when(billService.processPayment(customerId, billId, paymentRequest, jwtToken))
                 .thenReturn(Mono.just(billResponse));
 
         client.post()
@@ -150,47 +150,49 @@ public class CustomerBillsControllerUnitTest {
                     assertEquals(BillStatus.PAID, response.getResponseBody().getBillStatus());
                 });
 
-        verify(billService, times(1)).processPayment(customerId, billId, paymentRequest);
+        verify(billService, times(1)).processPayment(customerId, billId, paymentRequest, jwtToken);
     }
 
     @Test
     void payBill_InvalidPayment_ShouldReturnBadRequest() {
         String customerId = "cust-123";
         String billId = "bill-456";
+        String jwtToken = "fake-cookie-token";
         PaymentRequestDTO invalidPayment = new PaymentRequestDTO("123", "12", "12");
 
-        when(billService.processPayment(customerId, billId, invalidPayment))
+        when(billService.processPayment(customerId, billId, invalidPayment, jwtToken))
                 .thenReturn(Mono.error(new InvalidPaymentException("Invalid payment details")));
 
         client.post()
                 .uri("/bills/customer/{customerId}/bills/{billId}/pay", customerId, billId)
                 .contentType(MediaType.APPLICATION_JSON)
-                .cookie("Bearer", "dummy-jwt-token")
+                .cookie("Bearer", jwtToken)
                 .bodyValue(invalidPayment)
                 .exchange()
                 .expectStatus().isBadRequest();
 
-        verify(billService, times(1)).processPayment(customerId, billId, invalidPayment);
+        verify(billService, times(1)).processPayment(customerId, billId, invalidPayment, jwtToken);
     }
 
     @Test
     void payBill_NonExistentBill_ShouldReturnNotFound() {
         String customerId = "cust-123";
         String billId = "bill-404";
+        String jwtToken = "fake-cookie-token";
         PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "123", "12/25");
 
-        when(billService.processPayment(customerId, billId, paymentRequest))
+        when(billService.processPayment(customerId, billId, paymentRequest, jwtToken))
                 .thenReturn(Mono.error(new NotFoundException("Bill not found")));
 
         client.post()
                 .uri("/bills/customer/{customerId}/bills/{billId}/pay", customerId, billId)
                 .contentType(MediaType.APPLICATION_JSON)
-                .cookie("Bearer", "dummy-jwt-token")
+                .cookie("Bearer", jwtToken)
                 .bodyValue(paymentRequest)
                 .exchange()
                 .expectStatus().isNotFound();
 
-        verify(billService, times(1)).processPayment(customerId, billId, paymentRequest);
+        verify(billService, times(1)).processPayment(customerId, billId, paymentRequest, jwtToken);
     }
 
     @Test

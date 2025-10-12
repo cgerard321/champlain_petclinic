@@ -341,8 +341,9 @@ public class BillServiceImpl implements BillService{
         }
 
     @Override
-    public Mono<BillResponseDTO> processPayment(String customerId, String billId, PaymentRequestDTO paymentRequestDTO)
+    public Mono<BillResponseDTO> processPayment(String customerId, String billId, PaymentRequestDTO paymentRequestDTO, String jwtToken)
     {
+
 
         // 1. Validate card details before reactive pipeline.
         //    If card number, CVV, or expiration date lengths are invalid, throw InvalidPaymentException.
