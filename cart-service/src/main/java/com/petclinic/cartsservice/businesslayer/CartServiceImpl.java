@@ -381,11 +381,8 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public Mono<CartResponseModel> findCartByCustomerId(String customerId) {
-        if (customerId == null) {
-            return Mono.error(new InvalidInputException("customerId must not be null"));
-        }
-        if (customerId.trim().isEmpty()) {
-            return Mono.error(new InvalidInputException("customerId must not be empty"));
+        if (customerId == null || customerId.trim().isEmpty()) {
+            return Mono.error(new InvalidInputException("customerId must not be null or empty"));
         }
         return cartRepository.findCartByCustomerId(customerId)
                 .switchIfEmpty(Mono.defer(() -> createNewCartForCustomer(customerId)))
