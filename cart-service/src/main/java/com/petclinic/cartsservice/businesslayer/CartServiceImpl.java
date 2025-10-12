@@ -374,7 +374,15 @@ public class CartServiceImpl implements CartService {
     @Override
     public Mono<CartResponseModel> findCartByCustomerId(String customerId) {
         return cartRepository.findCartByCustomerId(customerId)
-                .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Cart for customer id was not found: " + customerId))))
+                .switchIfEmpty(
+                        Mono.defer(() -> {
+                            Cart newCart = new Cart();
+                            newCart.setCustomerId(customerId);
+                            newCart.setCartId(UUID.randomUUID().toString());
+                            newCart.setProducts(new ArrayList<>());
+                            return cartRepository.save(newCart);
+                        })
+                )
                 .doOnNext(cart -> log.debug("The cart for customer id {} is: {}", customerId, cart.toString()))
                 .flatMap(cart -> {
                     List<CartProduct> products = cart.getProducts();

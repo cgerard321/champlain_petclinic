@@ -550,16 +550,20 @@ class CartServiceUnitTest {
     }
 
     @Test
-    void findCartByCustomerId_withNonExistentId_thenReturnNotFoundException() {
+    void findCartByCustomerId_withNonExistentId_thenReturnNewCart() {
         // Arrange
         Mockito.when(cartRepository.findCartByCustomerId(nonExistentCustomerId))
                 .thenReturn(Mono.empty());
+        Mockito.when(cartRepository.save(Mockito.any(Cart.class)))
+                .thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
 
         // Act & Assert
         StepVerifier.create(cartService.findCartByCustomerId(nonExistentCustomerId))
-                .expectErrorMatches(throwable -> throwable instanceof NotFoundException &&
-                        throwable.getMessage().equals("Cart for customer id was not found: " + nonExistentCustomerId))
-                .verify();
+                .expectNextMatches(cartResponse ->
+                        cartResponse.getCustomerId().equals(nonExistentCustomerId) &&
+                                cartResponse.getProducts().isEmpty()
+                )
+                .verifyComplete();
     }
 
     @Test
