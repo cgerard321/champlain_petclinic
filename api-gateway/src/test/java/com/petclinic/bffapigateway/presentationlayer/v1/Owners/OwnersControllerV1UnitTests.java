@@ -51,7 +51,7 @@ public class OwnersControllerV1UnitTests {
     @MockBean
     private CustomersServiceClient customersServiceClient;
 
-
+    String ownerId = "ownerId-123";
     @Test
     void whenGetAllOwners_thenReturnOwners() {
         OwnerResponseDTO owner = new OwnerResponseDTO();
@@ -208,7 +208,6 @@ public class OwnersControllerV1UnitTests {
 
     @Test
     void whenDeletePet_thenReturnNoContent() {
-        String ownerId = "ownerId-123";
         String petId = "petId-456";
 
         when(customersServiceClient.deletePet(ownerId, petId)).thenReturn(Mono.empty());
@@ -223,7 +222,6 @@ public class OwnersControllerV1UnitTests {
 
     @Test
     void whenDeleteOwner_thenReturnNoContent() {
-        String ownerId = "ownerId-123";
 
         when(customersServiceClient.deleteOwner(ownerId)).thenReturn(Mono.empty());
 
@@ -237,7 +235,6 @@ public class OwnersControllerV1UnitTests {
 
     @Test
     void whenCreatePetForOwner_thenReturnCreatedPet() {
-        String ownerId = "ownerId-123";
         PetRequestDTO mockPetRequest = new PetRequestDTO();
         mockPetRequest.setName("Rex");
         mockPetRequest.setOwnerId(ownerId);
@@ -263,7 +260,7 @@ public class OwnersControllerV1UnitTests {
 
     @Test
     void whenGetPet_thenReturnPet() {
-        String ownerId = "ownerId-123";
+
         String petId = "petId-456";
 
         PetResponseDTO mockPetResponse = new PetResponseDTO();
@@ -286,7 +283,7 @@ public class OwnersControllerV1UnitTests {
 
     @Test
     void whenGetPetsByOwnerId_thenReturnListOfPets() {
-        String ownerId = "ownerId-123";
+
         PetResponseDTO pet1 = new PetResponseDTO();
         pet1.setName("Rocky");
         PetResponseDTO pet2 = new PetResponseDTO();
@@ -306,4 +303,38 @@ public class OwnersControllerV1UnitTests {
 
         verify(customersServiceClient, times(1)).getPetsByOwnerId(ownerId);
     }
+
+    @Test
+    void whenGetOwnerPhoto_thenReturnPhoto() {
+        byte[] mockPhotoBytes = "mockPhotoData".getBytes();
+
+        when(customersServiceClient.getOwnerPhoto(ownerId))
+                .thenReturn(Mono.just(mockPhotoBytes));
+
+        client.get()
+                .uri("/api/gateway/owners/{ownerId}/photos", ownerId)
+                .accept(MediaType.IMAGE_PNG)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.IMAGE_PNG)
+                .expectBody(byte[].class)
+                .value(bytes -> assertArrayEquals(mockPhotoBytes, bytes));
+
+        verify(customersServiceClient, times(1)).getOwnerPhoto(ownerId);
+    }
+
+    @Test
+    void whenGetOwnerPhotoNotFound_thenReturn404() {
+        when(customersServiceClient.getOwnerPhoto(ownerId))
+                .thenReturn(Mono.empty());
+
+        client.get()
+                .uri("/api/gateway/owners/{ownerId}/photos", ownerId)
+                .accept(MediaType.IMAGE_PNG)
+                .exchange()
+                .expectStatus().isNotFound();
+
+        verify(customersServiceClient, times(1)).getOwnerPhoto(ownerId);
+    }
+
 }
