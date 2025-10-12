@@ -172,7 +172,7 @@ class ProductsServiceClientIntegrationTest {
         String productType = "EQUIPMENT";
 
 
-        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(null, null, null, null, null, null,productType);
+        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(null, null, null, null, null, null, productType);
 
         StepVerifier.create(productsFlux)
                 .expectNextMatches(product -> product.getProductId().equals("1") && product.getProductType() == ProductType.EQUIPMENT)
@@ -417,7 +417,7 @@ class ProductsServiceClientIntegrationTest {
 
 
     //----------------------------------------------
-//TODO: Quanity
+//TODO: Quantity
     @Test
     void whenDecreaseProductQuantity_thenSucceed() {
         String productId = "abc123";
@@ -464,7 +464,7 @@ class ProductsServiceClientIntegrationTest {
                 .setBody(
                         "data:{\"bundleId\":\"1\"," +
                                 "\"bundleName\":\"Dog Bundle\"," +
-                                "\"bundleDescription\":\"Dog Food an& Flea Collar\"," +
+                                "\"bundleDescription\":\"Dog Food and Flea Collar\"," +
                                 "\"productIds\":[\"p1\",\"p2\",\"p3\"]," +
                                 "\"originalTotalPrice\":55.98," +
                                 "\"bundlePrice\":49.99}\n\n" +
