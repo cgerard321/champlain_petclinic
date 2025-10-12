@@ -156,8 +156,6 @@ public class CustomerBillsControllerIntegrationTest {
                 .expectStatus().isNotFound();
     }
 
-
-
     private Bill buildBill() {
                 return Bill.builder()
                                 .billId("1")
@@ -168,6 +166,7 @@ public class CustomerBillsControllerIntegrationTest {
                                 .amount(new BigDecimal(150.0))
                                 .billStatus(BillStatus.UNPAID)
                                 .dueDate(LocalDate.now().plusDays(20))
+                                .archive(false)
                                 .build();
         }
 
@@ -185,8 +184,10 @@ public class CustomerBillsControllerIntegrationTest {
                                 .date(date)
                                 .amount(new BigDecimal("150.00"))
                                 .billStatus(BillStatus.UNPAID)
+                                .archive(false)
                                 .build();
         }
+
         @Test
         void getBillByBillId_ShouldReturnInterest() {
                 billRepository.deleteAll().block();
@@ -213,5 +214,5 @@ public class CustomerBillsControllerIntegrationTest {
                         .expectHeader().contentType(MediaType.APPLICATION_JSON)
                         .expectBody()
                         .jsonPath("$.interest").isEqualTo(expectedInterest.doubleValue());
-}
+        }
 }

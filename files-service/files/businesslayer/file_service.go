@@ -6,4 +6,6 @@ import (
 
 type FileService interface {
 	GetFile(string) (*models.FileResponseModel, error)
+	AddFile(*models.FileRequestModel) (*models.FileResponseModel, error)
+	DeleteFileByFileId(string) error
 }

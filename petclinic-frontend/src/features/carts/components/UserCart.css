@@ -1,3 +1,10 @@
+/* Style for recent purchases images in cart */
+.recent-purchase-image img {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 4px;
+}
 .UserCart-container {
   width: 80vw;
   margin: 0 auto;
@@ -70,8 +77,8 @@
   background-color: gray;
   color: white;
   transition:
-          background-color 0.3s,
-          transform 0.2s;
+    background-color 0.3s,
+    transform 0.2s;
 }
 
 .continue-shopping-btn:hover {
@@ -83,8 +90,8 @@
   background-color: #f44336;
   color: white;
   transition:
-          background-color 0.3s,
-          transform 0.2s;
+    background-color 0.3s,
+    transform 0.2s;
 }
 
 .clear-cart-btn:hover {
@@ -361,8 +368,8 @@
   font-weight: bold;
   cursor: pointer;
   transition:
-          background-color 0.3s,
-          transform 0.2s;
+    background-color 0.3s,
+    transform 0.2s;
 }
 
 .checkout-btn:hover {
@@ -393,8 +400,8 @@
   font-weight: bold;
   cursor: pointer;
   transition:
-          background-color 0.3s,
-          transform 0.2s;
+    background-color 0.3s,
+    transform 0.2s;
   margin-left: 8px;
 }
 
@@ -411,8 +418,8 @@
 .cart-header-title {
   margin-top: 20px;
   /* If the overlay is an actual <img> with matching src or alt */
-  .Wishlist-items img[src*="out-of-stock" i],
-  .Wishlist-items img[alt*="out of stock" i],
+  .Wishlist-items img[src*='out-of-stock' i],
+  .Wishlist-items img[alt*='out of stock' i],
   .Wishlist-items .oos-overlay {
     display: none !important;
   }
@@ -425,3 +432,11 @@
     content: normal;
   }
 }
+
+
+.move-all-to-cart-btn[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: auto; /* laisse le tooltip/title fonctionner */
+}
+

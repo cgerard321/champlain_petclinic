@@ -1,41 +1,13 @@
 'use strict';
 
-angular.module('productForm')
-    .controller('ProductFormController', ["$http", '$state', '$stateParams', '$scope', 'InventoryService', function ($http, $state , $scope,  $stateParams, InventoryService) {
-        var self = this;
-        var product = {}
-        // post request to create a new product
-        self.submitProductForm = function (product) {
-            var data  = {
-                productName: self.product.productName,
-                productDescription: self.product.productDescription,
-                productPrice: self.product.productPrice,
-                productQuantity: self.product.productQuantity,
-                productSalePrice: self.product.productSalePrice
-            }
-            var inventoryId = InventoryService.getInventoryId();
-            console.log("InventoryId: " + inventoryId);
-            $http.post('/api/gateway/inventories/' + inventoryId + '/products', data
-            )
-                .then(function (response) {
-                    console.log(response);
-                    $state.go('productList', {inventoryId: inventoryId});
-                }, function (response) {
-                    var error = response.data;
-                    error.errors = error.errors || [];
-                    alert(error.error + "\r\n" + error.errors.map(function (e) {
-                        return e.field + ": " + e.defaultMessage;
-                    }).join("\r\n"));
-                });
-        }
-
-
-    }]);
-
 
 angular.module('shopProductForm')
     .controller('ShopProductFormController', ["$http", '$state', '$stateParams', function ($http, $state , $stateParams) {
         var self = this;
+            //hardcoded because no currently existing way to get
+            self.deliveryType = ["DELIVERY", "PICKUP", "DELIVERY_AND_PICKUP", "NO_DELIVERY_OPTION"];
+            self.productStatus = ["AVAILABLE", "PRE_ORDER", "OUT_OF_STOCK"];
+            self.productType = ["FOOD", "MEDICATION", "ACCESSORY", "EQUIPMENT"];
         // post request to create a new product
         self.submitProductForm = function () {
             var data  = {
@@ -43,9 +15,14 @@ angular.module('shopProductForm')
                 productDescription: self.product.productDescription,
                 productPrice: self.product.productPrice,
                 productQuantity: self.product.productQuantity,
-                productSalePrice: self.product.productSalePrice
+                productSalePrice: self.product.productSalePrice,
+                productType: self.product.productType,
+                productStatus: self.product.productStatus,
+                deliveryType: self.product.deliveryType,
+                imageId: self.product.imageId,
+                isUnlisted: self.product.isUnlisted
             }
-            $http.post('/api/v2/gateway/products', data
+            $http.post('/api/gateway/products', data
             )
                 .then(function (response) {
                     //console.log(response);

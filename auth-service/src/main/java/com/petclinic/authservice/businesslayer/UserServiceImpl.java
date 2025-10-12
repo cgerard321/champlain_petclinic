@@ -14,17 +14,13 @@ import com.petclinic.authservice.datalayer.roles.RoleRepo;
 import com.petclinic.authservice.datamapperlayer.UserMapper;
 import com.petclinic.authservice.domainclientlayer.Mail.Mail;
 import com.petclinic.authservice.domainclientlayer.Mail.MailService;
-import com.petclinic.authservice.domainclientlayer.cart.CartService;
 import com.petclinic.authservice.presentationlayer.User.*;
 import com.petclinic.authservice.security.JwtTokenUtil;
 import com.petclinic.authservice.security.SecurityConst;
 import com.petclinic.authservice.datalayer.user.*;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -55,7 +51,6 @@ public class UserServiceImpl implements UserService {
     private final MailService mailService;
     private final JwtTokenUtil jwtService;
     private final AuthenticationManager authenticationManager;
-    private final CartService cartService;
     private final String salt = BCrypt.gensalt(10);
 
 
@@ -111,14 +106,14 @@ public class UserServiceImpl implements UserService {
             log.info("Sending email to {}...", userIDLessDTO.getEmail());
 
             //Commented out the New emailing service and replaced it with the old emailing service as I implemented the new one but was told by Christine to revert back to the old one
-            log.info(mailService.sendMail(generateVerificationMail(user)));  //Old
+            mailService.sendMail(generateVerificationMail(user));  //Old
             //generateVerificationMailWithNewEmailingService(user);          //New
 
             log.info("Email sent to {}", userIDLessDTO.getEmail());
 
             //////////////////////////////////////// BROKEN CODE -> Cart decided to add a code the create a cart and DIDN'T TEST IT! Turns out it breaks everything when trying to sign up :)
             //////////////////////////////////////// So I commented it out and notified the one who initially wrote this piece of code, the error should be fixed in a future pull request
-            //User savedUser = userRepo.save(user);
+//            User savedUser = userRepo.save(user);
             //CartResponse cartResponse = cartService.createCart(new CartRequest(savedUser.getUserIdentifier().getUserId()));
             ////////////////////////////////////////
 

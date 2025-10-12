@@ -13,6 +13,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { Navbar, Nav, NavDropdown, Container } from 'react-bootstrap';
 import { FaShoppingCart } from 'react-icons/fa'; // Importing the shopping cart icon
 import './AppNavBar.css';
+import { isAxiosError } from 'axios';
 
 // localStorage-driven cart badge (no API calls in navbar)
 import {
@@ -24,9 +25,11 @@ import {
 export function NavBar(): JSX.Element {
   const { user } = useUser();
   const navigate = useNavigate();
+  const isAdmin = IsAdmin();
   const isInventoryManager = IsInventoryManager();
   const isReceptionist = IsReceptionist();
   const isVet = IsVet();
+  const isOwner = IsOwner();
   const [navbarOpen, setNavbarOpen] = useState(false);
   const [cartId, setCartId] = useState<string | null>(null);
   const [cartItemCount, setCartItemCount] = useState<number>(0); // State for cart item count
@@ -109,14 +112,14 @@ export function NavBar(): JSX.Element {
             </Nav.Link>
             {user.userId && (
               <>
-                {(IsAdmin() || IsVet()) && (
+                {(isAdmin || isVet) && (
                   <Nav.Link as={Link} to={AppRoutePaths.Vet}>
                     Veterinarians
                   </Nav.Link>
                 )}
-                {(IsAdmin() || IsVet() || isReceptionist) && (
+                {(isAdmin || isVet || isReceptionist) && (
                   <NavDropdown title="Customers" id="owners-dropdown">
-                    {(IsAdmin() || IsVet()) && (
+                    {(isAdmin || isVet) && (
                       <NavDropdown.Item
                         as={Link}
                         to={AppRoutePaths.AllCustomers}
@@ -124,7 +127,7 @@ export function NavBar(): JSX.Element {
                         Customers List
                       </NavDropdown.Item>
                     )}
-                    {(IsAdmin() || isReceptionist) && (
+                    {(isAdmin || isReceptionist) && (
                       <NavDropdown.Item
                         as={Link}
                         to={AppRoutePaths.AddingCustomer}
@@ -134,7 +137,7 @@ export function NavBar(): JSX.Element {
                     )}
                   </NavDropdown>
                 )}
-                {IsAdmin() && (
+                {isAdmin && (
                   <NavDropdown title="Users" id="users-dropdown">
                     <NavDropdown.Item as={Link} to={AppRoutePaths.AllUsers}>
                       Users List
@@ -144,15 +147,15 @@ export function NavBar(): JSX.Element {
                     </NavDropdown.Item>
                   </NavDropdown>
                 )}
-                {!IsAdmin() &&
+                {!isAdmin &&
                   !isInventoryManager &&
-                  !IsVet() &&
+                  !isVet &&
                   !isReceptionist && (
                     <Nav.Link as={Link} to={AppRoutePaths.CustomerBills}>
                       Bills
                     </Nav.Link>
                   )}
-                {!IsAdmin() && !isInventoryManager && (
+                {!isAdmin && !isInventoryManager && (
                   <Nav.Link as={Link} to={AppRoutePaths.CustomerVisits}>
                     Visits
                   </Nav.Link>
@@ -162,32 +165,27 @@ export function NavBar(): JSX.Element {
                     Emergency
                   </Nav.Link>
                 )}
-                {IsAdmin() && (
+                {isAdmin && (
                   <Nav.Link as={Link} to={AppRoutePaths.AdminBills}>
                     Bills
                   </Nav.Link>
                 )}
-                {(IsAdmin() || IsVet()) && (
+                {(isAdmin || isVet) && (
                   <Nav.Link as={Link} to={AppRoutePaths.Visits}>
                     Visits
                   </Nav.Link>
                 )}
-                {(isInventoryManager || IsAdmin()) && (
+                {(isInventoryManager || isAdmin) && (
                   <Nav.Link as={Link} to={AppRoutePaths.Inventories}>
                     Inventories
                   </Nav.Link>
                 )}
-                {IsAdmin() && (
-                  <Nav.Link as={Link} to={AppRoutePaths.Emailing}>
-                    Emails
-                  </Nav.Link>
-                )}
-                {IsAdmin() && (
+                {isAdmin && (
                   <Nav.Link as={Link} to={AppRoutePaths.Promos}>
                     Promos
                   </Nav.Link>
                 )}
-                {!IsAdmin() && (
+                {!isAdmin && (
                   <Nav.Link as={Link} to={AppRoutePaths.CustomerPromos}>
                     Promos
                   </Nav.Link>
@@ -198,13 +196,13 @@ export function NavBar(): JSX.Element {
                   </Nav.Link>
                 }
 
-                {IsAdmin() && (
+                {isAdmin && (
                   <Nav.Link as={Link} to={AppRoutePaths.Carts}>
                     Carts
                   </Nav.Link>
                 )}
 
-                {cartId && !isReceptionist && (
+                {cartId && isOwner && (
                   <Nav.Link
                     as={Link}
                     to={AppRoutePaths.UserCart.replace(':cartId', cartId)}
@@ -227,7 +225,7 @@ export function NavBar(): JSX.Element {
           <Nav className="ms-auto">
             {user.userId ? (
               <NavDropdown title={`${user.username}`} id="user-dropdown">
-                {IsOwner() && (
+                {isOwner && (
                   <NavDropdown.Item
                     as={Link}
                     to={AppRoutePaths.CustomerProfile}
@@ -235,7 +233,7 @@ export function NavBar(): JSX.Element {
                     Profile
                   </NavDropdown.Item>
                 )}
-                {IsOwner() && (
+                {isOwner && (
                   <NavDropdown.Item
                     as={Link}
                     to={AppRoutePaths.CustomerProfileEdit}
@@ -243,12 +241,12 @@ export function NavBar(): JSX.Element {
                     Edit Profile
                   </NavDropdown.Item>
                 )}
-                {IsAdmin() && (
+                {isAdmin && (
                   <NavDropdown.Item as={Link} to={AppRoutePaths.Home}>
                     Admin Panel
                   </NavDropdown.Item>
                 )}
-                {IsReceptionist() && (
+                {isReceptionist && (
                   <NavDropdown.Item as={Link} to={AppRoutePaths.AddingCustomer}>
                     Receptionist Panel
                   </NavDropdown.Item>

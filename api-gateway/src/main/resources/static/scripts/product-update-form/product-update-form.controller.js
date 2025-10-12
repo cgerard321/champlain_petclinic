@@ -1,54 +1,6 @@
 'use strict';
 
-angular.module('productUpdateForm')
-    .controller('ProductUpdateFormController', ["$http", '$state', '$stateParams', '$scope', 'InventoryService', function ($http, $state, $stateParams, $scope, InventoryService) {
-        var self = this;
-        var product = {}
-        var method = $stateParams.method;
 
-        var inventoryId = InventoryService.getInventoryId();
-        console.log("InventoryId: " + inventoryId);
-        var productId = $stateParams.productId;
-        console.log("ProductId: " + productId)
-        // post request to create a new product
-
-
-
-        $http.get('/api/gateway/inventories/' + inventoryId + '/products/' + productId).then(function (resp) {
-            self.product = resp.data;
-        });
-
-        self.submitProductUpdateForm = function () {
-
-            var data  = {
-                productName: self.product.productName,
-                productDescription: self.product.productDescription,
-                productPrice: self.product.productPrice,
-                productQuantity: self.product.productQuantity,
-                productSalePrice: self.product.productSalePrice
-            }
-
-            $http.put('/api/gateway/inventories/' + inventoryId + '/products/' + productId, data)
-                    .then(function (response) {
-                        console.log(response);
-                        $state.go('productList', {inventoryId: inventoryId});
-                    }, function (response) {
-                        var error = response.data;
-                        error.errors = error.errors || [];
-                        alert(error.error + "\r\n" + error.errors.map(function (e) {
-                            return e.field + ": " + e.defaultMessage;
-                        }).join("\r\n"));
-                    });
-
-            if (!inventoryId) {
-                console.error("Inventory ID is missing");
-            }
-            if (!productId) {
-                console.error("Product ID is missing");
-            }
-        }
-
-    }]);
 
 angular.module('shopProductUpdateForm')
     .controller('ShopProductUpdateFormController', [
@@ -56,12 +8,33 @@ angular.module('shopProductUpdateForm')
         function ($http, $state, $stateParams) {
             var self = this;
             var productId = $stateParams.productId;
+            //hardcoded because no currently existing way to get
+            self.deliveryType = ["DELIVERY", "PICKUP", "DELIVERY_AND_PICKUP", "NO_DELIVERY_OPTION"];
+            self.productStatus = ["AVAILABLE", "PRE_ORDER", "OUT_OF_STOCK"];
+            self.productType = ["FOOD", "MEDICATION", "ACCESSORY", "EQUIPMENT"];
+
 
             console.log("ProductId: " + productId);
 
             // Load product by ID
-            $http.get('/api/v2/gateway/products/' + productId).then(function (resp) {
+            $http.get('/api/gateway/products/' + productId).then(function (resp) {
                 self.product = resp.data;
+                if (self.product.isUnlisted === undefined || self.product.isUnlisted === null) {
+                   self.product.isUnlisted = false;
+                }
+                var prod = self.product;
+                //fetch image
+                            $http.get('api/gateway/images/' + prod.imageId).then(function (imageResp){
+                            if(imageResp.data === ""){
+                               console.log("no image found");
+                               return;
+                            }
+                               prod.imageData = imageResp.data.imageData;
+                               prod.imageType = imageResp.data.imageType;
+                            })
+                               .catch(function (err) {
+                               console.error("Error fetching image: ", err);
+                            });
             });
 
             // update
@@ -71,10 +44,15 @@ angular.module('shopProductUpdateForm')
                     productDescription: self.product.productDescription,
                     productPrice: self.product.productPrice,
                     productQuantity: self.product.productQuantity,
-                    productSalePrice: self.product.productSalePrice
+                    productSalePrice: self.product.productSalePrice,
+                    productType: self.product.productType,
+                    productStatus: self.product.productStatus,
+                    deliveryType: self.product.deliveryType,
+                    imageId: self.product.imageId,
+                    isUnlisted: self.product.isUnlisted
                 };
 
-                $http.put('/api/v2/gateway/products/' + productId, data)
+                $http.put('/api/gateway/products/' + productId, data)
                     .then(function (response) {
                         console.log(response);
                         $state.go('shopProductList');
