@@ -9,6 +9,7 @@ import {
   useCallback,
 } from 'react';
 import { useUser } from '@/context/UserContext';
+import { Role } from '@/shared/models/Role.ts';
 import {
   getCartIdFromLS,
   setCartIdInLS,
@@ -41,9 +42,30 @@ export function CartProvider({
   const [cartId, setCartIdState] = useState<string | null>(getCartIdFromLS());
   const [cartCount, setCartCountState] = useState<number>(getCartCountFromLS());
 
+  const roleList = useMemo<Role[]>(() => {
+    const rawRoles = user?.roles;
+    if (!rawRoles) return [];
+    if (rawRoles instanceof Set) {
+      return Array.from(rawRoles as Set<Role>);
+    }
+    if (Array.isArray(rawRoles)) {
+      return rawRoles as Role[];
+    }
+    return [];
+  }, [user?.roles]);
+
+  const isOwner = useMemo(
+    () => roleList.some(role => role?.name === 'OWNER'),
+    [roleList]
+  );
+
   const setCartId = (id: string | null): void => {
     setCartIdState(id);
-    if (id) setCartIdInLS(id);
+    if (id) {
+      setCartIdInLS(id);
+    } else {
+      localStorage.removeItem('cart:id');
+    }
   };
 
   const setCartCount = (n: number): void => {
@@ -58,7 +80,8 @@ export function CartProvider({
     cartId: string | null;
     cartCount: number;
   }> => {
-    if (!user?.userId) {
+    if (!isOwner || !user?.userId) {
+      setCartId(null);
       setCartCount(0);
       return { cartId: null, cartCount: 0 };
     }
@@ -80,11 +103,16 @@ export function CartProvider({
     const count = await fetchCartCountByCartId(id);
     setCartCount(count);
     return { cartId: id, cartCount: count };
-  }, [user?.userId, cartId]);
+  }, [user?.userId, cartId, isOwner]);
 
   // When the user logs in, check if we already have cart data in localStorage.
   // If not, fetch it from the API to keep the cart state in sync.
   useEffect(() => {
+    if (!isOwner) {
+      setCartId(null);
+      setCartCount(0);
+      return;
+    }
     if (!user?.userId) return;
     let alive = true;
     (async () => {
@@ -104,10 +132,15 @@ export function CartProvider({
     return () => {
       alive = false;
     };
-  }, [user?.userId, refreshFromAPI]);
+  }, [user?.userId, refreshFromAPI, isOwner]);
 
   // Sync with updates from other components/tabs (Products page, etc.)
   useEffect(() => {
+    if (!isOwner) {
+      setCartCountState(0);
+      setCartIdState(null);
+      return;
+    }
     const syncFromLocalStorage = (): void => {
       const n = getCartCountFromLS();
       setCartCountState(Math.max(0, Math.trunc(n)));
@@ -131,7 +164,7 @@ export function CartProvider({
       );
       window.removeEventListener('storage', onStorage);
     };
-  }, []);
+  }, [isOwner]);
 
   const value = useMemo<CartContextType>(
     () => ({
