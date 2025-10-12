@@ -165,6 +165,7 @@ public class CustomerBillsControllerUnitTest {
         client.post()
                 .uri("/bills/customer/{customerId}/bills/{billId}/pay", customerId, billId)
                 .contentType(MediaType.APPLICATION_JSON)
+                .cookie("Bearer", "dummy-jwt-token")
                 .bodyValue(invalidPayment)
                 .exchange()
                 .expectStatus().isBadRequest();
@@ -184,6 +185,7 @@ public class CustomerBillsControllerUnitTest {
         client.post()
                 .uri("/bills/customer/{customerId}/bills/{billId}/pay", customerId, billId)
                 .contentType(MediaType.APPLICATION_JSON)
+                .cookie("Bearer", "dummy-jwt-token")
                 .bodyValue(paymentRequest)
                 .exchange()
                 .expectStatus().isNotFound();

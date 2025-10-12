@@ -346,37 +346,39 @@ public class BillServiceImpl implements BillService{
 
         // 1. Validate card details before reactive pipeline.
         //    If card number, CVV, or expiration date lengths are invalid, throw InvalidPaymentException.
-        if (paymentRequestDTO.getCardNumber().length() != 16 ||
-                paymentRequestDTO.getCvv().length() != 3 ||
-                paymentRequestDTO.getExpirationDate().length() != 5) {
+        if (paymentRequestDTO.getCardNumber() == null || paymentRequestDTO.getCardNumber().length() != 16 ||
+                paymentRequestDTO.getCvv() == null || paymentRequestDTO.getCvv().length() != 3 ||
+                paymentRequestDTO.getExpirationDate() == null || paymentRequestDTO.getExpirationDate().length() != 5) {
             return Mono.error(new InvalidPaymentException("Invalid payment details"));
         }
-        // 🔹 Wrap logic in a contextual Mono to access user info
+
+        // Wrap logic in a contextual Mono to access user info
         return Mono.deferContextual(ctx -> {
 
-            // 🔹 Extract the userEmail from context (set in controller)
+            // Extract the userEmail from context (set in controller)
             String userEmail = ctx.getOrDefault("userEmail", "unknown");
 
-        // 2. Try to find the bill by customerId and billId.
-        //    If no bill exists, immediately return a 404 ResponseStatusException.
-        return billRepository.findByCustomerIdAndBillId(customerId, billId)
-                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Bill not found")))
+            // 2. Try to find the bill by customerId and billId.
+            //    If no bill exists, immediately return a 404 ResponseStatusException.
+            return billRepository.findByCustomerIdAndBillId(customerId, billId)
+                    .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Bill not found")))
 
-                // 3. If the bill exists, calculate and preserve the interest, then set status to PAID.
-                .flatMap(bill -> {
-                    // Calculate and preserve the interest before changing status
-                    BigDecimal interestAtPayment = InterestCalculationUtil.calculateInterest(bill);
-                    bill.setInterest(interestAtPayment);
-                    bill.setBillStatus(BillStatus.PAID);
+                    // 3. If the bill exists, calculate and preserve the interest, then set status to PAID.
+                    .flatMap(bill -> {
+                        // Calculate and preserve the interest before changing status
+                        BigDecimal interestAtPayment = InterestCalculationUtil.calculateInterest(bill);
+                        bill.setInterest(interestAtPayment);
+                        bill.setBillStatus(BillStatus.PAID);
 
-                    // 4. Save the updated bill back into the repository.
-                    return billRepository.save(bill);
-                })
+                        // 4. Save the updated bill back into the repository.
+                        return billRepository.save(bill);
+                    })
 
-                // 5. Map the updated Bill entity into a BillResponseDTO before returning.
-                .map(EntityDtoUtil::toBillResponseDto);
-    });
+                    // 5. Map the updated Bill entity into a BillResponseDTO before returning.
+                    .map(EntityDtoUtil::toBillResponseDto);
+        });
     }
+
 
     public Mono<BigDecimal> getInterest(String billId, BigDecimal amount, int overdueMonths) {
         return billRepository.findByBillId(billId)

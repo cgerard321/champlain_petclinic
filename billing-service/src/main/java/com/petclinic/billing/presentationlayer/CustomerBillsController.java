@@ -76,7 +76,7 @@ public class CustomerBillsController {
             @RequestBody PaymentRequestDTO paymentRequest,
             @CookieValue("Bearer") String jwtToken) {
 
-        String userEmail = "getEmail"; // Temporary placeholder
+        String userEmail = "getEmail";
 
         return Mono.deferContextual(ctx ->
                 billService.processPayment(customerId, billId, paymentRequest)
@@ -85,7 +85,7 @@ public class CustomerBillsController {
                                 e -> Mono.just(ResponseEntity.status(HttpStatus.BAD_REQUEST).build()))
                         .onErrorResume(ResponseStatusException.class,
                                 e -> Mono.just(ResponseEntity.status(e.getStatus()).build()))
-        ).contextWrite(Context.of("userEmail", userEmail)); //store the email reactively
+        ).contextWrite(Context.of("userEmail", userEmail));
 
     }
 }

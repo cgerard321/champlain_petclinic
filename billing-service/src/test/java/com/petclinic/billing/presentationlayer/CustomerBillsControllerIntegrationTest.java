@@ -126,6 +126,7 @@ public class CustomerBillsControllerIntegrationTest {
         client.post()
                 .uri("/bills/customer/{customerId}/bills/{billId}/pay", bill.getCustomerId(), bill.getBillId())
                 .contentType(MediaType.APPLICATION_JSON)
+                .cookie("Bearer", "dummy-jwt-token")
                 .bodyValue(paymentRequest)
                 .exchange()
                 .expectStatus().isOk()
@@ -146,6 +147,7 @@ public class CustomerBillsControllerIntegrationTest {
         client.post()
                 .uri("/bills/customer/{customerId}/bills/{billId}/pay", "cust-404", "bill-404")
                 .contentType(MediaType.APPLICATION_JSON)
+                .cookie("Bearer", "dummy-jwt-token")
                 .bodyValue(paymentRequest)
                 .exchange()
                 .expectStatus().isNotFound();
