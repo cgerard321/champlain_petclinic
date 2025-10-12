@@ -22,4 +22,5 @@ services:
     depends_on:
       - prometheus
     environment:
+      - GF_PATHS_CONFIG=./monitoring/credentials.ini
       - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_UID=4701
