@@ -42,7 +42,7 @@ export default async function addInventory(
         throw new Error(
           serverMessage.trim()
             ? serverMessage
-            : 'Some fields failed validation. Please fix the highlighted fields.'
+            : 'Inventory with the same name already exists.'
         );
       }
       case 429: {

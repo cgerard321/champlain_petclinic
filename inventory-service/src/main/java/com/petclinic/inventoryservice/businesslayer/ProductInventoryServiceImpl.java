@@ -15,10 +15,7 @@ import com.petclinic.inventoryservice.datalayer.Product.Status;
 import com.petclinic.inventoryservice.presentationlayer.*;
 import com.petclinic.inventoryservice.utils.EntityDTOUtil;
 import com.petclinic.inventoryservice.utils.InventoryValidator;
-import com.petclinic.inventoryservice.utils.exceptions.InvalidInputException;
-import com.petclinic.inventoryservice.utils.exceptions.InventoryNotFoundException;
-import com.petclinic.inventoryservice.utils.exceptions.NotFoundException;
-import com.petclinic.inventoryservice.utils.exceptions.UnprocessableEntityException;
+import com.petclinic.inventoryservice.utils.exceptions.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -636,7 +633,7 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
     @Override
     public Mono<byte[]> createSupplyPdf(String inventoryId) {
         if (inventoryId == null || inventoryId.trim().isEmpty()) {
-            return Mono.error(new IllegalArgumentException("Invalid inventory ID provided."));
+            return Mono.error(new InvalidInputException("Invalid inventory ID provided."));
         }
 
         return productRepository.findAllProductsByInventoryId(inventoryId)
@@ -671,7 +668,7 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
 
                         return Mono.just(byteArrayOutputStream.toByteArray());
                     } catch (DocumentException e) {
-                        return Mono.error(new RuntimeException("Error generating PDF", e));
+                        return Mono.error(new UnprocessableEntityException("Error generating PDF"));
                     }
                 });
     }

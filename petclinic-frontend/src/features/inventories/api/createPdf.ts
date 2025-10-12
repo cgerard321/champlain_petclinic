@@ -1,4 +1,5 @@
 import axiosInstance from '@/shared/api/axiosInstance.ts';
+import axios from 'axios';
 
 /**
  *
@@ -31,8 +32,20 @@ const createPdf = async (inventoryId: string): Promise<void> => {
     link.parentNode?.removeChild(link);
     window.URL.revokeObjectURL(url);
   } catch (error) {
-    console.error('Error generating PDF:', error);
-    alert('Failed to download PDF. Please try again later.');
+    if (!axios.isAxiosError(error)) {
+      throw error instanceof Error ? error : new Error('Failed to create PDF');
+    }
+
+    const status = error.response?.status ?? 0;
+    const message =
+      status === 400
+        ? 'Invalid inventory ID. Please check and try again.'
+        : status === 404
+          ? 'Inventory or supplies not found.'
+          : status === 422
+            ? 'No products available to generate PDF.'
+            : 'Failed to create PDF. Please try again later.';
+    throw new Error(message);
   }
 };
 
