@@ -237,7 +237,7 @@ class UserControllerIntegrationTest {
                         .expectStatus().isUnauthorized()
                         .expectBody(HTTPErrorMessage.class)
                         .value(error -> {
-                            assertEquals("Incorrect password for user with email: admin@admin.com",error.getMessage());
+                            assertEquals("Incorrect username or password for user: admin@admin.com",error.getMessage());
                             assertEquals(401,error.getStatusCode());
                             assertNotNull(error.getTimestamp());
                         });

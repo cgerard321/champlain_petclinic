@@ -254,6 +254,7 @@ public class UserServiceImpl implements UserService {
         String email = userResetPwdRequestModel.getEmail();
         String token = UUID.randomUUID().toString();
         try {
+            getUserbyUsername(email);
             getUserByEmail(email);
         }
         catch(RuntimeException e){
@@ -284,7 +285,7 @@ public class UserServiceImpl implements UserService {
             ResetPasswordToken resetPasswordToken = new ResetPasswordToken(user.get().getId(), BCrypt.hashpw(token,salt));
             tokenRepository.save(resetPasswordToken);
         } else {
-            throw new IllegalArgumentException("Could not find any customer with the email " + email);
+            throw new NotFoundException("Could not find any customer with the email " + email);
         }
     }
 
