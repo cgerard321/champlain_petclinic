@@ -1,9 +1,11 @@
+
+
 .star-shown {
-  fill: #fecf0a;
+  fill: black;
 }
 
 .star-hover:hover {
-  fill: #fecf0a;
+  fill: black;
 }
 
 .star-pointer {

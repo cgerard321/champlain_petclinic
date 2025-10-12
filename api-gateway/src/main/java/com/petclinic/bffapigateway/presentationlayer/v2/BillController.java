@@ -28,13 +28,6 @@ import java.util.Optional;
 public class BillController {
     private final BillServiceClient billService;
 
-    @IsUserSpecific(idToMatch = {"customerId"}, bypassRoles = {Roles.ADMIN})
-    @GetMapping(value = "/customer/{customerId}", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<BillResponseDTO> getBillsByOwnerId(final @PathVariable String customerId)
-    {
-        return billService.getBillsByOwnerId(customerId);
-    }
-
     @GetMapping(value = "/customer/{customerId}/paginated", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<BillResponseDTO> getBillsByCustomerIdPaginated(
             @PathVariable String customerId,
@@ -43,29 +36,6 @@ public class BillController {
         return billService.getBillsByCustomerIdPaginated(customerId, page, size);
     }
 
-
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @PostMapping(value = "/admin",
-            consumes = "application/json",
-            produces = "application/json")
-    public Mono<ResponseEntity<BillResponseDTO>> createBill(@RequestBody BillRequestDTO model) {
-        return billService.createBill(model).map(s -> ResponseEntity.status(HttpStatus.CREATED).body(s))
-                .defaultIfEmpty(ResponseEntity.badRequest().build());
-    }
-
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @GetMapping(value = "/admin", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<BillResponseDTO> getAllBills()
-    {
-        return billService.getAllBills();
-    }
-
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @GetMapping(value = "/admin/{billId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<BillResponseDTO> getBillById(@PathVariable String billId)
-    {
-        return billService.getBillById(billId);
-    }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping()
@@ -92,12 +62,6 @@ public class BillController {
                 ownerLastName, visitType, vetId, vetFirstName, vetLastName));
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @DeleteMapping(value = "/{billId}")
-    public Mono<ResponseEntity<Void>> deleteBill(final @PathVariable String billId) {
-        return billService.deleteBill(billId).then(Mono.just(ResponseEntity.noContent().<Void>build()))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
-    }
     
     @PutMapping(value = "/admin/{billId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<BillResponseDTO>> updateBill(@PathVariable String billId, @RequestBody Mono<BillRequestDTO> billRequestDTO) {
@@ -111,25 +75,6 @@ public class BillController {
 
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @GetMapping(value = "/admin/paid", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<BillResponseDTO> getAllPaidBills()
-    {
-        return billService.getAllPaidBills();
-    }
-
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @GetMapping(value = "/admin/unpaid", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<BillResponseDTO> getAllUnpaidBills()
-    {
-        return billService.getAllUnpaidBills();
-    }
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @GetMapping(value = "/admin/overdue", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<BillResponseDTO> getAllOverdueBills()
-    {
-        return billService.getAllOverdueBills();
-    }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping(value = "/admin/month", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
