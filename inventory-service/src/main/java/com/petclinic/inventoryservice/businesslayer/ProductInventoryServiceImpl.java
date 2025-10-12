@@ -25,6 +25,7 @@ import reactor.core.scheduler.Schedulers;
 import org.springframework.data.domain.Pageable;
 
 import java.io.ByteArrayOutputStream;
+import java.util.Comparator;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -313,10 +314,26 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
     @Override
     public Flux<InventoryResponseDTO> searchInventories(Pageable page, String inventoryCode, String inventoryName, String inventoryType, String inventoryDescription, Boolean importantOnly) {
 
+        Comparator<Inventory> byCode = (a, b) -> {
+            String c1 = a.getInventoryCode();
+            String c2 = b.getInventoryCode();
+            if (c1 == null && c2 == null) return 0;
+            if (c1 == null) return 1;
+            if (c2 == null) return -1;
+            try {
+                int n1 = Integer.parseInt(c1.replace("INV-", ""));
+                int n2 = Integer.parseInt(c2.replace("INV-", ""));
+                return Integer.compare(n1, n2);
+            } catch (NumberFormatException e) {
+                return c1.compareTo(c2);
+            }
+        };
+
         if (inventoryCode != null && !inventoryCode.trim().isEmpty()) {
             return inventoryRepository.findInventoryByInventoryCode(inventoryCode)
                     .flatMap(inventory ->
                             getRecentUpdateMessage(inventory.getInventoryId())
+                                    .defaultIfEmpty("-")
                                     .map(message -> {
                                         InventoryResponseDTO dto = EntityDTOUtil.toInventoryResponseDTO(inventory);
                                         dto.setRecentUpdateMessage(message);
@@ -331,16 +348,18 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
         if (inventoryName != null && inventoryType != null && inventoryDescription != null) {
             return inventoryRepository
                     .findAllByInventoryNameAndInventoryTypeAndInventoryDescription(inventoryName, inventoryType, inventoryDescription)
-                    .skip(page.getPageNumber() * page.getPageSize())
-                    .take(page.getPageSize())
-                    .flatMap(inventory ->
+                    .sort(byCode)
+                    .concatMap(inventory ->
                             getRecentUpdateMessage(inventory.getInventoryId())
+                                    .defaultIfEmpty("-")
                                     .map(message -> {
                                         InventoryResponseDTO dto = EntityDTOUtil.toInventoryResponseDTO(inventory);
                                         dto.setRecentUpdateMessage(message);
                                         return dto;
                                     })
                     )
+                    .skip(page.getPageNumber() * page.getPageSize())
+                    .take(page.getPageSize())
                     .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with Name: " + inventoryName +
                             ", Type: " + inventoryType + ", Description: " + inventoryDescription)));
         }
@@ -348,67 +367,62 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
         if (inventoryType != null && inventoryDescription != null) {
             return inventoryRepository
                     .findAllByInventoryTypeAndInventoryDescription(inventoryType, inventoryDescription)
-                    .skip(page.getPageNumber() * page.getPageSize())
-                    .take(page.getPageSize())
-                    .flatMap(inventory ->
+                    .sort(byCode)
+                    .concatMap(inventory ->
                             getRecentUpdateMessage(inventory.getInventoryId())
+                                    .defaultIfEmpty("-")
                                     .map(message -> {
                                         InventoryResponseDTO dto = EntityDTOUtil.toInventoryResponseDTO(inventory);
                                         dto.setRecentUpdateMessage(message);
                                         return dto;
                                     })
                     )
+                    .skip(page.getPageNumber() * page.getPageSize())
+                    .take(page.getPageSize())
                     .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with Type: " + inventoryType +
                             " and Description: " + inventoryDescription)));
         }
         if (inventoryName != null) {
+
             String escapedInventoryName = Pattern.quote(inventoryName);
             String regexPattern = "(?i)^" + escapedInventoryName + ".*";
 
-            if (inventoryName.length() == 1) {
-                return inventoryRepository
-                        .findByInventoryNameRegex(regexPattern)
-                        .skip(page.getPageNumber() * page.getPageSize())
-                        .take(page.getPageSize())
-                        .flatMap(inventory ->
-                                getRecentUpdateMessage(inventory.getInventoryId())
-                                        .map(message -> {
-                                            InventoryResponseDTO dto = EntityDTOUtil.toInventoryResponseDTO(inventory);
-                                            dto.setRecentUpdateMessage(message);
-                                            return dto;
-                                        })
-                        )
-                        .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found starting with: " + inventoryName)));
-            } else {
-                return inventoryRepository
-                        .findByInventoryNameRegex(regexPattern)
-                        .skip(page.getPageNumber() * page.getPageSize())
-                        .take(page.getPageSize())
-                        .flatMap(inventory ->
-                                getRecentUpdateMessage(inventory.getInventoryId())
-                                        .map(message -> {
-                                            InventoryResponseDTO dto = EntityDTOUtil.toInventoryResponseDTO(inventory);
-                                            dto.setRecentUpdateMessage(message);
-                                            return dto;
-                                        })
-                        )
-                        .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with Name starting with or matching: " + inventoryName)));
-            }
-        }
+            Flux<Inventory> base = inventoryRepository.findByInventoryNameRegex(regexPattern);
+
+            return base
+                    .sort(byCode)
+                    .concatMap(inv ->
+                            getRecentUpdateMessage(inv.getInventoryId())
+                                    .defaultIfEmpty("—")
+                                    .map(msg -> {
+                                        InventoryResponseDTO dto = EntityDTOUtil.toInventoryResponseDTO(inv);
+                                        dto.setRecentUpdateMessage(msg);
+                                        return dto;
+                                    })
+                    )
+                    .skip(page.getPageNumber() * page.getPageSize())
+                    .take(page.getPageSize())
+                    .switchIfEmpty(Mono.error(new NotFoundException(
+                            (inventoryName.length() == 1)
+                                    ? "Inventory not found starting with: " + inventoryName
+                                    : "Inventory not found with Name starting with or matching: " + inventoryName
+                    )));        }
 
         if (inventoryType != null /* … */) {
             return inventoryRepository
                     .findAllByInventoryType(inventoryType)
-                    .skip(page.getPageNumber() * page.getPageSize())
-                    .take(page.getPageSize())
-                    .flatMap(inventory ->
+                    .sort(byCode)
+                    .concatMap(inventory ->
                             getRecentUpdateMessage(inventory.getInventoryId())
+                                    .defaultIfEmpty("-")
                                     .map(message -> {
                                         InventoryResponseDTO dto = EntityDTOUtil.toInventoryResponseDTO(inventory);
                                         dto.setRecentUpdateMessage(message);
                                         return dto;
                                     })
                     )
+                    .skip(page.getPageNumber() * page.getPageSize())
+                    .take(page.getPageSize())
                     .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with Type: " + inventoryType)));
         }
 
@@ -416,35 +430,26 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
             String escapedInventoryDescription = Pattern.quote(inventoryDescription);
             String regexPattern = "(?i)^" + escapedInventoryDescription + ".*";
 
-            if (inventoryDescription.length() == 1) {
-                return inventoryRepository
-                        .findByInventoryDescriptionRegex(regexPattern)
-                        .skip(page.getPageNumber() * page.getPageSize())
-                        .take(page.getPageSize())
-                        .flatMap(inventory ->
-                                getRecentUpdateMessage(inventory.getInventoryId())
-                                        .map(message -> {
-                                            InventoryResponseDTO dto = EntityDTOUtil.toInventoryResponseDTO(inventory);
-                                            dto.setRecentUpdateMessage(message);
-                                            return dto;
-                                        })
-                        )
-                        .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with Description: " + inventoryDescription)));
-            } else {
-                return inventoryRepository
-                        .findByInventoryDescriptionRegex(regexPattern)
-                        .skip(page.getPageNumber() * page.getPageSize())
-                        .take(page.getPageSize())
-                        .flatMap(inventory ->
-                                getRecentUpdateMessage(inventory.getInventoryId())
-                                        .map(message -> {
-                                            InventoryResponseDTO dto = EntityDTOUtil.toInventoryResponseDTO(inventory);
-                                            dto.setRecentUpdateMessage(message);
-                                            return dto;
-                                        })
-                        )
-                        .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with Name starting with or matching: " + inventoryName)));
-            }
+            Flux<Inventory> base = inventoryRepository.findByInventoryDescriptionRegex(regexPattern);
+
+            return base
+                    .sort(byCode)
+                    .concatMap(inv ->
+                            getRecentUpdateMessage(inv.getInventoryId())
+                                    .defaultIfEmpty("—")
+                                    .map(msg -> {
+                                        InventoryResponseDTO dto = EntityDTOUtil.toInventoryResponseDTO(inv);
+                                        dto.setRecentUpdateMessage(msg);
+                                        return dto;
+                                    })
+                    )
+                    .skip(page.getPageNumber() * page.getPageSize())
+                    .take(page.getPageSize())
+                    .switchIfEmpty(Mono.error(new NotFoundException(
+                            (inventoryDescription.length() == 1)
+                                    ? "Inventory not found with Description: " + inventoryDescription
+                                    : "Inventory not found with Name starting with or matching: " + inventoryName
+                    )));
         }
         // Default - fetch all if no criteria provided.
         Flux<Inventory> inventoryFlux = inventoryRepository.findAll();
@@ -455,29 +460,18 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
         }
 
         return inventoryFlux
-                .sort((inv1, inv2) -> {
-                    if (inv1.getInventoryCode() == null && inv2.getInventoryCode() == null) return 0;
-                    if (inv1.getInventoryCode() == null) return 1;
-                    if (inv2.getInventoryCode() == null) return -1;
-
-                    try {
-                        int num1 = Integer.parseInt(inv1.getInventoryCode().replace("INV-", ""));
-                        int num2 = Integer.parseInt(inv2.getInventoryCode().replace("INV-", ""));
-                        return Integer.compare(num1, num2);
-                    } catch (NumberFormatException e) {
-                        return inv1.getInventoryCode().compareTo(inv2.getInventoryCode());
-                    }
-                })
-                .skip(page.getPageNumber() * page.getPageSize())
-                .take(page.getPageSize())
-                .flatMap(inventory ->
-                        getRecentUpdateMessage(inventory.getInventoryId())
-                                .map(message -> {
-                                    InventoryResponseDTO dto = EntityDTOUtil.toInventoryResponseDTO(inventory);
-                                    dto.setRecentUpdateMessage(message);
+                .sort(byCode)
+                .concatMap(inv ->
+                        getRecentUpdateMessage(inv.getInventoryId())
+                                .defaultIfEmpty("—")
+                                .map(msg -> {
+                                    InventoryResponseDTO dto = EntityDTOUtil.toInventoryResponseDTO(inv);
+                                    dto.setRecentUpdateMessage(msg);
                                     return dto;
                                 })
-                );
+                )
+                .skip(page.getPageNumber() * page.getPageSize())
+                .take(page.getPageSize());
     }
 
 
