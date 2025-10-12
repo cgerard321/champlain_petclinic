@@ -13,7 +13,6 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { Navbar, Nav, NavDropdown, Container } from 'react-bootstrap';
 import { FaShoppingCart } from 'react-icons/fa'; // Importing the shopping cart icon
 import './AppNavBar.css';
-import { isAxiosError } from 'axios';
 
 // localStorage-driven cart badge (no API calls in navbar)
 import {
@@ -202,11 +201,15 @@ export function NavBar(): JSX.Element {
                   </Nav.Link>
                 )}
 
-                {cartId && isOwner && (
+                {isOwner && (
                   <Nav.Link
                     as={Link}
-                    to={AppRoutePaths.UserCart.replace(':cartId', cartId)}
-                    className="cart-link"
+                    to={
+                      cartId
+                        ? AppRoutePaths.UserCart.replace(':cartId', cartId)
+                        : AppRoutePaths.Products // working on this atm.
+                    }
+                    className={`cart-link${cartItemCount === 0 ? ' cart-empty' : ''}`}
                   >
                     <FaShoppingCart aria-label="Shopping Cart" />
                     {cartItemCount > 0 && (

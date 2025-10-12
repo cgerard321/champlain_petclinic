@@ -25,7 +25,6 @@ import {
 import { useConfirmModal } from '@/shared/hooks/useConfirmModal';
 import axios from 'axios';
 
-
 interface ProductAPIResponse {
   productId: number;
   imageId: string;
@@ -388,7 +387,7 @@ const UserCart = (): JSX.Element => {
         setNotificationMessage('Failed to delete item.');
       }
     },
-    [cartId, cartItems, blockIfReadOnly]
+    [cartId, cartItems, blockIfReadOnly, confirm]
   );
 
   const clearCart = async (): Promise<void> => {
@@ -396,7 +395,7 @@ const UserCart = (): JSX.Element => {
 
     if (!cartId) {
       setNotificationMessage('Invalid cart ID');
-      
+
       return;
     }
 

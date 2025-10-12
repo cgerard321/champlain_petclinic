@@ -9,7 +9,6 @@ import {
 } from './cartEvent';
 import type { Role } from '@/shared/models/Role';
 
-
 type UseAddToCartReturnType = {
   addToCart: (productId: string) => Promise<boolean>;
 };
