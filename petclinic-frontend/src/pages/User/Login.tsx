@@ -95,9 +95,9 @@ export default function Login(): JSX.Element {
         <form onSubmit={login}>
           <label htmlFor="emailInput"></label>
           <input
-              type="text"
-              id="emailInput"
-              placeholder="Enter your email or username"
+            type="text"
+            id="emailInput"
+            placeholder="Enter your email or username"
           />
           <br />
           <label htmlFor="passwordInput"></label>
