@@ -8,6 +8,7 @@ import com.petclinic.inventoryservice.datalayer.Product.Status;
 import com.petclinic.inventoryservice.presentationlayer.*;
 import org.springframework.beans.BeanUtils;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -34,10 +35,11 @@ public class EntityDTOUtil {
                 .productQuantity(product.getProductQuantity())
                 .productSalePrice(product.getProductSalePrice())
                 .status(status)
+                .lastUpdatedAt(product.getLastUpdatedAt() != null ? product.getLastUpdatedAt() : LocalDateTime.of(1900, 1, 1, 0, 0))
                 .build();
     }
 
-//    public static ProductResponseDTO toProductResponseDTO(Product product){
+    //    public static ProductResponseDTO toProductResponseDTO(Product product){
 //        ProductResponseDTO productResponseDTO = new ProductResponseDTO();
 //        BeanUtils.copyProperties(product, productResponseDTO);
 //        return productResponseDTO;
@@ -61,7 +63,8 @@ public class EntityDTOUtil {
                         product.getProductQuantity(),
                         product.getProductSalePrice(),
                         product.getProductProfit(),
-                        product.getStatus()
+                        product.getStatus(),
+                        product.getLastUpdatedAt()
                 ))
                 .collect(Collectors.toList());
         inventoryResponseDTO.setProducts(productResponseDTOs);
