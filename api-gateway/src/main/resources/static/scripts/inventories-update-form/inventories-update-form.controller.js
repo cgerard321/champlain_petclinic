@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('inventoriesUpdateForm')
-    .controller('InventoriesUpdateFormController', ["$http", '$state', '$stateParams', '$scope', function ($http, $state, $stateParams, $scope) {
+    .controller('InventoriesUpdateFormConztroller', ["$http", '$state', '$stateParams', '$scope', function ($http, $state, $stateParams, $scope) {
         var self = this;
         var inventoryId = $stateParams.inventoryId || "";
         var method = 'edit';
