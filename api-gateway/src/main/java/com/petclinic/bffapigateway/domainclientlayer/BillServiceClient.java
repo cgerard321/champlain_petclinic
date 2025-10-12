@@ -363,7 +363,7 @@ public class BillServiceClient {
                 .bodyToMono(Double.class);
     }
 
-    public Mono<BillResponseDTO> payBill(String customerId, String billId, PaymentRequestDTO paymentRequestDTO,String jwtToken) {
+    public Mono<BillResponseDTO> payBill(String customerId, String billId, PaymentRequestDTO paymentRequestDTO, String jwtToken) {
         return webClientBuilder.build()
                 .post()
                 .uri(billServiceUrl + "/customer/{customerId}/bills/{billId}/pay", customerId, billId)
