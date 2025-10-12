@@ -270,10 +270,6 @@
   gap: 1rem;
 }
 
-.recent-purchase-card {
-  /* Add card styling as needed */
-}
-
 .recent-purchase-image {
   text-align: center;
   margin: 32px 0;
@@ -512,23 +508,24 @@
   transform: scale(1.05);
 }
 
+
 .cart-header-title {
   margin-top: 20px;
+}
 
-  /* If the overlay is an actual <img> with matching src or alt */
-  .Wishlist-items img[src*='out-of-stock' i],
-  .Wishlist-items img[alt*='out of stock' i],
-  .Wishlist-items .oos-overlay {
-    display: none !important;
-  }
+/* If the overlay is an actual <img> with matching src or alt */
+.Wishlist-items img[src*='out-of-stock' i],
+.Wishlist-items img[alt*='out of stock' i],
+.Wishlist-items .oos-overlay {
+  display: none !important;
+}
 
-  /* If the overlay is drawn via pseudo-elements (ribbons/badges) */
-  .Wishlist-items *::before,
-  .Wishlist-items *::after {
-    /* suppress when OOS ribbon text/image is explicitly called*/
-    background-image: none !important;
-    content: normal;
-  }
+/* If the overlay is drawn via pseudo-elements (ribbons/badges) */
+.Wishlist-items *::before,
+.Wishlist-items *::after {
+  /* suppress when OOS ribbon text/image is explicitly called*/
+  background-image: none !important;
+  content: normal;
 }
 
 
