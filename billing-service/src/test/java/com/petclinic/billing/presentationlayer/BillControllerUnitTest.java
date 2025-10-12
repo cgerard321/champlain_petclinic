@@ -2,6 +2,8 @@ package com.petclinic.billing.presentationlayer;
 
 import com.petclinic.billing.businesslayer.BillService;
 import com.petclinic.billing.datalayer.*;
+import com.petclinic.billing.domainclientlayer.Auth.AuthServiceClient;
+import com.petclinic.billing.domainclientlayer.Auth.Rethrower;
 import com.petclinic.billing.exceptions.InvalidPaymentException;
 import com.petclinic.billing.exceptions.NotFoundException;
 import com.petclinic.billing.util.InterestCalculationUtil;
@@ -46,6 +48,11 @@ class BillControllerUnitTest {
 
     @MockBean
     BillService billService;
+    @MockBean
+    AuthServiceClient authServiceClient;
+
+    @MockBean
+    Rethrower rethrower;
 
     @Test
     void getBillByBillId() {

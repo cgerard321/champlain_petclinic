@@ -2,6 +2,8 @@ package com.petclinic.billing.businesslayer;
 
 import com.itextpdf.text.DocumentException;
 import com.petclinic.billing.datalayer.*;
+import com.petclinic.billing.domainclientlayer.Auth.UserDetails;
+import com.petclinic.billing.domainclientlayer.Mailing.Mail;
 import com.petclinic.billing.exceptions.InvalidPaymentException;
 import com.petclinic.billing.exceptions.NotFoundException;
 import com.petclinic.billing.util.EntityDtoUtil;
@@ -395,7 +397,14 @@ public class BillServiceImpl implements BillService{
                     return Mono.just(bill);
                 });
     }
-
+    // You can add more arguments to add to the email and customize as you like
+    private Mail generateConfirmationEmail(UserDetails user){
+        return new Mail(
+                user.getEmail(), "Pet Clinic - Payment Confirmation", "default", "Pet Clinic confirmation email",
+                "Dear, " + user.getUsername() + "\n" +
+                "Your bill has been succesfully paid",
+                "Thank you for choosing Pet Clinic.", user.getUsername(), "ChamplainPetClinic@gmail.com");
+    }
 
 
 }

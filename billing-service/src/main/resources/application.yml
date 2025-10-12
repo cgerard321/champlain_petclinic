@@ -24,6 +24,12 @@ app:
   customers-service:
     host: customers-service-reactive
     port: 8090
+  auth-service:
+    host: auth-service
+    port: 7005
+  mailer-service:
+    host: mailer-service
+    port: 8888
 ---
 spring:
   config:
@@ -58,6 +64,12 @@ app:
   customers-service:
     host: customers-service-reactive
     port: 8080
+  auth-service:
+    host: auth-service
+    port: 7005
+  mailer-service:
+    host: mailer-service
+    port: 8888
 logging:
   level:
     root: INFO

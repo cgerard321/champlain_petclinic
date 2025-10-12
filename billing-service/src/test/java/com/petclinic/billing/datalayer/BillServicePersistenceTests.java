@@ -1,9 +1,12 @@
 package com.petclinic.billing.datalayer;
 
+import com.petclinic.billing.domainclientlayer.Auth.AuthServiceClient;
+import com.petclinic.billing.domainclientlayer.Auth.Rethrower;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import java.math.BigDecimal;
@@ -12,12 +15,17 @@ import java.time.ZoneId;
 import java.util.Calendar;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-
 @DataMongoTest
 public class BillServicePersistenceTests {
 
     @Autowired
     BillRepository repo;
+
+    @MockBean
+    AuthServiceClient authServiceClient;
+    
+    @MockBean
+    Rethrower rethrower;
 
     @Test
     void shouldSaveOneBill(){
