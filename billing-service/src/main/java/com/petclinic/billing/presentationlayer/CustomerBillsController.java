@@ -76,16 +76,14 @@ public class CustomerBillsController {
             @RequestBody PaymentRequestDTO paymentRequest,
             @CookieValue("Bearer") String jwtToken) {
 
-        String userEmail = "getEmail";
+        String userEmail = jwtToken; //  Placeholder NOT decoded yet need jwt Utils
 
-        return Mono.deferContextual(ctx ->
-                billService.processPayment(customerId, billId, paymentRequest)
+        return billService.processPayment(customerId, billId, paymentRequest)
                         .map(ResponseEntity::ok)
                         .onErrorResume(InvalidPaymentException.class,
                                 e -> Mono.just(ResponseEntity.status(HttpStatus.BAD_REQUEST).build()))
                         .onErrorResume(ResponseStatusException.class,
-                                e -> Mono.just(ResponseEntity.status(e.getStatus()).build()))
-        ).contextWrite(Context.of("userEmail", userEmail));
+                                e -> Mono.just(ResponseEntity.status(e.getStatus()).build()));
 
     }
 }

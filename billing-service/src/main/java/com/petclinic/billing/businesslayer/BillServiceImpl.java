@@ -352,12 +352,6 @@ public class BillServiceImpl implements BillService{
             return Mono.error(new InvalidPaymentException("Invalid payment details"));
         }
 
-        // Wrap logic in a contextual Mono to access user info
-        return Mono.deferContextual(ctx -> {
-
-            // Extract the userEmail from context (set in controller)
-            String userEmail = ctx.getOrDefault("userEmail", "unknown");
-
             // 2. Try to find the bill by customerId and billId.
             //    If no bill exists, immediately return a 404 ResponseStatusException.
             return billRepository.findByCustomerIdAndBillId(customerId, billId)
@@ -376,7 +370,7 @@ public class BillServiceImpl implements BillService{
 
                     // 5. Map the updated Bill entity into a BillResponseDTO before returning.
                     .map(EntityDtoUtil::toBillResponseDto);
-        });
+
     }
 
 
