@@ -118,6 +118,7 @@ class BillServiceClientIntegrationTest {
                 .verifyComplete();
     }
 
+
     @Test
     void getBillByVetId() throws Exception {
         server.enqueue(new MockResponse().setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -717,6 +718,93 @@ class BillServiceClientIntegrationTest {
     }
 
     @Test
+    void archiveBill_Success() throws Exception {
+        List<BillResponseDTO> archivedBills = Arrays.asList(
+                BillResponseDTO.builder()
+                        .billId("1")
+                        .amount(new BigDecimal(100.0))
+                        .taxedAmount(new BigDecimal(115.0))
+                        .customerId("1")
+                        .vetId("1")
+                        .visitType("Check up")
+                        .billStatus(BillStatus.PAID)
+                        .archive(false)
+                        .build(),
+                BillResponseDTO.builder()
+                        .billId("2")
+                        .amount(new BigDecimal(200.0))
+                        .taxedAmount(new BigDecimal(230.0))
+                        .customerId("2")
+                        .vetId("2")
+                        .visitType("Surgery")
+                        .billStatus(BillStatus.PAID)
+                        .archive(false)
+                        .build()
+        );
+
+        String responseBody = mapper.writeValueAsString(archivedBills);
+
+        prepareResponse(response -> response
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(responseBody)
+        );
+
+        Flux<BillResponseDTO> result = billServiceClient.archiveBill();
+
+        StepVerifier.create(result.collectList())
+                .expectNextMatches(bills -> {
+                    assertEquals(2, bills.size());
+                    assertTrue(bills.stream().anyMatch(bill -> "1".equals(bill.getBillId())));
+                    assertTrue(bills.stream().anyMatch(bill -> "2".equals(bill.getBillId())));
+                    return true;
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void archiveBill_FailsForUnpaidOrOverdueBills() throws Exception {
+        List<BillResponseDTO> bills = Arrays.asList(
+                BillResponseDTO.builder()
+                        .billId("1")
+                        .amount(new BigDecimal(100.0))
+                        .taxedAmount(new BigDecimal(115.0))
+                        .customerId("1")
+                        .vetId("1")
+                        .visitType("Check up")
+                        .billStatus(BillStatus.UNPAID)
+                        .archive(false)
+                        .build(),
+                BillResponseDTO.builder()
+                        .billId("2")
+                        .amount(new BigDecimal(200.0))
+                        .taxedAmount(new BigDecimal(230.0))
+                        .customerId("2")
+                        .vetId("2")
+                        .visitType("Surgery")
+                        .billStatus(BillStatus.OVERDUE)
+                        .archive(false)
+                        .build()
+        );
+
+        String responseBody = mapper.writeValueAsString(bills);
+
+        prepareResponse(response -> response
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(responseBody)
+        );
+
+        Flux<BillResponseDTO> result = billServiceClient.archiveBill();
+
+        StepVerifier.create(result.collectList())
+                .expectNextMatches(returnedBills -> {
+                    assertEquals(2, returnedBills.size());
+                    assertTrue(returnedBills.stream().allMatch(bill -> !bill.getArchive())); // Ensure no bills are archived
+                    return true;
+                })
+                .verifyComplete();
+    }
+
+
     void deleteBill_WhenBillIsUnpaid_ShouldReturn422_AndNotInvokeDelete() throws Exception {
         String billId = "B-123";
 
@@ -903,5 +991,150 @@ class BillServiceClientIntegrationTest {
                     assertEquals(404, w.getRawStatusCode());
                 })
                 .verify();
+    }
+
+    @Test
+    void getTotalNumberOfBills_Positive_ReturnsCount() throws Exception {
+        // Arrange
+        long totalBills = 100L;
+        prepareResponse(response -> response
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(String.valueOf(totalBills)));
+
+        // Act
+        Mono<Long> result = billServiceClient.getTotalNumberOfBills();
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNext(totalBills)
+                .verifyComplete();
+
+        RecordedRequest request = server.takeRequest();
+        assertEquals("GET", request.getMethod());
+        assertTrue(request.getPath().endsWith("/bills-count"));
+    }
+
+    @Test
+    void getTotalNumberOfBillsWithFilters_Positive_ReturnsFilteredCount() throws Exception {
+        // Arrange
+        long filteredBills = 50L;
+        prepareResponse(response -> response
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(String.valueOf(filteredBills)));
+
+        // Act
+        Mono<Long> result = billServiceClient.getTotalNumberOfBillsWithFilters(
+                "1", "123", "John", "Doe", "Checkup", "456", "Jane", "Smith");
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNext(filteredBills)
+                .verifyComplete();
+
+        RecordedRequest request = server.takeRequest();
+        assertEquals("GET", request.getMethod());
+        assertTrue(request.getPath().contains("/bills-filtered-count"));
+        assertTrue(request.getPath().contains("billId=1"));
+        assertTrue(request.getPath().contains("customerId=123"));
+        assertTrue(request.getPath().contains("ownerFirstName=John"));
+        assertTrue(request.getPath().contains("ownerLastName=Doe"));
+        assertTrue(request.getPath().contains("visitType=Checkup"));
+        assertTrue(request.getPath().contains("vetId=456"));
+        assertTrue(request.getPath().contains("vetFirstName=Jane"));
+        assertTrue(request.getPath().contains("vetLastName=Smith"));
+    }
+
+    @Test
+    void getTotalNumberOfBillsWithFilters_MissingFilters_ReturnsFilteredCount() throws Exception {
+        // Arrange
+        long filteredBills = 30L;
+        prepareResponse(response -> response
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(String.valueOf(filteredBills)));
+
+        // Act
+        Mono<Long> result = billServiceClient.getTotalNumberOfBillsWithFilters(
+                null, "123", null, "Doe", null, null, null, null);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNext(filteredBills)
+                .verifyComplete();
+
+        RecordedRequest request = server.takeRequest();
+        assertEquals("GET", request.getMethod());
+        assertTrue(request.getPath().contains("/bills-filtered-count"));
+        assertTrue(request.getPath().contains("customerId=123"));
+        assertTrue(request.getPath().contains("ownerLastName=Doe"));
+        assertFalse(request.getPath().contains("billId="));
+        assertFalse(request.getPath().contains("visitType="));
+    }
+
+    @Test
+    void getInterest_Positive_ReturnsInterest() throws Exception {
+        // Arrange
+        String billId = "B-123";
+        Double interest = 15.75;
+
+        prepareResponse(response -> response
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(String.valueOf(interest)));
+
+        // Act
+        Mono<Double> result = billServiceClient.getInterest(billId);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNext(interest)
+                .verifyComplete();
+
+        RecordedRequest request = server.takeRequest();
+        assertEquals("GET", request.getMethod());
+        assertTrue(request.getPath().contains("/" + billId + "/interest"));
+    }
+
+    @Test
+    void getTotalWithInterest_Positive_ReturnsTotal() throws Exception {
+        // Arrange
+        String billId = "B-123";
+        Double totalWithInterest = 115.75;
+
+        prepareResponse(response -> response
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(String.valueOf(totalWithInterest)));
+
+        // Act
+        Mono<Double> result = billServiceClient.getTotalWithInterest(billId);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNext(totalWithInterest)
+                .verifyComplete();
+
+        RecordedRequest request = server.takeRequest();
+        assertEquals("GET", request.getMethod());
+        assertTrue(request.getPath().contains("/" + billId + "/total"));
+    }
+
+    @Test
+    void setInterestExempt_Positive_SetsExemption() throws Exception {
+        // Arrange
+        String billId = "B-123";
+        boolean exempt = true;
+
+        prepareResponse(response -> response
+                .setResponseCode(204)); // No Content
+
+        // Act
+        Mono<Void> result = billServiceClient.setInterestExempt(billId, exempt);
+
+        // Assert
+        StepVerifier.create(result)
+                .verifyComplete();
+
+        RecordedRequest request = server.takeRequest();
+        assertEquals("PATCH", request.getMethod());
+        assertTrue(request.getPath().contains("/" + billId + "/exempt-interest"));
+        assertTrue(request.getPath().contains("exempt=true"));
     }
 }

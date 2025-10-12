@@ -15,4 +15,5 @@ export interface Bill {
   dueDate: string;
   timeRemaining: number;
   interestExempt: boolean;
+  archive: boolean;
 }

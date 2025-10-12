@@ -28,6 +28,8 @@ import {
 import PatchListingStatusButton from '../components/PatchListingStatusButton';
 import RecentlyViewedProducts from '@/features/products/components/RecentlyViewedProducts.tsx';
 import { useAddToCart } from '@/features/carts/api/addToCartFromProducts';
+import { useAddToWishlist } from '@/features/carts/api/addToWishlistFromProducts';
+import { FaHeart, FaCheck, FaTimes } from 'react-icons/fa';
 
 export default function ProductDetails(): JSX.Element {
   const isAdmin = IsAdmin();
@@ -39,6 +41,29 @@ export default function ProductDetails(): JSX.Element {
   const navigate = useNavigate();
   const { productId } = useParams();
   const { addToCart } = useAddToCart();
+  //------------------------------------------------------
+  const { addToWishlist } = useAddToWishlist();
+  const [quantity, setQuantity] = useState(1);
+  const handleMinus = (): void => {
+    if (quantity > 1) setQuantity(quantity - 1);
+  };
+  const handlePlus = (): void => {
+    setQuantity(quantity + 1);
+  };
+
+  const [successMessageWishlist, setSuccessMessageWishlist] = useState<
+    string | null
+  >(null);
+
+  const handleAddToWishlist = async (): Promise<void> => {
+    const isSuccess = await addToWishlist(currentProduct.productId, 1);
+    if (isSuccess) {
+      setSuccessMessageWishlist('Product added to wishlist successfully!');
+
+      // Clear the message after 3 seconds
+      setTimeout(() => setSuccessMessageWishlist(null), 3000);
+    }
+  };
 
   const [currentProduct, setCurrentProduct] =
     useState<ProductModel>(emptyProductModel);
@@ -56,6 +81,13 @@ export default function ProductDetails(): JSX.Element {
     });
   };
 
+  const getProductTypeLabel = (productType: string): string => {
+    if (productType === 'ACCESSORY') return 'Accessory';
+    if (productType === 'FOOD') return 'Food';
+    if (productType === 'MEDICATION') return 'Medication';
+    if (productType === 'EQUIPMENT') return 'Equipment';
+    return 'Unknown Product Type';
+  };
   const getDeliveryTypeLabel = (deliveryType: string): string => {
     if (deliveryType === 'DELIVERY') return 'Standard Delivery';
     if (deliveryType === 'PICKUP') return 'Pickup';
@@ -212,37 +244,108 @@ export default function ProductDetails(): JSX.Element {
                       Delete
                     </Button>
                   </div>
-                  <h2>{currentProduct.productName}</h2>
-                  <h3>{currentProduct.productSalePrice}$</h3>
+
+                  <h2>
+                    {currentProduct.productName}
+                    {!isInventoryManager && !isVet && !isReceptionist && (
+                      <button
+                        onClick={handleAddToWishlist}
+                        className="wishlist-btn"
+                      >
+                        <FaHeart className="wishlist-icon" /> Wishlist{' '}
+                      </button>
+                    )}
+                  </h2>
+                  {successMessageWishlist && (
+                    <p className="success-message">{successMessageWishlist}</p>
+                  )}
+
                   <div className="avgrating-container">
                     <StarRating
                       currentRating={currentProduct.averageRating}
                       viewOnly={true}
                     />
-                    <h3>{currentProduct.averageRating} / 5</h3>
+                    <h3>{currentProduct.averageRating} </h3>
+                    <div className="review-nums">
+                      {productReviews.length || 0} reviews{' '}
+                    </div>
                   </div>
+                  <div className="line"></div>
 
-                  <div className="cartactions-container">
-                    <Button
-                      onClick={handleAddToCartClick}
-                      disabled={isStaff}
-                      aria-disabled={isStaff}
-                    >
-                      Add to Cart
-                    </Button>
-                  </div>
-
-                  <p>Type: {currentProduct.productType}</p>
-                  <div className="deliveryTypeEdit-container">
-                    <p>
-                      Delivery Type:{' '}
+                  <p className="details-type">
+                    Type:
+                    <div className="box-details">
+                      {' '}
+                      {getProductTypeLabel(currentProduct.productType)}
+                    </div>
+                    Delivery Type:
+                    <div className="box-details">
                       {getDeliveryTypeLabel(currentProduct.deliveryType)}
-                    </p>
-                  </div>
-                  <h3>Description</h3>
-                  <p>{currentProduct.productDescription}</p>
-                </div>
+                    </div>
+                  </p>
 
+                  <h3 className="prod-price">
+                    {currentProduct.productSalePrice}$
+                  </h3>
+
+                  <div className="stock-details">
+                    <div className="inStock">
+                      {currentProduct.productQuantity >= 10 && (
+                        <p>
+                          {' '}
+                          <FaCheck /> In Stock - Available for Pickup
+                        </p>
+                      )}
+                    </div>
+                    <div className="outOfStock">
+                      {currentProduct.productQuantity === 0 && (
+                        <p>
+                          {' '}
+                          <FaTimes /> Out of Stock
+                        </p>
+                      )}
+                    </div>
+                    <div className="lowStock">
+                      {currentProduct.productQuantity > 0 &&
+                        currentProduct.productQuantity < 10 && (
+                          <p>
+                            {' '}
+                            <FaCheck /> Only a few left!
+                          </p>
+                        )}
+                    </div>
+                  </div>
+                  <h3 className="prod-desc-title">
+                    About this Product
+                    <p className="prod-description">
+                      {currentProduct.productDescription}
+                    </p>
+                  </h3>
+                  <div className=" cart-box">
+                    <div className=" quantity-selector">
+                      <button onClick={handleMinus} className="qty-btn">
+                        {'-'}
+                      </button>
+                      <input className="qty-input" value={quantity} readOnly />
+                      <button onClick={handlePlus} className="qty-btn">
+                        {'+'}
+                      </button>
+                    </div>
+
+                    {/* Single, final Add to Cart block */}
+                    {!isInventoryManager && !isVet && !isReceptionist && (
+                      <div className="cartactions-container">
+                        <Button
+                          onClick={handleAddToCartClick}
+                          disabled={isStaff}
+                          aria-disabled={isStaff}
+                        >
+                          Add to Cart
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </div>
                 <div className="review-section-container">
                   <div className="reviewproduct-container">
                     <h2>Review</h2>

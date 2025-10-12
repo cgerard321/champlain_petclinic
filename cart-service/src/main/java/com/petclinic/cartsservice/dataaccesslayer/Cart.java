@@ -32,4 +32,6 @@ public class Cart {
     private double tvc;
     private double total;
     private String invoiceId;
+    // Add recent purchases field
+    private List<CartProduct> recentPurchases;
 }

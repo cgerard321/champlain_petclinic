@@ -2,6 +2,8 @@ package com.petclinic.billing.businesslayer;
 
 import com.itextpdf.text.DocumentException;
 import com.petclinic.billing.datalayer.*;
+import com.petclinic.billing.domainclientlayer.OwnerClient;
+import com.petclinic.billing.domainclientlayer.VetClient;
 import com.petclinic.billing.exceptions.InvalidPaymentException;
 import com.petclinic.billing.exceptions.NotFoundException;
 import com.petclinic.billing.util.EntityDtoUtil;
@@ -17,6 +19,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.function.Predicate;
 
@@ -26,8 +29,8 @@ import java.util.function.Predicate;
 public class BillServiceImpl implements BillService{
 
     private final BillRepository billRepository;
-    //private final VetClient vetClient;
-    //private final OwnerClient ownerClient;
+    private final VetClient vetClient;
+    private final OwnerClient ownerClient;
 
 
    @Override
@@ -161,12 +164,35 @@ public class BillServiceImpl implements BillService{
                         ));
                     }
 
+                    // Validate vetId and customerId
+                    if (dto.getVetId() == null || dto.getVetId().isEmpty()) {
+                        return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Vet ID is required"));
+                    }
+                    if (dto.getCustomerId() == null || dto.getCustomerId().isEmpty()) {
+                        return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Customer ID is required"));
+                    }
 
-                    // Add more field checks if needed
-                    return Mono.just(dto);
+                    // Fetch Vet and Owner details
+                    Mono<VetResponseDTO> vetMono = vetClient.getVetByVetId(dto.getVetId());
+                    Mono<OwnerResponseDTO> ownerMono = ownerClient.getOwnerByOwnerId(dto.getCustomerId());
+
+                    return Mono.zip(vetMono, ownerMono, Mono.just(dto));
                 })
-                .map(EntityDtoUtil::toBillEntity)
-                .doOnNext(e -> e.setBillId(EntityDtoUtil.generateUUIDString()))
+                .map(tuple -> {
+                    VetResponseDTO vet = tuple.getT1();
+                    OwnerResponseDTO owner = tuple.getT2();
+                    BillRequestDTO dto = tuple.getT3();
+
+                    // Map to Bill entity and populate names
+                    Bill bill = EntityDtoUtil.toBillEntity(dto);
+                    bill.setBillId(EntityDtoUtil.generateUUIDString());
+                    bill.setVetFirstName(vet.getFirstName());
+                    bill.setVetLastName(vet.getLastName());
+                    bill.setOwnerFirstName(owner.getFirstName());
+                    bill.setOwnerLastName(owner.getLastName());
+
+                    return bill;
+                })
                 .flatMap(billRepository::insert)
                 .map(EntityDtoUtil::toBillResponseDto);
     }
@@ -380,6 +406,21 @@ public class BillServiceImpl implements BillService{
             })
             .then();
     }
+    @Override
+    public Flux<Bill> archiveBill() {
+        return billRepository.findAllByArchiveFalse()
+                .flatMap(bill -> {
+                    if (bill.getBillStatus() == BillStatus.UNPAID || bill.getBillStatus() == BillStatus.OVERDUE) {
+                        // No action needed; archive is already false by default.
+                    }
+                    else if (bill.getDate().isBefore(LocalDate.now().minusYears(1))) {
+                        bill.setArchive(true);
+                        return billRepository.save(bill);
+                    }
+                    return Mono.just(bill);
+                });
+    }
+
 
 
 }

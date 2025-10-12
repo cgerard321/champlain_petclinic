@@ -4,8 +4,6 @@ import com.petclinic.cartsservice.dataaccesslayer.Cart;
 import com.petclinic.cartsservice.dataaccesslayer.CartRepository;
 import com.petclinic.cartsservice.dataaccesslayer.cartproduct.CartProduct;
 import com.petclinic.cartsservice.domainclientlayer.ProductClient;
-import com.petclinic.cartsservice.domainclientlayer.ProductResponseModel;
-import com.petclinic.cartsservice.presentationlayer.CartRequestModel;
 import com.petclinic.cartsservice.presentationlayer.CartResponseModel;
 import com.petclinic.cartsservice.utils.EntityModelUtil;
 import com.petclinic.cartsservice.utils.exceptions.InvalidInputException;
@@ -21,13 +19,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
-import com.petclinic.cartsservice.utils.exceptions.NotFoundException;
 
 
 @Service
@@ -145,13 +138,50 @@ public class CartServiceImpl implements CartService {
                         return Mono.error(new InvalidInputException("Cart is empty"));
                     }
 
-                    // Create the invoice directly without a separate class
                     String invoiceId = UUID.randomUUID().toString();
                     List<CartProduct> products = cart.getProducts();
                     double total = calculateTotal(products);
 
                     // Log the invoice data (optional)
                     log.info("Generated Invoice: ID: {}, Cart ID: {}, Total: {}", invoiceId, cartId, total);
+
+                    // Append products to recentPurchases, preventing duplicates
+                    List<CartProduct> updatedRecentPurchases = cart.getRecentPurchases() != null
+                            ? new ArrayList<>(cart.getRecentPurchases())
+                            : new ArrayList<>();
+
+                    for (CartProduct purchasedProduct : products) {
+                        boolean found = false;
+                        for (CartProduct recent : updatedRecentPurchases) {
+                            if (recent.getProductId().equals(purchasedProduct.getProductId())) {
+                                // If already exists, update quantity or replace with new info
+                                recent.setQuantityInCart(
+                                        recent.getQuantityInCart() + purchasedProduct.getQuantityInCart()
+                                );
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (!found) {
+                            updatedRecentPurchases.add(purchasedProduct);
+                        }
+                    }
+
+                    // Optionally, remove duplicates and keep only the latest entry
+                    // Only uncomment this if the duplicates keep showing up, for now not needed
+                /*
+                updatedRecentPurchases = new ArrayList<>(
+                    updatedRecentPurchases.stream()
+                        .collect(Collectors.toMap(
+                            CartProduct::getProductId,
+                            Function.identity(),
+                            (a, b) -> b
+                        ))
+                        .values()
+                );
+                */
+
+                    cart.setRecentPurchases(updatedRecentPurchases);
 
                     // Clear the cart after checkout
                     cart.setProducts(Collections.emptyList());
@@ -625,6 +655,12 @@ public class CartServiceImpl implements CartService {
                                 return resp;
                             });
                 });
+    }
+
+    @Override
+    public Mono<List<CartProduct>> getRecentPurchases(String cartId) {
+        return cartRepository.findCartByCartId(cartId)
+                .map(cart -> cart.getRecentPurchases() != null ? cart.getRecentPurchases() : List.of());
     }
 
 }
