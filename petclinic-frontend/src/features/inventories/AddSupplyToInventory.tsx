@@ -5,10 +5,6 @@ import { addSupplyToInventory } from '@/features/inventories/api/AddSupplyToInve
 import { ProductRequestModel } from '@/features/inventories/models/InventoryModels/ProductRequestModel';
 import './AddSupplyToInventory.css';
 
-interface ApiError {
-  message: string;
-}
-
 const AddSupplyToInventory: React.FC = (): JSX.Element => {
   const { inventoryId } = useParams<{ inventoryId: string }>();
   const [product, setProduct] = useState<ProductRequestModel>({
@@ -68,8 +64,27 @@ const AddSupplyToInventory: React.FC = (): JSX.Element => {
         }, 2000);
       }
     } catch (error) {
-      const apiError = error as ApiError;
-      setErrorMessage(`Error adding supply: ${apiError.message}`);
+      const msg = error instanceof Error ? error.message || '' : '';
+
+      if (
+        msg.toLowerCase().includes('same name') ||
+        msg.toLowerCase().includes('already exists')
+      ) {
+        setError(prev => ({
+          ...prev,
+          productName:
+            prev.productName || 'This product name is already in use.',
+        }));
+      }
+
+      const next: Record<string, string> = {};
+      if (product.productPrice <= 0)
+        next.productPrice = 'Must be greater than 0';
+      if (product.productQuantity <= 0)
+        next.productQuantity = 'Must be greater than 0';
+      if (product.productSalePrice <= 0)
+        next.productSalePrice = 'Must be greater than 0';
+      if (Object.keys(next).length) setError(prev => ({ ...prev, ...next }));
     } finally {
       setLoading(false);
     }
@@ -77,13 +92,14 @@ const AddSupplyToInventory: React.FC = (): JSX.Element => {
 
   // Handle input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
-    setProduct({
-      ...product,
-      [e.target.name]:
-        e.target.type === 'number'
-          ? parseFloat(e.target.value)
-          : e.target.value,
-    });
+    const { name, value, type } = e.target;
+
+    setProduct(prev => ({
+      ...prev,
+      [name]: type === 'number' ? Number(value || 0) : value,
+    }));
+
+    setError(prev => ({ ...prev, [name]: '' })); // Clear error on change
   };
 
   return (
@@ -97,30 +113,43 @@ const AddSupplyToInventory: React.FC = (): JSX.Element => {
           <div className="add-supply-form-group">
             <label>Product Name</label>
             <input
-              className="add-supply-input"
+              className={`add-supply-input ${error.productName ? 'invalid animate' : ''}`}
               type="text"
               name="productName"
               value={product.productName}
               onChange={handleChange}
+              aria-invalid={!!error.productName}
+              aria-describedby={
+                error.productName ? 'err-productName' : undefined
+              }
               required
             />
             {error.productName && (
-              <span className="add-supply-error-text">{error.productName}</span>
+              <span id="err-productName" className="add-supply-error-text">
+                {error.productName}
+              </span>
             )}
           </div>
 
           <div className="add-supply-form-group">
             <label>Product Description</label>
             <input
-              className="add-supply-input"
+              className={`add-supply-input ${error.productDescription ? 'invalid animate' : ''}`}
               type="text"
               name="productDescription"
               value={product.productDescription}
               onChange={handleChange}
+              aria-invalid={!!error.productDescription}
+              aria-describedby={
+                error.productDescription ? 'err-productDescription' : undefined
+              }
               required
             />
             {error.productDescription && (
-              <span className="add-supply-error-text">
+              <span
+                id="err-productDescription"
+                className="add-supply-error-text"
+              >
                 {error.productDescription}
               </span>
             )}
@@ -129,15 +158,19 @@ const AddSupplyToInventory: React.FC = (): JSX.Element => {
           <div className="add-supply-form-group">
             <label>Product Price</label>
             <input
-              className="add-supply-input"
+              className={`add-supply-input ${error.productPrice ? 'invalid animate' : ''}`}
               type="number"
               name="productPrice"
               value={product.productPrice}
               onChange={handleChange}
+              aria-invalid={!!error.productPrice}
+              aria-describedby={
+                error.productPrice ? 'err-productPrice' : undefined
+              }
               required
             />
             {error.productPrice && (
-              <span className="add-supply-error-text">
+              <span id="err-productPrice" className="add-supply-error-text">
                 {error.productPrice}
               </span>
             )}
@@ -146,15 +179,19 @@ const AddSupplyToInventory: React.FC = (): JSX.Element => {
           <div className="add-supply-form-group">
             <label>Product Quantity</label>
             <input
-              className="add-supply-input"
+              className={`add-supply-input ${error.productQuantity ? 'invalid animate' : ''}`}
               type="number"
               name="productQuantity"
               value={product.productQuantity}
               onChange={handleChange}
+              aria-invalid={!!error.productQuantity}
+              aria-describedby={
+                error.productQuantity ? 'err-productQuantity' : undefined
+              }
               required
             />
             {error.productQuantity && (
-              <span className="add-supply-error-text">
+              <span id="err-productQuantity" className="add-supply-error-text">
                 {error.productQuantity}
               </span>
             )}
@@ -163,15 +200,19 @@ const AddSupplyToInventory: React.FC = (): JSX.Element => {
           <div className="add-supply-form-group">
             <label>Product Sale Price</label>
             <input
-              className="add-supply-input"
+              className={`add-supply-input ${error.productSalePrice ? 'invalid animate' : ''}`}
               type="number"
               name="productSalePrice"
               value={product.productSalePrice}
               onChange={handleChange}
+              aria-invalid={!!error.productSalePrice}
+              aria-describedby={
+                error.productSalePrice ? 'err-productSalePrice' : undefined
+              }
               required
             />
             {error.productSalePrice && (
-              <span className="add-supply-error-text">
+              <span id="err-productSalePrice" className="add-supply-error-text">
                 {error.productSalePrice}
               </span>
             )}

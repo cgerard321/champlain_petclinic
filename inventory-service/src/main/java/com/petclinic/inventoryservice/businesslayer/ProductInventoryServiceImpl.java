@@ -23,6 +23,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import org.springframework.data.domain.Pageable;
 
+import javax.security.auth.callback.TextInputCallback;
 import java.io.ByteArrayOutputStream;
 import java.util.Comparator;
 import java.time.LocalDateTime;
@@ -590,16 +591,23 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                         .flatMap(inventory -> {
                             if (requestDTO.getProductName() == null || requestDTO.getProductPrice() == null || requestDTO.getProductQuantity() == null || requestDTO.getProductSalePrice() == null) {
                                 return Mono.error(new InvalidInputException("Product must have an inventory id, product name, product price, and product quantity."));
-                            } else if (requestDTO.getProductPrice() < 0 || requestDTO.getProductQuantity() < 0 || requestDTO.getProductSalePrice() < 0) {
-                                return Mono.error(new InvalidInputException("Product price and quantity must be greater than 0."));
-                            } else {
+                            }
+                            if (requestDTO.getProductPrice() < 0 || requestDTO.getProductQuantity() < 0 || requestDTO.getProductSalePrice() < 0) {
+                                return Mono.error(new InvalidInputException("Product price quantity and sale price must be greater than 0."));
+                            }
+                            return productRepository.existsByInventoryIdAndProductNameIgnoreCase(inventoryId,requestDTO.getProductName())
+                                    .flatMap(exists -> {
+                                        if (exists) {
+                                            return Mono.error(new UnprocessableEntityException("A product with the name '" + requestDTO.getProductName() + "' already exists in this inventory."));
+                                    }
+
                                 Product product = EntityDTOUtil.toProductEntity(requestDTO);
                                 product.setInventoryId(inventoryId);
                                 product.setProductId(EntityDTOUtil.generateUUID());
                                 product.setLastUpdatedAt(LocalDateTime.now());
                                 return productRepository.save(product)
                                         .map(EntityDTOUtil::toProductResponseDTO);
-                            }
+                            });
                         }))
                 .switchIfEmpty(Mono.error(new InvalidInputException("Unable to save supply to the inventory, an error occurred.")));
 
