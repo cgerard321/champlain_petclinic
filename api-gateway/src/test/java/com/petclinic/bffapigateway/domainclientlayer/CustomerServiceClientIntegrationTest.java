@@ -653,4 +653,26 @@ public class CustomerServiceClientIntegrationTest {
         this.server.enqueue(response);
     }
 
+    @Test
+    void whenGetOwnerPhoto_thenReturnPhotoBytes() throws Exception {
+        byte[] mockPhotoBytes = "mockPhotoData".getBytes();
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(200)
+                .setHeader("Content-Type", "image/jpeg")
+                .setBody(new okio.Buffer().write(mockPhotoBytes)));
+
+        Mono<byte[]> result = customersServiceClient.getOwnerPhoto(OWNER_ID);
+
+        StepVerifier.create(result)
+                .expectNextMatches(bytes -> bytes.length == mockPhotoBytes.length &&
+                        new String(bytes).equals("mockPhotoData"))
+                .verifyComplete();
+
+        RecordedRequest request = server.takeRequest();
+        assertEquals("/owners/" + OWNER_ID + "/photos", request.getPath());
+        assertEquals("GET", request.getMethod());
+    }
+
+
 }
