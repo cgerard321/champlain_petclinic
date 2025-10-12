@@ -44,7 +44,12 @@ Back to [Main page](../README.md)
     - File data should only exist in memory when being sent to or received from the Files Service.
     - Database entities must store only the file’s `fileId` field.
     - The actual file data (e.g., `byte[] fileData`) belongs exclusively in the Files Service.
-   
+
+
+6. Never expose internal fileId values to the front end.
+    - fileId values are internal references used for service-to-service communication only.
+    - They must not appear in API responses or DTOs sent to clients.
+
 ## Backend Usage
 
 ### Backend Setup
@@ -266,19 +271,23 @@ Good Example from Customer-Service's ServiceImplement:
     @Override
     public Mono<OwnerResponseDTO> getOwnerByOwnerId(String ownerId, boolean includePhoto) {
         return ownerRepo.findOwnerByOwnerId(ownerId)
-                .switchIfEmpty(Mono.error(new NotFoundException("Owner not found with id : " + ownerId)))
+                .switchIfEmpty(Mono.error(new NotFoundException("Owner not found with id: " + ownerId)))
                 .flatMap(owner -> {
                     OwnerResponseDTO dto = EntityDTOUtil.toOwnerResponseDTO(owner);
-                    String fileId = (includePhoto && owner.getPhoto().getFileId() != null)
-                            ? owner.getPhoto().getFileId()
-                            : defaultPhotoId;
-                    return filesServiceClient.getFileById(fileId)
-                            .map(fileDetails -> {
-                                dto.setPhoto(fileDetails);
-                                return dto;
-                            });
+                    
+                    if (includePhoto && owner.getPhoto() != null) {
+                        return filesServiceClient.getFileById(owner.getPhoto().getFileId())
+                                .map(fileDetails -> {
+                                    dto.setPhoto(fileDetails);
+                                    return dto;
+                                })
+                                .onErrorReturn(dto);
+                    } else {
+                        dto.setPhoto(null);
+                        return Mono.just(dto);
+                    }
                 });
-        }
+    }
 ```
 
 #### 3. Update API Gateway Response Model
@@ -336,22 +345,28 @@ This approach is the simplest and only requires to update the addEntity of your 
 Good Example from Customer Service Implement:
 ```java
     @Override
-    public Mono<Owner> addOwner(Mono<OwnerRequestDTO> ownerRequestDTO) {
+    public Mono<OwnerResponseDTO> addOwner(Mono<OwnerRequestDTO> ownerRequestDTO) {
         return ownerRequestDTO
                 .flatMap(this::validateRequestDTO)
                 .flatMap(ownerRequest -> {
                     Owner owner = EntityDTOUtil.toOwner(ownerRequest);
-    
                     Mono<FileDetails> photoMono;
-    
+                    
                     if (ownerRequest.getPhoto() != null) {
                         photoMono = filesServiceClient.addFile(ownerRequest.getPhoto());
-                    } else
-                        photoMono = filesServiceClient.getFileById(defaultPhotoId);
-    
+                    } else {
+                        photoMono = Mono.empty();
+                    }
+
                     return photoMono
+                            .defaultIfEmpty(null)
                             .flatMap(photo -> {
-                                owner.setPhotoId(photo.getFileId());
+                                if (photo != null) {
+                                    owner.setPhotoId(photo.getFileId());
+                                } else {
+                                    owner.setPhotoId(null);
+                                }
+
                                 return ownerRepo.save(owner)
                                         .map(savedOwner -> {
                                             OwnerResponseDTO dto = EntityDTOUtil.toOwnerResponseDTO(savedOwner);
@@ -389,24 +404,42 @@ Good Example from Customer Service Implement:
 ```java
     @Override
     public Mono<OwnerResponseDTO> updateOwner(Mono<OwnerRequestDTO> ownerRequestDTO, String ownerId) {
-    
         return ownerRepo.findOwnerByOwnerId(ownerId)
-                .flatMap(existingOwner -> ownerRequestDTO.map(requestDTO -> {
-                    filesServiceClient.updateFile(existingOwner.getPhotoId(), requestDTO.getPhoto());
-                            
-                    existingOwner.setFirstName(requestDTO.getFirstName());
-                    existingOwner.setLastName(requestDTO.getLastName());
-                    existingOwner.setAddress(requestDTO.getAddress());
-                    existingOwner.setCity(requestDTO.getCity());
-                    existingOwner.setProvince(requestDTO.getProvince());
-                    existingOwner.setTelephone(requestDTO.getTelephone());
-                    return existingOwner;
-                } ))
+                .switchIfEmpty(Mono.error(new NotFoundException("Owner not found with id: " + ownerId)))
+                .flatMap(existingOwner ->
+                        ownerRequestDTO.flatMap(requestDTO -> {
+                            Mono<String> fileIdMono;
+
+                            if (existingOwner.getPhotoId() != null && requestDTO.getPhoto() != null) {
+                                fileIdMono = filesServiceClient.updateFile(existingOwner.getPhotoId(), requestDTO.getPhoto()).thenReturn(existingOwner.getPhotoId());
+                            } else if (requestDTO.getPhoto() != null) {
+                                fileIdMono = filesServiceClient.addFile(requestDTO.getPhoto()).map(FileResponseDTO::getFileId);
+                            } else if (existingOwner.getPhotoId() != null) {
+                                fileIdMono = filesServiceClient.deleteFile(existingOwner.getPhotoId()).thenReturn(null);
+                            } else {
+                                fileIdMono = Mono.justOrEmpty(existingOwner.getPhotoId());
+                            }
+
+                            return fileIdMono
+                                    .defaultIfEmpty(null)
+                                    .map(fileId -> {
+                                        existingOwner.setFirstName(requestDTO.getFirstName());
+                                        existingOwner.setLastName(requestDTO.getLastName());
+                                        existingOwner.setAddress(requestDTO.getAddress());
+                                        existingOwner.setCity(requestDTO.getCity());
+                                        existingOwner.setProvince(requestDTO.getProvince());
+                                        existingOwner.setTelephone(requestDTO.getTelephone());
+                                        existingOwner.setPhotoId(fileId);
+                                        return existingOwner;
+                                    });
+                        })
+                )
                 .flatMap(ownerRepo::save)
                 .map(EntityDTOUtil::toOwnerResponseDTO);
     }
 ```
-The id doesn't need to be saved again because it does not change.
+
+The downside is that even if the photo is not changed it will still update in the files Service, a patch approach would be more optimised.
 
 ### Delete File
 
@@ -416,22 +449,19 @@ Good Example from Customer Service Implement:
 
 ```java
     @Override
-    public Mono<OwnerResponseDTO> deleteOwnerByOwnerId(String ownerId) {
-        return ownerRepo.findOwnerByOwnerId(ownerId)
-                .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Course id not found: " + ownerId))))
-                .flatMap(found -> {
-                    Mono<Void> deleteOwnerMono = ownerRepo.delete(found);
-    
-                    Mono<Void> deletePhotoMono = Mono.empty();
-                    if (!found.getPhotoId().equals(defaultPhotoId)) {
-                        deletePhotoMono = filesServiceClient.deleteFileById(found.getPhotoId());
-                    }
-    
-                    return Mono.when(deleteOwnerMono, deletePhotoMono)
-                            .thenReturn(found);
-                })
-                .map(EntityDTOUtil::toOwnerResponseDTO);
-    }
+public Mono<OwnerResponseDTO> deleteOwnerByOwnerId(String ownerId) {
+    return ownerRepo.findOwnerByOwnerId(ownerId)
+            .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("OwnerId not found: " + ownerId))))
+            .flatMap(found -> {
+                Mono<Void> deletePhotoMono = Mono.justOrEmpty(found.getPhotoId())
+                        .flatMap(filesServiceClient::deleteFileById);
+                Mono<Void> deleteOwnerMono = ownerRepo.delete(found);
+
+                return Mono.when(deleteOwnerMono, deletePhotoMono)
+                        .thenReturn(found);
+            })
+            .map(EntityDTOUtil::toOwnerResponseDTO);
+}
 ```
 
 If the file needs to be deleted without the entire entity, follow [Add New Patch Endpoint](#add-new-patch-endpoint)
@@ -462,7 +492,7 @@ export interface OwnerResponseModel {
 ### React Display Image
 
 ```html
-<img 
+<img
         src={`data:${fileDetails.fileType};base64,${fileDetails.fileData}`}
         alt={`${fileDetails.fileName}`}
 />
