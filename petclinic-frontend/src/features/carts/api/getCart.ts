@@ -27,7 +27,7 @@ export async function fetchCartCountByCartId(cartId: string): Promise<number> {
     const n = Number(data?.itemCount);
     return Number.isFinite(n) && n >= 0 ? Math.trunc(n) : 0;
   } catch (error) {
-    console.error('Error fetching cart count for ${cartId}', error);
+    console.error(`Error fetching cart count for ${cartId}`, error);
     return 0;
   }
 }
