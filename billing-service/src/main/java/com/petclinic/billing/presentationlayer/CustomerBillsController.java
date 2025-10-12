@@ -78,7 +78,7 @@ public class CustomerBillsController {
         String userEmail = jwtToken; //  Placeholder NOT decoded yet need JWT Utils
 
         return billService.processPayment(customerId, billId, paymentRequest)
-                        .map(ResponseEntity::ok)
+                .map(ResponseEntity::ok)
                         .onErrorResume(InvalidPaymentException.class,
                                 e -> Mono.just(ResponseEntity.status(HttpStatus.BAD_REQUEST).build()))
                         .onErrorResume(ResponseStatusException.class,
