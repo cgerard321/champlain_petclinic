@@ -14,15 +14,12 @@ import { Navbar, Nav, NavDropdown, Container } from 'react-bootstrap';
 import { FaShoppingCart } from 'react-icons/fa'; // Importing the shopping cart icon
 import './AppNavBar.css';
 
-// localStorage-driven cart badge (no API calls in navbar)
-import {
-  CART_CHANGED,
-  getCartIdFromLS,
-  getCartCountFromLS,
-} from '@/features/carts/api/cartEvent';
+// Uses centralized cart context
+import { useCart } from '@/context/CartContext';
 
 export function NavBar(): JSX.Element {
   const { user } = useUser();
+  const { cartCount, refreshFromAPI } = useCart();
   const navigate = useNavigate();
   const isAdmin = IsAdmin();
   const isInventoryManager = IsInventoryManager();
@@ -30,17 +27,17 @@ export function NavBar(): JSX.Element {
   const isVet = IsVet();
   const isOwner = IsOwner();
   const [navbarOpen, setNavbarOpen] = useState(false);
-  const [cartId, setCartId] = useState<string | null>(null);
-  const [cartItemCount, setCartItemCount] = useState<number>(0); // State for cart item count
+  const [cartItemCount, setCartItemCount] = useState<number>(cartCount);
+  const [cartLoading, setCartLoading] = useState(false);
 
   const logoutUser = (): void => {
-    // Client-side logout only; keep API calls out of navbar
+    // Client-side logout only. Keep API calls out of navbar
     try {
       localStorage.removeItem('user');
       localStorage.removeItem('cart:id');
       localStorage.removeItem('cart:count');
     } catch {
-      /* ignore */
+      // ignore
     }
     navigate(AppRoutePaths.Login);
     window.location.reload();
@@ -50,47 +47,35 @@ export function NavBar(): JSX.Element {
     setNavbarOpen(prevNavbarOpen => !prevNavbarOpen);
   };
 
-  // LocalStorage-driven sync (no network here)
-  const refreshFromLocalStorage = useCallback(() => {
-    setCartId(getCartIdFromLS());
-    setCartItemCount(getCartCountFromLS());
-  }, []);
-
+  // keep local cart badge in sync with cart context
   useEffect(() => {
-    // initialize from LS
-    refreshFromLocalStorage();
-    // same-tab updates
-    const onCartChanged = (): void => refreshFromLocalStorage();
-    // cross-tab updates
-    const onStorage = (e: StorageEvent): void => {
-      if (
-        e.key === 'cart:changed' ||
-        e.key === 'cart:count' ||
-        e.key === 'cart:id'
-      ) {
-        refreshFromLocalStorage();
-      }
-    };
+    setCartItemCount(cartCount);
+  }, [cartCount]);
 
-    window.addEventListener(
-      CART_CHANGED as unknown as string,
-      onCartChanged as EventListener
-    );
-    window.addEventListener('storage', onStorage);
-    return () => {
-      window.removeEventListener(
-        CART_CHANGED as unknown as string,
-        onCartChanged as EventListener
-      );
-      window.removeEventListener('storage', onStorage);
-    };
-  }, [
-    refreshFromLocalStorage,
-    user.userId,
-    isInventoryManager,
-    isReceptionist,
-    isVet,
-  ]);
+  const goToCart = useCallback(async () => {
+    if (!user?.userId) {
+      // not logged in? Then send to login.
+      navigate(AppRoutePaths.Login);
+      return;
+    }
+    if (cartLoading) return; // prevent multiple clicks
+    setCartLoading(true);
+    try {
+      // Fetch the latest cart ID and count before redirecting
+      const { cartId: resolvedId } = await refreshFromAPI();
+      if (resolvedId) {
+        navigate(AppRoutePaths.UserCart.replace(':cartId', resolvedId));
+        // if no active cart, redirect to shop
+      } else {
+        navigate(AppRoutePaths.Products);
+      }
+    } catch (e) {
+      console.error('Could not go to cart: ' + e);
+      navigate(AppRoutePaths.Products);
+    } finally {
+      setCartLoading(false);
+    }
+  }, [user?.userId, navigate, cartLoading, refreshFromAPI]);
 
   return (
     <Navbar bg="light" expand="lg" className="navbar">
@@ -203,13 +188,14 @@ export function NavBar(): JSX.Element {
 
                 {isOwner && (
                   <Nav.Link
-                    as={Link}
-                    to={
-                      cartId
-                        ? AppRoutePaths.UserCart.replace(':cartId', cartId)
-                        : AppRoutePaths.Products // working on this atm.
-                    }
+                    href="#"
+                    onClick={e => {
+                      e.preventDefault();
+                      void goToCart();
+                    }}
+                    aria-busy={cartLoading}
                     className={`cart-link${cartItemCount === 0 ? ' cart-empty' : ''}`}
+                    title={cartLoading ? 'Loading cart...' : 'View Cart'}
                   >
                     <FaShoppingCart aria-label="Shopping Cart" />
                     {cartItemCount > 0 && (
