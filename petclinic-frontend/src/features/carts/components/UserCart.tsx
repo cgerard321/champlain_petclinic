@@ -677,7 +677,6 @@ const UserCart = (): JSX.Element => {
     <div>
       <NavBar />
       <ConfirmModal />
-      <h2 className="cart-header-title">Your Cart</h2>
       <div className="UserCart-container">
         {notificationMessage && (
           <div className="notification-message">
@@ -694,7 +693,14 @@ const UserCart = (): JSX.Element => {
 
         <div className="UserCart-checkout-flex">
           <div className="UserCart">
-            <div className="cart-header">
+            <div
+              className="cart-header"
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
               <div className="cart-badge-container">
                 <FaShoppingCart aria-label="Shopping Cart" />
                 {cartItemCount > 0 && (
@@ -706,6 +712,13 @@ const UserCart = (): JSX.Element => {
                   </span>
                 )}
               </div>
+              <button
+                className="continue-shopping-btn"
+                onClick={() => navigate('/products')}
+                style={{ marginLeft: 'auto' }}
+              >
+                Continue Shopping
+              </button>
             </div>
 
             <div className="cart-items-container">
@@ -725,29 +738,27 @@ const UserCart = (): JSX.Element => {
                   />
                 ))
               ) : (
-                <p className="empty-cart-message">No products in the cart.</p>
+                <div className="empty-cart-visual">
+                  <span
+                    className="empty-cart-icon"
+                    role="img"
+                    aria-label="empty-cart"
+                  >
+                    🛒
+                  </span>
+                  <div className="empty-cart-message">
+                    Looks like your cart is empty! Why not add something?
+                  </div>
+                </div>
               )}
             </div>
 
             <div className="UserCart-buttons">
-              <button
-                className="continue-shopping-btn"
-                onClick={() => navigate('/products')}
-              >
-                Continue Shopping
-              </button>
-              <button
-                className="clear-cart-btn"
-                onClick={clearCart}
-                disabled={isStaff}
-                title={
-                  isStaff
-                    ? 'Read-only: staff/admin cannot clear carts'
-                    : undefined
-                }
-              >
-                Clear Cart
-              </button>
+              {cartItems.length > 0 && (
+                <button className="clear-cart-btn" onClick={clearCart}>
+                  Clear Cart
+                </button>
+              )}
             </div>
           </div>
 
@@ -865,62 +876,25 @@ const UserCart = (): JSX.Element => {
         </div>
 
         {/* Recent Purchases Section - above Wishlist */}
-        <div
-          className="recent-purchases-section"
-          style={{ marginBottom: '2rem' }}
-        >
+        <div className="recent-purchases-section">
           <h2>Recent Purchases</h2>
-          <div
-            className="recent-purchases-list"
-            style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}
-          >
+          <div className="recent-purchases-list">
             {recentPurchasesList.length > 0 ? (
               recentPurchasesList.map(item => (
-                <div
-                  key={item.productId}
-                  className="recent-purchase-card"
-                  style={{
-                    border: '1px solid #eee',
-                    borderRadius: 8,
-                    padding: 16,
-                    minWidth: 180,
-                    maxWidth: 200,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                  }}
-                >
-                  <div
-                    style={{
-                      width: 48,
-                      height: 48,
-                      marginBottom: 8,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      overflow: 'hidden',
-                    }}
-                  >
+                <div key={item.productId} className="recent-purchase-card">
+                  <div className="recent-purchase-image-container">
                     <div className="recent-purchase-image">
                       <ImageContainer imageId={item.imageId} />
                     </div>
                   </div>
-                  <div style={{ fontWeight: 'bold', marginBottom: 4 }}>
-                    {item.productName}
-                  </div>
-                  <div style={{ marginBottom: 8 }}>
+                  <div className="recent-purchase-name">{item.productName}</div>
+                  <div className="recent-purchase-price">
                     ${item.productSalePrice.toFixed(2)}
                   </div>
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      marginBottom: 8,
-                    }}
-                  >
+                  <div className="recent-purchase-qty-row">
                     <label
                       htmlFor={`recent-qty-${item.productId}`}
-                      style={{ marginRight: 8 }}
+                      className="recent-purchase-qty-label"
                     >
                       Qty:
                     </label>
@@ -935,25 +909,16 @@ const UserCart = (): JSX.Element => {
                           Number(e.target.value)
                         )
                       }
-                      style={{ width: 48 }}
+                      className="recent-purchase-qty-input"
                     />
                   </div>
                   <button
                     className="purchase-again-btn"
-                    style={{
-                      background: '#1976d2',
-                      color: '#fff',
-                      border: 'none',
-                      borderRadius: 4,
-                      padding: '6px 12px',
-                      cursor: 'pointer',
-                      fontWeight: 'bold',
-                    }}
                     onClick={() => handlePurchaseAgain(item)}
                   >
                     Purchase Again
                   </button>
-                  <div style={{ marginTop: 8, fontSize: 12, color: '#555' }}>
+                  <div className="recent-purchase-total">
                     Total: $
                     {(
                       item.productSalePrice *
