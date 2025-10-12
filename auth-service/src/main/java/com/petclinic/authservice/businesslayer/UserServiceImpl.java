@@ -244,7 +244,7 @@ public class UserServiceImpl implements UserService {
             }};
         }
         catch (BadCredentialsException e){
-            throw new IncorrectPasswordException("Incorrect password for user with email: " + login.getEmail());
+            throw new IncorrectPasswordException("Incorrect username or password for user: " + login.getEmail());
         }
     }
 
