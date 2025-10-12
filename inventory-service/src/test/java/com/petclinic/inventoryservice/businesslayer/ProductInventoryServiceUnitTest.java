@@ -1289,6 +1289,10 @@ class ProductInventoryServiceUnitTest {
         when(inventoryRepository.findInventoryByInventoryCode(inventoryCode))
                 .thenReturn(Mono.just(inventory));
 
+        // ✅ add this line
+        when(productRepository.countByInventoryIdAndLastUpdatedAtAfter(eq("1"), any(LocalDateTime.class)))
+                .thenReturn(Mono.just(0L));
+
         Flux<InventoryResponseDTO> result = productInventoryService.searchInventories(
                 pageable, inventoryCode, null, null, null, null);
 
