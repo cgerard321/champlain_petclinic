@@ -13,26 +13,19 @@ import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.when;
 
-class FileRequestDTO {}
-class FileResponseDTO {}
-
-interface FilesServiceRethrower {
-    Throwable rethrow(Throwable t, String context);
-}
-
 @ExtendWith(MockitoExtension.class)
-public class FileServiceClientTests {
+class FilesServiceClientTest {
 
     @Mock
     private WebClient webClient;
+
+    @Mock
+    private WebClient.Builder webClientBuilder;
     @Mock
     private WebClient.RequestHeadersUriSpec requestHeadersUriSpec;
     @Mock
@@ -50,7 +43,9 @@ public class FileServiceClientTests {
 
     @BeforeEach
     void setUp() {
-        filesServiceClient = new FilesServiceClient(webClient, rethrower);
+        when(webClientBuilder.build()).thenReturn(webClient);
+        filesServiceClient = new FilesServiceClient(webClientBuilder, "test-host", "test-port");
+        when(responseSpec.onStatus(any(), any())).thenReturn(responseSpec);
     }
 
     @Test
@@ -59,9 +54,16 @@ public class FileServiceClientTests {
         when(requestHeadersUriSpec.uri(anyString(), anyString())).thenReturn(requestHeadersSpec);
         when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
 
-        when(responseSpec.bodyToMono(FileResponseDTO.class)).thenReturn(Mono.error(new RuntimeException("Simulated HTTP Error")));
-
         doThrow(new NotFoundException("File not found")).when(rethrower).rethrow(any(), any());
+
+        doAnswer(invocation -> {
+            try {
+                rethrower.rethrow(null, null);
+                return Mono.empty();
+            } catch (Throwable t) {
+                return Mono.error(t);
+            }
+        }).when(responseSpec).bodyToMono(FileResponseDTO.class);
 
         StepVerifier.create(filesServiceClient.getFile("missing"))
                 .expectError(NotFoundException.class)
@@ -78,10 +80,16 @@ public class FileServiceClientTests {
         when(requestBodyUriSpec.contentType(MediaType.APPLICATION_JSON)).thenReturn(requestBodyUriSpec);
         when(requestBodyUriSpec.bodyValue(any())).thenReturn(requestHeadersSpec);
         when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
-
-        when(responseSpec.bodyToMono(FileResponseDTO.class)).thenReturn(Mono.error(new RuntimeException("Simulated HTTP Error")));
-
         doThrow(new BadRequestException("Bad request")).when(rethrower).rethrow(any(), any());
+
+        doAnswer(invocation -> {
+            try {
+                rethrower.rethrow(null, null);
+                return Mono.empty();
+            } catch (Throwable t) {
+                return Mono.error(t);
+            }
+        }).when(responseSpec).bodyToMono(FileResponseDTO.class);
 
         StepVerifier.create(filesServiceClient.AddFile(requestDTO))
                 .expectError(BadRequestException.class)
@@ -99,9 +107,15 @@ public class FileServiceClientTests {
         when(requestBodyUriSpec.bodyValue(any())).thenReturn(requestHeadersSpec);
         when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
 
-        when(responseSpec.bodyToMono(FileResponseDTO.class)).thenReturn(Mono.error(new RuntimeException("Simulated HTTP Error")));
-
         doThrow(new InvalidInputException("Invalid input")).when(rethrower).rethrow(any(), any());
+        doAnswer(invocation -> {
+            try {
+                rethrower.rethrow(null, null);
+                return Mono.empty();
+            } catch (Throwable t) {
+                return Mono.error(t);
+            }
+        }).when(responseSpec).bodyToMono(FileResponseDTO.class);
 
         StepVerifier.create(filesServiceClient.UpdateFile("file1", requestDTO))
                 .expectError(InvalidInputException.class)
@@ -115,9 +129,16 @@ public class FileServiceClientTests {
         when(requestHeadersUriSpec.uri(anyString(), anyString())).thenReturn(requestHeadersSpec);
         when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
 
-        when(responseSpec.bodyToMono(Void.class)).thenReturn(Mono.error(new RuntimeException("Simulated HTTP Error")));
-
         doThrow(new RuntimeException("Server error")).when(rethrower).rethrow(any(), any());
+
+        doAnswer(invocation -> {
+            try {
+                rethrower.rethrow(null, null);
+                return Mono.empty();
+            } catch (Throwable t) {
+                return Mono.error(t);
+            }
+        }).when(responseSpec).bodyToMono(Void.class);
 
         StepVerifier.create(filesServiceClient.DeleteFile("file1"))
                 .expectError(RuntimeException.class)
@@ -127,17 +148,14 @@ public class FileServiceClientTests {
 
     @Test
     void testGetFile_ShouldReturnFileSuccessfully() {
-        // Arrange
         FileResponseDTO expectedResponse = new FileResponseDTO();
 
         when(webClient.get()).thenReturn(requestHeadersUriSpec);
         when(requestHeadersUriSpec.uri(anyString(), anyString())).thenReturn(requestHeadersSpec);
         when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
 
-        // Simulate successful 200 OK response
         when(responseSpec.bodyToMono(FileResponseDTO.class)).thenReturn(Mono.just(expectedResponse));
 
-        // Act & Assert
         StepVerifier.create(filesServiceClient.getFile("file1"))
                 .expectNext(expectedResponse)
                 .verifyComplete();
@@ -145,7 +163,6 @@ public class FileServiceClientTests {
 
     @Test
     void testAddFile_ShouldCreateFileSuccessfully() {
-        // Arrange
         FileRequestDTO requestDTO = new FileRequestDTO();
         FileResponseDTO expectedResponse = new FileResponseDTO();
 
@@ -155,10 +172,8 @@ public class FileServiceClientTests {
         when(requestBodyUriSpec.bodyValue(any())).thenReturn(requestHeadersSpec);
         when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
 
-        // Simulate successful 201 Created response
         when(responseSpec.bodyToMono(FileResponseDTO.class)).thenReturn(Mono.just(expectedResponse));
 
-        // Act & Assert
         StepVerifier.create(filesServiceClient.AddFile(requestDTO))
                 .expectNext(expectedResponse)
                 .verifyComplete();
@@ -166,7 +181,6 @@ public class FileServiceClientTests {
 
     @Test
     void testUpdateFile_ShouldUpdateFileSuccessfully() {
-        // Arrange
         FileRequestDTO requestDTO = new FileRequestDTO();
         FileResponseDTO expectedResponse = new FileResponseDTO();
 
@@ -176,10 +190,8 @@ public class FileServiceClientTests {
         when(requestBodyUriSpec.bodyValue(any())).thenReturn(requestHeadersSpec);
         when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
 
-        // Simulate successful 200 OK response
         when(responseSpec.bodyToMono(FileResponseDTO.class)).thenReturn(Mono.just(expectedResponse));
 
-        // Act & Assert
         StepVerifier.create(filesServiceClient.UpdateFile("file1", requestDTO))
                 .expectNext(expectedResponse)
                 .verifyComplete();
@@ -187,16 +199,13 @@ public class FileServiceClientTests {
 
     @Test
     void testDeleteFile_ShouldCompleteSuccessfully() {
-        // Arrange
         when(webClient.delete()).thenReturn(requestHeadersUriSpec);
         when(requestHeadersUriSpec.uri(anyString(), anyString())).thenReturn(requestHeadersSpec);
         when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
 
-        // Simulate successful 204 No Content response for deletion
         when(responseSpec.bodyToMono(Void.class)).thenReturn(Mono.empty());
 
-        // Act & Assert
         StepVerifier.create(filesServiceClient.DeleteFile("file1"))
-                .verifyComplete(); // Expects successful completion with no value
+                .verifyComplete();
     }
 }
