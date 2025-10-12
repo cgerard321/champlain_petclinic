@@ -269,7 +269,7 @@ public class UserServiceImpl implements UserService {
             String resetPasswordLink =  userResetPwdRequestModel.getUrl() + token;
             sendEmailForgotPassword(email, resetPasswordLink);
         } catch (Exception ex) {
-            throw new InvalidInputException(ex.getMessage());
+            throw new NotFoundException(ex.getMessage());
         }
     }
 

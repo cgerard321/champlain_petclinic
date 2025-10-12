@@ -251,7 +251,7 @@ public class AuthServiceUserServiceTests {
                     .thenReturn(Optional.empty());
 
         // Act
-        assertThrows(IllegalArgumentException.class, () -> userService.updateResetPasswordToken(token, email));
+        assertThrows(NotFoundException.class, () -> userService.updateResetPasswordToken(token, email));
         // Assert
         // IllegalArgumentException should be thrown
     }
