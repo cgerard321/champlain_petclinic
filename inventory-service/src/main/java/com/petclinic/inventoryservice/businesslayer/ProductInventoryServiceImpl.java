@@ -315,17 +315,32 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
 
         if (inventoryCode != null && !inventoryCode.trim().isEmpty()) {
             return inventoryRepository.findInventoryByInventoryCode(inventoryCode)
-                    .map(EntityDTOUtil::toInventoryResponseDTO)
+                    .flatMap(inventory ->
+                            getRecentUpdateMessage(inventory.getInventoryId())
+                                    .map(message -> {
+                                        InventoryResponseDTO dto = EntityDTOUtil.toInventoryResponseDTO(inventory);
+                                        dto.setRecentUpdateMessage(message);
+                                        return dto;
+                                    })
+                    )
                     .flux()
                     .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with Code: " + inventoryCode)));
         }
 
+
         if (inventoryName != null && inventoryType != null && inventoryDescription != null) {
             return inventoryRepository
                     .findAllByInventoryNameAndInventoryTypeAndInventoryDescription(inventoryName, inventoryType, inventoryDescription)
-                    .map(EntityDTOUtil::toInventoryResponseDTO)
                     .skip(page.getPageNumber() * page.getPageSize())
                     .take(page.getPageSize())
+                    .flatMap(inventory ->
+                            getRecentUpdateMessage(inventory.getInventoryId())
+                                    .map(message -> {
+                                        InventoryResponseDTO dto = EntityDTOUtil.toInventoryResponseDTO(inventory);
+                                        dto.setRecentUpdateMessage(message);
+                                        return dto;
+                                    })
+                    )
                     .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with Name: " + inventoryName +
                             ", Type: " + inventoryType + ", Description: " + inventoryDescription)));
         }
@@ -333,71 +348,104 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
         if (inventoryType != null && inventoryDescription != null) {
             return inventoryRepository
                     .findAllByInventoryTypeAndInventoryDescription(inventoryType, inventoryDescription)
-                    .map(EntityDTOUtil::toInventoryResponseDTO)
                     .skip(page.getPageNumber() * page.getPageSize())
                     .take(page.getPageSize())
+                    .flatMap(inventory ->
+                            getRecentUpdateMessage(inventory.getInventoryId())
+                                    .map(message -> {
+                                        InventoryResponseDTO dto = EntityDTOUtil.toInventoryResponseDTO(inventory);
+                                        dto.setRecentUpdateMessage(message);
+                                        return dto;
+                                    })
+                    )
                     .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with Type: " + inventoryType +
                             " and Description: " + inventoryDescription)));
         }
-
         if (inventoryName != null) {
-            String escapedInventoryName = Pattern.quote(inventoryName); // escape any special characters
-
-            // Regex pattern for partial or full name match
+            String escapedInventoryName = Pattern.quote(inventoryName);
             String regexPattern = "(?i)^" + escapedInventoryName + ".*";
 
-            // If only one character is provided, match all that starts with that character
             if (inventoryName.length() == 1) {
                 return inventoryRepository
                         .findByInventoryNameRegex(regexPattern)
-                        .map(EntityDTOUtil::toInventoryResponseDTO)
                         .skip(page.getPageNumber() * page.getPageSize())
                         .take(page.getPageSize())
+                        .flatMap(inventory ->
+                                getRecentUpdateMessage(inventory.getInventoryId())
+                                        .map(message -> {
+                                            InventoryResponseDTO dto = EntityDTOUtil.toInventoryResponseDTO(inventory);
+                                            dto.setRecentUpdateMessage(message);
+                                            return dto;
+                                        })
+                        )
                         .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found starting with: " + inventoryName)));
-            }
-            // For any other input, match starting characters or the exact name
-            else {
+            } else {
                 return inventoryRepository
                         .findByInventoryNameRegex(regexPattern)
-                        .map(EntityDTOUtil::toInventoryResponseDTO)
                         .skip(page.getPageNumber() * page.getPageSize())
                         .take(page.getPageSize())
+                        .flatMap(inventory ->
+                                getRecentUpdateMessage(inventory.getInventoryId())
+                                        .map(message -> {
+                                            InventoryResponseDTO dto = EntityDTOUtil.toInventoryResponseDTO(inventory);
+                                            dto.setRecentUpdateMessage(message);
+                                            return dto;
+                                        })
+                        )
                         .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with Name starting with or matching: " + inventoryName)));
             }
         }
 
-
-        if (inventoryType != null) {
+        if (inventoryType != null /* … */) {
             return inventoryRepository
                     .findAllByInventoryType(inventoryType)
-                    .map(EntityDTOUtil::toInventoryResponseDTO)
                     .skip(page.getPageNumber() * page.getPageSize())
                     .take(page.getPageSize())
+                    .flatMap(inventory ->
+                            getRecentUpdateMessage(inventory.getInventoryId())
+                                    .map(message -> {
+                                        InventoryResponseDTO dto = EntityDTOUtil.toInventoryResponseDTO(inventory);
+                                        dto.setRecentUpdateMessage(message);
+                                        return dto;
+                                    })
+                    )
                     .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with Type: " + inventoryType)));
         }
 
         if (inventoryDescription != null) {
-
             String escapedInventoryDescription = Pattern.quote(inventoryDescription);
             String regexPattern = "(?i)^" + escapedInventoryDescription + ".*";
 
             if (inventoryDescription.length() == 1) {
                 return inventoryRepository
                         .findByInventoryDescriptionRegex(regexPattern)
-                        .map(EntityDTOUtil::toInventoryResponseDTO)
                         .skip(page.getPageNumber() * page.getPageSize())
                         .take(page.getPageSize())
+                        .flatMap(inventory ->
+                                getRecentUpdateMessage(inventory.getInventoryId())
+                                        .map(message -> {
+                                            InventoryResponseDTO dto = EntityDTOUtil.toInventoryResponseDTO(inventory);
+                                            dto.setRecentUpdateMessage(message);
+                                            return dto;
+                                        })
+                        )
                         .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with Description: " + inventoryDescription)));
             } else {
                 return inventoryRepository
                         .findByInventoryDescriptionRegex(regexPattern)
-                        .map(EntityDTOUtil::toInventoryResponseDTO)
                         .skip(page.getPageNumber() * page.getPageSize())
                         .take(page.getPageSize())
+                        .flatMap(inventory ->
+                                getRecentUpdateMessage(inventory.getInventoryId())
+                                        .map(message -> {
+                                            InventoryResponseDTO dto = EntityDTOUtil.toInventoryResponseDTO(inventory);
+                                            dto.setRecentUpdateMessage(message);
+                                            return dto;
+                                        })
+                        )
                         .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with Name starting with or matching: " + inventoryName)));
             }
         }
-
         // Default - fetch all if no criteria provided.
         Flux<Inventory> inventoryFlux = inventoryRepository.findAll();
 

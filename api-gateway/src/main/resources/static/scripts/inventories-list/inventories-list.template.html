@@ -21,6 +21,7 @@
     <td>Name</td>
     <td>Type</td>
     <td>Description</td>
+    <td>Updates</td>
     <td></td>
     <td></td>
     <td></td>
@@ -71,8 +72,7 @@
     </td>
     <td><span>{{inventory.inventoryType}}</span></td>
     <td><span>{{inventory.inventoryDescription}}</span></td>
-
-
+    <td><span>{{ inventory.recentUpdateMessage || '—' }}</span></td>
     <td>
     <td>
       <a class="btn btn-warning" ui-sref="updateInventory({inventoryId: inventory.inventoryId, method: 'edit'})" ng-click="$event.stopPropagation()" title="Edit">
@@ -138,5 +138,3 @@
   <button class="add-inventory-button btn btn-success">Add Inventory</button>
 
 </a>
-
-
