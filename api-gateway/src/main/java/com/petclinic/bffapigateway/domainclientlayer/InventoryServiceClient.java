@@ -284,6 +284,10 @@ public class InventoryServiceClient {
                 .uri(inventoryServiceUrl + "/type")
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
+                .onStatus(status -> status.value() == 404,
+                        resp -> rethrower.rethrow(
+                                resp,
+                                ex -> new NotFoundException(String.valueOf(ex.get("message")))))
                 .bodyToFlux(InventoryTypeResponseDTO.class);
     }
 
