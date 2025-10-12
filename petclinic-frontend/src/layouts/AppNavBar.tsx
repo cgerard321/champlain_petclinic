@@ -8,7 +8,7 @@ import {
   useUser,
 } from '@/context/UserContext';
 import { AppRoutePaths } from '@/shared/models/path.routes';
-import { useEffect, useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Navbar, Nav, NavDropdown, Container } from 'react-bootstrap';
 import { FaShoppingCart } from 'react-icons/fa'; // Importing the shopping cart icon
@@ -27,7 +27,6 @@ export function NavBar(): JSX.Element {
   const isVet = IsVet();
   const isOwner = IsOwner();
   const [navbarOpen, setNavbarOpen] = useState(false);
-  const [cartItemCount, setCartItemCount] = useState<number>(cartCount);
   const [cartLoading, setCartLoading] = useState(false);
 
   const logoutUser = (): void => {
@@ -46,11 +45,6 @@ export function NavBar(): JSX.Element {
   const toggleNavbar = (): void => {
     setNavbarOpen(prevNavbarOpen => !prevNavbarOpen);
   };
-
-  // keep local cart badge in sync with cart context
-  useEffect(() => {
-    setCartItemCount(cartCount);
-  }, [cartCount]);
 
   const goToCart = useCallback(async () => {
     if (!user?.userId) {
@@ -194,16 +188,16 @@ export function NavBar(): JSX.Element {
                       void goToCart();
                     }}
                     aria-busy={cartLoading}
-                    className={`cart-link${cartItemCount === 0 ? ' cart-empty' : ''}`}
+                    className={`cart-link${cartCount === 0 ? ' cart-empty' : ''}`}
                     title={cartLoading ? 'Loading cart...' : 'View Cart'}
                   >
                     <FaShoppingCart aria-label="Shopping Cart" />
-                    {cartItemCount > 0 && (
+                    {cartCount > 0 && (
                       <span
                         className="cart-badge"
-                        aria-label={`Cart has ${cartItemCount} items`}
+                        aria-label={`Cart has ${cartCount} items`}
                       >
-                        {cartItemCount}
+                        {cartCount}
                       </span>
                     )}
                   </Nav.Link>
