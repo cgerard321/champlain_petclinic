@@ -4,11 +4,13 @@ import com.petclinic.customersservice.customersExceptions.exceptions.InvalidInpu
 import com.petclinic.customersservice.customersExceptions.exceptions.NotFoundException;
 import com.petclinic.customersservice.data.PetType;
 import com.petclinic.customersservice.data.PetTypeRepo;
+import com.petclinic.customersservice.domainclientlayer.FilesServiceClient;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
@@ -30,9 +32,12 @@ class PetTypeControllerIntegrationTest {
     @Autowired
     private PetTypeRepo petTypeRepo;
 
+    @MockBean
+    private FilesServiceClient filesServiceClient;
+
     PetType petTypeEntity2 = buildPetType2();
     String PUBLIC_PETTYPE_ID = petTypeEntity2.getPetTypeId();
-    
+
     @Test
     void getAllPetTypes_shouldSucceed() {
         webTestClient.get()
