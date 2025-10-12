@@ -62,6 +62,7 @@ import UserDetailsPage from './pages/Users/UserDetailsPage';
 import UpdateUserPage from './pages/Users/UpdateUserPage';
 import AllRoles from '@/pages/Users/AllRoles.tsx';
 import OwnerBookAppointment from '@/pages/Visit/OwnerBookAppointment.tsx';
+import VisitsCalendar from '@/pages/Visit/VisitsCalendar.tsx';
 import FAQ from './pages/FAQ/FAQ';
 import ContactPage from './pages/Contact/Contact';
 import PrivacyPolicyPage from './pages/PrivacyPolicy/PrivacyPolicy';
@@ -319,6 +320,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <AddingVisit />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.VisitsCalendar,
+        element: (
+          <ProtectedRoute>
+            <VisitsCalendar />
           </ProtectedRoute>
         ),
       },

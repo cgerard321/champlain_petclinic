@@ -1,0 +1,9 @@
+.visits-calendar-page {
+  min-height: 100vh;
+  background-color: #f0f2f5;
+}
+
+.visits-calendar-page .page-container {
+  padding: 20px;
+  max-width: 100%;
+}
