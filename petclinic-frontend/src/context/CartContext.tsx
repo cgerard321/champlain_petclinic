@@ -15,6 +15,7 @@ import {
   getCartCountFromLS,
   setCartCountInLS,
   notifyCartChanged,
+  CART_CHANGED,
 } from '@/features/carts/api/cartEvent';
 import {
   fetchCartIdByCustomerId,
@@ -104,6 +105,33 @@ export function CartProvider({
       alive = false;
     };
   }, [user?.userId, refreshFromAPI]);
+
+  // Sync with updates from other components/tabs (Products page, etc.)
+  useEffect(() => {
+    const syncFromLocalStorage = (): void => {
+      const n = getCartCountFromLS();
+      setCartCountState(Math.max(0, Math.trunc(n)));
+    };
+    const onStorage = (e: StorageEvent): void => {
+      if (e.key === 'cart:changed' || e.key === 'cart:count') {
+        syncFromLocalStorage();
+      }
+    };
+    //same-tab
+    window.addEventListener(
+      CART_CHANGED as unknown as string,
+      syncFromLocalStorage as EventListener
+    );
+    //cross-tab
+    window.addEventListener('storage', onStorage);
+    return () => {
+      window.removeEventListener(
+        CART_CHANGED as unknown as string,
+        syncFromLocalStorage as EventListener
+      );
+      window.removeEventListener('storage', onStorage);
+    };
+  }, []);
 
   const value = useMemo<CartContextType>(
     () => ({

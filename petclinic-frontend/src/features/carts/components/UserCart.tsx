@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import CartBillingForm, { BillingInfo } from './CartBillingForm';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import CartItem from './CartItem';
 import { ProductModel } from '../models/ProductModel';
 import './UserCart.css';
@@ -11,16 +11,16 @@ import axiosInstance from '@/shared/api/axiosInstance';
 import {
   IsAdmin,
   IsInventoryManager,
-  IsVet,
   IsReceptionist,
+  IsVet,
 } from '@/context/UserContext';
 import { AppRoutePaths } from '@/shared/models/path.routes';
 import { getProductByProductId } from '@/features/products/api/getProductByProductId';
 import {
+  bumpCartCountInLS,
   notifyCartChanged,
   setCartCountInLS,
   setCartIdInLS,
-  bumpCartCountInLS,
 } from '../api/cartEvent';
 import { useConfirmModal } from '@/shared/hooks/useConfirmModal';
 import axios from 'axios';
@@ -376,18 +376,19 @@ const UserCart = (): JSX.Element => {
           useV2: false,
         });
 
-        const removedQty = cartItems[indexToDelete]?.quantity || 1;
-        bumpCartCountInLS(-removedQty);
-
-        setCartItems(prev => prev.filter((_, idx) => idx !== indexToDelete));
-        setNotificationMessage('Item removed from cart.');
+        setCartItems(prev => {
+          const removedQty = prev[indexToDelete]?.quantity || 1;
+          setNotificationMessage('Item removed from cart.');
+          bumpCartCountInLS(-removedQty);
+          return prev.filter((_, idx) => idx !== indexToDelete);
+        });
         notifyCartChanged(); // item removed
       } catch (error) {
         console.error('Error deleting item: ', error);
         setNotificationMessage('Failed to delete item.');
       }
     },
-    [cartId, cartItems, blockIfReadOnly, confirm]
+    [cartId, blockIfReadOnly, confirm]
   );
 
   const clearCart = async (): Promise<void> => {
