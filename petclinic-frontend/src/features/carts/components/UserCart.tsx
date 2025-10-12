@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import CartBillingForm, { BillingInfo } from './CartBillingForm';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import CartItem from './CartItem';
 import { ProductModel } from '../models/ProductModel';
 import './UserCart.css';
@@ -11,12 +11,17 @@ import axiosInstance from '@/shared/api/axiosInstance';
 import {
   IsAdmin,
   IsInventoryManager,
-  IsVet,
   IsReceptionist,
+  IsVet,
 } from '@/context/UserContext';
 import { AppRoutePaths } from '@/shared/models/path.routes';
 import { getProductByProductId } from '@/features/products/api/getProductByProductId';
-import { notifyCartChanged } from '../api/cartEvent';
+import {
+  bumpCartCountInLS,
+  notifyCartChanged,
+  setCartCountInLS,
+  setCartIdInLS,
+} from '../api/cartEvent';
 import { useConfirmModal } from '@/shared/hooks/useConfirmModal';
 import axios from 'axios';
 
@@ -208,7 +213,12 @@ const UserCart = (): JSX.Element => {
         );
 
         setCartItems(products);
-
+        setCartIdInLS(cartId);
+        const countFromFetch = products.reduce(
+          (acc, p) => acc + (p.quantity || 0),
+          0
+        );
+        setCartCountInLS(countFromFetch);
         const enrichedWishlist = await Promise.all(
           (data.wishListProducts || []).map(async (item: ProductModel) => {
             const fullProduct = await getProductByProductId(item.productId);
@@ -285,7 +295,7 @@ const UserCart = (): JSX.Element => {
 
       const newQuantity = Math.max(1, Number(event.target.value));
       const item = cartItems[index];
-
+      const prevQty = item.quantity || 1;
       if (newQuantity > item.productQuantity) {
         setErrorMessages(prevErrors => ({
           ...prevErrors,
@@ -322,7 +332,8 @@ const UserCart = (): JSX.Element => {
             );
             setWishlistItems(prevItems => [...prevItems, item]);
             setNotificationMessage(data.message);
-            notifyCartChanged();
+            bumpCartCountInLS(-prevQty);
+            notifyCartChanged(); // left cart
             return;
           }
         } else {
@@ -332,7 +343,8 @@ const UserCart = (): JSX.Element => {
             return next;
           });
           setNotificationMessage('Item quantity updated successfully.');
-          notifyCartChanged();
+          bumpCartCountInLS(newQuantity - prevQty);
+          notifyCartChanged(); // qty changed
         }
       } catch (err) {
         console.error('Error updating quantity:', err);
@@ -364,14 +376,19 @@ const UserCart = (): JSX.Element => {
           useV2: false,
         });
 
-        setCartItems(prev => prev.filter((_, idx) => idx !== indexToDelete));
-        notifyCartChanged();
+        setCartItems(prev => {
+          const removedQty = prev[indexToDelete]?.quantity || 1;
+          setNotificationMessage('Item removed from cart.');
+          bumpCartCountInLS(-removedQty);
+          return prev.filter((_, idx) => idx !== indexToDelete);
+        });
+        notifyCartChanged(); // item removed
       } catch (error) {
-        console.error('Error deleting item:', error);
+        console.error('Error deleting item: ', error);
         setNotificationMessage('Failed to delete item.');
       }
     },
-    [cartId, confirm, blockIfReadOnly]
+    [cartId, blockIfReadOnly, confirm]
   );
 
   const clearCart = async (): Promise<void> => {
@@ -379,6 +396,7 @@ const UserCart = (): JSX.Element => {
 
     if (!cartId) {
       setNotificationMessage('Invalid cart ID');
+
       return;
     }
 
@@ -395,7 +413,9 @@ const UserCart = (): JSX.Element => {
       await axiosInstance.delete(`/carts/${cartId}/clear`, { useV2: false });
       setCartItems([]);
       setCartItemCount(0);
+      setCartCountInLS(0);
       notifyCartChanged();
+      setNotificationMessage('Cart has been cleared.');
     } catch (error) {
       console.error('Error clearing cart:', error);
       setNotificationMessage('Failed to clear cart.');
@@ -429,6 +449,11 @@ const UserCart = (): JSX.Element => {
 
       setWishlistItems(prevItems => [...prevItems, item]);
       setWishlistUpdated(true);
+
+      // Decrement LS count since item left the cart
+      bumpCartCountInLS(-(item.quantity || 1));
+
+      //notify navbar (item moved out of cart)
       notifyCartChanged();
     } catch (error: unknown) {
       console.error('Error adding to wishlist:', error);
@@ -472,6 +497,11 @@ const UserCart = (): JSX.Element => {
         prevItems.filter(product => product.productId !== item.productId)
       );
       setWishlistUpdated(true);
+
+      // Item entered the cart, increment LS count
+      bumpCartCountInLS(item.quantity || 1);
+
+      //notify navbar (item moved into cart)
       notifyCartChanged();
     } catch (error: unknown) {
       console.error('Error adding to cart:', error);
@@ -595,6 +625,11 @@ const UserCart = (): JSX.Element => {
       setCartItems([]);
       setCartItemCount(0);
       setIsCheckoutModalOpen(false);
+
+      // Reset LS so navbar badge = 0 without API
+      setCartCountInLS(0);
+
+      // notify navbar (cart emptied)
       notifyCartChanged();
 
       // Fetch recent purchases after checkout
