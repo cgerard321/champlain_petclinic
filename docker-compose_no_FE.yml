@@ -415,3 +415,6 @@ services:
     depends_on:
       - mongo-carts
       - cart-service
+
+volumes:
+  grafana-data:
