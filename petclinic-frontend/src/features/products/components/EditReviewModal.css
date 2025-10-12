@@ -45,7 +45,7 @@
   border-radius: 4px;
 }
 
-.cancel-btn {
+.wrm-button-container .cancel-btn {
   background-color: #fff;
   color: #000000;
   border: 1.5px solid #b9b9b9;
@@ -55,23 +55,23 @@
   cursor: pointer;
 }
 
-.cancel-btn:hover {
+.wrm-button-container .cancel-btn:hover {
   color: #000000;
   background-color: #f0f0f0;
   border: 1.5px solid #b9b9b9;
 }
 
-.cancel-btn:active {
-  background-color: #e0e0e0 !important;
-  color: #000 !important;
-  border: 1.5px solid #b9b9b9 !important;
-  outline: none !important;
+.wrm-button-container .cancel-btn:active {
+  background-color: #e0e0e0;
+  color: #000;
+  border: 1.5px solid #b9b9b9;
+  outline: none;
 }
 
-.cancel-btn:focus {
-  background-color: #e0e0e0 !important;
-  color: #000 !important;
-  border: 1.5px solid #b9b9b9 !important;
+.wrm-button-container .cancel-btn:focus {
+  background-color: #e0e0e0;
+  color: #000;
+  border: 1.5px solid #b9b9b9;
 }
 
 .wrm-close-btn:hover,

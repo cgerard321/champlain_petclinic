@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Modal, Button } from 'react-bootstrap';
 import StarRating from './StarRating.tsx';
 import ReviewBox from './ReviewBox.tsx';
@@ -54,6 +54,11 @@ const EditReviewModal = ({
     }
   };
 
+  const memoizedRating = useMemo(
+    () => ({ ...currentUserRating, review: reviewText }),
+    [currentUserRating, reviewText]
+  );
+
   return (
     <Modal
       show={show}
@@ -86,10 +91,7 @@ const EditReviewModal = ({
         {/* Review Section */}
         <div className="wrm-section">
           <label className="wrm-label">Your Review *</label>
-          <ReviewBox
-            updateFunc={setReviewText}
-            rating={{ ...currentUserRating, review: reviewText }}
-          />
+          <ReviewBox updateFunc={setReviewText} rating={memoizedRating} />
         </div>
 
         {/* Buttons */}

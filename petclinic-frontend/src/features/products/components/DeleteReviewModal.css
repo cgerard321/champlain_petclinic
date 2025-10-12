@@ -62,8 +62,8 @@
   background-color: #fff;
   color: #000;
   border: 1.5px solid #b9b9b9;
-  padding: 8px 20px;
-  font-size: 15px;
+  padding: 5px 12px;
+  font-size: 14px;
   border-radius: 4px;
   margin: 0;
 }
@@ -78,8 +78,8 @@
   background-color: #dc3545;
   color: #fff;
   border: 1.5px solid #dc3545;
-  padding: 8px 20px;
-  font-size: 15px;
+  padding: 5px 12px;
+  font-size: 14px;
   border-radius: 4px;
   margin: 0;
 }
@@ -90,6 +90,6 @@
 }
 
 .delete-modal-buttons .btn-danger {
-  padding: 8px 20px;
-  font-size: 15px;
+  padding: 5px 12px;
+  font-size: 14px;
 }

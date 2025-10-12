@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Modal, Button } from 'react-bootstrap';
 import StarRating from './StarRating.tsx';
 import ReviewBox from './ReviewBox.tsx';
@@ -28,7 +28,6 @@ const WriteReviewModal = ({
   );
   const [error, setError] = useState<string>('');
 
-  // Keep modal in sync when parent changes rating or review
   useEffect(() => {
     setReviewText(currentUserRating.review);
     setLocalRating(currentUserRating.rating);
@@ -55,6 +54,11 @@ const WriteReviewModal = ({
       console.error('Failed to submit review:', err);
     }
   };
+
+  const memoizedRating = useMemo(
+    () => ({ ...currentUserRating, review: reviewText }),
+    [currentUserRating, reviewText]
+  );
 
   return (
     <Modal
@@ -83,17 +87,14 @@ const WriteReviewModal = ({
           <StarRating
             currentRating={localRating}
             viewOnly={false}
-            updateRating={newRating => setLocalRating(newRating)} // local control
+            updateRating={newRating => setLocalRating(newRating)}
           />
         </div>
 
         {/* Review Section */}
         <div className="wrm-section">
           <label className="wrm-label">Your Review *</label>
-          <ReviewBox
-            updateFunc={setReviewText} // local text update
-            rating={{ ...currentUserRating, review: reviewText }}
-          />
+          <ReviewBox updateFunc={setReviewText} rating={memoizedRating} />
         </div>
 
         {/* Buttons */}
