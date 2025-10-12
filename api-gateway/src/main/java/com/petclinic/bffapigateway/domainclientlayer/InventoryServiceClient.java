@@ -293,7 +293,13 @@ public class InventoryServiceClient {
                 .uri(inventoryServiceUrl + "/{inventoryId}", inventoryId)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError, resp -> rethrower.rethrow(resp, ex -> new NotFoundException(ex.get("message").toString())))
+                .onStatus(status -> status.value() == 404,
+                        resp -> rethrower.rethrow(resp,
+                                ex -> new NotFoundException(ex.get("message").toString())))
+                .onStatus(HttpStatusCode::is4xxClientError,
+                        resp -> rethrower.rethrow(resp,
+                                ex -> new InvalidInputsInventoryException(
+                                        ex.get("message").toString(), BAD_REQUEST)))
                 .bodyToMono(Void.class);
     }
 

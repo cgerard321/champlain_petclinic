@@ -150,9 +150,21 @@ export default function InventoriesListTable(): JSX.Element {
     }
   };
 
-  const deleteInventoryHandler = (inventoryToDelete: Inventory): void => {
-    deleteInventory(inventoryToDelete);
-    getInventoryList(inventoryName, inventoryType, inventoryDescription);
+  const deleteInventoryHandler = async (
+    inventoryToDelete: Inventory
+  ): Promise<void> => {
+    try {
+      await deleteInventory(inventoryToDelete);
+      await getInventoryList(
+        inventoryName,
+        inventoryType,
+        inventoryDescription
+      );
+    } catch (error) {
+      const msg =
+        error instanceof Error ? error.message : 'Failed to delete inventory.';
+      alert(msg);
+    }
   };
 
   const handleDeleteAllInventories = (confirm: boolean): void => {
@@ -238,15 +250,32 @@ export default function InventoriesListTable(): JSX.Element {
   };
 
   const deleteSelectedInventories = async (): Promise<void> => {
-    for (const inventory of selectedInventories) {
-      await deleteInventory(inventory); // Delete each selected inventory from the database
-    }
+    if (selectedInventories.length === 0) return;
 
-    // Refresh the inventory list after deleting
-    getInventoryList(inventoryName, inventoryType, inventoryDescription);
+    const results = await Promise.allSettled(
+      selectedInventories.map(inventory => deleteInventory(inventory))
+    );
 
-    // Clear the selected inventories
+    const failures: string[] = results
+      .map((r, i) => ({ r, inv: selectedInventories[i] }))
+      .filter(({ r }) => r.status === 'rejected')
+      .map(x => {
+        const reason = (x.r as PromiseRejectedResult).reason;
+        const msg =
+          reason instanceof Error ? reason.message : 'Failed to delete';
+        return `${x.inv.inventoryName}: ${msg}`;
+      });
+
+    await getInventoryList(inventoryName, inventoryType, inventoryDescription);
     setSelectedInventories([]);
+
+    if (failures.length > 0) {
+      alert(
+        failures.length === 1
+          ? `Failed to delete inventory:\n${failures[0]}`
+          : `Some inventories could not be deleted:\n${failures.join('\n')}`
+      );
+    }
   };
 
   const location = useLocation();
