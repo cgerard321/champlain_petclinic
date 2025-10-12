@@ -41,7 +41,11 @@ spring:
   config:
     activate:
       on-profile: docker
-
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, prometheus
   data:
     mongodb:
       host: mongo-products

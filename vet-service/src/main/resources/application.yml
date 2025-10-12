@@ -86,7 +86,11 @@ spring:
       username: root
       password: password
       authentication-database: admin
-
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, prometheus
 logging:
   level:
     root: INFO

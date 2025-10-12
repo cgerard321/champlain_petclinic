@@ -7,4 +7,17 @@ scrape_configs:
     static_configs:
       - targets:
           - "auth-service:8080" # auth-service
+          - "visits-service-new:8080" # auth-service
+          - "inventory-service:8080" # auth-service
+          - "vet-service:8080" # auth-service
+          - "customers-service-reactive:8080" # auth-service
+          - "billing-service:8080" # auth-service
+          - "products-service:8080" # auth-service
+          - "cart-service:8080" # auth-service
+    
+  - job_name: 'mailer-service'
+    metrics_path: "/metrics"
+    static_configs:
+      - targets: ['mailer-service:8080'] 
+
 
