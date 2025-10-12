@@ -19,11 +19,22 @@ public class UserDetailsImpl implements UserDetailsService {
 
     @Override
     public UserPrincipalImpl loadUserByUsername(String email) {
-        Optional<User> user = userRepo.findByEmail(email);
+        Optional<User> user = findUserbyEmailorUsername(email);
         if (user.isEmpty()) {
             throw new UsernameNotFoundException(email);
         }
         return new UserPrincipalImpl(user);
+    }
+
+    public Optional<User> findUserbyEmailorUsername(String username){
+        Optional<User> user = userRepo.findByUsername(username);
+
+        if (user.isEmpty()) {
+            user = userRepo.findByEmail(username);
+            return user;
+        }
+        return user;
+
     }
 
 

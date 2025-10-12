@@ -195,7 +195,17 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public HashMap<String,Object> login(UserIDLessUsernameLessDTO login) throws IncorrectPasswordException {
-        User loggedInUser = getUserByEmail(login.getEmail());
+        User loggedInUser;
+        User usernameLogin = getUserbyUsername(login.getEmail());
+        User emailLogin = getUserByEmail(login.getEmail());
+        if (usernameLogin == null) {
+            loggedInUser = emailLogin;
+        }
+        else {
+            loggedInUser = usernameLogin;
+        }
+
+
 
         if (loggedInUser == null) {
             throw new NotFoundException("User not found");
@@ -353,8 +363,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserByEmail(String email) throws NotFoundException {
-        return userRepo.findByEmail(email)
-                .orElseThrow(() -> new NotFoundException("No account found for email: " + email));
+        Optional<User> foundUser = userRepo.findByEmail(email);
+        if (foundUser.isPresent()) {
+            return foundUser.get();
+        }
+        else {
+            return null;
+        }
     }
 
     @Override
@@ -421,6 +436,18 @@ public class UserServiceImpl implements UserService {
         existingUser.setUsername(username);
         userRepo.save(existingUser);
         return existingUser.getUsername();
+    }
+
+    @Override
+    public User getUserbyUsername(String username) throws NotFoundException {
+       Optional<User> foundUser = userRepo.findByUsername(username);
+       if (foundUser.isPresent()) {
+           return foundUser.get();
+       }
+       else {
+           return null;
+       }
+
     }
 
 }
