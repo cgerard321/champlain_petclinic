@@ -67,7 +67,7 @@ public class CustomerBillController {
             @RequestBody PaymentRequestDTO paymentRequestDTO,
             @CookieValue("Bearer") String jwtToken) {
 
-        return billService.payBill(customerId, billId, paymentRequestDTO)
+        return billService.payBill(customerId, billId, paymentRequestDTO,jwtToken)
                 .map(ResponseEntity::ok)
                 // billing-service returns 400 for invalid payment; the client maps that to ResponseStatusException(BAD_REQUEST)
                 .onErrorResume(ResponseStatusException.class, e ->
