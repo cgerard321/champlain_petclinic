@@ -75,7 +75,7 @@ public class CustomerBillsController {
             @RequestBody PaymentRequestDTO paymentRequest,
             @CookieValue("Bearer") String jwtToken) {
 
-        String userEmail = jwtToken; //  Placeholder NOT decoded yet need jwt Utils
+        String userEmail = jwtToken; //  Placeholder NOT decoded yet need JWT Utils
 
         return billService.processPayment(customerId, billId, paymentRequest)
                         .map(ResponseEntity::ok)
