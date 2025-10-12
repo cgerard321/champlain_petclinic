@@ -2,24 +2,11 @@ package com.petclinic.customersservice.exceptions;
 
 import com.petclinic.customersservice.customersExceptions.exceptions.NotFoundException;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-
-import static org.junit.jupiter.api.Assertions.*;
-
-@SpringBootTest
-@ExtendWith(SpringExtension.class)
 class NotFoundExceptionTest {
 
     @Test
@@ -27,15 +14,18 @@ class NotFoundExceptionTest {
         NotFoundException notFoundException = assertThrows(NotFoundException.class, ()->{
             throw new NotFoundException();
         });
+
         assertNull(notFoundException.getMessage());
     }
 
     @Test
     void NotFoundExceptionWithMessageTest(){
+        String expectedMessage = "Appropriate NotFoundException message";
         NotFoundException notFoundException = assertThrows(NotFoundException.class, ()->{
-            throw new NotFoundException("Appropriate NotFoundException message");
+            throw new NotFoundException(expectedMessage);
         });
-        assertNotNull(notFoundException.getMessage());
+         assertNotNull(notFoundException.getMessage());
+        assertEquals(expectedMessage, notFoundException.getMessage());
     }
 
 }

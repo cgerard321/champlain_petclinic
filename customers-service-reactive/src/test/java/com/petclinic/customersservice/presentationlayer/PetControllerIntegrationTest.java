@@ -5,11 +5,13 @@ import com.petclinic.customersservice.customersExceptions.exceptions.NotFoundExc
 import com.petclinic.customersservice.data.Pet;
 import com.petclinic.customersservice.data.PetRepo;
 import com.petclinic.customersservice.data.PetType;
+import com.petclinic.customersservice.domainclientlayer.FilesServiceClient;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
@@ -30,6 +32,10 @@ class PetControllerIntegrationTest {
 
     @Autowired
     private PetRepo repo;
+
+    @MockBean
+    private FilesServiceClient filesServiceClient;
+
     Pet petEntity = buildPet();
     String PET_ID = petEntity.getPetId();
 

@@ -4,6 +4,7 @@ import com.petclinic.customersservice.customersExceptions.exceptions.InvalidInpu
 import com.petclinic.customersservice.customersExceptions.exceptions.NotFoundException;
 import com.petclinic.customersservice.data.PetType;
 import com.petclinic.customersservice.data.PetTypeRepo;
+import com.petclinic.customersservice.domainclientlayer.FilesServiceClient;
 import com.petclinic.customersservice.presentationlayer.PetTypeRequestDTO;
 import com.petclinic.customersservice.presentationlayer.PetTypeResponseDTO;
 import org.junit.jupiter.api.Test;
@@ -37,7 +38,8 @@ class PetTypeServiceImplTest {
     @MockBean
     private PetTypeRepo petTypeRepo;
 
-    /** -------------------- CRUD + Validation -------------------- **/
+    @MockBean
+    private FilesServiceClient filesServiceClient;
 
     @Test
     void deletePetTypeByPetTypeId_ShouldDeleteSuccessfully() {
@@ -94,8 +96,6 @@ class PetTypeServiceImplTest {
 
         verify(petTypeRepo).insert(any(PetType.class));
     }
-
-    /** -------------------- Pagination + Filtering -------------------- **/
 
     @Test
     void getAllPetTypesPagination_WithNoFilters_ShouldReturnPaginatedResults() {
@@ -189,7 +189,6 @@ class PetTypeServiceImplTest {
                 .verifyComplete();
     }
 
-    /** -------------------- Helpers -------------------- **/
 
     private PetType buildPetType() {
         return PetType.builder()

@@ -5,10 +5,12 @@ import com.petclinic.customersservice.customersExceptions.exceptions.NotFoundExc
 import com.petclinic.customersservice.customersExceptions.http.GlobalControllerExceptionHandler;
 import com.petclinic.customersservice.customersExceptions.http.HttpErrorInfo;
 import com.petclinic.customersservice.data.Owner;
+import com.petclinic.customersservice.domainclientlayer.FilesServiceClient;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -32,6 +34,9 @@ class GlobalExceptionHandlerTest {
 
     @Autowired
     ObjectMapper objectMapper;
+
+    @MockBean
+    private FilesServiceClient filesServiceClient;
 
     @Test
     void HandleNotFoundExceptionTest() throws JsonProcessingException {
