@@ -50,7 +50,6 @@ services:
       - vet-service
       - visits-service-new
 
-
   auth-service:
     build: auth-service
     hostname: auth
@@ -70,7 +69,6 @@ services:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:
       - mongo-billing
-
 
   mailer-service:
     build: mailer-service
@@ -140,7 +138,7 @@ services:
       - ./data/mysql-files:/var/lib/mysql-files
       - ./data/init.d:/docker-entrypoint-initdb.d
     healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-uuser", "-ppwd", "-h", "localhost" ]
+      test: ["CMD", "mysqladmin", "ping", "-uuser", "-ppwd", "-h", "localhost"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -379,7 +377,31 @@ services:
     #        retries: 5
     #        interval: 15s
     #        start_period: 30s
-
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+    ports:
+      - "9090:9090"
+    restart: unless-stopped
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3001:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+      - ./monitoring/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+    depends_on:
+      - prometheus
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=pwd
+    restart: unless-stopped
   mongo-express-carts:
     image: mongo-express
     restart: always
