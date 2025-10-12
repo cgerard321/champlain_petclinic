@@ -30,9 +30,6 @@ public class CartResponseModel {
     private String paymentStatus;
     private String invoiceId;
 
-//    public CartResponseModel(String invoiceId, String cartId, List<CartProduct> products, double total) {
-//    }
-
     public CartResponseModel(String invoiceId, String cartId, List<CartProduct> products, double total) {
         this.invoiceId = invoiceId;
         this.cartId = cartId;
