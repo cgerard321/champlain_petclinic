@@ -311,6 +311,33 @@ public class MockServerConfigCustomersService {
                 );
     }
 
+    public void registerGetOwnerPhotoEndpointNotFound(String ownerId) {
+        mockServerClient_CustomersService
+                .when(
+                        request()
+                                .withMethod("GET")
+                                .withPath("/owners/" + ownerId + "/photos")
+                )
+                .respond(
+                        response()
+                                .withStatusCode(404)
+                );
+    }
+
+    public void registerGetOwnerPhotoEndpoint(String ownerId, byte[] photoBytes) {
+        mockServerClient_CustomersService
+                .when(
+                        request()
+                                .withMethod("GET")
+                                .withPath("/owners/" + ownerId + "/photos")
+                )
+                .respond(
+                        response()
+                                .withStatusCode(200)
+                                .withBody(photoBytes)
+                                .withHeader("Content-Type", "image/png")
+                );
+    }
 
     public void stopMockServer() {
         if(clientAndServer != null)

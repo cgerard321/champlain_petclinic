@@ -178,4 +178,38 @@ public class OwnerControllerV1IntegrationTests {
                 .exchange()
                 .expectStatus().isNotFound();
     }
+
+    @Test
+    void whenGetOwnerPhotoIntegration_thenReturnPhoto() {
+        byte[] mockPhotoBytes = "integrationPhotoData".getBytes();
+        mockServerConfigCustomersService.registerGetOwnerPhotoEndpoint(OWNER_ID, mockPhotoBytes);
+
+        Mono<byte[]> result = webTestClient.get()
+                .uri(OWNER_BASE_PATH + "/{ownerId}/photos", OWNER_ID)
+                .cookie("Bearer", jwtTokenForValidAdmin)
+                .accept(MediaType.IMAGE_PNG)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.IMAGE_PNG)
+                .returnResult(byte[].class)
+                .getResponseBody()
+                .single();
+
+        StepVerifier.create(result)
+                .expectNextMatches(bytes -> new String(bytes).equals("integrationPhotoData"))
+                .verifyComplete();
+    }
+
+    @Test
+    void whenGetOwnerPhotoIntegrationNotFound_thenReturn404() {
+        mockServerConfigCustomersService.registerGetOwnerPhotoEndpoint(OWNER_ID, null);
+
+        webTestClient.get()
+                .uri(OWNER_BASE_PATH + "/{ownerId}/photos", OWNER_ID)
+                .cookie("Bearer", jwtTokenForValidAdmin)
+                .accept(MediaType.IMAGE_PNG)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
 }
