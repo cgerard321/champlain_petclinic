@@ -1,37 +1,37 @@
 import {
   ProductModel,
   emptyProductModel,
-} from '@/features/products/models/ProductModels/ProductModel.ts';
-import { NavBar } from '@/layouts/AppNavBar.tsx';
+} from '@/features/products/models/ProductModels/ProductModel';
+import { NavBar } from '@/layouts/AppNavBar';
 import { useState, useEffect, JSX } from 'react';
 import { generatePath, useNavigate, useParams } from 'react-router-dom';
-import { updateUserRating } from './updateUserRating.ts';
-import { getProduct } from './getProduct.ts';
-import { deleteUserRating } from './deleteUserRating.ts';
+import { updateUserRating } from '../api/updateUserRating';
+import { getProduct } from '../api/getProduct';
+import { deleteUserRating } from '../api/deleteUserRating';
 import './ProductDetails.css';
-import StarRating from '../components/StarRating.tsx';
-import { RatingModel } from '../models/ProductModels/RatingModel.ts';
-import { getUserRatingsForProduct } from './getUserRatingsForProduct.ts';
-import { getUserRating } from './getUserRating.ts';
-import { AppRoutePaths } from '@/shared/models/path.routes.ts';
+import StarRating from './StarRating';
+import { RatingModel } from '../models/ProductModels/RatingModel';
+import { getUserRatingsForProduct } from '../api/getUserRatingsForProduct';
+import { getUserRating } from '../api/getUserRating';
+import { AppRoutePaths } from '@/shared/models/path.routes';
 import { AxiosError } from 'axios';
-import ImageContainer from '../components/ImageContainer.tsx';
+import ImageContainer from './ImageContainer';
 import { Button } from 'react-bootstrap';
-import { deleteProduct } from '@/features/products/api/deleteProduct.ts';
+import { deleteProduct } from '@/features/products/api/deleteProduct';
 import {
   IsAdmin,
   IsInventoryManager,
   IsVet,
   IsReceptionist,
-} from '@/context/UserContext.tsx';
-import PatchListingStatusButton from '../components/PatchListingStatusButton.tsx';
-import RecentlyViewedProducts from '@/features/products/components/RecentlyViewedProducts.tsx';
-import { useAddToCart } from '@/features/carts/api/addToCartFromProducts.ts';
-import { useAddToWishlist } from '@/features/carts/api/addToWishlistFromProducts.ts';
+} from '@/context/UserContext';
+import PatchListingStatusButton from './PatchListingStatusButton';
+import RecentlyViewedProducts from '@/features/products/components/RecentlyViewedProducts';
+import { useAddToCart } from '@/features/carts/api/addToCartFromProducts';
+import { useAddToWishlist } from '@/features/carts/api/addToWishlistFromProducts';
 import { FaHeart, FaCheck, FaTimes, FaPen, FaTrash } from 'react-icons/fa';
-import WriteReviewModal from '../components/WriteReviewModal.tsx';
-import EditReviewModal from '../components/EditReviewModal.tsx';
-import DeleteReviewModal from '../components/DeleteReviewModal.tsx';
+import WriteReviewModal from './WriteReviewModal';
+import EditReviewModal from './EditReviewModal';
+import DeleteReviewModal from './DeleteReviewModal';
 
 export default function ProductDetails(): JSX.Element {
   const isAdmin = IsAdmin();

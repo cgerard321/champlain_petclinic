@@ -1,13 +1,12 @@
 @import url('https://fonts.googleapis.com/css?family=Roboto:400,700&display=swap');
 
-h2,
+.productdetails-container > h2,
 .wishlist-btn {
   display: flex;
   vertical-align: middle;
   background: white;
   cursor: pointer;
   font-size: 16px;
-  display: flex;
   align-items: center;
   gap: 6px;
   color: #333;
@@ -20,6 +19,9 @@ h2,
   position: absolute;
   right: 110px;
   top: 0;
+  max-width: 150px;
+  white-space: nowrap;
+  padding: 8px 12px;
 }
 
 .wishlist-btn:hover {
@@ -130,6 +132,7 @@ h2,
 
 .review-nums {
   font-size: 0.7rem;
+  font-weight: 600;
   margin-top: 12px;
 }
 
@@ -263,6 +266,7 @@ h2,
   flex-direction: column;
   gap: 10px;
   position: relative;
+  padding-right: 0px;
 }
 
 .productdetails-container > h2 {
@@ -272,6 +276,7 @@ h2,
   font-size: 2.4rem;
   color: #333;
   position: relative;
+  padding-right: 0;
 }
 
 .avgrating-container {
@@ -284,7 +289,7 @@ h2,
 
 .avgrating-container > h3 {
   margin: 0;
-  font-size: 22px;
+  font-size: 30px;
 }
 
 .productadmin-container {
@@ -302,6 +307,18 @@ h2,
 
   .productadmin-container {
     justify-content: left;
+  }
+
+  .productdetails-container {
+    padding-right: 0;
+  }
+
+  .wishlist-btn {
+    position: static;
+    margin-top: 10px;
+    margin-left: 0;
+    width: auto;
+    max-width: 200px;
   }
 }
 

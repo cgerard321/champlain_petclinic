@@ -41,7 +41,7 @@ import AllUsers from '@/pages/Users/AllUsers.tsx';
 //import AddEmergencyForm from './features/visits/Emergency/AddEmergencyForm';
 import EditEmergency from '@/features/visits/Emergency/EditEmergency';
 import EmergencyList from './features/visits/Emergency/EmergencyList';
-import ProductDetails from '@/features/products/api/ProductDetails.tsx';
+import ProductDetails from '@/features/products/components/ProductDetails';
 // import ProductsList from '@/features/products/ProductsList.tsx';
 import AddPetPage from '@/pages/Customer/AddPetPage.tsx';
 import EditProduct from './features/products/components/EditProduct';
