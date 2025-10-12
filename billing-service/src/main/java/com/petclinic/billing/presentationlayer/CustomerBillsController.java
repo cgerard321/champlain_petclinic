@@ -3,7 +3,7 @@ package com.petclinic.billing.presentationlayer;
 import com.petclinic.billing.businesslayer.BillService;
 import com.petclinic.billing.datalayer.BillResponseDTO;
 import com.petclinic.billing.datalayer.BillStatus;
-import com.petclinic.billing.datalayer.PaymentRequestWithJwtDTO;
+import com.petclinic.billing.datalayer.PaymentRequestDTO;
 import com.petclinic.billing.exceptions.InvalidPaymentException;
 import lombok.extern.slf4j.Slf4j;
 import java.math.BigDecimal;
@@ -70,9 +70,9 @@ public class CustomerBillsController {
     public Mono<ResponseEntity<BillResponseDTO>> payBill(
             @PathVariable String customerId,
             @PathVariable String billId,
-            @RequestBody PaymentRequestWithJwtDTO  paymentRequest) {
+            @RequestBody PaymentRequestDTO paymentRequest) {
 
-        return billService.processPayment(customerId, billId, paymentRequest )
+        return billService.processPayment(customerId, billId, paymentRequest)
                 .map(ResponseEntity::ok)   // already BillResponseDTO
                 .onErrorResume(InvalidPaymentException.class,
                         e -> Mono.just(ResponseEntity.status(HttpStatus.BAD_REQUEST).build()))

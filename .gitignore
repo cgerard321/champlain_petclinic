@@ -105,7 +105,3 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 /emailing-service/emailing-service-test/obj/
-emailing-service/**/obj/
-emailing-service/**/*.cache
-FETCH_HEAD
-.github/copilot-instructions.md
