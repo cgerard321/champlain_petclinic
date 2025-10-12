@@ -90,7 +90,7 @@ public class BFFApiGatewayController {
             @PathVariable("billId") String billId,
             @Valid @RequestBody PaymentRequestDTO paymentRequestDTO,
             @CookieValue("Bearer") String jwtToken) {
-        return billServiceClient.payBill(customerId, billId, paymentRequestDTO,jwtToken)
+        return billServiceClient.payBill(customerId, billId, paymentRequestDTO, jwtToken)
                 .map(ResponseEntity::ok)
                 .onErrorResume(e -> Mono.just(ResponseEntity.badRequest().build()));
     }
