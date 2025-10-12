@@ -9,7 +9,7 @@ import {
   useCallback,
 } from 'react';
 import { useUser } from '@/context/UserContext';
-import { Role } from '@/shared/models/Role.ts';
+import { Role } from '@/shared/models/Role';
 import {
   getCartIdFromLS,
   setCartIdInLS,
