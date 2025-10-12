@@ -71,4 +71,16 @@ public class InventoryValidator {
         } catch (Exception ex) { return false; }
     }
 
+    public Mono<Inventory> validateInventoryForUpdate(Inventory e, String currentId) {
+
+        return validateInventory(e)
+                .flatMap(valid -> inventoryRepository
+                        .existsByInventoryNameAndInventoryIdNot(valid.getInventoryName(), currentId)
+                        .flatMap(exists -> exists
+                                ? Mono.error(new UnprocessableEntityException("Inventory name already exists."))
+                                : Mono.just(valid)
+                        )
+                );
+    }
+
 }

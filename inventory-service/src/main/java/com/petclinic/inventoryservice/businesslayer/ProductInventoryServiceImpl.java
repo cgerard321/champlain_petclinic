@@ -82,9 +82,9 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
 
                 }))
                 .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with id: " + inventoryId)))
+                .flatMap(inv -> validator.validateInventoryForUpdate(inv, inventoryId))
                 .flatMap(inventoryRepository::save)
                 .map(EntityDTOUtil::toInventoryResponseDTO);
-
     }
 
     @Override
