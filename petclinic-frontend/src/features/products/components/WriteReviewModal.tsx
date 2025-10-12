@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Modal, Button } from 'react-bootstrap';
-import StarRating from './StarRating.tsx';
-import ReviewBox from './ReviewBox.tsx';
+import StarRating from './StarRating';
+import ReviewBox from './ReviewBox';
 import { RatingModel } from '../models/ProductModels/RatingModel';
 
 import './WriteReviewModal.css';

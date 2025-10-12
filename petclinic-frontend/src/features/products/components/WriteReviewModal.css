@@ -50,7 +50,7 @@
 }
 
 .wrm-button-container .cancel-btn:active {
-  background-color: #e0e0e0;
+  background-color: #f9f9f9;
   color: #000;
   border: 1.5px solid #b9b9b9;
   outline: none;
