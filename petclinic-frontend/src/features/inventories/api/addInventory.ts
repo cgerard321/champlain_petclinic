@@ -38,13 +38,6 @@ export default async function addInventory(
             : 'Inventory resource was not found.'
         );
       }
-      case 409: {
-        throw new Error(
-          serverMessage.trim()
-            ? serverMessage
-            : 'An inventory with the same name already exists.'
-        );
-      }
       case 422: {
         throw new Error(
           serverMessage.trim()

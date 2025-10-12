@@ -14,6 +14,7 @@ import com.petclinic.inventoryservice.datalayer.Product.ProductRepository;
 import com.petclinic.inventoryservice.datalayer.Product.Status;
 import com.petclinic.inventoryservice.presentationlayer.*;
 import com.petclinic.inventoryservice.utils.EntityDTOUtil;
+import com.petclinic.inventoryservice.utils.InventoryValidator;
 import com.petclinic.inventoryservice.utils.exceptions.InvalidInputException;
 import com.petclinic.inventoryservice.utils.exceptions.InventoryNotFoundException;
 import com.petclinic.inventoryservice.utils.exceptions.NotFoundException;
@@ -44,7 +45,7 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
     private final InventoryRepository inventoryRepository;
     private final ProductRepository productRepository;
     private final InventoryTypeRepository inventoryTypeRepository;
-    private final InventoryNameRepository inventoryNameRepository;
+    private final InventoryValidator validator;
 
 
     @Override
@@ -52,7 +53,7 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
         return inventoryRepository.count()
                 .flatMap(count -> inventoryRequestDTO
                         .map(EntityDTOUtil::toInventoryEntity)
-                        .flatMap(this::validateInventoryInput)
+                        .flatMap(validator::validateInventory)
                         .doOnNext(e -> {
                             if (e.getInventoryType() == null) {
                                 throw new InvalidInputException("Invalid input data: inventory type cannot be blank.");
@@ -453,6 +454,7 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                                     : "Inventory not found with Name starting with or matching: " + inventoryName
                     )));
         }
+
         // Default - fetch all if no criteria provided.
         Flux<Inventory> inventoryFlux = inventoryRepository.findAll();
 
@@ -504,6 +506,7 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
     public Mono<InventoryTypeResponseDTO> addInventoryType(Mono<InventoryTypeRequestDTO> inventoryTypeRequestDTO) {
         return inventoryTypeRequestDTO
                 .map(EntityDTOUtil::toInventoryTypeEntity)
+                .flatMap(validator::validateInventoryType)
                 .doOnNext(e -> {
                     e.setTypeId(EntityDTOUtil.generateUUID());
                 })

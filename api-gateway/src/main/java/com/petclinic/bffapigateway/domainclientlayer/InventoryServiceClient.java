@@ -9,6 +9,7 @@ import com.petclinic.bffapigateway.exceptions.InvalidInputsInventoryException;
 import com.petclinic.bffapigateway.exceptions.InventoryNotFoundException;
 import com.petclinic.bffapigateway.exceptions.ProductListNotFoundException;
 import com.petclinic.bffapigateway.utils.Rethrower;
+import io.netty.handler.codec.http.HttpStatusClass;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.petclinic.bffapigateway.dtos.Inventory.*;
 import org.springframework.beans.factory.annotation.Value;
@@ -266,7 +267,16 @@ public class InventoryServiceClient {
                 .uri(inventoryServiceUrl + "/type")
                 .body(Mono.just(inventoryTypeRequestDTO),InventoryTypeRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
-                .retrieve().bodyToMono(InventoryTypeResponseDTO.class);
+                .retrieve()
+                .onStatus(s -> s.value() == 422,
+                        resp -> rethrower.rethrow(resp,
+                                ex -> new InvalidInputsInventoryException(
+                                        ex.get("message").toString(), HttpStatus.UNPROCESSABLE_ENTITY)))
+                .onStatus(HttpStatusCode::is4xxClientError,
+                        resp -> rethrower.rethrow(resp,
+                                ex -> new InvalidInputsInventoryException(
+                                        ex.get("message").toString(), HttpStatus.BAD_REQUEST)))
+                .bodyToMono(InventoryTypeResponseDTO.class);
     }
 
     public Flux<InventoryTypeResponseDTO> getAllInventoryTypes(){
