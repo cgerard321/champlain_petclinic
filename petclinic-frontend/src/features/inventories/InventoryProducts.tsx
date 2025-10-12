@@ -73,7 +73,9 @@ const InventoryProducts: React.FC = () => {
       try {
         await createPdf(inventoryId);
       } catch (error) {
-        console.error('Failed to create PDF', error);
+        const msg =
+          error instanceof Error ? error.message : 'Failed to create PDF';
+        alert(msg);
       }
     }
   };

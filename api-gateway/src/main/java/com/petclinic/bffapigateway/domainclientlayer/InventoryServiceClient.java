@@ -376,6 +376,18 @@ public class InventoryServiceClient {
                 .uri("/{inventoryId}/products/download", inventoryId)
                 .accept(MediaType.APPLICATION_PDF) // Expect PDF response
                 .retrieve()
+                .onStatus(status -> status.value() == 422,
+                        resp -> rethrower.rethrow(
+                                resp,
+                                ex -> new InvalidInputsInventoryException(
+                                        ex.get("message").toString(),
+                                        HttpStatus.UNPROCESSABLE_ENTITY)))
+                .onStatus(HttpStatusCode::is4xxClientError,
+                        resp -> rethrower.rethrow(
+                                resp,
+                                ex -> new InvalidInputsInventoryException(
+                                        ex.get("message").toString(),
+                                        HttpStatus.BAD_REQUEST)))
                 .bodyToMono(byte[].class); // Directly read the body as byte[]
     }
 
