@@ -15,10 +15,10 @@ export async function getAllInventoryTypes(): Promise<InventoryType[]> {
     if (!axios.isAxiosError(error)) throw error;
 
     const status = error.response?.status ?? 0;
-    if (status === 400) {
-      throw new Error('No inventory types found.');
+    if (status === 404) {
+      return [];
     }
 
-    throw error; // Re-throw the error if not handled above
+    throw error;
   }
 }
