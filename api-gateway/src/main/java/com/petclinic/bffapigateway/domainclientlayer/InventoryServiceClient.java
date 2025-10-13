@@ -441,6 +441,13 @@ public class InventoryServiceClient {
                 .uri(inventoryServiceUrl)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
+                .onStatus(status -> status.value() == 404,
+                        resp -> rethrower.rethrow(resp,
+                                ex -> new NotFoundException(ex.get("message").toString())))
+                .onStatus(HttpStatusCode::is4xxClientError,
+                        resp -> rethrower.rethrow(resp,
+                                ex -> new InvalidInputsInventoryException(
+                                        ex.get("message").toString(), BAD_REQUEST)))
                 .bodyToFlux(InventoryResponseDTO.class);
     }
 

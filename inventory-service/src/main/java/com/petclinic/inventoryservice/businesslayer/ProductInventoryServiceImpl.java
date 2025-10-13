@@ -692,6 +692,7 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
     @Override
     public Flux<InventoryResponseDTO> getAllInventories() {
         return inventoryRepository.findAll()
+                .switchIfEmpty(Flux.error(new NotFoundException("No inventories found")))
                 .sort((inv1, inv2) -> {
                     if (inv1.getInventoryCode() == null && inv2.getInventoryCode() == null) return 0;
                     if (inv1.getInventoryCode() == null) return 1;
