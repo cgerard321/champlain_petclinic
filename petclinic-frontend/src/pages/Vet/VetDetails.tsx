@@ -16,7 +16,10 @@ import {
   IsInventoryManager,
   IsOwner,
   IsReceptionist,
+  useUser,
 } from '@/context/UserContext';
+import { getOwner } from '@/features/customers/api/getOwner';
+import { deleteVetRating } from '@/features/veterinarians/api/deleteVetRating';
 
 interface VetResponseType {
   vetId: string;
@@ -76,6 +79,7 @@ interface RatingResponseType {
 
 export default function VetDetails(): JSX.Element {
   const { vetId } = useParams<{ vetId: string }>();
+  const { user } = useUser();
   const isInventoryManager = IsInventoryManager();
   const isOwner = IsOwner();
   const isReceptionist = IsReceptionist();
@@ -98,6 +102,7 @@ export default function VetDetails(): JSX.Element {
     useState<EducationResponseType | null>(null);
   const [ratings, setRatings] = useState<RatingResponseType[] | null>(null);
   const [selectedVet, setSelectedVet] = useState<VetRequestModel | null>(null);
+  const [currentCustomerName, setCurrentCustomerName] = useState<string>('');
   const refreshVetDetails = useCallback(async (): Promise<void> => {
     try {
       const response = await axiosInstance.get<VetResponseType>(
@@ -173,12 +178,46 @@ export default function VetDetails(): JSX.Element {
     fetchPhoto();
   }, [vetId]);
 
+  useEffect(() => {
+    const fetchCurrentCustomerName = async (): Promise<void> => {
+      try {
+        if (user.userId) {
+          const ownerResponse = await getOwner(user.userId);
+          const customerName = `${ownerResponse.data.firstName} ${ownerResponse.data.lastName}`;
+          setCurrentCustomerName(customerName);
+        }
+      } catch (error) {
+        console.error('Failed to fetch customer name:', error);
+        setCurrentCustomerName('');
+      }
+    };
+
+    fetchCurrentCustomerName();
+  }, [user.userId]);
+
   const handleEducationDeleted = (deletedEducationId: string): void => {
     setEducation(prevEducation =>
       prevEducation
         ? prevEducation.filter(edu => edu.educationId !== deletedEducationId)
         : null
     );
+  };
+
+  const handleRatingDeleted = async (): Promise<void> => {
+    try {
+      if (vetId) {
+        await deleteVetRating(vetId);
+        // Refresh ratings after deletion
+        const response = await axiosInstance.get<RatingResponseType[]>(
+          `/vets/${vetId}/ratings`,
+          { useV2: true }
+        );
+        setRatings(response.data);
+      }
+    } catch (error) {
+      console.error('Error deleting rating:', error);
+      setError('Failed to delete rating');
+    }
   };
 
   const handlePhotoDeleted = (): void => {
@@ -494,6 +533,25 @@ export default function VetDetails(): JSX.Element {
                   <strong>Rate Date:</strong>{' '}
                   {rating.rateDate || 'No date available'}
                 </p>
+                {currentCustomerName &&
+                  rating.customerName === currentCustomerName && (
+                    <button
+                      onClick={handleRatingDeleted}
+                      className="delete-rating-button"
+                      style={{
+                        backgroundColor: '#dc3545',
+                        color: 'white',
+                        border: 'none',
+                        padding: '8px 16px',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        marginTop: '10px',
+                        fontSize: '14px',
+                      }}
+                    >
+                      Delete My Rating
+                    </button>
+                  )}
                 <hr />
               </div>
             ))
