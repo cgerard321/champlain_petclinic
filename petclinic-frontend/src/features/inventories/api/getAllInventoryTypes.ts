@@ -14,6 +14,13 @@ export async function getAllInventoryTypes(): Promise<InventoryType[]> {
   } catch (error) {
     if (!axios.isAxiosError(error)) throw error;
 
+    console.error('[getAllInventoryTypes]', {
+      url: (error.config?.baseURL || '') + (error.config?.url || ''),
+      method: (error.config?.method || '').toUpperCase(),
+      status: error.response?.status,
+      dataReceived: error.response?.data,
+    });
+
     const status = error.response?.status ?? 0;
     if (status === 404) {
       return [];

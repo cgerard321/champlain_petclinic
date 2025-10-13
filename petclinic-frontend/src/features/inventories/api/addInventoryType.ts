@@ -12,6 +12,13 @@ export default async function addInventoryType(
   } catch (error) {
     if (!axios.isAxiosError(error)) throw error;
 
+    console.error('[addInventoryType]', {
+      url: (error.config?.baseURL || '') + (error.config?.url || ''),
+      method: (error.config?.method || '').toUpperCase(),
+      status: error.response?.status,
+      dataReceived: error.response?.data,
+    });
+
     const status = error.response?.status ?? 0;
     const payload: unknown = error.response?.data;
     const data =

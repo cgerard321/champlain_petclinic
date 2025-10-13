@@ -36,6 +36,13 @@ const createPdf = async (inventoryId: string): Promise<void> => {
       throw error instanceof Error ? error : new Error('Failed to create PDF');
     }
 
+    console.error('[createPdf]', {
+      url: (error.config?.baseURL || '') + (error.config?.url || ''),
+      method: (error.config?.method || '').toUpperCase(),
+      status: error.response?.status,
+      dataReceived: error.response?.data,
+    });
+
     const status = error.response?.status ?? 0;
     const message =
       status === 400

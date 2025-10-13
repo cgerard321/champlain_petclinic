@@ -12,6 +12,13 @@ export default async function deleteInventory(
   } catch (error) {
     if (!axios.isAxiosError(error)) throw error;
 
+    console.error('[deleteInventory]', {
+      url: (error.config?.baseURL || '') + (error.config?.url || ''),
+      method: (error.config?.method || '').toUpperCase(),
+      status: error.response?.status,
+      dataReceived: error.response?.data,
+    });
+
     const status = error.response?.status ?? 0;
     const body = (error.response?.data ?? {}) as Record<string, unknown>;
     const serverMessage = typeof body.message === 'string' ? body.message : '';
