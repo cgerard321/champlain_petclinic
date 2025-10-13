@@ -4,7 +4,8 @@ import { AppFooter } from '@/layouts/AppFooter';
 import useFaqSearch from '@/features/faq/hooks/useFaqSearch';
 
 import './FAQ.css';
-import Reveal from '@/features/home/components/Reveal';
+
+import { Reveal } from '@/shared/components';
 
 export default function FAQ(): JSX.Element {
   const { query, setQuery, results } = useFaqSearch();
