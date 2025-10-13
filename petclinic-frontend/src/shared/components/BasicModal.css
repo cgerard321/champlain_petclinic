@@ -1,0 +1,11 @@
+.basic-modal-body {
+    width: 90%;
+}
+
+.basic-modal-body > form > input {
+    width: 100%
+}
+
+.basic-modal-footer {
+    display: flex;
+}

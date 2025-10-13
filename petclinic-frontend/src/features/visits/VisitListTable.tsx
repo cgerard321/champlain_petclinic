@@ -9,7 +9,10 @@ import { IsVet } from '@/context/UserContext';
 import { AppRoutePaths } from '@/shared/models/path.routes';
 import { archiveVisit } from './api/archiveVisit';
 import { cancelVisit } from './api/cancelVisit';
-import ConfirmationModal from '@/shared/components/ConfirmationModal';
+
+import ConfirmationModal from '@/shared/components/BasicModal';
+import VisitDetails from '@/features/visits/components/VisitDetails';
+import EditingVisit from './components/EditingVisit';
 
 import eyeIcon from '@/assets/Icons/eyeDark.svg';
 import pencilIcon from '@/assets/Icons/pencilDark.svg';
@@ -267,21 +270,33 @@ export default function VisitListTable(): JSX.Element {
                   {visit.status}
                 </td>
                 <td className="action-column">
-                  <a
-                    className="icon"
-                    onClick={() => navigate(`/visits/${visit.visitId}`)}
-                    title="View"
-                  >
-                    {renderViewButton()}
-                  </a>
-                  {!isVet && (
-                    <a
+                  {/* <a
                       className="icon"
-                      onClick={() => navigate(`/visits/${visit.visitId}/edit`)}
-                      title="Edit"
+                      onClick={() => navigate(`/visits/${visit.visitId}`)}
+                      title="View"
                     >
-                      {renderEditButton()}
-                    </a>
+                      {renderViewButton()}
+                    </a> */}
+                  <ConfirmationModal
+                    title="Visit Details"
+                    showButton={renderViewButton()}
+                  >
+                    <VisitDetails visitId={visit.visitId} />
+                  </ConfirmationModal>
+                  {!isVet && (
+                    // <a
+                    //   className="icon"
+                    //   onClick={() =>
+                    //     navigate(`/visits/${visit.visitId}/edit`)
+                    //   }
+                    //   title="Edit"
+                    // >
+                    //   {renderEditButton()}
+                    // </a>
+                    <EditingVisit
+                      showButton={renderEditButton()}
+                      visitId={visit.visitId}
+                    />
                   )}
                   {visit.status === 'COMPLETED' && !isVet && (
                     // <a
