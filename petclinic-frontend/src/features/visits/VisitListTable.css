@@ -85,14 +85,19 @@
   background-color: var(--hover-clr);
 }
 
-/* Border for all visits to maintain consistent width */
-.visit-table-section tbody tr {
-  border-left: 5px solid var(--secondary-clr);
+/* Emergency visit indicator - red left border using pseudo-element */
+.visit-table-section tbody tr.emergency-visit td:first-child {
+  position: relative;
 }
 
-/* Emergency visit indicator - red left border */
-.visit-table-section tr.emergency-visit {
-  border-left: 5px solid var(--emergency-clr);
+.visit-table-section tbody tr.emergency-visit td:first-child::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background-color: var(--emergency-clr);
 }
 
 .visit-table-section tr.emergency-visit:hover {

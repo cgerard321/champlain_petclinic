@@ -4,10 +4,11 @@ import './VisitListTable.css';
 import { useNavigate } from 'react-router-dom';
 
 import { exportVisitsCSV } from './api/exportVisitsCSV';
-import axiosInstance from '@/shared/api/axiosInstance.ts';
 import { getAllVisits } from './api/getAllVisits';
 import { IsVet } from '@/context/UserContext';
 import { AppRoutePaths } from '@/shared/models/path.routes';
+import { archiveVisit } from './api/archiveVisit';
+import { cancelVisit } from './api/cancelVisit';
 
 export default function VisitListTable(): JSX.Element {
   const [visitIdToDelete, setConfirmDeleteId] = useState<string | null>(null);
@@ -36,199 +37,88 @@ export default function VisitListTable(): JSX.Element {
     getVisits();
   }, []);
 
-  // useEffect(() => {
-  //   // Skip EventSource setup for VET role - backend endpoints are ADMIN-only
-  //   // VETs should not reach this component due to route-level restrictions
-  //   if (isVet) {
-  //     return;
-  //   }
+  // Sort visits: emergency visits first, then by start date
+  const sortVisits = (visitsList: Visit[]): Visit[] => {
+    return [...visitsList].sort((a, b) => {
+      // Emergency visits come first
+      if (a.isEmergency && !b.isEmergency) return -1;
+      if (!a.isEmergency && b.isEmergency) return 1;
 
-  //   try {
-  //     const newVisit: Visit = JSON.parse(event.data);
-
-  //     setVisitsList(oldVisits =>
-  //       oldVisits.filter(visit => visit.visitId !== newVisit.visitId)
-  //     );
-
-  //     setVisitsList(oldVisits => {
-  //       const index = oldVisits.findIndex(
-  //         visit => visit.visitId === newVisit.visitId
-  //       );
-  //       if (index !== -1) {
-  //         // Update existing visit
-  //         const newVisits = [...oldVisits];
-  //         newVisits[index] = newVisit;
-  //         return newVisits;
-  //       } else {
-  //         // Add new visit
-  //         return [...oldVisits, newVisit];
-  //       }
-  //     });
-
-  //     setVisitsList(oldVisits => {
-  //       if (!oldVisits.some(visit => visit.visitId === newVisit.visitId)) {
-  //         return [...oldVisits, newVisit];
-  //       }
-  //       return oldVisits;
-  //     });
-  //     setVisitsAll(oldVisits => {
-  //       if (!oldVisits.some(visit => visit.visitId === newVisit.visitId)) {
-  //         return [...oldVisits, newVisit];
-  //       }
-  //       return oldVisits;
-  //     });
-  //   } catch (error) {
-  //     console.error('Error parsing SSE data:', error);
-  //   }
-  // };
-
-  //   eventSource.onerror = error => {
-  //     console.error('EventSource error:', error);
-  //     eventSource.close();
-  //   };
-
-  //   return () => {
-  //     eventSource.close();
-  //   };
-  // }, [isVet]);
-
-  // useEffect(() => {
-  //   // Skip EventSource setup for VET role - backend endpoints are ADMIN-only
-  //   // VETs should not reach this component due to route-level restrictions
-  //   if (isVet) {
-  //     return;
-  //   }
-
-  //   const archivedEventSource = new EventSource(
-  //     `${import.meta.env.VITE_BACKEND_URL}/gateway/visits/archived`,
-  //     { withCredentials: true }
-  //   );
-
-  //   archivedEventSource.onmessage = event => {
-  //     try {
-  //       const newArchivedVisit: Visit = JSON.parse(event.data);
-
-  //       setArchivedVisits(oldArchived => {
-  //         if (
-  //           !oldArchived.some(
-  //             visit => visit.visitId === newArchivedVisit.visitId
-  //           )
-  //         ) {
-  //           return [...oldArchived, newArchivedVisit];
-  //         } else {
-  //           // Update existing archived visit
-  //           return oldArchived.map(visit =>
-  //             visit.visitId === newArchivedVisit.visitId
-  //               ? newArchivedVisit
-  //               : visit
-  //           );
-  //         }
-  //       });
-  //     } catch (error) {
-  //       console.error('Error parsing SSE data for archived visits:', error);
-  //     }
-  //   };
-
-  //   archivedEventSource.onerror = error => {
-  //     console.error('Archived EventSource error:', error);
-  //     archivedEventSource.close();
-  //   };
-
-  //   return () => {
-  //     archivedEventSource.close();
-  //   };
-  // }, [isVet]);
+      // Within the same emergency status, sort by start date (most recent first)
+      return new Date(b.visitDate).getTime() - new Date(a.visitDate).getTime();
+    });
+  };
 
   // Update the displayed list whenever the search term or the full visits list changes.
   // This avoids refetching from the API and preserves the full list in `visits`.
   useEffect(() => {
     const term = searchTerm.trim().toLowerCase();
     if (term.length > 0) {
-      setDisplayedVisits(
-        visits.filter(v => (v.description || '').toLowerCase().includes(term))
+      const filtered = visits.filter(v =>
+        (v.description || '').toLowerCase().includes(term)
       );
+      setDisplayedVisits(sortVisits(filtered));
     } else {
-      setDisplayedVisits(visits);
+      setDisplayedVisits(sortVisits(visits));
     }
   }, [searchTerm, visits]);
 
   // Filter visits based on status
   // Derive the different lists from the displayed list so search / tabs compose
-  const emergencyVisits = displayedVisits.filter(visit => visit.isEmergency);
-  const confirmedVisits = displayedVisits.filter(visit => {
-    return visit.status === 'CONFIRMED';
-  });
-  const upcomingVisits = displayedVisits.filter(visit => {
-    return visit.status === 'UPCOMING';
-  });
-  const completedVisits = displayedVisits.filter(visit => {
-    return visit.status === 'COMPLETED';
-  });
-  const cancelledVisits = displayedVisits.filter(visit => {
-    return visit.status === 'CANCELLED';
-  });
-  const archivedVisits = displayedVisits.filter(visit => {
-    return visit.status === 'ARCHIVED';
-  });
+  const emergencyVisits = sortVisits(
+    displayedVisits.filter(visit => visit.isEmergency)
+  );
+  const confirmedVisits = sortVisits(
+    displayedVisits.filter(visit => {
+      return visit.status === 'CONFIRMED';
+    })
+  );
+  const upcomingVisits = sortVisits(
+    displayedVisits.filter(visit => {
+      return visit.status === 'UPCOMING';
+    })
+  );
+  const completedVisits = sortVisits(
+    displayedVisits.filter(visit => {
+      return visit.status === 'COMPLETED';
+    })
+  );
+  const cancelledVisits = sortVisits(
+    displayedVisits.filter(visit => {
+      return visit.status === 'CANCELLED';
+    })
+  );
+  const archivedVisits = sortVisits(
+    displayedVisits.filter(visit => {
+      return visit.status === 'ARCHIVED';
+    })
+  );
 
+  // Handle archiving the visit
   const handleArchive = async (visitId: string): Promise<void> => {
-    const confirmArchive = window.confirm(
-      `Are you sure you want to archive visit with ID: ${visitId}?`
-    );
-    if (confirmArchive) {
-      try {
-        const requestBody = { status: 'ARCHIVED' };
-        await axiosInstance.put(
-          `/visits/completed/${visitId}/archive`,
-          requestBody,
-          { useV2: true }
-        );
-
-        // Fetch the updated visit data from the backend
-        const updatedVisitResponse = await axiosInstance.get<Visit>(
-          `/visits/${visitId}`,
-          {
-            useV2: false,
-          }
-        );
-        const updatedVisit = await updatedVisitResponse.data;
-        // Replace the updated visit in the full list
-        setVisits(prev => {
-          return prev.map(visit => {
-            if (visit.visitId === visitId) return updatedVisit;
-            return visit;
-          });
+    await archiveVisit(visitId, updatedVisit => {
+      // This should prabably be removed once the visit list will be Zreactive
+      setVisits(prev => {
+        return prev.map(visit => {
+          if (visit.visitId === visitId) return updatedVisit;
+          return visit;
         });
-        alert('Visit archived successfully!');
-      } catch (error) {
-        console.error('Error archiving visit:', error);
-        alert('Error archiving visit.');
-      }
-    }
+      });
+    });
   };
 
   // Handle canceling the visit
   const handleCancel = async (visitId: string): Promise<void> => {
-    const confirmCancel = window.confirm(
-      'Do you confirm you want to cancel the reservation?'
-    );
-
-    if (!confirmCancel) return;
-    try {
-      await axiosInstance.patch(`/visits/${visitId}/CANCELLED`, {
-        useV2: false,
-      });
+    await cancelVisit(visitId, updatedVisit => {
       // Update the full visits list; the displayed list will update automatically
       // via the search effect above.
-      setVisits(prevVisits =>
-        prevVisits.map(visit =>
-          visit.visitId === visitId ? { ...visit, status: 'CANCELLED' } : visit
-        )
-      );
-    } catch (error) {
-      console.error('Error canceling visit:', error);
-      alert('Error canceling visit.');
-    }
+      setVisits(prev => {
+        return prev.map(visit => {
+          if (visit.visitId === visitId) return updatedVisit;
+          return visit;
+        });
+      });
+    });
   };
 
   const renderSidebarItem = (
