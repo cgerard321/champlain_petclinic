@@ -30,7 +30,7 @@ public class UserPrincipalImpl implements UserDetails {
     public String getUsername() {
         return this.user.get().getEmail();
     }
-    public String getUserName(){
+    public String getActualUsername(){
         return this.user.get().getUsername();
     }
 
