@@ -3,6 +3,8 @@ package com.petclinic.inventoryservice.presentationlayer;
 import com.petclinic.inventoryservice.datalayer.Product.Status;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -18,4 +20,5 @@ public class ProductResponseDTO {
     private Double productSalePrice;
     private Double productProfit;
     private Status status;
+    private LocalDateTime lastUpdatedAt;
 }

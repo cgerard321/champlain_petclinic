@@ -31,5 +31,9 @@ public class CartResponseModel {
     private String invoiceId;
 
     public CartResponseModel(String invoiceId, String cartId, List<CartProduct> products, double total) {
+        this.invoiceId = invoiceId;
+        this.cartId = cartId;
+        this.products = products;
+        this.total = total;
     }
 }

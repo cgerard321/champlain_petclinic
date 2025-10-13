@@ -375,10 +375,21 @@ public class CartServiceImpl implements CartService {
                 );
     }
 
+    private Mono<Cart> createNewCartForCustomer(String customerId) {
+        Cart newCart = new Cart();
+        newCart.setCustomerId(customerId);
+        newCart.setCartId(UUID.randomUUID().toString());
+        newCart.setProducts(new ArrayList<>());
+        return cartRepository.save(newCart);
+    }
+
     @Override
     public Mono<CartResponseModel> findCartByCustomerId(String customerId) {
+        if (customerId == null || customerId.trim().isEmpty()) {
+            return Mono.error(new InvalidInputException("customerId must not be null or empty"));
+        }
         return cartRepository.findCartByCustomerId(customerId)
-                .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Cart for customer id was not found: " + customerId))))
+                .switchIfEmpty(Mono.defer(() -> createNewCartForCustomer(customerId)))
                 .doOnNext(cart -> log.debug("The cart for customer id {} is: {}", customerId, cart.toString()))
                 .flatMap(cart -> {
                     List<CartProduct> products = cart.getProducts();

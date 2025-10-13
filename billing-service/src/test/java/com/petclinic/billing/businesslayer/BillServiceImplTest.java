@@ -1,6 +1,8 @@
 package com.petclinic.billing.businesslayer;
 
 import com.petclinic.billing.datalayer.*;
+import com.petclinic.billing.domainclientlayer.OwnerClient;
+import com.petclinic.billing.domainclientlayer.VetClient;
 import com.petclinic.billing.exceptions.InvalidPaymentException;
 import com.petclinic.billing.exceptions.NotFoundException;
 import com.petclinic.billing.util.EntityDtoUtil;
@@ -43,6 +45,12 @@ public class BillServiceImplTest {
 
     @MockBean
     BillRepository repo;
+
+    @MockBean
+    VetClient vetClient;
+
+    @MockBean
+    OwnerClient ownerClient;
 
     @Autowired
     BillService billService;
@@ -307,24 +315,106 @@ public class BillServiceImplTest {
     }
 
     @Test
-    public void test_createBill() {
+    void createBill_success() {
+        // Arrange
+        BillRequestDTO billDTO = new BillRequestDTO();
+        billDTO.setBillStatus(BillStatus.PAID);
+        billDTO.setVetId("vet-123");
+        billDTO.setCustomerId("owner-456");
+        billDTO.setDueDate(LocalDate.now().plusDays(30));
 
-        Bill billEntity = buildBill();
+        // Mock VetClient response
+        VetResponseDTO vetResponse = new VetResponseDTO();
+        vetResponse.setFirstName("John");
+        vetResponse.setLastName("Doe");
+        Mockito.when(vetClient.getVetByVetId("vet-123"))
+                .thenReturn(Mono.just(vetResponse));
 
-        Mono<Bill> billMono = Mono.just(billEntity);
-        BillRequestDTO billDTO = buildBillRequestDTO();
+        // Mock OwnerClient response
+        OwnerResponseDTO ownerResponse = new OwnerResponseDTO();
+        ownerResponse.setFirstName("Alice");
+        ownerResponse.setLastName("Smith");
+        Mockito.when(ownerClient.getOwnerByOwnerId("owner-456"))
+                .thenReturn(Mono.just(ownerResponse));
 
-        when(repo.insert(any(Bill.class))).thenReturn(billMono);
+        // Mock repository insert
+        Bill billEntity = EntityDtoUtil.toBillEntity(billDTO);
+        billEntity.setBillId("generated-id");
+        billEntity.setVetFirstName("John");
+        billEntity.setVetLastName("Doe");
+        billEntity.setOwnerFirstName("Alice");
+        billEntity.setOwnerLastName("Smith");
 
-        Mono<BillResponseDTO> returnedBill = billService.createBill(Mono.just(billDTO));
+        Mockito.when(repo.insert(Mockito.any(Bill.class)))
+                .thenReturn(Mono.just(billEntity));
 
-        StepVerifier.create(returnedBill)
-                .consumeNextWith(monoDTO -> {
-                    assertEquals(billEntity.getCustomerId(), monoDTO.getCustomerId());
-                    assertEquals(billEntity.getAmount(), monoDTO.getAmount());
-                })
+        // Act + Assert
+        StepVerifier.create(billService.createBill(Mono.just(billDTO)))
+                .expectNextMatches(response ->
+                        response.getBillId().equals("generated-id") &&
+                                response.getVetFirstName().equals("John") &&
+                                response.getOwnerFirstName().equals("Alice") &&
+                                response.getBillStatus().equals(BillStatus.PAID) &&
+                                response.getDueDate() != null
+                )
                 .verifyComplete();
+    }
 
+    @Test
+    void createBill_missingBillStatus_shouldReturnError() {
+        // Arrange
+        BillRequestDTO billDTO = new BillRequestDTO();
+        billDTO.setVetId("vet-123");
+        billDTO.setCustomerId("owner-456");
+        billDTO.setDueDate(LocalDate.now().plusDays(30));
+
+        // Act + Assert
+        StepVerifier.create(billService.createBill(Mono.just(billDTO)))
+                .expectErrorSatisfies(throwable -> {
+                    assertTrue(throwable instanceof ResponseStatusException);
+                    ResponseStatusException ex = (ResponseStatusException) throwable;
+                    assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
+                    assertEquals("Bill status is required", ex.getReason());
+                })
+                .verify();
+    }
+
+    @Test
+    void createBill_missingVetId_shouldReturnError() {
+        // Arrange
+        BillRequestDTO billDTO = new BillRequestDTO();
+        billDTO.setCustomerId("owner-456");
+        billDTO.setBillStatus(BillStatus.PAID);
+        billDTO.setDueDate(LocalDate.now().plusDays(30));
+
+        // Act + Assert
+        StepVerifier.create(billService.createBill(Mono.just(billDTO)))
+                .expectErrorSatisfies(throwable -> {
+                    assertTrue(throwable instanceof ResponseStatusException);
+                    ResponseStatusException ex = (ResponseStatusException) throwable;
+                    assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
+                    assertEquals("Vet ID is required", ex.getReason());
+                })
+                .verify();
+    }
+
+    @Test
+    void createBill_missingCustomerId_shouldReturnError() {
+        // Arrange
+        BillRequestDTO billDTO = new BillRequestDTO();
+        billDTO.setVetId("vet-123");
+        billDTO.setBillStatus(BillStatus.PAID);
+        billDTO.setDueDate(LocalDate.now().plusDays(30));
+
+        // Act + Assert
+        StepVerifier.create(billService.createBill(Mono.just(billDTO)))
+                .expectErrorSatisfies(throwable -> {
+                    assertTrue(throwable instanceof ResponseStatusException);
+                    ResponseStatusException ex = (ResponseStatusException) throwable;
+                    assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
+                    assertEquals("Customer ID is required", ex.getReason());
+                })
+                .verify();
     }
 
     @Test
@@ -732,13 +822,13 @@ public class BillServiceImplTest {
 
     @Test
     void processPayment_Success() {
+
         String customerId = "customerId-1";
         String billId = "billId-1";
         Bill bill = buildBill();
         bill.setBillStatus(BillStatus.UNPAID);
 
-        PaymentRequestWithJwtDTO paymentRequest =
-                new PaymentRequestWithJwtDTO("1234567812345678", "123", "12/23", null);
+        PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "123", "12/23");
 
         when(repo.findByCustomerIdAndBillId(customerId, billId)).thenReturn(Mono.just(bill));
         when(repo.save(any(Bill.class))).thenAnswer(invocation -> {
@@ -746,7 +836,9 @@ public class BillServiceImplTest {
             return Mono.just(savedBill);
         });
 
+
         Mono<BillResponseDTO> result = billService.processPayment(customerId, billId, paymentRequest);
+
 
         StepVerifier.create(result)
                 .consumeNextWith(updatedBillDto -> {
@@ -756,46 +848,37 @@ public class BillServiceImplTest {
                 .verifyComplete();
     }
 
-
     @Test
     void processPayment_InvalidCardNumber_Failure() {
         String customerId = "customerId-1";
         String billId = "billId-1";
-
-        PaymentRequestWithJwtDTO paymentRequest =
-                new PaymentRequestWithJwtDTO("12345678", "123", "12/23", null);
+        PaymentRequestDTO paymentRequest = new PaymentRequestDTO("12345678", "123", "12/23");
 
         StepVerifier.create(billService.processPayment(customerId, billId, paymentRequest))
                 .expectErrorMatches(throwable -> throwable instanceof InvalidPaymentException &&
                         throwable.getMessage().contains("Invalid payment details"))
                 .verify();
     }
-
 
 
     @Test
     void processPayment_InvalidCVV_Failure() {
         String customerId = "customerId-1";
         String billId = "billId-1";
-
-        PaymentRequestWithJwtDTO paymentRequest =
-                new PaymentRequestWithJwtDTO("1234567812345678", "12", "12/23", null);
+        PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "12", "12/23");
 
         StepVerifier.create(billService.processPayment(customerId, billId, paymentRequest))
                 .expectErrorMatches(throwable -> throwable instanceof InvalidPaymentException &&
                         throwable.getMessage().contains("Invalid payment details"))
                 .verify();
     }
-
 
 
     @Test
     void processPayment_InvalidExpirationDate_Failure() {
         String customerId = "customerId-1";
         String billId = "billId-1";
-
-        PaymentRequestWithJwtDTO paymentRequest =
-                new PaymentRequestWithJwtDTO("1234567812345678", "123", "1223", null);
+        PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "123", "1223");
 
         StepVerifier.create(billService.processPayment(customerId, billId, paymentRequest))
                 .expectErrorMatches(throwable -> throwable instanceof InvalidPaymentException &&
@@ -803,14 +886,11 @@ public class BillServiceImplTest {
                 .verify();
     }
 
-
     @Test
     void processPayment_BillNotFound_Failure() {
         String customerId = "customerId-1";
         String billId = "billId-1";
-
-        PaymentRequestWithJwtDTO paymentRequest =
-                new PaymentRequestWithJwtDTO("1234567812345678", "123", "12/23", null);
+        PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "123", "12/23");
 
         when(repo.findByCustomerIdAndBillId(customerId, billId)).thenReturn(Mono.empty());
 
@@ -823,7 +903,6 @@ public class BillServiceImplTest {
                 })
                 .verify();
     }
-
 
     @Test
     void getNumberOfBillsWithFilters_Positive_ShouldCountMatchingBills() {
