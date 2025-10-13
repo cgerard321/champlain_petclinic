@@ -38,6 +38,14 @@ type FieldKey =
   | 'inventoryType'
   | 'inventoryDescription'
   | 'inventoryImage'
+  | 'inventoryBackupImage'
+  | 'uploadedImage';
+
+type TextFieldKey =
+  | 'inventoryName'
+  | 'inventoryType'
+  | 'inventoryDescription'
+  | 'inventoryImage'
   | 'inventoryBackupImage';
 
 function buildInventoryFieldErrorMessage(params: {
@@ -77,7 +85,7 @@ function buildInventoryFieldErrorMessage(params: {
     next.inventoryBackupImage = 'Must be a valid http/https URL.';
   }
   if (imageUploaded && base64ByteLength(imageUploaded) > MAX_IMAGE_BYTES) {
-    next.inventoryImage = 'Image too large (max 160KB).';
+    next.uploadedImage = 'Image too large (max 160KB).';
   }
   return next;
 }
@@ -103,14 +111,14 @@ const EditInventory: React.FC = (): JSX.Element => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // Undo state
-  const [history, setHistory] = useState<Record<FieldKey, string[]>>({
+  const [history, setHistory] = useState<Record<TextFieldKey, string[]>>({
     inventoryName: [''],
     inventoryType: [''],
     inventoryDescription: [''],
     inventoryImage: [''],
     inventoryBackupImage: [''],
   });
-  const [lastEditedFields, setLastEditedFields] = useState<string[]>([]);
+  const [lastEditedFields, setLastEditedFields] = useState<TextFieldKey[]>([]);
 
   // Keep the original loaded inventory so Cancel can discard edits
   const originalInventoryRef = useRef<InventoryRequestModel | null>(null);
@@ -183,7 +191,7 @@ const EditInventory: React.FC = (): JSX.Element => {
   };
 
   // Push snapshots at word boundaries
-  const handleFieldChange = (field: FieldKey, value: string): void => {
+  const handleFieldChange = (field: TextFieldKey, value: string): void => {
     setHistory(prev => {
       const fieldHist = prev[field] ?? [''];
       const lastRecorded = fieldHist[fieldHist.length - 1] ?? '';
@@ -209,7 +217,15 @@ const EditInventory: React.FC = (): JSX.Element => {
 
     setFieldErrors(prev => ({ ...prev, [field]: undefined }));
 
-    setInventory({ ...inventory, [field]: value });
+    if (field === 'inventoryImage') {
+      setInventory(prev => ({
+        ...prev,
+        inventoryImage: value,
+        imageUploaded: '',
+      }));
+    } else {
+      setInventory(prev => ({ ...prev, [field]: value }));
+    }
   };
 
   // Undo handler
@@ -217,7 +233,7 @@ const EditInventory: React.FC = (): JSX.Element => {
     const order = [...lastEditedFields];
 
     while (order.length > 0) {
-      const candidate = order[order.length - 1] as FieldKey;
+      const candidate = order[order.length - 1] as TextFieldKey;
       const fieldHist = history[candidate];
 
       if (fieldHist && fieldHist.length > 1) {
@@ -309,6 +325,14 @@ const EditInventory: React.FC = (): JSX.Element => {
           return;
         }
 
+        if (msg.includes('uploaded image') || msg.includes('160kb')) {
+          setFieldErrors(prev => ({
+            ...prev,
+            uploadedImage: 'Image too large (max 160KB).',
+          }));
+          return;
+        }
+
         setErrorMessage(error.message || 'Failed to update inventory.');
         return;
       }
@@ -336,6 +360,9 @@ const EditInventory: React.FC = (): JSX.Element => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Clear the URL image via the same path as other text edits (so it's undoable)
+    handleFieldChange('inventoryImage', '');
+
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onloadend = () => {
@@ -347,28 +374,24 @@ const EditInventory: React.FC = (): JSX.Element => {
       if (byteLength > MAX_IMAGE_BYTES) {
         setFieldErrors(prev => ({
           ...prev,
-          inventoryImage: 'Image too large (max 160KB).',
+          uploadedImage: 'Image too large (max 160KB).',
         }));
-
-        if (fileInputRef.current) {
-          fileInputRef.current.value = '';
-        }
-
-        setInventory(prev => ({
-          ...prev,
-          imageUploaded: base64String,
-        }));
-
+        // keep imageUploaded empty
+        setInventory(prev => ({ ...prev, imageUploaded: '' }));
+        if (fileInputRef.current) fileInputRef.current.value = '';
         return;
       }
-      setInventory(prev => ({
-        ...prev,
-        imageUploaded: base64String,
-      }));
 
-      setFieldErrors(prev => ({ ...prev, inventoryImage: undefined }));
+      setInventory(prev => ({ ...prev, imageUploaded: base64String }));
+      setFieldErrors(prev => ({ ...prev, uploadedImage: undefined }));
     };
   };
+
+  const previewSrc = inventory.imageUploaded
+    ? `data:image/*;base64,${inventory.imageUploaded}`
+    : isHttpUrl(inventory.inventoryImage)
+      ? inventory.inventoryImage
+      : '';
 
   return (
     <div className="edit-inventory-form">
@@ -529,15 +552,24 @@ const EditInventory: React.FC = (): JSX.Element => {
                 <input
                   type="file"
                   name="uploadedImage"
-                  className={`form-control ${fieldErrors.inventoryImage ? 'invalid animate' : ''}`}
+                  className={`form-control ${fieldErrors.uploadedImage ? 'invalid animate' : ''}`}
                   accept="image/*"
                   onChange={handleFileChange}
                   ref={fileInputRef}
+                  aria-invalid={!!fieldErrors.uploadedImage}
+                  aria-describedby={
+                    fieldErrors.uploadedImage ? 'err-uploadedImage' : undefined
+                  }
                 />
-                {inventory.imageUploaded && (
+                {fieldErrors.uploadedImage && (
+                  <span id="err-uploadedImage" className="error">
+                    {fieldErrors.uploadedImage}
+                  </span>
+                )}
+                {previewSrc && (
                   <div style={{ marginTop: 8 }}>
                     <img
-                      src={`data:image/*;base64,${inventory.imageUploaded}`}
+                      src={previewSrc}
                       alt="Preview"
                       style={{ maxWidth: 120, maxHeight: 120, borderRadius: 4 }}
                     />

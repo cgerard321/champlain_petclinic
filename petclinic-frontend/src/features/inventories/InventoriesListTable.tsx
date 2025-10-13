@@ -16,6 +16,15 @@ import axiosInstance from '@/shared/api/axiosInstance.ts';
 import { toggleInventoryImportant } from './api/toggleInventoryImportant';
 
 export default function InventoriesListTable(): JSX.Element {
+  const isHttpUrl = (url: string): boolean => {
+    try {
+      const u = new URL(url);
+      return u.protocol === 'http:' || u.protocol === 'https:';
+    } catch {
+      return false;
+    }
+  }; //helper
+
   const [selectedInventories, setSelectedInventories] = useState<Inventory[]>(
     []
   );
@@ -502,15 +511,40 @@ export default function InventoriesListTable(): JSX.Element {
               style={{ cursor: 'pointer' }}
             >
               <div className={cardStylesInventory.imageContainer}>
-                <img
-                  src={
-                    inventory.imageUploaded instanceof Uint8Array
-                      ? `data:image/jpeg;base64,${arrayBufferToBase64(inventory.imageUploaded)}`
-                      : `data:image/jpeg;base64,${inventory.imageUploaded}`
-                  }
-                  alt={inventory.inventoryName}
-                  className={cardStylesInventory.cardImage}
-                />
+                {(() => {
+                  // pick the best available source for the card image
+                  const uploaded = inventory.imageUploaded
+                    ? inventory.imageUploaded instanceof Uint8Array
+                      ? `data:image/*;base64,${arrayBufferToBase64(inventory.imageUploaded)}`
+                      : `data:image/*;base64,${inventory.imageUploaded}`
+                    : '';
+
+                  const url = isHttpUrl(inventory.inventoryImage)
+                    ? inventory.inventoryImage
+                    : '';
+                  const fallback = isHttpUrl(inventory.inventoryBackupImage)
+                    ? inventory.inventoryBackupImage
+                    : '';
+
+                  const src = url || uploaded;
+
+                  return (
+                    <img
+                      src={src || fallback}
+                      alt={inventory.inventoryName}
+                      className={cardStylesInventory.cardImage}
+                      onError={e => {
+                        const img = e.currentTarget;
+                        // if main fails, try backup once; otherwise hide or swap to a placeholder
+                        if (fallback && img.src !== fallback) {
+                          img.src = fallback;
+                        } else {
+                          img.style.display = 'none'; // or: img.src = '/placeholder.png';
+                        }
+                      }}
+                    />
+                  );
+                })()}
               </div>
               <div className={cardStylesInventory.inventoryNameSection}>
                 <p id={cardStylesInventory.inventoryNameText}>
