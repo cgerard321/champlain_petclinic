@@ -16,6 +16,7 @@ type OwnerVisitType = {
   petId: string;
   practitionerId: string;
   status: Status;
+  isEmergency: boolean;
 };
 
 const OwnerBookingVisit: React.FC = (): JSX.Element => {
@@ -26,6 +27,7 @@ const OwnerBookingVisit: React.FC = (): JSX.Element => {
     petId: '',
     practitionerId: '',
     status: 'UPCOMING' as Status,
+    isEmergency: false,
   });
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -97,6 +99,7 @@ const OwnerBookingVisit: React.FC = (): JSX.Element => {
         localStorage.getItem('authToken') ||
         localStorage.getItem('token') ||
         '',
+      isEmergency: visit.isEmergency,
     };
 
     try {

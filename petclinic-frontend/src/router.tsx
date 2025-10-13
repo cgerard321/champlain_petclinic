@@ -47,7 +47,6 @@ import ResetPassword from '@/pages/User/ResetPassword.tsx';
 import PromoPage from '@/pages/Promos/PromoListPage.tsx';
 import AddPromoPage from '@/pages/Promos/AddPromoPage.tsx';
 import UpdatePromoPage from '@/pages/Promos/UpdatePromoPage.tsx';
-import CustomerEmergency from './pages/Visit/CustomerEmergency';
 import LowStockProducts from '@/features/inventories/LowStockProducts.tsx';
 import MoveInventoryProducts from '@/features/inventories/MoveInventoryProducts.tsx';
 import ReviewsCustomer from '@/pages/Review/CustomerReviews.tsx';
@@ -111,14 +110,6 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <VisitDetails />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: AppRoutePaths.CustomerEmergency,
-        element: (
-          <ProtectedRoute>
-            <CustomerEmergency />
           </ProtectedRoute>
         ),
       },
