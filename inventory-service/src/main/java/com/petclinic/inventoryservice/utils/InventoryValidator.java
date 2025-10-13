@@ -4,6 +4,8 @@ import com.petclinic.inventoryservice.datalayer.Inventory.Inventory;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryRepository;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryType;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryTypeRepository;
+import com.petclinic.inventoryservice.datalayer.Product.Product;
+import com.petclinic.inventoryservice.datalayer.Product.ProductRepository;
 import com.petclinic.inventoryservice.utils.exceptions.InvalidInputException;
 import com.petclinic.inventoryservice.utils.exceptions.UnprocessableEntityException;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +18,7 @@ public class InventoryValidator {
 
     private final InventoryRepository inventoryRepository;
     private final InventoryTypeRepository inventoryTypeRepository;
+    private final ProductRepository productRepository;
 
     public Mono<Inventory> validateInventory(Inventory e) {
       
@@ -70,7 +73,6 @@ public class InventoryValidator {
             return ("http".equalsIgnoreCase(scheme) || "https".equalsIgnoreCase(scheme)) && u.getHost() != null;
         } catch (Exception ex) { return false; }
     }
-
     public Mono<Inventory> validateInventoryForUpdate(Inventory e, String currentId) {
 
 
@@ -101,6 +103,35 @@ public class InventoryValidator {
                 .flatMap(exists -> exists
                         ? Mono.error(new UnprocessableEntityException("Inventory name already exists."))
                         : Mono.just(e));
+    }
+
+    private Mono<Product> validateProductFields(Product p) {
+        if (p.getProductName() != null) p.setProductName(p.getProductName().trim());
+
+        if (p.getProductName() == null || p.getProductName().isBlank())
+            return Mono.error(new InvalidInputException("Product name is required."));
+        if (p.getProductPrice() == null || p.getProductPrice() <= 0)
+            return Mono.error(new InvalidInputException("Product price must be greater than 0."));
+        if (p.getProductQuantity() == null || p.getProductQuantity() <= 0)
+            return Mono.error(new InvalidInputException("Product quantity must be greater than 0."));
+        if (p.getProductSalePrice() != null && p.getProductSalePrice() <= 0)
+            return Mono.error(new InvalidInputException("Product sale price must be greater than 0."));
+
+        return Mono.just(p);
+    }
+
+    public Mono<Product> validateProductForUpdate(Product p, String inventoryId, String productId) {
+        return validateProductFields(p)
+                .flatMap(valid ->
+                        productRepository
+                                .existsByInventoryIdAndProductNameIgnoreCaseAndProductIdNot(
+                                        inventoryId, valid.getProductName(), productId)
+                                .flatMap(dup -> dup
+                                        ? Mono.error(new UnprocessableEntityException(
+                                        "Product name already exists in this inventory."))
+                                        : Mono.just(valid)
+                                )
+                );
     }
 
 }

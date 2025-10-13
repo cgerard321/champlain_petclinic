@@ -70,8 +70,12 @@ public class InventoryServiceClient {
                 .uri(inventoryServiceUrl + "/{inventoryId}/products/{productId}", inventoryId, productId)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
+                .onStatus(s -> s.value() == 404,
+                        resp -> rethrower.rethrow(resp, ex ->
+                                new ProductListNotFoundException(ex.get("message").toString(), NOT_FOUND)))
                 .onStatus(HttpStatusCode::is4xxClientError,
-                        resp -> rethrower.rethrow(resp, ex -> new ProductListNotFoundException(ex.get("message").toString(), NOT_FOUND)))
+                        resp -> rethrower.rethrow(resp, ex ->
+                                new InvalidInputsInventoryException(ex.get("message").toString(), BAD_REQUEST)))
                 .bodyToMono(ProductResponseDTO.class);
     }
 
@@ -142,8 +146,15 @@ public class InventoryServiceClient {
                 .body(Mono.just(model),ProductRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError,
-                        resp -> rethrower.rethrow(resp, ex -> new InvalidInputsInventoryException(ex.get("message").toString(), BAD_REQUEST)))
+                .onStatus(s -> s.value() == 422, resp ->
+                        rethrower.rethrow(resp, ex ->
+                                new InvalidInputsInventoryException(ex.get("message").toString(), UNPROCESSABLE_ENTITY)))
+                .onStatus(s -> s.value() == 404, resp ->
+                        rethrower.rethrow(resp, ex ->
+                                new InvalidInputsInventoryException(ex.get("message").toString(), NOT_FOUND)))
+                .onStatus(HttpStatusCode::is4xxClientError, resp ->
+                        rethrower.rethrow(resp, ex ->
+                                new InvalidInputsInventoryException(ex.get("message").toString(), BAD_REQUEST)))
                 .bodyToMono(ProductResponseDTO.class);
     }
 
