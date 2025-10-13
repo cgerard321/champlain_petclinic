@@ -14,5 +14,3 @@ export const deleteProduct = async (
     throw error;
   }
 };
-
-// This page needs to be deleted since react is only for customers and not employees.
