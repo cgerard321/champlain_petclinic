@@ -1,0 +1,95 @@
+.delete-modal-dialog {
+  position: relative;
+  padding: 0px;
+}
+
+.delete-modal-dialog .modal-content {
+  padding: 20px;
+  min-height: 0;
+}
+
+.delete-modal-close-btn {
+  position: absolute;
+  top: -15px;
+  right: 0px;
+  font-size: 1.5rem;
+  font-weight: bold;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #000;
+  z-index: 10;
+}
+
+.delete-modal-close-btn:hover,
+.delete-modal-close-btn:focus,
+.delete-modal-close-btn:active {
+  color: #000;
+  background: transparent;
+  box-shadow: none;
+}
+
+.delete-modal-body {
+  padding: 5px;
+  position: relative;
+}
+
+.delete-modal-body h4 {
+  font-family: 'Roboto', sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  margin-bottom: 4px;
+  color: #333;
+  text-align: left;
+}
+
+.delete-modal-body p {
+  font-family: 'Roboto', sans-serif;
+  font-size: 14px;
+  color: #555;
+  margin-top: 20px;
+  margin-bottom: 25px;
+  text-align: left;
+}
+
+.delete-modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+}
+
+.delete-modal-buttons .cancel-btn {
+  background-color: #fff;
+  color: #000;
+  border: 1.5px solid #b9b9b9;
+  padding: 5px 12px;
+  font-size: 14px;
+  border-radius: 4px;
+  margin: 0;
+}
+
+.delete-modal-buttons .cancel-btn:hover {
+  background-color: #f0f0f0;
+  color: #000;
+  border: 1.5px solid #b9b9b9;
+}
+
+.delete-modal-buttons .delete-btn {
+  background-color: #dc3545;
+  color: #fff;
+  border: 1.5px solid #dc3545;
+  padding: 5px 12px;
+  font-size: 14px;
+  border-radius: 4px;
+  margin: 0;
+}
+
+.delete-modal-buttons .delete-btn:hover {
+  background-color: #c82333;
+  border-color: #bd2130;
+}
+
+.delete-modal-buttons .btn-danger {
+  padding: 5px 12px;
+  font-size: 14px;
+}
