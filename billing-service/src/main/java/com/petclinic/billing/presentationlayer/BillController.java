@@ -4,8 +4,6 @@ import com.petclinic.billing.businesslayer.BillService;
 import com.petclinic.billing.datalayer.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.repository.query.Param;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.MediaType;
@@ -13,11 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
 import java.math.BigDecimal;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 @RestController

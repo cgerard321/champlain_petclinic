@@ -19,7 +19,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.function.Predicate;
 
@@ -197,8 +196,6 @@ public class BillServiceImpl implements BillService{
                 .map(EntityDtoUtil::toBillResponseDto);
     }
 
-
-
     @Override
     public Mono<BillResponseDTO> updateBill(String billId, Mono<BillRequestDTO> billRequestDTO) {
         return billRequestDTO
@@ -236,7 +233,6 @@ public class BillServiceImpl implements BillService{
                 });
     }
 
-
     @Override
     public Flux<Void> deleteBillsByVetId(String vetId) {
         return billRepository.deleteBillsByVetId(vetId);
@@ -247,8 +243,6 @@ public class BillServiceImpl implements BillService{
 /**/
         return billRepository.findByCustomerId(customerId).map(EntityDtoUtil::toBillResponseDto);
     }
-
-
 
     @Override
     public Flux<BillResponseDTO> getBillsByVetId(String vetId) {
@@ -420,7 +414,5 @@ public class BillServiceImpl implements BillService{
                     return Mono.just(bill);
                 });
     }
-
-
 
 }
