@@ -254,7 +254,6 @@ public class UserServiceImpl implements UserService {
         String email = userResetPwdRequestModel.getEmail();
         String token = UUID.randomUUID().toString();
         try {
-            getUserbyUsername(email);
             getUserByEmail(email);
         }
         catch(RuntimeException e){
@@ -364,7 +363,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserByEmail(String email) throws NotFoundException {
-        return userRepo.findByEmail(email).orElseGet(null);
+        return userRepo.findByEmail(email).orElse(null);
     }
 
     @Override
@@ -435,7 +434,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserbyUsername(String username) throws NotFoundException {
-      return userRepo.findByUsername(username).orElseGet(null);
+      return userRepo.findByUsername(username).orElse(null);
     }
 
 }
