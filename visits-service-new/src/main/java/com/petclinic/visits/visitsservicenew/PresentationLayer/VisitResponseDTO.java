@@ -1,6 +1,7 @@
 package com.petclinic.visits.visitsservicenew.PresentationLayer;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.petclinic.visits.visitsservicenew.DataLayer.Status;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -31,4 +32,7 @@ public class VisitResponseDTO {
     private Status status;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime visitEndDate;
+    @JsonProperty("isEmergency")
+    private Boolean isEmergency;
+
 }

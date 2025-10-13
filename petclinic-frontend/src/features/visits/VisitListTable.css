@@ -85,6 +85,20 @@
   background-color: var(--hover-clr);
 }
 
+/* Border for all visits to maintain consistent width */
+.visit-table-section tbody tr {
+  border-left: 5px solid var(--secondary-clr);
+}
+
+/* Emergency visit indicator - red left border */
+.visit-table-section tr.emergency-visit {
+  border-left: 5px solid var(--emergency-clr);
+}
+
+.visit-table-section tr.emergency-visit:hover {
+  background-color: var(--hover-clr);
+}
+
 /* Border Radius */
 .visit-table-section thead th:first-child {
   border-top-left-radius: 10px;

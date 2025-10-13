@@ -8,4 +8,5 @@ export interface VisitRequestModel {
   ownerId?: string;
   jwtToken?: string;
   status: Status;
+  isEmergency: boolean;
 }

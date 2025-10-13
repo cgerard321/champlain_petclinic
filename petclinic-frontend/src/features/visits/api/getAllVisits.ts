@@ -1,7 +1,7 @@
 import axiosInstance from '@/shared/api/axiosInstance.ts';
 import { Visit } from '@/features/visits/models/Visit.ts';
 
-export async function getAllVisits(searchTerm: string): Promise<Visit[]> {
+export async function getAllVisits(searchTerm: string = ''): Promise<Visit[]> {
   try {
     const params: Record<string, string> = {};
     if (searchTerm !== '') params.searchTerm = searchTerm;
