@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useState } from 'react';
 import CartBillingForm, { BillingInfo } from './CartBillingForm';
 import { useNavigate, useParams } from 'react-router-dom';
-import CartItem, { formatPrice } from './CartItem';
+import CartItem from './CartItem';
 import { ProductModel } from '../models/ProductModel';
 import './UserCart.css';
 import { NavBar } from '@/layouts/AppNavBar';
 import { FaShoppingCart } from 'react-icons/fa';
 import ImageContainer from '@/features/products/components/ImageContainer';
 import axiosInstance from '@/shared/api/axiosInstance';
+import { formatPrice } from '../utils/formatPrice';
 import {
   IsAdmin,
   IsInventoryManager,
@@ -662,7 +663,9 @@ const UserCart = (): JSX.Element => {
         className="cart-loading-overlay"
         role="status"
         aria-label="Loading cart items"
-      />
+      >
+        <span className="sr-only">Loading cart items...</span>
+      </div>
     );
   if (error) return <div className="error">{error}</div>;
 

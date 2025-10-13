@@ -3,6 +3,7 @@ import './CartItem.css';
 import { ProductModel } from '../models/ProductModel';
 import ImageContainer from '@/features/products/components/ImageContainer';
 import { useUser } from '@/context/UserContext';
+import { formatPrice } from '../utils/formatPrice';
 
 interface CartItemProps {
   item: ProductModel;
@@ -19,9 +20,6 @@ interface CartItemProps {
   showNotification?: (message: string) => void;
   removeFromWishlist?: (item: ProductModel) => void;
 }
-
-export const formatPrice = (price: number): string =>
-  `$${price.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
 
 const CartItem = ({
   item,
