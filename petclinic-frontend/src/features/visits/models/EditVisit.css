@@ -72,3 +72,79 @@
 .profile-edit button.cancel:hover {
   background-color: darkred;
 }
+
+.help-text {
+  display: block;
+  margin-top: 5px;
+  font-size: 0.85em;
+  color: #666;
+  font-style: italic;
+}
+
+
+.time-slot {
+  padding: 10px 15px;
+  border: 2px solid #3498db;
+  background-color: white;
+  color: #3498db;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.slot-time {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.slot-vet {
+  font-size: 0.75em;
+  color: #7f8c8d;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.time-slot:hover {
+  background-color: #3498db;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.time-slot:hover .slot-vet {
+  color: rgba(255,255,255,0.9);
+}
+
+.time-slot.selected {
+  background-color: #2ecc71;
+  border-color: #2ecc71;
+  color: white;
+  font-weight: bold;
+}
+
+.time-slot.selected .slot-vet {
+  color: rgba(255,255,255,0.95);
+}
+
+
+.assigned-vet-info {
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+  color: #155724;
+  padding: 12px 16px;
+  border-radius: 4px;
+  margin-top: 15px;
+  font-weight: 500;
+}
+
+.error-message {
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  color: #721c24;
+  padding: 12px 16px;
+  border-radius: 4px;
+  margin-top: 15px;
+}

@@ -4,6 +4,8 @@ import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDateTime;
+
 public interface ProductRepository extends ReactiveMongoRepository<Product, String> {
     Mono<Boolean> existsByProductId(String productId);
 
@@ -20,7 +22,7 @@ public interface ProductRepository extends ReactiveMongoRepository<Product, Stri
 
     Mono<Boolean> deleteByInventoryId(String inventoryId);
     Flux<Product> findAllProductsByInventoryIdAndProductNameAndProductPriceAndProductQuantity(String inventoryId, String productName, Double productPrice, Integer productQuantity);
-   //Regex
+    //Regex
     Flux<Product> findAllProductsByInventoryIdAndProductNameRegex(String inventoryId, String regex);
 
     Flux<Product> findAllByInventoryIdAndProductQuantityLessThan(String inventoryId, int productQuantity);
@@ -38,5 +40,5 @@ public interface ProductRepository extends ReactiveMongoRepository<Product, Stri
     Flux<Product> findAllProductsByInventoryIdAndProductDescriptionAndStatus(String inventoryId, String productDescription, Status status);
 
     Flux<Product> findAllProductsByInventoryIdAndProductNameAndProductDescriptionAndStatus(String inventoryId, String productName, String productDescription, Status status);
-
+    Mono<Long> countByInventoryIdAndLastUpdatedAtAfter(String inventoryId, LocalDateTime since);
 }

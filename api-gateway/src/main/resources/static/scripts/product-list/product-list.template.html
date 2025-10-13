@@ -1,7 +1,7 @@
 <style>
     .btn:hover {
         transform: translateY(2px);
-        box-shadow: 0 0 rgba(0, 0, 0, 0.2);
+        box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.2);
         border-bottom-width: 1px;
     }
 
@@ -79,7 +79,7 @@
                             trigger="hover"
                             style="width:32px;height:32px">
                     </lord-icon>
-                </button >
+                </button>
         </td>
         <td>
                 <button  class="btn btn-success" type="button" ng-click="searchProduct(productSalePrice, productType, averageRating)" title="Search">
@@ -88,7 +88,7 @@
                             trigger="hover"
                             style="width:32px;height:32px">
                     </lord-icon>
-                </button >
+                </button>
         </td>
     </tr>
 
@@ -176,7 +176,7 @@
 <div id="notification" style="display: none; position: fixed; bottom: 10px; right: 10px; background-color: #4CAF50; color: white; padding: 10px; border-radius: 5px;">
     Notification Text Here
 </div>
-<a ui-sref="shopProductNew">
+<a ui-sref="productAdd">
     <button class="add-bundle-button btn btn-success">Add Product</button>
 </a>
 

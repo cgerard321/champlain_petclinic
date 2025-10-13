@@ -22,4 +22,5 @@ public class InventoryResponseDTO {
     private byte[] imageUploaded;
     private Boolean important;
     private List<ProductResponseDTO> products;
+    private String recentUpdateMessage;
 }

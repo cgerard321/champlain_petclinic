@@ -1,12 +1,21 @@
 import type { FaqItem } from '../models/FaqItem';
+import { contact } from '@/shared/content';
+
+// Formatted hours string for display in the contact info and footer
+export const formattedHours = contact.hours
+  .map(h =>
+    'note' in h && h.note
+      ? `${h.days}: ${h.note}`
+      : `${h.days}: ${h.open ?? '–'}–${h.close ?? '–'}`
+  )
+  .join('\n');
 
 // All the sample FAQ questions, answers, and so on.
 export const FAQ_ITEMS: readonly FaqItem[] = [
   {
     id: 'hours',
     question: 'What are your hours?',
-    answer:
-      'Mon–Fri 8:00–19:00, Sat 9:00–16:00. Closed Sunday. For urgent issues outside these hours, visit our Emergency page.',
+    answer: `${formattedHours}. For urgent issues outside these hours, visit our Emergency page.`,
     tags: ['schedule', 'open', 'close', 'weekend'],
     category: 'General',
   },

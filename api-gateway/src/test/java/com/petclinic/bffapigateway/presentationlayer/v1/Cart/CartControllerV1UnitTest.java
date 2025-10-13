@@ -45,7 +45,16 @@ public class CartControllerV1UnitTest {
     @MockBean
     private CartServiceClient cartServiceClient;
 
+    private final CartControllerV1 controller = new CartControllerV1(Mockito.mock(com.petclinic.bffapigateway.domainclientlayer.CartServiceClient.class));
+
     private final String baseCartURL = "/api/gateway/carts";
+
+    private CartControllerV1.ErrorOptions errorOptions(boolean includeBody, boolean asUnprocessable) {
+        return CartControllerV1.ErrorOptions.builder("testContext")
+                .includeBadRequestBodyMessage(includeBody)
+                .invalidInputAsUnprocessable(asUnprocessable)
+                .build();
+    }
 
     // Test Data Builders
     private CartResponseDTO buildCartResponseDTO() {
@@ -937,4 +946,135 @@ public class CartControllerV1UnitTest {
                         && response.getBody() == null)
                 .verifyComplete();
     }
+    @Test
+    void testUnprocessableEntity() {
+        WebClientResponseException ex = WebClientResponseException.create(422, "Unprocessable Entity", null, null, null);
+        Mono<ResponseEntity<CartResponseDTO>> result = controller.mapCartErrorWithMessage(ex, errorOptions(false, false));
+        StepVerifier.create(result)
+                .expectNextMatches(r -> r.getStatusCode().value() == 422)
+                .verifyComplete();
+    }
+
+    @Test
+    void testInvalidInputException_AsUnprocessable() {
+        InvalidInputException ex = new InvalidInputException("Invalid input");
+        Mono<ResponseEntity<CartResponseDTO>> result = controller.mapCartErrorWithMessage(ex, errorOptions(false, true));
+        StepVerifier.create(result)
+                .expectNextMatches(r -> r.getStatusCode().value() == 422)
+                .verifyComplete();
+    }
+
+    @Test
+    void testInvalidInputException_BadRequestWithBody() {
+        InvalidInputException ex = new InvalidInputException("Invalid input");
+        Mono<ResponseEntity<CartResponseDTO>> result = controller.mapCartErrorWithMessage(ex, errorOptions(true, false));
+        StepVerifier.create(result)
+                .expectNextMatches(r -> r.getStatusCode().is4xxClientError()
+                        && r.getBody() != null
+                        && "Invalid input".equals(r.getBody().getMessage()))
+                .verifyComplete();
+    }
+    @Test
+    void testInvalidInputException_BadRequest() {
+        InvalidInputException ex = new InvalidInputException("Invalid input");
+        Mono<ResponseEntity<CartResponseDTO>> result = controller.mapCartErrorWithMessage(ex, errorOptions(false, false));
+        StepVerifier.create(result)
+                .expectNextMatches(r -> r.getStatusCode().is4xxClientError()
+                        && r.getBody() == null)
+                .verifyComplete();
+    }
+
+    @Test
+    void testNotFoundException() {
+        NotFoundException ex = new NotFoundException("Not found");
+        Mono<ResponseEntity<CartResponseDTO>> result = controller.mapCartErrorWithMessage(ex, errorOptions(false, false));
+        StepVerifier.create(result)
+                .expectNextMatches(r -> r.getStatusCode().value() == 404)
+                .verifyComplete();
+    }
+
+    @Test
+    void testWebClientNotFoundException() {
+        WebClientResponseException ex = WebClientResponseException.create(404, "Not Found", null, null, null);
+        Mono<ResponseEntity<CartResponseDTO>> result = controller.mapCartErrorWithMessage(ex, errorOptions(false, false));
+        StepVerifier.create(result)
+                .expectNextMatches(r -> r.getStatusCode().value() == 404)
+                .verifyComplete();
+    }
+    @Test
+    void testBadRequestWithBody() {
+        WebClientResponseException ex = WebClientResponseException.create(400, "Bad Request", null, null, null);
+        Mono<ResponseEntity<CartResponseDTO>> result = controller.mapCartErrorWithMessage(ex, errorOptions(true, false));
+        StepVerifier.create(result)
+                .expectNextMatches(r -> r.getStatusCode().value() == 400
+                        && (r.getBody() == null || "400 Bad Request".equals(r.getBody().getMessage())))
+                .verifyComplete();
+    }
+
+    @Test
+    void testBadRequest() {
+        WebClientResponseException ex = WebClientResponseException.create(400, "Bad Request", null, null, null);
+        Mono<ResponseEntity<CartResponseDTO>> result = controller.mapCartErrorWithMessage(ex, errorOptions(false, false));
+        StepVerifier.create(result)
+                .expectNextMatches(r -> r.getStatusCode().value() == 400
+                        && r.getBody() == null)
+                .verifyComplete();
+    }
+
+    @Test
+    void testCustomStatus() {
+        WebClientResponseException ex = WebClientResponseException.create(409, "Conflict", null, null, null);
+        Mono<ResponseEntity<CartResponseDTO>> result = controller.mapCartErrorWithMessage(ex, errorOptions(false, false));
+        StepVerifier.create(result)
+                .expectNextMatches(r -> r.getStatusCode().value() == 409)
+                .verifyComplete();
+    }
+    @Test
+    void testInternalServerError() {
+        RuntimeException ex = new RuntimeException("Unexpected error");
+        Mono<ResponseEntity<CartResponseDTO>> result = controller.mapCartErrorWithMessage(ex, errorOptions(false, false));
+        StepVerifier.create(result)
+                .expectNextMatches(r -> r.getStatusCode().is5xxServerError())
+                .verifyComplete();
+    }
+    @Test
+    void testGetRecommendationPurchases_ReturnsOk() {
+        CartServiceClient cartServiceClient = Mockito.mock(CartServiceClient.class);
+        CartControllerV1 controller = new CartControllerV1(cartServiceClient);
+
+        String cartId = "test-cart-id";
+        List<CartProductResponseDTO> products = List.of(
+                CartProductResponseDTO.builder().productId("prod1").build()
+        );
+
+        Mockito.when(cartServiceClient.getRecommendationPurchases(cartId))
+                .thenReturn(Mono.just(products));
+
+        Mono<ResponseEntity<List<CartProductResponseDTO>>> result = controller.getRecommendationPurchases(cartId);
+
+        StepVerifier.create(result)
+                .expectNextMatches(response -> response.getStatusCode().is2xxSuccessful()
+                        && response.getBody() != null
+                        && response.getBody().size() == 1
+                        && "prod1".equals(response.getBody().get(0).getProductId()))
+                .verifyComplete();
+    }
+
+    @Test
+    void testGetRecommendationPurchases_ReturnsNotFound() {
+        CartServiceClient cartServiceClient = Mockito.mock(CartServiceClient.class);
+        CartControllerV1 controller = new CartControllerV1(cartServiceClient);
+
+        String cartId = "missing-cart-id";
+        Mockito.when(cartServiceClient.getRecommendationPurchases(cartId))
+                .thenReturn(Mono.empty());
+
+        Mono<ResponseEntity<List<CartProductResponseDTO>>> result = controller.getRecommendationPurchases(cartId);
+
+        StepVerifier.create(result)
+                .expectNextMatches(response -> response.getStatusCode().is4xxClientError()
+                        && response.getBody() == null)
+                .verifyComplete();
+    }
+
 }

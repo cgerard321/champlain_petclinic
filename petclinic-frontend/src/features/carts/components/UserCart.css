@@ -1,3 +1,20 @@
+/* Empty cart visual styles */
+.empty-cart-visual {
+  text-align: center;
+  margin: 32px 0;
+}
+
+.empty-cart-icon {
+  font-size: 4rem;
+  color: #ee0979;
+}
+
+.empty-cart-message {
+  font-size: 1.2rem;
+  color: #888;
+  margin-top: 12px;
+}
+
 /* Style for recent purchases images in cart */
 .recent-purchase-image img {
   width: 48px;
@@ -5,9 +22,11 @@
   object-fit: cover;
   border-radius: 4px;
 }
+
 .UserCart-container {
   width: 80vw;
   margin: 0 auto;
+  margin-top: 1rem;
   padding: 20px;
   background-color: #f9f9f9;
   border-radius: 8px;
@@ -89,14 +108,27 @@
 .clear-cart-btn {
   background-color: #f44336;
   color: white;
-  transition:
-    background-color 0.3s,
-    transform 0.2s;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 20px;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s, transform 0.2s, opacity 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.clear-cart-btn:hover {
+.clear-cart-btn:hover:not(:disabled) {
   background-color: #d32f2f;
   transform: scale(1.05);
+}
+
+.clear-cart-btn:disabled,
+.clear-cart-btn.disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .go-back-btn {
@@ -226,6 +258,49 @@
   font-size: 0.8em;
   font-weight: bold;
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+}
+
+.recent-purchases-section {
+  margin-bottom: 2rem;
+}
+
+.recent-purchases-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.recent-purchase-image {
+  text-align: center;
+  margin: 32px 0;
+}
+
+.recent-purchase-image span {
+  font-size: 4rem;
+  color: #ee0979;
+}
+
+.recent-purchase-title {
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.recent-purchase-subtitle {
+  margin-bottom: 8px;
+}
+
+.recent-purchase-details {
+  margin-right: 8px;
+}
+
+.recent-purchase-qty {
+  width: 48px;
+}
+
+.recent-purchase-note {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #555;
 }
 
 @media screen and (max-width: 768px) {
@@ -377,6 +452,21 @@
   transform: scale(1.05);
 }
 
+.checkout-btn:disabled,
+.checkout-btn[disabled] {
+  background-color: #90caf9;
+  cursor: not-allowed;
+  box-shadow: none;
+  border-bottom: none;
+  text-decoration: none;
+}
+
+.checkout-btn:disabled:hover,
+.checkout-btn[disabled]:hover {
+  background-color: #90caf9;
+  transform: none;
+}
+
 .voucher-code-section {
   display: flex;
   align-items: center;
@@ -415,28 +505,171 @@
   transform: scale(1.05);
 }
 
+
 .cart-header-title {
   margin-top: 20px;
-  /* If the overlay is an actual <img> with matching src or alt */
-  .Wishlist-items img[src*='out-of-stock' i],
-  .Wishlist-items img[alt*='out of stock' i],
-  .Wishlist-items .oos-overlay {
-    display: none !important;
-  }
-
-  /* If the overlay is drawn via pseudo-elements (ribbons/badges) */
-  .Wishlist-items *::before,
-  .Wishlist-items *::after {
-    /* suppress when OOS ribbon text/image is explicitly called*/
-    background-image: none !important;
-    content: normal;
-  }
 }
 
+.Wishlist-items img[src*='out-of-stock' i],
+.Wishlist-items img[alt*='out of stock' i],
+.Wishlist-items .oos-overlay {
+  display: none !important;
+}
+
+.Wishlist-items *::before,
+.Wishlist-items *::after {
+  background-image: none !important;
+  content: normal;
+}
 
 .move-all-to-cart-btn[disabled] {
   opacity: 0.6;
   cursor: not-allowed;
-  pointer-events: auto; /* laisse le tooltip/title fonctionner */
+  pointer-events: auto;
+  /* laisse le tooltip/title fonctionner */
+}
+
+/* Recommendation Purchases Section */
+.recommendation-purchases-section {
+  margin-bottom: 2rem;
+}
+
+.recommendation-subtitle {
+  margin-bottom: 0.5rem;
+  color: #555;
+  font-size: 1rem;
+  text-align: center;
+}
+
+.recommendation-purchases-list {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 1rem;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  scrollbar-width: thin; /* Firefox */
+  padding-left: 16px;
+  padding-right: 16px;
+  scroll-padding-left: 16px;
+  scroll-padding-right: 16px;
+  justify-content: flex-start;
+}
+
+.recommendation-purchase-card {
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 16px;
+  min-width: 180px;
+  max-width: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #fff;
+}
+
+.recommendation-purchase-image img {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.recommendation-product-name {
+  font-weight: bold;
+  margin-bottom: 4px;
+  text-align: center;
+}
+
+.recommendation-product-price {
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.recommendation-qty-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  justify-content: center;
+}
+
+.recommendation-qty-label {
+  margin-right: 8px;
+}
+
+.recommendation-qty-input {
+  width: 48px;
+  padding: 4px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  text-align: center;
+}
+
+.purchase-again-btn {
+  background: #1976d2;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-weight: bold;
+  margin-top: 4px;
+  transition: background 0.2s;
+}
+
+.purchase-again-btn:hover {
+  background: #1565c0;
+}
+
+.recommendation-total {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #555;
+  text-align: center;
+}
+
+.recommendation-empty-state {
+  color: #888;
+  font-size: 1.1rem;
+  padding: 24px 0;
+  text-align: center;
+  width: 100%;
+}
+
+.recommendation-empty-message {
+  margin-bottom: 12px;
+}
+
+.cta-browse-products-btn {
+  background: #1976d2;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 24px;
+  font-weight: bold;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 8px;
+  box-shadow: 0 2px 8px rgba(25,118,210,0.08);
+  transition: background 0.2s;
+}
+
+.cta-browse-products-btn:hover {
+  background: #1565c0;
+}
+
+.hover-effect {
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+.hover-effect:hover {
+  box-shadow: 0 4px 16px rgba(25, 118, 210, 0.15);
+  transform: translateY(-4px) scale(1.03);
+  z-index: 2;
+}
+
+/* Empty state illustration */
+.recommendation-empty-state img {
+  display: block;
+  margin: 0 auto 12px auto;
 }
 

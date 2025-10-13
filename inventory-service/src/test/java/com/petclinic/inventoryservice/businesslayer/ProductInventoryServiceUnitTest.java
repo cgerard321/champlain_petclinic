@@ -26,6 +26,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.io.ByteArrayOutputStream;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.io.IOException;
 import java.io.InputStream;
@@ -49,7 +50,7 @@ class ProductInventoryServiceUnitTest {
     @MockBean
     InventoryTypeRepository inventoryTypeRepository;
 
-//    ProductResponseDTO productResponseDTO = ProductResponseDTO.builder()
+    //    ProductResponseDTO productResponseDTO = ProductResponseDTO.builder()
 //            .inventoryId("1")
 //            .productId(UUID.randomUUID().toString())
 //            .productName("Benzodiazepines")
@@ -272,38 +273,38 @@ class ProductInventoryServiceUnitTest {
                         productPrice,
                         productQuantity,
                         null
-                        );
+                );
 
         StepVerifier
                 .create(productResponseDTOMono)
                 .expectNextCount(1)
                 .verifyComplete();
     }
-/*
-    @Test
-    void getAllProductsByInventoryId_andProductName_withValidFields_shouldSucceed(){
-        String inventoryType = "1";
-        String productName = "Benzodiazepines";
+    /*
+        @Test
+        void getAllProductsByInventoryId_andProductName_withValidFields_shouldSucceed(){
+            String inventoryType = "1";
+            String productName = "Benzodiazepines";
 
-        when(productRepository
-                .findAllProductsByInventoryIdAndProductName(
-                        inventoryType,
-                        productName))
-                .thenReturn(Flux.just(product));
+            when(productRepository
+                    .findAllProductsByInventoryIdAndProductName(
+                            inventoryType,
+                            productName))
+                    .thenReturn(Flux.just(product));
 
-        Flux<ProductResponseDTO> productResponseDTOMono = productInventoryService
-                .getProductsInInventoryByInventoryIdAndProductsField(
-                        inventoryType,
-                        productName,
-                        null,
-                        null);
+            Flux<ProductResponseDTO> productResponseDTOMono = productInventoryService
+                    .getProductsInInventoryByInventoryIdAndProductsField(
+                            inventoryType,
+                            productName,
+                            null,
+                            null);
 
-        StepVerifier
-                .create(productResponseDTOMono)
-                .expectNextCount(1)
-                .verifyComplete();
-    }
-*/
+            StepVerifier
+                    .create(productResponseDTOMono)
+                    .expectNextCount(1)
+                    .verifyComplete();
+        }
+    */
     @Test
     void getAllProductsByInventoryId_andProductPrice_withValidFields_shouldSucceed(){
         String inventoryId = "1";
@@ -716,7 +717,7 @@ class ProductInventoryServiceUnitTest {
         // You can also assert the exception message here if needed
     }
 
-//    public void deleteProduct_InvalidInventoryId_ShouldNotFound(){
+    //    public void deleteProduct_InvalidInventoryId_ShouldNotFound(){
 //        //arrange
 //        String invalidInventoryId = "invalid";
 //        when(inventoryRepository.existsByInventoryId(invalidInventoryId)).thenReturn(Mono.just(false));
@@ -1287,6 +1288,10 @@ class ProductInventoryServiceUnitTest {
 
         when(inventoryRepository.findInventoryByInventoryCode(inventoryCode))
                 .thenReturn(Mono.just(inventory));
+
+        // ✅ add this line
+        when(productRepository.countByInventoryIdAndLastUpdatedAtAfter(eq("1"), any(LocalDateTime.class)))
+                .thenReturn(Mono.just(0L));
 
         Flux<InventoryResponseDTO> result = productInventoryService.searchInventories(
                 pageable, inventoryCode, null, null, null, null);
@@ -1947,8 +1952,8 @@ class ProductInventoryServiceUnitTest {
         String inventoryId = "valid-id";
 
         // Create mock Product objects with correct parameters for Product constructor
-        Product product1 = new Product("1", "P001", inventoryId, "Product1", "Description1", 10, 5.99, 7.99, product.getProductProfit(), Status.AVAILABLE);
-        Product product2 = new Product("2", "P002", inventoryId, "Product2", "Description2", 20, 10.99, 12.99, product.getProductProfit(), Status.RE_ORDER);
+        Product product1 = new Product("1", "P001", inventoryId, "Product1", "Description1", 10, 5.99, 7.99, product.getProductProfit(), Status.AVAILABLE, LocalDateTime.now());
+        Product product2 = new Product("2", "P002", inventoryId, "Product2", "Description2", 20, 10.99, 12.99, product.getProductProfit(), Status.RE_ORDER, LocalDateTime.now());
 
         // Mock the repository to return a Flux of products
         when(productRepository.findAllProductsByInventoryId(inventoryId))
@@ -2257,6 +2262,35 @@ class ProductInventoryServiceUnitTest {
                     assertEquals("INV-0001", response.getInventoryCode());
                     return true;
                 })
+                .verifyComplete();
+    }
+
+    @Test
+    void getRecentUpdateMessage_WithRecentUpdates_ShouldReturnCount() {
+        String inventoryId = "1";
+        LocalDateTime now = LocalDateTime.now();
+
+        when(productRepository.countByInventoryIdAndLastUpdatedAtAfter(eq(inventoryId), any(LocalDateTime.class)))
+                .thenReturn(Mono.just(3L));
+
+        Mono<String> result = productInventoryService.getRecentUpdateMessage(inventoryId);
+
+        StepVerifier.create(result)
+                .expectNext("3 supplies updated in the last 15 min.")
+                .verifyComplete();
+    }
+
+    @Test
+    void getRecentUpdateMessage_WithNoRecentUpdates_ShouldReturnNoUpdates() {
+        String inventoryId = "1";
+
+        when(productRepository.countByInventoryIdAndLastUpdatedAtAfter(eq(inventoryId), any(LocalDateTime.class)))
+                .thenReturn(Mono.just(0L));
+
+        Mono<String> result = productInventoryService.getRecentUpdateMessage(inventoryId);
+
+        StepVerifier.create(result)
+                .expectNext("No recent updates.")
                 .verifyComplete();
     }
 

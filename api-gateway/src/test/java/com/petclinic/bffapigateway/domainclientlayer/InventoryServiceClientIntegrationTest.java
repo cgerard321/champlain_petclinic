@@ -2,6 +2,7 @@ package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.*;
 import com.petclinic.bffapigateway.dtos.Inventory.Status;
@@ -22,6 +23,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -34,7 +36,7 @@ class InventoryServiceClientIntegrationTest {
     @MockBean
     private InventoryServiceClient inventoryServiceClient;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
     private static MockWebServer mockWebServer;
 
@@ -70,7 +72,8 @@ class InventoryServiceClientIntegrationTest {
                 10.00,
                 2,
                 15.99,
-                Status.OUT_OF_STOCK
+                Status.OUT_OF_STOCK,
+                LocalDateTime.now()
         );
 
         mockWebServer.enqueue(new MockResponse()
@@ -96,7 +99,8 @@ class InventoryServiceClientIntegrationTest {
                 10.00,
                 2,
                 15.99,
-                Status.OUT_OF_STOCK
+                Status.OUT_OF_STOCK,
+                LocalDateTime.now()
         );
 
         mockWebServer.enqueue(new MockResponse()
@@ -159,7 +163,8 @@ class InventoryServiceClientIntegrationTest {
                 10.00,
                 2,
                 15.99,
-                Status.OUT_OF_STOCK
+                Status.OUT_OF_STOCK,
+                LocalDateTime.now()
         );
         ProductResponseDTO productResponseDTO1 = new ProductResponseDTO(
                 "productId",
@@ -169,7 +174,8 @@ class InventoryServiceClientIntegrationTest {
                 10.00,
                 2,
                 15.99,
-                Status.OUT_OF_STOCK
+                Status.OUT_OF_STOCK,
+                LocalDateTime.now()
         );
 
         Flux<ProductResponseDTO> productFlux = Flux.just(productResponseDTO, productResponseDTO1);
@@ -273,7 +279,8 @@ class InventoryServiceClientIntegrationTest {
                 100.00,
                 productQuantity,
                 15.99,
-                Status.AVAILABLE
+                Status.AVAILABLE,
+                LocalDateTime.now()
         );
 
         // Mock the response from the MockWebServer
@@ -338,7 +345,8 @@ class InventoryServiceClientIntegrationTest {
                 10.00,
                 2,
                 15.99,
-                Status.OUT_OF_STOCK
+                Status.OUT_OF_STOCK,
+                LocalDateTime.now()
         );
 
         // Mock the response from the MockWebServer
@@ -390,7 +398,8 @@ class InventoryServiceClientIntegrationTest {
                 10.00,
                 2,
                 15.99,
-                Status.OUT_OF_STOCK
+                Status.OUT_OF_STOCK,
+                LocalDateTime.now()
         );
 
         ProductResponseDTO productResponseDTO2 = new ProductResponseDTO(
@@ -401,15 +410,16 @@ class InventoryServiceClientIntegrationTest {
                 12.00,
                 3,
                 17.99,
-                Status.OUT_OF_STOCK
+                Status.OUT_OF_STOCK,
+                LocalDateTime.now()
         );
 
         // Create lists of products for inventories
         List<ProductResponseDTO> productResponseDTOList1 = new ArrayList<>(Arrays.asList(productResponseDTO1));
         List<ProductResponseDTO> productResponseDTOList2 = new ArrayList<>(Arrays.asList(productResponseDTO2));
 
-        InventoryResponseDTO inventoryResponseDTO1 = new InventoryResponseDTO("inventoryId1","INVT-1001", "Medication", "Medications", "desc1", "", "", diagnosticKitImage, false, productResponseDTOList1);
-        InventoryResponseDTO inventoryResponseDTO2 = new InventoryResponseDTO("inventoryId2","INVT-1002", "Vaccine", "Vaccines", "desc2", "", "", diagnosticKitImage,false, productResponseDTOList2);
+        InventoryResponseDTO inventoryResponseDTO1 = new InventoryResponseDTO("inventoryId1","INVT-1001", "Medication", "Medications", "desc1", "", "", diagnosticKitImage, false, productResponseDTOList1, "No recent updates.");
+        InventoryResponseDTO inventoryResponseDTO2 = new InventoryResponseDTO("inventoryId2","INVT-1002", "Vaccine", "Vaccines", "desc2", "", "", diagnosticKitImage, false, productResponseDTOList2, "No recent updates.");
 
         // Mock the response from the MockWebServer
         mockWebServer.enqueue(new MockResponse()
@@ -436,7 +446,8 @@ class InventoryServiceClientIntegrationTest {
                 10.00,
                 2,
                 15.99,
-                Status.OUT_OF_STOCK
+                Status.OUT_OF_STOCK,
+                LocalDateTime.now()
         );
 
         mockWebServer.enqueue(new MockResponse()
@@ -536,7 +547,8 @@ class InventoryServiceClientIntegrationTest {
                 10.00,
                 2,
                 15.99,
-                Status.OUT_OF_STOCK
+                Status.OUT_OF_STOCK,
+                LocalDateTime.now()
         );
 
         mockWebServer.enqueue(new MockResponse()
@@ -634,7 +646,8 @@ class InventoryServiceClientIntegrationTest {
                 10.00,
                 2,
                 15.99,
-                Status.OUT_OF_STOCK
+                Status.OUT_OF_STOCK,
+                LocalDateTime.now()
         );
 
         // Mock the response from the MockWebServer
@@ -693,5 +706,124 @@ class InventoryServiceClientIntegrationTest {
                 .expectErrorMatches(throwable -> throwable instanceof InventoryNotFoundException
                         && throwable.getMessage().contains("Product not found in inventory: " + inventoryId))
                 .verify();
+    }
+
+    @Test
+    void getInventoryById_shouldReturnInventoryWithRecentUpdateMessage() throws JsonProcessingException {
+        ProductResponseDTO productResponseDTO = new ProductResponseDTO(
+                "productId",
+                "inventoryId",
+                "name",
+                "desc",
+                10.00,
+                2,
+                15.99,
+                Status.OUT_OF_STOCK,
+                LocalDateTime.now()
+        );
+
+        List<ProductResponseDTO> products = new ArrayList<>(Arrays.asList(productResponseDTO));
+
+        InventoryResponseDTO inventoryResponseDTO = new InventoryResponseDTO(
+                "inventoryId1",
+                "INV-0001",
+                "Medication",
+                "Medications",
+                "desc1",
+                "",
+                "",
+                diagnosticKitImage,
+                false,
+                products,
+                "1 supplies updated in the last 15 min."
+        );
+
+        mockWebServer.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+                .setBody(objectMapper.writeValueAsString(inventoryResponseDTO))
+                .addHeader("Content-Type", "application/json"));
+
+        Mono<InventoryResponseDTO> result = inventoryServiceClient.getInventoryById("inventoryId1");
+
+        StepVerifier.create(result)
+                .expectNextMatches(response -> {
+                    assertNotNull(response.getRecentUpdateMessage());
+                    assertEquals("1 supplies updated in the last 15 min.", response.getRecentUpdateMessage());
+                    return true;
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void searchInventory_shouldReturnInventoriesWithRecentUpdateMessages() throws JsonProcessingException {
+        ProductResponseDTO productResponseDTO = new ProductResponseDTO(
+                "productId",
+                "inventoryId1",
+                "name",
+                "desc",
+                10.00,
+                2,
+                15.99,
+                Status.OUT_OF_STOCK,
+                LocalDateTime.now()
+        );
+
+        List<ProductResponseDTO> products = new ArrayList<>(Arrays.asList(productResponseDTO));
+
+        InventoryResponseDTO inventory1 = new InventoryResponseDTO(
+                "inventoryId1",
+                "INV-0001",
+                "Medication",
+                "Medications",
+                "desc1",
+                "",
+                "",
+                diagnosticKitImage,
+                false,
+                products,
+                "2 supplies updated in the last 15 min."
+        );
+
+        InventoryResponseDTO inventory2 = new InventoryResponseDTO(
+                "inventoryId2",
+                "INV-0002",
+                "Vaccine",
+                "Vaccines",
+                "desc2",
+                "",
+                "",
+                diagnosticKitImage,
+                false,
+                new ArrayList<>(),
+                "No recent updates."
+        );
+
+        Flux<InventoryResponseDTO> inventoryFlux = Flux.just(inventory1, inventory2);
+        final String body = objectMapper.writeValueAsString(inventoryFlux.collectList().block());
+
+        mockWebServer.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+                .setBody(body));
+
+        Flux<InventoryResponseDTO> result = inventoryServiceClient.searchInventory(
+                Optional.of(0),
+                Optional.of(2),
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+
+        StepVerifier.create(result)
+                .expectNextMatches(inv -> {
+                    assertNotNull(inv.getRecentUpdateMessage());
+                    return inv.getRecentUpdateMessage().contains("supplies updated");
+                })
+                .expectNextMatches(inv -> {
+                    assertNotNull(inv.getRecentUpdateMessage());
+                    return inv.getRecentUpdateMessage().equals("No recent updates.");
+                })
+                .verifyComplete();
     }
 }

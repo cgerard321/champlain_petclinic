@@ -1,11 +1,10 @@
 package com.petclinic.customersservice.business;
 
 import com.petclinic.customersservice.customersExceptions.exceptions.InvalidInputException;
-import com.petclinic.customersservice.customersExceptions.exceptions.NotFoundException;
 import com.petclinic.customersservice.data.PetType;
 import com.petclinic.customersservice.data.PetTypeRepo;
+import com.petclinic.customersservice.domainclientlayer.FilesServiceClient;
 import com.petclinic.customersservice.presentationlayer.PetTypeRequestDTO;
-import com.petclinic.customersservice.presentationlayer.PetTypeResponseDTO;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
@@ -37,7 +36,8 @@ class PetTypeServiceImplTest {
     @MockBean
     private PetTypeRepo petTypeRepo;
 
-    /** -------------------- CRUD + Validation -------------------- **/
+    @MockBean
+    private FilesServiceClient filesServiceClient;
 
     @Test
     void deletePetTypeByPetTypeId_ShouldDeleteSuccessfully() {
@@ -94,8 +94,6 @@ class PetTypeServiceImplTest {
 
         verify(petTypeRepo).insert(any(PetType.class));
     }
-
-    /** -------------------- Pagination + Filtering -------------------- **/
 
     @Test
     void getAllPetTypesPagination_WithNoFilters_ShouldReturnPaginatedResults() {
@@ -189,7 +187,6 @@ class PetTypeServiceImplTest {
                 .verifyComplete();
     }
 
-    /** -------------------- Helpers -------------------- **/
 
     private PetType buildPetType() {
         return PetType.builder()

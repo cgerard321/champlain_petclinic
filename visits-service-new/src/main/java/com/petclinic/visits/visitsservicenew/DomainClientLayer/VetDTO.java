@@ -33,6 +33,7 @@ public class VetDTO {
     private String imageId;
     private String resume;
     private Set<Workday> workday;
+    private String workHoursJson;
     private boolean active;
     private Set<SpecialtyDTO> specialties;
 

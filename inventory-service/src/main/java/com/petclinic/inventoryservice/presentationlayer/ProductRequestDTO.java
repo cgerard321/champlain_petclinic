@@ -15,4 +15,5 @@ public class ProductRequestDTO {
     private Integer productQuantity;
     private Double productSalePrice;
     private Status status;
+    private String recentUpdateMessage;
 }

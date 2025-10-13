@@ -3,10 +3,12 @@ package com.petclinic.bffapigateway.presentationlayer.v2.visit;
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VisitsServiceClient;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
+import com.petclinic.bffapigateway.dtos.Vets.VetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.Emergency.EmergencyRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.Emergency.EmergencyResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.Emergency.UrgencyLevel;
 import com.petclinic.bffapigateway.dtos.Visits.Status;
+import com.petclinic.bffapigateway.dtos.Visits.TimeSlotDTO;
 import com.petclinic.bffapigateway.dtos.Visits.VisitRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.VisitResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewRequestDTO;
@@ -1386,6 +1388,173 @@ public class VisitControllerUnitTest {
                 .hasSize(0);
 
         verify(visitsServiceClient, times(1)).getEmergencyVisitForPet("P001");
+    }
+
+
+    @Test
+    void getAllVetsForAvailability_whenVetsExist_thenReturnFluxVetResponseDTO() {
+        // Arrange
+        VetResponseDTO vet = VetResponseDTO.builder()
+                .vetId("vet-123")
+                .firstName("John")
+                .lastName("Doe")
+                .build();
+
+        when(visitsServiceClient.getAllVetsForAvailability())
+                .thenReturn(Flux.just(vet));
+
+        // Act
+        webTestClient.get()
+                .uri(BASE_VISIT_URL + "/availability/vets")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(VetResponseDTO.class)
+                .hasSize(1);
+
+        // Assert
+        verify(visitsServiceClient, times(1)).getAllVetsForAvailability();
+    }
+
+    @Test
+    void getAllVetsForAvailability_whenNoVetsExist_thenReturnEmptyFlux() {
+        // Arrange
+        when(visitsServiceClient.getAllVetsForAvailability())
+                .thenReturn(Flux.empty());
+
+        // Act
+        webTestClient.get()
+                .uri(BASE_VISIT_URL + "/availability/vets")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(VetResponseDTO.class)
+                .hasSize(0);
+
+        // Assert
+        verify(visitsServiceClient, times(1)).getAllVetsForAvailability();
+    }
+
+    @Test
+    void getAvailableTimeSlots_whenSlotsExist_thenReturnFluxTimeSlotDTO() {
+        // Arrange
+        TimeSlotDTO slot = new TimeSlotDTO(
+                LocalDateTime.of(2025, 10, 13, 9, 0),
+                LocalDateTime.of(2025, 10, 13, 10, 0),
+                true
+        );
+
+        when(visitsServiceClient.getAvailableTimeSlots(anyString(), anyString()))
+                .thenReturn(Flux.just(slot));
+
+        // Act
+        webTestClient.get()
+                .uri(BASE_VISIT_URL + "/availability/vets/vet-123/slots?date=2025-10-13")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(TimeSlotDTO.class)
+                .hasSize(1);
+
+        // Assert
+        verify(visitsServiceClient, times(1)).getAvailableTimeSlots(eq("vet-123"), eq("2025-10-13"));
+    }
+
+    @Test
+    void getAvailableTimeSlots_whenNoSlotsAvailable_thenReturnEmptyFlux() {
+        // Arrange
+        when(visitsServiceClient.getAvailableTimeSlots(anyString(), anyString()))
+                .thenReturn(Flux.empty());
+
+        // Act
+        webTestClient.get()
+                .uri(BASE_VISIT_URL + "/availability/vets/vet-123/slots?date=2025-10-13")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(TimeSlotDTO.class)
+                .hasSize(0);
+
+        // Assert
+        verify(visitsServiceClient, times(1)).getAvailableTimeSlots(eq("vet-123"), eq("2025-10-13"));
+    }
+
+    @Test
+    void getAvailableDates_whenDatesExist_thenReturnFluxString() {
+        // Arrange
+        when(visitsServiceClient.getAvailableDates(anyString(), anyString(), anyString()))
+                .thenReturn(Flux.just("2025-10-13", "2025-10-14"));
+
+        // Act
+        webTestClient.get()
+                .uri(BASE_VISIT_URL + "/availability/vets/vet-123/dates?startDate=2025-10-13&endDate=2025-10-20")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(String.class);
+
+        // Assert
+        verify(visitsServiceClient, times(1)).getAvailableDates(eq("vet-123"), eq("2025-10-13"), eq("2025-10-20"));
+    }
+
+    @Test
+    void getAvailableDates_whenNoDatesAvailable_thenReturnEmptyFlux() {
+        // Arrange
+        when(visitsServiceClient.getAvailableDates(anyString(), anyString(), anyString()))
+                .thenReturn(Flux.empty());
+
+        // Act
+        webTestClient.get()
+                .uri(BASE_VISIT_URL + "/availability/vets/vet-123/dates?startDate=2025-10-13&endDate=2025-10-20")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(String.class)
+                .hasSize(0);
+
+        // Assert
+        verify(visitsServiceClient, times(1)).getAvailableDates(eq("vet-123"), eq("2025-10-13"), eq("2025-10-20"));
+    }
+
+    @Test
+    void getVeterinarianAvailability_whenVetExists_thenReturnVetResponseDTO() {
+        // Arrange
+        VetResponseDTO vet = VetResponseDTO.builder()
+                .vetId("vet-123")
+                .firstName("John")
+                .lastName("Doe")
+                .build();
+
+        when(visitsServiceClient.getVeterinarianAvailability("vet-123"))
+                .thenReturn(Mono.just(vet));
+
+        // Act
+        webTestClient.get()
+                .uri(BASE_VISIT_URL + "/availability/vets/vet-123")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(VetResponseDTO.class);
+
+        // Assert
+        verify(visitsServiceClient, times(1)).getVeterinarianAvailability("vet-123");
+    }
+
+    @Test
+    void getVeterinarianAvailability_whenVetNotFound_thenReturnNotFound() {
+        // Arrange
+        when(visitsServiceClient.getVeterinarianAvailability("invalid-vet"))
+                .thenReturn(Mono.empty());
+
+        // Act
+        webTestClient.get()
+                .uri(BASE_VISIT_URL + "/availability/vets/invalid-vet")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound();
+
+        // Assert
+        verify(visitsServiceClient, times(1)).getVeterinarianAvailability("invalid-vet");
     }
 
 

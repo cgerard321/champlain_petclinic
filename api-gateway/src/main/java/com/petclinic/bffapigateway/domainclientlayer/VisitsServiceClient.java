@@ -4,9 +4,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.dtos.Inventory.InventoryRequestDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.InventoryResponseDTO;
+import com.petclinic.bffapigateway.dtos.Vets.VetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.Emergency.EmergencyRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.Emergency.EmergencyResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.Status;
+import com.petclinic.bffapigateway.dtos.Visits.TimeSlotDTO;
 import com.petclinic.bffapigateway.dtos.Visits.VisitRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.VisitResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewRequestDTO;
@@ -29,7 +31,6 @@ import reactor.core.publisher.Mono;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -43,6 +44,7 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 @Component
 public class VisitsServiceClient {
     private final WebClient webClient;
+    private final WebClient availabilityWebClient;
     private final String reviewUrl;
 
     private Rethrower rethrower;
@@ -55,6 +57,11 @@ public class VisitsServiceClient {
         reviewUrl = "http://" + visitsServiceHost + ":" + visitsServicePort + "/visits";
         this.webClient = WebClient.builder()
                 .baseUrl(reviewUrl)
+                .build();
+
+        String baseUrl = "http://" + visitsServiceHost + ":" + visitsServicePort;
+        this.availabilityWebClient = WebClient.builder()
+                .baseUrl(baseUrl)
                 .build();
     }
 
@@ -109,11 +116,7 @@ public class VisitsServiceClient {
 
     public Mono<VisitResponseDTO> addVisit(Mono<VisitRequestDTO> visitRequestDTO) {
         return visitRequestDTO.flatMap(visitRequestDTO1 -> {
-            if (visitRequestDTO1.getVisitDate() != null) {
-                LocalDateTime originalDate = visitRequestDTO1.getVisitDate();
-                LocalDateTime adjustedDate = originalDate.minusHours(4);
-                visitRequestDTO1.setVisitDate(adjustedDate);
-            } else {
+            if (visitRequestDTO1.getVisitDate() == null) {
                 throw new BadRequestException("Visit date is required");
             }
             return webClient
@@ -322,11 +325,7 @@ public class VisitsServiceClient {
     public Mono<VisitResponseDTO> updateVisitByVisitId(String visitId,
                                                        Mono<VisitRequestDTO> visitRequestDTO) {
         return visitRequestDTO.flatMap(requestDTO -> {
-            if (requestDTO.getVisitDate() != null) {
-                LocalDateTime originalDate = requestDTO.getVisitDate();
-                LocalDateTime adjustedDate = originalDate.minusHours(4);
-                requestDTO.setVisitDate(adjustedDate);
-            } else {
+            if (requestDTO.getVisitDate() == null) {
                 throw new BadRequestException("Visit date is required");
             }
             return webClient
@@ -378,19 +377,19 @@ public class VisitsServiceClient {
                 .bodyToMono(EmergencyResponseDTO.class);
     }
 
-   /* public Mono<EmergencyResponseDTO> createEmergency(Mono<EmergencyRequestDTO> model) {
-        String emergencyId= UUID.randomUUID().toString();
-        return model.flatMap(emergencyRequestDTO -> {
-            return webClient
-                    .post()
-                    .uri(reviewUrl + "/emergencies")
-                    .body(BodyInserters.fromValue(emergencyRequestDTO))
-                    .retrieve()
-                    .bodyToMono(EmergencyResponseDTO.class);
-        });
+    /* public Mono<EmergencyResponseDTO> createEmergency(Mono<EmergencyRequestDTO> model) {
+         String emergencyId= UUID.randomUUID().toString();
+         return model.flatMap(emergencyRequestDTO -> {
+             return webClient
+                     .post()
+                     .uri(reviewUrl + "/emergencies")
+                     .body(BodyInserters.fromValue(emergencyRequestDTO))
+                     .retrieve()
+                     .bodyToMono(EmergencyResponseDTO.class);
+         });
 
-    }
-*/
+     }
+ */
     public Mono<EmergencyResponseDTO> updateEmergency(String emergencyId, Mono<EmergencyRequestDTO> emergencyRequestDTOMono) {
         return emergencyRequestDTOMono.flatMap(requestDTO ->
                 webClient
@@ -475,7 +474,37 @@ public class VisitsServiceClient {
                 .map(InputStreamResource::new);  // Wrap in InputStreamResource
     }
 
+    public Flux<VetResponseDTO> getAllVetsForAvailability() {
+        return availabilityWebClient
+                .get()
+                .uri("/api/v1/availability/vets")
+                .retrieve()
+                .bodyToFlux(VetResponseDTO.class);
+    }
 
+    public Flux<TimeSlotDTO> getAvailableTimeSlots(String vetId, String date) {
+        return availabilityWebClient
+                .get()
+                .uri("/api/v1/availability/vets/{vetId}/slots?date={date}", vetId, date)
+                .retrieve()
+                .bodyToFlux(TimeSlotDTO.class);
+    }
+
+    public Flux<String> getAvailableDates(String vetId, String startDate, String endDate) {
+        return availabilityWebClient
+                .get()
+                .uri("/api/v1/availability/vets/{vetId}/dates?startDate={startDate}&endDate={endDate}",
+                        vetId, startDate, endDate)
+                .retrieve()
+                .bodyToFlux(String.class);
+    }
+
+    public Mono<VetResponseDTO> getVeterinarianAvailability(String vetId) {
+        return availabilityWebClient
+                .get()
+                .uri("/api/v1/availability/vets/{vetId}", vetId)
+                .retrieve()
+                .bodyToMono(VetResponseDTO.class);
+    }
 
 }
-
