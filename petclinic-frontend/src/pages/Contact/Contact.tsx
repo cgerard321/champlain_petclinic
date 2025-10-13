@@ -10,7 +10,8 @@ import {
 } from 'react-bootstrap';
 import { NavBar } from '@/layouts/AppNavBar';
 import { AppFooter } from '@/layouts/AppFooter';
-import Reveal from '@/features/home/components/Reveal';
+import { Reveal } from '@/shared/components';
+
 import './Contact.css';
 
 type Status = {

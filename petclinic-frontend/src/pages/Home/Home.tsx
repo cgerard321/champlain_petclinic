@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { NavBar } from '@/layouts/AppNavBar';
-import './Home.css';
+
 import { useNavigate } from 'react-router-dom';
 import { AppFooter } from '@/layouts/AppFooter';
 import { Container, Row, Col, Card, Button, Accordion } from 'react-bootstrap';
@@ -11,7 +11,9 @@ import useFeaturedVets from '@/features/home/hooks/useFeaturedVets';
 import { FAQ_ITEMS } from '@/features/faq/data/FaqItems';
 import type { FaqItem } from '@/features/faq/models/FaqItem';
 
-import Reveal from '@/features/home/components/Reveal';
+import { Reveal } from '@/shared/components';
+
+import './Home.css';
 
 const CORE_SERVICES = [
   {
