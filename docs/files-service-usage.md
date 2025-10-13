@@ -11,8 +11,8 @@ Back to [Main page](../README.md)
     * [Update File](#update-file)
     * [Delete File](#delete-file)
 * [React Frontend Usage](#react-frontend-usage)
-    * [Frontend Setup](#react-frontend-setup)
-    * [Display Image](#react-display-image)
+    * [React Frontend Setup](#react-frontend-setup)
+    * [React Display Image](#react-display-image)
 <!-- TOC -->
 
 ## General Rules
@@ -44,11 +44,6 @@ Back to [Main page](../README.md)
     - File data should only exist in memory when being sent to or received from the Files Service.
     - Database entities must store only the file’s `fileId` field.
     - The actual file data (e.g., `byte[] fileData`) belongs exclusively in the Files Service.
-
-
-6. Never expose internal fileId values to the front end.
-    - fileId values are internal references used for service-to-service communication only.
-    - They must not appear in API responses or DTOs sent to clients.
 
 ## Backend Usage
 
@@ -125,7 +120,7 @@ Here is the example to handle one, you need to handle them all.
 
 In this case, this error will always be thrown when a bad request is sent to the Files Service Client so we want the error being sent back to the gateway to also be 400 Bad Request.
 
-#### 2. Add Host and Port to application.yaml
+#### 5. Add Host and Port to application.yaml
 You will need to add the host and port in the application.yaml of your service for the client to work.
 
 ```yaml
@@ -135,14 +130,14 @@ app:
     port: 8000
 ```
 
-#### 3. Update Service Implement
+#### 6. Update Service Implement
 You will need to add the following variable to your service implement
 
 ```java
 private final FilesServiceClient filesServiceClient;
 ```
 
-#### 4. Add the File Details DTO
+#### 7. Add the File Details DTO
 You will also need to create a new DTO in your service with the following structure:
 
 ```java
@@ -170,7 +165,7 @@ public class FileRequestDTO {
 }
 ```
 
-#### 5. Include FileDetails in the Models
+#### 8. Include FileDetails in the Models
 
 Your Response and Request Model should be modified to include a FileDetails field.
 
@@ -212,7 +207,7 @@ public class OwnerRequestDTO {
 }
 ```
 
-#### 6. Add FileId Field to the Entity
+#### 9. Add FileId Field to the Entity
 
 Your Entity should only store the id of the file that it wishes to access later.
 
@@ -238,6 +233,15 @@ public class Owner {
     private String photoId;
 }
 ```
+
+#### 10. Update EntityMapper
+You will also need to update your EntityModelMapper to handle the file fields correctly:
+
+Request Model → Entity <br>
+Do not map the file field automatically. The fileId should be set manually, as it is not part of the request model.
+
+Entity → Response Model <br>
+Do not map the file field automatically. The fileResponseDTO should be set manually, since the entity does not contain all the necessary file information.
 
 ### Get File
 
@@ -275,8 +279,8 @@ Good Example from Customer-Service's ServiceImplement:
                 .flatMap(owner -> {
                     OwnerResponseDTO dto = EntityDTOUtil.toOwnerResponseDTO(owner);
                     
-                    if (includePhoto && owner.getPhoto() != null) {
-                        return filesServiceClient.getFileById(owner.getPhoto().getFileId())
+                    if (includePhoto && owner.getPhotoId() != null) {
+                        return filesServiceClient.getFileById(owner.getPhotoId())
                                 .map(fileDetails -> {
                                     dto.setPhoto(fileDetails);
                                     return dto;
@@ -380,20 +384,22 @@ Good Example from Customer Service Implement:
 
 #### Add New Patch Endpoint
 
-This is the harder method and requires that a new endpoint be created in the service and in the api-gateway.
+This is the harder method, but the most efficient. It requires that a new endpoint be created in the service and in the api-gateway.
 The Steps to add a new patch endpoint won't be explained here.
 
 Here is the logic to get a FileId after adding it to the Files Service.
 
 ```
-filesServiceClient.addFile(ownerRequest.getPhoto()).map(FileDetails::getFileId);
+filesServiceClient.addFile(ownerRequest.getPhoto()).map(FileResponseDTO::getFileId);
 ```
 
 ### Update File
 
 There are two possible ways to update the file associated with your entity, depending on your use case:
-* If only the file is changing, follow [Add New Patch Endpoint](#add-new-patch-endpoint)
-* If the file should be uploaded after creating the entity, follow [Update Service Implement to Support UpdateFile](#update-service-implement-to-support-updatefile)
+
+The best solution is to use a patch endpoint instead of a put endpoint when updating, [Add New Patch Endpoint](#add-new-patch-endpoint). This makes it so that only when the file has been changed will we send an update request to the Files Service.
+
+You can also use the put method, but it will be more costly since it send an update request to the Files Service everytime the entity is updated, [Update Service Implement to Support UpdateFile](#update-service-implement-to-support-updatefile).
 
 #### Update Service Implement to Support UpdateFile
 
