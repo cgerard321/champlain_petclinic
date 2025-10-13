@@ -1,2 +1,2 @@
-export { clinic } from './clinic';
-export { contact } from './contact';
+export { clinic } from './clinic.ts';
+export { contact } from './contact.ts';

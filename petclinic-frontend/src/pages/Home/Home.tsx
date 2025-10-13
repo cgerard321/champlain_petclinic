@@ -12,41 +12,9 @@ import { FAQ_ITEMS } from '@/features/faq/data/FaqItems';
 import type { FaqItem } from '@/features/faq/models/FaqItem';
 
 import { Reveal } from '@/shared/components';
+import { clinic } from '@/shared/content';
 
 import './Home.css';
-
-const CORE_SERVICES = [
-  {
-    icon: '\uD83E\uDE7A',
-    title: 'Wellness Exams',
-    desc: 'Annual check-ups & preventive care.',
-  },
-  {
-    icon: '\uD83D\uDC89',
-    title: 'Vaccinations',
-    desc: 'Core & lifestyle vaccines.',
-  },
-  {
-    icon: '\uD83E\uDDB7',
-    title: 'Dental Care',
-    desc: 'Cleaning, polishing & dental X-rays.',
-  },
-  {
-    icon: '\uD83E\uDDBB',
-    title: 'Diagnostics',
-    desc: 'Digital radiology & in-house lab.',
-  },
-  {
-    icon: '\u2702\uFE0F',
-    title: 'Surgery',
-    desc: 'Routine & soft-tissue procedures.',
-  },
-  {
-    icon: '\uD83D\uDE91',
-    title: 'Emergency',
-    desc: 'Urgent care during open hours.',
-  },
-];
 
 export default function Home(): JSX.Element {
   const navigate = useNavigate();
@@ -149,7 +117,7 @@ export default function Home(): JSX.Element {
             </h2>
           </Reveal>
           <Row xs={1} sm={2} md={3} className="g-2">
-            {CORE_SERVICES.map((s, i) => (
+            {clinic.services.map((s, i) => (
               <Col key={s.title}>
                 <Reveal delay={i * 80 + 500}>
                   <ServiceCard icon={s.icon} title={s.title} desc={s.desc} />
@@ -167,7 +135,7 @@ export default function Home(): JSX.Element {
           <Row xs={1} md={3} className="g-2">
             {vets.map((v, i) => (
               <Col key={v.vetId}>
-                <Reveal delay={i * 80}>
+                <Reveal delay={i * 80 + 650}>
                   <VetCard
                     vet={v}
                     photo={photos[v.vetId] || '/images/vet_default.jpg'}
