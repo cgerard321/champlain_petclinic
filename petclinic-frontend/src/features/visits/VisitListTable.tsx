@@ -9,7 +9,10 @@ import { IsVet } from '@/context/UserContext';
 // import { AppRoutePaths } from '@/shared/models/path.routes';
 import { archiveVisit } from './api/archiveVisit';
 import { cancelVisit } from './api/cancelVisit';
-import ConfirmationModal from '@/shared/components/ConfirmationModal';
+
+import ConfirmationModal from '@/shared/components/BasicModal';
+import VisitDetails from '@/features/visits/components/VisitDetails';
+import EditingVisit from './components/EditingVisit';
 
 import eyeIcon from '@/assets/Icons/eyeDark.svg';
 import pencilIcon from '@/assets/Icons/pencilDark.svg';
@@ -309,12 +312,20 @@ export default function VisitListTable(): JSX.Element {
                     >
                       {renderViewButton()}
                     </a> */}
+<<<<<<< HEAD
                   <BasicModal
+=======
+                  <ConfirmationModal
+>>>>>>> a50514b4 (Replaced View and Edit pages with modals for visits)
                     title="Visit Details"
                     showButton={renderViewButton()}
                   >
                     <VisitDetails visitId={visit.visitId} />
+<<<<<<< HEAD
                   </BasicModal>
+=======
+                  </ConfirmationModal>
+>>>>>>> a50514b4 (Replaced View and Edit pages with modals for visits)
                   {!isVet && (
                     // <a
                     //   className="icon"

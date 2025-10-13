@@ -1,5 +1,11 @@
+<<<<<<< HEAD
 textarea, input {
   margin-top: 10px;
   margin-bottom: 20px;
 }
 
+=======
+.form-input{
+  width: 50px;
+}
+>>>>>>> a50514b4 (Replaced View and Edit pages with modals for visits)
