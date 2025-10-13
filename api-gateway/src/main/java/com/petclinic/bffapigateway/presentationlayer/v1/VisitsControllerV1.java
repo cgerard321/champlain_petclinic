@@ -71,7 +71,7 @@ public class VisitsControllerV1 {
         return visitsServiceClient.getVisitByPractitionerId(practitionerId);
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.OWNER})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.RECEPTIONIST, Roles.OWNER, Roles.VET})
     @PostMapping(value = "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<VisitResponseDTO>> addVisit(@RequestBody Mono<VisitRequestDTO> visitRequestDTO) {
         return visitsServiceClient.addVisit(visitRequestDTO)
@@ -237,5 +237,42 @@ public class VisitsControllerV1 {
                         .contentType(MediaType.APPLICATION_OCTET_STREAM)
                         .body(csvData));
     }
+
+
+    /////////////////////////////////////////////
+///////////Availability Methods//////////////////
+///////////////////////////////////////////
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.RECEPTIONIST, Roles.OWNER, Roles.VET})
+    @GetMapping(value = "/availability/vets", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Flux<VetResponseDTO>> getAllVetsForAvailability() {
+        return ResponseEntity.ok().body(visitsServiceClient.getAllVetsForAvailability());
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.RECEPTIONIST, Roles.OWNER, Roles.VET})
+    @GetMapping(value = "/availability/vets/{vetId}/slots", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Flux<TimeSlotDTO>> getAvailableTimeSlots(
+            @PathVariable String vetId,
+            @RequestParam String date) {
+        return ResponseEntity.ok().body(visitsServiceClient.getAvailableTimeSlots(vetId, date));
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.RECEPTIONIST, Roles.OWNER, Roles.VET})
+    @GetMapping(value = "/availability/vets/{vetId}/dates", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Flux<String>> getAvailableDates(
+            @PathVariable String vetId,
+            @RequestParam String startDate,
+            @RequestParam String endDate) {
+        return ResponseEntity.ok().body(visitsServiceClient.getAvailableDates(vetId, startDate, endDate));
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.RECEPTIONIST, Roles.OWNER, Roles.VET})
+    @GetMapping(value = "/availability/vets/{vetId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<VetResponseDTO>> getVeterinarianAvailability(@PathVariable String vetId) {
+        return visitsServiceClient.getVeterinarianAvailability(vetId)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
 
 }

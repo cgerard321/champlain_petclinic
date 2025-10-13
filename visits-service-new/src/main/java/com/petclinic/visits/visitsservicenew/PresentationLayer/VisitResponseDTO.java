@@ -18,7 +18,7 @@ import java.util.Date;
 public class VisitResponseDTO {
     private String visitId;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime visitDate;
     private String description;
     private String petId;
@@ -30,7 +30,7 @@ public class VisitResponseDTO {
     private String vetEmail;
     private String vetPhoneNumber;
     private Status status;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime visitEndDate;
     @JsonProperty("isEmergency")
     private Boolean isEmergency;
