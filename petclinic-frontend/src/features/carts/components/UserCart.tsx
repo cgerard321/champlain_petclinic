@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import CartBillingForm, { BillingInfo } from './CartBillingForm';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import CartItem from './CartItem';
 import { ProductModel } from '../models/ProductModel';
 import './UserCart.css';
@@ -11,12 +11,17 @@ import axiosInstance from '@/shared/api/axiosInstance';
 import {
   IsAdmin,
   IsInventoryManager,
-  IsVet,
   IsReceptionist,
+  IsVet,
 } from '@/context/UserContext';
 import { AppRoutePaths } from '@/shared/models/path.routes';
 import { getProductByProductId } from '@/features/products/api/getProductByProductId';
-import { notifyCartChanged } from '../api/cartEvent';
+import {
+  bumpCartCountInLS,
+  notifyCartChanged,
+  setCartCountInLS,
+  setCartIdInLS,
+} from '../api/cartEvent';
 import { useConfirmModal } from '@/shared/hooks/useConfirmModal';
 import axios from 'axios';
 
@@ -208,7 +213,12 @@ const UserCart = (): JSX.Element => {
         );
 
         setCartItems(products);
-
+        setCartIdInLS(cartId);
+        const countFromFetch = products.reduce(
+          (acc, p) => acc + (p.quantity || 0),
+          0
+        );
+        setCartCountInLS(countFromFetch);
         const enrichedWishlist = await Promise.all(
           (data.wishListProducts || []).map(async (item: ProductModel) => {
             const fullProduct = await getProductByProductId(item.productId);
@@ -285,7 +295,7 @@ const UserCart = (): JSX.Element => {
 
       const newQuantity = Math.max(1, Number(event.target.value));
       const item = cartItems[index];
-
+      const prevQty = item.quantity || 1;
       if (newQuantity > item.productQuantity) {
         setErrorMessages(prevErrors => ({
           ...prevErrors,
@@ -322,7 +332,8 @@ const UserCart = (): JSX.Element => {
             );
             setWishlistItems(prevItems => [...prevItems, item]);
             setNotificationMessage(data.message);
-            notifyCartChanged();
+            bumpCartCountInLS(-prevQty);
+            notifyCartChanged(); // left cart
             return;
           }
         } else {
@@ -332,7 +343,8 @@ const UserCart = (): JSX.Element => {
             return next;
           });
           setNotificationMessage('Item quantity updated successfully.');
-          notifyCartChanged();
+          bumpCartCountInLS(newQuantity - prevQty);
+          notifyCartChanged(); // qty changed
         }
       } catch (err) {
         console.error('Error updating quantity:', err);
@@ -364,14 +376,19 @@ const UserCart = (): JSX.Element => {
           useV2: false,
         });
 
-        setCartItems(prev => prev.filter((_, idx) => idx !== indexToDelete));
-        notifyCartChanged();
+        setCartItems(prev => {
+          const removedQty = prev[indexToDelete]?.quantity || 1;
+          setNotificationMessage('Item removed from cart.');
+          bumpCartCountInLS(-removedQty);
+          return prev.filter((_, idx) => idx !== indexToDelete);
+        });
+        notifyCartChanged(); // item removed
       } catch (error) {
-        console.error('Error deleting item:', error);
+        console.error('Error deleting item: ', error);
         setNotificationMessage('Failed to delete item.');
       }
     },
-    [cartId, confirm, blockIfReadOnly]
+    [cartId, blockIfReadOnly, confirm]
   );
 
   const clearCart = async (): Promise<void> => {
@@ -379,6 +396,7 @@ const UserCart = (): JSX.Element => {
 
     if (!cartId) {
       setNotificationMessage('Invalid cart ID');
+
       return;
     }
 
@@ -395,7 +413,9 @@ const UserCart = (): JSX.Element => {
       await axiosInstance.delete(`/carts/${cartId}/clear`, { useV2: false });
       setCartItems([]);
       setCartItemCount(0);
+      setCartCountInLS(0);
       notifyCartChanged();
+      setNotificationMessage('Cart has been cleared.');
     } catch (error) {
       console.error('Error clearing cart:', error);
       setNotificationMessage('Failed to clear cart.');
@@ -429,6 +449,11 @@ const UserCart = (): JSX.Element => {
 
       setWishlistItems(prevItems => [...prevItems, item]);
       setWishlistUpdated(true);
+
+      // Decrement LS count since item left the cart
+      bumpCartCountInLS(-(item.quantity || 1));
+
+      //notify navbar (item moved out of cart)
       notifyCartChanged();
     } catch (error: unknown) {
       console.error('Error adding to wishlist:', error);
@@ -472,6 +497,11 @@ const UserCart = (): JSX.Element => {
         prevItems.filter(product => product.productId !== item.productId)
       );
       setWishlistUpdated(true);
+
+      // Item entered the cart, increment LS count
+      bumpCartCountInLS(item.quantity || 1);
+
+      //notify navbar (item moved into cart)
       notifyCartChanged();
     } catch (error: unknown) {
       console.error('Error adding to cart:', error);
@@ -595,6 +625,11 @@ const UserCart = (): JSX.Element => {
       setCartItems([]);
       setCartItemCount(0);
       setIsCheckoutModalOpen(false);
+
+      // Reset LS so navbar badge = 0 without API
+      setCartCountInLS(0);
+
+      // notify navbar (cart emptied)
       notifyCartChanged();
 
       // Fetch recent purchases after checkout
@@ -642,7 +677,6 @@ const UserCart = (): JSX.Element => {
     <div>
       <NavBar />
       <ConfirmModal />
-      <h2 className="cart-header-title">Your Cart</h2>
       <div className="UserCart-container">
         {notificationMessage && (
           <div className="notification-message">
@@ -659,7 +693,14 @@ const UserCart = (): JSX.Element => {
 
         <div className="UserCart-checkout-flex">
           <div className="UserCart">
-            <div className="cart-header">
+            <div
+              className="cart-header"
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
               <div className="cart-badge-container">
                 <FaShoppingCart aria-label="Shopping Cart" />
                 {cartItemCount > 0 && (
@@ -671,6 +712,13 @@ const UserCart = (): JSX.Element => {
                   </span>
                 )}
               </div>
+              <button
+                className="continue-shopping-btn"
+                onClick={() => navigate('/products')}
+                style={{ marginLeft: 'auto' }}
+              >
+                Continue Shopping
+              </button>
             </div>
 
             <div className="cart-items-container">
@@ -690,29 +738,27 @@ const UserCart = (): JSX.Element => {
                   />
                 ))
               ) : (
-                <p className="empty-cart-message">No products in the cart.</p>
+                <div className="empty-cart-visual">
+                  <span
+                    className="empty-cart-icon"
+                    role="img"
+                    aria-label="empty-cart"
+                  >
+                    🛒
+                  </span>
+                  <div className="empty-cart-message">
+                    Looks like your cart is empty! Why not add something?
+                  </div>
+                </div>
               )}
             </div>
 
             <div className="UserCart-buttons">
-              <button
-                className="continue-shopping-btn"
-                onClick={() => navigate('/products')}
-              >
-                Continue Shopping
-              </button>
-              <button
-                className="clear-cart-btn"
-                onClick={clearCart}
-                disabled={isStaff}
-                title={
-                  isStaff
-                    ? 'Read-only: staff/admin cannot clear carts'
-                    : undefined
-                }
-              >
-                Clear Cart
-              </button>
+              {cartItems.length > 0 && (
+                <button className="clear-cart-btn" onClick={clearCart}>
+                  Clear Cart
+                </button>
+              )}
             </div>
           </div>
 
@@ -830,62 +876,25 @@ const UserCart = (): JSX.Element => {
         </div>
 
         {/* Recent Purchases Section - above Wishlist */}
-        <div
-          className="recent-purchases-section"
-          style={{ marginBottom: '2rem' }}
-        >
+        <div className="recent-purchases-section">
           <h2>Recent Purchases</h2>
-          <div
-            className="recent-purchases-list"
-            style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}
-          >
+          <div className="recent-purchases-list">
             {recentPurchasesList.length > 0 ? (
               recentPurchasesList.map(item => (
-                <div
-                  key={item.productId}
-                  className="recent-purchase-card"
-                  style={{
-                    border: '1px solid #eee',
-                    borderRadius: 8,
-                    padding: 16,
-                    minWidth: 180,
-                    maxWidth: 200,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                  }}
-                >
-                  <div
-                    style={{
-                      width: 48,
-                      height: 48,
-                      marginBottom: 8,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      overflow: 'hidden',
-                    }}
-                  >
+                <div key={item.productId} className="recent-purchase-card">
+                  <div className="recent-purchase-image-container">
                     <div className="recent-purchase-image">
                       <ImageContainer imageId={item.imageId} />
                     </div>
                   </div>
-                  <div style={{ fontWeight: 'bold', marginBottom: 4 }}>
-                    {item.productName}
-                  </div>
-                  <div style={{ marginBottom: 8 }}>
+                  <div className="recent-purchase-name">{item.productName}</div>
+                  <div className="recent-purchase-price">
                     ${item.productSalePrice.toFixed(2)}
                   </div>
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      marginBottom: 8,
-                    }}
-                  >
+                  <div className="recent-purchase-qty-row">
                     <label
                       htmlFor={`recent-qty-${item.productId}`}
-                      style={{ marginRight: 8 }}
+                      className="recent-purchase-qty-label"
                     >
                       Qty:
                     </label>
@@ -900,25 +909,16 @@ const UserCart = (): JSX.Element => {
                           Number(e.target.value)
                         )
                       }
-                      style={{ width: 48 }}
+                      className="recent-purchase-qty-input"
                     />
                   </div>
                   <button
                     className="purchase-again-btn"
-                    style={{
-                      background: '#1976d2',
-                      color: '#fff',
-                      border: 'none',
-                      borderRadius: 4,
-                      padding: '6px 12px',
-                      cursor: 'pointer',
-                      fontWeight: 'bold',
-                    }}
                     onClick={() => handlePurchaseAgain(item)}
                   >
                     Purchase Again
                   </button>
-                  <div style={{ marginTop: 8, fontSize: 12, color: '#555' }}>
+                  <div className="recent-purchase-total">
                     Total: $
                     {(
                       item.productSalePrice *

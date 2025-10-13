@@ -1,22 +1,21 @@
 import {
   ProductModel,
   emptyProductModel,
-} from '@/features/products/models/ProductModels/ProductModel.ts';
-import { NavBar } from '@/layouts/AppNavBar.tsx';
+} from '@/features/products/models/ProductModels/ProductModel';
+import { NavBar } from '@/layouts/AppNavBar';
 import { useState, useEffect, JSX } from 'react';
 import { generatePath, useNavigate, useParams } from 'react-router-dom';
-import { updateUserRating } from './updateUserRating';
-import { getProduct } from './getProduct';
-import { deleteUserRating } from './deleteUserRating';
+import { updateUserRating } from '../api/updateUserRating';
+import { getProduct } from '../api/getProduct';
+import { deleteUserRating } from '../api/deleteUserRating';
 import './ProductDetails.css';
-import StarRating from '../components/StarRating';
-import ReviewBox from '../components/ReviewBox';
+import StarRating from './StarRating';
 import { RatingModel } from '../models/ProductModels/RatingModel';
-import { getUserRatingsForProduct } from './getUserRatingsForProduct';
-import { getUserRating } from './getUserRating';
+import { getUserRatingsForProduct } from '../api/getUserRatingsForProduct';
+import { getUserRating } from '../api/getUserRating';
 import { AppRoutePaths } from '@/shared/models/path.routes';
 import { AxiosError } from 'axios';
-import ImageContainer from '../components/ImageContainer';
+import ImageContainer from './ImageContainer';
 import { Button } from 'react-bootstrap';
 import { deleteProduct } from '@/features/products/api/deleteProduct';
 import {
@@ -25,11 +24,14 @@ import {
   IsVet,
   IsReceptionist,
 } from '@/context/UserContext';
-import PatchListingStatusButton from '../components/PatchListingStatusButton';
-import RecentlyViewedProducts from '@/features/products/components/RecentlyViewedProducts.tsx';
+import PatchListingStatusButton from './PatchListingStatusButton';
+import RecentlyViewedProducts from '@/features/products/components/RecentlyViewedProducts';
 import { useAddToCart } from '@/features/carts/api/addToCartFromProducts';
 import { useAddToWishlist } from '@/features/carts/api/addToWishlistFromProducts';
-import { FaHeart, FaCheck, FaTimes } from 'react-icons/fa';
+import { FaHeart, FaCheck, FaTimes, FaPen, FaTrash } from 'react-icons/fa';
+import WriteReviewModal from './WriteReviewModal';
+import EditReviewModal from './EditReviewModal';
+import DeleteReviewModal from './DeleteReviewModal';
 
 export default function ProductDetails(): JSX.Element {
   const isAdmin = IsAdmin();
@@ -73,6 +75,9 @@ export default function ProductDetails(): JSX.Element {
   });
   const [productReviews, setProductReviews] = useState<RatingModel[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const navigateToEditProduct = (): void => {
     if (!currentProduct || !productId) return;
@@ -201,6 +206,28 @@ export default function ProductDetails(): JSX.Element {
     );
   };
 
+  const handleEditReview = (): void => {
+    setShowEditModal(true);
+  };
+
+  const handleDeleteReview = (): void => {
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeleteReview = async (): Promise<void> => {
+    if (!productId) return;
+    try {
+      await deleteUserRating(productId);
+      setUserRating({ rating: 0, review: '' });
+      const resRefresh = await getProduct(productId);
+      setCurrentProduct(resRefresh);
+      await fetchRatings();
+      setShowDeleteModal(false);
+    } catch (err) {
+      console.error('Could not delete review', err);
+    }
+  };
+
   return (
     <>
       <NavBar />
@@ -272,17 +299,16 @@ export default function ProductDetails(): JSX.Element {
                   </div>
                   <div className="line"></div>
 
-                  <p className="details-type">
+                  <div className="details-type">
                     Type:
-                    <div className="box-details">
-                      {' '}
+                    <span className="box-details">
                       {getProductTypeLabel(currentProduct.productType)}
-                    </div>
+                    </span>
                     Delivery Type:
-                    <div className="box-details">
+                    <span className="box-details">
                       {getDeliveryTypeLabel(currentProduct.deliveryType)}
-                    </div>
-                  </p>
+                    </span>
+                  </div>
 
                   <h3 className="prod-price">
                     {currentProduct.productSalePrice}$
@@ -315,12 +341,10 @@ export default function ProductDetails(): JSX.Element {
                         )}
                     </div>
                   </div>
-                  <h3 className="prod-desc-title">
-                    About this Product
-                    <p className="prod-description">
-                      {currentProduct.productDescription}
-                    </p>
-                  </h3>
+                  <h3 className="prod-desc-title">About this Product</h3>
+                  <p className="prod-description">
+                    {currentProduct.productDescription}
+                  </p>
                   <div className=" cart-box">
                     <div className=" quantity-selector">
                       <button onClick={handleMinus} className="qty-btn">
@@ -346,31 +370,119 @@ export default function ProductDetails(): JSX.Element {
                     )}
                   </div>
                 </div>
+                <div className="product-review-separator"></div>
                 <div className="review-section-container">
                   <div className="reviewproduct-container">
-                    <h2>Review</h2>
-                    <p>Leave a rating:</p>
-                    <StarRating
-                      currentRating={currentUserRating.rating}
-                      viewOnly={isStaff}
-                      updateRating={isStaff ? undefined : updateRating}
+                    <h2>Customer Review</h2>
+
+                    <div className="rating-summary-container">
+                      <div className="rating-left">
+                        <div className="rating-display">
+                          <div className="rating-display-row">
+                            <span className="rating-number">
+                              {currentProduct.averageRating.toFixed(1)}
+                            </span>
+                            <div className="rating-stars-beside">
+                              <StarRating
+                                currentRating={currentProduct.averageRating}
+                                viewOnly={true}
+                              />
+                            </div>
+                          </div>
+                          <p className="review-count">
+                            Based on {productReviews.length} review
+                            {productReviews.length !== 1 ? 's' : ''}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="rating-breakdown">
+                        {[5, 4, 3, 2, 1].map(star => {
+                          const count = productReviews.filter(
+                            r => Math.floor(r.rating) === star
+                          ).length;
+                          const percentage =
+                            productReviews.length > 0
+                              ? (count / productReviews.length) * 100
+                              : 0;
+                          return (
+                            <div key={star} className="rating-bar-row">
+                              <span className="star-label">{star} stars</span>
+                              <div className="rating-bar">
+                                <div
+                                  className="rating-bar-fill"
+                                  style={{ width: `${percentage}%` }}
+                                ></div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    <div className="rating-section-separator"></div>
+
+                    <div className="review-action-row">
+                      <h3 className="reviews-heading">
+                        Reviews ({productReviews.length})
+                      </h3>
+                      <Button
+                        variant="primary"
+                        onClick={() => setShowReviewModal(true)}
+                        disabled={isStaff || currentUserRating.rating > 0}
+                      >
+                        Write a Review
+                      </Button>
+                    </div>
+
+                    <div className="rating-section-separator"></div>
+
+                    <WriteReviewModal
+                      show={showReviewModal}
+                      onClose={() => setShowReviewModal(false)}
+                      currentUserRating={currentUserRating}
+                      updateRating={updateRating}
                     />
-                    {!isStaff && (
-                      <ReviewBox
-                        updateFunc={(newReview: string) =>
-                          updateRating(currentUserRating.rating, newReview)
-                        }
-                        rating={currentUserRating}
-                      />
-                    )}
+
+                    <EditReviewModal
+                      show={showEditModal}
+                      onClose={() => setShowEditModal(false)}
+                      currentUserRating={currentUserRating}
+                      updateRating={updateRating}
+                    />
+
+                    <DeleteReviewModal
+                      show={showDeleteModal}
+                      onClose={() => setShowDeleteModal(false)}
+                      onConfirm={confirmDeleteReview}
+                    />
                   </div>
-                  <br />
-                  <h3>Users feedback</h3>
+
                   <div className="reviewsforproduct-container">
                     {productReviews.length > 0 ? (
                       productReviews.map(
                         (rating: RatingModel, index: number) => (
                           <div key={index} className="reviewbox">
+                            {currentUserRating.rating > 0 &&
+                              currentUserRating.review === rating.review &&
+                              !isStaff && (
+                                <div className="review-card-actions">
+                                  <button
+                                    className="review-card-edit-btn"
+                                    onClick={handleEditReview}
+                                    title="Edit your review"
+                                  >
+                                    <FaPen />
+                                  </button>
+                                  <button
+                                    className="review-card-delete-btn"
+                                    onClick={handleDeleteReview}
+                                    title="Delete your review"
+                                  >
+                                    <FaTrash />
+                                  </button>
+                                </div>
+                              )}
                             <div className="starcontainer">
                               {Array.from({ length: 5 }, (_, k) => (
                                 <svg
