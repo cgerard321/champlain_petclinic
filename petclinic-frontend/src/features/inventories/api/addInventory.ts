@@ -1,5 +1,5 @@
 import { Inventory } from '@/features/inventories/models/Inventory';
-import axiosInstance from '@/shared/api/axiosInstance';
+import axiosInstance from '@/shared/api/axiosInstance.ts';
 import axios from 'axios';
 
 export default async function addInventory(

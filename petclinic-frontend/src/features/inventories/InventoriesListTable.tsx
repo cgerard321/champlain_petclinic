@@ -12,7 +12,7 @@ import { ProductModel } from '@/features/inventories/models/ProductModels/Produc
 import inventoryStyles from './InventoriesListTable.module.css';
 import cardStylesInventory from './CardInventoryTeam.module.css';
 // import axios from 'axios';
-import axiosInstance from '@/shared/api/axiosInstance';
+import axiosInstance from '@/shared/api/axiosInstance.ts';
 import { toggleInventoryImportant } from './api/toggleInventoryImportant';
 
 export default function InventoriesListTable(): JSX.Element {
@@ -59,12 +59,6 @@ export default function InventoriesListTable(): JSX.Element {
     updateFilters,
   } = useSearchInventories();
 
-  useEffect(() => {
-    getInventoryList('', '', '', showImportantOnly);
-    fetchAllInventoryTypes();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPage]);
-
   const refreshInventoryTypes = async (): Promise<void> => {
     await fetchAllInventoryTypes();
   };
@@ -73,7 +67,7 @@ export default function InventoriesListTable(): JSX.Element {
     getInventoryList('', '', '', showImportantOnly);
     refreshInventoryTypes();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPage]);
+  }, [currentPage, showImportantOnly]);
 
   const handleInventoryNameChange = (value: string): void => {
     setInventoryName(value);
@@ -231,11 +225,7 @@ export default function InventoriesListTable(): JSX.Element {
     try {
       const data = await getAllInventoryTypes();
       setInventoryTypeList(data);
-    } catch (error) {
-      const msg = error instanceof Error ? error.message : '';
-      if (msg) alert(msg);
-      setInventoryTypeList([]);
-    }
+    } catch {}
   };
 
   const handleInventorySelection = (

@@ -73,14 +73,34 @@ public class InventoryValidator {
 
     public Mono<Inventory> validateInventoryForUpdate(Inventory e, String currentId) {
 
-        return validateInventory(e)
-                .flatMap(valid -> inventoryRepository
-                        .existsByInventoryNameAndInventoryIdNot(valid.getInventoryName(), currentId)
-                        .flatMap(exists -> exists
-                                ? Mono.error(new UnprocessableEntityException("Inventory name already exists."))
-                                : Mono.just(valid)
-                        )
-                );
+
+        if (e.getInventoryName() != null) e.setInventoryName(e.getInventoryName().trim());
+        if (e.getInventoryType() != null) e.setInventoryType(e.getInventoryType().trim());
+        if (e.getInventoryDescription() != null) e.setInventoryDescription(e.getInventoryDescription().trim());
+        if (e.getInventoryImage() != null) e.setInventoryImage(e.getInventoryImage().trim());
+        if (e.getInventoryBackupImage() != null) e.setInventoryBackupImage(e.getInventoryBackupImage().trim());
+
+
+        if (e.getInventoryName() == null || e.getInventoryName().isBlank())
+            return Mono.error(new InvalidInputException("Inventory name is required."));
+        if (e.getInventoryName().length() < 3)
+            return Mono.error(new InvalidInputException("Invalid name must be at least 3 characters long."));
+        if (e.getInventoryType() == null || e.getInventoryType().isBlank())
+            return Mono.error(new InvalidInputException("Inventory type cannot be blank."));
+        if (e.getInventoryDescription() == null || e.getInventoryDescription().isBlank())
+            return Mono.error(new InvalidInputException("Inventory description is required."));
+        if (hasText(e.getInventoryImage()) && !looksLikeHttpUrl(e.getInventoryImage()))
+            return Mono.error(new InvalidInputException("Inventory image must be a valid URL (http/https)."));
+        if (hasText(e.getInventoryBackupImage()) && !looksLikeHttpUrl(e.getInventoryBackupImage()))
+            return Mono.error(new InvalidInputException("Inventory backup image must be a valid URL (http/https)."));
+        if (e.getImageUploaded() != null && e.getImageUploaded().length > 160 * 1024)
+            return Mono.error(new InvalidInputException("Uploaded image must be 160KB or smaller."));
+
+        return inventoryRepository
+                .existsByInventoryNameAndInventoryIdNot(e.getInventoryName(), currentId)
+                .flatMap(exists -> exists
+                        ? Mono.error(new UnprocessableEntityException("Inventory name already exists."))
+                        : Mono.just(e));
     }
 
 }

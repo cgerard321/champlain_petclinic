@@ -1,4 +1,4 @@
-import axiosInstance from '@/shared/api/axiosInstance';
+import axiosInstance from '@/shared/api/axiosInstance.ts';
 import { InventoryName } from '@/features/inventories/models/InventoryName.ts';
 import { ProductModelINVT } from '@/features/inventories/models/ProductModels/ProductModelINVT.ts';
 

@@ -1,4 +1,4 @@
-import axiosInstance from '@/shared/api/axiosInstance';
+import axiosInstance from '@/shared/api/axiosInstance.ts';
 
 export const toggleInventoryImportant = async (
   inventoryId: string,
