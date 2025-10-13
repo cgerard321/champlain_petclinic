@@ -65,6 +65,18 @@ public class RatingServiceImpl implements RatingService {
     }
 
     @Override
+    public Mono<Void> deleteRatingByVetIdAndCustomerName(String vetId, String customerName) {
+        return vetRepository.findVetByVetId(vetId)
+                .switchIfEmpty(Mono.error(new NotFoundException("vetId not found: " + vetId)))
+                .then(ratingRepository.findAllByVetId(vetId)
+                        .filter(rating -> rating.getCustomerName() != null && rating.getCustomerName().equals(customerName))
+                        .next()
+                        .switchIfEmpty(Mono.error(new NotFoundException("No rating found for customer: " + customerName)))
+                        .flatMap(ratingRepository::delete)
+                );
+    }
+
+    @Override
     public Mono<RatingResponseDTO> addRatingToVet(String vetId, Mono<RatingRequestDTO> ratingRequestDTO) {
         return vetRepository.findVetByVetId(vetId)
                 .switchIfEmpty(Mono.error(new NotFoundException("vetId not found: " + vetId)))

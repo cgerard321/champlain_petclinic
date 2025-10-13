@@ -361,6 +361,24 @@ public class VetsServiceClient {
                 )
                 .bodyToMono(Void.class);
     }
+
+    public Mono<Void> deleteRatingByCustomerName(String vetId, String customerName) {
+        return webClientBuilder
+                .build()
+                .delete()
+                .uri(vetsServiceUrl + "/" + vetId + "/ratings/customer/" + customerName)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, error -> {
+                    HttpStatusCode statusCode = error.statusCode();
+                    if (statusCode.equals(HttpStatus.NOT_FOUND))
+                        return Mono.error(new NotFoundException("vetId not found "+vetId+" or no rating found for customer: " + customerName));
+                    return Mono.error(new IllegalArgumentException("Something went wrong with the client"));
+                })
+                .onStatus(HttpStatusCode::is5xxServerError, error ->
+                        Mono.error(new IllegalArgumentException("Something went wrong with the server"))
+                )
+                .bodyToMono(Void.class);
+    }
     public Flux<VetAverageRatingDTO> getTopThreeVetsWithHighestAverageRating() {
 
         return webClientBuilder

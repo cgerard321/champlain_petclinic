@@ -93,6 +93,14 @@ public class VetController {
                 .then(Mono.just(ResponseEntity.noContent().<Void>build()))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
+
+    @DeleteMapping("{vetId}/ratings/customer/{customerName}")
+    public Mono<ResponseEntity<Void>> deleteRatingByCustomerName(@PathVariable String vetId,
+                                                                 @PathVariable String customerName){
+        return ratingService.deleteRatingByVetIdAndCustomerName(vetId, customerName)
+                .then(Mono.just(ResponseEntity.noContent().<Void>build()))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
     @GetMapping("{vetId}/ratings/average")
     public Mono<ResponseEntity<Double>> getAverageRatingByVetId(@PathVariable String vetId){
         return ratingService.getAverageRatingByVetId(vetId)
@@ -367,7 +375,7 @@ public class VetController {
     public Mono<ResponseEntity<Void>> deleteAlbumPhoto(@PathVariable String vetId,@PathVariable Integer Id) {
         return albumService.deleteAlbumPhotoById(vetId, Id)
                 .then(Mono.defer(() -> Mono.just(ResponseEntity.noContent().<Void>build())))
-                .onErrorResume(NotFoundException.class, e -> Mono.defer(() -> Mono.just(ResponseEntity.<Void>notFound().build())));
+                .onErrorResume(NotFoundException.class, e -> Mono.defer(() -> Mono.just(ResponseEntity.notFound().build())));
     }
 
 }
