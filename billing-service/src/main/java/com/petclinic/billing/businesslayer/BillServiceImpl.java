@@ -400,6 +400,14 @@ public class BillServiceImpl implements BillService{
                 });
     }
 
+    private Mail generateConfirmationEmail(UserDetails user){
+        return new Mail(
+                user.getEmail(), "Pet Clinic - Payment Confirmation", "default", "Pet Clinic confirmation email",
+                "Dear, " + user.getUsername() + "\n" +
+                "Your bill has been succesfully paid",
+                "Thank you for choosing Pet Clinic.", user.getUsername(), "ChamplainPetClinic@gmail.com");
+    }
+
 
 
 }

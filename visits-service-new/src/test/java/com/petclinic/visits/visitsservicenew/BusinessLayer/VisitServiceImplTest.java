@@ -1,5 +1,11 @@
 package com.petclinic.visits.visitsservicenew.BusinessLayer;
 
+import com.petclinic.visits.visitsservicenew.DomainClientLayer.Auth.Role;
+import org.junit.jupiter.api.Test;
+import org.springframework.test.util.ReflectionTestUtils;
+import com.petclinic.visits.visitsservicenew.DomainClientLayer.Auth.UserDetails;
+import com.petclinic.visits.visitsservicenew.DomainClientLayer.Mailing.Mail;
+import java.time.LocalDateTime;
 import com.petclinic.visits.visitsservicenew.DataLayer.Status;
 import com.petclinic.visits.visitsservicenew.DataLayer.Visit;
 import com.petclinic.visits.visitsservicenew.DataLayer.VisitRepo;
@@ -171,7 +177,7 @@ class VisitServiceImplTest {
     }
 
     @Test
-    public void getVisitsForPet () {
+    public void getVisitsForPet() {
         // Arrange
         String petId = "yourPetId";
 
@@ -193,7 +199,7 @@ class VisitServiceImplTest {
     }
 
     @Test
-    void getVisitsForStatus () {
+    void getVisitsForStatus() {
         when(visitRepo.findAllByStatus(anyString())).thenReturn(Flux.just(visit1));
         when(entityDtoUtil.toVisitResponseDTO(any())).thenReturn(Mono.just(visitResponseDTO));
 
@@ -271,7 +277,7 @@ class VisitServiceImplTest {
 //    }
 
     @Test
-    void addVisit_NoConflictingVisits_InsertsNewVisit () {
+    void addVisit_NoConflictingVisits_InsertsNewVisit() {
         // Arrange
         LocalDateTime visitDate = LocalDateTime.now().plusDays(1);
         String description = "Test Description";
@@ -311,7 +317,7 @@ class VisitServiceImplTest {
     }
 
     @Test
-    void addVisit_ConflictingVisits_ThrowsDuplicateTimeException () {
+    void addVisit_ConflictingVisits_ThrowsDuplicateTimeException() {
         // Arrange
         LocalDateTime visitDate = LocalDateTime.now().plusDays(1);
         String description = "Test Description";
@@ -358,7 +364,7 @@ class VisitServiceImplTest {
     }
 
     @Test
-    public void testAddVisit_NoDescription () {
+    public void testAddVisit_NoDescription() {
         // Arrange
         VisitRequestDTO requestDTO = buildVisitRequestDTO();
         Visit visit = buildVisit(requestDTO.getDescription());
@@ -382,8 +388,9 @@ class VisitServiceImplTest {
                 .expectError(BadRequestException.class)
                 .verify();
     }
+
     @Test
-    public void testAddVisit_BadVisitDate () {
+    public void testAddVisit_BadVisitDate() {
         // Arrange
         VisitRequestDTO requestDTO = buildVisitRequestDTO();
         Visit visit = buildVisit(requestDTO.getDescription());
@@ -407,8 +414,9 @@ class VisitServiceImplTest {
                 .expectError(BadRequestException.class)
                 .verify();
     }
+
     @Test
-    public void testAddVisit_DateInThePast () {
+    public void testAddVisit_DateInThePast() {
         // Arrange
         VisitRequestDTO requestDTO = buildVisitRequestDTO();
         Visit visit = buildVisit(requestDTO.getDescription());
@@ -435,7 +443,7 @@ class VisitServiceImplTest {
     }
 
     @Test
-    public void testAddVisit_PetIdNull () {
+    public void testAddVisit_PetIdNull() {
         // Arrange
         VisitRequestDTO requestDTO = buildVisitRequestDTO();
         Visit visit = buildVisit(requestDTO.getDescription());
@@ -462,7 +470,7 @@ class VisitServiceImplTest {
     }
 
     @Test
-    public void testAddVisit_VetIdNull () {
+    public void testAddVisit_VetIdNull() {
         // Arrange
         VisitRequestDTO requestDTO = buildVisitRequestDTO();
         Visit visit = buildVisit(requestDTO.getDescription());
@@ -548,6 +556,7 @@ class VisitServiceImplTest {
                 .expectNext(visitResponseDTO)
                 .verifyComplete();
     }
+
     @Test
     void updateStatusForVisitByVisitId_CANCELLED() {
         String status = "CANCELLED";
@@ -564,6 +573,7 @@ class VisitServiceImplTest {
                 .expectNext(visitResponseDTO)
                 .verifyComplete();
     }
+
     @Test
     void updateStatusForVisitByVisitId_UPCOMING() {
         String status = "UPCOMING";
@@ -580,6 +590,7 @@ class VisitServiceImplTest {
                 .expectNext(visitResponseDTO)
                 .verifyComplete();
     }
+
     @Test
     void updateVisit() {
 
@@ -599,7 +610,7 @@ class VisitServiceImplTest {
     }
 
     @Test
-    void deleteVisitById_visitId_shouldSucceed () {
+    void deleteVisitById_visitId_shouldSucceed() {
         //arrange
         String visitId = "73b5c112-5703-4fb7-b7bc-ac8186811ae1";
 
@@ -618,7 +629,7 @@ class VisitServiceImplTest {
     }
 
     @Test
-    void deleteVisitById_visitDoesNotExist_shouldThrowNotFoundException () {
+    void deleteVisitById_visitDoesNotExist_shouldThrowNotFoundException() {
         // Arrange
         String visitId = UUID.randomUUID().toString();
 
@@ -639,7 +650,7 @@ class VisitServiceImplTest {
     }
 
     @Test
-    void deleteAllCancelledVisits () {
+    void deleteAllCancelledVisits() {
 
         // Arrange
 
@@ -663,7 +674,7 @@ class VisitServiceImplTest {
     }
 
     @Test
-    void deleteAllCanceledVisits_shouldThrowRuntimeException () {
+    void deleteAllCanceledVisits_shouldThrowRuntimeException() {
         // Arrange
         List<Visit> cancelledVisits = new ArrayList<>();
         cancelledVisits.add(buildVisit("Cat is sick"));
@@ -685,7 +696,7 @@ class VisitServiceImplTest {
     }
 
 
-    private Visit buildVisit (String description){
+    private Visit buildVisit(String description) {
         return Visit.builder()
                 .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
                 .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
@@ -695,7 +706,8 @@ class VisitServiceImplTest {
                 .status(Status.UPCOMING)
                 .build();
     }
-    private VisitResponseDTO buildVisitResponseDTO () {
+
+    private VisitResponseDTO buildVisitResponseDTO() {
         return VisitResponseDTO.builder()
                 .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
                 .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
@@ -705,7 +717,8 @@ class VisitServiceImplTest {
                 .status(Status.UPCOMING)
                 .build();
     }
-    private VisitRequestDTO buildVisitRequestDTO () {
+
+    private VisitRequestDTO buildVisitRequestDTO() {
         return VisitRequestDTO.builder()
                 .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .description("this is a dummy description")
@@ -715,7 +728,7 @@ class VisitServiceImplTest {
                 .build();
     }
 
-    private Mono<VisitRequestDTO> buildRequestDtoMono () {
+    private Mono<VisitRequestDTO> buildRequestDtoMono() {
         VisitRequestDTO requestDTO = buildVisitRequestDTO();
         return Mono.just(requestDTO);
     }
@@ -807,7 +820,36 @@ class VisitServiceImplTest {
     }
 
 
+    @Test
+    void generateVisitRequestEmail_ShouldCreateCorrectEmail() {
+        // Arrange
+        Set<Role> roles = new HashSet<>();
+        roles.add(Role.builder().id(1).name("ROLE_USER").build());
 
+        UserDetails user = new UserDetails(
+                "user123",
+                "Test User",
+                "test@example.com",
+                roles
+        );
+        String petName = "Fluffy";
+        LocalDateTime visitDate = LocalDateTime.of(2025, 10, 15, 14, 30);
 
+        // Act
+        Mail result = ReflectionTestUtils.invokeMethod(
+                visitService,
+                "generateVisitRequestEmail",
+                user,
+                petName,
+                visitDate
+        );
 
+        // Assert
+        assertEquals("test@example.com", result.getEmailSendTo());
+        assertEquals("PetClinic Visit request", result.getEmailTitle());
+        assertTrue(result.getBody().contains("Dear " + user.getUsername() + ",\n" +
+                "We have received a request to schedule a visit for your pet with id: " + petName + " on the following date and time: " + visitDate.toString() + "." + "\n" +
+                "If you do not wish to create an account, please disregard this email."));
+        assertTrue(result.getSenderName().contains("ChamplainPetClinic@gmail.com"));
+    }
 }
