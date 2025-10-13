@@ -155,7 +155,7 @@ angular.module('productList')
                 });
             }
         }
-        self.nextPage = function () {S
+        self.nextPage = function () {
             if (parseInt(self.currentPage) + 1 < self.totalPages) {
                 var currentPageInt = parseInt(self.currentPage) + 1
                 self.currentPage = currentPageInt.toString();
