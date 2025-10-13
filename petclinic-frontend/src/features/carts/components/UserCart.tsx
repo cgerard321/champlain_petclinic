@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import CartBillingForm, { BillingInfo } from './CartBillingForm';
 import { useNavigate, useParams } from 'react-router-dom';
-import CartItem from './CartItem';
+import CartItem, { formatPrice } from './CartItem';
 import { ProductModel } from '../models/ProductModel';
 import './UserCart.css';
 import { NavBar } from '@/layouts/AppNavBar';
@@ -166,9 +166,6 @@ const UserCart = (): JSX.Element => {
     isAdmin || IsInventoryManager() || IsVet() || IsReceptionist();
 
   // derived totals
-  const formatCurrency = (value: number): string =>
-    `$${value.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
-
   const subtotal = cartItems.reduce(
     (acc, item) => acc + item.productSalePrice * (item.quantity || 1),
     0
@@ -659,7 +656,14 @@ const UserCart = (): JSX.Element => {
     }
   };
 
-  if (loading) return <div className="loading">Loading cart items...</div>;
+  if (loading)
+    return (
+      <div
+        className="cart-loading-overlay"
+        role="status"
+        aria-label="Loading cart items"
+      />
+    );
   if (error) return <div className="error">{error}</div>;
 
   // Helper to filter out duplicate recent purchases by productId
@@ -791,12 +795,16 @@ const UserCart = (): JSX.Element => {
 
               <div className="CartSummary">
                 <h3>Cart Summary</h3>
-                <p className="summary-item">Subtotal: ${subtotal.toFixed(2)}</p>
-                <p className="summary-item">TVQ (9.975%): ${tvq.toFixed(2)}</p>
-                <p className="summary-item">TVC (5%): ${tvc.toFixed(2)}</p>
-                <p className="summary-item">Discount: ${discount.toFixed(2)}</p>
+                <p className="summary-item">
+                  Subtotal: {formatPrice(subtotal)}
+                </p>
+                <p className="summary-item">TVQ (9.975%): {formatPrice(tvq)}</p>
+                <p className="summary-item">TVC (5%): {formatPrice(tvc)}</p>
+                <p className="summary-item">
+                  Discount: {formatPrice(discount)}
+                </p>
                 <p className="total-price summary-item">
-                  Total: ${total.toFixed(2)}
+                  Total: {formatPrice(total)}
                 </p>
               </div>
 
@@ -982,7 +990,7 @@ const UserCart = (): JSX.Element => {
                       {item.productName}
                     </div>
                     <div className="recent-purchase-price">
-                      {formatCurrency(item.productSalePrice)}
+                      {formatPrice(item.productSalePrice)}
                     </div>
                     <div className="Wishlist-item-actions">
                       <button

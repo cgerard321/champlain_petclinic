@@ -10,6 +10,32 @@
   color: var(--cart-text);
 }
 
+.cart-loading-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(248, 250, 252, 0.8);
+  z-index: 1200;
+}
+
+.cart-loading-overlay::after {
+  content: '';
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 4px solid rgba(37, 99, 235, 0.2);
+  border-top-color: var(--cart-brand, #2563eb);
+  animation: cart-loading-spin 0.8s linear infinite;
+}
+
+@keyframes cart-loading-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* Empty cart visual styles */
 .empty-cart-visual {
   text-align: center;

@@ -1,3 +1,9 @@
+.modal-backdrop,
+.cart-billing-modal-backdrop,
+.confirm-modal-backdrop {
+  --cart-modal-radius: 0px;
+}
+
 .modal-backdrop {
   position: fixed;
   top: 0;
@@ -21,7 +27,7 @@
     ),
     #ffffff;
   padding: 2.25rem;
-  border-radius: 0 !important;
+  border-radius: var(--cart-modal-radius, 0px);
   width: 500px;
   max-width: min(90%, 520px);
   box-shadow: 0 28px 60px rgba(15, 23, 42, 0.28);
@@ -67,7 +73,7 @@
 }
 
 .cart-billing-modal-content {
-  border-radius: 0 !important;
+  border-radius: var(--cart-modal-radius, 0px);
 }
 
 .billing-form {
@@ -239,7 +245,7 @@
     ),
     #ffffff;
   padding: 2rem;
-  border-radius: 0;
+  border-radius: var(--cart-modal-radius, 0px);
   width: 400px;
   max-width: 90%;
   box-shadow: 0 24px 48px rgba(15, 23, 42, 0.26);
