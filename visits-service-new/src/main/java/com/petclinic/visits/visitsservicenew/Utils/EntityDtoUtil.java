@@ -92,7 +92,7 @@ public class EntityDtoUtil {
     }
 
     /**
-     * Generate a random UUID and returns it. IS NOT ERROR FREEa
+     * Generate a random UUID and returns it. IS NOT ERROR FREE
      * @return The UUID as a string
      */
     public String generateVisitIdString() {
