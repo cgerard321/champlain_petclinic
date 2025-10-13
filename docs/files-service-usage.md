@@ -61,28 +61,28 @@ We are adding a rethrower because the errors you will get as Response Entity wil
 As such the rethrower handles the error received by the files Service Client and sends back a new one to the api-gateway with the original message and technically the same error code.
 
 ```java
-@RequiredArgsConstructor
-@Component
-public class Rethrower {
-
-    private static final Logger log = LoggerFactory.getLogger(Rethrower.class);
-    private final ObjectMapper objectMapper;
-
-    public Mono<? extends Throwable> rethrow(ClientResponse clientResponse, Function<Map, ? extends Throwable> exceptionProvider) {
-        return clientResponse.createException().flatMap(n ->
-        {
-            try {
-                final Map map =
-                        objectMapper.readValue(n.getResponseBodyAsString(), Map.class);
-                return Mono.error(exceptionProvider.apply(map));
-            } catch (JsonProcessingException e) {
-                log.error(e.getMessage());
-                return Mono.error(e);
-            }
-        });
+    @RequiredArgsConstructor
+    @Component
+    public class Rethrower {
+    
+        private static final Logger log = LoggerFactory.getLogger(Rethrower.class);
+        private final ObjectMapper objectMapper;
+    
+        public Mono<? extends Throwable> rethrow(ClientResponse clientResponse, Function<Map, ? extends Throwable> exceptionProvider) {
+            return clientResponse.createException().flatMap(n ->
+            {
+                try {
+                    final Map map =
+                            objectMapper.readValue(n.getResponseBodyAsString(), Map.class);
+                    return Mono.error(exceptionProvider.apply(map));
+                } catch (JsonProcessingException e) {
+                    log.error(e.getMessage());
+                    return Mono.error(e);
+                }
+            });
+        }
+    
     }
-
-}
 ```
 
 #### 3. Handle the Files Service Client Errors
@@ -256,11 +256,11 @@ Good Example from Customer-Service's Controller:
 
 ```java
     @GetMapping("/{ownerId}")
-public Mono<ResponseEntity<OwnerResponseDTO>> getOwnerByOwnerId(@PathVariable String ownerId, @RequestParam(required = true) boolean includePhoto) {
-    return ownerService.getOwnerByOwnerId(ownerId, includePhoto)
-            .map(ownerResponseDTO -> ResponseEntity.status(HttpStatus.OK).body(ownerResponseDTO))
-            .defaultIfEmpty(ResponseEntity.notFound().build());
-}
+    public Mono<ResponseEntity<OwnerResponseDTO>> getOwnerByOwnerId(@PathVariable String ownerId, @RequestParam(required = true) boolean includePhoto) {
+        return ownerService.getOwnerByOwnerId(ownerId, includePhoto)
+                .map(ownerResponseDTO -> ResponseEntity.status(HttpStatus.OK).body(ownerResponseDTO))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
 ```
 
 #### 2. Update Service Implement to getFile
@@ -273,25 +273,25 @@ Good Example from Customer-Service's ServiceImplement:
 
 ```java
     @Override
-public Mono<OwnerResponseDTO> getOwnerByOwnerId(String ownerId, boolean includePhoto) {
-    return ownerRepo.findOwnerByOwnerId(ownerId)
-            .switchIfEmpty(Mono.error(new NotFoundException("Owner not found with id: " + ownerId)))
-            .flatMap(owner -> {
-                OwnerResponseDTO dto = EntityDTOUtil.toOwnerResponseDTO(owner);
-
-                if (includePhoto && owner.getPhotoId() != null) {
-                    return filesServiceClient.getFileById(owner.getPhotoId())
-                            .map(fileDetails -> {
-                                dto.setPhoto(fileDetails);
-                                return dto;
-                            })
-                            .onErrorReturn(dto);
-                } else {
-                    dto.setPhoto(null);
-                    return Mono.just(dto);
-                }
-            });
-}
+    public Mono<OwnerResponseDTO> getOwnerByOwnerId(String ownerId, boolean includePhoto) {
+        return ownerRepo.findOwnerByOwnerId(ownerId)
+                .switchIfEmpty(Mono.error(new NotFoundException("Owner not found with id: " + ownerId)))
+                .flatMap(owner -> {
+                    OwnerResponseDTO dto = EntityDTOUtil.toOwnerResponseDTO(owner);
+    
+                    if (includePhoto && owner.getPhotoId() != null) {
+                        return filesServiceClient.getFileById(owner.getPhotoId())
+                                .map(fileDetails -> {
+                                    dto.setPhoto(fileDetails);
+                                    return dto;
+                                })
+                                .onErrorReturn(dto);
+                    } else {
+                        dto.setPhoto(null);
+                        return Mono.just(dto);
+                    }
+                });
+    }
 ```
 
 #### 3. Update API Gateway Response Model
@@ -311,14 +311,14 @@ Good Example from Customer Service Client:
 
 ```java
     public Mono<OwnerResponseDTO> getOwner(final String ownerId, boolean includePhoto) {
-    UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(customersServiceUrl + "/owners/" + ownerId);
-    builder.queryParam("includePhoto", includePhoto);
-
-    return webClientBuilder.build().get()
-            .uri(builder.build().toUri())
-            .retrieve()
-            .bodyToMono(OwnerResponseDTO.class);
-}
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(customersServiceUrl + "/owners/" + ownerId);
+        builder.queryParam("includePhoto", includePhoto);
+    
+        return webClientBuilder.build().get()
+                .uri(builder.build().toUri())
+                .retrieve()
+                .bodyToMono(OwnerResponseDTO.class);
+    }
 ```
 
 #### 5. Update API Gateway Controller to Support File Inclusion
@@ -329,12 +329,12 @@ This allows clients to control whether file data should be included in the respo
 Good Example from Customer Api-gateway Controller:
 ```java
     @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN})
-@GetMapping(value = "/{ownerId}")
-public Mono<ResponseEntity<OwnerResponseDTO>> getOwnerDetails(final @PathVariable String ownerId, @RequestParam(required = false) boolean includeImage) {
-    return customersServiceClient.getOwner(ownerId, includeImage)
-            .map(ownerResponseDTO -> ResponseEntity.status(HttpStatus.OK).body(ownerResponseDTO))
-            .defaultIfEmpty(ResponseEntity.notFound().build());
-}
+    @GetMapping(value = "/{ownerId}")
+    public Mono<ResponseEntity<OwnerResponseDTO>> getOwnerDetails(final @PathVariable String ownerId, @RequestParam(required = false) boolean includeImage) {
+        return customersServiceClient.getOwner(ownerId, includeImage)
+                .map(ownerResponseDTO -> ResponseEntity.status(HttpStatus.OK).body(ownerResponseDTO))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
 ```
 
 ### Add File
@@ -349,37 +349,37 @@ This approach is the simplest and only requires to update the addEntity of your 
 Good Example from Customer Service Implement:
 ```java
     @Override
-public Mono<OwnerResponseDTO> addOwner(Mono<OwnerRequestDTO> ownerRequestDTO) {
-    return ownerRequestDTO
-            .flatMap(this::validateRequestDTO)
-            .flatMap(ownerRequest -> {
-                Owner owner = EntityDTOUtil.toOwner(ownerRequest);
-                Mono<FileDetails> photoMono;
-
-                if (ownerRequest.getPhoto() != null) {
-                    photoMono = filesServiceClient.addFile(ownerRequest.getPhoto());
-                } else {
-                    photoMono = Mono.empty();
-                }
-
-                return photoMono
-                        .defaultIfEmpty(null)
-                        .flatMap(photo -> {
-                            if (photo != null) {
-                                owner.setPhotoId(photo.getFileId());
-                            } else {
-                                owner.setPhotoId(null);
-                            }
-
-                            return ownerRepo.save(owner)
-                                    .map(savedOwner -> {
-                                        OwnerResponseDTO dto = EntityDTOUtil.toOwnerResponseDTO(savedOwner);
-                                        dto.setPhoto(photo);
-                                        return dto;
-                                    });
-                        });
-            });
-}
+    public Mono<OwnerResponseDTO> addOwner(Mono<OwnerRequestDTO> ownerRequestDTO) {
+        return ownerRequestDTO
+                .flatMap(this::validateRequestDTO)
+                .flatMap(ownerRequest -> {
+                    Owner owner = EntityDTOUtil.toOwner(ownerRequest);
+                    Mono<FileDetails> photoMono;
+    
+                    if (ownerRequest.getPhoto() != null) {
+                        photoMono = filesServiceClient.addFile(ownerRequest.getPhoto());
+                    } else {
+                        photoMono = Mono.empty();
+                    }
+    
+                    return photoMono
+                            .defaultIfEmpty(null)
+                            .flatMap(photo -> {
+                                if (photo != null) {
+                                    owner.setPhotoId(photo.getFileId());
+                                } else {
+                                    owner.setPhotoId(null);
+                                }
+    
+                                return ownerRepo.save(owner)
+                                        .map(savedOwner -> {
+                                            OwnerResponseDTO dto = EntityDTOUtil.toOwnerResponseDTO(savedOwner);
+                                            dto.setPhoto(photo);
+                                            return dto;
+                                        });
+                            });
+                });
+    }
 ```
 
 #### Add New Patch Endpoint
@@ -409,40 +409,40 @@ Good Example from Customer Service Implement:
 
 ```java
     @Override
-public Mono<OwnerResponseDTO> updateOwner(Mono<OwnerRequestDTO> ownerRequestDTO, String ownerId) {
-    return ownerRepo.findOwnerByOwnerId(ownerId)
-            .switchIfEmpty(Mono.error(new NotFoundException("Owner not found with id: " + ownerId)))
-            .flatMap(existingOwner ->
-                    ownerRequestDTO.flatMap(requestDTO -> {
-                        Mono<String> fileIdMono;
-
-                        if (existingOwner.getPhotoId() != null && requestDTO.getPhoto() != null) {
-                            fileIdMono = filesServiceClient.updateFile(existingOwner.getPhotoId(), requestDTO.getPhoto()).thenReturn(existingOwner.getPhotoId());
-                        } else if (requestDTO.getPhoto() != null) {
-                            fileIdMono = filesServiceClient.addFile(requestDTO.getPhoto()).map(FileResponseDTO::getFileId);
-                        } else if (existingOwner.getPhotoId() != null) {
-                            fileIdMono = filesServiceClient.deleteFile(existingOwner.getPhotoId()).thenReturn(null);
-                        } else {
-                            fileIdMono = Mono.justOrEmpty(existingOwner.getPhotoId());
-                        }
-
-                        return fileIdMono
-                                .defaultIfEmpty(null)
-                                .map(fileId -> {
-                                    existingOwner.setFirstName(requestDTO.getFirstName());
-                                    existingOwner.setLastName(requestDTO.getLastName());
-                                    existingOwner.setAddress(requestDTO.getAddress());
-                                    existingOwner.setCity(requestDTO.getCity());
-                                    existingOwner.setProvince(requestDTO.getProvince());
-                                    existingOwner.setTelephone(requestDTO.getTelephone());
-                                    existingOwner.setPhotoId(fileId);
-                                    return existingOwner;
-                                });
-                    })
-            )
-            .flatMap(ownerRepo::save)
-            .map(EntityDTOUtil::toOwnerResponseDTO);
-}
+    public Mono<OwnerResponseDTO> updateOwner(Mono<OwnerRequestDTO> ownerRequestDTO, String ownerId) {
+        return ownerRepo.findOwnerByOwnerId(ownerId)
+                .switchIfEmpty(Mono.error(new NotFoundException("Owner not found with id: " + ownerId)))
+                .flatMap(existingOwner ->
+                        ownerRequestDTO.flatMap(requestDTO -> {
+                            Mono<String> fileIdMono;
+    
+                            if (existingOwner.getPhotoId() != null && requestDTO.getPhoto() != null) {
+                                fileIdMono = filesServiceClient.updateFile(existingOwner.getPhotoId(), requestDTO.getPhoto()).thenReturn(existingOwner.getPhotoId());
+                            } else if (requestDTO.getPhoto() != null) {
+                                fileIdMono = filesServiceClient.addFile(requestDTO.getPhoto()).map(FileResponseDTO::getFileId);
+                            } else if (existingOwner.getPhotoId() != null) {
+                                fileIdMono = filesServiceClient.deleteFile(existingOwner.getPhotoId()).thenReturn(null);
+                            } else {
+                                fileIdMono = Mono.justOrEmpty(existingOwner.getPhotoId());
+                            }
+    
+                            return fileIdMono
+                                    .defaultIfEmpty(null)
+                                    .map(fileId -> {
+                                        existingOwner.setFirstName(requestDTO.getFirstName());
+                                        existingOwner.setLastName(requestDTO.getLastName());
+                                        existingOwner.setAddress(requestDTO.getAddress());
+                                        existingOwner.setCity(requestDTO.getCity());
+                                        existingOwner.setProvince(requestDTO.getProvince());
+                                        existingOwner.setTelephone(requestDTO.getTelephone());
+                                        existingOwner.setPhotoId(fileId);
+                                        return existingOwner;
+                                    });
+                        })
+                )
+                .flatMap(ownerRepo::save)
+                .map(EntityDTOUtil::toOwnerResponseDTO);
+    }
 ```
 
 The downside is that even if the photo is not changed it will still update in the files Service, a patch approach would be more optimised.
@@ -455,19 +455,19 @@ Good Example from Customer Service Implement:
 
 ```java
     @Override
-public Mono<OwnerResponseDTO> deleteOwnerByOwnerId(String ownerId) {
-    return ownerRepo.findOwnerByOwnerId(ownerId)
-            .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("OwnerId not found: " + ownerId))))
-            .flatMap(found -> {
-                Mono<Void> deletePhotoMono = Mono.justOrEmpty(found.getPhotoId())
-                        .flatMap(filesServiceClient::deleteFileById);
-                Mono<Void> deleteOwnerMono = ownerRepo.delete(found);
-
-                return Mono.when(deleteOwnerMono, deletePhotoMono)
-                        .thenReturn(found);
-            })
-            .map(EntityDTOUtil::toOwnerResponseDTO);
-}
+    public Mono<OwnerResponseDTO> deleteOwnerByOwnerId(String ownerId) {
+        return ownerRepo.findOwnerByOwnerId(ownerId)
+                .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("OwnerId not found: " + ownerId))))
+                .flatMap(found -> {
+                    Mono<Void> deletePhotoMono = Mono.justOrEmpty(found.getPhotoId())
+                            .flatMap(filesServiceClient::deleteFileById);
+                    Mono<Void> deleteOwnerMono = ownerRepo.delete(found);
+    
+                    return Mono.when(deleteOwnerMono, deletePhotoMono)
+                            .thenReturn(found);
+                })
+                .map(EntityDTOUtil::toOwnerResponseDTO);
+    }
 ```
 
 If the file needs to be deleted without the entire entity, follow [Add New Patch Endpoint](#add-new-patch-endpoint)
