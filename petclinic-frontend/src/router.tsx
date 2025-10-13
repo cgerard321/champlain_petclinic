@@ -29,7 +29,7 @@ import Forbidden from '@/pages/Error/Forbidden.tsx';
 import Unauthorized from '@/pages/Error/Unauthorized.tsx';
 import PageNotFound from '@/pages/Error/PageNotFound.tsx';
 import EditInventory from '@/features/inventories/EditInventory.tsx';
-import { ProtectedRoute } from './shared/components/ProtectedRouteProps';
+import { ProtectedRoute } from './shared/components';
 import CustomerDetailsPage from '@/pages/Customer/CustomerDetailsPage.tsx';
 import UpdateCustomerPage from '@/pages/Customer/UpdateCustomerPage.tsx';
 import VisitDetails from './features/visits/visits/VisitByVisitId';
