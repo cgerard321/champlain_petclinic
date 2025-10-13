@@ -13,179 +13,110 @@ angular.module('productList')
         self.productType = ["FOOD", "MEDICATION", "ACCESSORY", "EQUIPMENT"];
         fetchProductList();
 
-            $scope.toast = { visible: false, title: '', lines: [], actions: [] };
-            let toastTimer = null;
+        $scope.toast = { visible: false, title: '', lines: [], actions: [] };
+        let toastTimer = null;
 
-            function toastShow({ title = '', lines = [], actions = [], autoHideMs = 0 }) {
-                // clear any previous timer
-                if (toastTimer) { clearTimeout(toastTimer); toastTimer = null; }
-                // assign
-                $scope.toast.title = title;
-                $scope.toast.lines = lines;
-                $scope.toast.actions = actions;
-                $scope.toast.visible = true;
-                // optional auto hide
-                if (!actions.length && autoHideMs > 0) {
-                    toastTimer = setTimeout(toastHide, autoHideMs);
-                }
+        function toastShow({ title = '', lines = [], actions = [], autoHideMs = 0 }) {
+            // clear any previous timer
+            if (toastTimer) { clearTimeout(toastTimer); toastTimer = null; }
+            // assign
+            $scope.toast.title = title;
+            $scope.toast.lines = lines;
+            $scope.toast.actions = actions;
+            $scope.toast.visible = true;
+            // optional auto hide
+            if (!actions.length && autoHideMs > 0) {
+                toastTimer = setTimeout(toastHide, autoHideMs);
             }
-            function toastHide() {
-                $scope.toast.visible = false;
-                $scope.toast.title = ''; $scope.toast.lines = []; $scope.toast.actions = [];
-                if (toastTimer) { clearTimeout(toastTimer); toastTimer = null; }
-            }
-            // wire action buttons -> run stored callbacks
-            $scope.onToastAction = function (index) {
-                try {
-                    const action = $scope.toast.actions[index];
-                    toastHide();
-                    if (action && typeof action.onClick === 'function') action.onClick();
-                } catch (e) { /* no-op */ }
-            };
+        }
 
-            // ---------- API helpers ----------
-            function performDelete(productId, cascade) {
-                const url = self.baseUrl + '/' + encodeURIComponent(productId);
-                const cfg = cascade ? { params: { cascadeBundles: true } } : undefined;
-                return $http.delete(url, cfg);
-            }
+        function toastHide() {
+            $scope.toast.visible = false;
+            $scope.toast.title = ''; $scope.toast.lines = []; $scope.toast.actions = [];
+            if (toastTimer) { clearTimeout(toastTimer); toastTimer = null; }
+        }
 
-            // ---------- 5s soft delete with Undo → then handle 409 ----------
-            function scheduleSoftDelete(product) {
-                product.isTemporarilyDeleted = true;
+        $scope.onToastAction = function (index) {
+            try {
+                const action = $scope.toast.actions[index];
+                toastHide();
+                if (action && typeof action.onClick === 'function') action.onClick();
+            } catch (e) { /* no-op */ }
+        };
 
-                toastShow({
-                    title: 'Deleting in 5 seconds…',
-                    lines: [ product.productName ],
-                    actions: [
-                        { label: 'Undo', kind: 'secondary', onClick: function () {
-                                product.isTemporarilyDeleted = false;
-                            }
-                        }
-                    ]
-                });
+        function performDelete(productId, cascade) {
+            const url = self.baseUrl + '/' + encodeURIComponent(productId);
+            const cfg = cascade ? { params: { cascadeBundles: true } } : undefined;
+            return $http.delete(url, cfg);
+        }
 
-                setTimeout(function () {
-                    if (!product.isTemporarilyDeleted) return;
+        function scheduleSoftDelete(product) {
+            product.isTemporarilyDeleted = true;
 
-                    // 1st attempt: normal delete (no cascade)
-                    performDelete(product.productId, /*cascade*/ false)
-                        .then(function () {
-                            toastShow({ title: 'Success', lines: ['Product deleted.'], autoHideMs: 2000 });
-                            setTimeout(function(){ location.reload(); }, 800);
-                        })
-                        .catch(function (err) {
-                            if (err.status === 409) {
-                                // product is part of bundle(s) — ask for cascade, no HTML in controller
-                                toastShow({
-                                    title: 'Product is part of a bundle',
-                                    lines: ['Deleting will also delete its bundle(s). Continue?'],
-                                    actions: [
-                                        { label: 'Delete all', kind: 'danger', onClick: function () {
-                                                performDelete(product.productId, /*cascade*/ true)
-                                                    .then(function () {
-                                                        toastShow({ title: 'Success', lines: ['Product and bundle(s) deleted.'], autoHideMs: 2000 });
-                                                        setTimeout(function(){ location.reload(); }, 800);
-                                                    })
-                                                    .catch(function (err2) {
-                                                        product.isTemporarilyDeleted = false;
-                                                        const msg = (err2.data && err2.data.message) || err2.statusText || 'Delete failed';
-                                                        toastShow({ title: 'Error', lines: [msg], autoHideMs: 3000 });
-                                                    });
-                                            }
-                                        },
-                                        { label: 'Cancel', kind: 'secondary', onClick: function () {
+            toastShow({
+                title: 'Deleting in 5 seconds…',
+                lines: [ product.productName ],
+                actions: [{
+                    label: 'Undo', kind: 'secondary', onClick: function () {
+                        product.isTemporarilyDeleted = false;
+                    }
+                }]
+            });
+
+            setTimeout(function () {
+                if (!product.isTemporarilyDeleted) return;
+
+                // 1st attempt: normal delete (no cascade)
+                performDelete(product.productId, /*cascade*/ false)
+                    .then(function () {
+                        toastShow({ title: 'Success', lines: ['Product deleted.'], autoHideMs: 2000 });
+                        setTimeout(function(){ location.reload(); }, 800);
+                    })
+                    .catch(function (err) {
+                        if (err.status === 409) {
+                            // product is part of bundle(s) — ask for cascade, no HTML in controller
+                            toastShow({
+                                title: 'Product is part of a bundle',
+                                lines: ['Deleting will also delete its bundle(s). Continue?'],
+                                actions: [
+                                    {
+                                        label: 'Delete all', kind: 'danger', onClick: function () {
+                                        performDelete(product.productId, /*cascade*/ true)
+                                            .then(function () {
+                                                toastShow({ title: 'Success', lines: ['Product and bundle(s) deleted.'], autoHideMs: 2000 });
+                                                setTimeout(function(){ location.reload(); }, 800);
+                                            })
+                                            .catch(function (err2) {
                                                 product.isTemporarilyDeleted = false;
-                                            }
+                                                const msg = (err2.data && err2.data.message) || err2.statusText || 'Delete failed';
+                                                toastShow({ title: 'Error', lines: [msg], autoHideMs: 3000 });
+                                            });
                                         }
-                                    ]
-                                });
+                                    },
+                                    { label: 'Cancel', kind: 'secondary', onClick: function () { product.isTemporarilyDeleted = false; }}
+                                ]
+                            });
 
-                            } else {
-                                product.isTemporarilyDeleted = false;
-                                const msg = (err.data && err.data.message) || err.statusText || 'Delete failed';
-                                toastShow({ title: 'Error', lines: [msg], autoHideMs: 3000 });
-                            }
-                        });
-
+                        } else {
+                            product.isTemporarilyDeleted = false;
+                            const msg = (err.data && err.data.message) || err.statusText || 'Delete failed';
+                            toastShow({ title: 'Error', lines: [msg], autoHideMs: 3000 });
+                        }
+                    });
                 }, 5000);
-            }
+        }
 
-            // ---------- public click handler: 3 chances to cancel ----------
-            $scope.deleteProduct = function (product) {
-                // chance #1: confirm
-                toastShow({
-                    title: 'Delete product?',
-                    lines: ['Are you sure you want to delete "' + product.productName + '"?'],
-                    actions: [
-                        { label: 'Delete', kind: 'danger', onClick: function () {
-                                // chance #2: 5s undo
-                                scheduleSoftDelete(product);
-                            }
-                        },
-                        { label: 'Cancel', kind: 'secondary', onClick: function () {} }
-                    ]
-                });
-            };
-
-            // // DELETE
-        // $scope.deleteProduct = function(product) {
-        //     let ifConfirmed = confirm('Are you sure you want to remove this product?');
-        //     if (ifConfirmed) {
-        //         // Step 1: Mark as temporarily deleted on frontend.
-        //         product.isTemporarilyDeleted = true;
-        //
-        //         // Display an Undo button for say, 5 seconds.
-        //         setTimeout(function() {
-        //             if (product.isTemporarilyDeleted) {
-        //                 // If it's still marked as deleted after 5 seconds, proceed with actual deletion.
-        //                 proceedToDelete(product);
-        //             }
-        //         }, 5000);  // 5 seconds = 5000ms.
-        //     }
-        // };
-        //
-        // $scope.undoDelete = function(product) {
-        //     product.isTemporarilyDeleted = false;
-        //     // Hide the undo button.
-        // };
-        //
-        // function proceedToDelete(product) {
-        //     if (!product.isTemporarilyDeleted) return;  // In case the user clicked undo just before the timeout.
-        //
-        //     $http.delete('api/gateway/products/' + product.productId)
-        //         .then(successCallback, errorCallback)
-        //
-        //     function showNotification(message) {
-        //         const notificationElement = document.getElementById('notification');
-        //         notificationElement.innerHTML = message;
-        //         notificationElement.style.display = 'block';
-        //
-        //         setTimeout(() => {
-        //             notificationElement.style.display = 'none';
-        //         }, 5000);  // Hide after 5 seconds
-        //     }
-        //
-        //     function successCallback(response) {
-        //         $scope.errors = [];
-        //         console.log(response, 'res');
-        //
-        //         // After deletion, wait for a short moment (e.g., 1 second) before showing the notification
-        //         setTimeout(() => {
-        //             showNotification(product.productName + " has been deleted successfully!");
-        //             // Then, after displaying the notification for 5 seconds, reload the page
-        //             setTimeout(() => {
-        //                 location.reload();
-        //             }, 1000);
-        //         }, 1000);  // Wait for 1 second before showing notification
-        //     }
-        //     function errorCallback(error) {
-        //         // If the error message is nested under 'data.errors' in your API response:
-        //         alert(error.data.errors);
-        //         console.log(error, 'Data is inaccessible.');
-        //     }
-        // }
-
+        $scope.deleteProduct = function (product) {
+            // chance #1: confirm
+            toastShow({
+                title: 'Delete product?',
+                lines: ['Are you sure you want to delete "' + product.productName + '"?'],
+                actions: [
+                    { label: 'Delete', kind: 'danger', onClick: function () { scheduleSoftDelete(product); } },
+                    { label: 'Cancel', kind: 'secondary', onClick: function () {} }
+                ]
+            });
+        };
 
         $scope.clearQueries = function (){
             self.lastParams.productSalePrice = '';
