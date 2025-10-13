@@ -364,13 +364,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserByEmail(String email) throws NotFoundException {
-        Optional<User> foundUser = userRepo.findByEmail(email);
-        if (foundUser.isPresent()) {
-            return foundUser.get();
-        }
-        else {
-            return null;
-        }
+        return userRepo.findByEmail(email).orElseGet(null);
     }
 
     @Override
@@ -441,14 +435,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserbyUsername(String username) throws NotFoundException {
-       Optional<User> foundUser = userRepo.findByUsername(username);
-       if (foundUser.isPresent()) {
-           return foundUser.get();
-       }
-       else {
-           return null;
-       }
-
+      return userRepo.findByUsername(username).orElseGet(null);
     }
 
 }
