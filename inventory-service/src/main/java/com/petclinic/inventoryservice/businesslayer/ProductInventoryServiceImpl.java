@@ -589,7 +589,7 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                             if (requestDTO.getProductName() == null || requestDTO.getProductPrice() == null || requestDTO.getProductQuantity() == null || requestDTO.getProductSalePrice() == null) {
                                 return Mono.error(new InvalidInputException("Product must have an inventory id, product name, product price, and product quantity."));
                             }
-                            if (requestDTO.getProductPrice() < 0 || requestDTO.getProductQuantity() < 0 || requestDTO.getProductSalePrice() < 0) {
+                            if (requestDTO.getProductPrice() <= 0 || requestDTO.getProductQuantity() <= 0 || requestDTO.getProductSalePrice() <= 0) {
                                 return Mono.error(new InvalidInputException("Product price quantity and sale price must be greater than 0."));
                             }
                             return productRepository.existsByInventoryIdAndProductNameIgnoreCase(inventoryId,requestDTO.getProductName())
