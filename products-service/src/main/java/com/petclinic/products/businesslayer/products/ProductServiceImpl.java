@@ -1,24 +1,17 @@
 package com.petclinic.products.businesslayer.products;
 
-import com.petclinic.products.datalayer.products.ProductStatus;
-import com.petclinic.products.datalayer.products.ProductType;
-import com.petclinic.products.utils.exceptions.InvalidInputException;
+import com.petclinic.products.datalayer.products.*;
+import com.petclinic.products.utils.exceptions.*;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import com.petclinic.products.datalayer.products.Product;
-import com.petclinic.products.datalayer.products.ProductRepository;
 import com.petclinic.products.datalayer.ratings.Rating;
 import com.petclinic.products.datalayer.ratings.RatingRepository;
 import com.petclinic.products.presentationlayer.products.ProductRequestModel;
 import com.petclinic.products.presentationlayer.products.ProductResponseModel;
 import com.petclinic.products.utils.EntityModelUtil;
-import com.petclinic.products.utils.exceptions.InvalidAmountException;
 import com.petclinic.products.utils.exceptions.InvalidInputException;
-import com.petclinic.products.utils.exceptions.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -33,10 +26,15 @@ public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
 
     private final RatingRepository ratingRepository;
+    private final ProductBundleRepository productBundleRepository;
+    private final ProductBundleService productBundleService;
 
-    public ProductServiceImpl(ProductRepository productRepository, RatingRepository ratingRepository) {
+    public ProductServiceImpl(ProductRepository productRepository, RatingRepository ratingRepository
+    , ProductBundleRepository productBundleRepository, ProductBundleService productBundleService) {
         this.productRepository = productRepository;
         this.ratingRepository = ratingRepository;
+        this.productBundleRepository = productBundleRepository;
+        this.productBundleService = productBundleService;
     }
 
     private Mono<Product> getAverageRating(Product product) {
@@ -172,14 +170,29 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Mono<ProductResponseModel> deleteProductByProductId(String productId) {
+    public Mono<ProductResponseModel> deleteProductByProductId(String productId, boolean cascadeBundles) {
         return productRepository.findProductByProductId(productId)
-                .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Product id was not found: " + productId))))
-                .flatMap(found -> {
-                            ratingRepository.deleteRatingsByProductId(found.getProductId());
-                            return productRepository.delete(found)
-                                    .then(Mono.just(found));
-                        }
+                .switchIfEmpty(Mono.error(new NotFoundException("Product id was not found: " + productId)))
+                .flatMap(found ->
+                        productBundleRepository.findAllByProductIdsContaining(found.getProductId())
+                                .collectList()
+                                .flatMap(bundles -> {
+                                    if (!bundles.isEmpty() && !cascadeBundles) {
+                                        var bundlesDelete = bundles.stream()
+                                                .map(EntityModelUtil::toProductBundleResponseModel)
+                                                .toList();
+                                        return Mono.error(new ProductInBundleConflictException("Bundles were found: " + bundlesDelete));
+                                    }
+
+                                    Mono<Void> deleteBundles = bundles.isEmpty()
+                                            ? Mono.empty()
+                                            : productBundleService.deleteAllProductBundlesByProductId(found.getProductId()).then();
+
+                                    return deleteBundles
+                                            .then(ratingRepository.deleteRatingsByProductId(found.getProductId()).then())
+                                            .then(productRepository.delete(found))
+                                            .thenReturn(found);
+                                })
                 )
                 .map(EntityModelUtil::toProductResponseModel);
     }

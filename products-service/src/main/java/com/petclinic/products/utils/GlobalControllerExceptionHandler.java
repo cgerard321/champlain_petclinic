@@ -8,9 +8,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import static org.springframework.http.HttpStatus.NOT_FOUND;
-import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.*;
 
 @RestControllerAdvice
 @Slf4j
@@ -44,6 +42,12 @@ public class GlobalControllerExceptionHandler {
     @ExceptionHandler(InvalidImageTypeException.class)
     public HttpErrorInfo handleInvalidImageTypeException(ServerHttpRequest request, Exception ex) {
         return createHttpErrorInfo(UNPROCESSABLE_ENTITY, request, ex);
+    }
+
+    @ResponseStatus(CONFLICT)
+    @ExceptionHandler(ProductInBundleConflictException.class)
+    public HttpErrorInfo handleProductInBundleConflictException(ServerHttpRequest request, Exception ex) {
+        return createHttpErrorInfo(CONFLICT, request, ex);
     }
 
 
