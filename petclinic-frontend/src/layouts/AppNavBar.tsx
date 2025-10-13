@@ -16,6 +16,7 @@ import './AppNavBar.css';
 
 // Uses centralized cart context
 import { useCart } from '@/context/CartContext';
+import { clinic } from '@/shared/content';
 
 export function NavBar(): JSX.Element {
   const { user } = useUser();
@@ -75,7 +76,7 @@ export function NavBar(): JSX.Element {
     <Navbar bg="light" expand="lg" className="navbar">
       <Container>
         <Navbar.Brand as={Link} to={AppRoutePaths.Home}>
-          PetClinic
+          {clinic.name}
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" onClick={toggleNavbar}>
           <span className="navbar-toggler-icon"></span>
