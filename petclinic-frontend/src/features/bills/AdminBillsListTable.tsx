@@ -20,8 +20,17 @@ import { getAllBillsByVetName } from './api/getAllBillsByVetName';
 import { getAllBillsByVisitType } from './api/getAllBillsByVisitType';
 import { getAllBills } from './api/getAllBills';
 import InterestExemptToggle from './components/InterestExemptToggle';
+import { Currency, convertCurrency } from './utils/convertCurrency';
 
-export default function AdminBillsListTable(): JSX.Element {
+interface AdminBillsListTableProps {
+  currency: Currency;
+  setCurrency: (c: Currency) => void;
+}
+
+export default function AdminBillsListTable({
+  currency,
+  setCurrency,
+}: AdminBillsListTableProps): JSX.Element {
   const navigate = useNavigate();
   const [showArchivedBills, setShowArchivedBills] = useState<boolean>(false);
   const [searchId, setSearchId] = useState<string>('');
@@ -652,6 +661,39 @@ export default function AdminBillsListTable(): JSX.Element {
         </div>
       ) : (
         <div className="admin-bills-list-table-container">
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '16px',
+              marginBottom: '16px',
+            }}
+          >
+            <label htmlFor="statusFilter">Status:</label>
+            <select
+              id="statusFilter"
+              value={selectedFilter}
+              onChange={handleFilterChange}
+              style={{ width: '150px' }}
+            >
+              <option value="">All Bills</option>
+              <option value="unpaid">Unpaid</option>
+              <option value="paid">Paid</option>
+              <option value="overdue">Overdue</option>
+            </select>
+            <label htmlFor="currencyFilter" style={{ marginLeft: '8px' }}>
+              Currency:
+            </label>
+            <select
+              id="currencyFilter"
+              value={currency}
+              onChange={e => setCurrency(e.target.value as Currency)}
+              style={{ width: '100px' }}
+            >
+              <option value="CAD">CAD</option>
+              <option value="USD">USD</option>
+            </select>
+          </div>
           <table className="table table-striped">
             <thead>
               <tr>
@@ -681,8 +723,16 @@ export default function AdminBillsListTable(): JSX.Element {
                     {bill.vetFirstName} {bill.vetLastName}
                   </td>
                   <td>{bill.date}</td>
-                  <td>{bill.amount}</td>
-                  <td>{bill.taxedAmount}</td>
+                  <td>
+                    {currency === 'CAD'
+                      ? `CAD $${convertCurrency(bill.amount, 'CAD', 'CAD').toFixed(2)}`
+                      : `USD $${convertCurrency(bill.amount, 'CAD', 'USD').toFixed(2)}`}
+                  </td>
+                  <td>
+                    {currency === 'CAD'
+                      ? `CAD $${convertCurrency(bill.taxedAmount, 'CAD', 'CAD').toFixed(2)}`
+                      : `USD $${convertCurrency(bill.taxedAmount, 'CAD', 'USD').toFixed(2)}`}
+                  </td>
                   <td>{bill.billStatus}</td>
                   <td>{bill.dueDate}</td>
                   <td>
