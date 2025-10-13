@@ -10,7 +10,9 @@ import {
 } from 'react-bootstrap';
 import { NavBar } from '@/layouts/AppNavBar';
 import { AppFooter } from '@/layouts/AppFooter';
-import Reveal from '@/features/home/components/Reveal';
+import { Reveal } from '@/shared/components';
+import { contact, clinic } from '@/shared/content';
+
 import './Contact.css';
 
 type Status = {
@@ -102,46 +104,48 @@ export default function ContactPage(): JSX.Element {
                       {'\uD83D\uDCCD'}
                     </span>
                     <div>
-                      <div>900 Rue Riverside</div>
-                      <div>Saint-Lambert, QC</div>
+                      <div>{clinic.address.street}</div>
+                      <div>
+                        {clinic.address.city}, {clinic.address.province}
+                      </div>
                     </div>
                   </div>
                   <div className="contact-detail">
                     <span className="icon" aria-hidden="true">
                       {'\uD83D\uDCDE'}
                     </span>
-                    <a href="tel:+4506727360">+1 (450) 672-7360</a>
+                    <a href={`tel:${contact.phone.href}`}>
+                      {contact.phone.display}
+                    </a>
                   </div>
                   <div className="contact-detail">
                     <span className="icon" aria-hidden="true">
                       {'\uD83D\uDCE7'}
                     </span>
-                    <a href="mailto:info@champlainpetclinic.com">
-                      info@champlainpetclinic.com
-                    </a>
+                    <a href={`mailto:${contact.email}`}>{contact.email}</a>
                   </div>
 
                   <hr className="my-3" />
 
                   <Card.Title className="mb-2">Hours</Card.Title>
                   <div className="hours">
-                    <div>
-                      <span>Mon–Fri</span>
-                      <span>8:00–19:00</span>
-                    </div>
-                    <div>
-                      <span>Sat</span>
-                      <span>9:00–16:00</span>
-                    </div>
-                    <div>
-                      <span>Sun</span>
-                      <span>Closed</span>
-                    </div>
+                    {contact.hours.map(h => (
+                      <div key={h.days}>
+                        <span>{h.days}</span>
+                        <span>
+                          {'note' in h && h.note
+                            ? h.note
+                            : h.open && h.close
+                              ? `${h.open}–${h.close}`
+                              : 'Closed'}
+                        </span>
+                      </div>
+                    ))}
                   </div>
 
                   <div className="mt-3">
                     <a
-                      href="https://www.google.com/maps/search/?api=1&query=Champlain%20College%20StLambert"
+                      href={clinic.address.mapsUrl}
                       target="_blank"
                       rel="noreferrer"
                       className="map-link"
