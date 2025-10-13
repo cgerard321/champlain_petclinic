@@ -1037,4 +1037,44 @@ public class CartControllerV1UnitTest {
                 .expectNextMatches(r -> r.getStatusCode().is5xxServerError())
                 .verifyComplete();
     }
+    @Test
+    void testGetRecommendationPurchases_ReturnsOk() {
+        CartServiceClient cartServiceClient = Mockito.mock(CartServiceClient.class);
+        CartControllerV1 controller = new CartControllerV1(cartServiceClient);
+
+        String cartId = "test-cart-id";
+        List<CartProductResponseDTO> products = List.of(
+                CartProductResponseDTO.builder().productId("prod1").build()
+        );
+
+        Mockito.when(cartServiceClient.getRecommendationPurchases(cartId))
+                .thenReturn(Mono.just(products));
+
+        Mono<ResponseEntity<List<CartProductResponseDTO>>> result = controller.getRecommendationPurchases(cartId);
+
+        StepVerifier.create(result)
+                .expectNextMatches(response -> response.getStatusCode().is2xxSuccessful()
+                        && response.getBody() != null
+                        && response.getBody().size() == 1
+                        && "prod1".equals(response.getBody().get(0).getProductId()))
+                .verifyComplete();
+    }
+
+    @Test
+    void testGetRecommendationPurchases_ReturnsNotFound() {
+        CartServiceClient cartServiceClient = Mockito.mock(CartServiceClient.class);
+        CartControllerV1 controller = new CartControllerV1(cartServiceClient);
+
+        String cartId = "missing-cart-id";
+        Mockito.when(cartServiceClient.getRecommendationPurchases(cartId))
+                .thenReturn(Mono.empty());
+
+        Mono<ResponseEntity<List<CartProductResponseDTO>>> result = controller.getRecommendationPurchases(cartId);
+
+        StepVerifier.create(result)
+                .expectNextMatches(response -> response.getStatusCode().is4xxClientError()
+                        && response.getBody() == null)
+                .verifyComplete();
+    }
+
 }
