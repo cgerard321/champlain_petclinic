@@ -6,8 +6,11 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.*;
 import com.petclinic.bffapigateway.dtos.Inventory.Status;
+import com.petclinic.bffapigateway.exceptions.InvalidInputsInventoryException;
 import com.petclinic.bffapigateway.exceptions.InventoryNotFoundException;
+import com.petclinic.bffapigateway.exceptions.ProductListNotFoundException;
 import com.petclinic.bffapigateway.utils.InventoryUtils.ImageUtil;
+import com.petclinic.bffapigateway.utils.Rethrower;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterAll;
@@ -28,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -52,6 +56,7 @@ class InventoryServiceClientIntegrationTest {
     @BeforeEach
     void initialize(){
         inventoryServiceClient = new InventoryServiceClient("localhost", String.valueOf(mockWebServer.getPort()));
+        ReflectionTestUtils.setField(inventoryServiceClient, "rethrower", new Rethrower(new ObjectMapper()));
     }
 
     @AfterAll
@@ -826,4 +831,393 @@ class InventoryServiceClientIntegrationTest {
                 })
                 .verifyComplete();
     }
+
+    @Test
+    void getLowStockProducts_shouldReturnFlux_onSuccess() throws Exception {
+        // arrange
+        ProductResponseDTO p1 = new ProductResponseDTO(
+                "p1",
+                "inv1",
+                "A",
+                "d",
+                10.0,
+                1,
+                12.0,
+                Status.OUT_OF_STOCK,
+                LocalDateTime.now()
+        );
+        ProductResponseDTO p2 = new ProductResponseDTO(
+                "p2",
+                "inv1",
+                "B",
+                "d",
+                20.0,
+                2,
+                22.0,
+                Status.AVAILABLE,
+                LocalDateTime.now()
+        );
+        mockWebServer.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(objectMapper.writeValueAsString(List.of(p1, p2))));
+
+        // act
+        Flux<ProductResponseDTO> result = inventoryServiceClient.getLowStockProducts("inv1", 5);
+
+        // assert
+        StepVerifier.create(result)
+                .expectNext(p1)
+                .expectNext(p2)
+                .verifyComplete();
+    }
+
+    @Test
+    void getInventoryById_shouldMap404_toInventoryNotFoundException() {
+        // arrange
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(404)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("{\"message\":\"Inventory not found\"}"));
+
+        // act & assert
+        StepVerifier.create(inventoryServiceClient.getInventoryById("invX"))
+                .expectError(InventoryNotFoundException.class)
+                .verify();
+    }
+
+    @Test
+    void getLowStockProducts_shouldMap404_toNotFoundException() {
+        // arrange
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(404)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("{\"message\":\"No products below threshold\"}"));
+
+        // act & assert
+        StepVerifier.create(inventoryServiceClient.getLowStockProducts("invX", 5))
+                .expectError(org.webjars.NotFoundException.class)
+                .verify();
+    }
+
+    @Test
+    void addInventory_shouldReturnInventory_onSuccess() throws Exception {
+        // arrange
+        InventoryResponseDTO inv = new InventoryResponseDTO(
+                "inv1",
+                "INV-1",
+                "Medication",
+                "Type",
+                "desc",
+                "",
+                "",
+                diagnosticKitImage,
+                false,
+                List.of(),
+                "No recent updates."
+        );
+        mockWebServer.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(objectMapper.writeValueAsString(inv)));
+
+        // act & assert
+        StepVerifier.create(inventoryServiceClient.addInventory(new InventoryRequestDTO()))
+                .expectNext(inv)
+                .verifyComplete();
+    }
+
+    @Test
+    void updateInventory_shouldReturnInventory_onSuccess() throws Exception {
+        // arrange
+        InventoryResponseDTO inv = new InventoryResponseDTO(
+                "inv1",
+                "INV-1",
+                "Medication",
+                "Type",
+                "updated",
+                "",
+                "",
+                diagnosticKitImage,
+                false,
+                List.of(),
+                "No recent updates."
+        );
+        mockWebServer.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(objectMapper.writeValueAsString(inv)));
+
+        // act & assert
+        StepVerifier.create(inventoryServiceClient.updateInventory(new InventoryRequestDTO(), "inv1"))
+                .expectNext(inv)
+                .verifyComplete();
+    }
+
+    @Test
+    void updateInventory_shouldMap400_toInvalidInputsInventoryException() {
+        // arrange
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(400)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("{\"message\":\"bad update\"}"));
+
+        // act & assert
+        StepVerifier.create(inventoryServiceClient.updateInventory(new InventoryRequestDTO(), "inv1"))
+                .expectErrorMatches(ex -> ex instanceof InvalidInputsInventoryException
+                        && ex.getMessage().contains("bad update"))
+                .verify();
+    }
+
+    @Test
+    void updateProductInInventory_shouldReturnProduct_onSuccess() throws Exception {
+        // arrange
+        ProductResponseDTO p = new ProductResponseDTO(
+                "p1",
+                "inv1",
+                "name",
+                "d",
+                10.0,
+                5,
+                15.0,
+                Status.AVAILABLE,
+                LocalDateTime.now()
+        );
+        mockWebServer.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(objectMapper.writeValueAsString(p)));
+
+        // act & assert
+        StepVerifier.create(inventoryServiceClient.updateProductInInventory(new ProductRequestDTO(), "inv1", "p1"))
+                .expectNext(p)
+                .verifyComplete();
+    }
+
+    @Test
+    void updateProductInInventory_shouldMap400_toInvalidInputsInventoryException() {
+        // arrange
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(400)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("{\"message\":\"invalid product update\"}"));
+
+        // act & assert
+        StepVerifier.create(inventoryServiceClient.updateProductInInventory(new ProductRequestDTO(), "inv1", "p1"))
+                .expectErrorMatches(ex -> ex instanceof InvalidInputsInventoryException
+                        && ex.getMessage().contains("invalid product update"))
+                .verify();
+    }
+
+    @Test
+    void addSupplyToInventory_shouldReturnProduct_onSuccess() throws Exception {
+        // arrange
+        ProductResponseDTO p = new ProductResponseDTO(
+                "p1",
+                "inv1",
+                "Supply",
+                "d",
+                10.0,
+                1,
+                11.0,
+                Status.AVAILABLE,
+                LocalDateTime.now()
+        );
+        mockWebServer.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(objectMapper.writeValueAsString(p)));
+
+        // act & assert
+        StepVerifier.create(inventoryServiceClient.addSupplyToInventory(new ProductRequestDTO(), "inv1"))
+                .expectNext(p)
+                .verifyComplete();
+    }
+
+    @Test
+    // arrange
+    void addSupplyToInventory_shouldMap400_toInvalidInputsInventoryException() {
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(400)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("{\"message\":\"invalid supply\"}"));
+
+        // act & assert
+        StepVerifier.create(inventoryServiceClient.addSupplyToInventory(new ProductRequestDTO(), "inv1"))
+                .expectError(InvalidInputsInventoryException.class)
+                .verify();
+    }
+
+    @Test
+    void addInventory_shouldMap400_toInvalidInputsInventoryException() {
+        // arrange
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(400)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("{\"message\":\"invalid payload\"}"));
+
+        // act & assert
+        StepVerifier.create(inventoryServiceClient.addInventory(new InventoryRequestDTO()))
+                .expectErrorMatches(ex -> ex instanceof InvalidInputsInventoryException
+                        && ex.getMessage().contains("invalid payload"))
+                .verify();
+    }
+
+    @Test
+    void getProductByProductIdInInventory_shouldReturn_onSuccess() throws Exception {
+        // arrange
+        ProductResponseDTO p = new ProductResponseDTO(
+                "p1",
+                "inv1",
+                "N",
+                "d",
+                10.0,
+                1,
+                12.0,
+                Status.AVAILABLE,
+                LocalDateTime.now()
+        );
+        mockWebServer.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(objectMapper.writeValueAsString(p)));
+
+        // act & assert
+        StepVerifier.create(inventoryServiceClient.getProductByProductIdInInventory("inv1","p1"))
+                .expectNext(p)
+                .verifyComplete();
+    }
+
+    @Test
+    void getProductByProductIdInInventory_shouldMap404_toProductListNotFoundException() {
+        // arrange
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(404)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("{\"message\":\"not found\"}"));
+
+        // act & assert
+        StepVerifier.create(inventoryServiceClient.getProductByProductIdInInventory("inv1","missing"))
+                .expectError(ProductListNotFoundException.class)
+                .verify();
+    }
+
+    @Test
+    void deleteProductInInventory_shouldComplete_onSuccess() {
+        // arrange
+        mockWebServer.enqueue(new MockResponse().setResponseCode(204));
+        // act & assert
+        StepVerifier.create(inventoryServiceClient.deleteProductInInventory("inv1","p1"))
+                .verifyComplete();
+    }
+
+    @Test
+    void deleteProductInInventory_shouldMap404_toProductListNotFoundException() {
+        // arrange
+        mockWebServer.enqueue(new MockResponse().setResponseCode(404)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("{\"message\":\"missing\"}"));
+
+        // act & assert
+        StepVerifier.create(inventoryServiceClient.deleteProductInInventory("inv1","pX"))
+                .expectError(ProductListNotFoundException.class)
+                .verify();
+    }
+
+    @Test
+    void deleteAllProductsInInventory_shouldComplete_onSuccess() {
+        // arrange
+        mockWebServer.enqueue(new MockResponse().setResponseCode(204));
+        // act & assert
+        StepVerifier.create(inventoryServiceClient.deleteAllProductsInInventory("inv1"))
+                .verifyComplete();
+    }
+
+    @Test
+    void deleteAllProductsInInventory_shouldMap404_toProductListNotFoundException() {
+        // arrange
+        mockWebServer.enqueue(new MockResponse().setResponseCode(404)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("{\"message\":\"inventory missing\"}"));
+
+        // act & assert
+        StepVerifier.create(inventoryServiceClient.deleteAllProductsInInventory("invMissing"))
+                .expectError(ProductListNotFoundException.class)
+                .verify();
+    }
+
+    @Test
+    void deleteInventoryByInventoryId_shouldComplete_onSuccess() {
+        // arrange
+        mockWebServer.enqueue(new MockResponse().setResponseCode(204));
+        // act & assert
+        StepVerifier.create(inventoryServiceClient.deleteInventoryByInventoryId("inv1"))
+                .verifyComplete();
+    }
+
+    @Test
+    void deleteInventoryByInventoryId_shouldMap404_toNotFoundException() {
+        // arrange
+        mockWebServer.enqueue(new MockResponse().setResponseCode(404)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("{\"message\":\"no such inventory\"}"));
+
+        // act & assert
+        StepVerifier.create(inventoryServiceClient.deleteInventoryByInventoryId("invX"))
+                .expectError(org.webjars.NotFoundException.class)
+                .verify();
+    }
+
+    @Test
+    void updateImportantStatus_shouldComplete_onSuccess() {
+        // arrange
+        mockWebServer.enqueue(new MockResponse().setResponseCode(204));
+        // act & assert
+        StepVerifier.create(inventoryServiceClient.updateImportantStatus("inv1", true))
+                .verifyComplete();
+    }
+
+    @Test
+    void deleteAllInventories_shouldComplete_onSuccess() {
+        // arrange
+        mockWebServer.enqueue(new MockResponse().setResponseCode(204));
+        // act & assert
+        StepVerifier.create(inventoryServiceClient.deleteAllInventories())
+                .verifyComplete();
+    }
+
+    @Test
+    void getProductsByInventoryName_shouldReturnProducts() throws Exception {
+        // arrange
+        ProductResponseDTO p = new ProductResponseDTO(
+                "p1",
+                "inv1",
+                "Alpha",
+                "d",
+                10.0,
+                1,
+                12.0,
+                Status.AVAILABLE,
+                LocalDateTime.now()
+        );
+        mockWebServer.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(objectMapper.writeValueAsString(List.of(p))));
+
+        // act & assert
+        StepVerifier.create(inventoryServiceClient.getProductsByInventoryName("Medication"))
+                .expectNext(p)
+                .verifyComplete();
+    }
+
+    @Test
+    void createSupplyPdf_shouldReturnBytes() {
+        // arrange
+        byte[] pdf = new byte[] {37, 80, 68, 70}; // "%PDF"
+        mockWebServer.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_PDF_VALUE)
+                .setBody(new okio.Buffer().write(pdf)));
+
+        // act & assert
+        StepVerifier.create(inventoryServiceClient.createSupplyPdf("inv1"))
+                .expectNextMatches(bytes -> bytes.length == 4 && bytes[0] == 37)
+                .verifyComplete();
+    }
+
+
+
 }
