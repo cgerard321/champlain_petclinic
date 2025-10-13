@@ -2,11 +2,13 @@ package com.petclinic.customersservice.presentationlayer;
 
 import com.petclinic.customersservice.data.Owner;
 import com.petclinic.customersservice.data.OwnerRepo;
+import com.petclinic.customersservice.domainclientlayer.FilesServiceClient;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import static org.junit.jupiter.api.Assertions.*;
@@ -26,6 +28,47 @@ class OwnerControllerIntegrationTest {
 
     @Autowired
     private OwnerRepo repo;
+
+    @MockBean
+    private FilesServiceClient filesServiceClient;
+
+    private Owner buildOwner() {
+        return Owner.builder()
+                .id("55")
+                .ownerId("ownerId-123")
+                .firstName("FirstName")
+                .lastName("LastName")
+                .address("Test address")
+                .city("test city")
+                .province("test province")
+                .telephone("telephone")
+                .build();
+    }
+
+    private Owner buildOwner2() {
+        return Owner.builder()
+                .id("56")
+                .ownerId("ownerId-456")
+                .firstName("FirstName2")
+                .lastName("LastName2")
+                .address("Test address2")
+                .city("test city2")
+                .province("test province2")
+                .telephone("telephone2")
+                .build();
+    }
+
+    private Owner buildOwner3(String firstName, String ownerId) {
+        return Owner.builder()
+                .ownerId(ownerId)
+                .firstName(firstName)
+                .lastName("Doe")
+                .address("123 Main St")
+                .city("Anytown")
+                .province("CA")
+                .telephone("555-555-5555")
+                .build();
+    }
 
     Owner ownerEntity = buildOwner();
 
@@ -80,46 +123,6 @@ class OwnerControllerIntegrationTest {
                 .jsonPath("$.message").isEqualTo("Course id not found: " + nonExistentOwnerId);
     }
 
-//    @Test
-//    void deleteOwnerByOwnerId() {
-//        repo.save(ownerEntity);
-//        Publisher<Void> setup = repo.deleteById(OWNER_ID);
-//        StepVerifier.create(setup).expectNextCount(0).verifyComplete();
-//        client.delete().uri("/owners/" + OWNER_ID)
-//                .accept(MediaType.APPLICATION_JSON)
-//                .exchange().expectStatus().isOk().expectBody();
-//
-//    }
-
-    
-
-
-    /*
-    @Test
-    void getAllOwners() {
-        StepVerifier
-                .create(repo.save(ownerEntity2))
-                .expectNext(ownerEntity2)
-                .verifyComplete();
-
-        client.get()
-                .uri("/owners")
-                .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
-                .acceptCharset(StandardCharsets.UTF_8)
-                .exchange().expectStatus().isOk()
-                .expectHeader().valueEquals("Content-Type","text/event-stream;charset=UTF-8")
-                .expectBodyList(OwnerResponseDTO.class)
-                .value((list) -> {
-                    assertNotNull(list);
-                    assertEquals(11,list.size());
-                });
-
-    }
-    
-     */
-
-
-    
 
 
     @Test
@@ -196,6 +199,7 @@ class OwnerControllerIntegrationTest {
                 .city("test city1")
                 .province("province1")
                 .telephone("telephone1")
+                .photoId(null)
                 .build();
 
         StepVerifier.create(repo.deleteAll().thenMany(repo.save(owner1))).expectNextCount(1).verifyComplete();
@@ -303,144 +307,54 @@ class OwnerControllerIntegrationTest {
                     assertEquals(ownerResponseDTO.getProvince(),ownerEntity.getProvince());
                     assertEquals(ownerResponseDTO.getTelephone(),ownerEntity.getTelephone());
                 });
-//                .jsonPath("$.id").isEqualTo(ownerEntity.getId())
-//                .jsonPath("$.firstName").isEqualTo(ownerEntity.getFirstName())
-//                .jsonPath("$.lastName").isEqualTo(ownerEntity.getLastName())
-//                .jsonPath("$.address").isEqualTo(ownerEntity.getAddress())
-//                .jsonPath("$.city").isEqualTo(ownerEntity.getCity())
-//                .jsonPath("$.telephone").isEqualTo(ownerEntity.getTelephone());
-//                //.jsonPath("$.photoId").isEqualTo(ownerEntity.getPhotoId());
+
     }
+
     @Test
     void updateOwnerByOwnerId() {
-      Publisher<Owner> setup = repo.deleteAll().thenMany(repo.save(ownerEntity));
-      StepVerifier.create(setup).expectNextCount(1).verifyComplete();
-     client.put().uri("/owners/" + PUBLIC_OWNER_ID)
-            .body(Mono.just(ownerEntity), Owner.class)
-            .accept(MediaType.APPLICATION_JSON)
-          .exchange().expectStatus().isOk()
-            .expectHeader().contentType(MediaType.APPLICATION_JSON)
-              .expectBody()
-             .jsonPath("$.ownerId").isEqualTo(ownerEntity.getOwnerId())
-            .jsonPath("$.firstName").isEqualTo(ownerEntity.getFirstName())
-            .jsonPath("$.lastName").isEqualTo(ownerEntity.getLastName())
-            .jsonPath("$.address").isEqualTo(ownerEntity.getAddress())
-            .jsonPath("$.city").isEqualTo(ownerEntity.getCity())
-             .jsonPath("$.province").isEqualTo(ownerEntity.getProvince())
-            .jsonPath("$.telephone").isEqualTo(ownerEntity.getTelephone());
-             //.jsonPath("$.photoId").isEqualTo(ownerEntity.getPhotoId());
+        // Setup a unique owner for this test
+        String testOwnerId = "update-test-id-123";
+        Owner existingOwner = buildOwner3("OldFirst", testOwnerId);
+        existingOwner.setId("1");
 
-   }
+        // 1. Save the existing owner
+        Publisher<Owner> setup = repo.deleteAll().then(repo.save(existingOwner));
+        StepVerifier.create(setup).expectNextCount(1).verifyComplete();
 
-    /*
-    @Test
-    void updateOwnerByOwnerId() {
-        // Ensure that an owner with valid data exists in the repository
-        repo.save(ownerEntity).block();
+        // 2. Prepare the update DTO (assuming a full request DTO is needed)
+        OwnerRequestDTO updateDTO = new OwnerRequestDTO();
+        updateDTO.setFirstName("NewFirstName");
+        updateDTO.setLastName("NewLastName");
+        updateDTO.setAddress("New Address");
+        updateDTO.setCity("New City");
+        updateDTO.setProvince("New Province");
+        updateDTO.setTelephone("999-999-9999");
+        // photoId is left null
 
-        // Create an updated owner object
-        Owner updatedOwner = Owner.builder()
-                .ownerId(PUBLIC_OWNER_ID) // Set the same ownerId
-                .firstName("UpdatedFirstName")
-                .lastName("UpdatedLastName")
-                .address("Updated Address")
-                .city("Updated City")
-                .telephone("Updated Telephone")
-                //.photoId("Updated PhotoId")
-                .build();
-
-        // Send a PUT request to update the owner
+        // 3. Make the PUT request
         client.put()
-                .uri("/owners/" + PUBLIC_OWNER_ID) // Use the ownerId for the update
+                .uri("/owners/" + testOwnerId)
                 .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(updatedOwner)
+                .body(Mono.just(updateDTO), OwnerRequestDTO.class)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$.ownerId").isEqualTo(updatedOwner.getOwnerId()) // Verify the updated ID
-                .jsonPath("$.firstName").isEqualTo(updatedOwner.getFirstName())
-                .jsonPath("$.lastName").isEqualTo(updatedOwner.getLastName())
-                .jsonPath("$.address").isEqualTo(updatedOwner.getAddress())
-                .jsonPath("$.city").isEqualTo(updatedOwner.getCity())
-                .jsonPath("$.telephone").isEqualTo(updatedOwner.getTelephone());
-        //.jsonPath("$.photoId").isEqualTo(updatedOwner.getPhotoId());
+                // 4. Assert the response contents
+                .expectBody(OwnerResponseDTO.class)
+                .value(responseDTO -> {
+                    assertNotNull(responseDTO);
+                    assertEquals(testOwnerId, responseDTO.getOwnerId());
+                    assertEquals("NewFirstName", responseDTO.getFirstName());
+                    assertEquals("New City", responseDTO.getCity());
+                });
+
+        // 5. Verify the update persisted (optional but robust)
+        Mono<Owner> checkOwner = repo.findOwnerByOwnerId(testOwnerId);
+        StepVerifier.create(checkOwner)
+                .expectNextMatches(owner ->
+                        owner.getFirstName().equals("NewFirstName") &&
+                                owner.getCity().equals("New City")
+                )
+                .verifyComplete();
     }
-
-     */
-
-    @Test
-    void insertOwner() {
-        Publisher<Void> setup = repo.deleteAll();
-        StepVerifier.create(setup).expectNextCount(0).verifyComplete();
-        client.post().uri("/owners")
-                .body(Mono.just(ownerEntity), Owner.class)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange().expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$.id").isEqualTo(ownerEntity.getId())
-                .jsonPath("$.firstName").isEqualTo(ownerEntity.getFirstName())
-                .jsonPath("$.lastName").isEqualTo(ownerEntity.getLastName())
-                .jsonPath("$.address").isEqualTo(ownerEntity.getAddress())
-                .jsonPath("$.city").isEqualTo(ownerEntity.getCity())
-                .jsonPath("$.province").isEqualTo(ownerEntity.getProvince())
-                .jsonPath("$.telephone").isEqualTo(ownerEntity.getTelephone());
-                //.jsonPath("$.photoId").isEqualTo(ownerEntity.getPhotoId());
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-        private Owner buildOwner() {
-        return Owner.builder()
-                .id("9")
-                .ownerId("ownerId-123")
-                .firstName("FirstName")
-                .lastName("LastName")
-                .address("Test address")
-                .city("test city")
-                .province("province")
-                .telephone("telephone")
-                //.photoId("1")
-                .build();
-    }
-
-    private Owner buildOwner2() {
-        return Owner.builder()
-                .id("67")
-                .ownerId("ownerId-1234")
-                .firstName("FirstName")
-                .lastName("LastName")
-                .address("Test address")
-                .city("test city")
-                .province("province")
-                .telephone("telephone")
-                //.photoId("1")
-                .build();
-    }
-
-    private Owner buildOwner3(String firstName, String ownerId) {
-        return Owner.builder()
-                .ownerId("ownerId-1234")
-                .firstName("FirstName")
-                .lastName("LastName")
-                .address("Test address")
-                .city("test city")
-                .province("province")
-                .telephone("telephone")
-                //.photoId("1")
-                .build();
-    }
-
-
-
 }

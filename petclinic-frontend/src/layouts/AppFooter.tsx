@@ -1,5 +1,8 @@
 import { Container, Row, Col } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
+
+import { contact, clinic } from '@/shared/content';
+
 import './AppFooter.css';
 
 export function AppFooter(): JSX.Element {
@@ -12,12 +15,9 @@ export function AppFooter(): JSX.Element {
               <span className="icon" aria-hidden="true">
                 {'\uD83D\uDC3E'}
               </span>
-              PetClinic
+              {clinic.name}
             </h5>
-            <p className="footer-desc">
-              Providing compassionate veterinary care to keep your pets healthy
-              and happy.
-            </p>
+            <p className="footer-desc">{clinic.message}</p>
           </Col>
 
           <Col md={2}>
@@ -57,21 +57,21 @@ export function AppFooter(): JSX.Element {
                 <span className="icon" aria-hidden="true">
                   {'\uD83D\uDCCD'}
                 </span>
-                <span>900 Rue Riverside</span>
+                <span>{clinic.address.street}</span>
               </li>
               <li>
                 <span className="icon" aria-hidden="true">
                   {'\uD83D\uDCDE'}
                 </span>
-                <a href="tel:+14506727360">(450) 672-7360</a>
+                <a href={`tel:+${contact.phone.href}`}>
+                  {contact.phone.display}
+                </a>
               </li>
               <li>
                 <span className="icon" aria-hidden="true">
                   {'\uD83D\uDCE7'}
                 </span>
-                <a href="mailto:info@champlainpetclinic.com">
-                  info@champlainpetclinic.com
-                </a>
+                <a href={`mailto:${contact.email}`}>{contact.email}</a>
               </li>
             </ul>
           </Col>
