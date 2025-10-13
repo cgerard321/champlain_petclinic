@@ -4,30 +4,37 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(15, 23, 42, 0.55);
   display: flex;
   justify-content: center;
   align-items: flex-start;
   z-index: 1000;
+  padding: 2rem 1rem;
 }
 
-.modal-content {
+.modal-backdrop .modal-content {
   position: relative;
-  background: #fff;
-  padding: 2rem;
-  border-radius: 12px;
+  background: radial-gradient(
+      120% 120% at 10% 0%,
+      rgba(37, 99, 235, 0.08),
+      rgba(255, 255, 255, 0)
+    ),
+    #ffffff;
+  padding: 2.25rem;
+  border-radius: 0 !important;
   width: 500px;
-  max-width: 90%;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-  margin-top: 2rem;
-  margin-bottom: 2rem;
-  margin-left: auto;
-  margin-right: auto;
-  max-height: calc(100vh - 6rem);
+  max-width: min(90%, 520px);
+  box-shadow: 0 28px 60px rgba(15, 23, 42, 0.28);
+  border: 1px solid rgba(37, 99, 235, 0.12);
+  margin: 0 auto;
+  max-height: calc(100vh - 4rem);
   overflow-y: auto;
+  color: var(--cart-text, #0f172a);
 }
 
-.modal-close {
+.modal-close,
+.cart-billing-modal-close,
+.confirm-modal-close {
   position: absolute;
   top: 1rem;
   right: 1rem;
@@ -35,7 +42,7 @@
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
-  color: #666;
+  color: var(--cart-muted, #475569);
   line-height: 1;
   padding: 0;
   width: 30px;
@@ -45,14 +52,22 @@
   justify-content: center;
 }
 
-.modal-close:hover {
-  color: #000;
+.modal-close:hover,
+.cart-billing-modal-close:hover,
+.confirm-modal-close:hover {
+  color: var(--cart-brand, #2563eb);
 }
 
 .modal-content h2 {
   margin-top: 0;
   margin-bottom: 1.5rem;
-  color: #333;
+  font-size: clamp(1.4rem, 2.5vw, 1.65rem);
+  font-weight: 700;
+  color: var(--cart-text, #0f172a);
+}
+
+.cart-billing-modal-content {
+  border-radius: 0 !important;
 }
 
 .billing-form {
@@ -64,12 +79,17 @@
 .billing-form > input,
 .billing-form > select {
   width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #ccc;
-  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--cart-ring, #e5e7eb);
+  border-radius: 14px;
   font-size: 1rem;
   text-align: left;
   box-sizing: border-box;
+  background: #ffffff;
+  color: var(--cart-text, #0f172a);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .billing-form select {
@@ -100,87 +120,89 @@
 .form-field input {
   width: 100%;
   text-align: left;
-  padding: 0.75rem;
-  border: 1px solid #ccc;
-  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--cart-ring, #e5e7eb);
+  border-radius: 14px;
   font-size: 1rem;
   box-sizing: border-box;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.billing-form > input:focus,
+.billing-form > select:focus,
+.form-field input:focus {
+  outline: none;
+  border-color: rgba(37, 99, 235, 0.55);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
 }
 
 .billing-form button[type='submit'] {
-  margin-top: 0.5rem;
-  padding: 0.75rem;
-  background-color: #007bff;
+  margin-top: 0.75rem;
+  padding: 0.85rem;
+  background: linear-gradient(135deg, var(--cart-brand, #2563eb), #1d4ed8);
   color: white;
-  border: none;
-  border-radius: 8px;
+  border: 1px solid transparent;
+  border-radius: 999px;
   font-size: 1rem;
-  font-weight: bold;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
   width: 100%;
+  box-shadow: 0 14px 32px rgba(37, 99, 235, 0.28);
 }
 
 .billing-form button[type='submit']:hover:not(:disabled) {
-  background-color: #0056b3;
+  transform: translateY(-2px);
+  box-shadow: 0 18px 38px rgba(37, 99, 235, 0.32);
 }
 
 .billing-form button[type='submit']:disabled {
-  background-color: #ccc;
+  background: #e2e8f0;
+  color: var(--cart-muted, #475569);
   cursor: not-allowed;
+  box-shadow: none;
 }
 
 .error {
-  color: #f44336;
-  padding: 0.75rem;
-  background-color: #ffebee;
-  border-radius: 6px;
+  color: #b91c1c;
+  padding: 0.9rem;
+  background: rgba(239, 68, 68, 0.12);
+  border-radius: 14px;
   margin-bottom: 1rem;
+  border: 1px solid rgba(239, 68, 68, 0.2);
 }
 
 .success {
-  color: #4caf50;
-  padding: 0.75rem;
-  background-color: #e8f5e9;
-  border-radius: 6px;
+  color: #166534;
+  padding: 0.9rem;
+  background: rgba(34, 197, 94, 0.12);
+  border-radius: 14px;
   margin-bottom: 1rem;
-}
-.cart-billing-modal-close {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-  color: #666;
-  line-height: 1;
-  padding: 0;
-  width: 30px;
-  height: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  border: 1px solid rgba(34, 197, 94, 0.18);
 }
 .main-fields {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.1rem;
   width: 100%;
-  align-items: center;
+  align-items: stretch;
 }
 
 .modal-content .main-fields > input,
 .modal-content .main-fields > select {
-  width: 90%;
+  width: 100%;
   text-align: left;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
 }
 
 .main-fields .form-row {
   display: flex;
   gap: 1rem;
-  width: 90%;
+  width: 100%;
   justify-content: flex-start;
   align-items: stretch;
 }
@@ -201,7 +223,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(15, 23, 42, 0.55);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -210,17 +232,24 @@
 
 /* Confirmation modal content */
 .confirm-modal-content {
-  background: #fff;
+  background: radial-gradient(
+      140% 120% at 0% 0%,
+      rgba(37, 99, 235, 0.08),
+      rgba(255, 255, 255, 0)
+    ),
+    #ffffff;
   padding: 2rem;
-  border-radius: 12px;
+  border-radius: 0;
   width: 400px;
   max-width: 90%;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 24px 48px rgba(15, 23, 42, 0.26);
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 1rem;
+  border: 1px solid rgba(37, 99, 235, 0.12);
+  color: var(--cart-text, #0f172a);
 }
 
 .confirm-modal-buttons {
@@ -232,26 +261,35 @@
 
 /* Buttons */
 .confirm-modal-buttons button {
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  border: none;
-  font-size: 1rem;
+  padding: 0.65rem 1.25rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-size: 0.95rem;
   cursor: pointer;
+  font-weight: 600;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .confirm-modal-buttons button.confirm {
-  background-color: #007bff;
-  color: white;
+  background: linear-gradient(135deg, var(--cart-brand, #2563eb), #1d4ed8);
+  color: #fff;
+  box-shadow: 0 12px 28px rgba(37, 99, 235, 0.26);
 }
 
 .confirm-modal-buttons button.confirm:hover {
-  background-color: #0056b3;
+  transform: translateY(-2px);
+  box-shadow: 0 16px 34px rgba(37, 99, 235, 0.3);
 }
 
 .confirm-modal-buttons button.cancel {
-  background-color: #f44336;
+  background: linear-gradient(135deg, #fb7185, #ef4444);
+  color: #fff;
+  box-shadow: 0 12px 28px rgba(239, 68, 68, 0.26);
 }
 
 .confirm-modal-buttons button.cancel:hover {
-  background-color: #d32f2f;
+  transform: translateY(-2px);
+  box-shadow: 0 16px 34px rgba(239, 68, 68, 0.3);
 }

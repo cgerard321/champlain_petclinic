@@ -166,6 +166,9 @@ const UserCart = (): JSX.Element => {
     isAdmin || IsInventoryManager() || IsVet() || IsReceptionist();
 
   // derived totals
+  const formatCurrency = (value: number): string =>
+    `$${value.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
+
   const subtotal = cartItems.reduce(
     (acc, item) => acc + item.productSalePrice * (item.quantity || 1),
     0
@@ -966,20 +969,42 @@ const UserCart = (): JSX.Element => {
           {/* Wishlist items */}
           <div className="Wishlist-items">
             {wishlistItems.length > 0 ? (
-              wishlistItems.map(item => (
-                <CartItem
-                  key={item.productId}
-                  item={item}
-                  index={-1}
-                  changeItemQuantity={() => {}}
-                  deleteItem={() => {}}
-                  addToWishlist={() => {}}
-                  addToCart={addToCartFunction}
-                  isInWishlist={true}
-                  removeFromWishlist={removeFromWishlist}
-                  showNotification={setNotificationMessage}
-                />
-              ))
+              wishlistItems.map(item => {
+                const isOutOfStock = item.productQuantity <= 0;
+                return (
+                  <div key={item.productId} className="Wishlist-item">
+                    <div className="recent-purchase-image-container">
+                      <div className="recent-purchase-image">
+                        <ImageContainer imageId={item.imageId} />
+                      </div>
+                    </div>
+                    <div className="recent-purchase-name">
+                      {item.productName}
+                    </div>
+                    <div className="recent-purchase-price">
+                      {formatCurrency(item.productSalePrice)}
+                    </div>
+                    <div className="Wishlist-item-actions">
+                      <button
+                        className="addToCart-button"
+                        onClick={() => addToCartFunction(item)}
+                        disabled={isStaff || isOutOfStock}
+                        aria-disabled={isStaff || isOutOfStock}
+                      >
+                        {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
+                      </button>
+                      <button
+                        className="wishlist-button danger"
+                        onClick={() => removeFromWishlist(item)}
+                        disabled={isStaff}
+                        aria-disabled={isStaff}
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                );
+              })
             ) : (
               <p>No products in the wishlist.</p>
             )}

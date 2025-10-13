@@ -65,88 +65,105 @@ const CartItem = ({
 
   return (
     <div className="CartItem">
-      <ImageContainer imageId={item.imageId} />
-      <div className="CartItem-info">
-        <h2 className="info-title">{item.productName}</h2>
-        <p className="info-description">{item.productDescription}</p>
+      <div className="cart-item-media">
+        <ImageContainer imageId={item.imageId} />
       </div>
 
-      <div className="CartItem-details">
+      <div className="cart-item-content">
+        <div className="cart-item-header">
+          <h2 className="info-title">{item.productName}</h2>
+          {remainingStock <= 5 && remainingStock > 0 && (
+            <span className="stock-message">
+              Only {remainingStock} items left in stock.
+            </span>
+          )}
+          {remainingStock === 0 && (
+            <span className="stock-message out-of-stock">Out of stock</span>
+          )}
+        </div>
+
+        <p className="info-description">{item.productDescription}</p>
+
         {/* Ligne panier normale */}
         {!isInWishlist && (
-          <>
-            <div className="item-quantity">
-              <input
-                type="number"
-                min="1"
-                max={item.productQuantity}
-                value={item.quantity || 1}
-                onChange={e => changeItemQuantity(e, index)}
-                onBlur={e => changeItemQuantity(e, index)}
-                aria-label={`Quantity of ${item.productName}`}
-                disabled={isStaff}
-              />
+          <div className="cart-item-meta">
+            <div className="item-controls">
+              <div className="item-quantity">
+                <label
+                  className="sr-only"
+                  htmlFor={`quantity-${item.productId}`}
+                >
+                  Quantity of {item.productName}
+                </label>
+                <input
+                  id={`quantity-${item.productId}`}
+                  type="number"
+                  min="1"
+                  max={item.productQuantity}
+                  value={item.quantity || 1}
+                  onChange={e => changeItemQuantity(e, index)}
+                  onBlur={e => changeItemQuantity(e, index)}
+                  aria-label={`Quantity of ${item.productName}`}
+                  disabled={isStaff}
+                />
+              </div>
+              <div className="item-actions-inline">
+                <button
+                  type="button"
+                  className="action-link danger"
+                  onClick={() => deleteItem(item.productId, index)}
+                  disabled={isStaff}
+                >
+                  Remove
+                </button>
+                <span className="action-divider" aria-hidden="true" />
+                <button
+                  type="button"
+                  className="action-link"
+                  onClick={() => addToWishlist(item)}
+                  disabled={isStaff}
+                >
+                  Add to wishlist
+                </button>
+              </div>
             </div>
             <span className="CartItem-price">
               {formatPrice(item.productSalePrice)}
             </span>
-            <button
-              className="wishlist-button"
-              onClick={() => deleteItem(item.productId, index)}
-              aria-label={`Remove ${item.productName} from cart`}
-              disabled={isStaff}
-            >
-              Remove
-            </button>
-            <button
-              className="wishlist-button"
-              onClick={() => addToWishlist(item)}
-              aria-label={`Add ${item.productName} to wishlist`}
-              disabled={isStaff}
-            >
-              Add to Wishlist
-            </button>
-          </>
+          </div>
         )}
 
         {/* Ligne wishlist */}
         {isInWishlist && (
-          <div className="cartitem-actions">
-            <button
-              className="addToCart-button"
-              onClick={handleAddToCart}
-              aria-label={`Add ${item.productName} to cart`}
-              disabled={isStaff || item.productQuantity === 0}
-              aria-disabled={isStaff || item.productQuantity === 0}
-            >
-              {/* read-only: staff/admin OR out of stock */}
-              {item.productQuantity === 0 ? 'Out of Stock' : 'Add to Cart'}
-            </button>
+          <div className="cart-item-meta wishlist">
+            <div className="cart-item-actions">
+              <button
+                className="addToCart-button"
+                onClick={handleAddToCart}
+                aria-label={`Add ${item.productName} to cart`}
+                disabled={isStaff || item.productQuantity === 0}
+                aria-disabled={isStaff || item.productQuantity === 0}
+              >
+                {/* read-only: staff/admin OR out of stock */}
+                {item.productQuantity === 0 ? 'Out of Stock' : 'Add to Cart'}
+              </button>
 
-            <button
-              className="wishlist-button danger"
-              style={{ marginLeft: '0.5rem' }}
-              onClick={() => removeFromWishlist && removeFromWishlist(item)}
-              aria-label={`Remove ${item.productName} from wishlist`}
-              disabled={isStaff}
-            >
-              Remove
-            </button>
+              <button
+                className="wishlist-button danger"
+                onClick={() => removeFromWishlist && removeFromWishlist(item)}
+                aria-label={`Remove ${item.productName} from wishlist`}
+                disabled={isStaff}
+              >
+                Remove
+              </button>
+            </div>
           </div>
         )}
-      </div>
 
-      <div className="stock-message-container">
-        {remainingStock <= 5 && remainingStock > 0 ? (
-          <div className="stock-message">
-            Only {remainingStock} items left in stock.
-          </div>
-        ) : remainingStock === 0 ? (
-          <div className="stock-message out-of-stock">Out of stock</div>
-        ) : null}
+        {errorMessage && (
+          <div className="item-error-message">{errorMessage}</div>
+        )}
       </div>
-
-      {errorMessage && <div className="item-error-message">{errorMessage}</div>}
     </div>
   );
 };
