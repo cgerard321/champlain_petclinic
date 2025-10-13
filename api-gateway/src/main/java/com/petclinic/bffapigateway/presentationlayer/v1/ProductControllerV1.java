@@ -81,7 +81,7 @@ public class ProductControllerV1 {
     }
 
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
     @DeleteMapping(value = "/{productId}")
     public Mono<ResponseEntity<ProductResponseDTO>> deleteProduct(@PathVariable String productId,
                                                     @RequestParam(name = "cascadeBundles", defaultValue = "false")  boolean cascadeBundles) {

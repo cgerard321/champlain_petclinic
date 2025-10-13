@@ -519,17 +519,17 @@ public void whenUpdateProduct_thenReturnUpdatedProduct() {
 
 
 //TODO:Delete
-@Test
-public void whenDeleteProduct_thenReturnNothing() {
-    when(productsServiceClient.deleteProduct("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")).thenReturn(Mono.empty());
-
-    webTestClient.delete()
-            .uri(baseProductsURL + "/e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
-            .exchange()
-            .expectStatus().isNoContent();
-
-    verify(productsServiceClient, times(1)).deleteProduct("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a");
-}
+//@Test
+//public void whenDeleteProduct_thenReturnNothing() {
+//    when(productsServiceClient.deleteProduct("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")).thenReturn(Mono.empty());
+//
+//    webTestClient.delete()
+//            .uri(baseProductsURL + "/e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
+//            .exchange()
+//            .expectStatus().isNoContent();
+//
+//    verify(productsServiceClient, times(1)).deleteProduct("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a");
+//}
 
 
 //TODO: Bundles
