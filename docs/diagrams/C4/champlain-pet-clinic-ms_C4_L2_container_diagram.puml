@@ -14,7 +14,8 @@ scale 0.4
 !include $ICONURL/devicons/html5.puml
 !include $ICONURL/font-awesome-5/database.puml
 !include $ICONURL/font-awesome-5/user.puml
-' Your existing AddElementTag and AddRelTag definitions here...
+
+
 AddElementTag("microService-java", $shape=EightSidedShape(), $bgColor="#6DB33F", $fontColor="black", $legendText="API Java \neight sided")
 AddElementTag("microService-go", $shape=EightSidedShape(), $bgColor="#29BEB0", $fontColor="white", $legendText="API Go \neight sided")
 AddElementTag("microService-c#", $shape=EightSidedShape(), $bgColor="#512bd4", $fontColor="white", $legendText="API C# \neight sided")
@@ -27,61 +28,56 @@ AddElementTag("framework-react", $shape=RoundedBoxShape(), $bgColor="#61DBFB", $
 AddElementTag("framework-angular", $shape=RoundedBoxShape(), $bgColor="#b52e31", $fontColor="white", $legendText=Angular Single-Page Application")
 
 AddElementTag("webApp", $bgColor="#e34f26", $fontColor="white", $legendText="Web Application")
-AddElementTag("monitoring", $shape=RoundedBoxShape(), $bgColor="#E6522C", $fontColor="white")
-AddElementTag("visualization", $shape=RoundedBoxShape(), $bgColor="#F99035", $fontColor="white")
 
 AddRelTag("red-line", $lineColor="red", $legendText="billing-service\ndependency")
 AddRelTag("blue-line", $lineColor="blue", $legendText="auth-service\ndependency")
 AddRelTag("green-line", $lineColor="green", $legendText="cart-service\ndependency")
 AddRelTag("orange-line", $lineColor="orange", $legendText="visits-service\ndependency")
 AddRelTag("purple-line", $lineColor="purple", $legendText="api_gateway\ndependency")
-AddRelTag("metrics", $lineColor="gray", $lineStyle="dashed", $legendText="Metrics collection")
-
 
 LAYOUT_TOP_DOWN()
+'LAYOUT_WITH_LEGEND()
 SHOW_PERSON_OUTLINE()
+'HIDE_STEREOTYPE()
 
 
-title Container Diagram for Champlain Pet Clinic System with Monitoring
+title Container Diagram for Champlain Pet Clinic System
 
 Person(receptionist, "Receptionist", "An employee of the Champlain Pet Clinic who assists clients of the clinic.")
 Person(inventoryManager, "Inventory Manager", "An employee of the  Champlain Pet Clinic who manages the medical inventory.")
 Person(veterinarian, "Veterinarian", "An medical employee of the Champlain Pet Clinic who treats client pets.")
 Person(admin, "Admin", "An employee of the Champlain Pet Clinic responsible for account creation and handling overall system issues.")
 Person(customer, "Customer", "A customer of the Champlain Pet Clinic.")
-Person(developer, "Developer", "Developer of the Pet Clinic")
-
 
 Container_Ext(minio, "Bucket Storage", "Minio", "Stores uploaded files externally")
 
 System_Boundary(c1, "Champlain Pet Clinic System"){
 
-    ' Your existing containers...
+together {
     together {
-        together {
-            Container(react_spa, "React Single-Page Application", "TypeScript, React", "Provides all the Champlain Pet Clinic functionality to clients via their web browser.", $sprite="react", $tags = "framework-react")
-            Container(client_app, "Client Web Application", "HTML, CSS", "Delivers the static Client-focused content and the react single page application.", $sprite="html5", $tags = "webApp")
-        }
-        together {
-            Container(employee_app, "Employee Web Application", "HTML, CSS", "Delivers the static Employee-focused content and angular single page application.", $sprite="html5", $tags = "webApp")
-            Container(angular_spa, "Angular Single-Page Application", "JavaScript, Angular", "Provides all the Champlain Pet Clinic functionality to employees via their web browser.", $sprite="angular", $tags = "framework-angular")
-        }
+        Container(react_spa, "React Single-Page Application", "TypeScript, React", "Provides all the Champlain Pet Clinic functionality to clients via their web browser.", $sprite="react", $tags = "framework-react")
+        Container(client_app, "Client Web Application", "HTML, CSS", "Delivers the static Client-focused content and the react single page application.", $sprite="html5", $tags = "webApp")
     }
+    together {
+        Container(employee_app, "Employee Web Application", "HTML, CSS", "Delivers the static Employee-focused content and angular single page application.", $sprite="html5", $tags = "webApp")
+        Container(angular_spa, "Angular Single-Page Application", "JavaScript, Angular", "Provides all the Champlain Pet Clinic functionality to employees via their web browser.", $sprite="angular", $tags = "framework-angular")
+    }
+}
 
-    together {
-        Container(api_gateway, "API-Gateway", "Java, Spring Boot", "Provides Champlain Pet Clinic functionality and hosts the Employee Web Application.", $sprite="spring_original", $tags = "microService-java")
-        Container(files_service, "files-service", "Go", "Makes API calls to store and access files for other services", $sprite="go", $tags = "microService-go")
-        Container(auth_service, "auth-service", "Java, Spring Boot", "Provides authentication and authorization functionality.", $sprite="spring_original" , $tags = "microService-java")
-        Container(customers_service, "customers-service", "Java, Spring Boot", "Provides customer functionality which includes owners, pets, and types.", $sprite="spring_original", $tags = "microService-java")
-        Container(inventory_service, "inventory-service", "Java, Spring Boot", "Provides medical inventory functionality.", $sprite="spring_original", $tags = "microService-java")
-        Container(vets_service, "vets-service", "Java, Spring Boot", "Provides veterinarian functionality.", $sprite="spring_original", $tags = "microService-java")
-        Container(visits_service, "visits-service", "Java, Spring Boot", "Provides appointment booking functionality. Includes its own mail service", $sprite="spring_original", $tags = "microService-java")
-        Container(billing_service, "billing-service", "Java, Spring Boot", "Provides billing functionality.", $sprite="spring_original", $tags = "microService-java")
-        Container(products_service, "products-service", "Java, Spring Boot", "Provides product management functionality for the online store.", $sprite="spring_original", $tags = "microService-java")
-        Container(cart_service, "cart-service", "Java, Spring Boot", "Provides cart management functionality for the online store.", $sprite="spring_original", $tags = "microService-java")
-        Container(mailer_service, "mailer-service", "Go", "Provides email functionality for the auth-service.", $sprite="go", $tags = "microService-go")
-        Container(emailing_service, "emailing-service", "C#, ASP.NET Core", "Provides email functionality.", $sprite="dotnetcore", $tags = "microService-c#")
-    }
+together {
+    Container(api_gateway, "API-Gateway", "Java, Spring Boot", "Provides Champlain Pet Clinic functionality and hosts the Employee Web Application.", $sprite="spring_original", $tags = "microService-java")
+    Container(files_service, "files-service", "Go", "Makes API calls to store and access files for other services", $sprite="go", $tags = "microService-go")
+    Container(auth_service, "auth-service", "Java, Spring Boot", "Provides authentication and authorization functionality.", $sprite="spring_original" , $tags = "microService-java")
+    Container(customers_service, "customers-service", "Java, Spring Boot", "Provides customer functionality which includes owners, pets, and types.", $sprite="spring_original", $tags = "microService-java")
+    Container(inventory_service, "inventory-service", "Java, Spring Boot", "Provides medical inventory functionality.", $sprite="spring_original", $tags = "microService-java")
+    Container(vets_service, "vets-service", "Java, Spring Boot", "Provides veterinarian functionality.", $sprite="spring_original", $tags = "microService-java")
+    Container(visits_service, "visits-service", "Java, Spring Boot", "Provides appointment booking functionality. Includes its own mail service", $sprite="spring_original", $tags = "microService-java")
+    Container(billing_service, "billing-service", "Java, Spring Boot", "Provides billing functionality.", $sprite="spring_original", $tags = "microService-java")
+    Container(products_service, "products-service", "Java, Spring Boot", "Provides product management functionality for the online store.", $sprite="spring_original", $tags = "microService-java")
+    Container(cart_service, "cart-service", "Java, Spring Boot", "Provides cart management functionality for the online store.", $sprite="spring_original", $tags = "microService-java")
+    Container(mailer_service, "mailer-service", "Go", "Provides email functionality for the auth-service.", $sprite="go", $tags = "microService-go")
+    Container(emailing_service, "emailing-service", "C#, ASP.NET Core", "Provides email functionality.", $sprite="dotnetcore", $tags = "microService-c#")
+}
     together {
         ContainerDb(auth_db, "auth-db", "MySQL 5.7.x", "Stores user information.", $sprite="mysql" , $tags = "storage-mysql")
         ContainerDb(files_db, "files-db", "MySQL 5.7.x", "Stores files information.", $sprite="mysql" , $tags = "storage-mysql")
@@ -95,15 +91,8 @@ System_Boundary(c1, "Champlain Pet Clinic System"){
         ContainerDb(cart_db, "cart-db", "Mongo", "Stores cart information.", $sprite="mongodb", $tags = "storage-mongo")
         ContainerDb(emailing_db, "emailing-db", "MySQL 8.0", "Stores email information.", $sprite="mysql", $tags = "storage-mysql")
     }
-
-    ' Add Prometheus and Grafana containers
-    together {
-        Container(prometheus, "Prometheus", "Time Series Database", "Collects and stores metrics from all microservices.", $tags="monitoring")
-        Container(grafana, "Grafana", "Visualization", "Allows for visualization and analysis of metrics from Prometheus.", $tags="visualization")
-    }
 }
 
-' Your existing relationships...
 Rel(customer, client_app, "Visits petclinic.benmusicgeek.synology.me/ using", "HTTPS")
 Rel(admin, employee_app, "Visits petclinic-backend.benmusicgeek.synology.me/#! using", "HTTPS")
 Rel(receptionist, employee_app, "Visits petclinic-backend.benmusicgeek.synology.me/#! using", "HTTPS")
@@ -155,24 +144,6 @@ Rel(visits_service, emailing_service, "Reads from and writes to", "Mongo/MQL/TCP
 Rel(visits_service, auth_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="orange-line")
 Rel(visits_service, customers_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="orange-line")
 Rel(visits_service, vets_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="orange-line")
-
-
-' relationships for monitoring
-Rel(prometheus, api_gateway, "Pulls metrics from", "HTTP", $tags="metrics")
-Rel(prometheus, files_service, "Pulls metrics from", "HTTP", $tags="metrics")
-Rel(prometheus, auth_service, "Pulls metrics from", "HTTP", $tags="metrics")
-Rel(prometheus, customers_service, "Pulls metrics from", "HTTP", $tags="metrics")
-Rel(prometheus, inventory_service, "Pulls metrics from", "HTTP", $tags="metrics")
-Rel(prometheus, vets_service, "Pulls metrics from", "HTTP", $tags="metrics")
-Rel(prometheus, visits_service, "Pulls metrics from", "HTTP", $tags="metrics")
-Rel(prometheus, billing_service, "Pulls metrics from", "HTTP", $tags="metrics")
-Rel(prometheus, products_service, "Pulls metrics from", "HTTP", $tags="metrics")
-Rel(prometheus, cart_service, "Pulls metrics from", "HTTP", $tags="metrics")
-Rel(prometheus, mailer_service, "Pulls metrics from", "HTTP", $tags="metrics")
-Rel(prometheus, emailing_service, "Pulls metrics from", "HTTP", $tags="metrics")
-
-Rel(grafana, prometheus, "Queries metrics from", "HTTP")
-Rel(developer, grafana, "Views dashboards")
 
 
 SHOW_LEGEND()

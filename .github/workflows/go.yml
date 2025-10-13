@@ -26,7 +26,7 @@ jobs:
       - name: Build
         run: cd mailer-service && go build -v -o app; cd -
 
-      - name: Test
+      - name: Test Go Mailer
         run: cd mailer-service && go test -v ./...; cd -
 
       - name: Grant execute perm on cover.sh

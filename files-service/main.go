@@ -16,6 +16,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/minio/minio-go/v7/pkg/credentials"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/minio/minio-go/v7"
@@ -33,6 +34,7 @@ func main() {
 	util.SetupDatabase(db)
 
 	engine := gin.Default()
+	engine.GET("/metrics", gin.WrapH(promhttp.Handler()))
 	defer engine.Run(":8000")
 
 	endpoint := os.Getenv("FILE_ENDPOINT")
