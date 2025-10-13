@@ -25,7 +25,7 @@ export const updateProductInventoryId = async (
     await axiosInstance.put<void>(
       `/inventories/${currentInventoryId}/products/${productId}/updateInventoryId/${newInventoryId}`,
       undefined,
-      { useV2: false } // not implemented, must find
+      { useV2: false }
     );
   } catch (error) {
     console.error('Error updating Product by Inventory Id:', error);

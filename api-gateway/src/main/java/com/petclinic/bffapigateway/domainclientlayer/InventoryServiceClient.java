@@ -119,6 +119,7 @@ public class InventoryServiceClient {
     public Mono<InventoryResponseDTO> updateInventory(InventoryRequestDTO model, String inventoryId){
         return webClient.put()
                 .uri(inventoryServiceUrl + "/{inventoryId}" , inventoryId)
+                .contentType(MediaType.APPLICATION_JSON)
                 .body(Mono.just(model),InventoryRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()

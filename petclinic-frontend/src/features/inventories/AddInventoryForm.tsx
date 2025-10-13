@@ -38,36 +38,33 @@ function buildIventoryFieldErrorMessage(params: {
 
   const next: Partial<Record<FieldKey, string>> = {};
 
-  const nameTrim = inventoryName.trim();
-  if (!nameTrim) next.inventoryName = 'Inventory name is required.';
-  else if (nameTrim.length < 3)
+  if (!inventoryName.trim()) next.inventoryName = 'Inventory name is required.';
+  else if (inventoryName.trim().length < 3)
     next.inventoryName = 'Name must be at least 3 characters.';
 
-  const typeTrim = inventoryType.trim();
-  if (!typeTrim) next.inventoryType = 'Inventory type is required.';
+  if (!inventoryType.trim()) next.inventoryType = 'Inventory type is required.';
+  if (!inventoryDescription.trim())
+    next.inventoryDescription = 'Description is required.';
 
-  const descTrim = inventoryDescription.trim();
-  if (!descTrim) next.inventoryDescription = 'Description is required.';
-
-  if (inventoryImage && !isHttpUrl(inventoryImage)) {
+  if (inventoryImage && !isHttpUrl(inventoryImage))
     next.inventoryImage = 'Must be a valid http/https URL.';
-  }
-  if (inventoryBackupImage && !isHttpUrl(inventoryBackupImage)) {
+  if (inventoryBackupImage && !isHttpUrl(inventoryBackupImage))
     next.inventoryBackupImage = 'Must be a valid http/https URL.';
-  }
-  if (imageUploaded && imageUploaded.length > 160 * 1024) {
-    next.inventoryImage = 'Image too large (max 160KB).';
-  }
 
+  if (imageUploaded && imageUploaded.length > 160 * 1024) {
+    next.uploadedImage = 'Image too large (max 160KB).';
+  }
   return next;
 }
 
-type FieldKey =
+type TextFieldKey =
   | 'inventoryName'
   | 'inventoryType'
   | 'inventoryDescription'
   | 'inventoryImage'
   | 'inventoryBackupImage';
+
+type FieldKey = TextFieldKey | 'uploadedImage';
 
 const AddInventoryForm: React.FC<AddInventoryProps> = ({
   showAddInventoryForm,
@@ -86,7 +83,7 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
   >({});
 
   // Per-field history arrays. Initialize with the initial/current value so there is always a baseline.
-  const [history, setHistory] = useState<Record<FieldKey, string[]>>({
+  const [history, setHistory] = useState<Record<TextFieldKey, string[]>>({
     inventoryName: [''],
     inventoryType: [''],
     inventoryDescription: [''],
@@ -134,7 +131,7 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
   };
 
   // helper: push a normalized snapshot for a field
-  const pushSnapshot = (field: FieldKey, rawValue: string): void => {
+  const pushSnapshot = (field: TextFieldKey, rawValue: string): void => {
     const normalized = rawValue.trim(); // trim trailing spaces
     setHistory(prev => {
       const fieldHist = prev[field] ?? [''];
@@ -155,7 +152,7 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
 
   // Save snapshot for field only when the *word count* changed
   const handleFieldChange = (
-    field: FieldKey,
+    field: TextFieldKey,
     setter: React.Dispatch<React.SetStateAction<string>>,
     value: string
   ): void => {
@@ -181,7 +178,7 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
     const order = [...lastEditedFields];
 
     while (order.length > 0) {
-      const candidate = order[order.length - 1] as FieldKey;
+      const candidate = order[order.length - 1] as TextFieldKey;
       const fieldHist = history[candidate];
 
       if (fieldHist && fieldHist.length > 1) {
@@ -309,29 +306,27 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 160 * 1024) {
-        setFieldErrors(prev => ({
-          ...prev,
-          inventoryImage: 'Image too large (max 160KB).',
-        }));
-        setImageUploaded(null);
-        e.target.value = '';
-        return;
-      }
+    if (!file) return;
 
-      const reader = new FileReader();
-      reader.onload = event => {
-        if (event.target?.result instanceof ArrayBuffer) {
-          // push snapshot before changing image
-          pushSnapshot('inventoryImage', inventoryImage);
-          const uint8Array = new Uint8Array(event.target.result as ArrayBuffer);
-          setImageUploaded(uint8Array);
-          setFieldErrors(prev => ({ ...prev, inventoryImage: undefined })); // clear error
-        }
-      };
-      reader.readAsArrayBuffer(file);
+    if (file.size > 160 * 1024) {
+      setFieldErrors(prev => ({
+        ...prev,
+        uploadedImage: 'Image too large (max 160KB).',
+      }));
+      setImageUploaded(null);
+      e.target.value = '';
+      return;
     }
+
+    const reader = new FileReader();
+    reader.onload = ev => {
+      if (ev.target?.result instanceof ArrayBuffer) {
+        const bytes = new Uint8Array(ev.target.result);
+        setImageUploaded(bytes);
+        setFieldErrors(prev => ({ ...prev, uploadedImage: undefined }));
+      }
+    };
+    reader.readAsArrayBuffer(file);
   };
 
   function arrayBufferToBase64(buffer: Uint8Array): string {
@@ -509,7 +504,17 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
               id="imageUpload"
               accept="image/*"
               onChange={handleImageUpload}
+              className={fieldErrors.uploadedImage ? 'invalid animate' : ''}
+              aria-invalid={!!fieldErrors.uploadedImage}
+              aria-describedby={
+                fieldErrors.uploadedImage ? 'err-uploadedImage' : undefined
+              }
             />
+            {fieldErrors.uploadedImage && (
+              <div id="err-uploadedImage" className="field-error">
+                {fieldErrors.uploadedImage}
+              </div>
+            )}
           </div>
 
           <button type="submit">Add Inventory</button>

@@ -332,37 +332,41 @@ const EditInventory: React.FC = (): JSX.Element => {
     }
   };
 
-  const handleFileChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ): void => {
-    const file = event.target.files?.[0];
-    if (file) {
-      if (file.size > 160 * 1024) {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onloadend = () => {
+      if (!reader.result) return;
+
+      const base64String = (reader.result as string).split(',')[1];
+      const byteLength = base64ByteLength(base64String);
+
+      if (byteLength > MAX_IMAGE_BYTES) {
         setFieldErrors(prev => ({
           ...prev,
           inventoryImage: 'Image too large (max 160KB).',
         }));
-        if (fileInputRef.current) fileInputRef.current.value = '';
-        return;
-      } else {
-        convertToBase64(file);
 
-        setFieldErrors(prev => ({ ...prev, inventoryImage: undefined }));
-      }
-    }
-  };
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
 
-  const convertToBase64 = (file: File): void => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onloadend = () => {
-      if (reader.result) {
-        const base64String = (reader.result as string).split(',')[1];
-        setInventory({
-          ...inventory,
+        setInventory(prev => ({
+          ...prev,
           imageUploaded: base64String,
-        });
+        }));
+
+        return;
       }
+      setInventory(prev => ({
+        ...prev,
+        imageUploaded: base64String,
+      }));
+
+      setFieldErrors(prev => ({ ...prev, inventoryImage: undefined }));
     };
   };
 
