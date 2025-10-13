@@ -1,41 +1,67 @@
-<!--<div class="bColor text-center">-->
-<!--    <h2 class="titleProduct form" id="title">New Product</h2>-->
-<!--</div>-->
-<!--<div class="p-3 formColor m-0">-->
-<!--    <form id="productForm" class="form-horizontal" enctype="multipart/form-data" ng-submit="$ctrl.submitProductForm()">-->
-<!--        <div class="row">-->
-<!--            <div class="col-sm-6 form-group">-->
-<!--                <label class="control-label" for="item">Product</label>-->
-<!--                <input class="form-control" id="item" ng-model="$ctrl.product.productName" name="productName" type="text" placeholder="Please enter product name." />-->
-<!--                <input type="hidden" ng-model="$ctrl.product.inventoryId" ng-value="inventoryId">-->
-<!--            </div>-->
-<!--        </div>-->
-<!--        <div class="col-sm-6 form-group">-->
-<!--            <label class="control-label" for="description">Description</label>-->
-<!--            <input class="form-control col-sm-4" id="description" ng-model="$ctrl.product.productDescription" name="productDescription" type="text" placeholder="Please enter product description." />-->
-<!--        </div>-->
-<!--        <div class="row">-->
-<!--            <div class="form-group col-sm-12">-->
-<!--                <label class="control-label" for="price">Price</label>-->
-<!--                <input class="form-control" id="price" step="0.01" min="0" ng-model="$ctrl.product.productPrice" name="productPrice" type="number" placeholder="Please enter a price" />-->
-<!--            </div>-->
-<!--        </div>-->
-<!--        <div class="form-group p-3">-->
-<!--            <div class="bundle marg col-sm-12">-->
-<!--                <label class="control-label" for="quantity">Quantity</label>-->
-<!--                <input class="form-control" id="quantity" min="0" ng-model="$ctrl.product.productQuantity" name="productQuantity" type="number" required title="Please enter quantities." />-->
-<!--            </div>-->
-<!--        </div>-->
-<!--        <div class="form-group p-3">-->
-<!--            <div class="bundle marg col-sm-12">-->
-<!--                <label class="control-label" for="salePrice">Sale Price</label>-->
-<!--                <input class="form-control" id="salePrice" step="0.01" min="0" ng-model="$ctrl.product.productSalePrice" name="productSalePrice" type="number" required title="Please enter the sale price." />-->
-<!--            </div>-->
-<!--        </div>-->
-<!--        <div class="form-group formColor">-->
-<!--            <div class="owner marg col-sm-6">-->
-<!--                <button id="newBtn" class="btn btn-default" type="submit">Submit</button>-->
-<!--            </div>-->
-<!--        </div>-->
-<!--    </form>-->
-<!--</div>-->
+<div class="container d-flex justify-content-center mt-5">
+    <div class="card shadow-sm p-4" style="max-width: 600px; width: 100%;">
+        <h4 class="mb-4 text-center">Add New Product</h4>
+        <div class="p-3 formColor m-0">
+            <form id="productForm" class="form-horizontal" enctype="multipart/form-data" ng-submit="$ctrl.submitProductForm()">
+
+                <div class="form-group mb-3">
+                    <label class="control-label" for="item">Product Name</label>
+                    <input class="form-control" id="item" ng-model="$ctrl.product.productName" name="productName" type="text" placeholder="Please enter product name." required title="Please enter product name." />
+                </div>
+
+                <div class="form-group mb-3">
+                    <label class="control-label" for="description">Description</label>
+                    <input class="form-control" id="description" ng-model="$ctrl.product.productDescription" name="productDescription" type="text" placeholder="Please enter product description." required title="Please enter product description." />
+                </div>
+
+                <div class="form-group mb-3">
+                    <label class="control-label" for="quantity">Quantity</label>
+                    <input class="form-control" id="quantity" min="0" ng-model="$ctrl.product.productQuantity" name="productQuantity" type="number" required title="Please enter quantities." />
+                </div>
+
+                <div class="form-group mb-4">
+                    <label class="control-label" for="salePrice">Sale Price</label>
+                    <input class="form-control" id="salePrice" step="0.01" min="0.01" ng-model="$ctrl.product.productSalePrice" name="productSalePrice" type="number" required title="Please enter the sale price." />
+                </div>
+
+                <div class="form-group mb-3">
+                    <label class="control-label" for="image">Image Id</label>
+                    <input class="form-control" id="image" ng-model="$ctrl.product.imageId" name="imageId" type="text" placeholder="Please enter the image Id." />
+                </div>
+                <div class="form-group mb-3">
+                    <label class="control-label" for="type">Product Type</label>
+                    <select class="form-control" id="type" ng-model="$ctrl.product.productType" ng-options="type for type in $ctrl.productType" name="productType" required>
+                        <option value="">-- Select Product Type --</option>
+                    </select>
+                </div>
+                <div class="form-group mb-3">
+                    <label class="control-label" for="productStatus">Product Status</label>
+                    <select class="form-control" id="productStatus" ng-model="$ctrl.product.productStatus" ng-options="status for status in $ctrl.productStatus" name="productStatus" required>
+                        <option value="">-- Select Product Status --</option>
+                    </select>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label class="control-label" for="deliveryType">Delivery Type</label>
+                    <select class="form-control" id="deliveryType" ng-model="$ctrl.product.deliveryType" ng-options="type for type in $ctrl.deliveryType" name="deliveryType" required>
+                        <option value="">-- Select Delivery Type --</option>
+                    </select>
+                </div>
+                <div class="form-group mb-3">
+                    <label class="control-label" for="isUnlisted">isUnlisted</label>
+                    <select class="form-control" id="isUnlisted" ng-model="$ctrl.product.isUnlisted" name="isUnlisted" ng-init="$ctrl.product.isUnlisted = false" required>
+                        <option value="false">false</option>
+                        <option value="true">true</option>
+                    </select>
+                </div>
+
+                <div class="text-center">
+                    <div class="owner marg col-sm-6">
+                        <button id="newBtn" class="btn btn-primary px-4" type="submit">Submit</button>
+                    </div>
+                </div>
+                <br>
+            </form>
+        </div>
+    </div>
+</div>

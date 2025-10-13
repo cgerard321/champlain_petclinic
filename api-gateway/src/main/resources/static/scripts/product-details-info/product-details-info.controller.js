@@ -1,7 +1,7 @@
 
 
-angular.module('shopProductDetailsInfo')
-    .controller('ShopProductDetailsInfoController', ["$http", '$state', '$stateParams', function ($http, $state, $stateParams) {
+angular.module('productDetailsInfo')
+    .controller('ProductDetailsInfoController', ["$http", '$state', '$stateParams', function ($http, $state, $stateParams) {
         var self = this;
         self.product = {}; // Initialize self.product
         var productId = $stateParams.productId;

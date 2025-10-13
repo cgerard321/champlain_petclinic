@@ -1,12 +1,12 @@
 'use strict';
 
 
-angular.module('shopProductDetailsInfo', ['ui.router'])
+angular.module('productDetailsInfo', ['ui.router'])
     .config(['$stateProvider', function ($stateProvider) {
         $stateProvider
-            .state('shopProductsDetails', {
+            .state('productsDetails', {
                 parent: 'app',
                 url: '/products/:productId',
-                template: '<shop-product-details-info></shop-product-details-info>'
+                template: '<product-details-info></product-details-info>'
             })
     }]);
