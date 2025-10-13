@@ -1,4 +1,3 @@
-// src/components/ProtectedRoute.tsx
 import { ReactNode, useEffect } from 'react';
 import { useAuthRedirect } from '@/shared/hooks/useAuthRedirect';
 import { useHasRequiredRole } from '@/shared/hooks/useHasRequiredRole';

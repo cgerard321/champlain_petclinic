@@ -279,11 +279,18 @@ public class CustomersServiceClient {
                 .bodyToMono(OwnerResponseDTO.class);
     }
 
-    public Mono<String> setOwnerPhoto(PhotoDetails file, int id) {
+    public Mono<String> setOwnerPhoto(PhotoDetails file, String ownerId) {
         return webClientBuilder.build().post()
-                .uri(customersServiceUrl + "/photo/" + id)
+                .uri(customersServiceUrl + "/owners/" + ownerId + "/photos")
                 .body(just(file), PhotoDetails.class)
                 .retrieve().bodyToMono(String.class);
+    }
+    public Mono<byte[]> getOwnerPhoto(String ownerId) {
+        return webClientBuilder.build()
+                .get()
+                .uri(customersServiceUrl + "/owners/" + ownerId + "/photos")
+                .retrieve()
+                .bodyToMono(byte[].class);
     }
 
     public Mono<Void> deletePetPhoto(int ownerId, int photoId) {
@@ -404,6 +411,7 @@ public class CustomersServiceClient {
                 .retrieve()
                 .bodyToMono(Long.class);
     }
+
 
 
 }

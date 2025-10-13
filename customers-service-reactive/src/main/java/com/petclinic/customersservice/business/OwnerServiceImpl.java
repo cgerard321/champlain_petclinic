@@ -39,6 +39,12 @@ public class OwnerServiceImpl implements OwnerService {
     }
 
     @Override
+    public Mono<Owner> getOwnerEntityByOwnerId(String ownerId) {
+        return ownerRepo.findOwnerByOwnerId(ownerId)
+                .switchIfEmpty(Mono.error(new NotFoundException("Owner not found with id : " + ownerId)));
+    }
+
+    @Override
     public Mono<Void> deleteOwner(String ownerId) {
         return ownerRepo.deleteById(ownerId);
     }

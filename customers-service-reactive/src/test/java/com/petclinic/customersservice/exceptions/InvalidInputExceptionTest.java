@@ -1,43 +1,49 @@
 package com.petclinic.customersservice.exceptions;
-
 import com.petclinic.customersservice.customersExceptions.exceptions.InvalidInputException;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
-@SpringBootTest
-@ExtendWith(SpringExtension.class)
 public class InvalidInputExceptionTest {
 
     @Test
     void TestInvalidInputEmptyConstructor() {
-        assertThrows(InvalidInputException.class, () -> {
+        InvalidInputException exception = assertThrows(InvalidInputException.class, () -> {
             throw new InvalidInputException();
         });
+
+        assertNull(exception.getMessage());
     }
 
     @Test
     void TestInvalidInputString() {
-        assertThrows(InvalidInputException.class, () -> {
-            throw new InvalidInputException("Error");
+        String message = "Validation failed";
+        InvalidInputException exception = assertThrows(InvalidInputException.class, () -> {
+            throw new InvalidInputException(message);
         });
+        assertEquals(message, exception.getMessage());
     }
 
     @Test
     void TestInvalidInputCauseOnlyConstructor() {
-        assertThrows(InvalidInputException.class, () -> {
-            throw new InvalidInputException(new Exception());
+        Exception cause = new Exception("Root cause");
+        InvalidInputException exception = assertThrows(InvalidInputException.class, () -> {
+            throw new InvalidInputException(cause);
         });
+        assertEquals(cause, exception.getCause());
     }
 
     @Test
     void TestInvalidInputMessageAndCauseConstructor() {
-        assertThrows(InvalidInputException.class, () -> {
-            throw new InvalidInputException("Error", new Exception());
+        String message = "Input error with cause";
+        Exception cause = new Exception("Root cause");
+        InvalidInputException exception = assertThrows(InvalidInputException.class, () -> {
+            throw new InvalidInputException(message, cause);
         });
+        assertEquals(message, exception.getMessage());
+        assertEquals(cause, exception.getCause());
     }
-
 }

@@ -42,14 +42,14 @@ public class CartControllerV1 {
     }
 
     // Parameter object to configure error mapping (builder pattern)
-    private static final class ErrorOptions {
+    public static final class ErrorOptions {
         final String context;
         final String cartId;
         final String productId;
         final boolean includeBadRequestBodyMessage;
         final boolean invalidInputAsUnprocessable;
 
-        private ErrorOptions(Builder b) {
+        public ErrorOptions(Builder b) {
             this.context = b.context;
             this.cartId = b.cartId;
             this.productId = b.productId;
@@ -57,21 +57,21 @@ public class CartControllerV1 {
             this.invalidInputAsUnprocessable = b.invalidInputAsUnprocessable;
         }
 
-        static Builder builder(String context) { return new Builder(context); }
+        public static Builder builder(String context) { return new Builder(context); }
 
-        static final class Builder {
+        public static final class Builder {
             private final String context;
             private String cartId;
             private String productId;
-            private boolean includeBadRequestBodyMessage;
+            public boolean includeBadRequestBodyMessage;
             private boolean invalidInputAsUnprocessable;
 
             private Builder(String context) { this.context = context; }
             Builder cartId(String v) { this.cartId = v; return this; }
             Builder productId(String v) { this.productId = v; return this; }
-            Builder includeBadRequestBodyMessage(boolean v) { this.includeBadRequestBodyMessage = v; return this; }
-            Builder invalidInputAsUnprocessable(boolean v) { this.invalidInputAsUnprocessable = v; return this; }
-            ErrorOptions build() { return new ErrorOptions(this); }
+            public Builder includeBadRequestBodyMessage(boolean v) { this.includeBadRequestBodyMessage = v; return this; }
+            public Builder invalidInputAsUnprocessable(boolean v) { this.invalidInputAsUnprocessable = v; return this; }
+            public ErrorOptions build() { return new ErrorOptions(this); }
         }
     }
 
@@ -106,7 +106,7 @@ public class CartControllerV1 {
     }
 
     // Variant that can include a CartResponseDTO error body message on 400 scenarios
-    private Mono<ResponseEntity<CartResponseDTO>> mapCartErrorWithMessage(Throwable e, ErrorOptions o) {
+    public Mono<ResponseEntity<CartResponseDTO>> mapCartErrorWithMessage(Throwable e, ErrorOptions o) {
         log.error("{} error for cartId: {}, productId: {} - {}", o.context, o.cartId, o.productId, e.getMessage());
 
         if (e instanceof WebClientResponseException.UnprocessableEntity) {
@@ -348,6 +348,13 @@ public class CartControllerV1 {
     @GetMapping("/{cartId}/recent-purchases")
     public Mono<ResponseEntity<List<CartProductResponseDTO>>> getRecentPurchases(@PathVariable String cartId) {
         return cartServiceClient.getRecentPurchases(cartId)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/{cartId}/recommendation-purchases")
+    public Mono<ResponseEntity<List<CartProductResponseDTO>>> getRecommendationPurchases(@PathVariable String cartId) {
+        return cartServiceClient.getRecommendationPurchases(cartId)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }

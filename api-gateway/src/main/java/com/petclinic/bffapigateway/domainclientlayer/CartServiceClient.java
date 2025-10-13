@@ -396,4 +396,12 @@ public Mono<CartResponseDTO> deleteCartByCartId(String CardId) {
                 .retrieve()
                 .bodyToMono(new ParameterizedTypeReference<List<CartProductResponseDTO>>() {});
     }
+
+    public Mono<List<CartProductResponseDTO>> getRecommendationPurchases(String cartId) {
+        return webClientBuilder.build()
+                .get()
+                .uri(cartServiceUrl + "/{cartId}/recommendation-purchases", cartId)
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<List<CartProductResponseDTO>>() {});
+    }
 }
