@@ -9,4 +9,5 @@ export interface Visit {
   vetPhoneNumber: string;
   status: string;
   visitEndDate: string;
+  practitionerId: string;
 }

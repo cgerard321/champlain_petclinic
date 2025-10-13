@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Visit } from './models/Visit';
 import './VisitListTable.css';
 import './Emergency.css';
@@ -8,12 +8,14 @@ import { EmergencyResponseDTO } from './Emergency/Model/EmergencyResponseDTO';
 import { deleteEmergency } from './Emergency/Api/deleteEmergency';
 
 import { exportVisitsCSV } from './api/exportVisitsCSV';
-import axiosInstance from '@/shared/api/axiosInstance.ts';
+// import axiosInstance from '@/shared/api/axiosInstance.ts';
 import { getAllVisits } from './api/getAllVisits';
-import { IsVet } from '@/context/UserContext';
+import { IsVet, useUser } from '@/context/UserContext';
 import { AppRoutePaths } from '@/shared/models/path.routes';
+import { updateVisitStatus } from './api/updateVisit';
 
 export default function VisitListTable(): JSX.Element {
+  const didFetch = useRef(false);
   const [visitIdToDelete, setConfirmDeleteId] = useState<string | null>(null);
   const isVet = IsVet();
   const [visitsList, setVisitsList] = useState<Visit[]>([]);
@@ -32,14 +34,24 @@ export default function VisitListTable(): JSX.Element {
 
   const navigate = useNavigate();
 
+  const { user } = useUser();
+  const vetId = user?.practitionerId ?? null;
+
+  const filterByVet = (arr: Visit[]): Visit[] => {
+    if (!isVet || !vetId) return arr;
+    return arr.filter(v => String(v.practitionerId) === String(vetId));
+  };
+
   useEffect(() => {
+    if (didFetch.current) return;
+    didFetch.current = true;
     const loadInitialData = async (): Promise<void> => {
       try {
         const [visitsRes, emergenciesRes] = await Promise.allSettled([
-          getAllVisits(searchTerm),
+          // fetch all; client-side search filters below
+          getAllVisits(''),
           getAllEmergency(),
         ]);
-
         if (visitsRes.status === 'fulfilled') {
           setVisitsList(visitsRes.value);
           setVisitsAll(visitsRes.value);
@@ -52,8 +64,8 @@ export default function VisitListTable(): JSX.Element {
         console.error('Error loading initial data:', error);
       }
     };
-    loadInitialData();
-  }, [searchTerm]);
+    void loadInitialData();
+  }, []);
 
   useEffect(() => {
     // Skip EventSource setup for VET role - backend endpoints are ADMIN-only
@@ -198,22 +210,20 @@ export default function VisitListTable(): JSX.Element {
   }, [isVet]);
 
   useEffect(() => {
-    if (searchTerm) {
-      setVisitsList(
-        visitsAll.filter(visit =>
-          visit.description.toLowerCase().includes(searchTerm.toLowerCase())
-        )
-      );
-
-      setEmergencyList(
-        emergencyAll.filter(visit =>
-          visit.description.toLowerCase().includes(searchTerm.toLowerCase())
-        )
-      );
-    } else {
+    if (!searchTerm) {
+      // reset to all when query cleared
+      setVisitsList(visitsAll);
+      setEmergencyList(emergencyAll);
       return;
     }
-  }, [searchTerm, visitsList, visitsAll, emergencyList, emergencyAll]);
+    const q = searchTerm.toLowerCase();
+    setVisitsList(
+      visitsAll.filter(v => v.description.toLowerCase().includes(q))
+    );
+    setEmergencyList(
+      emergencyAll.filter(e => e.description.toLowerCase().includes(q))
+    );
+  }, [searchTerm, visitsAll, emergencyAll]);
 
   // Filter visits based on status
   const confirmedVisits = visitsList.filter(
@@ -228,63 +238,44 @@ export default function VisitListTable(): JSX.Element {
   const cancelledVisits = visitsList.filter(
     visit => visit.status === 'CANCELLED'
   );
-  // Use the archivedVisits state for archived visits
 
   const handleArchive = async (visitId: string): Promise<void> => {
     const confirmArchive = window.confirm(
       `Are you sure you want to archive visit with ID: ${visitId}?`
     );
     if (confirmArchive) {
-      try {
-        const requestBody = { status: 'ARCHIVED' };
-        await axiosInstance.put(
-          `/visits/completed/${visitId}/archive`,
-          requestBody,
-          { useV2: true }
-        );
-
-        // Fetch the updated visit data from the backend
-        const updatedVisitResponse = await axiosInstance.get<Visit>(
-          `/visits/${visitId}`,
-          {
-            useV2: false,
-          }
-        );
-
-        const updatedVisit = await updatedVisitResponse.data;
-        setVisitsList(prev =>
-          prev.filter(visit =>
-            visit.visitId === visitId ? updatedVisit : visit
-          )
-        );
-        alert('Visit archived successfully!');
-      } catch (error) {
-        console.error('Error archiving visit:', error);
-        alert('Error archiving visit.');
-      }
+      await handleStatusChange(visitId, 'ARCHIVED');
     }
   };
 
-  // Handle canceling the visit
+  const handleStatusChange = async (
+    visitId: string,
+    newStatus: string
+  ): Promise<void> => {
+    try {
+      const response = await updateVisitStatus(visitId, newStatus);
+      setVisitsList(prevVisits =>
+        prevVisits.map(visit => (visit.visitId === visitId ? response : visit))
+      );
+
+      // If archiving, move to archived list
+      if (newStatus === 'ARCHIVED') {
+        setArchivedVisits(prev => [...prev, response]);
+        setVisitsList(prev => prev.filter(v => v.visitId !== visitId));
+      }
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'An unknown error occurred';
+      alert(`Failed to update visit status: ${errorMessage}`);
+    }
+  };
+
   const handleCancel = async (visitId: string): Promise<void> => {
     const confirmCancel = window.confirm(
       'Do you confirm you want to cancel the reservation?'
     );
-
-    if (!confirmCancel) return;
-    try {
-      await axiosInstance.patch(`/visits/${visitId}/CANCELLED`, {
-        useV2: false,
-      });
-      // Update the visit list after cancellation
-      setVisitsAll(prevVisits =>
-        prevVisits.map(visit =>
-          visit.visitId === visitId ? { ...visit, status: 'CANCELLED' } : visit
-        )
-      );
-    } catch (error) {
-      console.error('Error canceling visit:', error);
-      alert('Error canceling visit.');
+    if (confirmCancel) {
+      await handleStatusChange(visitId, 'CANCELLED');
     }
   };
 
@@ -630,6 +621,13 @@ export default function VisitListTable(): JSX.Element {
     );
 
   const renderVisitsTables = (): JSX.Element => {
+    // Filter visits by vet
+    const vetVisits = filterByVet(visitsList);
+    const vetConfirmedVisits = filterByVet(confirmedVisits);
+    const vetUpcomingVisits = filterByVet(upcomingVisits);
+    const vetCompletedVisits = filterByVet(completedVisits);
+    const vetCancelledVisits = filterByVet(cancelledVisits);
+
     return (
       <div className="page-container">
         <div className="visit-action-bar">
@@ -652,12 +650,20 @@ export default function VisitListTable(): JSX.Element {
           </button>
         </div>
         {/* Emergency Table below buttons, but above visit tables */}
-        {renderEmergencyTable('Emergencies', emergencyList)}
-        {renderTable('All', visitsList)}
-        {renderTable('Confirmed', confirmedVisits)}
-        {renderTable('Upcoming', upcomingVisits)}
-        {renderTable('Completed', completedVisits)}
-        {renderTable('Cancelled', cancelledVisits)}
+        {renderEmergencyTable(
+          'Emergencies',
+          !isVet || !vetId
+            ? emergencyList
+            : emergencyList.filter(
+                e => String(e.practitionerId) === String(vetId)
+              )
+        )}
+
+        {renderTable('All', vetVisits)}
+        {renderTable('Confirmed', vetConfirmedVisits)}
+        {renderTable('Upcoming', vetUpcomingVisits)}
+        {renderTable('Completed', vetCompletedVisits)}
+        {renderTable('Cancelled', vetCancelledVisits)}
         {renderTable('Archived', archivedVisits)}
         {visitIdToDelete && (
           <div className="modal">

@@ -5,4 +5,5 @@ export interface UserResponseModel {
   email: string;
   userId: string;
   roles: Set<Role>;
+  practitionerId?: string;
 }

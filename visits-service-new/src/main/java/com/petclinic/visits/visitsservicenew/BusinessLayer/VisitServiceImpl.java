@@ -421,8 +421,8 @@ public class VisitServiceImpl implements VisitService {
             return Mono.error(new BadRequestException("PetId cannot be null or blank"));
         } else if (dto.getPractitionerId() == null || dto.getPractitionerId().isBlank()) {
             return Mono.error(new BadRequestException("VetId cannot be null or blank"));
-        } else if (dto.getStatus() != Status.UPCOMING) {
-            return Mono.error(new BadRequestException("Status is being set wrong!"));
+        } else if (dto.getStatus() == null) {
+            return Mono.error(new BadRequestException("Status cannot be null"));
         } else {
             return Mono.just(dto);
         }
@@ -502,16 +502,22 @@ public class VisitServiceImpl implements VisitService {
     @Override
     public Mono<VisitResponseDTO> patchVisitStatusInVisit(String visitId, String status) {
         // Find the visit by the ID
+        log.info("Attempting to update visit {} to status {}", visitId, status);
         return repo.findByVisitId(visitId)
                 .switchIfEmpty(Mono.defer(() ->
                         Mono.error(new NotFoundException("Cannot find visit with id: " + visitId))
                 ))
                 // Update the status of the found Visit entity
-                .doOnNext(visit -> visit.setStatus(Status.valueOf(status))) // Update status reactively
+                .doOnNext(visit -> {
+                    log.info("Current status: {}, New status: {}", visit.getStatus(), status);
+                    visit.setStatus(Status.valueOf(status));
+                }) // Update status reactively
                 // Save the updated visit
                 .flatMap(repo::save)
+                .doOnNext(saved -> log.info("Saved visit with new status: {}", saved.getStatus()))
                 // Convert to VisitResponseDTO
-                .flatMap(entityDtoUtil::toVisitResponseDTO);
+                .flatMap(entityDtoUtil::toVisitResponseDTO)
+                .doOnNext(dto -> log.info("Converted to DTO with status: {}", dto.getStatus()));
     }
 
 
