@@ -322,23 +322,6 @@ public class VisitController {
                 .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-//    @PostMapping(value = "/owners/{ownerId}/reviews", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-//    public Mono<ResponseEntity<ReviewResponseDTO>> addReviewCustomer(@PathVariable String ownerId, @RequestBody Mono<ReviewRequestDTO> reviewRequestDTOMono) {
-//        return reviewService.addReview(ownerId, reviewRequestDTOMono)
-//                .map(c -> ResponseEntity.status(HttpStatus.CREATED).body(c))
-//                .defaultIfEmpty(ResponseEntity.badRequest().build());
-//    }
-
-//    @GetMapping(value = "/owners/{ownerId}/reviews", produces = MediaType.APPLICATION_JSON_VALUE)
-//    public Flux<ReviewResponseDTO> getReviewsByOwnerId(@PathVariable String ownerId) {
-//        return reviewService.GetAllReviewsByOwnerId(ownerId);
-//    }
-
-//    @DeleteMapping(value = "/owners/{ownerId}/reviews/{reviewId}", produces = MediaType.APPLICATION_JSON_VALUE)
-//    public Mono<ResponseEntity<Void>> deleteReviewCustomer(@PathVariable String ownerId, @PathVariable String reviewId) {
-//        return reviewService.deleteReview(ownerId, reviewId)
-//                .then(Mono.just(ResponseEntity.noContent().build()));
-//    }
 
     @GetMapping(value = "/export", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     public Mono<ResponseEntity<InputStreamResource>> exportVisitsToCSV() {
