@@ -31,7 +31,7 @@ func TestMailHandler_Post_Success(t *testing.T) {
 	r.Use(mw.UnmarshalMail())
 	r.POST("/mail", h.Post)
 
-	body := []byte(`{"to":"a@b.com","subject":"hi","body":"<p>x</p>","sender_name":"PetClinic"}`)
+	body := []byte(`{"emailSendTo":"a@b.com","emailTitle":"hi","body":"<p>x</p>","senderName":"PetClinic"}`)
 	req := httptest.NewRequest(http.MethodPost, "/mail", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
@@ -57,7 +57,7 @@ func TestMailHandler_Post_ServiceError_Returns500(t *testing.T) {
 	r.Use(mw.UnmarshalMail())
 	r.POST("/mail", h.Post)
 
-	body := []byte(`{"to":"a@b.com","subject":"hi"}`)
+	body := []byte(`{"emailSendTo":"a@b.com","emailTitle":"hi"}`)
 	req := httptest.NewRequest(http.MethodPost, "/mail", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
