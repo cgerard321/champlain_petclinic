@@ -7,9 +7,8 @@ import lombok.*;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class FileResponseDTO {
-
-    private String fileId;
+public class FileServiceRequestDTO {
+    
     private String fileName;
     private String fileType;
     private String fileData;
