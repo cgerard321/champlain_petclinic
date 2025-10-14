@@ -350,6 +350,44 @@ export default function InventoriesListTable(): JSX.Element {
     setActionsMenu(prevState => !prevState);
   };
 
+  const toggleArchiveStatus = (
+      e: React.MouseEvent,
+      inventory: Inventory
+  ): void => {
+    e.stopPropagation();
+    const id = inventory.inventoryId;
+    setArchivedMap(prev => {
+      const next = { ...prev };
+      if (next[id]) {
+        delete next[id];
+      } else {
+        next[id] = true;
+      }
+      return next;
+    });
+    // ensure archived items are removed from selection
+    setSelectedInventories(prev =>
+        prev.filter(si => si.inventoryId !== inventory.inventoryId)
+    );
+  };
+
+  useEffect(() => {
+    if (selectedInventories.length > 0) {
+      setSelectedInventories(prev =>
+          prev.filter(si => !archivedMap[si.inventoryId])
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [archivedMap]);
+
+  // ARCHIVE: compute displayed list based on viewMode
+  const displayedInventories = inventoryList.filter(inv => {
+    const isArchived = Boolean(archivedMap[inv.inventoryId]);
+    if (viewMode === 'active') return !isArchived;
+    if (viewMode === 'archived') return isArchived;
+    return true; 
+  });
+
   return (
     <>
       <div id={inventoryStyles.menuSection}>
