@@ -86,6 +86,41 @@ func (i *FilesServiceImpl) AddFile(model *models.FileRequestModel) (*models.File
 	return response, nil
 }
 
+func (i *FilesServiceImpl) UpdateFile(id string, model *models.FileRequestModel) (*models.FileResponseModel, error) {
+	fileInfo := i.repository.GetFileInfo(id)
+	if fileInfo == nil {
+		return nil, exception.NewNotFoundException("fileId: " + id + " was not found")
+	}
+
+	if err := i.minioServiceClient.DeleteFile(fileInfo); err != nil {
+		return nil, err
+	}
+	if err := i.repository.DeleteFileInfo(id); err != nil {
+		return nil, err
+	}
+
+	newFileInfo := &datalayer.FileInfo{
+		FileId:   id,
+		FileName: model.FileName,
+		FileType: model.FileType,
+	}
+	if err := i.repository.AddFileInfo(newFileInfo); err != nil {
+		return nil, err
+	}
+	if err := i.minioServiceClient.AddFile(newFileInfo, model.FileData); err != nil {
+		_ = i.repository.DeleteFileInfo(id)
+		return nil, err
+	}
+
+	updated := &models.FileResponseModel{
+		FileId:   id,
+		FileName: newFileInfo.FileName,
+		FileType: newFileInfo.FileType,
+		FileData: model.FileData,
+	}
+	return updated, nil
+}
+
 func (i *FilesServiceImpl) DeleteFileByFileId(id string) error {
 	fileInfo := i.repository.GetFileInfo(id)
 	if fileInfo == nil {
