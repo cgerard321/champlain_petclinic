@@ -64,24 +64,20 @@ const createAxiosInstance = (): AxiosInstance => {
 
 const handleAxiosError = (error: unknown): boolean => {
   if (axios.isAxiosError(error)) {
+    // get status code from error
     const statusCode = error.response?.status ?? 0;
-    // We cast the config to our custom type to access the new property
     const config = error.config as CustomAxiosRequestConfig;
 
-    // Status codes that are normally handled globally
     const globallyHandledCodes = [401, 403, 500, 502, 503, 504];
 
     if (globallyHandledCodes.includes(statusCode)) {
-      // --- THIS IS THE KEY CHANGE ---
-      // Check for the bypass flag in the original request's config.
-      // If `handleLocally` is true, we force propagation by returning false.
       if (config?.handleLocally) {
         return false; // Let the component's catch block handle it
       }
 
       // If no bypass is requested, proceed with global handling.
       axiosErrorResponseHandler(error as AxiosError, statusCode);
-      return true; // Stop propagation
+      return true; 
     }
 
     // For all other errors, allow local handling as before

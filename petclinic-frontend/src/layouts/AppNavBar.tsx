@@ -199,10 +199,6 @@ export function NavBar(): JSX.Element {
             )}
           </Nav>
           <Nav className="ms-auto">
-            {/* 
-              FIX 2: Check for the user object here as well. This controls the
-              display of the user dropdown vs. the login/signup links.
-            */}
             {user ? (
               <NavDropdown title={user.username} id="user-dropdown">
                 {isOwner && (
