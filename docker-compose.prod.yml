@@ -299,44 +299,91 @@ services:
 
   dbgate:
     image: dbgate/dbgate:latest
+    container_name: dbgate
     ports:
-      - "8090:3000"
+      - "8090:3000"                       # Web UI → http://<host>:8090
     restart: unless-stopped
+    volumes:
+      - dbgate-data:/root/.dbgate         # persist users, sessions, connection tweaks
     environment:
-      # --- Auth (BASIC) ---
-      - BASIC_AUTH=1                 # turn on Basic auth
-      - LOGIN=admin                  # required when BASIC_AUTH is enabled
-      - PASSWORD=change-me           # required when BASIC_AUTH is enabled
-      - SKIP_ALL_AUTH=0              # ensure auth isn't skipped
+      # --- Auth (Basic + form creds) ---
+      - BASIC_AUTH=1
+      - LOGIN=admin
+      - PASSWORD=${DBGATE_PASSWORD:-change-me}
+      - SKIP_ALL_AUTH=0
+      - ADMIN_PASSWORD=${DBGATE_ADMIN_PASSWORD:-change-me}
 
-      # --- (optional) admin page password ---
-      - ADMIN_PASSWORD=change-me-too
+      # --- Preconfigured connections (UI “Add connection” will be hidden) ---
+      - CONNECTIONS=mysqlAuth,mysqlFiles,postgresVet,mongoVet,mongoBilling,mongoVisits,mongoCustomers,mongoInventory,mongoProducts,mongoCarts
 
-      # --- Example preconfigured connections (add more as needed) ---
-      - CONNECTIONS=mysql,postgres,mongoVet
-      - LABEL_mysql=MySQL auth-db
-      - ENGINE_mysql=mysql@dbgate-plugin-mysql
-      - SERVER_mysql=mysql-auth
-      - PORT_mysql=3306
-      - USER_mysql=user
-      - PASSWORD_mysql=pwd
-      - DATABASE_mysql=auth-db
+      # MySQL (auth)
+      - LABEL_mysqlAuth=MySQL auth-db
+      - ENGINE_mysqlAuth=mysql@dbgate-plugin-mysql
+      - SERVER_mysqlAuth=mysql-auth
+      - PORT_mysqlAuth=3306
+      - USER_mysqlAuth=user
+      - PASSWORD_mysqlAuth=pwd
+      - DATABASE_mysqlAuth=auth-db
 
-      - LABEL_postgres=Postgres vet
-      - ENGINE_postgres=postgres@dbgate-plugin-postgres
-      - SERVER_postgres=postgres
-      - PORT_postgres=5432
-      - USER_postgres=user
-      - PASSWORD_postgres=pwd
-      - DATABASE_postgres=images
+      # MySQL (files)
+      - LABEL_mysqlFiles=MySQL files-db
+      - ENGINE_mysqlFiles=mysql@dbgate-plugin-mysql
+      - SERVER_mysqlFiles=mysql-files
+      - PORT_mysqlFiles=3306
+      - USER_mysqlFiles=user
+      - PASSWORD_mysqlFiles=pwd
+      - DATABASE_mysqlFiles=files-db
 
-      - LABEL_mongoVet=Mongo vet
+      # Postgres (vet)
+      - LABEL_postgresVet=Postgres images
+      - ENGINE_postgresVet=postgres@dbgate-plugin-postgres
+      - SERVER_postgresVet=postgres
+      - PORT_postgresVet=5432
+      - USER_postgresVet=user
+      - PASSWORD_postgresVet=pwd
+      - DATABASE_postgresVet=images
+
+      # MongoDBs (auth via root user on admin DB — use URL_* for reliability)
+      - LABEL_mongoVet=Mongo (vet)
       - ENGINE_mongoVet=mongo@dbgate-plugin-mongo
-      - SERVER_mongoVet=mongo-vet
-      - PORT_mongoVet=27017
-      - USER_mongoVet=root
-      - PASSWORD_mongoVet=password
+      - URL_mongoVet=mongodb://root:password@mongo-vet:27017/?authSource=admin
 
+      - LABEL_mongoBilling=Mongo (billing)
+      - ENGINE_mongoBilling=mongo@dbgate-plugin-mongo
+      - URL_mongoBilling=mongodb://root:password@mongo-billing:27017/?authSource=admin
+
+      - LABEL_mongoVisits=Mongo (visits)
+      - ENGINE_mongoVisits=mongo@dbgate-plugin-mongo
+      - URL_mongoVisits=mongodb://root:password@mongo-visits:27017/?authSource=admin
+
+      - LABEL_mongoCustomers=Mongo (customers)
+      - ENGINE_mongoCustomers=mongo@dbgate-plugin-mongo
+      - URL_mongoCustomers=mongodb://root:password@mongo-customers:27017/?authSource=admin
+
+      - LABEL_mongoInventory=Mongo (inventory)
+      - ENGINE_mongoInventory=mongo@dbgate-plugin-mongo
+      - URL_mongoInventory=mongodb://root:password@mongo-inventory:27017/?authSource=admin
+
+      - LABEL_mongoProducts=Mongo (products)
+      - ENGINE_mongoProducts=mongo@dbgate-plugin-mongo
+      - URL_mongoProducts=mongodb://root:password@mongo-products:27017/?authSource=admin
+
+      - LABEL_mongoCarts=Mongo (carts)
+      - ENGINE_mongoCarts=mongo@dbgate-plugin-mongo
+      - URL_mongoCarts=mongodb://root:password@mongo-carts:27017/?authSource=admin
+
+    depends_on:
+      - mysql-auth
+      - mysql-files
+      - postgres-vet
+      - mongo-vet
+      - mongo-billing
+      - mongo-visits
+      - mongo-customers
+      - mongo-inventory
+      - mongo-products
+      - mongo-carts
+      -
 # -------------------
 # VOLUMES
 # -------------------
