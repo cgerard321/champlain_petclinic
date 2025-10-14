@@ -1,7 +1,9 @@
 package com.petclinic.customersservice.exceptions;
 
+import com.petclinic.customersservice.customersExceptions.exceptions.BadRequestException;
 import com.petclinic.customersservice.customersExceptions.exceptions.InvalidInputException;
 import com.petclinic.customersservice.customersExceptions.exceptions.NotFoundException;
+import com.petclinic.customersservice.customersExceptions.exceptions.UnprocessableEntityException;
 import com.petclinic.customersservice.customersExceptions.http.GlobalControllerExceptionHandler;
 import com.petclinic.customersservice.customersExceptions.http.HttpErrorInfo;
 import com.petclinic.customersservice.data.Owner;
@@ -167,6 +169,48 @@ class GlobalExceptionHandlerTest {
         } catch (Exception e) {
             fail("Test failed with exception: " + e.getMessage());
         }
+    }
+
+    @Test
+    void handleBadRequestException_WithValidRequest_ShouldReturnBadRequestStatus() {
+        BadRequestException exception = new BadRequestException("Invalid file format");
+        ServerHttpRequest request = MockServerHttpRequest.post("/files").build();
+
+        HttpErrorInfo result = exceptionHandler.handleBadRequestException(request, exception);
+
+        assertNotNull(result);
+        assertEquals(HttpStatus.BAD_REQUEST, result.getHttpStatus());
+        assertEquals("/files", result.getPath());
+        assertEquals("Invalid file format", result.getMessage());
+        assertNotNull(result.getTimestamp());
+    }
+
+    @Test
+    void handleUnprocessableEntityException_WithValidRequest_ShouldReturnUnprocessableEntityStatus() {
+        UnprocessableEntityException exception = new UnprocessableEntityException("File data cannot be processed");
+        ServerHttpRequest request = MockServerHttpRequest.post("/files").build();
+
+        HttpErrorInfo result = exceptionHandler.handleUnprocessableEntityException(request, exception);
+
+        assertNotNull(result);
+        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, result.getHttpStatus());
+        assertEquals("/files", result.getPath());
+        assertEquals("File data cannot be processed", result.getMessage());
+        assertNotNull(result.getTimestamp());
+    }
+
+    @Test
+    void handleRuntimeException_WithValidRequest_ShouldReturnInternalServerErrorStatus() {
+        RuntimeException exception = new RuntimeException("Unexpected server error");
+        ServerHttpRequest request = MockServerHttpRequest.get("/owners").build();
+
+        HttpErrorInfo result = exceptionHandler.handleRuntimeException(request, exception);
+
+        assertNotNull(result);
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result.getHttpStatus());
+        assertEquals("/owners", result.getPath());
+        assertEquals("Unexpected server error", result.getMessage());
+        assertNotNull(result.getTimestamp());
     }
 
 
