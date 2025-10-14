@@ -1,8 +1,8 @@
 'use strict';
 
 
-angular.module('shopProductForm')
-    .controller('ShopProductFormController', ["$http", '$state', '$stateParams', function ($http, $state , $stateParams) {
+angular.module('productForm')
+    .controller('ProductFormController', ["$http", '$state', '$stateParams', function ($http, $state , $stateParams) {
         var self = this;
             //hardcoded because no currently existing way to get
             self.deliveryType = ["DELIVERY", "PICKUP", "DELIVERY_AND_PICKUP", "NO_DELIVERY_OPTION"];
@@ -26,7 +26,7 @@ angular.module('shopProductForm')
             )
                 .then(function (response) {
                     //console.log(response);
-                    $state.go('shopProductList');
+                    $state.go('productList');
 
                 }, function (response) {
                     var error = response.data;

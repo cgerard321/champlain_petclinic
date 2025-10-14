@@ -86,11 +86,12 @@ public class ProductController {
     }
 
     @DeleteMapping(value = "/{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<ProductResponseModel>> deleteProduct(@PathVariable String productId) {
+    public Mono<ResponseEntity<ProductResponseModel>> deleteProduct(@PathVariable String productId,
+                                                                    @RequestParam(name = "cascadeBundles", defaultValue = "false") boolean cascadeBundles) {
         return Mono.just(productId)
                 .filter(id -> id.length() == 36)
                 .switchIfEmpty(Mono.error(new InvalidInputException("Provided product id is invalid: " + productId)))
-                .flatMap(productService::deleteProductByProductId)
+                .flatMap(foundId -> productService.deleteProductByProductId(foundId, cascadeBundles))
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
