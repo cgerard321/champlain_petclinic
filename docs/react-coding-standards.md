@@ -178,6 +178,7 @@ export const getEducation = async (vetId: string): Promise<ApiResponse<Education
 - **File naming**: Use camelCase for API files (e.g., `getAllVets.ts`, `addInventory.ts`)
 - **Function naming**: Use descriptive verbs (get, add, update, delete, search)
 - **Return types**: Always specify return types and use proper TypeScript generics
+- **Streaming Responses**: Use `responseType: 'stream'` for Server-Sent Events (SSE) or real-time data updates. This is useful for live notifications, real-time dashboards, or continuous data feeds used from the reactive services.
 
 **GOOD Example:**
 
@@ -200,6 +201,22 @@ export async function getAllVets(): Promise<ApiResponse<VetResponseModel[]>> {
     return { 
       data: null, 
       errorMessage: 'Unable to fetch veterinarians. Please try again later.' 
+    };
+  }
+}
+
+// Example with streaming for real-time data
+export async function getVetsStream(): Promise<ApiResponse<VetResponseModel[]>> {
+  try {
+    const response = await axiosInstance.get<VetResponseModel[]>('/vets', { 
+      useV2: false,
+      responseType: 'stream'
+    });
+    return { data: response.data, errorMessage: null };
+  } catch (error) {
+    return { 
+      data: null, 
+      errorMessage: 'Unable to fetch veterinarians stream. Please try again later.' 
     };
   }
 }
