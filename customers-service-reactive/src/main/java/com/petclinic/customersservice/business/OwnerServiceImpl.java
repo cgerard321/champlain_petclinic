@@ -4,6 +4,7 @@ import com.petclinic.customersservice.customersExceptions.exceptions.NotFoundExc
 import com.petclinic.customersservice.data.Owner;
 import com.petclinic.customersservice.data.OwnerRepo;
 import com.petclinic.customersservice.domainclientlayer.FileRequestDTO;
+import com.petclinic.customersservice.domainclientlayer.FileResponseDTO;
 import com.petclinic.customersservice.domainclientlayer.FilesServiceClient;
 import com.petclinic.customersservice.presentationlayer.OwnerRequestDTO;
 import com.petclinic.customersservice.presentationlayer.OwnerResponseDTO;
@@ -108,23 +109,28 @@ public class OwnerServiceImpl implements OwnerService {
         return ownerRepo.findOwnerByOwnerId(ownerId)
                 .switchIfEmpty(Mono.error(new NotFoundException("Owner not found with id: " + ownerId)))
                 .flatMap(existingOwner -> {
-                    return filesServiceClient.addFile(photo)
-                            .map(fileResp -> {
+                    Mono<FileResponseDTO> fileOperation;
+                    
+                    if (existingOwner.getPhotoId() != null && !existingOwner.getPhotoId().isEmpty()) {
+                        fileOperation = filesServiceClient.updateFile(existingOwner.getPhotoId(), photo)
+                                .onErrorResume(e -> {
+                                    log.warn("Photo file {} not found or error updating, creating new file instead: {}", 
+                                            existingOwner.getPhotoId(), e.getMessage());
+                                    return filesServiceClient.addFile(photo);
+                                });
+                    } else {
+                        fileOperation = filesServiceClient.addFile(photo);
+                    }
+                    
+                    return fileOperation
+                            .flatMap(fileResp -> {
                                 existingOwner.setPhotoId(fileResp.getFileId());
-                                return existingOwner;
-                            });
-                })
-                .flatMap(ownerRepo::save)
-                .flatMap(savedOwner -> {
-                    OwnerResponseDTO dto = EntityDTOUtil.toOwnerResponseDTO(savedOwner);
-                    return filesServiceClient.getFile(savedOwner.getPhotoId())
-                            .map(fileResp -> {
-                                dto.setPhoto(fileResp);
-                                return dto;
-                            })
-                            .onErrorResume(err -> {
-                                log.error("Error fetching file {} for ownerId {}: {}", savedOwner.getPhotoId(), ownerId, err.getMessage());
-                                return Mono.just(dto);
+                                return ownerRepo.save(existingOwner)
+                                        .map(savedOwner -> {
+                                            OwnerResponseDTO dto = EntityDTOUtil.toOwnerResponseDTO(savedOwner);
+                                            dto.setPhoto(fileResp);
+                                            return dto;
+                                        });
                             });
                 });
     }
