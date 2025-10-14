@@ -6,6 +6,7 @@ import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.*;
 import com.petclinic.bffapigateway.dtos.Vets.PhotoDetails;
+import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
@@ -654,24 +655,328 @@ public class CustomerServiceClientIntegrationTest {
     }
 
     @Test
-    void whenGetOwnerPhoto_thenReturnPhotoBytes() throws Exception {
-        byte[] mockPhotoBytes = "mockPhotoData".getBytes();
+    void whenGetOwnerWithPhoto_thenReturnOwnerWithPhotoData() throws Exception {
+        String mockOwnerJson = """
+            {
+                "ownerId": "ownerId-123",
+                "firstName": "aaa",
+                "lastName": "bbb",
+                "photo": {
+                    "fileId": "photo-123",
+                    "fileName": "profile.jpg",
+                    "fileType": "image/jpeg",
+                    "fileData": "bW9ja1Bob3RvRGF0YQ=="
+                }
+            }
+            """;
 
         server.enqueue(new MockResponse()
                 .setResponseCode(200)
-                .setHeader("Content-Type", "image/jpeg")
-                .setBody(new okio.Buffer().write(mockPhotoBytes)));
+                .setHeader("Content-Type", "application/json")
+                .setBody(mockOwnerJson));
 
-        Mono<byte[]> result = customersServiceClient.getOwnerPhoto(OWNER_ID);
+        Mono<OwnerResponseDTO> result = customersServiceClient.getOwner(OWNER_ID, true);
 
         StepVerifier.create(result)
-                .expectNextMatches(bytes -> bytes.length == mockPhotoBytes.length &&
-                        new String(bytes).equals("mockPhotoData"))
+                .expectNextMatches(owner -> 
+                    owner.getOwnerId().equals("ownerId-123") &&
+                    owner.getFirstName().equals("aaa") &&
+                    owner.getLastName().equals("bbb") &&
+                    owner.getPhoto() != null &&
+                    owner.getPhoto().getFileType().equals("image/jpeg"))
                 .verifyComplete();
 
         RecordedRequest request = server.takeRequest();
-        assertEquals("/owners/" + OWNER_ID + "/photos", request.getPath());
+        assertEquals("/owners/" + OWNER_ID + "?includePhoto=true", request.getPath());
         assertEquals("GET", request.getMethod());
+    }
+
+    @Test
+    void whenGetOwnerWithoutPhoto_thenReturnOwnerWithoutPhotoData() throws Exception {
+        String mockOwnerJson = """
+            {
+                "ownerId": "ownerId-123",
+                "firstName": "aaa",
+                "lastName": "bbb"
+            }
+            """;
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(200)
+                .setHeader("Content-Type", "application/json")
+                .setBody(mockOwnerJson));
+
+        Mono<OwnerResponseDTO> result = customersServiceClient.getOwner(OWNER_ID, false);
+
+        StepVerifier.create(result)
+                .expectNextMatches(owner -> 
+                    owner.getOwnerId().equals("ownerId-123") &&
+                    owner.getFirstName().equals("aaa") &&
+                    owner.getLastName().equals("bbb") &&
+                    owner.getPhoto() == null)
+                .verifyComplete();
+
+        RecordedRequest request = server.takeRequest();
+        assertEquals("/owners/" + OWNER_ID + "?includePhoto=false", request.getPath());
+        assertEquals("GET", request.getMethod());
+    }
+
+    @Test
+    void whenAddOwner_thenReturnCreatedOwner() throws Exception {
+        OwnerRequestDTO requestDTO = OwnerRequestDTO.builder()
+                .firstName("New")
+                .lastName("Owner")
+                .address("123 Street")
+                .city("City")
+                .province("Province")
+                .telephone("1234567890")
+                .build();
+
+        OwnerResponseDTO responseDTO = OwnerResponseDTO.builder()
+                .ownerId("new-owner-id")
+                .firstName("New")
+                .lastName("Owner")
+                .build();
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(201)
+                .setHeader("Content-Type", "application/json")
+                .setBody(mapper.writeValueAsString(responseDTO)));
+
+        Mono<OwnerResponseDTO> result = customersServiceClient.addOwner(Mono.just(requestDTO));
+
+        StepVerifier.create(result)
+                .expectNextMatches(r -> r.getOwnerId().equals("new-owner-id"))
+                .verifyComplete();
+
+        RecordedRequest request = server.takeRequest();
+        assertEquals("/owners", request.getPath());
+        assertEquals("POST", request.getMethod());
+    }
+
+    @Test
+    void whenDeleteOwner_thenReturnDeletedOwner() throws Exception {
+        OwnerResponseDTO responseDTO = OwnerResponseDTO.builder()
+                .ownerId(OWNER_ID)
+                .firstName("Deleted")
+                .lastName("Owner")
+                .build();
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(200)
+                .setHeader("Content-Type", "application/json")
+                .setBody(mapper.writeValueAsString(responseDTO)));
+
+        Mono<OwnerResponseDTO> result = customersServiceClient.deleteOwner(OWNER_ID);
+
+        StepVerifier.create(result)
+                .expectNextMatches(r -> r.getOwnerId().equals(OWNER_ID))
+                .verifyComplete();
+
+        RecordedRequest request = server.takeRequest();
+        assertEquals("/owners/" + OWNER_ID, request.getPath());
+        assertEquals("DELETE", request.getMethod());
+    }
+
+    @Test
+    void whenGetPetByPetId_thenReturnPet() throws Exception {
+        server.enqueue(new MockResponse()
+                .setResponseCode(200)
+                .setHeader("Content-Type", "application/json")
+                .setBody(mapper.writeValueAsString(TEST_PET)));
+
+        Mono<PetResponseDTO> result = customersServiceClient.getPetByPetId(PET_ID);
+
+        StepVerifier.create(result)
+                .expectNextMatches(r -> r.getPetId().equals(PET_ID))
+                .verifyComplete();
+
+        RecordedRequest request = server.takeRequest();
+        assertEquals("/pet/" + PET_ID, request.getPath());
+        assertEquals("GET", request.getMethod());
+    }
+
+    @Test
+    void whenDeletePetType_thenReturnDeletedPetType() throws Exception {
+        server.enqueue(new MockResponse()
+                .setResponseCode(200)
+                .setHeader("Content-Type", "application/json")
+                .setBody(mapper.writeValueAsString(TEST_PETTYPE_RESPONSE)));
+
+        Mono<PetTypeResponseDTO> result = customersServiceClient.deletePetType(PET_TYPE_ID);
+
+        StepVerifier.create(result)
+                .expectNextMatches(r -> r.getPetTypeId().equals(PET_TYPE_ID))
+                .verifyComplete();
+
+        RecordedRequest request = server.takeRequest();
+        assertEquals("/owners/petTypes/" + PET_TYPE_ID, request.getPath());
+        assertEquals("DELETE", request.getMethod());
+    }
+
+    @Test
+    void whenGetPetTypeByPetTypeId_thenReturnPetType() throws Exception {
+        server.enqueue(new MockResponse()
+                .setResponseCode(200)
+                .setHeader("Content-Type", "application/json")
+                .setBody(mapper.writeValueAsString(TEST_PETTYPE_RESPONSE)));
+
+        Mono<PetTypeResponseDTO> result = customersServiceClient.getPetTypeByPetTypeId(PET_TYPE_ID);
+
+        StepVerifier.create(result)
+                .expectNextMatches(r -> r.getPetTypeId().equals(PET_TYPE_ID))
+                .verifyComplete();
+
+        RecordedRequest request = server.takeRequest();
+        assertEquals("/owners/petTypes/" + PET_TYPE_ID, request.getPath());
+        assertEquals("GET", request.getMethod());
+    }
+
+    @Test
+    void whenGetPetTypes_thenReturnPetTypesList() throws Exception {
+        PetType petType1 = new PetType();
+        petType1.setId(1);
+        petType1.setName("Dog");
+
+        PetType petType2 = new PetType();
+        petType2.setId(2);
+        petType2.setName("Cat");
+
+        List<PetType> petTypes = List.of(petType1, petType2);
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(200)
+                .setHeader("Content-Type", "application/json")
+                .setBody(mapper.writeValueAsString(petTypes)));
+
+        Flux<PetType> result = customersServiceClient.getPetTypes();
+
+        StepVerifier.create(result)
+                .expectNextCount(2)
+                .verifyComplete();
+
+        RecordedRequest request = server.takeRequest();
+        assertEquals("/owners/petTypes", request.getPath());
+        assertEquals("GET", request.getMethod());
+    }
+
+    @Test
+    void whenCreatePet_thenReturnCreatedPet() throws Exception {
+        server.enqueue(new MockResponse()
+                .setResponseCode(201)
+                .setHeader("Content-Type", "application/json")
+                .setBody(mapper.writeValueAsString(TEST_PET)));
+
+        Mono<PetResponseDTO> result = customersServiceClient.createPet(TEST_PET, OWNER_ID);
+
+        StepVerifier.create(result)
+                .expectNextMatches(r -> r.getPetId().equals(PET_ID))
+                .verifyComplete();
+
+        RecordedRequest request = server.takeRequest();
+        assertEquals("/pet", request.getPath());
+        assertEquals("POST", request.getMethod());
+    }
+
+    @Test
+    void whenCreateOwners_thenReturnOwnersList() throws Exception {
+        List<OwnerResponseDTO> owners = List.of(TEST_OWNER_RESPONSE);
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(200)
+                .setHeader("Content-Type", "application/json")
+                .setBody(mapper.writeValueAsString(owners)));
+
+        Flux<OwnerResponseDTO> result = customersServiceClient.createOwners();
+
+        StepVerifier.create(result)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        RecordedRequest request = server.takeRequest();
+        assertEquals("/", request.getPath());
+        assertEquals("POST", request.getMethod());
+    }
+
+    @Test
+    void whenUpdateOwnerPhoto_thenReturnUpdatedOwner() throws Exception {
+        com.petclinic.bffapigateway.dtos.CustomerDTOs.FileRequestDTO fileRequest = 
+            com.petclinic.bffapigateway.dtos.CustomerDTOs.FileRequestDTO.builder()
+                .fileName("profile.jpg")
+                .fileType("image/jpeg")
+                .fileData("base64encodeddata")
+                .build();
+
+        OwnerResponseDTO responseWithPhoto = OwnerResponseDTO.builder()
+                .ownerId(OWNER_ID)
+                .firstName("John")
+                .lastName("Smith")
+                .build();
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(200)
+                .setHeader("Content-Type", "application/json")
+                .setBody(mapper.writeValueAsString(responseWithPhoto)));
+
+        Mono<OwnerResponseDTO> result = customersServiceClient.updateOwnerPhoto(OWNER_ID, fileRequest);
+
+        StepVerifier.create(result)
+                .expectNextMatches(r -> r.getOwnerId().equals(OWNER_ID))
+                .verifyComplete();
+
+        RecordedRequest request = server.takeRequest();
+        assertEquals("/owners/" + OWNER_ID + "/photo", request.getPath());
+        assertEquals("POST", request.getMethod());
+    }
+
+    @Test
+    void whenUpdateOwnerPhoto_withNotFoundOwner_thenThrowRuntimeException() throws Exception {
+        com.petclinic.bffapigateway.dtos.CustomerDTOs.FileRequestDTO fileRequest = 
+            com.petclinic.bffapigateway.dtos.CustomerDTOs.FileRequestDTO.builder()
+                .fileName("profile.jpg")
+                .fileType("image/jpeg")
+                .fileData("base64encodeddata")
+                .build();
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(404));
+
+        Mono<OwnerResponseDTO> result = customersServiceClient.updateOwnerPhoto(OWNER_ID, fileRequest);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> 
+                    throwable instanceof RuntimeException && 
+                    throwable.getMessage().contains("Owner not found"))
+                .verify();
+
+        RecordedRequest request = server.takeRequest();
+        assertEquals("/owners/" + OWNER_ID + "/photo", request.getPath());
+        assertEquals("POST", request.getMethod());
+    }
+
+    @Test
+    void whenUpdateOwnerPhoto_withBadRequest_thenThrowInvalidInputException() throws Exception {
+        com.petclinic.bffapigateway.dtos.CustomerDTOs.FileRequestDTO fileRequest = 
+            com.petclinic.bffapigateway.dtos.CustomerDTOs.FileRequestDTO.builder()
+                .fileName("profile.jpg")
+                .fileType("image/jpeg")
+                .fileData("invalid")
+                .build();
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(400));
+
+        Mono<OwnerResponseDTO> result = customersServiceClient.updateOwnerPhoto(OWNER_ID, fileRequest);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> 
+                    throwable instanceof InvalidInputException && 
+                    throwable.getMessage().contains("Invalid photo data"))
+                .verify();
+
+        RecordedRequest request = server.takeRequest();
+        assertEquals("/owners/" + OWNER_ID + "/photo", request.getPath());
+        assertEquals("POST", request.getMethod());
     }
 
 
