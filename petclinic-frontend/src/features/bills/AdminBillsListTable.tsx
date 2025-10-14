@@ -794,8 +794,8 @@ export default function AdminBillsListTable(): JSX.Element {
                 <button
                   type="submit"
                   style={{
-                    background: !showCreateModal ? undefined : '#009879',
-                    color: !showCreateModal ? undefined : '#fff',
+                    background: '#009879',
+                    color: '#fff',
                     border: 'none',
                     borderRadius: '4px',
                     padding: '0.5rem 2rem',
