@@ -2,7 +2,7 @@ import * as React from 'react';
 import ReviewModal from './reviewComponents/ReviewModal';
 import { FormEvent, useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { addReview } from './Api/addReview';
+import { addCustomerReview } from './Api/addCustomerReview';
 import { ReviewRequestDTO } from './Model/ReviewRequestDTO';
 import './AddForm.css';
 import { useUser } from '@/context/UserContext';
