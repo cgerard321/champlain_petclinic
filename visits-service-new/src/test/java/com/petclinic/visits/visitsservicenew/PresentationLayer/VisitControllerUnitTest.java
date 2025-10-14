@@ -165,7 +165,7 @@ class VisitControllerUnitTest {
         when(visitService.getVisitsForPet(anyString())).thenReturn(Flux.just(visitResponseDTO));
 
         webTestClient.get()
-                .uri("/visits/pets/" + Pet_Id_OK)
+                .uri("/visits/pets/" + Pet_Id_OK + "/visits")
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()

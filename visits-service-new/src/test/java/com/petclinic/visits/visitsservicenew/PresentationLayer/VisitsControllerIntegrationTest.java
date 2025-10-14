@@ -249,7 +249,7 @@ class VisitsControllerIntegrationTest {
         when(entityDtoUtil.toVisitResponseDTO(any())).thenReturn(Mono.just(visitResponseDTO));
         webTestClient
                 .get()
-                .uri("/visits/pets/" + visit1.getPetId())
+                .uri("/visits/pets/" + visit1.getPetId() + "/visits")
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
