@@ -1,6 +1,6 @@
 .product-bundle-card {
   position: relative;
-  border: 3px outset #4caf50;
+  border: 3px outset #222;
   background-image: linear-gradient(to bottom right, white, #f1f1f1);
   padding: 16px;
   margin: 16px;
@@ -11,12 +11,14 @@
 
 .product-bundle-products {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column; 
   height: 250px;
   overflow-y: auto;
+  overflow-x: hidden;
   border: 1px solid black;
   border-radius: 15px;
-  scrollbar-width: none;
+  scrollbar-width: thin;
+  scrollbar-color: #888 #eee;
   margin: 20px 0;
   background-color: white;
   box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
@@ -85,6 +87,38 @@
   font-size: 1.5em;
   font-weight: bold;
   margin-bottom: 8px;
+}
+
+.add-bundle-to-cart-button {
+  background-color: #777;
+  color: white;
+  border: none;
+  margin: auto;
+  margin-left: 50px;
+  padding: 10px 20px;
+  font-size: 1em;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.add-bundle-to-cart-button:hover {
+  background-color: #222;
+  border-color: #bbb;
+}
+
+.product-bundle-products::-webkit-scrollbar {
+  height: 8px;
+}
+
+.product-bundle-products::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.product-bundle-products::-webkit-scrollbar-track {
+  background: #eee;
+  border-radius: 4px;
 }
 
 /* Responsive Design */
