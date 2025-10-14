@@ -43,12 +43,6 @@ public class CustomerServiceClientIntegrationTest {
     private final String OWNER_ID = "ownerId-123";
     private final String PET_ID = "petId-123";
     private final String PET_TYPE_ID = "petTypeId-123";
-    private final PhotoDetails TEST_PHOTO = PhotoDetails.builder()
-            .id(2)
-            .name("photo")
-            .type("jpeg")
-            .photo("testBytes")
-            .build();
 
     private final OwnerRequestDTO TEST_OWNER = OwnerRequestDTO.builder()
             .ownerId("ownerId-123")
@@ -897,95 +891,5 @@ public class CustomerServiceClientIntegrationTest {
         assertEquals("/", request.getPath());
         assertEquals("POST", request.getMethod());
     }
-
-    @Test
-    void whenPatchOwnerWithPhoto_thenReturnUpdatedOwner() throws Exception {
-        com.petclinic.bffapigateway.dtos.Files.FileDetails fileDetails = 
-            new com.petclinic.bffapigateway.dtos.Files.FileDetails();
-        fileDetails.setFileName("profile.jpg");
-        fileDetails.setFileType("image/jpeg");
-        fileDetails.setFileData("base64encodeddata".getBytes());
-
-        OwnerRequestDTO ownerRequest = OwnerRequestDTO.builder()
-                .photo(fileDetails)
-                .build();
-
-        OwnerResponseDTO responseWithPhoto = OwnerResponseDTO.builder()
-                .ownerId(OWNER_ID)
-                .firstName("John")
-                .lastName("Smith")
-                .photo(fileDetails)
-                .build();
-
-        server.enqueue(new MockResponse()
-                .setResponseCode(200)
-                .setHeader("Content-Type", "application/json")
-                .setBody(mapper.writeValueAsString(responseWithPhoto)));
-
-        Mono<OwnerResponseDTO> result = customersServiceClient.patchOwner(OWNER_ID, Mono.just(ownerRequest));
-
-        StepVerifier.create(result)
-                .expectNextMatches(r -> r.getOwnerId().equals(OWNER_ID))
-                .verifyComplete();
-
-        RecordedRequest request = server.takeRequest();
-        assertEquals("/owners/" + OWNER_ID, request.getPath());
-        assertEquals("PATCH", request.getMethod());
-    }
-
-    @Test
-    void whenPatchOwnerWithPhoto_withNotFoundOwner_thenThrowRuntimeException() throws Exception {
-        com.petclinic.bffapigateway.dtos.Files.FileDetails fileDetails = 
-            new com.petclinic.bffapigateway.dtos.Files.FileDetails();
-        fileDetails.setFileName("profile.jpg");
-        fileDetails.setFileType("image/jpeg");
-        fileDetails.setFileData("base64encodeddata".getBytes());
-
-        OwnerRequestDTO ownerRequest = OwnerRequestDTO.builder()
-                .photo(fileDetails)
-                .build();
-
-        server.enqueue(new MockResponse()
-                .setResponseCode(404));
-
-        Mono<OwnerResponseDTO> result = customersServiceClient.patchOwner(OWNER_ID, Mono.just(ownerRequest));
-
-        StepVerifier.create(result)
-                .expectErrorMatches(throwable -> 
-                    throwable instanceof RuntimeException)
-                .verify();
-
-        RecordedRequest request = server.takeRequest();
-        assertEquals("/owners/" + OWNER_ID, request.getPath());
-        assertEquals("PATCH", request.getMethod());
-    }
-
-    @Test
-    void whenPatchOwnerWithPhoto_withBadRequest_thenThrowInvalidInputException() throws Exception {
-        com.petclinic.bffapigateway.dtos.Files.FileDetails fileDetails = 
-            new com.petclinic.bffapigateway.dtos.Files.FileDetails();
-        fileDetails.setFileName("profile.jpg");
-        fileDetails.setFileType("image/jpeg");
-        fileDetails.setFileData("invalid".getBytes());
-
-        OwnerRequestDTO ownerRequest = OwnerRequestDTO.builder()
-                .photo(fileDetails)
-                .build();
-
-        server.enqueue(new MockResponse()
-                .setResponseCode(400));
-
-        Mono<OwnerResponseDTO> result = customersServiceClient.patchOwner(OWNER_ID, Mono.just(ownerRequest));
-
-        StepVerifier.create(result)
-                .expectErrorMatches(throwable -> 
-                    throwable instanceof RuntimeException)
-                .verify();
-
-        RecordedRequest request = server.takeRequest();
-        assertEquals("/owners/" + OWNER_ID, request.getPath());
-        assertEquals("PATCH", request.getMethod());
-    }
-
 
 }
