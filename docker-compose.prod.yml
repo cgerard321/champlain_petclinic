@@ -301,16 +301,16 @@ services:
     image: dbgate/dbgate:latest
     container_name: dbgate
     ports:
-      - "8030:3000"                     # Web UI
+      - "8979:3000"
     environment:
-      # bootstrap admin user for DbGate itself (not your DBs)
-      - DBGATE_PUBLIC_URL=https://petclinic-dbadmin.benmusicgeek.synology.me
-      - ADMIN_EMAIL=admin@admin.com
-      - ADMIN_PASSWORD=password
-      - AUTH_METHOD=local               # built-in auth
+      - AUTH_METHOD=local           # ✅ Enables login system
+      - ADMIN_EMAIL=admin@example.com
+      - ADMIN_PASSWORD=change_me    # ✅ First admin user
+      - USER_MODE=server            # ✅ Forces multi-user mode (important!)
     volumes:
-      - dbgate-data:/root/.dbgate       # persists connections/users
+      - dbgate-data:/root/.dbgate   # ✅ Persist users, roles, connections
     restart: unless-stopped
+
     depends_on:
       - postgres-vet
       - mysql-auth
