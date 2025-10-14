@@ -299,7 +299,7 @@ services:
 
   # ---------- SQL DB MANAGER ----------
   cloudbeaver:
-    image: dbeaver/cloudbeaver:latest
+    image: dbeaver/cloudbeaver:25.2.2
     container_name: cloudbeaver
     ports:
       - "8978:8978"
