@@ -302,11 +302,112 @@ services:
     container_name: dbgate
     restart: unless-stopped
     ports:
-      - "8030:3000"
+      - "8030:3000"   # Web UI at http://<host>:8030
     environment:
+      # Protect the admin screen at /admin.html
       - ADMIN_PASSWORD=${DBGATE_ADMIN_PASSWORD:-change-me}
+
+      # Show all connections in the left sidebar (order matters)
+      - CONNECTIONS=mysqlAuth,mysqlFiles,pgVet,mongoVet,mongoBilling,mongoVisits,mongoCustomers,mongoInventory,mongoProducts,mongoCarts
+
+      # --------------------
+      # MySQL — mysql-auth
+      # --------------------
+      - LABEL_mysqlAuth=MySQL (auth)
+      - ENGINE_mysqlAuth=mysql@dbgate-plugin-mysql
+      - SERVER_mysqlAuth=mysql-auth
+      - PORT_mysqlAuth=3306
+      - USER_mysqlAuth=user
+      - PASSWORD_mysqlAuth=pwd
+      - DATABASE_mysqlAuth=auth-db
+
+      # --------------------
+      # MySQL — mysql-files
+      # --------------------
+      - LABEL_mysqlFiles=MySQL (files)
+      - ENGINE_mysqlFiles=mysql@dbgate-plugin-mysql
+      - SERVER_mysqlFiles=mysql-files
+      - PORT_mysqlFiles=3306
+      - USER_mysqlFiles=user
+      - PASSWORD_mysqlFiles=pwd
+      - DATABASE_mysqlFiles=files-db
+
+      # --------------------
+      # PostgreSQL — postgres-vet
+      # --------------------
+      - LABEL_pgVet=PostgreSQL (vet)
+      - ENGINE_pgVet=postgres@dbgate-plugin-postgres
+      - SERVER_pgVet=postgres-vet
+      - PORT_pgVet=5432
+      - USER_pgVet=user
+      - PASSWORD_pgVet=pwd
+      - DATABASE_pgVet=images
+
+      # --------------------
+      # MongoDB — mongo-vet
+      # --------------------
+      - LABEL_mongoVet=MongoDB (vet)
+      - ENGINE_mongoVet=mongo@dbgate-plugin-mongo
+      - SERVER_mongoVet=mongo-vet
+      - PORT_mongoVet=27017
+      - USER_mongoVet=root
+      - PASSWORD_mongoVet=password
+      - AUTH_SOURCE_mongoVet=admin
+
+      # MongoDB — mongo-billing
+      - LABEL_mongoBilling=MongoDB (billing)
+      - ENGINE_mongoBilling=mongo@dbgate-plugin-mongo
+      - SERVER_mongoBilling=mongo-billing
+      - PORT_mongoBilling=27017
+      - USER_mongoBilling=root
+      - AUTH_SOURCE_mongoBilling=admin
+
+      # MongoDB — mongo-visits
+      - LABEL_mongoVisits=MongoDB (visits)
+      - ENGINE_mongoVisits=mongo@dbgate-plugin-mongo
+      - SERVER_mongoVisits=mongo-visits
+      - PORT_mongoVisits=27017
+      - USER_mongoVisits=root
+      - AUTH_SOURCE_mongoVisits=admin
+
+      # MongoDB — mongo-customers
+      - LABEL_mongoCustomers=MongoDB (customers)
+      - ENGINE_mongoCustomers=mongo@dbgate-plugin-mongo
+      - SERVER_mongoCustomers=mongo-customers
+      - PORT_mongoCustomers=27017
+      - USER_mongoCustomers=root
+      - PASSWORD_mongoCustomers=password
+      - AUTH_SOURCE_mongoCustomers=admin
+
+      # MongoDB — mongo-inventory
+      - LABEL_mongoInventory=MongoDB (inventory)
+      - ENGINE_mongoInventory=mongo@dbgate-plugin-mongo
+      - SERVER_mongoInventory=mongo-inventory
+      - PORT_mongoInventory=27017
+      - USER_mongoInventory=root
+      - PASSWORD_mongoInventory=password
+      - AUTH_SOURCE_mongoInventory=admin
+
+      # MongoDB — mongo-products
+      - LABEL_mongoProducts=MongoDB (products)
+      - ENGINE_mongoProducts=mongo@dbgate-plugin-mongo
+      - SERVER_mongoProducts=mongo-products
+      - PORT_mongoProducts=27017
+      - USER_mongoProducts=root
+      - PASSWORD_mongoProducts=password
+      - AUTH_SOURCE_mongoProducts=admin
+
+      # MongoDB — mongo-carts
+      - LABEL_mongoCarts=MongoDB (carts)
+      - ENGINE_mongoCarts=mongo@dbgate-plugin-mongo
+      - SERVER_mongoCarts=mongo-carts
+      - PORT_mongoCarts=27017
+      - USER_mongoCarts=root
+      - PASSWORD_mongoCarts=password
+      - AUTH_SOURCE_mongoCarts=admin
+
     volumes:
-      - ./dbgate-data:/root/.dbgate
+      - ./dbgate-data:/root/.dbgate   # persist saved connections/queries
     depends_on:
       - mysql-auth
       - mysql-files
@@ -318,7 +419,6 @@ services:
       - mongo-inventory
       - mongo-products
       - mongo-carts
-
 
 # -------------------
 # VOLUMES
