@@ -41,4 +41,8 @@ public interface ProductRepository extends ReactiveMongoRepository<Product, Stri
 
     Flux<Product> findAllProductsByInventoryIdAndProductNameAndProductDescriptionAndStatus(String inventoryId, String productName, String productDescription, Status status);
     Mono<Long> countByInventoryIdAndLastUpdatedAtAfter(String inventoryId, LocalDateTime since);
+    Mono<Boolean> existsByInventoryIdAndProductNameIgnoreCase(String inventoryId, String productName);
+    Mono<Boolean> existsByInventoryIdAndProductNameIgnoreCaseAndProductIdNot(
+            String inventoryId, String productName, String productId
+    );
 }

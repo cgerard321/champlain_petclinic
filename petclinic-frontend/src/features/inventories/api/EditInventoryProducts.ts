@@ -1,6 +1,7 @@
 import axiosInstance from '@/shared/api/axiosInstance.ts';
 import { ProductResponseModel } from '@/features/inventories/models/InventoryModels/ProductResponseModel.ts';
 import { ProductRequestModel } from '@/features/inventories/models/InventoryModels/ProductRequestModel.ts';
+import axios from 'axios';
 
 export const updateProductInInventory = async (
   inventoryId: string,
@@ -14,8 +15,45 @@ export const updateProductInInventory = async (
       { useV2: false }
     );
   } catch (error) {
-    console.error('Error update product in Inventory:', error);
-    throw error;
+    if (!axios.isAxiosError(error)) throw error;
+
+    console.error('[editInventoryProducts]', {
+      url: (error.config?.baseURL || '') + (error.config?.url || ''),
+      method: (error.config?.method || '').toUpperCase(),
+      status: error.response?.status,
+      dataReceived: error.response?.data,
+    });
+
+    const status = error.response?.status ?? 0;
+    const payload: unknown = error.response?.data;
+
+    const data =
+      payload && typeof payload === 'object'
+        ? (payload as Record<string, unknown>)
+        : undefined;
+
+    const serverMessage =
+      typeof data?.message === 'string' ? data.message.trim() : '';
+
+    switch (status) {
+      case 400:
+        throw new Error(
+          serverMessage || 'Invalid product data. Please review your input.'
+        );
+      case 404:
+        throw new Error(serverMessage || 'Inventory or product not found.');
+      case 422:
+        throw new Error(
+          serverMessage ||
+            'A product with this name already exists in this inventory.'
+        );
+      case 429:
+        throw new Error(
+          serverMessage || 'Too many requests. Please try again later.'
+        );
+      default:
+        throw error;
+    }
   }
 };
 
@@ -30,7 +68,39 @@ export const getProductByProductIdInInventory = async (
     );
     return response.data;
   } catch (error) {
-    console.error('Error get product by product id in Inventory:', error);
-    throw error;
+    if (!axios.isAxiosError(error)) throw error;
+
+    console.error('[getProductByProductIdInInventory]', {
+      url: (error.config?.baseURL || '') + (error.config?.url || ''),
+      method: (error.config?.method || '').toUpperCase(),
+      status: error.response?.status,
+      dataReceived: error.response?.data,
+    });
+
+    const status = error.response?.status ?? 0;
+    const payload: unknown = error.response?.data;
+
+    const data =
+      payload && typeof payload === 'object'
+        ? (payload as Record<string, unknown>)
+        : undefined;
+
+    const serverMessage =
+      typeof data?.message === 'string' ? data.message.trim() : '';
+
+    switch (status) {
+      case 400:
+        throw new Error(serverMessage || 'Invalid request.');
+      case 404:
+        throw new Error(
+          serverMessage || 'Product not found in this inventory.'
+        );
+      case 429:
+        throw new Error(
+          serverMessage || 'Too many requests. Please try again later.'
+        );
+      default:
+        throw error;
+    }
   }
 };
