@@ -338,7 +338,6 @@ const VetList: React.FC = () => {
 - Always include try-catch blocks for async operations
 - Return structured responses with data and error messages instead of throwing errors
 - Let the axios interceptor handle global error responses
-- Use consistent `ApiResponse<T>` interface for all API functions
 - **Important**: If you use `console.error()` for debugging purposes, remove it before merging into production
 - **Error Property**: Use `errorMessage` instead of `error` to clearly indicate this is a user-friendly message intended to be displayed directly to the client. This is a local error message that components can show to users without additional processing.
 
@@ -359,6 +358,7 @@ if (errorMessage) {
 **Example:**
 
 ```typescript
+// Here you can use a Consistent ApiResponse<T> interface to expect all api hook calls to return the data and a errorMessage if a local error occurs
 interface ApiResponse<T> {
   data: T | null;
   errorMessage: string | null;
