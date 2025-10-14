@@ -308,7 +308,7 @@ services:
     environment:
       # --- Auth (Basic + form creds) ---
       - BASIC_AUTH=1
-      - LOGIN=admin
+      - LOGIN=CPC_Admin
       - PASSWORD=${DBGATE_PASSWORD:-change-me}
       - SKIP_ALL_AUTH=0
       - ADMIN_PASSWORD=${DBGATE_ADMIN_PASSWORD:-change-me}
