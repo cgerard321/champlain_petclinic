@@ -1,18 +1,23 @@
 package com.petclinic.billing.presentationlayer;
 
 import com.petclinic.billing.datalayer.*;
-import com.petclinic.billing.util.EntityDtoUtil;
+import com.petclinic.billing.domainclientlayer.OwnerClient;
+import com.petclinic.billing.domainclientlayer.VetClient;
 import com.petclinic.billing.util.InterestCalculationUtil;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import static reactor.core.publisher.Mono.just;
+import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -36,6 +41,17 @@ class BillControllerIntegrationTest {
 
     @Autowired
     private BillRepository repo;
+
+    @MockBean
+    private VetClient vetClient;
+
+    @MockBean
+    private OwnerClient ownerClient;
+
+    @BeforeEach
+    void setup() {
+        repo.deleteAll().block();
+    }
 
     @Test
     void getBillByValidBillID() {
@@ -78,7 +94,7 @@ class BillControllerIntegrationTest {
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE+";charset=UTF-8")
+                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE + ";charset=UTF-8")
                 .expectBodyList(Bill.class)
                 .consumeWith(response -> {
                     List<Bill> bills = response.getResponseBody();
@@ -161,35 +177,46 @@ class BillControllerIntegrationTest {
     }
 
     @Test
-    void createBill() {
 
-        Bill billEntity = buildBill();
+    void createBill_ShouldReturnCreatedBillWithVetAndOwner() {
+        // Arrange
+        BillRequestDTO billRequest = new BillRequestDTO();
+        billRequest.setBillStatus(BillStatus.PAID);
+        billRequest.setVetId("vet-1");
+        billRequest.setCustomerId("cust-1");
+        billRequest.setVisitType("Checkup");
+        billRequest.setAmount(new BigDecimal("100.00"));
+        billRequest.setDueDate(LocalDate.now().plusDays(10));
 
-        Publisher<Bill> setup = repo.deleteAll().thenMany(repo.save(billEntity));
+        // Mock Vet + Owner service responses
+        VetResponseDTO vet = new VetResponseDTO();
+        vet.setFirstName("John");
+        vet.setLastName("Doe");
 
-        StepVerifier
-                .create(setup)
-                .expectNextCount(1)
-                .verifyComplete();
+        OwnerResponseDTO owner = new OwnerResponseDTO();
+        owner.setFirstName("Alice");
+        owner.setLastName("Smith");
 
+        when(vetClient.getVetByVetId("vet-1")).thenReturn(Mono.just(vet));
+        when(ownerClient.getOwnerByOwnerId("cust-1")).thenReturn(Mono.just(owner));
+
+        // Act
         client.post()
                 .uri("/bills")
-                .body(just(billEntity), Bill.class)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(billRequest)
                 .exchange()
+                // Assert
                 .expectStatus().isCreated()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody();
-
-        client.get()
-                .uri("/bills/" + billEntity.getBillId())
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.visitType").isEqualTo(billEntity.getVisitType())
-                .jsonPath("$.customerId").isEqualTo(billEntity.getCustomerId())
-                .jsonPath("$.amount").isEqualTo(billEntity.getAmount());
+                .jsonPath("$.billId").isNotEmpty()
+                .jsonPath("$.vetFirstName").isEqualTo("John")
+                .jsonPath("$.vetLastName").isEqualTo("Doe")
+                .jsonPath("$.ownerFirstName").isEqualTo("Alice")
+                .jsonPath("$.ownerLastName").isEqualTo("Smith")
+                .jsonPath("$.billStatus").isEqualTo("PAID")
+                .jsonPath("$.amount").isEqualTo(100.00);
     }
 
     @Test

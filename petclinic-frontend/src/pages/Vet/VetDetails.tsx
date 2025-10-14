@@ -721,54 +721,66 @@ export default function VetDetails(): JSX.Element {
                 )}
             </section>
 
-            <section className="album-photos">
-              <div className="d-flex justify-content-between align-items-center">
-                <h2>Album Photos</h2>
-                {vetId && (
-                  <UploadAlbumPhoto
-                    vetId={vetId}
-                    onUploadComplete={loadAlbumPhotos}
-                  />
-                )}
-              </div>
+            {/* Only show album photos section if:
+                1. There are photos to display, OR
+                2. User is admin (not inventory manager, owner, or receptionist) */}
+            {(albumPhotos.length > 0 ||
+              (!isInventoryManager && !isOwner && !isReceptionist)) && (
+              <section className="album-photos">
+                <div className="d-flex justify-content-between align-items-center">
+                  <h2>Album Photos</h2>
 
-              {albumPhotos.length > 0 ? (
-                <div className="album-photo-grid">
-                  {albumPhotos.map(photo => (
-                    <div
-                      key={photo.id}
-                      className="album-photo-card"
-                      onClick={() =>
-                        openPhotoModal(
-                          `data:${photo.imgType};base64,${photo.data}`
-                        )
-                      }
-                    >
-                      <img
-                        src={`data:${photo.imgType};base64,${photo.data}`}
-                        alt={`Album Photo ${photo.id}`}
-                        className="album-photo-thumbnail"
+                  {vetId &&
+                    !isInventoryManager &&
+                    !isOwner &&
+                    !isReceptionist && (
+                      <UploadAlbumPhoto
+                        vetId={vetId}
+                        onUploadComplete={loadAlbumPhotos}
                       />
-                      <button
-                        style={{
-                          backgroundColor: '#f93142ff',
-                          borderColor: '#f93142ff',
-                        }}
-                        className="delete-photo-button"
-                        onClick={e => {
-                          e.stopPropagation();
-                          void handleDeleteAlbumPhoto(photo.id);
-                        }}
-                      >
-                        Delete Image
-                      </button>
-                    </div>
-                  ))}
+                    )}
                 </div>
-              ) : (
-                <p>No album photos available</p>
-              )}
-            </section>
+
+                {albumPhotos.length > 0 ? (
+                  <div className="album-photo-grid">
+                    {albumPhotos.map(photo => (
+                      <div
+                        key={photo.id}
+                        className="album-photo-card"
+                        onClick={() =>
+                          openPhotoModal(
+                            `data:${photo.imgType};base64,${photo.data}`
+                          )
+                        }
+                      >
+                        <img
+                          src={`data:${photo.imgType};base64,${photo.data}`}
+                          alt={`Album Photo ${photo.id}`}
+                          className="album-photo-thumbnail"
+                        />
+                        {!isInventoryManager && !isOwner && !isReceptionist && (
+                          <button
+                            style={{
+                              backgroundColor: '#f93142ff',
+                              borderColor: '#f93142ff',
+                            }}
+                            className="delete-photo-button"
+                            onClick={e => {
+                              e.stopPropagation();
+                              void handleDeleteAlbumPhoto(photo.id);
+                            }}
+                          >
+                            Delete Image
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p>No album photos available</p>
+                )}
+              </section>
+            )}
           </>
         )}
       </div>

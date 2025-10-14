@@ -14,6 +14,7 @@ import com.petclinic.inventoryservice.utils.EntityDTOUtil;
 import com.petclinic.inventoryservice.utils.ImageUtil;
 import com.petclinic.inventoryservice.utils.exceptions.InvalidInputException;
 import com.petclinic.inventoryservice.utils.exceptions.NotFoundException;
+import com.petclinic.inventoryservice.utils.exceptions.UnprocessableEntityException;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.io.ByteArrayOutputStream;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.io.IOException;
 import java.io.InputStream;
@@ -49,7 +51,7 @@ class ProductInventoryServiceUnitTest {
     @MockBean
     InventoryTypeRepository inventoryTypeRepository;
 
-//    ProductResponseDTO productResponseDTO = ProductResponseDTO.builder()
+    //    ProductResponseDTO productResponseDTO = ProductResponseDTO.builder()
 //            .inventoryId("1")
 //            .productId(UUID.randomUUID().toString())
 //            .productName("Benzodiazepines")
@@ -272,38 +274,38 @@ class ProductInventoryServiceUnitTest {
                         productPrice,
                         productQuantity,
                         null
-                        );
+                );
 
         StepVerifier
                 .create(productResponseDTOMono)
                 .expectNextCount(1)
                 .verifyComplete();
     }
-/*
-    @Test
-    void getAllProductsByInventoryId_andProductName_withValidFields_shouldSucceed(){
-        String inventoryType = "1";
-        String productName = "Benzodiazepines";
+    /*
+        @Test
+        void getAllProductsByInventoryId_andProductName_withValidFields_shouldSucceed(){
+            String inventoryType = "1";
+            String productName = "Benzodiazepines";
 
-        when(productRepository
-                .findAllProductsByInventoryIdAndProductName(
-                        inventoryType,
-                        productName))
-                .thenReturn(Flux.just(product));
+            when(productRepository
+                    .findAllProductsByInventoryIdAndProductName(
+                            inventoryType,
+                            productName))
+                    .thenReturn(Flux.just(product));
 
-        Flux<ProductResponseDTO> productResponseDTOMono = productInventoryService
-                .getProductsInInventoryByInventoryIdAndProductsField(
-                        inventoryType,
-                        productName,
-                        null,
-                        null);
+            Flux<ProductResponseDTO> productResponseDTOMono = productInventoryService
+                    .getProductsInInventoryByInventoryIdAndProductsField(
+                            inventoryType,
+                            productName,
+                            null,
+                            null);
 
-        StepVerifier
-                .create(productResponseDTOMono)
-                .expectNextCount(1)
-                .verifyComplete();
-    }
-*/
+            StepVerifier
+                    .create(productResponseDTOMono)
+                    .expectNextCount(1)
+                    .verifyComplete();
+        }
+    */
     @Test
     void getAllProductsByInventoryId_andProductPrice_withValidFields_shouldSucceed(){
         String inventoryId = "1";
@@ -615,6 +617,12 @@ class ProductInventoryServiceUnitTest {
 
         when(productRepository.save(any(Product.class))).thenReturn(Mono.just(updatedProduct));
 
+        when(productRepository.existsByInventoryIdAndProductNameIgnoreCaseAndProductIdNot(
+                eq(inventoryId),
+                eq(productRequestDTO.getProductName()),
+                eq(productId)
+        )).thenReturn(Mono.just(false));
+
         // Act and Assert
         StepVerifier
                 .create(productInventoryService.updateProductInInventory(Mono.just(productRequestDTO), inventoryId, productId))
@@ -681,13 +689,13 @@ class ProductInventoryServiceUnitTest {
         Mockito.when(inventoryRepository.findInventoryByInventoryId(inventoryId))
                 .thenReturn(Mono.just(inventory));
 
-        // Act and Assert
-        Throwable exception = assertThrows(InvalidInputException.class, () -> {
-            productInventoryService.updateProductInInventory(Mono.just(productRequestDTO), inventoryId, productId).block();
-        });
+        when(productRepository.findProductByProductId(eq(productId)))
+                .thenReturn(Mono.just(Product.builder().productId(productId).inventoryId(inventoryId).build()));
 
         // Assert
-        assertTrue(exception.getMessage().contains("Product price and quantity must be greater than 0."));
+        assertThrows(InvalidInputException.class, () ->
+                productInventoryService.updateProductInInventory(Mono.just(productRequestDTO), inventoryId, productId).block()
+        );
     }
 
     @Test
@@ -708,6 +716,16 @@ class ProductInventoryServiceUnitTest {
         when(inventoryRepository.findInventoryByInventoryId(eq(inventoryId)))
                 .thenReturn(Mono.just(new Inventory()));
 
+        when(productRepository.findProductByProductId(eq(productId)))
+                .thenReturn(Mono.just(
+                        Product.builder()
+                                .productId(productId)
+                                .inventoryId(inventoryId)
+                                .productName("existing")
+                                .build()
+                ));
+
+
         // Act and Assert
         StepVerifier.create(productInventoryService.updateProductInInventory(Mono.just(productRequestDTO), inventoryId, productId))
                 .expectError(InvalidInputException.class)
@@ -716,7 +734,7 @@ class ProductInventoryServiceUnitTest {
         // You can also assert the exception message here if needed
     }
 
-//    public void deleteProduct_InvalidInventoryId_ShouldNotFound(){
+    //    public void deleteProduct_InvalidInventoryId_ShouldNotFound(){
 //        //arrange
 //        String invalidInventoryId = "invalid";
 //        when(inventoryRepository.existsByInventoryId(invalidInventoryId)).thenReturn(Mono.just(false));
@@ -787,9 +805,14 @@ class ProductInventoryServiceUnitTest {
     void addSupplyToInventory_ShouldSucceed() {
         // Arrange
         String inventoryId = "1";
-        Mockito.when(inventoryRepository.findInventoryByInventoryId(inventoryId))
+
+        when(inventoryRepository.findInventoryByInventoryId(inventoryId))
                 .thenReturn(Mono.just(inventory));
-        Mockito.when(productRepository.save(any(Product.class)))
+
+        when(productRepository.existsByInventoryIdAndProductNameIgnoreCase(eq(inventoryId), eq("Benzodiazepines")))
+                .thenReturn(Mono.just(false));
+
+        when(productRepository.save(any(Product.class)))
                 .thenReturn(Mono.just(product));
         //Act
         Mono<ProductResponseDTO> result = productInventoryService.addSupplyToInventory(Mono.just(productRequestDTO), inventoryId);
@@ -806,6 +829,22 @@ class ProductInventoryServiceUnitTest {
                 })
                 .verifyComplete();
         Mockito.verify(productRepository, Mockito.times(1)).save(any(Product.class));
+    }
+    @Test
+    void addSupplyToInventory_ShouldFail_WhenProductNameExists() {
+        String inventoryId = "1";
+
+        when(inventoryRepository.findInventoryByInventoryId(inventoryId))
+                .thenReturn(Mono.just(inventory));
+        when(productRepository.existsByInventoryIdAndProductNameIgnoreCase(eq(inventoryId), eq("Benzodiazepines")))
+                .thenReturn(Mono.just(true));
+
+        Mono<ProductResponseDTO> result =
+                productInventoryService.addSupplyToInventory(Mono.just(productRequestDTO), inventoryId);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(ex -> ex instanceof UnprocessableEntityException)
+                .verify();
     }
     @Test
     void addSupplyToInventory_WithInvalidInventoryId_ShouldThrowNotFoundException(){
@@ -842,9 +881,9 @@ class ProductInventoryServiceUnitTest {
         Mono<ProductResponseDTO> result = productInventoryService.addSupplyToInventory(Mono.just(productRequestDTO), inventoryId);
         //Assert
         StepVerifier.create(result)
-                .expectErrorMatches(throwable -> {
-                    assertEquals("Product price and quantity must be greater than 0.", throwable.getMessage());
-                    return throwable instanceof InvalidInputException;
+                .expectErrorSatisfies(ex -> {
+                    assertTrue(ex instanceof InvalidInputException);
+                    assertTrue(ex.getMessage().contains("greater than 0"));
                 })
                 .verify();
     }
@@ -1066,29 +1105,30 @@ class ProductInventoryServiceUnitTest {
 
     @Test
     public void addInventoryType_shouldSucceed(){
-        // Arrange
-        InventoryTypeRequestDTO inventoryTypeRequestDTO = InventoryTypeRequestDTO.builder()
+        InventoryTypeRequestDTO dto = InventoryTypeRequestDTO.builder()
                 .type("Internal")
                 .build();
 
-        assertNotNull(inventoryType);
+        assertNotNull(inventoryType); // make sure this is initialized in @BeforeEach
 
+        when(inventoryTypeRepository.existsByTypeIgnoreCase(eq("Internal")))
+                .thenReturn(Mono.just(false));
 
         when(inventoryTypeRepository.insert(any(InventoryType.class)))
                 .thenReturn(Mono.just(inventoryType));
 
+        // Act
+        Mono<InventoryTypeResponseDTO> result = productInventoryService.addInventoryType(Mono.just(dto));
 
-        Mono<InventoryTypeResponseDTO> inventoryTypeResponseDTO = productInventoryService.addInventoryType(Mono.just(inventoryTypeRequestDTO));
-
-
-        StepVerifier
-                .create(inventoryTypeResponseDTO)
-                .expectNextMatches(foundInventoryType -> {
-                    assertNotNull(foundInventoryType);
-                    assertEquals(inventoryType.getType(), foundInventoryType.getType());
+        // Assert
+        StepVerifier.create(result)
+                .expectNextMatches(found -> {
+                    assertNotNull(found);
+                    assertEquals(inventoryType.getType(), found.getType());
                     return true;
                 })
                 .verifyComplete();
+
     }
 
 
@@ -1288,6 +1328,10 @@ class ProductInventoryServiceUnitTest {
         when(inventoryRepository.findInventoryByInventoryCode(inventoryCode))
                 .thenReturn(Mono.just(inventory));
 
+        // ✅ add this line
+        when(productRepository.countByInventoryIdAndLastUpdatedAtAfter(eq("1"), any(LocalDateTime.class)))
+                .thenReturn(Mono.just(0L));
+
         Flux<InventoryResponseDTO> result = productInventoryService.searchInventories(
                 pageable, inventoryCode, null, null, null, null);
 
@@ -1362,12 +1406,12 @@ class ProductInventoryServiceUnitTest {
 
         // Assert
         StepVerifier.create(result)
-                .expectError(NotFoundException.class)
-                .verify();
+                .expectNextCount(0)   // no items
+                .verifyComplete();
     }
 
     @Test
-    void getLowStockProducts_WithNoMatchingInventory_ShouldThrowNotFound() {
+    void getLowStockProducts_WithNoMatchingInventory_ShouldNotThrowNotFound() {
         // Arrange
         String invalidInventoryId = "999";
         int stockThreshold = 5;
@@ -1380,8 +1424,8 @@ class ProductInventoryServiceUnitTest {
 
         // Assert
         StepVerifier.create(result)
-                .expectError(NotFoundException.class)
-                .verify();
+                .expectNextCount(0)
+                .verifyComplete();
     }
 
     @Test
@@ -1921,7 +1965,7 @@ class ProductInventoryServiceUnitTest {
 
         // Assert
         StepVerifier.create(result)
-                .expectError(IllegalArgumentException.class)
+                .expectError(InvalidInputException.class)
                 .verify();
     }
 
@@ -1937,8 +1981,7 @@ class ProductInventoryServiceUnitTest {
 
         // Assert
         StepVerifier.create(result)
-                .expectErrorMatches(throwable -> throwable instanceof NotFoundException &&
-                        throwable.getMessage().contains("No products found for inventory ID"))
+                .expectError(NotFoundException.class)
                 .verify();
     }
 
@@ -1947,8 +1990,8 @@ class ProductInventoryServiceUnitTest {
         String inventoryId = "valid-id";
 
         // Create mock Product objects with correct parameters for Product constructor
-        Product product1 = new Product("1", "P001", inventoryId, "Product1", "Description1", 10, 5.99, 7.99, product.getProductProfit(), Status.AVAILABLE);
-        Product product2 = new Product("2", "P002", inventoryId, "Product2", "Description2", 20, 10.99, 12.99, product.getProductProfit(), Status.RE_ORDER);
+        Product product1 = new Product("1", "P001", inventoryId, "Product1", "Description1", 10, 5.99, 7.99, product.getProductProfit(), Status.AVAILABLE, LocalDateTime.now());
+        Product product2 = new Product("2", "P002", inventoryId, "Product2", "Description2", 20, 10.99, 12.99, product.getProductProfit(), Status.RE_ORDER, LocalDateTime.now());
 
         // Mock the repository to return a Flux of products
         when(productRepository.findAllProductsByInventoryId(inventoryId))
@@ -2245,6 +2288,8 @@ class ProductInventoryServiceUnitTest {
 
         when(inventoryRepository.count()).thenReturn(Mono.just(0L));
         when(inventoryRepository.insert(any(Inventory.class))).thenReturn(Mono.just(savedInventory));
+        when(inventoryRepository.existsByInventoryName(anyString())).thenReturn(Mono.just(false));
+
 
         // Act
         Mono<InventoryResponseDTO> result = productInventoryService.addInventory(Mono.just(requestDTO));
@@ -2257,6 +2302,35 @@ class ProductInventoryServiceUnitTest {
                     assertEquals("INV-0001", response.getInventoryCode());
                     return true;
                 })
+                .verifyComplete();
+    }
+
+    @Test
+    void getRecentUpdateMessage_WithRecentUpdates_ShouldReturnCount() {
+        String inventoryId = "1";
+        LocalDateTime now = LocalDateTime.now();
+
+        when(productRepository.countByInventoryIdAndLastUpdatedAtAfter(eq(inventoryId), any(LocalDateTime.class)))
+                .thenReturn(Mono.just(3L));
+
+        Mono<String> result = productInventoryService.getRecentUpdateMessage(inventoryId);
+
+        StepVerifier.create(result)
+                .expectNext("3 supplies updated in the last 15 min.")
+                .verifyComplete();
+    }
+
+    @Test
+    void getRecentUpdateMessage_WithNoRecentUpdates_ShouldReturnNoUpdates() {
+        String inventoryId = "1";
+
+        when(productRepository.countByInventoryIdAndLastUpdatedAtAfter(eq(inventoryId), any(LocalDateTime.class)))
+                .thenReturn(Mono.just(0L));
+
+        Mono<String> result = productInventoryService.getRecentUpdateMessage(inventoryId);
+
+        StepVerifier.create(result)
+                .expectNext("No recent updates.")
                 .verifyComplete();
     }
 

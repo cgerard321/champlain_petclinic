@@ -133,7 +133,7 @@ class VisitsControllerIntegrationTest {
     private Visit buildVisit(String uuid, String description, String vetId) {
         return Visit.builder()
                 .visitId(uuid)
-                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .visitDate(LocalDateTime.parse("2024-11-25T13:45:00"))
                 .description(description)
                 .petId("2")
                 .practitionerId(vetId)
@@ -144,7 +144,7 @@ class VisitsControllerIntegrationTest {
     private Visit buildCancelledVisit(String uuid, String description, String vetId) {
         return Visit.builder()
                 .visitId(uuid)
-                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .visitDate(LocalDateTime.parse("2024-11-25T13:45:00"))
                 .description(description)
                 .petId("2")
                 .practitionerId(vetId)
@@ -167,7 +167,7 @@ class VisitsControllerIntegrationTest {
     private VisitResponseDTO buildVisitResponseDto(String visitId, String vetId) {
         return VisitResponseDTO.builder()
                 .visitId(visitId)
-                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .visitDate(LocalDateTime.parse("2024-11-25T13:45:00"))
                 .description("this is a dummy description")
                 .petId("2")
                 .practitionerId(vetId)
@@ -177,7 +177,7 @@ class VisitsControllerIntegrationTest {
 
     private VisitRequestDTO buildVisitRequestDto(String vetId) {
         return VisitRequestDTO.builder()
-                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .visitDate(LocalDateTime.parse("2024-11-25T13:45:00"))
                 .description("this is a dummy description")
                 .petId("2")
                 .practitionerId(vetId)
@@ -214,7 +214,7 @@ class VisitsControllerIntegrationTest {
                 .jsonPath("$.practitionerId").isEqualTo(visit1.getPractitionerId())
                 .jsonPath("$.petId").isEqualTo(visit1.getPetId())
                 .jsonPath("$.description").isEqualTo(visit1.getDescription())
-                .jsonPath("$.visitDate").isEqualTo("2024-11-25 13:45")
+                .jsonPath("$.visitDate").isEqualTo("2024-11-25T13:45:00")
                 .jsonPath("$.status").isEqualTo("UPCOMING");
     }
 
@@ -314,7 +314,7 @@ class VisitsControllerIntegrationTest {
                 .jsonPath("$.practitionerId").isEqualTo(visit1.getPractitionerId())
                 .jsonPath("$.petId").isEqualTo(visit1.getPetId())
                 .jsonPath("$.description").isEqualTo(visit1.getDescription())
-                .jsonPath("$.visitDate").isEqualTo("2024-11-25 13:45")
+                .jsonPath("$.visitDate").isEqualTo("2024-11-25T13:45:00")
                 .jsonPath("$.status").isEqualTo("UPCOMING");
     }
 
@@ -336,7 +336,7 @@ class VisitsControllerIntegrationTest {
                 .jsonPath("$.practitionerId").isEqualTo(visit1.getPractitionerId())
                 .jsonPath("$.petId").isEqualTo(visit1.getPetId())
                 .jsonPath("$.description").isEqualTo(visit1.getDescription())
-                .jsonPath("$.visitDate").isEqualTo("2024-11-25 13:45")
+                .jsonPath("$.visitDate").isEqualTo("2024-11-25T13:45:00")
                 .jsonPath("$.status").isEqualTo("UPCOMING");
     }
 
@@ -387,8 +387,8 @@ class VisitsControllerIntegrationTest {
     void getAllArchivedVisits_returnsAllArchivedVisitsFluxDTO() {
         VisitResponseDTO completedVisit = VisitResponseDTO.builder()
                 .visitId("visitId4")
-                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
-                .visitEndDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .visitDate(LocalDateTime.parse("2024-11-25T13:45:00"))
+                .visitEndDate(LocalDateTime.parse("2024-11-25T13:45:00"))
                 .description("Dog Needs Physio-Therapy")
                 .petId("0e4d8481-b611-4e52-baed-af16caa8bf8a")
                 .practitionerId("69f85d2e-625b-11ee-8c99-0242ac120002")
@@ -413,7 +413,7 @@ class VisitsControllerIntegrationTest {
         String validCompletedVisitId = "visitId";
         Visit completedVisit = Visit.builder()
                 .visitId(validCompletedVisitId)
-                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .visitDate(LocalDateTime.parse("2024-11-25T13:45:00"))
                 .description("Dog Needs Physio-Therapy")
                 .petId("0e4d8481-b611-4e52-baed-af16caa8bf8a")
                 .practitionerId(vet.getVetId())

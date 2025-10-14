@@ -3,6 +3,8 @@ package com.petclinic.inventoryservice.datalayer.Product;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 
+import java.time.LocalDateTime;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -20,4 +22,5 @@ public class Product {
     private Double productSalePrice;
     private Double productProfit;
     private Status status;
+    private LocalDateTime lastUpdatedAt;
 }
