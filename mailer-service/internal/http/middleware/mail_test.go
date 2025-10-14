@@ -25,7 +25,7 @@ func TestUnmarshalMail_ValidPayload(t *testing.T) {
 		c.Status(http.StatusOK)
 	})
 
-	body := []byte(`{"to":"a@b.com","subject":"hi","body":"<p>x</p>"}`)
+	body := []byte(`{"emailSendTo":"a@b.com","emailTitle":"hi","body":"<p>x</p>"}`)
 	req := httptest.NewRequest(http.MethodPost, "/mail", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
 
@@ -45,7 +45,7 @@ func TestUnmarshalMail_InvalidPayload_Returns400(t *testing.T) {
 	r.Use(mw.UnmarshalMail())
 	r.POST("/mail", func(c *gin.Context) { c.Status(http.StatusOK) })
 
-	body := []byte(`{"to":"a@b.com","body":"<p>x</p>"}`)
+	body := []byte(`{"emailSendTo":"a@b.com","body":"<p>x</p>"}`)
 	req := httptest.NewRequest(http.MethodPost, "/mail", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
 
@@ -66,7 +66,7 @@ func TestUnmarshalMail_MalformedJSON_Returns400(t *testing.T) {
 		c.Status(http.StatusOK)
 	})
 
-	body := `{"to":"a@b.com","subject":"hi","body":"<p>x</p>"`
+	body := `{"emailSendTo":"a@b.com","emailTitle":"hi","body":"<p>x</p>"`
 	req := httptest.NewRequest(http.MethodPost, "/mail", strings.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
 
