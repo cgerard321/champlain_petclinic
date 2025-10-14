@@ -108,9 +108,13 @@ func (i *FilesServiceImpl) UpdateFile(id string, model *models.FileRequestModel)
 		return nil, err
 	}
 	if err := i.minioServiceClient.AddFile(newFileInfo, model.FileData); err != nil {
-		_ = i.repository.DeleteFileInfo(id)
-		return nil, err
-	}
+    cleanupErr := i.repository.DeleteFileInfo(id)
+    if cleanupErr != nil {
+        log.Printf("Failed to cleanup DB after MinIO error: %v", cleanupErr)
+        return nil, fmt.Errorf("MinIO error: %v; Cleanup error: %v", err, cleanupErr)
+    }
+    return nil, err
+}
 
 	updated := &models.FileResponseModel{
 		FileId:   id,
