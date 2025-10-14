@@ -8,6 +8,29 @@
     .table-striped tbody tr:hover {
         background-color: #D8D8D8;
     }
+
+    .action-toast {
+        position: fixed;
+
+        /* CENTER IT */
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+
+        max-width: 380px;
+        background: #333;
+        color: #fff;
+        padding: 12px 14px;
+        border-radius: 8px;
+        box-shadow: 0 4px 16px rgba(0,0,0,.3);
+        z-index: 9999;
+        display: none;
+    }
+
+    .action-toast.show {
+        display: block;
+    }
+
 </style>
 
 <h2>Products</h2>
@@ -115,14 +138,15 @@
 
 
 
-        <td><a ng-if="!product.isTemporarilyDeleted" class="btn btn-danger" href="javascript:void(0)" ng-click="deleteProduct(product); $event.stopPropagation()" title="Delete">
-            <lord-icon
-                    src="https://cdn.lordicon.com/skkahier.json"
-                    trigger="hover"
-                    style="width:32px;height:32px">
-            </lord-icon>
-            <a ng-if="product.isTemporarilyDeleted"  class="btn btn-info" href="javascript:void(0)" ng-click="undoDelete(product); $event.stopPropagation()">Restore</a>
-        </a>
+        <td>
+            <a ng-if="!product.isTemporarilyDeleted" class="btn btn-danger" href="javascript:void(0)" ng-click="deleteProduct(product); $event.stopPropagation()" title="Delete">
+                <lord-icon
+                        src="https://cdn.lordicon.com/skkahier.json"
+                        trigger="hover"
+                        style="width:32px;height:32px">
+                </lord-icon>
+                <a ng-if="product.isTemporarilyDeleted"  class="btn btn-info" href="javascript:void(0)" ng-click="undoDelete(product); $event.stopPropagation()">Restore</a>
+            </a>
         </td>
 
         <td></td>
@@ -155,3 +179,18 @@
 <a ui-sref="productAdd">
     <button class="add-bundle-button btn btn-success">Add Product</button>
 </a>
+
+<div class="action-toast" ng-class="{'show': toast.visible}">
+    <div class="title">{{ toast.title }}</div>
+    <div class="line" ng-repeat="line in toast.lines track by $index">{{ line }}</div>
+    <div class="actions" ng-if="toast.actions && toast.actions.length">
+        <button class="btn"
+                ng-class="{'btn-primary': (action.kind||'primary')==='primary',
+                       'btn-secondary': action.kind==='secondary',
+                       'btn-danger': action.kind==='danger' }"
+                ng-repeat="action in toast.actions track by $index"
+                ng-click="onToastAction($index)">
+            {{ action.label }}
+        </button>
+    </div>
+</div>
