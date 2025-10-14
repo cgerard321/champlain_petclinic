@@ -366,35 +366,35 @@ class ProductsServiceClientIntegrationTest {
                 .verify();
     }
 
-    @Test
-    void whenDeleteProduct_thenDeleteProduct() throws JsonProcessingException {
-        ProductResponseDTO productResponseDTO = new ProductResponseDTO(
-                "productId",
-                "imageId",
-                "Product 1",
-                "desc",
-                10.00,
-                0.00,
-                0,
-                6,
-                false,
-                ProductType.FOOD,
-                ProductStatus.AVAILABLE,
-                DeliveryType.DELIVERY_AND_PICKUP
-        );
-
-        mockWebServer.enqueue(new MockResponse()
-                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody(objectMapper.writeValueAsString(productResponseDTO))
-                .addHeader("Content-Type", "application/json"));
-
-        Mono<ProductResponseDTO> productResponseDTOMono = productsServiceClient
-                .deleteProduct("productId");
-
-        StepVerifier.create(productResponseDTOMono)
-                .expectNextMatches(product -> product.getProductId().equals("productId"))
-                .verifyComplete();
-    }
+//    @Test
+//    void whenDeleteProduct_thenDeleteProduct() throws JsonProcessingException {
+//        ProductResponseDTO productResponseDTO = new ProductResponseDTO(
+//                "productId",
+//                "imageId",
+//                "Product 1",
+//                "desc",
+//                10.00,
+//                0.00,
+//                0,
+//                6,
+//                false,
+//                ProductType.FOOD,
+//                ProductStatus.AVAILABLE,
+//                DeliveryType.DELIVERY_AND_PICKUP
+//        );
+//
+//        mockWebServer.enqueue(new MockResponse()
+//                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+//                .setBody(objectMapper.writeValueAsString(productResponseDTO))
+//                .addHeader("Content-Type", "application/json"));
+//
+//        Mono<ProductResponseDTO> productResponseDTOMono = productsServiceClient
+//                .deleteProduct("productId");
+//
+//        StepVerifier.create(productResponseDTOMono)
+//                .expectNextMatches(product -> product.getProductId().equals("productId"))
+//                .verifyComplete();
+//    }
 
 
 

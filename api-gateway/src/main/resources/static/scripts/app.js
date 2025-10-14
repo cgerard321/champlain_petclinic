@@ -9,7 +9,7 @@ const whiteList = new Set([
 
 /* App Module */
 const petClinicApp = angular.module('petClinicApp', [
-    'ui.router', 'layoutNav', 'layoutFooter', 'layoutWelcome', 'ownerList', 'ownerDetails', 'ownerForm', 'ownerRegister', 'petRegister', 'petForm',
+    'ui.router', 'ui.bootstrap', 'layoutNav', 'layoutFooter', 'layoutWelcome', 'ownerList', 'ownerDetails', 'ownerForm', 'ownerRegister', 'petRegister', 'petForm',
     'productDetailsInfo', 'productForm', 'productList', 'productUpdateForm', 'visits', 'visit', 'visitList' , 'vetList','vetForm',
     'vetDetails', 'billForm', 'billUpdateForm', 'loginForm', 'rolesDetails', 'signupForm',
     'billDetails', 'billsByOwnerId', 'billHistory','billsByVetId','inventoriesList', 'inventoriesForm','inventoriesService','inventoriesProductList', 'inventoriesProductDetailsInfo', 'inventoriesUpdateForm', 'inventoriesProductUpdateForm','inventoriesProductDetailsInfo','inventoriesProductForm',
