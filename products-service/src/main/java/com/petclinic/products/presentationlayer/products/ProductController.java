@@ -85,7 +85,7 @@ public class ProductController {
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
-    @DeleteMapping(value = "/{productId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @DeleteMapping(value = "/{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<ProductResponseModel>> deleteProduct(@PathVariable String productId,
                                                                     @RequestParam(name = "cascadeBundles", defaultValue = "false") boolean cascadeBundles) {
         return Mono.just(productId)
