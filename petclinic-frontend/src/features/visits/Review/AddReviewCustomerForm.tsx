@@ -2,7 +2,7 @@ import * as React from 'react';
 import ReviewModal from './reviewComponents/ReviewModal';
 import { FormEvent, useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { addCustomerReview } from './Api/addCustomerReview';
+import { addReview } from './Api/addReview';
 import { ReviewRequestDTO } from './Model/ReviewRequestDTO';
 import './AddForm.css';
 import { useUser } from '@/context/UserContext';
@@ -115,7 +115,7 @@ const AddCustomerReviewForm: React.FC = (): JSX.Element => {
 
     try {
       // Call the addCustomerReview API with the updated review state
-      await addCustomerReview(payload.ownerId, payload);
+      await addReview(payload);
 
 
       // Success handling
