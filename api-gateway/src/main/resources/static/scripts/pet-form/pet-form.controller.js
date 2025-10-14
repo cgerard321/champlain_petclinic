@@ -6,6 +6,27 @@ angular.module('petForm')
         var ownerId = $stateParams.ownerId || 0;
         var petId = $stateParams.petId || 0;
 
+        self.notification = {
+            show: false,
+            message: '',
+            type: 'info'
+        };
+
+        self.showNotification = function(message, type) {
+            self.notification.show = true;
+            self.notification.message = message;
+            self.notification.type = type;
+            
+            setTimeout(function() {
+                self.hideNotification();
+            }, 5000);
+        };
+
+        self.hideNotification = function() {
+            self.notification.show = false;
+            self.notification.message = '';
+        };
+
         self.getPetTypeName = function (petTypeId) {
             switch (petTypeId) {
                 case '1':
@@ -24,8 +45,8 @@ angular.module('petForm')
                     return 'Unknown';
             }
         };
- // Clear the form fields
-        self.pet = {}; // Changed $ctrl.pet to self.pet
+
+        self.pet = {};
 
         $http.get('api/gateway/owners/petTypes').then(function (resp) {
             self.types = resp.data;
@@ -39,8 +60,8 @@ angular.module('petForm')
 
         $http.get('api/gateway/owners/' + ownerId).then(function (resp) {
             var ownerData = resp.data;
-            var owner = ownerData.firstName + " " + ownerData.lastName; // Added "var" before owner
-            self.pet.owner = owner; // Changed self.pet = { owner: owner } to self.pet.owner = owner
+            var owner = ownerData.firstName + " " + ownerData.lastName;
+            self.pet.owner = owner;
         });
 
         $q.all([
@@ -57,34 +78,30 @@ angular.module('petForm')
             self.checked = false;
         });
 
-        // Function to submit the form
         self.submit = function () {
             var birthDate = new Date(self.pet.birthDate);
             var offset = birthDate.getTimezoneOffset();
             birthDate.setMinutes(birthDate.getMinutes() - offset);
             var data = {
-                    petId: self.pet.petId,
-                    name: self.pet.name,
-                    birthDate: new Date(self.pet.birthDate).toISOString(),
-                    ownerId: self.pet.ownerId,
-                    petTypeId: self.pet.petTypeId,
-                    weight: self.pet.weight,
-                    isActive: self.pet.isActive
+                petId: self.pet.petId,
+                name: self.pet.name,
+                birthDate: new Date(self.pet.birthDate).toISOString(),
+                ownerId: self.pet.ownerId,
+                petTypeId: self.pet.petTypeId,
+                weight: self.pet.weight,
+                isActive: self.pet.isActive
             };
 
-                var req;
+            var req = $http.put("api/gateway/pets/" + petId, data);
 
-                req = $http.put("api/gateway/pets/" + petId, data);
-
-                req.then(function () {
-                    $state.go('petDetails', {petId: petId});
-                }).catch(function (response) {
-                    var error = response.data;
-                    error.errors = error.errors || [];
-                    alert(error.error + "\r\n" + error.errors.map(function (e) {
-                        return e.field + ": " + e.defaultMessage;
-                    }).join("\r\n"));
-                });
-            
+            req.then(function () {
+                $state.go('petDetails', {petId: petId});
+            }).catch(function (response) {
+                var error = response.data;
+                error.errors = error.errors || [];
+                self.showNotification(error.error + "\r\n" + error.errors.map(function (e) {
+                    return e.field + ": " + e.defaultMessage;
+                }).join("\r\n"), 'error');
+            });
         };
     }]);
