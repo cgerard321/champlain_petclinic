@@ -4,6 +4,8 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
+	ginSwagger "github.com/swaggo/gin-swagger"
+	"github.com/swaggo/gin-swagger/swaggerFiles"
 
 	"mailer-service/internal/http/handlers"
 	"mailer-service/internal/http/middleware"
@@ -17,6 +19,8 @@ import (
 // @BasePath /
 func main() {
 	r := gin.Default()
+
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	host := util.Getenv("SMTP_SERVER")
 	user := util.Getenv("SMTP_USER")
