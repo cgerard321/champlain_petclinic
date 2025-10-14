@@ -185,7 +185,8 @@ export const getEducation = async (vetId: string): Promise<ApiResponse<Education
 import { VetResponseModel } from '@/features/veterinarians/models/VetResponseModel';
 import axiosInstance from '@/shared/api/axiosInstance';
 
-// Example instantiation
+// NOTE: This interface should be defined once in a shared location (e.g., /src/shared/models/ApiResponse.ts) 
+// and imported by all API functions. Do not redefine this interface in every file.
 interface ApiResponse<T> {
   data: T | null;
   errorMessage: string | null;
@@ -359,7 +360,8 @@ if (errorMessage) {
 **Example:**
 
 ```typescript
-// Here you can use a Consistent ApiResponse<T> interface to expect all api hook calls to return the data and an errorMessage if a local error occurs
+// NOTE: This interface should be defined once in a shared location (e.g., /src/shared/models/ApiResponse.ts) 
+// and imported by all API functions. Do not redefine this interface in every file.
 interface ApiResponse<T> {
   data: T | null;
   errorMessage: string | null;
