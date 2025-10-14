@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { FormEvent, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { addCustomerReview } from './Api/addCustomerReview';
+import { addReview } from './Api/addReview';
 import { ReviewRequestDTO } from './Model/ReviewRequestDTO';
 import './AddForm.css';
 import { useUser } from '@/context/UserContext';
@@ -97,7 +97,7 @@ const AddCustomerReviewForm: React.FC = (): JSX.Element => {
 
     try {
       // Call the addCustomerReview API with the updated review state
-      await addCustomerReview(user.userId, review);
+      await addReview(review);
 
       // Success handling
       setSuccessMessage('Review added successfully!');
