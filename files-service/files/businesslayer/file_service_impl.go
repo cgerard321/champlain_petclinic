@@ -23,6 +23,22 @@ func NewFileService(repository datalayer.FileInfoRepository, minioServiceClient 
 	}
 }
 
+func (i *FilesServiceImpl) saveFileInfo(fileInfo *datalayer.FileInfo, data []byte) (*models.FileResponseModel, error) {
+	if err := i.repository.AddFileInfo(fileInfo); err != nil {
+		return nil, err
+	}
+	if err := i.minioServiceClient.AddFile(fileInfo, data); err != nil {
+		_ = i.repository.DeleteFileInfo(fileInfo.FileId)
+		return nil, err
+	}
+	return &models.FileResponseModel{
+		FileId:   fileInfo.FileId,
+		FileName: fileInfo.FileName,
+		FileType: fileInfo.FileType,
+		FileData: data,
+	}, nil
+}
+
 func (i *FilesServiceImpl) GetFile(id string) (*models.FileResponseModel, error) {
 	fileInfo := i.repository.GetFileInfo(id)
 
@@ -85,44 +101,23 @@ func (i *FilesServiceImpl) AddFile(model *models.FileRequestModel) (*models.File
 
 	return response, nil
 }
-
 func (i *FilesServiceImpl) UpdateFile(id string, model *models.FileRequestModel) (*models.FileResponseModel, error) {
 	fileInfo := i.repository.GetFileInfo(id)
 	if fileInfo == nil {
 		return nil, exception.NewNotFoundException("fileId: " + id + " was not found")
 	}
-
-	if err := i.minioServiceClient.DeleteFile(fileInfo); err != nil {
+	if err := i.DeleteFileByFileId(id); err != nil {
 		return nil, err
 	}
-	if err := i.repository.DeleteFileInfo(id); err != nil {
-		return nil, err
-	}
+	fileName := strings.Replace(strings.TrimSuffix(model.FileName, path.Ext(model.FileName)), "_", " ", -1)
 
 	newFileInfo := &datalayer.FileInfo{
 		FileId:   id,
-		FileName: model.FileName,
+		FileName: fileName,
 		FileType: model.FileType,
 	}
-	if err := i.repository.AddFileInfo(newFileInfo); err != nil {
-		return nil, err
-	}
-	if err := i.minioServiceClient.AddFile(newFileInfo, model.FileData); err != nil {
-    cleanupErr := i.repository.DeleteFileInfo(id)
-    if cleanupErr != nil {
-        log.Printf("Failed to cleanup DB after MinIO error: %v", cleanupErr)
-        return nil, fmt.Errorf("MinIO error: %v; Cleanup error: %v", err, cleanupErr)
-    }
-    return nil, err
-}
 
-	updated := &models.FileResponseModel{
-		FileId:   id,
-		FileName: newFileInfo.FileName,
-		FileType: newFileInfo.FileType,
-		FileData: model.FileData,
-	}
-	return updated, nil
+	return i.saveFileInfo(newFileInfo, model.FileData)
 }
 
 func (i *FilesServiceImpl) DeleteFileByFileId(id string) error {
