@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.rmi.ServerException;
 
 public class OwnerClientUnitTest {
-    
+
     private OwnerClient ownerClient;
     private static MockWebServer mockBackEnd;
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -35,11 +35,12 @@ public class OwnerClientUnitTest {
         mockBackEnd = new MockWebServer();
         mockBackEnd.start();
     }
+
     @BeforeEach
-    public void initialize(){
+    public void initialize() {
         ownerClient = new OwnerClient("localhost", String.valueOf(mockBackEnd.getPort()));
     }
-}
+
     @AfterAll
     static void tearDown() throws IOException {
         mockBackEnd.shutdown();
@@ -51,8 +52,8 @@ public class OwnerClientUnitTest {
         OwnerResponseDTO ownerResponseDTO = new OwnerResponseDTO(ownerId, "John", "Doe", "address", "city", "514", "string", null, null);
 
         mockBackEnd.enqueue(new MockResponse()
-                        .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .setBody(objectMapper.writeValueAsString(ownerResponseDTO))
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(objectMapper.writeValueAsString(ownerResponseDTO))
         );
 
         Mono<OwnerResponseDTO> ownerResponseDTOMono = ownerClient.getOwnerByOwnerId(ownerId);
@@ -63,7 +64,7 @@ public class OwnerClientUnitTest {
     }
 
     @Test
-    public void getOwnerByOwnerId_Invalid(){
+    public void getOwnerByOwnerId_Invalid() {
         String invalidId = "00000000";
 
         mockBackEnd.enqueue(new MockResponse()
@@ -72,7 +73,6 @@ public class OwnerClientUnitTest {
                 .addHeader("Content-Type", "application/json"));
 
         Mono<OwnerResponseDTO> result = ownerClient.getOwnerByOwnerId(invalidId);
-
 
         StepVerifier.create(result)
                 .expectErrorMatches(throwable -> throwable instanceof NotFoundException && throwable.getMessage().equals("Owner not found with ownerId: " + invalidId))
