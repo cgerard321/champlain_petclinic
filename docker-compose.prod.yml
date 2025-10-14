@@ -301,7 +301,7 @@ services:
     image: dbgate/dbgate:latest
     container_name: dbgate
     ports:
-      - "8090:3000"                       # Web UI → http://<host>:8090
+      - "8030:3000"                       # Web UI → http://<host>:8090
     restart: unless-stopped
     volumes:
       - dbgate-data:/root/.dbgate         # persist users, sessions, connection tweaks
