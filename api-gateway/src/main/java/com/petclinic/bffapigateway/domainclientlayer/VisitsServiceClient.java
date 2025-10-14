@@ -90,7 +90,7 @@ public class VisitsServiceClient {
     public Flux<VisitResponseDTO> getVisitsForPet(final String petId) {
         return webClient
                 .get()
-                .uri("/pets/{petId}/visits", petId)
+                .uri("/pets/{petId}", petId)
                 .retrieve()
                 .bodyToFlux(VisitResponseDTO.class);
     }

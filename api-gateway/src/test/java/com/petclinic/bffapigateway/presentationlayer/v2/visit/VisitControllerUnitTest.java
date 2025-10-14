@@ -965,7 +965,7 @@ public class VisitControllerUnitTest {
                 .thenReturn(Flux.just(visitResponseDTO1));
 
         webTestClient.get()
-                .uri(BASE_VISIT_URL + "/pets/{petId}/visits", "P001")
+                .uri(BASE_VISIT_URL + "/pets/{petId}", "P001")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBodyList(VisitResponseDTO.class)
@@ -980,7 +980,7 @@ public class VisitControllerUnitTest {
                 .thenReturn(Flux.empty());
 
         webTestClient.get()
-                .uri(BASE_VISIT_URL + "/pets/{petId}/visits", "P001")
+                .uri(BASE_VISIT_URL + "/pets/{petId}", "P001")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBodyList(VisitResponseDTO.class)

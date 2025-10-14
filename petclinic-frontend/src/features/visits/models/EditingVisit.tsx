@@ -57,7 +57,7 @@ const EditingVisit: React.FC = (): JSX.Element => {
             petId: response.petId,
             visitStartDate: new Date(response.visitDate),
             status: response.status,
-            isEmergency: response.isEmergency
+            isEmergency: response.isEmergency,
           });
         } catch (error) {
           console.error(`Error fetching visit with ID ${visitId}:`, error);

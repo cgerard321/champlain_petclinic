@@ -255,7 +255,7 @@ const AddingVisit: React.FC = (): JSX.Element => {
       petId: visit.petId,
       practitionerId: visit.assignedVetId,
       status: visit.status,
-      isEmergency: visit.isEmergency
+      isEmergency: visit.isEmergency,
     };
 
     try {
@@ -271,7 +271,7 @@ const AddingVisit: React.FC = (): JSX.Element => {
         selectedTimeSlot: '',
         status: 'UPCOMING' as Status,
         //visitEndDate: new Date(),
-        isEmergency: false
+        isEmergency: false,
       });
       setTimeout(() => {
         navigate('/visits');

@@ -62,7 +62,7 @@ public class VisitController {
      * @param petId The Pet id to find the visit for
      * @return All the visit with the common pet ID
      */
-    @GetMapping(value = "/pets/{petId}/visits", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(value = "/pets/{petId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<VisitResponseDTO> getVisitsForPet(@PathVariable String petId) {
         return visitService.getVisitsForPet(petId);
     }

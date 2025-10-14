@@ -57,7 +57,7 @@ public class VisitsControllerV1 {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    @GetMapping(value = "/pets/{petId}/visits", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(value = "/pets/{petId}", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<VisitResponseDTO> getVisitsForPet(@PathVariable String petId){
         return visitsServiceClient.getVisitsForPet(petId);
     }
