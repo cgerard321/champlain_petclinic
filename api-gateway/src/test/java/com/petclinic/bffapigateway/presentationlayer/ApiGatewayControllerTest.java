@@ -1220,347 +1220,6 @@ class ApiGatewayControllerTest {
 //    }
     //private static final int BILL_ID = 1;
 
-    @Test
-    void shouldGetAllBills() {
-        BillResponseDTO billResponseDTO =  BillResponseDTO.builder()
-                .billId("BillUUID")
-                .customerId("1")
-                .visitType("Test type")
-                .vetId("1")
-                .date(LocalDate.of(2024,10,1))
-                .dueDate(LocalDate.of(2024,10,30))
-                .billStatus(BillStatus.UNPAID)
-                .amount(new BigDecimal("25.00"))
-                .taxedAmount(BigDecimal.ZERO)
-                .timeRemaining(13L)
-                .build();
-
-
-        BillResponseDTO billResponseDTO2 = BillResponseDTO.builder()
-                .billId("BillUUID2")
-                .customerId("2")
-                .visitType("Test type")
-                .vetId("2")
-                .date(LocalDate.of(2024,10,1))
-                .dueDate(LocalDate.of(2024,10,30))
-                .billStatus(BillStatus.UNPAID)
-                .amount(new BigDecimal("27.00"))
-                .taxedAmount(BigDecimal.ZERO)
-                .timeRemaining(13L)
-                .build();
-        when(billServiceClient.getAllBills()).thenReturn(Flux.just(billResponseDTO,billResponseDTO2));
-
-        client.get()
-                .uri("/api/gateway/bills")
-                .accept(MediaType.TEXT_EVENT_STREAM)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE+";charset=UTF-8")
-                .expectBodyList(BillResponseDTO.class)
-                .value((list)->assertEquals(list.size(),2));
-        Mockito.verify(billServiceClient,times(1)).getAllBills();
-    }
-
-    @Test
-    void shouldGetAllPaidBills() {
-        BillResponseDTO billResponseDTO = BillResponseDTO.builder()
-                .billId("BillUUID")
-                .customerId("1")
-                .visitType("Test type")
-                .vetId("1")
-                .date(LocalDate.of(2024,10,1))
-                .dueDate(LocalDate.of(2024,10,30))
-                .billStatus(PAID)
-                .amount(new BigDecimal("25.00"))
-                .taxedAmount(BigDecimal.ZERO)
-                .timeRemaining(0L)
-                .build();
-
-        BillResponseDTO billResponseDTO2 = BillResponseDTO.builder()
-                .billId("BillUUID2")
-                .customerId("2")
-                .visitType("Test type")
-                .vetId("2")
-                .date(LocalDate.of(2024,10,1))
-                .dueDate(LocalDate.of(2024,10,30))
-                .billStatus(PAID)
-                .amount(new BigDecimal("27.00"))
-                .taxedAmount(BigDecimal.ZERO)
-                .timeRemaining(0L)
-                .build();
-        when(billServiceClient.getAllPaidBills()).thenReturn(Flux.just(billResponseDTO,billResponseDTO2));
-
-        client.get()
-                .uri("/api/gateway/bills/paid")
-                .accept(MediaType.TEXT_EVENT_STREAM)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE+";charset=UTF-8")
-                .expectBodyList(BillResponseDTO.class)
-                .value((list)->assertEquals(list.size(),2));
-        Mockito.verify(billServiceClient,times(1)).getAllPaidBills();
-    }
-
-    @Test
-    void shouldGetAllUnpaidBills() {
-        BillResponseDTO billResponseDTO = BillResponseDTO.builder()
-                .billId("BillUUID")
-                .customerId("1")
-                .visitType("Test type")
-                .vetId("1")
-                .date(LocalDate.of(2024,10,1))
-                .dueDate(LocalDate.of(2024,10,30))
-                .billStatus(BillStatus.UNPAID)
-                .amount(new BigDecimal("25.00"))
-                .taxedAmount(BigDecimal.ZERO)
-                .timeRemaining(13L)
-                .build();
-
-        BillResponseDTO billResponseDTO2 = BillResponseDTO.builder()
-                .billId("BillUUID2")
-                .customerId("2")
-                .visitType("Test type")
-                .vetId("2")
-                .date(LocalDate.of(2024,10,1))
-                .dueDate(LocalDate.of(2024,10,30))
-                .billStatus(BillStatus.UNPAID)
-                .amount(new BigDecimal("27.00"))
-                .taxedAmount(BigDecimal.ZERO)
-                .timeRemaining(13L)
-                .build();
-        when(billServiceClient.getAllUnpaidBills()).thenReturn(Flux.just(billResponseDTO,billResponseDTO2));
-
-        client.get()
-                .uri("/api/gateway/bills/unpaid")
-                .accept(MediaType.TEXT_EVENT_STREAM)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE+";charset=UTF-8")
-                .expectBodyList(BillResponseDTO.class)
-                .value((list)->assertEquals(list.size(),2));
-        Mockito.verify(billServiceClient,times(1)).getAllUnpaidBills();
-    }
-
-    @Test
-    void shouldGetAllOverdueBills() {
-        BillResponseDTO billResponseDTO = BillResponseDTO.builder()
-                .billId("BillUUID")
-                .customerId("1")
-                .visitType("Test type")
-                .vetId("1")
-                .date(LocalDate.of(2024,10,1))
-                .dueDate(LocalDate.of(2024,10,8))
-                .billStatus(BillStatus.OVERDUE)
-                .amount(new BigDecimal("25.00"))
-                .taxedAmount(BigDecimal.ZERO)
-                .timeRemaining(0L)
-                .build();
-
-        BillResponseDTO billResponseDTO2 = BillResponseDTO.builder()
-                .billId("BillUUID2")
-                .customerId("2")
-                .visitType("Test type")
-                .vetId("2")
-                .date(LocalDate.of(2024,10,1))
-                .dueDate(LocalDate.of(2024,10,8))
-                .billStatus(BillStatus.OVERDUE)
-                .amount(new BigDecimal("27.00"))
-                .taxedAmount(BigDecimal.ZERO)
-                .timeRemaining(0L)
-                .build();
-        when(billServiceClient.getAllOverdueBills()).thenReturn(Flux.just(billResponseDTO,billResponseDTO2));
-
-        client.get()
-                .uri("/api/gateway/bills/overdue")
-                .accept(MediaType.TEXT_EVENT_STREAM)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE+";charset=UTF-8")
-                .expectBodyList(BillResponseDTO.class)
-                .value((list)->assertEquals(list.size(),2));
-        Mockito.verify(billServiceClient,times(1)).getAllOverdueBills();
-    }
-
-    @Test
-    void shouldGetBillById() {
-        // Arrange
-        String billId = UUID.randomUUID().toString();
-        BillResponseDTO bill = new BillResponseDTO();
-        bill.setBillId(billId);
-        bill.setCustomerId("1");
-        bill.setAmount(new BigDecimal("499"));
-        bill.setVisitType("Test");
-
-        when(billServiceClient.getBillById(billId))
-                .thenReturn(Mono.just(bill));
-
-        // Act & Assert
-        client.get()
-                .uri("/api/gateway/bills/{billId}", billId)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$.billId").isEqualTo(billId)
-                .jsonPath("$.customerId").isEqualTo(bill.getCustomerId())
-                .jsonPath("$.visitType").isEqualTo(bill.getVisitType())
-                .jsonPath("$.amount").isEqualTo(bill.getAmount());
-
-        Mockito.verify(billServiceClient, times(1)).getBillById(billId);
-    }
-
-
-    @Test
-    public void getBillsByOwnerId(){
-        BillResponseDTO bill = new BillResponseDTO();
-        bill.setBillId(UUID.randomUUID().toString());
-        bill.setCustomerId("1");
-        bill.setAmount(new BigDecimal("499"));
-        bill.setVisitType("Test");
-
-        when(billServiceClient.getBillsByOwnerId(bill.getCustomerId()))
-                .thenReturn(Flux.just(bill));
-
-        client.get()
-                .uri("/api/gateway/bills/customer/{customerId}", bill.getCustomerId())
-                .accept(MediaType.TEXT_EVENT_STREAM)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE+";charset=UTF-8")
-                .expectBodyList(BillResponseDTO.class)
-                .consumeWith(response -> {
-                    List<BillResponseDTO> billResponseDTOS = response.getResponseBody();
-                    Assertions.assertNotNull(billResponseDTOS);
-                });
-    }
-
-    @Test
-    public void getBillsByVetId(){
-        BillResponseDTO bill = new BillResponseDTO();
-        bill.setBillId(UUID.randomUUID().toString());
-        bill.setVetId("1");
-        bill.setAmount(new BigDecimal("499"));
-        bill.setVisitType("Test");
-
-        when(billServiceClient.getBillsByVetId(bill.getVetId()))
-                .thenReturn(Flux.just(bill));
-
-        client.get()
-                .uri("/api/gateway/bills/vets/{vetId}", bill.getVetId())
-                .accept(MediaType.TEXT_EVENT_STREAM)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE+";charset=UTF-8")
-                .expectBodyList(BillResponseDTO.class)
-                .consumeWith(response -> {
-                    List<BillResponseDTO> billResponseDTOS = response.getResponseBody();
-                    Assertions.assertNotNull(billResponseDTOS);
-                });
-
-    }
-    @Test
-    void getBillUsingMissingPath(){
-        client.get()
-                .uri("/bills")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isNotFound()
-                .expectBody()
-                .jsonPath("$.path").isEqualTo("/bills")
-                .jsonPath("$.message").isEqualTo(null);
-    }
-
-    @Test
-    void getBillNotFound(){
-        client.get()
-                .uri("/bills/{billId}", 100)
-                .accept(APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isNotFound()
-                .expectHeader().contentType(APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$.path").isEqualTo("/bills/100")
-                .jsonPath("$.message").isEqualTo(null);
-    }
-
-
-    @Test
-    void createBill(){
-        BillResponseDTO billResponseDTO = new BillResponseDTO();
-        billResponseDTO.setBillId("9");
-        billResponseDTO.setDate(null);
-        billResponseDTO.setAmount(new BigDecimal("600"));
-        billResponseDTO.setVisitType("Adoption");
-
-        BillRequestDTO billRequestDTO = new BillRequestDTO();
-        billRequestDTO.setDate(null);
-        billRequestDTO.setAmount(new BigDecimal("600"));
-        billRequestDTO.setVisitType("Adoption");
-        when(billServiceClient.createBill(billRequestDTO))
-                .thenReturn(Mono.just(billResponseDTO));
-
-        client.post()
-                .uri("/api/gateway/bills")
-                .body(Mono.just(billRequestDTO), BillRequestDTO.class)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isCreated()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody();
-
-        assertEquals(billResponseDTO.getBillId(),"9");
-    }
-
-    @Test
-    void putBillRequestNotFound(){
-        client.put()
-                .uri("/bills/{billId}", 100)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isNotFound()
-                .expectBody()
-                .jsonPath("$.path").isEqualTo("/bills/100")
-                .jsonPath("$.message").isEqualTo(null);
-    }
-
-    @Test
-    void putBillWithMissingPath(){
-        client.put()
-                .uri("/bills")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isNotFound()
-                .expectBody()
-                .jsonPath("$.path").isEqualTo("/bills")
-                .jsonPath("$.message").isEqualTo(null);
-    }
-
-
-    @Test
-    void shouldDeleteBillById(){
-        when(billServiceClient.deleteBill("9"))
-                    .thenReturn(Mono.empty());
-        client.delete()
-                .uri("/api/gateway/bills/9")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isNoContent()
-                .expectBody().isEmpty();
-        verify(billServiceClient, times(1)).deleteBill("9");
-    }
-
-    @Test
-    void shouldDeleteBillsByVetId() {
-        when(billServiceClient.deleteBillsByVetId("9"))
-                .thenReturn(Flux.empty());
-        client.delete()
-                .uri("/api/gateway/bills/vets/9")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isNoContent()
-                .expectBody().isEmpty();
-    }
 
     @Test
     void payBill_Success() {
@@ -1680,6 +1339,59 @@ class ApiGatewayControllerTest {
                     assertTrue(response.contains("CVV must be 3 digits"));
                 });
     }
+
+
+
+    @Test
+    void getAllBillsByOwnerName() {
+        // Arrange
+        String ownerFirstName = "John";
+        String ownerLastName = "Doe";
+
+        BillResponseDTO bill = new BillResponseDTO();
+        bill.setBillId("1");
+        bill.setOwnerFirstName(ownerFirstName);
+        bill.setOwnerLastName(ownerLastName);
+
+        when(billServiceClient.getBillsByOwnerName(ownerFirstName, ownerLastName))
+                .thenReturn(Flux.just(bill));
+
+        // Act & Assert
+        client.get()
+                .uri("/api/gateway/bills/owner/" + ownerFirstName + "/" + ownerLastName)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(BillResponseDTO.class)
+                .consumeWith(response -> {
+                    assertEquals(1, response.getResponseBody().size());
+                });
+    }
+
+
+    @Test
+    public void getBillsByOwnerId(){
+        BillResponseDTO bill = new BillResponseDTO();
+        bill.setBillId(UUID.randomUUID().toString());
+        bill.setCustomerId("1");
+        bill.setAmount(new BigDecimal("499"));
+        bill.setVisitType("Test");
+
+        when(billServiceClient.getBillsByOwnerId(bill.getCustomerId()))
+                .thenReturn(Flux.just(bill));
+
+        client.get()
+                .uri("/api/gateway/bills/customer/{customerId}", bill.getCustomerId())
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE+";charset=UTF-8")
+                .expectBodyList(BillResponseDTO.class)
+                .consumeWith(response -> {
+                    List<BillResponseDTO> billResponseDTOS = response.getResponseBody();
+                    Assertions.assertNotNull(billResponseDTOS);
+                });
+    }
+
 
 
 
@@ -2976,100 +2688,9 @@ private VetAverageRatingDTO buildVetAverageRatingDTO(){
                 .expectStatus().isNoContent();
     }
 
-    @Test
-    void getAllBillsByOwnerName() {
-        // Arrange
-        String ownerFirstName = "John";
-        String ownerLastName = "Doe";
 
-        BillResponseDTO bill = new BillResponseDTO();
-        bill.setBillId("1");
-        bill.setOwnerFirstName(ownerFirstName);
-        bill.setOwnerLastName(ownerLastName);
 
-        when(billServiceClient.getBillsByOwnerName(ownerFirstName, ownerLastName))
-                .thenReturn(Flux.just(bill));
 
-        // Act & Assert
-        client.get()
-                .uri("/api/gateway/bills/owner/" + ownerFirstName + "/" + ownerLastName)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBodyList(BillResponseDTO.class)
-                .consumeWith(response -> {
-                    assertEquals(1, response.getResponseBody().size());
-                });
-    }
-
-    @Test
-    void getAllBillsByVetName(){
-        // Arrange
-        String vetFirstName = "John";
-        String vetLastName = "Doe";
-
-        BillResponseDTO bill = new BillResponseDTO();
-        bill.setBillId("1");
-        bill.setVetFirstName(vetFirstName);
-        bill.setVetLastName(vetLastName);
-
-        when(billServiceClient.getBillsByVetName(vetFirstName, vetLastName))
-                .thenReturn(Flux.just(bill));
-
-        // Act & Assert
-        client.get()
-                .uri("/api/gateway/bills/vet/" + vetFirstName + "/" + vetLastName)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBodyList(BillResponseDTO.class)
-                .consumeWith(response -> {
-                    assertEquals(1, response.getResponseBody().size());
-                });
-    }
-
-    @Test
-    public void getBillsByVisitType(){
-        String visitType = "Checkup";
-
-        BillResponseDTO bill = new BillResponseDTO();
-        bill.setBillId("1");
-        bill.setVisitType(visitType);
-
-        when(billServiceClient.getBillsByVisitType(visitType))
-                .thenReturn(Flux.just(bill));
-
-        client.get()
-                .uri("/api/gateway/bills/visitType/" + visitType)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBodyList(BillResponseDTO.class)
-                .consumeWith(response -> {
-                    assertEquals(1, response.getResponseBody().size());
-                });
-    }
-
-    @Test
-    void archiveBill_ShouldReturnNoContent_WhenSuccessful() {
-        Mockito.when(billServiceClient.archiveBill()).thenReturn(Flux.empty());
-
-        client.patch()
-                .uri("/api/gateway/bills/archive")
-                .exchange()
-                .expectStatus().isNoContent();
-
-        Mockito.verify(billServiceClient).archiveBill();
-    }
-
-    @Test
-    void archiveBill_ShouldReturnNoContent_WhenNoBillsArchived() {
-        Mockito.when(billServiceClient.archiveBill()).thenReturn(Flux.empty());
-
-        client.patch()
-                .uri("/api/gateway/bills/archive")
-                .exchange()
-                .expectStatus().isNoContent();
-
-        Mockito.verify(billServiceClient).archiveBill();
-    }
 
     private EducationResponseDTO buildEducation(){
         return EducationResponseDTO.builder()

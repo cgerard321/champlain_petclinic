@@ -12,10 +12,19 @@ import { ProductModel } from '@/features/inventories/models/ProductModels/Produc
 import inventoryStyles from './InventoriesListTable.module.css';
 import cardStylesInventory from './CardInventoryTeam.module.css';
 // import axios from 'axios';
-import axiosInstance from '@/shared/api/axiosInstance';
+import axiosInstance from '@/shared/api/axiosInstance.ts';
 import { toggleInventoryImportant } from './api/toggleInventoryImportant';
 
 export default function InventoriesListTable(): JSX.Element {
+  const isHttpUrl = (url: string): boolean => {
+    try {
+      const u = new URL(url);
+      return u.protocol === 'http:' || u.protocol === 'https:';
+    } catch {
+      return false;
+    }
+  }; //helper
+
   const [selectedInventories, setSelectedInventories] = useState<Inventory[]>(
     []
   );
@@ -59,12 +68,6 @@ export default function InventoriesListTable(): JSX.Element {
     updateFilters,
   } = useSearchInventories();
 
-  useEffect(() => {
-    getInventoryList('', '', '', showImportantOnly);
-    fetchAllInventoryTypes();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPage]);
-
   const refreshInventoryTypes = async (): Promise<void> => {
     await fetchAllInventoryTypes();
   };
@@ -73,7 +76,7 @@ export default function InventoriesListTable(): JSX.Element {
     getInventoryList('', '', '', showImportantOnly);
     refreshInventoryTypes();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPage]);
+  }, [currentPage, showImportantOnly]);
 
   const handleInventoryNameChange = (value: string): void => {
     setInventoryName(value);
@@ -150,9 +153,21 @@ export default function InventoriesListTable(): JSX.Element {
     }
   };
 
-  const deleteInventoryHandler = (inventoryToDelete: Inventory): void => {
-    deleteInventory(inventoryToDelete);
-    getInventoryList(inventoryName, inventoryType, inventoryDescription);
+  const deleteInventoryHandler = async (
+    inventoryToDelete: Inventory
+  ): Promise<void> => {
+    try {
+      await deleteInventory(inventoryToDelete);
+      await getInventoryList(
+        inventoryName,
+        inventoryType,
+        inventoryDescription
+      );
+    } catch (error) {
+      const msg =
+        error instanceof Error ? error.message : 'Failed to delete inventory.';
+      alert(msg);
+    }
   };
 
   const handleDeleteAllInventories = (confirm: boolean): void => {
@@ -216,8 +231,10 @@ export default function InventoriesListTable(): JSX.Element {
   };
 
   const fetchAllInventoryTypes = async (): Promise<void> => {
-    const data = await getAllInventoryTypes();
-    setInventoryTypeList(data);
+    try {
+      const data = await getAllInventoryTypes();
+      setInventoryTypeList(data);
+    } catch {}
   };
 
   const handleInventorySelection = (
@@ -238,15 +255,32 @@ export default function InventoriesListTable(): JSX.Element {
   };
 
   const deleteSelectedInventories = async (): Promise<void> => {
-    for (const inventory of selectedInventories) {
-      await deleteInventory(inventory); // Delete each selected inventory from the database
-    }
+    if (selectedInventories.length === 0) return;
 
-    // Refresh the inventory list after deleting
-    getInventoryList(inventoryName, inventoryType, inventoryDescription);
+    const results = await Promise.allSettled(
+      selectedInventories.map(inventory => deleteInventory(inventory))
+    );
 
-    // Clear the selected inventories
+    const failures: string[] = results
+      .map((r, i) => ({ r, inv: selectedInventories[i] }))
+      .filter(({ r }) => r.status === 'rejected')
+      .map(x => {
+        const reason = (x.r as PromiseRejectedResult).reason;
+        const msg =
+          reason instanceof Error ? reason.message : 'Failed to delete';
+        return `${x.inv.inventoryName}: ${msg}`;
+      });
+
+    await getInventoryList(inventoryName, inventoryType, inventoryDescription);
     setSelectedInventories([]);
+
+    if (failures.length > 0) {
+      alert(
+        failures.length === 1
+          ? `Failed to delete inventory:\n${failures[0]}`
+          : `Some inventories could not be deleted:\n${failures.join('\n')}`
+      );
+    }
   };
 
   const location = useLocation();
@@ -477,15 +511,40 @@ export default function InventoriesListTable(): JSX.Element {
               style={{ cursor: 'pointer' }}
             >
               <div className={cardStylesInventory.imageContainer}>
-                <img
-                  src={
-                    inventory.imageUploaded instanceof Uint8Array
-                      ? `data:image/jpeg;base64,${arrayBufferToBase64(inventory.imageUploaded)}`
-                      : `data:image/jpeg;base64,${inventory.imageUploaded}`
-                  }
-                  alt={inventory.inventoryName}
-                  className={cardStylesInventory.cardImage}
-                />
+                {(() => {
+                  // pick the best available source for the card image
+                  const uploaded = inventory.imageUploaded
+                    ? inventory.imageUploaded instanceof Uint8Array
+                      ? `data:image/*;base64,${arrayBufferToBase64(inventory.imageUploaded)}`
+                      : `data:image/*;base64,${inventory.imageUploaded}`
+                    : '';
+
+                  const url = isHttpUrl(inventory.inventoryImage)
+                    ? inventory.inventoryImage
+                    : '';
+                  const fallback = isHttpUrl(inventory.inventoryBackupImage)
+                    ? inventory.inventoryBackupImage
+                    : '';
+
+                  const src = url || uploaded;
+
+                  return (
+                    <img
+                      src={src || fallback}
+                      alt={inventory.inventoryName}
+                      className={cardStylesInventory.cardImage}
+                      onError={e => {
+                        const img = e.currentTarget;
+                        // if main fails, try backup once; otherwise hide or swap to a placeholder
+                        if (fallback && img.src !== fallback) {
+                          img.src = fallback;
+                        } else {
+                          img.style.display = 'none'; // or: img.src = '/placeholder.png';
+                        }
+                      }}
+                    />
+                  );
+                })()}
               </div>
               <div className={cardStylesInventory.inventoryNameSection}>
                 <p id={cardStylesInventory.inventoryNameText}>

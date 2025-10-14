@@ -6,7 +6,8 @@ export async function getAllBillsPaginated(
   listSize: number
 ): Promise<Bill[]> {
   const response = await axiosInstance.get<Bill[]>(
-    `/bills?page=${currentPage}&size=${listSize}`
+    `/bills?page=${currentPage}&size=${listSize}`,
+    { useV2: true }
   );
   return response.data;
 }

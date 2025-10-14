@@ -81,12 +81,12 @@ public class ProductControllerV1 {
     }
 
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @DeleteMapping(value = "{productId}")
-    public Mono<ResponseEntity<Void>> deleteProduct(@PathVariable String productId) {
-        return productsServiceClient.deleteProduct(productId)
-                .then(Mono.just(ResponseEntity.noContent().<Void>build()))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
+    @DeleteMapping(value = "/{productId}")
+    public Mono<ResponseEntity<ProductResponseDTO>> deleteProduct(@PathVariable String productId,
+                                                    @RequestParam(name = "cascadeBundles", defaultValue = "false")  boolean cascadeBundles) {
+        return productsServiceClient.deleteProduct(productId, cascadeBundles)
+                .map(product -> ResponseEntity.status(HttpStatus.OK).body(product));
     }
 
 
