@@ -1,6 +1,6 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
-import com.petclinic.bffapigateway.dtos.CustomerDTOs.FileRequestDTO;
+import com.petclinic.bffapigateway.dtos.Files.FileDetails;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.*;
@@ -411,18 +411,10 @@ public class CustomersServiceClient {
                 .bodyToMono(Long.class);
     }
 
-    public Mono<OwnerResponseDTO> patchOwner(String ownerId, Mono<OwnerRequestDTO> ownerRequestDTOMono) {
-        return webClientBuilder.build().patch()
-                .uri(customersServiceUrl + "/owners/" + ownerId)
-                .body(ownerRequestDTOMono, OwnerRequestDTO.class)
-                .retrieve()
-                .bodyToMono(OwnerResponseDTO.class);
-    }
-
-    public Mono<OwnerResponseDTO> updateOwnerPhoto(String ownerId, Mono<FileRequestDTO> photoMono) {
+    public Mono<OwnerResponseDTO> updateOwnerPhoto(String ownerId, Mono<FileDetails> photoMono) {
         return webClientBuilder.build().patch()
                 .uri(customersServiceUrl + "/owners/" + ownerId + "/photo")
-                .body(photoMono, FileRequestDTO.class)
+                .body(photoMono, FileDetails.class)
                 .retrieve()
                 .bodyToMono(OwnerResponseDTO.class);
     }
