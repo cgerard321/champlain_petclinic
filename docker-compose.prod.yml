@@ -371,7 +371,6 @@ services:
       - LABEL_mongoCarts=Mongo (carts)
       - ENGINE_mongoCarts=mongo@dbgate-plugin-mongo
       - URL_mongoCarts=mongodb://root:password@mongo-carts:27017/?authSource=admin
-
     depends_on:
       - mysql-auth
       - mysql-files
@@ -383,7 +382,7 @@ services:
       - mongo-inventory
       - mongo-products
       - mongo-carts
-      -
+
 # -------------------
 # VOLUMES
 # -------------------
