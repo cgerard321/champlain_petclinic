@@ -1,20 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin>
-    <!-- RESOURCES: add our mongodb-jdbc driver folder -->
-    <extension point="io.cloudbeaver.resources">
+
+    <!-- Existing resources (CloudBeaver has many). Keep your current ones too. -->
+    <extension
+            point="io.cloudbeaver.resources">
+        <!-- add ours -->
         <resource name="drivers/mongodb-jdbc"/>
-        <!-- keep any other existing <resource> entries from your image here -->
     </extension>
 
-    <!-- BUNDLES: declare a bundle id that points to that resource dir -->
-    <extension point="io.cloudbeaver.resourceBundle">
+    <!-- Bind resource folders to bundle IDs -->
+    <extension
+            point="io.cloudbeaver.resources.bundles">
+        <!-- add ours -->
         <bundle id="drivers.mongodb-jdbc" label="MongoDB JDBC Driver files"/>
-        <!-- keep other <bundle> entries here -->
     </extension>
 
-    <!-- ENABLE DRIVERS: enable the JDBC driver by id under Generic provider -->
-    <extension point="io.cloudbeaver.enabledDrivers">
+    <!-- Enable drivers that CloudBeaver should expose in the UI -->
+    <extension
+            point="io.cloudbeaver.resources.drivers">
+        <!-- keep the existing list that CE ships with, AND add this line: -->
         <driver id="generic.mongodb-jdbc"/>
-        <!-- keep other <driver id="..."/> entries here -->
     </extension>
+
 </plugin>

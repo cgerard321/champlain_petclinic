@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<drivers>
+    <provider id="generic" name="Generic" class="org.jkiss.dbeaver.ext.generic.GenericDataSourceProvider">
+        <driver
+                id="mongodb-jdbc"
+                label="MongoDB (JDBC)"
+                class="com.mongodb.jdbc.MongoDriver"
+                sampleURL="jdbc:mongodb://{host}[:{port}]/{database}"
+                defaultPort="27017"
+                clientClass="com.mongodb.jdbc.MongoDriver"
+                description="Official MongoDB JDBC driver (Atlas SQL/BI or compatible).">
+            <!-- point the driver to our jar -->
+            <library type="jar" path="/opt/cloudbeaver/server/drivers/mongodb-jdbc/mongodb-jdbc-${MONGO_JDBC_VERSION}-all.jar"/>
+            <!-- categorize it so it’s easy to spot -->
+            <category>nosql</category>
+        </driver>
+    </provider>
+</drivers>
