@@ -309,13 +309,6 @@ services:
       - CB_EXTENSIONS_DEFAULT=1
     restart: unless-stopped
 
-  # ---------- MONGO DB MANAGER ----------
-  mongoku:
-    image: huggingface/mongoku:latest
-    container_name: mongoku
-    restart: unless-stopped
-    ports: [ "9090:3100" ]
-
 # -------------------
 # VOLUMES
 # -------------------
