@@ -120,10 +120,12 @@ public class ProductsServiceClient {
 
     }
 
-    public Mono<ProductResponseDTO> deleteProduct(final String productId) {
+    public Mono<ProductResponseDTO> deleteProduct(final String productId, boolean cascadeBundles) {
         return webClientBuilder.build()
                 .delete()
-                .uri(productsServiceUrl + "/"  + productId)
+                .uri(uri -> uri.path("/"  + productId)
+                        .queryParam("cascadeBundles", cascadeBundles)
+                        .build())
                 .retrieve()
                 .bodyToMono(ProductResponseDTO.class);
     }
