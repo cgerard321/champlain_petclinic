@@ -1,5 +1,6 @@
 package com.petclinic.customersservice.presentationlayer;
 
+import com.petclinic.customersservice.domainclientlayer.FileResponseDTO;
 import lombok.*;
 
 import java.util.List;
@@ -19,4 +20,5 @@ public class OwnerResponseDTO {
     private String telephone;
     private List<PetResponseDTO> pets;
     private String photoId;
+    private FileResponseDTO photo;
 }
