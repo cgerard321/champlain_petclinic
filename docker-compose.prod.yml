@@ -300,8 +300,7 @@ services:
   # ---------- SQL DB MANAGER ----------
   cloudbeaver:
     build:
-      context: ./cloudbeaver    # <— folder with Dockerfile + plugin.xml
-    image: cloudbeaver-mongo:25.2.3    # pin a tag you control
+      context: ./cloudbeaver
     container_name: cloudbeaver
     ports:
       - "8978:8978"
