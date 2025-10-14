@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin>
+    <!-- Include driver in server configuration (wiki): -->
+    <extension point="io.cloudbeaver.resources">
+        <resource name="drivers/mongodb-jdbc"/>
+    </extension>
+
+    <extension point="io.cloudbeaver.resourceBundle">
+        <bundle id="drivers.mongodb-jdbc" label="MongoDB JDBC Driver files"/>
+    </extension>
+
+    <extension point="io.cloudbeaver.enabledDrivers">
+        <!-- full driver id = providerId.driverId -->
+        <driver id="generic.mongodb-jdbc"/>
+    </extension>
+</plugin>
