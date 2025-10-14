@@ -4,9 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.dtos.Vets.VetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.*;
-import com.petclinic.bffapigateway.dtos.Visits.Emergency.EmergencyRequestDTO;
-import com.petclinic.bffapigateway.dtos.Visits.Emergency.EmergencyResponseDTO;
-import com.petclinic.bffapigateway.dtos.Visits.Emergency.UrgencyLevel;
 import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewResponseDTO;
 import com.petclinic.bffapigateway.exceptions.BadRequestException;
@@ -173,6 +170,7 @@ class VisitsServiceClientIntegrationTest {
                 .vetEmail("vet@email.com")
                 .vetPhoneNumber("123-456-7890")
                 .status(Status.UPCOMING)
+                .isEmergency(true)
                 .build();
         server.enqueue(new MockResponse().setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .setBody(objectMapper.writeValueAsString(visitResponseDTO)).addHeader("Content-Type", "application/json"));
@@ -193,7 +191,9 @@ class VisitsServiceClientIntegrationTest {
                 "f470653d-05c5-4c45-b7a0-7d70f003d2ac",
                 "testJwtToken",
                 "2",
-                "73b5c112-5703-4fb7-b7bc-ac8186811ae1"
+                "73b5c112-5703-4fb7-b7bc-ac8186811ae1",
+                true
+
         );
 
         // Mock the server response
@@ -240,7 +240,8 @@ class VisitsServiceClientIntegrationTest {
                 "f470653d-05c5-4c45-b7a0-7d70f003d2ac",
                 "testJwtToken",
                 "2",
-                "73b5c112-5703-4fb7-b7bc-ac8186811ae1"
+                "73b5c112-5703-4fb7-b7bc-ac8186811ae1",
+                true
         );
 
         String errorMessage = "{\"message\":\"A visit with the same time already exists.\"}";
@@ -270,7 +271,8 @@ class VisitsServiceClientIntegrationTest {
                 "f470653d-05c5-4c45-b7a0-7d70f003d2ac",
                 "testJwtToken",
                 "2",
-                "73b5c112-5703-4fb7-b7bc-ac8186811ae1"
+                "73b5c112-5703-4fb7-b7bc-ac8186811ae1",
+                true
         );
 
         String errorMessage = "{\"message\":\"Visit not found.\"}";
@@ -300,7 +302,8 @@ class VisitsServiceClientIntegrationTest {
                 "f470653d-05c5-4c45-b7a0-7d70f003d2ac",
                 "testJwtToken",
                 "2",
-                "73b5c112-5703-4fb7-b7bc-ac8186811ae1"
+                "73b5c112-5703-4fb7-b7bc-ac8186811ae1",
+                false
         );
 
         String errorMessage = "{\"message\":\"Invalid request.\"}";
@@ -330,7 +333,8 @@ class VisitsServiceClientIntegrationTest {
                 "f470653d-05c5-4c45-b7a0-7d70f003d2ac",
                 "testJwtToken",
                 "2",
-                "73b5c112-5703-4fb7-b7bc-ac8186811ae1"
+                "73b5c112-5703-4fb7-b7bc-ac8186811ae1",
+                true
         );
 
         // Mock the server error response with a bad request status and non-JSON body, which should trigger an IOException during parsing
@@ -735,7 +739,8 @@ class VisitsServiceClientIntegrationTest {
                 "practitionerId", // Practitioner ID
                 "jwtToken", // JWT Token
                 "ownerId",
-                "73b5c112-5703-4fb7-b7bc-ac8186811ae1"
+                "73b5c112-5703-4fb7-b7bc-ac8186811ae1",
+                true
         );
 
         VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
@@ -975,217 +980,6 @@ class VisitsServiceClientIntegrationTest {
     }
 
      */
-
-    @Test
-    void getAllEmergencies() throws JsonProcessingException {
-        DateTimeFormatter FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-        String fixedStr1 = "2024-09-28 19:54";
-        String fixedStr2 = "2024-09-28 19:55";
-        LocalDateTime fixedLdt1 = LocalDateTime.parse(fixedStr1, FMT);
-        LocalDateTime fixedLdt2 = LocalDateTime.parse(fixedStr2, FMT);
-
-        EmergencyRequestDTO emergencyRequestDTO = EmergencyRequestDTO.builder()
-                .visitDate(fixedLdt1)
-                .description("Updated Emergency")
-                .petId("Oscar")
-                .practitionerId("2332222232323234hhh232")
-                .urgencyLevel(UrgencyLevel.MEDIUM)
-                .emergencyType("Accident")
-                .build();
-
-        EmergencyRequestDTO emergencyRequestDTO2 = EmergencyRequestDTO.builder()
-                .visitDate(fixedLdt2)
-                .description("Updated Emergency2")
-                .petId("Oscar2")
-                .practitionerId("2332222232323234hhh232")
-                .urgencyLevel(UrgencyLevel.MEDIUM)
-                .emergencyType("Accident2")
-                .build();
-
-        Date fixedBirth = new Date(0);
-
-        EmergencyResponseDTO emergency1 = EmergencyResponseDTO.builder()
-                .visitEmergencyId(UUID.randomUUID().toString())
-                .visitDate(fixedLdt1)
-                .description(emergencyRequestDTO.getDescription())
-                .petId(emergencyRequestDTO.getPetId())
-                .petName("hamid")
-                .petBirthDate(fixedBirth)
-                .practitionerId(emergencyRequestDTO.getPractitionerId())
-                .vetFirstName("carlos")
-                .vetLastName("ambock")
-                .vetEmail("carlos@gmail.com")
-                .vetPhoneNumber("540-233-2323")
-                .urgencyLevel(emergencyRequestDTO.getUrgencyLevel())
-                .emergencyType(emergencyRequestDTO.getEmergencyType())
-                .build();
-
-        EmergencyResponseDTO emergency2 = EmergencyResponseDTO.builder()
-                .visitEmergencyId(UUID.randomUUID().toString())
-                .visitDate(fixedLdt2)
-                .description(emergencyRequestDTO2.getDescription())
-                .petId(emergencyRequestDTO2.getPetId())
-                .petName("hamid")
-                .petBirthDate(fixedBirth)
-                .practitionerId(emergencyRequestDTO2.getPractitionerId())
-                .vetFirstName("carlos")
-                .vetLastName("ambock")
-                .vetEmail("carlos@gmail.com")
-                .vetPhoneNumber("540-233-2323")
-                .urgencyLevel(emergencyRequestDTO2.getUrgencyLevel())
-                .emergencyType(emergencyRequestDTO2.getEmergencyType())
-                .build();
-
-        server.enqueue(new MockResponse()
-                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody(objectMapper.writeValueAsString(new EmergencyResponseDTO[]{emergency1, emergency2})));
-
-        StepVerifier.create(visitsServiceClient.getAllEmergency())
-                .expectNext(emergency1)
-                .expectNext(emergency2)
-                .verifyComplete();
-    }
-
-
-    @Test
-    void createEmergency() throws JsonProcessingException {
-        // Predefine the visitEmergencyId to ensure it matches the expected value
-        String EMERGENCY_ID = "df7da576-8f99-4d57-82ce-48e695416f8e"; // Example UUID
-
-        // Create EmergencyRequestDTO object
-        EmergencyRequestDTO emergencyRequestDTO = EmergencyRequestDTO.builder()
-                .visitDate(LocalDateTime.now())
-                .description("Updated Emergency")
-                .petId("Oscar")
-                .practitionerId("2332222232323234hhh232")
-                .urgencyLevel(UrgencyLevel.HIGH)
-                .emergencyType("Accident")
-                .build();
-
-        // Create EmergencyResponseDTO object, using the predefined EMERGENCY_ID
-        EmergencyResponseDTO emergencyResponseDTO = EmergencyResponseDTO.builder()
-                .visitEmergencyId(EMERGENCY_ID)
-                .visitDate(emergencyRequestDTO.getVisitDate())
-                .description(emergencyRequestDTO.getDescription())
-                .petId(emergencyRequestDTO.getPetId())
-                .petName("hamid")
-                .petBirthDate(new Date()) // Using a new date for simplicity
-                .practitionerId(emergencyRequestDTO.getPractitionerId())
-                .vetFirstName("carlos")
-                .vetLastName("ambock")
-                .vetEmail("carlos@gmail.com")
-                .vetPhoneNumber("540-233-2323")
-                .urgencyLevel(emergencyRequestDTO.getUrgencyLevel())
-                .emergencyType(emergencyRequestDTO.getEmergencyType())
-                .build();
-
-        // Set up the MockWebServer to return the mock response
-        server.enqueue(new MockResponse()
-                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody(objectMapper.writeValueAsString(emergencyResponseDTO)));
-
-        // Call the visitsServiceClient method to create the emergency
-        Mono<EmergencyResponseDTO> emergencyMono = visitsServiceClient.createEmergency(Mono.just(emergencyRequestDTO));
-
-        // Use StepVerifier to verify the response matches expected values
-        StepVerifier.create(emergencyMono)
-                .expectNextMatches(emergency ->
-                        emergency.getVisitEmergencyId().equals(EMERGENCY_ID) && // Check if visitEmergencyId matches
-                                emergency.getUrgencyLevel().equals(UrgencyLevel.HIGH)  // Check if urgencyLevel is HIGH
-                )
-                .verifyComplete();
-    }
-
-
-    @Test
-    void getEmergencyVisitsForPet() throws Exception {
-        DateTimeFormatter FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-        String fixedStr = "2024-09-28 19:48";
-        LocalDateTime fixedLdt = LocalDateTime.parse(fixedStr, FMT);
-
-        EmergencyRequestDTO emergencyRequestDTO = EmergencyRequestDTO.builder()
-                .visitDate(fixedLdt)
-                .description("Updated Emergency")
-                .petId("2")
-                .practitionerId("2332222232323234hhh232")
-                .urgencyLevel(UrgencyLevel.MEDIUM)
-                .emergencyType("Accident")
-                .build();
-
-        EmergencyResponseDTO emergency1 = EmergencyResponseDTO.builder()
-                .visitEmergencyId(UUID.randomUUID().toString())
-                .visitDate(fixedLdt)
-                .description(emergencyRequestDTO.getDescription())
-                .petId(emergencyRequestDTO.getPetId())
-                .petName("hamid")
-                .petBirthDate(new Date(0))
-                .practitionerId(emergencyRequestDTO.getPractitionerId())
-                .vetFirstName("carlos")
-                .vetLastName("ambock")
-                .vetEmail("carlos@gmail.com")
-                .vetPhoneNumber("540-233-2323")
-                .urgencyLevel(emergencyRequestDTO.getUrgencyLevel())
-                .emergencyType(emergencyRequestDTO.getEmergencyType())
-                .build();
-
-        server.enqueue(new MockResponse()
-                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody(objectMapper.writeValueAsString(emergency1)));
-
-        Flux<EmergencyResponseDTO> visits = visitsServiceClient.getEmergencyVisitForPet("2");
-
-        StepVerifier.create(visits)
-                .expectNext(emergency1)
-                .verifyComplete();
-    }
-
-
-    @Test
-    void getEmergencyByEmergencyId() throws JsonProcessingException {
-        // Create an EmergencyRequestDTO with HIGH urgency level
-        EmergencyRequestDTO emergencyRequestDTO = EmergencyRequestDTO.builder()
-                .visitDate(LocalDateTime.now())
-                .description("Updated Emergency")
-                .petId("2")
-                .practitionerId("2332222232323234hhh232")
-                .urgencyLevel(UrgencyLevel.HIGH)  // Set urgency level to HIGH
-                .emergencyType("Accident")
-                .build();
-
-        // Create an EmergencyResponseDTO with HIGH urgency level to match the request
-        EmergencyResponseDTO emergencyResponse = EmergencyResponseDTO.builder()
-                .visitEmergencyId(UUID.randomUUID().toString())
-                .visitDate(emergencyRequestDTO.getVisitDate())
-                .description(emergencyRequestDTO.getDescription())
-                .petId(emergencyRequestDTO.getPetId())
-                .petName("hamid")
-                .petBirthDate(new Date())  // Set pet birth date
-                .practitionerId(emergencyRequestDTO.getPractitionerId())
-                .vetFirstName("carlos")
-                .vetLastName("ambock")
-                .vetEmail("carlos@gmail.com")
-                .vetPhoneNumber("540-233-2323")
-                .urgencyLevel(UrgencyLevel.HIGH)  // Set urgency level to HIGH
-                .emergencyType(emergencyRequestDTO.getEmergencyType())
-                .build();
-
-        // Enqueue a mock response with the above emergencyResponse
-        server.enqueue(new MockResponse()
-                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody(objectMapper.writeValueAsString(emergencyResponse)));
-
-        // Fetch the emergency by ID from the service client
-        Mono<EmergencyResponseDTO> emergencyMono = visitsServiceClient.getEmergencyByEmergencyId(emergencyResponse.getVisitEmergencyId());
-
-        // Verify the response using StepVerifier
-        StepVerifier.create(emergencyMono)
-                .expectNextMatches(emergency ->
-                        emergency.getVisitEmergencyId().equals(emergencyResponse.getVisitEmergencyId()) &&  // Check if ID matches
-                                emergency.getUrgencyLevel().equals(UrgencyLevel.HIGH) &&  // Check urgency level is HIGH
-                                emergency.getDescription().equals("Updated Emergency"))  // Ensure description matches
-                .verifyComplete();
-    }
-
 
     /*
 

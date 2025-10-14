@@ -29,6 +29,7 @@ type VisitType = {
   selectedTimeSlot: string;
   assignedVetId: string;
   status: Status;
+  isEmergency: boolean;
 };
 
 const AddingVisit: React.FC = (): JSX.Element => {
@@ -40,6 +41,7 @@ const AddingVisit: React.FC = (): JSX.Element => {
     selectedTimeSlot: '',
     assignedVetId: '',
     status: 'UPCOMING' as Status,
+    isEmergency: false,
   });
 
   const [vets, setVets] = useState<VetResponse[]>([]);
@@ -253,6 +255,7 @@ const AddingVisit: React.FC = (): JSX.Element => {
       petId: visit.petId,
       practitionerId: visit.assignedVetId,
       status: visit.status,
+      isEmergency: visit.isEmergency,
     };
 
     try {
@@ -267,6 +270,8 @@ const AddingVisit: React.FC = (): JSX.Element => {
         selectedDate: '',
         selectedTimeSlot: '',
         status: 'UPCOMING' as Status,
+        //visitEndDate: new Date(),
+        isEmergency: false,
       });
       setTimeout(() => {
         navigate('/visits');

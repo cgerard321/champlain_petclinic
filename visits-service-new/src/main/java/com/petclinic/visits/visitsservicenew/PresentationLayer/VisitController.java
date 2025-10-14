@@ -1,14 +1,9 @@
 package com.petclinic.visits.visitsservicenew.PresentationLayer;
 
-import com.petclinic.visits.visitsservicenew.BusinessLayer.Emergency.EmergencyService;
 import com.petclinic.visits.visitsservicenew.BusinessLayer.Review.ReviewService;
 import com.petclinic.visits.visitsservicenew.BusinessLayer.VisitService;
 import com.petclinic.visits.visitsservicenew.Exceptions.InvalidInputException;
 import com.petclinic.visits.visitsservicenew.Exceptions.NotFoundException;
-import com.petclinic.visits.visitsservicenew.PresentationLayer.Emergency.EmergencyRequestDTO;
-import com.petclinic.visits.visitsservicenew.PresentationLayer.Emergency.EmergencyResponseDTO;
-import com.petclinic.visits.visitsservicenew.PresentationLayer.Emergency.EmergencyRequestDTO;
-import com.petclinic.visits.visitsservicenew.PresentationLayer.Emergency.EmergencyResponseDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.Review.ReviewRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.Review.ReviewResponseDTO;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +30,6 @@ public class VisitController {
      */
     private final VisitService visitService;
     private final ReviewService reviewService;
-    private final EmergencyService emergencyService;
 
     /**
      * Simple Get all Visits
@@ -215,31 +209,6 @@ public class VisitController {
 
     //emergencies
 
-    @GetMapping(value = "/emergencies/pets/{petId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<EmergencyResponseDTO> getEmergencyVisitsForPet(@PathVariable String petId) {
-        return emergencyService.getEmergencyVisitsForPet(petId);
-    }
-    @GetMapping(value = "/emergencies")
-    public Flux<EmergencyResponseDTO> getAllEmergency() {
-        return emergencyService.GetAllEmergencies();
-    }
-
-    @PostMapping(value = "/emergencies")
-    public Mono<ResponseEntity<EmergencyResponseDTO>> PostEmergency(@RequestBody Mono<EmergencyRequestDTO> emergencyRequestDTOMono) {
-        return emergencyService.AddEmergency(emergencyRequestDTOMono)
-                .map(c -> ResponseEntity.status(HttpStatus.CREATED).body(c))
-                .defaultIfEmpty(ResponseEntity.badRequest().build());
-    }
-
-    @GetMapping(value = "/emergencies/{emergencyId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<EmergencyResponseDTO>> getEmergencyByEmergencyId(@PathVariable String emergencyId) {
-        return Mono.just(emergencyId)
-                //.filter(id -> id.length() == 36)
-                //.switchIfEmpty(Mono.error(new InvalidInputException("the provided emergency id is invalid: " + emergencyId)))
-                .flatMap(emergencyService::GetEmergencyByEmergencyId)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.badRequest().build());
-    }
 
 /*
     @GetMapping(value = "/emergencies/{emergencyId}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -269,23 +238,6 @@ public class VisitController {
 //                .map(ResponseEntity::ok)
 //                .defaultIfEmpty(ResponseEntity.badRequest().build());
 //    }
-
-    @PutMapping(value = "/emergencies/{visitEmergencyId}", consumes = "application/json", produces = "application/json")
-    public Mono<EmergencyResponseDTO> updateEmergencyById(
-            @PathVariable String visitEmergencyId,
-            @RequestBody Mono<EmergencyRequestDTO> emergencyRequestDTOMono) {
-        return emergencyService.updateEmergency(visitEmergencyId, emergencyRequestDTOMono);
-    }
-
-    @DeleteMapping(value = "/emergencies/{emergencyId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<EmergencyResponseDTO>> DeleteEmergency(@PathVariable String emergencyId) {
-        return Mono.just(emergencyId)
-                // .filter(id -> id.length() == 36)
-                // .switchIfEmpty(Mono.error(new InvalidInputException("the provided emergency id is invalid: " + emergencyId)))
-                .flatMap(emergencyService::DeleteEmergency)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.badRequest().build());
-    }
 
 
     @PutMapping(value = "/completed/{visitId}/archive", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)

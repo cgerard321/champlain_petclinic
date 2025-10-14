@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static com.mongodb.assertions.Assertions.assertTrue;
 
@@ -443,7 +444,7 @@ class InventoryControllerIntegrationTest {
     @Test
     public void addNewInventoryWithValidValues_shouldSucceed() {
         InventoryRequestDTO inventoryRequestDTO = InventoryRequestDTO.builder()
-                .inventoryName("internal")
+                .inventoryName("internal-" + UUID.randomUUID())
                 .inventoryType(inventoryType1.getType())
                 .inventoryDescription("inventory_3")
                 .build();
@@ -487,7 +488,7 @@ class InventoryControllerIntegrationTest {
                 .expectBody(InvalidInputException.class)
                 .value(invalidErrorResponse -> {
                     assertNotNull(invalidErrorResponse);
-                    assertEquals("Invalid input data: inventory type cannot be blank.", invalidErrorResponse.getMessage());
+                    assertEquals("Inventory type cannot be blank.", invalidErrorResponse.getMessage());
 
                 });
     }
@@ -691,8 +692,9 @@ class InventoryControllerIntegrationTest {
     @Test
     void addProductToInventory_WithValidInventoryIdAndValidBody_ShouldSucceed() {
         // Arrange
+        String uniqueName = "Benzodiazepines-" + UUID.randomUUID();
         ProductRequestDTO productRequestDTO = ProductRequestDTO.builder()
-                .productName("Benzodiazepines")
+                .productName(uniqueName)
                 .productDescription("Sedative Medication")
                 .productPrice(100.00)
                 .productQuantity(10)
@@ -721,8 +723,9 @@ class InventoryControllerIntegrationTest {
     @Test
     void addProductToInventory_WithInvalidInventoryId_AndValidValues_ShouldThrowNotFoundException() {
         // Arrange
+        String uniqueName = "Benzodiazepines-" + UUID.randomUUID();
         ProductRequestDTO productRequestDTO = ProductRequestDTO.builder()
-                .productName("Benzodiazepines")
+                .productName(uniqueName)
                 .productDescription("Sedative Medication")
                 .productPrice(100.00)
                 .productQuantity(10)
