@@ -300,7 +300,7 @@ services:
   # ---------- SQL DB MANAGER ----------
   cloudbeaver:
     build:
-      context: ./cloudbeaver-mongo
+      context: ./cloudbeaver
       args:
         BASE_TAG: latest
     image: cloudbeaver-mongo:latest
