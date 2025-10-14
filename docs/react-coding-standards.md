@@ -178,7 +178,7 @@ export const getEducation = async (vetId: string): Promise<ApiResponse<Education
 - **File naming**: Use camelCase for API files (e.g., `getAllVets.ts`, `addInventory.ts`)
 - **Function naming**: Use descriptive verbs (get, add, update, delete, search)
 - **Return types**: Always specify return types and use proper TypeScript generics
-- **Streaming Responses**: Use `responseType: 'stream'` for Server-Sent Events (SSE) or real-time data updates. This is useful for live notifications, real-time dashboards, or continuous data feeds used from the reactive services.
+- **Streaming Responses**: Use `responseType: 'stream'` for Server-Sent Events (SSE) or real-time data updates. When using this option, `response.data` will be a `ReadableStream<Uint8Array>` that needs to be processed chunk by chunk. This is useful for live notifications, real-time dashboards, or continuous data feeds from reactive services. See the streaming example below for proper stream handling.
 
 **GOOD Example:**
 
@@ -205,19 +205,79 @@ export async function getAllVets(): Promise<ApiResponse<VetResponseModel[]>> {
   }
 }
 
-// Example with streaming for real-time data
-export async function getVetsStream(): Promise<ApiResponse<VetResponseModel[]>> {
+// Example with streaming for reactive API endpoints (Spring WebFlux)
+// NOTE: This example is adapted for reactive Spring Boot services that return Flux<T> streams.
+// The reactive services typically emit individual JSON objects separated by newlines.
+export async function getVetsReactiveStream(): Promise<ApiResponse<ReadableStream<Uint8Array>>> {
   try {
-    const response = await axiosInstance.get<VetResponseModel[]>('/vets', { 
+    const response = await axiosInstance.get('/vets', { 
       useV2: false,
-      responseType: 'stream'
+      responseType: 'stream',
+      headers: {
+        'Accept': 'application/x-ndjson' // Newline Delimited JSON for reactive streams
+      }
     });
+    
+    // response.data is a ReadableStream when responseType is 'stream'
     return { data: response.data, errorMessage: null };
   } catch (error) {
     return { 
       data: null, 
-      errorMessage: 'Unable to fetch veterinarians stream. Please try again later.' 
+      errorMessage: 'Unable to establish veterinarians reactive stream. Please try again later.' 
     };
+  }
+}
+
+// Example of processing reactive stream (Spring WebFlux Flux<VetResponseModel>)
+// NOTE: Reactive APIs typically emit individual JSON objects separated by newlines (NDJSON format)
+export async function processReactiveVetsStream(stream: ReadableStream<Uint8Array>, 
+                                              onVetReceived: (vet: VetResponseModel) => void,
+                                              onComplete?: () => void,
+                                              onError?: (error: string) => void): Promise<void> {
+  const reader = stream.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      
+      if (done) {
+        // Process any remaining data in buffer
+        if (buffer.trim()) {
+          try {
+            const vet: VetResponseModel = JSON.parse(buffer.trim());
+            onVetReceived(vet);
+          } catch (parseError) {
+            onError?.(`Failed to parse final vet data: ${parseError}`);
+          }
+        }
+        onComplete?.();
+        break;
+      }
+      
+      // Decode chunk and add to buffer
+      buffer += decoder.decode(value, { stream: true });
+      
+      // Process complete lines (each line is a JSON object from Flux)
+      const lines = buffer.split('\n');
+      buffer = lines.pop() || ''; // Keep incomplete line in buffer
+      
+      for (const line of lines) {
+        if (line.trim()) {
+          try {
+            const vet: VetResponseModel = JSON.parse(line.trim());
+            onVetReceived(vet); // Process each vet as it arrives
+          } catch (parseError) {
+            onError?.(`Failed to parse vet data: ${parseError}`);
+          }
+        }
+      }
+    }
+  } catch (streamError) {
+    onError?.(`Stream processing error: ${streamError}`);
+  } finally {
+    reader.releaseLock();
   }
 }
 ```
