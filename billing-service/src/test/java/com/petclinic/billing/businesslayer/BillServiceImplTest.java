@@ -9,9 +9,11 @@ import com.petclinic.billing.exceptions.InvalidPaymentException;
 import com.petclinic.billing.exceptions.NotFoundException;
 import com.petclinic.billing.util.EntityDtoUtil;
 import com.petclinic.billing.util.InterestCalculationUtil;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,6 +26,7 @@ import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+
 import static org.mockito.ArgumentMatchers.*;
 
 import java.lang.reflect.Method;
@@ -33,6 +36,8 @@ import java.time.LocalDate;
 import java.time.Month;
 import java.time.ZoneId;
 import java.util.*;
+
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -597,47 +602,45 @@ public class BillServiceImplTest {
 
     @Test
     public void testGenerateBillPdf() {
-    Bill mockBill = Bill.builder()
-            .billId("billId-1")
-            .customerId("customerId-1")
-            .ownerFirstName("John")
-            .ownerLastName("Doe")
-            .visitType("General")
-            .vetId("vetId-1")
-            .amount(new BigDecimal(100.0))
-            .billStatus(BillStatus.PAID)
-            .date(LocalDate.now())
-            .dueDate(LocalDate.now().plusDays(15))
-            .build();
+        Bill mockBill = Bill.builder()
+                .billId("billId-1")
+                .customerId("customerId-1")
+                .ownerFirstName("John")
+                .ownerLastName("Doe")
+                .visitType("General")
+                .vetId("vetId-1")
+                .amount(new BigDecimal(100.0))
+                .billStatus(BillStatus.PAID)
+                .date(LocalDate.now())
+                .dueDate(LocalDate.now().plusDays(15))
+                .build();
 
-    String customerId = mockBill.getCustomerId();
-    String billId = mockBill.getBillId();
-    String currency = "USD";
+        String customerId = mockBill.getCustomerId();
+        String billId = mockBill.getBillId();
 
-    when(repo.findByBillId(billId)).thenReturn(Mono.just(mockBill));
+        when(repo.findByBillId(billId)).thenReturn(Mono.just(mockBill));
 
-    Mono<byte[]> pdfBytesMono = billService.generateBillPdf(customerId, billId, currency);
+        Mono<byte[]> pdfBytesMono = billService.generateBillPdf(customerId, billId);
 
-    StepVerifier.create(pdfBytesMono)
-            .assertNext(pdfBytes -> {
-                assertNotNull(pdfBytes);
-                assertTrue(pdfBytes.length > 0);
-            })
-            .verifyComplete();
-}
+        StepVerifier.create(pdfBytesMono)
+                .assertNext(pdfBytes -> {
+                    assertNotNull(pdfBytes);
+                    assertTrue(pdfBytes.length > 0);
+                })
+                .verifyComplete();
+    }
 
-@Test
-public void testGenerateBillPdf_BillNotFound() {
-    when(repo.findByBillId(anyString())).thenReturn(Mono.empty());
+    @Test
+    public void testGenerateBillPdf_BillNotFound() {
+        when(repo.findByBillId(anyString())).thenReturn(Mono.empty());
 
-    String currency = "USD";
-    Mono<byte[]> pdfMono = billService.generateBillPdf("nonexistentCustomerId", "nonexistentBillId", currency);
+        Mono<byte[]> pdfMono = billService.generateBillPdf("nonexistentCustomerId", "nonexistentBillId");
 
-    StepVerifier.create(pdfMono)
-            .expectErrorMatches(throwable -> throwable instanceof RuntimeException &&
-                    throwable.getMessage().equals("Bill not found for given customer"))
-            .verify();
-}
+        StepVerifier.create(pdfMono)
+                .expectErrorMatches(throwable -> throwable instanceof RuntimeException &&
+                        throwable.getMessage().equals("Bill not found for given customer"))
+                .verify();
+    }
 
     private BillRequestDTO buildInvalidBillRequestDTO() {
         LocalDate date = LocalDate.now();
@@ -668,6 +671,7 @@ public void testGenerateBillPdf_BillNotFound() {
 
     private Bill buildUnpaidBill() {
 
+        VetResponseDTO vetDTO = buildVetDTO();
         Calendar calendar = Calendar.getInstance();
         calendar.set(2022, Calendar.SEPTEMBER, 25);
         LocalDate date = calendar.getTime().toInstant()
@@ -696,6 +700,8 @@ public void testGenerateBillPdf_BillNotFound() {
 
     private BillRequestDTO buildBillRequestDTO() {
 
+        VetResponseDTO vetDTO = buildVetDTO();
+
         Calendar calendar = Calendar.getInstance();
         calendar.set(2022, Calendar.SEPTEMBER, 25);
         LocalDate date = calendar.getTime().toInstant()
@@ -706,6 +712,20 @@ public void testGenerateBillPdf_BillNotFound() {
 
         return BillRequestDTO.builder().customerId("1").vetId("1").visitType("Test Type").date(date).amount(new BigDecimal(13.37)).billStatus(BillStatus.PAID).dueDate(dueDate).build();
 
+    }
+
+    private VetResponseDTO buildVetDTO() {
+        return VetResponseDTO.builder()
+                .vetId("d9d3a7ac-6817-4c13-9a09-c09da74fb65f")
+                .vetBillId("53c2d16e-1ba3-4dbc-8e31-6decd2eaa99a")
+                .firstName("Pauline")
+                .lastName("LeBlanc")
+                .email("skjfhf@gmail.com")
+                .phoneNumber("947-238-2847")
+                .resume("Just became a vet")
+                .specialties(new HashSet<>())
+                .active(false)
+                .build();
     }
 
     @Test
@@ -801,6 +821,7 @@ public void testGenerateBillPdf_BillNotFound() {
                 .expectNext(new BigDecimal(0.0))
                 .verifyComplete();
     }
+
 
     @Test
     void processPayment_Success() {
@@ -1447,13 +1468,11 @@ public void testGenerateBillPdf_BillNotFound() {
         verify(repo, never()).deleteBillByBillId(anyString());
     }
 
-
     @Test
     void generateBillPdf_Negative_BillNotForCustomer_ShouldErrorAndSkipPdf() {
         String billId = "B-42";
         String repoCustomer = "C-123";
         String requestedCustomer = "C-999";
-        String currency = "USD";
 
         Bill bill = buildBill();
         bill.setBillId(billId);
@@ -1461,18 +1480,17 @@ public void testGenerateBillPdf_BillNotFound() {
 
         when(repo.findByBillId(billId)).thenReturn(Mono.just(bill));
 
-        Mono<byte[]> result = billService.generateBillPdf(requestedCustomer, billId, currency);
+        Mono<byte[]> result = billService.generateBillPdf(requestedCustomer, billId);
 
         StepVerifier.create(result)
-            .expectErrorSatisfies(ex -> {
-                assertTrue(ex instanceof RuntimeException);
-                assertEquals("Bill not found for given customer", ex.getMessage());
-            })
-            .verify();
+                .expectErrorSatisfies(ex -> {
+                    assertTrue(ex instanceof RuntimeException);
+                    assertEquals("Bill not found for given customer", ex.getMessage());
+                })
+                .verify();
 
         verify(repo, times(1)).findByBillId(billId);
     }
-
 
     @Test
     void test_EntityDtoUtil_ToBillResponseDto_WithOverdueBill_ShouldCalculateFreshInterest() {

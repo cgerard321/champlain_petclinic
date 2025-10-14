@@ -26,6 +26,7 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import static org.junit.jupiter.api.Assertions.*;
 
+
 class BillServiceClientIntegrationTest {
 
     private BillServiceClient billServiceClient;
@@ -116,6 +117,7 @@ class BillServiceClientIntegrationTest {
                 .expectNextMatches(returnedBillResponseDTO1 -> returnedBillResponseDTO1.getBillId().equals("1"))
                 .verifyComplete();
     }
+
 
     @Test
     void getBillByVetId() throws Exception {
@@ -800,7 +802,8 @@ class BillServiceClientIntegrationTest {
                     return true;
                 })
                 .verifyComplete();
-        }
+    }
+
 
     void deleteBill_WhenBillIsUnpaid_ShouldReturn422_AndNotInvokeDelete() throws Exception {
         String billId = "B-123";
@@ -905,7 +908,7 @@ class BillServiceClientIntegrationTest {
                 .setBody("{\"message\":\"Bill not found\"}")
         );
 
-        Mono<byte[]> result = billServiceClient.downloadBillPdf("C-404", "B-missing", null);
+        Mono<byte[]> result = billServiceClient.downloadBillPdf("C-404", "B-missing");
 
         StepVerifier.create(result)
                 .expectErrorSatisfies(ex -> {
@@ -928,7 +931,7 @@ class BillServiceClientIntegrationTest {
                 .setBody(new Buffer().write(pdf))
         );
 
-        Mono<byte[]> result = billServiceClient.downloadBillPdf(customerId, billId, null);
+        Mono<byte[]> result = billServiceClient.downloadBillPdf(customerId, billId);
 
         StepVerifier.create(result)
                 .assertNext(bytes -> {

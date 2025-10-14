@@ -4,17 +4,8 @@ import { useUser } from '@/context/UserContext';
 import PaymentForm from './PaymentForm';
 import './BillsListTable.css';
 import axiosInstance from '@/shared/api/axiosInstance';
-import { Currency, convertCurrency } from './utils/convertCurrency';
 
-interface BillsListTableProps {
-  currency: Currency;
-  setCurrency: (c: Currency) => void;
-}
-
-export default function BillsListTable({
-  currency,
-  setCurrency,
-}: BillsListTableProps): JSX.Element {
+export default function BillsListTable(): JSX.Element {
   const { user } = useUser();
   const [bills, setBills] = useState<Bill[]>([]);
   const [filteredBills, setFilteredBills] = useState<Bill[]>([]);
@@ -77,7 +68,7 @@ export default function BillsListTable({
   ): Promise<void> => {
     try {
       const response = await axiosInstance.get(
-        `/customers/${customerId}/bills/${billId}/pdf?currency=${currency}`,
+        `/customers/${customerId}/bills/${billId}/pdf`,
         {
           responseType: 'blob',
           headers: {
@@ -153,15 +144,8 @@ export default function BillsListTable({
 
   return (
     <div>
-      {/* Status and Currency dropdowns together */}
-      <div
-        className="filterContainer"
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '16px',
-        }}
-      >
+      {/* Dropdown to filter bills by status */}
+      <div className="filterContainer">
         <label htmlFor="statusFilter">Filter by Status:</label>
         <select
           id="statusFilter"
@@ -173,18 +157,6 @@ export default function BillsListTable({
           <option value="overdue">Overdue</option>
           <option value="paid">Paid</option>
           <option value="unpaid">Unpaid</option>
-        </select>
-        <label htmlFor="currencyFilter" style={{ marginLeft: '8px' }}>
-          Currency:
-        </label>
-        <select
-          id="currencyFilter"
-          value={currency}
-          onChange={e => setCurrency(e.target.value as Currency)}
-          style={{ width: '100px' }}
-        >
-          <option value="CAD">CAD</option>
-          <option value="USD">USD</option>
         </select>
       </div>
 
@@ -222,21 +194,9 @@ export default function BillsListTable({
                     {bill.vetFirstName} {bill.vetLastName}
                   </td>
                   <td>{bill.date}</td>
-                  <td>
-                    {currency === 'CAD'
-                      ? `CAD $${bill.amount.toFixed(2)}`
-                      : `USD $${convertCurrency(bill.amount, 'CAD', 'USD').toFixed(2)}`}
-                  </td>
-                  <td>
-                    {currency === 'CAD'
-                      ? `CAD $${(bill.interest || 0).toFixed(2)}`
-                      : `USD $${convertCurrency(bill.interest || 0, 'CAD', 'USD').toFixed(2)}`}
-                  </td>
-                  <td>
-                    {currency === 'CAD'
-                      ? `CAD $${bill.taxedAmount.toFixed(2)}`
-                      : `USD $${convertCurrency(bill.taxedAmount, 'CAD', 'USD').toFixed(2)}`}
-                  </td>
+                  <td>${bill.amount.toFixed(2)}</td>
+                  <td>${(bill.interest || 0).toFixed(2)}</td>
+                  <td>${bill.taxedAmount.toFixed(2)}</td>
                   <td>
                     {bill.billStatus === 'OVERDUE' ? (
                       <span style={{ color: 'red' }}>Overdue</span>

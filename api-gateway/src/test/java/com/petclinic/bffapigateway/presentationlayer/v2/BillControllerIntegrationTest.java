@@ -3,6 +3,7 @@ package com.petclinic.bffapigateway.presentationlayer.v2;
 import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillStatus;
+import com.petclinic.bffapigateway.dtos.Bills.PaymentRequestDTO;
 import com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigAuthService;
 import com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigBillService;
 import org.junit.jupiter.api.AfterAll;
@@ -12,18 +13,25 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.web.reactive.function.BodyInserters;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import static com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigAuthService.*;
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -61,6 +69,30 @@ public class BillControllerIntegrationTest {
             .vetId("3")
             .date(LocalDate.parse("2024-10-11"))
             .amount(new BigDecimal("100.0"))
+            .billStatus(BillStatus.UNPAID)
+            .dueDate(LocalDate.parse("2024-10-13"))
+            .build();
+
+    private BillResponseDTO billresponse = BillResponseDTO.builder()
+            .billId("e6c7398e-8ac4-4e10-9ee0-03ef33f0361b")
+            .customerId("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
+            .visitType("general")
+            .vetId("3")
+            .date(LocalDate.parse("2024-10-11"))
+            .amount(new BigDecimal("100.0"))
+            .taxedAmount(new BigDecimal("0.0"))
+            .billStatus(BillStatus.UNPAID)
+            .dueDate(LocalDate.parse("2024-10-13"))
+            .build();
+
+    private BillResponseDTO billresponse2 = BillResponseDTO.builder()
+            .billId("e6c7398e-8ac4-4e10-9ee0-03ef33f0361b")
+            .customerId("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
+            .visitType("general")
+            .vetId("2")
+            .date(LocalDate.parse("2024-10-11"))
+            .amount(new BigDecimal("120.0"))
+            .taxedAmount(new BigDecimal("10.0"))
             .billStatus(BillStatus.UNPAID)
             .dueDate(LocalDate.parse("2024-10-13"))
             .build();
@@ -145,6 +177,7 @@ public class BillControllerIntegrationTest {
                 .exchange()
                 .expectStatus().isUnauthorized();
     }
+
 
     @Test
     void whenUpdateBill_thenReturnUpdatedBill(){
@@ -234,6 +267,8 @@ public class BillControllerIntegrationTest {
                 });
     }
 
+
+
     @Test
     void whenGetInterest_withInvalidRole_thenUnauthorized() {
         String billId = "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a";
@@ -245,6 +280,8 @@ public class BillControllerIntegrationTest {
                 .exchange()
                 .expectStatus().isUnauthorized();
     }
+
+
 
     @Test
     void whenGetTotal_withInvalidRole_thenUnauthorized() {
@@ -260,6 +297,8 @@ public class BillControllerIntegrationTest {
 
     // --- Customer endpoints (user-specific) ---
 
+
+
     @Test
     void whenGetInterestForCustomer_withInvalidRole_thenUnauthorized() {
         String customerId = "cust-123";
@@ -273,6 +312,8 @@ public class BillControllerIntegrationTest {
                 .expectStatus().isUnauthorized();
     }
 
+
+
     @Test
     void whenGetTotalForCustomer_withInvalidRole_thenUnauthorized() {
         String customerId = "cust-123";
@@ -285,4 +326,6 @@ public class BillControllerIntegrationTest {
                 .exchange()
                 .expectStatus().isUnauthorized();
     }
+
+
 }

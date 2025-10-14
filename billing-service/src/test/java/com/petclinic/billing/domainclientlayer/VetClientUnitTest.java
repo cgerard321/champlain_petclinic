@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -23,8 +24,10 @@ import java.rmi.ServerException;
 public class VetClientUnitTest {
 
     private VetClient vetClient;
+    private WebTestClient webTestClient;
     private static MockWebServer mockBackEnd;
     private final ObjectMapper objectMapper = new ObjectMapper();
+
 
     @Mock
     private WebClient webClient;
@@ -36,7 +39,9 @@ public class VetClientUnitTest {
     @BeforeEach
     public void initialize(){
         vetClient = new VetClient("localhost", String.valueOf(mockBackEnd.getPort()));
+        webTestClient = WebTestClient.bindToController(vetClient).build();
     }
+
     @AfterAll
     static void tearDown() throws IOException {
         mockBackEnd.shutdown();

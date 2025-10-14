@@ -1,5 +1,10 @@
 package com.petclinic.bffapigateway.exceptions;
 
+import lombok.Data;
+import lombok.Getter;
+import org.springframework.http.HttpStatus;
+
+
 public class ExistingRatingNotFoundException extends RuntimeException{
     public ExistingRatingNotFoundException() {}
 

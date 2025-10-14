@@ -18,10 +18,13 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import static reactor.core.publisher.Mono.just;
 import static org.mockito.Mockito.when;
+
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.Month;
+import java.time.Period;
 import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.List;
@@ -725,6 +728,23 @@ class BillControllerIntegrationTest {
         return Duration.between(LocalDate.now().atStartOfDay(), billEntity.getDueDate().atStartOfDay()).toDays();
     }
 
+    private BillResponseDTO buildBillResponseDTO() {
+        return BillResponseDTO.builder()
+                .billId("BillUUID")
+                .customerId("Customer1")
+                .vetId("Vet1")
+                .visitType("Routine Check")
+                .date(LocalDate.of(2022, 9, 25))
+                .amount(new BigDecimal(150.75))
+                .billStatus(BillStatus.PAID)
+                .dueDate(LocalDate.of(2022, 10, 15))
+                .ownerFirstName("John")
+                .ownerLastName("Doe")
+                .vetFirstName("Jane")
+                .vetLastName("Smith")
+                .archive(false)
+                .build();
+    }
         @Test
         void getBillByValidBillID_Overdue_ShouldReturnInterest() {
                 Bill billEntity = buildOverdueBill();

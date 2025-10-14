@@ -2,6 +2,7 @@ package com.petclinic.bffapigateway.utils;
 
 
 import com.petclinic.bffapigateway.exceptions.HandlerIsNullException;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerMapping;

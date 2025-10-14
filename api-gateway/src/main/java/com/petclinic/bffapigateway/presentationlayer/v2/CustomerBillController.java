@@ -4,6 +4,7 @@ import com.petclinic.bffapigateway.domainclientlayer.BillServiceClient;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
 import com.petclinic.bffapigateway.dtos.Bills.PaymentRequestDTO;
 import com.petclinic.bffapigateway.utils.Security.Annotations.IsUserSpecific;
+import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -35,10 +36,9 @@ public class CustomerBillController {
     @GetMapping(value = "/{billId}/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
     public Mono<ResponseEntity<byte[]>> downloadBillPdf(
             @PathVariable String customerId, 
-            @PathVariable String billId,
-            @RequestParam(name = "currency", required = false, defaultValue = "CAD") String currency) {
+            @PathVariable String billId) {
 
-        return billService.downloadBillPdf(customerId, billId, currency)
+        return billService.downloadBillPdf(customerId, billId)
                 .map(pdf -> {
                     HttpHeaders headers = new HttpHeaders();
                     headers.setContentType(MediaType.APPLICATION_PDF);
@@ -72,4 +72,5 @@ public class CustomerBillController {
                 .onErrorResume(ResponseStatusException.class, e ->
                         Mono.just(ResponseEntity.status(e.getStatusCode()).build()));
     }
+
 }

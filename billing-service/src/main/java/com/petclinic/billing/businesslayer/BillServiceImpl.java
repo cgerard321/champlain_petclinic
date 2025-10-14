@@ -1,5 +1,6 @@
 package com.petclinic.billing.businesslayer;
 
+import com.itextpdf.text.DocumentException;
 import com.petclinic.billing.datalayer.*;
 import com.petclinic.billing.domainclientlayer.Auth.UserDetails;
 import com.petclinic.billing.domainclientlayer.Mailing.Mail;
@@ -20,6 +21,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.function.Predicate;
 
@@ -197,6 +199,8 @@ public class BillServiceImpl implements BillService{
                 .map(EntityDtoUtil::toBillResponseDto);
     }
 
+
+
     @Override
     public Mono<BillResponseDTO> updateBill(String billId, Mono<BillRequestDTO> billRequestDTO) {
         return billRequestDTO
@@ -234,6 +238,7 @@ public class BillServiceImpl implements BillService{
                 });
     }
 
+
     @Override
     public Flux<Void> deleteBillsByVetId(String vetId) {
         return billRepository.deleteBillsByVetId(vetId);
@@ -244,6 +249,8 @@ public class BillServiceImpl implements BillService{
 /**/
         return billRepository.findByCustomerId(customerId).map(EntityDtoUtil::toBillResponseDto);
     }
+
+
 
     @Override
     public Flux<BillResponseDTO> getBillsByVetId(String vetId) {
@@ -297,17 +304,16 @@ public class BillServiceImpl implements BillService{
     }
 
     @Override
-    public Mono<byte[]> generateBillPdf(String customerId, String billId, String currency) {
+    public Mono<byte[]> generateBillPdf(String customerId, String billId) {
         return billRepository.findByBillId(billId)
                 .filter(bill -> bill.getCustomerId().equals(customerId))
                 .switchIfEmpty(Mono.error(new RuntimeException("Bill not found for given customer")))
                 .map(EntityDtoUtil::toBillResponseDto)
                 .flatMap(bill -> {
                     try {
-                        byte[] pdfBytes = PdfGenerator.generateBillPdf(bill, currency);
+                        byte[] pdfBytes = PdfGenerator.generateBillPdf(bill);
                         return Mono.just(pdfBytes);
-                    } catch (Exception e) {
-                        log.error("PDF generation failed for billId: {}, currency: {}. Error: {}", bill.getBillId(), currency, e.getMessage(), e);
+                    } catch (DocumentException e) {
                         return Mono.error(new RuntimeException("Error generating PDF", e));
                     }
                 });

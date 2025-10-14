@@ -4,6 +4,7 @@ import com.petclinic.bffapigateway.domainclientlayer.BillServiceClient;
 import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillStatus;
+import com.petclinic.bffapigateway.dtos.Bills.PaymentRequestDTO;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.presentationlayer.v1.BillControllerV1;
 import org.apache.http.HttpStatus;
@@ -16,20 +17,26 @@ import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.web.reactive.function.BodyInserters;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
 import static com.petclinic.bffapigateway.dtos.Bills.BillStatus.PAID;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
@@ -76,6 +83,17 @@ public class BillsControllerUnitTest {
             .billStatus(BillStatus.UNPAID)
             .dueDate(LocalDate.parse("2024-10-13"))
             .build();
+
+    private BillRequestDTO billRequestDTO = BillRequestDTO.builder()
+            .customerId("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
+            .visitType("general")
+            .vetId("3")
+            .date(LocalDate.parse("2024-10-11"))
+            .amount(new BigDecimal("100.0"))
+            .billStatus(BillStatus.UNPAID)
+            .dueDate(LocalDate.parse("2024-10-13"))
+            .build();
+
 
     @Test
     void shouldGetAllBills() {
@@ -267,6 +285,9 @@ public class BillsControllerUnitTest {
         Mockito.verify(billServiceClient, times(1)).getBillById(billId);
     }
 
+
+
+
     @Test
     public void getBillsByVetId(){
         BillResponseDTO bill = new BillResponseDTO();
@@ -291,7 +312,6 @@ public class BillsControllerUnitTest {
                 });
 
     }
-
     @Test
     void getBillUsingMissingPath(){
         client.get()
@@ -316,6 +336,7 @@ public class BillsControllerUnitTest {
                 .jsonPath("$.path").isEqualTo("/bills/100")
                 .jsonPath("$.message").isEqualTo(null);
     }
+
 
     @Test
     void createBill(){
@@ -368,6 +389,7 @@ public class BillsControllerUnitTest {
                 .jsonPath("$.message").isEqualTo(null);
     }
 
+
     @Test
     void shouldDeleteBillById(){
         when(billServiceClient.deleteBill("9"))
@@ -392,6 +414,9 @@ public class BillsControllerUnitTest {
                 .expectStatus().isNoContent()
                 .expectBody().isEmpty();
     }
+
+
+
 
     @Test
     void getAllBillsByVetName(){
@@ -450,6 +475,8 @@ public class BillsControllerUnitTest {
 
         Mockito.verify(billServiceClient).archiveBill();
     }
+
+
 
     @Test
     public void whenGetAllBills_thenReturnAllBills(){
