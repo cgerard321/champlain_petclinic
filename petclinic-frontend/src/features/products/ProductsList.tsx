@@ -3,12 +3,8 @@ import { getAllProducts } from '@/features/products/api/getAllProducts.ts';
 import './ProductList.css';
 import { ProductModel } from '@/features/products/models/ProductModels/ProductModel';
 import Product from './components/Product';
-import AddProduct from './components/AddProduct';
-import { addProduct } from '@/features/products/api/addProduct';
 import { useUser } from '@/context/UserContext';
 import './components/Sidebar.css';
-import { addImage } from './api/addImage';
-import { ImageModel } from './models/ProductModels/ImageModel';
 //import StarRating from '@/features/products/components/StarRating.tsx';
 import './components/StarRating.css';
 //import { ProductType } from '@/features/products/api/ProductTypeEnum.ts';
@@ -40,7 +36,6 @@ export default function ProductList({
   const [bundleList, setBundleList] = useState<ProductBundleModel[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { user } = useUser();
-  const [isRightRole] = useState<boolean>(false); //setIsRightRole
   const [recentlyClickedProducts, setRecentlyClickedProducts] = useState<
     ProductModel[]
   >([]);
@@ -97,20 +92,6 @@ export default function ProductList({
     }
   }, [searchQuery, productList]);
 
-  const handleAddImage = async (formData: FormData): Promise<ImageModel> => {
-    const created = await addImage(formData);
-    await fetchProducts();
-    return created;
-  };
-
-  const handleAddProduct = async (
-    product: ProductModel
-  ): Promise<ProductModel> => {
-    const saved = await addProduct(product);
-    await fetchProducts();
-    return saved;
-  };
-
   const handleProductClick = (product: ProductModel): void => {
     setRecentlyClickedProducts(prev => {
       const updated = prev.filter(p => p.productId !== product.productId);
@@ -141,10 +122,6 @@ export default function ProductList({
 
   return (
     <div className="product-list-container">
-      {isRightRole && (
-        <AddProduct addProduct={handleAddProduct} addImage={handleAddImage} />
-      )}
-
       <div className="main-content">
         {view === 'catalog' && (
           <div className="list-container">
