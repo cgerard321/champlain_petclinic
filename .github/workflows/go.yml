@@ -32,7 +32,7 @@ jobs:
       - name: Build
         run: cd files-service && go build -v -o app; cd -
 
-      - name: Test
+      - name: Test files-service
         run: cd files-service && go test -v ./...; cd -
 
       - name: Grant execute perm on cover.sh
