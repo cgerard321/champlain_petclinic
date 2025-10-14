@@ -402,5 +402,4 @@ volumes:
   mongo-carts-config:
   postgres-vet-data:
   mysql-files-data:
-  cloudbeaver-data:
   dbgate-data:
