@@ -41,6 +41,42 @@ export default function InventoriesListTable(): JSX.Element {
 
   const [showImportantOnly, setShowImportantOnly] = useState(false);
 
+  // viewMode controls which inventories to show: 'active' | 'archived' | 'all'
+  const [viewMode, setViewMode] = useState<'active' | 'archived' | 'all'>('active');
+
+  // archivedMap stores archived flags by inventoryId and is persisted to localStorage
+  const [archivedMap, setArchivedMap] = useState<{ [inventoryId: string]: boolean }>({});
+
+  const ARCHIVE_STORAGE_KEY = 'archivedInventories_v1';
+
+  const loadArchivedFromLocalStorage = (): { [inventoryId: string]: boolean } => {
+    try {
+      const raw = window.localStorage.getItem(ARCHIVE_STORAGE_KEY);
+      if (!raw) return {};
+      return JSON.parse(raw);
+    } catch (e) {
+      console.error('Failed to load archived state from localStorage', e);
+      return {};
+    }
+  };
+
+  const saveArchivedToLocalStorage = (map: { [inventoryId: string]: boolean }): void => {
+    try {
+      window.localStorage.setItem(ARCHIVE_STORAGE_KEY, JSON.stringify(map));
+    } catch (e) {
+      console.error('Failed to save archived state to localStorage', e);
+    }
+  };
+
+  useEffect(() => {
+    const map = loadArchivedFromLocalStorage();
+    setArchivedMap(map);
+  }, []);
+
+  useEffect(() => {
+    saveArchivedToLocalStorage(archivedMap);
+  }, [archivedMap]);
+
   const handleMenuClick = (
     e: React.MouseEvent<SVGElement>,
     inventoryId: string
