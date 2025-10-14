@@ -303,7 +303,7 @@ services:
       context: ./cloudbeaver
       args:
         BASE_TAG: latest
-    image: cloudbeaver:latest
+#    image: cloudbeaver:latest
     container_name: cloudbeaver
     ports:
       - "8978:8978"
