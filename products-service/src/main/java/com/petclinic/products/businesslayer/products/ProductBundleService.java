@@ -12,4 +12,5 @@ public interface ProductBundleService {
     Mono<ProductBundleResponseModel> createProductBundle(Mono<ProductBundleRequestModel> requestModel);
     Mono<ProductBundleResponseModel> updateProductBundle(String bundleId, Mono<ProductBundleRequestModel> requestModel);
     Mono<Void> deleteProductBundle(String bundleId);
+    Flux<ProductBundleResponseModel> deleteAllProductBundlesByProductId(String productId);
 }
