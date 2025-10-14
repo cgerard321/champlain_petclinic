@@ -1,5 +1,6 @@
 .basic-modal-body {
     width: 90%;
+    height: fit-content;
 }
 
 .basic-modal-body > form > input {
@@ -7,5 +8,6 @@
 }
 
 .basic-modal-footer {
+    margin-top: auto;
     display: flex;
 }

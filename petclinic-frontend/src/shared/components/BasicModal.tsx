@@ -5,19 +5,21 @@ import { Button, Modal } from 'react-bootstrap';
 import './BasicModal.css';
 
 interface BasicModalProps {
-  title?: string;
-  confirmText?: string;
-  onConfirm?: () => Promise<void>;
-  formId?: string;
-  validate?: () => boolean;
-  showButton: JSX.Element;
-  children?: React.ReactNode;
+  title?: string; //The header of the modal
+  confirmText?: string; //The text shown on the confirmation button
+  onConfirm?: () => Promise<void>; //The function to be handled upon pressing the confirmation button
+  refreshPageOnConfirm?: boolean; //If true, refreshes the page upon pressing the confirm button
+  formId?: string; //The id of the form inside of the modal
+  validate?: () => boolean; //What needs to be true before it handles confirmation
+  showButton: JSX.Element; //The button that shows the modal
+  children?: React.ReactNode; //The body of the modal
 }
 
 const BasicModal: React.FC<BasicModalProps> = ({
   title,
   confirmText = 'Confirm',
   onConfirm,
+  refreshPageOnConfirm,
   formId,
   validate = () => false,
   showButton,
@@ -26,7 +28,6 @@ const BasicModal: React.FC<BasicModalProps> = ({
   const [show, setShow] = useState(false);
   const [busy, setBusy] = useState(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  // const [progress, setProgress] = useState<number | null>(null);
   const [errorMessage, setErrorMessage] = useState<string>('');
 
   // Show modal
@@ -40,32 +41,46 @@ const BasicModal: React.FC<BasicModalProps> = ({
 
   const resetForm = (): void => {
     setBusy(false);
-    // setProgress(null);
-    // setError(null);
+    setErrorMessage('');
   };
 
-  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   const handleConfirm = async (): Promise<void> => {
     if (busy) return;
 
     if (!validate()) return;
 
     setIsLoading(true);
-    // setErrorMessage('');
-    // setSuccessMessage('');
     try {
       if (onConfirm) await onConfirm();
+      if (refreshPageOnConfirm) {
+        setTimeout(() => {
+          window.location.reload();
+        }, 100);
+      }
     } catch (error) {
-      // const apiError = error as ApiError;
       setErrorMessage(`Error updating visit: ${error}`);
+    } finally {
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
-    // setErrorMessage('');
-    // setSuccessMessage('');
-
-    handleClose();
   };
+
+  // const handleSubmitForm = async (): Promise<void> => {
+  //   if (busy) return;
+
+  //   if (!validate()) return;
+
+  //   setIsLoading(true);
+  //   try {
+  //     if (onConfirm) await onConfirm();
+  //     setTimeout(() => {
+  //       window.location.reload();
+  //     }, 100);
+  //   } catch (error) {
+  //     setErrorMessage(`Error updating visit: ${error}`);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
 
   const renderConfirmButton = (): JSX.Element =>
     onConfirm || formId != null ? (
