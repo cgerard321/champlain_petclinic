@@ -309,6 +309,8 @@ services:
 
       # Show all connections in the left sidebar (order matters)
       - CONNECTIONS=mysqlAuth,mysqlFiles,pgVet,mongoVet,mongoBilling,mongoVisits,mongoCustomers,mongoInventory,mongoProducts,mongoCarts
+      - BASIC_AUTH_USER=admin
+      - BASIC_AUTH_PASSWORD=change-me
 
       # --------------------
       # MySQL — mysql-auth
