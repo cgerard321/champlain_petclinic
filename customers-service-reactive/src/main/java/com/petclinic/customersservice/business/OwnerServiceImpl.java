@@ -4,7 +4,6 @@ import com.petclinic.customersservice.customersExceptions.exceptions.NotFoundExc
 import com.petclinic.customersservice.data.Owner;
 import com.petclinic.customersservice.data.OwnerRepo;
 import com.petclinic.customersservice.domainclientlayer.FileRequestDTO;
-import com.petclinic.customersservice.domainclientlayer.FileServiceRequestDTO;
 import com.petclinic.customersservice.domainclientlayer.FilesServiceClient;
 import com.petclinic.customersservice.presentationlayer.OwnerRequestDTO;
 import com.petclinic.customersservice.presentationlayer.OwnerResponseDTO;
@@ -109,13 +108,7 @@ public class OwnerServiceImpl implements OwnerService {
         return ownerRepo.findOwnerByOwnerId(ownerId)
                 .switchIfEmpty(Mono.error(new NotFoundException("Owner not found with id: " + ownerId)))
                 .flatMap(existingOwner -> {
-                    FileServiceRequestDTO photoWithBytes = FileServiceRequestDTO.builder()
-                            .fileName(photo.getFileName())
-                            .fileType(photo.getFileType())
-                            .fileData(photo.getFileData())
-                            .build();
-                    
-                    return filesServiceClient.addFile(photoWithBytes)
+                    return filesServiceClient.addFile(photo)
                             .map(fileResp -> {
                                 existingOwner.setPhotoId(fileResp.getFileId());
                                 return existingOwner;

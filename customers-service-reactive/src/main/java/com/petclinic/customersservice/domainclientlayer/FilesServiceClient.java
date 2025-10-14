@@ -39,10 +39,10 @@ public class FilesServiceClient {
                 .bodyToMono(FileResponseDTO.class);
     }
 
-    public Mono<FileResponseDTO> addFile(FileServiceRequestDTO fileDetails) {
+    public Mono<FileResponseDTO> addFile(FileRequestDTO fileDetails) {
         log.info("Sending file to Files Service URL: {}, fileName: {}, fileType: {}, fileData length: {}", 
                 filesServiceUrl, fileDetails.getFileName(), fileDetails.getFileType(), 
-                fileDetails.getFileData() != null ? fileDetails.getFileData().length() : 0);
+                fileDetails.getFileData() != null ? fileDetails.getFileData().length : 0);
         
         return webClientBuilder.build()
                 .post()
@@ -68,7 +68,7 @@ public class FilesServiceClient {
                 .doOnError(error -> log.error("Error calling Files Service: {}", error.getMessage(), error));
     }
 
-    public Mono<FileResponseDTO> updateFile(String fileId, FileServiceRequestDTO fileDetails) {
+    public Mono<FileResponseDTO> updateFile(String fileId, FileRequestDTO fileDetails) {
         return webClientBuilder.build()
                 .put()
                 .uri(filesServiceUrl + "/{fileId}", fileId)

@@ -4,8 +4,6 @@ import com.petclinic.customersservice.business.OwnerService;
 import com.petclinic.customersservice.customersExceptions.exceptions.InvalidInputException;
 import com.petclinic.customersservice.data.Owner;
 import com.petclinic.customersservice.domainclientlayer.FileRequestDTO;
-import com.petclinic.customersservice.presentationlayer.OwnerRequestDTO;
-import com.petclinic.customersservice.presentationlayer.OwnerResponseDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -96,38 +94,41 @@ public class OwnerController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    @PostMapping("/{ownerId}/photo")
-    public Mono<ResponseEntity<OwnerResponseDTO>> updateOwnerPhoto(
+    @PatchMapping("/{ownerId}")
+    public Mono<ResponseEntity<OwnerResponseDTO>> patchOwner(
             @PathVariable String ownerId,
-            @RequestBody FileRequestDTO photo) {
-        log.info("Received photo upload request for ownerId: {}, fileName: {}", ownerId, photo.getFileName());
-        
-        // this is to remove extension to match files service validation
-        String normalizedFileName = normalizeFileName(photo.getFileName(), photo.getFileType());
-        
-        FileRequestDTO photoRequest = FileRequestDTO.builder()
-                .fileName(normalizedFileName)
-                .fileType(photo.getFileType())
-                .fileData(photo.getFileData()) 
-                .build();
-        
-        return ownerService.updateOwnerPhoto(ownerId, photoRequest)
-                .map(updatedOwner -> ResponseEntity.ok().body(updatedOwner))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+            @RequestBody Mono<OwnerRequestDTO> ownerRequestMono) {
+        return ownerRequestMono.flatMap(ownerRequest -> {
+            if (ownerRequest.getPhoto() != null) {
+                FileRequestDTO normalizedPhoto = normalizeFileExtension(ownerRequest.getPhoto());
+                return ownerService.updateOwnerPhoto(ownerId, normalizedPhoto)
+                        .map(updatedOwner -> ResponseEntity.ok().body(updatedOwner));
+            }
+            return ownerService.updateOwner(Mono.just(ownerRequest), ownerId)
+                    .map(updatedOwner -> ResponseEntity.ok().body(updatedOwner));
+        }).defaultIfEmpty(ResponseEntity.notFound().build());
     }
-    
-   
-    private String normalizeFileName(String fileName, String fileType) {
-        if (fileName == null) {
-            return fileName;
+
+    private FileRequestDTO normalizeFileExtension(FileRequestDTO photo) {
+        if (photo == null || photo.getFileName() == null || photo.getFileType() == null) {
+            return photo;
         }
+
+        String fileName = photo.getFileName();
+        String fileType = photo.getFileType();
+        
+        String expectedExtension = fileType.substring(fileType.lastIndexOf('/') + 1);
         
         int lastDotIndex = fileName.lastIndexOf('.');
-        if (lastDotIndex > 0) {
-            return fileName.substring(0, lastDotIndex);
-        }
-    
-        return fileName;
+        String nameWithoutExtension = (lastDotIndex > 0) ? fileName.substring(0, lastDotIndex) : fileName;
+        
+        String normalizedFileName = nameWithoutExtension + "." + expectedExtension;
+        
+        return FileRequestDTO.builder()
+                .fileName(normalizedFileName)
+                .fileType(photo.getFileType())
+                .fileData(photo.getFileData())
+                .build();
     }
 
 }

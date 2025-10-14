@@ -11,5 +11,5 @@ public class FileRequestDTO {
     
     private String fileName;
     private String fileType;
-    private String fileData;
+    private byte[] fileData;
 }
