@@ -1,5 +1,6 @@
 package com.petclinic.bffapigateway.dtos.CustomerDTOs;
 
+import com.petclinic.bffapigateway.dtos.Files.FileDetails;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,6 +22,5 @@ public class OwnerResponseDTO {
     private String province;
     private String telephone;
     private List<PetResponseDTO> pets;
-    private String photoId;
-    private FileResponseDTO photo;
+    private FileDetails photo;
 }

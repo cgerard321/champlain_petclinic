@@ -1,7 +1,6 @@
 package com.petclinic.bffapigateway.presentationlayer.v1;
 
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
-import com.petclinic.bffapigateway.dtos.CustomerDTOs.FileRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetRequestDTO;
@@ -101,6 +100,18 @@ public class OwnerControllerV1 {
         );
     }
 
+    @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN, Roles.RECEPTIONIST})
+    @PatchMapping("/{ownerId}")
+    public Mono<ResponseEntity<OwnerResponseDTO>> patchOwner(
+            @PathVariable String ownerId,
+            @RequestBody Mono<OwnerRequestDTO> ownerRequestMono) {
+        return ownerRequestMono.flatMap(ownerRequestDTO ->
+                customersServiceClient.patchOwner(ownerId, Mono.just(ownerRequestDTO))
+                        .map(updatedOwner -> ResponseEntity.ok().body(updatedOwner))
+                        .defaultIfEmpty(ResponseEntity.notFound().build())
+        );
+    }
+
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @DeleteMapping(value = "/{ownerId}")
     public Mono<ResponseEntity<OwnerResponseDTO>> deleteOwner(@PathVariable String ownerId){
@@ -134,21 +145,6 @@ public class OwnerControllerV1 {
     @DeleteMapping("/{ownerId}/pets/{petId}")
     public Mono<ResponseEntity<PetResponseDTO>> deletePet(@PathVariable String ownerId, @PathVariable String petId){
         return customersServiceClient.deletePet(ownerId,petId).then(Mono.just(ResponseEntity.noContent().<PetResponseDTO>build()))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
-    }
-
-    @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN, Roles.RECEPTIONIST})
-    @PostMapping(value = "/{ownerId}/photo", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<OwnerResponseDTO>> updateOwnerPhoto(
-            @PathVariable String ownerId,
-            @RequestBody FileRequestDTO photo) {
-        log.info("API Gateway: Received photo upload request for ownerId: {}", ownerId);
-        return customersServiceClient.updateOwnerPhoto(ownerId, photo)
-                .map(updatedOwner -> {
-                    log.info("API Gateway: Photo uploaded successfully for ownerId: {}", ownerId);
-                    return ResponseEntity.ok().body(updatedOwner);
-                })
-                .doOnError(error -> log.error("API Gateway: Error uploading photo for ownerId {}: {}", ownerId, error.getMessage()))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 

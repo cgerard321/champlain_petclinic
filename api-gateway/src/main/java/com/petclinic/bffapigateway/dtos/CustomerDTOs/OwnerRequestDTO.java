@@ -1,5 +1,6 @@
     package com.petclinic.bffapigateway.dtos.CustomerDTOs;
 
+    import com.petclinic.bffapigateway.dtos.Files.FileDetails;
     import lombok.AllArgsConstructor;
     import lombok.Builder;
     import lombok.Data;
@@ -19,5 +20,5 @@
         private String province;
         private String telephone;
         //private List<PetResponseDTO> pets;
-        private FileRequestDTO photo;
+        private FileDetails photo;
     }
