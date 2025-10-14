@@ -13,7 +13,7 @@ import java.util.Optional;
 
 public class PdfGenerator {
 
-    public static byte[] generateBillPdf(BillResponseDTO bill) throws DocumentException {
+    public static byte[] generateBillPdf(BillResponseDTO bill, String currency) throws DocumentException {
         Document document = new Document(PageSize.A4, 50, 50, 50, 50);
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         PdfWriter.getInstance(document, byteArrayOutputStream);
@@ -73,14 +73,21 @@ public class PdfGenerator {
         addHeaderCell(charges, "Unit Price");
         addHeaderCell(charges, "Subtotal");
 
-        BigDecimal subtotal = bill.getAmount();
-        BigDecimal interest = bill.getInterest() != null ? bill.getInterest() : BigDecimal.ZERO;
-        BigDecimal totalDue = subtotal.add(interest);
+        // Use CAD as base, convert to requested currency to match FE convertCurrency.ts
+        BigDecimal rawAmount   = Optional.ofNullable(bill.getAmount()).orElse(BigDecimal.ZERO);
+        BigDecimal rawInterest = Optional.ofNullable(bill.getInterest()).orElse(BigDecimal.ZERO);
+        // Prefer taxedAmount if present (matches FE where Total Due uses taxedAmount)
+        BigDecimal rawTotal    = Optional.ofNullable(bill.getTaxedAmount())
+                                     .orElse(rawAmount.add(rawInterest));
+
+        BigDecimal subtotal = convertFromCad(rawAmount, currency);
+        BigDecimal interest = convertFromCad(rawInterest, currency);
+        BigDecimal totalDue = convertFromCad(rawTotal, currency);
 
         charges.addCell("Visit – " + Optional.ofNullable(bill.getVisitType()).orElse("N/A"));
         charges.addCell("1");
-        charges.addCell(rightAligned(formatCurrency(subtotal)));
-        charges.addCell(rightAligned(formatCurrency(subtotal)));
+        charges.addCell(rightAligned(formatCurrency(subtotal, currency)));
+        charges.addCell(rightAligned(formatCurrency(subtotal, currency)));
 
         document.add(charges);
 
@@ -99,11 +106,11 @@ public class PdfGenerator {
         totals.addCell(separator);
 
         totals.addCell("Subtotal");
-        totals.addCell(rightAligned(formatCurrency(subtotal)));
+        totals.addCell(rightAligned(formatCurrency(subtotal, currency)));
 
         if (interest.compareTo(BigDecimal.ZERO) > 0) {
             totals.addCell("Interest");
-            totals.addCell(rightAligned(formatCurrency(interest)));
+            totals.addCell(rightAligned(formatCurrency(interest, currency)));
         }
 
         PdfPCell labelCell = new PdfPCell(new Phrase("Total Due",
@@ -111,7 +118,7 @@ public class PdfGenerator {
         labelCell.setBorder(Rectangle.NO_BORDER);
         totals.addCell(labelCell);
 
-        PdfPCell totalCell = new PdfPCell(new Phrase(formatCurrency(totalDue),
+        PdfPCell totalCell = new PdfPCell(new Phrase(formatCurrency(totalDue, currency),
                 FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12)));
         totalCell.setBorder(Rectangle.NO_BORDER);
         totalCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
@@ -137,8 +144,9 @@ public class PdfGenerator {
         return byteArrayOutputStream.toByteArray();
     }
 
-    private static String formatCurrency(BigDecimal value) {
-        return NumberFormat.getCurrencyInstance(Locale.CANADA).format(value);
+    private static String formatCurrency(BigDecimal value, String currency) {
+        Locale locale = "USD".equalsIgnoreCase(currency) ? Locale.US : Locale.CANADA;
+        return NumberFormat.getCurrencyInstance(locale).format(value);
     }
 
     // Helper: metadata table cells
@@ -167,5 +175,14 @@ public class PdfGenerator {
         PdfPCell cell = new PdfPCell(new Phrase(text, FontFactory.getFont(FontFactory.HELVETICA, 10)));
         cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
         return cell;
+    }
+
+    private static BigDecimal convertFromCad(BigDecimal value, String currency) {
+        if (value == null) return BigDecimal.ZERO;
+        if ("USD".equalsIgnoreCase(currency)) {
+            return value.multiply(new BigDecimal("0.73"));
+        }
+        // Default/base: CAD
+        return value;
     }
 }

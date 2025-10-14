@@ -19,6 +19,7 @@ type VisitType = {
   practitionerId: string;
   // ownerId: string;
   status: Status;
+  isEmergency: boolean;
 };
 
 const formatDate = (date: Date): string => {
@@ -33,7 +34,8 @@ const EditingVisit: React.FC = (): JSX.Element => {
     description: '',
     petId: '',
     practitionerId: '',
-    status: null as unknown as Status,
+    status: 'UPCOMING' as Status,
+    isEmergency: false,
   });
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -55,6 +57,7 @@ const EditingVisit: React.FC = (): JSX.Element => {
             petId: response.petId,
             visitStartDate: new Date(response.visitDate),
             status: response.status,
+            isEmergency: response.isEmergency,
           });
         } catch (error) {
           console.error(`Error fetching visit with ID ${visitId}:`, error);
@@ -114,6 +117,7 @@ const EditingVisit: React.FC = (): JSX.Element => {
       petId: visit.petId,
       practitionerId: visit.practitionerId,
       status: visit.status,
+      isEmergency: visit.isEmergency,
     };
 
     try {

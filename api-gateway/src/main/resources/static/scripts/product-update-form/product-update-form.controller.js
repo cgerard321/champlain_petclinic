@@ -2,8 +2,8 @@
 
 
 
-angular.module('shopProductUpdateForm')
-    .controller('ShopProductUpdateFormController', [
+angular.module('productUpdateForm')
+    .controller('ProductUpdateFormController', [
         "$http", "$state", "$stateParams",
         function ($http, $state, $stateParams) {
             var self = this;
@@ -55,7 +55,7 @@ angular.module('shopProductUpdateForm')
                 $http.put('/api/gateway/products/' + productId, data)
                     .then(function (response) {
                         console.log(response);
-                        $state.go('shopProductList');
+                        $state.go('productList');
                     }, function (response) {
                         var error = response.data;
                         error.errors = error.errors || [];

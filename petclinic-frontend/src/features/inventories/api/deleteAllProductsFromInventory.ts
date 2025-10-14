@@ -15,4 +15,4 @@ export default async function deleteAllProductsFromInventory(inventory: {
     throw error;
   }
 }
-//was missing / before inventory
+//plan to remove

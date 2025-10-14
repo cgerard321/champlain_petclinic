@@ -145,7 +145,7 @@ public class CartServiceImpl implements CartService {
                     // Log the invoice data (optional)
                     log.info("Generated Invoice: ID: {}, Cart ID: {}, Total: {}", invoiceId, cartId, total);
 
-                    // Append products to recentPurchases, preventing duplicates
+                    // --- Recent Purchases Logic ---
                     List<CartProduct> updatedRecentPurchases = cart.getRecentPurchases() != null
                             ? new ArrayList<>(cart.getRecentPurchases())
                             : new ArrayList<>();
@@ -154,7 +154,6 @@ public class CartServiceImpl implements CartService {
                         boolean found = false;
                         for (CartProduct recent : updatedRecentPurchases) {
                             if (recent.getProductId().equals(purchasedProduct.getProductId())) {
-                                // If already exists, update quantity or replace with new info
                                 recent.setQuantityInCart(
                                         recent.getQuantityInCart() + purchasedProduct.getQuantityInCart()
                                 );
@@ -166,22 +165,27 @@ public class CartServiceImpl implements CartService {
                             updatedRecentPurchases.add(purchasedProduct);
                         }
                     }
-
-                    // Optionally, remove duplicates and keep only the latest entry
-                    // Only uncomment this if the duplicates keep showing up, for now not needed
-                /*
-                updatedRecentPurchases = new ArrayList<>(
-                    updatedRecentPurchases.stream()
-                        .collect(Collectors.toMap(
-                            CartProduct::getProductId,
-                            Function.identity(),
-                            (a, b) -> b
-                        ))
-                        .values()
-                );
-                */
-
                     cart.setRecentPurchases(updatedRecentPurchases);
+
+                    // --- Recommendation Purchases Logic ---
+                    // Only recommend products bought 3+ times
+                    Map<String, Integer> purchaseCounts = new HashMap<>();
+                    for (CartProduct p : updatedRecentPurchases) {
+                        purchaseCounts.put(
+                                p.getProductId(),
+                                purchaseCounts.getOrDefault(p.getProductId(), 0) + p.getQuantityInCart()
+                        );
+                    }
+                    List<CartProduct> recommended = new ArrayList<>();
+                    for (CartProduct p : updatedRecentPurchases) {
+                        if (purchaseCounts.get(p.getProductId()) >= 3) {
+                            // Deduplicate by productId
+                            if (recommended.stream().noneMatch(r -> r.getProductId().equals(p.getProductId()))) {
+                                recommended.add(p);
+                            }
+                        }
+                    }
+                    cart.setRecommendationPurchase(recommended);
 
                     // Clear the cart after checkout
                     cart.setProducts(Collections.emptyList());
@@ -674,4 +678,9 @@ public class CartServiceImpl implements CartService {
                 .map(cart -> cart.getRecentPurchases() != null ? cart.getRecentPurchases() : List.of());
     }
 
+    @Override
+    public Mono<List<CartProduct>> getRecommendationPurchases(String cartId) {
+        return cartRepository.findCartByCartId(cartId)
+                .map(cart -> cart.getRecommendationPurchase() != null ? cart.getRecommendationPurchase() : List.of());
+    }
 }

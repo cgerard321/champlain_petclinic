@@ -1,282 +1,123 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Visit } from './models/Visit';
 import './VisitListTable.css';
-import './Emergency.css';
 import { useNavigate } from 'react-router-dom';
-import { getAllEmergency } from './Emergency/Api/getAllEmergency';
-import { EmergencyResponseDTO } from './Emergency/Model/EmergencyResponseDTO';
-import { deleteEmergency } from './Emergency/Api/deleteEmergency';
 
 import { exportVisitsCSV } from './api/exportVisitsCSV';
-// import axiosInstance from '@/shared/api/axiosInstance.ts';
 import { getAllVisits } from './api/getAllVisits';
-import { IsVet, useUser } from '@/context/UserContext';
+import { IsVet } from '@/context/UserContext';
 import { AppRoutePaths } from '@/shared/models/path.routes';
-import { updateVisitStatus } from './api/updateVisit';
+import { archiveVisit } from './api/archiveVisit';
+import { cancelVisit } from './api/cancelVisit';
 
 export default function VisitListTable(): JSX.Element {
-  const didFetch = useRef(false);
   const [visitIdToDelete, setConfirmDeleteId] = useState<string | null>(null);
   const isVet = IsVet();
-  const [visitsList, setVisitsList] = useState<Visit[]>([]);
-  //visits all used for search bar filtering
-  const [visitsAll, setVisitsAll] = useState<Visit[]>([]);
-  const [archivedVisits, setArchivedVisits] = useState<Visit[]>([]);
+  // full list fetched from backend
+  const [visits, setVisits] = useState<Visit[]>([]);
+  // list currently shown in the UI (filtered by search term / tabs)
+  const [displayedVisits, setDisplayedVisits] = useState<Visit[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>(''); // Search term state
-  const [emergencyList, setEmergencyList] = useState<EmergencyResponseDTO[]>(
-    []
-  );
-  //emergency all used for search bar filtering
-  const [emergencyAll, setEmergencyAll] = useState<EmergencyResponseDTO[]>([]);
 
   //use sidebar to select which table is shown
   const [currentTab, setCurrentTab] = useState<string | null>('All');
 
   const navigate = useNavigate();
 
-  const { user } = useUser();
-  const vetId = user?.practitionerId ?? null;
-
-  const filterByVet = (arr: Visit[]): Visit[] => {
-    if (!isVet || !vetId) return arr;
-    return arr.filter(v => String(v.practitionerId) === String(vetId));
-  };
-
   useEffect(() => {
-    if (didFetch.current) return;
-    didFetch.current = true;
-    const loadInitialData = async (): Promise<void> => {
+    const getVisits = async (): Promise<void> => {
       try {
-        const [visitsRes, emergenciesRes] = await Promise.allSettled([
-          // fetch all; client-side search filters below
-          getAllVisits(''),
-          getAllEmergency(),
-        ]);
-        if (visitsRes.status === 'fulfilled') {
-          setVisitsList(visitsRes.value);
-          setVisitsAll(visitsRes.value);
-        }
-        if (emergenciesRes.status === 'fulfilled') {
-          setEmergencyList(emergenciesRes.value);
-          setEmergencyAll(emergenciesRes.value);
-        }
+        const fetchedVisits = await getAllVisits();
+        setVisits(fetchedVisits);
+        setDisplayedVisits(fetchedVisits);
       } catch (error) {
-        console.error('Error loading initial data:', error);
+        console.error('Error fetching visits:', error);
       }
     };
-    void loadInitialData();
+    getVisits();
   }, []);
 
-  useEffect(() => {
-    // Skip EventSource setup for VET role - backend endpoints are ADMIN-only
-    // VETs should not reach this component due to route-level restrictions
-    if (isVet) {
-      return;
-    }
+  // Sort visits: emergency visits first, then by start date
+  const sortVisits = (visitsList: Visit[]): Visit[] => {
+    return [...visitsList].sort((a, b) => {
+      // Emergency visits come first
+      if (a.isEmergency && !b.isEmergency) return -1;
+      if (!a.isEmergency && b.isEmergency) return 1;
 
-    // const eventSource = new EventSource('/visits');
-    const API_BASE =
-      import.meta.env.VITE_BFF_BASE_URL ?? 'http://localhost:8080';
-    const eventSource = new EventSource(`${API_BASE}/api/gateway/visits`, {
-      withCredentials: true,
+      // Within the same emergency status, sort by start date (most recent first)
+      return new Date(b.visitDate).getTime() - new Date(a.visitDate).getTime();
     });
-
-    eventSource.onmessage = event => {
-      try {
-        const newVisit: Visit = JSON.parse(event.data);
-
-        setVisitsList(oldVisits =>
-          oldVisits.filter(visit => visit.visitId !== newVisit.visitId)
-        );
-
-        setVisitsList(oldVisits => {
-          const index = oldVisits.findIndex(
-            visit => visit.visitId === newVisit.visitId
-          );
-          if (index !== -1) {
-            // Update existing visit
-            const newVisits = [...oldVisits];
-            newVisits[index] = newVisit;
-            return newVisits;
-          } else {
-            // Add new visit
-            return [...oldVisits, newVisit];
-          }
-        });
-
-        setVisitsList(oldVisits => {
-          if (!oldVisits.some(visit => visit.visitId === newVisit.visitId)) {
-            return [...oldVisits, newVisit];
-          }
-          return oldVisits;
-        });
-        setVisitsAll(oldVisits => {
-          if (!oldVisits.some(visit => visit.visitId === newVisit.visitId)) {
-            return [...oldVisits, newVisit];
-          }
-          return oldVisits;
-        });
-      } catch (error) {
-        console.error('Error parsing SSE data:', error);
-      }
-    };
-
-    eventSource.onerror = error => {
-      console.error('EventSource error:', error);
-      eventSource.close();
-    };
-
-    return () => {
-      eventSource.close();
-    };
-  }, [isVet]);
-
-  useEffect(() => {
-    // Fetch emergency visits
-    async function fetchEmergencies(): Promise<void> {
-      try {
-        const emergencies = await getAllEmergency();
-        setEmergencyList(emergencies); // Set emergency data to state
-      } catch (error) {
-        console.error('Error fetching emergencies:', error);
-      }
-    }
-    fetchEmergencies();
-  }, []);
-
-  const handleDeleteEmergency = async (
-    visitEmergencyId: string
-  ): Promise<void> => {
-    try {
-      await deleteEmergency(visitEmergencyId);
-      setEmergencyList(prevEmergencies =>
-        prevEmergencies.filter(
-          emergency => emergency.visitEmergencyId !== visitEmergencyId
-        )
-      );
-    } catch (error) {
-      console.error(
-        `Error deleting emergency with ID ${visitEmergencyId}:`,
-        error
-      );
-    }
   };
 
+  // Update the displayed list whenever the search term or the full visits list changes.
+  // This avoids refetching from the API and preserves the full list in `visits`.
   useEffect(() => {
-    // Skip EventSource setup for VET role - backend endpoints are ADMIN-only
-    // VETs should not reach this component due to route-level restrictions
-    if (isVet) {
-      return;
+    const term = searchTerm.trim().toLowerCase();
+    if (term.length > 0) {
+      const filtered = visits.filter(v =>
+        (v.description || '').toLowerCase().includes(term)
+      );
+      setDisplayedVisits(sortVisits(filtered));
+    } else {
+      setDisplayedVisits(sortVisits(visits));
     }
-
-    const archivedEventSource = new EventSource(
-      `${import.meta.env.VITE_BACKEND_URL}gateway/visits/archived`,
-      { withCredentials: true }
-    );
-
-    archivedEventSource.onmessage = event => {
-      try {
-        const newArchivedVisit: Visit = JSON.parse(event.data);
-
-        setArchivedVisits(oldArchived => {
-          if (
-            !oldArchived.some(
-              visit => visit.visitId === newArchivedVisit.visitId
-            )
-          ) {
-            return [...oldArchived, newArchivedVisit];
-          } else {
-            // Update existing archived visit
-            return oldArchived.map(visit =>
-              visit.visitId === newArchivedVisit.visitId
-                ? newArchivedVisit
-                : visit
-            );
-          }
-        });
-      } catch (error) {
-        console.error('Error parsing SSE data for archived visits:', error);
-      }
-    };
-
-    archivedEventSource.onerror = error => {
-      console.error('Archived EventSource error:', error);
-      archivedEventSource.close();
-    };
-
-    return () => {
-      archivedEventSource.close();
-    };
-  }, [isVet]);
-
-  useEffect(() => {
-    if (!searchTerm) {
-      // reset to all when query cleared
-      setVisitsList(visitsAll);
-      setEmergencyList(emergencyAll);
-      return;
-    }
-    const q = searchTerm.toLowerCase();
-    setVisitsList(
-      visitsAll.filter(v => v.description.toLowerCase().includes(q))
-    );
-    setEmergencyList(
-      emergencyAll.filter(e => e.description.toLowerCase().includes(q))
-    );
-  }, [searchTerm, visitsAll, emergencyAll]);
+  }, [searchTerm, visits]);
 
   // Filter visits based on status
-  const confirmedVisits = visitsList.filter(
-    visit => visit.status === 'CONFIRMED'
+  // Derive the different lists from the displayed list so search / tabs compose
+  const emergencyVisits = sortVisits(
+    displayedVisits.filter(visit => visit.isEmergency)
   );
-  const upcomingVisits = visitsList.filter(
-    visit => visit.status === 'UPCOMING'
+  const confirmedVisits = sortVisits(
+    displayedVisits.filter(visit => {
+      return visit.status === 'CONFIRMED';
+    })
   );
-  const completedVisits = visitsList.filter(
-    visit => visit.status === 'COMPLETED'
+  const upcomingVisits = sortVisits(
+    displayedVisits.filter(visit => {
+      return visit.status === 'UPCOMING';
+    })
   );
-  const cancelledVisits = visitsList.filter(
-    visit => visit.status === 'CANCELLED'
+  const completedVisits = sortVisits(
+    displayedVisits.filter(visit => {
+      return visit.status === 'COMPLETED';
+    })
+  );
+  const cancelledVisits = sortVisits(
+    displayedVisits.filter(visit => {
+      return visit.status === 'CANCELLED';
+    })
+  );
+  const archivedVisits = sortVisits(
+    displayedVisits.filter(visit => {
+      return visit.status === 'ARCHIVED';
+    })
   );
 
+  // Handle archiving the visit
   const handleArchive = async (visitId: string): Promise<void> => {
-    const confirmArchive = window.confirm(
-      `Are you sure you want to archive visit with ID: ${visitId}?`
-    );
-    if (confirmArchive) {
-      await handleStatusChange(visitId, 'ARCHIVED');
-    }
-  };
-
-  const handleStatusChange = async (
-    visitId: string,
-    newStatus: string
-  ): Promise<void> => {
-    try {
-      const response = await updateVisitStatus(visitId, newStatus);
-      setVisitsList(prevVisits =>
-        prevVisits.map(visit => (visit.visitId === visitId ? response : visit))
-      );
-
-      // If archiving, move to archived list
-      if (newStatus === 'ARCHIVED') {
-        setArchivedVisits(prev => [...prev, response]);
-        setVisitsList(prev => prev.filter(v => v.visitId !== visitId));
-      }
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'An unknown error occurred';
-      alert(`Failed to update visit status: ${errorMessage}`);
-    }
+    await archiveVisit(visitId, updatedVisit => {
+      // This should probably be removed once the visit list will be reactive
+      setVisits(prev => {
+        return prev.map(visit => {
+          if (visit.visitId === visitId) return updatedVisit;
+          return visit;
+        });
+      });
+    });
   };
 
   const handleCancel = async (visitId: string): Promise<void> => {
-    const confirmCancel = window.confirm(
-      'Do you confirm you want to cancel the reservation?'
-    );
-    if (confirmCancel) {
-      await handleStatusChange(visitId, 'CANCELLED');
-    }
+    await cancelVisit(visitId, updatedVisit => {
+      // Update the full visits list; the displayed list will update automatically
+      // via the search effect above.
+      setVisits(prev => {
+        return prev.map(visit => {
+          if (visit.visitId === visitId) return updatedVisit;
+          return visit;
+        });
+      });
+    });
   };
 
   const renderSidebarItem = (
@@ -346,52 +187,65 @@ export default function VisitListTable(): JSX.Element {
     </aside>
   );
 
-  // Render table for emergencies
-  const renderEmergencyTable = (
-    title: string,
-    emergencies: EmergencyResponseDTO[]
-  ): JSX.Element =>
-    currentTab == title || currentTab == 'All' ? (
-      <div className="visit-table-section emergency">
+  // Unified table renderer for all visits
+  const renderTable = (title: string, visits: Visit[]): JSX.Element =>
+    currentTab == title ? (
+      <div className="visit-table-section">
         <table>
           <thead>
             <tr>
-              <th>Emergency Id</th>
-              <th>Pet Id</th>
+              <th>Visit Id</th>
               <th>Pet Name</th>
               <th>Description</th>
-              <th>Pet Birthdate </th>
-              <th>Practitionner Id</th>
               <th>Veterinarian</th>
               <th>Vet Email</th>
               <th>Vet Phone Number</th>
-              <th>Date</th>
+              <th>Start Date</th>
+              <th>End Date</th>
+              <th className="status-column">Status</th>
               <th className="action-column"></th>
             </tr>
           </thead>
           <tbody>
-            {emergencies.map(emergency => (
-              <tr key={emergency.visitEmergencyId}>
-                <td>{emergency.visitEmergencyId}</td>
-                <td> {emergency.petId}</td>
-                <td>{emergency.petName}</td>
-                <td>{emergency.description}</td>
-                <td> {new Date(emergency.petBirthDate).toLocaleString()}</td>
-                <td>{emergency.practitionerId}</td>
+            {visits.map(visit => (
+              <tr
+                key={visit.visitId}
+                className={visit.isEmergency ? 'emergency-visit' : ''}
+              >
+                <td>{visit.visitId}</td>
+                <td>{visit.petName}</td>
+                <td>{visit.description}</td>
                 <td>
-                  {emergency.vetFirstName} {emergency.vetLastName}
+                  {visit.vetFirstName} {visit.vetLastName}
                 </td>
-                <td>{emergency.vetEmail}</td>
-                <td>{emergency.vetPhoneNumber}</td>
-                <td>{new Date(emergency.visitDate).toLocaleString()}</td>
+                <td>{visit.vetEmail}</td>
+                <td>{visit.vetPhoneNumber}</td>
+                <td>{new Date(visit.visitDate).toLocaleString()}</td>
+                <td>{new Date(visit.visitEndDate).toLocaleString()}</td>
+                <td
+                  className="status-column"
+                  style={{
+                    color:
+                      visit.status === 'CONFIRMED'
+                        ? 'green'
+                        : visit.status === 'UPCOMING'
+                          ? 'orange'
+                          : visit.status === 'CANCELLED'
+                            ? 'red'
+                            : visit.status === 'COMPLETED'
+                              ? 'blue'
+                              : visit.status === 'ARCHIVED'
+                                ? 'gray'
+                                : 'inherit',
+                    fontWeight: 'bold',
+                  }}
+                >
+                  {visit.status}
+                </td>
                 <td className="action-column">
                   <a
                     className="icon"
-                    onClick={() =>
-                      navigate(
-                        `/visits/emergency/${emergency.visitEmergencyId}`
-                      )
-                    }
+                    onClick={() => navigate(`/visits/${visit.visitId}`)}
                     title="View"
                   >
                     <svg
@@ -410,11 +264,7 @@ export default function VisitListTable(): JSX.Element {
                   {!isVet && (
                     <a
                       className="icon"
-                      onClick={() => {
-                        navigate(
-                          `/visits/emergency/${emergency.visitEmergencyId}/edit`
-                        );
-                      }}
+                      onClick={() => navigate(`/visits/${visit.visitId}/edit`)}
                       title="Edit"
                     >
                       <svg
@@ -432,13 +282,11 @@ export default function VisitListTable(): JSX.Element {
                       </svg>
                     </a>
                   )}
-                  {!isVet && (
+                  {visit.status === 'COMPLETED' && !isVet && (
                     <a
                       className="icon"
-                      onClick={async () =>
-                        setConfirmDeleteId(emergency.visitEmergencyId)
-                      }
-                      title="Delete"
+                      onClick={() => handleArchive(visit.visitId)}
+                      title="Archive"
                     >
                       <svg
                         viewBox="0 0 24 24"
@@ -446,13 +294,47 @@ export default function VisitListTable(): JSX.Element {
                         xmlns="http://www.w3.org/2000/svg"
                       >
                         <path
-                          d="M5 6.5H20M10 6.5V4.5C10 3.94772 10.4477 3.5 11 3.5H14C14.5523 3.5 15 3.94772 15 4.5V6.5M12.5 9V17M15.5 9L15 17M9.5 9L10 17M18.5 6.5L17.571 18.5767C17.5309 19.0977 17.0965 19.5 16.574 19.5H8.42603C7.90349 19.5 7.46905 19.0977 7.42898 18.5767L6.5 6.5H18.5Z"
-                          stroke="#121923"
+                          d="M16 14L12.5 17.5L9 14M4.5 7.5V20.5H20.5V7.5L18.5 4.5H6.5L4.5 7.5Z"
+                          stroke="#212529"
+                          strokeWidth="1.2"
+                        />
+                        <path
+                          d="M12.5 10.5V17"
+                          stroke="#212529"
+                          strokeWidth="1.2"
+                        />
+                        <path
+                          d="M4.5 7.5H20.5"
+                          stroke="#212529"
                           strokeWidth="1.2"
                         />
                       </svg>
                     </a>
                   )}
+
+                  {visit.status !== 'CANCELLED' &&
+                    visit.status !== 'ARCHIVED' &&
+                    visit.status !== 'COMPLETED' &&
+                    !isVet && (
+                      <a
+                        className="icon"
+                        onClick={() => handleCancel(visit.visitId)}
+                        title="Cancel"
+                      >
+                        <svg
+                          viewBox="0 -2 18 18"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            clipRule="evenodd"
+                            d="M12.8536 2.85355C13.0488 2.65829 13.0488 2.34171 12.8536 2.14645C12.6583 1.95118 12.3417 1.95118 12.1464 2.14645L7.5 6.79289L2.85355 2.14645C2.65829 1.95118 2.34171 1.95118 2.14645 2.14645C1.95118 2.34171 1.95118 2.65829 2.14645 2.85355L6.79289 7.5L2.14645 12.1464C1.95118 12.3417 1.95118 12.6583 2.14645 12.8536C2.34171 13.0488 2.65829 13.0488 2.85355 12.8536L7.5 8.20711L12.1464 12.8536C12.3417 13.0488 12.6583 13.0488 12.8536 12.8536C13.0488 12.6583 13.0488 12.3417 12.8536 12.1464L8.20711 7.5L12.8536 2.85355Z"
+                            fill="#212529"
+                          />
+                        </svg>
+                      </a>
+                    )}
                 </td>
               </tr>
             ))}
@@ -462,172 +344,8 @@ export default function VisitListTable(): JSX.Element {
     ) : (
       <></>
     );
-  const renderTable = (title: string, visits: Visit[]): JSX.Element =>
-    currentTab == title ? (
-      <div className="visit-table-section">
-        {
-          <table>
-            <thead>
-              <tr>
-                <th>Visit Id</th>
-                <th>Pet Name</th>
-                <th>Description</th>
-                <th>Veterinarian</th>
-                <th>Vet Email</th>
-                <th>Vet Phone Number</th>
-                <th>Start Date</th>
-                <th>End Date</th>
-                <th className="status-column">Status</th>
-                <th className="action-column"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {visits.map(visit => (
-                <tr key={visit.visitId}>
-                  <td>{visit.visitId}</td>
-                  <td>{visit.petName}</td>
-                  <td>{visit.description}</td>
-                  <td>
-                    {visit.vetFirstName} {visit.vetLastName}
-                  </td>
-                  <td>{visit.vetEmail}</td>
-                  <td>{visit.vetPhoneNumber}</td>
-                  <td>{new Date(visit.visitDate).toLocaleString()}</td>
-                  <td>{new Date(visit.visitEndDate).toLocaleString()}</td>
-                  <td
-                    className="status-column"
-                    style={{
-                      color:
-                        visit.status === 'CONFIRMED'
-                          ? 'green'
-                          : visit.status === 'UPCOMING'
-                            ? 'orange'
-                            : visit.status === 'CANCELLED'
-                              ? 'red'
-                              : visit.status === 'COMPLETED'
-                                ? 'blue'
-                                : visit.status === 'ARCHIVED'
-                                  ? 'gray'
-                                  : 'inherit',
-                      fontWeight: 'bold',
-                    }}
-                  >
-                    {visit.status}
-                  </td>
-                  <td className="action-column">
-                    <a
-                      className="icon"
-                      onClick={() => navigate(`/visits/${visit.visitId}`)}
-                      title="View"
-                    >
-                      <svg
-                        viewBox="0 -3 24 24"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <circle cx="12" cy="12" r="3.5" fill="#212529" />
-                        <path
-                          d="M21 12C21 12 20 4 12 4C4 4 3 12 3 12"
-                          stroke="#212529"
-                          strokeWidth="1.2"
-                        />
-                      </svg>
-                    </a>
-                    {
-                      <a
-                        className="icon"
-                        onClick={() =>
-                          navigate(`/visits/${visit.visitId}/edit`)
-                        }
-                        title="Edit"
-                      >
-                        <svg
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <rect width="24" height="24" fill="none" />
-                          <path
-                            d="M15.6287 5.12132L4.31497 16.435M15.6287 5.12132L19.1642 8.65685M15.6287 5.12132L17.0429 3.70711C17.4334 3.31658 18.0666 3.31658 18.4571 3.70711L20.5784 5.82843C20.969 6.21895 20.969 6.85212 20.5784 7.24264L19.1642 8.65685M7.85051 19.9706L4.31497 16.435M7.85051 19.9706L19.1642 8.65685M7.85051 19.9706L3.25431 21.0312L4.31497 16.435"
-                            stroke="#212529"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                      </a>
-                    }
-                    {visit.status === 'COMPLETED' && !isVet && (
-                      <a
-                        className="icon"
-                        onClick={() => handleArchive(visit.visitId)}
-                        title="Archive"
-                      >
-                        <svg
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M16 14L12.5 17.5L9 14M4.5 7.5V20.5H20.5V7.5L18.5 4.5H6.5L4.5 7.5Z"
-                            stroke="#212529"
-                            strokeWidth="1.2"
-                          />
-                          <path
-                            d="M12.5 10.5V17"
-                            stroke="#212529"
-                            strokeWidth="1.2"
-                          />
-                          <path
-                            d="M4.5 7.5H20.5"
-                            stroke="#212529"
-                            strokeWidth="1.2"
-                          />
-                        </svg>
-                      </a>
-                    )}
-
-                    {visit.status !== 'CANCELLED' &&
-                      visit.status !== 'ARCHIVED' &&
-                      visit.status !== 'COMPLETED' &&
-                      !isVet && (
-                        <a
-                          className="icon"
-                          onClick={() => handleCancel(visit.visitId)}
-                          title="Cancel"
-                        >
-                          <svg
-                            viewBox="0 -2 18 18"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              clipRule="evenodd"
-                              d="M12.8536 2.85355C13.0488 2.65829 13.0488 2.34171 12.8536 2.14645C12.6583 1.95118 12.3417 1.95118 12.1464 2.14645L7.5 6.79289L2.85355 2.14645C2.65829 1.95118 2.34171 1.95118 2.14645 2.14645C1.95118 2.34171 1.95118 2.65829 2.14645 2.85355L6.79289 7.5L2.14645 12.1464C1.95118 12.3417 1.95118 12.6583 2.14645 12.8536C2.34171 13.0488 2.65829 13.0488 2.85355 12.8536L7.5 8.20711L12.1464 12.8536C12.3417 13.0488 12.6583 13.0488 12.8536 12.8536C13.0488 12.6583 13.0488 12.3417 12.8536 12.1464L8.20711 7.5L12.8536 2.85355Z"
-                              fill="#212529"
-                            />
-                          </svg>
-                        </a>
-                      )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        }
-      </div>
-    ) : (
-      <></>
-    );
 
   const renderVisitsTables = (): JSX.Element => {
-    // Filter visits by vet
-    const vetVisits = filterByVet(visitsList);
-    const vetConfirmedVisits = filterByVet(confirmedVisits);
-    const vetUpcomingVisits = filterByVet(upcomingVisits);
-    const vetCompletedVisits = filterByVet(completedVisits);
-    const vetCancelledVisits = filterByVet(cancelledVisits);
-
     return (
       <div className="page-container">
         <div className="visit-action-bar">
@@ -649,21 +367,12 @@ export default function VisitListTable(): JSX.Element {
             Download CSV
           </button>
         </div>
-        {/* Emergency Table below buttons, but above visit tables */}
-        {renderEmergencyTable(
-          'Emergencies',
-          !isVet || !vetId
-            ? emergencyList
-            : emergencyList.filter(
-                e => String(e.practitionerId) === String(vetId)
-              )
-        )}
-
-        {renderTable('All', vetVisits)}
-        {renderTable('Confirmed', vetConfirmedVisits)}
-        {renderTable('Upcoming', vetUpcomingVisits)}
-        {renderTable('Completed', vetCompletedVisits)}
-        {renderTable('Cancelled', vetCancelledVisits)}
+        {renderTable('All', displayedVisits)}
+        {renderTable('Emergencies', emergencyVisits)}
+        {renderTable('Confirmed', confirmedVisits)}
+        {renderTable('Upcoming', upcomingVisits)}
+        {renderTable('Completed', completedVisits)}
+        {renderTable('Cancelled', cancelledVisits)}
         {renderTable('Archived', archivedVisits)}
         {visitIdToDelete && (
           <div className="modal">
@@ -678,7 +387,7 @@ export default function VisitListTable(): JSX.Element {
                 <button
                   onClick={async () => {
                     try {
-                      await handleDeleteEmergency(visitIdToDelete);
+                      // Implement Deleting visit
                       setConfirmDeleteId(null);
                     } catch (error) {
                       console.error('Error deleting emergency visit:', error);

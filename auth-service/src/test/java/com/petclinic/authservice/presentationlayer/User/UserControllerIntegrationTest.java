@@ -164,7 +164,7 @@ class UserControllerIntegrationTest {
 
 
     @Test
-    void userLoginWithInvalidCredentials_ShouldReturnUnauthorized(){
+    void userLoginWithInvalidCredentials_ShouldReturnNotFoundUser(){
 
 
 
@@ -179,7 +179,7 @@ class UserControllerIntegrationTest {
                 .expectStatus().isNotFound()
                 .expectBody(HTTPErrorMessage.class).
                 value(error -> {
-                    assertEquals(error.getMessage(),"No account found for email: invalidEmail");
+                    assertEquals(error.getMessage(),"User not found");
                     assertEquals(error.getStatusCode(),404);
                     assertNotNull(error.getTimestamp());
                 });
@@ -237,7 +237,7 @@ class UserControllerIntegrationTest {
                         .expectStatus().isUnauthorized()
                         .expectBody(HTTPErrorMessage.class)
                         .value(error -> {
-                            assertEquals("Incorrect password for user with email: admin@admin.com",error.getMessage());
+                            assertEquals("Incorrect username or password for user: admin@admin.com",error.getMessage());
                             assertEquals(401,error.getStatusCode());
                             assertNotNull(error.getTimestamp());
                         });

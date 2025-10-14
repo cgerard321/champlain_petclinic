@@ -29,6 +29,7 @@ type OwnerVisitType = {
   selectedTimeSlot: string;
   assignedVetId: string;
   status: Status;
+  isEmergency: boolean;
 };
 
 const OwnerBookingVisit: React.FC = (): JSX.Element => {
@@ -41,6 +42,7 @@ const OwnerBookingVisit: React.FC = (): JSX.Element => {
     selectedTimeSlot: '',
     assignedVetId: '',
     status: 'UPCOMING' as Status,
+    isEmergency: false,
   });
 
   const [vets, setVets] = useState<VetResponse[]>([]);
@@ -250,6 +252,7 @@ const OwnerBookingVisit: React.FC = (): JSX.Element => {
         localStorage.getItem('authToken') ||
         localStorage.getItem('token') ||
         '',
+      isEmergency: visit.isEmergency,
     };
 
     try {
@@ -264,6 +267,7 @@ const OwnerBookingVisit: React.FC = (): JSX.Element => {
         selectedDate: '',
         selectedTimeSlot: '',
         status: 'UPCOMING' as Status,
+        isEmergency: false,
       });
       setTimeout(() => {
         navigate('/customer/visits');
@@ -476,6 +480,30 @@ const OwnerBookingVisit: React.FC = (): JSX.Element => {
             }
           </div>
         )}
+
+        <div className="form-group emergency-toggle-group">
+          <label htmlFor="isEmergency">
+            <span className="emergency-label-text">
+              <span>Emergency Visit</span>
+            </span>
+            <div className="switch-wrapper">
+              <input
+                type="checkbox"
+                id="isEmergency"
+                name="isEmergency"
+                checked={visit.isEmergency}
+                onChange={e =>
+                  setVisit(prev => ({
+                    ...prev,
+                    isEmergency: e.target.checked,
+                  }))
+                }
+                className="switch-input"
+              />
+              <span className="switch-slider"></span>
+            </div>
+          </label>
+        </div>
 
         <div className="button-group"></div>
         <button className="cancel" type="button" onClick={handleCancel}>

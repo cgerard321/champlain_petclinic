@@ -185,28 +185,41 @@ public class ProductControllerUnitTest {
     }
 
     @Test
-    public void whenDeleteProduct_thenReturnDeletedProduct() {
-        ProductResponseModel productResponseModel = ProductResponseModel.builder()
-                .productId("ae2d3af7-f2a2-407f-ad31-ca7d8220cb7a")
+    void whenDeleteProduct_withCascadeTrue_thenReturnDeletedProductJson() {
+        // arrange
+        String id = "ae2d3af7-f2a2-407f-ad31-ca7d8220cb7a";
+        ProductResponseModel expected = ProductResponseModel.builder()
+                .productId(id)
                 .productName("Bird Cage")
                 .productDescription("Spacious cage for small birds like parakeets")
                 .productSalePrice(29.99)
                 .averageRating(0.0)
                 .build();
 
-        when(productService.deleteProductByProductId("ae2d3af7-f2a2-407f-ad31-ca7d8220cb7a")).thenReturn(Mono.just(productResponseModel));
+        when(productService.deleteProductByProductId(id, true))
+                .thenReturn(Mono.just(expected));
 
-        webClient.delete().uri("/products/ae2d3af7-f2a2-407f-ad31-ca7d8220cb7a")
+        // act + assert
+        webClient.delete()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/products/{productId}")
+                        .queryParam("cascadeBundles", true)   // <-- include query param
+                        .build(id))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
+                .expectHeader().contentTypeCompatibleWith(MediaType.APPLICATION_JSON)
                 .expectBody(ProductResponseModel.class)
-                .value(response -> {
-                    assertNotNull(response);
-                    assertEquals("ae2d3af7-f2a2-407f-ad31-ca7d8220cb7a", response.getProductId());
+                .value(resp -> {
+                    assertNotNull(resp);
+                    assertEquals(expected.getProductId(), resp.getProductId());
+                    assertEquals(expected.getProductName(), resp.getProductName());
+                    assertEquals(expected.getProductDescription(), resp.getProductDescription());
+                    assertEquals(expected.getProductSalePrice(), resp.getProductSalePrice());
+                    assertEquals(expected.getAverageRating(), resp.getAverageRating());
                 });
 
-        verify(productService).deleteProductByProductId("ae2d3af7-f2a2-407f-ad31-ca7d8220cb7a");
+        verify(productService).deleteProductByProductId(id, true);
     }
 
     @Test

@@ -106,14 +106,14 @@ public class ProductController {
                     }
                 });
     }
-
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @DeleteMapping(value = "{productId}")
-    public Mono<ResponseEntity<Void>> deleteProduct(@PathVariable String productId) {
-        return productsServiceClient.deleteProduct(productId)
-                .then(Mono.just(ResponseEntity.noContent().<Void>build()))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
-    }
+//
+//    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+//    @DeleteMapping(value = "{productId}")
+//    public Mono<ResponseEntity<Void>> deleteProduct(@PathVariable String productId) {
+//        return productsServiceClient.deleteProduct(productId)
+//                .then(Mono.just(ResponseEntity.noContent().<Void>build()))
+//                .defaultIfEmpty(ResponseEntity.notFound().build());
+//    }
     @GetMapping(value = "/filter/{productType}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Flux<ProductResponseDTO> getProductsByType(@PathVariable String productType) {
         return productsServiceClient.getProductsByType(productType);

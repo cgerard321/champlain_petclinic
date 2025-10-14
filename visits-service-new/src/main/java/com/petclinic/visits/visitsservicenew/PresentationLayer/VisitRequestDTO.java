@@ -24,4 +24,5 @@ public class VisitRequestDTO {
     private String jwtToken;//used to get the userDetails from the Auth-Service when sending visit emails
     private String practitionerId;
     private Status status;
+    private Boolean isEmergency;
 }

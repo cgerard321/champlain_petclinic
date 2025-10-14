@@ -180,23 +180,42 @@ public class OwnerControllerV1IntegrationTests {
     }
 
     @Test
-    void whenGetOwnerPhotoIntegration_thenReturnPhoto() {
-        byte[] mockPhotoBytes = "integrationPhotoData".getBytes();
-        mockServerConfigCustomersService.registerGetOwnerPhotoEndpoint(OWNER_ID, mockPhotoBytes);
+    void whenGetOwnerWithPhotoIntegration_thenReturnOwnerWithPhoto() {
+        mockServerConfigCustomersService.clearExpectationsForOwner(OWNER_ID);
+        
+        String mockOwnerJson = """
+            {
+                "ownerId": "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a",
+                "firstName": "John",
+                "lastName": "Doe",
+                "photo": {
+                    "fileId": "photo-123",
+                    "fileName": "profile.png",
+                    "fileType": "image/png",
+                    "fileData": "aW50ZWdyYXRpb25QaG90b0RhdGE="
+                }
+            }
+            """;
+        mockServerConfigCustomersService.registerGetOwnerWithPhotoEndpoint(OWNER_ID, mockOwnerJson);
 
-        Mono<byte[]> result = webTestClient.get()
-                .uri(OWNER_BASE_PATH + "/{ownerId}/photos", OWNER_ID)
+        Mono<OwnerResponseDTO> result = webTestClient.get()
+                .uri(OWNER_BASE_PATH + "/{ownerId}?includePhoto=true", OWNER_ID)
                 .cookie("Bearer", jwtTokenForValidAdmin)
-                .accept(MediaType.IMAGE_PNG)
+                .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.IMAGE_PNG)
-                .returnResult(byte[].class)
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .returnResult(OwnerResponseDTO.class)
                 .getResponseBody()
                 .single();
 
         StepVerifier.create(result)
-                .expectNextMatches(bytes -> new String(bytes).equals("integrationPhotoData"))
+                .expectNextMatches(owner -> 
+                    owner.getOwnerId().equals("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a") &&
+                    owner.getFirstName().equals("John") &&
+                    owner.getLastName().equals("Doe") &&
+                    owner.getPhoto() != null &&
+                    owner.getPhoto().getFileType().equals("image/png"))
                 .verifyComplete();
     }
 

@@ -2,6 +2,7 @@ export interface Visit {
   visitId: string;
   visitDate: string;
   description: string;
+  petId: string;
   petName: string;
   vetFirstName: string;
   vetLastName: string;
@@ -9,5 +10,5 @@ export interface Visit {
   vetPhoneNumber: string;
   status: string;
   visitEndDate: string;
-  practitionerId: string;
+  isEmergency: boolean;
 }

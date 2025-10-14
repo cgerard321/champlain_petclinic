@@ -21,11 +21,31 @@ angular.module('inventoriesProductForm')
                     console.log(response);
                     $state.go('inventoriesProduct', {inventoryId: inventoryId});
                 }, function (response) {
-                    var error = response.data;
-                    error.errors = error.errors || [];
-                    alert(error.error + "\r\n" + error.errors.map(function (e) {
-                        return e.field + ": " + e.defaultMessage;
-                    }).join("\r\n"));
+                    var data = (response && response.data) || {};
+                    var baseMsg =
+                        (typeof data === 'string' && data) ||
+                        data.message ||
+                        data.error ||
+                        (response && response.status ? ('HTTP ' + response.status + ' ' + (response.statusText || '')) : 'Request failed');
+                    var fieldErrors =
+                        (Array.isArray(data.errors) && data.errors) ||
+                        (Array.isArray(data.details) && data.details) ||
+                        data.fieldErrors ||
+                        [];
+
+                    var fieldText = '';
+                    if (Array.isArray(fieldErrors) && fieldErrors.length) {
+                        fieldText = fieldErrors.map(function (e) {
+                            if (typeof e === 'string') return e;
+                            var field = e.field || e.path || e.parameter || '';
+                            var msg = e.defaultMessage || e.message || e.reason || JSON.stringify(e);
+                            return field ? (field + ': ' + msg) : msg;
+                        }).join('\r\n');
+                    }
+
+                    alert(fieldText ? (baseMsg + '\r\n' + fieldText) : baseMsg);
+                    // ---------------------------------------------------
+
                 });
         }
 

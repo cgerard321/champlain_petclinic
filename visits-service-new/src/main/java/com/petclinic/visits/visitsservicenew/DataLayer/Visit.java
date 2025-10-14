@@ -38,5 +38,6 @@ public class Visit {
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     LocalDateTime visitEndDate;
 
+    private Boolean isEmergency;
 
 }
