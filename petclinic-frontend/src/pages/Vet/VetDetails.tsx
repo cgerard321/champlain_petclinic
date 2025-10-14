@@ -94,6 +94,11 @@ export default function VetDetails(): JSX.Element {
   const [enlargedPhoto, setEnlargedPhoto] = useState<string | null>(null);
   const [formVisible, setFormVisible] = useState<boolean>(false);
 
+  // Confirm-delete modal state
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [pendingPhotoId, setPendingPhotoId] = useState<number | null>(null);
+  const canManageVet = !isInventoryManager && !isReceptionist; // allow Vet and Owner/Admin
+
   const [selectedEducation, setSelectedEducation] =
     useState<EducationResponseType | null>(null);
   const [ratings, setRatings] = useState<RatingResponseType[] | null>(null);
@@ -140,6 +145,24 @@ export default function VetDetails(): JSX.Element {
     password: 'defaultPassword',
     vetBillId: vet.vetBillId,
   });
+
+  const requestDeleteAlbumPhoto = (photoId: number): void => {
+    setPendingPhotoId(photoId);
+    setConfirmOpen(true);
+  };
+
+  const confirmDelete = (): void => {
+    if (pendingPhotoId != null) {
+      void handleDeleteAlbumPhoto(pendingPhotoId);
+    }
+    setConfirmOpen(false);
+    setPendingPhotoId(null);
+  };
+
+  const cancelDelete = (): void => {
+    setConfirmOpen(false);
+    setPendingPhotoId(null);
+  };
 
   useEffect(() => {
     const fetchVetRatings = async (): Promise<void> => {
@@ -444,7 +467,7 @@ export default function VetDetails(): JSX.Element {
               onChange={handleUpdateVetProfilePhoto}
               accept="image/*"
             />
-            {!isInventoryManager && !isOwner && !isReceptionist && (
+            {canManageVet && (
               <>
                 {!isDefaultPhoto && (
                   <DeleteVetPhoto
@@ -554,7 +577,7 @@ export default function VetDetails(): JSX.Element {
                   {vet.specialties.map((specialty, index) => (
                     <li key={index}>
                       {specialty.name}
-                      {!isInventoryManager && !isOwner && !isReceptionist && (
+                      {canManageVet && (
                         <button
                           onClick={() =>
                             handleDeleteSpecialty(specialty.specialtyId)
@@ -571,7 +594,7 @@ export default function VetDetails(): JSX.Element {
               )}
 
               {/* Button to open the form */}
-              {!isInventoryManager && !isOwner && !isReceptionist && (
+              {canManageVet && (
                 <button onClick={() => setIsFormOpen(true)}>
                   Add Specialty
                 </button>
@@ -640,7 +663,7 @@ export default function VetDetails(): JSX.Element {
                     <p>
                       <strong>End Date:</strong> {edu.endDate}
                     </p>
-                    {!isInventoryManager && !isOwner && !isReceptionist && (
+                    {canManageVet && (
                       <>
                         <div
                           style={{ marginBottom: '20px', textAlign: 'right' }}
@@ -687,7 +710,7 @@ export default function VetDetails(): JSX.Element {
                 <div>
                   <p>No education details available</p>
 
-                  {!isInventoryManager && !isOwner && !isReceptionist && (
+                  {canManageVet && (
                     <div style={{ marginBottom: '20px', textAlign: 'right' }}>
                       <button
                         onClick={() => setFormVisible(prev => !prev)}
@@ -767,7 +790,7 @@ export default function VetDetails(): JSX.Element {
                             className="delete-photo-button"
                             onClick={e => {
                               e.stopPropagation();
-                              void handleDeleteAlbumPhoto(photo.id);
+                              requestDeleteAlbumPhoto(photo.id);
                             }}
                           >
                             Delete Image
@@ -789,6 +812,74 @@ export default function VetDetails(): JSX.Element {
       {enlargedPhoto && (
         <div className="photo-modal" onClick={closePhotoModal}>
           <img src={enlargedPhoto} alt="Enlarged Vet Album Photo" />
+        </div>
+      )}
+      {confirmOpen && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.45)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+          }}
+          onClick={cancelDelete}
+        >
+          <div
+            style={{
+              background: '#fff',
+              padding: 20,
+              borderRadius: 12,
+              width: 'min(520px, 92vw)',
+              boxShadow: '0 10px 30px rgba(0,0,0,0.25)',
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            <h3 style={{ marginTop: 0 }}>Delete this photo?</h3>
+            <p>
+              You’re about to delete <strong>photo #{pendingPhotoId}</strong>.
+            </p>
+            <p>
+              <strong>Vet ID:</strong> <code>{vetId}</code>
+            </p>
+            <p style={{ fontSize: 13, opacity: 0.85 }}>
+              This can’t be undone. Make sure this is the correct veterinarian
+              profile.
+            </p>
+            <div
+              style={{
+                display: 'flex',
+                gap: 12,
+                justifyContent: 'flex-end',
+                marginTop: 18,
+              }}
+            >
+              <button
+                onClick={cancelDelete}
+                style={{
+                  padding: '8px 14px',
+                  borderRadius: 8,
+                  border: '1px solid #ddd',
+                }}
+              >
+                Undo
+              </button>
+              <button
+                onClick={confirmDelete}
+                style={{
+                  padding: '8px 14px',
+                  borderRadius: 8,
+                  border: '1px solid #f93142',
+                  background: '#f93142',
+                  color: '#fff',
+                }}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
