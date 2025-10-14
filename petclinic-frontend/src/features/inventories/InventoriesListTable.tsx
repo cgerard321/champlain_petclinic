@@ -109,6 +109,18 @@ export default function InventoriesListTable(): JSX.Element {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage, showImportantOnly]);
 
+  // load archived from localStorage on mount
+  useEffect(() => {
+    const map = loadArchivedFromLocalStorage();
+    setArchivedMap(map);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // persist archivedMap to localStorage whenever it changes
+  useEffect(() => {
+    saveArchivedToLocalStorage(archivedMap);
+  }, [archivedMap]);
+
   const handleInventoryNameChange = (value: string): void => {
     setInventoryName(value);
     updateFilters({
