@@ -132,6 +132,8 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
     setIsLoading(true);
     setErrorMessage('');
     setSuccessMessage('');
+    // setErrorMessage('');
+    // setSuccessMessage('');
 
     const formattedVisit: VisitRequestModel = {
       visitDate: visit.visitStartDate.toISOString(),
@@ -151,11 +153,15 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
         setTimeout(() => {
           window.location.reload();
         }, 1000);
+        // setSuccessMessage('Visit updated successfully!');
+        // setShowNotification(true);
+        // setTimeout(() => setShowNotification(false), 3000); // Hide notification after 3 seconds
+        // navigate('/visits'); // Navigate to a different page or clear form
       }
     } catch (error) {
       // Use type assertion or check error type
-      const apiError = error as ApiError;
-      setErrorMessage(`Error updating visit: ${apiError.message}`);
+      // const apiError = error as ApiError;
+      // setErrorMessage(`Error updating visit: ${apiError.message}`);
     } finally {
       setIsLoading(false);
     }
@@ -167,7 +173,6 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
       showButton={showButton}
       formId="modalform"
       validate={validate}
-      // refreshPageOnConfirm={true}
       confirmText={isLoading ? 'Updating...' : 'Update'}
       errorMessage={errorMessage}
     >
@@ -215,6 +220,8 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
           {errors.visitStartDate && (
             <span className="error">{errors.visitStartDate}</span>
           )}
+          Visit Date:{' '}
+          {errors.visitStartDate && <span className="error">Required</span>}
         </label>
 
         <input
@@ -230,9 +237,50 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
           {errors.status && <span className="error">{errors.status}</span>}
         </label>
 
+        <label>
+          Description:{' '}
+          {errors.description && (
+            <span className="error">{errors.description}</span>
+          )}
+        </label>
+
+        <input
+          type="text"
+          name="description"
+          value={visit.description}
+          onChange={handleChange}
+          required
+        />
+
+        <br />
+        <label>
+          Practitioner ID:{' '}
+          {errors.practitionerId && (
+            <span className="error">{errors.practitionerId}</span>
+          )}
+        </label>
+
+        <input
+          type="text"
+          name="practitionerId"
+          value={visit.practitionerId}
+          onChange={handleChange}
+          required
+        />
+
+        <br />
+        <label>
+          Status:{' '}
+          {errors.status && <span className="error">{errors.status}</span>}
+        </label>
+
         <select name="status" value={visit.status} onChange={handleChange}>
           <option value="CONFIRMED">Confirmed</option>
+          <option value="CONFIRMED">Confirmed</option>
           <option value="UPCOMING">Upcoming</option>
+          <option value="COMPLETED">Completed</option>
+          <option value="CANCELED">Canceled</option>
+          <option value="ARCHIVED">Archived</option>
           <option value="COMPLETED">Completed</option>
           <option value="CANCELED">Canceled</option>
           <option value="ARCHIVED">Archived</option>

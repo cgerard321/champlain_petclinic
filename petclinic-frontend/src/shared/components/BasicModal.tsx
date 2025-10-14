@@ -20,6 +20,7 @@ const BasicModal: React.FC<BasicModalProps> = ({
   title,
   confirmText = 'Confirm',
   onConfirm,
+  refreshPageOnConfirm,
   formId,
   validate = () => true,
   showButton,
