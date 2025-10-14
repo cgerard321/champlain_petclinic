@@ -15,13 +15,9 @@ export const uploadOwnerPhoto = async (
     fileData: fileData,
   };
 
-  const patchRequest = {
-    photo: photoRequest,
-  };
-
   return await axiosInstance.patch<OwnerResponseModel>(
-    `/owners/${ownerId}`,
-    patchRequest,
+    `/owners/${ownerId}/photo`,
+    photoRequest,
     {
       useV2: false,
     }
