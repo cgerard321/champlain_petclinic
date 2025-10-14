@@ -50,6 +50,41 @@ export default function InventoriesListTable(): JSX.Element {
 
   const [showImportantOnly, setShowImportantOnly] = useState(false);
 
+  // viewMode controls which inventories to show: 'active' | 'archived' | 'all'
+  const [viewMode, setViewMode] = useState<'active' | 'archived' | 'all'>(
+    'active'
+  );
+
+  // archivedMap stores archived flags by inventoryId and is persisted to localStorage
+  const [archivedMap, setArchivedMap] = useState<{
+    [inventoryId: string]: boolean;
+  }>({});
+
+  const ARCHIVE_STORAGE_KEY = 'archivedInventories_v1';
+
+  const loadArchivedFromLocalStorage = (): {
+    [inventoryId: string]: boolean;
+  } => {
+    try {
+      const raw = window.localStorage.getItem(ARCHIVE_STORAGE_KEY);
+      if (!raw) return {};
+      return JSON.parse(raw);
+    } catch (e) {
+      console.error('Failed to load archived state from localStorage', e);
+      return {};
+    }
+  };
+
+  const saveArchivedToLocalStorage = (map: {
+    [inventoryId: string]: boolean;
+  }): void => {
+    try {
+      window.localStorage.setItem(ARCHIVE_STORAGE_KEY, JSON.stringify(map));
+    } catch (e) {
+      console.error('Failed to save archived state to localStorage', e);
+    }
+  };
+
   const handleMenuClick = (
     e: React.MouseEvent<SVGElement>,
     inventoryId: string
@@ -77,6 +112,17 @@ export default function InventoriesListTable(): JSX.Element {
     refreshInventoryTypes();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage, showImportantOnly]);
+
+  // load archived from localStorage on mount
+  useEffect(() => {
+    const map = loadArchivedFromLocalStorage();
+    setArchivedMap(map);
+  }, []);
+
+  // persist archivedMap to localStorage whenever it changes
+  useEffect(() => {
+    saveArchivedToLocalStorage(archivedMap);
+  }, [archivedMap]);
 
   const handleInventoryNameChange = (value: string): void => {
     setInventoryName(value);
@@ -307,6 +353,44 @@ export default function InventoriesListTable(): JSX.Element {
     setActionsMenu(prevState => !prevState);
   };
 
+  const toggleArchiveStatus = (
+    e: React.MouseEvent,
+    inventory: Inventory
+  ): void => {
+    e.stopPropagation();
+    const id = inventory.inventoryId;
+    setArchivedMap(prev => {
+      const next = { ...prev };
+      if (next[id]) {
+        delete next[id];
+      } else {
+        next[id] = true;
+      }
+      return next;
+    });
+    // ensure archived items are removed from selection
+    setSelectedInventories(prev =>
+      prev.filter(si => si.inventoryId !== inventory.inventoryId)
+    );
+  };
+
+  useEffect(() => {
+    if (selectedInventories.length > 0) {
+      setSelectedInventories(prev =>
+        prev.filter(si => !archivedMap[si.inventoryId])
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [archivedMap]);
+
+  // ARCHIVE: compute displayed list based on viewMode
+  const displayedInventories = inventoryList.filter(inv => {
+    const isArchived = Boolean(archivedMap[inv.inventoryId]);
+    if (viewMode === 'active') return !isArchived;
+    if (viewMode === 'archived') return isArchived;
+    return true;
+  });
+
   return (
     <>
       <div id={inventoryStyles.menuSection}>
@@ -478,6 +562,23 @@ export default function InventoriesListTable(): JSX.Element {
                   </svg>
                 </button>
               </td>
+
+              {/*viewMode selector for Active / Archived / All */}
+              <td>
+                <select
+                  className="form-control"
+                  value={viewMode}
+                  onChange={e =>
+                    setViewMode(e.target.value as 'active' | 'archived' | 'all')
+                  }
+                  title="View: Active / Archived / All"
+                >
+                  <option value="active">Active</option>
+                  <option value="archived">Archived</option>
+                  <option value="all">All</option>
+                </select>
+              </td>
+
               <td></td>
             </tr>
           </thead>
@@ -496,164 +597,216 @@ export default function InventoriesListTable(): JSX.Element {
           )}
         {/*//Cards start here*/}
         <div className={cardStylesInventory.cardContainerCustom}>
-          {inventoryList.map(inventory => (
-            <div
-              className={`
+          {displayedInventories.map(inventory => {
+            const isArchived = Boolean(archivedMap[inventory.inventoryId]); // ARCHIVE: computed
+            return (
+              <div
+                className={`
               ${cardStylesInventory.card} 
               ${
                 inventory.inventoryId === lastConsultedInventoryId
                   ? cardStylesInventory.highlightedCard
                   : ''
               }`}
-              key={inventory.inventoryName}
-              onClick={() => handleCardClick(inventory.inventoryId)}
-              onMouseLeave={() => setOpenMenuId(null)}
-              style={{ cursor: 'pointer' }}
-            >
-              <div className={cardStylesInventory.imageContainer}>
-                {(() => {
-                  // pick the best available source for the card image
-                  const uploaded = inventory.imageUploaded
-                    ? inventory.imageUploaded instanceof Uint8Array
-                      ? `data:image/*;base64,${arrayBufferToBase64(inventory.imageUploaded)}`
-                      : `data:image/*;base64,${inventory.imageUploaded}`
-                    : '';
+                key={inventory.inventoryName}
+                onClick={() => handleCardClick(inventory.inventoryId)}
+                onMouseLeave={() => setOpenMenuId(null)}
+                style={{ cursor: 'pointer', opacity: isArchived ? 0.6 : 1 }} // ARCHIVE: dim archived
+              >
+                <div className={cardStylesInventory.imageContainer}>
+                  {(() => {
+                    // pick the best available source for the card image
+                    const uploaded = inventory.imageUploaded
+                      ? inventory.imageUploaded instanceof Uint8Array
+                        ? `data:image/*;base64,${arrayBufferToBase64(inventory.imageUploaded)}`
+                        : `data:image/*;base64,${inventory.imageUploaded}`
+                      : '';
 
-                  const url = isHttpUrl(inventory.inventoryImage)
-                    ? inventory.inventoryImage
-                    : '';
-                  const fallback = isHttpUrl(inventory.inventoryBackupImage)
-                    ? inventory.inventoryBackupImage
-                    : '';
+                    const url = isHttpUrl(inventory.inventoryImage)
+                      ? inventory.inventoryImage
+                      : '';
+                    const fallback = isHttpUrl(inventory.inventoryBackupImage)
+                      ? inventory.inventoryBackupImage
+                      : '';
 
-                  const src = url || uploaded;
+                    const src = url || uploaded;
 
-                  return (
-                    <img
-                      src={src || fallback}
-                      alt={inventory.inventoryName}
-                      className={cardStylesInventory.cardImage}
-                      onError={e => {
-                        const img = e.currentTarget;
-                        // if main fails, try backup once; otherwise hide or swap to a placeholder
-                        if (fallback && img.src !== fallback) {
-                          img.src = fallback;
-                        } else {
-                          img.style.display = 'none'; // or: img.src = '/placeholder.png';
-                        }
+                    return (
+                      <img
+                        src={src || fallback}
+                        alt={inventory.inventoryName}
+                        className={cardStylesInventory.cardImage}
+                        onError={e => {
+                          const img = e.currentTarget;
+                          // if main fails, try backup once; otherwise hide or swap to a placeholder
+                          if (fallback && img.src !== fallback) {
+                            img.src = fallback;
+                          } else {
+                            img.style.display = 'none'; // or: img.src = '/placeholder.png';
+                          }
+                        }}
+                      />
+                    );
+                  })()}
+                </div>
+                <div className={cardStylesInventory.inventoryNameSection}>
+                  <p id={cardStylesInventory.inventoryNameText}>
+                    {inventory.inventoryName}
+                    <svg
+                      onClick={e => handleToggleImportant(e, inventory)}
+                      style={{
+                        marginLeft: '10px',
+                        cursor: 'pointer',
+                        fill: inventory.important ? '#FFD700' : '#D3D3D3',
                       }}
-                    />
-                  );
-                })()}
-              </div>
-              <div className={cardStylesInventory.inventoryNameSection}>
-                <p id={cardStylesInventory.inventoryNameText}>
-                  {inventory.inventoryName}
-                  <svg
-                    onClick={e => handleToggleImportant(e, inventory)}
-                    style={{
-                      marginLeft: '10px',
-                      cursor: 'pointer',
-                      fill: inventory.important ? '#FFD700' : '#D3D3D3',
-                    }}
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 16 16"
-                  >
-                    <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z" />
-                  </svg>
-                </p>
-                <div id={cardStylesInventory.iconSection}>
-                  <p id={cardStylesInventory.productQuantityNumber}>
-                    {productQuantities[inventory.inventoryId] !== undefined
-                      ? productQuantities[inventory.inventoryId]
-                      : 'Loading...'}{' '}
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="20"
+                      height="20"
+                      viewBox="0 0 16 16"
+                    >
+                      <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z" />
+                    </svg>
+
+                    {/* Archived badge */}
+                    {isArchived && (
+                      <span
+                        style={{
+                          marginLeft: '8px',
+                          fontSize: '0.75rem',
+                          color: '#fff',
+                          background: '#6c757d',
+                          padding: '2px 6px',
+                          borderRadius: '4px',
+                        }}
+                      >
+                        Archived
+                      </span>
+                    )}
                   </p>
+                  <div id={cardStylesInventory.iconSection}>
+                    <p id={cardStylesInventory.productQuantityNumber}>
+                      {productQuantities[inventory.inventoryId] !== undefined
+                        ? productQuantities[inventory.inventoryId]
+                        : 'Loading...'}{' '}
+                    </p>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      fill="currentColor"
+                      className={`bi bi-box-fill ${cardStylesInventory.iconCustomized}`}
+                      viewBox="0 0 16 16"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M15.528 2.973a.75.75 0 0 1 .472.696v8.662a.75.75 0 0 1-.472.696l-7.25 2.9a.75.75 0 0 1-.557 0l-7.25-2.9A.75.75 0 0 1 0 12.331V3.669a.75.75 0 0 1 .471-.696L7.443.184l.004-.001.274-.11a.75.75 0 0 1 .558 0l.274.11.004.001zm-1.374.527L8 5.962 1.846 3.5 1 3.839v.4l6.5 2.6v7.922l.5.2.5-.2V6.84l6.5-2.6v-.4l-.846-.339Z"
+                      />
+                    </svg>
+                  </div>
+                </div>
+                <div id={cardStylesInventory.cardTypeSection}>
+                  <p>Type: {inventory.inventoryType}</p>
+                </div>
+                <div id={cardStylesInventory.cardDescriptionSection}>
+                  <p>{inventory.inventoryDescription}</p>
+                </div>
+                <div className={cardStylesInventory.checkboxSection}>
                   <svg
+                    id={cardStylesInventory.cardMenu}
+                    onClick={e => handleMenuClick(e, inventory.inventoryId)}
                     xmlns="http://www.w3.org/2000/svg"
                     width="16"
                     height="16"
                     fill="currentColor"
-                    className={`bi bi-box-fill ${cardStylesInventory.iconCustomized}`}
+                    className="bi bi-pencil-square"
                     viewBox="0 0 16 16"
                   >
+                    <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z" />
                     <path
                       fillRule="evenodd"
-                      d="M15.528 2.973a.75.75 0 0 1 .472.696v8.662a.75.75 0 0 1-.472.696l-7.25 2.9a.75.75 0 0 1-.557 0l-7.25-2.9A.75.75 0 0 1 0 12.331V3.669a.75.75 0 0 1 .471-.696L7.443.184l.004-.001.274-.11a.75.75 0 0 1 .558 0l.274.11.004.001zm-1.374.527L8 5.962 1.846 3.5 1 3.839v.4l6.5 2.6v7.922l.5.2.5-.2V6.84l6.5-2.6v-.4l-.846-.339Z"
+                      d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"
                     />
                   </svg>
+                  {openMenuId === inventory.inventoryId && (
+                    <div className={cardStylesInventory.popupMenuDiv}>
+                      {/* ARCHIVE: add Archive/Unarchive button */}
+                      <button
+                        onClick={e => {
+                          e.stopPropagation();
+                          toggleArchiveStatus(e, inventory);
+                        }}
+                        className="btn btn-secondary"
+                        title={
+                          isArchived
+                            ? 'Unarchive inventory'
+                            : 'Archive inventory'
+                        }
+                      >
+                        {isArchived ? 'Unarchive' : 'Archive'}
+                      </button>
+
+                      <button
+                        onClick={e => {
+                          e.stopPropagation();
+                          if (isArchived) {
+                            alert(
+                              'This inventory is archived and cannot be edited.'
+                            );
+                            return;
+                          }
+                          navigate(
+                            `/inventories/${inventory.inventoryId}/edit`
+                          );
+                        }}
+                        className="btn btn-warning"
+                        disabled={isArchived}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        className="btn btn-danger"
+                        onClick={e => {
+                          e.stopPropagation();
+                          if (isArchived) {
+                            alert(
+                              'This inventory is archived and cannot be deleted.'
+                            );
+                            return;
+                          }
+                          deleteInventoryHandler(inventory);
+                        }}
+                        title="Delete"
+                        disabled={isArchived}
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="32"
+                          height="32"
+                          fill="currentColor"
+                          className="bi bi-trash"
+                          viewBox="0 0 16 16"
+                        >
+                          <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z" />
+                          <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z" />
+                        </svg>
+                      </button>
+                    </div>
+                  )}
+                  <input
+                    id={cardStylesInventory.checkboxCard}
+                    type="checkbox"
+                    checked={selectedInventories.some(
+                      selectedInventory =>
+                        selectedInventory.inventoryId === inventory.inventoryId
+                    )}
+                    onChange={e => handleInventorySelection(e, inventory)}
+                    onClick={e => e.stopPropagation()}
+                    disabled={isArchived} // prevent selecting archived
+                  />
                 </div>
               </div>
-              <div id={cardStylesInventory.cardTypeSection}>
-                <p>Type: {inventory.inventoryType}</p>
-              </div>
-              <div id={cardStylesInventory.cardDescriptionSection}>
-                <p>{inventory.inventoryDescription}</p>
-              </div>
-              <div className={cardStylesInventory.checkboxSection}>
-                <svg
-                  id={cardStylesInventory.cardMenu}
-                  onClick={e => handleMenuClick(e, inventory.inventoryId)}
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  fill="currentColor"
-                  className="bi bi-pencil-square"
-                  viewBox="0 0 16 16"
-                >
-                  <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z" />
-                  <path
-                    fillRule="evenodd"
-                    d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"
-                  />
-                </svg>
-                {openMenuId === inventory.inventoryId && (
-                  <div className={cardStylesInventory.popupMenuDiv}>
-                    <button
-                      onClick={e => {
-                        e.stopPropagation();
-                        navigate(`/inventories/${inventory.inventoryId}/edit`);
-                      }}
-                      className="btn btn-warning"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      className="btn btn-danger"
-                      onClick={e => {
-                        e.stopPropagation();
-                        deleteInventoryHandler(inventory);
-                      }}
-                      title="Delete"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="32"
-                        height="32"
-                        fill="currentColor"
-                        className="bi bi-trash"
-                        viewBox="0 0 16 16"
-                      >
-                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z" />
-                        <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z" />
-                      </svg>
-                    </button>
-                  </div>
-                )}
-                <input
-                  id={cardStylesInventory.checkboxCard}
-                  type="checkbox"
-                  checked={selectedInventories.some(
-                    selectedInventory =>
-                      selectedInventory.inventoryId === inventory.inventoryId
-                  )}
-                  onChange={e => handleInventorySelection(e, inventory)}
-                  onClick={e => e.stopPropagation()}
-                />
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
         <div
           className="d-flex justify-content-center"
