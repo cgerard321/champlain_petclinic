@@ -1,12 +1,12 @@
 package mailer
 
 type Mail struct {
-	To            string `json:"to"               validate:"required,email"`
-	Subject       string `json:"subject"          validate:"required"`
-	TemplateName  string `json:"template_name"`
-	Header        string `json:"header"`
-	Body          string `json:"body"`
-	Footer        string `json:"footer"`
-	Correspondent string `json:"correspondent"`
-	SenderName    string `json:"sender_name"`
+	To            string `json:"EmailSendTo"      validate:"required,email"`
+	Subject       string `json:"EmailTitle"       validate:"required"`
+	TemplateName  string `json:"TemplateName"`
+	Header        string `json:"Header"`
+	Body          string `json:"Body"`
+	Footer        string `json:"Footer"`
+	Correspondent string `json:"CorrespondantName"`
+	SenderName    string `json:"SenderName"`
 }
