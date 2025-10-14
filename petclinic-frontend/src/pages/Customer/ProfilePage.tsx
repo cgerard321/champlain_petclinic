@@ -10,6 +10,7 @@ import { useUser } from '@/context/UserContext';
 import { NavBar } from '@/layouts/AppNavBar.tsx';
 import AddPetModal from '@/features/customers/components/AddPetModal';
 import EditPetModal from '@/features/customers/components/EditPetModal';
+import UploadPhotoModal from '@/features/customers/components/UploadPhotoModal';
 import './ProfilePage.css';
 import { AppRoutePaths } from '@/shared/models/path.routes.ts';
 import { useNavigate } from 'react-router-dom';
@@ -26,6 +27,8 @@ const ProfilePage = (): JSX.Element => {
   const [error, setError] = useState<string | null>(null);
   const [isAddPetModalOpen, setIsAddPetModalOpen] = useState<boolean>(false);
   const [isEditPetModalOpen, setIsEditPetModalOpen] = useState<boolean>(false);
+  const [isUploadPhotoModalOpen, setIsUploadPhotoModalOpen] =
+    useState<boolean>(false);
   const [selectedPetId, setSelectedPetId] = useState<string>('');
   const [petTypes, setPetTypes] = useState<PetTypeModel[]>([]);
   const navigate = useNavigate();
@@ -83,19 +86,27 @@ const ProfilePage = (): JSX.Element => {
       if (!user.userId) return;
 
       try {
-        // useV2:false because your axios instance by default prepends /v2/gateway
-        const response = await axiosInstance.get(
-          `/owners/${user.userId}/photos`,
-          {
-            responseType: 'blob',
-            useV2: false,
-          }
-        );
+        const ownerResponse = await getOwner(user.userId, true);
+        const ownerData = ownerResponse.data;
 
-        const blob = response.data as Blob;
-        objectUrl = URL.createObjectURL(blob);
-        if (isMounted) {
-          setProfilePicUrl(objectUrl);
+        if (ownerData.photo && ownerData.photo.fileData) {
+          const base64Data = ownerData.photo.fileData;
+          const contentType = ownerData.photo.fileType || 'image/png';
+          const byteCharacters = atob(base64Data);
+          const byteNumbers = new Array(byteCharacters.length);
+          for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+          }
+          const byteArray = new Uint8Array(byteNumbers);
+          const blob = new Blob([byteArray], { type: contentType });
+          objectUrl = URL.createObjectURL(blob);
+          if (isMounted) {
+            setProfilePicUrl(objectUrl);
+          }
+        } else {
+          if (isMounted) {
+            setProfilePicUrl('');
+          }
         }
       } catch (err) {
         console.warn(
@@ -202,6 +213,14 @@ const ProfilePage = (): JSX.Element => {
     setIsAddPetModalOpen(false);
   };
 
+  const handleOpenUploadPhotoModal = (): void => {
+    setIsUploadPhotoModalOpen(true);
+  };
+
+  const handleCloseUploadPhotoModal = (): void => {
+    setIsUploadPhotoModalOpen(false);
+  };
+
   const handlePetAdded = (newPet: PetResponseModel): void => {
     if (owner) {
       setOwner({
@@ -235,6 +254,33 @@ const ProfilePage = (): JSX.Element => {
     } catch (error) {
       console.error('Error deleting pet:', error);
       alert('Failed to delete pet. Please try again.');
+    }
+  };
+
+  const handlePhotoUploaded = async (): Promise<void> => {
+    if (!user.userId) return;
+
+    try {
+      const ownerResponse = await getOwner(user.userId, true);
+      const ownerData = ownerResponse.data;
+
+      if (ownerData.photo && ownerData.photo.fileData) {
+        const base64Data = ownerData.photo.fileData;
+        const contentType = ownerData.photo.fileType || 'image/png';
+        const byteCharacters = atob(base64Data);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: contentType });
+        const objectUrl = URL.createObjectURL(blob);
+        setProfilePicUrl(objectUrl);
+      } else {
+        setProfilePicUrl('');
+      }
+    } catch (error) {
+      console.error('Error refreshing profile picture:', error);
     }
   };
 
@@ -316,17 +362,41 @@ const ProfilePage = (): JSX.Element => {
             className="customers-profile-header"
             style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}
           >
-            <img
-              src={profilePicUrl || defaultProfile}
-              alt="Profile Picture"
-              className="profile-picture"
+            <div
               style={{
-                width: '96px',
-                height: '96px',
-                borderRadius: '50%',
-                objectFit: 'cover',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '8px',
               }}
-            />
+            >
+              <img
+                src={profilePicUrl || defaultProfile}
+                alt="Profile Picture"
+                className="profile-picture"
+                style={{
+                  width: '96px',
+                  height: '96px',
+                  borderRadius: '50%',
+                  objectFit: 'cover',
+                }}
+              />
+              <button
+                onClick={handleOpenUploadPhotoModal}
+                style={{
+                  padding: '8px 16px',
+                  backgroundColor: '#007bff',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  marginTop: '8px',
+                }}
+              >
+                Change Photo
+              </button>
+            </div>
             <h1>
               {owner.firstName} {owner.lastName}&apos;s Profile
             </h1>
@@ -431,6 +501,13 @@ const ProfilePage = (): JSX.Element => {
         ownerId={user.userId}
         onPetUpdated={handlePetUpdated}
         onPetDeleted={handlePetDeleted}
+      />
+
+      <UploadPhotoModal
+        isOpen={isUploadPhotoModalOpen}
+        onClose={handleCloseUploadPhotoModal}
+        ownerId={user.userId}
+        onPhotoUploaded={handlePhotoUploaded}
       />
     </div>
   );

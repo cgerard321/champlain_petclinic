@@ -1,4 +1,5 @@
 import { PetResponseModel } from './PetResponseModel.ts';
+import { FileDetails } from '@/shared/models/FileDetails';
 
 export interface OwnerResponseModel {
   ownerId: string;
@@ -9,4 +10,6 @@ export interface OwnerResponseModel {
   province: string;
   telephone: string;
   pets: PetResponseModel[];
+  photoId?: string;
+  photo?: FileDetails;
 }
