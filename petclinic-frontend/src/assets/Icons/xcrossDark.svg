@@ -1,9 +1,13 @@
 <svg
 <<<<<<< HEAD
+<<<<<<< HEAD
     viewBox="-2 -2 18 18"
 =======
     viewBox="0 -2 18 18"
 >>>>>>> 8cd06dc7 (Added basic reusable confirmation modal)
+=======
+    viewBox="-2 -2 18 18"
+>>>>>>> d7690daa (Added vet selection to edit modal)
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
 >

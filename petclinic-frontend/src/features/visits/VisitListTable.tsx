@@ -20,7 +20,6 @@ import archiveIcon from '@/assets/Icons/archiveDark.svg';
 import xcrossIcon from '@/assets/Icons/xcrossDark.svg';
 import pentosquareIcon from '@/assets/Icons/pentosquareLight.svg';
 import starIcon from '@/assets/Icons/starEmptyLight.svg';
-
 import AddingVisit from './components/AddingVisit';
 
 export default function VisitListTable(): JSX.Element {
