@@ -3,14 +3,12 @@ package com.petclinic.bffapigateway.presentationlayer.v2;
 import com.petclinic.bffapigateway.domainclientlayer.BillServiceClient;
 import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
-import com.petclinic.bffapigateway.dtos.Bills.PaymentRequestDTO;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.utils.Security.Annotations.IsUserSpecific;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -36,7 +34,6 @@ public class BillController {
         return billService.getBillsByCustomerIdPaginated(customerId, page, size);
     }
 
-
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping()
     public ResponseEntity<Flux<BillResponseDTO>> getAllBillsByPage(
@@ -61,7 +58,6 @@ public class BillController {
         return ResponseEntity.ok().body(billService.getAllBillsByPage(page, size, billId, customerId, ownerFirstName,
                 ownerLastName, visitType, vetId, vetFirstName, vetLastName));
     }
-
     
     @PutMapping(value = "/admin/{billId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<BillResponseDTO>> updateBill(@PathVariable String billId, @RequestBody Mono<BillRequestDTO> billRequestDTO) {
@@ -135,7 +131,4 @@ public class BillController {
         return billService.setInterestExempt(billId, exempt)
                 .thenReturn(ResponseEntity.noContent().build());
     }
-
-
-
 }
