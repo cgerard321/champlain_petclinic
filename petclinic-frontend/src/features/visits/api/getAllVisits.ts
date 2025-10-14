@@ -16,8 +16,9 @@ export async function getAllVisits(): Promise<VisitResponseModel[]> {
         } catch (err) {
           console.error("Can't parse JSON:", err);
         }
+        return null;
       })
-      .filter((data?: JSON) => data !== null);
+      .filter((data?: VisitResponseModel | null) => data !== null);
   } catch (error) {
     console.error('Error fetching visits:', error);
     throw error;
