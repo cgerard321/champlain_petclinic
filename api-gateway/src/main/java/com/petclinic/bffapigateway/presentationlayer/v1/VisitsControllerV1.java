@@ -249,7 +249,7 @@ public class VisitsControllerV1 {
 
 
 
-    @SecuredEndpoint(allowedRoles = {Roles.ALL})
+    @SecuredEndpoint(allowedRoles = {Roles.OWNER})
     @PostMapping(value = "/reviews", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<ReviewResponseDTO>> PostReview(@RequestBody Mono<ReviewRequestDTO> reviewRequestDTOMono){
         return visitsServiceClient.createReview(reviewRequestDTOMono)
