@@ -38,8 +38,8 @@ public class OwnerClientUnitTest {
     @BeforeEach
     public void initialize(){
         ownerClient = new OwnerClient("localhost", String.valueOf(mockBackEnd.getPort()));
-        WebTestClient.bindToController(ownerClient).build();
     }
+}
     @AfterAll
     static void tearDown() throws IOException {
         mockBackEnd.shutdown();
