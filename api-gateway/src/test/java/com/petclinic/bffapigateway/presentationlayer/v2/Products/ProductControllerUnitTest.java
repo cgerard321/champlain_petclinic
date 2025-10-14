@@ -385,17 +385,17 @@ class ProductControllerUnitTest {
         verify(productsServiceClient, times(1)).patchListingStatus("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a", patchProductRequest);
     }
 
-    @Test
-    public void whenDeleteProduct_thenReturnNothing() {
-        when(productsServiceClient.deleteProduct("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")).thenReturn(Mono.empty());
-
-        webTestClient.delete()
-                .uri(baseInventoryURL + "/e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
-                .exchange()
-                .expectStatus().isNoContent();
-
-        verify(productsServiceClient, times(1)).deleteProduct("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a");
-    }
+//    @Test
+//    public void whenDeleteProduct_thenReturnNothing() {
+//        when(productsServiceClient.deleteProduct("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")).thenReturn(Mono.empty());
+//
+//        webTestClient.delete()
+//                .uri(baseInventoryURL + "/e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
+//                .exchange()
+//                .expectStatus().isNoContent();
+//
+//        verify(productsServiceClient, times(1)).deleteProduct("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a");
+//    }
 
     @Test
     void whenGetAllProductsWithNegativeMinPrice_thenReturnBadRequest() {

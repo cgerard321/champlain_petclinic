@@ -1,5 +1,7 @@
 package com.petclinic.billing.presentationlayer;
 
+import com.petclinic.billing.domainclientlayer.Auth.AuthServiceClient;
+import com.petclinic.billing.domainclientlayer.Auth.Rethrower;
 import com.petclinic.billing.exceptions.InvalidPaymentException;
 import com.petclinic.billing.exceptions.NotFoundException;
 import com.petclinic.billing.businesslayer.BillService;
@@ -31,6 +33,11 @@ public class CustomerBillsControllerUnitTest {
 
     @MockBean
     BillService billService;
+    @MockBean
+    AuthServiceClient authServiceClient;
+
+    @MockBean
+    Rethrower rethrower;
 
     @Test
     void getBillsByCustomerId_shouldSucceed() {

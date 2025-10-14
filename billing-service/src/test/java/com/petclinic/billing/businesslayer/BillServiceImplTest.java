@@ -1,6 +1,8 @@
 package com.petclinic.billing.businesslayer;
 
 import com.petclinic.billing.datalayer.*;
+import com.petclinic.billing.domainclientlayer.Auth.UserDetails;
+import com.petclinic.billing.domainclientlayer.Mailing.Mail;
 import com.petclinic.billing.domainclientlayer.OwnerClient;
 import com.petclinic.billing.domainclientlayer.VetClient;
 import com.petclinic.billing.exceptions.InvalidPaymentException;
@@ -23,6 +25,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import static org.mockito.ArgumentMatchers.*;
+
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
@@ -1832,5 +1836,28 @@ public void testGenerateBillPdf_BillNotFound() {
                 assertEquals(expectedTaxedAmount, dto.getTaxedAmount());
             })
             .verifyComplete();
+    }
+
+    @Test
+    void generateConfirmationEmail_shouldGenerateCorrectEmail() throws Exception {
+        // Arrange
+        UserDetails userDetails = new UserDetails();
+        userDetails.setEmail("test@example.com");
+        userDetails.setUsername("testuser");
+
+        Method method = BillServiceImpl.class.getDeclaredMethod("generateConfirmationEmail", UserDetails.class);
+        method.setAccessible(true);
+
+        // Act
+        Mail result = (Mail) method.invoke(billService, userDetails);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals("test@example.com", result.getEmailSendTo());
+        assertEquals("Pet Clinic - Payment Confirmation", result.getEmailTitle());
+        assertEquals("default", result.getTemplateName());
+        assertEquals("Pet Clinic confirmation email", result.getHeader());
+        assertEquals("testuser", result.getCorrespondantName());
+        assertEquals("ChamplainPetClinic@gmail.com", result.getSenderName());
     }
 }
