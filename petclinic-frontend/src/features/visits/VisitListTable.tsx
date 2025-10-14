@@ -357,6 +357,7 @@ export default function VisitListTable(): JSX.Element {
                         title="Cancel Visit"
                         showButton={renderCancelButton()}
                         onConfirm={() => handleCancel(visit.visitId)}
+                        refreshPageOnConfirm={true}
                       >
                         <div>
                           This will set the status of this visit to Canceled.

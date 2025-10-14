@@ -12,6 +12,7 @@ interface BasicModalProps {
   formId?: string; //The id of the form inside of the modal
   validate?: () => boolean; //What needs to be true before it handles confirmation
   showButton: JSX.Element; //The button that shows the modal
+  errorMessage?: string;
   children?: React.ReactNode; //The body of the modal
 }
 
@@ -21,14 +22,14 @@ const BasicModal: React.FC<BasicModalProps> = ({
   onConfirm,
   refreshPageOnConfirm,
   formId,
-  validate = () => false,
+  validate = () => true,
   showButton,
+  errorMessage,
   children,
 }) => {
   const [show, setShow] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [errorMessage, setErrorMessage] = useState<string>('');
+  // const [errorMessage, setErrorMessage] = useState<string>('');
 
   // Show modal
   const handleShow = (): void => setShow(true);
@@ -41,7 +42,7 @@ const BasicModal: React.FC<BasicModalProps> = ({
 
   const resetForm = (): void => {
     setBusy(false);
-    setErrorMessage('');
+    // setErrorMessage('');
   };
 
   const handleConfirm = async (): Promise<void> => {
@@ -49,38 +50,22 @@ const BasicModal: React.FC<BasicModalProps> = ({
 
     if (!validate()) return;
 
-    setIsLoading(true);
+    setBusy(true);
     try {
       if (onConfirm) await onConfirm();
-      if (refreshPageOnConfirm) {
+      if (refreshPageOnConfirm)
         setTimeout(() => {
-          window.location.reload();
-        }, 100);
-      }
+          if (errorMessage) {
+            window.location.reload();
+          }
+        }, 1000);
+      handleClose;
     } catch (error) {
-      setErrorMessage(`Error updating visit: ${error}`);
+      // setErrorMessage(`Error updating visit: ${error}`);
     } finally {
-      setIsLoading(false);
+      setBusy(false);
     }
   };
-
-  // const handleSubmitForm = async (): Promise<void> => {
-  //   if (busy) return;
-
-  //   if (!validate()) return;
-
-  //   setIsLoading(true);
-  //   try {
-  //     if (onConfirm) await onConfirm();
-  //     setTimeout(() => {
-  //       window.location.reload();
-  //     }, 100);
-  //   } catch (error) {
-  //     setErrorMessage(`Error updating visit: ${error}`);
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
 
   const renderConfirmButton = (): JSX.Element =>
     onConfirm || formId != null ? (
@@ -89,7 +74,7 @@ const BasicModal: React.FC<BasicModalProps> = ({
         type="submit"
         variant="primary"
         onClick={handleConfirm}
-        disabled={isLoading}
+        disabled={busy}
       >
         {confirmText}
       </Button>
@@ -109,17 +94,13 @@ const BasicModal: React.FC<BasicModalProps> = ({
       >
         <h2 className="mx-auto">{title}</h2>
         <div className="basic-modal-body">{children}</div>
+        {errorMessage && <div className="error">{errorMessage}</div>}
         <div className="basic-modal-footer">
-          <Button
-            variant="secondary"
-            onClick={handleClose}
-            disabled={isLoading}
-          >
+          <Button variant="secondary" onClick={handleClose} disabled={busy}>
             Close
           </Button>
           {renderConfirmButton()}
         </div>
-        {errorMessage && <div className="error">{errorMessage}</div>}
       </Modal>
     </>
   );

@@ -16,9 +16,9 @@ interface EditingVisitProps {
   visitId: string;
 }
 
-// interface ApiError {
-//   message: string;
-// }
+interface ApiError {
+  message: string;
+}
 
 type VisitType = {
   visitStartDate: Date;
@@ -47,10 +47,10 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
   });
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  // const [successMessage, setSuccessMessage] = useState<string>('');
-  // const [errorMessage, setErrorMessage] = useState<string>('');
+  const [successMessage, setSuccessMessage] = useState<string>('');
+  const [errorMessage, setErrorMessage] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  // const [showNotification, setShowNotification] = useState<boolean>(false);
+  const [showNotification, setShowNotification] = useState<boolean>(false);
 
   const navigate = useNavigate();
 
@@ -107,8 +107,8 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
     if (!validate()) return;
 
     setIsLoading(true);
-    // setErrorMessage('');
-    // setSuccessMessage('');
+    setErrorMessage('');
+    setSuccessMessage('');
 
     const formattedVisit: VisitRequestModel = {
       visitDate: visit.visitStartDate
@@ -124,15 +124,15 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
     try {
       if (visitId) {
         await updateVisit(visitId, formattedVisit);
-        // setSuccessMessage('Visit updated successfully!');
-        // setShowNotification(true);
-        // setTimeout(() => setShowNotification(false), 3000); // Hide notification after 3 seconds
+        setSuccessMessage('Visit updated successfully!');
+        setShowNotification(true);
+        setTimeout(() => setShowNotification(false), 3000); // Hide notification after 3 seconds
         navigate('/visits'); // Navigate to a different page or clear form
       }
     } catch (error) {
       // Use type assertion or check error type
-      // const apiError = error as ApiError;
-      // setErrorMessage(`Error updating visit: ${apiError.message}`);
+      const apiError = error as ApiError;
+      setErrorMessage(`Error updating visit: ${apiError.message}`);
     } finally {
       setIsLoading(false);
     }
@@ -146,6 +146,7 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
       validate={validate}
       refreshPageOnConfirm={true}
       confirmText={isLoading ? 'Updating...' : 'Update'}
+      errorMessage={errorMessage}
     >
       <form id="modalform" onSubmit={handleSubmit}>
         <label>
@@ -221,7 +222,7 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
         </select>
         <br />
       </form>
-      {/* {showNotification && <div className="notification">{successMessage}</div>} */}
+      {showNotification && <div className="notification">{successMessage}</div>}
     </BasicModal>
   );
 };
