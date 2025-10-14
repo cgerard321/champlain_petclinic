@@ -590,7 +590,7 @@ public class BillServiceImplTest {
                 .expectError()
                 .verify();
     }
-    
+
     @Test
     public void testGenerateBillPdf() {
     Bill mockBill = Bill.builder()
