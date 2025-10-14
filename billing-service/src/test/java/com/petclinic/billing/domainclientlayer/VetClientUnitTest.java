@@ -36,7 +36,6 @@ public class VetClientUnitTest {
     @BeforeEach
     public void initialize(){
         vetClient = new VetClient("localhost", String.valueOf(mockBackEnd.getPort()));
-        vetClient = new VetClient("localhost", String.valueOf(mockBackEnd.getPort()));
     }
     @AfterAll
     static void tearDown() throws IOException {
