@@ -83,6 +83,9 @@
 
 .inventoryTable {
   border-collapse: collapse;
+  width: 100%;
+  table-layout: fixed;
+  text-align: center;
 }
 
 .cleanTable :global(thead th),
@@ -113,6 +116,8 @@
 
 .inventoryTable :global(th),
 .inventoryTable :global(td) {
+  padding: 8px;
+  vertical-align: middle;
   border: 0 !important;
 }
 

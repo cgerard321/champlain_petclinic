@@ -485,17 +485,13 @@ export default function InventoriesListTable(): JSX.Element {
         >
           <thead>
             <tr>
-              <td></td>
-              <td style={{ fontWeight: 'bold' }}>Name</td>
-              <td style={{ fontWeight: 'bold' }}>Type</td>
-              <td style={{ fontWeight: 'bold' }}>Description</td>
-              <td className="text-center" style={{ fontWeight: 'bold' }}>
-                Important
-              </td>
-              <td className="text-center" style={{ fontWeight: 'bold' }}>
-                Clear
-              </td>
-              <td></td>
+              <th style={{ width: '5%' }}></th>
+              <th style={{ width: '20%', textAlign: 'center' }}>Name</th>
+              <th style={{ width: '15%', textAlign: 'center' }}>Type</th>
+              <th style={{ width: '25%', textAlign: 'center' }}>Description</th>
+              <th style={{ width: '10%', textAlign: 'center' }}>Important</th>
+              <th style={{ width: '10%', textAlign: 'center' }}>Clear</th>
+              <th style={{ width: '15%', textAlign: 'center' }}>Status</th>
             </tr>
             <tr>
               <td></td>
