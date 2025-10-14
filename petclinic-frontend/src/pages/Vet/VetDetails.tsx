@@ -16,7 +16,10 @@ import {
   IsInventoryManager,
   IsOwner,
   IsReceptionist,
+  useUser,
 } from '@/context/UserContext';
+import AddVetRatingModal from '@/pages/Vet/AddVetRatingModal';
+import { format } from 'date-fns';
 
 interface VetResponseType {
   vetId: string;
@@ -74,11 +77,28 @@ interface RatingResponseType {
   customerName: string;
 }
 
+const formatRatingDate = (rateDate?: string): string => {
+  if (!rateDate) {
+    return 'No date available';
+  }
+
+  try {
+    const parsedDate = new Date(rateDate);
+    if (Number.isNaN(parsedDate.getTime())) {
+      return rateDate;
+    }
+    return format(parsedDate, 'yyyy-MM-dd');
+  } catch {
+    return rateDate;
+  }
+};
+
 export default function VetDetails(): JSX.Element {
   const { vetId } = useParams<{ vetId: string }>();
   const isInventoryManager = IsInventoryManager();
   const isOwner = IsOwner();
   const isReceptionist = IsReceptionist();
+  const { user } = useUser();
   const [vet, setVet] = useState<VetResponseType | null>(null);
   const [education, setEducation] = useState<EducationResponseType[] | null>(
     null
@@ -93,6 +113,7 @@ export default function VetDetails(): JSX.Element {
   const [specialtyName, setSpecialtyName] = useState('');
   const [enlargedPhoto, setEnlargedPhoto] = useState<string | null>(null);
   const [formVisible, setFormVisible] = useState<boolean>(false);
+  const [isRatingModalOpen, setIsRatingModalOpen] = useState<boolean>(false);
 
   // Confirm-delete modal state
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -103,6 +124,7 @@ export default function VetDetails(): JSX.Element {
     useState<EducationResponseType | null>(null);
   const [ratings, setRatings] = useState<RatingResponseType[] | null>(null);
   const [selectedVet, setSelectedVet] = useState<VetRequestModel | null>(null);
+  const canSubmitReview = Boolean(user.userId) && isOwner;
   const refreshVetDetails = useCallback(async (): Promise<void> => {
     try {
       const response = await axiosInstance.get<VetResponseType>(
@@ -146,6 +168,20 @@ export default function VetDetails(): JSX.Element {
     vetBillId: vet.vetBillId,
   });
 
+  const fetchVetRatings = useCallback(async (): Promise<void> => {
+    if (!vetId) return;
+    try {
+      const response = await axiosInstance.get<RatingResponseType[]>(
+        `/vets/${vetId}/ratings`,
+        { useV2: true }
+      );
+      setRatings(response.data ?? []);
+    } catch (error) {
+      console.error('Failed to fetch vet ratings:', error);
+      setError('Failed to fetch vet ratings');
+      setRatings([]);
+    }
+  }, [vetId]);
   const requestDeleteAlbumPhoto = (photoId: number): void => {
     setPendingPhotoId(photoId);
     setConfirmOpen(true);
@@ -165,19 +201,12 @@ export default function VetDetails(): JSX.Element {
   };
 
   useEffect(() => {
-    const fetchVetRatings = async (): Promise<void> => {
-      try {
-        const response = await axiosInstance.get<RatingResponseType[]>(
-          `/vets/${vetId}/ratings`,
-          { useV2: true }
-        );
-        setRatings(response.data);
-      } catch (error) {
-        setError('Failed to fetch vet ratings');
-      }
-    };
-    fetchVetRatings();
-  }, [vetId]);
+    void fetchVetRatings();
+  }, [fetchVetRatings]);
+
+  const handleRatingSubmitSuccess = useCallback((): void => {
+    void fetchVetRatings();
+  }, [fetchVetRatings]);
 
   useEffect(() => {
     const fetchPhoto = async (): Promise<void> => {
@@ -496,7 +525,18 @@ export default function VetDetails(): JSX.Element {
         )}
 
         <section className="vet-ratings-info">
-          <h2>Ratings</h2>
+          <div className="vet-ratings-header">
+            <h2>Ratings</h2>
+            {canSubmitReview && (
+              <button
+                className="add-rating-button"
+                onClick={() => setIsRatingModalOpen(true)}
+                type="button"
+              >
+                Write a Review
+              </button>
+            )}
+          </div>
           {ratings && ratings.length > 0 ? (
             ratings.map((rating, index) => (
               <div key={index} className="rating-card">
@@ -515,7 +555,7 @@ export default function VetDetails(): JSX.Element {
                 </p>
                 <p>
                   <strong>Rate Date:</strong>{' '}
-                  {rating.rateDate || 'No date available'}
+                  {formatRatingDate(rating.rateDate)}
                 </p>
                 <hr />
               </div>
@@ -524,6 +564,13 @@ export default function VetDetails(): JSX.Element {
             <p>No ratings available</p>
           )}
         </section>
+        {isRatingModalOpen && canSubmitReview && vetId && (
+          <AddVetRatingModal
+            vetId={vetId}
+            onClose={() => setIsRatingModalOpen(false)}
+            onSubmitSuccess={handleRatingSubmitSuccess}
+          />
+        )}
 
         {vet && (
           <>
