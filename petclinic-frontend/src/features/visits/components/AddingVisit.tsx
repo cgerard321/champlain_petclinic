@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { useNavigate } from 'react-router-dom';
 import { FormEvent, useState, useEffect } from 'react';
 import './EditVisit.css';
 import { Status } from '@/features/visits/models/Status';

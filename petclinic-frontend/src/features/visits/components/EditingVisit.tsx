@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { useNavigate } from 'react-router-dom';
 import { FormEvent, useState, useEffect } from 'react';
 import { VisitRequestModel } from '@/features/visits/models/VisitRequestModel';
 import { Status } from '@/features/visits/models/Status';
@@ -56,8 +55,6 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
   const [showNotification, setShowNotification] = useState<boolean>(false);
 
   const [vets, setVets] = useState<VetResponse[]>([]);
-
-  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchVisitData = async (): Promise<void> => {
