@@ -17,6 +17,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.math.BigDecimal;
 import java.net.URI;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -422,6 +423,51 @@ public class BillServiceClient {
                 .bodyToFlux(BillResponseDTO.class);
     }
 
+    //for customerBillController
+    public Flux<BillResponseDTO> getBillsByAmountRange(String customerId, BigDecimal minAmount, BigDecimal maxAmount) {
+        UriComponentsBuilder builder = UriComponentsBuilder
+                .fromUriString(billServiceUrl + "/customer/{customerId}/bills/filter-by-amount")
+                .queryParam("minAmount", minAmount)
+                .queryParam("maxAmount", maxAmount);
 
+        return webClientBuilder.build()
+                .get()
+                .uri(builder.build(customerId))
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToFlux(BillResponseDTO.class)
+                .switchIfEmpty(Flux.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "No bills found in the specified amount range")));
+    }
 
+    //for customerBillController
+    public Flux<BillResponseDTO> getBillsByDueDateRange(String customerId, LocalDate startDate, LocalDate endDate) {
+        UriComponentsBuilder builder = UriComponentsBuilder
+                .fromUriString(billServiceUrl + "/customer/{customerId}/bills/filter-by-due-date")
+                .queryParam("startDate", startDate)
+                .queryParam("endDate", endDate);
+
+        return webClientBuilder.build()
+                .get()
+                .uri(builder.build(customerId))
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToFlux(BillResponseDTO.class)
+                .switchIfEmpty(Flux.error(new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "No bills found in the specified due date range")));
+    }
+
+    //for customerBillController
+    public Flux<BillResponseDTO> getBillsByDateRange(String customerId, LocalDate startDate, LocalDate endDate) {
+        UriComponentsBuilder builder = UriComponentsBuilder
+                .fromUriString(billServiceUrl + "/customer/{customerId}/bills/filter-by-date")
+                .queryParam("startDate", startDate)
+                .queryParam("endDate", endDate);
+
+        return webClientBuilder.build()
+                .get()
+                .uri(builder.build(customerId))
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToFlux(BillResponseDTO.class);
+    }
 }

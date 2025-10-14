@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -43,7 +44,12 @@ public interface BillRepository extends ReactiveMongoRepository<Bill, String> {
 
     Flux<Bill> findAllByArchiveFalse();
 
-
     Flux<Bill> findAllByDateBefore(LocalDate date);
+
+    Flux<Bill> findByCustomerIdAndAmountBetween(String customerId, BigDecimal minAmount, BigDecimal maxAmount);
+
+    Flux<Bill> findByCustomerIdAndDueDateBetween(String customerId, LocalDate startDate, LocalDate endDate);
+
+    Flux<Bill> findByCustomerIdAndDateBetween(String customerId, LocalDate startDate, LocalDate endDate);
 
 }

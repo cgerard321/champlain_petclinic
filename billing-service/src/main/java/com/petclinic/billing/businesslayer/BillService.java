@@ -51,7 +51,6 @@ public interface BillService {
 
     Mono<Void> deleteBill(@RequestParam(value = "billId", required = true) String billId);
 
-    Flux<BillResponseDTO> getBillsByCustomerId(@RequestParam(value = "customerId", required = true) String customerId);
     Flux<BillResponseDTO> getBillsByVetId(@RequestParam(value = "vetId", required = true) String vetId);
 
     Flux<Void> deleteBillsByVetId(@RequestParam(value="vetId", required = true) String vetId);
@@ -60,6 +59,28 @@ public interface BillService {
     Mono<BillResponseDTO> updateBill(String billId, Mono<BillRequestDTO> billRequestDTO);
 
     Mono<Void> deleteAllBills();
+
+    // Method to fetch bills by month
+    Flux<BillResponseDTO> getBillsByMonth(int year, int month);
+
+    Mono<BigDecimal> calculateCurrentBalance(String customerId);
+
+    Mono<Void> setInterestExempt(String billId, boolean exempt);
+
+    Mono<BigDecimal> getInterest(String billId, BigDecimal amount, int overdueMonths);
+
+    Mono<BigDecimal> getTotalWithInterest(String billId, BigDecimal amount, int overdueMonths);
+
+    Flux<Bill> archiveBill();
+
+
+
+///////////////// Used by both BillController and CustomerBillsController /////////////////////
+
+    Flux<BillResponseDTO> getBillsByCustomerId(@RequestParam(value = "customerId", required = true) String customerId);
+
+
+//////////////// Used by CustomerBillsController only ///////////////////////////////////////////
 
     // Fetch a specific bill for a customer
     Mono<BillResponseDTO> getBillByCustomerIdAndBillId(String customerId, String billId);
@@ -70,22 +91,13 @@ public interface BillService {
     // Method to generate the bill PDF
     Mono<byte[]> generateBillPdf(String customerId, String billId);
 
-    // Method to fetch bills by month
-    Flux<BillResponseDTO> getBillsByMonth(int year, int month);
-
-    Mono<BigDecimal> calculateCurrentBalance(String customerId);
-
     Mono<BillResponseDTO> processPayment(String customerId, String billId, PaymentRequestDTO paymentRequestDTO);
 
-    Mono<Void> setInterestExempt(String billId, boolean exempt);
+    Flux<BillResponseDTO> getBillsByAmountRange(String customerId, BigDecimal minAmount, BigDecimal maxAmount);
 
-    Mono<BigDecimal> getInterest(String billId, BigDecimal amount, int overdueMonths);
+    Flux<BillResponseDTO> getBillsByDueDateRange(String customerId, LocalDate startDate, LocalDate endDate);
 
-    Mono<BigDecimal> getTotalWithInterest(String billId, BigDecimal amount, int overdueMonths);
-
-
-
-    Flux<Bill> archiveBill();
+    Flux<BillResponseDTO> getBillsByCustomerIdAndDateRange(String customerId, LocalDate startDate, LocalDate endDate);
 
 
 }

@@ -215,4 +215,55 @@ public class CustomerBillsControllerIntegrationTest {
                         .expectBody()
                         .jsonPath("$.interest").isEqualTo(expectedInterest.doubleValue());
         }
+
+    @Test
+    void getBillsByAmountRange_integrationTest() {
+        Bill bill = buildBill();
+        billRepository.deleteAll().then(billRepository.save(bill)).block();
+
+        client.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/bills/customer/{customerId}/bills/filter-by-amount")
+                        .queryParam("minAmount", "100")
+                        .queryParam("maxAmount", "200")
+                        .build(bill.getCustomerId()))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$[0].customerId").isEqualTo(bill.getCustomerId());
+    }
+
+    @Test
+    void getBillsByDueDateRange_integrationTest() {
+        Bill bill = buildBill();
+        billRepository.deleteAll().then(billRepository.save(bill)).block();
+
+        client.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/bills/customer/{customerId}/bills/filter-by-due-date")
+                        .queryParam("startDate", LocalDate.now().minusDays(1))
+                        .queryParam("endDate", LocalDate.now().plusDays(30))
+                        .build(bill.getCustomerId()))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$[0].customerId").isEqualTo(bill.getCustomerId());
+    }
+
+    @Test
+    void getBillsByCustomerIdAndDateRange_integrationTest() {
+        Bill bill = buildBill();
+        billRepository.deleteAll().then(billRepository.save(bill)).block();
+
+        client.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/bills/customer/{customerId}/bills/filter-by-date")
+                        .queryParam("startDate", LocalDate.now().minusDays(20))
+                        .queryParam("endDate", LocalDate.now())
+                        .build(bill.getCustomerId()))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$[0].customerId").isEqualTo(bill.getCustomerId());
+    }
 }

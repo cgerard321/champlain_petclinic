@@ -1878,4 +1878,117 @@ public class BillServiceImplTest {
         assertEquals("testuser", result.getCorrespondantName());
         assertEquals("ChamplainPetClinic@gmail.com", result.getSenderName());
     }
+
+    @Test
+    void getBillsByCustomerIdAndAmountRange_shouldReturnBills() {
+        String customerId = "cust-1";
+        Bill bill = Bill.builder()
+                .customerId(customerId)
+                .amount(new BigDecimal("100.00"))
+                .dueDate(LocalDate.now().plusDays(10)) // <--- add this!
+                .build();
+
+        when(repo.findByCustomerIdAndAmountBetween(customerId, new BigDecimal("50"), new BigDecimal("150")))
+                .thenReturn(Flux.just(bill));
+
+        StepVerifier.create(billService.getBillsByAmountRange(customerId, new BigDecimal("50"), new BigDecimal("150")))
+                .expectNextMatches(dto -> dto.getAmount().equals(new BigDecimal("100.00")))
+                .verifyComplete();
+    }
+
+    @Test
+    void getBillsByCustomerIdAndAmountRange_noBills_shouldReturnEmptyFlux() {
+        String customerId = "cust-999";
+        BigDecimal minAmount = new BigDecimal("500");
+        BigDecimal maxAmount = new BigDecimal("1000");
+
+        when(repo.findByCustomerIdAndAmountBetween(customerId, minAmount, maxAmount))
+                .thenReturn(Flux.empty());
+
+        StepVerifier.create(billService.getBillsByAmountRange(customerId, minAmount, maxAmount))
+                .expectNextCount(0) // Expect empty
+                .verifyComplete();
+    }
+
+    @Test
+    void getBillsByCustomerIdAndDueDateRange_shouldReturnBills() {
+        String customerId = "cust-3";
+        LocalDate start = LocalDate.now().minusDays(5);
+        LocalDate end = LocalDate.now().plusDays(5);
+
+        Bill bill = Bill.builder()
+                .billId("bill-456")
+                .customerId(customerId)
+                .vetId("vet-2")
+                .visitType("surgery")
+                .date(LocalDate.now().minusDays(2))
+                .dueDate(LocalDate.now().plusDays(2)) // <-- required for due date test
+                .amount(new BigDecimal("200.00"))
+                .billStatus(BillStatus.UNPAID)
+                .build();
+
+        when(repo.findByCustomerIdAndDueDateBetween(customerId, start, end))
+                .thenReturn(Flux.just(bill));
+
+        StepVerifier.create(billService.getBillsByDueDateRange(customerId, start, end))
+                .expectNextMatches(dto -> dto.getCustomerId().equals(customerId) && dto.getBillId().equals("bill-456"))
+                .verifyComplete();
+    }
+
+    @Test
+    void getBillsByCustomerIdAndDueDateRange_noBills_shouldReturnNotFound() {
+        String customerId = "cust-2";
+        LocalDate start = LocalDate.now().minusDays(10);
+        LocalDate end = LocalDate.now();
+
+        when(repo.findByCustomerIdAndDueDateBetween(customerId, start, end))
+                .thenReturn(Flux.empty());
+
+        StepVerifier.create(billService.getBillsByDueDateRange(customerId, start, end))
+                .expectError(ResponseStatusException.class)
+                .verify();
+    }
+
+    @Test
+    void getBillsByCustomerIdAndDateRange_shouldReturnBills() {
+        String customerId = "cust-3";
+        LocalDate start = LocalDate.now().minusDays(10);
+        LocalDate end = LocalDate.now();
+
+        Bill bill = Bill.builder()
+                .billId("bill-123")
+                .customerId(customerId)
+                .vetId("vet-1")
+                .visitType("checkup")
+                .date(LocalDate.now().minusDays(5))
+                .dueDate(LocalDate.now().plusDays(10)) // <-- prevent NPE
+                .amount(new BigDecimal("100.00"))
+                .billStatus(BillStatus.UNPAID)
+                .build();
+
+        when(repo.findByCustomerIdAndDateBetween(customerId, start, end))
+                .thenReturn(Flux.just(bill));
+
+        StepVerifier.create(billService.getBillsByCustomerIdAndDateRange(customerId, start, end))
+                .expectNextMatches(dto -> dto.getCustomerId().equals(customerId) && dto.getBillId().equals("bill-123"))
+                .verifyComplete();
+    }
+
+    @Test
+    void getBillsByCustomerIdAndDateRange_noBills_shouldEmitNotFound() {
+        String customerId = "cust-999";
+        LocalDate start = LocalDate.now().minusDays(10);
+        LocalDate end = LocalDate.now();
+
+        when(repo.findByCustomerIdAndDateBetween(customerId, start, end))
+                .thenReturn(Flux.empty());
+
+        StepVerifier.create(billService.getBillsByCustomerIdAndDateRange(customerId, start, end))
+                .expectErrorMatches(throwable ->
+                        throwable instanceof ResponseStatusException &&
+                                ((ResponseStatusException) throwable).getStatus() == HttpStatus.NOT_FOUND &&
+                                ((ResponseStatusException) throwable).getReason().contains("No bills found")
+                )
+                .verify();
+    }
 }

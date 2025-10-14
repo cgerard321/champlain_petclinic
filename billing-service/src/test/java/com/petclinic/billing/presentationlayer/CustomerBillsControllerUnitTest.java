@@ -28,6 +28,8 @@ import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import static org.hibernate.validator.internal.util.Contracts.assertTrue;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -229,4 +231,83 @@ public class CustomerBillsControllerUnitTest {
                         });
                 verify(billService, times(1)).getBillsByCustomerId(overdueBill.getCustomerId());
         }
+
+    @Test
+    void getBillsByAmountRange_shouldReturnBills() {
+        String customerId = "cust-1";
+
+        // Prepare test DTO
+        BillResponseDTO bill = BillResponseDTO.builder()
+                .customerId(customerId)
+                .amount(new BigDecimal("100.00"))
+                .build();
+
+        // Mock the service call
+        when(billService.getBillsByAmountRange(eq(customerId), any(BigDecimal.class), any(BigDecimal.class)))
+                .thenReturn(Flux.just(bill));
+
+        // Execute WebTestClient call
+        client.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/bills/customer/{customerId}/bills/filter-by-amount")
+                        .queryParam("minAmount", "50")
+                        .queryParam("maxAmount", "150")
+                        .build(customerId))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(BillResponseDTO.class)
+                .hasSize(1)
+                .consumeWith(resp -> {
+                    BillResponseDTO responseBill = resp.getResponseBody().get(0);
+                    assertNotNull(responseBill);
+                    assertEquals(customerId, responseBill.getCustomerId());
+                    assertTrue(responseBill.getAmount().compareTo(new BigDecimal("100.00")) == 0,
+                            "Expected amount to be 100.00 but was " + responseBill.getAmount());
+                });
+
+    }
+
+
+    @Test
+    void getBillsByDueDateRange_noBills_shouldReturnNotFound() {
+        String customerId = "cust-2";
+        LocalDate start = LocalDate.now().minusDays(10);
+        LocalDate end = LocalDate.now();
+
+        when(billService.getBillsByDueDateRange(eq(customerId), eq(start), eq(end)))
+                .thenReturn(Flux.error(new ResponseStatusException(HttpStatus.NOT_FOUND)));
+
+        client.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/bills/customer/{customerId}/bills/filter-by-due-date")
+                        .queryParam("startDate", start)
+                        .queryParam("endDate", end)
+                        .build(customerId))
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    void getBillsByCustomerIdAndDateRange_shouldReturnBills() {
+        String customerId = "cust-3";
+        LocalDate start = LocalDate.now().minusDays(10);
+        LocalDate end = LocalDate.now();
+        BillResponseDTO bill = BillResponseDTO.builder()
+                .customerId(customerId)
+                .build();
+
+        when(billService.getBillsByCustomerIdAndDateRange(eq(customerId), eq(start), eq(end)))
+                .thenReturn(Flux.just(bill));
+
+        client.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/bills/customer/{customerId}/bills/filter-by-date")
+                        .queryParam("startDate", start)
+                        .queryParam("endDate", end)
+                        .build(customerId))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(BillResponseDTO.class)
+                .hasSize(1);
+    }
 }
