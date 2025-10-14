@@ -440,8 +440,8 @@ const handleAxiosError = (error: unknown): boolean => {
     // Local handling errors (don't stop propagation)
     const locallyHandledCodes = [400, 404, 409, 422, 429];
 
-    // Always log the error for debugging
-    console.error(`HTTP ${statusCode} Error:`, error.response?.data || error.message);
+    // log the error only for debugging
+    // console.error(`HTTP ${statusCode} Error:`, error.response?.data || error.message);
 
     // Handle global errors
     if (statusCode in globallyHandledCodes) {
