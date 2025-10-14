@@ -300,7 +300,10 @@ services:
   # ---------- SQL DB MANAGER ----------
   cloudbeaver:
     build:
-      context: ./cloudbeaver
+      context: ./cloudbeaver-mongo
+      args:
+        BASE_TAG: latest   # or another tag you’ve verified exists
+    image: cloudbeaver-mongo:latest
     container_name: cloudbeaver
     ports:
       - "8978:8978"
@@ -309,6 +312,7 @@ services:
     environment:
       - CB_EXTENSIONS_DEFAULT=1
     restart: unless-stopped
+
 
 # -------------------
 # VOLUMES
