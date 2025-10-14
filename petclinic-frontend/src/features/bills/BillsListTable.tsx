@@ -4,8 +4,17 @@ import axiosInstance from '@/shared/api/axiosInstance';
 import { useCallback, useEffect, useState } from 'react';
 import './BillsListTable.css';
 import PaymentForm from './PaymentForm';
+import { Currency, convertCurrency } from './utils/convertCurrency';
 
-export default function BillsListTable(): JSX.Element {
+interface BillsListTableProps {
+  currency: Currency;
+  setCurrency: (c: Currency) => void;
+}
+
+export default function BillsListTable({
+  currency,
+  setCurrency,
+}: BillsListTableProps): JSX.Element {
   const { user } = useUser();
   const [bills, setBills] = useState<Bill[]>([]);
   const [filteredBills, setFilteredBills] = useState<Bill[]>([]);
@@ -186,7 +195,7 @@ export default function BillsListTable(): JSX.Element {
   ): Promise<void> => {
     try {
       const response = await axiosInstance.get(
-        `/customers/${customerId}/bills/${billId}/pdf`,
+        `/customers/${customerId}/bills/${billId}/pdf?currency=${currency}`,
         {
           responseType: 'blob',
           headers: { 'Content-Type': 'application/pdf' },
@@ -246,6 +255,39 @@ export default function BillsListTable(): JSX.Element {
         <button className="filter-btn" onClick={() => toggleSection('date')}>
           {activeSection === 'date' ? 'Close Date' : 'Filter by Date'}
         </button>
+      {/* Status and Currency dropdowns together */}
+      <div
+        className="filterContainer"
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '16px',
+        }}
+      >
+        <label htmlFor="statusFilter">Filter by Status:</label>
+        <select
+          id="statusFilter"
+          value={selectedStatus}
+          onChange={e => setSelectedStatus(e.target.value)}
+          style={{ width: '150px' }}
+        >
+          <option value="all">All</option>
+          <option value="overdue">Overdue</option>
+          <option value="paid">Paid</option>
+          <option value="unpaid">Unpaid</option>
+        </select>
+        <label htmlFor="currencyFilter" style={{ marginLeft: '8px' }}>
+          Currency:
+        </label>
+        <select
+          id="currencyFilter"
+          value={currency}
+          onChange={e => setCurrency(e.target.value as Currency)}
+          style={{ width: '100px' }}
+        >
+          <option value="CAD">CAD</option>
+          <option value="USD">USD</option>
+        </select>
       </div>
 
       {activeSection === 'status' && (
@@ -437,6 +479,29 @@ export default function BillsListTable(): JSX.Element {
                     }
                   >
                     {bill.billStatus}
+                  <td>
+                    {currency === 'CAD'
+                      ? `CAD $${bill.amount.toFixed(2)}`
+                      : `USD $${convertCurrency(bill.amount, 'CAD', 'USD').toFixed(2)}`}
+                  </td>
+                  <td>
+                    {currency === 'CAD'
+                      ? `CAD $${(bill.interest || 0).toFixed(2)}`
+                      : `USD $${convertCurrency(bill.interest || 0, 'CAD', 'USD').toFixed(2)}`}
+                  </td>
+                  <td>
+                    {currency === 'CAD'
+                      ? `CAD $${bill.taxedAmount.toFixed(2)}`
+                      : `USD $${convertCurrency(bill.taxedAmount, 'CAD', 'USD').toFixed(2)}`}
+                  </td>
+                  <td>
+                    {bill.billStatus === 'OVERDUE' ? (
+                      <span style={{ color: 'red' }}>Overdue</span>
+                    ) : bill.billStatus === 'PAID' ? (
+                      <span style={{ color: 'green' }}>{bill.billStatus}</span>
+                    ) : (
+                      bill.billStatus
+                    )}
                   </td>
                   <td>{bill.dueDate}</td>
                   <td>

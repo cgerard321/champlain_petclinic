@@ -49,17 +49,19 @@ public class CustomerBillsController {
     }
 
     @GetMapping(value = "/{billId}/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
-    public Mono<ResponseEntity<byte[]>> downloadBillPdf(@PathVariable String customerId,
-                                                        @PathVariable String billId) {
-        return billService.generateBillPdf(customerId, billId)
+    public Mono<ResponseEntity<byte[]>> downloadBillPdf(
+            @PathVariable String customerId,
+            @PathVariable String billId,
+            @RequestParam(name = "currency", required = false, defaultValue = "CAD") String currency) {
+        return billService.generateBillPdf(customerId, billId, currency)
                 .map(pdf -> {
                     HttpHeaders headers = new HttpHeaders();
                     headers.setContentType(MediaType.APPLICATION_PDF);
-                    headers.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=bill-" + billId + ".pdf"); //inline lets the browser open the PDF in a new tab.
+                    headers.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=bill-" + billId + ".pdf");
                     return new ResponseEntity<>(pdf, headers, HttpStatus.OK);
                 })
                 .onErrorResume(e -> {
-                    log.error("Error generating PDF for billId: {}", billId, e);
+                    log.error("Error generating PDF for billId: {} currency: {} error: {}", billId, currency, e.getMessage(), e);
                     return Mono.just(new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR));
                 });
     }

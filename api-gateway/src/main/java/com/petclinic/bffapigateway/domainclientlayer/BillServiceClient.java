@@ -9,18 +9,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
 import java.math.BigDecimal;
 import java.net.URI;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Component
@@ -30,16 +26,19 @@ public class BillServiceClient {
     private final WebClient.Builder webClientBuilder;
     private final String billServiceUrl;
 
-
     public BillServiceClient(
             WebClient.Builder webClientBuilder,
             @Value("${app.billing-service.host}") String billingServiceHost,
             @Value("${app.billing-service.port}") String billingServicePort
     ) {
         this.webClientBuilder = webClientBuilder;
-
+        if (billingServiceHost == null || billingServiceHost.isBlank()) {
+            throw new IllegalArgumentException("Configuration property 'app.billing-service.host' must be set and non-blank");
+        }
+        if (billingServicePort == null || billingServicePort.isBlank()) {
+            throw new IllegalArgumentException("Configuration property 'app.billing-service.port' must be set and non-blank");
+        }
         billServiceUrl = "http://" + billingServiceHost + ":" + billingServicePort + "/bills";
-
     }
 
     public Mono<BillResponseDTO> getBillById(final String billId) {
@@ -319,10 +318,6 @@ public class BillServiceClient {
                 .bodyToFlux(BillResponseDTO.class);
     }
 
-
-
-
-
     public Flux<BillResponseDTO> getBillsByCustomerIdPaginated(final String customerId, Optional<Integer> page, Optional<Integer> size) {
         return webClientBuilder.build().get()
                 .uri(billServiceUrl + "/customer/" + customerId + "/paginated?page=" + page.orElse(0) + "&size=" + size.orElse(10))
@@ -330,10 +325,19 @@ public class BillServiceClient {
                 .bodyToFlux(BillResponseDTO.class);
     }
 
-    public Mono<byte[]> downloadBillPdf(String customerId, String billId) {
+    // Example PDF download method (replace with your actual method name/signature)
+    public Mono<byte[]> downloadBillPdf(String customerId, String billId, String currency) {
+        String cur = (currency == null || currency.isBlank()) ? "CAD" : currency;
+        String url = UriComponentsBuilder
+                .fromHttpUrl(billServiceUrl)
+                .path("/customer/{customerId}/bills/{billId}/pdf")
+                .queryParam("currency", cur)
+                .buildAndExpand(customerId, billId)
+                .toUriString();
+
         return webClientBuilder.build()
                 .get()
-                .uri(billServiceUrl + "/customer/{customerId}/bills/{billId}/pdf", customerId, billId)
+                .uri(url)
                 .accept(MediaType.APPLICATION_PDF)
                 .retrieve()
                 .bodyToMono(byte[].class);

@@ -8,9 +8,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-
 public interface BillService {
     Mono<BillResponseDTO> getBillByBillId(String billId);
 
@@ -75,6 +72,7 @@ public interface BillService {
 
 
 
+
 ///////////////// Used by both BillController and CustomerBillsController /////////////////////
 
     Flux<BillResponseDTO> getBillsByCustomerId(@RequestParam(value = "customerId", required = true) String customerId);
@@ -98,6 +96,5 @@ public interface BillService {
     Flux<BillResponseDTO> getBillsByDueDateRange(String customerId, LocalDate startDate, LocalDate endDate);
 
     Flux<BillResponseDTO> getBillsByCustomerIdAndDateRange(String customerId, LocalDate startDate, LocalDate endDate);
-
 
 }
