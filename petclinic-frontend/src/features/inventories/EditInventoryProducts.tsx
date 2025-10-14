@@ -6,19 +6,9 @@ import {
   updateProductInInventory,
 } from '@/features/inventories/api/EditInventoryProducts.ts';
 import { ProductRequestModel } from '@/features/inventories/models/InventoryModels/ProductRequestModel';
+import './EditInventoryProduct.css';
 
 const MAX_QTY = 100;
-
-function validateQuantityValue(n: unknown): string | null {
-  if (n === null || n === undefined || Number.isNaN(Number(n))) {
-    return 'Quantity is required';
-  }
-  const num = Number(n);
-  if (!Number.isInteger(num)) return 'Quantity must be a whole number';
-  if (num <= 0) return 'Quantity must be greater than 0';
-  if (num > MAX_QTY) return `Quantity cannot exceed ${MAX_QTY}`;
-  return null;
-}
 
 interface ApiError {
   message: string;
@@ -68,28 +58,16 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
   }, [inventoryId, productId]);
 
   const validate = (): boolean => {
-    const newError: { [key: string]: string } = {};
+    const errors: Record<string, string> = {};
 
-    if (!product.productName) newError.productName = 'Product name is required';
-    if (!product.productDescription)
-      newError.productDescription = 'Product description is required';
+    const name = product.productName?.trim() ?? '';
+    if (!name) errors.productName = 'Product name is required';
 
-    if (product.productPrice === undefined || product.productPrice === null) {
-      newError.productPrice = 'Product price is required';
-    }
+    const desc = product.productDescription?.trim() ?? '';
+    if (!desc) errors.productDescription = 'Product description is required';
 
-    const qtyMsg = validateQuantityValue(product.productQuantity);
-    if (qtyMsg) newError.productQuantity = qtyMsg;
-
-    if (
-      product.productSalePrice === undefined ||
-      product.productSalePrice === null
-    ) {
-      newError.productSalePrice = 'Product sale price is required';
-    }
-
-    setError(newError);
-    return Object.keys(newError).length === 0;
+    setError(errors);
+    return Object.keys(errors).length === 0;
   };
 
   const handleSubmit = async (
@@ -114,7 +92,47 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
       }
     } catch (err) {
       const apiError = err as ApiError;
-      setErrorMessage(`Error updating product: ${apiError.message}`);
+      const msg = (apiError?.message || '').toLowerCase();
+
+      if (msg.includes('already exists') && msg.includes('product')) {
+        setError(prev => ({
+          ...prev,
+          productName:
+            'A product with this name already exists in this inventory.',
+        }));
+        setErrorMessage('');
+        return;
+      }
+      if (
+        msg.includes('price must be greater than 0') &&
+        msg.includes('product price')
+      ) {
+        setError(prev => ({
+          ...prev,
+          productPrice: 'Product price must be greater than 0',
+        }));
+        setErrorMessage('');
+        return;
+      }
+      if (msg.includes('quantity must be greater than 0')) {
+        setError(prev => ({
+          ...prev,
+          productQuantity: 'Product quantity must be greater than 0',
+        }));
+        setErrorMessage('');
+        return;
+      }
+      if (msg.includes('sale price') && msg.includes('greater than 0')) {
+        setError(prev => ({
+          ...prev,
+          productSalePrice: 'Sale price must be greater than 0',
+        }));
+        setErrorMessage('');
+        return;
+      }
+      setErrorMessage(
+        `Error updating product: ${apiError.message || 'Unknown error'}`
+      );
     } finally {
       setLoading(false);
     }
@@ -127,21 +145,15 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
 
     if (name === 'productQuantity') {
       const digitsOnly = value.replace(/[^\d]/g, '');
-
       setProduct(prev => ({
         ...prev,
         productQuantity:
           digitsOnly === '' ? ('' as unknown as number) : Number(digitsOnly),
       }));
-
-      const msg =
-        digitsOnly === ''
-          ? 'Quantity is required'
-          : validateQuantityValue(Number(digitsOnly));
-      setError(prev => ({ ...prev, productQuantity: msg ?? '' }));
+      if (error.productQuantity)
+        setError(prev => ({ ...prev, productQuantity: '' }));
       return;
     }
-
     setProduct(prev => ({
       ...prev,
       [name]:
@@ -149,135 +161,156 @@ const EditInventoryProducts: React.FC = (): JSX.Element => {
           ? Number(value)
           : (value as ProductRequestModel[typeof name]),
     }));
+
+    if (error[name]) {
+      setError(prev => ({ ...prev, [name]: '' }));
+    }
   };
 
   return (
-    <div
-      className="card d-flex justify-content-center align-items-center"
-      style={{
-        width: '500px',
-        height: '700px',
-        backgroundColor: 'lightgray',
-        margin: '0 auto',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-      }}
-    >
-      <h2>Edit Product</h2>
+    <div className="edit-product-container">
+      <div className="edit-product-form-container">
+        <h2>Edit Product</h2>
 
-      <br />
-
-      <form onSubmit={handleSubmit}>
-        <h6>Name</h6>
-        <div className="input-group mb-3">
-          <input
-            className="form-control"
-            type="text"
-            name="productName"
-            value={product.productName}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <br />
-
-        <h6>Description</h6>
-        <div className="input-group mb-3">
-          <input
-            className="form-control"
-            type="text"
-            name="productDescription"
-            value={product.productDescription}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <br />
-
-        <h6>Cost Price</h6>
-        <div className="input-group mb-3">
-          <span className="input-group-text">$</span>
-          <input
-            className="form-control"
-            aria-label="Amount (to the nearest dollar)"
-            type="number"
-            name="productPrice"
-            value={product.productPrice}
-            onChange={handleChange}
-            required
-          />
-          <span className="input-group-text">.00</span>
-        </div>
-
-        <br />
-
-        <h6>Quantity</h6>
-        <div className="input-group mb-3">
-          <input
-            className="form-control"
-            type="number"
-            name="productQuantity"
-            value={product.productQuantity}
-            onChange={handleChange}
-            inputMode="numeric"
-            pattern="\d*"
-            step={1}
-            min={1}
-            max={MAX_QTY}
-            onKeyDown={e => {
-              // prevent '.', '-', 'e', 'E', '+'
-              if (['.', '-', 'e', 'E', '+'].includes(e.key)) e.preventDefault();
-            }}
-            required
-          />
-        </div>
-        {error.productQuantity && (
-          <p style={{ color: 'red', marginTop: -8 }}>{error.productQuantity}</p>
+        {errorMessage && (
+          <div className="edit-product-error-message">{errorMessage}</div>
+        )}
+        {successMessage && showNotification && (
+          <div className="edit-product-success-message">{successMessage}</div>
         )}
 
-        <br />
-
-        <h6>Sale Price</h6>
-        <div className="input-group mb-3">
-          <span className="input-group-text">$</span>
-          <input
-            className="form-control"
-            aria-label="Amount (to the nearest dollar)"
-            type="number"
-            name="productSalePrice"
-            value={product.productSalePrice}
-            onChange={handleChange}
-            required
-          />
-          <span className="input-group-text">.00</span>
-        </div>
-
-        <button
-          type="submit"
-          style={{
-            width: '100px',
-            backgroundColor: '#333',
-            color: 'white',
-          }}
-        >
-          Update
-        </button>
-      </form>
-
-      <div>
-        {loading && <p>Loading...</p>}
-        {error.message && <p style={{ color: 'red' }}>{error.message}</p>}
-        {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
-        {showNotification ? (
-          <div className="notification">
-            {successMessage && (
-              <p style={{ color: 'white' }}>{successMessage}</p>
+        <form onSubmit={handleSubmit} noValidate>
+          <div className="edit-product-form-group">
+            <label htmlFor="productName">Name</label>
+            <input
+              id="productName"
+              className={`edit-product-input ${error.productName ? 'invalid animate' : ''}`}
+              type="text"
+              name="productName"
+              value={product.productName}
+              onChange={handleChange}
+              aria-invalid={!!error.productName}
+              aria-describedby={
+                error.productName ? 'err-productName' : undefined
+              }
+            />
+            {error.productName && (
+              <div id="err-productName" className="edit-product-error-text">
+                {error.productName}
+              </div>
             )}
           </div>
-        ) : null}
+
+          <div className="edit-product-form-group">
+            <label htmlFor="productDescription">Description</label>
+            <input
+              id="productDescription"
+              className={`edit-product-input ${error.productDescription ? 'invalid animate' : ''}`}
+              type="text"
+              name="productDescription"
+              value={product.productDescription}
+              onChange={handleChange}
+              aria-invalid={!!error.productDescription}
+              aria-describedby={
+                error.productDescription ? 'err-productDescription' : undefined
+              }
+            />
+            {error.productDescription && (
+              <div
+                id="err-productDescription"
+                className="edit-product-error-text"
+              >
+                {error.productDescription}
+              </div>
+            )}
+          </div>
+
+          <div className="edit-product-form-group">
+            <label htmlFor="productPrice">Cost Price</label>
+            <input
+              id="productPrice"
+              className={`edit-product-input ${error.productPrice ? 'invalid animate' : ''}`}
+              type="number"
+              name="productPrice"
+              value={product.productPrice}
+              onChange={handleChange}
+              min={0}
+              step="any"
+              aria-invalid={!!error.productPrice}
+              aria-describedby={
+                error.productPrice ? 'err-productPrice' : undefined
+              }
+            />
+            {error.productPrice && (
+              <div id="err-productPrice" className="edit-product-error-text">
+                {error.productPrice}
+              </div>
+            )}
+          </div>
+          <div className="edit-product-form-group">
+            <label htmlFor="productQuantity">Quantity</label>
+            <input
+              id="productQuantity"
+              className={`edit-product-input ${error.productQuantity ? 'invalid animate' : ''}`}
+              type="number"
+              name="productQuantity"
+              value={product.productQuantity ?? ''}
+              onChange={handleChange}
+              inputMode="numeric"
+              pattern="\d*"
+              step={1}
+              min={1}
+              max={MAX_QTY}
+              onKeyDown={e => {
+                if (['.', '-', 'e', 'E', '+'].includes(e.key))
+                  e.preventDefault();
+              }}
+              aria-invalid={!!error.productQuantity}
+              aria-describedby={
+                error.productQuantity ? 'err-productQuantity' : undefined
+              }
+            />
+            {error.productQuantity && (
+              <div id="err-productQuantity" className="edit-product-error-text">
+                {error.productQuantity}
+              </div>
+            )}
+          </div>
+
+          <div className="edit-product-form-group">
+            <label htmlFor="productSalePrice">Sale Price</label>
+            <input
+              id="productSalePrice"
+              className={`edit-product-input ${error.productSalePrice ? 'invalid animate' : ''}`}
+              type="number"
+              name="productSalePrice"
+              value={product.productSalePrice}
+              onChange={handleChange}
+              min={1}
+              step="any"
+              aria-invalid={!!error.productSalePrice}
+              aria-describedby={
+                error.productSalePrice ? 'err-productSalePrice' : undefined
+              }
+            />
+            {error.productSalePrice && (
+              <div
+                id="err-productSalePrice"
+                className="edit-product-error-text"
+              >
+                {error.productSalePrice}
+              </div>
+            )}
+          </div>
+
+          <button
+            type="submit"
+            className="edit-product-submit-button"
+            disabled={loading}
+          >
+            {loading ? 'Updating…' : 'Update'}
+          </button>
+        </form>
       </div>
     </div>
   );
