@@ -297,36 +297,46 @@ services:
       - mongo-carts-config:/data/configdb
     restart: unless-stopped
 
-  appsmith:
-    image: appsmith/appsmith-ce
-    container_name: appsmith
-    restart: unless-stopped
+  metabase:
+    image: metabase/metabase:latest
+    container_name: metabase
     ports:
-      - "8030:80"             # UI at http://<host>:8090
-    volumes:
-      - appsmith-stacks:/appsmith-stacks
+      - "8030:3000"                   # behind your reverse-proxy if public
     environment:
-      - APPSMITH_INSTANCE_NAME=Petclinic Admin
-      # (optional) disable public signups; you can invite users from the admin UI
-      # - APPSMITH_SIGNUP_DISABLED=true
-      # (optional) SMTP for invites/password reset; you can set this later in UI
-      # - APPSMITH_MAIL_ENABLED=true
-      # - APPSMITH_MAIL_HOST=smtp.gmail.com
-      # - APPSMITH_MAIL_PORT=587
-      # - APPSMITH_MAIL_USERNAME=champlain.petclinic@gmail.com
-      # - APPSMITH_MAIL_PASSWORD=<app-password>
-      # - APPSMITH_MAIL_FROM=champlain.petclinic@gmail.com
+      - MB_ADMIN_EMAIL=admin@cpc.com
+      - MB_ADMIN_PASSWORD=password
+
+      - MB_DB_TYPE=postgres
+      - MB_DB_HOST=metabase-db
+      - MB_DB_PORT=5432
+      - MB_DB_DBNAME=metabase
+      - MB_DB_USER=mb_user
+      - MB_DB_PASS=mb_pass
+
+      - MB_ANON_TRACKING_ENABLED=false
+      - JAVA_TOOL_OPTIONS=-Xms512m -Xmx1024m
+    volumes:
+      - metabase-plugins:/plugins
     depends_on:
-      - mysql-auth
-      - mysql-files
-      - postgres-vet
-      - mongo-vet
-      - mongo-billing
-      - mongo-visits
-      - mongo-customers
-      - mongo-inventory
-      - mongo-products
-      - mongo-carts
+      - metabase-db
+    restart: unless-stopped
+    labels:
+      - homepage.group=Admin
+      - homepage.name=Metabase (Analytics)
+      - homepage.icon=https://github.com/homarr-labs/dashboard-icons/blob/main/png/metabase.png?raw=true
+      - homepage.href=https://reports.benmusicgeek.synology.me/
+      - homepage.description=Query + dashboards for Postgres/MySQL/Mongo
+
+  metabase-db:
+    image: postgres:16
+    container_name: metabase-db
+    environment:
+      - POSTGRES_USER=mb_user
+      - POSTGRES_PASSWORD=mb_pass
+      - POSTGRES_DB=metabase
+    volumes:
+      - metabase-db-data:/var/lib/postgresql/data
+    restart: unless-stopped
 
 
 # -------------------
@@ -350,4 +360,5 @@ volumes:
   mongo-carts-config:
   postgres-vet-data:
   mysql-files-data:
-  appsmith-stacks:
+  metabase-db-data:
+  metabase-plugins:
