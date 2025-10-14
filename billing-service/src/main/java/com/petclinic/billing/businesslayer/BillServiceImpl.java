@@ -348,6 +348,14 @@ public class BillServiceImpl implements BillService{
     public Mono<BillResponseDTO> processPayment(String customerId, String billId, PaymentRequestDTO paymentRequestDTO, String jwtToken)
     {
         return authClient.getUserById(jwtToken, customerId)
+                .onErrorResume(e -> {
+                    log.error("Failed to authenticate or fetch user for customerId: {}. Error: {}", customerId, e.getMessage(), e);
+                    if (e instanceof ResponseStatusException) {
+                        return Mono.error(e);
+                    }
+                    // Customize error handling as needed, e.g., unauthorized or not found
+                    return Mono.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication failed or user not found"));
+                })
                 .flatMap(user -> {
 
                     // 1. Validate card details before reactive pipeline.
