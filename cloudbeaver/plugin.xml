@@ -1,20 +1,46 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin>
-    <!-- RESOURCES: tell CloudBeaver where our jars live -->
+
+    <!-- =========================
+         A) DRIVER DEFINITION (Generic)
+         This is the critical bit the UI needs to show "MongoDB (JDBC)".
+         ========================= -->
+    <extension point="org.jkiss.dbeaver.dataSourceProvider">
+        <!-- Extend the Generic JDBC provider -->
+        <datasource id="generic">
+            <drivers managable="true">
+                <driver
+                        id="mongodb-jdbc"
+                        label="MongoDB (JDBC)"
+                        description="MongoDB JDBC driver (SQL over Mongo; class com.mongodb.jdbc.MongoDriver)"
+                        class="com.mongodb.jdbc.MongoDriver"
+                        sampleURL="jdbc:mongodb://{host}[:{port}]/{database}"
+                        useURL="true"
+                        defaultPort="27017"
+                        categories="nosql">
+                    <!-- Point to the folder with our JARs -->
+                    <file type="jar" path="drivers/mongodb-jdbc" bundle="drivers.mongodb-jdbc"/>
+                </driver>
+            </drivers>
+        </datasource>
+    </extension>
+
+    <!-- =========================
+         B) RESOURCES/BUNDLES/ENABLED (wiki "Include driver in server configuration")
+         ========================= -->
+    <!-- Tell CloudBeaver where the jars live -->
     <extension point="io.cloudbeaver.resources">
         <resource name="drivers/mongodb-jdbc"/>
-        <!-- keep other <resource> entries here if you copied a full file -->
     </extension>
 
-    <!-- BUNDLES: attach a bundle id -->
+    <!-- Declare the bundle id that maps to that resource folder -->
     <extension point="io.cloudbeaver.resourceBundle">
         <bundle id="drivers.mongodb-jdbc" label="MongoDB JDBC Driver files"/>
-        <!-- keep other <bundle> entries -->
     </extension>
 
-    <!-- ENABLE the driver (the full id is usually 'generic.<your-id>') -->
+    <!-- Enable the driver by its FULL id: providerId.driverId => generic.mongodb-jdbc -->
     <extension point="io.cloudbeaver.enabledDrivers">
         <driver id="generic.mongodb-jdbc"/>
-        <!-- keep other <driver> entries -->
     </extension>
+
 </plugin>
