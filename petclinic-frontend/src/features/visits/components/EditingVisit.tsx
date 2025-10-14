@@ -160,8 +160,8 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
       }
     } catch (error) {
       // Use type assertion or check error type
-      const apiError = error as ApiError;
-      setErrorMessage(`Error updating visit: ${apiError.message}`);
+      // const apiError = error as ApiError;
+      // setErrorMessage(`Error updating visit: ${apiError.message}`);
     } finally {
       setIsLoading(false);
     }
@@ -294,11 +294,7 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
 
         <select name="status" value={visit.status} onChange={handleChange}>
           <option value="CONFIRMED">Confirmed</option>
-          <option value="CONFIRMED">Confirmed</option>
           <option value="UPCOMING">Upcoming</option>
-          <option value="COMPLETED">Completed</option>
-          <option value="CANCELED">Canceled</option>
-          <option value="ARCHIVED">Archived</option>
           <option value="COMPLETED">Completed</option>
           <option value="CANCELED">Canceled</option>
           <option value="ARCHIVED">Archived</option>
