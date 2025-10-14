@@ -292,7 +292,7 @@ angular.module('vetDetails')
             const deleteAction = function() {
                 $http.delete('api/gateway/vets/' + $stateParams.vetId + '/ratings/' + ratingId)
                     .then(function successCallback(response) {
-                        self.showConfirmationModal('Success', ratingId + "Deleted Successfully!", null);
+                        self.showConfirmationModal('Success', ratingId + " Deleted Successfully!", null);
 
                         $http.get('api/gateway/vets/' + $stateParams.vetId + '/ratings').then(function (resp) {
                             self.ratings = resp.data;
