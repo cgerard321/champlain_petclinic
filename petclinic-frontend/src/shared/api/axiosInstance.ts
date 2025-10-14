@@ -1,6 +1,10 @@
 // src/shared/api/axiosInstance.ts
 
-import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'axios';
+import axios, {
+  AxiosError,
+  AxiosInstance,
+  InternalAxiosRequestConfig,
+} from 'axios';
 import axiosErrorResponseHandler from '@/shared/api/axiosErrorResponseHandler.ts';
 
 axios.defaults.withCredentials = true;
@@ -77,7 +81,7 @@ const handleAxiosError = (error: unknown): boolean => {
 
       // If no bypass is requested, proceed with global handling.
       axiosErrorResponseHandler(error as AxiosError, statusCode);
-      return true; 
+      return true;
     }
 
     // For all other errors, allow local handling as before

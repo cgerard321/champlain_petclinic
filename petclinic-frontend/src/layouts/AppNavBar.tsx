@@ -78,7 +78,10 @@ export function NavBar(): JSX.Element {
         <Navbar.Brand as={Link} to={AppRoutePaths.Home}>
           {clinic.name}
         </Navbar.Brand>
-        <Navbar.Toggle aria-controls="basic-navbar-nav" onClick={toggleNavbar} />
+        <Navbar.Toggle
+          aria-controls="basic-navbar-nav"
+          onClick={toggleNavbar}
+        />
         <Navbar.Collapse
           id="basic-navbar-nav"
           className={navbarOpen ? 'show' : ''}

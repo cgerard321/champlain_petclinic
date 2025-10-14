@@ -16,7 +16,9 @@ export default function axiosErrorResponseHandler(
 ): void {
   // Specific handling for 401 Unauthorized
   if (statusCode === 401) {
-    console.error('Unauthorized access. Clearing credentials and redirecting to home.');
+    console.error(
+      'Unauthorized access. Clearing credentials and redirecting to home.'
+    );
     localStorage.clear();
     // Use the router here for a clean client-side navigation
     router.navigate('/home');
@@ -26,7 +28,10 @@ export default function axiosErrorResponseHandler(
   const redirectPath = errorPageRedirects[statusCode];
 
   if (redirectPath) {
-    console.error(`Redirecting to ${redirectPath} due to a server error:`, error);
+    console.error(
+      `Redirecting to ${redirectPath} due to a server error:`,
+      error
+    );
     // Use window.location for hard redirects on critical errors
     if (typeof window !== 'undefined') {
       window.location.href = redirectPath;
