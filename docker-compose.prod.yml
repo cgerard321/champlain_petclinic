@@ -313,7 +313,7 @@ services:
     container_name: tooljet
     restart: unless-stopped
     ports:
-      - "8030:80"
+      - "8091:80"
     environment:
       - PG_HOST=tooljet-db
       - PG_PORT=5432
@@ -321,20 +321,17 @@ services:
       - PG_USER=tooljet
       - PG_PASS=tooljetpwd
 
-      - TOOLJET_HOST=http://localhost:8030
-      - DISABLE_SIGNUP=true
+      - TOOLJET_HOST=http://localhost:8091
+
+      - ENABLE_TOOLJET_DB=true
+      - TOOLJET_DB_HOST=tooljet-db
+      - TOOLJET_DB_PORT=5432
+      - TOOLJET_DB=tooljet_db
+      - TOOLJET_DB_USER=tooljet
+      - TOOLJET_DB_PASS=tooljetpwd
     depends_on:
       - tooljet-db
-      - mysql-auth
-      - mysql-files
-      - postgres-vet
-      - mongo-vet
-      - mongo-billing
-      - mongo-visits
-      - mongo-customers
-      - mongo-inventory
-      - mongo-products
-      - mongo-carts
+
 
 # -------------------
 # VOLUMES
