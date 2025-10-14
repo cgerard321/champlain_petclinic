@@ -117,7 +117,6 @@ const AddCustomerReviewForm: React.FC = (): JSX.Element => {
       // Call the addCustomerReview API with the updated review state
       await addReview(payload);
 
-
       // Success handling
       setSuccessMessage('Review added successfully!');
       setShowNotification(true);
