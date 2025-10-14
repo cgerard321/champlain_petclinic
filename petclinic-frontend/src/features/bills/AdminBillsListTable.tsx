@@ -393,7 +393,7 @@ export default function AdminBillsListTable(): JSX.Element {
             onClick={() => setShowArchivedBills(v => !v)}
             style={{ width: '92%' }}
           >
-            {showArchivedBills ? 'Show Archived' : 'Show Archived'}
+            {showArchivedBills ? 'Hide Archived' : 'Show Archived'}
           </button>
         </div>
       </aside>
