@@ -1191,7 +1191,7 @@ const UserCart = (): JSX.Element => {
                     {item.productName}
                   </div>
                   <div className="recommendation-product-price recent-purchase-price">
-                    ${item.productSalePrice.toFixed(2)}
+                    ${formatPrice(item.productSalePrice)}
                   </div>
                   <div className="recommendation-qty-row recent-purchase-qty-row">
                     <label
