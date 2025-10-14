@@ -305,8 +305,6 @@ services:
       - "8978:8978"
     volumes:
       - cloudbeaver-data:/opt/cloudbeaver/workspace
-      - ./root/cloudbeaver-overrides/drivers/mongodb-jdbc:/opt/cloudbeaver/server/drivers/mongodb-jdbc:ro
-      - ./root/cloudbeaver-overrides/plugin.xml:/opt/cloudbeaver/server/bundles/io.cloudbeaver.resources.drivers.base/plugin.xml:ro
     environment:
       - CB_EXTENSIONS_DEFAULT=1
     restart: unless-stopped
