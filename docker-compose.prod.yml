@@ -304,8 +304,6 @@ services:
     ports:
       - "8030:3000"
     environment:
-      - ADMIN_PASSWORD=${DBGATE_ADMIN_PASSWORD:-change-me}
-
       - CONNECTIONS=mysqlAuth,mysqlFiles,pgVet,mongoVet,mongoBilling,mongoVisits,mongoCustomers,mongoInventory,mongoProducts,mongoCarts
 
       # --------------------
