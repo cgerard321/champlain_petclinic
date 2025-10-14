@@ -1,11 +1,10 @@
 package com.petclinic.customersservice.presentationlayer;
 
+import com.petclinic.customersservice.domainclientlayer.FileRequestDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 @Builder
 @Data
@@ -20,5 +19,5 @@ public class OwnerRequestDTO {
     private String province;
     private String telephone;
     //private List<PetResponseDTO> pets;
-    private String photoId;
+    private FileRequestDTO photo;
 }
