@@ -97,7 +97,7 @@ export default function VisitListTable(): JSX.Element {
   // Handle archiving the visit
   const handleArchive = async (visitId: string): Promise<void> => {
     await archiveVisit(visitId, updatedVisit => {
-      // This should prabably be removed once the visit list will be Zreactive
+      // This should probably be removed once the visit list will be reactive
       setVisits(prev => {
         return prev.map(visit => {
           if (visit.visitId === visitId) return updatedVisit;
