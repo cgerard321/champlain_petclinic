@@ -7,6 +7,7 @@ import com.petclinic.bffapigateway.dtos.Inventory.ProductRequestDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.ProductResponseDTO;
 import com.petclinic.bffapigateway.exceptions.InvalidInputsInventoryException;
 import com.petclinic.bffapigateway.exceptions.InventoryNotFoundException;
+import com.petclinic.bffapigateway.exceptions.InventoryProductUnprocessableEntityException;
 import com.petclinic.bffapigateway.exceptions.ProductListNotFoundException;
 import com.petclinic.bffapigateway.utils.Rethrower;
 import io.netty.handler.codec.http.HttpStatusClass;
@@ -86,6 +87,10 @@ public class InventoryServiceClient {
                 .body(Mono.just(model),ProductRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
+                .onStatus(status -> status.value() == 422,
+                        resp -> rethrower.rethrow(resp,
+                                ex -> new InventoryProductUnprocessableEntityException(
+                                        ex.get("message").toString(), UNPROCESSABLE_ENTITY)))
                 .onStatus(HttpStatusCode::is4xxClientError,
                         resp -> rethrower.rethrow(resp, ex -> new InvalidInputsInventoryException(ex.get("message").toString(), BAD_REQUEST)))
                 .bodyToMono(ProductResponseDTO.class);
@@ -379,6 +384,13 @@ public class InventoryServiceClient {
                 .body(Mono.just(model),ProductRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
+                .onStatus(s -> s.value() == 422,
+                        resp -> rethrower.rethrow(resp,
+                                ex -> new InventoryProductUnprocessableEntityException(
+                                        ex.get("message").toString(), HttpStatus.UNPROCESSABLE_ENTITY)))
+                .onStatus(status -> status.value() == 404,
+                        resp -> rethrower.rethrow(resp,
+                                ex -> new NotFoundException(ex.get("message").toString())))
                 .onStatus(HttpStatusCode::is4xxClientError,
                         resp -> rethrower.rethrow(resp, ex -> new InvalidInputsInventoryException(ex.get("message").toString(), BAD_REQUEST)))
                 .bodyToMono(ProductResponseDTO.class);
