@@ -90,8 +90,8 @@ public class CustomerBillController {
     @GetMapping(value = "/filter-by-due-date", produces = MediaType.APPLICATION_JSON_VALUE)
     public Flux<BillResponseDTO> getBillsByDueDateRange(
             @PathVariable("customerId") String customerId,
-            @RequestParam("startDate") LocalDate startDate,
-            @RequestParam("endDate") LocalDate endDate) {
+            @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
         return billService.getBillsByDueDateRange(customerId, startDate, endDate);
     }
 
