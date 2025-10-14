@@ -94,41 +94,14 @@ public class OwnerController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    @PatchMapping("/{ownerId}")
-    public Mono<ResponseEntity<OwnerResponseDTO>> patchOwner(
+    @PatchMapping("/{ownerId}/photo")
+    public Mono<ResponseEntity<OwnerResponseDTO>> updateOwnerPhoto(
             @PathVariable String ownerId,
-            @RequestBody Mono<OwnerRequestDTO> ownerRequestMono) {
-        return ownerRequestMono.flatMap(ownerRequest -> {
-            if (ownerRequest.getPhoto() != null) {
-                FileRequestDTO normalizedPhoto = normalizeFileExtension(ownerRequest.getPhoto());
-                return ownerService.updateOwnerPhoto(ownerId, normalizedPhoto)
-                        .map(updatedOwner -> ResponseEntity.ok().body(updatedOwner));
-            }
-            return ownerService.updateOwner(Mono.just(ownerRequest), ownerId)
-                    .map(updatedOwner -> ResponseEntity.ok().body(updatedOwner));
-        }).defaultIfEmpty(ResponseEntity.notFound().build());
-    }
-
-    private FileRequestDTO normalizeFileExtension(FileRequestDTO photo) {
-        if (photo == null || photo.getFileName() == null || photo.getFileType() == null) {
-            return photo;
-        }
-
-        String fileName = photo.getFileName();
-        String fileType = photo.getFileType();
-        
-        String expectedExtension = fileType.substring(fileType.lastIndexOf('/') + 1);
-        
-        int lastDotIndex = fileName.lastIndexOf('.');
-        String nameWithoutExtension = (lastDotIndex > 0) ? fileName.substring(0, lastDotIndex) : fileName;
-        
-        String normalizedFileName = nameWithoutExtension + "." + expectedExtension;
-        
-        return FileRequestDTO.builder()
-                .fileName(normalizedFileName)
-                .fileType(photo.getFileType())
-                .fileData(photo.getFileData())
-                .build();
+            @RequestBody Mono<FileRequestDTO> photoMono) {
+        return photoMono
+                .flatMap(photo -> ownerService.updateOwnerPhoto(ownerId, photo))
+                .map(updatedOwner -> ResponseEntity.ok().body(updatedOwner))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
 }

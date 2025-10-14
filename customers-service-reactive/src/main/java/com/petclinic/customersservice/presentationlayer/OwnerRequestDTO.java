@@ -1,6 +1,5 @@
 package com.petclinic.customersservice.presentationlayer;
 
-import com.petclinic.customersservice.domainclientlayer.FileRequestDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,5 +18,4 @@ public class OwnerRequestDTO {
     private String province;
     private String telephone;
     //private List<PetResponseDTO> pets;
-    private FileRequestDTO photo;
 }
