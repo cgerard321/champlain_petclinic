@@ -1,5 +1,5 @@
 cd "mailer-service" || exit 1
-go test -race -covermode=atomic -v -coverpkg=./... -coverprofile=cover.out ./...
+go test -race -covermode=atomic -v -coverpkg=./internal/... -coverprofile=cover.out ./internal/...
 
 # Generate visual report
 if [[ "$1" == "visual" ]]
