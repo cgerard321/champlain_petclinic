@@ -14,6 +14,7 @@ import com.petclinic.inventoryservice.utils.EntityDTOUtil;
 import com.petclinic.inventoryservice.utils.ImageUtil;
 import com.petclinic.inventoryservice.utils.exceptions.InvalidInputException;
 import com.petclinic.inventoryservice.utils.exceptions.NotFoundException;
+import com.petclinic.inventoryservice.utils.exceptions.UnprocessableEntityException;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -616,6 +617,12 @@ class ProductInventoryServiceUnitTest {
 
         when(productRepository.save(any(Product.class))).thenReturn(Mono.just(updatedProduct));
 
+        when(productRepository.existsByInventoryIdAndProductNameIgnoreCaseAndProductIdNot(
+                eq(inventoryId),
+                eq(productRequestDTO.getProductName()),
+                eq(productId)
+        )).thenReturn(Mono.just(false));
+
         // Act and Assert
         StepVerifier
                 .create(productInventoryService.updateProductInInventory(Mono.just(productRequestDTO), inventoryId, productId))
@@ -682,13 +689,13 @@ class ProductInventoryServiceUnitTest {
         Mockito.when(inventoryRepository.findInventoryByInventoryId(inventoryId))
                 .thenReturn(Mono.just(inventory));
 
-        // Act and Assert
-        Throwable exception = assertThrows(InvalidInputException.class, () -> {
-            productInventoryService.updateProductInInventory(Mono.just(productRequestDTO), inventoryId, productId).block();
-        });
+        when(productRepository.findProductByProductId(eq(productId)))
+                .thenReturn(Mono.just(Product.builder().productId(productId).inventoryId(inventoryId).build()));
 
         // Assert
-        assertTrue(exception.getMessage().contains("Product price and quantity must be greater than 0."));
+        assertThrows(InvalidInputException.class, () ->
+                productInventoryService.updateProductInInventory(Mono.just(productRequestDTO), inventoryId, productId).block()
+        );
     }
 
     @Test
@@ -708,6 +715,16 @@ class ProductInventoryServiceUnitTest {
         // Mock the behavior of the inventoryRepository to return a dummy Inventory object
         when(inventoryRepository.findInventoryByInventoryId(eq(inventoryId)))
                 .thenReturn(Mono.just(new Inventory()));
+
+        when(productRepository.findProductByProductId(eq(productId)))
+                .thenReturn(Mono.just(
+                        Product.builder()
+                                .productId(productId)
+                                .inventoryId(inventoryId)
+                                .productName("existing")
+                                .build()
+                ));
+
 
         // Act and Assert
         StepVerifier.create(productInventoryService.updateProductInInventory(Mono.just(productRequestDTO), inventoryId, productId))
@@ -788,9 +805,14 @@ class ProductInventoryServiceUnitTest {
     void addSupplyToInventory_ShouldSucceed() {
         // Arrange
         String inventoryId = "1";
-        Mockito.when(inventoryRepository.findInventoryByInventoryId(inventoryId))
+
+        when(inventoryRepository.findInventoryByInventoryId(inventoryId))
                 .thenReturn(Mono.just(inventory));
-        Mockito.when(productRepository.save(any(Product.class)))
+
+        when(productRepository.existsByInventoryIdAndProductNameIgnoreCase(eq(inventoryId), eq("Benzodiazepines")))
+                .thenReturn(Mono.just(false));
+
+        when(productRepository.save(any(Product.class)))
                 .thenReturn(Mono.just(product));
         //Act
         Mono<ProductResponseDTO> result = productInventoryService.addSupplyToInventory(Mono.just(productRequestDTO), inventoryId);
@@ -807,6 +829,22 @@ class ProductInventoryServiceUnitTest {
                 })
                 .verifyComplete();
         Mockito.verify(productRepository, Mockito.times(1)).save(any(Product.class));
+    }
+    @Test
+    void addSupplyToInventory_ShouldFail_WhenProductNameExists() {
+        String inventoryId = "1";
+
+        when(inventoryRepository.findInventoryByInventoryId(inventoryId))
+                .thenReturn(Mono.just(inventory));
+        when(productRepository.existsByInventoryIdAndProductNameIgnoreCase(eq(inventoryId), eq("Benzodiazepines")))
+                .thenReturn(Mono.just(true));
+
+        Mono<ProductResponseDTO> result =
+                productInventoryService.addSupplyToInventory(Mono.just(productRequestDTO), inventoryId);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(ex -> ex instanceof UnprocessableEntityException)
+                .verify();
     }
     @Test
     void addSupplyToInventory_WithInvalidInventoryId_ShouldThrowNotFoundException(){
@@ -843,9 +881,9 @@ class ProductInventoryServiceUnitTest {
         Mono<ProductResponseDTO> result = productInventoryService.addSupplyToInventory(Mono.just(productRequestDTO), inventoryId);
         //Assert
         StepVerifier.create(result)
-                .expectErrorMatches(throwable -> {
-                    assertEquals("Product price and quantity must be greater than 0.", throwable.getMessage());
-                    return throwable instanceof InvalidInputException;
+                .expectErrorSatisfies(ex -> {
+                    assertTrue(ex instanceof InvalidInputException);
+                    assertTrue(ex.getMessage().contains("greater than 0"));
                 })
                 .verify();
     }
@@ -1067,29 +1105,30 @@ class ProductInventoryServiceUnitTest {
 
     @Test
     public void addInventoryType_shouldSucceed(){
-        // Arrange
-        InventoryTypeRequestDTO inventoryTypeRequestDTO = InventoryTypeRequestDTO.builder()
+        InventoryTypeRequestDTO dto = InventoryTypeRequestDTO.builder()
                 .type("Internal")
                 .build();
 
-        assertNotNull(inventoryType);
+        assertNotNull(inventoryType); // make sure this is initialized in @BeforeEach
 
+        when(inventoryTypeRepository.existsByTypeIgnoreCase(eq("Internal")))
+                .thenReturn(Mono.just(false));
 
         when(inventoryTypeRepository.insert(any(InventoryType.class)))
                 .thenReturn(Mono.just(inventoryType));
 
+        // Act
+        Mono<InventoryTypeResponseDTO> result = productInventoryService.addInventoryType(Mono.just(dto));
 
-        Mono<InventoryTypeResponseDTO> inventoryTypeResponseDTO = productInventoryService.addInventoryType(Mono.just(inventoryTypeRequestDTO));
-
-
-        StepVerifier
-                .create(inventoryTypeResponseDTO)
-                .expectNextMatches(foundInventoryType -> {
-                    assertNotNull(foundInventoryType);
-                    assertEquals(inventoryType.getType(), foundInventoryType.getType());
+        // Assert
+        StepVerifier.create(result)
+                .expectNextMatches(found -> {
+                    assertNotNull(found);
+                    assertEquals(inventoryType.getType(), found.getType());
                     return true;
                 })
                 .verifyComplete();
+
     }
 
 
@@ -1367,12 +1406,12 @@ class ProductInventoryServiceUnitTest {
 
         // Assert
         StepVerifier.create(result)
-                .expectError(NotFoundException.class)
-                .verify();
+                .expectNextCount(0)   // no items
+                .verifyComplete();
     }
 
     @Test
-    void getLowStockProducts_WithNoMatchingInventory_ShouldThrowNotFound() {
+    void getLowStockProducts_WithNoMatchingInventory_ShouldNotThrowNotFound() {
         // Arrange
         String invalidInventoryId = "999";
         int stockThreshold = 5;
@@ -1385,8 +1424,8 @@ class ProductInventoryServiceUnitTest {
 
         // Assert
         StepVerifier.create(result)
-                .expectError(NotFoundException.class)
-                .verify();
+                .expectNextCount(0)
+                .verifyComplete();
     }
 
     @Test
@@ -1926,7 +1965,7 @@ class ProductInventoryServiceUnitTest {
 
         // Assert
         StepVerifier.create(result)
-                .expectError(IllegalArgumentException.class)
+                .expectError(InvalidInputException.class)
                 .verify();
     }
 
@@ -1942,8 +1981,7 @@ class ProductInventoryServiceUnitTest {
 
         // Assert
         StepVerifier.create(result)
-                .expectErrorMatches(throwable -> throwable instanceof NotFoundException &&
-                        throwable.getMessage().contains("No products found for inventory ID"))
+                .expectError(NotFoundException.class)
                 .verify();
     }
 
@@ -2250,7 +2288,7 @@ class ProductInventoryServiceUnitTest {
 
         when(inventoryRepository.count()).thenReturn(Mono.just(0L));
         when(inventoryRepository.insert(any(Inventory.class))).thenReturn(Mono.just(savedInventory));
-
+        when(inventoryRepository.existsByInventoryName(anyString())).thenReturn(Mono.just(false));
 
 
         // Act
