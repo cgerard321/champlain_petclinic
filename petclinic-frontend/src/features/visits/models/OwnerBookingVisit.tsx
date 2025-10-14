@@ -61,7 +61,7 @@ const OwnerBookingVisit: React.FC = (): JSX.Element => {
 
   const navigate = useNavigate();
 
-  //fetch pets
+  //Fetch pets
   useEffect(() => {
     const fetchPets = async (): Promise<void> => {
       try {
@@ -358,7 +358,7 @@ const OwnerBookingVisit: React.FC = (): JSX.Element => {
               onChange={handleChange}
               className={errors.petId ? 'error-input' : ''}
             >
-              <option value="">-- Select a Pet --</option>
+              <option value="">Select a Pet</option>
               {pets.map(pet => (
                 <option key={pet.petId} value={pet.petId}>
                   {pet.name}

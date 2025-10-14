@@ -59,16 +59,14 @@ const AddingVisit: React.FC = (): JSX.Element => {
   const [showNotification, setShowNotification] = useState<boolean>(false);
 
   const navigate = useNavigate();
-  //fetch pets
+  //Fetch pets
   useEffect(() => {
     const fetchPets = async (): Promise<void> => {
       try {
         setLoadingPets(true);
         const petsData = await getAllPets();
 
-        // Filter only active pets
-        const activePets = petsData.filter(pet => pet.isActive === 'true');
-        setPets(activePets);
+        setPets(petsData);
       } catch (error) {
         console.error('Error fetching pets:', error);
         setErrorMessage('Failed to load pets. Please try again.');
@@ -80,7 +78,7 @@ const AddingVisit: React.FC = (): JSX.Element => {
     fetchPets();
   }, []);
 
-  //fetch vets
+  //Fetch vets
   useEffect(() => {
     const fetchVets = async (): Promise<void> => {
       try {
@@ -362,10 +360,10 @@ const AddingVisit: React.FC = (): JSX.Element => {
               onChange={handleChange}
               className={errors.petId ? 'error-input' : ''}
             >
-              <option value="">-- Select a Pet --</option>
+              <option value="">Select a Pet</option>
               {pets.map(pet => (
                 <option key={pet.petId} value={pet.petId}>
-                  {pet.name}
+                  {pet.name} {pet.isActive === 'false' ? '(Inactive)' : ''}
                 </option>
               ))}
             </select>
