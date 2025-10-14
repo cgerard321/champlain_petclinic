@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { ProductBundleModel } from '@/features/products/models/ProductModels/ProductBundleModel';
 import { getProductByProductId } from '@/features/products/api/getProductByProductId';
 import { ProductModel } from '@/features/products/models/ProductModels/ProductModel';
+import { useNavigate } from 'react-router-dom';
 import './ProductBundle.css';
 import ImageContainer from './ImageContainer';
 
@@ -15,6 +16,7 @@ const ProductBundle: React.FC<ProductBundleProps> = ({ bundle }) => {
   const [bundleStatus, setBundleStatus] = useState<
     'available' | 'unavailable' | 'hidden'
   >('available');
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProducts = async (): Promise<void> => {
@@ -63,7 +65,19 @@ const ProductBundle: React.FC<ProductBundleProps> = ({ bundle }) => {
       <p>{bundle.bundleDescription}</p>
       <div className="product-bundle-products">
         {products.map(product => (
-          <div key={product.productId} className="product-bundle-item">
+          <div
+            key={product.productId}
+            className="product-bundle-item"
+            style={{ cursor: 'pointer' }}
+            onClick={() => navigate(`/products/${product.productId}`)}
+            tabIndex={0}
+            role="button"
+            onKeyPress={e => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                navigate(`/products/${product.productId}`);
+              }
+            }}
+          >
             <ImageContainer imageId={product.imageId} />
             <div className="product-details">
               <p>{product.productName}</p>
@@ -82,6 +96,7 @@ const ProductBundle: React.FC<ProductBundleProps> = ({ bundle }) => {
         Bundle Price:{' '}
         <span className="bundle-price">${bundle.bundlePrice.toFixed(2)}</span>
       </p>
+      <button className="add-bundle-to-cart-button">Add Bundle to Cart</button>
     </div>
   );
 };
