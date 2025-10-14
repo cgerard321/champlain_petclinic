@@ -216,6 +216,7 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
         </div>
         <br />
         <label>
+<<<<<<< HEAD
           Visit Date:{' '}
           {errors.visitStartDate && (
             <span className="error">{errors.visitStartDate}</span>
@@ -238,6 +239,8 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
         </label>
 
         <label>
+=======
+>>>>>>> b01eeb1d (Fixed loading vets for create visit modal)
           Description:{' '}
           {errors.description && (
             <span className="error">{errors.description}</span>
@@ -274,7 +277,21 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
             ))}
           </select>
         </div>
+        <br />
+        <label>
+          Visit Date:{' '}
+          {errors.visitStartDate && (
+            <span className="error">{errors.visitDate}</span>
+          )}
+        </label>
 
+        <input
+          type="datetime-local"
+          name="visitStartDate"
+          value={formatDate(visit.visitStartDate)}
+          onChange={handleChange}
+          required
+        />
         <br />
         <label>
           Status:{' '}
