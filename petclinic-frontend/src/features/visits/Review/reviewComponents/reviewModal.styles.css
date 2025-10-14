@@ -1,0 +1,51 @@
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 1000;
+}
+
+.modal-card {
+  background: #fff;
+  width: min(520px, 92vw);
+  border-radius: 12px;
+  padding: 16px 18px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.modal-body {
+  margin-top: 8px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.btn-primary {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 0;
+  background: #0ea5e9;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-primary:hover {
+  filter: brightness(0.95);
+}
+
+.profanity-preview {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 10px;
+  margin-top: 8px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  white-space: pre-wrap;
+}
