@@ -3,6 +3,7 @@ package com.petclinic.bffapigateway.presentationlayer.v1.Owners;
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
+import com.petclinic.bffapigateway.dtos.Files.FileDetails;
 import com.petclinic.bffapigateway.dtos.Pets.PetRequestDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
 import com.petclinic.bffapigateway.presentationlayer.v1.OwnerControllerV1;
@@ -160,7 +161,7 @@ public class OwnersControllerV1UnitTests {
         owner.setProvince("Quebec");
         owner.setTelephone("51451545144");
 
-        when(customersServiceClient.getOwner("ownerId-123"))
+        when(customersServiceClient.getOwner("ownerId-123", false))
                 .thenReturn(Mono.just(owner));
 
         client.get()
@@ -189,7 +190,7 @@ public class OwnersControllerV1UnitTests {
         updatedOwner.setFirstName(updatedOwnerData.getFirstName());
         updatedOwner.setLastName(updatedOwnerData.getLastName());
 
-        when(customersServiceClient.updateOwner(eq(ownerId), any(Mono.class)))
+        when(customersServiceClient.updateOwner(eq(ownerId), any()))
                 .thenReturn(Mono.just(updatedOwner));
 
         client.put()
@@ -203,7 +204,7 @@ public class OwnersControllerV1UnitTests {
                 .isEqualTo(updatedOwner);
 
         Mockito.verify(customersServiceClient, times(1))
-                .updateOwner(eq(ownerId), any(Mono.class));
+                .updateOwner(eq(ownerId), any());
     }
 
     @Test
@@ -305,36 +306,305 @@ public class OwnersControllerV1UnitTests {
     }
 
     @Test
-    void whenGetOwnerPhoto_thenReturnPhoto() {
-        byte[] mockPhotoBytes = "mockPhotoData".getBytes();
+    void whenGetOwnerWithPhoto_thenReturnOwnerWithPhotoData() {
+        OwnerResponseDTO owner = new OwnerResponseDTO();
+        owner.setOwnerId(ownerId);
+        owner.setFirstName("John");
+        owner.setLastName("Doe");
+        FileDetails photo = new FileDetails();
+        photo.setFileData("mockPhotoData".getBytes());
+        photo.setFileType("image/png");
+        owner.setPhoto(photo);
 
-        when(customersServiceClient.getOwnerPhoto(ownerId))
-                .thenReturn(Mono.just(mockPhotoBytes));
+        when(customersServiceClient.getOwner(ownerId, true))
+                .thenReturn(Mono.just(owner));
 
         client.get()
-                .uri("/api/gateway/owners/{ownerId}/photos", ownerId)
-                .accept(MediaType.IMAGE_PNG)
+                .uri("/api/gateway/owners/{ownerId}?includePhoto=true", ownerId)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.IMAGE_PNG)
-                .expectBody(byte[].class)
-                .value(bytes -> assertArrayEquals(mockPhotoBytes, bytes));
+                .expectBody(OwnerResponseDTO.class)
+                .value(ownerResponse -> {
+                    assertEquals(ownerId, ownerResponse.getOwnerId());
+                    assertEquals("John", ownerResponse.getFirstName());
+                    assertEquals("Doe", ownerResponse.getLastName());
+                    assertNotNull(ownerResponse.getPhoto());
+                    assertArrayEquals("mockPhotoData".getBytes(), ownerResponse.getPhoto().getFileData());
+                    assertEquals("image/png", ownerResponse.getPhoto().getFileType());
+                });
 
-        verify(customersServiceClient, times(1)).getOwnerPhoto(ownerId);
+        verify(customersServiceClient, times(1)).getOwner(ownerId, true);
     }
 
     @Test
-    void whenGetOwnerPhotoNotFound_thenReturn404() {
-        when(customersServiceClient.getOwnerPhoto(ownerId))
+    void whenGetOwnerWithoutPhoto_thenReturnOwnerWithoutPhotoData() {
+        OwnerResponseDTO owner = new OwnerResponseDTO();
+        owner.setOwnerId(ownerId);
+        owner.setFirstName("John");
+        owner.setLastName("Doe");
+
+        when(customersServiceClient.getOwner(ownerId, false))
+                .thenReturn(Mono.just(owner));
+
+        client.get()
+                .uri("/api/gateway/owners/{ownerId}?includePhoto=false", ownerId)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(OwnerResponseDTO.class)
+                .value(ownerResponse -> {
+                    assertEquals(ownerId, ownerResponse.getOwnerId());
+                    assertEquals("John", ownerResponse.getFirstName());
+                    assertEquals("Doe", ownerResponse.getLastName());
+                    assertNull(ownerResponse.getPhoto());
+                });
+
+        verify(customersServiceClient, times(1)).getOwner(ownerId, false);
+    }
+
+    @Test
+    void whenGetOwnerWithDefaultPhoto_thenReturnOwnerWithDefaultPhoto() {
+        OwnerResponseDTO owner = new OwnerResponseDTO();
+        owner.setOwnerId(ownerId);
+        owner.setFirstName("John");
+        owner.setLastName("Doe");
+
+        when(customersServiceClient.getOwner(ownerId, false))
+                .thenReturn(Mono.just(owner));
+
+        client.get()
+                .uri("/api/gateway/owners/{ownerId}", ownerId)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(OwnerResponseDTO.class)
+                .value(ownerResponse -> {
+                    assertEquals(ownerId, ownerResponse.getOwnerId());
+                    assertEquals("John", ownerResponse.getFirstName());
+                    assertEquals("Doe", ownerResponse.getLastName());
+                });
+
+        verify(customersServiceClient, times(1)).getOwner(ownerId, false);
+    }
+
+    @Test
+    void whenGetAllOwnersByPagination_withFilters_thenReturnFilteredOwners() {
+        OwnerResponseDTO owner = new OwnerResponseDTO();
+        owner.setOwnerId("owner1");
+        owner.setFirstName("John");
+        owner.setLastName("Doe");
+        owner.setCity("Montreal");
+        owner.setTelephone("5551234567");
+
+        Optional<Integer> page = Optional.of(0);
+        Optional<Integer> size = Optional.of(5);
+
+        when(customersServiceClient.getOwnersByPagination(page, size, "owner1", "John", "Doe", "5551234567", "Montreal"))
+                .thenReturn(Flux.just(owner));
+
+        client.get()
+                .uri("/api/gateway/owners/owners-pagination?page=0&size=5&ownerId=owner1&firstName=John&lastName=Doe&phoneNumber=5551234567&city=Montreal")
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
+                .expectBodyList(OwnerResponseDTO.class)
+                .value(list -> {
+                    assertNotNull(list);
+                    assertEquals(1, list.size());
+                    assertEquals("owner1", list.get(0).getOwnerId());
+                });
+    }
+
+    @Test
+    void whenGetTotalNumberOfOwnersWithFilters_withFilters_thenReturnFilteredCount() {
+        long expectedCount = 5L;
+
+        when(customersServiceClient.getTotalNumberOfOwnersWithFilters("owner1", "John", "Doe", "5551234567", "Montreal"))
+                .thenReturn(Mono.just(expectedCount));
+
+        client.get()
+                .uri("/api/gateway/owners/owners-filtered-count?ownerId=owner1&firstName=John&lastName=Doe&phoneNumber=5551234567&city=Montreal")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(Long.class)
+                .value(body -> assertEquals(expectedCount, body));
+    }
+
+    @Test
+    void whenGetOwnerByOwnerId_withNonExistentOwner_thenReturnNotFound() {
+        when(customersServiceClient.getOwner("nonexistent", false))
                 .thenReturn(Mono.empty());
 
         client.get()
-                .uri("/api/gateway/owners/{ownerId}/photos", ownerId)
-                .accept(MediaType.IMAGE_PNG)
+                .uri("/api/gateway/owners/{ownerId}", "nonexistent")
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    void whenUpdateOwner_withNonExistentOwner_thenReturnNotFound() {
+        OwnerRequestDTO requestDTO = new OwnerRequestDTO();
+        requestDTO.setFirstName("John");
+        requestDTO.setLastName("Doe");
+
+        when(customersServiceClient.updateOwner(eq("nonexistent"), any()))
+                .thenReturn(Mono.empty());
+
+        client.put()
+                .uri("/api/gateway/owners/{ownerId}", "nonexistent")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromValue(requestDTO))
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    void whenCreatePetForOwner_withInvalidData_thenReturnBadRequest() {
+        PetRequestDTO petRequest = new PetRequestDTO();
+        petRequest.setName("Fluffy");
+
+        when(customersServiceClient.createPetForOwner(eq(ownerId), any(PetRequestDTO.class)))
+                .thenReturn(Mono.empty());
+
+        client.post()
+                .uri("/api/gateway/owners/{ownerId}/pets", ownerId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromValue(petRequest))
+                .exchange()
+                .expectStatus().isBadRequest();
+    }
+
+    @Test
+    void whenGetPet_withNonExistentPet_thenReturnNotFound() {
+        when(customersServiceClient.getPet(ownerId, "nonexistent"))
+                .thenReturn(Mono.empty());
+
+        client.get()
+                .uri("/api/gateway/owners/{ownerId}/pets/{petId}", ownerId, "nonexistent")
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    void whenGetPetsByOwnerId_withNoPets_thenReturnEmptyList() {
+        when(customersServiceClient.getPetsByOwnerId(ownerId))
+                .thenReturn(Flux.empty());
+
+        client.get()
+                .uri("/api/gateway/owners/{ownerId}/pets", ownerId)
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
+                .expectBodyList(PetResponseDTO.class)
+                .hasSize(0);
+    }
+
+    @Test
+    void whenDeletePet_withNonExistentPet_thenReturnNoContent() {
+        when(customersServiceClient.deletePet(ownerId, "nonexistent"))
+                .thenReturn(Mono.empty());
+
+        client.delete()
+                .uri("/api/gateway/owners/{ownerId}/pets/{petId}", ownerId, "nonexistent")
+                .exchange()
+                .expectStatus().isNoContent();
+    }
+
+    @Test
+    void whenUpdateOwnerPhoto_withValidPhoto_thenReturnUpdatedOwner() {
+        FileDetails photoRequest = FileDetails.builder()
+                        .fileName("profile.jpeg")
+                        .fileType("image/jpeg")
+                        .fileData("mockPhotoData".getBytes())
+                        .build();
+
+        OwnerResponseDTO updatedOwner = new OwnerResponseDTO();
+        updatedOwner.setOwnerId(ownerId);
+        updatedOwner.setFirstName("John");
+        updatedOwner.setLastName("Doe");
+        FileDetails photo = new FileDetails();
+        photo.setFileData("mockPhotoData".getBytes());
+        photo.setFileType("image/jpeg");
+        updatedOwner.setPhoto(photo);
+
+        when(customersServiceClient.updateOwnerPhoto(eq(ownerId), any()))
+                .thenReturn(Mono.just(updatedOwner));
+
+        client.patch()
+                .uri("/api/gateway/owners/{ownerId}/photo", ownerId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromValue(photoRequest))
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(OwnerResponseDTO.class)
+                .value(body -> {
+                    assertNotNull(body);
+                    assertEquals(ownerId, body.getOwnerId());
+                    assertNotNull(body.getPhoto());
+                    assertEquals("image/jpeg", body.getPhoto().getFileType());
+                    assertArrayEquals("mockPhotoData".getBytes(), body.getPhoto().getFileData());
+                });
+
+        verify(customersServiceClient, times(1)).updateOwnerPhoto(eq(ownerId), any());
+    }
+
+    @Test
+    void whenUpdateOwnerPhoto_withNonExistentOwner_thenReturnNotFound() {
+        FileDetails photoRequest = FileDetails.builder()
+                        .fileName("profile.jpeg")
+                        .fileType("image/jpeg")
+                        .fileData("mockPhotoData".getBytes())
+                        .build();
+
+        when(customersServiceClient.updateOwnerPhoto(eq("nonexistent"), any()))
+                .thenReturn(Mono.empty());
+
+        client.patch()
+                .uri("/api/gateway/owners/{ownerId}/photo", "nonexistent")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromValue(photoRequest))
                 .exchange()
                 .expectStatus().isNotFound();
 
-        verify(customersServiceClient, times(1)).getOwnerPhoto(ownerId);
+        verify(customersServiceClient, times(1)).updateOwnerPhoto(eq("nonexistent"), any());
+    }
+
+    @Test
+    void whenUpdateOwnerPhoto_withPngPhoto_thenReturnUpdatedOwner() {
+        FileDetails photoRequest = FileDetails.builder()
+                        .fileName("avatar.png")
+                        .fileType("image/png")
+                        .fileData("pngPhotoData".getBytes())
+                        .build();
+
+        OwnerResponseDTO updatedOwner = new OwnerResponseDTO();
+        updatedOwner.setOwnerId(ownerId);
+        updatedOwner.setFirstName("Jane");
+        updatedOwner.setLastName("Smith");
+        FileDetails photo = new FileDetails();
+        photo.setFileData("pngPhotoData".getBytes());
+        photo.setFileType("image/png");
+        updatedOwner.setPhoto(photo);
+
+        when(customersServiceClient.updateOwnerPhoto(eq(ownerId), any()))
+                .thenReturn(Mono.just(updatedOwner));
+
+        client.patch()
+                .uri("/api/gateway/owners/{ownerId}/photo", ownerId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromValue(photoRequest))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(OwnerResponseDTO.class)
+                .value(body -> {
+                    assertNotNull(body);
+                    assertEquals(ownerId, body.getOwnerId());
+                    assertNotNull(body.getPhoto());
+                    assertEquals("image/png", body.getPhoto().getFileType());
+                });
+
+        verify(customersServiceClient, times(1)).updateOwnerPhoto(eq(ownerId), any());
     }
 
 }
