@@ -86,4 +86,21 @@ public class ProductBundleServiceImpl implements ProductBundleService {
                 .switchIfEmpty(Mono.error(new NotFoundException("Bundle not found: " + bundleId)))
                 .flatMap(bundleRepository::delete);
     }
+
+    @Override
+    public Flux<ProductBundleResponseModel> deleteAllProductBundlesByProductId(String productId) {
+        return bundleRepository.findAllByProductIdsContaining(productId)
+                .switchIfEmpty(Flux.error(new NotFoundException("No Bundles found with product: " + productId)))
+                .collectList()
+                .flatMapMany(bundles -> {
+                    if (bundles.isEmpty()) { return Flux.empty(); }
+
+                    var deletedBundles = bundles.stream()
+                            .map(EntityModelUtil::toProductBundleResponseModel)
+                            .toList();
+
+                    return bundleRepository.deleteAll(bundles)
+                            .thenMany(Flux.fromIterable(deletedBundles));
+                });
+    }
 }
