@@ -57,7 +57,7 @@ class FilesServiceClientTest {
                 .fileId("file1")
                 .fileName("test.jpg")
                 .fileType("image/jpeg")
-                .fileData("base64data")
+                .fileData("base64data".getBytes())
                 .build();
 
         mockBackEnd.enqueue(new MockResponse()
@@ -111,17 +111,17 @@ class FilesServiceClientTest {
 
     @Test
     void addFile_WithValidRequest_ShouldReturnCreatedFile() throws Exception {
-        FileServiceRequestDTO requestDTO = FileServiceRequestDTO.builder()
+        FileRequestDTO requestDTO = FileRequestDTO.builder()
                 .fileName("newfile.jpg")
                 .fileType("image/jpeg")
-                .fileData("base64data")
+                .fileData("base64data".getBytes())
                 .build();
 
         FileResponseDTO expectedResponse = FileResponseDTO.builder()
                 .fileId("newfile1")
                 .fileName("newfile.jpg")
                 .fileType("image/jpeg")
-                .fileData("base64data")
+                .fileData("base64data".getBytes())
                 .build();
 
         mockBackEnd.enqueue(new MockResponse()
@@ -138,10 +138,10 @@ class FilesServiceClientTest {
 
     @Test
     void addFile_WithUnprocessableEntityStatus_ShouldThrowUnprocessableEntityException() {
-        FileServiceRequestDTO requestDTO = FileServiceRequestDTO.builder()
+        FileRequestDTO requestDTO = FileRequestDTO.builder()
                 .fileName("invalid.jpg")
                 .fileType("image/jpeg")
-                .fileData("")
+                .fileData(new byte[0])
                 .build();
 
         mockBackEnd.enqueue(new MockResponse()
@@ -156,10 +156,10 @@ class FilesServiceClientTest {
 
     @Test
     void addFile_WithBadRequestStatus_ShouldThrowBadRequestException() {
-        FileServiceRequestDTO requestDTO = FileServiceRequestDTO.builder()
+        FileRequestDTO requestDTO = FileRequestDTO.builder()
                 .fileName("test.jpg")
                 .fileType("image/jpeg")
-                .fileData("base64data")
+                .fileData("base64data".getBytes())
                 .build();
 
         mockBackEnd.enqueue(new MockResponse()
@@ -174,10 +174,10 @@ class FilesServiceClientTest {
 
     @Test
     void addFile_WithInternalServerError_ShouldThrowRuntimeException() {
-        FileServiceRequestDTO requestDTO = FileServiceRequestDTO.builder()
+        FileRequestDTO requestDTO = FileRequestDTO.builder()
                 .fileName("test.jpg")
                 .fileType("image/jpeg")
-                .fileData("base64data")
+                .fileData("base64data".getBytes())
                 .build();
 
         mockBackEnd.enqueue(new MockResponse()
@@ -192,17 +192,17 @@ class FilesServiceClientTest {
 
     @Test
     void updateFile_WithValidRequest_ShouldReturnUpdatedFile() throws Exception {
-        FileServiceRequestDTO requestDTO = FileServiceRequestDTO.builder()
+        FileRequestDTO requestDTO = FileRequestDTO.builder()
                 .fileName("updated.jpg")
                 .fileType("image/jpeg")
-                .fileData("updatedbase64data")
+                .fileData("updatedbase64data".getBytes())
                 .build();
 
         FileResponseDTO expectedResponse = FileResponseDTO.builder()
                 .fileId("file1")
                 .fileName("updated.jpg")
                 .fileType("image/jpeg")
-                .fileData("updatedbase64data")
+                .fileData("updatedbase64data".getBytes())
                 .build();
 
         mockBackEnd.enqueue(new MockResponse()
@@ -219,10 +219,10 @@ class FilesServiceClientTest {
 
     @Test
     void updateFile_WithNotFoundStatus_ShouldThrowNotFoundException() {
-        FileServiceRequestDTO requestDTO = FileServiceRequestDTO.builder()
+        FileRequestDTO requestDTO = FileRequestDTO.builder()
                 .fileName("updated.jpg")
                 .fileType("image/jpeg")
-                .fileData("updatedbase64data")
+                .fileData("updatedbase64data".getBytes())
                 .build();
 
         mockBackEnd.enqueue(new MockResponse()
@@ -237,10 +237,10 @@ class FilesServiceClientTest {
 
     @Test
     void updateFile_WithUnprocessableEntityStatus_ShouldThrowUnprocessableEntityException() {
-        FileServiceRequestDTO requestDTO = FileServiceRequestDTO.builder()
+        FileRequestDTO requestDTO = FileRequestDTO.builder()
                 .fileName("updated.jpg")
                 .fileType("image/jpeg")
-                .fileData("")
+                .fileData(new byte[0])
                 .build();
 
         mockBackEnd.enqueue(new MockResponse()
@@ -255,10 +255,10 @@ class FilesServiceClientTest {
 
     @Test
     void updateFile_WithBadRequestStatus_ShouldThrowBadRequestException() {
-        FileServiceRequestDTO requestDTO = FileServiceRequestDTO.builder()
+        FileRequestDTO requestDTO = FileRequestDTO.builder()
                 .fileName("updated.jpg")
                 .fileType("image/jpeg")
-                .fileData("updatedbase64data")
+                .fileData("updatedbase64data".getBytes())
                 .build();
 
         mockBackEnd.enqueue(new MockResponse()
@@ -273,10 +273,10 @@ class FilesServiceClientTest {
 
     @Test
     void updateFile_WithInternalServerError_ShouldThrowRuntimeException() {
-        FileServiceRequestDTO requestDTO = FileServiceRequestDTO.builder()
+        FileRequestDTO requestDTO = FileRequestDTO.builder()
                 .fileName("updated.jpg")
                 .fileType("image/jpeg")
-                .fileData("updatedbase64data")
+                .fileData("updatedbase64data".getBytes())
                 .build();
 
         mockBackEnd.enqueue(new MockResponse()

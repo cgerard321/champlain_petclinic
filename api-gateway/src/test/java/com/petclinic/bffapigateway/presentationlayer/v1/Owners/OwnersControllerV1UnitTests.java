@@ -1,10 +1,9 @@
 package com.petclinic.bffapigateway.presentationlayer.v1.Owners;
 
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
-import com.petclinic.bffapigateway.dtos.CustomerDTOs.FileRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
-import com.petclinic.bffapigateway.dtos.CustomerDTOs.FileResponseDTO;
+import com.petclinic.bffapigateway.dtos.Files.FileDetails;
 import com.petclinic.bffapigateway.dtos.Pets.PetRequestDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
 import com.petclinic.bffapigateway.presentationlayer.v1.OwnerControllerV1;
@@ -312,10 +311,9 @@ public class OwnersControllerV1UnitTests {
         owner.setOwnerId(ownerId);
         owner.setFirstName("John");
         owner.setLastName("Doe");
-        FileResponseDTO photo = FileResponseDTO.builder()
-                .fileData("mockPhotoData")
-                .fileType("image/png")
-                .build();
+        FileDetails photo = new FileDetails();
+        photo.setFileData("mockPhotoData".getBytes());
+        photo.setFileType("image/png");
         owner.setPhoto(photo);
 
         when(customersServiceClient.getOwner(ownerId, true))
@@ -331,7 +329,7 @@ public class OwnersControllerV1UnitTests {
                     assertEquals("John", ownerResponse.getFirstName());
                     assertEquals("Doe", ownerResponse.getLastName());
                     assertNotNull(ownerResponse.getPhoto());
-                    assertEquals("mockPhotoData", ownerResponse.getPhoto().getFileData());
+                    assertArrayEquals("mockPhotoData".getBytes(), ownerResponse.getPhoto().getFileData());
                     assertEquals("image/png", ownerResponse.getPhoto().getFileType());
                 });
 
@@ -513,50 +511,58 @@ public class OwnersControllerV1UnitTests {
     }
 
     @Test
-    void whenUpdateOwnerPhoto_thenReturnUpdatedOwner() {
-        FileRequestDTO photoRequest = FileRequestDTO.builder()
-                .fileName("photo.jpg")
-                .fileType("image/jpeg")
-                .fileData("base64data")
+    void whenPatchOwnerWithPhoto_thenReturnUpdatedOwner() {
+        FileDetails photoRequest = new FileDetails();
+        photoRequest.setFileName("photo.jpg");
+        photoRequest.setFileType("image/jpeg");
+        photoRequest.setFileData("base64data".getBytes());
+
+        OwnerRequestDTO ownerRequest = OwnerRequestDTO.builder()
+                .photo(photoRequest)
                 .build();
 
         OwnerResponseDTO responseDTO = new OwnerResponseDTO();
         responseDTO.setOwnerId(ownerId);
         responseDTO.setFirstName("John");
+        responseDTO.setPhoto(photoRequest);
 
-        when(customersServiceClient.updateOwnerPhoto(eq(ownerId), any(FileRequestDTO.class)))
+        when(customersServiceClient.patchOwner(eq(ownerId), any(Mono.class)))
                 .thenReturn(Mono.just(responseDTO));
 
-        client.post()
-                .uri("/api/gateway/owners/{ownerId}/photo", ownerId)
+        client.patch()
+                .uri("/api/gateway/owners/{ownerId}", ownerId)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(BodyInserters.fromValue(photoRequest))
+                .body(BodyInserters.fromValue(ownerRequest))
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(OwnerResponseDTO.class)
                 .value(body -> {
                     assertEquals(ownerId, body.getOwnerId());
                     assertEquals("John", body.getFirstName());
+                    assertNotNull(body.getPhoto());
                 });
 
-        verify(customersServiceClient, times(1)).updateOwnerPhoto(eq(ownerId), any(FileRequestDTO.class));
+        verify(customersServiceClient, times(1)).patchOwner(eq(ownerId), any(Mono.class));
     }
 
     @Test
-    void whenUpdateOwnerPhoto_withNonExistentOwner_thenReturnNotFound() {
-        FileRequestDTO photoRequest = FileRequestDTO.builder()
-                .fileName("photo.jpg")
-                .fileType("image/jpeg")
-                .fileData("base64data")
+    void whenPatchOwnerWithPhoto_withNonExistentOwner_thenReturnNotFound() {
+        FileDetails photoRequest = new FileDetails();
+        photoRequest.setFileName("photo.jpg");
+        photoRequest.setFileType("image/jpeg");
+        photoRequest.setFileData("base64data".getBytes());
+
+        OwnerRequestDTO ownerRequest = OwnerRequestDTO.builder()
+                .photo(photoRequest)
                 .build();
 
-        when(customersServiceClient.updateOwnerPhoto(eq("nonexistent"), any(FileRequestDTO.class)))
+        when(customersServiceClient.patchOwner(eq("nonexistent"), any(Mono.class)))
                 .thenReturn(Mono.empty());
 
-        client.post()
-                .uri("/api/gateway/owners/{ownerId}/photo", "nonexistent")
+        client.patch()
+                .uri("/api/gateway/owners/{ownerId}", "nonexistent")
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(BodyInserters.fromValue(photoRequest))
+                .body(BodyInserters.fromValue(ownerRequest))
                 .exchange()
                 .expectStatus().isNotFound();
     }

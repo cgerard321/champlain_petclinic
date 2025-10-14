@@ -259,7 +259,7 @@ class OwnerServiceImplTest {
         
         com.petclinic.customersservice.domainclientlayer.FileResponseDTO fileResponse = 
             com.petclinic.customersservice.domainclientlayer.FileResponseDTO.builder()
-                .fileData("mockPhotoData")
+                .fileData("mockPhotoData".getBytes())
                 .fileType("image/png")
                 .build();
         when(filesServiceClient.getFile("photo-123")).thenReturn(Mono.just(fileResponse));
@@ -271,7 +271,7 @@ class OwnerServiceImplTest {
                 .consumeNextWith(foundOwner -> {
                     assertEquals(ownerEntity.getOwnerId(), foundOwner.getOwnerId());
                     assertNotNull(foundOwner.getPhoto());
-                    assertEquals("mockPhotoData", foundOwner.getPhoto().getFileData());
+                    assertArrayEquals("mockPhotoData".getBytes(), foundOwner.getPhoto().getFileData());
                     assertEquals("image/png", foundOwner.getPhoto().getFileType());
                 })
                 .verifyComplete();
@@ -329,7 +329,7 @@ class OwnerServiceImplTest {
             com.petclinic.customersservice.domainclientlayer.FileRequestDTO.builder()
                 .fileName("profile-photo")
                 .fileType("image/jpeg")
-                .fileData("base64data")
+                .fileData("base64data".getBytes())
                 .build();
         
         com.petclinic.customersservice.domainclientlayer.FileResponseDTO addFileResponse = 
@@ -344,11 +344,11 @@ class OwnerServiceImplTest {
                 .fileId("new-photo-id")
                 .fileName("profile-photo")
                 .fileType("image/jpeg")
-                .fileData("base64data")
+                .fileData("base64data".getBytes())
                 .build();
         
         when(repo.findOwnerByOwnerId(ownerId)).thenReturn(Mono.just(existingOwner));
-        when(filesServiceClient.addFile(any(com.petclinic.customersservice.domainclientlayer.FileServiceRequestDTO.class)))
+        when(filesServiceClient.addFile(any(com.petclinic.customersservice.domainclientlayer.FileRequestDTO.class)))
             .thenReturn(Mono.just(addFileResponse));
         when(repo.save(any(Owner.class))).thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
         when(filesServiceClient.getFile("new-photo-id")).thenReturn(Mono.just(getFileResponse));
@@ -365,7 +365,7 @@ class OwnerServiceImplTest {
             .verifyComplete();
         
         verify(repo).findOwnerByOwnerId(ownerId);
-        verify(filesServiceClient).addFile(any(com.petclinic.customersservice.domainclientlayer.FileServiceRequestDTO.class));
+        verify(filesServiceClient).addFile(any(com.petclinic.customersservice.domainclientlayer.FileRequestDTO.class));
         verify(repo).save(any(Owner.class));
         verify(filesServiceClient).getFile("new-photo-id");
     }
@@ -378,7 +378,7 @@ class OwnerServiceImplTest {
             com.petclinic.customersservice.domainclientlayer.FileRequestDTO.builder()
                 .fileName("profile-photo")
                 .fileType("image/jpeg")
-                .fileData("base64data")
+                .fileData("base64data".getBytes())
                 .build();
         
         when(repo.findOwnerByOwnerId(ownerId)).thenReturn(Mono.empty());
@@ -403,11 +403,11 @@ class OwnerServiceImplTest {
             com.petclinic.customersservice.domainclientlayer.FileRequestDTO.builder()
                 .fileName("profile-photo")
                 .fileType("image/jpeg")
-                .fileData("base64data")
+                .fileData("base64data".getBytes())
                 .build();
         
         when(repo.findOwnerByOwnerId(ownerId)).thenReturn(Mono.just(existingOwner));
-        when(filesServiceClient.addFile(any(com.petclinic.customersservice.domainclientlayer.FileServiceRequestDTO.class)))
+        when(filesServiceClient.addFile(any(com.petclinic.customersservice.domainclientlayer.FileRequestDTO.class)))
             .thenReturn(Mono.error(new RuntimeException("File service unavailable")));
         
         Mono<OwnerResponseDTO> result = ownerService.updateOwnerPhoto(ownerId, photoRequest);
@@ -417,7 +417,7 @@ class OwnerServiceImplTest {
             .verify();
         
         verify(repo).findOwnerByOwnerId(ownerId);
-        verify(filesServiceClient).addFile(any(com.petclinic.customersservice.domainclientlayer.FileServiceRequestDTO.class));
+        verify(filesServiceClient).addFile(any(com.petclinic.customersservice.domainclientlayer.FileRequestDTO.class));
         verify(repo, never()).save(any());
     }
 
@@ -430,7 +430,7 @@ class OwnerServiceImplTest {
             com.petclinic.customersservice.domainclientlayer.FileRequestDTO.builder()
                 .fileName("profile-photo")
                 .fileType("image/jpeg")
-                .fileData("base64data")
+                .fileData("base64data".getBytes())
                 .build();
         
         com.petclinic.customersservice.domainclientlayer.FileResponseDTO addFileResponse = 
@@ -441,7 +441,7 @@ class OwnerServiceImplTest {
                 .build();
         
         when(repo.findOwnerByOwnerId(ownerId)).thenReturn(Mono.just(existingOwner));
-        when(filesServiceClient.addFile(any(com.petclinic.customersservice.domainclientlayer.FileServiceRequestDTO.class)))
+        when(filesServiceClient.addFile(any(com.petclinic.customersservice.domainclientlayer.FileRequestDTO.class)))
             .thenReturn(Mono.just(addFileResponse));
         when(repo.save(any(Owner.class))).thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
         when(filesServiceClient.getFile("new-photo-id")).thenReturn(Mono.error(new RuntimeException("File not found")));
@@ -456,9 +456,10 @@ class OwnerServiceImplTest {
             .verifyComplete();
         
         verify(repo).findOwnerByOwnerId(ownerId);
-        verify(filesServiceClient).addFile(any(com.petclinic.customersservice.domainclientlayer.FileServiceRequestDTO.class));
+        verify(filesServiceClient).addFile(any(com.petclinic.customersservice.domainclientlayer.FileRequestDTO.class));
         verify(repo).save(any(Owner.class));
         verify(filesServiceClient).getFile("new-photo-id");
     }
+
 
 }

@@ -66,7 +66,7 @@ public class OwnerControllerUnitTest {
 
     @Test
     void getOwnerByOwnerId_ShouldReturnOwnerWithPhoto_WhenIncludePhotoTrue() {
-        String imageData = "custom-image-data";
+        byte[] imageData = "custom-image-data".getBytes();
         OwnerResponseDTO mockResponse = new OwnerResponseDTO();
         mockResponse.setOwnerId(TEST_OWNER_ID);
         mockResponse.setFirstName("John");
@@ -114,7 +114,7 @@ public class OwnerControllerUnitTest {
             com.petclinic.customersservice.domainclientlayer.FileRequestDTO.builder()
                 .fileName("profile-photo.jpg")
                 .fileType("image/jpeg")
-                .fileData("base64data")
+                .fileData("base64data".getBytes())
                 .build();
 
         OwnerResponseDTO mockResponse = new OwnerResponseDTO();
@@ -123,7 +123,7 @@ public class OwnerControllerUnitTest {
         FileResponseDTO photo = FileResponseDTO.builder()
                 .fileId("photo-456")
                 .fileType("image/jpeg")
-                .fileData("base64data")
+                .fileData("base64data".getBytes())
                 .build();
         mockResponse.setPhoto(photo);
 
@@ -131,7 +131,10 @@ public class OwnerControllerUnitTest {
             .when(ownerService)
             .updateOwnerPhoto(org.mockito.ArgumentMatchers.eq(TEST_OWNER_ID), org.mockito.ArgumentMatchers.any(com.petclinic.customersservice.domainclientlayer.FileRequestDTO.class));
 
-        Mono<ResponseEntity<OwnerResponseDTO>> result = ownerController.updateOwnerPhoto(TEST_OWNER_ID, photoRequest);
+        OwnerRequestDTO ownerRequest = new OwnerRequestDTO();
+        ownerRequest.setPhoto(photoRequest);
+
+        Mono<ResponseEntity<OwnerResponseDTO>> result = ownerController.patchOwner(TEST_OWNER_ID, Mono.just(ownerRequest));
 
         StepVerifier.create(result)
             .consumeNextWith(response -> {
