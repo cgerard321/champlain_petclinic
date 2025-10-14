@@ -344,6 +344,19 @@ export default function VisitListTable(): JSX.Element {
             Reviews
           </button>
         </li>
+        <li>
+          <button
+            className="btn btn-primary"
+            onClick={() => navigate(AppRoutePaths.VisitsCalendar)}
+            title="Calendar View"
+          >
+            <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+              <title>calendar</title>
+              <path d="M26 4h-4V2c0-0.552-0.448-1-1-1s-1 0.448-1 1v2h-8V2c0-0.552-0.448-1-1-1S10 1.448 10 2v2H6C4.346 4 3 5.346 3 7v19c0 1.654 1.346 3 3 3h20c1.654 0 3-1.346 3-3V7C29 5.346 27.654 4 26 4zM27 26c0 0.552-0.448 1-1 1H6c-0.552 0-1-0.448-1-1v-14h22V26zM27 10H5V7c0-0.552 0.448-1 1-1h4v1c0 0.552 0.448 1 1 1s1-0.448 1-1V6h8v1c0 0.552 0.448 1 1 1s1-0.448 1-1V6h4c0.552 0 1 0.448 1 1V10z" />
+            </svg>
+            Calendar View
+          </button>
+        </li>
         {renderSidebarItem('All')}
         {renderSidebarItem('Emergencies', true)}
         {renderSidebarItem('Confirmed')}

@@ -7,3 +7,37 @@
   padding: 20px;
   max-width: 100%;
 }
+
+.calendar-navigation {
+  margin-bottom: 20px;
+}
+
+.back-to-list-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  font-weight: 500;
+  transition: all 0.2s ease-out;
+}
+
+.back-to-list-btn svg {
+  font-size: 16px;
+}
+
+.back-to-list-btn:hover {
+  transform: translateX(-2px);
+  box-shadow: -2px 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .visits-calendar-page .page-container {
+    padding: 10px;
+  }
+
+  .back-to-list-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
