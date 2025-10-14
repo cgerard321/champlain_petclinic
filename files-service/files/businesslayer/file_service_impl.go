@@ -23,7 +23,7 @@ func NewFileService(repository datalayer.FileInfoRepository, minioServiceClient 
 	}
 }
 
-func (i *FilesServiceImpl) saveFileInfo(fileInfo *datalayer.FileInfo, data []byte) (*models.FileResponseModel, error) {
+func (i *FilesServiceImpl) saveFile(fileInfo *datalayer.FileInfo, data []byte) (*models.FileResponseModel, error) {
 	if err := i.repository.AddFileInfo(fileInfo); err != nil {
 		return nil, err
 	}
@@ -117,7 +117,7 @@ func (i *FilesServiceImpl) UpdateFile(id string, model *models.FileRequestModel)
 		FileType: model.FileType,
 	}
 
-	return i.saveFileInfo(newFileInfo, model.FileData)
+	return i.saveFile(newFileInfo, model.FileData)
 }
 
 func (i *FilesServiceImpl) DeleteFileByFileId(id string) error {
