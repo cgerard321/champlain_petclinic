@@ -160,8 +160,8 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
       }
     } catch (error) {
       // Use type assertion or check error type
-      // const apiError = error as ApiError;
-      // setErrorMessage(`Error updating visit: ${apiError.message}`);
+      const apiError = error as ApiError;
+      setErrorMessage(`Error updating visit: ${apiError.message}`);
     } finally {
       setIsLoading(false);
     }
