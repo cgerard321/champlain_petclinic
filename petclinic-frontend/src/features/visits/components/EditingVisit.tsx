@@ -253,20 +253,27 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
         />
 
         <br />
-        <label>
-          Practitioner ID:{' '}
-          {errors.practitionerId && (
-            <span className="error">{errors.practitionerId}</span>
-          )}
-        </label>
-
-        <input
-          type="text"
-          name="practitionerId"
-          value={visit.practitionerId}
-          onChange={handleChange}
-          required
-        />
+        <div className="form-group">
+          <label htmlFor="practitionerId">Veterinarian Preference:</label>
+          <select
+            id="practitionerId"
+            name="practitionerId"
+            value={visit.practitionerId}
+            onChange={handleChange}
+          >
+            <option value="no-preference">
+              No Preference (Show All Available Times)
+            </option>
+            {vets.map(vet => (
+              <option key={vet.vetId} value={vet.vetId}>
+                Dr. {vet.firstName} {vet.lastName}
+                {vet.specialties &&
+                  vet.specialties.length > 0 &&
+                  ` (${vet.specialties.map(s => s.name).join(', ')})`}
+              </option>
+            ))}
+          </select>
+        </div>
 
         <br />
         <label>

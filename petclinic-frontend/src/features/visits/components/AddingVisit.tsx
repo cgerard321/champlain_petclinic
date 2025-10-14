@@ -209,7 +209,6 @@ const AddingVisit: React.FC<AddingVisitProps> = ({
 
     fetchTimeSlots();
   }, [visit.practitionerId, visit.selectedDate, vets]);
-
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
