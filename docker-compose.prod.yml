@@ -299,18 +299,21 @@ services:
 
   dbgate:
     image: dbgate/dbgate:latest
-    container_name: dbgate
-    restart: unless-stopped
     ports:
-      - "8030:3000"                 # web UI -> http://<host>:8090
+      - "8090:3000"
+    restart: unless-stopped
     environment:
-      # --- Auth options ---
-      # Use Basic Auth for the whole UI (simple & works behind reverse proxy):
-      - BASIC_AUTH=1                # if unset, DbGate shows a login form + JWT
-      - ADMIN_PASSWORD=change-me    # for /admin.html (set it!)
-      # --- Predefined connections (add more blocks for each DB) ---
+      # --- Auth (BASIC) ---
+      - BASIC_AUTH=1                 # turn on Basic auth
+      - LOGIN=admin                  # required when BASIC_AUTH is enabled
+      - PASSWORD=change-me           # required when BASIC_AUTH is enabled
+      - SKIP_ALL_AUTH=0              # ensure auth isn't skipped
+
+      # --- (optional) admin page password ---
+      - ADMIN_PASSWORD=change-me-too
+
+      # --- Example preconfigured connections (add more as needed) ---
       - CONNECTIONS=mysql,postgres,mongoVet
-      # MySQL (auth-service)
       - LABEL_mysql=MySQL auth-db
       - ENGINE_mysql=mysql@dbgate-plugin-mysql
       - SERVER_mysql=mysql-auth
@@ -318,7 +321,7 @@ services:
       - USER_mysql=user
       - PASSWORD_mysql=pwd
       - DATABASE_mysql=auth-db
-      # Postgres (vet images)
+
       - LABEL_postgres=Postgres vet
       - ENGINE_postgres=postgres@dbgate-plugin-postgres
       - SERVER_postgres=postgres
@@ -326,26 +329,13 @@ services:
       - USER_postgres=user
       - PASSWORD_postgres=pwd
       - DATABASE_postgres=images
-      # Mongo (pick one to start — you can add others similarly)
+
       - LABEL_mongoVet=Mongo vet
       - ENGINE_mongoVet=mongo@dbgate-plugin-mongo
       - SERVER_mongoVet=mongo-vet
       - PORT_mongoVet=27017
       - USER_mongoVet=root
       - PASSWORD_mongoVet=password
-      # Optional: don’t skip auth accidentally
-      - SKIP_ALL_AUTH=0
-    depends_on:
-      - mysql-auth
-      - postgres-vet
-      - mongo-vet
-    labels:
-      - homepage.group=Development
-      - homepage.name=DbGate (SQL+Mongo)
-      - homepage.icon=https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/dbgate.png
-      - homepage.href=http://petclinic-backend.benmusicgeek.synology.me:8090/
-      - homepage.description=One UI with login for MySQL/Postgres/Mongo
-
 
 # -------------------
 # VOLUMES
