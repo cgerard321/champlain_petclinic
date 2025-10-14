@@ -19,6 +19,26 @@ const isHttpUrl = (url: string): boolean => {
   }
 };
 
+//Helper
+function mapServerMessageToFieldErrors(
+  msg: string
+): Partial<Record<FieldKey, string>> {
+  const m = msg.toLowerCase();
+
+  if (
+    m.includes('name') &&
+    (m.includes('already exists') || m.includes('duplicate'))
+  ) {
+    return { inventoryName: 'An inventory with this name already exists.' };
+  }
+
+  if (m.includes('image') && m.includes('url')) {
+    return { inventoryImage: 'Must be a valid http/https URL.' };
+  }
+
+  return {};
+}
+
 function buildIventoryFieldErrorMessage(params: {
   inventoryName: string;
   inventoryType: string;
@@ -81,6 +101,7 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
   const [fieldErrors, setFieldErrors] = useState<
     Partial<Record<FieldKey, string>>
   >({});
+  const [formError, setFormError] = useState<string>('');
 
   // Per-field history arrays. Initialize with the initial/current value so there is always a baseline.
   const [history, setHistory] = useState<Record<TextFieldKey, string[]>>({
@@ -225,6 +246,8 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
   // Handling form submission
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
+    setFormError('');
+
     const errorsBeforeSubmit = buildIventoryFieldErrorMessage({
       inventoryName,
       inventoryType,
@@ -263,43 +286,28 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
       imageUploaded: base64Image,
     };
 
-    try {
-      await addInventory(newInventory as Omit<Inventory, 'inventoryId'>);
-      setInventoryName('');
-      setInventoryType('');
-      setInventoryDescription('');
-      setInventoryImage('');
-      setImageUploaded(null);
-      setFieldErrors({});
-      refreshInventoryTypes();
-      handleInventoryClose();
-    } catch (error) {
-      if (error instanceof Error) {
-        const msg = error.message.toLowerCase();
+    const result = await addInventory(newInventory);
 
-        if (msg.includes('already exists')) {
-          setFieldErrors(prev => ({
-            ...prev,
-            inventoryName:
-              prev.inventoryName ||
-              'An inventory with this name already exists.',
-          }));
-          return;
-        }
-      }
-      const errorsAfter = buildIventoryFieldErrorMessage({
-        inventoryName,
-        inventoryType,
-        inventoryDescription,
-        inventoryImage,
-        inventoryBackupImage,
-        imageUploaded,
-      });
-      if (Object.keys(errorsAfter).length) {
-        setFieldErrors(prev => ({ ...prev, ...errorsAfter }));
+    if (result.errorMessage) {
+      const mapped = mapServerMessageToFieldErrors(result.errorMessage);
+      if (Object.keys(mapped).length) {
+        setFieldErrors(prev => ({ ...prev, ...mapped }));
         return;
       }
+
+      setFormError(result.errorMessage);
+      return;
     }
+
+    setInventoryName('');
+    setInventoryType('');
+    setInventoryDescription('');
+    setInventoryImage('');
+    setInventoryBackupImage('');
+    setImageUploaded(null);
+    setFieldErrors({});
+    refreshInventoryTypes();
+    handleInventoryClose();
   };
 
   if (!showAddInventoryForm) return null;
@@ -516,6 +524,14 @@ const AddInventoryForm: React.FC<AddInventoryProps> = ({
               </div>
             )}
           </div>
+          {formError && (
+            <div
+              className="field-error"
+              style={{ marginTop: 8, marginBottom: 8 }}
+            >
+              {formError}
+            </div>
+          )}
 
           <button type="submit">Add Inventory</button>
           <button
