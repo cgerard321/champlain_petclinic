@@ -124,6 +124,7 @@ export default function VetDetails(): JSX.Element {
     useState<EducationResponseType | null>(null);
   const [ratings, setRatings] = useState<RatingResponseType[] | null>(null);
   const [selectedVet, setSelectedVet] = useState<VetRequestModel | null>(null);
+  const canSubmitReview = Boolean(user.userId) && isOwner;
   const refreshVetDetails = useCallback(async (): Promise<void> => {
     try {
       const response = await axiosInstance.get<VetResponseType>(
@@ -540,7 +541,7 @@ export default function VetDetails(): JSX.Element {
         <section className="vet-ratings-info">
           <div className="vet-ratings-header">
             <h2>Ratings</h2>
-            {user.userId && (
+            {canSubmitReview && (
               <button
                 className="add-rating-button"
                 onClick={() => setIsRatingModalOpen(true)}
@@ -577,7 +578,7 @@ export default function VetDetails(): JSX.Element {
             <p>No ratings available</p>
           )}
         </section>
-        {isRatingModalOpen && vetId && (
+        {isRatingModalOpen && canSubmitReview && vetId && (
           <AddVetRatingModal
             vetId={vetId}
             onClose={() => setIsRatingModalOpen(false)}
