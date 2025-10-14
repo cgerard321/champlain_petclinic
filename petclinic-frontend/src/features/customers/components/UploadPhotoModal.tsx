@@ -126,7 +126,9 @@ const UploadPhotoModal: React.FC<UploadPhotoModalProps> = ({
                   Choose File
                 </button>
                 {selectedFile && (
-                  <span className="file-name">{selectedFile.name}</span>
+                  <span className="file-name" title={selectedFile.name}>
+                    {selectedFile.name}
+                  </span>
                 )}
               </div>
             </div>

@@ -23,6 +23,17 @@
   flex-direction: column;
   gap: 30px;
   text-align: left;
+  overflow: hidden;
+}
+
+.modal-body {
+  width: 100%;
+  min-width: 0;
+}
+
+.modal-body .form-group {
+  width: 100%;
+  min-width: 0;
 }
 
 .modal-header {
@@ -506,6 +517,7 @@
   color: #374151;
   min-width: 100px;
   margin: 0;
+  flex-shrink: 0;
 }
 
 .file-input-wrapper {
@@ -513,6 +525,8 @@
   align-items: center;
   gap: 12px;
   flex: 1;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .file-select-button {
@@ -524,6 +538,7 @@
   font-size: 0.9rem;
   font-weight: 500;
   cursor: pointer;
+  flex-shrink: 0;
   transition:
     background-color 0.2s,
     transform 0.1s;
@@ -547,7 +562,8 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 200px;
+  flex: 1;
+  min-width: 0;
 }
 
 .modal-footer {
