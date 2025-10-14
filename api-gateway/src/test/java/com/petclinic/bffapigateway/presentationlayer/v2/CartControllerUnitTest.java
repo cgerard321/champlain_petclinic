@@ -4,6 +4,7 @@ import com.petclinic.bffapigateway.domainclientlayer.CartServiceClient;
 import com.petclinic.bffapigateway.dtos.Cart.CartResponseDTO;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import org.junit.Ignore;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.springframework.http.HttpStatus;
@@ -151,12 +153,20 @@ public class CartControllerUnitTest {
 
     @Test
     void testGetAllCarts_Success() {
-        when(cartServiceClient.getAllCarts()).thenReturn(reactor.core.publisher.Flux.empty());
+        CartResponseDTO cart1 = new CartResponseDTO();
+        cart1.setCartId("c-1");
+        CartResponseDTO cart2 = new CartResponseDTO();
+        cart2.setCartId("c-2");
+
+        when(cartServiceClient.getAllCarts()).thenReturn(Flux.just(cart1, cart2));
 
         client.get()
                 .uri("/api/v2/gateway/carts")
                 .exchange()
-                .expectStatus().isOk();
+                .expectStatus().isOk()
+                .expectBodyList(CartResponseDTO.class)
+                .hasSize(2)
+                .contains(cart1, cart2);
 
         verify(cartServiceClient).getAllCarts();
     }
@@ -677,5 +687,272 @@ public class CartControllerUnitTest {
                 .exchange()
                 .expectStatus().isEqualTo(422);
     }
+    @Test
+    void testAddProductToCart_BadRequest_WithMessage() {
+        String cartId = "cart-2";
+        InvalidInputException ex = new InvalidInputException("Only 10 items left in stock");
+        when(cartServiceClient.addProductToCart(eq(cartId), any())).thenReturn(Mono.error(ex));
 
+        client.post()
+                .uri("/api/v2/gateway/carts/{cartId}/products", cartId)
+                .bodyValue(new com.petclinic.bffapigateway.dtos.Cart.AddProductRequestDTO())
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody(CartResponseDTO.class)
+                .consumeWith(r -> {
+                    Assertions.assertEquals("Only 10 items left in stock", r.getResponseBody().getMessage());
+                });
+    }
+
+    @Test
+    void testAddProductToCart_NotFound() {
+        String cartId = "cart-2";
+        when(cartServiceClient.addProductToCart(eq(cartId), any()))
+                .thenReturn(Mono.error(new org.webjars.NotFoundException("nope")));
+
+        client.post()
+                .uri("/api/v2/gateway/carts/{cartId}/products", cartId)
+                .bodyValue(new com.petclinic.bffapigateway.dtos.Cart.AddProductRequestDTO())
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+    @Test
+    void testAddProductToCart_Conflict() {
+        String cartId = "cart-2";
+        WebClientResponseException ex = WebClientResponseException.create(409, "Conflict", null, null, null);
+        when(cartServiceClient.addProductToCart(eq(cartId), any())).thenReturn(Mono.error(ex));
+
+        client.post()
+                .uri("/api/v2/gateway/carts/{cartId}/products", cartId)
+                .bodyValue(new com.petclinic.bffapigateway.dtos.Cart.AddProductRequestDTO())
+                .exchange()
+                .expectStatus().isEqualTo(409);
+    }
+
+    @Test
+    void testAddProductToCart_UnexpectedError() {
+        String cartId = "cart-2";
+        when(cartServiceClient.addProductToCart(eq(cartId), any())).thenReturn(Mono.error(new RuntimeException("boom")));
+
+        client.post()
+                .uri("/api/v2/gateway/carts/{cartId}/products", cartId)
+                .bodyValue(new com.petclinic.bffapigateway.dtos.Cart.AddProductRequestDTO())
+                .exchange()
+                .expectStatus().is5xxServerError();
+    }
+    @Test
+    void testMoveAllWishlistToCart_NotFound() {
+        String cartId = "cart-3";
+        WebClientResponseException ex = WebClientResponseException.create(404, "Not Found", null, null, null);
+        when(cartServiceClient.moveAllWishlistToCart(cartId)).thenReturn(Mono.error(ex));
+
+        client.post()
+                .uri("/api/v2/gateway/carts/{cartId}/wishlist/moveAll", cartId)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody(CartResponseDTO.class)
+                .consumeWith(r -> {
+                    Assertions.assertEquals("Cart not found: cart-3", r.getResponseBody().getMessage());
+                });
+    }
+
+    @Test
+    void testMoveAllWishlistToCart_UnprocessableEntity() {
+        String cartId = "cart-3";
+        WebClientResponseException ex = WebClientResponseException.create(422, "Unprocessable Entity", null, null, null);
+        when(cartServiceClient.moveAllWishlistToCart(cartId)).thenReturn(Mono.error(ex));
+
+        client.post()
+                .uri("/api/v2/gateway/carts/{cartId}/wishlist/moveAll", cartId)
+                .exchange()
+                .expectStatus().isEqualTo(422)
+                .expectBody(CartResponseDTO.class)
+                .consumeWith(r -> {
+                    Assertions.assertEquals("422 Unprocessable Entity", r.getResponseBody().getMessage());
+                });
+    }
+    @Test
+    void testMoveAllWishlistToCart_UnexpectedError() {
+        String cartId = "cart-3";
+        when(cartServiceClient.moveAllWishlistToCart(cartId)).thenReturn(Mono.error(new RuntimeException("boom")));
+
+        client.post()
+                .uri("/api/v2/gateway/carts/{cartId}/wishlist/moveAll", cartId)
+                .exchange()
+                .expectStatus().is5xxServerError()
+                .expectBody(CartResponseDTO.class)
+                .consumeWith(r -> {
+                    Assertions.assertEquals("Unexpected error", r.getResponseBody().getMessage());
+                });
+    }
+    @Test
+    void testAddProductToWishList_Success() {
+        // Arrange
+        String cartId = "cart-1";
+        String productId = "prod-1";
+        int quantity = 2;
+        CartResponseDTO response = new CartResponseDTO();
+        when(cartServiceClient.addProductToWishList(cartId, productId, quantity))
+                .thenReturn(Mono.just(response));
+
+        // Act & Assert
+        client.post()
+                .uri("/api/v2/gateway/carts/{cartId}/products/{productId}/quantity/{quantity}", cartId, productId, quantity)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(CartResponseDTO.class);
+    }
+
+    @Test
+    void testAddProductToWishList_NotFound() {
+        String cartId = "cart-2";
+        String productId = "prod-2";
+        int quantity = 1;
+        when(cartServiceClient.addProductToWishList(cartId, productId, quantity))
+                .thenReturn(Mono.empty());
+
+        client.post()
+                .uri("/api/v2/gateway/carts/{cartId}/products/{productId}/quantity/{quantity}", cartId, productId, quantity)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+    @Test
+    void testAddProductToWishList_UnprocessableEntity() {
+        String cartId = "cart-3";
+        String productId = "prod-3";
+        int quantity = 1;
+        WebClientResponseException.UnprocessableEntity ex =
+                (WebClientResponseException.UnprocessableEntity) WebClientResponseException.create(422, "Unprocessable Entity", null, null, null);
+        when(cartServiceClient.addProductToWishList(cartId, productId, quantity))
+                .thenReturn(Mono.error(ex));
+
+        client.post()
+                .uri("/api/v2/gateway/carts/{cartId}/products/{productId}/quantity/{quantity}", cartId, productId, quantity)
+                .exchange()
+                .expectStatus().isEqualTo(422);
+    }
+
+    @Test
+    void testAddProductToWishList_UnexpectedError() {
+        String cartId = "cart-4";
+        String productId = "prod-4";
+        int quantity = 1;
+        RuntimeException ex = new RuntimeException("boom");
+        when(cartServiceClient.addProductToWishList(cartId, productId, quantity))
+                .thenReturn(Mono.error(ex));
+
+        client.post()
+                .uri("/api/v2/gateway/carts/{cartId}/products/{productId}/quantity/{quantity}", cartId, productId, quantity)
+                .exchange()
+                .expectStatus().is5xxServerError();
+    }
+    @Test
+    void testMoveProductFromCartToWishlist_Success() {
+        String cartId = "cart-1", productId = "prod-1";
+        CartResponseDTO dto = new CartResponseDTO();
+        when(cartServiceClient.moveProductFromCartToWishlist(cartId, productId)).thenReturn(Mono.just(dto));
+
+        client.put()
+                .uri("/api/v2/gateway/carts/{cartId}/wishlist/{productId}/toWishList", cartId, productId)
+                .exchange()
+                .expectStatus().isOk();
+    }
+
+    @Test
+    void testMoveProductFromCartToWishlist_422() {
+        String cartId = "cart-2", productId = "prod-2";
+        WebClientResponseException ex = WebClientResponseException.create(
+                422, "Unprocessable Entity", null, null, null);
+        when(cartServiceClient.moveProductFromCartToWishlist(cartId, productId)).thenReturn(Mono.error(ex));
+
+        client.put()
+                .uri("/api/v2/gateway/carts/{cartId}/wishlist/{productId}/toWishList", cartId, productId)
+                .exchange()
+                .expectStatus().isEqualTo(422);
+    }
+    @Test
+    void testMoveProductFromCartToWishlist_404() {
+        String cartId = "cart-3", productId = "prod-3";
+        WebClientResponseException ex = WebClientResponseException.create(
+                404, "Not Found", null, null, null);
+        when(cartServiceClient.moveProductFromCartToWishlist(cartId, productId)).thenReturn(Mono.error(ex));
+
+        client.put()
+                .uri("/api/v2/gateway/carts/{cartId}/wishlist/{productId}/toWishList", cartId, productId)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    void testMoveProductFromCartToWishlist_UnexpectedError() {
+        String cartId = "cart-4", productId = "prod-4";
+        RuntimeException ex = new RuntimeException("boom");
+        when(cartServiceClient.moveProductFromCartToWishlist(cartId, productId)).thenReturn(Mono.error(ex));
+
+        client.put()
+                .uri("/api/v2/gateway/carts/{cartId}/wishlist/{productId}/toWishList", cartId, productId)
+                .exchange()
+                .expectStatus().is5xxServerError();
+    }
+    @Test
+    void testMoveProductFromWishListToCart_Success() {
+        String cartId = "cart-1", productId = "prod-1";
+        CartResponseDTO dto = new CartResponseDTO();
+        when(cartServiceClient.moveProductFromWishListToCart(cartId, productId)).thenReturn(Mono.just(dto));
+
+        client.put()
+                .uri("/api/v2/gateway/carts/{cartId}/wishlist/{productId}/toCart", cartId, productId)
+                .exchange()
+                .expectStatus().isOk();
+    }
+
+    @Test
+    void testMoveProductFromWishListToCart_422() {
+        String cartId = "cart-2", productId = "prod-2";
+        WebClientResponseException ex = WebClientResponseException.create(
+                422, "Unprocessable Entity", null, null, null);
+        when(cartServiceClient.moveProductFromWishListToCart(cartId, productId)).thenReturn(Mono.error(ex));
+
+        client.put()
+                .uri("/api/v2/gateway/carts/{cartId}/wishlist/{productId}/toCart", cartId, productId)
+                .exchange()
+                .expectStatus().isEqualTo(422);
+    }
+    @Test
+    void testMoveProductFromWishListToCart_404() {
+        String cartId = "cart-3", productId = "prod-3";
+        WebClientResponseException ex = WebClientResponseException.create(
+                404, "Not Found", null, null, null);
+        when(cartServiceClient.moveProductFromWishListToCart(cartId, productId)).thenReturn(Mono.error(ex));
+
+        client.put()
+                .uri("/api/v2/gateway/carts/{cartId}/wishlist/{productId}/toCart", cartId, productId)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    void testMoveProductFromWishListToCart_UnexpectedError() {
+        String cartId = "cart-4", productId = "prod-4";
+        RuntimeException ex = new RuntimeException("boom");
+        when(cartServiceClient.moveProductFromWishListToCart(cartId, productId)).thenReturn(Mono.error(ex));
+
+        client.put()
+                .uri("/api/v2/gateway/carts/{cartId}/wishlist/{productId}/toCart", cartId, productId)
+                .exchange()
+                .expectStatus().is5xxServerError();
+    }
+    @Test
+    void testGetAllCarts_Empty() {
+        when(cartServiceClient.getAllCarts()).thenReturn(Flux.empty());
+
+        client.get()
+                .uri("/api/v2/gateway/carts")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(CartResponseDTO.class)
+                .hasSize(0);
+
+        verify(cartServiceClient).getAllCarts();
+    }
 }

@@ -66,6 +66,10 @@
             <div class="col-md-2 custom-label">Product Quantity:</div>
             <div class="col-md-2 custom-value">{{self.product.productQuantity}}</div>
         </div>
+        
+        <div class="row custom-row">
+            <div class="col-md-2 custom-label">Product Last Updated:</div>
+            <div class="col-md-2 custom-value">{{self.product.lastUpdated | date:'medium'}}</div>
     </div>
 
     <div class="text-center mt-4" ng-if="!self.loading">

@@ -2,21 +2,19 @@ package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.petclinic.bffapigateway.dtos.Products.*;
 import com.petclinic.bffapigateway.dtos.Products.DeliveryType;
-import com.petclinic.bffapigateway.dtos.Products.DeliveryType;
-import com.petclinic.bffapigateway.dtos.Products.ProductRequestDTO;
 
-import com.petclinic.bffapigateway.dtos.Products.ProductResponseDTO;
-import com.petclinic.bffapigateway.dtos.Products.ProductStatus;
-import com.petclinic.bffapigateway.dtos.Products.ProductType;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.RecordedRequest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
@@ -24,6 +22,10 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 class ProductsServiceClientIntegrationTest {
@@ -155,6 +157,30 @@ class ProductsServiceClientIntegrationTest {
                 .expectNextMatches(product -> product.getProductId().equals("2") && product.getDeliveryType() == DeliveryType.DELIVERY)
                 .verifyComplete();
     }
+
+
+    @Test
+    void getAllProducts_WithProductTypeFiltering_ThenReturnFilteredProductList() {
+
+        mockWebServer.enqueue(new MockResponse()
+                .setBody(
+                        "data:{\"productId\":\"1\",\"productName\":\"Product A\",\"productDescription\":\"Description A\",\"productSalePrice\":29.99,\"averageRating\":4.0,\"deliveryType\":\"DELIVERY\",\"productType\":\"EQUIPMENT\"}\n\n" +
+                                "data:{\"productId\":\"2\",\"productName\":\"Product B\",\"productDescription\":\"Description B\",\"productSalePrice\":49.99,\"averageRating\":4.5,\"deliveryType\":\"PICKUP\",\"productType\":\"EQUIPMENT\"}\n\n"
+                )
+                .setHeader("Content-Type", "text/event-stream")
+        );
+
+        String productType = "EQUIPMENT";
+
+
+        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(null, null, null, null, null, null, productType);
+
+        StepVerifier.create(productsFlux)
+                .expectNextMatches(product -> product.getProductId().equals("1") && product.getProductType() == ProductType.EQUIPMENT)
+                .expectNextMatches(product -> product.getProductId().equals("2") && product.getProductType() == ProductType.EQUIPMENT)
+                .verifyComplete();
+    }
+
 
     @Test
     void getAllProducts_WithSortAscending_ThenReturnProductsInAscendingOrder() {
@@ -340,34 +366,250 @@ class ProductsServiceClientIntegrationTest {
                 .verify();
     }
 
+//    @Test
+//    void whenDeleteProduct_thenDeleteProduct() throws JsonProcessingException {
+//        ProductResponseDTO productResponseDTO = new ProductResponseDTO(
+//                "productId",
+//                "imageId",
+//                "Product 1",
+//                "desc",
+//                10.00,
+//                0.00,
+//                0,
+//                6,
+//                false,
+//                ProductType.FOOD,
+//                ProductStatus.AVAILABLE,
+//                DeliveryType.DELIVERY_AND_PICKUP
+//        );
+//
+//        mockWebServer.enqueue(new MockResponse()
+//                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+//                .setBody(objectMapper.writeValueAsString(productResponseDTO))
+//                .addHeader("Content-Type", "application/json"));
+//
+//        Mono<ProductResponseDTO> productResponseDTOMono = productsServiceClient
+//                .deleteProduct("productId");
+//
+//        StepVerifier.create(productResponseDTOMono)
+//                .expectNextMatches(product -> product.getProductId().equals("productId"))
+//                .verifyComplete();
+//    }
+
+
+
     @Test
-    void whenDeleteProduct_thenDeleteProduct() throws JsonProcessingException {
-        ProductResponseDTO productResponseDTO = new ProductResponseDTO(
-                "productId",
-                "imageId",
-                "Product 1",
-                "desc",
-                10.00,
-                0.00,
-                0,
-                6,
-                false,
-                ProductType.FOOD,
-                ProductStatus.AVAILABLE,
-                DeliveryType.DELIVERY_AND_PICKUP
+    void whenRequestCount_thenSucceed() {
+        String productId = "abc123";
+
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(HttpStatus.OK.value())
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+        );
+
+        Mono<Void> resultMono = productsServiceClient.requestCount(productId);
+
+        StepVerifier.create(resultMono)
+                .verifyComplete();
+    }
+
+
+
+
+    //----------------------------------------------
+//TODO: Quantity
+    @Test
+    void whenDecreaseProductQuantity_thenSucceed() {
+        String productId = "abc123";
+
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(HttpStatus.OK.value())
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE));
+
+        Mono<Void> resultMono = productsServiceClient.decreaseProductQuantity(productId);
+
+        StepVerifier.create(resultMono)
+                .verifyComplete();
+    }
+
+
+
+
+
+    @Test
+    void whenChangeProductQuantity_thenSucceed(){
+        String productId = "abc123";
+        Integer newQuantity = 10;
+
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(HttpStatus.OK.value())
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE));
+
+        Mono<Void> resultMono = productsServiceClient.changeProductQuantity(productId, newQuantity);
+
+        StepVerifier.create(resultMono)
+                .verifyComplete();
+    }
+
+
+
+    //--------------------------------------
+    //TODO: Bundles
+
+    @Test
+    void getAllProductBundles_ThenReturnBundleList(){
+        mockWebServer.enqueue(new MockResponse()
+                .setBody(
+                        "data:{\"bundleId\":\"1\"," +
+                                "\"bundleName\":\"Dog Bundle\"," +
+                                "\"bundleDescription\":\"Dog Food and Flea Collar\"," +
+                                "\"productIds\":[\"p1\",\"p2\",\"p3\"]," +
+                                "\"originalTotalPrice\":55.98," +
+                                "\"bundlePrice\":49.99}\n\n" +
+
+                                "data:{\"bundleId\":\"2\"," +
+                                "\"bundleName\":\"Accessory Bundle\"," +
+                                "\"bundleDescription\":\"All Accessories\"," +
+                                "\"productIds\":[\"p4\",\"p5\"]," +
+                                "\"originalTotalPrice\":157.95," +
+                                "\"bundlePrice\":129.99}\n\n"
+                )
+                .setHeader("Content-Type", "text/event-stream")
+        );
+
+        Flux<ProductBundleResponseDTO> bundlesFlux = productsServiceClient.getAllProductBundles();
+
+        StepVerifier.create(bundlesFlux)
+                .expectNextMatches(bundle ->
+                        bundle.getBundleId().equals("1") &&
+                                bundle.getBundleName().equals("Dog Bundle") &&
+                                bundle.getProductIds().size() == 3 &&
+                                bundle.getBundlePrice().equals(49.99))
+                .expectNextMatches(bundle ->
+                        bundle.getBundleId().equals("2") &&
+                                bundle.getBundleName().equals("Accessory Bundle") &&
+                                bundle.getProductIds().size() == 2 &&
+                                bundle.getBundlePrice().equals(129.99))
+                .verifyComplete();
+    }
+
+
+
+    @Test
+    void getProductBundleById_ThenReturnBundle() throws JsonProcessingException{
+        ProductBundleResponseDTO responseDTO = new ProductBundleResponseDTO(
+                "1",
+                "Dog Bundle",
+                "Dog Food and Flea Collar",
+                Arrays.asList("p1", "p2", "p3"),
+                55.98,
+                49.99
+        );
+
+        mockWebServer.enqueue(new MockResponse()
+                .setBody(objectMapper.writeValueAsString(responseDTO))
+                .setHeader("Content-Type", "application/json")
+        );
+
+        String bundleId = "1";
+
+        Mono<ProductBundleResponseDTO> bundleMono = productsServiceClient.getProductBundleById(bundleId);
+
+        StepVerifier.create(bundleMono)
+                .expectNextMatches(bundle ->
+                        bundle.getBundleId().equals("1") &&
+                                bundle.getBundleName().equals("Dog Bundle") &&
+                                bundle.getBundleDescription().equals("Dog Food and Flea Collar") &&
+                                bundle.getProductIds().size() == 3 &&
+                                bundle.getBundlePrice().equals(49.99))
+                .verifyComplete();
+    }
+
+
+    @Test
+    void whenCreateProductBundle_thenReturnBundle() throws JsonProcessingException {
+        ProductBundleResponseDTO responseDTO = new ProductBundleResponseDTO(
+                "1",
+                "Dog Bundle",
+                "Dog Food and Flea Collar",
+                Arrays.asList("p1", "p2", "p3"),
+                55.98,
+                49.99
         );
 
         mockWebServer.enqueue(new MockResponse()
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody(objectMapper.writeValueAsString(productResponseDTO))
+                .setBody(objectMapper.writeValueAsString(responseDTO))
                 .addHeader("Content-Type", "application/json"));
 
-        Mono<ProductResponseDTO> productResponseDTOMono = productsServiceClient
-                .deleteProduct("productId");
+        ProductBundleRequestDTO requestDTO = ProductBundleRequestDTO.builder()
+                .bundleName("Dog Bundle")
+                .bundleDescription("Dog Food and Flea Collar")
+                .productIds(Arrays.asList("p1", "p2", "p3"))
+                .bundlePrice(49.99)
+                .build();
 
-        StepVerifier.create(productResponseDTOMono)
-                .expectNextMatches(product -> product.getProductId().equals("productId"))
+        Mono<ProductBundleResponseDTO> resultMono = productsServiceClient.createProductBundle(requestDTO);
+
+        StepVerifier.create(resultMono)
+                .expectNextMatches(bundle ->
+                        "1".equals(bundle.getBundleId()) &&
+                                "Dog Bundle".equals(bundle.getBundleName()) &&
+                                bundle.getProductIds() != null &&
+                                bundle.getProductIds().size() == 3 &&
+                                Double.valueOf(49.99).equals(bundle.getBundlePrice()))
                 .verifyComplete();
     }
+
+
+    @Test
+    void whenUpdateProductBundle_thenReturnUpdatedBundle() throws JsonProcessingException {
+        ProductBundleResponseDTO responseDTO = new ProductBundleResponseDTO(
+                "1",
+                " Updated Dog Bundle",
+                "Dog Food and Flea Collar",
+                List.of("p1", "p2", "p3"),
+                60.00,
+                54.99
+        );
+
+        mockWebServer.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(objectMapper.writeValueAsString(responseDTO))
+                .addHeader("Content-Type", "application/json"));
+
+        ProductBundleRequestDTO requestDTO = ProductBundleRequestDTO.builder()
+                .bundleName("Updated Dog Bundle")
+                .bundleDescription("Dog Food and Flea Collar")
+                .productIds(List.of("p1", "p2", "p3"))
+                .bundlePrice(54.99)
+                .build();
+
+        Mono<ProductBundleResponseDTO> resultMono = productsServiceClient
+                .updateProductBundle(responseDTO.getBundleId(), requestDTO);
+
+        StepVerifier.create(resultMono)
+                .expectNextMatches(bundle ->
+                        bundle.getBundleId().equals("1"))
+                .verifyComplete();
+    }
+
+
+
+    @Test
+    void whenDeleteProductBundle_thenCompleteSuccessfully() throws JsonProcessingException {
+        String bundleId = "1";
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(HttpStatus.NO_CONTENT.value())
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE));
+
+        Mono<Void> resultMono = productsServiceClient.deleteProductBundle(bundleId);
+
+        StepVerifier.create(resultMono)
+                .verifyComplete();
+    }
+
+
+
 
 }

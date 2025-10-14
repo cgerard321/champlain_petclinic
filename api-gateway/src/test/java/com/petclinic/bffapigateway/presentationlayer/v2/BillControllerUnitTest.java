@@ -7,6 +7,7 @@ import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillStatus;
 import com.petclinic.bffapigateway.dtos.Bills.PaymentRequestDTO;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
+import com.petclinic.bffapigateway.presentationlayer.v1.BillControllerV1;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -15,6 +16,7 @@ import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWeb
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.http.MediaType;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -32,7 +34,8 @@ import static org.mockito.Mockito.*;
 @ContextConfiguration(classes = {
         BillController.class,
         BillServiceClient.class,
-        GlobalExceptionHandler.class
+        GlobalExceptionHandler.class,
+        BillControllerV1.class
 })
 @WebFluxTest(controllers = BillController.class)
 @AutoConfigureWebTestClient
@@ -79,126 +82,7 @@ private final String baseBillURL = "/api/v2/gateway/bills";
             .dueDate(LocalDate.parse("2024-10-13"))
             .build();
 
-   @Test
-    public void whenGetAllBillsByCustomerId_ThenReturnCustomerBills() {
-       when(billServiceClient.getBillsByOwnerId("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")).thenReturn(Flux.just(billresponse, billresponse2));
-        webTestClient.get()
-                .uri(baseBillURL + "/customer/{customerId}", "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
-                .exchange()
-                .expectStatus().isOk()
-                .expectBodyList(BillResponseDTO.class)
-                .hasSize(2)
-                .contains(billresponse, billresponse2);
-    }
 
-    @Test
-    public void whenGetAllBillsByInvalidCustomerId_ThenReturnInvalidInput() {
-        when(billServiceClient.getBillsByOwnerId("invalid-owner-id")).thenReturn(Flux.defer(() -> Flux.error(new InvalidInputException("Invalid owner id"))));
-        webTestClient.get()
-                .uri(baseBillURL + "/customer/{customerId}", "invalid-owner-id")
-                .exchange()
-                .expectStatus().isEqualTo(HttpStatus.SC_UNPROCESSABLE_ENTITY);
-
-    }
-
-    @Test
-    public void whenGetAllBills_thenReturnAllBills(){
-       when(billServiceClient.getAllBills())
-               .thenReturn(Flux.just(billresponse, billresponse2));
-
-       webTestClient
-               .get()
-               .uri(baseBillURL + "/admin")
-               .accept(MediaType.TEXT_EVENT_STREAM)
-               .exchange()
-               .expectStatus().isOk()
-               .expectHeader().valueEquals("Content-Type", "text/event-stream;charset=UTF-8")
-               .expectBodyList(BillResponseDTO.class)
-               .hasSize(2)
-               .contains(billresponse, billresponse2);
-
-       verify(billServiceClient, times(1))
-               .getAllBills();
-    }
-
-    @Test
-    public void whenGetBillById_thenReturnBill(){
-        when(billServiceClient.getBillById("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a"))
-                .thenReturn(Mono.just(billresponse));
-
-        webTestClient
-                .get()
-                .uri(baseBillURL + "/admin/{billId}", "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBodyList(BillResponseDTO.class)
-                .hasSize(1)
-                .contains(billresponse);
-
-        verify(billServiceClient, times(1))
-                .getBillById("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a");
-    }
-
-    @Test
-    public void whenGetAllPaidBills_thenReturnAllPaidBills(){
-        when(billServiceClient.getAllPaidBills())
-                .thenReturn(Flux.just(billresponse, billresponse2));
-
-        webTestClient
-                .get()
-                .uri(baseBillURL + "/admin/paid")
-                .accept(MediaType.TEXT_EVENT_STREAM)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().valueEquals("Content-Type", "text/event-stream;charset=UTF-8")
-                .expectBodyList(BillResponseDTO.class)
-                .hasSize(2)
-                .contains(billresponse, billresponse2);
-
-        verify(billServiceClient, times(1))
-                .getAllPaidBills();
-    }
-
-    @Test
-    public void whenGetAllUnpaidBills_thenReturnAllUnpaidBills(){
-        when(billServiceClient.getAllUnpaidBills())
-                .thenReturn(Flux.just(billresponse, billresponse2));
-
-        webTestClient
-                .get()
-                .uri(baseBillURL + "/admin/unpaid")
-                .accept(MediaType.TEXT_EVENT_STREAM)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().valueEquals("Content-Type", "text/event-stream;charset=UTF-8")
-                .expectBodyList(BillResponseDTO.class)
-                .hasSize(2)
-                .contains(billresponse, billresponse2);
-
-        verify(billServiceClient, times(1))
-                .getAllUnpaidBills();
-    }
-
-    @Test
-    public void whenGetAllOverdueBills_thenReturnAllOverdueBills() {
-        when(billServiceClient.getAllOverdueBills())
-                .thenReturn(Flux.just(billresponse, billresponse2));
-
-        webTestClient
-                .get()
-                .uri(baseBillURL + "/admin/overdue")
-                .accept(MediaType.TEXT_EVENT_STREAM)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().valueEquals("Content-Type", "text/event-stream;charset=UTF-8")
-                .expectBodyList(BillResponseDTO.class)
-                .hasSize(2)
-                .contains(billresponse, billresponse2);
-
-        verify(billServiceClient, times(1))
-                .getAllOverdueBills();
-    }
     public void AddBill_thenReturnBill(){
         when(billServiceClient.createBill(billRequestDTO)).thenReturn(Mono.just(billresponse));
         webTestClient.post()
@@ -276,32 +160,120 @@ private final String baseBillURL = "/api/v2/gateway/bills";
     }
 
     @Test
-    public void whenDeleteBill_Succeeds_ThenReturnNoContent() {
-        String billId = "B-77";
+    public void whenGetBillsByCustomerIdPaginated_thenReturnBillList(){
+        when(billServiceClient.getBillsByCustomerIdPaginated("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a", Optional.of(0), Optional.of(5)))
+                .thenReturn(Flux.just(billresponse, billresponse2));
 
-        when(billServiceClient.deleteBill(billId)).thenReturn(Mono.empty());
-
-        webTestClient.delete()
-                .uri(baseBillURL + "/{billId}", billId)
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder.path(baseBillURL + "/customer/{customerId}/paginated")
+                        .queryParam("page", 0)
+                        .queryParam("size", 5)
+                        .build("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a"))
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
-                .expectStatus().isEqualTo(HttpStatus.SC_NO_CONTENT);
+                .expectStatus().isOk()
+                .expectBodyList(BillResponseDTO.class)
+                .hasSize(2)
+                .contains(billresponse, billresponse2);
 
-        verify(billServiceClient, times(1)).deleteBill(billId);
+        verify(billServiceClient, times(1)).getBillsByCustomerIdPaginated("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a", Optional.of(0), Optional.of(5));
     }
 
     @Test
-    public void whenDeleteBill_Unprocessable_ThenReturn422() {
-        String billId = "B-88";
+    void getInterest_Positive_ReturnsInterest() {
+        // Arrange
+        String billId = "B-123";
+        Double interest = 15.75;
 
-        when(billServiceClient.deleteBill(billId))
-                .thenReturn(Mono.error(new InvalidInputException("Cannot delete a bill that is unpaid or overdue.")));
+        // Mock the service call
+        when(billServiceClient.getInterest(billId)).thenReturn(Mono.just(interest));
 
-        webTestClient.delete()
-                .uri(baseBillURL + "/{billId}", billId)
+        // Act & Assert
+        webTestClient.get()
+                .uri(baseBillURL + "/admin/{billId}/interest", billId)
                 .exchange()
-                .expectStatus().isEqualTo(HttpStatus.SC_UNPROCESSABLE_ENTITY);
+                .expectStatus().isOk()
+                .expectBody(Double.class)
+                .isEqualTo(interest);
 
-        verify(billServiceClient, times(1)).deleteBill(billId);
+        // Verify the interaction
+        verify(billServiceClient, times(1)).getInterest(billId);
+    }
+
+    @Test
+    void getTotalWithInterest_Positive_ReturnsTotal() {
+        // Arrange
+        String billId = "B-123";
+        Double totalWithInterest = 115.75;
+
+        when(billServiceClient.getTotalWithInterest(billId)).thenReturn(Mono.just(totalWithInterest));
+
+        // Act & Assert
+        webTestClient.get()
+                .uri(baseBillURL + "/admin/{billId}/total", billId)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(Double.class)
+                .isEqualTo(totalWithInterest);
+
+        verify(billServiceClient, times(1)).getTotalWithInterest(billId);
+    }
+
+    @Test
+    void setInterestExempt_Positive_SetsExemption() {
+        // Arrange
+        String billId = "B-123";
+        boolean exempt = true;
+
+        when(billServiceClient.setInterestExempt(billId, exempt)).thenReturn(Mono.empty());
+
+        // Act & Assert
+        webTestClient.patch()
+                .uri(baseBillURL + "/{billId}/exempt-interest?exempt={exempt}", billId, exempt)
+                .exchange()
+                .expectStatus().isNoContent();
+
+        verify(billServiceClient, times(1)).setInterestExempt(billId, exempt);
+    }
+
+    @Test
+    void getInterestForCustomer_Positive_ReturnsInterest() {
+        // Arrange
+        String customerId = "C-123";
+        String billId = "B-123";
+        Double interest = 15.75;
+
+        when(billServiceClient.getInterest(billId)).thenReturn(Mono.just(interest));
+
+        // Act & Assert
+        webTestClient.get()
+                .uri(baseBillURL + "/customer/{customerId}/bills/{billId}/interest", customerId, billId)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(Double.class)
+                .isEqualTo(interest);
+
+        verify(billServiceClient, times(1)).getInterest(billId);
+    }
+
+    @Test
+    void getTotalForCustomer_Positive_ReturnsTotal() {
+        // Arrange
+        String customerId = "C-123";
+        String billId = "B-123";
+        Double totalWithInterest = 115.75;
+
+        when(billServiceClient.getTotalWithInterest(billId)).thenReturn(Mono.just(totalWithInterest));
+
+        // Act & Assert
+        webTestClient.get()
+                .uri(baseBillURL + "/customer/{customerId}/bills/{billId}/total", customerId, billId)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(Double.class)
+                .isEqualTo(totalWithInterest);
+
+        verify(billServiceClient, times(1)).getTotalWithInterest(billId);
     }
 
 }

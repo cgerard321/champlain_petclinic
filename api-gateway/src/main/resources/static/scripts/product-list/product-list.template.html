@@ -1,13 +1,36 @@
 <style>
     .btn:hover {
         transform: translateY(2px);
-        box-shadow: 0 0 rgba(0, 0, 0, 2);
+        box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.2);
         border-bottom-width: 1px;
     }
 
     .table-striped tbody tr:hover {
         background-color: #D8D8D8;
     }
+
+    .action-toast {
+        position: fixed;
+
+        /* CENTER IT */
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+
+        max-width: 380px;
+        background: #333;
+        color: #fff;
+        padding: 12px 14px;
+        border-radius: 8px;
+        box-shadow: 0 4px 16px rgba(0,0,0,.3);
+        z-index: 9999;
+        display: none;
+    }
+
+    .action-toast.show {
+        display: block;
+    }
+
 </style>
 
 <h2>Products</h2>
@@ -15,68 +38,79 @@
 <table class="table table-striped">
     <thead>
     <tr>
+        <td>Image</td>
         <td>Name</td>
         <td>Id</td>
         <td>Quantity</td>
         <td>Description</td>
         <td>Sale Price</td>
-        <td></td>
-        <td></td>
-        <td></td>
+        <td>Type</td>
+        <td>Status</td>
+        <td>Max Rating</td>
     </tr>
     <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
         <td>
-<!--            <span>-->
-<!--                <input type="text" ng-model="productName" ng-keyup="$event.keyCode == 13 && searchProduct(productName, productQuantity, productPrice, productSalePrice)">-->
-<!--            </span>-->
+            <span>
+                <input type="number" step="0.01" style="width: 80%" min="0" ng-model="productSalePrice" ng-keyup="$event.keyCode == 13 && searchProduct(productSalePrice, productType, averageRating)">
+            </span>
+        </td>
+        <td>
+            <span>
+                <select ng-model="productType" ng-options="type for type in $ctrl.productType" ng-keyup="$event.keyCode == 13 && searchProduct(productSalePrice, productType, averageRating)">
+                    <option value="">-- Type --</option>
+                </select>
+            </span>
         </td>
         <td></td>
         <td>
-<!--            <span>-->
-<!--                <input type="number" min="0" ng-model="productQuantity" ng-keyup="$event.keyCode == 13 && searchProduct(productName, productQuantity, productPrice, productSalePrice)">-->
-<!--            </span>-->
+            <span><input type="number" min="0" style="width: 80%" ng-model="averageRating" ng-keyup="$event.keyCode == 13 && searchProduct(productSalePrice, productType, averageRating)"></span>
         </td>
         <td></td>
-        <td>
-<!--            <span>-->
-<!--                <input type="number" step="0.01" min="0" ng-model="productSalePrice" ng-keyup="$event.keyCode == 13 && searchProduct(productName, productQuantity, productPrice, productSalePrice)">-->
-<!--            </span>-->
-        </td>
-        <td></td>
-        <td>
-<!--             <span>-->
-<!--                <a class="btn btn-success" type="button" ng-click="clearQueries()" title="Clear">-->
-<!--                    <lord-icon-->
-<!--                            src="https://cdn.lordicon.com/zxvuvcnc.json"-->
-<!--                            trigger="hover"-->
-<!--                            style="width:32px;height:32px">-->
-<!--                    </lord-icon>-->
-<!--                </a>-->
-<!--            </span>-->
-        </td>
-        <td>
-<!--            <span>-->
 
-<!--                <a class="btn btn-success" type="button" ng-click="searchProduct(productSalePrice)" title="Search">-->
-<!--                    <lord-icon-->
-<!--                            src="https://cdn.lordicon.com/fkdzyfle.json"-->
-<!--                            trigger="hover"-->
-<!--                            style="width:32px;height:32px">-->
-<!--                    </lord-icon>-->
-<!--                </a>-->
-
-<!--            </span>-->
+        <td>
+                <button class="btn btn-success" type="button" ng-click="clearQueries()" title="Clear">
+                    <lord-icon
+                            src="https://cdn.lordicon.com/zxvuvcnc.json"
+                            trigger="hover"
+                            style="width:32px;height:32px">
+                    </lord-icon>
+                </button>
+        </td>
+        <td>
+                <button  class="btn btn-success" type="button" ng-click="searchProduct(productSalePrice, productType, averageRating)" title="Search">
+                    <lord-icon
+                            src="https://cdn.lordicon.com/fkdzyfle.json"
+                            trigger="hover"
+                            style="width:32px;height:32px">
+                    </lord-icon>
+                </button>
         </td>
     </tr>
 
     </thead>
     <tr ng-repeat="product in $ctrl.productList | filter:$ctrl.query track by product.productId">
+        <td>
+            <img ng-if="product.imageData"
+                ng-src="data:{{product.imageType}};base64,{{product.imageData}}"
+                alt="{{product.productName}}"
+                width="90">
+        </td>
         <td><span>{{product.productName}}</span></td>
         <td><span>{{product.productId}}</span></td>
         <td><span>{{product.productQuantity}}</span></td>
         <!--<td><span>{{product.productPrice}}$</span></td> -->
         <td><span>{{product.productDescription}}</span></td>
         <td><span>{{product.productSalePrice}}$</span></td>
+        <td><span>{{product.productType}}</span></td>
+        <td><span>{{product.productStatus}}</span></td>
+        <td><span>{{product.averageRating}}</span></td>
+
+
 
         <td>
             <a class="btn btn-info" href="#!/products/{{product.productId}}" title="Details">
@@ -104,14 +138,15 @@
 
 
 
-        <td><a ng-if="!product.isTemporarilyDeleted" class="btn btn-danger" href="javascript:void(0)" ng-click="deleteProduct(product); $event.stopPropagation()" title="Delete">
-            <lord-icon
-                    src="https://cdn.lordicon.com/skkahier.json"
-                    trigger="hover"
-                    style="width:32px;height:32px">
-            </lord-icon>
-            <a ng-if="product.isTemporarilyDeleted"  class="btn btn-info" href="javascript:void(0)" ng-click="undoDelete(product); $event.stopPropagation()">Restore</a>
-        </a>
+        <td>
+            <a ng-if="!product.isTemporarilyDeleted" class="btn btn-danger" href="javascript:void(0)" ng-click="deleteProduct(product); $event.stopPropagation()" title="Delete">
+                <lord-icon
+                        src="https://cdn.lordicon.com/skkahier.json"
+                        trigger="hover"
+                        style="width:32px;height:32px">
+                </lord-icon>
+                <a ng-if="product.isTemporarilyDeleted"  class="btn btn-info" href="javascript:void(0)" ng-click="undoDelete(product); $event.stopPropagation()">Restore</a>
+            </a>
         </td>
 
         <td></td>
@@ -141,6 +176,21 @@
 <div id="notification" style="display: none; position: fixed; bottom: 10px; right: 10px; background-color: #4CAF50; color: white; padding: 10px; border-radius: 5px;">
     Notification Text Here
 </div>
-<a ui-sref="shopProductNew">
+<a ui-sref="productAdd">
     <button class="add-bundle-button btn btn-success">Add Product</button>
 </a>
+
+<div class="action-toast" ng-class="{'show': toast.visible}">
+    <div class="title">{{ toast.title }}</div>
+    <div class="line" ng-repeat="line in toast.lines track by $index">{{ line }}</div>
+    <div class="actions" ng-if="toast.actions && toast.actions.length">
+        <button class="btn"
+                ng-class="{'btn-primary': (action.kind||'primary')==='primary',
+                       'btn-secondary': action.kind==='secondary',
+                       'btn-danger': action.kind==='danger' }"
+                ng-repeat="action in toast.actions track by $index"
+                ng-click="onToastAction($index)">
+            {{ action.label }}
+        </button>
+    </div>
+</div>

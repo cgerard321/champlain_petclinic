@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import './cart-shared.css';
 import './CartTable.css';
 import { ProductModel } from '../models/ProductModel';
 import axiosInstance from '@/shared/api/axiosInstance';
@@ -97,11 +98,19 @@ export default function CartListTable(): JSX.Element {
   }, [fetchCarts]);
 
   return (
-    <div className="cart-list-container">
-      {loading && <div className="loading">Loading carts...</div>}
-      {error && <div className="error">{error}</div>}
+    <div className="cart-list-container cart-panel cart-panel--spacious">
+      {loading && (
+        <div className="loading cart-panel cart-panel--padded">
+          Loading carts...
+        </div>
+      )}
+      {error && (
+        <div className="error cart-panel cart-panel--padded">{error}</div>
+      )}
       {!loading && carts.length === 0 && (
-        <div className="no-carts">No carts available.</div>
+        <div className="no-carts cart-panel cart-panel--padded">
+          No carts available.
+        </div>
       )}
       {!loading && carts.length > 0 && (
         <table className="cart-table">
@@ -118,7 +127,10 @@ export default function CartListTable(): JSX.Element {
                 <td>{cart.cartId}</td>
                 <td>{cart.customerId}</td>
                 <td>
-                  <Link to={`/carts/${cart.cartId}`} className="view-button">
+                  <Link
+                    to={`/carts/${cart.cartId}`}
+                    className="cart-button cart-button--brand"
+                  >
                     View Cart
                   </Link>
                 </td>

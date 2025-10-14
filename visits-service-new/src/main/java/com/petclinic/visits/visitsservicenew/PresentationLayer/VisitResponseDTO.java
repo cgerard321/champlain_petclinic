@@ -1,6 +1,9 @@
 package com.petclinic.visits.visitsservicenew.PresentationLayer;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.petclinic.visits.visitsservicenew.DataLayer.Status;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,7 +20,7 @@ import java.util.Date;
 public class VisitResponseDTO {
     private String visitId;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime visitDate;
     private String description;
     private String petId;
@@ -29,6 +32,9 @@ public class VisitResponseDTO {
     private String vetEmail;
     private String vetPhoneNumber;
     private Status status;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime visitEndDate;
+    @JsonProperty("isEmergency")
+    private Boolean isEmergency;
+
 }

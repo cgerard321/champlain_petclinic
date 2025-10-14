@@ -3,14 +3,14 @@ package com.petclinic.customersservice.presentationlayer;
 import com.petclinic.customersservice.business.OwnerService;
 import com.petclinic.customersservice.customersExceptions.exceptions.InvalidInputException;
 import com.petclinic.customersservice.data.Owner;
+import com.petclinic.customersservice.domainclientlayer.FilesServiceClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+
+import java.util.Base64;
 import java.util.Optional;
 
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +25,8 @@ import reactor.core.publisher.Mono;
 public class OwnerController {
 
     private final OwnerService ownerService;
+    private final FilesServiceClient filesServiceClient;
+
     @GetMapping()
     public Flux<OwnerResponseDTO> getAllOwners() {
         return ownerService.getAllOwners();
@@ -92,6 +94,55 @@ public class OwnerController {
         return ownerService.updateOwner(ownerRequestDTO, ownerId)
                 .map(updatedOwner -> ResponseEntity.ok().body(updatedOwner))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/{ownerId}/photos")
+    public Mono<ResponseEntity<byte[]>> getOwnerPhoto(@PathVariable String ownerId) {
+        return ownerService.getOwnerEntityByOwnerId(ownerId)
+                .flatMap(owner -> {
+                    String photoId = owner.getPhotoId();
+                    String fileIdToRequest = (photoId != null && !photoId.isEmpty()) ? photoId : "defaultProfilePicture.png";
+
+        return filesServiceClient.getFile(fileIdToRequest)
+                .map(fileResp -> {
+                     if (fileResp == null || fileResp.getFileData() == null) {
+                     log.warn("File {} is missing content, returning default placeholder", fileIdToRequest);
+                     return getDefaultPlaceholderResponse();
+                     }
+
+                     byte[] fileBytes = fileResp.getFileData();
+                     String contentType = fileResp.getFileType();
+
+                     if (contentType == null || !contentType.startsWith("image/")) {
+                     String fileName = fileResp.getFileName();
+                     if (fileName != null) {
+                      if (fileName.endsWith(".png")) contentType = "image/png";
+                        else if (fileName.endsWith(".jpg") || fileName.endsWith(".jpeg")) contentType = "image/jpeg";
+                      else contentType = "application/octet-stream";
+                      }
+                     else {
+                          contentType = "application/octet-stream";
+                           }
+                     }
+
+                     return ResponseEntity.ok()
+                        .contentType(MediaType.parseMediaType(contentType))
+                        .body(fileBytes);
+                     })
+                        .onErrorResume(err -> {
+                            log.error("Error fetching file {} for ownerId {}: {}", fileIdToRequest, ownerId, err.getMessage());
+                                return Mono.just(getDefaultPlaceholderResponse());
+                            });
+                })
+                .defaultIfEmpty(getDefaultPlaceholderResponse());
+    }
+
+    private ResponseEntity<byte[]> getDefaultPlaceholderResponse() {
+        // You can load a real local default image into byte[] if desired
+        byte[] defaultImageBytes = new byte[0]; // empty placeholder
+        return ResponseEntity.ok()
+                .contentType(MediaType.IMAGE_PNG)
+                .body(defaultImageBytes);
     }
 
 
