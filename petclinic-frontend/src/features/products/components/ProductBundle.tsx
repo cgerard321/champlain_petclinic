@@ -72,7 +72,7 @@ const ProductBundle: React.FC<ProductBundleProps> = ({ bundle }) => {
             onClick={() => navigate(`/products/${product.productId}`)}
             tabIndex={0}
             role="button"
-            onKeyPress={e => {
+            onKeyDown={e => {
               if (e.key === 'Enter' || e.key === ' ') {
                 navigate(`/products/${product.productId}`);
               }
@@ -96,7 +96,12 @@ const ProductBundle: React.FC<ProductBundleProps> = ({ bundle }) => {
         Bundle Price:{' '}
         <span className="bundle-price">${bundle.bundlePrice.toFixed(2)}</span>
       </p>
-      <button className="add-bundle-to-cart-button">Add Bundle to Cart</button>
+      <button
+        className="add-bundle-to-cart-button"
+        aria-label={`Add ${bundle.bundleName} to Cart`}
+      >
+        Add Bundle to Cart
+      </button>
     </div>
   );
 };
