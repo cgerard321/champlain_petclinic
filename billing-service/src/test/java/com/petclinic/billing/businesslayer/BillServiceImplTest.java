@@ -1,8 +1,10 @@
 package com.petclinic.billing.businesslayer;
 
 import com.petclinic.billing.datalayer.*;
+import com.petclinic.billing.domainclientlayer.Auth.AuthServiceClient;
 import com.petclinic.billing.domainclientlayer.Auth.UserDetails;
 import com.petclinic.billing.domainclientlayer.Mailing.Mail;
+import com.petclinic.billing.domainclientlayer.Mailing.MailService;
 import com.petclinic.billing.domainclientlayer.OwnerClient;
 import com.petclinic.billing.domainclientlayer.VetClient;
 import com.petclinic.billing.exceptions.InvalidPaymentException;
@@ -47,6 +49,12 @@ public class BillServiceImplTest {
 
     @MockBean
     VetClient vetClient;
+
+    @MockBean
+    AuthServiceClient authClient;
+
+    @MockBean
+    MailService mailService;
 
     @MockBean
     OwnerClient ownerClient;
@@ -814,6 +822,17 @@ public void testGenerateBillPdf_BillNotFound() {
 
         PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "123", "12/23");
 
+        UserDetails fakeUser = new UserDetails();
+        fakeUser.setUserId("user-123");
+        fakeUser.setUsername("fakeUser");
+        fakeUser.setEmail("fakeUser@example.com");
+
+        when(authClient.getUserById(anyString(), anyString()))
+                .thenReturn(Mono.just(fakeUser));
+        when(mailService.sendMail(any(Mail.class)))
+                .thenReturn(null);
+
+
         when(repo.findByCustomerIdAndBillId(customerId, billId)).thenReturn(Mono.just(bill));
         when(repo.save(any(Bill.class))).thenAnswer(invocation -> {
             Bill savedBill = invocation.getArgument(0);
@@ -839,6 +858,16 @@ public void testGenerateBillPdf_BillNotFound() {
         String jwtToken = "Bearer faketoken";
         PaymentRequestDTO paymentRequest = new PaymentRequestDTO("12345678", "123", "12/23");
 
+        UserDetails fakeUser = new UserDetails();
+        fakeUser.setUserId("user-123");
+        fakeUser.setUsername("fakeUser");
+        fakeUser.setEmail("fakeUser@example.com");
+
+        when(authClient.getUserById(anyString(), anyString()))
+                .thenReturn(Mono.just(fakeUser));
+        when(mailService.sendMail(any(Mail.class)))
+                .thenReturn(null);
+
         StepVerifier.create(billService.processPayment(customerId, billId, paymentRequest, jwtToken))
                 .expectErrorMatches(throwable -> throwable instanceof InvalidPaymentException &&
                         throwable.getMessage().contains("Invalid payment details"))
@@ -852,6 +881,16 @@ public void testGenerateBillPdf_BillNotFound() {
         String billId = "billId-1";
         String jwtToken = "Bearer faketoken";
         PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "12", "12/23");
+
+        UserDetails fakeUser = new UserDetails();
+        fakeUser.setUserId("user-123");
+        fakeUser.setUsername("fakeUser");
+        fakeUser.setEmail("fakeUser@example.com");
+
+        when(authClient.getUserById(anyString(), anyString()))
+                .thenReturn(Mono.just(fakeUser));
+        when(mailService.sendMail(any(Mail.class)))
+                .thenReturn(null);
 
         StepVerifier.create(billService.processPayment(customerId, billId, paymentRequest, jwtToken))
                 .expectErrorMatches(throwable -> throwable instanceof InvalidPaymentException &&
@@ -867,6 +906,16 @@ public void testGenerateBillPdf_BillNotFound() {
         String jwtToken = "Bearer faketoken";
         PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "123", "1223");
 
+        UserDetails fakeUser = new UserDetails();
+        fakeUser.setUserId("user-123");
+        fakeUser.setUsername("fakeUser");
+        fakeUser.setEmail("fakeUser@example.com");
+
+        when(authClient.getUserById(anyString(), anyString()))
+                .thenReturn(Mono.just(fakeUser));
+        when(mailService.sendMail(any(Mail.class)))
+                .thenReturn(null);
+
         StepVerifier.create(billService.processPayment(customerId, billId, paymentRequest, jwtToken))
                 .expectErrorMatches(throwable -> throwable instanceof InvalidPaymentException &&
                         throwable.getMessage().contains("Invalid payment details"))
@@ -879,6 +928,16 @@ public void testGenerateBillPdf_BillNotFound() {
         String billId = "billId-1";
         String jwtToken = "Bearer faketoken";
         PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "123", "12/23");
+
+        UserDetails fakeUser = new UserDetails();
+        fakeUser.setUserId("user-123");
+        fakeUser.setUsername("fakeUser");
+        fakeUser.setEmail("fakeUser@example.com");
+
+        when(authClient.getUserById(anyString(), anyString()))
+                .thenReturn(Mono.just(fakeUser));
+        when(mailService.sendMail(any(Mail.class)))
+                .thenReturn(null);
 
         when(repo.findByCustomerIdAndBillId(customerId, billId)).thenReturn(Mono.empty());
 
