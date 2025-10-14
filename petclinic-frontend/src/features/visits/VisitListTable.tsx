@@ -107,29 +107,44 @@ export default function VisitListTable(): JSX.Element {
 
   // Handle archiving the visit
   const handleArchive = async (visitId: string): Promise<void> => {
-    await archiveVisit(visitId, updatedVisit => {
-      // This should probably be removed once the visit list will be reactive
-      setVisits(prev => {
-        return prev.map(visit => {
-          if (visit.visitId === visitId) return updatedVisit;
-          return visit;
+    try {
+      await archiveVisit(visitId, updatedVisit => {
+        // This should probably be removed once the visit list will be reactive
+        setVisits(prev => {
+          return prev.map(visit => {
+            if (visit.visitId === visitId) return updatedVisit;
+            return visit;
+          });
         });
       });
-    });
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    } catch (error) {
+      return;
+    }
   };
 
   // Handle canceling the visit
   const handleCancel = async (visitId: string): Promise<void> => {
-    await cancelVisit(visitId, updatedVisit => {
-      // Update the full visits list; the displayed list will update automatically
-      // via the search effect above.
-      setVisits(prev => {
-        return prev.map(visit => {
-          if (visit.visitId === visitId) return updatedVisit;
-          return visit;
+    try {
+      await cancelVisit(visitId, updatedVisit => {
+        // Update the full visits list; the displayed list will update automatically
+        // via the search effect above.
+        setVisits(prev => {
+          return prev.map(visit => {
+            if (visit.visitId === visitId) return updatedVisit;
+            return visit;
+          });
         });
       });
-    });
+
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    } catch (error) {
+      return;
+    }
   };
 
   // RENDERING
@@ -344,7 +359,6 @@ export default function VisitListTable(): JSX.Element {
                         title="Cancel Visit"
                         showButton={renderCancelButton()}
                         onConfirm={() => handleCancel(visit.visitId)}
-                        refreshPageOnConfirm={true}
                       >
                         <div>
                           This will set the status of this visit to Canceled.

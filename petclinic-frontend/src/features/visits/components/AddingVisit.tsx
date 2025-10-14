@@ -61,7 +61,7 @@ const AddingVisit: React.FC<AddingVisitProps> = ({
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [showNotification, setShowNotification] = useState<boolean>(false);
 
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   //fetch vets
   useEffect(() => {
     const fetchVets = async (): Promise<void> => {
@@ -272,9 +272,11 @@ const AddingVisit: React.FC<AddingVisitProps> = ({
         //visitEndDate: new Date(),
         isEmergency: false,
       });
+      setTimeout(() => setShowNotification(false), 3000); // Hide notification after 3 seconds
+
       setTimeout(() => {
-        navigate('/visits');
-      }, 2000);
+        window.location.reload();
+      }, 1000);
     } catch (error) {
       const apiError = error as ApiError;
       setErrorMessage(`Error adding visit: ${apiError.message}`);
@@ -315,7 +317,7 @@ const AddingVisit: React.FC<AddingVisitProps> = ({
       showButton={showButton}
       formId="addvisit"
       validate={validate}
-      refreshPageOnConfirm={true}
+      // refreshPageOnConfirm={true}
       confirmText={isSubmitting ? 'Adding...' : 'Add'}
       errorMessage={errorMessage}
     >

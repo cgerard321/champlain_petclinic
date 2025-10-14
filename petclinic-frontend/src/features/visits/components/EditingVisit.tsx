@@ -135,10 +135,7 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
     setSuccessMessage('');
 
     const formattedVisit: VisitRequestModel = {
-      visitDate: visit.visitStartDate
-        .toISOString()
-        .slice(0, 16)
-        .replace('T', ' '),
+      visitDate: visit.visitStartDate.toISOString(),
       description: visit.description,
       petId: visit.petId,
       practitionerId: visit.practitionerId,
@@ -152,7 +149,9 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
         setSuccessMessage('Visit updated successfully!');
         setShowNotification(true);
         setTimeout(() => setShowNotification(false), 3000); // Hide notification after 3 seconds
-        navigate('/visits'); // Navigate to a different page or clear form
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
       }
     } catch (error) {
       // Use type assertion or check error type
@@ -169,7 +168,7 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
       showButton={showButton}
       formId="modalform"
       validate={validate}
-      refreshPageOnConfirm={true}
+      // refreshPageOnConfirm={true}
       confirmText={isLoading ? 'Updating...' : 'Update'}
       errorMessage={errorMessage}
     >
