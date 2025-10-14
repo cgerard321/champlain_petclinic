@@ -292,7 +292,7 @@ angular.module('vetDetails')
             const deleteAction = function() {
                 $http.delete('api/gateway/vets/' + $stateParams.vetId + '/ratings/' + ratingId)
                     .then(function successCallback(response) {
-                        self.showConfirmationModal('Success', ratingId + "Deleted Successfully!", null);
+                        self.showConfirmationModal('Success', ratingId + " Deleted Successfully!", null);
 
                         $http.get('api/gateway/vets/' + $stateParams.vetId + '/ratings').then(function (resp) {
                             self.ratings = resp.data;
@@ -510,7 +510,7 @@ angular.module('vetDetails')
                     $http.get('api/gateway/vets/' + $stateParams.vetId + '/educations').then(function (resp) {
                         self.educations = resp.data;
                     });
-                    document.getElementById("educationForm").reset();
+                    self.newEducation = {}; // Reset the model instead of the non-existent form
                 }, function (error) {
                     let errorMessage = 'An error occurred while adding the education.';
                     if (error.data && error.data.message) {
