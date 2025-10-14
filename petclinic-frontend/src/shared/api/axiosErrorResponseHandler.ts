@@ -1,5 +1,4 @@
 import { AxiosError } from 'axios';
-import router from '@/router';
 
 // Map status codes to their respective error pages
 const errorPageRedirects: Record<number, string> = {
