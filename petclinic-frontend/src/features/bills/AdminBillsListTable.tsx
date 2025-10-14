@@ -725,12 +725,12 @@ export default function AdminBillsListTable({
                   <td>{bill.date}</td>
                   <td>
                     {currency === 'CAD'
-                      ? `CAD $${convertCurrency(bill.amount, 'CAD', 'CAD').toFixed(2)}`
+                      ? `CAD $${bill.amount.toFixed(2)}`
                       : `USD $${convertCurrency(bill.amount, 'CAD', 'USD').toFixed(2)}`}
                   </td>
                   <td>
                     {currency === 'CAD'
-                      ? `CAD $${convertCurrency(bill.taxedAmount, 'CAD', 'CAD').toFixed(2)}`
+                      ? `CAD $${bill.taxedAmount.toFixed(2)}`
                       : `USD $${convertCurrency(bill.taxedAmount, 'CAD', 'USD').toFixed(2)}`}
                   </td>
                   <td>{bill.billStatus}</td>
