@@ -297,18 +297,34 @@ services:
       - mongo-carts-config:/data/configdb
     restart: unless-stopped
 
-  appsmith:
-    image: appsmith/appsmith-ce
-    container_name: appsmith
+  tooljet-db:
+    image: postgres:14
+    container_name: tooljet-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=tooljet
+      - POSTGRES_USER=tooljet
+      - POSTGRES_PASSWORD=tooljetpwd
+    volumes:
+      - tooljet-db-data:/var/lib/postgresql/data
+
+  tooljet:
+    image: tooljet/tooljet-ce:latest
+    container_name: tooljet
     restart: unless-stopped
     ports:
       - "8030:80"
-    volumes:
-      - appsmith-stacks:/appsmith-stacks
     environment:
-      - APPSMITH_INSTANCE_NAME=Petclinic Admin
-      - APPSMITH_SIGNUP_DISABLED=false
+      - PG_HOST=tooljet-db
+      - PG_PORT=5432
+      - PG_DB=tooljet
+      - PG_USER=tooljet
+      - PG_PASS=tooljetpwd
+
+      - TOOLJET_HOST=http://localhost:8030
+      - DISABLE_SIGNUP=true
     depends_on:
+      - tooljet-db
       - mysql-auth
       - mysql-files
       - postgres-vet
@@ -319,7 +335,6 @@ services:
       - mongo-inventory
       - mongo-products
       - mongo-carts
-
 
 # -------------------
 # VOLUMES
@@ -342,4 +357,4 @@ volumes:
   mongo-carts-config:
   postgres-vet-data:
   mysql-files-data:
-  appsmith-stacks:
+  tooljet-db-data:
