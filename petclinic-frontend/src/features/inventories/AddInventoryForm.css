@@ -33,14 +33,6 @@
   margin-bottom: 5px;
 }
 
-.form-container input {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  box-sizing: border-box;
-}
-
 /* Buttons */
 .form-container button {
   background-color: #007bff;
@@ -63,4 +55,56 @@
 
 .form-container button.cancel:hover {
   background-color: #5a6268;
+}
+
+
+/* Base inputs so we have room for inline error text */
+.form-container input[type='text'],
+.form-container input[type='number'],
+.form-container select,
+.form-container textarea{
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0 4px; /* leave space for error line */
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-size: 16px;
+  transition: border-color 120ms ease, box-shadow 120ms ease, background-color 120ms ease;
+}
+
+/* Error state (toggle via className 'invalid') */
+.form-container input.invalid,
+.form-container select.invalid,
+.form-container textarea.invalid {
+  border-color: #d32f2f;
+  background-color: #ffebee;
+}
+
+.form-container input.invalid:focus,
+.form-container select.invalid:focus,
+.form-container textarea.invalid:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.2);
+}
+
+/* Inline error text under each field */
+.field-error {
+  color: #d32f2f;
+  font-size: 0.85rem;
+  line-height: 1.2;
+  margin: 2px 0 8px;
+}
+
+/* Subtle shake when the error first appears (use 'invalid animate') */
+.form-container input.invalid.animate,
+.form-container select.invalid.animate,
+.form-container textarea.invalid.animate {
+  animation: inventory-input-shake 180ms ease-in-out 0s 2;
+}
+
+@keyframes inventory-input-shake {
+  0%, 100% { transform: translateX(0); }
+  25%      { transform: translateX(-3px); }
+  75%      { transform: translateX(3px); }
 }

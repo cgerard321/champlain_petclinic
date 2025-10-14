@@ -19,7 +19,7 @@ export default function MoveInventoryProducts(): JSX.Element {
     { inventoryId: string; inventoryName: string }[]
   >([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [showNotification, setShowNotification] = useState<boolean>(false);
@@ -33,7 +33,9 @@ export default function MoveInventoryProducts(): JSX.Element {
         const response = await getAllInventories();
         setInventories(response);
       } catch (err) {
-        setError('Error fetching inventories');
+        const msg =
+          err instanceof Error ? err.message : 'Error fetching inventories';
+        setFetchError(msg);
       } finally {
         setLoading(false);
       }
@@ -46,6 +48,21 @@ export default function MoveInventoryProducts(): JSX.Element {
     event: FormEvent<HTMLFormElement>
   ): Promise<void> => {
     event.preventDefault();
+
+    if (!newInventoryId) {
+      setErrorMessage('Please select a destination inventory.');
+      return;
+    }
+    if (inventoryId && newInventoryId === inventoryId) {
+      setErrorMessage(
+        'Please choose a different inventory than the current one.'
+      );
+      return;
+    }
+    if (!productId || !inventoryId) {
+      setErrorMessage('Missing product or inventory id.');
+      return;
+    }
 
     setLoading(true);
     setErrorMessage('');
@@ -73,6 +90,8 @@ export default function MoveInventoryProducts(): JSX.Element {
     event: React.ChangeEvent<HTMLSelectElement>
   ): void => {
     setNewInventoryId(event.target.value);
+
+    if (errorMessage) setErrorMessage('');
   };
 
   const filteredInventories = inventories.filter(
@@ -102,6 +121,7 @@ export default function MoveInventoryProducts(): JSX.Element {
             id="newInventorySelect"
             value={newInventoryId}
             onChange={handleNewInventoryChange}
+            disabled={loading}
           >
             <option value="">Select inventory</option>
             {filteredInventories.map(inventory => (
@@ -110,18 +130,23 @@ export default function MoveInventoryProducts(): JSX.Element {
               </option>
             ))}
           </select>
+          {filteredInventories.length === 0 && !loading && (
+            <small style={{ color: '#444' }}>
+              No other inventories available.
+            </small>
+          )}
         </div>
         <div style={{ display: 'flex', gap: '12px', marginTop: '12px' }}>
           <button
             type="submit"
-            disabled={!newInventoryId}
+            disabled={!newInventoryId || loading}
             style={{
               width: '100px',
               backgroundColor: '#333',
               color: 'white',
             }}
           >
-            Move
+            {loading ? 'Moving...' : 'Move'}
           </button>
 
           <button
@@ -139,7 +164,7 @@ export default function MoveInventoryProducts(): JSX.Element {
       </form>
       <div>
         {loading && <p>Loading...</p>}
-        {error && <p style={{ color: 'red' }}>{error}</p>}{' '}
+        {fetchError && <p style={{ color: 'red' }}>{fetchError}</p>}{' '}
         {/* Error message directly */}
         {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
         {showNotification ? (
