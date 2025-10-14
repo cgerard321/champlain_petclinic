@@ -20,6 +20,7 @@ const BasicModal: React.FC<BasicModalProps> = ({
   title,
   confirmText = 'Confirm',
   onConfirm,
+  refreshPageOnConfirm,
   formId,
   validate = () => true,
   showButton,
@@ -56,6 +57,24 @@ const BasicModal: React.FC<BasicModalProps> = ({
     handleClose;
     setBusy(false);
   };
+
+  // const handleSubmitForm = async (): Promise<void> => {
+  //   if (busy) return;
+
+  //   if (!validate()) return;
+
+  //   setIsLoading(true);
+  //   try {
+  //     if (onConfirm) await onConfirm();
+  //     setTimeout(() => {
+  //       window.location.reload();
+  //     }, 100);
+  //   } catch (error) {
+  //     setErrorMessage(`Error updating visit: ${error}`);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
 
   const renderConfirmButton = (): JSX.Element =>
     onConfirm || formId != null ? (

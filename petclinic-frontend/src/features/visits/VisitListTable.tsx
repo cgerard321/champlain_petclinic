@@ -380,10 +380,42 @@ export default function VisitListTable(): JSX.Element {
                         onConfirm={() => handleCancel(visit.visitId)}
                       >
                         <div>
+<<<<<<< HEAD
                           This will set the status of this visit to Canceled.
                         </div>
                         <div>Do you wish to proceed?</div>
                       </BasicModal>
+=======
+                          This will set the status of this visit to Archived.
+                        </div>
+                        <div>Do you wish to proceed?</div>
+                      </ConfirmationModal>
+                      // </a>
+                    )}
+
+                  {visit.status !== 'CANCELLED' &&
+                    visit.status !== 'ARCHIVED' &&
+                    visit.status !== 'COMPLETED' &&
+                    !isVet && (
+                      // <a
+                      //   className="icon"
+                      //   onClick={() => handleCancel(visit.visitId)}
+                      //   title="Cancel"
+                      // >
+                      //   <img src={xcrossIcon} />
+                      // </a>
+                      // <a className="icon" title="Delete">
+                      <ConfirmationModal
+                        title="Cancel Visit"
+                        showButton={renderCancelButton()}
+                        onConfirm={() => handleCancel(visit.visitId)}
+                      >
+                        <div>
+                          This will set the status of this visit to Canceled.
+                        </div>
+                        <div>Do you wish to proceed?</div>
+                      </ConfirmationModal>
+>>>>>>> 5f210cf1 (fixed styling for view and edit)
                       // </a>
                     )}
                 </td>
