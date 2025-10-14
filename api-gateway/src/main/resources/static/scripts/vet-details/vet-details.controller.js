@@ -510,7 +510,7 @@ angular.module('vetDetails')
                     $http.get('api/gateway/vets/' + $stateParams.vetId + '/educations').then(function (resp) {
                         self.educations = resp.data;
                     });
-                    document.getElementById("educationForm").reset();
+                    self.newEducation = {}; // Reset the model instead of the non-existent form
                 }, function (error) {
                     let errorMessage = 'An error occurred while adding the education.';
                     if (error.data && error.data.message) {
