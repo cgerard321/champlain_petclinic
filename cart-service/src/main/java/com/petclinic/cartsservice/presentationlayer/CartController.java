@@ -315,4 +315,11 @@ public class CartController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/{cartId}/recommendation-purchases")
+    public Mono<ResponseEntity<List<CartProduct>>> getRecommendationPurchases(@PathVariable String cartId) {
+        return cartService.getRecommendationPurchases(cartId)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
 }
