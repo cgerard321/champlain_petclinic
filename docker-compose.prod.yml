@@ -297,24 +297,29 @@ services:
       - mongo-carts-config:/data/configdb
     restart: unless-stopped
 
-  dbgate:
-    image: dbgate/dbgate:latest
-    container_name: dbgate
-    ports:
-      - "8979:3000"
-    environment:
-      - AUTH_METHOD=local           # ✅ Enables login system
-      - ADMIN_EMAIL=admin@example.com
-      - ADMIN_PASSWORD=change_me    # ✅ First admin user
-      - USER_MODE=server            # ✅ Forces multi-user mode (important!)
-    volumes:
-      - dbgate-data:/root/.dbgate   # ✅ Persist users, roles, connections
+  appsmith:
+    image: appsmith/appsmith-ce
+    container_name: appsmith
     restart: unless-stopped
-
+    ports:
+      - "8030:80"             # UI at http://<host>:8090
+    volumes:
+      - appsmith-stacks:/appsmith-stacks
+    environment:
+      - APPSMITH_INSTANCE_NAME=Petclinic Admin
+      # (optional) disable public signups; you can invite users from the admin UI
+      # - APPSMITH_SIGNUP_DISABLED=true
+      # (optional) SMTP for invites/password reset; you can set this later in UI
+      # - APPSMITH_MAIL_ENABLED=true
+      # - APPSMITH_MAIL_HOST=smtp.gmail.com
+      # - APPSMITH_MAIL_PORT=587
+      # - APPSMITH_MAIL_USERNAME=champlain.petclinic@gmail.com
+      # - APPSMITH_MAIL_PASSWORD=<app-password>
+      # - APPSMITH_MAIL_FROM=champlain.petclinic@gmail.com
     depends_on:
-      - postgres-vet
       - mysql-auth
       - mysql-files
+      - postgres-vet
       - mongo-vet
       - mongo-billing
       - mongo-visits
@@ -322,6 +327,7 @@ services:
       - mongo-inventory
       - mongo-products
       - mongo-carts
+
 
 # -------------------
 # VOLUMES
@@ -344,4 +350,4 @@ volumes:
   mongo-carts-config:
   postgres-vet-data:
   mysql-files-data:
-  dbgate-data:
+  tooljet-db-data:
