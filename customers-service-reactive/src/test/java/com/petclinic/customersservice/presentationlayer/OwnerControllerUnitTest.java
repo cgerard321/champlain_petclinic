@@ -2,7 +2,6 @@ package com.petclinic.customersservice.presentationlayer;
 
 import com.petclinic.customersservice.business.OwnerService;
 import com.petclinic.customersservice.data.Owner;
-import com.petclinic.customersservice.presentationlayer.OwnerResponseDTO;
 import com.petclinic.customersservice.domainclientlayer.FileResponseDTO;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -57,6 +56,7 @@ public class OwnerControllerUnitTest {
                     assertEquals(HttpStatus.OK, response.getStatusCode());
                     assertNotNull(response.getBody());
                     OwnerResponseDTO body = response.getBody();
+                    assertNotNull(body);
                     assertEquals(TEST_OWNER_ID, body.getOwnerId());
                     assertEquals("John", body.getFirstName());
                 })
@@ -85,6 +85,7 @@ public class OwnerControllerUnitTest {
                     assertEquals(HttpStatus.OK, response.getStatusCode());
                     assertNotNull(response.getBody());
                     OwnerResponseDTO body = response.getBody();
+                    assertNotNull(body);
                     assertEquals(TEST_OWNER_ID, body.getOwnerId());
                     assertEquals("John", body.getFirstName());
                     assertNotNull(body.getPhoto());
@@ -131,10 +132,7 @@ public class OwnerControllerUnitTest {
             .when(ownerService)
             .updateOwnerPhoto(org.mockito.ArgumentMatchers.eq(TEST_OWNER_ID), org.mockito.ArgumentMatchers.any(com.petclinic.customersservice.domainclientlayer.FileRequestDTO.class));
 
-        OwnerRequestDTO ownerRequest = new OwnerRequestDTO();
-        ownerRequest.setPhoto(photoRequest);
-
-        Mono<ResponseEntity<OwnerResponseDTO>> result = ownerController.patchOwner(TEST_OWNER_ID, Mono.just(ownerRequest));
+        Mono<ResponseEntity<OwnerResponseDTO>> result = ownerController.updateOwnerPhoto(TEST_OWNER_ID, Mono.just(photoRequest));
 
         StepVerifier.create(result)
             .consumeNextWith(response -> {
