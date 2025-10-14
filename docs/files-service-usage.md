@@ -10,6 +10,7 @@ Back to [Main page](../README.md)
     * [Add File](#add-file)
     * [Update File](#update-file)
     * [Delete File](#delete-file)
+    * [Patch File](#patch-file)
 * [React Frontend Usage](#react-frontend-usage)
     * [React Frontend Setup](#react-frontend-setup)
     * [React Display Image](#react-display-image)
@@ -251,12 +252,13 @@ Since files can be heavy and won't always be used, we add a request parameter to
 
 We are not making a new endpoint in this case to get a file because the owner's photo will never be needed without the other details about him.
 This should be the general rule, do not make a new endpoint as you would simply make it so that you have to make 2 HTTP GET calls to get all the information you need instead of one.
+Using a request parameter with a default value to false makes it backwards compatible.
 
 Good Example from Customer-Service's Controller:
 
 ```java
     @GetMapping("/{ownerId}")
-    public Mono<ResponseEntity<OwnerResponseDTO>> getOwnerByOwnerId(@PathVariable String ownerId, @RequestParam(required = true) boolean includePhoto) {
+    public Mono<ResponseEntity<OwnerResponseDTO>> getOwnerByOwnerId(@PathVariable String ownerId, @RequestParam(required = false, defaultValue = "false") boolean includePhoto) {
         return ownerService.getOwnerByOwnerId(ownerId, includePhoto)
                 .map(ownerResponseDTO -> ResponseEntity.status(HttpStatus.OK).body(ownerResponseDTO))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
@@ -341,7 +343,7 @@ Good Example from Customer Api-gateway Controller:
 
 There are two possible ways to associate a file with your entity, depending on your use case:
 * If the file should be uploaded when creating the entity, follow [Add File on Creation](#update-service-implement-to-addfile)
-* If the file should be uploaded after creating the entity, follow [Add File after Creation](#add-new-patch-endpoint)
+* If the file should be uploaded after creating the entity, follow [Add File after Creation](#patch-file)
 
 #### Update Service Implement to Support addFile
 This approach is the simplest and only requires to update the addEntity of your service.
@@ -382,22 +384,70 @@ Good Example from Customer Service Implement:
     }
 ```
 
-#### Add New Patch Endpoint
+### Patch File
 
 This is the harder method, but the most efficient. It requires that a new endpoint be created in the service and in the api-gateway.
-The Steps to add a new patch endpoint won't be explained here.
+Here are the steps for adding the endpoint to your service, to add it to the api-gateway, you can just do the same things as other endpoints.
 
-Here is the logic to get a FileId after adding it to the Files Service.
+#### 1. Add Service Implement Patch
+When using a PATCH endpoint, you need to make that you update only if the entity already has a fileId.
+Do not use addFile when a file already exists because it will not remove the old file.
 
+Good Example from Customer Service Implement:
+
+```java
+    @Override
+    public Mono<OwnerResponseDTO> updateOwnerPhoto(String ownerId, FileRequestDTO photo) {
+        return ownerRepo.findOwnerByOwnerId(ownerId)
+                .switchIfEmpty(Mono.error(new NotFoundException("Owner not found with id: " + ownerId)))
+                .flatMap(existingOwner -> {
+                    Mono<FileResponseDTO> fileOperation;
+
+                    if (existingOwner.getPhotoId() != null && !existingOwner.getPhotoId().isEmpty()) {
+                        fileOperation = filesServiceClient.updateFile(existingOwner.getPhotoId(), photo)
+                                .onErrorResume(e -> {
+                                    log.warn("Photo file {} not found or error updating, creating new file instead: {}", 
+                                            existingOwner.getPhotoId(), e.getMessage());
+                                    return filesServiceClient.addFile(photo);
+                                });
+                    } else {
+                        fileOperation = filesServiceClient.addFile(photo);
+                    }
+
+                    return fileOperation
+                            .flatMap(fileResp -> {
+                                existingOwner.setPhotoId(fileResp.getFileId());
+                                return ownerRepo.save(existingOwner)
+                                        .map(savedOwner -> {
+                                            OwnerResponseDTO dto = EntityDTOUtil.toOwnerResponseDTO(savedOwner);
+                                            dto.setPhoto(fileResp);
+                                            return dto;
+                                        });
+                            });
+                });
+    }
 ```
-filesServiceClient.addFile(ownerRequest.getPhoto()).map(FileResponseDTO::getFileId);
+
+#### 2. Add Controller Patch 
+The PATCH endpoint doesn't need the full entity dto, it only needs the FileDTO.
+
+Good Example from Customer Service Implement:
+
+```java
+    @PatchMapping("/{ownerId}/photo")
+    public Mono<ResponseEntity<OwnerResponseDTO>> updateOwnerPhoto(@PathVariable String ownerId, @RequestBody Mono<FileRequestDTO> photoMono) {
+        return photoMono
+                .flatMap(photo -> ownerService.updateOwnerPhoto(ownerId, photo))
+                .map(updatedOwner -> ResponseEntity.ok().body(updatedOwner))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
 ```
 
 ### Update File
 
 There are two possible ways to update the file associated with your entity, depending on your use case:
 
-The best solution is to use a patch endpoint instead of a put endpoint when updating, [Add New Patch Endpoint](#add-new-patch-endpoint). This makes it so that only when the file has been changed will we send an update request to the Files Service.
+The best solution is to use a patch endpoint instead of a put endpoint when updating, [Add New Patch Endpoint](#patch-file). This makes it so that only when the file has been changed will we send an update request to the Files Service.
 
 You can also use the put method, but it will be more costly since it send an update request to the Files Service everytime the entity is updated, [Update Service Implement to Support UpdateFile](#update-service-implement-to-support-updatefile).
 
@@ -470,7 +520,7 @@ Good Example from Customer Service Implement:
     }
 ```
 
-If the file needs to be deleted without the entire entity, follow [Add New Patch Endpoint](#add-new-patch-endpoint)
+If the file needs to be deleted without the entire entity, follow [Add New Patch Endpoint](#patch-file)
 
 ## React Frontend Usage
 
