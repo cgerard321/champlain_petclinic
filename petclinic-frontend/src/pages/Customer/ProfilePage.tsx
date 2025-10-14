@@ -275,8 +275,15 @@ const ProfilePage = (): JSX.Element => {
         const byteArray = new Uint8Array(byteNumbers);
         const blob = new Blob([byteArray], { type: contentType });
         const objectUrl = URL.createObjectURL(blob);
+
+        if (profilePicUrl) {
+          URL.revokeObjectURL(profilePicUrl);
+        }
         setProfilePicUrl(objectUrl);
       } else {
+        if (profilePicUrl) {
+          URL.revokeObjectURL(profilePicUrl);
+        }
         setProfilePicUrl('');
       }
     } catch (error) {
