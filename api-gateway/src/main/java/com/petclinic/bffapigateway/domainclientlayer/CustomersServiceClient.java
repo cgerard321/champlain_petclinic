@@ -1,11 +1,14 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
+import com.petclinic.bffapigateway.dtos.CustomerDTOs.FileRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.*;
 import com.petclinic.bffapigateway.dtos.Vets.PhotoDetails;
+import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -40,6 +43,16 @@ public class CustomersServiceClient {
     public Mono<OwnerResponseDTO> getOwner(final String ownerId) {
         return webClientBuilder.build().get()
                 .uri(customersServiceUrl + "/owners/" + ownerId)
+                .retrieve()
+                .bodyToMono(OwnerResponseDTO.class);
+    }
+
+    public Mono<OwnerResponseDTO> getOwner(final String ownerId, boolean includePhoto) {
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(customersServiceUrl + "/owners/" + ownerId);
+        builder.queryParam("includePhoto", includePhoto);
+        
+        return webClientBuilder.build().get()
+                .uri(builder.build().toUri())
                 .retrieve()
                 .bodyToMono(OwnerResponseDTO.class);
     }
@@ -279,19 +292,6 @@ public class CustomersServiceClient {
                 .bodyToMono(OwnerResponseDTO.class);
     }
 
-    public Mono<String> setOwnerPhoto(PhotoDetails file, String ownerId) {
-        return webClientBuilder.build().post()
-                .uri(customersServiceUrl + "/owners/" + ownerId + "/photos")
-                .body(just(file), PhotoDetails.class)
-                .retrieve().bodyToMono(String.class);
-    }
-    public Mono<byte[]> getOwnerPhoto(String ownerId) {
-        return webClientBuilder.build()
-                .get()
-                .uri(customersServiceUrl + "/owners/" + ownerId + "/photos")
-                .retrieve()
-                .bodyToMono(byte[].class);
-    }
 
     public Mono<Void> deletePetPhoto(int ownerId, int photoId) {
         return webClientBuilder.build().delete()
@@ -412,6 +412,19 @@ public class CustomersServiceClient {
                 .bodyToMono(Long.class);
     }
 
-
+    public Mono<OwnerResponseDTO> updateOwnerPhoto(String ownerId, FileRequestDTO photo) {
+        log.info("CustomersServiceClient: Sending photo upload request to {}/owners/{}/photo", customersServiceUrl, ownerId);
+        return webClientBuilder.build().post()
+                .uri(customersServiceUrl + "/owners/" + ownerId + "/photo")
+                .body(BodyInserters.fromValue(photo))
+                .retrieve()
+                .onStatus(HttpStatus.NOT_FOUND::equals, response -> 
+                    Mono.error(new RuntimeException("Owner not found with id: " + ownerId)))
+                .onStatus(HttpStatus.BAD_REQUEST::equals, response -> 
+                    Mono.error(new InvalidInputException("Invalid photo data for owner: " + ownerId)))
+                .bodyToMono(OwnerResponseDTO.class)
+                .doOnSuccess(result -> log.info("CustomersServiceClient: Photo uploaded successfully for ownerId: {}", ownerId))
+                .doOnError(error -> log.error("CustomersServiceClient: Error uploading photo for ownerId {}: {}", ownerId, error.getMessage()));
+    }
 
 }

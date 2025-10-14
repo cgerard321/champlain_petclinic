@@ -21,4 +21,6 @@ public class OwnerResponseDTO {
     private String province;
     private String telephone;
     private List<PetResponseDTO> pets;
+    private String photoId;
+    private FileResponseDTO photo;
 }

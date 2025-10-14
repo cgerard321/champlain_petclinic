@@ -19,4 +19,5 @@
         private String province;
         private String telephone;
         //private List<PetResponseDTO> pets;
+        private FileRequestDTO photo;
     }
