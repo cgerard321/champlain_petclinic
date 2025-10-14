@@ -31,9 +31,13 @@ public class BillServiceClient {
             @Value("${app.billing-service.port}") String billingServicePort
     ) {
         this.webClientBuilder = webClientBuilder;
-        String host = (billingServiceHost == null || billingServiceHost.isBlank()) ? "billing-service" : billingServiceHost;
-        String port = (billingServicePort == null || billingServicePort.isBlank()) ? "8080" : billingServicePort;
-        billServiceUrl = "http://" + host + ":" + port + "/bills";
+        if (billingServiceHost == null || billingServiceHost.isBlank()) {
+            throw new IllegalArgumentException("Configuration property 'app.billing-service.host' must be set and non-blank");
+        }
+        if (billingServicePort == null || billingServicePort.isBlank()) {
+            throw new IllegalArgumentException("Configuration property 'app.billing-service.port' must be set and non-blank");
+        }
+        billServiceUrl = "http://" + billingServiceHost + ":" + billingServicePort + "/bills";
     }
 
     public Mono<BillResponseDTO> getBillById(final String billId) {
