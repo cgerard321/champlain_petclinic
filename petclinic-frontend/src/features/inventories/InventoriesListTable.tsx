@@ -513,6 +513,21 @@ export default function InventoriesListTable(): JSX.Element {
                   </svg>
                 </button>
               </td>
+
+              {/* New: viewMode selector for Active / Archived / All */}
+              <td>
+                <select
+                    className="form-control"
+                    value={viewMode}
+                    onChange={e => setViewMode(e.target.value as 'active' | 'archived' | 'all')}
+                    title="View: Active / Archived / All"
+                >
+                  <option value="active">Active</option>
+                  <option value="archived">Archived</option>
+                  <option value="all">All</option>
+                </select>
+              </td>
+
               <td></td>
             </tr>
           </thead>
