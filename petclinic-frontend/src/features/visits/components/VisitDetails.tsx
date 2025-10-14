@@ -41,6 +41,10 @@ const VisitDetails: React.FC<VisitDetailsProps> = ({ visitId }) => {
         <span className="visit-value">{visit.description}</span>
       </div>
       <div className="visit-field">
+        <span className="visit-label">Pet ID:</span>
+        <span className="visit-value">{visit.petId}</span>
+      </div>
+      <div className="visit-field">
         <span className="visit-label">Pet Name:</span>
         <span className="visit-value">{visit.petName}</span>
       </div>

@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { exportVisitsCSV } from './api/exportVisitsCSV';
 import { getAllVisits } from './api/getAllVisits';
 import { IsVet } from '@/context/UserContext';
-import { AppRoutePaths } from '@/shared/models/path.routes';
+// import { AppRoutePaths } from '@/shared/models/path.routes';
 import { archiveVisit } from './api/archiveVisit';
 import { cancelVisit } from './api/cancelVisit';
 
@@ -20,6 +20,7 @@ import archiveIcon from '@/assets/Icons/archiveDark.svg';
 import xcrossIcon from '@/assets/Icons/xcrossDark.svg';
 import pentosquareIcon from '@/assets/Icons/pentosquareLight.svg';
 import starIcon from '@/assets/Icons/starEmptyLight.svg';
+import AddingVisit from './components/AddingVisit';
 
 export default function VisitListTable(): JSX.Element {
   const isVet = IsVet();
@@ -135,19 +136,27 @@ export default function VisitListTable(): JSX.Element {
 
   // Buttons
   const renderCancelButton = (): JSX.Element => (
-    <img className="icon" src={xcrossIcon} title="Cancel" />
+    <a>
+      <img className="icon" src={xcrossIcon} title="Cancel" />
+    </a>
   );
 
   const renderArchiveButton = (): JSX.Element => (
-    <img className="icon" src={archiveIcon} title="Archive" />
+    <a>
+      <img className="icon" src={archiveIcon} title="Archive" />
+    </a>
   );
 
   const renderEditButton = (): JSX.Element => (
-    <img className="icon" src={pencilIcon} title="Edit" />
+    <a>
+      <img className="icon" src={pencilIcon} title="Edit" />
+    </a>
   );
 
   const renderViewButton = (): JSX.Element => (
-    <img className="icon" src={eyeIcon} title="View" />
+    <a>
+      <img className="icon" src={eyeIcon} title="View" />
+    </a>
   );
 
   // Sidebar
@@ -184,14 +193,14 @@ export default function VisitListTable(): JSX.Element {
         </li>
 
         <li>
-          <button
-            className="btn btn-primary"
-            onClick={() => navigate(AppRoutePaths.AddVisit)}
-            title="Create"
-          >
-            <img src={pentosquareIcon} />
-            Create
-          </button>
+          <AddingVisit
+            showButton={
+              <button className="btn btn-primary" title="Create">
+                <img src={pentosquareIcon} />
+                Create
+              </button>
+            }
+          />
         </li>
         <li>
           <button

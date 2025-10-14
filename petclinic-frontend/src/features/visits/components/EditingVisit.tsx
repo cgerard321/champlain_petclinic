@@ -6,6 +6,7 @@ import { Status } from '@/features/visits/models/Status';
 import { VisitResponseModel } from '../models/VisitResponseModel';
 import { getVisit } from '../api/getVisit';
 import { updateVisit } from '../api/updateVisit';
+import { getAvailableVets, VetResponse } from '@/features/visits/api/getVets';
 
 import BasicModal from '@/shared/components/BasicModal';
 
@@ -26,6 +27,7 @@ type VisitType = {
   petId: string;
   practitionerId: string;
   // ownerId: string;
+  isEmergency: boolean;
   status: Status;
 };
 
@@ -43,6 +45,7 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
     description: '',
     petId: '',
     practitionerId: '',
+    isEmergency: false,
     status: 'UPCOMING' as Status,
   });
 
@@ -51,6 +54,8 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [showNotification, setShowNotification] = useState<boolean>(false);
+
+  const [vets, setVets] = useState<VetResponse[]>([]);
 
   const navigate = useNavigate();
 
@@ -65,6 +70,7 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
             petId: response.petId,
             visitStartDate: new Date(response.visitDate),
             status: response.status,
+            isEmergency: response.isEmergency,
           });
         } catch (error) {
           console.error(`Error fetching visit with ID ${visitId}:`, error);
@@ -76,6 +82,24 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
       fetchVisitData();
     }
   }, [visitId]);
+
+  //fetch vets
+  useEffect(() => {
+    const fetchVets = async (): Promise<void> => {
+      try {
+        const vetsResponse = await getAvailableVets();
+        const activeVets = Array.isArray(vetsResponse)
+          ? vetsResponse.filter(vet => vet.active)
+          : [];
+        setVets(activeVets);
+      } catch (error) {
+        const apiError = error as ApiError;
+        setErrorMessage(`Error loading vets: ${apiError.message}`);
+      }
+    };
+
+    fetchVets();
+  }, []);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -118,6 +142,7 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
       description: visit.description,
       petId: visit.petId,
       practitionerId: visit.practitionerId,
+      isEmergency: visit.isEmergency,
       status: visit.status,
     };
 
@@ -150,7 +175,8 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
     >
       <form id="modalform" onSubmit={handleSubmit}>
         <label>
-          Pet ID: {errors.petId && <span className="error">Required</span>}
+          Pet ID:{' '}
+          {errors.petId && <span className="error">{errors.petId}</span>}
         </label>
 
         <input
@@ -164,7 +190,9 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
         <br />
         <label>
           Visit Date:{' '}
-          {errors.visitStartDate && <span className="error">Required</span>}
+          {errors.visitStartDate && (
+            <span className="error">{errors.visitDate}</span>
+          )}
         </label>
 
         <input
@@ -192,20 +220,27 @@ const EditingVisit: React.FC<EditingVisitProps> = ({
         />
 
         <br />
-        <label>
-          Practitioner ID:{' '}
-          {errors.practitionerId && (
-            <span className="error">{errors.practitionerId}</span>
-          )}
-        </label>
-
-        <input
-          type="text"
-          name="practitionerId"
-          value={visit.practitionerId}
-          onChange={handleChange}
-          required
-        />
+        <div className="form-group">
+          <label htmlFor="practitionerId">Veterinarian Preference:</label>
+          <select
+            id="practitionerId"
+            name="practitionerId"
+            value={visit.practitionerId}
+            onChange={handleChange}
+          >
+            <option value="no-preference">
+              No Preference (Show All Available Times)
+            </option>
+            {vets.map(vet => (
+              <option key={vet.vetId} value={vet.vetId}>
+                Dr. {vet.firstName} {vet.lastName}
+                {vet.specialties &&
+                  vet.specialties.length > 0 &&
+                  ` (${vet.specialties.map(s => s.name).join(', ')})`}
+              </option>
+            ))}
+          </select>
+        </div>
 
         <br />
         <label>

@@ -12,7 +12,8 @@ interface BasicModalProps {
   formId?: string; //The id of the form inside of the modal
   validate?: () => boolean; //What needs to be true before it handles confirmation
   showButton: JSX.Element; //The button that shows the modal
-  errorMessage?: string;
+  errorMessage?: string; //The error message that will show at the bottom of the modal
+  loading?: boolean; //Displays a basic "Loading..."
   children?: React.ReactNode; //The body of the modal
 }
 
@@ -25,6 +26,7 @@ const BasicModal: React.FC<BasicModalProps> = ({
   validate = () => true,
   showButton,
   errorMessage,
+  loading = false,
   children,
 }) => {
   const [show, setShow] = useState(false);
@@ -84,7 +86,7 @@ const BasicModal: React.FC<BasicModalProps> = ({
 
   return (
     <>
-      <a onClick={handleShow}>{showButton}</a>
+      {React.cloneElement(showButton, { onClick: handleShow })}
 
       <Modal
         show={show}
@@ -94,7 +96,10 @@ const BasicModal: React.FC<BasicModalProps> = ({
         className="basic-modal"
       >
         <h2 className="mx-auto">{title}</h2>
-        <div className="basic-modal-body">{children}</div>
+
+        <div className="basic-modal-body">
+          {loading ? 'Loading...' : children}
+        </div>
         {errorMessage && <div className="error">{errorMessage}</div>}
         <div className="basic-modal-footer">
           <Button variant="secondary" onClick={handleClose} disabled={busy}>
