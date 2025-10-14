@@ -310,14 +310,11 @@ services:
     restart: unless-stopped
 
   # ---------- MONGO DB MANAGER ----------
-  adminmongo:
-    image: mrvautin/adminmongo:latest
-    container_name: adminmongo
-    ports:
-      - "9081:1234"
-    volumes:
-      - ./root/adminmongo/config:/config:ro
+  mongoku:
+    image: huggingface/mongoku:latest
+    container_name: mongoku
     restart: unless-stopped
+    ports: [ "9090:3100" ]
 
 # -------------------
 # VOLUMES
