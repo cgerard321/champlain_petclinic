@@ -8,6 +8,7 @@ import com.petclinic.bffapigateway.dtos.Inventory.*;
 import com.petclinic.bffapigateway.dtos.Inventory.Status;
 import com.petclinic.bffapigateway.exceptions.InvalidInputsInventoryException;
 import com.petclinic.bffapigateway.exceptions.InventoryNotFoundException;
+import com.petclinic.bffapigateway.exceptions.InventoryProductUnprocessableEntityException;
 import com.petclinic.bffapigateway.exceptions.ProductListNotFoundException;
 import com.petclinic.bffapigateway.utils.InventoryUtils.ImageUtil;
 import com.petclinic.bffapigateway.utils.Rethrower;
@@ -66,6 +67,15 @@ class InventoryServiceClientIntegrationTest {
 
     InputStream inputStream = getClass().getResourceAsStream("/images/DiagnosticKitImage.jpg");
     byte[] diagnosticKitImage = ImageUtil.readImage(inputStream);
+
+    private void enqueueError(int status, String message) {
+        mockWebServer.enqueue(
+                new MockResponse()
+                        .setResponseCode(status)
+                        .addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .setBody("{\"message\":\"" + message + "\"}")
+        );
+    }
 
     @Test
     void getProductsInInventoryByInventoryIdAndProductsField() throws JsonProcessingException {
@@ -1216,6 +1226,198 @@ class InventoryServiceClientIntegrationTest {
         StepVerifier.create(inventoryServiceClient.createSupplyPdf("inv1"))
                 .expectNextMatches(bytes -> bytes.length == 4 && bytes[0] == 37)
                 .verifyComplete();
+    }
+
+    @Test
+    void getInventoryById_404_ShouldMapToInventoryNotFoundException() {
+        enqueueError(404, "Inventory not found");
+        StepVerifier.create(inventoryServiceClient.getInventoryById("inv-404"))
+                .expectError(InventoryNotFoundException.class)
+                .verify();
+    }
+
+    @Test
+    void getInventoryById_400_ShouldMapToInvalidInputsInventoryException() {
+        enqueueError(400, "Bad inventory id");
+        StepVerifier.create(inventoryServiceClient.getInventoryById("bad"))
+                .expectError(InvalidInputsInventoryException.class)
+                .verify();
+    }
+
+
+
+    @Test
+    void getProductInInventory_404_ShouldMapToProductNotFound() {
+        enqueueError(404, "Product not found in inventory");
+        StepVerifier.create(inventoryServiceClient.getProductByProductIdInInventory("inv-1", "prod-x"))
+                .expectError(ProductListNotFoundException.class)
+                .verify();
+    }
+
+    @Test
+    void getProductInInventory_400_ShouldMapToInvalidInputs() {
+        enqueueError(400, "Invalid product id");
+        StepVerifier.create(inventoryServiceClient.getProductByProductIdInInventory("inv-1", "bad"))
+                .expectError(InvalidInputsInventoryException.class)
+                .verify();
+    }
+
+
+    @Test
+    void addInventory_422_ShouldMapToInvalidInputsInventoryException() throws JsonProcessingException {
+        enqueueError(422, "Inventory name already exists.");
+        InventoryRequestDTO req = InventoryRequestDTO.builder()
+                .inventoryName("internal")
+                .inventoryType("Internal")
+                .inventoryDescription("desc")
+                .build();
+
+        StepVerifier.create(inventoryServiceClient.addInventory(req))
+                .expectError(InvalidInputsInventoryException.class)
+                .verify();
+    }
+
+    @Test
+    void addInventory_400_ShouldMapToInvalidInputsInventoryException() {
+        enqueueError(400, "Missing required field");
+        InventoryRequestDTO req = InventoryRequestDTO.builder()
+                .inventoryName("")   // bad
+                .inventoryType("Internal")
+                .build();
+
+        StepVerifier.create(inventoryServiceClient.addInventory(req))
+                .expectError(InvalidInputsInventoryException.class)
+                .verify();
+    }
+
+    @Test
+    void updateInventory_404_ShouldMapToInventoryNotFoundException() {
+        enqueueError(404, "Inventory not found");
+        InventoryRequestDTO req = InventoryRequestDTO.builder()
+                .inventoryName("name")
+                .inventoryType("Internal")
+                .build();
+
+        StepVerifier.create(inventoryServiceClient.updateInventory(req, "missing-id"))
+                .expectError(InventoryNotFoundException.class)
+                .verify();
+    }
+
+    @Test
+    void updateInventory_422_ShouldMapToInvalidInputsInventoryException() {
+        enqueueError(422, "Inventory name already exists.");
+        InventoryRequestDTO req = InventoryRequestDTO.builder()
+                .inventoryName("dup")
+                .inventoryType("Internal")
+                .build();
+
+        StepVerifier.create(inventoryServiceClient.updateInventory(req, "inv-1"))
+                .expectError(InvalidInputsInventoryException.class)
+                .verify();
+    }
+
+
+
+    @Test
+    void addSupply_422_ShouldMapToInvalidInputsInventoryException() {
+        enqueueError(422, "A product with the name already exists in this inventory.");
+        ProductRequestDTO req = ProductRequestDTO.builder()
+                .productName("Benzodiazepines")
+                .productDescription("Sedative")
+                .productPrice(100.0)
+                .productQuantity(10)
+                .productSalePrice(15.99)
+                .build();
+
+        StepVerifier.create(inventoryServiceClient.addSupplyToInventory(req, "inv-1"))
+                .expectError(InventoryProductUnprocessableEntityException.class)
+                .verify();
+    }
+
+    @Test
+    void addSupply_400_ShouldMapToInvalidInputsInventoryException() {
+        enqueueError(400, "Invalid product body");
+        ProductRequestDTO req = ProductRequestDTO.builder()
+                .productName("") // bad
+                .productPrice(0.0)
+                .build();
+
+        StepVerifier.create(inventoryServiceClient.addSupplyToInventory(req, "inv-1"))
+                .expectError(InvalidInputsInventoryException.class)
+                .verify();
+    }
+
+
+    @Test
+    void getProductsByFilters_404_ShouldMapToProductListNotFoundException() {
+        enqueueError(404, "No products match filters");
+        StepVerifier.create(inventoryServiceClient.getProductsInInventoryByInventoryIdAndProductsField(
+                        "inv-1", "needle", null, null, null))
+                .expectError(ProductListNotFoundException.class)
+                .verify();
+    }
+
+    @Test
+    void getProductsByFiltersPaginated_404_ShouldMapToProductListNotFoundException() {
+        enqueueError(404, "No products");
+        StepVerifier.create(inventoryServiceClient.getProductsInInventoryByInventoryIdAndProductFieldPagination(
+                        "inv-1", null, null, null, Optional.of(0), Optional.of(10)))
+                .expectError(ProductListNotFoundException.class)
+                .verify();
+    }
+
+
+
+    @Test
+    void getTotalProductsCount_404_ShouldMapToProductListNotFoundException() {
+        enqueueError(404, "Inventory not found or empty");
+        StepVerifier.create(inventoryServiceClient.getTotalNumberOfProductsWithRequestParams(
+                        "inv-1", null, null, null))
+                .expectError(ProductListNotFoundException.class)
+                .verify();
+    }
+
+    @Test
+    void getQuantityOfProducts_404_ShouldMapToInventoryNotFoundException() {
+        enqueueError(404, "Inventory not found");
+        StepVerifier.create(inventoryServiceClient.getQuantityOfProductsInInventory("missing"))
+                .expectError(InventoryNotFoundException.class)
+                .verify();
+    }
+
+
+    @Test
+    void addInventoryType_422_ShouldMapToInvalidInputsInventoryException() {
+        enqueueError(422, "Type already exists");
+        InventoryTypeRequestDTO dto = new InventoryTypeRequestDTO("Internal");
+        StepVerifier.create(inventoryServiceClient.addInventoryType(dto))
+                .expectError(InvalidInputsInventoryException.class)
+                .verify();
+    }
+
+    @Test
+    void getAllInventoryTypes_404_ShouldMapToNotFoundException() {
+        enqueueError(404, "No inventory types");
+        StepVerifier.create(inventoryServiceClient.getAllInventoryTypes())
+                .expectError(NotFoundException.class)
+                .verify();
+    }
+
+
+    @Test
+    void getAllInventories_404_ShouldMapToNotFoundException() {
+        enqueueError(404, "No inventories exist");
+        StepVerifier.create(inventoryServiceClient.getAllInventories())
+                .expectError(NotFoundException.class)
+                .verify();
+    }
+
+    @Test
+    void createSupplyPdf_422_ShouldMapToInvalidInputsInventoryException() {
+        enqueueError(422, "Invalid inventory ID provided.");
+        StepVerifier.create(inventoryServiceClient.createSupplyPdf("bad-id"))
+                .expectError(InvalidInputsInventoryException.class)
+                .verify();
     }
 
 
