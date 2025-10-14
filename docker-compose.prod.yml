@@ -297,21 +297,55 @@ services:
       - mongo-carts-config:/data/configdb
     restart: unless-stopped
 
-  # ---------- SQL DB MANAGER ----------
-  cloudbeaver:
-    build:
-      context: ./cloudbeaver
-      args:
-        BASE_TAG: latest
-#    image: cloudbeaver:latest
-    container_name: cloudbeaver
-    ports:
-      - "8978:8978"
-    volumes:
-      - cloudbeaver-data:/opt/cloudbeaver/workspace
-    environment:
-      - CB_EXTENSIONS_DEFAULT=1
+  dbgate:
+    image: dbgate/dbgate:latest
+    container_name: dbgate
     restart: unless-stopped
+    ports:
+      - "8030:3000"                 # web UI -> http://<host>:8090
+    environment:
+      # --- Auth options ---
+      # Use Basic Auth for the whole UI (simple & works behind reverse proxy):
+      - BASIC_AUTH=1                # if unset, DbGate shows a login form + JWT
+      - ADMIN_PASSWORD=change-me    # for /admin.html (set it!)
+      # --- Predefined connections (add more blocks for each DB) ---
+      - CONNECTIONS=mysql,postgres,mongoVet
+      # MySQL (auth-service)
+      - LABEL_mysql=MySQL auth-db
+      - ENGINE_mysql=mysql@dbgate-plugin-mysql
+      - SERVER_mysql=mysql-auth
+      - PORT_mysql=3306
+      - USER_mysql=user
+      - PASSWORD_mysql=pwd
+      - DATABASE_mysql=auth-db
+      # Postgres (vet images)
+      - LABEL_postgres=Postgres vet
+      - ENGINE_postgres=postgres@dbgate-plugin-postgres
+      - SERVER_postgres=postgres
+      - PORT_postgres=5432
+      - USER_postgres=user
+      - PASSWORD_postgres=pwd
+      - DATABASE_postgres=images
+      # Mongo (pick one to start — you can add others similarly)
+      - LABEL_mongoVet=Mongo vet
+      - ENGINE_mongoVet=mongo@dbgate-plugin-mongo
+      - SERVER_mongoVet=mongo-vet
+      - PORT_mongoVet=27017
+      - USER_mongoVet=root
+      - PASSWORD_mongoVet=password
+      # Optional: don’t skip auth accidentally
+      - SKIP_ALL_AUTH=0
+    depends_on:
+      - mysql-auth
+      - postgres-vet
+      - mongo-vet
+    labels:
+      - homepage.group=Development
+      - homepage.name=DbGate (SQL+Mongo)
+      - homepage.icon=https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/png/dbgate.png
+      - homepage.href=http://petclinic-backend.benmusicgeek.synology.me:8090/
+      - homepage.description=One UI with login for MySQL/Postgres/Mongo
+
 
 # -------------------
 # VOLUMES
@@ -335,3 +369,4 @@ volumes:
   postgres-vet-data:
   mysql-files-data:
   cloudbeaver-data:
+  dbgate-data:
